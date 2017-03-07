@@ -120,9 +120,9 @@ public class QueryApi extends HttpServlet{
 	@Context private HttpServletRequest request;
 	
 	/**
-	 * Runs a query and returns the results.
-	 * URL: ../server/api/query/{queryuuid}
-	 * Call Type: GET
+	 * <p>Runs a query and returns the results.
+	 * <p>URL: ../server/api/query/{queryuuid}
+	 * <p>Call Type: GET
 	 * 
 	 * @param queryuuid		provided in the URL, the uuid of the query requested
 	 * @param format	requested format, not all options makes sense for all query types: csv, shp, tif, geojson
@@ -419,8 +419,8 @@ public class QueryApi extends HttpServlet{
 	
 	/**
 	 * returns all Queries the user is able to view 
-	 * URL: ../server/api/query/
-	 * Call Type: GET
+	 * <p>URL: ../server/api/query/
+	 * <p>Call Type: GET
 	 * 
 	 * @param type - optional type String - only return queries that match the type key provided, see getAllQueryTypes for list of possible values. leave blank to get everything.
 	 * @param ca - optional UUID - only return queries that match the CA UUID provided. leave blank to get everything.

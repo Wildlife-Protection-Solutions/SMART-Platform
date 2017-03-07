@@ -88,7 +88,7 @@
 						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
 						  </tr>
 						  <tr>
-						   <td colspan=2><fmt:message key="sharedlinks.sourceip"/></td><td><input id="allowedIp" type="text" name="allowedIp" value=192.168.1.1 style='width:125px'> </td>
+						   <td colspan=2><fmt:message key="sharedlinks.sourceip"/></td><td><input id="allowedIp" type="text" name="allowedIp" value="" style='width:125px'> </td>
 						  </tr>
 						  <tr>
 						   <td colspan=3><fmt:message key="sharedlinks.sourceip2"/></td>

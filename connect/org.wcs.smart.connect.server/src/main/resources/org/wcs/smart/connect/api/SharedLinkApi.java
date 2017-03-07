@@ -143,10 +143,10 @@ public class SharedLinkApi extends HttpServlet{
 	}
 	
 	/**
-	 * Create a new shared link
-	 * URL: ../server/api/sharedlink/
-	 * Call Type: POST
-	 * Payload: A JSON object of the 2 required attributes: expiresAfter and url, ex: 
+	 * Create a new shared link. Expired Links are also cleaned up (deleted) when a new link is created.
+	 * <p>URL: ../server/api/sharedlink/
+	 * <p>Call Type: POST
+	 * <p>Payload: A JSON object of the 2 required attributes: expiresAfter and url, ex: 
 	 * 		{expiresAfter: 525600, url: "query/api/5e4b8ab8-1313-42b4-886c-ff5b7db8ec65?format=csv&date_filter=waypointdate"}  
 	 * 		<expires in 1 year>
 	 * @param expiresAfter - 0  means the link will never expire, otherwise it is # of minutes until the link expires
@@ -241,14 +241,27 @@ public class SharedLinkApi extends HttpServlet{
 	
 	
 	/**
-	 * Create a new full-access token
-	 * URL: ../server/api/sharedlink/token/
-	 * Call Type: POST
-	 * Payload: A JSON object of the required attributes: expiresAfter  ex: 
+	 * Create a new full-access user token. This allows you to pass a variable, &token=9dd23c7b-657c-492d-9857-9981713438b3  in a URL instead of using the basic auth. 
+	 * The access granted is the same as if the token creator was making the request themselves. This token is deleted the same way as SharedLinks, calling the removeSharedlinks with a token
+	 * uuid will delete and invalid the token. Expired Links are also cleaned up (deleted) when a new link is created.
+	 * 
+	 * <p>URL: ../server/api/sharedlink/token/
+	 * 
+	 * <p>Call Type: POST
+	 * 
+	 * <p>Payload: A JSON object of the required attributes: expiresAfter  and the optional allowedIP
+	 * 		<br>example #1, link that expires in 1 year, can be used from any IP address: 
 	 * 		{expiresAfter: 525600"}  
-	 * 		<expires in 1 year>
+	 * 		
+	 * 
+	 * 		<br>Example #2, restricted to an IP address, expirees in 1 hour:  
+	 * 		{"expiresAfter":"60","allowedIp":"192.168.1.1"}
 	 * @param expiresAfter - 0  means the link will never expire, otherwise it is # of minutes until the link expires
-	 * @return Returns a JSON ShareLink object for the created user, the link_uuid attribute is the token 
+	 * @param allowedIp - an IP address that is the only one allowed to use this token. If none is provided the link can be used from anywhere. The IP address is matched using Javascript's 
+	 * 				request.getRemoteAddr() function, proxy servers etccan affect this address sometimes. It is recommended you test
+	 * 				requests from your desired computer and see what the results of request.getRemoteAddr() is and enter that address in your restriction. 
+	 * @return Returns a JSON ShareLink object for the created user, the uuid attribute is the token and can be used for any valid API calls 
+	 * 			by appending a token attribute with your uuid to the URL, ex: &token=9dd23c7b-657c-492d-9857-9981713438b3   <-replace the uuid with your valid token uuid.
 	 */
 	@POST
     @Path("/token/")
@@ -282,6 +295,10 @@ public class SharedLinkApi extends HttpServlet{
 			
 			s.save(newLink);
 			
+			//clean up any old, expired links. Seems like a vaguely reasonable place to do it: the more you create, the more often the clean-up occurs.
+			SQLQuery q = s.createSQLQuery("delete from connect.shared_links where expires_after != 0 AND expires_at < (select now())");
+			q.executeUpdate();
+			
 		}catch(Exception e){
 			e.printStackTrace();
 			throw e;
@@ -295,8 +312,8 @@ public class SharedLinkApi extends HttpServlet{
 	
 	/**
 	 * Delete a shared link
-	 * URL: ../server/api/sharedlink//{alertUuid}
-	 * Call Type: DELETE
+	 * <p>URL: ../server/api/sharedlink//{alertUuid}
+	 * <p>Call Type: DELETE
 	 * 
 	 * @param	Uuid	provided in the URL, the UUID of the shared link to delete.
 	 * @return Returns a JSON shared link object for the deleted link 

@@ -187,9 +187,9 @@ public class ConservationAreas extends HttpServlet{
 	}
 	
 	/**
-	 * List all Conservation Areas
-	 * URL: ../server/api/conservationarea/
-	 * Call Type: GET
+	 * <p>List all Conservation Areas
+	 * <p>URL: ../server/api/conservationarea/
+	 * <p>Call Type: GET
 	 * 
 	 * @param organizationFilter String - optional - only return CAs that have the provided text in the organization field
 	 * @param caJsonFilter String - optional - must be valid GeoJson polygon - only return CAs that are completely contained within this GeoJSON Polygon. ie. if a single point of the CA Boundary is outside of it, the ca will not be returned.
@@ -297,8 +297,8 @@ public class ConservationAreas extends HttpServlet{
 	
 	/**
 	 * List all Conservation Areas that have SMART data
-	 * URL: ../server/api/conservationarea/withdataonly/
-	 * Call Type: GET
+	 * <p>URL: ../server/api/conservationarea/withdataonly/
+	 * <p>Call Type: GET
 	 * 
 	 * @return Returns a JSON array of ConservationAreaProxy objects for the updated user. Only returns the CAs with Desktop Data associated.
 	 * (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/ConservationAreaProxy.java)
@@ -318,19 +318,20 @@ public class ConservationAreas extends HttpServlet{
 	}
 
 	/**
-	 * Gets a conservation area.  
-	 * This function returns different information depending on parameters
+	 * <p>Gets a conservation area.  
+	 * <p>This function returns different information depending on parameters
 	 * provided:
-	 *  If no parameters are provided it returns a JSON object
-	 * with information about the conservation area.  
-	 * If data, version, and revision
+	 *  <ul><li>If no parameters are provided it returns a JSON object
+	 * with information about the conservation area.</li>  
+	 * <li>If data, version, and revision
 	 * are provided with a value of "changelog" for data then a zip file is
 	 * returned containing the change log.  In data is provided with a value of 
 	 * "all" then a url is returned that represents the status of the ca download
-	 * package process.
+	 * package process.</li>
+	 * </ul>
 	 * 
-	 * URL: ../server/api/conservationarea/{cauuid}
-	 * Call Type: GET
+	 * <p>URL: ../server/api/conservationarea/{cauuid}
+	 * <p>Call Type: GET
 	 * 
 	 * @param	caUuid	provided in the URL; This is the CA's UUID you want information about.
 	 */
@@ -692,8 +693,8 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	/**
 	 * Deletes a given conservation area.
-	 * URL: ../server/api/conservationarea/{cauuid}
-	 * Call Type: DELETE
+	 * <p>URL: ../server/api/conservationarea/{cauuid}
+	 * <p>Call Type: DELETE
 	 * 
 	 * @param	caUuid	provided in the URL, the ca UUID you wish to delete
 	 * @param dataonly String that indicates you only want to delete the desktop data, not the alerts and other Connect-based data.
@@ -819,9 +820,9 @@ public class ConservationAreas extends HttpServlet{
 	 * Creates a new conservation area with no data.  Both parameters are optional and generated
 	 * by the system if not provided.
 	 * 
-	 * URL: ../server/api/conservationarea/
-	 * Call Type: POST
-	 * Payload: none
+	 * <p>URL: ../server/api/conservationarea/
+	 * <p>Call Type: POST
+	 * <p>Payload: none
 	 * 
 	 * @param caUuid The CA UUID you wish to create, leave it blank if you want the system to create one for you.
 	 * @param name 	The CA Name

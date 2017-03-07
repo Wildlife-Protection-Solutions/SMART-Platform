@@ -152,9 +152,9 @@ public class DataQueue {
 	
 	
 	/**
-	 * Get Detailed Data Queue Items
-	 * URL: ../server/api/dataqueue/detailedItems/
-	 * Call Type: GET
+	 * <p>Get Detailed Data Queue Items
+	 * <p>URL: ../server/api/dataqueue/detailedItems/
+	 * <p>Call Type: GET
 	 * 
 	 * @param	cafilter	only show items from these CAs. A comma separated string of UUIDs.
 	 * @param	status	comma separated list of status states to include.
@@ -175,9 +175,9 @@ public class DataQueue {
 		
 	/**
 	 * Get data Queue Items
-	 * This will only return items that the user has permission to see.
-	 * URL: ../server/api/dataqueue/items/
-	 * Call Type: GET
+	 * <p>This will only return items that the user has permission to see.
+	 * <p>URL: ../server/api/dataqueue/items/
+	 * <p>Call Type: GET
 	 * 
 	 * @param caFilter a comma delimited list of ca uuids (or null for all)
 	 * @param status comma delimited list of status values to filter on or null for all
@@ -272,8 +272,8 @@ public class DataQueue {
 	
 	/**
 	 * Deletes the given data queue item (and associated work item if applicable).
-	 * URL: ../server/api/dataqueue/items/{uuid}
-	 * Call Type: DELETE
+	 * <p>URL: ../server/api/dataqueue/items/{uuid}
+	 * <p>Call Type: DELETE
 	 * 
 	 * @param uuid
 	 */
@@ -322,11 +322,11 @@ public class DataQueue {
 	/**
 	 * Creates an item and associated work item for file uploading.  Returns the URL that
 	 * can be used for uploading the file.
-	 * URL: ../server/api/dataqueue/items/
-	 * Call Type: POST
+	 * <p>URL: ../server/api/dataqueue/items/
+	 * <p>Call Type: POST
+	 * <p>Payload: a ServerDataQueueItem object, example {"conservationArea":"8f7fbe1b-201a-4ef4-bda8-14f5581e65ce","type":"PATROL_XML","name":"patrol1234.xml"}
 	 * 
-	 * 
-	 * @param item
+	 * @param item - not used in the web API, use the PST payload to provide details of what you want created, see above.
 	 * @return the location of where to upload the file in the "location" header, in javascript you can get it like: oReq.getResponseHeader("location");
 	 * where oReq is the XMLHttpRequest object used to post this request.
 	 */
@@ -415,8 +415,8 @@ public class DataQueue {
 	
 	/**
 	 * Gets a particular data queue item.
-	 * URL: ../server/api/dataqueue/items/{uuid}
-	 * Call Type: GET
+	 * <p>URL: ../server/api/dataqueue/items/{uuid}
+	 * <p>Call Type: GET
 	 * 
 	 * @param uuid	provided in the URL, the uuid of the item requested.
 	 * @return JSON representation of a ServerDataQueueItem object. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/dataqueue/ServerDataQueueItem.java) 
@@ -484,15 +484,15 @@ public class DataQueue {
 	}
 	
 	/**
-	 * Updates the type and status of a data queue item
-	 * URL: ../server/api/dataqueue/items/{uuid}
-	 * Call Type: PUT
+	 * <p>Updates the type and status of a data queue item
+	 * <p>URL: ../server/api/dataqueue/items/{uuid}
+	 * <p>Call Type: PUT
 	 * 
-	 * Payload: JSON of the attributes to update, ex:
+	 * <p>Payload: JSON of the attributes to update, ex:
 	 * 		{"type":"MISSION_XML","status":"QUEUED"}
 	 * 
-	 * type options: PATROL_XML, MISSION_XML, INCIDENT_XML
-	 * Status options: QUEUED, COMPLETE, ERROR
+	 * <p>type options: PATROL_XML, MISSION_XML, INCIDENT_XML
+	 * <p>Status options: QUEUED, COMPLETE, ERROR
 	 * 
 	 * @param uuid	the uuid of the item to update, from the URL
 	 * @return a JSON representation of the modified DataQueueItem object.

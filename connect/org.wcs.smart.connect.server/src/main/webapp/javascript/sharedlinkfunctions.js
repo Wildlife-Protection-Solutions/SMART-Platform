@@ -84,4 +84,6 @@ function tokenCreated(){
 	document.getElementById("quickMinSelect").disabled=true;
 	document.getElementById("expiresAfter").disabled=true;
 	
+	refreshLinkList();
+	
 }
