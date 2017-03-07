@@ -259,6 +259,7 @@ public class Messages extends NLS {
 	public static String PatrolFilterDialog_SortByOption;
 	public static String PatrolFilteredComboViewerComposite_Filter_Tooltip;
 	public static String PatrolGpsImportEngine_NotracksFound;
+	public static String PatrolGpxImportEngine_NotAllTracksImported;
 	public static String PatrolGpxImportEngine_NotracksFound;
 //	public static String PatrolFilterDialog_Reset_Button;
 	public static String PatrolHibernateManager_20;

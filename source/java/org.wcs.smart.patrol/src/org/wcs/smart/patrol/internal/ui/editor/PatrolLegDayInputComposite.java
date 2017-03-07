@@ -100,7 +100,6 @@ import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;

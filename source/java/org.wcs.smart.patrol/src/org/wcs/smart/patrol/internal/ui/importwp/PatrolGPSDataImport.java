@@ -34,9 +34,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
+import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
@@ -396,7 +396,7 @@ public class PatrolGPSDataImport {
 	 */
 	public static Track convertToTrack(List<Waypoint> coordinates){
 		if (coordinates.isEmpty()) return null;
-		if (coordinates.size() == 1) throw new RuntimeException("Multiple points required to generate a track.  Only a single point found."); //$NON-NLS-1$
+		if (coordinates.size() == 1) return null; //throw new RuntimeException("Multiple points required to generate a track.  Only a single point found."); //$NON-NLS-1$
 		LineString track = ObservationGPSDataImport.convertToLineString(coordinates, Track.ZTIMEZONE);
 		Track t = new Track();
 		t.setLineString(track);

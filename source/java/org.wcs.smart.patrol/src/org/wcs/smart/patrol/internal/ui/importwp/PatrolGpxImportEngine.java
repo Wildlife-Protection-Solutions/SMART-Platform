@@ -35,6 +35,7 @@ import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOp
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 
@@ -58,8 +59,18 @@ public class PatrolGpxImportEngine extends GpxImportEngine {
 		}else if (type == ImportType.TRACK){
 			HashMap<PatrolLegDay, Track> tracks  = new HashMap<PatrolLegDay,Track>();
 			if (option == ImportOption.ALL){
+				int expectedCnt = 0;
+				for (PatrolLeg pd : patrol.getLegs()){
+					expectedCnt += pd.getPatrolLegDays().size();
+				}
+				
 				tracks = PatrolGPSDataImport.convertTracks(waypoints, patrol.getLegs());
-				message = MessageFormat.format(Messages.GpxImportEngine_ImportMultiTrack, new Object[]{tracks.size()});
+				
+				if (tracks.size() == expectedCnt){
+					message = MessageFormat.format(Messages.GpxImportEngine_ImportMultiTrack, new Object[]{tracks.size()});	
+				}else{
+					message = MessageFormat.format(Messages.PatrolGpxImportEngine_NotAllTracksImported, new Object[]{tracks.size(), expectedCnt - tracks.size()});
+				}
 				if (tracks.size() == 0){
 					message += "\n" + Messages.PatrolGpxImportEngine_NotracksFound; //$NON-NLS-1$
 				}
