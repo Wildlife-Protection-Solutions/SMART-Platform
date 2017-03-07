@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Cybertracker Patrol Data Queue Processor
 Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.cybertracker.patrol;singleton:=true
-Bundle-Version: 4.1.0.qualifier
+Bundle-Version: 5.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.wcs.smart,
  org.wcs.smart.connect.dataqueue.cybertracker,

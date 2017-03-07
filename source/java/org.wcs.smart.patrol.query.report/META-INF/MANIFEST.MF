@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Patrol Query Report PlugIn
 Bundle-SymbolicName: org.wcs.smart.patrol.query.report;singleton:=true
-Bundle-Version: 4.1.0.qualifier
+Bundle-Version: 5.0.0.qualifier
 Bundle-Activator: org.wcs.smart.report.query.PatrolQueryReportPlugIn
 Require-Bundle: org.wcs.smart.patrol.query,
  org.wcs.smart.query,
