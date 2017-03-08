@@ -113,6 +113,9 @@ public class Messages extends NLS {
 	public static String AreaPropertyPage_Error_ReadingFile;
 	public static String AreaPropertyPage_Error_ResettingCounts;
 	public static String AreaPropertyPage_Error_UpdatingAreas;
+	public static String AreaPropertyPage_GeomModWarn;
+	public static String AreaPropertyPage_GeomModWarnTitle;
+	public static String AreaPropertyPage_InvalidGeometry;
 	public static String AreaPropertyPage_Load_DialogTitle;
 	public static String AreaPropertyPage_Load_Text;
 	public static String AreaPropertyPage_PageTitle;

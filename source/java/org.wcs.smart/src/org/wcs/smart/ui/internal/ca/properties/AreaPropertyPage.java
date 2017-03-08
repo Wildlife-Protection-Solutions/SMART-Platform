@@ -416,7 +416,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					}
 					
 					
-					
+					boolean modifiedWarnings = false;
 					Session s = HibernateManager.openSession();
 					s.beginTransaction();
 					// add new areas
@@ -445,10 +445,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 								Area area = new Area();
 								area.setType(areatype);
 								area.setConservationArea(AreaPropertyPage.this.currentCa);
-								//
-								Geometry geom = (Geometry) sf.getDefaultGeometry();
-								geom = JTS.transform(geom, transform);
-								area.setGeom(writer.write(geom));
+								
 								String defaultName = areatype + "_" + cnt++; //$NON-NLS-1$
 								HashMap<Language, AttributeDescriptor> data = idDialog[0].getSelectedFields();
 								for(Entry<Language, AttributeDescriptor> entry : data.entrySet()){
@@ -461,6 +458,21 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 										defaultName = id;
 									}
 								}
+								
+								/// - geometry; ensure they are valid and simple
+								Geometry geom = (Geometry) sf.getDefaultGeometry();
+								geom = JTS.transform(geom, transform);
+								if (!geom.isValid() || !geom.isSimple()){
+									//try buffer 0 to clean up and check again
+									modifiedWarnings = true;
+									geom = geom.buffer(0);
+									if (!geom.isValid() || !geom.isSimple()){
+										//still not valid and not simple so error out
+										throw new Exception(MessageFormat.format(Messages.AreaPropertyPage_InvalidGeometry, defaultName));
+									}
+								}
+								area.setGeom(writer.write(geom));
+								
 								String key = Area.generateKey(defaultName, Messages.Area_EmptyKey, currentKeys);
 								area.setKeyId(key);
 								currentKeys.add(key);
@@ -478,7 +490,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						}catch (Exception ex){
 							SmartPlugIn.log("", ex); //$NON-NLS-1$
 						}
-						throw(new InvocationTargetException(e));
+						throw(new InvocationTargetException(e, e.getMessage()));
 					}finally{
 						s.close();
 					}
@@ -490,10 +502,16 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					ConservationAreaManager.getInstance().fireAreaChanged(areatype);
 					initLayers(true, monitor);
 					monitor.done();
+					
+					if (modifiedWarnings){
+						Display.getDefault().syncExec(()->{
+							MessageDialog.openWarning(getShell(), Messages.AreaPropertyPage_GeomModWarnTitle, Messages.AreaPropertyPage_GeomModWarn);
+						});
+					}
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_UpdatingAreas, e);
+			SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_UpdatingAreas + ": " + e.getMessage(), e);
 		}
 	}
 	
