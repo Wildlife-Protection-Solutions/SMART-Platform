@@ -60,6 +60,8 @@ import org.wcs.smart.internal.Messages;
  */
 public class ConservationAreaClonerEngine {
 
+	private static final String ALL_KEY = "org.wcs.smart.*"; //$NON-NLS-1$
+
 	public static final String EXTENSION_ID = "org.wcs.smart.ca.templateCloner"; //$NON-NLS-1$
 	
 	private ConservationArea templateCa;
@@ -285,6 +287,16 @@ public class ConservationAreaClonerEngine {
 			}
 			session.flush();
 			
+			List<Cloner> runAtEnd = new ArrayList<Cloner>();
+			for(Cloner c : cloners){
+				for (String s : c.requirements){
+					if (s.equalsIgnoreCase(ALL_KEY)){
+						runAtEnd.add(c);
+						break;
+					}
+				}
+			}
+			cloners.removeAll(runAtEnd);
 			
 			Set<String> processed = new HashSet<String>();
 			int cnt = 0;
@@ -325,6 +337,46 @@ public class ConservationAreaClonerEngine {
 				}
 			}
 			
+			//run the ones at end
+			while(runAtEnd.size() > 0){
+				Cloner c = runAtEnd.remove(0);
+				boolean canProcess = true;
+				
+				for(String s : c.requirements){
+					//if all cloners which match string s
+					if (s.equals(ALL_KEY)) continue;
+					List<Cloner> matches = new ArrayList<Cloner>();
+					for (Cloner tc : allCloners){
+						if (tc.id.matches(s)){
+							matches.add(tc);
+						}
+					}
+					for (Cloner tc : matches){
+						if (!processed.contains(tc.id)){
+							canProcess = false;
+							break;
+						}
+					}
+					if (!canProcess){
+						break;
+					}
+				}
+				
+				
+				if (!canProcess){
+					runAtEnd.add(c);
+					cnt++;
+				}else{
+					cnt = 0;
+					c.cloner.cloneTemplateData(this, new SubProgressMonitor(monitor, 10));
+					processed.add(c.id);
+				}
+				if (cnt > runAtEnd.size()){
+					throw new Exception(Messages.ConservationAreaClonerEngine_Error_CircularDependency);
+				}
+			}
+			
+			
 			
 			t.commit();
 		}catch(Exception ex){
@@ -345,9 +397,10 @@ public class ConservationAreaClonerEngine {
 			session.close();
 			SmartHibernateManager.setUserName(SmartDB.DbUser.LOGIN.getUserName(), SmartDB.DbUser.LOGIN.getPassword());
 			monitor.done();
-		}
-		
+		}	
 	}
+	
+	
 	
 	/**
 	 * Loads the cloner information from the extension registry.

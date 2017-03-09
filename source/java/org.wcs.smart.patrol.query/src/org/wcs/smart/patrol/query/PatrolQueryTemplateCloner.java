@@ -94,7 +94,9 @@ public class PatrolQueryTemplateCloner implements
 	private void cloneGriddedQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
 		@SuppressWarnings("unchecked")
-		List<PatrolGriddedQuery> queries = (List<PatrolGriddedQuery>) engine.getSession().createCriteria(PatrolGriddedQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<PatrolGriddedQuery> queries = (List<PatrolGriddedQuery>) engine.getSession().createCriteria(PatrolGriddedQuery.class)
+			.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
+			.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
 		
 		for(PatrolGriddedQuery query : queries){
 			PatrolGriddedQuery clone = (PatrolGriddedQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolGriddedQuery.KEY) );

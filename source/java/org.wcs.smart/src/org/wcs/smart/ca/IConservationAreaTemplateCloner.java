@@ -47,6 +47,10 @@ public interface IConservationAreaTemplateCloner {
 	 */
 	void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception;
 
+	/**
+	 * Any interceptors that need to be added to hibernate session
+	 * @return
+	 */
 	default Collection<? extends Interceptor> getInterceptors() {
 		return Collections.emptyList();
 	}

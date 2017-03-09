@@ -1122,6 +1122,16 @@
       </templateCloner>
    </extension>
    <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.query.CompoundQueryTemplateCloner"
+            id="org.wcs.smart.CompoundQueryCloner">
+         <require
+               id="org.wcs.smart.*">
+         </require>
+      </templateCloner>
+   </extension>
+   <extension
          point="org.wcs.smart.query.export.format">
       <Exporter
             class="org.wcs.smart.query.common.importexport.CsvSummaryExporter">

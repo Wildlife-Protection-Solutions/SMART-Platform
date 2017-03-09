@@ -75,16 +75,14 @@
    <element name="require">
       <annotation>
          <documentation>
-            Allows the creation of the cloner hierarchy.  This cloner will not be run until all required cloners are run first.
+            Allows the creation of the cloner hierarchy.  This cloner will not be run until all required cloners are run first. A value of &quot;org.wcs.smart.*&quot; will run the cloner after all other cloners are run.
          </documentation>
       </annotation>
       <complexType>
          <attribute name="id" type="string">
             <annotation>
                <documentation>
-                  
                   The id of the template cloner that is required to run before this cloner can be run.
-               
                </documentation>
                <appinfo>
                   <meta.attribute kind="identifier" basedOn="org.wcs.smart.ca.templateCloner/templateCloner/@id"/>
