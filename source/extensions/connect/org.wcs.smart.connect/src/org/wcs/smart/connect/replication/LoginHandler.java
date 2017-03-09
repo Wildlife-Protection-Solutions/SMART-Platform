@@ -152,6 +152,7 @@ public class LoginHandler implements ILoginHandler {
 				return;
 			}finally{
 				s.close();
+				DerbyReplicationManager.INSTANCE.clearCachedReplicationState();
 			}
 				
 		}else if (status.getStatus() == ConnectServerStatus.Status.UPLOAD){

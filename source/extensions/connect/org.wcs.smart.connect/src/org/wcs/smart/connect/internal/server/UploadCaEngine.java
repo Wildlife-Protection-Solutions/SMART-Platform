@@ -50,6 +50,7 @@ import org.wcs.smart.connect.internal.server.replication.SyncHistoryManager;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -173,6 +174,7 @@ public class UploadCaEngine {
 					}finally{
 						s.close();
 					}
+					DerbyReplicationManager.INSTANCE.clearCachedReplicationState();
 					
 					String uploadURL = connect.getCaUploadUrl(localStatus.getUuid(), 
 							localStatus.getVersion(), 

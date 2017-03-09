@@ -31,7 +31,11 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
@@ -45,7 +49,9 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.util.DerbyUtil;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -90,6 +96,11 @@ public enum DerbyReplicationManager {
 	private Thread fileStoreReplication;
 	private FileStoreWatcher watcher;
 	private boolean replicationState = false;
+	
+	/*
+	 * Cached replication state 
+	 */
+	private volatile Boolean cachedReplicationEnabled = null;
 	
 	/**
 	 * This MUST BE wrapped in a transaction that is committed
@@ -156,6 +167,7 @@ public enum DerbyReplicationManager {
 			@Override
 			public void execute(Connection connection) throws SQLException {
 				connection.createStatement().execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('" + LOGGING_DB_PROPERTY + "', " + (isEnabled ? "true" : "null") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				clearCachedReplicationState();
 			}});
 	}
 	
@@ -275,5 +287,54 @@ public enum DerbyReplicationManager {
 			handlers.add(handler);
 		}
 		return handlers;
+	}
+	
+	/**
+	 * Get the cached replication state
+	 * @return
+	 */
+	public boolean getCachedReplicationState(){
+		if (cachedReplicationEnabled == null){
+			synchronized (this) {
+				if (cachedReplicationEnabled == null){
+					final boolean[] isEnabled = new boolean[]{false};
+					Job j = new Job("replicationstatus") { //$NON-NLS-1$
+						
+						@Override
+						public IStatus run(IProgressMonitor monitor) {
+							if (!SmartHibernateManager.isSessionFactorySet()){
+								//for performance in particular for connect; skip this check if we don't have a session factory
+								isEnabled[0] = false;
+								return Status.OK_STATUS;
+							}
+							Session s = HibernateManager.openSession();
+							try{
+								isEnabled[0] = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);
+							}finally{
+								s.close();
+							}
+							return Status.OK_STATUS;
+						}
+					};
+					j.schedule();
+					try {
+						j.join();
+					} catch (InterruptedException e) {
+						ConnectPlugIn.log(e.getMessage(), e);
+						return false;
+					}
+					cachedReplicationEnabled = isEnabled[0];
+				}
+			}
+		}
+		return cachedReplicationEnabled;
+	}
+	
+	/**
+	 * Clear the cached replication state value.  This will cause the state to be recomputed next time
+	 * it is used.
+	 */
+	public void clearCachedReplicationState(){
+		cachedReplicationEnabled = null;
 	}
 }

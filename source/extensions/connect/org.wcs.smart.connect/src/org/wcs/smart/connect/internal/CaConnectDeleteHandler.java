@@ -29,6 +29,7 @@ import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.connect.internal.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.internal.server.replication.SyncHistoryManager;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 
 /**
  * Delete handler for deleting smart connect information attached to conservation area.
@@ -75,6 +76,7 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	
+		DerbyReplicationManager.INSTANCE.clearCachedReplicationState();
 	}
 
 }
