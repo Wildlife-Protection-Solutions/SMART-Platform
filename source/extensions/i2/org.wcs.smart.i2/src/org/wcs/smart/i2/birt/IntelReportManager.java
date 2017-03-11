@@ -59,6 +59,7 @@ import org.wcs.smart.i2.birt.record.RecordDataset;
 import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
 import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -74,7 +75,7 @@ public enum IntelReportManager {
 
 	INSTANCE;
 
-	public static final String TEMP_DIRECTORY = IntelAttachment.INTELLIGENCE_FS_DIR + "_TEMP";
+	public static final String TEMP_DIRECTORY = IntelAttachment.INTELLIGENCE_FS_DIR + "_TEMP"; //$NON-NLS-1$
 	
 	/**
 	 * The BIRT template for intelligence records for the given conservation area.
@@ -86,7 +87,7 @@ public enum IntelReportManager {
 		return FileSystems.getDefault().getPath(
 				ca.getFileDataStoreLocation(),
 				IntelAttachment.INTELLIGENCE_FS_DIR,
-				"record" + IReportEditorContants.DESIGN_FILE_EXTENTION);
+				"record" + IReportEditorContants.DESIGN_FILE_EXTENTION); //$NON-NLS-1$
 	}
 	
 
@@ -101,7 +102,7 @@ public enum IntelReportManager {
 		return FileSystems.getDefault().getPath(
 				entityType.getConservationArea().getFileDataStoreLocation(),
 				IntelAttachment.INTELLIGENCE_FS_DIR,
-				"entitytypes",
+				"entitytypes", //$NON-NLS-1$
 				entityType.getBirtTemplate());
 	}
 	
@@ -151,25 +152,25 @@ public enum IntelReportManager {
 		if (dataSetId.equals(EntityDataset.DATASET_TYPE)){
 			return entityType.getName();
 		}else if (dataSetId.equals(EntityLocationAttributeDataset.DATASET_TYPE)){
-			return MessageFormat.format("{0} - Position Attribute Locations", entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityPositionAttributeDatasetName, entityType.getName());
 		}else if (dataSetId.equals(EntityLocationDataset.DATASET_TYPE)){
-			return MessageFormat.format("{0} - Locations", entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityLocationDataSetName, entityType.getName());
 		}else if (dataSetId.equals(EntityRelationDataset.DATASET_TYPE)){
-			return MessageFormat.format("{0} - Relationships", entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityRelationshipDatasetName, entityType.getName());
 		}else if (dataSetId.equals(EntityAttachmentDataset.DATASET_TYPE)){
-			return MessageFormat.format("{0} - Attachments", entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityAttachmentsDatasetName, entityType.getName());
 		}else if (dataSetId.equals(EntityRecordDataset.DATASET_TYPE)){
-			return MessageFormat.format("{0} - Records", entityType.getName());
+			return MessageFormat.format(Messages.IntelReportManager_EntityRecordDatasetName, entityType.getName());
 		}else if (dataSetId.equals(RecordDataset.DATASET_TYPE)){
-			return "Record Details";
+			return Messages.IntelReportManager_RecordDatasetName;
 		}else if (dataSetId.equals(RecordAttributeDataset.DATASET_TYPE)){
-			return "Record Attributes";
+			return Messages.IntelReportManager_RecordAttributeDatasetName;
 		}else if (dataSetId.equals(RecordEntityDataset.DATASET_TYPE)){
-			return "Record Entities";
+			return Messages.IntelReportManager_RecordEntityDatasetName;
 		}else if (dataSetId.equals(RecordLocationDataset.DATASET_TYPE)){
-			return "Record Locations";
+			return Messages.IntelReportManager_RecordLocationDatasetName;
 		}else if (dataSetId.equals(RecordAttachmentDataset.DATASET_TYPE)){
-			return "Record Attachments";
+			return Messages.IntelReportManager_RecordAttachmentsDatasetName;
 		}
 		return dataSetId;
 	}
@@ -181,8 +182,8 @@ public enum IntelReportManager {
 	 * @param service
 	 */
 	public void resetTemplate(IntelEntityType entityType, EPartService service){
-		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Reset", 
-				MessageFormat.format("Are you sure you want to reset the printing template for entity type {0}?  You will loose any changes you have made to this template.", entityType.getName()))){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.IntelReportManager_ResetTitle, 
+				MessageFormat.format(Messages.IntelReportManager_ResetMessage, entityType.getName()))){
 			return;
 		}
 		Session s = HibernateManager.openSession();
@@ -208,7 +209,7 @@ public enum IntelReportManager {
 				try {
 					Files.delete(p);
 				} catch (IOException e) {
-					Intelligence2PlugIn.log("Unable to delete current template file. " + e.getMessage(), e);
+					Intelligence2PlugIn.log(Messages.IntelReportManager_DeleteError + e.getMessage(), e);
 					return;
 				}
 			}
@@ -224,8 +225,8 @@ public enum IntelReportManager {
 	 * @param service
 	 */
 	public void resetRecordTemplate(EPartService service){
-		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Reset", 
-				"Are you sure you want to reset the printing template for intelligence records?  You will loose any changes you have made to this template.")){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.IntelReportManager_ResetTitle, 
+				Messages.IntelReportManager_ResetValidate)){
 			return;
 		}
 		
@@ -243,7 +244,7 @@ public enum IntelReportManager {
 				try {
 					Files.delete(p);
 				} catch (IOException e) {
-					Intelligence2PlugIn.log("Unable to delete current template file. " + e.getMessage(), e);
+					Intelligence2PlugIn.log(Messages.IntelReportManager_DeleteError + e.getMessage(), e);
 					return;
 				}
 			}
@@ -259,7 +260,7 @@ public enum IntelReportManager {
 		try{
 			if (entityType.getBirtTemplate() == null){
 				//create a new template for entity type
-				String file = entityType.getKeyId() + "." + UuidUtils.uuidToString(entityType.getUuid()) +  IReportEditorContants.DESIGN_FILE_EXTENTION;
+				String file = entityType.getKeyId() + "." + UuidUtils.uuidToString(entityType.getUuid()) +  IReportEditorContants.DESIGN_FILE_EXTENTION; //$NON-NLS-1$
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
@@ -268,7 +269,7 @@ public enum IntelReportManager {
 					s.getTransaction().commit();
 				}catch (Exception ex){
 					s.getTransaction().rollback();
-					Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to edit template for entity type {0}. {1}", entityType.getName(),  ex.getMessage()), ex);
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError, entityType.getName(),  ex.getMessage()), ex);
 				}finally{
 					s.close();
 				}
@@ -289,7 +290,7 @@ public enum IntelReportManager {
 					s.getTransaction().commit();
 				}catch (Exception ex){
 					s.getTransaction().rollback();
-					Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to edit template for entity type {0}. {1}", entityType.getName(),  ex.getMessage()), ex);
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError, entityType.getName(),  ex.getMessage()), ex);
 				}finally{
 					s.close();
 				}
@@ -300,7 +301,7 @@ public enum IntelReportManager {
 			IntelEntityTypeEditorInput input = new IntelEntityTypeEditorInput(p.toFile(), entityType);
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error opening entity printing template." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			Intelligence2PlugIn.displayLog("Error opening entity printing template." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 	}
@@ -334,8 +335,8 @@ public enum IntelReportManager {
 						@Override
 						public void run() {
 							if (editor.isDirty()){
-								if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Entity Templates", 
-										MessageFormat.format("Do you want to save the changes you made to the {0} entity type template?", type.getName()))){
+								if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.IntelReportManager_SaveTitle, 
+										MessageFormat.format(Messages.IntelReportManager_SaveMessage, type.getName()))){
 									editor.doSave(new NullProgressMonitor());
 								}
 							}
@@ -400,7 +401,7 @@ public enum IntelReportManager {
 			IntelRecordTemplateEditorInput input = new IntelRecordTemplateEditorInput(p.toFile());
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error opening intelligence record printing template." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			Intelligence2PlugIn.displayLog("Error opening intelligence record printing template." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 	}

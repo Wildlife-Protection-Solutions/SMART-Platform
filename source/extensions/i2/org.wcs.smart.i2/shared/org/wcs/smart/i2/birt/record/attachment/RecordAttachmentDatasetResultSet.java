@@ -76,16 +76,16 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 		this.connection = connection;
 		this.metadata = metadata;
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
-		String hql = "SELECT ir FROM IntelRecordAttachment ir join ir.id.record r WHERE r.conservationArea IN (:ca )";
+		String hql = "SELECT ir FROM IntelRecordAttachment ir join ir.id.record r WHERE r.conservationArea IN (:ca )"; //$NON-NLS-1$
 		if (index >= 0){
-			hql += " AND r.uuid = :record";
+			hql += " AND r.uuid = :record"; //$NON-NLS-1$
 		}
 		Query query = connection.getSession().createQuery(hql);
-		query.setParameterList("ca", connection.getConservationAreas());
+		query.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
 		
 		if (index >= 0){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
-			query.setParameter("record",  recordUuid);
+			query.setParameter("record",  recordUuid); //$NON-NLS-1$
 		}
 		
 		results = query.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
@@ -155,7 +155,7 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 	 */
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return "";
+		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}
 

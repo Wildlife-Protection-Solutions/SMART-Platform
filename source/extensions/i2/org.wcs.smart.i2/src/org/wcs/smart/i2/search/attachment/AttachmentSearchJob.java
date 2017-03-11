@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Attachment search job.  Only a single search job runs at a time.
@@ -60,7 +61,7 @@ public class AttachmentSearchJob extends Job {
 	private String searchString;
 	
 	public AttachmentSearchJob(List<ISmartAttachment> attachments, IMatchCollector collector, String searchString){
-		super("Search attachments....");
+		super(Messages.AttachmentSearchJob_JobName);
 		
 		this.attachments = attachments;
 		this.collector = collector;
@@ -80,10 +81,10 @@ public class AttachmentSearchJob extends Job {
 		List<IFileSearcher> searchers = AttachmentSearchEngine.INSTANCE.getFileSearchers();
 		collector.start();
 		try{
-			monitor.beginTask("Searching attachments...", searchers.size() * toSearch.size() * 5);
+			monitor.beginTask(Messages.AttachmentSearchJob_TaskName, searchers.size() * toSearch.size() * 5);
 			for (IFileSearcher searcher : searchers){
 				for (ISmartAttachment a : toSearch){
-					monitor.subTask(MessageFormat.format("text searching {0}",  a.getFilename()));
+					monitor.subTask(MessageFormat.format(Messages.AttachmentSearchJob_SubTaskName,  a.getFilename()));
 					searcher.search(searchString, a, collector, new SubProgressMonitor(monitor, 5));
 				}
 				if (monitor.isCanceled()){

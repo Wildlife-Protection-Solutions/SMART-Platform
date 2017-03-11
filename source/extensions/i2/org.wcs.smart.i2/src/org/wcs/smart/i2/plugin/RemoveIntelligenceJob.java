@@ -38,6 +38,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 
 /**
@@ -49,7 +50,7 @@ import org.wcs.smart.i2.model.IntelAttachment;
 public class RemoveIntelligenceJob extends Job {
 
 	public RemoveIntelligenceJob() {
-		super("Uninstalling Intelligence Plugin");
+		super(Messages.RemoveIntelligenceJob_JobName);
 	}
 
 	@Override
@@ -70,7 +71,7 @@ public class RemoveIntelligenceJob extends Job {
 			}catch (Exception ex){
 				Intelligence2PlugIn.log(ex.getMessage(), ex);	
 			}
-			Intelligence2PlugIn.displayLog("Error uninstalling intelligence plugin", e);
+			Intelligence2PlugIn.displayLog(Messages.RemoveIntelligenceJob_UninstallError, e);
 			return new Status(Status.ERROR,Intelligence2PlugIn.PLUGIN_ID,e.getMessage());
 		} finally {
 			try {
@@ -87,13 +88,13 @@ public class RemoveIntelligenceJob extends Job {
 					File folder = new File(ca.getFileDataStoreLocation() + File.separator + IntelAttachment.INTELLIGENCE_FS_DIR);
 					FileUtils.deleteDirectory(folder);
 				} catch (IOException ex) {
-					Intelligence2PlugIn.log("Unable to delete intelligence data folder:" + ex.getMessage(), ex);
+					Intelligence2PlugIn.log(Messages.RemoveIntelligenceJob_DeleteFolderError + ex.getMessage(), ex);
 				}
 				try {
 					File folder = new File(ca.getFileDataStoreLocation() + File.separator + IntelReportManager.TEMP_DIRECTORY);
 					FileUtils.deleteDirectory(folder);
 				} catch (IOException ex) {
-					Intelligence2PlugIn.log("Unable to delete intelligence data folder:" + ex.getMessage(), ex);
+					Intelligence2PlugIn.log(Messages.RemoveIntelligenceJob_DeleteFolderError + ex.getMessage(), ex);
 				}
 			}
 		}
@@ -102,6 +103,7 @@ public class RemoveIntelligenceJob extends Job {
 	}
 
 	private void uninstall(Session s){
+		@SuppressWarnings("nls")
 		String[] sql = new String[]{
 				"DROP TABLE smart.i_entity_location",
 				"DROP TABLE smart.i_observation_attribute",

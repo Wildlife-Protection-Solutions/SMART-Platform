@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Query results progress panel that contains a progress bar and label.
@@ -55,7 +56,7 @@ public class ProgressPanel extends Composite {
 		pbar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		btnCancel = new Button(this, SWT.PUSH);
-		btnCancel.setText("Cancel");
+		btnCancel.setText(Messages.ProgressPanel_CancelBtn);
 		btnCancel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnCancel.addListener(SWT.Selection, event->{
 			if (currentMonitor != null){
@@ -64,7 +65,7 @@ public class ProgressPanel extends Composite {
 		});
 		
 		progressLabel = new Label(this, SWT.NONE);
-		progressLabel.setText("");
+		progressLabel.setText(""); //$NON-NLS-1$
 		progressLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		
@@ -95,7 +96,7 @@ public class ProgressPanel extends Composite {
 	 */
 	public void clear(){
 		setProgress(0);
-		setLabel("");
+		setLabel(""); //$NON-NLS-1$
 		setProgressMonitor(null);
 		layout(true);
 	}
@@ -105,7 +106,7 @@ public class ProgressPanel extends Composite {
 	 */
 	public void done(){
 		setProgress(pbar.getMaximum());
-		setLabel("");
+		setLabel(""); //$NON-NLS-1$
 		setProgressMonitor(null);
 		layout(true);
 	}

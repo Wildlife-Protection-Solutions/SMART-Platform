@@ -36,6 +36,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -66,7 +67,7 @@ public class EntityRelationshipExporter {
 	public boolean exportEntity(IntelEntity entity, int degrees, Path outputDirectory, IProgressMonitor monitor) throws Exception{
 		if (monitor == null) monitor = new NullProgressMonitor();
 		
-		monitor.beginTask("Exporting entity and relationships", 4);
+		monitor.beginTask(Messages.EntityRelationshipExporter_ProgressMsg, 4);
 		AttributeValueLabelProvider provider = new AttributeValueLabelProvider();
 		Session s = HibernateManager.openSession();
 		try{
@@ -81,7 +82,7 @@ public class EntityRelationshipExporter {
 			toSearch.add(entity);
 			
 			
-			monitor.setTaskName("Searching entities to export");
+			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg);
 			while(degree <= degrees && !toSearch.isEmpty()){
 				degree++;
 				if (monitor.isCanceled()) return false;
@@ -89,9 +90,9 @@ public class EntityRelationshipExporter {
 				//find all relationships whose source or target entity 
 				//is in tosearch
 				
-				String hql = "From IntelEntityRelationship WHERE sourceEntity IN (:toSearch) or targetEntity IN (:toSearch)";
+				String hql = "From IntelEntityRelationship WHERE sourceEntity IN (:toSearch) or targetEntity IN (:toSearch)"; //$NON-NLS-1$
 				Query q = s.createQuery(hql);
-				q.setParameterList("toSearch", toSearch);
+				q.setParameterList("toSearch", toSearch); //$NON-NLS-1$
 				
 				List<IntelEntityRelationship> relationships = q.list();
 				
@@ -116,7 +117,7 @@ public class EntityRelationshipExporter {
 			
 			if (monitor.isCanceled()) return false;
 			monitor.worked(1);
-			monitor.setTaskName("Compiling attributes");
+			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg2);
 			//now we have entities and relationships to export lets compile a list of
 			//all valid attributes
 			Set<IntelEntityType> types = entitiesToExport.stream().map(r->r.getEntityType()).distinct().collect(Collectors.toSet());
@@ -142,7 +143,7 @@ public class EntityRelationshipExporter {
 			//and all relationships to another csv file
 			if (monitor.isCanceled()) return false;
 			monitor.worked(1);
-			monitor.setTaskName("Exporting Entities...");
+			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg3);
 			
 			Path entities = getEntityFile(outputDirectory, entity.getIdAttributeAsText());
 			Path relationships = getRelationshipFile(outputDirectory, entity.getIdAttributeAsText());
@@ -150,9 +151,9 @@ public class EntityRelationshipExporter {
 			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(entities))){
 				String[] data = new String[entityAttributes.size() + 3];
 				int i = 0;
-				data[i++] = "UUID";
-				data[i++] = "Entity Name";
-				data[i++] = "Entity Type";
+				data[i++] = Messages.EntityRelationshipExporter_UuidColumnName;
+				data[i++] = Messages.EntityRelationshipExporter_EntityColumnName;
+				data[i++] = Messages.EntityRelationshipExporter_TypeColumnName;
 				for (IntelAttribute ia : entityAttributes){
 					data[i++] = ia.getName();
 				}
@@ -169,7 +170,7 @@ public class EntityRelationshipExporter {
 						if (v != null){
 							data[i++] = provider.getText(v);
 						}else{
-							data[i++] = "";
+							data[i++] = ""; //$NON-NLS-1$
 						}
 					}
 					writer.writeNext(data);
@@ -178,16 +179,16 @@ public class EntityRelationshipExporter {
 			}
 			
 			monitor.worked(1);
-			monitor.setTaskName("Exporting Attributes...");
+			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg4);
 			
 			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(relationships))){
 				String[] data = new String[relationshipAttributes.size() + 5];
 				int i = 0;
-				data[i++] = "UUID";
-				data[i++] = "Source Entity UUID";
-				data[i++] = "Source Entity ID";
-				data[i++] = "Target Entity UUID";
-				data[i++] = "Target Entity ID";
+				data[i++] = Messages.EntityRelationshipExporter_RelationshipUuidColumnName;
+				data[i++] = Messages.EntityRelationshipExporter_SrcEntityUuid;
+				data[i++] = Messages.EntityRelationshipExporter_SrcEntityId;
+				data[i++] = Messages.EntityRelationshipExporter_TargetEntityUuid;
+				data[i++] = Messages.EntityRelationshipExporter_TargetEntityId;
 				
 				for (IntelAttribute ia : relationshipAttributes){
 					data[i++] = ia.getName();
@@ -207,7 +208,7 @@ public class EntityRelationshipExporter {
 						if (v != null){
 							data[i++] = provider.getText(v);
 						}else{
-							data[i++] = "";
+							data[i++] = ""; //$NON-NLS-1$
 						}
 					}
 					writer.writeNext(data);
@@ -249,10 +250,10 @@ public class EntityRelationshipExporter {
 	
 	public static Path getEntityFile(Path dir, String name){
 		name = cleanFilename(name);
-		return dir.resolve(name + "_entities.csv");
+		return dir.resolve(name + "_entities.csv"); //$NON-NLS-1$
 	}
 	public static  Path getRelationshipFile(Path dir, String name){
 		name = cleanFilename(name);
-		return dir.resolve(name + "_relationships.csv");
+		return dir.resolve(name + "_relationships.csv"); //$NON-NLS-1$
 	}
 }

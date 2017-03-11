@@ -50,7 +50,7 @@ public class RelationshipTypeLabelProvider extends LabelProvider {
 			if (type.getRelationshipGroup() == null){
 				return type.getName();
 			}else{
-				return MessageFormat.format("{0} ({1})", type.getName(), type.getRelationshipGroup().getName());
+				return MessageFormat.format("{0} ({1})", type.getName(), type.getRelationshipGroup().getName()); //$NON-NLS-1$
 			}
 		}
 		return super.getText(element);

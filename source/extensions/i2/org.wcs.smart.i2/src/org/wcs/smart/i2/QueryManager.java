@@ -26,6 +26,7 @@ import java.util.UUID;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 
 /**
@@ -51,17 +52,17 @@ public enum QueryManager {
 		try{
 			s.beginTransaction();
 			removed = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
-			if (removed == null) throw new Exception("Query not found - could not delete query.");
+			if (removed == null) throw new Exception(Messages.QueryManager_NotFoundError);
 			
-			Query wsQuery = s.createQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query");
-			wsQuery.setParameter("query", removed);
+			Query wsQuery = s.createQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query"); //$NON-NLS-1$
+			wsQuery.setParameter("query", removed); //$NON-NLS-1$
 			wsQuery.executeUpdate();
 			
 			s.delete(removed);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Error deleteing query: " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.QueryManager_DeleteError + ex.getMessage(), ex);
 			return null;
 		}finally{
 			s.close();

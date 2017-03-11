@@ -157,26 +157,26 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		
 		IntelObservationResultItem item = new IntelObservationResultItem();
 		
-		item.setObservationUuid(asUuid(sc,columnNameToIndex.get("observation_uuid")));
-		item.setLocationUuid(asUuid(sc,columnNameToIndex.get("location_uuid")));
-		item.setRecordUuid(asUuid(sc,columnNameToIndex.get("record_uuid")));
-		item.setRecordStatus((String)sc.get(columnNameToIndex.get("record_status")));
-		item.setRecordTitle((String)sc.get(columnNameToIndex.get("record_title")));
+		item.setObservationUuid(asUuid(sc,columnNameToIndex.get("observation_uuid"))); //$NON-NLS-1$
+		item.setLocationUuid(asUuid(sc,columnNameToIndex.get("location_uuid"))); //$NON-NLS-1$
+		item.setRecordUuid(asUuid(sc,columnNameToIndex.get("record_uuid"))); //$NON-NLS-1$
+		item.setRecordStatus((String)sc.get(columnNameToIndex.get("record_status"))); //$NON-NLS-1$
+		item.setRecordTitle((String)sc.get(columnNameToIndex.get("record_title"))); //$NON-NLS-1$
 		
-		item.setLocationId((String)sc.get(columnNameToIndex.get("loc_id")));
-		item.setLocationDate((Timestamp)sc.get(columnNameToIndex.get("loc_datetime")));
-		item.setLocationComment((String)sc.get(columnNameToIndex.get("loc_comment")));
+		item.setLocationId((String)sc.get(columnNameToIndex.get("loc_id"))); //$NON-NLS-1$
+		item.setLocationDate((Timestamp)sc.get(columnNameToIndex.get("loc_datetime"))); //$NON-NLS-1$
+		item.setLocationComment((String)sc.get(columnNameToIndex.get("loc_comment"))); //$NON-NLS-1$
 		try{
-			item.setGeometry(asGeometry(sc, columnNameToIndex.get("loc_geometry")), null);
+			item.setGeometry(asGeometry(sc, columnNameToIndex.get("loc_geometry")), null); //$NON-NLS-1$
 		}catch (Exception ex){
 			ex.printStackTrace();
 			item.setGeometry(null, ex);
 		}
-		item.setCategoryUuid(asUuid(sc,columnNameToIndex.get("category_uuid")));
+		item.setCategoryUuid(asUuid(sc,columnNameToIndex.get("category_uuid"))); //$NON-NLS-1$
 		
 		List<String> categories = new ArrayList<String>();
 		for (int i = 0; i < categoryCnt; i ++){
-			Object x = sc.get(columnNameToIndex.get("category_" + i));
+			Object x = sc.get(columnNameToIndex.get("category_" + i)); //$NON-NLS-1$
 			if (x != null) categories.add((String)x);
 		}
 		item.setCategoryLabels(categories.toArray(new String[categories.size()]));
@@ -184,7 +184,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		//add attachments
 		if (item.getObservationUuid() != null){
 			List<IntelObservationAttribute> attributes = session.createCriteria(IntelObservationAttribute.class)
-					.add(Restrictions.eq("id.observation.uuid", item.getObservationUuid()))
+					.add(Restrictions.eq("id.observation.uuid", item.getObservationUuid())) //$NON-NLS-1$
 					.list();
 			
 			for (IntelObservationAttribute a : attributes){
@@ -219,7 +219,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		Session session = SmartContext.INSTANCE.getClass(IConnectionFactory.class).openSession();
 		try{
 			String sortSql = configureSort(session);
-			String sql = "SELECT * FROM " + resultsTable + sortSql;
+			String sql = "SELECT * FROM " + resultsTable + sortSql; //$NON-NLS-1$
 			SqlGenerator.logString(sql);
 			ScrollableResults sc = session.createSQLQuery(sql).scroll();
 			try{
@@ -240,37 +240,37 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	
 	@SuppressWarnings("unchecked")
 	private String configureSort(Session session){
-		if (sortColumn == null || sortDirection == null) return "";
+		if (sortColumn == null || sortDirection == null) return ""; //$NON-NLS-1$
 		
-		String sql = " order by ";
+		String sql = " order by "; //$NON-NLS-1$
 		
 		if (sortColumn instanceof FixedQueryColumn){
 			if (((FixedQueryColumn) sortColumn).getColumn() == Column.LOC_COMMENT){
-				return sql + "lower(loc_comment)" + getSortDirectionSql();
+				return sql + "lower(loc_comment)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.LOC_ID){
-				return sql + "lower(loc_id)" + getSortDirectionSql();
+				return sql + "lower(loc_id)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.LOC_DATE){
-				return sql + "loc_datetime" + getSortDirectionSql();
+				return sql + "loc_datetime" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.LOC_TIME){
-				return sql + "time(loc_datetime)" + getSortDirectionSql();
+				return sql + "time(loc_datetime)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_STATUS){
-				return sql + "record_status" + getSortDirectionSql();
+				return sql + "record_status" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_TITLE){
-				return sql + "lower(record_title)" + getSortDirectionSql();
+				return sql + "lower(record_title)" + getSortDirectionSql(); //$NON-NLS-1$
 			}
 		}else if (sortColumn instanceof FilterQueryColumn){
 			String filterKey = ((FilterQueryColumn)sortColumn).getFilterKey();
 			for (Entry<IQueryFilter,String> filter : filterToColumn.entrySet()){
 				if (filter.getKey() instanceof IColumnIdentifierProvider){
 					if (((IColumnIdentifierProvider)filter.getKey()).getUniqueColumnIdentifier().equals(filterKey)){
-						return sql + " " + filter.getValue() + getSortDirectionSql();
+						return sql + " " + filter.getValue() + getSortDirectionSql(); //$NON-NLS-1$
 					}
 				}
 			}
 		}else if (sortColumn instanceof DataModelColumn){
 			DataModelColumn dm =(DataModelColumn)sortColumn;
 			if (dm.getLevel() >= 0 && dm.getLevel() < categoryCnt){
-				return sql + " category_" + dm.getLevel() + getSortDirectionSql();
+				return sql + " category_" + dm.getLevel() + getSortDirectionSql(); //$NON-NLS-1$
 			}else{
 				if (lastSortColumn != sortColumn){
 					session.getTransaction().begin();
@@ -279,26 +279,26 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 					switch(((DataModelColumn) sortColumn).getAttributeType()){
 					case BOOLEAN:
 					case NUMERIC:
-						String updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = null";
+						String updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
 						session.createSQLQuery(updateQuery).executeUpdate();
 						
-						updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = (SELECT a.double_value FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')";
+						updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = (SELECT a.double_value FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						SqlGenerator.logString(updateQuery);
 						session.createSQLQuery(updateQuery).executeUpdate();
 						break;
 					case DATE:
-						updateQuery = "UPDATE " + resultsTable + " SET date_sort = null";
+						updateQuery = "UPDATE " + resultsTable + " SET date_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
 						session.createSQLQuery(updateQuery).executeUpdate();
 						
-						updateQuery = "UPDATE " + resultsTable + " SET date_sort = (SELECT date(a.string_value) FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')";
+						updateQuery = "UPDATE " + resultsTable + " SET date_sort = (SELECT date(a.string_value) FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						SqlGenerator.logString(updateQuery);
 						session.createSQLQuery(updateQuery).executeUpdate();
 						break;
 					case LIST:		
-						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null";
+						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
 						session.createSQLQuery(updateQuery).executeUpdate();
 						
-						String attribute = "SELECT distinct a.list_element_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.list_element_uuid is not null";
+						String attribute = "SELECT distinct a.list_element_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.list_element_uuid is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						List<Object> listitems = session.createSQLQuery(attribute).list();
 						for (Object b : listitems){
 							UUID uuid = null;
@@ -309,37 +309,37 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 							}
 							AttributeListItem item = (AttributeListItem) session.get(AttributeListItem.class, uuid);
 							if (item != null){
-								updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE observation_uuid in (select observation_uuid FROM smart.i_observation_attribute a WHERE " + resultsTable + ".observation_uuid = a.observation_uuid and a.list_element_uuid = :listitem)";
+								updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE observation_uuid in (select observation_uuid FROM smart.i_observation_attribute a WHERE " + resultsTable + ".observation_uuid = a.observation_uuid and a.list_element_uuid = :listitem)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								
 								SQLQuery q = session.createSQLQuery(updateQuery);
-								q.setParameter("value", item.getName());
-								q.setParameter("listitem", item.getUuid());
+								q.setParameter("value", item.getName()); //$NON-NLS-1$
+								q.setParameter("listitem", item.getUuid()); //$NON-NLS-1$
 								q.executeUpdate();
 							}
 						}
 						break;
 					case TEXT:
-						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null";
+						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
 						session.createSQLQuery(updateQuery).executeUpdate();
 						
-						updateQuery = "UPDATE " + resultsTable + " SET str_sort = (SELECT a.string_value FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')";
+						updateQuery = "UPDATE " + resultsTable + " SET str_sort = (SELECT a.string_value FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						SqlGenerator.logString(updateQuery);
 						session.createSQLQuery(updateQuery).executeUpdate();
 						break;
 					case TREE:
-						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null";
+						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
 						session.createSQLQuery(updateQuery).executeUpdate();
 						
-						attribute = "SELECT distinct a.tree_node_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.tree_node_uuid is not null";
+						attribute = "SELECT distinct a.tree_node_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.tree_node_uuid is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						List<byte[]> treenodes = session.createSQLQuery(attribute).list();
 						for (byte[] b : treenodes){
 							AttributeTreeNode item = (AttributeTreeNode) session.get(AttributeTreeNode.class, UuidUtils.byteToUUID(b));
 							if (item != null){
-								updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE observation_uuid in (select observation_uuid FROM smart.i_observation_attribute a WHERE " + resultsTable + ".observation_uuid = a.observation_uuid and a.tree_node_uuid = :listitem)";
+								updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE observation_uuid in (select observation_uuid FROM smart.i_observation_attribute a WHERE " + resultsTable + ".observation_uuid = a.observation_uuid and a.tree_node_uuid = :listitem)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								
 								SQLQuery q = session.createSQLQuery(updateQuery);
-								q.setParameter("value", item.getName());
-								q.setParameter("listitem", item.getUuid());
+								q.setParameter("value", item.getName()); //$NON-NLS-1$
+								q.setParameter("listitem", item.getUuid()); //$NON-NLS-1$
 								q.executeUpdate();
 							}
 						}
@@ -355,25 +355,25 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 				switch(((DataModelColumn) sortColumn).getAttributeType()){
 				case BOOLEAN:
 				case NUMERIC:
-					return sql + "dbl_sort" + getSortDirectionSql();
+					return sql + "dbl_sort" + getSortDirectionSql(); //$NON-NLS-1$
 				case DATE:
-					return sql + "date_sort" + getSortDirectionSql();
+					return sql + "date_sort" + getSortDirectionSql(); //$NON-NLS-1$
 				case LIST:
 				case TEXT:
 				case TREE:
-					return sql + "str_sort" + getSortDirectionSql();
+					return sql + "str_sort" + getSortDirectionSql(); //$NON-NLS-1$
 				default:
 					break;
 				}
 			}
 		}
 		
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	private String getSortDirectionSql(){
-		if (sortDirection == SortDirection.UP) return " asc";
-		return " desc";
+		if (sortDirection == SortDirection.UP) return " asc"; //$NON-NLS-1$
+		return " desc"; //$NON-NLS-1$
 	}
 	
 	@Override
@@ -398,7 +398,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 
 	@Override
 	public void dispose(Session session) throws SQLException {
-		String sql = "DROP TABLE " + resultsTable;
+		String sql = "DROP TABLE " + resultsTable; //$NON-NLS-1$
 		resultsTable = null;
 		SqlGenerator.logString(sql);
 		session.createSQLQuery(sql).executeUpdate();

@@ -70,6 +70,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RelationshipTypeManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.NamedItemViewerFilter;
@@ -252,9 +253,9 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		
 		
-		setTitle("Relationship Type Groups");
-		getShell().setText("Relationship Type Groups");
-		setMessage("Manage the relationship groups in the system.");
+		setTitle(Messages.RelationshipGroupListDialog_Title);
+		getShell().setText(Messages.RelationshipGroupListDialog_Title);
+		setMessage(Messages.RelationshipGroupListDialog_Message);
 		
 		loadGroups.setSystem(true);
 		loadGroups.schedule();
@@ -298,13 +299,13 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 			if (x instanceof IntelRelationshipGroup){
 				toDelete.add((IntelRelationshipGroup)x);
 				sb.append(((IntelRelationshipGroup) x).getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the following relationship groups? This action cannot be undone.\n\n{0}", sb.toString()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.RelationshipGroupListDialog_ConfirmDeleteTitle, MessageFormat.format(Messages.RelationshipGroupListDialog_ConfirmDeleteMes, sb.toString()))){
 			return;
 		}
 		
@@ -315,7 +316,7 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 
-					monitor.beginTask("Deleting relationship groups", toDelete.size());
+					monitor.beginTask(Messages.RelationshipGroupListDialog_DeleteTaskName, toDelete.size());
 					Session s = HibernateManager.openSession();
 					try{
 						for (IntelRelationshipGroup t : toDelete){
@@ -326,7 +327,7 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 								s.getTransaction().commit();
 							}catch(Exception ex){
 								s.getTransaction().rollback();
-								Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to delete Relationship Group {0}. {1}", t.getName(), ex.getMessage()), ex);
+								Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.RelationshipGroupListDialog_DeleteError1, t.getName(), ex.getMessage()), ex);
 							}
 							monitor.worked(1);
 						}
@@ -338,7 +339,7 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 				}
 			});
 		} catch (Exception e) {
-			Intelligence2PlugIn.displayLog("Error deleting relationship groups: " +e.getMessage(), e);
+			Intelligence2PlugIn.displayLog(Messages.RelationshipGroupListDialog_DeleteError2 +e.getMessage(), e);
 		}
 		
 		refresh();

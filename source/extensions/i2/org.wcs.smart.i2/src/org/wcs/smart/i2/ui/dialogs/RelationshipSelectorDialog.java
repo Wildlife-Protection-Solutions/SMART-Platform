@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
@@ -121,7 +122,7 @@ public class RelationshipSelectorDialog extends TitleAreaDialog{
 						cmbTypes.setInput(rtypes);
 						selection = rtypes.get(0);
 					}else{
-						String noTypes = "No valid relationship types found.";
+						String noTypes = Messages.RelationshipSelectorDialog_NoRelationshipsFound;
 						cmbTypes.setInput(new String[]{noTypes});
 						selection = noTypes;
 					}
@@ -131,9 +132,9 @@ public class RelationshipSelectorDialog extends TitleAreaDialog{
 		}).schedule();
 		
 		
-		setMessage("Select the relationship type to create");
-		setTitle("New Relationship");
-		getShell().setText("New Relationship");
+		setMessage(Messages.RelationshipSelectorDialog_Message);
+		setTitle(Messages.RelationshipSelectorDialog_Title);
+		getShell().setText(Messages.RelationshipSelectorDialog_Title);
 		
 		return parent;
 	}

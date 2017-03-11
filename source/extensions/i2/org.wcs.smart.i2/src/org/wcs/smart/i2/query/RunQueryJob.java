@@ -33,6 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 import org.wcs.smart.i2.ui.editors.query.ProgressPanel;
@@ -52,7 +53,7 @@ public abstract class RunQueryJob extends Job {
 	private ProgressPanel progressPanel;
 	
 	public RunQueryJob(IntelRecordObservationQuery query) {
-		super("executing intelligence query: " + query.getName());
+		super(Messages.RunQueryJob_jobname + query.getName());
 		this.query = query;
 		parameters = new HashMap<String, Object>();
 		
@@ -91,7 +92,7 @@ public abstract class RunQueryJob extends Job {
 			parameters.put(Session.class.getName(), session);
 			results = (new IntelObservationQueryEngine()).executeQuery(query, parameters);	
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error running query. " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.RunQueryJob_error + ex.getMessage(), ex);
 			onError(ex);
 			return Status.OK_STATUS;
 		}finally{

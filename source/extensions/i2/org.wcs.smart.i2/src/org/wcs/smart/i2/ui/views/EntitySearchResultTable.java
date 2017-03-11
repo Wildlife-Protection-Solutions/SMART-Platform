@@ -76,6 +76,7 @@ import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
@@ -96,11 +97,11 @@ import org.wcs.smart.util.E3Utils;
  */
 public class EntitySearchResultTable extends Composite {
 
-	private static final String ICON_SIZE_KEY = "org.wcs.smart.i2.ui.views.EntitySearchResultTable.iconsize";
+	private static final String ICON_SIZE_KEY = "org.wcs.smart.i2.ui.views.EntitySearchResultTable.iconsize"; //$NON-NLS-1$
 	private enum IconSize{
-		SMALL(50, "Small"), 
-		MEDIUM(100, "Medium"),
-		LARGE(200, "Large");
+		SMALL(50, Messages.EntitySearchResultTable_SmallOp), 
+		MEDIUM(100, Messages.EntitySearchResultTable_MediumOp),
+		LARGE(200, Messages.EntitySearchResultTable_LargeOp);
 		
 		int size;
 		String label;
@@ -195,12 +196,12 @@ public class EntitySearchResultTable extends Composite {
 		core.setLayout(new GridLayout(2, false));
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label img = toolkit.createLabel(core, "");
+		Label img = toolkit.createLabel(core, ""); //$NON-NLS-1$
 		img.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
 		img.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		
-		Label l = toolkit.createLabel(core, MessageFormat.format("Search error: {0}", ex.getMessage()), SWT.WRAP);
+		Label l = toolkit.createLabel(core, MessageFormat.format(Messages.EntitySearchResultTable_SearchError, ex.getMessage()), SWT.WRAP);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 150;
 		l.setToolTipText(ex.getMessage());
@@ -245,7 +246,7 @@ public class EntitySearchResultTable extends Composite {
 			boldFont = new Font(Display.getDefault(), fd);
 		}
 		if (entities == null){
-			toolkit.createLabel(core, "Searching...");
+			toolkit.createLabel(core, Messages.EntitySearchResultTable_SearchingLabel);
 			sc = null;
 		}else{
 			Composite top = toolkit.createComposite(core);
@@ -256,21 +257,21 @@ public class EntitySearchResultTable extends Composite {
 			((GridLayout)top.getLayout()).horizontalSpacing = 0;
 			((GridLayout)top.getLayout()).verticalSpacing = 0;
 			
-			toolkit.createLabel(top, MessageFormat.format("{0} of {1}", entities.getResults().size(), entities.getTotalMatched()));
+			toolkit.createLabel(top, MessageFormat.format(Messages.EntitySearchResultTable_SearchResultCntLabel, entities.getResults().size(), entities.getTotalMatched()));
 			
 			iconSizeLabel = toolkit.createLabel(top, iconSize.label);
 			iconSizeLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-			iconSizeLabel.setToolTipText("Thumbnail Size");
-			Button btnDown = toolkit.createButton(top, "", SWT.ARROW | SWT.DOWN);
+			iconSizeLabel.setToolTipText(Messages.EntitySearchResultTable_ThumbSizeOp);
+			Button btnDown = toolkit.createButton(top, "", SWT.ARROW | SWT.DOWN); //$NON-NLS-1$
 			btnDown.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-			btnDown.setToolTipText("select thumbnail size");
+			btnDown.setToolTipText(Messages.EntitySearchResultTable_ThumbSizeTooltip);
 			Menu mnuIconSize = new Menu(btnDown);
 			MenuItem small = new MenuItem(mnuIconSize, SWT.RADIO);
 			MenuItem medium = new MenuItem(mnuIconSize, SWT.RADIO);
 			MenuItem large = new MenuItem(mnuIconSize, SWT.RADIO);
-			small.setText("Small");
-			medium.setText("Medium");
-			large.setText("Large");
+			small.setText(IconSize.SMALL.label);
+			medium.setText(IconSize.MEDIUM.label);
+			large.setText(IconSize.LARGE.label);
 			
 			if(iconSize == IconSize.SMALL){
 				small.setSelection(true);
@@ -304,11 +305,11 @@ public class EntitySearchResultTable extends Composite {
 				toolkit.adapt(entityComposite);
 				entityComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
-				Label l = toolkit.createLabel(main, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+				Label l = toolkit.createLabel(main, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 			}
-			toolkit.createLabel(main, MessageFormat.format("{0} seconds", entities.getTotalTime() / Math.pow(10, 9)));
+			toolkit.createLabel(main, MessageFormat.format(Messages.EntitySearchResultTable_SearchTimeResult, entities.getTotalTime() / Math.pow(10, 9)));
 			layout(true);
 			sc.setMinSize(main.computeSize(sc.getClientArea().width, SWT.DEFAULT));
 			core.addListener(SWT.Resize, event -> {
@@ -345,7 +346,7 @@ public class EntitySearchResultTable extends Composite {
 		List<IntelEntity> itemsToDelete = getCurrentSelection();
 		if (itemsToDelete.isEmpty()) return;
 		
-		if (!MessageDialog.openQuestion(getShell(), "Delete Entities", MessageFormat.format("Are you sure you want to delete the {0} selected entities?", itemsToDelete.size()))) return; 
+		if (!MessageDialog.openQuestion(getShell(), Messages.EntitySearchResultTable_DeleteEntityTitle, MessageFormat.format(Messages.EntitySearchResultTable_DeleteEntityMsg, itemsToDelete.size()))) return; 
 		
 		
 		//look for any dirty record editors and save them first
@@ -356,16 +357,16 @@ public class EntitySearchResultTable extends Composite {
 			if ( x instanceof RecordEditor && ((RecordEditor)x).isDirty()){
 				editors.add((RecordEditor)x);
 				names.append(((RecordEditor)x).getPartName());
-				names.append(", ");
+				names.append(", "); //$NON-NLS-1$
 			}
 		}
 		if (!editors.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("The following editors must be saved before you can delete this entity.  Do you want to save these editors and continue?");
-			sb.append("\n");
+			sb.append(Messages.EntitySearchResultTable_SaveRequiredMsg);
+			sb.append("\n"); //$NON-NLS-1$
 			sb.append(names.substring(0, names.length() - 2));
 			
-			if (!MessageDialog.openQuestion(getShell(), "Delete Entities", sb.toString())){
+			if (!MessageDialog.openQuestion(getShell(), Messages.EntitySearchResultTable_DeleteEntitiesTitle2, sb.toString())){
 				return;
 			}
 			for (RecordEditor p : editors){
@@ -384,7 +385,7 @@ public class EntitySearchResultTable extends Composite {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Deleting Entities...", itemsToDelete.size());
+					monitor.beginTask(Messages.EntitySearchResultTable_DeleteTaskName, itemsToDelete.size());
 					Session s = HibernateManager.openSession(new AttachmentInterceptor());
 					try{
 						s.beginTransaction();
@@ -404,12 +405,12 @@ public class EntitySearchResultTable extends Composite {
 						context.get(IEventBroker.class).send(IntelEvents.ENTITY_DELETE, itemsToDelete);
 					}catch (Exception ex){
 						//error with events;
-						Intelligence2PlugIn.displayLog("Entities deleted.  Error occurred refreshing UI: " + ex.getMessage(), ex);
+						Intelligence2PlugIn.displayLog(Messages.EntitySearchResultTable_RefreshError + ex.getMessage(), ex);
 					}
 				}
 			});
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Could not delete entities: " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.EntitySearchResultTable_DeleteError + ex.getMessage(), ex);
 			return;
 		}
 	}
@@ -418,7 +419,7 @@ public class EntitySearchResultTable extends Composite {
 		Menu menu = new Menu(parent);
 		
 		MenuItem mnuOpen = new MenuItem(menu, SWT.PUSH);
-		mnuOpen.setText("Open...");
+		mnuOpen.setText(Messages.EntitySearchResultTable_OpenItem);
 		mnuOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -428,7 +429,7 @@ public class EntitySearchResultTable extends Composite {
 		});
 		
 		MenuItem mnuOpenThumb = new MenuItem(menu, SWT.PUSH);
-		mnuOpenThumb.setText("Open Thumbnail ...");
+		mnuOpenThumb.setText(Messages.EntitySearchResultTable_OpenThumbItem);
 		mnuOpenThumb.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -441,14 +442,14 @@ public class EntitySearchResultTable extends Composite {
 		});
 		
 		MenuItem mnuCompare = new MenuItem(menu, SWT.PUSH);
-		mnuCompare.setText("Compare...");
+		mnuCompare.setText(Messages.EntitySearchResultTable_CompareItem);
 		mnuCompare.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				try{
 					(new CompareEntitiesHandler()).compare(getCurrentSelection(), context.get(EPartService.class));
 				}catch (Exception ex){
-					MessageDialog.openInformation(getShell(), "Error", ex.getMessage());
+					MessageDialog.openInformation(getShell(), Messages.EntitySearchResultTable_CompareErrorDialogTitle, ex.getMessage());
 				}
 			}
 		});
@@ -456,7 +457,7 @@ public class EntitySearchResultTable extends Composite {
 		new MenuItem(menu, SWT.SEPARATOR);
 		
 		MenuItem mnuPrint = new MenuItem(menu, SWT.PUSH);
-		mnuPrint.setText("Print Entities...");
+		mnuPrint.setText(Messages.EntitySearchResultTable_PrintMenuItem);
 		mnuPrint.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
 		mnuPrint.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -466,7 +467,7 @@ public class EntitySearchResultTable extends Composite {
 		});
 		
 		MenuItem mnuExport = new MenuItem(menu, SWT.PUSH);
-		mnuExport.setText("Export Entity & Relationships...");
+		mnuExport.setText(Messages.EntitySearchResultTable_ExportMenuItem);
 		mnuExport.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_EXPORT));
 		mnuExport.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -477,7 +478,7 @@ public class EntitySearchResultTable extends Composite {
 		
 		if (IntelSecurityManager.INSTANCE.canEditEntity()){
 			MenuItem mnuDelete = new MenuItem(menu, SWT.PUSH);
-			mnuDelete.setText("Delete...");
+			mnuDelete.setText(Messages.EntitySearchResultTable_DeleteMenuItem);
 			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			mnuDelete.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -490,7 +491,7 @@ public class EntitySearchResultTable extends Composite {
 		new MenuItem(menu, SWT.SEPARATOR);
 		
 		MenuItem mnuWorkingset = new MenuItem(menu, SWT.PUSH);
-		mnuWorkingset.setText("Add to Working Set");
+		mnuWorkingset.setText(Messages.EntitySearchResultTable_AddToWsMenuItem);
 		mnuWorkingset.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
 		mnuWorkingset.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -516,7 +517,7 @@ public class EntitySearchResultTable extends Composite {
 				
 				if (mnuAddToRecord == null || mnuAddToRecord.isDisposed()){
 					mnuAddToRecord = new MenuItem(menu, SWT.CASCADE);
-					mnuAddToRecord.setText("Add to Record ");
+					mnuAddToRecord.setText(Messages.EntitySearchResultTable_AddToRecordMenuItem);
 				
 					subRecord = new Menu(menu);
 					mnuAddToRecord.setMenu(subRecord);
@@ -584,6 +585,8 @@ public class EntitySearchResultTable extends Composite {
 	}
 	private class EntityComponent extends Composite implements Listener{
 
+		private static final String LAST_SELECTION_INDEX_KEY = "last_selection_index"; //$NON-NLS-1$
+		
 		private IntelSearchResultItem item;
 		private Color backgroundColor = null;
 		private boolean isSelected = false;
@@ -631,9 +634,9 @@ public class EntitySearchResultTable extends Composite {
 			((GridData)l.getLayoutData()).widthHint = 100;
 			addListener(l);
 			StringBuilder sb = new StringBuilder();
-			sb.append(MessageFormat.format("Date Created: {0}", DateFormat.getDateInstance().format(item.getEntity().getDateCreated())));
-			sb.append("\n");
-			sb.append(MessageFormat.format("Date Modified: {0}", DateFormat.getDateInstance().format(item.getEntity().getDateModified())));
+			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateCreatedLabel, DateFormat.getDateInstance().format(item.getEntity().getDateCreated())));
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateModifiedLabel, DateFormat.getDateInstance().format(item.getEntity().getDateModified())));
 			l.setToolTipText(sb.toString());
 			
 			int spacer = 2;
@@ -643,7 +646,7 @@ public class EntitySearchResultTable extends Composite {
 			((GridLayout)typecomp.getLayout()).marginHeight = 0;
 			typecomp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
 			if (item.getEntity().getEntityType().getIcon() != null){
-				final Label l1 = toolkit.createLabel(typecomp,"");
+				final Label l1 = toolkit.createLabel(typecomp,""); //$NON-NLS-1$
 				l1.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, true));
 				l1.setImage(EntityTypeLabelProvider.createImageDescriptor(item.getEntity().getEntityType()).createImage());
 				l1.addDisposeListener((e)->{if (l1.getImage() != null) l1.getImage().dispose();});
@@ -657,7 +660,7 @@ public class EntitySearchResultTable extends Composite {
 			l.setFont(smallerFont);
 			
 			
-			l = toolkit.createLabel(right, MessageFormat.format("Rating: {0}", item.getFormattedRating()));
+			l = toolkit.createLabel(right, MessageFormat.format(Messages.EntitySearchResultTable_RatingLabel, item.getFormattedRating()));
 			l.setToolTipText(item.getMatchString());
 			l.setFont(smallerFont);
 			addListener(l);
@@ -764,9 +767,9 @@ public class EntitySearchResultTable extends Composite {
 		
 		private void changeSelection(Event event){
 
-			Integer lastSelection = (Integer) getParent().getData("last_selection_index");
+			Integer lastSelection = (Integer) getParent().getData(LAST_SELECTION_INDEX_KEY);
 			if (lastSelection == null) lastSelection = 0;
-			getParent().setData("last_selection_index", index);
+			getParent().setData(LAST_SELECTION_INDEX_KEY, index);
 			
 			if ((event.stateMask & SWT.CTRL) != 0){
 				if (event.button == 1) isSelected = !isSelected;

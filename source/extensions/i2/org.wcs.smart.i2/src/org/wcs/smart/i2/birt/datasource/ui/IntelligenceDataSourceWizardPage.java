@@ -29,6 +29,7 @@ import org.eclipse.datatools.connectivity.ui.PingJob;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Intelligence data source wizard page
@@ -52,8 +53,8 @@ public class IntelligenceDataSourceWizardPage extends DataSourceWizardPage {
 	@Override
 	public void createPageCustomControl(Composite arg0) {
 		Label lbl = new Label(arg0, SWT.NONE);
-		lbl.setText("The intelligence data source is not configurable");
-		setTitle("SMART Intelligence Data Source");
+		lbl.setText(Messages.IntelligenceDataSourceWizardPage_NotConfigurable);
+		setTitle(Messages.IntelligenceDataSourceWizardPage_Title);
 	}
 
 	@Override

@@ -43,7 +43,7 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 	private Logger logger = Logger.getLogger(QueryGeoResourceInfo.class.getName());
 	
 	public QueryGeoResourceInfo( QueryGeoResource resource, IProgressMonitor monitor){
-		this.title = resource.getQueryName() + " (" + resource.getDataType() + ")";
+		this.title = resource.getQueryName() + " (" + resource.getDataType() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		computeBounds(resource, monitor);
 	}
 	
@@ -64,7 +64,7 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 				this.bounds =  new ReferencedEnvelope(env, GeometryUtils.SMART_CRS);
 			}
 		}catch (IOException ex){
-			logger.log(Level.INFO, "Unable to read bounds from query results", this.bounds);
+			logger.log(Level.INFO, "Unable to read bounds from query results", this.bounds); //$NON-NLS-1$
 		}
 	}
 }

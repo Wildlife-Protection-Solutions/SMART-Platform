@@ -82,6 +82,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -122,14 +123,14 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		
 	private IntelRecordSource currentSelection = null;
 	
-	private Job loadSources = new Job("load intelligence sources"){
+	private Job loadSources = new Job(Messages.RecordSourceAttributeDialog_LoadSourceJobName){
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Session s = HibernateManager.openSession();
 			try{
 				List<IntelRecordSource> srcs = s.createCriteria(IntelRecordSource.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 				srcs.forEach(e -> {
 					e.getNames().size();
@@ -190,16 +191,16 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		for (Button b : srcButtons) b.setEnabled(false);
 		for (MenuItem b : srcMenu) b.setEnabled(false);
 		
-		setTitle("Record Source");
-		setMessage("Configure the record sources and associated attributes");
-		getShell().setText("Record Source");
+		setTitle(Messages.RecordSourceAttributeDialog_Title);
+		setMessage(Messages.RecordSourceAttributeDialog_Message);
+		getShell().setText(Messages.RecordSourceAttributeDialog_Title);
 		
 		return parent;
 	}
 
 	public void cancelPressed(){
 		if (getButton(IDialogConstants.OK_ID).isEnabled()){
-			if (MessageDialog.openQuestion(getShell(), "Save Changes", "Do you want to save the changes before closing?")){
+			if (MessageDialog.openQuestion(getShell(), Messages.RecordSourceAttributeDialog_ConfirmSaveTitle, Messages.RecordSourceAttributeDialog_ConfirmSaveMessage)){
 				if (doSave()){
 					super.cancelPressed();		
 				}
@@ -229,7 +230,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		if (currentSelection == null){
 			iconComp.setEnabled(false);
 			iconComp.setImage(null);
-			sourceLabel.setText("");
+			sourceLabel.setText(""); //$NON-NLS-1$
 			lstAttributes.setInput(null);
 			lstAttributes.getControl().setEnabled(false);
 			for (Button b : attributeButtons) b.setEnabled(false);
@@ -269,7 +270,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		((GridLayout)iconc.getLayout()).marginHeight = 0;
 		
 		l = new Label(iconc, SWT.NONE);
-		l.setText("Icon:");
+		l.setText(Messages.RecordSourceAttributeDialog_IconLabel);
 		
 		iconComp = new IconComposite(iconc);
 		iconComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -288,7 +289,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		
 		
 		Label attributesLabel = new Label(detailsPanel, SWT.NONE);
-		attributesLabel.setText("Attributes:");
+		attributesLabel.setText(Messages.RecordSourceAttributeDialog_AttributeLabel);
 		attributesLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		lstAttributes = new TableViewer(detailsPanel, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
@@ -312,12 +313,12 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		TableViewerColumn colIcon = new TableViewerColumn(lstAttributes, SWT.NONE);
 		colIcon.getColumn().setWidth(150);
 		colIcon.setLabelProvider(provider);
-		colIcon.getColumn().setText("Attribute/Entity Type");
+		colIcon.getColumn().setText(Messages.RecordSourceAttributeDialog_AttributeTypeLabel);
 		
 		TableViewerColumn colName = new TableViewerColumn(lstAttributes, SWT.NONE);
 		colName.getColumn().setWidth(150);
 		colName.setLabelProvider(new RecordSourceAttributeLabelProvider(RecordSourceAttributeLabelProvider.Column.NAME));
-		colName.getColumn().setText("Field Name");
+		colName.getColumn().setText(Messages.RecordSourceAttributeDialog_FieldNameLabel);
 		
 
 		colName.setEditingSupport(new EditingSupport(colName.getViewer()) {
@@ -378,7 +379,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		TableViewerColumn colMulti = new TableViewerColumn(lstAttributes, SWT.NONE);
 		colMulti.getColumn().setWidth(50);
 		colMulti.setLabelProvider(new RecordSourceAttributeLabelProvider(RecordSourceAttributeLabelProvider.Column.MULTI));
-		colMulti.getColumn().setText("Multi");
+		colMulti.getColumn().setText(Messages.RecordSourceAttributeDialog_IsMultiLabel);
 		colMulti.setEditingSupport(new EditingSupport(colName.getViewer()) {
 			CheckboxCellEditor editor = new CheckboxCellEditor(lstAttributes.getTable());
 			@Override
@@ -388,7 +389,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 					Boolean newValue = (Boolean)value;
 					
 					if (a.getIsMultiple() != null && a.getIsMultiple() && !newValue){
-						if (!MessageDialog.openQuestion(getShell(), "Warning", "By changing this attribute from a mutli-select list to a single-select list all values for this attribute associated with any record of this type will be delete.  Area you sure you want to continue?")){
+						if (!MessageDialog.openQuestion(getShell(), Messages.RecordSourceAttributeDialog_WarningDialogTitle, Messages.RecordSourceAttributeDialog_MultiWarning)){
 							//do not update
 							return;
 						}
@@ -451,14 +452,14 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		l = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		Button btnMoveUp = new Button(buttonPanel, SWT.PUSH);
-		btnMoveUp.setText("Move Up");
+		btnMoveUp.setText(Messages.RecordSourceAttributeDialog_moveUpLabel);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.addListener(SWT.Selection, e->{
 			moveAttribute(-1);
 		});
 		
 		Button btnMoveDown = new Button(buttonPanel, SWT.PUSH);
-		btnMoveDown.setText("Move Down");
+		btnMoveDown.setText(Messages.RecordSourceAttributeDialog_moveDownLabel);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.addListener(SWT.Selection, e->{
 			moveAttribute(1);
@@ -476,27 +477,27 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		
 		MenuItem mnuAdd = new MenuItem(attributeMenu,SWT.PUSH);
 		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		mnuAdd.setText("Add");
+		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		mnuAdd.addListener(SWT.Selection, e->addAttribute());
 		
 		MenuItem mnuDelete = new MenuItem(attributeMenu,SWT.PUSH);
 		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		mnuDelete.setText("Delete");
+		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		mnuDelete.addListener(SWT.Selection, e->deleteAttribute());
 		
 		MenuItem mnuEdit = new MenuItem(attributeMenu,SWT.PUSH);
 		mnuEdit.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-		mnuEdit.setText("Translate...");
+		mnuEdit.setText(Messages.RecordSourceAttributeDialog_TranslateLabel);
 		mnuEdit.addListener(SWT.Selection, e->editAttribute());
 		
 		new MenuItem(attributeMenu,SWT.SEPARATOR);
 		
 		MenuItem mnuMoveUp = new MenuItem(attributeMenu,SWT.PUSH);
-		mnuMoveUp.setText("Move Up");
+		mnuMoveUp.setText(Messages.RecordSourceAttributeDialog_moveUpLabel);
 		mnuMoveUp.addListener(SWT.Selection, e->moveAttribute(-1));
 		
 		MenuItem mnuMoveDown = new MenuItem(attributeMenu,SWT.PUSH);
-		mnuMoveDown.setText("Move Down");
+		mnuMoveDown.setText(Messages.RecordSourceAttributeDialog_moveDownLabel);
 		mnuMoveDown.addListener(SWT.Selection, e->moveAttribute(1));
 		
 		attributeButtons = new Button[]{btnAdd, btnDelete, btnMoveUp, btnMoveDown};
@@ -569,7 +570,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			}
 		}
 		if (delete.size() == 0) return;
-		if (!MessageDialog.openConfirm(getShell(), "Delete Attributes", MessageFormat.format("Are you sure you want to delete the {0} attributes associated with this source.  This will also delete these attributes from the intelligence records. This action cannot be undone.", delete.size()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.RecordSourceAttributeDialog_DeleteAttributeTitle, MessageFormat.format(Messages.RecordSourceAttributeDialog_DeleteAttributeMsg, delete.size()))){
 			return;
 		}
 		currentSelection.getAttributes().removeAll(delete);
@@ -587,7 +588,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			lstAttributes.setInput(source.getAttributes());
 			source.setAttributes(new ArrayList<>());
 		}
-		SelectAttributeEntityTypeDialog dialog = new SelectAttributeEntityTypeDialog(getShell(), MessageFormat.format("Add attributes / entity types to record source {0}", source.getName()));
+		SelectAttributeEntityTypeDialog dialog = new SelectAttributeEntityTypeDialog(getShell(), MessageFormat.format(Messages.RecordSourceAttributeDialog_AddDialogTitle, source.getName()));
 		ContextInjectionFactory.inject(dialog, context);				
 		if (dialog.open() == Window.OK){
 			for (NamedItem ia : dialog.getSelectedAttributes()){
@@ -620,7 +621,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		srcPanel.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(srcPanel, SWT.NONE);
-		l.setText("Record Source:");
+		l.setText(Messages.RecordSourceAttributeDialog_RecordSourceLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		lstSources = new TableViewer(srcPanel, SWT.BORDER);
@@ -669,17 +670,17 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		
 		MenuItem mnuAdd = new MenuItem(srcMenu,SWT.PUSH);
 		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		mnuAdd.setText("Add");
+		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		mnuAdd.addListener(SWT.Selection, e->addSource());
 		
 		MenuItem mnuEdit = new MenuItem(srcMenu,SWT.PUSH);
 		mnuEdit.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-		mnuEdit.setText("Edit");
+		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		mnuEdit.addListener(SWT.Selection, e->editSource());
 		
 		MenuItem mnuDelete = new MenuItem(srcMenu,SWT.PUSH);
 		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		mnuDelete.setText("Delete");
+		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		mnuDelete.addListener(SWT.Selection, e->deleteSource());
 		
 		
@@ -693,7 +694,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		
 		
 		Hyperlink hk = new Hyperlink(srcPanel, SWT.NONE);
-		hk.setText("Edit Record BIRT Template...");
+		hk.setText(Messages.RecordSourceAttributeDialog_EditTemplateLink);
 		hk.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		hk.setUnderlined(true);
 		hk.setForeground(hk.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
@@ -718,7 +719,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 		NameKeyDialog<IntelRecordSource> dialog = new NameKeyDialog<IntelRecordSource>(getShell(), newItem, sources){
 			@Override
 			protected String getTitle(){
-				return "New Record Source";
+				return Messages.RecordSourceAttributeDialog_NewSourceDialogTitle;
 			}
 		};
 		if (dialog.open() == Window.OK){
@@ -742,7 +743,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			}
 		}
 		if (delete.isEmpty()) return;
-		if (!MessageDialog.openConfirm(getShell(), "Delete Sources", MessageFormat.format("Are you sure you want to delete the {0} selected sources?  This will also update all intelligence records that are associated with this source. ", delete.size()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.RecordSourceAttributeDialog_DeleteSourceDialogTitle, MessageFormat.format(Messages.RecordSourceAttributeDialog_DeleteSourceDialogMsg, delete.size()))){
 			return;
 		}
 		sources.removeAll(delete);
@@ -762,7 +763,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			NameKeyDialog<IntelRecordSource> dialog = new NameKeyDialog<IntelRecordSource>(getShell(), source, kids){
 				@Override
 				protected String getTitle(){
-					return "Edit Record Source";
+					return Messages.RecordSourceAttributeDialog_EditoSourceDialogTitle;
 				}
 			};
 			if (dialog.open() == Window.OK){
@@ -782,8 +783,8 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 				if (a.getUuid() == null) continue; //not saved skip
 				
 				//delete any values associated with this attribute 
-				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ");
-				q.setParameter("attribute", a);
+				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
+				q.setParameter("attribute", a); //$NON-NLS-1$
 				q.executeUpdate();
 				
 				//delete the attributes
@@ -795,8 +796,8 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 				if (a.getUuid() == null) continue; //not saved skip 
 				
 				//delete any values associated with this attribute 
-				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ");
-				q.setParameter("attribute", a);
+				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
+				q.setParameter("attribute", a); //$NON-NLS-1$
 				q.executeUpdate();
 			}
 			
@@ -805,15 +806,15 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 				if (source.getUuid() == null) continue;
 				
 				//update intelligence records to have no source
-				Query q = session.createQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source");
-				q.setParameter("source", source);
+				Query q = session.createQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source"); //$NON-NLS-1$
+				q.setParameter("source", source); //$NON-NLS-1$
 				q.executeUpdate();
 				
 				//remove all attributes associated with source
 				for (IntelRecordSourceAttribute a : source.getAttributes()){
 					//delete any values associated with this attribute 
-					q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute ");
-					q.setParameter("attribute", a);
+					q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
+					q.setParameter("attribute", a); //$NON-NLS-1$
 					q.executeUpdate();
 					//delete the attributes
 					session.delete(a);
@@ -833,7 +834,7 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 			attributesMultiToSingle.clear();
 			toDelete.clear();
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error saving changes to record sources: " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + ex.getMessage(), ex);
 			return false;
 		}finally{
 			session.close();

@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.birt.entity;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,6 +30,9 @@ import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -47,27 +49,25 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	
 	public static enum Column{
-		ENTITY_UUID("entity:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		ID("entity:id", "ID", java.sql.Types.VARCHAR),
-		TYPE_KEY("entity:type_key", "Entity Type Key", java.sql.Types.VARCHAR),
-		TYPE("entity:type", "Entity Type", java.sql.Types.VARCHAR),
-		DATE_CREATED("entity:date_created", "Date Created", java.sql.Types.DATE),
-		DATE_MODIFIED("entity:date_modified", "Date Modified", java.sql.Types.DATE),
-		CREATED_BY("entity:created_by", "Created By", java.sql.Types.VARCHAR),
-		MODIFIED_BY("entity:modified_by", "Last Modified By", java.sql.Types.VARCHAR),
-		PRIMARY_IMAGE("entity:primary_image", "Primay Image", java.sql.Types.VARCHAR);
+		ENTITY_UUID("entity:entity_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ID("entity:id",java.sql.Types.VARCHAR), //$NON-NLS-1$
+		TYPE_KEY("entity:type_key",  java.sql.Types.VARCHAR), //$NON-NLS-1$
+		TYPE("entity:type", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		DATE_CREATED("entity:date_created", java.sql.Types.DATE), //$NON-NLS-1$
+		DATE_MODIFIED("entity:date_modified",  java.sql.Types.DATE), //$NON-NLS-1$
+		CREATED_BY("entity:created_by",  java.sql.Types.VARCHAR), //$NON-NLS-1$
+		MODIFIED_BY("entity:modified_by", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		PRIMARY_IMAGE("entity:primary_image",  java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		String id;
-		String name;
 		int type;
 		
-		Column(String id, String name, int type){
+		Column(String id, int type){
 			this.id = id;
-			this.name = name;
 			this.type = type;
 		}
-		public String getColumnName(){
-			return this.name;
+		public String getColumnName(Locale l){
+			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
 		public String getId(){
 			return this.id;
@@ -79,13 +79,13 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 			if (this == TYPE) return entity.getEntityType().getName();
 			if (this == DATE_CREATED) return entity.getDateCreated();
 			if (this == DATE_MODIFIED) return entity.getDateModified();
-			if (this == CREATED_BY) return MessageFormat.format("{0} {1}", entity.getCreatedBy().getGivenName(), entity.getCreatedBy().getFamilyName());
-			if (this == MODIFIED_BY) return MessageFormat.format("{0} {1}", entity.getLastModifiedBy().getGivenName(), entity.getLastModifiedBy().getFamilyName());
+			if (this == CREATED_BY) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getCreatedBy());
+			if (this == MODIFIED_BY) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getLastModifiedBy());
 			if (this == PRIMARY_IMAGE){
 				if (entity.getPrimaryAttachment() == null){
 					return null;
 				}
-				return "file:/" + entity.getPrimaryAttachment().getAttachmentFile().getCanonicalPath();
+				return "file:/" + entity.getPrimaryAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
 			}
 			return null;
 		}
@@ -94,11 +94,13 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	private List<String> attributeColumnNames;
 	private List<String> attributeColumnLabels;
 	private List<IntelEntityTypeAttribute> attributes;
+	private Locale l;
 	
-	public EntityDatasetResultSetMetadata(IntelEntityType type){
+	public EntityDatasetResultSetMetadata(IntelEntityType type, Locale l){
+		this.l = l;
 		HashSet<String> fixedLabels = new HashSet<>();
 		for (Column c : Column.values()){
-			fixedLabels.add(c.name);
+			fixedLabels.add(c.getColumnName(l));
 		}
 		if (type.getAttributes() == null){
 			attributes = Collections.emptyList();
@@ -110,13 +112,13 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 		attributeColumnLabels = new ArrayList<String>(attributes.size());
 		for (IntelEntityTypeAttribute attribute : attributes){
 			String corelabel = attribute.getAttribute().getName();
-			String name = "attribute:" + attribute.getAttribute().getKeyId();
+			String name = "attribute:" + attribute.getAttribute().getKeyId(); //$NON-NLS-1$
 			
 			attributeColumnNames.add(name);
 			int add = 1;
 			String label = corelabel;
 			while(attributeColumnLabels.contains(label) || fixedLabels.contains(label)){
-				label = corelabel + "_" + add;
+				label = corelabel + "_" + add; //$NON-NLS-1$
 				add++;
 			}
 			attributeColumnLabels.add(label);
@@ -147,12 +149,12 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		if (index < Column.values().length) return Column.values()[index-1].name;
+		if (index < Column.values().length) return Column.values()[index-1].getColumnName(l);
 		index = index - Column.values().length;
 		if (index < attributes.size()){
 			return attributeColumnLabels.get(index);
 		}
-		return Column.PRIMARY_IMAGE.name;
+		return Column.PRIMARY_IMAGE.getColumnName(l);
 	}
 
 	/**

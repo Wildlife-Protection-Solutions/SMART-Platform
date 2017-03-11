@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 
@@ -48,7 +49,7 @@ public class RelationshipContentProvider implements ITreeContentProvider {
 	private static IntelRelationshipGroup NONEGROUP;
 	static{
 		NONEGROUP = new IntelRelationshipGroup();
-		NONEGROUP.setName("None");
+		NONEGROUP.setName(Messages.RelationshipContentProvider_NoneGroupName);
 	}
 	
 	

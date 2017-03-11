@@ -184,13 +184,13 @@ public class IntelRecordAttributeValue extends UuidItem{
 				return getStringValue();
 			case POSITION:
 				if (crs == null || crs == GeometryUtils.SMART_CRS || CRS.equalsIgnoreMetadata(crs, GeometryUtils.SMART_CRS)){
-					return "POINT( " + getNumberValue() +" " + getNumberValue2() + ")";
+					return "POINT( " + getNumberValue() +" " + getNumberValue2() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}else{
 					try{
 						Coordinate c = ReprojectUtils.reproject(getNumberValue(), getNumberValue2(), GeometryUtils.SMART_CRS, crs);
-						return "POINT( " + c.x + " " + c.y + ")";
+						return "POINT( " + c.x + " " + c.y + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}catch (Exception ex){
-						return "ERROR: " + ex.getMessage();
+						return "ERROR: " + ex.getMessage(); //$NON-NLS-1$
 					}
 				}
 			}

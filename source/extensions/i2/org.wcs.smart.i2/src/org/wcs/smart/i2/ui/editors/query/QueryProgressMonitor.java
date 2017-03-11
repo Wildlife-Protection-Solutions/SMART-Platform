@@ -53,7 +53,7 @@ public class QueryProgressMonitor implements IProgressMonitor {
 
 	public void updateGui(){
 		Display.getDefault().asyncExec(()->{
-			panel.setLabel(taskName + " - " + subTaskName);
+			panel.setLabel(taskName + " - " + subTaskName); //$NON-NLS-1$
 			int progress = (int) Math.round( (worked / totalWork) * 100.0 ) ;
 			panel.setProgress(progress);
 			panel.layout(true);

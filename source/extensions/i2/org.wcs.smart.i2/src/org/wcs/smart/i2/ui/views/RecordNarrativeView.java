@@ -63,6 +63,7 @@ import org.osgi.service.event.Event;
 import org.wcs.smart.PerspectiveEditorTracker;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -79,10 +80,10 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditor;
  */
 public class RecordNarrativeView {
 
-	public static final String ID = "org.wcs.smart.i2.record.editor.narrative";
+	public static final String ID = "org.wcs.smart.i2.record.editor.narrative"; //$NON-NLS-1$
 	
-	public static final String TYPE_KEY = ID + ".type";
-	public static final String EDITOR_KEY = ID + ".editor";
+	public static final String TYPE_KEY = ID + ".type"; //$NON-NLS-1$
+	public static final String EDITOR_KEY = ID + ".editor"; //$NON-NLS-1$
 	
 	public enum FieldType{NARRATIVE,SCRATCHPAD};
 	
@@ -149,12 +150,12 @@ public class RecordNarrativeView {
 		if (!part.getTags().contains(PerspectiveEditorTracker.EDITOR_TAG)) part.getTags().add(PerspectiveEditorTracker.EDITOR_TAG);
 		if (!part.getTags().contains(IntelDataAssessmentPerspective.ID)) part.getTags().add(IntelDataAssessmentPerspective.ID);
 		if (!part.getTags().contains(IntelDataAnalysisPerspective.ID)) part.getTags().add(IntelDataAnalysisPerspective.ID);
-		part.getTags().remove("View");
+		part.getTags().remove("View"); //$NON-NLS-1$
 		
 		this.type = (FieldType) part.getTransientData().get(TYPE_KEY);
 		this.recordEditor = (RecordEditor) part.getTransientData().get(EDITOR_KEY);
 		
-		if (type == null || recordEditor == null) throw new IllegalStateException("No type or intelligence record provided.");
+		if (type == null || recordEditor == null) throw new IllegalStateException("No type or intelligence record provided."); //$NON-NLS-1$
 		
 		parent.setLayout(new GridLayout());
 		parent.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -162,8 +163,8 @@ public class RecordNarrativeView {
 		lblHeader = new Label(parent, SWT.NONE);
 		StringBuilder sb = new StringBuilder();
 		sb.append(recordEditor.getRecord().getTitle());
-		sb.append(" - ");
-		sb.append(type == FieldType.NARRATIVE ? "Narrative" : "Scratchpad");
+		sb.append(" - "); //$NON-NLS-1$
+		sb.append(type == FieldType.NARRATIVE ? Messages.RecordNarrativeView_NarrativeTitle : Messages.RecordNarrativeView_ScratchpadTitle);
 		
 		lblHeader.setText(sb.toString());
 		lblHeader.setBackground(lblHeader.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -184,13 +185,13 @@ public class RecordNarrativeView {
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		if (type == FieldType.NARRATIVE){
 			if (recordEditor.getRecord().getDescription() == null){
-				txt.setText("");
+				txt.setText(""); //$NON-NLS-1$
 			}else{
 				txt.setText(recordEditor.getRecord().getDescription());
 			}
 		}else if (type == FieldType.SCRATCHPAD){
 			if (recordEditor.getRecord().getComment() == null){
-				txt.setText("");
+				txt.setText(""); //$NON-NLS-1$
 			}else{
 				txt.setText(recordEditor.getRecord().getComment());
 			}
@@ -208,7 +209,7 @@ public class RecordNarrativeView {
 	public void updateText(String text){
 		txt.removeModifyListener(textListener);
 		try{
-			if (text == null) text = "";
+			if (text == null) text = ""; //$NON-NLS-1$
 			txt.setText(text);
 		}finally{
 			txt.addModifyListener(textListener);
@@ -242,7 +243,7 @@ public class RecordNarrativeView {
 		text.setMenu(menu);
 		
 		MenuItem search = new MenuItem(menu, SWT.CASCADE);
-		search.setText("Search Entity -> ");
+		search.setText(Messages.RecordNarrativeView_SearchEntities);
 		search.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {				
@@ -253,7 +254,7 @@ public class RecordNarrativeView {
 		
 		if (IntelSecurityManager.INSTANCE.canCreateEntity()){
 			MenuItem newEntity = new MenuItem(menu, SWT.CASCADE);
-			newEntity.setText("New Entity ... ");
+			newEntity.setText(Messages.RecordNarrativeView_NewEntities);
 			newEntity.addSelectionListener(new SelectionAdapter() {			
 				@Override
 				public void widgetSelected(SelectionEvent e) {				
@@ -269,7 +270,7 @@ public class RecordNarrativeView {
 		new MenuItem(menu, SWT.SEPARATOR);
 		
 		MenuItem cut = new MenuItem(menu, SWT.PUSH);
-		cut.setText("Cut");
+		cut.setText(Messages.RecordNarrativeView_cut);
 		cut.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -277,7 +278,7 @@ public class RecordNarrativeView {
 			}
 		});
 		MenuItem copy = new MenuItem(menu, SWT.PUSH);
-		copy.setText("Copy");
+		copy.setText(Messages.RecordNarrativeView_copy);
 		copy.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -285,7 +286,7 @@ public class RecordNarrativeView {
 			}
 		});
 		MenuItem paste = new MenuItem(menu, SWT.PUSH);
-		paste.setText("Paste");
+		paste.setText(Messages.RecordNarrativeView_paste);
 		paste.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -294,7 +295,7 @@ public class RecordNarrativeView {
 		});
 		
 		MenuItem delete = new MenuItem(menu, SWT.PUSH);
-		delete.setText("Delete");
+		delete.setText(Messages.RecordNarrativeView_delete);
 		delete.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -308,7 +309,7 @@ public class RecordNarrativeView {
 		new MenuItem(menu, SWT.SEPARATOR);
 
 		MenuItem selectAll = new MenuItem(menu, SWT.PUSH);
-		selectAll.setText("Select All");
+		selectAll.setText(Messages.RecordNarrativeView_selectall);
 		selectAll.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {

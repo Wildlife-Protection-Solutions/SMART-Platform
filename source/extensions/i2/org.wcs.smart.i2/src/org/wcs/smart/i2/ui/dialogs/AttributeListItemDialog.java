@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
@@ -88,9 +89,9 @@ public class AttributeListItemDialog extends TitleAreaDialog {
 			}
 		});
 		
-		setTitle("Intelligence Attribute List Item");
-		getShell().setText("Intelligence Attribute List Item");
-		setMessage("Create or edit intelligence attribute list item.");
+		setTitle(Messages.AttributeListItemDialog_Title);
+		getShell().setText(Messages.AttributeListItemDialog_Title);
+		setMessage(Messages.AttributeListItemDialog_Message);
 		
 		return parent;
 	}

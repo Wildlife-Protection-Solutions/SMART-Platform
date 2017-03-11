@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -9,13 +30,19 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.i2.internal.Messages;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKTReader;
 
-public class GeometryDialog extends TitleAreaDialog {
+/**
+ * Dialog for editing the WKT of a geometry
+ * @author Emily
+ *
+ */
+public class WKTGeometryDialog extends TitleAreaDialog {
 
 	private Text txtGeometry;
 	
@@ -23,7 +50,7 @@ public class GeometryDialog extends TitleAreaDialog {
 	private Geometry newGeometry;
 	private WKTReader parser = new WKTReader();
 	
-	public GeometryDialog(Shell parentShell, Geometry  geometry) {
+	public WKTGeometryDialog(Shell parentShell, Geometry  geometry) {
 		super(parentShell);
 		this.geometry = geometry;
 	}
@@ -43,15 +70,15 @@ public class GeometryDialog extends TitleAreaDialog {
 	
 		txtGeometry = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		String text = geometry.toText();
-		text = text.replaceAll(", ", ", \n ");
+		text = text.replaceAll(", ", ", \n "); //$NON-NLS-1$ //$NON-NLS-2$
 		txtGeometry.setText(text);
 		
 		txtGeometry.addListener(SWT.Modify, e-> validate());
 		txtGeometry.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		setTitle("Edit Geometry");
-		setMessage("Enter the well-known text representation of the geometry.");
-		getShell().setText("Location");
+		setTitle(Messages.WKTGeometryDialog_Title);
+		setMessage(Messages.WKTGeometryDialog_Message);
+		getShell().setText(Messages.WKTGeometryDialog_ShellTitle);
 		return parent;
 	}
 	
@@ -61,10 +88,10 @@ public class GeometryDialog extends TitleAreaDialog {
 			newGeometry = null;
 			newGeometry = parser.read(txtGeometry.getText());
 			if (!(newGeometry instanceof Point || newGeometry instanceof Polygon)){
-				message = "Geometry must be of type Point or Polygon";
+				message = Messages.WKTGeometryDialog_InvalidGeometryType;
 			}
 		}catch (Exception ex){
-			message = "Invalid geometry";
+			message = Messages.WKTGeometryDialog_InvalidGeometry;
 		}
 		setErrorMessage(message);
 		getButton(IDialogConstants.OK_ID).setEnabled(message == null);

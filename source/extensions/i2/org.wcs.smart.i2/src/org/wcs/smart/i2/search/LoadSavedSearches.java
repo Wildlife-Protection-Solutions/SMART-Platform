@@ -33,6 +33,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 
 import com.ibm.icu.text.Collator;
@@ -46,7 +47,7 @@ import com.ibm.icu.text.Collator;
 public abstract class LoadSavedSearches extends Job{
 
 	public LoadSavedSearches() {
-		super("loading queries job");
+		super(Messages.LoadSavedSearches_jobname);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -57,13 +58,13 @@ public abstract class LoadSavedSearches extends Job{
 		Session session = HibernateManager.openSession();
 		try{
 			List<IntelEntitySearch> objects = session.createCriteria(IntelEntitySearch.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 			.list();
 			
 			objects.forEach(o -> searches.add(new SearchProxy(o.getUuid(), o.getName())));
 			
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error loading saved searches: " + ex.getMessage() , ex);
+			Intelligence2PlugIn.displayLog(Messages.LoadSavedSearches_errorMsg + ex.getMessage() , ex);
 			return Status.OK_STATUS;
 		}finally{	
 			session.close();

@@ -69,6 +69,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.ui.WorkingSetLabelProvider;
 import org.wcs.smart.i2.ui.views.WorkingSetView;
@@ -83,7 +84,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class WorkingSetListDialog extends TitleAreaDialog {
 
-	public static final String NONE_LABEL = "(None)";
+	public static final String NONE_LABEL = Messages.WorkingSetListDialog_NoneLabel;
 	
 	@Inject
 	private IEventBroker eventBroker;
@@ -126,7 +127,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		
 		Button btnAdd = new Button(buttonComp, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.setToolTipText("create a new working set");
+		btnAdd.setToolTipText(Messages.WorkingSetListDialog_addTooltip);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -136,8 +137,8 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		});
 
 		Button btnCopy = new Button(buttonComp, SWT.PUSH);
-		btnCopy.setText("Copy");
-		btnCopy.setToolTipText("create a new working set using the selected working set as a template");
+		btnCopy.setText(Messages.WorkingSetListDialog_CopyLabel);
+		btnCopy.setToolTipText(Messages.WorkingSetListDialog_copytooltip);
 		btnCopy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnCopy.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -148,8 +149,8 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		btnCopy.setEnabled(false);
 		
 		Button btnRename = new Button(buttonComp, SWT.PUSH);
-		btnRename.setText("Rename");
-		btnRename.setToolTipText("rename selected working set");
+		btnRename.setText(Messages.WorkingSetListDialog_RenameLabel);
+		btnRename.setToolTipText(Messages.WorkingSetListDialog_renametooltip);
 		btnRename.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnRename.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -162,7 +163,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		
 		Button btnDelete = new Button(buttonComp, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setToolTipText("delete selected working set");
+		btnDelete.setToolTipText(Messages.WorkingSetListDialog_deletetooltip);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -182,7 +183,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 			}
 		});
 		MenuItem renameItem = new MenuItem(menu, SWT.PUSH);
-		renameItem.setText("Rename");
+		renameItem.setText(Messages.WorkingSetListDialog_RenameLabel);
 		renameItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -203,7 +204,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		});
 		
 		MenuItem copyItem = new MenuItem(menu, SWT.PUSH);
-		copyItem.setText("Create Copy");
+		copyItem.setText(Messages.WorkingSetListDialog_createcopyLabel);
 //		copyItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		copyItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -237,9 +238,9 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 			public void menuHidden(MenuEvent e) {}
 		});
 		
-		setTitle("Working Sets");
-		getShell().setText("Working Sets");
-		setMessage("Select the working set to use");
+		setTitle(Messages.WorkingSetListDialog_Title);
+		getShell().setText(Messages.WorkingSetListDialog_Title);
+		setMessage(Messages.WorkingSetListDialog_Message);
 		
 		loadWorkingsets.setSystem(true);
 		loadWorkingsets.schedule();
@@ -264,7 +265,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		IntelWorkingSet itemToCopy = getSelectedItem();
 		if (itemToCopy == null) return;
 		
-		String newName = WorkingSetView.getWorkingsetName(getShell(), MessageFormat.format("Copy of {0}", itemToCopy.getName()));
+		String newName = WorkingSetView.getWorkingsetName(getShell(), MessageFormat.format(Messages.WorkingSetListDialog_DefaultCopyWsName, itemToCopy.getName()));
 		if (newName == null) return;
 		
 		Session s = HibernateManager.openSession();
@@ -280,7 +281,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Unable to save cloned working set", ex);
+			Intelligence2PlugIn.displayLog(Messages.WorkingSetListDialog_SaveError, ex);
 		}finally{
 			s.close();
 		}
@@ -309,7 +310,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();
-				Intelligence2PlugIn.displayLog(MessageFormat.format("Error renaming working set ''{0}''. {1}", toRename.getName(), ex.getMessage()), ex);
+				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetListDialog_RenameError, toRename.getName(), ex.getMessage()), ex);
 			}finally{
 				s.close();
 			}
@@ -331,7 +332,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 			deleteok = true;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Error deleting working set ''{0}''. {1}", toDelete.getName(), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetListDialog_DeleteError, toDelete.getName(), ex.getMessage()), ex);
 		}finally{
 			s.close();
 		}
@@ -363,7 +364,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		return true;
 	}
 
-	Job loadWorkingsets = new Job("load working sets"){
+	Job loadWorkingsets = new Job(Messages.WorkingSetListDialog_loadingJobName){
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -373,7 +374,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 			Session s = HibernateManager.openSession();
 			try{
 				sets = s.createCriteria(IntelWorkingSet.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 			}finally{
 				s.close();

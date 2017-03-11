@@ -83,7 +83,7 @@ public class SectionTabHeader extends Composite implements IHyperlinkListener{
 		});
 
 		if (onMaximize != null){
-			Label max = toolkit.createLabel(this, "");
+			Label max = toolkit.createLabel(this, ""); //$NON-NLS-1$
 			max.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 			max.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SECTION_EXPAND));
 			max.addListener(SWT.MouseUp, (e)->onMaximize.run());

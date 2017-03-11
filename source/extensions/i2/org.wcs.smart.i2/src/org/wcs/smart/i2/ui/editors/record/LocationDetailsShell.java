@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.ObservationTreeViewer;
@@ -145,7 +146,7 @@ public class LocationDetailsShell extends SmartShellDialog{
 		
 		
 		Label lblEntities = new Label(entities, SWT.NONE);
-		lblEntities.setText("Entities:");
+		lblEntities.setText(Messages.LocationDetailsShell_EntitiesLabel);
 		lblEntities.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		if (!entityLocationLinks.isEmpty()){	
 			ListViewer lstViewer = new ListViewer(entities, SWT.NONE);
@@ -164,7 +165,7 @@ public class LocationDetailsShell extends SmartShellDialog{
 			lstViewer.setInput(entityLocationLinks);
 		}else{
 			Label l = new Label(entities, SWT.NONE);
-			l.setText("(None)");
+			l.setText(Messages.LocationDetailsShell_EntityNoneLabel);
 		}
 		
 		
@@ -176,7 +177,7 @@ public class LocationDetailsShell extends SmartShellDialog{
 		
 		
 		Label lblObservations = new Label(obs, SWT.NONE);
-		lblObservations.setText("Observations:");
+		lblObservations.setText(Messages.LocationDetailsShell_ObservationsLabel);
 		lblObservations.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		if (location.getObservations() != null && !location.getObservations().isEmpty()){
 			ObservationTreeViewer observationTree = new ObservationTreeViewer(obs, SWT.FULL_SELECTION);
@@ -185,7 +186,7 @@ public class LocationDetailsShell extends SmartShellDialog{
 			observationTree.expandToLevel(2);
 		}else{
 			Label l = new Label(obs, SWT.NONE);
-			l.setText("(None)");
+			l.setText(Messages.LocationDetailsShell_ObsNoneLabel);
 		}
 		sc.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		//configure background color

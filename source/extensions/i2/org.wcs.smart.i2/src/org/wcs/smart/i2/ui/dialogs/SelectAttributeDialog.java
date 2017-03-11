@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
@@ -192,7 +193,7 @@ public class SelectAttributeDialog extends TitleAreaDialog{
 			}
 		});
 		Button btnNew = new Button(parent, SWT.PUSH);
-		btnNew.setText("Create New Attribute");
+		btnNew.setText(Messages.SelectAttributeDialog_NewAttributeBtn);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -203,8 +204,8 @@ public class SelectAttributeDialog extends TitleAreaDialog{
 				}
 			}
 		});
-		setTitle("Select Attributes");
-		getShell().setText("Select Attributes");
+		setTitle(Messages.SelectAttributeDialog_Title);
+		getShell().setText(Messages.SelectAttributeDialog_Title);
 		setMessage(message);
 		
 		loadAttributes.setSystem(true);

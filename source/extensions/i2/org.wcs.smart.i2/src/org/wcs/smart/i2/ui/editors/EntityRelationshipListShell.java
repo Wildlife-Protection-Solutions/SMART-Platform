@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -79,7 +80,7 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 		if (view != null){
 			entityOptions = view.getEntities().stream().map(e->e.getEntity()).collect(Collectors.toList());
 		}else{
-			entityOptions = Collections.singletonList("No Entities Found");
+			entityOptions = Collections.singletonList(Messages.EntityRelationshipListShell_NoEntitiesFound);
 		}
 	}
 	
@@ -121,7 +122,7 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 								Display.getDefault().syncExec(()->{
 									if (types.getControl().isDisposed()) return;
 										if (rtypes.isEmpty()){
-											types.setInput(new String[]{"No relationship types found for given entity types"});
+											types.setInput(new String[]{Messages.EntityRelationshipListShell_NoRelationshipsFound});
 										}else{
 											types.setInput(rtypes);
 										}

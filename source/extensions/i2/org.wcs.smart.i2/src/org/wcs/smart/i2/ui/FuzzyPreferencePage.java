@@ -21,14 +21,9 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -44,26 +39,25 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelAnalystUserLevel;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelRelationshipType;
-import org.wcs.smart.i2.search.SearchDataGenerator;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.search.SearchManager;
 import org.wcs.smart.user.UserLevelManager;
 
+/**
+ * Preference page for testing the fuzzy matching algorithm.
+ * 
+ * @author Emily
+ *
+ */
 public class FuzzyPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
 
-	public static final String ID = "org.wcs.smart.i2.fuzzymatching";
+	public static final String ID = "org.wcs.smart.i2.fuzzymatching"; //$NON-NLS-1$
 	
 	public FuzzyPreferencePage() {
-		this("Fuzzy String Matching");
+		this(Messages.FuzzyPreferencePage_PageName);
 	}
 
 	public FuzzyPreferencePage(String title) {
@@ -83,7 +77,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 	protected Control createContents(Composite parent) {
 		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE)){
 			Label l = new Label(parent, SWT.NONE);
-			l.setText(MessageFormat.format("Only {0} users can access this page.", IntelAnalystUserLevel.INSTANCE.getGuiName(Locale.getDefault())));
+			l.setText(MessageFormat.format(Messages.FuzzyPreferencePage_InsufficientPermissions, IntelAnalystUserLevel.INSTANCE.getGuiName(Locale.getDefault())));
 			return l;
 		}
 		Composite c = new Composite(parent, SWT.NONE);
@@ -93,11 +87,11 @@ public class FuzzyPreferencePage extends PreferencePage implements
 		
 		
 		Group g = new Group(c, SWT.NONE);
-		g.setText("String Searching");
+		g.setText(Messages.FuzzyPreferencePage_SearchGroupTitle);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label l = new Label(g, SWT.WRAP);
-		l.setText("Test search results.  Enter the string you are searching for and the string you expect it to match.  The results will tell you if it matches or not.");
+		l.setText(Messages.FuzzyPreferencePage_Details);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 200;
 		
@@ -106,21 +100,21 @@ public class FuzzyPreferencePage extends PreferencePage implements
 		c2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = new Label(c2, SWT.NONE);
-		l.setText("Search For:");
+		l.setText(Messages.FuzzyPreferencePage_searchForLabel);
 		Text txtSearchFor = new Text(c2, SWT.BORDER);
 		txtSearchFor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = new Label(c2, SWT.NONE);
-		l.setText("Search In:");
+		l.setText(Messages.FuzzyPreferencePage_SearchInLabel);
 		Text txtSearchIn = new Text(c2, SWT.BORDER);
 		txtSearchIn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnMatch = new Button(c2, SWT.PUSH);
 		btnMatch.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
-		btnMatch.setText("Match Strings");
+		btnMatch.setText(Messages.FuzzyPreferencePage_ResultsTitle);
 		
 		l = new Label(c2, SWT.NONE);
-		l.setText("Results:");
+		l.setText(Messages.FuzzyPreferencePage_ResultLabel);
 		Text txtSearchResult = new Text(c2, SWT.BORDER);
 		txtSearchResult.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -129,9 +123,9 @@ public class FuzzyPreferencePage extends PreferencePage implements
 			public void widgetSelected(SelectionEvent e) {
 				Double value = SearchManager.INSTANCE.getRating(txtSearchFor.getText(), txtSearchIn.getText());
 				if (value == null){
-					txtSearchResult.setText("NO MATCH");
+					txtSearchResult.setText(Messages.FuzzyPreferencePage_NoMatchMsg);
 				}else{
-					txtSearchResult.setText(MessageFormat.format("MATCH: {0}", value));
+					txtSearchResult.setText(MessageFormat.format(Messages.FuzzyPreferencePage_MatchMsg, value));
 				}
 				
 			}

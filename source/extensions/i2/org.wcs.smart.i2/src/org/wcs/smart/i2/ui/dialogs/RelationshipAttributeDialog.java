@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
@@ -80,8 +81,8 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		setTitle(relationship.getRelationshipType().getName());
-		setMessage(MessageFormat.format("Configure attributes for {0} relationship between {1} and {2}", relationship.getRelationshipType().getName(), relationship.getSourceEntity().getIdAttributeAsText(), relationship.getTargetEntity().getIdAttributeAsText()));
-		getShell().setText("Relationship Attributes");
+		setMessage(MessageFormat.format(Messages.RelationshipAttributeDialog_Message, relationship.getRelationshipType().getName(), relationship.getSourceEntity().getIdAttributeAsText(), relationship.getTargetEntity().getIdAttributeAsText()));
+		getShell().setText(Messages.RelationshipAttributeDialog_Title);
 		getShell().setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RELATIONSHIP));
 		
 		fields = new HashMap<>();
@@ -92,7 +93,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	
 		if (relationship.getRelationshipType().getAttributes().size() == 0){
 			Label l = new Label(parent, SWT.NONE);
-			l.setText("There are no attributes configured for this relationship type.");
+			l.setText(Messages.RelationshipAttributeDialog_NoAttributes);
 		}else{
 			ScrolledComposite scroll = new ScrolledComposite(parent, SWT.V_SCROLL);
 			scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -113,7 +114,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 			
 			scroll.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			
-			Job j = new Job(""){
+			Job j = new Job(""){ //$NON-NLS-1$
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					Session s = HibernateManager.openSession();
@@ -176,7 +177,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	@Override
 	protected void cancelPressed(){
 		if (modified){
-			if (MessageDialog.openQuestion(getShell(), "Save Changes", "Would you like the save the changes before closing?")){
+			if (MessageDialog.openQuestion(getShell(), Messages.RelationshipAttributeDialog_SaveConfirmTitle, Messages.RelationshipAttributeDialog_SaveConfirmMessage)){
 				okPressed();
 				return;
 			}

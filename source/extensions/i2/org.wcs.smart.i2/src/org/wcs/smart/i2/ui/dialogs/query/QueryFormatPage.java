@@ -44,6 +44,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.export.CsvQueryExporter;
 import org.wcs.smart.i2.query.export.IQueryExporter;
 import org.wcs.smart.i2.query.export.ShpQueryExporter;
@@ -64,7 +65,7 @@ public class QueryFormatPage extends WizardPage {
 	 * @param pageName
 	 */
 	protected QueryFormatPage() {
-		super("Export_Format");
+		super("Export_Format"); //$NON-NLS-1$
 	}
 
 	
@@ -78,7 +79,7 @@ public class QueryFormatPage extends WizardPage {
 		
 		main.setLayout(new GridLayout(1, false));
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Format:");
+		lbl.setText(Messages.QueryFormatPage_FormatOp);
 		
 		outputOptions = new TableViewer(main, SWT.BORDER | SWT.SINGLE );
 		outputOptions.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -137,8 +138,8 @@ public class QueryFormatPage extends WizardPage {
 			outputOptions.setSelection(new StructuredSelection(defaultExport));
 		}
 		
-		setTitle(MessageFormat.format("Export Query: {0}", ((ExportQueryWizard)getWizard()).getQuery().getName())); //$NON-NLS-1$
-		setMessage("Exports the current query results to file");
+		setTitle(MessageFormat.format(Messages.QueryFormatPage_Title, ((ExportQueryWizard)getWizard()).getQuery().getName()));
+		setMessage(Messages.QueryFormatPage_Message);
 		setControl(main);
 		setPageComplete(!outputOptions.getSelection().isEmpty());
 	}

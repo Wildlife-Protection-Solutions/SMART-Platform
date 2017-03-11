@@ -36,6 +36,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.record.importer.RecordImportConfig;
 import org.wcs.smart.i2.record.importer.RecordImportEngine;
 
@@ -62,7 +63,7 @@ public class ImportRecordWizard extends Wizard implements IPageChangingListener 
 	public ImportRecordWizard(){
 		super();
 		
-		setWindowTitle("Import Records");
+		setWindowTitle(Messages.ImportRecordWizard_Title);
 		super.setNeedsProgressMonitor(true);
 		config = new RecordImportConfig();
 	}
@@ -83,23 +84,23 @@ public class ImportRecordWizard extends Wizard implements IPageChangingListener 
 							r[0] = false;
 							if (monitor.isCanceled()){
 								Display.getDefault().syncExec(()->{
-									MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Import Records", "User cancelled.");
+									MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportRecordWizard_ImportTitle, Messages.ImportRecordWizard_CancelledMsg);
 								});
 							}
 						}else{
 							r[0] = true;
 							Display.getDefault().syncExec(()->{
-								MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Import Records", MessageFormat.format("Imported {0} record.", numRecords));
+								MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportRecordWizard_ImportTitle, MessageFormat.format(Messages.ImportRecordWizard_SuccessMsg, numRecords));
 							});
 						}
 					}catch (Exception ex){
-						Intelligence2PlugIn.displayLog(MessageFormat.format("Error importing record: {0}",  ex.getMessage()), ex);
+						Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.ImportRecordWizard_ImportError,  ex.getMessage()), ex);
 						r[0] = false;
 					}
 				}
 			});
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Error importing records: {0}",  ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.ImportRecordWizard_ImportError2,  ex.getMessage()), ex);
 			r[0] = false;
 		}
 		

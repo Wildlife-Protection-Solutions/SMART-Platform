@@ -69,6 +69,7 @@ import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.udig.LocationLayerType;
@@ -105,7 +106,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 	private LocationAttributeMapLayer attributeLayer;
 	private LocationListComposite locationPanel;
 	
-	private Job localMapLayerJob = new Job("configuring locations layer") {
+	private Job localMapLayerJob = new Job(Messages.RecordMapPage_jobname) { 
 		
 		@SuppressWarnings("unchecked")
 		@Override
@@ -134,7 +135,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 							 super.run(monitor);
 							 if (getLayers() != null &&  !getLayers().isEmpty()){
 								 polygonLayer = getLayers().get(0);
-								 polygonLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POLYGON.getDefaultLayerStyle());
+								 polygonLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POLYGON.getDefaultLayerStyle()); //$NON-NLS-1$
 							 }
 						 }
 					};
@@ -153,7 +154,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 							 super.run(monitor);
 							 if (getLayers() != null &&  !getLayers().isEmpty()){
 								 pointLayer = getLayers().get(0);
-								 pointLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POINT.getDefaultLayerStyle());
+								 pointLayer.getStyleBlackboard().put("org.locationtech.udig.style.sld", LocationLayerType.POINT.getDefaultLayerStyle()); //$NON-NLS-1$
 							 }
 						 }
 					};
@@ -237,7 +238,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 		UUID id = recordEditor.getRecord().getUuid();
 		if (id == null) id = UUID.randomUUID();
 		
-		attributeLayer = new LocationAttributeMapLayer(getMap(), "Position Attributes", UuidUtils.uuidToString(id));
+		attributeLayer = new LocationAttributeMapLayer(getMap(), Messages.RecordMapPage_PositionMapLayerName, UuidUtils.uuidToString(id));
 		attributeLayer.createLayersRecord(recordEditor.getRecord().getAttributes());
 	}
 	
@@ -301,16 +302,16 @@ public class RecordMapPage extends SmartMapEditorPart {
 		
 		ToolItem importItem = new ToolItem(bar, SWT.DROP_DOWN);
 		importItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_LOCATION_IMPORT));
-		importItem.setToolTipText("import locations from file or GPS device");
+		importItem.setToolTipText(Messages.RecordMapPage_ImportMenuItem);
 		
 		Menu dd = new Menu(bar);
 		
 		MenuItem fromFile = new MenuItem(dd, SWT.PUSH);
-		fromFile.setText("Import From File...");
+		fromFile.setText(Messages.RecordMapPage_ImportFileMenuItem);
 		fromFile.addListener(SWT.Selection, e->locationPanel.importLocationsFromFile());
 		
 		MenuItem fromGps = new MenuItem(dd, SWT.PUSH);
-		fromGps.setText("Import From GPS Device...");
+		fromGps.setText(Messages.RecordMapPage_ImportGpsMenuItem);
 		fromGps.addListener(SWT.Selection, e->locationPanel.importLocationsFromGps());
 		
 		importItem.addSelectionListener(new SelectionAdapter(){

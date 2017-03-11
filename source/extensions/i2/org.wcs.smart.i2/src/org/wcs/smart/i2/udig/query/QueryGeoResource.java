@@ -74,11 +74,11 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 		try{
 			if (serviceIdentifer != null){
 				this.url = new URL(serviceIdentifer, serviceIdentifer.toExternalForm() + "#" + dataType, CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
-				String part = "smart://smartdb/i2/query/" + UuidUtils.uuidToString((UUID)service.getConnectionParams().get(QueryServiceExtension.QUERY_UUID_KEY)) + "#" + dataType;
+				String part = "smart://smartdb/i2/query/" + UuidUtils.uuidToString((UUID)service.getConnectionParams().get(QueryServiceExtension.QUERY_UUID_KEY)) + "#" + dataType; //$NON-NLS-1$ //$NON-NLS-2$
 				this.fixedURL = new URL(null, part, CorePlugin.RELAXED_HANDLER);
 			}
 		 } catch (MalformedURLException e) {
-             throw new IllegalArgumentException("malformed url", e);
+             throw new IllegalArgumentException("malformed url", e); //$NON-NLS-1$
          }	
 	}
 
@@ -178,7 +178,7 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 				if (fs != null)
 					return adaptee.cast(fs);
 			} else {
-				logger.log(Level.WARNING, "No datasource found.");
+				logger.log(Level.WARNING, "No datasource found."); //$NON-NLS-1$
 				return null;
 			}
 		}

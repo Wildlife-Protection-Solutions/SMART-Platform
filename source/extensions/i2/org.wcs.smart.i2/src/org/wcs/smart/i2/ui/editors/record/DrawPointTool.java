@@ -30,6 +30,7 @@ import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.tool.SimpleTool;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -64,7 +65,7 @@ public class DrawPointTool extends SimpleTool {
 			p = GeometryFactoryProvider.getFactory().createPoint(pnt);
 			p = (com.vividsolutions.jts.geom.Point) JTS.transform(p, CRS.findMathTransform(getContext().getViewportModel().getCRS(), SmartDB.DATABASE_CRS));
 			if (p.isEmpty() || !p.isSimple() || !p.isValid()){
-				error = "Invalid point.";
+				error = Messages.DrawPointTool_InvalidPointMsg;
 			}
 		} catch (Exception e) {
 			Intelligence2PlugIn.log(e.getMessage(), e);

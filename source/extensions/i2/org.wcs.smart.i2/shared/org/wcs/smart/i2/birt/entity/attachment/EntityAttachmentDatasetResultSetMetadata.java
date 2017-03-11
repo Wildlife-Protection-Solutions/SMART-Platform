@@ -22,11 +22,14 @@
 package org.wcs.smart.i2.birt.entity.attachment;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -47,18 +50,16 @@ import org.wcs.smart.i2.model.IntelEntityAttachment;
 public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public static enum Column{
-		ENTITY_UUID("attachment:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		FILE_NAME("attachment:filename", "Name", java.sql.Types.VARCHAR),
-		DATE_CREATED("attachment:date_created", "Date Created", java.sql.Types.DATE),
-		PATH("attachment:path", "Path", java.sql.Types.VARCHAR);
+		ENTITY_UUID("attachment:entity_uuid",  java.sql.Types.VARCHAR), //$NON-NLS-1$
+		FILE_NAME("attachment:filename", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		DATE_CREATED("attachment:date_created",  java.sql.Types.DATE), //$NON-NLS-1$
+		PATH("attachment:path", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		String id;
-		String name;
 		int type;
 		
-		Column(String id, String name, int type){
+		Column(String id, int type){
 			this.id = id;
-			this.name = name;
 			this.type = type;
 		}
 		
@@ -66,8 +67,8 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 			return this.id;
 		}
 		
-		public String getColumnName(){
-			return this.name;
+		public String getColumnName(Locale l){
+			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
 		
 		public Object getValue(IntelEntityAttachment location) {
@@ -75,7 +76,7 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 			if (this == FILE_NAME) return location.getAttachment().getFilename();
 			if (this == PATH){
 				try {
-					return "file:/" + location.getAttachment().getAttachmentFile().getCanonicalPath();
+					return "file:/" + location.getAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
 				} catch (IOException e) {
 					Logger.getLogger(EntityAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}
@@ -88,8 +89,9 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 		}
 	}
 	
-	
-	public EntityAttachmentDatasetResultSetMetadata(){
+	private Locale l;
+	public EntityAttachmentDatasetResultSetMetadata(Locale l){
+		this.l = l;
 	}
 	
 	/**
@@ -114,7 +116,7 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].getColumnName(l);
 	}
 
 	/**

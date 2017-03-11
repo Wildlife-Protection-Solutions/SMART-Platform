@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.editors.query;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
@@ -54,6 +55,6 @@ public class ObservationQuerySourceFinder implements IQuerySourceFinder {
 
 	@Override
 	public String getName() {
-		return "Open Record...";
+		return Messages.ObservationQuerySourceFinder_Label;
 	}
 }

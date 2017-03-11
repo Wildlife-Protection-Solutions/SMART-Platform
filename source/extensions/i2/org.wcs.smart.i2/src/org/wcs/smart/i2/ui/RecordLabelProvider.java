@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
@@ -57,12 +58,12 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 			case TITLE:
 				return record.getTitle();
 			case TITLE_CREATED:
-				return MessageFormat.format("{0} ({1})", record.getTitle(), DateFormat.getDateInstance().format(record.getDateCreated()));
+				return MessageFormat.format(Messages.RecordLabelProvider_0Title1DateCreated, record.getTitle(), DateFormat.getDateInstance().format(record.getDateCreated()));
 			default:
 				break;
 			
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	};
 	
@@ -88,7 +89,7 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 		}else if (element instanceof RecordEditorInput && field == RecordField.TITLE){
 			return ((RecordEditorInput) element).getName();
 		}else if (element instanceof RecordEditorInput && field == RecordField.TITLE_CREATED){
-			return MessageFormat.format("{0} ({1})", ((RecordEditorInput) element).getName(), DateFormat.getDateInstance().format(((RecordEditorInput) element).getDateCreated()));
+			return MessageFormat.format(Messages.RecordLabelProvider_0Name1DateCreated, ((RecordEditorInput) element).getName(), DateFormat.getDateInstance().format(((RecordEditorInput) element).getDateCreated()));
 		}
 		return super.getText(element);
 	}

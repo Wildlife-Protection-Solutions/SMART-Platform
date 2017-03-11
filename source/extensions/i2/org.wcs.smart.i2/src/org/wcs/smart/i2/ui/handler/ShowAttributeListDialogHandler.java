@@ -36,6 +36,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.ui.dialogs.AttributeListDialog;
 import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
@@ -64,14 +65,14 @@ public class ShowAttributeListDialogHandler extends ShowDialogHandler {
 				if (x instanceof EntityEditor || x instanceof RecordEditor){
 					dirtyeditors.add((EditorPart)x);
 					sb.append(((EditorPart)x).getEditorInput().getName());
-					sb.append(", ");
+					sb.append(", "); //$NON-NLS-1$
 				}
 			}
 		}
 		
 		if (!dirtyeditors.isEmpty()){
-			if (!MessageDialog.openQuestion(activeShell, "Close Editors", 
-					MessageFormat.format("The following entities & records must be saved before you can modify attributes.  Do you want to save these? \n{0}",sb.substring(0, sb.length() - 2)))){
+			if (!MessageDialog.openQuestion(activeShell, Messages.ShowAttributeListDialogHandler_ConfirmTitle, 
+					MessageFormat.format(Messages.ShowAttributeListDialogHandler_ConfirmMsg,sb.substring(0, sb.length() - 2)))){
 				return;
 			}
 			for (EditorPart e : dirtyeditors){

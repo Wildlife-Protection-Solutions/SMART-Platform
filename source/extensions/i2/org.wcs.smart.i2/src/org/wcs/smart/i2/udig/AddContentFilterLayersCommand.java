@@ -34,6 +34,7 @@ import org.locationtech.udig.project.internal.LayerFactory;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectPlugin;
 import org.opengis.filter.Filter;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * An alternative to the add layers command that creates ContentFilterLayerImpl instead of regular
@@ -131,7 +132,7 @@ public class AddContentFilterLayersCommand extends AbstractCommand implements Un
     }
 
     public String getName() {
-        return "Add Filtering Layers";
+        return Messages.AddContentFilterLayersCommand_CmdName;
     }
 
     public List<Layer> getLayers() {

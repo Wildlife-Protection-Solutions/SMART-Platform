@@ -27,6 +27,7 @@ import java.util.Locale;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.impl.Blob;
+import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
@@ -41,30 +42,28 @@ import org.wcs.smart.util.UuidUtils;
 public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 	
 	public static enum Column{
-		UUID("record:uuid", "UUID", java.sql.Types.VARCHAR),
-		TITLE("record:title", "Title", java.sql.Types.VARCHAR),
-		DESCRIPTION("record:description", "Description", java.sql.Types.VARCHAR),
-		SCRATCHPAD("record:scratchpad", "Scatchpad", java.sql.Types.VARCHAR),
-		CREATED_BY("record:createdby", "Created By", java.sql.Types.VARCHAR),
-		LAST_MODIFIED_BY("record:lastmodifiedby", "Last Modified By", java.sql.Types.VARCHAR),
-		CREATED("record:created", "Date Created", java.sql.Types.DATE),
-		LAST_MODIFIED("record:lastmodified", "Date Last Modified", java.sql.Types.DATE),
-		STATUS("record:status", "Status", java.sql.Types.VARCHAR),
-		STATUS_KEY("record:status_key", "Status Key", java.sql.Types.VARCHAR),
-		SOURCE("record:source", "Record Source", java.sql.Types.VARCHAR),
-		SOURCE_ICON("record:source_icon", "Record Source Image", java.sql.Types.BLOB);
+		UUID("record:uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		TITLE("record:title", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		DESCRIPTION("record:description", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		SCRATCHPAD("record:scratchpad",  java.sql.Types.VARCHAR), //$NON-NLS-1$
+		CREATED_BY("record:createdby", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		LAST_MODIFIED_BY("record:lastmodifiedby",java.sql.Types.VARCHAR), //$NON-NLS-1$
+		CREATED("record:created", java.sql.Types.DATE), //$NON-NLS-1$
+		LAST_MODIFIED("record:lastmodified", java.sql.Types.DATE), //$NON-NLS-1$
+		STATUS("record:status", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		STATUS_KEY("record:status_key", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		SOURCE("record:source", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		SOURCE_ICON("record:source_icon", java.sql.Types.BLOB); //$NON-NLS-1$
 		
 		String id;
-		String name;
 		int type;
 		
-		Column(String id, String name, int type){
+		Column(String id, int type){
 			this.id = id;
-			this.name = name;
 			this.type = type;
 		}
-		public String getColumnName(){
-			return this.name;
+		public String getColumnName(Locale l){
+			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
 		public String getId(){
 			return this.id;
@@ -81,9 +80,9 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 			case SCRATCHPAD:
 				return record.getComment();
 			case CREATED_BY:
-				return MessageFormat.format("{0} {1}", record.getCreatedBy().getGivenName(), record.getCreatedBy().getFamilyName());
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(record.getCreatedBy());
 			case LAST_MODIFIED_BY:
-				return MessageFormat.format("{0} {1}", record.getLastModifiedBy().getGivenName(), record.getLastModifiedBy().getFamilyName());
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(record.getLastModifiedBy());
 			case CREATED:
 				return record.getDateCreated();
 			case LAST_MODIFIED:
@@ -104,7 +103,9 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 		}
 	}
 	
-	public RecordDatasetResultSetMetadata(){
+	private Locale l;
+	public RecordDatasetResultSetMetadata(Locale l){
+		this.l =l;
 	}
 	
 	/**
@@ -129,7 +130,7 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].getColumnName(l);
 	}
 
 	/**

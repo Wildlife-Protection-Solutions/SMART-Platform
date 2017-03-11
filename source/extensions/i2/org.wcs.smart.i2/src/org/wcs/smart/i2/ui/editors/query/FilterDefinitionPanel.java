@@ -54,6 +54,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter.FilterType;
@@ -358,12 +359,12 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		filterTypeComp.setLayout(layout);
 		
 		Label l = new Label(filterTypeComp, SWT.NONE);
-		l.setText("Filter Type:");
+		l.setText(Messages.FilterDefinitionPanel_FilterTypeLabel);
 		
 		
 		opWaypoint = new Button(filterTypeComp, SWT.RADIO);
-		opWaypoint.setToolTipText("Query across observations at a single location");
-		opWaypoint.setText("Incident");
+		opWaypoint.setToolTipText(Messages.FilterDefinitionPanel_incidenttooltip);
+		opWaypoint.setText(Messages.FilterDefinitionPanel_IncidentQueryOption);
 		opWaypoint.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -373,8 +374,8 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		opWaypoint.setSelection(true);
 		
 		opObservation = new Button(filterTypeComp, SWT.RADIO);
-		opObservation.setToolTipText("Query distinct observations");
-		opObservation.setText("Observation");
+		opObservation.setToolTipText(Messages.FilterDefinitionPanel_obsTooltip);
+		opObservation.setText(Messages.FilterDefinitionPanel_ObservationQueryType);
 		opObservation.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -390,7 +391,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		saveItem = new ToolItem(toolbar, SWT.PUSH);
-		saveItem.setToolTipText("save query");
+		saveItem.setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
 		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
 		saveItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -400,7 +401,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		});
 		
 		ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
-		clear.setToolTipText("clear query");
+		clear.setToolTipText(Messages.FilterDefinitionPanel_clearTooltip);
 		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
 		clear.addSelectionListener(new SelectionAdapter() {
 			
@@ -412,7 +413,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		});
 		
 		runItem = new ToolItem(toolbar, SWT.PUSH);
-		runItem.setToolTipText("run query");
+		runItem.setToolTipText(Messages.FilterDefinitionPanel_runtooltip);
 		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
 		runItem.addSelectionListener(new SelectionAdapter() {
 			@Override

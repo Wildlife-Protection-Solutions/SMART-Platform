@@ -29,6 +29,7 @@ import java.util.UUID;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 
@@ -89,7 +90,7 @@ public class EntityComparisonInput  implements IEditorInput{
 	
 	@Override
 	public String getName() {
-		return MessageFormat.format("Compare {0} ({1})", type.getName(), entitiesToCompare.size());
+		return MessageFormat.format(Messages.EntityComparisonInput_ComparisonName_type_numentities, type.getName(), entitiesToCompare.size());
 	}
 
 	@Override

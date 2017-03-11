@@ -20,6 +20,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.internal.Messages;
 
 public class RefreshDataSetBindings {
 
@@ -52,7 +53,7 @@ public class RefreshDataSetBindings {
 			@Override
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				monitor.beginTask("Updating DataSetBindings", 2);
+				monitor.beginTask(Messages.RefreshDataSetBindings_TaskName, 2);
 				monitor.worked(1);
 				
 				try{

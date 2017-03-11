@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.SmartShellDialog;
@@ -89,7 +90,7 @@ public class RecordDetailsShell extends SmartShellDialog{
 		if (!this.record.equals(record)){
 			this.record = record;
 			for (Label l : new Label[]{lblName, lblDateCreated, lblDateModified, lblNarrative, lblEntities}){
-				l.setText("");
+				l.setText(""); //$NON-NLS-1$
 			}
 			lblName.setText(DialogConstants.LOADING_TEXT);
 			loadRecord.schedule(500);
@@ -136,16 +137,16 @@ public class RecordDetailsShell extends SmartShellDialog{
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
-		createHeaderLabel("Date Created:", scContent);
+		createHeaderLabel(Messages.RecordDetailsShell_DateCreatedLabel, scContent);
 		lblDateCreated= createContentLabel(scContent);
 		
-		createHeaderLabel("Date Modified:", scContent);
+		createHeaderLabel(Messages.RecordDetailsShell_DateModifiedLabel, scContent);
 		lblDateModified = createContentLabel(scContent);
 		
-		createHeaderLabel("Narrative:", scContent);
+		createHeaderLabel(Messages.RecordDetailsShell_NarrativeLabel, scContent);
 		lblNarrative = createContentLabel(scContent);
 		
-		createHeaderLabel("Entities:", scContent);
+		createHeaderLabel(Messages.RecordDetailsShell_EntitiesLabel, scContent);
 		lblEntities = createContentLabel(scContent);
 		sc.setSize(scContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		owner.addListener(SWT.Resize, r->{
@@ -212,13 +213,13 @@ public class RecordDetailsShell extends SmartShellDialog{
 		}
 	}
 	
-	private Job loadRecord = new Job("load record job"){
+	private Job loadRecord = new Job("load record job"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final StringBuilder sbEntities = new StringBuilder();
-			String name ="";
-			String narr = "";
+			String name =""; //$NON-NLS-1$
+			String narr = ""; //$NON-NLS-1$
 			Date dCreated;
 			Date dModified;
 			Session s = HibernateManager.openSession();
@@ -230,7 +231,7 @@ public class RecordDetailsShell extends SmartShellDialog{
 				dModified = temp.getDateModified();
 				for (IntelEntityRecord e : temp.getEntities()){
 					sbEntities.append(e.getEntity().getIdAttributeAsText());
-					sbEntities.append(", ");
+					sbEntities.append(", "); //$NON-NLS-1$
 				}
 				if (sbEntities.length() > 0) sbEntities.delete(sbEntities.length() - 2, sbEntities.length());
 			}finally{

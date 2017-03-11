@@ -32,17 +32,17 @@ import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 public class DataSourceParameter {
 
 	public static DataSourceParameter RECORD_UUID = new DataSourceParameter(
-			"Record UUID", IParameterMetaData.parameterModeIn,
+			"Record UUID", IParameterMetaData.parameterModeIn, //$NON-NLS-1$
 			java.sql.Types.VARCHAR);
 	
 	public static DataSourceParameter ENTITY_UUID = new DataSourceParameter(
-			"Entity UUID", IParameterMetaData.parameterModeIn,
+			"Entity UUID", IParameterMetaData.parameterModeIn, //$NON-NLS-1$
 			java.sql.Types.VARCHAR);
 	
-	public static DataSourceParameter START_DATE = new DataSourceParameter("Start Date",
+	public static DataSourceParameter START_DATE = new DataSourceParameter("Start Date", //$NON-NLS-1$
 			IParameterMetaData.parameterModeIn, java.sql.Types.DATE);
 	
-	public static DataSourceParameter END_DATE = new DataSourceParameter("End Date",
+	public static DataSourceParameter END_DATE = new DataSourceParameter("End Date", //$NON-NLS-1$
 			IParameterMetaData.parameterModeIn, java.sql.Types.DATE);
 
 	private String name;

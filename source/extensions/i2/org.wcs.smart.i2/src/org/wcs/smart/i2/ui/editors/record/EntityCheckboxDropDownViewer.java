@@ -114,11 +114,11 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 			List<EntityItem> eitems = new ArrayList<EntityItem>();
 			selected.clear();		
 			setValue(eitems);
-			if (txtSearch != null) txtSearch.setText("");
+			if (txtSearch != null) txtSearch.setText(""); //$NON-NLS-1$
 			return;
 		}
 		
-		Job j = new Job("initialize entity drop dwon"){
+		Job j = new Job("initialize entity drop dwon"){ //$NON-NLS-1$
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -171,7 +171,7 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 		});
 		// create filter fields
 		txtSearch = new FilterComposite(popup, SWT.NONE);
-		txtSearch.setText("");
+		txtSearch.setText(""); //$NON-NLS-1$
 		txtSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtSearch.addChangeListener(new Listener() {
 			@Override
@@ -180,7 +180,7 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 					pattern = null;
 					table.setFilters(new ViewerFilter[]{});
 				}else{
-					pattern = Pattern.compile(".*" + txtSearch.getPatternFilter().toLowerCase() + ".*");
+					pattern = Pattern.compile(".*" + txtSearch.getPatternFilter().toLowerCase() + ".*"); //$NON-NLS-1$ //$NON-NLS-2$
 					table.setFilters(new ViewerFilter[]{filter});
 				}
 				table.refresh();
@@ -258,7 +258,7 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 		if (isLoading) return DialogConstants.LOADING_TEXT;
 		String value = super.getTextLabel(objects);
 		if (!objects.isEmpty()){
-			value = "(" + objects.size() + ") " + value;
+			value = "(" + objects.size() + ") " + value; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return value;
 	}
@@ -336,11 +336,11 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 	protected void popupVisible(){
 		table.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		loadEntities();
-		txtSearch.setText("");
+		txtSearch.setText(""); //$NON-NLS-1$
 	}
 
 	private void loadEntities(){
-		Job j = new Job("loading entities"){
+		Job j = new Job("loading entities"){ //$NON-NLS-1$
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -348,7 +348,7 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 				Session s = HibernateManager.openSession();
 				try{
 					ScrollableResults r = s.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("entityType", type))
+					.add(Restrictions.eq("entityType", type)) //$NON-NLS-1$
 					.scroll();
 					while(r.next()){
 						IntelEntity e = (IntelEntity)r.get()[0];
@@ -361,7 +361,7 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 				Display.getDefault().syncExec(()->{
 					
 					if (table.getControl().isDisposed()) return;
-					txtSearch.setText("");
+					txtSearch.setText(""); //$NON-NLS-1$
 					table.setInput(entities);
 					setCheckedElements(selected.toArray());
 				});

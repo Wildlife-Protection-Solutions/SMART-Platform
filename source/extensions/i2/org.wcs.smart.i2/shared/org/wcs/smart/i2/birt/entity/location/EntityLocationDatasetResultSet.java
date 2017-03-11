@@ -26,6 +26,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
@@ -58,6 +59,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	
 	private EntityLocationDatasetResultSetMetadata metadata;
 	private ScrollableResults results;
+	private Locale l;
 	
 	/**
 	 * Creates a new summary results set
@@ -71,22 +73,22 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			EntityLocationDatasetResultSetMetadata metadata, 
 			AbstractIntelBirtConnection connection, HashMap<Integer, Object> parameters,
 			EntityLocationParameterMetadata pmetadata) {
-		
+		this.l = connection.getCurrentLocale();
 		this.metadata = metadata;
 	
-		String q1 = "SELECT count(*) FROM IntelEntityLocation l WHERE l.id.entity.entityType = :type ";
-		String q2 = "FROM IntelEntityLocation l WHERE l.id.entity.entityType = :type ";
+		String q1 = "SELECT count(*) FROM IntelEntityLocation l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
+		String q2 = "FROM IntelEntityLocation l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
 		
 		HashMap<String, Object> values = new HashMap<String, Object>();
-		values.put("type", type);
+		values.put("type", type); //$NON-NLS-1$
 		int index =pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		if (index >= 0){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
-				q1 += " AND l.id.entity.uuid = :uuid";
-				q2 += " AND l.id.entity.uuid = :uuid";
+				q1 += " AND l.id.entity.uuid = :uuid"; //$NON-NLS-1$
+				q2 += " AND l.id.entity.uuid = :uuid"; //$NON-NLS-1$
 				
-				values.put("uuid", UuidUtils.stringToUuid(entity));
+				values.put("uuid", UuidUtils.stringToUuid(entity)); //$NON-NLS-1$
 			}
 		}
 		
@@ -96,11 +98,11 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			Date startDate = (Date) parameters.get(index1);
 			Date endDate = (Date) parameters.get(index2);
 			if (startDate != null && endDate != null){
-				q1 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end ";
-				q2 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end ";
+				q1 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
+				q2 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
 				
-				values.put("start", startDate);
-				values.put("end", endDate);
+				values.put("start", startDate); //$NON-NLS-1$
+				values.put("end", endDate); //$NON-NLS-1$
 			}
 		}
 		
@@ -176,7 +178,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	 */
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return "";
+		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}
 
@@ -188,7 +190,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelEntityLocation i = (IntelEntityLocation) ((Object[])currentItem)[0];
-		return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, l);
 	}
 
 	/**

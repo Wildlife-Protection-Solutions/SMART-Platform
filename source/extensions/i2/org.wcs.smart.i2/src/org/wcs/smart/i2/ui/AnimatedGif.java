@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Display;
  */
 public class AnimatedGif extends Canvas {
 	
-	public static final String ICON_PROGRESS = "images/icons/obj16/search_progress.gif";
+	public static final String ICON_PROGRESS = "images/icons/obj16/search_progress.gif"; //$NON-NLS-1$
 
 	private ImageData[] data;
 	private Image[] images;

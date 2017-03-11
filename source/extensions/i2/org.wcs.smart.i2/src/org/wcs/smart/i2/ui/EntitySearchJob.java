@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.search.BasicEntitySearch;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.search.IntelSearchResult;
@@ -44,7 +45,7 @@ public abstract class EntitySearchJob extends Job{
 	private IIntelEntitySearch search = new BasicEntitySearch(null);
 	
 	public EntitySearchJob() {
-		super("Entity Search");
+		super(Messages.EntitySearchJob_JobName);
 	}
 
 	public void setSearch(IIntelEntitySearch search){
@@ -53,7 +54,7 @@ public abstract class EntitySearchJob extends Job{
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-		monitor.beginTask("Entity Search", 3);
+		monitor.beginTask(Messages.EntitySearchJob_TaskName, 3);
 		beforeSearch(new SubProgressMonitor(monitor, 1));
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		IntelSearchResult entities = null; 

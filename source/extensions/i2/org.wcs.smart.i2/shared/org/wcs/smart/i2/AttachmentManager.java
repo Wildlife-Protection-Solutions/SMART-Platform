@@ -53,13 +53,13 @@ public enum AttachmentManager {
 		//attachments are linked to:
 		//entities; records
 		Long recordCnt = (Long)session.createCriteria(IntelRecordAttachment.class)
-			.add(Restrictions.eq("id.attachment", attachment))
+			.add(Restrictions.eq("id.attachment", attachment)) //$NON-NLS-1$
 			.setProjection(Projections.rowCount())
 			.uniqueResult();
 		if (recordCnt != 0) return false;
 		
 		recordCnt = (Long)session.createCriteria(IntelEntityAttachment.class)
-				.add(Restrictions.eq("id.attachment", attachment))
+				.add(Restrictions.eq("id.attachment", attachment)) //$NON-NLS-1$
 				.setProjection(Projections.rowCount())
 				.uniqueResult();
 		if (recordCnt != 0) return false;

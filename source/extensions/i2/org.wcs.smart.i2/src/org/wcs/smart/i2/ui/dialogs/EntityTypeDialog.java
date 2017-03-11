@@ -94,6 +94,7 @@ import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -169,7 +170,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	@Override
 	public void cancelPressed(){
 		if (getButton(IDialogConstants.OK_ID).isEnabled()){
-			if (MessageDialog.openQuestion(getShell(), "Close", "Would you like to save changes before closing?")){
+			if (MessageDialog.openQuestion(getShell(), Messages.EntityTypeDialog_CloseConfirmTitle, Messages.EntityTypeDialog_CloseConfirmMsg)){
 				okPressed();
 			}
 		}
@@ -234,7 +235,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			
 			//remove groups
 			List<IntelEntityTypeAttributeGroup> currentGroups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
-					.add(Restrictions.eq("entityType", type))
+					.add(Restrictions.eq("entityType", type)) //$NON-NLS-1$
 					.list();
 			for (IntelEntityTypeAttributeGroup g : currentGroups){
 				if (!groups.contains(g)){
@@ -245,7 +246,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Unable to save changes: " +ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -302,13 +303,13 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		cdList.hide();
 		if (attributeList.isEmpty()){
 			isError = true;
-			cdList.setDescriptionText("At least one attribute must exist.");
+			cdList.setDescriptionText(Messages.EntityTypeDialog_AttributeRequired);
 			cdList.show();
 		}
 		cdId.hide();
 		if (type.getIdAttribute() == null){
 			isError = true;
-			cdId.setDescriptionText("One attribute must be selected as the identifier for the attribute.");
+			cdId.setDescriptionText(Messages.EntityTypeDialog_IdAttributeRequired);
 			cdId.show();
 		}
 		
@@ -335,7 +336,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		});
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Icon:");
+		l.setText(Messages.EntityTypeDialog_IconLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		icon = new IconComposite(parent);
@@ -349,7 +350,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		});
 	
 		l = new Label(parent, SWT.NONE);
-		l.setText("ID Attribute:");
+		l.setText(Messages.EntityTypeDialog_IdAttLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		idAttribute = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -372,11 +373,11 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		cdId= createDecoration(idAttribute.getControl());
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Print Template:");
+		l.setText(Messages.EntityTypeDialog_BirtLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText(type.getBirtTemplate() == null ? "Not Configured" : type.getBirtTemplate());
+		l.setText(type.getBirtTemplate() == null ? Messages.EntityTypeDialog_NotConfiguredLabel : type.getBirtTemplate());
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
 		Button btnEditTemplate = new Button(parent, SWT.PUSH);
@@ -394,7 +395,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		});
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Attributes:");
+		l.setText(Messages.EntityTypeDialog_AttributesLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
 		
@@ -554,7 +555,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		treeAttributes.getControl().setMenu(listMenu);
 		
 		addItem = new MenuItem(listMenu, SWT.DEFAULT);
-		addItem.setText("Add Attribute");
+		addItem.setText(Messages.EntityTypeDialog_AddAttributeAction);
 		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addItem.setEnabled(true);
 		addItem.addSelectionListener(new SelectionAdapter() {
@@ -565,7 +566,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		});
 		
 		addGroupItem = new MenuItem(listMenu, SWT.DEFAULT);
-		addGroupItem.setText("New Group...");
+		addGroupItem.setText(Messages.EntityTypeDialog_NewGroupMnu);
 		addGroupItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ATTRIBUTE_GROUP_NEW));
 		addGroupItem.setEnabled(true);
 		addGroupItem.addSelectionListener(new SelectionAdapter() {
@@ -603,7 +604,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		btnAdd = new Button(buttonComp, SWT.NONE);
-		btnAdd.setText("Add Attribute");
+		btnAdd.setText(Messages.EntityTypeDialog_AddAttributeAction);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -613,7 +614,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		});
 		
 		btnNewGroup = new Button(buttonComp, SWT.NONE);
-		btnNewGroup.setText("New Group");
+		btnNewGroup.setText(Messages.EntityTypeDialog_NewGroupBtn);
 		btnNewGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnNewGroup.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -648,7 +649,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		btnMoveUp = new Button(buttonComp, SWT.NONE);
-		btnMoveUp.setText("Move Down");
+		btnMoveUp.setText(Messages.EntityTypeDialog_MoveDownBtn);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.setEnabled(false);
 		btnMoveUp.addSelectionListener(new SelectionAdapter() {
@@ -659,7 +660,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		});
 		
 		btnMoveDown = new Button(buttonComp, SWT.NONE);
-		btnMoveDown.setText("Move Up");
+		btnMoveDown.setText(Messages.EntityTypeDialog_MoveUpBtn);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.setEnabled(false);
 		btnMoveDown.addSelectionListener(new SelectionAdapter() {
@@ -672,9 +673,9 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		s = new Label(buttonComp, SWT.HORIZONTAL | SWT.SEPARATOR);
 		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		setTitle("Entity Type");
-		getShell().setText("Entity Type");
-		setMessage("Configure entity type");
+		setTitle(Messages.EntityTypeDialog_Title);
+		getShell().setText(Messages.EntityTypeDialog_Title);
+		setMessage(Messages.EntityTypeDialog_Message);
 		
 		return parent;
 	}
@@ -721,8 +722,8 @@ public class EntityTypeDialog extends TitleAreaDialog {
 	}
 	
 	private void addGroup(){
-		InputDialog dialog = new InputDialog(getParentShell(), "New Group", "Name for group",
-				"New Group", (text)-> text.trim().isEmpty() ? "Name cannot be empty" : null);
+		InputDialog dialog = new InputDialog(getParentShell(), Messages.EntityTypeDialog_NewGroupTitle, Messages.EntityTypeDialog_NewGroupName,
+				Messages.EntityTypeDialog_NewGroupDefault, (text)-> text.trim().isEmpty() ? Messages.EntityTypeDialog_NameRequired : null);
 		if (dialog.open() == Window.OK){
 			IntelEntityTypeAttributeGroup newGroup = new IntelEntityTypeAttributeGroup();
 			newGroup.setEntityType(type);
@@ -747,7 +748,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 		}
 		
-		SelectAttributeDialog dialog = new SelectAttributeDialog(getShell(), MessageFormat.format("Add attributes for entity type {0}", type.getName()));
+		SelectAttributeDialog dialog = new SelectAttributeDialog(getShell(), MessageFormat.format(Messages.EntityTypeDialog_AddAttributeDialogTitle, type.getName()));
 		ContextInjectionFactory.inject(dialog, context);
 		if (dialog.open() == Window.OK){
 			
@@ -823,10 +824,10 @@ public class EntityTypeDialog extends TitleAreaDialog {
 								DeleteManager.canDelete(x, session);
 								aToDelete.add(x);
 							}catch (Exception ex){
-								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", x.getAttribute().getName(), ex.getMessage()));
+								warnings.add(MessageFormat.format(Messages.EntityTypeDialog_AttributeWarning, x.getAttribute().getName(), ex.getMessage()));
 								//cannot remove associated group
 								if (x.getAttributeGroup() != null && gToDelete.contains(x.getAttributeGroup())){
-									warnings.add(MessageFormat.format("The attribute group {0} cannot be removed. {1}", x.getAttributeGroup().getName(), ex.getMessage()));
+									warnings.add(MessageFormat.format(Messages.EntityTypeDialog_GroupWarning, x.getAttributeGroup().getName(), ex.getMessage()));
 									gToDelete.remove(x.getAttributeGroup());
 								}
 							}
@@ -837,7 +838,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 								DeleteManager.canDelete(g, session);
 							}catch (Exception ex){
 								gToDelete.remove(g);
-								warnings.add(MessageFormat.format("The attribute group {0} cannot be removed. {1}", g.getName(), ex.getMessage()));
+								warnings.add(MessageFormat.format(Messages.EntityTypeDialog_GroupWarning, g.getName(), ex.getMessage()));
 							}
 						}
 					}finally{
@@ -851,7 +852,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			warnings.add(ex.getMessage());
 		}
 		if(!warnings.isEmpty()){
-			WarningDialog wd = new WarningDialog(getShell(), "Warnings","Cannot remove selected attributes.", warnings);
+			WarningDialog wd = new WarningDialog(getShell(), Messages.EntityTypeDialog_WarningsDialogTitle,Messages.EntityTypeDialog_WarningDialogMsg, warnings);
 			wd.open();
 		}
 		
@@ -859,15 +860,15 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			StringBuilder sb = new StringBuilder();
 			for (IntelEntityTypeAttribute d: aToDelete){
 				sb.append(d.getAttribute().getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			for (IntelEntityTypeAttributeGroup d: gToDelete){
 				sb.append(d.getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
-			if (MessageDialog.openConfirm(getShell(), "Remove Attributes / Groups", MessageFormat.format("Are you sure you want to delete the attributes (and groups) {0}? \n All attribute information associated with entities will also be removed.", sb.toString()))){
+			if (MessageDialog.openConfirm(getShell(), Messages.EntityTypeDialog_RemoveDialogTitle, MessageFormat.format(Messages.EntityTypeDialog_RemoveDialogMsg, sb.toString()))){
 				attributeList.removeAll(aToDelete);
 				groups.removeAll(gToDelete);
 			}
@@ -912,7 +913,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			public void run(IProgressMonitor smonitor) throws InvocationTargetException,
 					InterruptedException {
 				SubMonitor monitor = SubMonitor.convert(smonitor);
-				monitor.beginTask("Loading Entity Type Details", 4);
+				monitor.beginTask(Messages.EntityTypeDialog_LoadingTaskName, 4);
 				
 				monitor.worked(1);
 				Session s = HibernateManager.openSession();
@@ -922,21 +923,21 @@ public class EntityTypeDialog extends TitleAreaDialog {
 						type.getNames().size();
 						
 						SubMonitor kid1 = monitor.newChild(1);
-						kid1.beginTask("Loading Attributes...", type.getAttributes().size());
+						kid1.beginTask(Messages.EntityTypeDialog_AttributesSubTask, type.getAttributes().size());
 						for (IntelEntityTypeAttribute a : type.getAttributes()){
 							a.getAttribute().getNames().size();
-							monitor.subTask(MessageFormat.format("Loading {0}", a.getAttribute().getName()));
+							monitor.subTask(MessageFormat.format(Messages.EntityTypeDialog_AttributeSubTask2, a.getAttribute().getName()));
 							kid1.worked(1);
 						}
 					}
-					monitor.subTask("Loading Entity Types...");
+					monitor.subTask(Messages.EntityTypeDialog_EntityTypeSubTask);
 					entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
 					entityTypeSiblings.remove(type);
 					monitor.worked(1);
 					if (type.getUuid() != null){
 						groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
-								.add(Restrictions.eq("entityType", type))
-								.addOrder(Order.asc("order"))
+								.add(Restrictions.eq("entityType", type)) //$NON-NLS-1$
+								.addOrder(Order.asc("order")) //$NON-NLS-1$
 								.list();
 						for (IntelEntityTypeAttributeGroup g : groups) g.getNames().size();
 					}
@@ -968,7 +969,7 @@ public class EntityTypeDialog extends TitleAreaDialog {
 			}
 		});
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to load entity type: {0}", ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.EntityTypeDialog_EntityLoadError, ex.getMessage()), ex);
 		}
 	}
 	

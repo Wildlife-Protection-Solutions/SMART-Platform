@@ -26,6 +26,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
@@ -46,7 +47,7 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof IntelAttribute)){
-			return "Object not an IntelAttribute object.  Cannot delete.";
+			return Messages.DeleteIntelAttributeAdvisor_InvalidObject;
 		}
 		IntelAttribute attribute = (IntelAttribute) object;
 		List<IntelEntityTypeAttribute> links = 
@@ -56,14 +57,14 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 		
 		if (!links.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("The following entity types reference this intelligence attribute and must be removed before the attribute can be deleted. ");
+			sb.append(Messages.DeleteIntelAttributeAdvisor_EntityTypeError);
 			for (IntelEntityTypeAttribute a : links){
 				sb.append(a.getEntityType().getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
-			sb.append(".");
+			sb.append("."); //$NON-NLS-1$
 			return sb.toString();
 		}
 		
@@ -74,14 +75,14 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 		
 		if (!links2.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("The following relationship types reference this intelligence attribute and must be removed before the attribute can be deleted. ");
+			sb.append(Messages.DeleteIntelAttributeAdvisor_RelationshipTypeError);
 			for (IntelRelationshipTypeAttribute a : links2){
 				sb.append(a.getRelationshipType().getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
-			sb.append(".");
+			sb.append("."); //$NON-NLS-1$
 			return sb.toString();
 		}
 		
@@ -92,14 +93,14 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 		
 		if (!links3.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("The following record source options reference this intelligence attribute and must be removed before the attribute can be deleted. ");
+			sb.append(Messages.DeleteIntelAttributeAdvisor_SourceError);
 			for (IntelRecordSourceAttribute a : links3){
 				sb.append(a.getSource().getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
-			sb.append(".");
+			sb.append("."); //$NON-NLS-1$
 			return sb.toString();
 		}
 		

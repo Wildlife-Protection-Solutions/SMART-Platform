@@ -98,6 +98,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.QueryManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
@@ -120,9 +121,9 @@ import org.wcs.smart.util.E3Utils;
  */
 public class QueryView {
 
-	public static final String REFRESHLABEL_KEY = "refreshlabel";
+	public static final String REFRESHLABEL_KEY = "refreshlabel"; //$NON-NLS-1$
 
-	public static final String ID = "org.wcs.smart.i2.ui.view.queries";
+	public static final String ID = "org.wcs.smart.i2.ui.view.queries"; //$NON-NLS-1$
 	
 	@Inject
 	private IEclipseContext context;
@@ -176,7 +177,7 @@ public class QueryView {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.adapt(parent);
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Saved Queries", "Query Filters"}, parent, toolkit, parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.QueryView_SaveQuerySection, Messages.QueryView_FiltersSection}, parent, toolkit, parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)tabList.getLayoutData()).verticalIndent = 2;
 		
@@ -264,7 +265,7 @@ public class QueryView {
 		filterTree.getTree().setEnabled(false);
 		if (filterTree.getTree().getData(REFRESHLABEL_KEY) == null){
 			Label modifiedLabel = new Label(treePart, SWT.NONE);
-			modifiedLabel.setText("Elements modified, click to refresh");
+			modifiedLabel.setText(Messages.QueryView_refreshRequired);
 			
 			Rectangle r = filterTree.getTree().getBounds();
 			Point size = modifiedLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT);
@@ -305,7 +306,7 @@ public class QueryView {
 
 		Menu mnu = new Menu(filterTree.getTree());
 		MenuItem addToQuery = new MenuItem(mnu,SWT.PUSH);
-		addToQuery.setText("Add to Query");
+		addToQuery.setText(Messages.QueryView_AddToQueryBtn);
 		addToQuery.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		addToQuery.addListener(SWT.Selection, event->addFilterSelectionToQuery());
 		filterTree.getTree().setMenu(mnu);
@@ -361,7 +362,7 @@ public class QueryView {
 				s.close();
 			}
 			if (toEdit == null){
-				Intelligence2PlugIn.log("Query not found.", null);
+				Intelligence2PlugIn.log(Messages.QueryView_QueryNotFound, null);
 				return; //query not found
 			}
 			
@@ -369,7 +370,7 @@ public class QueryView {
 				(new TranslateNamesHandler()).execute(new StructuredSelection(toEdit), context.get(Shell.class));
 				context.get(IEventBroker.class).send(IntelEvents.QUERY_MODIFIED, toEdit);
 			} catch (ExecutionException e) {
-				Intelligence2PlugIn.displayLog(MessageFormat.format("Error occurred while renaming query: {0}", e.getMessage()), e);
+				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.QueryView_RenameError, e.getMessage()), e);
 			}
 		}
 		
@@ -377,7 +378,7 @@ public class QueryView {
 	
 	private void deleteSelection(){
 		int cnt = ((IStructuredSelection)queryList.getSelection()).size();
-		if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Queries", MessageFormat.format("Are you sure you want to delete the {0} selected queries?  This action cannot be undone.", cnt))){
+		if (!MessageDialog.openQuestion(context.get(Shell.class), Messages.QueryView_DeleteTitle, MessageFormat.format(Messages.QueryView_DeleteMessage, cnt))){
 			return;
 		}
 		
@@ -409,7 +410,7 @@ public class QueryView {
 		List<MenuItem> items = new ArrayList<MenuItem>();
 		
 		MenuItem miOpen = new MenuItem(m, SWT.PUSH);
-		miOpen.setText("Open");
+		miOpen.setText(Messages.QueryView_OpenMenuItem);
 		miOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -423,7 +424,7 @@ public class QueryView {
 			new MenuItem(m, SWT.SEPARATOR);
 			
 			MenuItem miDelete = new MenuItem(m, SWT.PUSH);
-			miDelete.setText("Delete");
+			miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			miDelete.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -434,7 +435,7 @@ public class QueryView {
 			items.add(miDelete);
 
 			MenuItem miRename = new MenuItem(m, SWT.PUSH);
-			miRename.setText("Rename");
+			miRename.setText(Messages.QueryView_RenameMenuItem);
 			miRename.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 			miRename.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -449,7 +450,7 @@ public class QueryView {
 			new MenuItem(m, SWT.SEPARATOR);
 			
 			MenuItem miAdd = new MenuItem(m, SWT.PUSH);
-			miAdd.setText("Add To Working Set");
+			miAdd.setText(Messages.QueryView_AddToWsMenuItem);
 			miAdd.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
 			miAdd.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -547,7 +548,7 @@ public class QueryView {
 	}
 
 	
-	Job refreshQueriesJob = new Job("refresh query list"){
+	Job refreshQueriesJob = new Job(Messages.QueryView_RefreshJobName){
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -556,7 +557,7 @@ public class QueryView {
 			Session s = HibernateManager.openSession();
 			try{
 				List<IntelRecordObservationQuery> items = s.createCriteria(IntelRecordObservationQuery.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 				
 				proxyItems = items.stream().map(t->new QueryProxy(t.getName(), t.getUuid())).collect(Collectors.toList());
@@ -619,7 +620,7 @@ public class QueryView {
 		private String filterString;
 		
 		public void setFilterString(String filterString){
-			this.filterString = ".*" + filterString.toUpperCase() + ".*";
+			this.filterString = ".*" + filterString.toUpperCase() + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		@Override

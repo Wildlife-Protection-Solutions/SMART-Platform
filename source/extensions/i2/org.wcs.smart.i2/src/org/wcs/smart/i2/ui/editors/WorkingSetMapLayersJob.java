@@ -40,6 +40,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IWorkingSetMapLayer;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -104,19 +105,19 @@ public class WorkingSetMapLayersJob extends Job {
 				s.beginTransaction();
 				if (resource.getResourceType() == IntelWorkingSetCategory.ENTITY){
 					//find working set
-					org.hibernate.Query q = s.createQuery("FROM IntelWorkingSetEntity i WHERE i.id.entity.uuid = :uuid and i.id.workingSet.uuid = :uuid2");
-					q.setParameter("uuid", resource.getResourceId());
-					q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet());
+					org.hibernate.Query q = s.createQuery("FROM IntelWorkingSetEntity i WHERE i.id.entity.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
+					q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
+					q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
 					workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
 				}else if (resource.getResourceType() == IntelWorkingSetCategory.RECORD){
-					org.hibernate.Query q = s.createQuery("FROM IntelWorkingSetRecord i WHERE i.id.record.uuid = :uuid and i.id.workingSet.uuid = :uuid2");
-					q.setParameter("uuid", resource.getResourceId());
-					q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet());
+					org.hibernate.Query q = s.createQuery("FROM IntelWorkingSetRecord i WHERE i.id.record.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
+					q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
+					q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
 					workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
 				}else if (resource.getResourceType() == IntelWorkingSetCategory.QUERIES){
-					org.hibernate.Query q = s.createQuery("FROM IntelWorkingSetQuery i WHERE i.id.query.uuid = :uuid and i.id.workingSet.uuid = :uuid2");
-					q.setParameter("uuid", resource.getResourceId());
-					q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet());
+					org.hibernate.Query q = s.createQuery("FROM IntelWorkingSetQuery i WHERE i.id.query.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
+					q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
+					q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
 					workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
 				}
 				if (workingSetMapLayer != null){
@@ -141,7 +142,7 @@ public class WorkingSetMapLayersJob extends Job {
 	};
 	
 	public WorkingSetMapLayersJob(Map map, IEclipseContext context, ILayerListener... layerlisteners){
-		super("loading working set map layers");
+		super("loading working set map layers"); //$NON-NLS-1$
 		this.map = map;
 		this.context = context;
 		this.listeners = layerlisteners;
@@ -208,7 +209,7 @@ public class WorkingSetMapLayersJob extends Job {
 			Date[] dates = null;
 			String dateFilter = workingset.getEntityDateFilter();
 			try{
-				String[] bits = dateFilter.split(":");
+				String[] bits = dateFilter.split(":"); //$NON-NLS-1$
 				DateFilter initFilter = DateFilter.valueOf(bits[0]);
 				if (initFilter == DateFilter.CUSTOM){
 					dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
@@ -216,7 +217,7 @@ public class WorkingSetMapLayersJob extends Job {
 					dates = new Date[]{initFilter.getStartDate(), initFilter.getEndDate()};
 				}
 			}catch (Exception ex){
-				Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
+				Intelligence2PlugIn.log(Messages.WorkingSetMapLayersJob_ParseError + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 			
 			addLayers(toAdd, visible, layerStyles, true, dates);

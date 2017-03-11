@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.udig.record;
 
 import org.locationtech.udig.catalog.IServiceInfo;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * @author Emily
@@ -29,9 +30,9 @@ import org.locationtech.udig.catalog.IServiceInfo;
 public class IntelRecordServiceInfo extends IServiceInfo{
 
 	public IntelRecordServiceInfo(IntelRecordService service){
-		this.description = "service for providing intel record locations";
-		this.keywords = new String[]{"Intelligence", "Location", "Record"};
-		this.title = "Intelligence Record Service";
+		this.description = Messages.IntelRecordServiceInfo_Description;
+		this.keywords = new String[]{Messages.IntelRecordServiceInfo_keyword1, Messages.IntelRecordServiceInfo_keyword2, Messages.IntelRecordServiceInfo_keyword3};
+		this.title = Messages.IntelRecordServiceInfo_Title;
 	}
 	
 }

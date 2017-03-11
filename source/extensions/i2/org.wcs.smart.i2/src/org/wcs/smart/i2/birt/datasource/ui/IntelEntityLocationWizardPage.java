@@ -23,6 +23,7 @@ package org.wcs.smart.i2.birt.datasource.ui;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Dataset wizard for entity location dataset.
@@ -31,7 +32,7 @@ import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
  */
 public class IntelEntityLocationWizardPage extends AbstractIntelEntityTypeListWizardPage {
 
-	private static final String SELECT_ENTITY_TYPE = "Select the entity type to use";
+	private static final String SELECT_ENTITY_TYPE = Messages.IntelEntityLocationWizardPage_SelectType;
 	
 	/**
 	 * Constructor

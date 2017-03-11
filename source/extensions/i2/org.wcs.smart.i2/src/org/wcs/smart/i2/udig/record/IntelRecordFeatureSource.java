@@ -43,7 +43,7 @@ import org.wcs.smart.i2.udig.LocationLayerType;
 @SuppressWarnings("unchecked")
 public class IntelRecordFeatureSource extends ContentFeatureSource {
 
-	public static final String FID_FIELD = "fid";
+	public static final String FID_FIELD = "fid"; //$NON-NLS-1$
 	
 	private UUID recordUuid;
 	
@@ -55,9 +55,9 @@ public class IntelRecordFeatureSource extends ContentFeatureSource {
 
 	public static String getFeatureSchemaString(LocationLayerType geomType){
 		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:");
+		sb.append("the_geom:"); //$NON-NLS-1$
 		sb.append(geomType.getGeomType());
-		sb.append(":srid=4326," + FID_FIELD + ":String,id:String,date:Date,time:Date,comment:String,system_id:String");
+		sb.append(":srid=4326," + FID_FIELD + ":String,id:String,date:Date,time:Date,comment:String,system_id:String"); //$NON-NLS-1$ //$NON-NLS-2$
 		return sb.toString();
 	}
 	

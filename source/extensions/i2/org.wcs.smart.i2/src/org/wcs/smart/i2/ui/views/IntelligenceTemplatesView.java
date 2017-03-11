@@ -60,6 +60,7 @@ import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -73,7 +74,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class IntelligenceTemplatesView {
 	
-	public static final String ID = "org.wcs.smart.i2.view.entitytypelist";
+	public static final String ID = "org.wcs.smart.i2.view.entitytypelist"; //$NON-NLS-1$
 	
 	@Inject
 	private IEclipseContext context;
@@ -126,7 +127,7 @@ public class IntelligenceTemplatesView {
 		lstTypes.getControl().setMenu(mnu);
 		
 		MenuItem edit = new MenuItem(mnu, SWT.PUSH);
-		edit.setText("Edit");
+		edit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		edit.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 		edit.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -138,7 +139,7 @@ public class IntelligenceTemplatesView {
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem reset = new MenuItem(mnu, SWT.PUSH);
-		reset.setText("Reset");
+		reset.setText(Messages.IntelligenceTemplatesView_ResetMenuItem);
 		reset.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -197,7 +198,7 @@ public class IntelligenceTemplatesView {
 		}
 	}
 	
-	private Job refreshJob = new Job("refresh entity list"){
+	private Job refreshJob = new Job(Messages.IntelligenceTemplatesView_refreshJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -223,7 +224,7 @@ public class IntelligenceTemplatesView {
 		public static final IntelRecordTemplate INSTANCE = new IntelRecordTemplate();
 		private IntelRecordTemplate(){}
 		public String getName(){
-			return "Intelligence Record";
+			return Messages.IntelligenceTemplatesView_RecordTemplateName;
 		}
 	}
 }

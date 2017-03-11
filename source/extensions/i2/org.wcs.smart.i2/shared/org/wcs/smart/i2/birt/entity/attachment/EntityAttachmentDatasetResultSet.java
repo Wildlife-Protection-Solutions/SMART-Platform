@@ -79,19 +79,19 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 		
 		this.metadata = metadata;
 	
-		String q1 = "SELECT count(*) FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type ";
-		String q2 = "FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type ";
+		String q1 = "SELECT count(*) FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
+		String q2 = "FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
 		
 		HashMap<String, Object> values = new HashMap<String, Object>();
-		values.put("type", type);
+		values.put("type", type); //$NON-NLS-1$
 		int index =pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		if (index >= 0){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
-				q1 += " AND l.id.entity.uuid = :uuid";
-				q2 += " AND l.id.entity.uuid = :uuid";
+				q1 += " AND l.id.entity.uuid = :uuid"; //$NON-NLS-1$
+				q2 += " AND l.id.entity.uuid = :uuid"; //$NON-NLS-1$
 				
-				values.put("uuid", UuidUtils.stringToUuid(entity));
+				values.put("uuid", UuidUtils.stringToUuid(entity)); //$NON-NLS-1$
 			}
 		}
 		
@@ -169,7 +169,7 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 	 */
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return "";
+		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}
 
@@ -185,7 +185,7 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 		try {
 			i.getAttachment().computeFileLocation(currentSession);
 		} catch (Exception e) {
-			Logger.getLogger(EntityAttachmentDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e); //$NON-NLS-1$
+			Logger.getLogger(EntityAttachmentDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e);
 		}
 		return EntityAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
 	}

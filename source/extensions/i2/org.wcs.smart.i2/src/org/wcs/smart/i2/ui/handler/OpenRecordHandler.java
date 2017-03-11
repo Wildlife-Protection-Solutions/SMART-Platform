@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
@@ -45,7 +46,7 @@ public class OpenRecordHandler {
 			input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || editMode);
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, RecordEditor.ID);
 		} catch (PartInitException e) {
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to open record. {0}", e.getMessage()), e);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.OpenRecordHandler_OpenError, e.getMessage()), e);
 		}
 	}
 	

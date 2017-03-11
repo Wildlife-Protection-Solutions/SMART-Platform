@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 
@@ -55,7 +56,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		String searchString = bits[2];
 		String[] types = null;
 		if (bits.length >= 3){
-			types = bits[3].split(":");
+			types = bits[3].split(":"); //$NON-NLS-1$
 		}
 		
 		BasicEntitySearch search = new BasicEntitySearch(searchString, maxResultsCnt);
@@ -100,7 +101,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		
 		if (searchString != null && searchString.length() > 0){
 			//perform fuzzy search
-			monitor.beginTask("searching...", maxResultCnt);
+			monitor.beginTask(Messages.BasicEntitySearch_taskName, maxResultCnt);
 			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, session);
 			int actualCnt = Math.min(sresults.size(), maxResultCnt);
 			for (int i = 0; i < actualCnt; i ++){
@@ -115,16 +116,16 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 
 		if (searchString == null || searchString.isEmpty()){
 			//search all entities
-			monitor.beginTask("searching...", maxResultCnt);
+			monitor.beginTask(Messages.BasicEntitySearch_taskName, maxResultCnt);
 			Criteria c = session.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
 			Criteria c1 = session.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
 			if (entityTypes != null && !entityTypes.isEmpty()){
-				c.createAlias("entityType", "et");
-				c.add(Restrictions.in("et.keyId", entityTypes));
-				c1.createAlias("entityType", "et");
-				c1.add(Restrictions.in("et.keyId", entityTypes));
+				c.createAlias("entityType", "et"); //$NON-NLS-1$ //$NON-NLS-2$
+				c.add(Restrictions.in("et.keyId", entityTypes)); //$NON-NLS-1$
+				c1.createAlias("entityType", "et"); //$NON-NLS-1$ //$NON-NLS-2$
+				c1.add(Restrictions.in("et.keyId", entityTypes)); //$NON-NLS-1$
 			}
 			
 			
@@ -136,7 +137,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			List<IntelSearchResultItem> results = new ArrayList<IntelSearchResultItem>();
 			for (IntelEntity it : items){
 				lazyLoadEntity(it, session);
-				IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(),"", 1.0);
+				IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(),"", 1.0); //$NON-NLS-1$
 				result.setEntity(it);
 				results.add(result);
 				monitor.worked(1);
@@ -161,16 +162,16 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		if (searchString != null) sb.append(searchString);
 		sb.append(SEPARATOR);
 		if (entityTypes != null){
-			entityTypes.forEach(a -> sb.append(a + ":"));
+			entityTypes.forEach(a -> sb.append(a + ":")); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
 	
 	
 	public BasicEntitySearch deserialize(String search){
-		String[] bits = search.split(":");
+		String[] bits = search.split(":"); //$NON-NLS-1$
 		if (bits.length < 2) return null;
-		if (!bits[0].equals("basic")) return null;
+		if (!bits[0].equals("basic")) return null; //$NON-NLS-1$
 		
 		
 		int maxCnt = Integer.parseInt(bits[1]);

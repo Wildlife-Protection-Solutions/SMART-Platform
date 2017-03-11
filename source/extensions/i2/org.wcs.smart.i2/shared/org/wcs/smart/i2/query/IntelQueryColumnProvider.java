@@ -62,25 +62,25 @@ public class IntelQueryColumnProvider {
 	public static Object ANY_ITEM = new Object(); 
 			
 	public static String generateName(Area area){
-		return MessageFormat.format("{0} [{1}]", area.getName(), area.getType().name());
+		return MessageFormat.format("{0} [{1}]", area.getName(), area.getType().name()); //$NON-NLS-1$
 	}
 	
 	public static String generateName(IntelAttribute attribute, IntelEntityType type){
 		if (type == null){
 			return attribute.getName();
 		}else{
-			return MessageFormat.format("{0} ({1})", attribute.getName(), type.getName());
+			return MessageFormat.format("{0} ({1})", attribute.getName(), type.getName()); //$NON-NLS-1$
 		}
 	}
 	
 	public static String generateName(IntelEntity entity, Locale l){
-		return MessageFormat.format("{0} ({1})", entity.getIdAttributeAsText(l), entity.getEntityType().getName() );
+		return MessageFormat.format("{0} ({1})", entity.getIdAttributeAsText(l), entity.getEntityType().getName() ); //$NON-NLS-1$
 	}
 	
 	public static String generateName(Attribute attribute, Category category){
 		if (attribute != null && category == null) return attribute.getName();
 		if (category != null && attribute == null) return category.getFullCategoryName();
-		if (category != null && attribute != null) return  MessageFormat.format("{0} ({1})", attribute.getName(), category.getFullCategoryName());
+		if (category != null && attribute != null) return  MessageFormat.format("{0} ({1})", attribute.getName(), category.getFullCategoryName()); //$NON-NLS-1$
 		return null;
 	}
 	
@@ -126,23 +126,23 @@ public class IntelQueryColumnProvider {
 			}
 			
 		}catch (Exception ex){
-			throw new Exception("Error loading query columns.  Unable to parse query: " + ex.getMessage(), ex);
+			throw new Exception("Error loading query columns.  Unable to parse query: " + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		
 
 		//data model columns
 		//categories
-		SQLQuery sq = session.createSQLQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid = :ca");
-		sq.setParameter("ca", ca.getUuid());
+		SQLQuery sq = session.createSQLQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid = :ca"); //$NON-NLS-1$
+		sq.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 		Integer maxCategory = (Integer) sq.uniqueResult();
 		
 		for (int i = 0; i < maxCategory; i ++){
-			columns.add(new DataModelColumn(i));
+			columns.add(new DataModelColumn(i, l));
 		}
 		
 		//attributes
-		Query q = session.createQuery("SELECT distinct id.attribute FROM CategoryAttribute a WHERE a.id.attribute.conservationArea = :ca and a.isActive = 'true'");
-		q.setParameter("ca", ca);
+		Query q = session.createQuery("SELECT distinct id.attribute FROM CategoryAttribute a WHERE a.id.attribute.conservationArea = :ca and a.isActive = 'true'"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		List<Attribute> attributes = q.list();
 
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
@@ -190,7 +190,7 @@ public class IntelQueryColumnProvider {
 		}else{
 			sb.append(filter.getAttributeKey());
 			if (filter.getEntityTypeKey() != null){
-				sb.append (" (" + filter.getEntityTypeKey() + ")");
+				sb.append (" (" + filter.getEntityTypeKey() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		
@@ -198,17 +198,17 @@ public class IntelQueryColumnProvider {
 			case BOOLEAN:
 				break;
 			case DATE:
-				sb.append(": ");
+				sb.append(": "); //$NON-NLS-1$
 				sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[0]));
-				sb.append(" " + filter.getOperator().getLabel(l) + " ");
+				sb.append(" " + filter.getOperator().getLabel(l) + " "); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[1]));
 				break;
 			case LIST:
 				if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
-					sb.append(": ");
+					sb.append(": "); //$NON-NLS-1$
 					sb.append(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(ANY_ITEM, l));
 				}else{
-					sb.append(": ");
+					sb.append(": "); //$NON-NLS-1$
 					IntelAttributeListItem i = IntelHibernateManager.getAttributeListItem(attribute, filter.getKeyValue(), session);
 					if (i != null){
 						sb.append(i.getName());
@@ -218,17 +218,19 @@ public class IntelQueryColumnProvider {
 				}
 				break;
 			case NUMERIC:
-				sb.append(": ");
+				sb.append(": "); //$NON-NLS-1$
 				sb.append(filter.getOperator().getLabel(l));
-				sb.append(" ");
+				sb.append(" "); //$NON-NLS-1$
 				sb.append(filter.getNumberValue());
 				break;
 			case TEXT:
-				sb.append(": ");
+				sb.append(": "); //$NON-NLS-1$
 				sb.append(filter.getOperator().getLabel(l));
-				sb.append(" ");
+				sb.append(" "); //$NON-NLS-1$
 				sb.append(filter.getStringValue());
 				break;
+			case POSITION:
+				throw new UnsupportedOperationException("position attributes not supported in queries"); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}

@@ -5,28 +5,28 @@ import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 
 public class EntityLocationAttributeDatasetResultSetMetadata implements IResultSetMetaData {
 	
 	public static enum Column{
-		ENTITY_UUID("entity:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		ATTRIBUTE_KEY("attribute:key", "Attribute Key", java.sql.Types.VARCHAR),
-		ATTRIBUTE_NAME("attribute:name", "Attribute Name", java.sql.Types.VARCHAR),
-		GEOMETRY("attribute:geometry", "Geometry", java.sql.Types.JAVA_OBJECT);
+		ENTITY_UUID("entity:entity_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ATTRIBUTE_KEY("attribute:key", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ATTRIBUTE_NAME("attribute:name",  java.sql.Types.VARCHAR), //$NON-NLS-1$
+		GEOMETRY("attribute:geometry",  java.sql.Types.JAVA_OBJECT); //$NON-NLS-1$
 		
 		String id;
-		String name;
 		int type;
 		
-		Column(String id, String name, int type){
+		Column(String id, int type){
 			this.id = id;
-			this.name = name;
 			this.type = type;
 		}
-		public String getColumnName(){
-			return this.name;
+		public String getColumnName(Locale l){
+			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
 		public String getId(){
 			return this.id;
@@ -40,10 +40,13 @@ public class EntityLocationAttributeDatasetResultSetMetadata implements IResultS
 		}
 	}
 	
-	public EntityLocationAttributeDatasetResultSetMetadata(){
+	private Locale l;
+	
+	public EntityLocationAttributeDatasetResultSetMetadata(Locale l){
+		this.l = l;
 		HashSet<String> fixedLabels = new HashSet<>();
 		for (Column c : Column.values()){
-			fixedLabels.add(c.name);
+			fixedLabels.add(c.getColumnName(l));
 		}
 	}
 	
@@ -69,7 +72,7 @@ public class EntityLocationAttributeDatasetResultSetMetadata implements IResultS
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].getColumnName(l);
 	}
 
 	/**

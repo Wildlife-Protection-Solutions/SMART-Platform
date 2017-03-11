@@ -83,6 +83,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -251,7 +252,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		});
 		
 		final TableViewerColumn nameColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
-		nameColumn.getColumn().setText("Relationship");
+		nameColumn.getColumn().setText(Messages.RelationshipTypeListDialog_RelationshipColumnName);
 		nameColumn.setLabelProvider(new ColumnLabelProvider() {
 			private RelationshipTypeLabelProvider rl = new RelationshipTypeLabelProvider();
 			@Override
@@ -275,14 +276,14 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		nameColumn.getColumn().addSelectionListener(sortListener);
 		
 		TableViewerColumn groupColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
-		groupColumn.getColumn().setText("Relationship Group");
+		groupColumn.getColumn().setText(Messages.RelationshipTypeListDialog_GroupColumnName);
 		groupColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element){
 				if (element instanceof IntelRelationshipType){
 					IntelRelationshipType t = (IntelRelationshipType)element;
 					if (t.getRelationshipGroup() != null) return t.getRelationshipGroup().getName();
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}
@@ -290,7 +291,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		groupColumn.getColumn().setWidth(150);
 		groupColumn.getColumn().addSelectionListener(sortListener);
 		TableViewerColumn sourceColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
-		sourceColumn.getColumn().setText("Source Entity Type");
+		sourceColumn.getColumn().setText(Messages.RelationshipTypeListDialog_SrcColumName);
 		sourceColumn.setLabelProvider(new ColumnLabelProvider() {
 			private EntityTypeLabelProvider el = new EntityTypeLabelProvider();
 			@Override
@@ -298,7 +299,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 				if (element instanceof IntelRelationshipType){
 					IntelRelationshipType t = (IntelRelationshipType)element;
 					if (t.getSourceEntityType() != null) return t.getSourceEntityType().getName();
-					return "<Unknown>";
+					return Messages.RelationshipTypeListDialog_UnknownOption;
 				}
 				return super.getText(element);
 			}
@@ -318,7 +319,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		sourceColumn.getColumn().setWidth(150);
 		sourceColumn.getColumn().addSelectionListener(sortListener);
 		TableViewerColumn targetColumn = new TableViewerColumn(tblTypes, SWT.DEFAULT);
-		targetColumn.getColumn().setText("Target Entity Type");
+		targetColumn.getColumn().setText(Messages.RelationshipTypeListDialog_TargetColumName);
 		targetColumn.setLabelProvider(new ColumnLabelProvider() {
 			private EntityTypeLabelProvider el = new EntityTypeLabelProvider();
 			@Override
@@ -326,7 +327,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 				if (element instanceof IntelRelationshipType){
 					IntelRelationshipType t = (IntelRelationshipType)element;
 					if (t.getTargetEntityType() != null) return t.getTargetEntityType().getName();
-					return "<Unknown>";
+					return Messages.RelationshipTypeListDialog_UnknownOption;
 				}
 				return super.getText(element);
 			}
@@ -422,9 +423,9 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		
 		
-		setTitle("Relationship Types");
-		getShell().setText("Relationship Types");
-		setMessage("Manage the relationship types in the system.");
+		setTitle(Messages.RelationshipTypeListDialog_Title);
+		getShell().setText(Messages.RelationshipTypeListDialog_Title);
+		setMessage(Messages.RelationshipTypeListDialog_Message);
 		
 		loadTypes.setSystem(true);
 		loadTypes.schedule();
@@ -465,14 +466,14 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 					if (((EntityEditor)src).hasRelation(type)){
 						toSave.add((EntityEditor) src);
 						sb.append(((EntityEditor)src).getEntity().getIdAttributeAsText());
-						sb.append(", ");
+						sb.append(", "); //$NON-NLS-1$
 					}
 				}
 			}
 		}
 		if (!toSave.isEmpty()){
-			if (MessageDialog.openQuestion(getShell(), "Relationship Type", 
-					MessageFormat.format("Before {0} the relationship type {1} all changes to the following entities must be saved.  Do you want to save now? \n{2}", action, type.getName(), sb.substring(0, sb.length()-2)))){
+			if (MessageDialog.openQuestion(getShell(), Messages.RelationshipTypeListDialog_DoActionTitle, 
+					MessageFormat.format(Messages.RelationshipTypeListDialog_DoActionMessage, action, type.getName(), sb.substring(0, sb.length()-2)))){
 				for (EntityEditor e : toSave){
 					e.doSave(new NullProgressMonitor());
 				}
@@ -486,7 +487,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		Object x = ((IStructuredSelection)tblTypes.getSelection()).getFirstElement();
 		if (x instanceof IntelRelationshipType){
 			IntelRelationshipType type = (IntelRelationshipType)x;	
-			checkSaveEditors(type, "editing");
+			checkSaveEditors(type, Messages.RelationshipTypeListDialog_editingLabel);
 			openTypeDialog(type);
 		}
 	}
@@ -500,17 +501,17 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 			if (x instanceof IntelRelationshipType){
 				toDelete.add((IntelRelationshipType)x);
 				sb.append(((IntelRelationshipType) x).getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the following relationship types?  All relationships and other references will also be removed.  This action cannot be undone.\n\n{0}", sb.toString()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.RelationshipTypeListDialog_DeleteDialogTitle, MessageFormat.format(Messages.RelationshipTypeListDialog_DeletedialogMsg, sb.toString()))){
 			return;
 		}
 		for (IntelRelationshipType t : toDelete){
-			if (!checkSaveEditors(t, "deleting")){
+			if (!checkSaveEditors(t, Messages.RelationshipTypeListDialog_deleting)){
 				return;
 			}
 		}
@@ -522,7 +523,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 
-					monitor.beginTask("Deleting relationship types", toDelete.size());
+					monitor.beginTask(Messages.RelationshipTypeListDialog_DeleteTaskName, toDelete.size());
 					List<IntelRelationshipType> deleted = new ArrayList<IntelRelationshipType>();
 					Session s = HibernateManager.openSession();
 					try{
@@ -535,7 +536,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 								deleted.add(t);
 							}catch(Exception ex){
 								s.getTransaction().rollback();
-								Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to delete Relationship Type {0}. {1}", t.getName(), ex.getMessage()), ex);
+								Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.RelationshipTypeListDialog_DeleteError, t.getName(), ex.getMessage()), ex);
 							}
 							monitor.worked(1);
 						}
@@ -549,7 +550,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 				}
 			});
 		} catch (Exception e) {
-			Intelligence2PlugIn.displayLog("Error deleting relationship types: " +e.getMessage(), e);
+			Intelligence2PlugIn.displayLog(Messages.RelationshipTypeListDialog_DeleteError2 +e.getMessage(), e);
 		}
 		
 		refresh();

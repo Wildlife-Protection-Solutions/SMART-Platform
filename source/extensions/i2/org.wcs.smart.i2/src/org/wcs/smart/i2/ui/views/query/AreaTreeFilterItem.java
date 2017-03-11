@@ -47,7 +47,7 @@ public class AreaTreeFilterItem extends BasicTreeFilterItem{
 	
 	@Override
 	public DropItem[] asDropItem() {
-		String queryKey = "area:" + type + ":" + key;
+		String queryKey = "area:" + type + ":" + key; //$NON-NLS-1$ //$NON-NLS-2$
 		return new DropItem[]{new TextDropItem(name, queryKey)};
 	}
 }

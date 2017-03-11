@@ -33,7 +33,7 @@ public class IntelDataEntryUserLevel extends SmartUserLevel {
 	
 	public static final IntelDataEntryUserLevel INSTANCE = new IntelDataEntryUserLevel();
 	
-	private static final String KEY = "INTEL_DATA_ENTRY";
+	private static final String KEY = "INTEL_DATA_ENTRY"; //$NON-NLS-1$
 	
 	public IntelDataEntryUserLevel() {
 		super(KEY);

@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -156,7 +157,7 @@ public abstract class DropItem {
 		createComposite(inner);
 		
 		Label lblX = new Label(inner, SWT.NONE);
-		lblX.setToolTipText("Delete Item");
+		lblX.setToolTipText(Messages.DropItem_DeleteItemTooltip);
 		lblX.setLayoutData(new GridData(SWT.TOP, SWT.RIGHT, false, true));
 		lblX.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_DELETE_SMALL));
 		lblX.addMouseListener(new MouseAdapter() {

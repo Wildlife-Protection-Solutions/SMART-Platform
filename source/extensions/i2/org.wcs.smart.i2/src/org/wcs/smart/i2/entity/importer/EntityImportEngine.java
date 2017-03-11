@@ -51,6 +51,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -84,7 +85,7 @@ public enum EntityImportEngine {
 	public Integer importEntities(EntityImportConfig config, IEventBroker eventBroker, IProgressMonitor pMonitor) throws Exception{
 		SubMonitor monitor = SubMonitor.convert(pMonitor);
 		
-		monitor.beginTask("Importing Entities", 5);
+		monitor.beginTask(Messages.EntityImportEngine_ImportTaskName, 5);
 		//ensure the file exists
 		if (!Files.exists(config.getFile())) throw new FileNotFoundException(config.getFile().toString());
 		
@@ -93,7 +94,7 @@ public enum EntityImportEngine {
 		MathTransform transform = CRS.findMathTransform(fromCrs, toCrs);
 		
 		
-		monitor.subTask("Loading attribute information");
+		monitor.subTask(Messages.EntityImportEngine_AttributeTaskName);
 		//load the attributes 
 		Set<IntelAttribute> attributes = new HashSet<>();
 		Session s = HibernateManager.openSession();
@@ -119,7 +120,7 @@ public enum EntityImportEngine {
 		
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(config.getDateFormatString());
 		
-		monitor.subTask("Reading csv file");
+		monitor.subTask(Messages.EntityImportEngine_ReadTaskName);
 		int lineCnt = 0;
 		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile()), config.getDelimiter())){
 			lineCnt = reader.readAll().size();
@@ -142,7 +143,7 @@ public enum EntityImportEngine {
 			while((data=reader.readNext())!=null ){
 				line++;
 				if (data.length < numcols+1){
-					warnings.add(MessageFormat.format("Invalid line {0}. The number of columns ({1}) is less than the required number of columns ({2}).  Line will be ignored.", line, data.length, (numcols+1)));
+					warnings.add(MessageFormat.format(Messages.EntityImportEngine_InvalidLine, line, data.length, (numcols+1)));
 					continue;
 				}
 				
@@ -165,9 +166,9 @@ public enum EntityImportEngine {
 					switch(a.getType()){
 					case BOOLEAN:
 						Boolean bvalue = null;
-						if (value1.equalsIgnoreCase("true") || value1.equalsIgnoreCase("yes")){
+						if (value1.equalsIgnoreCase("true") || value1.equalsIgnoreCase("yes")){ //$NON-NLS-1$ //$NON-NLS-2$
 							bvalue = true;
-						}else if (value1.equalsIgnoreCase("false") || value1.equalsIgnoreCase("no")){
+						}else if (value1.equalsIgnoreCase("false") || value1.equalsIgnoreCase("no")){ //$NON-NLS-1$ //$NON-NLS-2$
 							bvalue = false;
 						}else{
 							try{
@@ -187,7 +188,7 @@ public enum EntityImportEngine {
 							add = true;
 							break;
 						}
-						warnings.add(MessageFormat.format("Cannot convert the value {0} to valid boolean.  Attribute will not be imported. (Line {1} Attribute {2})", value1, line, a.getName()));
+						warnings.add(MessageFormat.format(Messages.EntityImportEngine_InvalidBoolean, value1, line, a.getName()));
 						break;
 					case DATE:
 						try{
@@ -196,7 +197,7 @@ public enum EntityImportEngine {
 							add = true;
 						}catch (Exception ex){
 							ex.printStackTrace();
-							warnings.add(MessageFormat.format("Cannot convert the value {0} to valid date.  Attribute will not be imported. (Line {1} Attribute {2})", value1, line, a.getName()));	
+							warnings.add(MessageFormat.format(Messages.EntityImportEngine_InvalidDate, value1, line, a.getName()));	
 						}
 						break;
 					case LIST:
@@ -227,7 +228,7 @@ public enum EntityImportEngine {
 								add = true;
 								break;	
 							}
-							warnings.add(MessageFormat.format("Cannot find a list value for value ''{0}''.  Attribute will not be imported. (Line {1} Attribute {2})", value1, line, a.getName()));
+							warnings.add(MessageFormat.format(Messages.EntityImportEngine_InvalidListValue, value1, line, a.getName()));
 						}
 						
 						break;
@@ -238,7 +239,7 @@ public enum EntityImportEngine {
 							add = true;
 						}catch (NumberFormatException e ){
 							//cannot parse a value; skip this attribute
-							warnings.add(MessageFormat.format("Cannot convert the value {0} to a number. Attribute will not be imported. (Line {1} Attribute {2})", value1, line, a.getName()));
+							warnings.add(MessageFormat.format(Messages.EntityImportEngine_InvalidNumber, value1, line, a.getName()));
 						}
 						break;
 					case TEXT:
@@ -259,7 +260,7 @@ public enum EntityImportEngine {
 							add = true;
 						}catch (Exception e ){
 							//cannot parse a value; skip this attribute
-							warnings.add(MessageFormat.format("Cannot convert the values ({0} and {1}) to a position. Attribute will not be imported. (Line {1} Attribute {2})", value1, value2, line, a.getName()));
+							warnings.add(MessageFormat.format(Messages.EntityImportEngine_InvalidPosition, value1, value2, line, a.getName()));
 						}
 					}
 					
@@ -302,7 +303,7 @@ public enum EntityImportEngine {
 		}catch (Exception ex){
 			
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Error saving imported entities to database. " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.EntityImportEngine_SaveError + ex.getMessage(), ex);
 			return null;
 		}finally{
 			s.close();
@@ -316,7 +317,7 @@ public enum EntityImportEngine {
 	private boolean confirmContinue(List<String> warnings){
 		boolean r[] = new boolean[]{false};
 		Display.getDefault().syncExec(()->{
-			WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), "Import Entitie", "The following warnings were generated while parsing data.  Do you want to continue with the import?", warnings,
+			WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.EntityImportEngine_WarningTitle, Messages.EntityImportEngine_WarningMessage, warnings,
 					new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);	
 			if (wd.open() == 0){
 				r[0] = true;
@@ -329,7 +330,7 @@ public enum EntityImportEngine {
 		IntelAttributeListItem[] item = new IntelAttributeListItem[]{null};
 		Display.getDefault().syncExec(()->{
 			
-			if (MessageDialog.open(MessageDialog.QUESTION, Display.getDefault().getActiveShell(), "Attribute List Item", MessageFormat.format("No list item found with the value {0} for attribute {1}. Do you want to add this {2} to the list options?", value, attribute.getName(), value), SWT.NONE)){
+			if (MessageDialog.open(MessageDialog.QUESTION, Display.getDefault().getActiveShell(), Messages.EntityImportEngine_ItemNotFoundTitle, MessageFormat.format(Messages.EntityImportEngine_ItemNotFoundMessage, value, attribute.getName(), value), SWT.NONE)){
 				item[0] = new IntelAttributeListItem();
 				item[0].setAttribute(attribute);
 				item[0].setKeyId(DataModelManager.INSTANCE.generateKey(value, attribute.getAttributeList()));

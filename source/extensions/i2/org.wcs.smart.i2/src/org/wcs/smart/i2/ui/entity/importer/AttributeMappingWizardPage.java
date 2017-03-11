@@ -51,6 +51,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.entity.importer.EntityImportConfig;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -68,11 +69,11 @@ import au.com.bytecode.opencsv.CSVReader;
 public class AttributeMappingWizardPage extends WizardPage{
 	
 
-	private static final String Y_ATTRIBUTE_DATA_KEY = "Y_ATTRIBUTE";
+	private static final String Y_ATTRIBUTE_DATA_KEY = "Y_ATTRIBUTE"; //$NON-NLS-1$
 
-	private static final String ATTRIBUTE_DATA_KEY = "ATTRIBUTE";
+	private static final String ATTRIBUTE_DATA_KEY = "ATTRIBUTE"; //$NON-NLS-1$
 
-	public static final String FILE_PAGE = "org.wcs.smart.i2.ui.entity.importer.mapping";
+	public static final String FILE_PAGE = "org.wcs.smart.i2.ui.entity.importer.mapping"; //$NON-NLS-1$
 		
 	private Composite mappingPanel;
 	private ScrolledComposite sc ;
@@ -107,8 +108,8 @@ public class AttributeMappingWizardPage extends WizardPage{
 		
 		sc.setContent(mappingPanel);
 		sc.setMinSize(mappingPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		setTitle("Attribute Mapping");
-		setMessage("Map entity type attributes to a column");
+		setTitle(Messages.AttributeMappingWizardPage_Title);
+		setMessage(Messages.AttributeMappingWizardPage_Message);
 		setControl(sc);
 	}
 	
@@ -144,7 +145,7 @@ public class AttributeMappingWizardPage extends WizardPage{
 		}
 	}
 	
-	Job j = new Job("load attribute info"){
+	Job j = new Job(Messages.AttributeMappingWizardPage_AttributeInfoJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -182,11 +183,11 @@ public class AttributeMappingWizardPage extends WizardPage{
 			try(CSVReader reader = new CSVReader(Files.newBufferedReader(file))){
 				headers = reader.readNext();
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to read file ''{0}''. {1}", file.toString(), ex.getMessage()), ex);
+				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.AttributeMappingWizardPage_FileReadError, file.toString(), ex.getMessage()), ex);
 				return Status.OK_STATUS;
 			}
 			final Object[] fheaders = new Object[headers.length+1];
-			fheaders[0] = new Object[]{"",-1};
+			fheaders[0] = new Object[]{"",-1}; //$NON-NLS-1$
 			for (int i = 1; i < fheaders.length; i ++){
 				fheaders[i] = new Object[]{headers[i-1], i-1};
 			}
@@ -194,7 +195,7 @@ public class AttributeMappingWizardPage extends WizardPage{
 				for (Control c : mappingPanel.getChildren()){
 					c.dispose();
 				}
-				setMessage(MessageFormat.format("Map entity type ''{0}'' attributes to a column", name));
+				setMessage(MessageFormat.format(Messages.AttributeMappingWizardPage_MappingMsg, name));
 				mappings = new ArrayList<>();
 				ArrayList<IntelEntityTypeAttributeGroup> groups = new ArrayList<>();
 				groups.addAll(attributes.keySet());
@@ -223,7 +224,7 @@ public class AttributeMappingWizardPage extends WizardPage{
 					for (IntelAttribute a : attributes.get(g)){
 						
 						l = new Label(mappingPanel, SWT.NONE);
-						l.setText(MessageFormat.format("{0}:", a.getName()));
+						l.setText(MessageFormat.format("{0}:", a.getName())); //$NON-NLS-1$
 						
 						if (a.getType() == AttributeType.POSITION){
 							Composite xy = new Composite(mappingPanel, SWT.NONE);
@@ -233,7 +234,7 @@ public class AttributeMappingWizardPage extends WizardPage{
 							((GridLayout)xy.getLayout()).marginHeight = 0;
 							
 							l = new Label(xy, SWT.NONE);
-							l.setText("X:");
+							l.setText(Messages.AttributeMappingWizardPage_XColumn);
 							
 							ComboViewer xviewer = new ComboViewer(xy, SWT.READ_ONLY | SWT.DROP_DOWN);
 							xviewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -251,7 +252,7 @@ public class AttributeMappingWizardPage extends WizardPage{
 							xviewer.setData(ATTRIBUTE_DATA_KEY, a);
 							
 							l = new Label(xy, SWT.NONE);
-							l.setText("Y:");
+							l.setText(Messages.AttributeMappingWizardPage_YColumn);
 							
 							ComboViewer yviewer = new ComboViewer(xy, SWT.READ_ONLY | SWT.DROP_DOWN);
 							yviewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

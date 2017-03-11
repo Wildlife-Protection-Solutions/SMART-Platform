@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.ui.I2SwtUtils;
 import org.wcs.smart.ui.Thumbnail;
@@ -144,7 +145,7 @@ public class AttachmentTable extends Composite implements Listener {
 	
 	
 	
-	private Job redraw = new Job("redraw thumbnails"){
+	private Job redraw = new Job("redraw thumbnails"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -292,6 +293,7 @@ public class AttachmentTable extends Composite implements Listener {
 		}
 		
 		private class ThumbInfo implements Listener{
+			private static final String LAST_SELECTION_INDEX_KEY = "last_selection_index"; //$NON-NLS-1$
 			ISmartAttachment file;
 			Thumbnail thumb;
 			String tooltip;
@@ -305,7 +307,7 @@ public class AttachmentTable extends Composite implements Listener {
 				this.file = file;
 				tooltip = file.getFilename();
 				if (file instanceof IntelAttachment){
-					tooltip += "\nAdded: " + DateFormat.getDateInstance().format(((IntelAttachment)file).getDateCreated());
+					tooltip += "\n" + Messages.AttachmentTable_AddedLabel + DateFormat.getDateInstance().format(((IntelAttachment)file).getDateCreated()); //$NON-NLS-1$
 				}
 			}
 			
@@ -375,9 +377,9 @@ public class AttachmentTable extends Composite implements Listener {
 			}
 			
 			private void changeSelection(Event event){
-				Integer lastSelection = (Integer) getParent().getData("last_selection_index");
+				Integer lastSelection = (Integer) getParent().getData(LAST_SELECTION_INDEX_KEY);
 				if (lastSelection == null) lastSelection = 0;
-				getParent().setData("last_selection_index", index);
+				getParent().setData(LAST_SELECTION_INDEX_KEY, index);
 				
 				if ((event.stateMask & SWT.CTRL) != 0){
 					if (event.button == 1) isSelected = !isSelected;

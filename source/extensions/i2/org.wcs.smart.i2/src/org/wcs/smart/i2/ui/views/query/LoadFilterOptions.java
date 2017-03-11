@@ -54,6 +54,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -73,7 +74,7 @@ public class LoadFilterOptions extends Job {
 	private TreeViewer viewer;
 	
 	public LoadFilterOptions(TreeViewer viewer) {
-		super("Loading query filters....");
+		super(Messages.LoadFilterOptions_JobName);
 		this.viewer= viewer;
 	}
 
@@ -106,7 +107,7 @@ public class LoadFilterOptions extends Job {
 	}
 
 	private FilterTreeItem loadOperators(){
-		BasicTreeFilterItem opRoot = new BasicTreeFilterItem("Operators");
+		BasicTreeFilterItem opRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_OperatorsLabel);
 		Operator[] ops = new Operator[]{
 				Operator.NOT,
 				Operator.BRACKETS
@@ -119,7 +120,7 @@ public class LoadFilterOptions extends Job {
 	}
 	
 	private FilterTreeItem loadAreas(Session session){
-		BasicTreeFilterItem locationFilters = new BasicTreeFilterItem("Location Filters");
+		BasicTreeFilterItem locationFilters = new BasicTreeFilterItem(Messages.LoadFilterOptions_LocationFilterLabel);
 		locationFilters.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_AREA));
 		
 		Area.AreaType[] types = new Area.AreaType[]{
@@ -140,29 +141,29 @@ public class LoadFilterOptions extends Job {
 	@SuppressWarnings("unchecked")
 	private FilterTreeItem loadDataModel(Session session){
 		
-		BasicTreeFilterItem dataModelItem = new BasicTreeFilterItem("Data Model");
+		BasicTreeFilterItem dataModelItem = new BasicTreeFilterItem(Messages.LoadFilterOptions_DataModelFilterLabel);
 		dataModelItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON));
 		
-		BasicTreeFilterItem categoryItem = new BasicTreeFilterItem("Categories");
+		BasicTreeFilterItem categoryItem = new BasicTreeFilterItem(Messages.LoadFilterOptions_CategoriesFilterLabel);
 		categoryItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.CATEGORY_ICON));
 		dataModelItem.addChild(categoryItem);
 		
 		List<Category> categories = session.createCriteria(Category.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-			.add(Restrictions.isNull("parent"))
-			.addOrder(Order.asc("categoryOrder"))
+			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+			.add(Restrictions.isNull("parent")) //$NON-NLS-1$
+			.addOrder(Order.asc("categoryOrder")) //$NON-NLS-1$
 			.list();
 		for (Category c : categories){
 			DataModelTreeFilterItem item = new DataModelTreeFilterItem(c);
 			categoryItem.addChild(item);
 		}
 		
-		BasicTreeFilterItem attributesItem = new BasicTreeFilterItem("Attributes");
+		BasicTreeFilterItem attributesItem = new BasicTreeFilterItem(Messages.LoadFilterOptions_DmAttributesFilterLabel);
 		attributesItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ATTRIBUTE_NUMBER_ICON));
 		dataModelItem.addChild(attributesItem);
 		List<Attribute> attributes= 
 				session.createCriteria(Attribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (Attribute a : attributes){
@@ -175,11 +176,11 @@ public class LoadFilterOptions extends Job {
 	
 	@SuppressWarnings("unchecked")
 	private FilterTreeItem loadAttributes(Session session){
-		AttributeHeaderFilterItem attributeRoots = new AttributeHeaderFilterItem("Entity Attributes", false);
+		AttributeHeaderFilterItem attributeRoots = new AttributeHeaderFilterItem(Messages.LoadFilterOptions_EntityAttributeFilterLabel, false);
 		
 		List<IntelAttribute> attributes= 
 				session.createCriteria(IntelAttribute.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.list();
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (IntelAttribute a : attributes){
@@ -193,11 +194,11 @@ public class LoadFilterOptions extends Job {
 		
 	@SuppressWarnings("unchecked")
 	private FilterTreeItem loadEntity(Session session){
-		BasicTreeFilterItem entityTypeRoot = new BasicTreeFilterItem("Entity Types");
+		BasicTreeFilterItem entityTypeRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_EntityTypeFilterLabel);
 		entityTypeRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY));
 		List<IntelEntityType> types = 
 				session.createCriteria(IntelEntityType.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 		types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelEntityType t : types){
@@ -228,7 +229,7 @@ public class LoadFilterOptions extends Job {
 			EntityTypeTreeFilterItem entitiesNode = new EntityTypeTreeFilterItem(t);
 			entityNode.addChild(entitiesNode);
 			
-			AttributeHeaderFilterItem attributesNode = new AttributeHeaderFilterItem("Attributes", false);
+			AttributeHeaderFilterItem attributesNode = new AttributeHeaderFilterItem(Messages.LoadFilterOptions_AttributeFilterLabel, false);
 			entityNode.addChild(attributesNode);
 
 			Map<IntelEntityTypeAttributeGroup, List<IntelEntityTypeAttribute>> attributeMapping = new HashMap<>();

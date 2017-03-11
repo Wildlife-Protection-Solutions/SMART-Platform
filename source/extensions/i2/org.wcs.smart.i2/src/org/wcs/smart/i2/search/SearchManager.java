@@ -46,7 +46,7 @@ public enum SearchManager {
 	
 	private static final Levenshtein LEVENSHTEIN_DISTANCE = new Levenshtein();
 	private static final DoubleMetaphone DOUBLE_METAPHONE = new DoubleMetaphone();
-	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+");
+	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+"); //$NON-NLS-1$
 	
 	@SuppressWarnings("unchecked")
 	public List<IntelSearchResultItem> fuzzySearch(String searchFor, List<String> typeKeys, Session session){
@@ -65,8 +65,8 @@ public enum SearchManager {
 		List<byte[]> types = null;
 		if (typeKeys != null && !typeKeys.isEmpty()){
 			List<IntelEntityType> stypes = session.createCriteria(IntelEntityType.class)
-			.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas()))
-			.add(Restrictions.in("keyId", typeKeys))
+			.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())) //$NON-NLS-1$
+			.add(Restrictions.in("keyId", typeKeys)) //$NON-NLS-1$
 			.list();
 			types = stypes.stream()
 					.map(iet -> UuidUtils.uuidToByte(iet.getUuid()))
@@ -74,45 +74,45 @@ public enum SearchManager {
 		}
 				
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT a.string_value, a.entity_uuid ");
-		sql.append (" FROM ");
-		sql.append (" smart.i_entity_attribute_value a ");
-		sql.append (" JOIN smart.i_entity b ");
-		sql.append(" ON a.entity_uuid = b.uuid and b.ca_uuid in (:cas) ");
-		sql.append(" AND a.string_value is not null ");
+		sql.append("SELECT a.string_value, a.entity_uuid "); //$NON-NLS-1$
+		sql.append (" FROM "); //$NON-NLS-1$
+		sql.append (" smart.i_entity_attribute_value a "); //$NON-NLS-1$
+		sql.append (" JOIN smart.i_entity b "); //$NON-NLS-1$
+		sql.append(" ON a.entity_uuid = b.uuid and b.ca_uuid in (:cas) "); //$NON-NLS-1$
+		sql.append(" AND a.string_value is not null "); //$NON-NLS-1$
 		
 		if (types != null ){
-			sql.append(" AND b.entity_type_uuid in (:types) ");
+			sql.append(" AND b.entity_type_uuid in (:types) "); //$NON-NLS-1$
 		}
 		
 		if (!metas.isEmpty()){
-			sql.append(" AND ( ");
+			sql.append(" AND ( "); //$NON-NLS-1$
 			for (int i = 0; i < metas.size(); i ++){
-				sql.append(" smart.metaphoneContains(:m"+i+",a.metaphone) OR ");
+				sql.append(" smart.metaphoneContains(:m"+i+",a.metaphone) OR "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			sql.deleteCharAt(sql.length() - 1);
 			sql.deleteCharAt(sql.length() - 1);
 			sql.deleteCharAt(sql.length() - 1);
 			sql.deleteCharAt(sql.length() - 1);
 			
-			sql.append(" OR ");
-			sql.append(" a.string_value like :ml");
-			sql.append(" ) ");
+			sql.append(" OR "); //$NON-NLS-1$
+			sql.append(" a.string_value like :ml"); //$NON-NLS-1$
+			sql.append(" ) "); //$NON-NLS-1$
 		}else{
-			sql.append(" AND ");
-			sql.append(" a.string_value like :ml");
+			sql.append(" AND "); //$NON-NLS-1$
+			sql.append(" a.string_value like :ml"); //$NON-NLS-1$
 		}
 
 		// create the query and parameters
 		Query q = session.createSQLQuery(sql.toString());
-		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas());
+		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
 		if (types != null){
-			q.setParameterList("types", types);
+			q.setParameterList("types", types); //$NON-NLS-1$
 		}
 		for (int i = 0; i < metas.size(); i ++){
-			q.setParameter("m" + i, metas.get(i));
+			q.setParameter("m" + i, metas.get(i)); //$NON-NLS-1$
 		}
-		q.setParameter("ml", "%" + searchFor + "%");
+		q.setParameter("ml", "%" + searchFor + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		List<Object[]> items = q.list();
 		
 		ParsedString searchString = new ParsedString(searchFor);
@@ -182,7 +182,7 @@ public enum SearchManager {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < words.getNumWords(); i ++){
 				sb.append(words.getWord(i));
-				sb.append(" ");
+				sb.append(" "); //$NON-NLS-1$
 			}
 			String searchFor = sb.toString();
 			value = 1 - (LEVENSHTEIN_DISTANCE.distance(searchFor, searchIn) / Math.max(searchFor.length(), searchIn.length()));

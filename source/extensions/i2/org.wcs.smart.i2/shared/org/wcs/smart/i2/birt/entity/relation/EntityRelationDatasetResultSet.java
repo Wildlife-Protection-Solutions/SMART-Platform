@@ -91,20 +91,20 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 		
 		//add the conservation area filter here otherwise we will
 		//get data from other conservation areas if no entity is provided
-		String q1 = "SELECT count(*) FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) ";
-		String q2 = "FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) ";
+		String q1 = "SELECT count(*) FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) "; //$NON-NLS-1$
+		String q2 = "FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) "; //$NON-NLS-1$
 
 		HashMap<String, Object> values = new HashMap<String, Object>();
-		values.put("type", type);
+		values.put("type", type); //$NON-NLS-1$
 		int index =pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		if (index >= 0){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
-				q1 += " AND ( l.sourceEntity.uuid = :uuid1 or l.targetEntity.uuid = :uuid2 )";
-				q2 += " AND ( l.sourceEntity.uuid = :uuid1 or l.targetEntity.uuid = :uuid2 )";
+				q1 += " AND ( l.sourceEntity.uuid = :uuid1 or l.targetEntity.uuid = :uuid2 )"; //$NON-NLS-1$
+				q2 += " AND ( l.sourceEntity.uuid = :uuid1 or l.targetEntity.uuid = :uuid2 )"; //$NON-NLS-1$
 				this.entityUuid = UuidUtils.stringToUuid(entity);
-				values.put("uuid1", entityUuid);
-				values.put("uuid2", entityUuid);
+				values.put("uuid1", entityUuid); //$NON-NLS-1$
+				values.put("uuid2", entityUuid); //$NON-NLS-1$
 			}
 		}
 		
@@ -114,8 +114,8 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 			query1.setParameter(e.getKey(), e.getValue());
 			query2.setParameter(e.getKey(), e.getValue());
 		}
-		query1.setParameterList("ca", connection.getConservationAreas());
-		query2.setParameterList("ca", connection.getConservationAreas());
+		query1.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
+		query2.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
 		
 		m_maxRows = (Long)query1.uniqueResult();
 		results = query2.setReadOnly(true)
@@ -182,7 +182,7 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 	 */
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return "";
+		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}
 

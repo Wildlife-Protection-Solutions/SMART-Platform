@@ -41,7 +41,7 @@ public class PagedResultSetIterator {
 	public PagedResultSetIterator(IPagedQueryResultSet results, Session session){
 		this.results = results;
 		this.session = session;
-		resultSet = session.createSQLQuery("SELECT * FROM " + results.getQueryDataTable()).scroll();
+		resultSet = session.createSQLQuery("SELECT * FROM " + results.getQueryDataTable()).scroll(); //$NON-NLS-1$
 	}
 	
 	public boolean hasNext(){

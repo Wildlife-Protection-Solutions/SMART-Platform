@@ -77,10 +77,10 @@ public class OptionDropItem extends DropItem {
 	@Override
 	public String getText() {
 		if (label != null){
-			return label + " = ";
+			return label + " = "; //$NON-NLS-1$
 		}else{
 			Option x = getSelection();
-			if (x == null) return "";
+			if (x == null) return ""; //$NON-NLS-1$
 			return x.label;
 		}
 	}
@@ -90,9 +90,9 @@ public class OptionDropItem extends DropItem {
 		StringBuilder sb = new StringBuilder();
 		if (key  != null){
 			sb.append(key);
-			sb.append(" ");
+			sb.append(" "); //$NON-NLS-1$
 			sb.append(Operator.EQUALS.getKey());
-			sb.append(" ");
+			sb.append(" "); //$NON-NLS-1$
 		}
 		Option x = getSelection();
 		if (x != null){
@@ -120,7 +120,7 @@ public class OptionDropItem extends DropItem {
 		
 		if (this.label != null){
 			Label l = new Label(parent, SWT.NONE);
-			l.setText(formatStringForLabel(label + " = "));
+			l.setText(formatStringForLabel(label + " = ")); //$NON-NLS-1$
 			initDrag(l);
 		}
 		combo = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);

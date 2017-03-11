@@ -45,7 +45,7 @@ import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
  */
 public class RecordAttachmentDataset implements IQuery {
 	
-	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.record.attachment";
+	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.record.attachment"; //$NON-NLS-1$
 
 	private IResultSetMetaData r_metadata = null;
 	private RecordParameterMetadata pMetadata = null;
@@ -90,7 +90,7 @@ public class RecordAttachmentDataset implements IQuery {
 	@Override
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (r_metadata == null){
-			r_metadata = new RecordAttachmentDatasetResultSetMetadata();
+			r_metadata = new RecordAttachmentDatasetResultSetMetadata(connection.getCurrentLocale());
 		}
 		return r_metadata;
 	}

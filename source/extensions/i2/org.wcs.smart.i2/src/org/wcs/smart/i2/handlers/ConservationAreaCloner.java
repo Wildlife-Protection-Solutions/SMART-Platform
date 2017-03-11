@@ -33,6 +33,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -55,25 +56,25 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Cloning Intelligence Details...", 6);
+		monitor.beginTask(Messages.ConservationAreaCloner_TaskName, 6);
 		try{
-			monitor.subTask("Processing Attributes");
+			monitor.subTask(Messages.ConservationAreaCloner_AttributeSubTask);
 			cloneAttributes(engine);
 			monitor.worked(1);
 			
-			monitor.setTaskName("Processing Entity Types");
+			monitor.setTaskName(Messages.ConservationAreaCloner_EntityTypeSubTask);
 			cloneEntityTypes(engine);
 			monitor.worked(1);
 			
-			monitor.setTaskName("Processing Relationship Groups");
+			monitor.setTaskName(Messages.ConservationAreaCloner_GroupsSubTask);
 			cloneRelationshipGroups(engine);
 			monitor.worked(1);
 			
-			monitor.setTaskName("Processing Relationship Types");
+			monitor.setTaskName(Messages.ConservationAreaCloner_RelationshiptypesSubTask);
 			cloneRelationshipTypes(engine);
 			monitor.worked(1);
 			
-			monitor.setTaskName("Processing Record Source Types");
+			monitor.setTaskName(Messages.ConservationAreaCloner_SourceTypesSubTask);
 			cloneRecordSource(engine);
 			monitor.worked(1);
 			
@@ -91,7 +92,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	private void cloneAttributes(ConservationAreaClonerEngine engine){
 		List<IntelAttribute> attributes = engine.getSession()
 				.createCriteria(IntelAttribute.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
 		
 		
 		for (IntelAttribute ia : attributes){
@@ -120,7 +121,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	private void cloneEntityTypes(ConservationAreaClonerEngine engine) throws Exception{
 		List<IntelEntityType> entityTypes = engine.getSession()
 				.createCriteria(IntelEntityType.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
 		
 		
 		for (IntelEntityType ia : entityTypes){
@@ -175,7 +176,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	private void cloneRelationshipGroups(ConservationAreaClonerEngine engine){
 		List<IntelRelationshipGroup> relationshipGroups = engine.getSession()
 				.createCriteria(IntelRelationshipGroup.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
 		
 		for (IntelRelationshipGroup g : relationshipGroups){
 			IntelRelationshipGroup clone = new IntelRelationshipGroup();
@@ -192,7 +193,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	private void cloneRelationshipTypes(ConservationAreaClonerEngine engine){
 		List<IntelRelationshipType> relationshipGroups = engine.getSession()
 				.createCriteria(IntelRelationshipType.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
 		
 		for (IntelRelationshipType g : relationshipGroups){
 			IntelRelationshipType clone = new IntelRelationshipType();
@@ -226,7 +227,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		
 		List<IntelRecordSource> sources = engine.getSession()
 				.createCriteria(IntelRecordSource.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list();
+				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
 		
 		for (IntelRecordSource source : sources){
 			IntelRecordSource clone = new IntelRecordSource();

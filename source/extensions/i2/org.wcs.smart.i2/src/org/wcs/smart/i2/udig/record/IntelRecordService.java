@@ -41,6 +41,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.util.UuidUtils;
@@ -67,10 +68,10 @@ public class IntelRecordService extends IService {
 	 * this jobs configures the names of the geo resources
 	 * associated with this service
 	 */
-	private Job configureResourceNames = new Job("load name"){
+	private Job configureResourceNames = new Job("load name"){ //$NON-NLS-1$
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			String recordName = "Intelligence Record";
+			String recordName = Messages.IntelRecordService_DefaultName;
 			Session s = HibernateManager.openSession();
 			try{
 				IntelRecord r = (IntelRecord) s.get(IntelRecord.class, recordUuid);

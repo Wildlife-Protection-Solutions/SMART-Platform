@@ -33,6 +33,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.ui.dialogs.RecordSourceAttributeDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.util.E3Utils;
@@ -56,19 +57,19 @@ public class ConfigureRecordAttributesHandler {
 				if (x instanceof RecordEditor){
 					//save or discard changes
 					parts.add(p);
-					names.append(((RecordEditor) x).getRecord().getTitle() + "\n");
+					names.append(((RecordEditor) x).getRecord().getTitle() + "\n"); //$NON-NLS-1$
 				}
 			}
 		}
 		if (!parts.isEmpty()){
-			if(!MessageDialog.openQuestion(context.get(Shell.class),"Configure Records", MessageFormat.format("Changes to the following {0} records must be saved before you can continue.  Do you want to save now?\n\n{1}",  parts.size(), names.toString()))){
+			if(!MessageDialog.openQuestion(context.get(Shell.class),Messages.ConfigureRecordAttributesHandler_Title, MessageFormat.format(Messages.ConfigureRecordAttributesHandler_SaveRequired,  parts.size(), names.toString()))){
 				return;
 			}
 			for (MPart p : parts){
 				//save parts; part service doesn't work as it still prompt user
 				RecordEditor x = (RecordEditor)E3Utils.getSourceObject(p);
 				if (!x.getSite().getPage().saveEditor(x,  false)){
-					MessageDialog.openError(context.get(Shell.class), "Configure Records", MessageFormat.format("Cannot save record {0}.", x.getRecord().getTitle()));
+					MessageDialog.openError(context.get(Shell.class), Messages.ConfigureRecordAttributesHandler_Title, MessageFormat.format(Messages.ConfigureRecordAttributesHandler_SaveError, x.getRecord().getTitle()));
 					return;
 				}
 			}

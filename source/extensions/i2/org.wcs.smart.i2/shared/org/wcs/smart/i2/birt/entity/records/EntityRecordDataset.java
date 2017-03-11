@@ -46,7 +46,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
  */
 public class EntityRecordDataset  implements IQuery {
 	
-	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.entity.record";
+	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.entity.record"; //$NON-NLS-1$
 
 	private IResultSetMetaData r_metadata = null;
 	private EntityRecordParameterMetadata pMetadata = null;
@@ -65,8 +65,8 @@ public class EntityRecordDataset  implements IQuery {
 	@Override
 	public void prepare(String queryText) throws OdaException {
 		type = (IntelEntityType) connection.getSession().createCriteria(IntelEntityType.class)
-				.add(Restrictions.in("conservationArea", connection.getConservationAreas()))
-			.add(Restrictions.eq("keyId", queryText))
+				.add(Restrictions.in("conservationArea", connection.getConservationAreas())) //$NON-NLS-1$
+			.add(Restrictions.eq("keyId", queryText)) //$NON-NLS-1$
 			.uniqueResult();
 		
 	}
@@ -97,7 +97,7 @@ public class EntityRecordDataset  implements IQuery {
 	@Override
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (r_metadata == null){
-			r_metadata = new EntityRecordDatasetResultSetMetadata();
+			r_metadata = new EntityRecordDatasetResultSetMetadata(connection.getCurrentLocale());
 		}
 		return r_metadata;
 	}

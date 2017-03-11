@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -137,7 +138,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider {
 		private int from;
 		
 		public LoadCellDataJob(int from) {
-			super(MessageFormat.format("Loading results {0} to {1}", from, from + pageSize));
+			super(MessageFormat.format(Messages.QueryLazyResultsContentProvider_LoadingResultLbl, from, from + pageSize));
 			this.from = from;
 		}
 

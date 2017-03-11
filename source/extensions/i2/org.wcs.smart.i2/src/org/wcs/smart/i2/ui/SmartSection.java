@@ -49,8 +49,8 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
  */
 public class SmartSection extends Composite{
 
-	public static final String MAX_KEY = "currentmaximized";
-	public static final String KIDS_KEY = "kids";
+	public static final String MAX_KEY = "currentmaximized"; //$NON-NLS-1$
+	public static final String KIDS_KEY = "kids"; //$NON-NLS-1$
 	
 	private boolean isMinimized;
 	private Composite header;
@@ -268,7 +268,7 @@ public class SmartSection extends Composite{
 		int totalHeight = sashForm.getClientArea().height - off;
 		for (int i = 0; i < sections.size(); i ++){
 			if (newweights[i] == -1){
-				newweights[i] = (int)(totalHeight * percentage[i]);/// cnt;
+				newweights[i] = (int)(totalHeight * percentage[i]);
 			}
 		}		
 		for (SmartSection s : sections) s.processingEvent = true;
@@ -276,9 +276,7 @@ public class SmartSection extends Composite{
 		try{
 			sashForm.setWeights(newweights);
 		}catch (Throwable ex){
-			System.err.print("error setting weights: ");
-			for (int i : newweights) System.out.print(i);
-			System.err.println();
+			Intelligence2PlugIn.log("error setting section weights", ex); //$NON-NLS-1$
 		}finally{
 			for (SmartSection s : sections) s.processingEvent = false;
 		}

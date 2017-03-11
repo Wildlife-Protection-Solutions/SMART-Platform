@@ -78,6 +78,7 @@ import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.search.BasicRecordSearch;
 import org.wcs.smart.i2.search.IntelRecordResult;
@@ -136,7 +137,7 @@ public class BasicRecordSearchPanel extends Composite {
 //		((GridLayout)top.getLayout()).marginWidth = 0;
 //		((GridLayout)top.getLayout()).marginHeight = 0;
 		
-		toolkit.createLabel(top, "Source:");
+		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_SourceLabel);
 		
 		cmbSource = new TableComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		cmbSource.setContentProvider(ArrayContentProvider.getInstance());
@@ -148,7 +149,7 @@ public class BasicRecordSearchPanel extends Composite {
 			}
 		});
 		
-		toolkit.createLabel(top, "Narrative:");
+		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_NarrativeLabel);
 		
 		txtNarrative = new FilterComposite(top, SWT.NONE);
 		txtNarrative.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -158,7 +159,7 @@ public class BasicRecordSearchPanel extends Composite {
 			}
 		});
 
-		toolkit.createLabel(top, "Title:");
+		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_TitleLabel);
 		
 		
 		txtSearch = new FilterComposite(top, SWT.NONE);
@@ -175,8 +176,7 @@ public class BasicRecordSearchPanel extends Composite {
 		((GridLayout)btnComp.getLayout()).marginWidth  = 0;
 		((GridLayout)btnComp.getLayout()).marginHeight  = 0;
 		
-		Hyperlink btnExport = toolkit.createHyperlink(btnComp, "Export...", SWT.NONE);
-		btnExport.setText("Export...");
+		Hyperlink btnExport = toolkit.createHyperlink(btnComp, Messages.BasicRecordSearchPanel_ExportLink, SWT.NONE);
 		btnExport.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		btnExport.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -184,9 +184,9 @@ public class BasicRecordSearchPanel extends Composite {
 				doExport();
 			}
 		});
-		btnExport.setToolTipText("export search results to csv file");
+		btnExport.setToolTipText(Messages.BasicRecordSearchPanel_ExportTooltip);
 		
-		Button btnSearch = toolkit.createButton(btnComp, "Search",  SWT.PUSH);
+		Button btnSearch = toolkit.createButton(btnComp, Messages.BasicRecordSearchPanel_SearchBtn,  SWT.PUSH);
 		btnSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		btnSearch.addListener(SWT.Selection, e->doSearch());
 	
@@ -306,7 +306,7 @@ public class BasicRecordSearchPanel extends Composite {
 						txtMatchString.setVisible(true);
 					}
 				}else{
-					txtMatchString.setText("");
+					txtMatchString.setText(""); //$NON-NLS-1$
 					txtMatchString.setStyleRange(null);
 					((GridData)txtMatchString.getLayoutData()).heightHint = 0;
 					txtMatchString.getParent().layout(true, true);
@@ -328,13 +328,13 @@ public class BasicRecordSearchPanel extends Composite {
 		Menu mnu = new Menu(tblResults.getControl());
 		
 		final MenuItem open = new MenuItem(mnu, SWT.PUSH);
-		open.setText("Open...");
+		open.setText(Messages.BasicRecordSearchPanel_OpenMenuItem);
 		open.addListener(SWT.Selection, e->openSelection());
 		
 		MenuItem ws = null;
 		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
 				ws = new MenuItem(mnu, SWT.PUSH);
-				ws.setText("Add to Working Set");
+				ws.setText(Messages.BasicRecordSearchPanel_AddToWsMenuItem);
 				ws.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
 				ws.addListener(SWT.Selection, e->addToWorkingset());
 		}
@@ -343,7 +343,7 @@ public class BasicRecordSearchPanel extends Composite {
 		MenuItem delete = null;
 		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			delete = new MenuItem(mnu, SWT.PUSH);
-			delete.setText("Delete");
+			delete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			delete.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -356,12 +356,12 @@ public class BasicRecordSearchPanel extends Composite {
 							toDelete.add(new RecordEditorInput(null, item.getRecordUuid(), null, item.getRecordSourceUuid(), null));
 						}
 					}
-					if (MessageDialog.openConfirm(context.get(Shell.class), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected records?", toDelete.size()))){
+					if (MessageDialog.openConfirm(context.get(Shell.class), Messages.BasicRecordSearchPanel_DeleteDialogTitle, MessageFormat.format(Messages.BasicRecordSearchPanel_DeleteDialogMsg, toDelete.size()))){
 						ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
 						try {
 							pmd.run(true, true, (monitor)-> RecordManager.INSTANCE.deleteRecords(toDelete, context,monitor));
 						} catch (Exception ex) {
-							Intelligence2PlugIn.displayLog("Error deleting records: " + ex.getMessage(), ex);
+							Intelligence2PlugIn.displayLog(Messages.BasicRecordSearchPanel_DeleteError + ex.getMessage(), ex);
 						}
 						doSearch();
 					}
@@ -444,7 +444,7 @@ public class BasicRecordSearchPanel extends Composite {
 		
 		final BasicRecordSearch search = new BasicRecordSearch(source, narrative, title);
 	
-		Job searchJob = new Job("search"){
+		Job searchJob = new Job(Messages.BasicRecordSearchPanel_SearchJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				
@@ -458,8 +458,8 @@ public class BasicRecordSearchPanel extends Composite {
 				IntelRecordResult fresult = result;
 				Display.getDefault().syncExec(()->{
 					tblResults.setInput(fresult.getResults());
-					searchCount.setText(MessageFormat.format("{0} of {1}", fresult.getResults().size(), fresult.getTotalMatched()));
-					searchTime.setText(MessageFormat.format("{0} seconds", fresult.getTotalTime() / Math.pow(10, 9)));
+					searchCount.setText(MessageFormat.format(Messages.BasicRecordSearchPanel_SearchResultCntLabel, fresult.getResults().size(), fresult.getTotalMatched()));
+					searchTime.setText(MessageFormat.format(Messages.BasicRecordSearchPanel_SearchResultTimeLabel, fresult.getTotalTime() / Math.pow(10, 9)));
 				});
 				return Status.OK_STATUS;
 			}
@@ -473,17 +473,17 @@ public class BasicRecordSearchPanel extends Composite {
 		refreshSource.schedule();
 	}
 	
-	private Job refreshSource = new Job("refresh source"){
+	private Job refreshSource = new Job(Messages.BasicRecordSearchPanel_RefershSourceJobName){
 
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> sources = new ArrayList<>();
-			sources.add("");
+			sources.add(""); //$NON-NLS-1$
 			Session s = HibernateManager.openSession();
 			try{
 				List<IntelRecordSource> srcs = s.createCriteria(IntelRecordSource.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.list();
 					srcs.forEach(r->{
 					r.getName();

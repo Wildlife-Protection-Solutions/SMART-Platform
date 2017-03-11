@@ -94,6 +94,7 @@ import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RelationshipTypeManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -118,7 +119,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class RelationshipTypeDialog extends TitleAreaDialog {
 
-	private static final String NEW_GROUP = "<Create New Group...>";
+	private static final String NEW_GROUP = Messages.RelationshipTypeDialog_CreateNewGroupLabel;
 	
 	@Inject
 	private IEventBroker eventBroker;
@@ -218,7 +219,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Unable to save changes: " +ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.RelationshipTypeDialog_SaveError +ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -292,12 +293,12 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		cdSrcType.hide();
 		if (cmbSrcType.getSelection().isEmpty()){
 			isError = true;
-			cdSrcType.setDescriptionText("A source entity type must be selected");
+			cdSrcType.setDescriptionText(Messages.RelationshipTypeDialog_SourceEntityTypeRequired);
 			cdSrcType.show();
 		}else{
 			if (! (((IStructuredSelection)cmbSrcType.getSelection()).getFirstElement() instanceof IntelEntityType)){
 				isError = true;
-				cdSrcType.setDescriptionText("A valid entity type must be selected for the source entity type.");
+				cdSrcType.setDescriptionText(Messages.RelationshipTypeDialog_ValidSourceEntityTypeRequired);
 				cdSrcType.show();
 			}
 		}
@@ -305,12 +306,12 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		cdTrgType.hide();
 		if (cmbTrgType.getSelection().isEmpty()){
 			isError = true;
-			cdTrgType.setDescriptionText("A target entity type must be selected");
+			cdTrgType.setDescriptionText(Messages.RelationshipTypeDialog_TargetEntityTypeRequired);
 			cdTrgType.show();
 		}else{
 			if (! (((IStructuredSelection)cmbTrgType.getSelection()).getFirstElement() instanceof IntelEntityType)){
 				isError = true;
-				cdTrgType.setDescriptionText("A valid entity type must be selected for the target entity type.");
+				cdTrgType.setDescriptionText(Messages.RelationshipTypeDialog_ValidTargetEntityTypeRequired);
 				cdTrgType.show();
 			}
 		}
@@ -337,7 +338,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		});
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Icon:");
+		l.setText(Messages.RelationshipTypeDialog_IconLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		icon = new IconComposite(parent);
@@ -351,7 +352,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		});
 	
 		l = new Label(parent, SWT.NONE);
-		l.setText("Group:");
+		l.setText(Messages.RelationshipTypeDialog_GroupLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		cmbGroup = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -405,7 +406,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		});
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Source Entity Type:");
+		l.setText(Messages.RelationshipTypeDialog_SrcLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		cmbSrcType = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -431,7 +432,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		cdSrcType = createDecoration(cmbSrcType.getControl());
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Target Entity Type:");
+		l.setText(Messages.RelationshipTypeDialog_TargetLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		cmbTrgType = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -455,7 +456,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		cdTrgType = createDecoration(cmbTrgType.getControl());
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Attributes:");
+		l.setText(Messages.RelationshipTypeDialog_AttributesLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
 		
@@ -613,7 +614,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		btnMoveUp = new Button(buttonComp, SWT.NONE);
-		btnMoveUp.setText("Move Down");
+		btnMoveUp.setText(Messages.RelationshipTypeDialog_MoveDown);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.setEnabled(false);
 		btnMoveUp.addSelectionListener(new SelectionAdapter() {
@@ -624,7 +625,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		});
 		
 		btnMoveDown = new Button(buttonComp, SWT.NONE);
-		btnMoveDown.setText("Move Up");
+		btnMoveDown.setText(Messages.RelationshipTypeDialog_MoveUp);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.setEnabled(false);
 		btnMoveDown.addSelectionListener(new SelectionAdapter() {
@@ -634,9 +635,9 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		setTitle("Relationship Type");
-		getShell().setText("Relationship Type");
-		setMessage("Configure relationship type");
+		setTitle(Messages.RelationshipTypeDialog_Title);
+		getShell().setText(Messages.RelationshipTypeDialog_Title);
+		setMessage(Messages.RelationshipTypeDialog_Message);
 		
 		return parent;
 	}
@@ -708,7 +709,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 								DeleteManager.canDelete(x, session);
 								aToDelete.add(x);
 							}catch (Exception ex){
-								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", ((IntelRelationshipTypeAttribute) x).getAttribute().getName(), ex.getMessage()));
+								warnings.add(MessageFormat.format(Messages.RelationshipTypeDialog_AttributeDeleteWarn, ((IntelRelationshipTypeAttribute) x).getAttribute().getName(), ex.getMessage()));
 							}
 						}	
 					}finally{
@@ -722,7 +723,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			warnings.add(ex.getMessage());
 		}
 		if(!warnings.isEmpty()){
-			WarningDialog wd = new WarningDialog(getShell(), "Warnings","Cannot remove selected attributes.", warnings);
+			WarningDialog wd = new WarningDialog(getShell(), Messages.RelationshipTypeDialog_WarningDialogTitle,Messages.RelationshipTypeDialog_WarningDialogMessage, warnings);
 			wd.open();
 		}
 		
@@ -730,11 +731,11 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			StringBuilder sb = new StringBuilder();
 			for (IntelRelationshipTypeAttribute d: aToDelete){
 				sb.append(d.getAttribute().getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
-			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? \n All attribute information associated with entities will also be removed.", sb.toString()))){
+			if (MessageDialog.openConfirm(getShell(), Messages.RelationshipTypeDialog_DeleteAttributeConfirmTitle, MessageFormat.format(Messages.RelationshipTypeDialog_DeleteAttributeConfirmMsg, sb.toString()))){
 				attributeList.removeAll(aToDelete);
 				modified();
 			}
@@ -778,11 +779,11 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 				
 				
 				IntelEntityType any = new IntelEntityType();
-				any.setName("<Any>");
+				any.setName(Messages.RelationshipTypeDialog_AnyOption);
 				types.add(0, any);
 				
 				Collections.sort(groups, (a,b) -> Collator.getInstance().compare(((IntelRelationshipGroup)a).getName().toLowerCase(), ((IntelRelationshipGroup)b).getName().toLowerCase()));
-				String noGroup = "";
+				String noGroup = ""; //$NON-NLS-1$
 				groups.add(0, noGroup);
 				groups.add(NEW_GROUP);
 				
@@ -821,7 +822,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 		});
 		
 		}catch (Exception ex){
-			Intelligence2PlugIn.log(MessageFormat.format("Error loading Relationship Type: {0}", ex.getMessage()), ex);
+			Intelligence2PlugIn.log(MessageFormat.format(Messages.RelationshipTypeDialog_LoadError, ex.getMessage()), ex);
 		}
 	}
 	
@@ -923,7 +924,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 			attributeList.setFilters(new ViewerFilter[]{filter});
 			
 			Button btnNew = new Button(parent, SWT.PUSH);
-			btnNew.setText("Create New Attribute");
+			btnNew.setText(Messages.RelationshipTypeDialog_CreateNewOption);
 			btnNew.addSelectionListener(new SelectionAdapter() {
 				
 				@Override
@@ -933,9 +934,9 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 					}
 				}
 			});
-			setTitle("Entity Type Attributes");
-			getShell().setText("Entity Type Attributes");
-			setMessage(MessageFormat.format("Add attributes for entity type {0}", type.getName()));
+			setTitle(Messages.RelationshipTypeDialog_AttributeListTitle);
+			getShell().setText(Messages.RelationshipTypeDialog_AttributeListTitle);
+			setMessage(MessageFormat.format(Messages.RelationshipTypeDialog_AttributeListTitleMsg, type.getName()));
 			
 			loadAttributes.setSystem(true);
 			loadAttributes.schedule(0);

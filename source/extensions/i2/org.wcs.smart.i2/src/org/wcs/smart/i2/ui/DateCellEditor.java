@@ -164,7 +164,7 @@ public class DateCellEditor extends CellEditor {
     protected void editOccured(SelectionEvent e) {
         Date value = SmartUtils.getDate(dtControl);
         if (value == null) {
-			value = new Date();//$NON-NLS-1$
+			value = new Date();
 		}
         Object typedValue = value;
         boolean oldValidState = isValueValid();

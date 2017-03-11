@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -40,7 +41,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Upgrading intelligence plugin", 1);
+		monitor.beginTask(Messages.IntelligenceDatabaseUpgrader_JobName, 1);
 		Session session = HibernateManager.openSession();
 		try{
 			session.beginTransaction();
@@ -49,7 +50,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			String currentPluginVersion = versions.get(Intelligence2PlugIn.PLUGIN_ID);
 			
 			if (currentPluginVersion == null) {
-				monitor.subTask("Installing intelligence plugin");
+				monitor.subTask(Messages.IntelligenceDatabaseUpgrader_TaskName);
 				(new AddIntelligenceJob()).installPlugin(session);
 			}else{
 				upgrade(currentPluginVersion, session);

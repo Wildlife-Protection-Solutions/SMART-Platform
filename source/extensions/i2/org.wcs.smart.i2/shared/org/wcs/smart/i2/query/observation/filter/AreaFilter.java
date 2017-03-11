@@ -30,7 +30,7 @@ import org.wcs.smart.ca.Area;
 public class AreaFilter implements IQueryFilter {
 
 	public static AreaFilter create(String key){
-		String[] bits = key.split(":");
+		String[] bits = key.split(":"); //$NON-NLS-1$
 		return new AreaFilter(Area.AreaType.valueOf(bits[1]), bits[2]);
 	}
 	

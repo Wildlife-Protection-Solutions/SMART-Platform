@@ -44,6 +44,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.udig.LocationLayerType;
@@ -72,10 +73,10 @@ public class IntelEntityService extends IService {
 	 * this jobs configures the names of the geo resources
 	 * associated with this service
 	 */
-	private Job configureResourceNames = new Job("load name"){
+	private Job configureResourceNames = new Job("load name"){ //$NON-NLS-1$
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			String recordName = "Intelligence Entity";
+			String recordName = Messages.IntelEntityService_DefaultName;
 			Session s = HibernateManager.openSession();
 			try{
 				IntelEntity r = (IntelEntity) s.get(IntelEntity.class, entityUuid);
@@ -90,7 +91,7 @@ public class IntelEntityService extends IService {
 			try{
 				for (IGeoResource lresource : resources(monitor)){
 					if (lresource.getIdentifier().getRef().equals(LocationLayerType.ATTRIBUTE.name())){
-						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format("{0} - Position Attributes", recordName));
+						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format(Messages.IntelEntityService_Title, recordName));
 					}else{
 						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(recordName);
 					}
@@ -177,16 +178,16 @@ public class IntelEntityService extends IService {
 				if (members == null){
 					
 					if (hasPosition == null){
-						Job j = new Job("loading attributes"){
+						Job j = new Job("loading attributes"){ //$NON-NLS-1$
 
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
 								Session s = HibernateManager.openSession();
 								try{
 									
-									Query q = s.createQuery("SELECT count(*) FROM IntelEntity e join e.entityType t join t.attributes ta join ta.id.attribute a WHERE a.type = :type and e.uuid = :uuid");
-									q.setParameter("type", IntelAttribute.AttributeType.POSITION);
-									q.setParameter("uuid", entityUuid);
+									Query q = s.createQuery("SELECT count(*) FROM IntelEntity e join e.entityType t join t.attributes ta join ta.id.attribute a WHERE a.type = :type and e.uuid = :uuid"); //$NON-NLS-1$
+									q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+									q.setParameter("uuid", entityUuid); //$NON-NLS-1$
 									Long cnt = (Long) q.uniqueResult();
 									hasPosition = cnt > 0;
 									

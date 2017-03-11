@@ -79,7 +79,7 @@ public class LocationAttributeMapLayer {
 
 	private SimpleFeatureType createFeatureType() throws SchemaException{
 		 return DataUtilities.createType(uniqueId,
-					"the_geom:Point:srid=4326,id:String,attribute:String");
+					"the_geom:Point:srid=4326,id:String,attribute:String"); //$NON-NLS-1$
 	}
 	
 	public void createLayersRecord(List<IntelRecordAttributeValue> values) {
@@ -126,7 +126,7 @@ public class LocationAttributeMapLayer {
 		if (attribute == null) return;
 		
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
-		Filter f = ff.equals(ff.property("id"), ff.literal(UuidUtils.uuidToString(attribute.getUuid())));
+		Filter f = ff.equals(ff.property("id"), ff.literal(UuidUtils.uuidToString(attribute.getUuid()))); //$NON-NLS-1$
 
 		try {
 			SimpleFeatureStore store = (SimpleFeatureStore) attributeResource
@@ -134,7 +134,7 @@ public class LocationAttributeMapLayer {
 
 			if (number1 == null || number2 == null) {
 				// remove feature
-				try (Transaction transaction = new DefaultTransaction("deletetransaction")) {
+				try (Transaction transaction = new DefaultTransaction("deletetransaction")) { //$NON-NLS-1$
 					store.setTransaction(transaction);
 					store.removeFeatures(f);
 					transaction.commit();
@@ -143,7 +143,7 @@ public class LocationAttributeMapLayer {
 				final com.vividsolutions.jts.geom.Point p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(number1, number2));
 				if (store.getFeatures(f).size() == 0) {
 					// need to add the feature
-					try (Transaction transaction = new DefaultTransaction("addtransaction")) {
+					try (Transaction transaction = new DefaultTransaction("addtransaction")) { //$NON-NLS-1$
 						store.setTransaction(transaction);
 						SimpleFeature sf = SimpleFeatureBuilder.build(store.getSchema(),
 								new Object[] {p, UuidUtils.uuidToString(attribute.getUuid()),attribute.getName() }, null);
@@ -151,9 +151,9 @@ public class LocationAttributeMapLayer {
 						transaction.commit();
 					}
 				} else {
-					try (Transaction transaction = new DefaultTransaction("edittransaction")) {
+					try (Transaction transaction = new DefaultTransaction("edittransaction")) { //$NON-NLS-1$
 						store.setTransaction(transaction);
-						store.modifyFeatures("the_geom", p, f);
+						store.modifyFeatures("the_geom", p, f); //$NON-NLS-1$
 						transaction.commit();
 					}
 				}
@@ -212,7 +212,7 @@ public class LocationAttributeMapLayer {
 					super.run(monitor);
 					LocationAttributeMapLayer.this.layer = getLayers().get(0);
 					layer.setName(layerName);
-					layer.getStyleBlackboard().put("org.locationtech.udig.style.sld", EntityManager.INSTANCE.buildRedStarStyle());
+					layer.getStyleBlackboard().put("org.locationtech.udig.style.sld", EntityManager.INSTANCE.buildRedStarStyle()); //$NON-NLS-1$
 					layer.refresh(null);
 				}
 			};

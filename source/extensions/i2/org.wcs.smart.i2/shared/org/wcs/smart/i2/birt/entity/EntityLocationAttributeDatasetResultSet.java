@@ -49,30 +49,30 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		
 		this.metadata = metadata;
 
-		String hql = "FROM IntelEntityAttributeValue v join v.id.attribute a join v.id.entity e where a.type = :type and e.entityType = :etype";
+		String hql = "FROM IntelEntityAttributeValue v join v.id.attribute a join v.id.entity e where a.type = :type and e.entityType = :etype"; //$NON-NLS-1$
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		UUID entity = null;
 		if (index > 0){
-			hql += " AND e.uuid = :euuid";
+			hql += " AND e.uuid = :euuid"; //$NON-NLS-1$
 			entity = UuidUtils.stringToUuid((String) parameters.get(index)); 
 		}
 		
-		String cnt = "SELECT count(*) " + hql;
+		String cnt = "SELECT count(*) " + hql; //$NON-NLS-1$
 		Query q = connection.getSession().createQuery(cnt);
-		q.setParameter("type", IntelAttribute.AttributeType.POSITION);
-		q.setParameter("etype", type);
+		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
-			q.setParameter("euuid", entity);
+			q.setParameter("euuid", entity); //$NON-NLS-1$
 		}
 		m_maxRows = (Long)q.uniqueResult();
 		
 		
 		q = connection.getSession().createQuery(hql);
-		q.setParameter("type", IntelAttribute.AttributeType.POSITION);
-		q.setParameter("etype", type);
+		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
-			q.setParameter("euuid", entity);
+			q.setParameter("euuid", entity); //$NON-NLS-1$
 		}
 		
 		
@@ -141,7 +141,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	 */
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return "";
+		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}
 

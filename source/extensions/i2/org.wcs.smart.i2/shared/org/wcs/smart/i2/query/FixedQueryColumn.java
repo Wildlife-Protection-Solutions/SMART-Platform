@@ -41,17 +41,13 @@ import com.vividsolutions.jts.geom.Geometry;
 public class FixedQueryColumn extends AbstractQueryColumn{
 	
 	public enum Column{
-		RECORD_TITLE("record:title"),
-		RECORD_STATUS("record:status"),
-//		RECORD_DATE_CREATED("record:created"),
-//		RECORD_DATE_MODIFIED("record:modified"),
-//		RECORD_CREATED_BY("record:createdby"),
-//		RECORD_MODIFIED_BY("record:modifiedby"),
-		LOC_ID("loc:id"),
-		LOC_DATE("loc:date"),
-		LOC_TIME("loc:time"),
-		LOC_COMMENT("loc:comment"),
-		LOC_GEOMTRY("loc:geom");
+		RECORD_TITLE("record:title"), //$NON-NLS-1$
+		RECORD_STATUS("record:status"), //$NON-NLS-1$
+		LOC_ID("loc:id"), //$NON-NLS-1$
+		LOC_DATE("loc:date"), //$NON-NLS-1$
+		LOC_TIME("loc:time"), //$NON-NLS-1$
+		LOC_COMMENT("loc:comment"), //$NON-NLS-1$
+		LOC_GEOMTRY("loc:geom"); //$NON-NLS-1$
 		
 		String key;
 		Column(String key){
@@ -81,8 +77,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		case LOC_DATE:
 			return i.getLocationDate();
 		case LOC_GEOMTRY:
-			if (i.getGeometryError() != null) return "Parse Error";
-			if (i.getGeometry() == null) return "";
+			if (i.getGeometryError() != null) return "Parse Error"; //$NON-NLS-1$
+			if (i.getGeometry() == null) return ""; //$NON-NLS-1$
 			return i.getGeometry();
 		case LOC_ID:
 			return i.getLocationId();
@@ -99,7 +95,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 	@Override
 	public String getValue(IResultItem item, Locale l){
 		Object toFormat = getValue(item);
-		if (toFormat == null) return "";
+		if (toFormat == null) return ""; //$NON-NLS-1$
 		switch(column){
 			case LOC_DATE:
 				return DateFormat.getDateInstance(DateFormat.DEFAULT, l).format((Date)toFormat);

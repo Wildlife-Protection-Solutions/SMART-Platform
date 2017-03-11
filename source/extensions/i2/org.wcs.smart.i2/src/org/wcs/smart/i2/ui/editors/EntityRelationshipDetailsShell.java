@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationship.Source;
@@ -123,7 +124,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		topDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label ll = new Label(topDetails, SWT.NONE);
-		ll.setText("Source:");
+		ll.setText(Messages.EntityRelationshipDetailsShell_SourceLabel);
 		ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		fd = ll.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -132,18 +133,18 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		ll.addDisposeListener(e->boldFont.dispose());
 		
 		ll = new Label(topDetails, SWT.NONE);
-		String text = "Unknown";
+		String text = Messages.EntityRelationshipDetailsShell_UnknownLabel;
 		if (relationship.getSource() == Source.ENTITY ){
 			if (relationship.getSourceObject() != null){
-				text = MessageFormat.format("Entity - {0}", ((IntelEntity)relationship.getSourceObject()).getIdAttributeAsText());
+				text = MessageFormat.format(Messages.EntityRelationshipDetailsShell_EntityLabel, ((IntelEntity)relationship.getSourceObject()).getIdAttributeAsText());
 			}else{
-				text = "Entity";
+				text = Messages.EntityRelationshipDetailsShell_EntityLabel2;
 			}
 		}else if (relationship.getSource() == Source.RECORD){
 			if (relationship.getSourceObject() != null){
-				text = MessageFormat.format("Record - {0}", ((IntelRecord)relationship.getSourceObject()).getTitle());
+				text = MessageFormat.format(Messages.EntityRelationshipDetailsShell_RecordLabel, ((IntelRecord)relationship.getSourceObject()).getTitle());
 			}else{
-				text = "Record";
+				text = Messages.EntityRelationshipDetailsShell_RecordLabel2;
 			}
 		}else if (relationship.getSource() != null){
 			text = relationship.getSource().name();
@@ -152,7 +153,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		ll = new Label(topDetails, SWT.NONE);
-		ll.setText("Source Entity:");
+		ll.setText(Messages.EntityRelationshipDetailsShell_SrcEntityLabel);
 		ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		ll.setFont(boldFont);
 		
@@ -161,7 +162,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		ll = new Label(topDetails, SWT.NONE);
-		ll.setText("Target Entity:");
+		ll.setText(Messages.EntityRelationshipDetailsShell_TrgEntityLabel);
 		ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		ll.setFont(boldFont);
 		
@@ -220,7 +221,7 @@ public class EntityRelationshipDetailsShell extends SmartShellDialog{
 
 		for (IntelRelationshipTypeAttribute a : all){
 			Label ll = new Label(details, SWT.NONE);
-			ll.setText(MessageFormat.format("{0}:", a.getAttribute().getName()));
+			ll.setText(MessageFormat.format("{0}:", a.getAttribute().getName())); //$NON-NLS-1$
 			ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 			ll.setFont(boldFont);
 			

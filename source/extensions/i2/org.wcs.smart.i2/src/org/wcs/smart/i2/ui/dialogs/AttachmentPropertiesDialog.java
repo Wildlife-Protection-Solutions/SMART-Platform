@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.dialogs;
 
 import java.text.Collator;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +46,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -61,7 +63,7 @@ import com.drew.metadata.Tag;
  */
 public class AttachmentPropertiesDialog {
 
-	private static final String DETAILS_KEY = "SMART Details";
+	private static final String DETAILS_KEY = "SMART Details"; //$NON-NLS-1$
 	
 	private IntelAttachment attachment;
 	private Shell parent;
@@ -113,7 +115,7 @@ public class AttachmentPropertiesDialog {
 		this.parent = new Shell(parent, SWT.RESIZE|SWT.TITLE|SWT.CLOSE|SWT.APPLICATION_MODAL);
 		this.attachment =attachment;
 		createDialogArea();
-		this.parent.setText("Properties: " + attachment.getFilename());
+		this.parent.setText(MessageFormat.format(Messages.AttachmentPropertiesDialog_Message, attachment.getFilename()));
 		this.parent.setSize(400,  500);
 	}
 	
@@ -147,7 +149,7 @@ public class AttachmentPropertiesDialog {
 
 		TreeViewerColumn colType = new TreeViewerColumn(treeViewer, SWT.DEFAULT);
 		colType.getColumn().setWidth(150);
-		colType.getColumn().setText("Property");
+		colType.getColumn().setText(Messages.AttachmentPropertiesDialog_PropertyColumnLabel);
 		colType.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
@@ -159,13 +161,13 @@ public class AttachmentPropertiesDialog {
 		
 		TreeViewerColumn colValue = new TreeViewerColumn(treeViewer, SWT.DEFAULT);
 		colValue.getColumn().setWidth(200);
-		colValue.getColumn().setText("Value");
+		colValue.getColumn().setText(Messages.AttachmentPropertiesDialog_ValueColumnLabel);
 		colValue.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
-				if (element instanceof String) return "";
+				if (element instanceof String) return ""; //$NON-NLS-1$
 				if (element instanceof Entry){
-					if (((Entry)element).getValue() == null) return "";
+					if (((Entry)element).getValue() == null) return ""; //$NON-NLS-1$
 					return ((Entry) element).getValue().toString();
 				}
 				return super.getText(element);
@@ -181,15 +183,15 @@ public class AttachmentPropertiesDialog {
 				attachment = (IntelAttachment) s.get(IntelAttachment.class, attachment.getUuid());
 			}
 			List<Entry> details = new ArrayList<AttachmentPropertiesDialog.Entry>();
-			details.add(new Entry("Name", attachment.getFilename()));
-			details.add(new Entry("Created By", SmartLabelProvider.getShortLabel(attachment.getCreatedBy())));
-			details.add(new Entry("Created On", DateFormat.getDateInstance().format(attachment.getDateCreated())));
+			details.add(new Entry(Messages.AttachmentPropertiesDialog_NameLabel, attachment.getFilename()));
+			details.add(new Entry(Messages.AttachmentPropertiesDialog_CreatedByLabel, SmartLabelProvider.getShortLabel(attachment.getCreatedBy())));
+			details.add(new Entry(Messages.AttachmentPropertiesDialog_CreatedOnLabel, DateFormat.getDateInstance().format(attachment.getDateCreated())));
 			try {
 				attachment.computeFileLocation(s);
-				details.add(new Entry("Path", attachment.getAttachmentFile().getAbsolutePath()));
+				details.add(new Entry(Messages.AttachmentPropertiesDialog_PathLabel, attachment.getAttachmentFile().getAbsolutePath()));
 			} catch (Exception e) {
 				Intelligence2PlugIn.log(e.getMessage(), e);
-				details.add(new Entry("Path", "ERROR: " +e.getMessage()));
+				details.add(new Entry(Messages.AttachmentPropertiesDialog_PathLabel, Messages.AttachmentPropertiesDialog_PathError +e.getMessage()));
 			}
 			properties.put(DETAILS_KEY, details);
 		}finally{

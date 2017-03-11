@@ -44,7 +44,7 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
  */
 public class RecordDataset implements IQuery {
 	
-	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.record.details";
+	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.record.details"; //$NON-NLS-1$
 
 	private IResultSetMetaData r_metadata = null;
 	protected RecordParameterMetadata pMetadata = null;
@@ -89,7 +89,7 @@ public class RecordDataset implements IQuery {
 	@Override
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (r_metadata == null){
-			r_metadata = new RecordDatasetResultSetMetadata();
+			r_metadata = new RecordDatasetResultSetMetadata(connection.getCurrentLocale());
 		}
 		return r_metadata;
 	}

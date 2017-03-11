@@ -72,6 +72,7 @@ import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
@@ -120,7 +121,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	//link text field editors
 	private HashMap<RecordNarrativeView.FieldType, RecordNarrativeView> links = new HashMap<RecordNarrativeView.FieldType, RecordNarrativeView>();
 	
-	private Job loadRecordJob = new Job("load intelligence record"){
+	private Job loadRecordJob = new Job("load intelligence record"){ //$NON-NLS-1$
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -213,7 +214,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					}
 					if (!temp.getLocations().isEmpty()){
 						currentEntityLocationLinks = s.createCriteria(IntelEntityLocation.class)
-							.add(Restrictions.in("id.location", temp.getLocations()))
+							.add(Restrictions.in("id.location", temp.getLocations())) //$NON-NLS-1$
 							.list();
 						for (IntelEntityLocation ll : currentEntityLocationLinks){
 							ll.getEntity().getIdAttributeAsText();
@@ -289,7 +290,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				if (location.getUuid() == null) continue;
 				//find any entity location links and remove these
 				List<IntelEntityLocation> todelete = s.createCriteria(IntelEntityLocation.class)
-					.add(Restrictions.eq("id.location", location))
+					.add(Restrictions.eq("id.location", location)) //$NON-NLS-1$
 					.list();
 				for (IntelEntityLocation l : todelete){
 					l.setLocation((IntelLocation) s.merge(l.getLocation()));
@@ -343,7 +344,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			summaryPage.clearLists();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Unable to save changes to intelligence record. " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.RecordEditor_SaveError + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -439,7 +440,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				if (isDirty){
 					//TODO: try to just remove this entity link; 
 					//for now just a warning; note payload could be single intel entity or collection or entities
-					MessageDialog.openWarning(getSite().getShell(), "Warning", MessageFormat.format("The record {0} has local modifications and could not be refreshed after some entities were deleted.  You may need to manually remove the entity or refresh the editor and drop all changes.", getEditorInput().getName()) );
+					MessageDialog.openWarning(getSite().getShell(), Messages.RecordEditor_WarningDialogTitle, MessageFormat.format(Messages.RecordEditor_WarningDialogMsg, getEditorInput().getName()) );
 				}else{
 					//refresh the entire editor
 					refresh();
@@ -461,17 +462,17 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			summaryPage = new RecordSummaryPage(this);
 			int i = addPage(summaryPage, getEditorInput());
-			setPageText(i, "Summary");
+			setPageText(i, Messages.RecordEditor_SummarySection);
 			setPageImage(i, Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
 			
 			descPage = new RecordDescriptionPage(this);
 			i = addPage(descPage, getEditorInput());
-			setPageText(i, "Narrative / Scratchpad");
+			setPageText(i, Messages.RecordEditor_NarrativeSection);
 			setPageImage(i, Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
 			
 			mapPage = new RecordMapPage(this);
 			i = addPage(mapPage, getEditorInput());
-			setPageText(i, "Map / Locations");
+			setPageText(i, Messages.RecordEditor_MapSection);
 			setPageImage(i, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 		} catch (final Throwable t) {
 			Intelligence2PlugIn.log(t.getMessage(), t);
@@ -599,7 +600,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		for (IntelLocation newLocation : newLocations){
 			newLocation.setConservationArea(SmartDB.getCurrentConservationArea());
 			if (newLocation.getId() == null){
-				newLocation.setId(MessageFormat.format("Location {0}", record.getLocations().size()+1));
+				newLocation.setId(MessageFormat.format(Messages.RecordEditor_DefaultLocationId, record.getLocations().size()+1));
 			}
 			newLocation.setRecord(record);
 			newLocation.setObservations(new ArrayList<IntelObservation>());
@@ -638,7 +639,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 	
 	public void linkEntity(IntelEntity entity){
-		Job link = new Job("linking entity"){
+		Job link = new Job("linking entity"){ //$NON-NLS-1$
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -797,13 +798,13 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public void openExternalText(RecordNarrativeView.FieldType type){
 		EPartService pService = parentContext.get(EPartService.class);
 		
-		String pId = RecordNarrativeView.ID + ":" + UuidUtils.uuidToString(getRecord().getUuid()) + ":" + type.name();
+		String pId = RecordNarrativeView.ID + ":" + UuidUtils.uuidToString(getRecord().getUuid()) + ":" + type.name(); //$NON-NLS-1$ //$NON-NLS-2$
 		MPart part = pService.findPart(pId);
 		if (part == null){
 			part = pService.createPart(RecordNarrativeView.ID);
 			part.getTransientData().put(RecordNarrativeView.TYPE_KEY, type);
 			part.getTransientData().put(RecordNarrativeView.EDITOR_KEY, RecordEditor.this);
-			part.setElementId(pId); //$NON-NLS-1$
+			part.setElementId(pId); 
 		}
 		
 		pService.showPart(part, PartState.VISIBLE);

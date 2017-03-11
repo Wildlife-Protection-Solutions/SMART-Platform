@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.record.RecordDataset;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Intelligence record wizard page.  A wizard page with no options. 
@@ -63,7 +64,7 @@ public class IntelRecordDetailsWizardPage extends DataSetWizardPage {
 	@Override
 	public void createPageCustomControl(Composite parent) {
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("There are no configuration options for this layer.");
+		l.setText(Messages.IntelRecordDetailsWizardPage_NoConfOptions);
 		setControl(parent);
 	}
 
@@ -121,7 +122,7 @@ public class IntelRecordDetailsWizardPage extends DataSetWizardPage {
 	}
 	
 	public String getName(){
-		return "Record Details";
+		return Messages.IntelRecordDetailsWizardPage_Name;
 	}
 	
 	/**
@@ -220,7 +221,7 @@ public class IntelRecordDetailsWizardPage extends DataSetWizardPage {
 
 			for (ParameterDefinition param : paramDesign
 					.getParameterDefinitions()) {
-				param.setDefaultScalarValue("TODO: Link to Report Parameter");
+				param.setDefaultScalarValue(Messages.IntelRecordDetailsWizardPage_LinkParameters);
 			}
 		}
 	}

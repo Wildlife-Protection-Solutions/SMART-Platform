@@ -37,6 +37,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -63,30 +64,31 @@ public class RecordCsvExporter implements ICsvDataExporter {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean exportCsvFile(File file, char delimiter,
 			ConservationArea ca, boolean headers, IProgressMonitor monitor,
 			Session session) throws Exception {
-		monitor.beginTask("Export records to csv file", uuids.size() + 2);
+		monitor.beginTask(Messages.RecordCsvExporter_TaskName, uuids.size() + 2);
 		monitor.worked(1);
 		
-		monitor.subTask("Loading record attributes...");
-		String hql = "SELECT distinct atts from IntelRecordSource s join s.attributes atts WHERE s.conservationArea = :ca";
+		monitor.subTask(Messages.RecordCsvExporter_SubTask1);
+		String hql = "SELECT distinct atts from IntelRecordSource s join s.attributes atts WHERE s.conservationArea = :ca"; //$NON-NLS-1$
 		Query q = session.createQuery(hql);
-		q.setParameter("ca", ca);
+		q.setParameter("ca", ca); //$NON-NLS-1$
 		
 		List<IntelRecordSourceAttribute> attributes = q.list();
 		
 		
 		String[] data = new String[attributes.size() + 7];
 		int i = 0;
-		data[i++] = "Title";
-		data[i++] = "Date Created";
-		data[i++] = "Date Modified";
-		data[i++] = "Created By";
-		data[i++] = "Modified By";
-		data[i++] = "Status";
-		data[i++] = "Source";
+		data[i++] = Messages.RecordCsvExporter_TitleColumn;
+		data[i++] = Messages.RecordCsvExporter_DateCreatedColumn;
+		data[i++] = Messages.RecordCsvExporter_DateModifiedColumn;
+		data[i++] = Messages.RecordCsvExporter_CreatedByColumn;
+		data[i++] = Messages.RecordCsvExporter_ModifiedByColumn;
+		data[i++] = Messages.RecordCsvExporter_StatusColumn;
+		data[i++] = Messages.RecordCsvExporter_Sourcecolumn;
 		for (IntelRecordSourceAttribute ia : attributes){
 			String name = ia.getName();
 			if (name == null){
@@ -97,12 +99,12 @@ public class RecordCsvExporter implements ICsvDataExporter {
 				}
 			}
 			
-			data[i++] = name + "(" + ia.getSource().getName() + ")";
+			data[i++] = name + "(" + ia.getSource().getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		IIntelligenceLabelProvider ll = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class);
 		monitor.worked(1);
-		monitor.subTask("Exporting records...");
+		monitor.subTask(Messages.RecordCsvExporter_SubTask2);
 		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(file.toPath()), delimiter)){
 			writer.writeNext(data);
 			
@@ -117,7 +119,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 				data[i++] = SmartLabelProvider.getShortLabel(r.getCreatedBy());
 				data[i++] = SmartLabelProvider.getShortLabel(r.getLastModifiedBy());
 				data[i++] = ll.getLabel(r.getStatus(), Locale.getDefault());
-				data[i++] = r.getRecordSource() == null ? "" : r.getRecordSource().getName();
+				data[i++] = r.getRecordSource() == null ? "" : r.getRecordSource().getName(); //$NON-NLS-1$
 				
 				for (IntelRecordSourceAttribute ia : attributes){
 					data[i++] = null;
@@ -125,9 +127,9 @@ public class RecordCsvExporter implements ICsvDataExporter {
 						if (v.getAttribute().equals(ia)){
 							if (ia.isListAttribute()){
 								StringBuilder sb = new StringBuilder();
-								sb.append("(");
+								sb.append("("); //$NON-NLS-1$
 								sb.append(v.getAttributeValueAsString(Locale.getDefault(), GeometryUtils.SMART_CRS));
-								sb.append(") ");
+								sb.append(") "); //$NON-NLS-1$
 								
 								for ( IntelRecordAttributeValueList  listItem : v.getAttributeListItems()){
 									if (ia.getAttribute() != null){
@@ -137,7 +139,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 										IntelEntity list = (IntelEntity) session.get(IntelEntity.class, listItem.getId().getElementUuid());
 										sb.append(list.getIdAttributeAsText());
 									}
-									sb.append(",");
+									sb.append(","); //$NON-NLS-1$
 								}
 								sb.deleteCharAt(sb.length() - 1);
 								data[i-1] = sb.toString();
@@ -166,17 +168,17 @@ public class RecordCsvExporter implements ICsvDataExporter {
 			
 			@Override
 			public String getTitle() {
-				return "Export Records";
+				return Messages.RecordCsvExporter_ConfigTitle;
 			}
 			
 			@Override
 			public String getSuccessMessage() {
-				return "Records exported successfully";
+				return Messages.RecordCsvExporter_SuccessMsg;
 			}
 			
 			@Override
 			public String getMessage() {
-				return "Export intelligence records to csv file.";
+				return Messages.RecordCsvExporter_ProgressMsg;
 			}
 			
 			@Override
@@ -196,17 +198,17 @@ public class RecordCsvExporter implements ICsvDataExporter {
 			
 			@Override
 			public String getFailMessage() {
-				return "Failed to export records to file";
+				return Messages.RecordCsvExporter_ErrorMsg;
 			}
 			
 			@Override
 			public String getDefaultFileName() {
-				return "records";
+				return "records"; //$NON-NLS-1$
 			}
 			
 			@Override
 			public String getActionButtonText() {
-				return "records";
+				return "records"; //$NON-NLS-1$
 			}
 			
 			@Override

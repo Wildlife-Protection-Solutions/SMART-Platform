@@ -64,48 +64,48 @@ public enum EntityManager {
 		if (newId == null) return false;
 		
 		IntelAttribute attribute = type.getIdAttribute();
-		String query = "SELECT count(*) FROM IntelEntity e join e.attributes as v where e.conservationArea = :ca and e.entityType = :type and v.id.attribute = :attribute ";
+		String query = "SELECT count(*) FROM IntelEntity e join e.attributes as v where e.conservationArea = :ca and e.entityType = :type and v.id.attribute = :attribute "; //$NON-NLS-1$
 		switch(attribute.getType()){
 			case BOOLEAN:
 			case POSITION:
 				return false;	//don't both checking we will always have duplicates
 			case DATE:
-				query += " and v.stringValue = :test";
+				query += " and v.stringValue = :test"; //$NON-NLS-1$
 				break;
 			case LIST:
-				query += " and v.attributeListItem = :test";
+				query += " and v.attributeListItem = :test"; //$NON-NLS-1$
 				break;
 			case NUMERIC:
-				query += " and v.numberValue = :test";
+				query += " and v.numberValue = :test"; //$NON-NLS-1$
 				break;
 			case TEXT:
-				query += " and v.stringValue = :test "; 
+				query += " and v.stringValue = :test ";  //$NON-NLS-1$
 				break;
 		}
 		
 		if (currentEntity != null){
-			query += " AND e.uuid != :entity ";
+			query += " AND e.uuid != :entity "; //$NON-NLS-1$
 		}
 		Query hql = session.createQuery(query);
-		hql.setParameter("attribute", type.getIdAttribute());
-		hql.setParameter("ca", ca);
-		hql.setParameter("type", type);
+		hql.setParameter("attribute", type.getIdAttribute()); //$NON-NLS-1$
+		hql.setParameter("ca", ca); //$NON-NLS-1$
+		hql.setParameter("type", type); //$NON-NLS-1$
 		switch(attribute.getType()){
 			case BOOLEAN: 
 			case POSITION:
 				return false; // not supported
 			case DATE:
-				hql.setParameter("test", ((java.sql.Date)newId).toString());
+				hql.setParameter("test", ((java.sql.Date)newId).toString()); //$NON-NLS-1$
 				break;
 			case LIST:
 			case NUMERIC:
 			case TEXT:
-				hql.setParameter("test", newId);
+				hql.setParameter("test", newId); //$NON-NLS-1$
 				break;
 				
 		}
 		if (currentEntity != null){
-			hql.setParameter("entity",  currentEntity);
+			hql.setParameter("entity",  currentEntity); //$NON-NLS-1$
 		}
 
 		long cnt = (Long) hql.uniqueResult();
@@ -118,27 +118,27 @@ public enum EntityManager {
 	public void deleteEntity(IntelEntity entity, Session session) throws Exception{
 
 		//delete all record attribute links 
-		Query q = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :entityUuid"); 
-		q.setParameter("entityUuid", entity.getUuid());
+		Query q = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :entityUuid");  //$NON-NLS-1$
+		q.setParameter("entityUuid", entity.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 
 				
 		//delete all entity relationships attributes
-		q = session.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue where id.relationship IN (FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity))"); 
-		q.setParameter("srcentity", entity);
-		q.setParameter("trgentity", entity);
+		q = session.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue where id.relationship IN (FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity))");  //$NON-NLS-1$
+		q.setParameter("srcentity", entity); //$NON-NLS-1$
+		q.setParameter("trgentity", entity); //$NON-NLS-1$
 		q.executeUpdate();
 
 		
 		//delete all entity relationships 
-		q = session.createQuery("DELETE FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity)");
-		q.setParameter("srcentity", entity);
-		q.setParameter("trgentity", entity);
+		q = session.createQuery("DELETE FROM IntelEntityRelationship where (id.sourceEntity = :srcentity or id.targetEntity = :trgentity)"); //$NON-NLS-1$
+		q.setParameter("srcentity", entity); //$NON-NLS-1$
+		q.setParameter("trgentity", entity); //$NON-NLS-1$
 		q.executeUpdate();
 
 		//delete all working set links 
-		q = session.createQuery("DELETE FROM IntelWorkingSetEntity where id.entity = :entity");
-		q.setParameter("entity", entity);
+		q = session.createQuery("DELETE FROM IntelWorkingSetEntity where id.entity = :entity"); //$NON-NLS-1$
+		q.setParameter("entity", entity); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		//delete entity
@@ -167,14 +167,14 @@ public enum EntityManager {
 		List<IntelEntityLocation> alllocations = null;
 		
 		if (dFilter != null && dFilter.length == 2 && dFilter[0] != null && dFilter[1] != null){
-			Query q = session.createQuery("FROM IntelEntityLocation WHERE id.entity.uuid = :uuid and id.location.dateTime between :d1 and :d2");
-			q.setParameter("uuid", entityUuid);
-			q.setParameter("d1", dFilter[0]);
-			q.setParameter("d2", dFilter[1]);
+			Query q = session.createQuery("FROM IntelEntityLocation WHERE id.entity.uuid = :uuid and id.location.dateTime between :d1 and :d2"); //$NON-NLS-1$
+			q.setParameter("uuid", entityUuid); //$NON-NLS-1$
+			q.setParameter("d1", dFilter[0]); //$NON-NLS-1$
+			q.setParameter("d2", dFilter[1]); //$NON-NLS-1$
 			alllocations = q.list();
 		}else{
 			alllocations = session.createCriteria(IntelEntityLocation.class)
-				.add(Restrictions.eq("id.entity.uuid", entityUuid))
+				.add(Restrictions.eq("id.entity.uuid", entityUuid)) //$NON-NLS-1$
 				.list();
 		}
 		return alllocations;
@@ -183,7 +183,7 @@ public enum EntityManager {
 	public Style buildRedStarStyle(){
 		StyleBuilder sb = new StyleBuilder();
 		Color darkRed = new Color(153, 0, 0);
-		Mark mark = sb.createMark("star", sb.createFill(Color.RED),sb.createStroke(darkRed, 1));
+		Mark mark = sb.createMark("star", sb.createFill(Color.RED),sb.createStroke(darkRed, 1)); //$NON-NLS-1$
 		Graphic g = sb.createGraphic(null, mark, null, 1.0, 13.0,0.0);
 		Style style = sb.createStyle(sb.createPointSymbolizer(g));
 		return style;

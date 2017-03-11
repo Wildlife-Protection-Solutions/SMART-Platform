@@ -33,11 +33,10 @@ public class IntelAnalystUserLevel extends SmartUserLevel {
 	
 	public static final IntelAnalystUserLevel INSTANCE = new IntelAnalystUserLevel();
 	
-	private static final String KEY = "INTEL_ANALYST";
+	private static final String KEY = "INTEL_ANALYST"; //$NON-NLS-1$
 	
 	public IntelAnalystUserLevel() {
 		super(KEY);
 	}
-	
 
 }

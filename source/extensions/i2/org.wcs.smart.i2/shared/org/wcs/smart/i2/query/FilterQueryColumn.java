@@ -67,7 +67,7 @@ public class FilterQueryColumn extends AbstractQueryColumn {
 	@Override
 	public String getValue(IResultItem item, Locale l){
 		Object toFormat = getValue(item);
-		if (toFormat == null) return "";
+		if (toFormat == null) return ""; //$NON-NLS-1$
 		if ((Boolean)toFormat){
 			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, Locale.getDefault());
 		}else{

@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.i2.birt.record.location;
 
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelLocation;
 
@@ -39,24 +42,22 @@ import com.vividsolutions.jts.io.ParseException;
 public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaData {
 	
 	public static enum Column{
-		RECORD_UUID("recordlocation:record_uuid", "Record UUID", java.sql.Types.VARCHAR),
-		ID("recordlocation:id", "ID", java.sql.Types.VARCHAR),
-		GEOM("recordlocation:geom", "Geometry", java.sql.Types.JAVA_OBJECT),
-		DATE("recordlocation:date", "Date", java.sql.Types.DATE),
-		COMMENT("recordlocation:comment", "Comment", java.sql.Types.VARCHAR),
-		OBSERVATION("recordlocation:observation", "Observation", java.sql.Types.VARCHAR);
+		RECORD_UUID("recordlocation:record_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ID("recordlocation:id", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		GEOM("recordlocation:geom", java.sql.Types.JAVA_OBJECT), //$NON-NLS-1$
+		DATE("recordlocation:date", java.sql.Types.DATE), //$NON-NLS-1$
+		COMMENT("recordlocation:comment", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		OBSERVATION("recordlocation:observation", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		String id;
-		String name;
 		int type;
 		
-		Column(String id, String name, int type){
+		Column(String id, int type){
 			this.id = id;
-			this.name = name;
 			this.type = type;
 		}
-		public String getColumnName(){
-			return this.name;
+		public String getColumnName(Locale l){
+			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
 		public String getId(){
 			return this.id;
@@ -74,12 +75,14 @@ public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaDat
 			}
 			if (this == DATE) return location.getDateTime();
 			if (this == COMMENT) return location.getComment();
-			if (this == OBSERVATION) return "TODO:";
+			if (this == OBSERVATION) return "TODO:"; //$NON-NLS-1$
 			return null;
 		}
 	}
 	
-	public RecordLocationDatasetResultSetMetadata(){
+	private Locale l;
+	public RecordLocationDatasetResultSetMetadata(Locale l){
+		this.l = l;
 	}
 	
 	/**
@@ -104,7 +107,7 @@ public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaDat
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].getColumnName(l);
 	}
 
 	/**

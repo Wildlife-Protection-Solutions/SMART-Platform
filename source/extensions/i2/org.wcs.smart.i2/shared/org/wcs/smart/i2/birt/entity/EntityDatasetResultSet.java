@@ -85,16 +85,16 @@ public class EntityDatasetResultSet implements IResultSet {
 		this.type = type;
 		
 		Criteria c = connection.getSession().createCriteria(IntelEntity.class)
-			.add(Restrictions.eq("entityType", type));
+			.add(Restrictions.eq("entityType", type)); //$NON-NLS-1$
 		Criteria c2 = connection.getSession().createCriteria(IntelEntity.class)
-				.add(Restrictions.eq("entityType", type));
+				.add(Restrictions.eq("entityType", type)); //$NON-NLS-1$
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		if (index > 0){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
-				c = c.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(entity)));
-				c2 = c2.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(entity)));
+				c = c.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(entity))); //$NON-NLS-1$
+				c2 = c2.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(entity))); //$NON-NLS-1$
 			}
 		}
 			
@@ -165,7 +165,7 @@ public class EntityDatasetResultSet implements IResultSet {
 	 */
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return "";
+		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}
 
@@ -182,7 +182,7 @@ public class EntityDatasetResultSet implements IResultSet {
 			try {
 				i.getPrimaryAttachment().computeFileLocation(connection.getSession());
 			} catch (Exception e) {
-				Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e); //$NON-NLS-1$
+				Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e); 
 			}
 		}
 		try {
@@ -201,7 +201,7 @@ public class EntityDatasetResultSet implements IResultSet {
 				return EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getValue(i, connection.getCurrentLocale());
 			}
 		} catch (IOException e) {
-			Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.SEVERE, e.getMessage(), e); //$NON-NLS-1$
+			Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.SEVERE, e.getMessage(), e); 
 			return null;	
 		}
 	}

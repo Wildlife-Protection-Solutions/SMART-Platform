@@ -41,6 +41,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
@@ -78,7 +79,7 @@ public class ReportAddon {
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
-						monitor.beginTask("Updating Entity Templates", values.size() + 1);
+						monitor.beginTask(Messages.ReportAddon_ProgressMsg, values.size() + 1);
 						monitor.worked(1);
 						for (IntelEntityType value : values){
 							monitor.subTask(value.getName());

@@ -54,6 +54,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -69,13 +70,10 @@ import au.com.bytecode.opencsv.CSVReader;
  *
  */
 public class AttributeMappingWizardPage extends WizardPage implements ISelectionChangedListener{
-	
 
-	private static final String Y_ATTRIBUTE_DATA_KEY = "Y_ATTRIBUTE";
+	private static final String ATTRIBUTE_DATA_KEY = "ATTRIBUTE"; //$NON-NLS-1$
 
-	private static final String ATTRIBUTE_DATA_KEY = "ATTRIBUTE";
-
-	public static final String FILE_PAGE = "org.wcs.smart.i2.ui.record.importer.mapping";
+	public static final String FILE_PAGE = "org.wcs.smart.i2.ui.record.importer.mapping"; //$NON-NLS-1$
 		
 	private Composite mappingPanel;
 	private ScrolledComposite sc ;
@@ -100,7 +98,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 				}
 			}
 		}
-		setErrorMessage("A mapping for Record Title is required");
+		setErrorMessage(Messages.AttributeMappingWizardPage1_TitleMappingRequired);
 		return false;
 	}
 
@@ -115,8 +113,8 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 		
 		sc.setContent(mappingPanel);
 		sc.setMinSize(mappingPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		setTitle("Column Mapping");
-		setMessage("Map columns to record fields");
+		setTitle(Messages.AttributeMappingWizardPage1_Title);
+		setMessage(Messages.AttributeMappingWizardPage1_Message);
 		setControl(sc);
 	}
 	
@@ -145,8 +143,9 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 		}
 	}
 	
-	Job j = new Job("load attribute info"){
+	Job j = new Job(Messages.AttributeMappingWizardPage1_loadingAttributeJobName){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (lastType != null && lastFile != null){
@@ -160,9 +159,9 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 			
 			Session s = HibernateManager.openSession();
 			try{
-				List<IntelRecordSourceAttribute> atts = s.createCriteria(IntelRecordSourceAttribute.class, "rs")
-						.createAlias("rs.source", "src")
-						.add(Restrictions.eq("src.conservationArea", SmartDB.getCurrentConservationArea()))
+				List<IntelRecordSourceAttribute> atts = s.createCriteria(IntelRecordSourceAttribute.class, "rs") //$NON-NLS-1$
+						.createAlias("rs.source", "src") //$NON-NLS-1$ //$NON-NLS-2$
+						.add(Restrictions.eq("src.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 						.list();
 				recordattributes.addAll(atts);
 			}finally{
@@ -176,7 +175,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 			try(CSVReader reader = new CSVReader(Files.newBufferedReader(file))){
 				headers = reader.readNext();
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to read file ''{0}''. {1}", file.toString(), ex.getMessage()), ex);
+				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.AttributeMappingWizardPage1_FileReadError, file.toString(), ex.getMessage()), ex);
 				return Status.OK_STATUS;
 			}
 			final String[] fheaders = headers;
@@ -194,7 +193,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 						if (x.getAttribute() != null) name = x.getAttribute().getName();
 						if (x.getEntityType() != null) name = x.getEntityType().getName();
 					}
-					x.setName(name + " [X Value]");
+					x.setName(name + Messages.AttributeMappingWizardPage1_XpositionValue);
 					
 					IntelAttribute y = new IntelAttribute();
 					y.setKeyId(x.getAttribute().getKeyId());
@@ -204,7 +203,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 					src.setAttribute(y);
 					src.setSource(x.getSource());
 					src.setName(x.getName());
-					src.setName(name + " [Y Value]");
+					src.setName(name + Messages.AttributeMappingWizardPage1_YPositionValue);
 					columnOptions.add(src);
 				}
 			}
@@ -229,14 +228,14 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 			});
 			
 			
-			columnOptions.add(0, "");
-			columnOptions.add(1, "----------------- Record Attributes ------------------");
+			columnOptions.add(0, ""); //$NON-NLS-1$
+			columnOptions.add(1, Messages.AttributeMappingWizardPage1_RecordAttributes);
 			columnOptions.add(2, RecordImportConfig.Column.TITLE);
 			columnOptions.add(3, RecordImportConfig.Column.SOURCE);
 			columnOptions.add(4, RecordImportConfig.Column.NARRATIVE);
 			columnOptions.add(5, RecordImportConfig.Column.SCRATCHPAD);
-			columnOptions.add(6, "--------------------- Attributes ---------------------");
-			columnOptions.add(7, "------------- Source Specific Attributes -------------");
+			columnOptions.add(6, Messages.AttributeMappingWizardPage1_IntelAttribute);
+			columnOptions.add(7, Messages.AttributeMappingWizardPage1_SourceSpecificAttributes);
 			columnOptions.addAll(7, attributes);
 			
 			Display.getDefault().syncExec(()->{
@@ -249,7 +248,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 	
 					Label l = new Label(mappingPanel, SWT.NONE);
 					l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-					l.setText(fheaders[i] + ":");
+					l.setText(fheaders[i] + ":"); //$NON-NLS-1$
 					
 					ComboViewer viewer = new ComboViewer(mappingPanel, SWT.READ_ONLY | SWT.DROP_DOWN);
 					viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -273,10 +272,10 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 										if (name == null){
 											name = e.getEntityType().getName();
 										}
-										name += " (" + e.getEntityType().getName() + ")";
+										name += " (" + e.getEntityType().getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 									}
 									
-									return e.getSource().getName() + ": " + name;
+									return e.getSource().getName() + ": " + name; //$NON-NLS-1$
 								}
 								return super.getText(element);
 							}

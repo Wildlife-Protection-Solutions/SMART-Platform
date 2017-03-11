@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Smart query data source factor.  
@@ -42,7 +43,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	/**
 	 * query uuid parameter
 	 */
-	public static final Param QUERY_UUID = new Param(QueryServiceExtension.QUERY_UUID_KEY, UUID.class, "Query UUID", true);  
+	public static final Param QUERY_UUID = new Param(QueryServiceExtension.QUERY_UUID_KEY, UUID.class, Messages.QueryDataSourceFactory_ParamName, true);  
  
 	  
 	/**
@@ -61,7 +62,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return "Intelligence Query Data Source";
+		return Messages.QueryDataSourceFactory_Description;
 	}
 
 	/**
@@ -69,7 +70,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return "Intelligence Query Data Source";
+		return Messages.QueryDataSourceFactory_DisplayName;
 	}
 
 	/**
@@ -112,7 +113,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, Serializable> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException("Read Only");
+		throw new UnsupportedOperationException("Read Only"); //$NON-NLS-1$
 	}
 
 }

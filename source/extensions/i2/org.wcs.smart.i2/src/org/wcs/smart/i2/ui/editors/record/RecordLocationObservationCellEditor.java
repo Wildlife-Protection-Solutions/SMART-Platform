@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.editors.record;
 import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.ObservationDialog;
 
@@ -84,7 +85,7 @@ public class RecordLocationObservationCellEditor extends DialogCellEditor {
 	protected void updateContents(Object value) {
 		if (location == null) return;
 		if (getDefaultLabel() != null){
-			getDefaultLabel().setText( "Edit Observations...");
+			getDefaultLabel().setText( Messages.RecordLocationObservationCellEditor_CellLabel);
 		}
 	}
 

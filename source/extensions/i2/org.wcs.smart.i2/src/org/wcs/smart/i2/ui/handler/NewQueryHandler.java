@@ -25,6 +25,7 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 
@@ -44,7 +45,7 @@ public class NewQueryHandler {
 		ContextInjectionFactory.invoke(new ShowPerspectiveHandler(), Execute.class, kid);
 
 		//open editor
-		QueryEditorInput input = new QueryEditorInput("New Query", null);
+		QueryEditorInput input = new QueryEditorInput(Messages.NewQueryHandler_DefaultQueryName, null);
 		(new OpenQueryHandler()).openQuery(input, true);
 	}
 	

@@ -49,6 +49,7 @@ import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.export.IQueryExporter;
 import org.wcs.smart.i2.query.export.IQueryExporter.ExportOption;
 import org.wcs.smart.ui.ProjectionLabelProvider;
@@ -76,7 +77,7 @@ public class QueryFormatOptionPage extends WizardPage {
 	 * Creates a new query wizard page.
 	 */
 	protected QueryFormatOptionPage() {
-		super("Export_Options");
+		super("Export_Options"); //$NON-NLS-1$
 	}
 
 	/**
@@ -130,7 +131,7 @@ public class QueryFormatOptionPage extends WizardPage {
 		main.setLayout(new GridLayout(3, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Location:");
+		lbl.setText(Messages.QueryFormatOptionPage_LocationTitle);
 		
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -145,7 +146,7 @@ public class QueryFormatOptionPage extends WizardPage {
 		});		
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("...");
+		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -155,7 +156,7 @@ public class QueryFormatOptionPage extends WizardPage {
 				FileDialog fd = new FileDialog(QueryFormatOptionPage.this.getShell(), SWT.SAVE);
 					
 				String[] extensions = new String[]{"*." + ext, "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
-				String[] names = new String[]{name + " (*." + ext + ")","All Files"}; //$NON-NLS-1$ //$NON-NLS-2$
+				String[] names = new String[]{name + " (*." + ext + ")",Messages.QueryFormatOptionPage_AllFileDialogOp}; //$NON-NLS-1$ //$NON-NLS-2$
 					
 				fd.setFilterExtensions(extensions);
 				fd.setFilterNames(names);
@@ -172,16 +173,16 @@ public class QueryFormatOptionPage extends WizardPage {
 		
 
 		
-		setTitle(MessageFormat.format("Export Options: {0}", ((ExportQueryWizard)getWizard()).getQuery().getName())); //$NON-NLS-1$
-		setMessage("Select export options");
+		setTitle(MessageFormat.format(Messages.QueryFormatOptionPage_Title, ((ExportQueryWizard)getWizard()).getQuery().getName())); 
+		setMessage(Messages.QueryFormatOptionPage_Message);
 		setPageComplete(false);
 		setControl(main);
 	}
 
 	private void createDelimiterOption(){
 		lblDelimiter = new Label(main, SWT.NONE);
-		lblDelimiter.setText("Delimiter");
-		lblDelimiter.setToolTipText("select the delimiter for the export file");
+		lblDelimiter.setText(Messages.QueryFormatOptionPage_DelimiterOp);
+		lblDelimiter.setToolTipText(Messages.QueryFormatOptionPage_DelimiterTooltip);
 		
 		cmbDelimiter = new DelimiterCombo(main,  SWT.DROP_DOWN);
 	
@@ -193,8 +194,8 @@ public class QueryFormatOptionPage extends WizardPage {
 		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
 		
 		lblProjection = new Label(main, SWT.NONE);
-		lblProjection.setText("Projection");
-		lblProjection.setToolTipText("select the projection for the export file");
+		lblProjection.setText(Messages.QueryFormatOptionPage_ProjectionOp);
+		lblProjection.setToolTipText(Messages.QueryFormatOptionPage_ProjectionTooltip);
 		
 		cmbProjection = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbProjection.setContentProvider(ArrayContentProvider.getInstance());

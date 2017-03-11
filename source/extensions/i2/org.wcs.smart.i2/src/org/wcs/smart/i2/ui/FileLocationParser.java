@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.gpx.xml.WptType;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.dialogs.WptTypeSelectionDialog;
 import org.wcs.smart.map.GeometryFactoryProvider;
@@ -58,6 +59,9 @@ public enum FileLocationParser {
 
 	INSTANCE;
 	
+	private static final String GPX_EXTENSION = ".gpx"; //$NON-NLS-1$
+
+
 	/**
 	 * Attempts to parse locations from a files.  Checks both gpx and image formats.
 	 * @param f
@@ -79,14 +83,14 @@ public enum FileLocationParser {
 	 */
 	public List<IntelLocation> parseFromGpx(File gpxFile, IProgressMonitor monitor){
 		if (monitor == null) monitor = new NullProgressMonitor();
-		if (!gpxFile.getName().toLowerCase().endsWith(".gpx")) return Collections.emptyList();
+		if (!gpxFile.getName().toLowerCase().endsWith(GPX_EXTENSION)) return Collections.emptyList();
 		List<IntelLocation> locations = new ArrayList<IntelLocation>();
 		try{
 			List<WptType> waypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(gpxFile.getAbsolutePath()), monitor);
 			
 			List<WptType> selectedPoints = new ArrayList<WptType>();
 			Display.getDefault().syncExec(()->{
-				WptTypeSelectionDialog dialog = new WptTypeSelectionDialog(Display.getDefault().getActiveShell(), waypoints, MessageFormat.format("Import locations from gpx file: {0}", gpxFile.getName()));
+				WptTypeSelectionDialog dialog = new WptTypeSelectionDialog(Display.getDefault().getActiveShell(), waypoints, MessageFormat.format(Messages.FileLocationParser_OptionDialogMsg, gpxFile.getName()));
 				if (dialog.open() == Window.OK){
 					selectedPoints.addAll(dialog.getWaypoints());
 				}
@@ -99,7 +103,7 @@ public enum FileLocationParser {
 				l.setGeometry(pnt);
 				l.setDateTime(dt);
 				l.setId(wp.getName());
-				if (wp.getCmt() != null && !"null".equals(wp.getCmt().toLowerCase())){
+				if (wp.getCmt() != null && !"null".equals(wp.getCmt().toLowerCase())){ //$NON-NLS-1$
 					l.setComment(wp.getCmt());
 				}
 				locations.add(l);

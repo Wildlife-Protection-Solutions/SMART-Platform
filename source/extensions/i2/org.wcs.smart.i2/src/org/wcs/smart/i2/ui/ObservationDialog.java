@@ -73,6 +73,7 @@ import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
@@ -134,7 +135,7 @@ public class ObservationDialog extends Dialog {
 	}
 
 	private void loadDataModel(){
-		Job j = new Job("loading data model") {
+		Job j = new Job(Messages.ObservationDialog_LoadDmJobName) {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -150,7 +151,7 @@ public class ObservationDialog extends Dialog {
 						toVisit.addAll(c.getActiveChildren());
 					}
 				}catch (Exception ex){
-					Intelligence2PlugIn.displayLog("Error loading data model. " + ex.getMessage(), ex);
+					Intelligence2PlugIn.displayLog(Messages.ObservationDialog_DmLoadError + ex.getMessage(), ex);
 					return Status.OK_STATUS;
 				}finally{
 					s.close();
@@ -173,7 +174,7 @@ public class ObservationDialog extends Dialog {
 	}
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		getShell().setText("Location Observations");
+		getShell().setText(Messages.ObservationDialog_ShellTitle);
 		
 		SashForm main = new SashForm(parent, SWT.VERTICAL);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -210,7 +211,7 @@ public class ObservationDialog extends Dialog {
 		attributeComposite.setBackground(attributeComposite.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		Label l = new Label(attributeComposite, SWT.WRAP);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		l.setText("To create a new observation select a category on the left.  To edit an exisitng observation select the observation then the edit button");
+		l.setText(Messages.ObservationDialog_ObservationMsg);
 		((GridData)l.getLayoutData()).widthHint = 150;
 		l.setBackground(attributeComposite.getBackground());
 		
@@ -221,12 +222,12 @@ public class ObservationDialog extends Dialog {
 		observationTable = new TableViewer(lower, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		observationTable.setContentProvider(ArrayContentProvider.getInstance());
 		observationTable.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		observationTable.setInput("Observation here");
+		observationTable.setInput(Messages.ObservationDialog_ObsTableMsg);
 		observationTable.getTable().setHeaderVisible(true);
 		observationTable.getTable().setLinesVisible(true);
 		
 		TableViewerColumn categoryColumn = new TableViewerColumn(observationTable, SWT.NONE);
-		categoryColumn.getColumn().setText("Category");
+		categoryColumn.getColumn().setText(Messages.ObservationDialog_CategoryLabel);
 		categoryColumn.getColumn().setWidth(250);
 		categoryColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -239,7 +240,7 @@ public class ObservationDialog extends Dialog {
 		});
 		
 		TableViewerColumn attributeColumn = new TableViewerColumn(observationTable, SWT.NONE);
-		attributeColumn.getColumn().setText("Attributes");
+		attributeColumn.getColumn().setText(Messages.ObservationDialog_AttributeLabel);
 		attributeColumn.getColumn().setWidth(800);
 		attributeColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -249,9 +250,9 @@ public class ObservationDialog extends Dialog {
 					IntelObservation oo = (IntelObservation)element;
 					for (IntelObservationAttribute aa : oo.getObservationAttributes()){
 						sb.append(aa.getAttribute().getName());
-						sb.append(": ");
+						sb.append(": "); //$NON-NLS-1$
 						sb.append(aa.getAttributeValueAsString(Locale.getDefault()));
-						sb.append(" | ");
+						sb.append(" | "); //$NON-NLS-1$
 					}
 					if (sb.length() > 0){
 						sb = sb.delete(sb.length() - 3, sb.length());
@@ -265,7 +266,7 @@ public class ObservationDialog extends Dialog {
 		Menu observationMnu = new Menu(observationTable.getControl());
 		observationTable.getTable().setMenu(observationMnu);
 		final MenuItem editItem = new MenuItem(observationMnu, SWT.PUSH);
-		editItem.setText("Edit");
+		editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -275,7 +276,7 @@ public class ObservationDialog extends Dialog {
 		});
 		
 		final MenuItem deleteItem = new MenuItem(observationMnu, SWT.PUSH);
-		deleteItem.setText("Delete");
+		deleteItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		deleteItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -299,7 +300,7 @@ public class ObservationDialog extends Dialog {
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
 		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
-		btnEdit.setToolTipText("edit selected observation");
+		btnEdit.setToolTipText(Messages.ObservationDialog_editTooltip);
 		btnEdit.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 		btnEdit.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -309,7 +310,7 @@ public class ObservationDialog extends Dialog {
 		});
 		
 		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
-		btnDelete.setToolTipText("delete selected observation");
+		btnDelete.setToolTipText(Messages.ObservationDialog_deleteTooltip);
 		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -342,7 +343,7 @@ public class ObservationDialog extends Dialog {
 				 }
 			 }
 			 
-			 btnAdd.setText("Update Observation");
+			 btnAdd.setText(Messages.ObservationDialog_UpdateButtonText);
 			 observationTable.refresh();
 		 }
 	}
@@ -389,7 +390,7 @@ public class ObservationDialog extends Dialog {
 					}
 				}
 				if (ismodified){
-					if (MessageDialog.openQuestion(getShell(), "Save Changes", "Create / update observation?")){
+					if (MessageDialog.openQuestion(getShell(), Messages.ObservationDialog_SaveTitle, Messages.ObservationDialog_SaveMessage)){
 						createObservation();
 					}
 				}
@@ -465,7 +466,7 @@ public class ObservationDialog extends Dialog {
 		
 		btnAdd = new Button(attributeComposite, SWT.NONE);
 		btnAdd.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		btnAdd.setText("Create Observation");
+		btnAdd.setText(Messages.ObservationDialog_CreateButtonText);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -489,7 +490,7 @@ public class ObservationDialog extends Dialog {
 		for (IAttributeField<?> f : fields){
 			String err = f.validate();
 			if (err != null){
-				MessageDialog.openWarning(getShell(), "Error", MessageFormat.format("Cannot create observation.  Invalid value for attribute ''{0}''. {1}", f.getAttribute().getName(), err));
+				MessageDialog.openWarning(getShell(), Messages.ObservationDialog_ErrorDialogTitle, MessageFormat.format(Messages.ObservationDialog_CreateErrorMsg, f.getAttribute().getName(), err));
 				return;
 			}
 		}
@@ -542,7 +543,7 @@ public class ObservationDialog extends Dialog {
 	@Override
 	public void cancelPressed(){
 		if (hasChanges){
-			if (MessageDialog.openQuestion(getShell(), "Save", "Observations have been modified.  Save Changes?")){
+			if (MessageDialog.openQuestion(getShell(), Messages.ObservationDialog_SavedialogTitle, Messages.ObservationDialog_ConfirmSave)){
 				okPressed();
 				return;
 			}

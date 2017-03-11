@@ -81,7 +81,7 @@ public class AttributeTreeDropItem extends DropItem {
 	/*
 	 * Job to load the attribute list options
 	 */
-	private Job loadItemsJobs = new Job("loading attribute tree"){
+	private Job loadItemsJobs = new Job("loading attribute tree"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

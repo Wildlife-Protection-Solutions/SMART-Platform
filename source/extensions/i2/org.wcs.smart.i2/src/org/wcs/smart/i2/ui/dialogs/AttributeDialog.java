@@ -61,6 +61,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -121,7 +122,7 @@ public class AttributeDialog extends TitleAreaDialog {
 				if(!attribute.getAttributeList().contains(i)){
 					//delete all reference to attribute list item
 					List<IntelEntityAttributeValue> items = s.createCriteria(IntelEntityAttributeValue.class)
-							.add(Restrictions.eq("attributeListItem", i))
+							.add(Restrictions.eq("attributeListItem", i)) //$NON-NLS-1$
 							.list();
 					for (IntelEntityAttributeValue item : items){
 						modifiedEntities.add(item.getEntity());
@@ -129,7 +130,7 @@ public class AttributeDialog extends TitleAreaDialog {
 					}
 					
 					List<IntelEntityRelationshipAttributeValue> items2 = s.createCriteria(IntelEntityRelationshipAttributeValue.class)
-							.add(Restrictions.eq("attributeListItem", i))
+							.add(Restrictions.eq("attributeListItem", i)) //$NON-NLS-1$
 							.list();
 					for (IntelEntityRelationshipAttributeValue item : items2){
 						modifiedEntities.add(item.getRelationship().getSourceEntity());
@@ -137,8 +138,8 @@ public class AttributeDialog extends TitleAreaDialog {
 						s.delete(item);
 					}
 					
-					Query q = s.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid");
-					q.setParameter("uuid", i.getUuid());
+					Query q = s.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid"); //$NON-NLS-1$
+					q.setParameter("uuid", i.getUuid()); //$NON-NLS-1$
 					q.executeUpdate();
 				}
 			}
@@ -152,7 +153,7 @@ public class AttributeDialog extends TitleAreaDialog {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Unable to save changes: " +ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.AttributeDialog_SaveError +ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -198,7 +199,7 @@ public class AttributeDialog extends TitleAreaDialog {
 		});
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Type:");
+		l.setText(Messages.AttributeDialog_TypeLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		cmbType = new ComboViewer(parent);
 		cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -238,9 +239,9 @@ public class AttributeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		setTitle("Intelligence Attribute");
-		getShell().setText("Intelligence Attribute");
-		setMessage("Create or edit intelligence attributes.");
+		setTitle(Messages.AttributeDialog_Title);
+		getShell().setText(Messages.AttributeDialog_ShellTitle);
+		setMessage(Messages.AttributeDialog_Message);
 		
 		return parent;
 	}
@@ -294,7 +295,7 @@ public class AttributeDialog extends TitleAreaDialog {
 			}
 		});
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Uanble to load attribute: {0}", ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.AttributeDialog_LoadError, ex.getMessage()), ex);
 		}
 		
 		

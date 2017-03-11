@@ -57,15 +57,15 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 			if (item.getCreatedBy() == null){
     			item.setCreatedBy(SmartDB.getCurrentEmployee());
     			item.setDateCreated(now);
-    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item);
-                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item);
+    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
+                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
             }
 			
 			item.setLastModifiedBy(SmartDB.getCurrentEmployee());
 			item.setDateModified(now);
 			
-			 setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item);
-             setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateModified", item.getDateModified(), item);
+			 setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
+             setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
 		}
 		return false;
 	}
@@ -80,14 +80,14 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 			if (item.getCreatedBy() == null){
     			item.setCreatedBy(SmartDB.getCurrentEmployee());
     			item.setDateCreated(now);
-    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item);
-                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item);
+    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
+                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
             }
 			
 			item.setLastModifiedBy(SmartDB.getCurrentEmployee());
 			item.setDateModified(now);
-			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item);
-            setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateModified", item.getDateModified(), item);
+			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
+            setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
 
             
 			 
@@ -100,7 +100,7 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 		if (index >= 0) {
 			currentState[index] = value;
 		} else {
-			Logger.getLogger(IntelHibernateListener.class.getName()).log(Level.INFO, "Field '" + propertyToSet+ "' not found on entity '" + entity.getClass().getName() + "'.");
+			Logger.getLogger(IntelHibernateListener.class.getName()).log(Level.INFO, "Field '" + propertyToSet+ "' not found on entity '" + entity.getClass().getName() + "'."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 }

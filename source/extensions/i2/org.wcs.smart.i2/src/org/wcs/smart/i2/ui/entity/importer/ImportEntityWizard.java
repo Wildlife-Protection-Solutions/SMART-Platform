@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.entity.importer.EntityImportConfig;
 import org.wcs.smart.i2.entity.importer.EntityImportEngine;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Import entity wizard
@@ -61,7 +62,7 @@ public class ImportEntityWizard extends Wizard implements IPageChangingListener 
 	public ImportEntityWizard(){
 		super();
 		
-		setWindowTitle("Import Entities");
+		setWindowTitle(Messages.ImportEntityWizard_Title);
 		super.setNeedsProgressMonitor(true);
 		config = new EntityImportConfig();
 	}
@@ -82,23 +83,23 @@ public class ImportEntityWizard extends Wizard implements IPageChangingListener 
 							r[0] = false;
 							if (monitor.isCanceled()){
 								Display.getDefault().syncExec(()->{
-									MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Import Entities", "User cancelled.");
+									MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportEntityWizard_InfoDialogTitle, Messages.ImportEntityWizard_CancelledMsg);
 								});
 							}
 						}else{
 							r[0] = true;
 							Display.getDefault().syncExec(()->{
-								MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Import Entities", MessageFormat.format("Imported {0} entities.", numEntities));
+								MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportEntityWizard_ImportDialogTitle, MessageFormat.format(Messages.ImportEntityWizard_SuccessMsg, numEntities));
 							});
 						}
 					}catch (Exception ex){
-						Intelligence2PlugIn.displayLog(MessageFormat.format("Error importing entities: {0}",  ex.getMessage()), ex);
+						Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.ImportEntityWizard_ErrorMsg,  ex.getMessage()), ex);
 						r[0] = false;
 					}
 				}
 			});
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Error importing entities: {0}",  ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.ImportEntityWizard_ErrorMsg,  ex.getMessage()), ex);
 			r[0] = false;
 		}
 		

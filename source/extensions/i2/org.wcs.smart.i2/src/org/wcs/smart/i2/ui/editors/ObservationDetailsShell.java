@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.ObservationTreeViewer;
 import org.wcs.smart.i2.ui.SmartShellDialog;
@@ -92,7 +93,7 @@ public class ObservationDetailsShell extends SmartShellDialog{
 			
 		}else{
 			Label l = new Label(owner, SWT.NONE);
-			l.setText("(None)");
+			l.setText(Messages.ObservationDetailsShell_NoneLabel);
 		}
 		
 		//configure background color

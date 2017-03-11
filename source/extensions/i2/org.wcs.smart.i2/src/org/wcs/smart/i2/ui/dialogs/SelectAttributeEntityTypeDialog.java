@@ -59,6 +59,7 @@ import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -238,7 +239,7 @@ public class SelectAttributeEntityTypeDialog extends TitleAreaDialog{
 			}
 		});
 		Button btnNew = new Button(parent, SWT.PUSH);
-		btnNew.setText("Create New Attribute");
+		btnNew.setText(Messages.SelectAttributeEntityTypeDialog_NewAttributeBtn);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -249,8 +250,8 @@ public class SelectAttributeEntityTypeDialog extends TitleAreaDialog{
 				}
 			}
 		});
-		setTitle("Select Attributes");
-		getShell().setText("Select Attributes");
+		setTitle(Messages.SelectAttributeEntityTypeDialog_Title);
+		getShell().setText(Messages.SelectAttributeEntityTypeDialog_Title);
 		setMessage(message);
 		
 		loadOptions.setSystem(true);

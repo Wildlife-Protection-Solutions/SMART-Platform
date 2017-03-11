@@ -57,9 +57,9 @@ public class QueryContentFeatureSource extends ContentFeatureSource {
 		
 		String geomType = IQueryColumn.Type.GEOMETRY.getFeatureType();
 		if (entry.getName().equals(QueryDataSource.POINT_TYPE)){
-			geomType = "Point";
+			geomType = "Point"; //$NON-NLS-1$
 		}else if (entry.getName().equals(QueryDataSource.POLYGON_TYPE)){
-			geomType = "Polygon";
+			geomType = "Polygon"; //$NON-NLS-1$
 		}
 		try{
 			return FeatureGenerator.generateFeatureType(geomType, entry.getName(), source.getResultSet().getQueryColumns());

@@ -25,6 +25,9 @@ import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 
 /**
  * Entity dataset metadata
@@ -33,9 +36,9 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
  */
 public class EntityDatasetMetadata implements IDataSetMetaData {
 
-	private IConnection connection;
+	protected AbstractIntelBirtConnection connection;
 	
-	public EntityDatasetMetadata(IConnection connection){
+	public EntityDatasetMetadata(AbstractIntelBirtConnection connection){
 		this.connection = connection;
 	}
 	
@@ -62,7 +65,7 @@ public class EntityDatasetMetadata implements IDataSetMetaData {
 
 	@Override
 	public String getDataSourceProductName() throws OdaException {
-		return "Intelligence Entity Types";
+		return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(getClass(), connection.getCurrentLocale());
 	}
 
 	@Override

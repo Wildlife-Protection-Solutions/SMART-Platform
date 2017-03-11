@@ -348,7 +348,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 				
 				Object value = v.getAttributeValue();
 				IntelAttribute attribute = v.getAttribute();
-				if (value == null) return "";
+				if (value == null) return ""; //$NON-NLS-1$
 				if (value instanceof String){
 					return (String) value;
 				}else if (value instanceof Number){
@@ -369,7 +369,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 				}
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	@Transient

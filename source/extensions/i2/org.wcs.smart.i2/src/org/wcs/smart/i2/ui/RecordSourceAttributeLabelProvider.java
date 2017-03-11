@@ -27,6 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 
@@ -46,9 +47,6 @@ public class RecordSourceAttributeLabelProvider extends ColumnLabelProvider impl
 	private AttributeLabelProvider attributeProvider = new AttributeLabelProvider();
 	private EntityTypeLabelProvider etProvider = new EntityTypeLabelProvider();
 	
-//	private Color entityColor;
-//	private Color attributeColor;
-	
 	private Column column;
 	
 	public RecordSourceAttributeLabelProvider(){
@@ -57,8 +55,6 @@ public class RecordSourceAttributeLabelProvider extends ColumnLabelProvider impl
 	
 	public RecordSourceAttributeLabelProvider(Column column){
 		this.column = column;
-//		attributeColor = new Color(Display.getDefault(), 234, 238, 246);
-//		entityColor = new Color(Display.getDefault(), 254, 250, 226);
 	}
 	
 	public String getText(Object element){
@@ -68,10 +64,10 @@ public class RecordSourceAttributeLabelProvider extends ColumnLabelProvider impl
 				if ((a.getAttribute() != null && a.getAttribute().getType() == AttributeType.LIST) || a.getEntityType() != null){
 					if (a.getIsMultiple() != null && a.getIsMultiple()){
 						//true
-						return "Yes";
+						return Messages.RecordSourceAttributeLabelProvider_YesLabel;
 					}else{
 						//false
-						return "No";
+						return Messages.RecordSourceAttributeLabelProvider_NoLabel;
 					}
 				}else{
 					return null;
@@ -118,21 +114,11 @@ public class RecordSourceAttributeLabelProvider extends ColumnLabelProvider impl
 	
 	@Override
 	public Color getBackground(Object element) {
-//		if (element instanceof IntelRecordSourceAttribute){
-//			IntelRecordSourceAttribute a = (IntelRecordSourceAttribute)element;
-//			if (a.getAttribute() != null){
-//				return attributeColor;
-//			}else if (a.getEntityType() != null){
-//				return entityColor;
-//			}
-//		}
 		return null;
 	}
 	
 	@Override
 	public void dispose(){
-//		if (entityColor != null) entityColor.dispose();
-//		if (attributeColor != null) attributeColor.dispose();
 		attributeProvider.dispose();
 		etProvider.dispose();
 		super.dispose();

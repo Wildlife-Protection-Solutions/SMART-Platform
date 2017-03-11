@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * A header composite that contains a
@@ -109,8 +110,8 @@ public class IntelQueryNameLabel extends Composite implements Listener{
 	
 	private boolean validateName(String name){
 		if (name.length() > MAX_NAME_LENGTH){
-			MessageDialog.openError(getShell(), "Error",
-					MessageFormat.format("Query name must be fewer than {0} characters.", new Object[]{MAX_NAME_LENGTH}));
+			MessageDialog.openError(getShell(), Messages.IntelQueryNameLabel_ErrorTitle,
+					MessageFormat.format(Messages.IntelQueryNameLabel_ErrorMsg, new Object[]{MAX_NAME_LENGTH}));
 			return false;
 		}
 		return true;

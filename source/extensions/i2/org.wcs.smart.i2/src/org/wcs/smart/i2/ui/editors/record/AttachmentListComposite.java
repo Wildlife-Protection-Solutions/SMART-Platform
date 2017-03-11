@@ -49,6 +49,7 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -140,7 +141,7 @@ public class AttachmentListComposite extends Composite{
 			private void createMenu(){		
 				if (mnuOpenThumbnail == null){
 					mnuOpenThumbnail = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuOpenThumbnail.setText("Open Image");
+					mnuOpenThumbnail.setText(Messages.AttachmentListComposite_openMenuItem);
 					mnuOpenThumbnail.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
@@ -153,7 +154,7 @@ public class AttachmentListComposite extends Composite{
 				}
 				if (mnuOpen == null){
 					mnuOpen = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuOpen.setText("Open System Editor");
+					mnuOpen.setText(Messages.AttachmentListComposite_OpenSystemMenuItem);
 					mnuOpen.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
@@ -166,7 +167,7 @@ public class AttachmentListComposite extends Composite{
 				}
 				if (mnuSearch == null){
 					mnuSearch = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuSearch.setText("Search");
+					mnuSearch.setText(Messages.AttachmentListComposite_SearchItem);
 					mnuSearch.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ATTACHMENT_SEARCH));
 					mnuSearch.addSelectionListener(new SelectionAdapter() {
 						@Override
@@ -182,7 +183,7 @@ public class AttachmentListComposite extends Composite{
 					int index = 4;
 					if (mnuAdd == null){
 						mnuAdd = new MenuItem(thumbMenu,SWT.DEFAULT,index);
-						mnuAdd.setText("Add Attachment");
+						mnuAdd.setText(Messages.AttachmentListComposite_AddAttachmentItem);
 						mnuAdd.addSelectionListener(new SelectionAdapter() {
 							@Override
 							public void widgetSelected(SelectionEvent e) {
@@ -224,7 +225,7 @@ public class AttachmentListComposite extends Composite{
 					
 					if (IntelSecurityManager.INSTANCE.canLinkAttachmentsToEntities()){
 						mnulinkTo = new MenuItem(this.thumbMenu, SWT.CASCADE,index);
-						mnulinkTo.setText("Link To Entity...");
+						mnulinkTo.setText(Messages.AttachmentListComposite_LinkEntityItem);
 						
 						Menu mnuEntities = new Menu(mnulinkTo);
 						mnulinkTo.setMenu(mnuEntities);
@@ -290,7 +291,7 @@ public class AttachmentListComposite extends Composite{
 				}
 				if (mnuProperties == null){
 					mnuProperties = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuProperties.setText("Properties...");
+					mnuProperties.setText(Messages.AttachmentListComposite_PropertiesItem);
 					mnuProperties.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
@@ -343,7 +344,7 @@ public class AttachmentListComposite extends Composite{
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
 						List<IntelLocation> addedLocations = new ArrayList<IntelLocation>();
-						monitor.beginTask("Processing files for locations", IProgressMonitor.UNKNOWN);
+						monitor.beginTask(Messages.AttachmentListComposite_ProcessingFilesTask, IProgressMonitor.UNKNOWN);
 						for (IntelAttachment ia : toSearch){
 							List<IntelLocation> toAdd = FileLocationParser.INSTANCE.parseFile(ia.getCopyFromLocation());
 							if (toAdd != null) addedLocations.addAll(toAdd);
@@ -353,14 +354,14 @@ public class AttachmentListComposite extends Composite{
 					}
 				});
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog("Error processing files for locations: " +ex.getMessage(), ex);
+				Intelligence2PlugIn.displayLog(Messages.AttachmentListComposite_ProcessingError +ex.getMessage(), ex);
 			}
 			
 			if (locations[0] != null){
 				List<IntelLocation> added =  (List<IntelLocation>)locations[0];
 				editor.addNewLocations(added);
 				if (added.size() > 0){
-					TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format("{0} locations parsed from {1} selected files and added to the record.", added.size(), toSearch.size()));
+					TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format(Messages.AttachmentListComposite_LocationsParsedMsg, added.size(), toSearch.size()));
 					infodialog.open();	
 				}
 			}

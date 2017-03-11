@@ -138,7 +138,7 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 		if (level < categoryLabels.length ){
 			return categoryLabels[level];
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	public void addAttribute(String attributeKey, Object value){

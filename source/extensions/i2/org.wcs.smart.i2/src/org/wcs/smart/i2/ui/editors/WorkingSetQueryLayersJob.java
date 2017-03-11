@@ -23,6 +23,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
@@ -47,7 +48,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 	
 	public WorkingSetQueryLayersJob(Map map, IEclipseContext context, ILayerListener... layerlisteners){
 		super(map, context, layerlisteners);
-		setName("loading working set query map layers");
+		setName("loading working set query map layers"); //$NON-NLS-1$
 	}
 	
 	public WorkingSetQueryLayersJob clone(){
@@ -129,7 +130,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 			Date[] dates = null;
 			String dateFilter = workingset.getEntityDateFilter();
 			try{
-				String[] bits = dateFilter.split(":");
+				String[] bits = dateFilter.split(":"); //$NON-NLS-1$
 				DateFilter initFilter = DateFilter.valueOf(bits[0]);
 				if (initFilter == DateFilter.CUSTOM){
 					dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
@@ -137,7 +138,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 					dates = new Date[]{initFilter.getStartDate(), initFilter.getEndDate()};
 				}
 			}catch (Exception ex){
-				Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
+				Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 						
 			List<IntelWorkingSetQuery> queries = null;
@@ -173,7 +174,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 					protected void onComplete(IPagedQueryResultSet results) {
 						if (results == null){
 							//Do something better here - show something on tree with error image overlay
-							Intelligence2PlugIn.displayLog("Query could not be run.  Results not displayed on map", null);
+							Intelligence2PlugIn.displayLog(Messages.WorkingSetQueryLayersJob_QueryRunError, null);
 							return;
 						}
 						//add a new query service with associated layers

@@ -109,6 +109,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
@@ -236,7 +237,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		
 		@Override
 		public String getName() {
-			return "Map";
+			return Messages.IntelligenceMapEditor_MapName;
 		}
 		
 		@Override
@@ -621,7 +622,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		String uuid = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(WorkingSetView.LAST_WS_PREFERENCE + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));
 		if (uuid != null && !uuid.isEmpty()){
 		
-			Job loadWs = new Job("loading working set"){
+			Job loadWs = new Job("loading working set"){ //$NON-NLS-1$
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					UUID wset = UuidUtils.stringToUuid(uuid);
@@ -629,8 +630,8 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 					Session s = HibernateManager.openSession();
 					try{
 						ws = (IntelWorkingSet)s.createCriteria(IntelWorkingSet.class)
-								.add(Restrictions.eq("uuid", wset))
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+								.add(Restrictions.eq("uuid", wset)) //$NON-NLS-1$
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 								.uniqueResult();
 					}finally{
 						s.close();

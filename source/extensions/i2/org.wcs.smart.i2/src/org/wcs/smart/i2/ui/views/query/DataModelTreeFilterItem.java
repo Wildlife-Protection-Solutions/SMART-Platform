@@ -38,6 +38,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeTreeDropItem;
@@ -68,7 +69,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 	public DataModelTreeFilterItem(Category category){
 		super(category.getName());
 		this.categoryUuid = category.getUuid();
-		queryKey = "dm_category:" + category.getHkey();
+		queryKey = "dm_category:" + category.getHkey(); //$NON-NLS-1$
 		dropItemName = IntelQueryColumnProvider.generateName(null, category);
 	}
 	
@@ -76,7 +77,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		super(attribute.getName());
 		this.attributeUuid = attribute.getUuid();
 		this.type = attribute.getType();
-		queryKey = "dm_attribute:" + attribute.getType().typeKey + "::" + attribute.getKeyId();
+		queryKey = "dm_attribute:" + attribute.getType().typeKey + "::" + attribute.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
 		dropItemName = IntelQueryColumnProvider.generateName(attribute, null);
 	}
 	
@@ -87,7 +88,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		this.attributeUuid = attribute.getAttribute().getUuid();
 		this.type = attribute.getAttribute().getType();
 		
-		queryKey = "dm_attribute:" + attribute.getAttribute().getType().typeKey + ":" + attribute.getCategory().getHkey() + ":" + attribute.getAttribute().getKeyId();
+		queryKey = "dm_attribute:" + attribute.getAttribute().getType().typeKey + ":" + attribute.getCategory().getHkey() + ":" + attribute.getAttribute().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		dropItemName = IntelQueryColumnProvider.generateName(attribute.getAttribute(),  attribute.getCategory());
 	}
 	
@@ -156,7 +157,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 			final List<String> keys = new ArrayList<String>();
 			labels.add(DropItemFactory.ANY_LABEL);
 			keys.add(IQueryFilter.ANY_OPTION_KEY);
-			Job j = new Job("creating attribute drop item"){
+			Job j = new Job("creating attribute drop item"){ //$NON-NLS-1$
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -180,7 +181,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 			try {
 				j.join();
 			} catch (InterruptedException e) {
-				Intelligence2PlugIn.displayLog("Error loading attribute list items", e);
+				Intelligence2PlugIn.displayLog(Messages.DataModelTreeFilterItem_ErrorMsg, e);
 			}
 			
 			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]))};

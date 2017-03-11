@@ -40,6 +40,7 @@ import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.udig.query.QueryService;
 import org.wcs.smart.i2.ui.editors.MapComposite;
@@ -134,7 +135,7 @@ public class QueryMapPanel extends MapComposite {
 			
 			Display.getDefault().syncExec(()->((IntelQueryEditor)editor).setDirty(true));
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error saving query layer styles.", ex);
+			Intelligence2PlugIn.displayLog(Messages.QueryMapPanel_StyleSaveError, ex);
 		}
 		
 	}

@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.entity.exporter.EntityRelationshipExporter;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
 
@@ -57,8 +58,8 @@ import org.wcs.smart.i2.ui.TransparentInfoDialog;
  */
 public class EntityRelationshipExportDialog extends TitleAreaDialog{
 
-	private String LAST_DIR_KEY = "org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog.DIR";
-	private String LAST_DEGREE_KEY = "org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog.DEGREE";
+	private String LAST_DIR_KEY = "org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog.DIR"; //$NON-NLS-1$
+	private String LAST_DEGREE_KEY = "org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog.DEGREE"; //$NON-NLS-1$
 	
 	private IntelEntity entity;
 	
@@ -77,15 +78,15 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Entity:");
+		l.setText(Messages.EntityRelationshipExportDialog_EntityLabel);
 		
 		l = new Label(main, SWT.NONE);
 		l.setText(this.entity.getIdAttributeAsText());
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Output Directory:");
-		l.setToolTipText("Two files will be created in this directory - one for entities and one for relationships");
+		l.setText(Messages.EntityRelationshipExportDialog_DirLabel);
+		l.setToolTipText(Messages.EntityRelationshipExportDialog_DirTooltip);
 		
 		txtOutput = new Text(main, SWT.BORDER);
 		txtOutput.setText(getDefaultDirectory());
@@ -93,13 +94,13 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		txtOutput.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Button btnBrowse = new Button(main, SWT.PUSH);
-		btnBrowse.setText("...");
+		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnBrowse.addListener(SWT.Selection, e->{
 			DirectoryDialog dd = new DirectoryDialog(getShell());
 			dd.setFilterPath(txtOutput.getText());
-			dd.setText("Output Directory");
-			dd.setMessage("Select the directory to write files to.  Two files will be created, one for entities and one for elationships");
+			dd.setText(Messages.EntityRelationshipExportDialog_DDTitle);
+			dd.setMessage(Messages.EntityRelationshipExportDialog_DDMessage);
 			String newFolder = dd.open();
 			if (newFolder != null){
 				txtOutput.setText(newFolder);
@@ -107,17 +108,17 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		});
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Degrees:");
-		l.setToolTipText("The number or relationship degrees to include in the export");
+		l.setText(Messages.EntityRelationshipExportDialog_DegreeLabel);
+		l.setToolTipText(Messages.EntityRelationshipExportDialog_DegreeTooltip);
 		
 		txtDegree = new Text(main, SWT.BORDER);
 		txtDegree.setText(getDefaultDegree());
 		txtDegree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		txtDegree.addListener(SWT.Modify, e->validate());
 		
-		setTitle(MessageFormat.format("Export {0}",entity.getIdAttributeAsText()));
-		getShell().setText("Export Entity and Relationships");
-		setMessage("Export entities and relationships for importing into graphing tools");
+		setTitle(MessageFormat.format(Messages.EntityRelationshipExportDialog_Title,entity.getIdAttributeAsText()));
+		getShell().setText(Messages.EntityRelationshipExportDialog_ShellTitle);
+		setMessage(Messages.EntityRelationshipExportDialog_Message);
 		return main;
 	}
 	
@@ -125,16 +126,16 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		try{
 			int x = Integer.parseInt(txtDegree.getText());
 			if (x <= 0){
-				setErrorMessage("Degree must be an integer greater than 0.");	
+				setErrorMessage(Messages.EntityRelationshipExportDialog_InvalidDegree1);	
 			}else{
 				setErrorMessage(null);
 			}
 		}catch (Exception ex){
-			setErrorMessage("Degree must be an integer greater than 0.");	
+			setErrorMessage(Messages.EntityRelationshipExportDialog_InvalidDegree2);	
 		}
 		
 		if (txtOutput.getText().trim().isEmpty()){
-			setErrorMessage("You must select an output folder.");
+			setErrorMessage(Messages.EntityRelationshipExportDialog_FolderRequired);
 		}
 		
 		if (getErrorMessage() == null){
@@ -149,14 +150,14 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 	private String getDefaultDirectory(){
 		String dir = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(LAST_DIR_KEY);
 		if (dir == null || dir.isEmpty()){
-			dir = System.getProperty("user.dir");
+			dir = System.getProperty("user.dir"); //$NON-NLS-1$
 		}
 		return dir;
 	}
 	private String getDefaultDegree(){
 		int x = Intelligence2PlugIn.getDefault().getPreferenceStore().getInt(LAST_DEGREE_KEY);
 		if (x <= 3){
-			return "3";
+			return "3"; //$NON-NLS-1$
 		}
 		return String.valueOf(x);
 	}
@@ -171,7 +172,7 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		if (doExport()){
 			super.okPressed();
 			
-			String message = "Entity/Relationship export complete.";
+			String message = Messages.EntityRelationshipExportDialog_CompleteMsg;
 			TransparentInfoDialog ti = new TransparentInfoDialog(getParentShell(), message);
 			ti.open();
 		}
@@ -185,13 +186,13 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		final int degrees = Integer.parseInt(txtDegree.getText());
 		
 		if (!Files.exists(outputDir)){
-			if (!MessageDialog.openQuestion(getShell(), "Export", MessageFormat.format("The directory {0} does not exist.  Do you want to create it?", outputDir.toString()))){
+			if (!MessageDialog.openQuestion(getShell(), Messages.EntityRelationshipExportDialog_ExportTitle, MessageFormat.format(Messages.EntityRelationshipExportDialog_ExportMsg, outputDir.toString()))){
 				return false;
 			}
 			try {
 				Files.createDirectories(outputDir);
 			} catch (IOException e) {
-				Intelligence2PlugIn.displayLog(MessageFormat.format("Could not create directory {0}: {1}", outputDir.toString(), e.getMessage()), e);;
+				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.EntityRelationshipExportDialog_DirectoryError, outputDir.toString(), e.getMessage()), e);;
 				return false;
 			}
 		}
@@ -201,7 +202,7 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		Path rFile = EntityRelationshipExporter.getRelationshipFile(outputDir, name);
 		
 		if (Files.exists(eFile) || Files.exists(rFile)){
-			if (!MessageDialog.openQuestion(getShell(), "Export", MessageFormat.format("The files {0} and {1} will be overwritten.  Are you sure you want to continue?", eFile.toString(), rFile.toString()))){
+			if (!MessageDialog.openQuestion(getShell(), Messages.EntityRelationshipExportDialog_ExportTitle, MessageFormat.format(Messages.EntityRelationshipExportDialog_ExportMsg2, eFile.toString(), rFile.toString()))){
 				return false;
 			}
 		}
@@ -223,19 +224,19 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 						}
 					}catch (Exception ex){
 						isOk[0] = false;
-						Intelligence2PlugIn.displayLog("Error exporting entities and relationships: " + ex.getMessage(), ex);
+						Intelligence2PlugIn.displayLog(Messages.EntityRelationshipExportDialog_ExportError + ex.getMessage(), ex);
 					}
 					
 					if (monitor.isCanceled()){
 						Display.getDefault().syncExec(()->{
-							MessageDialog.openInformation(getShell(), "Cancelled", "Export cancelled.");
+							MessageDialog.openInformation(getShell(), Messages.EntityRelationshipExportDialog_CanceledTitle, Messages.EntityRelationshipExportDialog_CanceledMsg);
 						});
 						isOk[0] = false;
 					}
 				}
 			});
 		} catch (Exception e) {
-			Intelligence2PlugIn.displayLog("Error exporting entities and relationships: " + e.getMessage(), e);
+			Intelligence2PlugIn.displayLog(Messages.EntityRelationshipExportDialog_ExportError + e.getMessage(), e);
 			return false;
 		}
 		return isOk[0];

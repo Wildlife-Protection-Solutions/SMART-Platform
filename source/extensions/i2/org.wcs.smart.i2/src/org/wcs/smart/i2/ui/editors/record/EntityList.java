@@ -57,6 +57,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -164,7 +165,7 @@ public class EntityList extends Composite {
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		if (entities == null){
-			toolkit.createLabel(core, "");
+			toolkit.createLabel(core, ""); //$NON-NLS-1$
 		}else{
 			ScrolledComposite sc = new ScrolledComposite(core, SWT.V_SCROLL |  SWT.H_SCROLL);
 			toolkit.adapt(sc);
@@ -241,7 +242,7 @@ public class EntityList extends Composite {
 					}
 					if (mnuRelationship == null || mnuRelationship.isDisposed()){
 						mnuRelationship = new MenuItem(mnuEntities, SWT.CASCADE, 0);
-						mnuRelationship.setText("New Relationship...");
+						mnuRelationship.setText(Messages.EntityList_NewRelMenuItem);
 						
 						if (!getCurrentSelection().isEmpty()){
 							
@@ -279,7 +280,7 @@ public class EntityList extends Composite {
 													loading.dispose();
 													if (rtypes.isEmpty()){
 														MenuItem loading = new MenuItem(rMenu, SWT.PUSH);
-														loading.setText("(No Relationship Types Found)");
+														loading.setText(Messages.EntityList_NoTypesFoundMsg);
 														loading.setEnabled(false);
 														return;
 													}
@@ -287,7 +288,7 @@ public class EntityList extends Composite {
 														MenuItem mi = new MenuItem(rMenu, SWT.PUSH);
 														String name = t.getName();
 														if (t.getRelationshipGroup() != null){
-															name = name + " (" + t.getRelationshipGroup().getName() + ")";
+															name = name + " (" + t.getRelationshipGroup().getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 														}
 														mi.setText(name);
 														mi.addSelectionListener(new SelectionAdapter(){
@@ -327,7 +328,7 @@ public class EntityList extends Composite {
 		});
 		
 		mnuOpen = new MenuItem(mnuEntities, SWT.PUSH);
-		mnuOpen.setText("Open");
+		mnuOpen.setText(Messages.EntityList_OpenItem);
 		mnuOpen.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -402,12 +403,12 @@ public class EntityList extends Composite {
 				try{
 					s.beginTransaction();
 					IntelEntityRelationship existing = (IntelEntityRelationship) s.createCriteria(IntelEntityRelationship.class)
-							.add(Restrictions.eq("sourceEntity", newRelationship.getSourceEntity()))
-							.add(Restrictions.eq("targetEntity", newRelationship.getTargetEntity()))
-							.add(Restrictions.eq("relationshipType", newRelationship.getRelationshipType()))
+							.add(Restrictions.eq("sourceEntity", newRelationship.getSourceEntity())) //$NON-NLS-1$
+							.add(Restrictions.eq("targetEntity", newRelationship.getTargetEntity())) //$NON-NLS-1$
+							.add(Restrictions.eq("relationshipType", newRelationship.getRelationshipType())) //$NON-NLS-1$
 							.uniqueResult();
 					if (existing != null){
-						MessageDialog.openInformation(getShell(), "Create Relationship", MessageFormat.format("The relationship of type {0} already exists between {1} and {2}.  Cannot duplicate relationship", rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
+						MessageDialog.openInformation(getShell(), Messages.EntityList_CreateTitle, MessageFormat.format(Messages.EntityList_CreateMsg, rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
 						return;
 					}
 				
@@ -429,12 +430,12 @@ public class EntityList extends Composite {
 				modified.add(newRelationship.getSourceEntity());
 				modified.add(newRelationship.getTargetEntity());
 				listParent.getEditor().getContext().get(IEventBroker.class).send(IntelEvents.ENTITY_MODIFIED, modified);
-				MessageDialog.openInformation(getShell(), "Relationship Created", MessageFormat.format("Relationship Created.\n\nA relationship of type {0} was successfully created between {1} and {2}", rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
+				MessageDialog.openInformation(getShell(), Messages.EntityList_CreatedTitle, MessageFormat.format(Messages.EntityList_CreatedMsg, rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog("Error occurred while creating new relationship." + ex.getMessage(), ex);
+				Intelligence2PlugIn.displayLog(Messages.EntityList_CreateError + ex.getMessage(), ex);
 			}
 		}else{
-			MessageDialog.openInformation(getShell(), "Create Relationship", MessageFormat.format("Could not create a valide relationship of type {0} between {1} and {2}.  Cannot duplicate relationship", rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
+			MessageDialog.openInformation(getShell(), Messages.EntityList_CreateErrorTitle, MessageFormat.format(Messages.EntityList_CreateErrorMsg, rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
 		}
 		
 	}
@@ -450,6 +451,8 @@ public class EntityList extends Composite {
 		
 	}
 	private class EntityComponent extends Composite implements Listener{
+
+		private static final String LAST_SELECTION_INDEX_KEY = "last_selection_index"; //$NON-NLS-1$
 
 		private static final int THUMB_SIZE = 30;
 		
@@ -472,7 +475,7 @@ public class EntityList extends Composite {
 			if (locationCnt != null){
 				StringBuilder sb = new StringBuilder();
 				for (IntelLocation x : locationCnt){
-					sb.append(x.getId() + "\n");
+					sb.append(x.getId() + "\n"); //$NON-NLS-1$
 				}
 				locationTooltip = sb.toString();
 			}
@@ -576,7 +579,7 @@ public class EntityList extends Composite {
 					Menu menu = new Menu(c2);
 					c2.setMenu(menu);
 					MenuItem mi = new MenuItem(menu, SWT.PUSH);
-					mi.setText("Remove Attachment");
+					mi.setText(Messages.EntityList_RemoveItem);
 					mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 					mi.addSelectionListener(new SelectionAdapter() {
 						@Override
@@ -587,7 +590,7 @@ public class EntityList extends Composite {
 					});
 				}
 				
-				l = toolkit.createLabel(info, MessageFormat.format("Locations: {0}", locationCount));
+				l = toolkit.createLabel(info, MessageFormat.format(Messages.EntityList_LocationLabel, locationCount));
 				l.setToolTipText(locationTooltip);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 				addListener(l);
@@ -642,9 +645,9 @@ public class EntityList extends Composite {
 				mouseOver = false;
 				colorAll();
 			}else if (event.type == SWT.MouseDown){
-				Integer lastSelection = (Integer) getParent().getData("last_selection_index");
+				Integer lastSelection = (Integer) getParent().getData(LAST_SELECTION_INDEX_KEY);
 				if (lastSelection == null) lastSelection = 0;
-				getParent().setData("last_selection_index", index);
+				getParent().setData(LAST_SELECTION_INDEX_KEY, index);
 				
 				if ((event.stateMask & SWT.CTRL) != 0){
 					isSelected = !isSelected;

@@ -80,8 +80,8 @@ public class ShpQueryExporter implements IQueryExporter {
 		List<SimpleFeature> pointFeatures = new ArrayList<SimpleFeature>();
 		List<SimpleFeature> polygonFeatures = new ArrayList<SimpleFeature>();
 		
-		SimpleFeatureType pointType = FeatureGenerator.generateFeatureType("Point", FeatureGenerator.POINT_TYPE, results.getQueryColumns(), true);
-		SimpleFeatureType polygonType = FeatureGenerator.generateFeatureType("Polygon", FeatureGenerator.POLYGON_TYPE, results.getQueryColumns(), true);
+		SimpleFeatureType pointType = FeatureGenerator.generateFeatureType("Point", FeatureGenerator.POINT_TYPE, results.getQueryColumns(), true); //$NON-NLS-1$
+		SimpleFeatureType polygonType = FeatureGenerator.generateFeatureType("Polygon", FeatureGenerator.POLYGON_TYPE, results.getQueryColumns(), true); //$NON-NLS-1$
 		
 		
 		PagedResultSetIterator iterator = new PagedResultSetIterator(results, session);
@@ -106,11 +106,11 @@ public class ShpQueryExporter implements IQueryExporter {
 		String polygonFile = filename;
 		
 		if (ext < 0 ){
-			pointFile = pointFile + "_point.shp";
-			polygonFile = polygonFile + "_polygon.shp";
+			pointFile = pointFile + "_point.shp"; //$NON-NLS-1$
+			polygonFile = polygonFile + "_polygon.shp"; //$NON-NLS-1$
 		}else{
-			pointFile = pointFile.substring(0, ext) + "_point" + pointFile.substring(ext);
-			polygonFile = polygonFile.substring(0, ext) + "_polygon" + polygonFile.substring(ext);
+			pointFile = pointFile.substring(0, ext) + "_point" + pointFile.substring(ext); //$NON-NLS-1$
+			polygonFile = polygonFile.substring(0, ext) + "_polygon" + polygonFile.substring(ext); //$NON-NLS-1$
 		}
 		
 		
@@ -167,7 +167,7 @@ public class ShpQueryExporter implements IQueryExporter {
 
 	@Override
 	public String getExtension() {
-		return "shp";
+		return "shp"; //$NON-NLS-1$
 	}
 
 }

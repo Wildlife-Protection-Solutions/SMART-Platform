@@ -33,7 +33,7 @@ import org.wcs.smart.util.UuidUtils;
 public class EntityFilter implements IQueryFilter, IColumnIdentifierProvider {
 
 	public static EntityFilter create(String key){
-		return new EntityFilter(UuidUtils.stringToUuid(key.split(":")[1]));
+		return new EntityFilter(UuidUtils.stringToUuid(key.split(":")[1])); //$NON-NLS-1$
 	}
 	
 	private UUID uuid;
@@ -49,7 +49,7 @@ public class EntityFilter implements IQueryFilter, IColumnIdentifierProvider {
 	@Override
 	public String getUniqueColumnIdentifier(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("ie_");
+		sb.append("ie_"); //$NON-NLS-1$
 		sb.append(UuidUtils.uuidToString(uuid));
 		return sb.toString();
 	}

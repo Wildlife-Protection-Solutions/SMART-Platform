@@ -68,14 +68,14 @@ public class IntelEntityDataSource extends ContentDataStore{
 	
 	public static Name generateName(LocationLayerType type, UUID entityUuid){
 		if (type == LocationLayerType.ATTRIBUTE){
-			return new NameImpl("org.wcs.smart.i2.entity." + UuidUtils.uuidToString(entityUuid), type.name());	
+			return new NameImpl("org.wcs.smart.i2.entity." + UuidUtils.uuidToString(entityUuid), type.name());	 //$NON-NLS-1$
 		}
-		return new NameImpl("org.wcs.smart.i2.entity.location." + UuidUtils.uuidToString(entityUuid), type.name());
+		return new NameImpl("org.wcs.smart.i2.entity.location." + UuidUtils.uuidToString(entityUuid), type.name()); //$NON-NLS-1$
 	}
 
 	public static Filter createDateFilter(Date startDate, Date endDate){
 		if (startDate == null || endDate == null) return Filter.INCLUDE;
 		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-		return ff.between(ff.property("date"), ff.literal(startDate), ff.literal(endDate));
+		return ff.between(ff.property("date"), ff.literal(startDate), ff.literal(endDate)); //$NON-NLS-1$
 	}
 }

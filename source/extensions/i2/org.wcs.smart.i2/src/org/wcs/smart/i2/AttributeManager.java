@@ -23,6 +23,7 @@ package org.wcs.smart.i2;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 
 /**
@@ -39,7 +40,7 @@ public enum AttributeManager {
 
 	public void canDelete(IntelAttribute type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){
-			throw new Exception("Unknown error occurrs while deleteing entity type.");
+			throw new Exception(Messages.AttributeManager_DeleteError);
 		}
 	}
 	

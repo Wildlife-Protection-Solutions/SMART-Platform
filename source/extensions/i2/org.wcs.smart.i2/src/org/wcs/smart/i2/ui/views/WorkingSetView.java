@@ -92,6 +92,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -128,7 +129,7 @@ public class WorkingSetView {
 	 * LAST_WS_PREFERENCE + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid())
 	 * 
 	 */
-	public static final String LAST_WS_PREFERENCE = "org.wcs.smart.i2.workingset.uuid.";
+	public static final String LAST_WS_PREFERENCE = "org.wcs.smart.i2.workingset.uuid."; //$NON-NLS-1$
 	@Inject
 	private IEclipseContext context;
 
@@ -169,7 +170,7 @@ public class WorkingSetView {
 		header.setLayout(new GridLayout(3, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		lblWorkingSet = toolkit.createLabel(header, "");
+		lblWorkingSet = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		lblWorkingSet.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		FontData fd = lblWorkingSet.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -177,13 +178,13 @@ public class WorkingSetView {
 		Font f = new Font(lblWorkingSet.getDisplay(), fd);
 		lblWorkingSet.addListener(SWT.Dispose,(e)->f.dispose());
 		lblWorkingSet.setFont(f);
-		lblWorkingSet.setText("<Not Selected>");
+		lblWorkingSet.setText(Messages.WorkingSetView_NotSelectedLabel);
 		
 		ToolBar tools = new ToolBar(header, SWT.FLAT);
 		
 		copyItem = new ToolItem(tools, SWT.PUSH);
 		copyItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_COPY));
-		copyItem.setToolTipText("Copy existing working set into a new working set");
+		copyItem.setToolTipText(Messages.WorkingSetView_copyTooltip);
 		copyItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -194,7 +195,7 @@ public class WorkingSetView {
 		
 		newItem = new ToolItem(tools, SWT.PUSH);
 		newItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		newItem.setToolTipText("Create new working set");
+		newItem.setToolTipText(Messages.WorkingSetView_createnewTooltip);
 		newItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -204,7 +205,7 @@ public class WorkingSetView {
 		
 		selectItem = new ToolItem(tools, SWT.PUSH);
 		selectItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_SELECT));
-		selectItem.setToolTipText("Select working set");
+		selectItem.setToolTipText(Messages.WorkingSetView_selectTooltip);
 		selectItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -233,7 +234,7 @@ public class WorkingSetView {
 				
 				String dateFilter = dateComp.getDateFilter().name();
 				if (dateComp.getDateFilter() == DateFilter.CUSTOM){
-					dateFilter += ":" + dFilters[0].getTime() + ":" + dFilters[1].getTime();
+					dateFilter += ":" + dFilters[0].getTime() + ":" + dFilters[1].getTime(); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
 				//save date filter
@@ -244,7 +245,7 @@ public class WorkingSetView {
 					ws.setEntityDateFilter(dateFilter);
 					s.getTransaction().commit();
 				}catch (Exception ex){
-					Intelligence2PlugIn.displayLog("Unable to save changes to date filter to database.", ex);
+					Intelligence2PlugIn.displayLog(Messages.WorkingSetView_SaveDateError, ex);
 					s.getTransaction().rollback();
 				}finally{
 					s.close();
@@ -373,7 +374,7 @@ public class WorkingSetView {
 						s.getTransaction().commit();
 					}catch(Exception ex){
 						s.getTransaction().rollback();
-						Intelligence2PlugIn.log("Unable to update visible state of layers for working set" + ex.getMessage(), ex);
+						Intelligence2PlugIn.log(Messages.WorkingSetView_SaveVisibilityError + ex.getMessage(), ex);
 					}finally{
 						s.close();
 					}
@@ -390,7 +391,7 @@ public class WorkingSetView {
 		workingsetTree.getControl().setMenu(menu);
 		
 		MenuItem open = new MenuItem(menu, SWT.PUSH);
-		open.setText("Open");
+		open.setText(Messages.WorkingSetView_OpenMenuItem);
 		open.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -630,7 +631,7 @@ public class WorkingSetView {
 		try{
 			s.beginTransaction();
 			set = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-			String newName = WorkingSetView.getWorkingsetName(activeShell, MessageFormat.format("Copy of {0}", set.getName()));
+			String newName = WorkingSetView.getWorkingsetName(activeShell, MessageFormat.format(Messages.WorkingSetView_DefaultWsName, set.getName()));
 			if (newName != null){
 				set = WorkingSetManager.INSTANCE.clone(set);
 				set.setName(newName);
@@ -645,7 +646,7 @@ public class WorkingSetView {
 			
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Error removing working set {0}. {1}", lblWorkingSet.getText(), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetView_DeleteError, lblWorkingSet.getText(), ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();
@@ -799,12 +800,12 @@ public class WorkingSetView {
 
 	
 	public static String getWorkingsetName(Shell activeShell, String initialValue){
-		if (initialValue == null) initialValue = "Working Set";
-		InputDialog in = new InputDialog(activeShell, "New Working Set", "Enter a name for the new working set.", initialValue, new IInputValidator() {
+		if (initialValue == null) initialValue = Messages.WorkingSetView_DefaultName;
+		InputDialog in = new InputDialog(activeShell, Messages.WorkingSetView_NewDialogTitle, Messages.WorkingSetView_NewDialogMsg, initialValue, new IInputValidator() {
 			@Override
 			public String isValid(String newText) {
 				if (newText.trim().isEmpty() || newText.trim().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
-					return MessageFormat.format("Name must be provided and few than {0} characters.", org.wcs.smart.ca.Label.MAX_LENGTH);
+					return MessageFormat.format(Messages.WorkingSetView_InvalidName, org.wcs.smart.ca.Label.MAX_LENGTH);
 				}
 				return null;
 			}
@@ -833,7 +834,7 @@ public class WorkingSetView {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Error creating new working set. {1}", ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetView_NewWsError, ex.getMessage()), ex);
 		}finally{
 			s.close();
 		}
@@ -848,7 +849,7 @@ public class WorkingSetView {
 		private boolean isNew = true;
 		
 		public LoadWorkingSetJob(){
-			super("load working set job");
+			super(Messages.WorkingSetView_loadingJobName);
 		}
 		
 		public void setWorkingSetUuid(UUID uuid){
@@ -864,7 +865,7 @@ public class WorkingSetView {
 				Display.getDefault().syncExec(()->{
 					if (lblWorkingSet.isDisposed()) return;
 					lastSelection = workingsetTree.getSelection();
-					lblWorkingSet.setText("Loading...");
+					lblWorkingSet.setText(DialogConstants.LOADING_TEXT);
 					
 					if (isNew){
 						lastOpenElements = null;
@@ -906,13 +907,13 @@ public class WorkingSetView {
 				if (ws != null){
 					String dateFilter = ws.getEntityDateFilter();
 					try{
-						String[] bits = dateFilter.split(":");
+						String[] bits = dateFilter.split(":"); //$NON-NLS-1$
 						initFilter = DateFilter.valueOf(bits[0]);
 						if (initFilter == DateFilter.CUSTOM){
 							dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
 						}
 					}catch (Exception ex){
-						Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex);
+						Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					
 				}
@@ -924,13 +925,13 @@ public class WorkingSetView {
 				if (wss != null){
 					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(key, UuidUtils.uuidToString(wss.getUuid()));
 				}else{
-					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(key, "");
+					Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(key, ""); //$NON-NLS-1$
 				}
 				
 				Display.getDefault().syncExec(()->{
 					if (lblWorkingSet.isDisposed()) return;
 					if (wss == null){
-						lblWorkingSet.setText("<Not Selected>");
+						lblWorkingSet.setText(Messages.WorkingSetView_NotSelectedLabel);
 						dateComp.setEnabled(false);
 						workingsetTree.setInput(null);
 					}else{

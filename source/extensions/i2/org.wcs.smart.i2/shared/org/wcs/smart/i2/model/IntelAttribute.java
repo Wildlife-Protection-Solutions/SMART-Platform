@@ -52,12 +52,12 @@ import org.wcs.smart.i2.IIntelligenceLabelProvider;
 public class IntelAttribute extends NamedKeyItem{
 
 	public enum AttributeType{
-		NUMERIC("n"),
-		TEXT("s"), 
-		BOOLEAN("b"),
-		LIST("l"),
-		DATE("d"),
-		POSITION("p");
+		NUMERIC("n"), //$NON-NLS-1$
+		TEXT("s"),  //$NON-NLS-1$
+		BOOLEAN("b"), //$NON-NLS-1$
+		LIST("l"), //$NON-NLS-1$
+		DATE("d"), //$NON-NLS-1$
+		POSITION("p"); //$NON-NLS-1$
 		
 		public String key;
 		

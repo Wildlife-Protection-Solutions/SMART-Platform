@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.FileCharSequence;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Text file searcher
@@ -46,7 +47,7 @@ public class TextFileSearcher implements IFileSearcher {
 	@Override
 	public void search(String searchString, ISmartAttachment attachment,
 			IMatchCollector collector, IProgressMonitor monitor) {
-		monitor.beginTask(MessageFormat.format("text searching {0}",  attachment.getFilename()), 1);
+		monitor.beginTask(MessageFormat.format(Messages.TextFileSearcher_TaskName,  attachment.getFilename()), 1);
 	
 		Matcher fMatcher = Pattern.compile(searchString, Pattern.CASE_INSENSITIVE).matcher(searchString);
 		
@@ -79,13 +80,13 @@ public class TextFileSearcher implements IFileSearcher {
 						end = start + length;
 						if (matchCount <= MAX_MATCH_COUNT){
 							addCount++;
-							SearchResult result = new SearchResult(attachment, searchString, "..." + sequence.getSubString(substart, subend+1)  + "...", start+3, end+3);
+							SearchResult result = new SearchResult(attachment, searchString, "..." + sequence.getSubString(substart, subend+1)  + "...", start+3, end+3); //$NON-NLS-1$ //$NON-NLS-2$
 							collector.addMatch(result);
 						}
 					}
 					if (k++ == 20) {
 						if (monitor.isCanceled()){
-							throw new OperationCanceledException("File search canceled");
+							throw new OperationCanceledException(Messages.TextFileSearcher_CanceledMsg);
 						}
 						k= 0;
 					}
@@ -93,7 +94,7 @@ public class TextFileSearcher implements IFileSearcher {
 				collector.setMatchCount(attachment, matchCount, addCount);
 			}
 		}catch (Exception ex){
-			SearchResult errorResult = new SearchResult(attachment, "ERROR", ex.getMessage(), 0,0);
+			SearchResult errorResult = new SearchResult(attachment, Messages.TextFileSearcher_ErrorItemName, ex.getMessage(), 0,0);
 			collector.addMatch(errorResult);
 		}finally{
 			monitor.done();

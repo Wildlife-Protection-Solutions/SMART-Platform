@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
@@ -44,7 +45,7 @@ public class DeleteIntelAttributeListItemAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof IntelAttributeListItem)){
-			return "Object not an IntelAttributeListItem object.  Cannot delete.";
+			return Messages.DeleteIntelAttributeListItemAdvisor_InvalidObject;
 		}
 		IntelAttributeListItem attribute = (IntelAttributeListItem) object;
 		
@@ -55,7 +56,7 @@ public class DeleteIntelAttributeListItemAdvisor implements IDeleteAdvisor {
 			.uniqueResult();
 		
 		if (linkCnt > 0){
-			return MessageFormat.format("This attribute list item is referenced by {0} entities.  These references must be removed before you can delete this item. ", linkCnt);
+			return MessageFormat.format(Messages.DeleteIntelAttributeListItemAdvisor_EntityError, linkCnt);
 		}
 		
 		linkCnt =  
@@ -65,7 +66,7 @@ public class DeleteIntelAttributeListItemAdvisor implements IDeleteAdvisor {
 			.uniqueResult();
 		
 		if (linkCnt > 0){
-			return MessageFormat.format("This attribute list item is referenced by {0} relationships.  These references must be removed before you can delete this item. ", linkCnt);
+			return MessageFormat.format(Messages.DeleteIntelAttributeListItemAdvisor_RelationshipError, linkCnt);
 		}
 		return null;
 	}

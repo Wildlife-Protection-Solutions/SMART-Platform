@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -55,7 +56,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 	private UUID attributeUuid;
 	private IntelAttribute.AttributeType type;
 	private String dropItemName = null;
-	private String queryKey = "";
+	private String queryKey = ""; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new attribute filter for an entity type attribute
@@ -66,7 +67,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 		this.attributeUuid = attribute.getAttribute().getUuid();
 		type = attribute.getAttribute().getType();
 		dropItemName = IntelQueryColumnProvider.generateName(attribute.getAttribute(),  attribute.getEntityType());
-		queryKey = "e_attribute:" + attribute.getAttribute().getType().key + ":" + attribute.getAttribute().getKeyId() + ":" + attribute.getEntityType().getKeyId();
+		queryKey = "e_attribute:" + attribute.getAttribute().getType().key + ":" + attribute.getAttribute().getKeyId() + ":" + attribute.getEntityType().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**
@@ -78,7 +79,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 		this.attributeUuid = attribute.getUuid();
 		type = attribute.getType();
 		dropItemName = IntelQueryColumnProvider.generateName(attribute, null);
-		queryKey = "e_attribute:" + attribute.getType().key + ":" + attribute.getKeyId() + ":" ;
+		queryKey = "e_attribute:" + attribute.getType().key + ":" + attribute.getKeyId() + ":" ; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public IntelAttribute.AttributeType getType(){
@@ -98,7 +99,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 			final List<String> keys = new ArrayList<String>();
 			labels.add(DropItemFactory.ANY_LABEL);
 			keys.add(IQueryFilter.ANY_OPTION_KEY);
-			Job j = new Job("creating attribute drop item"){
+			Job j = new Job("creating attribute drop item"){ //$NON-NLS-1$
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -122,7 +123,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 			try {
 				j.join();
 			} catch (InterruptedException e) {
-				Intelligence2PlugIn.displayLog("Error loading attribute list items", e);
+				Intelligence2PlugIn.displayLog(Messages.AttributeTreeFilterItem_ErrorMsg, e);
 			}
 			
 			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]))};

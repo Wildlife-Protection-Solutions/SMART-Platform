@@ -48,7 +48,7 @@ public class ErrorPanel extends Composite {
 		errorImage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
 		
 		errorLabel = new Label(this, SWT.NONE);
-		errorLabel.setText("");
+		errorLabel.setText(""); //$NON-NLS-1$
 		errorLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	}
 

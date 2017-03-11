@@ -44,7 +44,7 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 @Table(name="smart.i_attachment")
 public class IntelAttachment extends ISmartAttachment{
 
-	public static final String INTELLIGENCE_FS_DIR = "intelligence2";
+	public static final String INTELLIGENCE_FS_DIR = "intelligence2"; //$NON-NLS-1$
 	
 	private ConservationArea ca;
 	private Date dateCreated;
@@ -146,7 +146,7 @@ public class IntelAttachment extends ISmartAttachment{
 		return getConservationArea().getFileDataStoreLocation() + 
 				File.separator +
 				INTELLIGENCE_FS_DIR +
-				"/attachments";
+				"/attachments"; //$NON-NLS-1$
 	}
 
 

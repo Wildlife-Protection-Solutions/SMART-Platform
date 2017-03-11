@@ -74,8 +74,9 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * @author Emily
  *
  */
+@SuppressWarnings("nls")
 public class SearchDataGenerator {
-
+	
 	public static List<IntelRelationshipType> generateRelationshipTypes(int numberOfGroups, int numberOfRelationshipTypes, int numberOfAttributePerRelationship, List<IntelAttribute> attributes, List<IntelEntityType> types, IProgressMonitor monitor, Session session){
 			
 		List<IntelRelationshipGroup> groups = new ArrayList<>();

@@ -97,7 +97,7 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 			@Override
 			public Object visit(PropertyIsBetween filter, Object object) {
 				PropertyIsBetween betweenFilter = (PropertyIsBetween) filter;
-				if (betweenFilter.getExpression() instanceof PropertyName && (((PropertyName)betweenFilter.getExpression()).getPropertyName().equalsIgnoreCase("date"))){
+				if (betweenFilter.getExpression() instanceof PropertyName && (((PropertyName)betweenFilter.getExpression()).getPropertyName().equalsIgnoreCase("date"))){ //$NON-NLS-1$
 					Date startDate = (Date) betweenFilter.getLowerBoundary().evaluate(null);
 					Date endDate = (Date) betweenFilter.getUpperBoundary().evaluate(null);
 					if (startDate != null && endDate != null){
@@ -118,15 +118,15 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 			case POINT:
 			case POLYGON:
 				StringBuilder sb = new StringBuilder();
-				sb.append("the_geom:");
+				sb.append("the_geom:"); //$NON-NLS-1$
 				sb.append(geomType.getGeomType());
-				sb.append(":srid=4326,fid:String,id:String,date:Date,comment:String,record:String,record_date:Date,record_uuid:String,system_id:String");
+				sb.append(":srid=4326,fid:String,id:String,date:Date,comment:String,record:String,record_date:Date,record_uuid:String,system_id:String"); //$NON-NLS-1$
 				return sb.toString();
 			case ATTRIBUTE:
 				sb = new StringBuilder();
-				sb.append("the_geom:");
+				sb.append("the_geom:"); //$NON-NLS-1$
 				sb.append(geomType.getGeomType());
-				sb.append(":srid=4326,fid:String,attribute:String");
+				sb.append(":srid=4326,fid:String,attribute:String"); //$NON-NLS-1$
 				return sb.toString();
 		}
 		return null;

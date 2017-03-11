@@ -28,6 +28,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.editors.EntityEditor;
@@ -53,7 +54,7 @@ public class OpenEntityHandler {
 				}
 			}
 		} catch (PartInitException e) {
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to open entity. {0}", e.getMessage()), e);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.OpenEntityHandler_OpenError, e.getMessage()), e);
 		}
 		
 	}

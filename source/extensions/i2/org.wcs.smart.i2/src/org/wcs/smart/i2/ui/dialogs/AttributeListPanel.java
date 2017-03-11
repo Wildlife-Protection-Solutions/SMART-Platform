@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
@@ -218,7 +219,7 @@ public class AttributeListPanel extends Composite {
 			if (x instanceof IntelAttributeListItem){
 				toDelete.add((IntelAttributeListItem) x);
 				sb.append(((IntelAttributeListItem)x).getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 		}
 		
@@ -226,7 +227,8 @@ public class AttributeListPanel extends Composite {
 		sb.deleteCharAt(sb.length()-1);
 		sb.deleteCharAt(sb.length()-1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete List Items", MessageFormat.format("Are you sure you want to delete the following {0} list items? \n {1}", toDelete.size(), sb.toString()))) return;
+		if (!MessageDialog.openConfirm(getShell(), Messages.AttributeListPanel_ConfirmTitle,
+				MessageFormat.format(Messages.AttributeListPanel_ConfirmMsg, toDelete.size(), sb.toString()))) return;
 
 		attribute.getAttributeList().removeAll(toDelete);
 		this.items.refresh();

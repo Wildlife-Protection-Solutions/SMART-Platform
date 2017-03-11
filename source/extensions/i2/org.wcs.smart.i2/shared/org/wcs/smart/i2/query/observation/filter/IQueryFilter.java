@@ -31,11 +31,11 @@ public interface IQueryFilter {
 
 	public static final String ANY_OPTION_KEY = "list.any"; //$NON-NLS-1$
 	
-	public static String DATE_FORMAT_STR = "yyyy-MM-dd";
+	public static String DATE_FORMAT_STR = "yyyy-MM-dd"; //$NON-NLS-1$
 	
 	public enum FilterType{
-		OBSERVATION("observation"),
-		WAYPOINT("waypoint");
+		OBSERVATION("observation"), //$NON-NLS-1$
+		WAYPOINT("waypoint"); //$NON-NLS-1$
 		
 		String key;
 		FilterType(String key){
@@ -50,7 +50,7 @@ public interface IQueryFilter {
 			for (FilterType t : FilterType.values()){
 				if (t.key.equalsIgnoreCase(key)) return t;
 			}
-			throw new IllegalStateException(key + " invalid filter type");
+			throw new IllegalStateException(key + " invalid filter type"); //$NON-NLS-1$
 		}
 	}
 	

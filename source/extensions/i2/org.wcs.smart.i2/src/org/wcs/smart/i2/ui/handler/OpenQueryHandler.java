@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
 import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 
@@ -42,7 +43,7 @@ public class OpenQueryHandler {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelQueryEditor.ID);
 		} catch (PartInitException e) {
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to open intelligence query. {0}", e.getMessage()), e);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.OpenQueryHandler_OpenError, e.getMessage()), e);
 		}
 	}
 	

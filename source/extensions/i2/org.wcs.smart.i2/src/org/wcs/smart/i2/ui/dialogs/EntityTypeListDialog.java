@@ -75,6 +75,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
@@ -264,9 +265,9 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		
 		
-		setTitle("Entity Types");
-		getShell().setText("Entity Types");
-		setMessage("Manage the entity types in the system.");
+		setTitle(Messages.EntityTypeListDialog_Title);
+		getShell().setText(Messages.EntityTypeListDialog_Title);
+		setMessage(Messages.EntityTypeListDialog_Message);
 		
 		loadTypes.setSystem(true);
 		loadTypes.schedule();
@@ -311,13 +312,13 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 							&& ((EntityEditor)src).getEntity().getEntityType().equals(type)){
 						toSave.add((EntityEditor) src);
 						sb.append(((EntityEditor)src).getEntity().getIdAttributeAsText());
-						sb.append(", ");
+						sb.append(", "); //$NON-NLS-1$
 					}
 				}
 			}
 			if (!toSave.isEmpty()){
-				if (MessageDialog.openQuestion(getShell(), "Entity Type", 
-						MessageFormat.format("Before editing the entity type {0} all changes to the following entities must be saved.  Do you want to save now? \n{1}", type.getName(), sb.substring(0, sb.length()-2)))){
+				if (MessageDialog.openQuestion(getShell(), Messages.EntityTypeListDialog_EditTypeTitle, 
+						MessageFormat.format(Messages.EntityTypeListDialog_EditTypeMsg, type.getName(), sb.substring(0, sb.length()-2)))){
 					for (EntityEditor e : toSave){
 						e.doSave(new NullProgressMonitor());
 					}
@@ -339,13 +340,13 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 			if (x instanceof IntelEntityType){
 				toDelete.add((IntelEntityType)x);
 				sb.append(((IntelEntityType) x).getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the following entity types?  All entities, attributes, relationships and other references will also be removed.  This action cannot be undone.\n\n{0}", sb.toString()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.EntityTypeListDialog_DeleteTitle, MessageFormat.format(Messages.EntityTypeListDialog_DeleteMsg, sb.toString()))){
 			return;
 		}
 		
@@ -356,7 +357,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 
-					monitor.beginTask("Deleting entity types", toDelete.size());
+					monitor.beginTask(Messages.EntityTypeListDialog_DeleteTaskName, toDelete.size());
 					List<IntelEntityType> deleted = new ArrayList<IntelEntityType>();
 					Session s = HibernateManager.openSession();
 					try{
@@ -369,7 +370,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 								deleted.add(t);
 							}catch(Exception ex){
 								s.getTransaction().rollback();
-								Intelligence2PlugIn.displayLog(MessageFormat.format("Unable to delete Entity Type {0}. {1}", t.getName(), ex.getMessage()), ex);
+								Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.EntityTypeListDialog_DeleteError, t.getName(), ex.getMessage()), ex);
 							}
 							monitor.worked(1);
 						}
@@ -384,7 +385,7 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 				}
 			});
 		} catch (Exception e) {
-			Intelligence2PlugIn.displayLog("Error deleting entity types: " +e.getMessage(), e);
+			Intelligence2PlugIn.displayLog(Messages.EntityTypeListDialog_DeleteError2 +e.getMessage(), e);
 		}
 		
 		refresh();

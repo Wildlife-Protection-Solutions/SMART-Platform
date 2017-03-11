@@ -41,9 +41,9 @@ import org.wcs.smart.i2.EntityManager;
  *
  */
 public enum LocationLayerType {
-	POINT("Point"), 
-	POLYGON("Polygon"),
-	ATTRIBUTE("Point");
+	POINT("Point"),  //$NON-NLS-1$
+	POLYGON("Polygon"), //$NON-NLS-1$
+	ATTRIBUTE("Point"); //$NON-NLS-1$
 	
 	private String geomType;
 	
@@ -63,7 +63,7 @@ public enum LocationLayerType {
     	
     	if (this == POINT){
 	    	FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-	    	fts.setName("Style 1");
+	    	fts.setName("Style 1"); //$NON-NLS-1$
 	    	Mark x = sf.getXMark();
 	    	x.setFill(sf.createFill(builder.colorExpression(fillColor), builder.literalExpression(0.5)));
 	    	PointSymbolizer point = sf.createPointSymbolizer();
@@ -71,7 +71,7 @@ public enum LocationLayerType {
 	    	point.getGraphic().graphicalSymbols().add(x);
 	    	point.getGraphic().setRotation(builder.literalExpression(0));
 	    	Rule r = sf.createRule();
-	    	r.setName("Rule 1");
+	    	r.setName("Rule 1"); //$NON-NLS-1$
 	    	r.symbolizers().add(point);
 	    	fts.rules().add(r);
 	    	Style style = sf.createStyle();
@@ -80,14 +80,14 @@ public enum LocationLayerType {
     	}else if (this == POLYGON){
     		Style style = sf.createStyle();
     		FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-    		fts.setName("Style 1");
+    		fts.setName("Style 1"); //$NON-NLS-1$
     		style.featureTypeStyles().add(fts);
     		
     		PolygonSymbolizer sym = sf.createPolygonSymbolizer();
     		sym.setFill(sf.createFill(builder.colorExpression(fillColor), builder.literalExpression(0.5)));
     		sym.setStroke(sf.createStroke(builder.colorExpression(lineColor), builder.literalExpression(1)));
     		Rule r = sf.createRule();
-    		r.setName("Rule 1");
+    		r.setName("Rule 1"); //$NON-NLS-1$
     		r.symbolizers().add(sym);
     		fts.rules().add(r);
     		return style;

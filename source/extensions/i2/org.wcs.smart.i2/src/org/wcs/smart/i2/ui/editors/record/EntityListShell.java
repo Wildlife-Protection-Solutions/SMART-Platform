@@ -51,6 +51,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.search.IntelSearchResult;
@@ -70,8 +71,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class EntityListShell extends SmartShellDialog {
 	
-	private static final String ALL_ENTITIES = "All Entities >";
-	private static final String NEW_ENTITY = "New Entity...";
+	private static final String ALL_ENTITIES = Messages.EntityListShell_AllEntitiesLabel;
+	private static final String NEW_ENTITY = Messages.EntityListShell_NewEntityLabel;
 
 	private TableViewer tblSearchEntityList;
 	private TableViewer tblEntityTypeList;
@@ -216,7 +217,7 @@ public class EntityListShell extends SmartShellDialog {
 		return this.selectedEntity;
 	}
 	
-	private Job loadEntityTypesJob = new Job("load entity types"){
+	private Job loadEntityTypesJob = new Job("load entity types"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -233,7 +234,7 @@ public class EntityListShell extends SmartShellDialog {
 		
 	};
 	
-	private Job loadEntitiesJob = new Job("load entities"){
+	private Job loadEntitiesJob = new Job("load entities"){ //$NON-NLS-1$
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -243,7 +244,7 @@ public class EntityListShell extends SmartShellDialog {
 				Session s = HibernateManager.openSession();
 				try{
 					entities.addAll(s.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("entityType", lastSelectedType))
+					.add(Restrictions.eq("entityType", lastSelectedType)) //$NON-NLS-1$
 					.list());
 					for (IntelEntity e : entities){
 						e.getIdAttributeAsText();

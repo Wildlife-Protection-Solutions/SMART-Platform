@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.BasicEntitySearch;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
@@ -104,7 +105,7 @@ public class EntitySearchShell extends SmartShellDialog {
 			public String getText(Object element){
 				if (element instanceof IntelSearchResultItem){
 					IntelSearchResultItem item = (IntelSearchResultItem)element;
-					return MessageFormat.format("{0} ({1})", item.getEntity().getIdAttributeAsText(), item.getFormattedRating());
+					return MessageFormat.format("{0} ({1})", item.getEntity().getIdAttributeAsText(), item.getFormattedRating()); //$NON-NLS-1$
 					
 				}
 				return super.getText(element);
@@ -131,7 +132,7 @@ public class EntitySearchShell extends SmartShellDialog {
 		tblEntityList.getTable().setMenu(mnu);
 		
 		MenuItem addToRecord = new MenuItem(mnu, SWT.PUSH);
-		addToRecord.setText("Add to Record");
+		addToRecord.setText(Messages.EntitySearchShell_AddtoRecordItem);
 		addToRecord.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -159,10 +160,10 @@ public class EntitySearchShell extends SmartShellDialog {
 	}
 
 	
-	private Job searchEntityJob = new Job("search entity"){
+	private Job searchEntityJob = new Job("search entity"){ //$NON-NLS-1$
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			String[] searchText = new String[]{""};
+			String[] searchText = new String[]{""}; //$NON-NLS-1$
 			Display.getDefault().syncExec(()->{
 				searchText[0] = txtSearch.getText();
 				tblEntityList.setInput(new String[]{DialogConstants.LOADING_TEXT});
@@ -181,7 +182,7 @@ public class EntitySearchShell extends SmartShellDialog {
 				if (tblEntityList.getTable().isDisposed()) return;
 				
 				if (entities.isEmpty()){
-					tblEntityList.setInput(new String[]{"No results found"});
+					tblEntityList.setInput(new String[]{Messages.EntitySearchShell_NoResultsFound});
 				}else{
 					tblEntityList.setInput(entities);
 				}

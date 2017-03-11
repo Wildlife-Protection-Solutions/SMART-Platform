@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.i2.birt.entity.records;
 
+import java.util.Locale;
+
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 
@@ -34,24 +38,22 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public static enum Column{
-		ENTITY_UUID("record:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		TITLE("record:title", "Title", java.sql.Types.VARCHAR),
-		STATUS("record:status", "Status", java.sql.Types.VARCHAR),
-		DATE_RECIEVED("record:datereceived", "Date Received", java.sql.Types.DATE),
-		DATE_MODIFIED("record:datemodified", "Date Modified", java.sql.Types.DATE),
-		DESCRIPTION("record:description", "Description", java.sql.Types.VARCHAR);
+		ENTITY_UUID("record:entity_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		TITLE("record:title", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		STATUS("record:status", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		DATE_RECIEVED("record:datereceived", java.sql.Types.DATE), //$NON-NLS-1$
+		DATE_MODIFIED("record:datemodified", java.sql.Types.DATE), //$NON-NLS-1$
+		DESCRIPTION("record:description", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		String id;
-		String name;
 		int type;
 		
-		Column(String id, String name, int type){
+		Column(String id, int type){
 			this.id = id;
-			this.name = name;
 			this.type = type;
 		}
-		public String getColumnName(){
-			return this.name;
+		public String getColumnName(Locale l){
+			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
 		public String getId(){
 			return this.id;
@@ -67,7 +69,9 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 		}
 	}
 	
-	public EntityRecordDatasetResultSetMetadata(){
+	private Locale l;
+	public EntityRecordDatasetResultSetMetadata(Locale l){
+		this.l = l;
 	}
 	
 	/**
@@ -92,7 +96,7 @@ public class EntityRecordDatasetResultSetMetadata implements IResultSetMetaData 
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].getColumnName(l);
 	}
 
 	/**

@@ -45,7 +45,7 @@ import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
  */
 public class RecordLocationDataset implements IQuery {
 	
-	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.record.location";
+	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.record.location"; //$NON-NLS-1$
 
 	private IResultSetMetaData r_metadata = null;
 	private RecordParameterMetadata pMetadata = null;
@@ -90,7 +90,7 @@ public class RecordLocationDataset implements IQuery {
 	@Override
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (r_metadata == null){
-			r_metadata = new RecordLocationDatasetResultSetMetadata();
+			r_metadata = new RecordLocationDatasetResultSetMetadata(connection.getCurrentLocale());
 		}
 		return r_metadata;
 	}

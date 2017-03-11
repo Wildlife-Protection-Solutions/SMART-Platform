@@ -68,6 +68,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttributeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
@@ -241,9 +242,9 @@ public class AttributeListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		mnuNew.setEnabled(true);
 		
-		setTitle("Intelligence Attributes");
-		getShell().setText("Intelligence Attributes");
-		setMessage("Manage the attributes in the system.");
+		setTitle(Messages.AttributeListDialog_Title);
+		getShell().setText(Messages.AttributeListDialog_Title);
+		setMessage(Messages.AttributeListDialog_Message);
 		
 		loadTypes.setSystem(true);
 		loadTypes.schedule();
@@ -296,7 +297,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 			if (x instanceof IntelAttribute){
 				toDelete.add((IntelAttribute) x);
 				sb.append(((IntelAttribute)x).getName());
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 		}
 		
@@ -304,7 +305,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 		sb.deleteCharAt(sb.length()-1);
 		sb.deleteCharAt(sb.length()-1);
 		
-		if (!MessageDialog.openConfirm(getShell(), "Delete Attributes", MessageFormat.format("Are you sure you want to delete the following {0} attributes? This action cannot be undone. \n {1}", toDelete.size(), sb.toString()))) return;
+		if (!MessageDialog.openConfirm(getShell(), Messages.AttributeListDialog_DeleteDialogTitle, MessageFormat.format(Messages.AttributeListDialog_deleteDialogMsg, toDelete.size(), sb.toString()))) return;
 	
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
@@ -321,7 +322,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 							try {
 								AttributeManager.INSTANCE.deleteAttribute(a, s);
 							}catch(Exception ex){
-								warnings.add(a.getName() + ": " + ex.getMessage());
+								warnings.add(a.getName() + ": " + ex.getMessage()); //$NON-NLS-1$
 							}
 						}
 						s.getTransaction().commit();
@@ -329,7 +330,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 							Display.getDefault().syncExec(new Runnable(){
 								@Override
 								public void run() {
-									WarningDialog wd = new WarningDialog(getShell(), "Delete Attributes", "The following attributes could not be removed: ", warnings);
+									WarningDialog wd = new WarningDialog(getShell(), Messages.AttributeListDialog_DeleteDialogTitle, Messages.AttributeListDialog_DeleteErrorMsg, warnings);
 									wd.open();		
 								}
 								
@@ -338,14 +339,14 @@ public class AttributeListDialog extends TitleAreaDialog {
 						}
 					}catch (Exception ex){
 						s.getTransaction().rollback();
-						Intelligence2PlugIn.displayLog("Could not delete attributes: " + ex.getMessage(), ex);
+						Intelligence2PlugIn.displayLog(Messages.AttributeListDialog_DeleteError + ex.getMessage(), ex);
 					}finally{
 						s.close();
 					}			
 				}
 			});
 		}catch(Exception ex){
-			Intelligence2PlugIn.displayLog("Could not delete attributes: " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.AttributeListDialog_DeleteError + ex.getMessage(), ex);
 			
 		}
 		refresh();

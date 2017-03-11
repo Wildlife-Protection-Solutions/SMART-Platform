@@ -203,7 +203,7 @@ public class QueryService extends IService {
                 	if (results != null){
                 		ds = new QueryDataSource(getResultSet());
                 	}else{
-                		throw new IOException("Unable to create datastore - query results not provided.");
+                		throw new IOException("Unable to create datastore - query results not provided."); //$NON-NLS-1$
                     }
                 }
             } finally {

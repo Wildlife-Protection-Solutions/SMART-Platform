@@ -68,6 +68,7 @@ import org.eclipse.ui.forms.widgets.Twistie;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.search.attachment.AttachmentSearchEngine;
 import org.wcs.smart.i2.search.attachment.IMatchCollector;
 import org.wcs.smart.i2.search.attachment.SearchResult;
@@ -81,11 +82,11 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class FileSearchView {
 
-	private static final String SECTION_LABEL_KEY = "LABEL";
+	private static final String SECTION_LABEL_KEY = "LABEL"; //$NON-NLS-1$
 
-	private static final String SECTION_STATE_KEY = "STATE";
+	private static final String SECTION_STATE_KEY = "STATE"; //$NON-NLS-1$
 
-	public static final String ID = "org.wcs.smart.i2.ui.view.filesearch";
+	public static final String ID = "org.wcs.smart.i2.ui.view.filesearch"; //$NON-NLS-1$
 	
 	private Object SEARCHJOB_SYNC = new Object();
 	
@@ -141,7 +142,7 @@ public class FileSearchView {
 		});
 		
 		Button btnSearch = new Button(search, SWT.PUSH);
-		btnSearch.setText("Search");
+		btnSearch.setText(Messages.FileSearchView_SerachBtn);
 		btnSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		btnSearch.addListener(SWT.Selection, e->doSearch(null));
 		
@@ -179,10 +180,10 @@ public class FileSearchView {
 		lastAttachments = attachments;
 		
 		StringBuilder files = new StringBuilder();
-		files.append(MessageFormat.format("Files: ({0})", attachments.size()));
-		files.append(" ");
+		files.append(MessageFormat.format(Messages.FileSearchView_FilesLabel, attachments.size()));
+		files.append(" "); //$NON-NLS-1$
 		for (ISmartAttachment m : attachments){
-			files.append(m.getFilename() + ", ");
+			files.append(m.getFilename() + ", "); //$NON-NLS-1$
 		}
 		files.delete(files.length() - 2, files.length());
 		lblFiles.setText(files.toString());
@@ -244,7 +245,7 @@ public class FileSearchView {
 		}
 		
 		Hyperlink h = new Hyperlink(progressComposite, SWT.NONE);
-		h.setText("Cancel...");
+		h.setText(Messages.FileSearchView_CancelLink);
 		h.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		h.setForeground(h.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
 		h.setBackground(h.getDisplay().getSystemColor(SWT.COLOR_WHITE));
@@ -348,7 +349,7 @@ public class FileSearchView {
 			c = createFileHeaderComp(compResults, attachment);
 		}
 		Label l = (Label)c.getData(SECTION_LABEL_KEY);
-		l.setText(MessageFormat.format("{0} ({1} of {2})", attachment.getFilename(), displayCount, matchCount));
+		l.setText(MessageFormat.format(Messages.FileSearchView_SearchResults_Filename_displaycnt_matchCnt, attachment.getFilename(), displayCount, matchCount));
 		l.getParent().layout(true);
 		
 		layoutResults();
@@ -366,7 +367,7 @@ public class FileSearchView {
 		l.setBackground(compResults.getBackground());
 		l = new Label(cancelComposite, SWT.NONE);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		l.setText("Search Canceled");
+		l.setText(Messages.FileSearchView_CancelledLabel);
 		l.setBackground(compResults.getBackground());
 		cancelComposite.moveAbove(compResults.getChildren()[0]);
 	}
@@ -394,7 +395,7 @@ public class FileSearchView {
 		private List<SearchResult> allResults;
 		private List<SearchResult> displayResults;
 		
-		private Job updateUiJob = new Job("update match results"){		
+		private Job updateUiJob = new Job(Messages.FileSearchView_updateUiJob){		
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				while(!monitor.isCanceled()){

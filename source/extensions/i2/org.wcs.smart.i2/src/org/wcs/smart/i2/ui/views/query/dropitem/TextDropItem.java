@@ -69,7 +69,7 @@ public class TextDropItem extends DropItem {
 	@Override
 	protected void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText( formatStringForLabel(getText()));  //$NON-NLS-1$//$NON-NLS-2$
+		lbl.setText( formatStringForLabel(getText()));  
 		initDrag(lbl);
 
 	}

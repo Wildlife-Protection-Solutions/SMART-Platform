@@ -84,6 +84,7 @@ import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -114,12 +115,12 @@ import com.vividsolutions.jts.io.ParseException;
 public class EntityEditorMapComposite extends Composite implements MapPart{
 
 	private enum LocationTableColumn{
-		ID("ID"),
-		DATETIME("Date/Time"),
-		COMMENT("Comment"),
-		RECORD("Record"),
-		RECORDDATE("Record Date"),
-		OBSERVATION("Observation");
+		ID(Messages.EntityEditorMapComposite_IDColumnName),
+		DATETIME(Messages.EntityEditorMapComposite_DateTimeColumnName),
+		COMMENT(Messages.EntityEditorMapComposite_CommentColumnName),
+		RECORD(Messages.EntityEditorMapComposite_RecordColumnName),
+		RECORDDATE(Messages.EntityEditorMapComposite_RecordDatecolumnName),
+		OBSERVATION(Messages.EntityEditorMapComposite_ObservationColumnName);
 		
 		String guiName;
 	
@@ -130,7 +131,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		public String getLabel(IntelLocation location){
 			if (this == ID) return location.getId();
 			if (this == DATETIME) return DateFormat.getDateTimeInstance().format(location.getDateTime());
-			if (this==COMMENT) return location.getComment() == null ? "" : location.getComment();
+			if (this==COMMENT) return location.getComment() == null ? "" : location.getComment(); //$NON-NLS-1$
 			if (this == RECORD) return location.getRecord().getTitle();
 			if (this == RECORDDATE) return DateFormat.getDateTimeInstance().format(location.getRecord().getDateCreated());
 			if (this == OBSERVATION){
@@ -138,9 +139,9 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				if (location.getObservations() != null ){
 					cnt = location.getObservations().size();
 				}
-				return MessageFormat.format("{0} Observations", cnt);
+				return MessageFormat.format(Messages.EntityEditorMapComposite_ObservationsLabel, cnt);
 			};
-			return "";
+			return ""; //$NON-NLS-1$
 			
 		}
 	}
@@ -182,7 +183,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			}
 		}
 
-		Job j = new Job("add location layers job"){
+		Job j = new Job("add location layers job"){ //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
@@ -228,7 +229,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			}
 		}
 		if (hasPosition){
-			locationLayer = new LocationAttributeMapLayer(getMap(), "Position Attributes", UuidUtils.uuidToString(editor.getEntity().getUuid()));
+			locationLayer = new LocationAttributeMapLayer(getMap(), Messages.EntityEditorMapComposite_LayerName, UuidUtils.uuidToString(editor.getEntity().getUuid()));
 			locationLayer.createValueLayers(editor.getEntity().getAttributes());
 		}
 	}
@@ -313,7 +314,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		locationTable.getTable().setHeaderVisible(true);
 		
 		TableViewerColumn geomTypeColumn = new TableViewerColumn(locationTable, SWT.CENTER);
-		geomTypeColumn.getColumn().setText("");
+		geomTypeColumn.getColumn().setText(""); //$NON-NLS-1$
 		geomTypeColumn.getColumn().setWidth(25);
 		geomTypeColumn.setLabelProvider(new ColumnLabelProvider() {
 			
@@ -328,7 +329,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			}
 			@Override
 			public String getText(Object element) {
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			
 			@Override
@@ -427,7 +428,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		locationTable.getTable().setMenu(mnu);
 		
 		MenuItem openItem = new MenuItem(mnu, SWT.PUSH);
-		openItem.setText("Open Record");
+		openItem.setText(Messages.EntityEditorMapComposite_OpenRecordMnuItem);
 		openItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -469,7 +470,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				for (IntelAttribute ia : attributes){			
 					MenuItem setAttribute = new MenuItem(mnu, SWT.PUSH);
 					
-					setAttribute.setText(MessageFormat.format("Update {0} To Selection", ia.getName()));
+					setAttribute.setText(MessageFormat.format(Messages.EntityEditorMapComposite_UpdateMenuItem, ia.getName()));
 					setAttribute.addSelectionListener(new SelectionAdapter() {
 						
 						@Override
@@ -478,7 +479,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 							try{
 								IntelLocation loc = getSelectedLocation();
 								if (!(loc.getGeometry() instanceof com.vividsolutions.jts.geom.Point)){
-									MessageDialog.openError(getShell(), "Update Attribute", "Invalid location type.  Can only update position attributes to point locations");
+									MessageDialog.openError(getShell(), Messages.EntityEditorMapComposite_UpdateAttributeErrorDialogTitle, Messages.EntityEditorMapComposite_UpdateAttributeErrorDialogMessage);
 									return;
 								}
 								p = (com.vividsolutions.jts.geom.Point) loc.getGeometry();
@@ -533,7 +534,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			for (Layer l : locationLayers){
 				if ((l.getGeoResource().resolve(FeatureSource.class, null).getSchema().getName().getLocalPart().equals(LocationLayerType.POINT.name()) && location.isPoint()) ||
 					( l.getGeoResource().resolve(FeatureSource.class, null).getSchema().getName().getLocalPart().equals(LocationLayerType.POLYGON.name()) && location.isPolygon())){
-					l.setFilter(ff.equals(ff.property("system_id"), ff.literal(UuidUtils.uuidToString(location.getUuid()))));
+					l.setFilter(ff.equals(ff.property("system_id"), ff.literal(UuidUtils.uuidToString(location.getUuid())))); //$NON-NLS-1$
 				}else{
 					l.setFilter(Filter.EXCLUDE);
 				}
@@ -600,7 +601,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	}
 	
 	
-	private Job loadLocationsLink = new Job("loading location links"){
+	private Job loadLocationsLink = new Job("loading location links"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

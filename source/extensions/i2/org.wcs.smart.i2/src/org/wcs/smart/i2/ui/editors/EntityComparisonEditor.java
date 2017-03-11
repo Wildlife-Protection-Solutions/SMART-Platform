@@ -67,6 +67,7 @@ import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -268,7 +269,7 @@ public class EntityComparisonEditor extends EditorPart{
 		
 	}
 	
-	private Job loadValues= new Job("Loading Entities Values"){
+	private Job loadValues= new Job(Messages.EntityComparisonEditor_LoadJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			IntelEntityType type;
@@ -416,7 +417,7 @@ public class EntityComparisonEditor extends EditorPart{
 			new Label(parent, SWT.NONE);
 			
 			for (IntelEntity et : entities){
-				Hyperlink l = toolkit.createHyperlink(parent, "remove", SWT.NONE);
+				Hyperlink l = toolkit.createHyperlink(parent, Messages.EntityComparisonEditor_removelink, SWT.NONE);
 				GridData gd = new GridData(SWT.LEFT, SWT.FILL, false, false);
 				gd.widthHint = 150;
 				l.setLayoutData(gd);
@@ -463,7 +464,7 @@ public class EntityComparisonEditor extends EditorPart{
 				groupRow.setBackground(headerColor);
 				
 				
-				Label info = toolkit.createLabel(groupRow, "");
+				Label info = toolkit.createLabel(groupRow, ""); //$NON-NLS-1$
 				if (group == null){
 					info.setText(OtherAttributeGroup.INSTANCE.getName());
 				}else{
@@ -480,7 +481,7 @@ public class EntityComparisonEditor extends EditorPart{
 					outer.setLayout(new GridLayout());
 					outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 					((GridData)outer.getLayoutData()).widthHint = 200;
-					Label l = toolkit.createLabel(outer, "", SWT.WRAP);
+					Label l = toolkit.createLabel(outer, "", SWT.WRAP); //$NON-NLS-1$
 					l.setText(a.getAttribute().getName());
 					GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
 					gd.widthHint = 200;
@@ -499,7 +500,7 @@ public class EntityComparisonEditor extends EditorPart{
 						outer.setLayout(new GridLayout());
 						outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 						
-						l = toolkit.createLabel(outer, "", SWT.WRAP);
+						l = toolkit.createLabel(outer, "", SWT.WRAP); //$NON-NLS-1$
 						l.setText(valueProvider.getText(e.findAttributeValue(a.getAttribute())));
 						gd = new GridData(SWT.FILL, SWT.FILL, false, false);
 						gd.widthHint = 150;
@@ -523,11 +524,11 @@ public class EntityComparisonEditor extends EditorPart{
 			groupRow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, entities.size() + 1, 1));
 			groupRow.setBackground(headerColor);
 
-			Label info = toolkit.createLabel(groupRow, "Attachments");
+			Label info = toolkit.createLabel(groupRow, Messages.EntityComparisonEditor_AttachmentsLabel);
 			info.setBackground(headerColor);
 			info.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 			
-			toolkit.createLabel(parent, "");
+			toolkit.createLabel(parent, ""); //$NON-NLS-1$
 			for (IntelEntity e : entities){
 				Composite outer = toolkit.createComposite(parent, SWT.NONE);
 				outer.setLayout(new GridLayout());

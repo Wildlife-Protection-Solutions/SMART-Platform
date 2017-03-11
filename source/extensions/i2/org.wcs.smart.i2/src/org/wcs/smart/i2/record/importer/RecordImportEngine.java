@@ -38,8 +38,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
@@ -49,12 +47,12 @@ import org.hibernate.criterion.Restrictions;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -93,10 +91,11 @@ public enum RecordImportEngine {
 	 * @return the number of entities imported or null if nothing imported
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	public Integer importRecords(RecordImportConfig config, IEventBroker eventBroker, IProgressMonitor pMonitor) throws Exception{
 		SubMonitor monitor = SubMonitor.convert(pMonitor);
 		
-		monitor.beginTask("Importing Records", 5);
+		monitor.beginTask(Messages.RecordImportEngine_TaskName, 5);
 		//ensure the file exists
 		if (!Files.exists(config.getFile())) throw new FileNotFoundException(config.getFile().toString());
 		
@@ -105,13 +104,13 @@ public enum RecordImportEngine {
 		MathTransform transform = CRS.findMathTransform(fromCrs, toCrs);
 		
 		
-		monitor.subTask("Loading source and attribute information");
+		monitor.subTask(Messages.RecordImportEngine_LoadingSubTaskName);
 //		//load the attributes 
 		Set<IntelRecordSource> sources = new HashSet<>();
 		Session s = HibernateManager.openSession();
 		try{
 			sources.addAll(s.createCriteria(IntelRecordSource.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.list());
 			sources.forEach(src -> {
 				src.getNames().size();
@@ -139,7 +138,7 @@ public enum RecordImportEngine {
 		
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(config.getDateFormatString());
 		
-		monitor.subTask("Reading csv file");
+		monitor.subTask(Messages.RecordImportEngine_ReadingSubTask);
 		int lineCnt = 0;
 		int numcols = -1;
 		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile()), config.getDelimiter())){
@@ -167,7 +166,7 @@ public enum RecordImportEngine {
 			while((data=reader.readNext())!=null ){
 				line++;
 				if (data.length < numcols){
-					warnings.add(MessageFormat.format("Invalid line {0}. The number of columns ({1}) is less than the required number of columns ({2}).  Line will be ignored.", line, data.length, (numcols+1)));
+					warnings.add(MessageFormat.format(Messages.RecordImportEngine_InvalidLine, line, data.length, (numcols+1)));
 					continue;
 				}
 
@@ -229,7 +228,7 @@ public enum RecordImportEngine {
 								attributeValue = convertValue(value, value2, ia.getAttribute(), dateFormatter, transform);
 							}catch (Exception ex){
 								attributeValue = null;
-								warnings.add(MessageFormat.format("Error converting value ''{0}'' to valid value for attribute ''{1}'': {2}", value, ia.getAttribute().getName(), ex.getMessage()));
+								warnings.add(MessageFormat.format(Messages.RecordImportEngine_AttributeConversionError, value, ia.getAttribute().getName(), ex.getMessage()));
 							}
 						}else if (ia.getEntityType() != null){
 							//search entity type
@@ -237,7 +236,7 @@ public enum RecordImportEngine {
 								attributeValue = convertValue(value, ia);
 							}catch (Exception ex){
 								attributeValue = null;
-								warnings.add(MessageFormat.format("Error converting value ''{0}'' to valid entity: {1}", value, ex.getMessage()));
+								warnings.add(MessageFormat.format(Messages.RecordImportEngine_EntityConversionError, value, ex.getMessage()));
 							}
 						}
 						
@@ -278,7 +277,7 @@ public enum RecordImportEngine {
 		}catch (Exception ex){
 			
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Error saving imported records to database. " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.RecordImportEngine_SaveError + ex.getMessage(), ex);
 			return null;
 		}finally{
 			s.close();
@@ -288,6 +287,7 @@ public enum RecordImportEngine {
 		return addedItems.size();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private IntelRecordAttributeValue convertValue(String strvalue, IntelRecordSourceAttribute attribute) throws Exception{
 		if (strvalue.isEmpty()) return null;
 		
@@ -299,17 +299,17 @@ public enum RecordImportEngine {
 			IntelEntityType type = (IntelEntityType) s.get(IntelEntityType.class, attribute.getEntityType().getUuid());
 			IntelAttribute ia = type.getIdAttribute();
 			
-			String hql = "SELECT v.id.entity FROM IntelEntityAttributeValue v join v.id.entity e WHERE v.id.attribute = :ia and e.entityType = :type and lower(v.stringValue) like :value ";
+			String hql = "SELECT v.id.entity FROM IntelEntityAttributeValue v join v.id.entity e WHERE v.id.attribute = :ia and e.entityType = :type and lower(v.stringValue) like :value "; //$NON-NLS-1$
 			Query query = s.createQuery(hql);
-			query.setParameter("ia", ia);
-			query.setParameter("type", type);
-			query.setParameter("value", "%" + strvalue.toLowerCase() + "%");
+			query.setParameter("ia", ia); //$NON-NLS-1$
+			query.setParameter("type", type); //$NON-NLS-1$
+			query.setParameter("value", "%" + strvalue.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			
 			List<IntelEntity> entities = query.list();
 			if (entities.size() > 1){
-				throw new Exception(MessageFormat.format("Multiple entities of type {0} found with id {1}", type.getName(), strvalue));
+				throw new Exception(MessageFormat.format(Messages.RecordImportEngine_MultipleEntitiesFound, type.getName(), strvalue));
 			}else if (entities.size() == 0){
-				throw new Exception(MessageFormat.format("No entities of type {0} found with id {1}", type.getName(), strvalue));
+				throw new Exception(MessageFormat.format(Messages.RecordImportEngine_NoEntitiesFound, type.getName(), strvalue));
 			}
 			
 			IntelRecordAttributeValueList item = new IntelRecordAttributeValueList();
@@ -340,7 +340,7 @@ public enum RecordImportEngine {
 				}
 				return value;
 			}catch (Exception ex){
-				throw new Exception(MessageFormat.format("Invalid Boolean: {0}", strvalue));
+				throw new Exception(MessageFormat.format(Messages.RecordImportEngine_InvalidBoolean, strvalue));
 			}
 		case DATE:
 			try{
@@ -348,7 +348,7 @@ public enum RecordImportEngine {
 				value.setDateValue(d);
 				return value;
 			}catch (Exception ex){
-				throw new Exception(MessageFormat.format("Invalid Date: {0}", strvalue));
+				throw new Exception(MessageFormat.format(Messages.RecordImportEngine_InvalidDate, strvalue));
 			}
 		case LIST:
 			for (IntelAttributeListItem i : attribute.getAttributeList()){
@@ -362,29 +362,29 @@ public enum RecordImportEngine {
 					}
 				}
 			}
-			throw new Exception(MessageFormat.format("Invalid list option {0} for attribute {1}", strvalue, attribute.getName()));
+			throw new Exception(MessageFormat.format(Messages.RecordImportEngine_InvalidListItem, strvalue, attribute.getName()));
 		case NUMERIC:
 			try{
 				Double dvalue = Double.parseDouble(strvalue);
 				value.setNumberValue(dvalue);
 				return value;
 			}catch (Exception ex){
-				throw new Exception(MessageFormat.format("Invalid Number: {0}", strvalue));
+				throw new Exception(MessageFormat.format(Messages.RecordImportEngine_InvalidNumber, strvalue));
 			}
 		case POSITION:
-			if (strvalue2 == null) throw new Exception("No Y value found for matching X value.");
+			if (strvalue2 == null) throw new Exception(Messages.RecordImportEngine_MissingYValue);
 			
 			Double x = null;
 			Double y = null;
 			try{
 				x = Double.parseDouble(strvalue);
 			}catch (Exception ex){
-				throw new Exception(MessageFormat.format("Invalid number for x position attribute: {0}", strvalue));
+				throw new Exception(MessageFormat.format(Messages.RecordImportEngine_InvalidX, strvalue));
 			}
 			try{
 				y = Double.parseDouble(strvalue2);
 			}catch (Exception ex){
-				throw new Exception(MessageFormat.format("Invalid number for y position  attribute: {0}", strvalue2));
+				throw new Exception(MessageFormat.format(Messages.RecordImportEngine_InvalidY, strvalue2));
 			}
 			
 			Point p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x,y));
@@ -402,7 +402,7 @@ public enum RecordImportEngine {
 	private boolean confirmContinue(List<String> warnings){
 		boolean r[] = new boolean[]{false};
 		Display.getDefault().syncExec(()->{
-			WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), "Import Entitie", "The following warnings were generated while parsing data.  Do you want to continue with the import?", warnings,
+			WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.RecordImportEngine_WarningTitle, Messages.RecordImportEngine_WarningMessage, warnings,
 					new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);	
 			if (wd.open() == 0){
 				r[0] = true;
@@ -410,21 +410,5 @@ public enum RecordImportEngine {
 		});
 		return r[0];	
 	}
-	
-	private IntelAttributeListItem confirmAddListItem(String value, IntelAttribute attribute){
-		IntelAttributeListItem[] item = new IntelAttributeListItem[]{null};
-		Display.getDefault().syncExec(()->{
-			
-			if (MessageDialog.open(MessageDialog.QUESTION, Display.getDefault().getActiveShell(), "Attribute List Item", MessageFormat.format("No list item found with the value {0} for attribute {1}. Do you want to add this {2} to the list options?", value, attribute.getName(), value), SWT.NONE)){
-				item[0] = new IntelAttributeListItem();
-				item[0].setAttribute(attribute);
-				item[0].setKeyId(DataModelManager.INSTANCE.generateKey(value, attribute.getAttributeList()));
-				item[0].updateName(SmartDB.getCurrentLanguage(), value);
-				item[0].updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), value);
-				item[0].setName(value);
-				attribute.getAttributeList().add(item[0]);
-			}
-		});
-		return item[0];
-	}
+
 }

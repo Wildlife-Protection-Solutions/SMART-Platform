@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.gpx.xml.WptType;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Dialog for selecting waypoints from a gpx file.
@@ -120,9 +121,9 @@ public class WptTypeSelectionDialog extends TitleAreaDialog{
 					
 					Date d = GPSDataImport.findWaypointDate(wp);
 					if (d != null){
-						value.append( " [");
+						value.append( " ["); //$NON-NLS-1$
 						value.append(DateFormat.getInstance().format(GPSDataImport.findWaypointDate(wp)));
-						value.append( " ]");
+						value.append( " ]"); //$NON-NLS-1$
 					}
 					
 					return value.toString();
@@ -155,7 +156,7 @@ public class WptTypeSelectionDialog extends TitleAreaDialog{
 		((GridLayout)bottom.getLayout()).marginHeight = 0;
 		
 		Link lnkSelectAll = new Link(bottom, SWT.NONE);
-		lnkSelectAll.setText("<a>" + "Select All" + "</a>"); 
+		lnkSelectAll.setText("<a>" + Messages.WptTypeSelectionDialog_selectAll + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
 		lnkSelectAll.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				lstViewer.setAllChecked(true);
@@ -163,7 +164,7 @@ public class WptTypeSelectionDialog extends TitleAreaDialog{
 		});
 		
 		lnkSelectAll = new Link(bottom, SWT.NONE);
-		lnkSelectAll.setText("<a>" + "Select None" + "</a>"); 
+		lnkSelectAll.setText("<a>" + Messages.WptTypeSelectionDialog_selectNone + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
 		lnkSelectAll.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				lstViewer.setAllChecked(false);
@@ -171,8 +172,8 @@ public class WptTypeSelectionDialog extends TitleAreaDialog{
 		});
 		
 		super.setMessage(message);
-		super.setTitle("Import Waypoints");
-		getShell().setText("Import Waypoints");
+		super.setTitle(Messages.WptTypeSelectionDialog_Title);
+		getShell().setText(Messages.WptTypeSelectionDialog_Title);
 		
 		return parent;
 	}

@@ -62,6 +62,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -93,10 +94,10 @@ import org.wcs.smart.util.SharedUtils;
 public class AdvancedEntitySearchPanel extends Composite {
 
 	private enum FilterOption{
-		ENTITY_TYPE("Entity Type Filter..."),
-		ENTITY_ATTRIBUTE_TYPE("Entity Attribute Filter..."),
+		ENTITY_TYPE(Messages.AdvancedEntitySearchPanel_EntityTypeFilterLabel),
+		ENTITY_ATTRIBUTE_TYPE(Messages.AdvancedEntitySearchPanel_AttributeFilterLabel),
 		NOT(Operator.NOT.getLabel(Locale.getDefault())),
-		BRACKET(" ( Brackets ) ");
+		BRACKET(Messages.AdvancedEntitySearchPanel_bracketsFilterLabel);
 		
 		public String guiName;
 		
@@ -131,14 +132,14 @@ public class AdvancedEntitySearchPanel extends Composite {
 		((GridLayout)top.getLayout()).marginHeight = 0;
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		btnAddFilter = toolkit.createButton(top, "Add Filter ...", SWT.PUSH);
+		btnAddFilter = toolkit.createButton(top, Messages.AdvancedEntitySearchPanel_addFilterBtn, SWT.PUSH);
 		btnAddFilter.addListener(SWT.Selection, e-> showFilterMenu(e));
 		
 		ToolBar tb = new ToolBar(top, SWT.FLAT);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
 		ToolItem clear = new ToolItem(tb, SWT.PUSH);
-		clear.setToolTipText("clear search panel");
+		clear.setToolTipText(Messages.AdvancedEntitySearchPanel_Cleartooltip);
 		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
 		clear.addListener(SWT.Selection, (event)->searchPanel.clear());
 		
@@ -164,10 +165,10 @@ public class AdvancedEntitySearchPanel extends Composite {
 		((GridLayout)bottom.getLayout()).marginHeight = 0;
 		bottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		btnSearch = toolkit.createButton(bottom, "Search", SWT.PUSH);
+		btnSearch = toolkit.createButton(bottom, Messages.AdvancedEntitySearchPanel_SaveButton, SWT.PUSH);
 		btnSearch.addListener(SWT.Selection, e->doSearch());
 		
-		Hyperlink saveSearch = toolkit.createHyperlink(bottom, "Save Search", SWT.NONE);
+		Hyperlink saveSearch = toolkit.createHyperlink(bottom, Messages.AdvancedEntitySearchPanel_SaveSearchlink, SWT.NONE);
 		saveSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		saveSearch.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -190,7 +191,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 	private boolean configureSearch(){
 		String error = searchPanel.validate();
 		if (error != null){
-			MessageDialog.openError(getShell(), "Search", "Search error - the search must be valid before you can run or save the search.");
+			MessageDialog.openError(getShell(), Messages.AdvancedEntitySearchPanel_SaveDialogTitle, Messages.AdvancedEntitySearchPanel_SaveDialogMsg);
 			return false;
 		}
 		
@@ -212,7 +213,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 		
 		List<DropItem> toAdd = new ArrayList<DropItem>();
 		
-		String[] parts = search.getSearchString().split("\\|");
+		String[] parts = search.getSearchString().split("\\|"); //$NON-NLS-1$
 		
 		for(String p : parts){
 			if (p.equalsIgnoreCase(Operator.BRACKET_OPEN.getKey())){
@@ -230,21 +231,21 @@ public class AdvancedEntitySearchPanel extends Composite {
 				di.setInitialValue(Operator.OR.getKey());
 				toAdd.add(di);
 			}else if (p.startsWith(AdvancedEntitySearch.ENTITYTYPE_KEY)){
-				String entityTypeKey = p.split("=")[1];
+				String entityTypeKey = p.split("=")[1]; //$NON-NLS-1$
 				toAdd.add(createEntityTypeDropItem(entityTypeKey));				
-			}else if (p.startsWith(AdvancedEntitySearch.ATTRIBUTE_KEY + ":")){
-				String[] bits = p.split(" ")[0].split(":");
+			}else if (p.startsWith(AdvancedEntitySearch.ATTRIBUTE_KEY + ":")){ //$NON-NLS-1$
+				String[] bits = p.split(" ")[0].split(":"); //$NON-NLS-1$ //$NON-NLS-2$
 				String key = bits[2];
 				IntelAttribute ia = null;
 				Session session = HibernateManager.openSession();
 				try{
 					ia = (IntelAttribute)session.createCriteria(IntelAttribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-							.add(Restrictions.eq("keyId", key))
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+							.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
 							.uniqueResult();
 					
 					if (ia != null && ia.getType() == AttributeType.LIST){
-						String listKey = p.split(" ")[2];
+						String listKey = p.split(" ")[2]; //$NON-NLS-1$
 						boolean found = false;
 						if (ia.getAttributeList() != null){
 							for (IntelAttributeListItem listitem : ia.getAttributeList()){
@@ -255,7 +256,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 							}
 						}
 						if (!found){
-							toAdd.add(new ErrorDropItem(MessageFormat.format("Intelligence list item {0} not found for attribute {1}", listKey, ia.getName())));
+							toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.AdvancedEntitySearchPanel_listitemnotfound, listKey, ia.getName())));
 							continue;
 						}
 					}
@@ -263,33 +264,33 @@ public class AdvancedEntitySearchPanel extends Composite {
 					session.close();
 				}
 				if (ia == null){
-					toAdd.add(new ErrorDropItem(MessageFormat.format("Intelligence Attribute {0} not found", key)));
+					toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.AdvancedEntitySearchPanel_attributenotfound, key)));
 				}else{
 					try{
 						DropItem di = createAttributeDropItem(ia);
 						if (ia.getType() == IntelAttribute.AttributeType.TEXT){
-							String[] queryParts = p.split(" ");
+							String[] queryParts = p.split(" "); //$NON-NLS-1$
 							Operator op = Operator.parse(queryParts[1]);
 							String value = SharedUtils.stripQuotes(queryParts[2]);
 							((TextBoxDropItem)di).setInitialValue(op, value);
 						}else if (ia.getType() == IntelAttribute.AttributeType.NUMERIC){
-							String[] queryParts = p.split(" ");
+							String[] queryParts = p.split(" "); //$NON-NLS-1$
 							Operator op = Operator.parse(queryParts[1]);
 							String value = queryParts[2];
 							((TextBoxDropItem)di).setInitialValue(op, value);
 						}else if (ia.getType() == IntelAttribute.AttributeType.DATE){
-							String[] queryParts = p.split(" ");
+							String[] queryParts = p.split(" "); //$NON-NLS-1$
 							Operator op = Operator.parse(queryParts[1]);
 							Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[2]);
 							Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[4]);
 							((DateDropItem)di).setInitialValue(op, d1, d2);
 						}else if (ia.getType() == IntelAttribute.AttributeType.LIST){
-							String listKey = p.split(" ")[2];
+							String listKey = p.split(" ")[2]; //$NON-NLS-1$
 							((OptionDropItem)di).setInitialValue(listKey);
 						}
 						toAdd.add(di);
 					}catch (Exception ex){
-						toAdd.add(new ErrorDropItem(MessageFormat.format("Error parsing saved search: {0}", ex.getMessage())));
+						toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.AdvancedEntitySearchPanel_ParseError, ex.getMessage())));
 					}
 				}
 					
@@ -415,7 +416,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 				break;
 			case ENTITY_TYPE:
 				attributeTable.setInput(DialogConstants.LOADING_TEXT);
-				Job entityJob = new Job("loading entities"){
+				Job entityJob = new Job(Messages.AdvancedEntitySearchPanel_LoadingEntitiesJobName){
 
 					private List<IntelEntityType> entities;
 					@SuppressWarnings("unchecked")
@@ -424,7 +425,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 						Session s = HibernateManager.openSession();
 						try{
 							entities = s.createCriteria(IntelEntityType.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.list();
 							entities.forEach(ent->ent.getName());
 						}finally{
@@ -442,7 +443,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 					attributeTable.setInput(attributes);
 				}else{
 					attributeTable.setInput(new String[]{DialogConstants.LOADING_TEXT});
-					Job j = new Job("loading attributes"){
+					Job j = new Job(Messages.AdvancedEntitySearchPanel_loadingAttributeJobName){
 
 						@SuppressWarnings("unchecked")
 						@Override
@@ -450,7 +451,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 							Session s = HibernateManager.openSession();
 							try{
 								List<IntelAttribute> ats = s.createCriteria(IntelAttribute.class)
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 								.list();
 								ats.forEach(a->{
 									a.getName();
@@ -481,7 +482,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 	
 	private DropItem createAttributeDropItem(IntelAttribute a){
 		DropItem di = null;
-		String key = AdvancedEntitySearch.ATTRIBUTE_KEY + ":" + a.getType().key + ":" + a.getKeyId();
+		String key = AdvancedEntitySearch.ATTRIBUTE_KEY + ":" + a.getType().key + ":" + a.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
 		switch(a.getType()){
 		case BOOLEAN:
 			di = new TextDropItem(a.getName(), key);
@@ -514,14 +515,14 @@ public class AdvancedEntitySearchPanel extends Composite {
 	@SuppressWarnings("unchecked")
 	private DropItem createEntityTypeDropItem(String entityTypeKey){
 		String[][] values = new String[2][];
-		Job j = new Job("loading entity types"){
+		Job j = new Job(Messages.AdvancedEntitySearchPanel_loadingEntityTypeJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
 				try{
 					List<IntelEntityType> types = s.createCriteria(IntelEntityType.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.list();
 					
 					values[0] = new String[types.size()];
@@ -544,7 +545,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 			return new ErrorDropItem(e.getMessage());
 		}
 		
-		OptionDropItem dropItem = new OptionDropItem("Entity Type", AdvancedEntitySearch.ENTITYTYPE_KEY, values[0], values[1]);
+		OptionDropItem dropItem = new OptionDropItem(Messages.AdvancedEntitySearchPanel_EntityTypeOptionDropItemName, AdvancedEntitySearch.ENTITYTYPE_KEY, values[0], values[1]);
 		if (entityTypeKey != null){
 			dropItem.setInitialValue(entityTypeKey);
 		}

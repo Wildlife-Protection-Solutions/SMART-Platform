@@ -64,7 +64,7 @@ public class IntelRecordDataSource extends ContentDataStore{
 	}
 	
 	public static Name generateName(LocationLayerType type, UUID recordUuid){
-		return new NameImpl("org.wcs.smart.i2.record.location." + UuidUtils.uuidToString(recordUuid), type.name());
+		return new NameImpl("org.wcs.smart.i2.record.location." + UuidUtils.uuidToString(recordUuid), type.name()); //$NON-NLS-1$
 	}
 	
 }

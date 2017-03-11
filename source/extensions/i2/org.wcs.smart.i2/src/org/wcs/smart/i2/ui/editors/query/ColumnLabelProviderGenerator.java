@@ -38,7 +38,7 @@ public class ColumnLabelProviderGenerator {
 	public static ColumnLabelProvider createLabelProvider(IQueryColumn column){
 		return new ColumnLabelProvider(){
 			public String getText(Object element){
-				if (element == null) return "";
+				if (element == null) return ""; //$NON-NLS-1$
 				if (element instanceof IResultItem){
 					return column.getValue((IResultItem)element, Locale.getDefault());	
 				}

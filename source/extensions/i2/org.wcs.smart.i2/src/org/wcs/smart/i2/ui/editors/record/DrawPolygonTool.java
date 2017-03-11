@@ -41,6 +41,7 @@ import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelEvent
 import org.locationtech.udig.project.ui.tool.SimpleTool;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -206,7 +207,7 @@ public class DrawPolygonTool extends SimpleTool {
 			p = GeometryFactoryProvider.getFactory().createPolygon(c);
 			p = (Polygon) JTS.transform(p, CRS.findMathTransform(getContext().getViewportModel().getCRS(), SmartDB.DATABASE_CRS));
 			if (p.isEmpty() || !p.isSimple() || !p.isValid()){
-				error = "Invalid polygon.  Polygon must not be empty and must be valid";
+				error = Messages.DrawPolygonTool_InvalidPolygonMsg;
 			}
 		} catch (Exception e) {
 			Intelligence2PlugIn.log(e.getMessage(), e);

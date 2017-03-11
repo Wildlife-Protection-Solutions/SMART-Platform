@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -72,7 +73,7 @@ public enum WorkingSetManager {
 			this.activeWorkingSet = null;
 		}else{
 			if (!active.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-				throw new Exception("Working set not valid for current Conservation Area");
+				throw new Exception(Messages.WorkingSetManager_InvalidWorkingSet);
 			}
 			this.activeWorkingSet = active.getUuid();
 		}
@@ -117,7 +118,7 @@ public enum WorkingSetManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence record {0} to active working set. {1}", input.getName(), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordError, input.getName(), ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();
@@ -153,7 +154,7 @@ public enum WorkingSetManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence record {0} to active working set. {1}", record.getTitle(), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordError, record.getTitle(), ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();
@@ -189,7 +190,7 @@ public enum WorkingSetManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence entity {0} to active working set. {1}", entity.getIdAttributeAsText(Locale.getDefault()), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_EntityError, entity.getIdAttributeAsText(Locale.getDefault()), ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();
@@ -207,7 +208,7 @@ public enum WorkingSetManager {
 			s.beginTransaction();
 			
 			IntelRecordObservationQuery query = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
-			if (query == null) throw new Exception("Query not found.");
+			if (query == null) throw new Exception(Messages.WorkingSetManager_QueryNotFound);
 			
 			queryName = query.getName();
 			wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
@@ -232,7 +233,7 @@ public enum WorkingSetManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not add intelligence query {0} to active working set. {1}", queryName, ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_QueryError, queryName, ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();
@@ -266,7 +267,7 @@ public enum WorkingSetManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not remove intelligence query {0} from active working set. {1}", query.getName(), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_QueryRemoveError, query.getName(), ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();
@@ -296,7 +297,7 @@ public enum WorkingSetManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not remove intelligence entity {0} from active working set. {1}", entity.getIdAttributeAsText(), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_EntityRemoveError, entity.getIdAttributeAsText(), ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();
@@ -326,7 +327,7 @@ public enum WorkingSetManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Could not remove intelligence record {0} from active working set. {1}", record.getTitle(), ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordRemoveError, record.getTitle(), ex.getMessage()), ex);
 			return;
 		}finally{
 			s.close();

@@ -73,7 +73,7 @@ public class DateDropItem extends DropItem {
 	public String getText() {
 		String d1 = SmartUtils.getDate(dtime1).toString();
 		String d2 = SmartUtils.getDate(dtime1).toString();
-		return this.text + " " + getOperatorSelection().getLabel(Locale.getDefault()) + " " + d1 + " " + d2;
+		return this.text + " " + getOperatorSelection().getLabel(Locale.getDefault()) + " " + d1 + " " + d2; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		
 	}

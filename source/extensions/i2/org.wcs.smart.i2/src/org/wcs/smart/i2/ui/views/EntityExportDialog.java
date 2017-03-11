@@ -59,6 +59,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.EntityExportReportJob;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 
 /**
@@ -69,7 +70,7 @@ import org.wcs.smart.i2.model.IntelEntity;
  */
 public class EntityExportDialog extends TitleAreaDialog {
 
-	private static final String DIR_KEY = "org.wcs.smart.i2.entity.export.directory";
+	private static final String DIR_KEY = "org.wcs.smart.i2.entity.export.directory"; //$NON-NLS-1$
 	private List<IntelEntity> toExport;
 	
 	private DateFilterDropDownComposite dateComp;
@@ -88,25 +89,25 @@ public class EntityExportDialog extends TitleAreaDialog {
 		
 		Path p = Paths.get(dir);
 		if (!Files.exists(p)){
-			if (!MessageDialog.openQuestion(getShell(), "Export Entities", MessageFormat.format("The directory ''{0}'' does not exist.  Do you want to create it?", p.toString()))){
+			if (!MessageDialog.openQuestion(getShell(), Messages.EntityExportDialog_ExportDialogTitle, MessageFormat.format(Messages.EntityExportDialog_DirectoryMsg, p.toString()))){
 				return;
 			}
 			try{
 				Path tmpdir = Files.createDirectories(p);
-				if (tmpdir == null) throw new Exception(MessageFormat.format("Directory not create ''{0}''", p.toString()));
+				if (tmpdir == null) throw new Exception(MessageFormat.format(Messages.EntityExportDialog_DirectoryNotCreated, p.toString()));
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog("Unable to create output directory", ex);
+				Intelligence2PlugIn.displayLog(Messages.EntityExportDialog_ErrorCreatingDirectory, ex);
 				return;
 			}
 		}
 		try {
 			if (Files.list(p).count() > 0){
-				if (!MessageDialog.openQuestion(getShell(), "Export Entities", MessageFormat.format("The directory ''{0}'' contains files that may be overwritten.  Do you want to continue?", p.toString()))){
+				if (!MessageDialog.openQuestion(getShell(), Messages.EntityExportDialog_OverwriteTitle, MessageFormat.format(Messages.EntityExportDialog_OverwriteMsg, p.toString()))){
 					return;
 				}
 			}
 		} catch (IOException ex) {
-			Intelligence2PlugIn.displayLog("Unable to read output directory", ex);
+			Intelligence2PlugIn.displayLog(Messages.EntityExportDialog_ErrorReadingOutputDir, ex);
 			return;
 		}
 		DateFilter df = dateComp.getDateFilter();
@@ -127,7 +128,7 @@ public class EntityExportDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Output Format:");
+		l.setText(Messages.EntityExportDialog_FormatLabel);
 		
 		cmbFormat = new TableComboViewer(main);
 		cmbFormat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -165,17 +166,17 @@ public class EntityExportDialog extends TitleAreaDialog {
 		if (emitters.length > 0) cmbFormat.setSelection(new StructuredSelection(emitters[0]));
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Output Location:");
+		l.setText(Messages.EntityExportDialog_LocationLabel);
 		
 		txtDirectory = new Text(main, SWT.BORDER);
 		txtDirectory.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		Button btnBrowse = new Button(main, SWT.PUSH);
-		btnBrowse.setText("...");
+		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.addListener(SWT.MouseUp, e->{
 			DirectoryDialog dd = new DirectoryDialog(getShell());
 			dd.setFilterPath(txtDirectory.getText());
-			dd.setMessage("Select output location");
-			dd.setText("Export Entities");
+			dd.setMessage(Messages.EntityExportDialog_DDMessage);
+			dd.setText(Messages.EntityExportDialog_DDText);
 			String d = dd.open();
 			if (d != null) txtDirectory.setText(d);
 		});
@@ -186,8 +187,8 @@ public class EntityExportDialog extends TitleAreaDialog {
 		
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Date Range:");
-		l.setToolTipText("date range for entity locations to include in export map");
+		l.setText(Messages.EntityExportDialog_DateRangeLabel);
+		l.setToolTipText(Messages.EntityExportDialog_DateRangeTooltip);
 		
 		DateFilterComposite.DateFilter[] defaultFilters = new DateFilter[]{
 				DateFilter.LAST_30_DAYS,
@@ -201,9 +202,9 @@ public class EntityExportDialog extends TitleAreaDialog {
 		dateComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
     
-		setTitle("Export Entities");
-		setMessage(MessageFormat.format("Export the {0} selected entities", toExport.size()));
-		getShell().setText("Export Entities");
+		setTitle(Messages.EntityExportDialog_Title);
+		setMessage(MessageFormat.format(Messages.EntityExportDialog_Message, toExport.size()));
+		getShell().setText(Messages.EntityExportDialog_Title);
 		return parent;
 	}
 

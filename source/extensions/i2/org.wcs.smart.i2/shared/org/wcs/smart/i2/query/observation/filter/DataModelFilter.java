@@ -37,7 +37,7 @@ public class DataModelFilter implements IQueryFilter {
 
 	//category
 	public static DataModelFilter createCategory(String key){
-		String[] bits = key.split(":");
+		String[] bits = key.split(":"); //$NON-NLS-1$
 		return new DataModelFilter(bits[1]);
 	}
 	
@@ -86,7 +86,7 @@ public class DataModelFilter implements IQueryFilter {
 	}
 	
 	private static DataModelFilter createCore(String key){
-		String bits[] = key.split(":");
+		String bits[] = key.split(":"); //$NON-NLS-1$
 		Attribute.AttributeType type = parseType(bits[1]);
 		String categoryKey = bits[2];
 		if (categoryKey.trim().isEmpty()) categoryKey = null;
@@ -100,7 +100,7 @@ public class DataModelFilter implements IQueryFilter {
 				return t;
 			}
 		}
-		throw new IllegalStateException(attributeType + " is not a valid attribute type identifier");
+		throw new IllegalStateException(attributeType + " is not a valid attribute type identifier"); //$NON-NLS-1$
 	}
 	
 	private Attribute.AttributeType attributeType = null;

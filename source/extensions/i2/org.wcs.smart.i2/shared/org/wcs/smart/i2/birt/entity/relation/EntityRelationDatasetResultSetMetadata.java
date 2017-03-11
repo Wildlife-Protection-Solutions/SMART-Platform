@@ -27,6 +27,8 @@ import java.util.UUID;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -42,27 +44,25 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 	private List<IntelAttribute> validAttributes;
 	
 	public static enum Column{
-		ENTITY_UUID("relation:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		SOURCE_RELATION_UUID("relation:source_uuid", "Source Relation UUID", java.sql.Types.VARCHAR),
-		SOURCE_RELATION_ID("relation:source_id", "Source Relation", java.sql.Types.VARCHAR),
-		TARGET_RELATION_UUID("relation:target_uuid", "Target Relation UUID", java.sql.Types.VARCHAR),
-		TARGET_RELATION_ID("relation:garget_id", "Target Relation", java.sql.Types.VARCHAR),
-		GROUP_NAME("relation:group_name", "Group", java.sql.Types.VARCHAR),
-		GROUP_KEY("relation:group_key", "Group Key", java.sql.Types.VARCHAR),
-		RELATIONSHIP_TYPE("relation:relationship_type", "Relationship Type", java.sql.Types.VARCHAR),
-		RELATIONSHIP_TYPE_KEY("relation:relationship_type_key", "Relationship Type Key", java.sql.Types.VARCHAR);
+		ENTITY_UUID("relation:entity_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		SOURCE_RELATION_UUID("relation:source_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		SOURCE_RELATION_ID("relation:source_id",  java.sql.Types.VARCHAR), //$NON-NLS-1$
+		TARGET_RELATION_UUID("relation:target_uuid",  java.sql.Types.VARCHAR), //$NON-NLS-1$
+		TARGET_RELATION_ID("relation:garget_id", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		GROUP_NAME("relation:group_name",  java.sql.Types.VARCHAR), //$NON-NLS-1$
+		GROUP_KEY("relation:group_key", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		RELATIONSHIP_TYPE("relation:relationship_type", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		RELATIONSHIP_TYPE_KEY("relation:relationship_type_key",  java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		String id;
-		String name;
 		int type;
 		
-		Column(String id, String name, int type){
+		Column(String id, int type){
 			this.id = id;
-			this.name = name;
 			this.type = type;
 		}
-		public String getColumnName(){
-			return this.name;
+		public String getColumnName(Locale l){
+			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
 		public String getId(){
 			return this.id;
@@ -80,10 +80,10 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 				}
 				break;
 			case GROUP_KEY:
-				if (relation.getRelationshipType().getRelationshipGroup() == null) return "";
+				if (relation.getRelationshipType().getRelationshipGroup() == null) return ""; //$NON-NLS-1$
 				return relation.getRelationshipType().getRelationshipGroup().getKeyId();
 			case GROUP_NAME:
-				if (relation.getRelationshipType().getRelationshipGroup() == null) return "";
+				if (relation.getRelationshipType().getRelationshipGroup() == null) return ""; //$NON-NLS-1$
 				return relation.getRelationshipType().getRelationshipGroup().getName();
 			case RELATIONSHIP_TYPE:
 				return relation.getRelationshipType().getName();
@@ -104,9 +104,10 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 			return null;
 		}
 	}
-	
-	public EntityRelationDatasetResultSetMetadata(List<IntelAttribute> attributes){
+	private Locale l;
+	public EntityRelationDatasetResultSetMetadata(List<IntelAttribute> attributes, Locale l){
 		this.validAttributes = attributes;
+		this.l = l;
 	}
 	
 	/**
@@ -132,7 +133,7 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
 		if (index <= Column.values().length){
-			return Column.values()[index-1].name;
+			return Column.values()[index-1].getColumnName(l);
 		}
 		index = index - 1 - Column.values().length;
 		if (index >= 0){
@@ -151,7 +152,7 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 		}
 		index = index - 1 - Column.values().length;
 		if (index >= 0){
-			return "attribute:" + validAttributes.get(index).getKeyId();
+			return "attribute:" + validAttributes.get(index).getKeyId(); //$NON-NLS-1$
 		}
 		return null;
 	}

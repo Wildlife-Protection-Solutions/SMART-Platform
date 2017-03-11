@@ -54,6 +54,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -78,7 +79,7 @@ public class EntityExportReportJob extends Job {
 	}
 
 	public EntityExportReportJob(Collection<IntelEntity> entity, Date[] dFilter, EmitterInfo format, Path outputDir) {
-		super("Exporting Entity Records");
+		super(Messages.EntityExportReportJob_JobName);
 		this.entities = entity;
 		this.dFilter = dFilter;
 		this.format = format;
@@ -87,7 +88,7 @@ public class EntityExportReportJob extends Job {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask("Export entities", entities.size());
+		monitor.beginTask(Messages.EntityExportReportJob_ProgressMsg, entities.size());
 		for (IntelEntity e : entities){
 			monitor.subTask(e.getIdAttributeAsText(Locale.getDefault()));
 			try{
@@ -122,7 +123,7 @@ public class EntityExportReportJob extends Job {
 		}
 		Path reportFile = IntelReportManager.INSTANCE.getEntityTemplate(type);
 		if (reportFile == null || !Files.exists(reportFile)){
-			throw new Exception(MessageFormat.format("BIRT template is not configured for the entity type {0}.  You must configure the template before you can export the entity.", type.getName()));
+			throw new Exception(MessageFormat.format(Messages.EntityExportReportJob_BIRTNotConfigured, type.getName()));
 			
 		}
 		//create the pdf file output location
@@ -131,18 +132,18 @@ public class EntityExportReportJob extends Job {
 			try {
 				Files.createDirectory(outputFile);
 			} catch (IOException e) {
-				throw new Exception(MessageFormat.format("Unable to create directory {0} to generate pdf file to.", outputFile.toString()), e);
+				throw new Exception(MessageFormat.format(Messages.EntityExportReportJob_ErrorCreatingDirectory, outputFile.toString()), e);
 			}
 		}
 
 		String fileName = entity.getIdAttributeAsText();
 		fileName = URLUtils.cleanFilename(fileName);
 		Path current = outputFile;
-		outputFile = current.resolve(fileName + "." + format.getFormat());
+		outputFile = current.resolve(fileName + "." + format.getFormat()); //$NON-NLS-1$
 		if (Files.exists(outputFile)){
 			int cnt = 1;
 			while(cnt < 1000){
-				outputFile = current.resolve(fileName + "." + cnt + "." + format.getFormat());
+				outputFile = current.resolve(fileName + "." + cnt + "." + format.getFormat()); //$NON-NLS-1$ //$NON-NLS-2$
 				if (!Files.exists(outputFile)){
 					break;
 				}
@@ -181,7 +182,7 @@ public class EntityExportReportJob extends Job {
 				if (session.isOpen()) session.close();
 			}
 		}catch (Exception ex){
-			throw new Exception(MessageFormat.format("Unable to export entity. {0}", ex.getMessage(), ex));
+			throw new Exception(MessageFormat.format(Messages.EntityExportReportJob_ExportError, ex.getMessage(), ex));
 		}
 		
 		//delete on exit

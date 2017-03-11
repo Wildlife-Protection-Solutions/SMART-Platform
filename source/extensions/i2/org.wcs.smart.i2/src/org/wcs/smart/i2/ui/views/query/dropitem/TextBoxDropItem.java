@@ -83,10 +83,10 @@ public class TextBoxDropItem extends DropItem {
 	@Override
 	public String asQueryPart() {
 		if (type == InputType.TEXT){
-			String strValue = value.getText().replaceAll("\"", "");
-			return queryKeyPart + " " + ((Operator) ((IStructuredSelection)operators.getSelection()).getFirstElement()).getKey() + " \"" + strValue + "\"";
+			String strValue = value.getText().replaceAll("\"", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			return queryKeyPart + " " + ((Operator) ((IStructuredSelection)operators.getSelection()).getFirstElement()).getKey() + " \"" + strValue + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else{
-			return queryKeyPart + " " + ((Operator) ((IStructuredSelection)operators.getSelection()).getFirstElement()).getKey() + " " + value.getText();
+			return queryKeyPart + " " + ((Operator) ((IStructuredSelection)operators.getSelection()).getFirstElement()).getKey() + " " + value.getText(); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -109,7 +109,7 @@ public class TextBoxDropItem extends DropItem {
 		
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText( formatStringForLabel(getText()));  //$NON-NLS-1$//$NON-NLS-2$
+		lbl.setText( formatStringForLabel(getText()));
 		initDrag(lbl);
 
 		operators = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);

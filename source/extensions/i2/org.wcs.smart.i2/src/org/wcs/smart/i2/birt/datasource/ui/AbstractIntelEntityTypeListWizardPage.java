@@ -58,6 +58,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 
@@ -137,7 +138,7 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 		Session s = HibernateManager.openSession();
 		try{
 			types = s.createCriteria(IntelEntityType.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.list();
 		}finally{
 			s.close();
@@ -249,7 +250,7 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 		if (isValid) {
 			setMessage(message);
 		} else {
-			setMessage("Must select an entity type", ERROR);
+			setMessage(Messages.AbstractIntelEntityTypeListWizardPage_EntityTypeRequired, ERROR);
 		}
 
 		setPageComplete(isValid);
@@ -418,7 +419,7 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 
 			for (ParameterDefinition param : paramDesign
 					.getParameterDefinitions()) {
-				param.setDefaultScalarValue("TODO: Link to Report Parameter");
+				param.setDefaultScalarValue(Messages.AbstractIntelEntityTypeListWizardPage_LinkParameter);
 			}
 		}
 	}

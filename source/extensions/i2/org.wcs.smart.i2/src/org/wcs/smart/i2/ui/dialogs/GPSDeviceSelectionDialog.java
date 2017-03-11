@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.gpx.GPSBabel;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Simple dialog for selecting the device type from the GPS Babel device options.
@@ -86,13 +87,13 @@ public class GPSDeviceSelectionDialog extends TitleAreaDialog{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Device Type:");
+		l.setText(Messages.GPSDeviceSelectionDialog_DeviceTypeLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,false, false));
 		HashMap<String, String> options = new HashMap<String, String>();
 		try {
 			options = GPSBabel.getDeviceOptions();
 		} catch (IOException e) {
-			Intelligence2PlugIn.displayLog("Unable to load gps device options: " +e.getMessage(), e);
+			Intelligence2PlugIn.displayLog(Messages.GPSDeviceSelectionDialog_ErrorLoadingOptions +e.getMessage(), e);
 		}
 		
 		String[][] stroptions = new String[options.size()][2];
@@ -101,7 +102,7 @@ public class GPSDeviceSelectionDialog extends TitleAreaDialog{
 		for (Entry<String,String> op : options.entrySet()){
 			stroptions[index][0] = op.getKey();
 			stroptions[index++][1] = op.getValue();
-			if (op.getKey().toLowerCase().contains(GPSBabel.DEFAULT_DEVICE_TYPE)){ //$NON-NLS-1$
+			if (op.getKey().toLowerCase().contains(GPSBabel.DEFAULT_DEVICE_TYPE)){
 				toSelect = stroptions[index-1];
 			}
 		}
@@ -122,9 +123,9 @@ public class GPSDeviceSelectionDialog extends TitleAreaDialog{
 		if (toSelect != null) cmbDevice.setSelection(new StructuredSelection((Object)toSelect));
 		cmbDevice.addSelectionChangedListener(e->getButton(IDialogConstants.OK_ID).setEnabled(validate()));
 		
-		super.setMessage("Select the type of device to import from");
-		super.setTitle("Import Waypoints");
-		getShell().setText("Import Waypoints");
+		super.setMessage(Messages.GPSDeviceSelectionDialog_Message);
+		super.setTitle(Messages.GPSDeviceSelectionDialog_Title);
+		getShell().setText(Messages.GPSDeviceSelectionDialog_Title);
 		
 		return parent;
 	}

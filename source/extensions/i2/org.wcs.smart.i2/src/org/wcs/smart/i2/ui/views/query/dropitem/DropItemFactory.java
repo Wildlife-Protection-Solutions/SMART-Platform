@@ -38,6 +38,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -105,21 +106,21 @@ public class DropItemFactory {
 		if (filter.getClass().equals(NotFilter.class))
 			return generateDropItem((NotFilter) filter);
 		
-		ErrorDropItem error = new ErrorDropItem(MessageFormat.format("The query filter type {0} is not supported", filter.getClass().getName()));
+		ErrorDropItem error = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_FilterTypeNotSupported, filter.getClass().getName()));
 		return Collections.singletonList(error);
 	}
 	
 	
 	public List<DropItem> generateDropItem(AreaFilter filter){
 		
-		String queryKey = "area:" + filter.getType() + ":" + filter.getKey();
+		String queryKey = "area:" + filter.getType() + ":" + filter.getKey(); //$NON-NLS-1$ //$NON-NLS-2$
 		Area a = (Area) session.createCriteria(Area.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.add(Restrictions.eq("type", filter.getType()))
-				.add(Restrictions.eq("keyId", filter.getKey()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("type", filter.getType())) //$NON-NLS-1$
+				.add(Restrictions.eq("keyId", filter.getKey())) //$NON-NLS-1$
 				.uniqueResult();
 		if (a == null){
-			ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find area of type {0} with key {1}.", filter.getType(), filter.getKey()));
+			ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidAreaType, filter.getType(), filter.getKey()));
 			return Collections.singletonList(item);	
 		}
 		return Collections.singletonList(new TextDropItem(IntelQueryColumnProvider.generateName(a), queryKey));
@@ -129,11 +130,11 @@ public class DropItemFactory {
 	public List<DropItem> generateDropItem(EntityFilter filter){
 		IntelEntity entity = (IntelEntity) session.get(IntelEntity.class, filter.getEntityUuid());
 		if (entity == null){
-			ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find entity with uuid: {0}", filter.getEntityUuid().toString()));
+			ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidEntity, filter.getEntityUuid().toString()));
 			return Collections.singletonList(item);	
 			
 		}
-		return Collections.singletonList(new TextDropItem(IntelQueryColumnProvider.generateName(entity, Locale.getDefault()), "entity:"+UuidUtils.uuidToString(entity.getUuid())));
+		return Collections.singletonList(new TextDropItem(IntelQueryColumnProvider.generateName(entity, Locale.getDefault()), "entity:"+UuidUtils.uuidToString(entity.getUuid()))); //$NON-NLS-1$
 	}
 	
 	public List<DropItem> generateDropItem(EntityTypeFilter filter){
@@ -141,11 +142,11 @@ public class DropItemFactory {
 		if (filter.getTypeKey() != null){
 			type = IntelHibernateManager.getEntityType(filter.getTypeKey(),SmartDB.getCurrentConservationArea(), session);
 			if (type == null){
-				ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find intelligence entity type with key: {0}", filter.getTypeKey()));
+				ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidEntityType, filter.getTypeKey()));
 				return Collections.singletonList(item);	
 			}
 		}
-		return Collections.singletonList(new TextDropItem(type.getName(), "entitytype:" + type.getKeyId()));
+		return Collections.singletonList(new TextDropItem(type.getName(), "entitytype:" + type.getKeyId())); //$NON-NLS-1$
 	}
 	
 
@@ -177,14 +178,14 @@ public class DropItemFactory {
 	
 	
 	public List<DropItem> generateDropItem(IntelAttributeFilter filter){
-		String queryKeyPart = "e_attribute:" + filter.getAttributeType().key + ":" + filter.getAttributeKey() + ":";
+		String queryKeyPart = "e_attribute:" + filter.getAttributeType().key + ":" + filter.getAttributeKey() + ":"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		if (filter.getEntityTypeKey() != null){
 			queryKeyPart += filter.getEntityTypeKey();
 		}
 		
 		IntelAttribute ia = IntelHibernateManager.getAttribute(filter.getAttributeKey(), SmartDB.getCurrentConservationArea(), session);
 		if (ia == null){
-			ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find intelligence attribute with key: {0}", filter.getAttributeKey()));
+			ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidAttributeKey, filter.getAttributeKey()));
 			return Collections.singletonList(item);
 		}
 		
@@ -192,7 +193,7 @@ public class DropItemFactory {
 		if (filter.getEntityTypeKey() != null){
 			type = IntelHibernateManager.getEntityType(filter.getEntityTypeKey(), SmartDB.getCurrentConservationArea(), session);
 			if (type == null){
-				ErrorDropItem item = new ErrorDropItem(MessageFormat.format("Unable to find intelligence entity type with key: {0}", filter.getEntityTypeKey()));
+				ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidEntityTypeKey, filter.getEntityTypeKey()));
 				return Collections.singletonList(item);	
 			}
 		}
@@ -237,33 +238,33 @@ public class DropItemFactory {
 		Category category = null;
 		if (filter.getCategoryKey() != null){
 			category = (Category) session.createCriteria(Category.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.add(Restrictions.eq("hkey", filter.getCategoryKey()))
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+					.add(Restrictions.eq("hkey", filter.getCategoryKey())) //$NON-NLS-1$
 					.uniqueResult();
 			if (category == null){
-				DropItem di = new ErrorDropItem(MessageFormat.format("Category with hkey ''{0}'' not found.", filter.getCategoryKey()));
+				DropItem di = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidCategory, filter.getCategoryKey()));
 				return Collections.singletonList(di);
 			}
 		}
 		
 		if (filter.getAttributeKey() == null){
-			String queryKeyPart = "dm_category:" + filter.getCategoryKey();
+			String queryKeyPart = "dm_category:" + filter.getCategoryKey(); //$NON-NLS-1$
 			DropItem di = new TextDropItem(IntelQueryColumnProvider.generateName(null, category), queryKeyPart);
 			return Collections.singletonList(di);
 		}
 		
-		String queryKeyPart = "dm_attribute:" + filter.getAttributeType().typeKey + ":";
+		String queryKeyPart = "dm_attribute:" + filter.getAttributeType().typeKey + ":"; //$NON-NLS-1$ //$NON-NLS-2$
 		if (filter.getCategoryKey() != null){
 			queryKeyPart += filter.getCategoryKey();
 		}
-		queryKeyPart += ":" + filter.getAttributeKey();
+		queryKeyPart += ":" + filter.getAttributeKey(); //$NON-NLS-1$
 		
 		Attribute attribute = (Attribute) session.createCriteria(Attribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.add(Restrictions.eq("keyId", filter.getAttributeKey()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("keyId", filter.getAttributeKey())) //$NON-NLS-1$
 				.uniqueResult();
 		if (attribute == null){
-			DropItem di = new ErrorDropItem(MessageFormat.format("Attribute with key ''{0}'' not found.", filter.getAttributeKey()));
+			DropItem di = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_AttributeKeyNotFound, filter.getAttributeKey()));
 			return Collections.singletonList(di);
 		}
 	
@@ -301,11 +302,11 @@ public class DropItemFactory {
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
 			
 			AttributeTreeNode treeNode = (AttributeTreeNode) session.createCriteria(AttributeTreeNode.class)
-					.add(Restrictions.eq("hkey", filter.getKeyValue()))
-					.add(Restrictions.eq("attribute", attribute))
+					.add(Restrictions.eq("hkey", filter.getKeyValue())) //$NON-NLS-1$
+					.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
 					.uniqueResult();
 			if (treeNode == null){
-				DropItem di = new ErrorDropItem(MessageFormat.format("Attribute tree node with key ''{0}'' not found for attribute.", filter.getKeyValue(),attribute.getName()));
+				DropItem di = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_TreeNodeNotFound, filter.getKeyValue(),attribute.getName()));
 				return Collections.singletonList(di);
 			}
 			

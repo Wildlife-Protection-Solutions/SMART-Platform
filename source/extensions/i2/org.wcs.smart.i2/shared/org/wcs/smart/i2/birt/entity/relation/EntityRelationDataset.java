@@ -53,7 +53,7 @@ import org.wcs.smart.i2.model.IntelRelationshipType;
  */
 public class EntityRelationDataset  implements IQuery {
 	
-	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.entity.relationship";
+	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.entity.relationship"; //$NON-NLS-1$
 
 	private IResultSetMetaData r_metadata = null;
 	private EntityRelationParameterMetadata pMetadata = null;
@@ -75,20 +75,20 @@ public class EntityRelationDataset  implements IQuery {
 	@Override
 	public void prepare(String queryText) throws OdaException {
 		type = (IntelEntityType) connection.getSession().createCriteria(IntelEntityType.class)
-				.add(Restrictions.in("conservationArea", connection.getConservationAreas()))
-			.add(Restrictions.eq("keyId", queryText))
+				.add(Restrictions.in("conservationArea", connection.getConservationAreas())) //$NON-NLS-1$
+			.add(Restrictions.eq("keyId", queryText)) //$NON-NLS-1$
 			.uniqueResult();
 		
 		//get all attributes that are associated with an relationship that is associated with
 		//the entity type
 		List<IntelRelationshipType> relationshipTypes = connection.getSession().createCriteria(IntelRelationshipType.class)
 		.add(Restrictions.or(
-				Restrictions.eq("sourceEntityType", type),
-				Restrictions.eq("targetEntityType", type),
-				Restrictions.isNull("sourceEntityType"),
-				Restrictions.isNull("targetEntityType")
+				Restrictions.eq("sourceEntityType", type), //$NON-NLS-1$
+				Restrictions.eq("targetEntityType", type), //$NON-NLS-1$
+				Restrictions.isNull("sourceEntityType"), //$NON-NLS-1$
+				Restrictions.isNull("targetEntityType") //$NON-NLS-1$
 				))
-		.add(Restrictions.in("conservationArea", connection.getConservationAreas()))
+		.add(Restrictions.in("conservationArea", connection.getConservationAreas())) //$NON-NLS-1$
 		.list();
 		
 		Set<IntelAttribute> attSet = new HashSet<IntelAttribute>();
@@ -127,7 +127,7 @@ public class EntityRelationDataset  implements IQuery {
 	@Override
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (r_metadata == null){
-			r_metadata = new EntityRelationDatasetResultSetMetadata(validAttributes);
+			r_metadata = new EntityRelationDatasetResultSetMetadata(validAttributes, connection.getCurrentLocale());
 		}
 		return r_metadata;
 	}

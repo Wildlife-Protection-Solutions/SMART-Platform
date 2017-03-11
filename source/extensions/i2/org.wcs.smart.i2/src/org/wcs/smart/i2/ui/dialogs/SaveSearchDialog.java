@@ -50,6 +50,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.search.LoadSavedSearches;
@@ -64,7 +65,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class SaveSearchDialog extends TitleAreaDialog{
 
-	private String NEW_QUERY_OP = "Create New Query...";
+	private String NEW_QUERY_OP = Messages.SaveSearchDialog_CreateQueryOption;
 	
 	private Label newQuery;
 	private Text newQueryName;
@@ -111,7 +112,7 @@ public class SaveSearchDialog extends TitleAreaDialog{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Save As:");
+		l.setText(Messages.SaveSearchDialog_SaveAsLabel);
 		
 		cmbQueries = new ComboViewer(main, SWT.READ_ONLY);
 		cmbQueries.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -139,18 +140,18 @@ public class SaveSearchDialog extends TitleAreaDialog{
 		});
 		
 		newQuery = new Label(main, SWT.NONE);
-		newQuery.setText("New Query:");
+		newQuery.setText(Messages.SaveSearchDialog_NewQueryLabel);
 		newQuery.setEnabled(false);
 		
 		newQueryName = new Text(main, SWT.BORDER);
-		newQueryName.setText("<Query Name>");
+		newQueryName.setText(Messages.SaveSearchDialog_DefaultNewQueryName);
 		newQueryName.setEnabled(false);
 		newQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		loadSearches.schedule();
 		
-		setTitle("Save Search");
-		getShell().setText("Save Search");
-		setMessage("Saves the search to database");
+		setTitle(Messages.SaveSearchDialog_Title);
+		getShell().setText(Messages.SaveSearchDialog_Title);
+		setMessage(Messages.SaveSearchDialog_Message);
 		return parent;
 	}
 
@@ -177,7 +178,7 @@ public class SaveSearchDialog extends TitleAreaDialog{
 				session.save(search);
 				session.getTransaction().commit();
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog("Unable to save new query:" + ex.getMessage(), ex);
+				Intelligence2PlugIn.displayLog(Messages.SaveSearchDialog_SaveError + ex.getMessage(), ex);
 				return;
 			}finally{
 				session.close();
@@ -195,7 +196,7 @@ public class SaveSearchDialog extends TitleAreaDialog{
 				eSearch.setSearchString(isearch.serialize());
 				session.getTransaction().commit();
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog("Unable to overwrite query:" + ex.getMessage(), ex);
+				Intelligence2PlugIn.displayLog(Messages.SaveSearchDialog_OverwriteError + ex.getMessage(), ex);
 				return;
 			}finally{
 				session.close();

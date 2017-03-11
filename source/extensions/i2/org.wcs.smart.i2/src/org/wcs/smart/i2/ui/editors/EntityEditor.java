@@ -143,6 +143,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -190,6 +191,8 @@ import org.wcs.smart.util.E3Utils;
  */
 public class EntityEditor extends EditorPart implements MapPart{
 	
+	private static final String TBLRECORD_LBLPROVIDER_KEY = "LBLPROVIDER"; //$NON-NLS-1$
+
 	public static final String ID = "org.wcs.smart.i2.editor.entity"; //$NON-NLS-1$
 
 	private static final int THUMB_SIZE = 150;
@@ -250,7 +253,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private AttributeValueLabelProvider attributeLabelProvider = new AttributeValueLabelProvider();
 	
-	private Job loadEntity = new Job("load entity"){
+	private Job loadEntity = new Job("load entity"){ //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -284,14 +287,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 				
 				groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
-						.add(Restrictions.eq("entityType", temp.getEntityType()))
-						.addOrder(Order.asc("order"))
+						.add(Restrictions.eq("entityType", temp.getEntityType())) //$NON-NLS-1$
+						.addOrder(Order.asc("order")) //$NON-NLS-1$
 						.list();
 				
 				temp.getPrimaryAttachment();
 				
 				relationships = s.createCriteria(IntelEntityRelationship.class)
-					.add(Restrictions.or (Restrictions.eq("sourceEntity", temp), Restrictions.eq("targetEntity", temp)))
+					.add(Restrictions.or (Restrictions.eq("sourceEntity", temp), Restrictions.eq("targetEntity", temp))) //$NON-NLS-1$ //$NON-NLS-2$
 					.list();
 				for (IntelEntityRelationship r : relationships){
 					r.getRelationshipType().getName();
@@ -344,7 +347,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 	};
 	
-	private Job loadRecords = new Job("loading entity records"){
+	private Job loadRecords = new Job("loading entity records"){ //$NON-NLS-1$
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -354,7 +357,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			Session s = HibernateManager.openSession();
 			try{
 				List<IntelEntityRecord> entityRecords = s.createCriteria(IntelEntityRecord.class)
-						.add(Restrictions.eq("id.entity", entity))
+						.add(Restrictions.eq("id.entity", entity)) //$NON-NLS-1$
 						.list();
 				for (IntelEntityRecord r : entityRecords){
 					records.add(r.getRecord());
@@ -382,7 +385,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 							}catch (Exception ex){}
 						}
 					}
-					Object x = tblRecords.getTable().getData("LBLPROVIDER");
+					Object x = tblRecords.getTable().getData(TBLRECORD_LBLPROVIDER_KEY);
 					if (x != null && x instanceof RecordLabelProvider){
 						((RecordLabelProvider)x).setSourceImages(images);
 					}
@@ -399,7 +402,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	public void doSave(IProgressMonitor monitor) {
 		for(AttributeFieldEditor editor : fieldEditors){
 			if (!editor.isValid()){
-				MessageDialog.openError(getSite().getShell(), "Save Error", MessageFormat.format("Fix error with attribute {0} before saving", editor.getAttribute().getName()));
+				MessageDialog.openError(getSite().getShell(), Messages.EntityEditor_SaveDialogTitle, MessageFormat.format(Messages.EntityEditor_SaveDialogMsg, editor.getAttribute().getName()));
 				return;
 			}
 		}
@@ -488,7 +491,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			clearLists();
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Error saving entity changes: " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.EntityEditor_SaveError + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -571,7 +574,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			public void handleEvent(org.osgi.service.event.Event event) {
 				if (context.get(MPart.class) == event.getProperty(UIEvents.EventTags.ELEMENT)){
 					eventBroker.unsubscribe(this);
-					if (MessageDialog.openQuestion(getSite().getShell(), "Entity Modified", MessageFormat.format("The entity ''{0}'' has been changed by another process.  Do you want to reload the editor and loose local changes?", entity.getIdAttributeAsText()))){
+					if (MessageDialog.openQuestion(getSite().getShell(), Messages.EntityEditor_ModifiedTitle, MessageFormat.format(Messages.EntityEditor_ModifiedMsg, entity.getIdAttributeAsText()))){
 						loadEntity.schedule();
 						setDirty(false);
 					}
@@ -715,7 +718,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridLayout)bottom.getLayout()).marginWidth = 0;
 		((GridLayout)bottom.getLayout()).marginHeight = 0;
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Map", "Records", "Relationships"}, bottom, toolkit, ()->maximizeMainPanel(1));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.EntityEditor_MapTitle, Messages.EntityEditor_RecordsTitle, Messages.EntityEditor_RelationshipsTitle}, bottom, toolkit, ()->maximizeMainPanel(1));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(bottom, SWT.NONE);
@@ -845,29 +848,29 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridData)lblMainImage.getLayoutData()).widthHint = THUMB_SIZE;
 		((GridData)lblMainImage.getLayoutData()).heightHint = THUMB_SIZE;
 
-		toolkit.createLabel(leftPart, "Type:");
-		lblType = toolkit.createLabel(leftPart, "");
+		toolkit.createLabel(leftPart, Messages.EntityEditor_TypeLabel);
+		lblType = toolkit.createLabel(leftPart, ""); //$NON-NLS-1$
 		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		int offset = 0;
 		GC gc = new GC(lblType);
 		try{
-			offset = gc.textExtent("Type:").x;
+			offset = gc.textExtent(Messages.EntityEditor_TypeLabel).x;
 		}finally{
 			gc.dispose();
 		}
 		((GridData)lblType.getLayoutData()).widthHint = THUMB_SIZE - offset;
 		
-		toolkit.createLabel(leftPart, "Created:");
-		lblCreated = toolkit.createLabel(leftPart, "CREATED");
+		toolkit.createLabel(leftPart, Messages.EntityEditor_CreatedLabel);
+		lblCreated = toolkit.createLabel(leftPart, DateFormat.getInstance().format(new Date()));
 		
-		toolkit.createLabel(leftPart, "Modified:");
+		toolkit.createLabel(leftPart, Messages.EntityEditor_ModifiedLabel);
 		lblModified= toolkit.createLabel(leftPart, DateFormat.getInstance().format(new Date()));
 		
 		Composite rightPart = toolkit.createComposite(panel, SWT.NONE);
 		rightPart.setLayout(new GridLayout(2, false));
 		rightPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)rightPart.getLayout()).verticalSpacing = 2;
-		lblIdentifier = toolkit.createLabel(rightPart, "");
+		lblIdentifier = toolkit.createLabel(rightPart, ""); //$NON-NLS-1$
 		lblIdentifier.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		lblIdentifier.setFont(headerFont);
 
@@ -899,7 +902,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		saveItem = new ToolItem(buttonBar, SWT.PUSH);
 		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-		saveItem.setToolTipText("save");
+		saveItem.setToolTipText(Messages.EntityEditor_savetooltip);
 		saveItem.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent event){
 				getSite().getPage().saveEditor(EntityEditor.this, false);
@@ -908,7 +911,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		saveItem.setEnabled(false);
 		
 		exportItem = new ToolItem(buttonBar, SWT.PUSH);
-		exportItem.setToolTipText("Export entity and relationships to csv file");
+		exportItem.setToolTipText(Messages.EntityEditor_exporttooltip);
 		exportItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_EXPORT));
 		exportItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -920,7 +923,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		printItem = new ToolItem(buttonBar, SWT.DROP_DOWN);
 		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
-		printItem.setToolTipText("print to pdf");
+		printItem.setToolTipText(Messages.EntityEditor_printtooltip);
 		printItem.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent event){
@@ -932,25 +935,25 @@ public class EntityEditor extends EditorPart implements MapPart{
 			          formatsOpMenu.setVisible(true);
 			    }else{
 					for (EmitterInfo i : ReportEngineManager.getBirtReportEngine().getEmitterInfo()){
-						if (i.getFormat().equalsIgnoreCase("PDF")){
+						if (i.getFormat().equalsIgnoreCase("PDF")){ //$NON-NLS-1$
 							IntelReportManager.INSTANCE.exportEntity(getEntity(), mapPart.getDateFilter(), i);
 							return;
 						}
 					}
-					MessageDialog.openError(getSite().getShell(), "Error", "Could not find PDF exporter.");
+					MessageDialog.openError(getSite().getShell(), Messages.EntityEditor_PdfErrorTitle, Messages.EntityEditor_PdfErrorMsg);
 			    }
 			}	
 		});
 		
 		ToolItem refreshItem = new ToolItem(buttonBar, SWT.PUSH);
 		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-		refreshItem.setToolTipText("refresh record");
+		refreshItem.setToolTipText(Messages.EntityEditor_refreshtooltip);
 		refreshItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean doAction = true;
 				if (isDirty){
-					if (!MessageDialog.openConfirm(getSite().getShell(), "Refresh", "Changes will be lost.  Are you sure you want to refresh?")){
+					if (!MessageDialog.openConfirm(getSite().getShell(), Messages.EntityEditor_RefreshDialogTitle, Messages.EntityEditor_RefreshDialogMessage)){
 						doAction = false;
 					}
 				}
@@ -964,11 +967,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		deleteItem = new ToolItem(buttonBar, SWT.PUSH);
 		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteItem.setToolTipText("delete entity");
+		deleteItem.setToolTipText(Messages.EntityEditor_deleteTooltip);
 		deleteItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (MessageDialog.openConfirm(getSite().getShell(), "Delete", "Are you sure you want to delete this entity?  This action cannot be undone.")){
+				if (MessageDialog.openConfirm(getSite().getShell(), Messages.EntityEditor_DeleteEntityTitle, Messages.EntityEditor_DeleteEntityMessage)){
 					
 					//look for any dirty record editors and save them first
 					List<RecordEditor> editors = new ArrayList<>();
@@ -978,16 +981,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 						if ( x instanceof RecordEditor && ((RecordEditor)x).isDirty()){
 							editors.add((RecordEditor) x);
 							names.append(((RecordEditor)x).getPartName());
-							names.append(", ");
+							names.append(", "); //$NON-NLS-1$
 						}
 					}
 					if (!editors.isEmpty()){
 						StringBuilder sb = new StringBuilder();
-						sb.append("The following editors must be saved before you can delete this entity.  Do you want to save these editors and continue?");
-						sb.append("\n");
+						sb.append(Messages.EntityEditor_DeleteCloseWarning);
+						sb.append("\n"); //$NON-NLS-1$
 						sb.append(names.substring(0, names.length() - 2));
 						
-						if (!MessageDialog.openQuestion(getSite().getShell(), "Delete Entity", sb.toString())){
+						if (!MessageDialog.openQuestion(getSite().getShell(), Messages.EntityEditor_38, sb.toString())){
 							return;
 						}
 						for (RecordEditor p : editors){
@@ -1005,7 +1008,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 							@Override
 							public void run(IProgressMonitor monitor) throws InvocationTargetException,
 									InterruptedException {
-								monitor.beginTask("Deleting Entity...", IProgressMonitor.UNKNOWN);
+								monitor.beginTask(Messages.EntityEditor_DeleteTaskName, IProgressMonitor.UNKNOWN);
 								Session s = HibernateManager.openSession(new AttachmentInterceptor());
 								try{
 									s.beginTransaction();
@@ -1021,7 +1024,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 							}
 						});
 					}catch (Exception ex){
-						Intelligence2PlugIn.displayLog("Error deleting entity. " + ex.getMessage(), ex);
+						Intelligence2PlugIn.displayLog(Messages.EntityEditor_DeleteError + ex.getMessage(), ex);
 						return;
 					}
 					eventBroker.send(IntelEvents.ENTITY_DELETE, entity);
@@ -1033,7 +1036,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
 		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-		wsetItem.setToolTipText("add to current working set");
+		wsetItem.setToolTipText(Messages.EntityEditor_addtowstooltip);
 		wsetItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1045,7 +1048,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		editItem = new ToolItem(buttonBar, SWT.CHECK);
 		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-		editItem.setToolTipText("enable or disable editing of record");
+		editItem.setToolTipText(Messages.EntityEditor_editingtooltip);
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1054,7 +1057,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		});
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Attributes", "Files", "Scratchpad"}, rightPart, toolkit, ()->maximizeMainPanel(0));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.EntityEditor_AttributeTitle, Messages.EntityEditor_FilesTitle, Messages.EntityEditor_ScratchpadTitle}, rightPart, toolkit, ()->maximizeMainPanel(0));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(rightPart, SWT.NONE);
@@ -1078,7 +1081,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridLayout)compScratchpad.getLayout()).marginHeight = 0;
 		((GridLayout)compScratchpad.getLayout()).marginWidth = 0;
 		
-		txtScratchpad = toolkit.createText(compScratchpad, "", SWT.MULTI | SWT.V_SCROLL | SWT.BORDER);
+		txtScratchpad = toolkit.createText(compScratchpad, "", SWT.MULTI | SWT.V_SCROLL | SWT.BORDER); //$NON-NLS-1$
 		txtScratchpad.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtScratchpad.addListener(SWT.Modify, e->setDirty(true));
 		
@@ -1214,7 +1217,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						existing.getTargetEntity().equals(newRelationship.getTargetEntity()) &&
 						existing.getRelationshipType().equals(newRelationship.getRelationshipType())){
 					add = false;
-					MessageDialog.openInformation(getEditorSite().getShell(), "Relationship", "Relationship already exists between these entities. Cannot duplicate relationships.");
+					MessageDialog.openInformation(getEditorSite().getShell(), Messages.EntityEditor_RelationshipInfoDialog, Messages.EntityEditor_RelationshipInfoMsg);
 					break;
 				}
 						
@@ -1241,7 +1244,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		relationshipEditPanel.setLayout(createGridLayoutNoMargin(2));
 		relationshipEditPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		Button btnAddRelationship = toolkit.createButton(relationshipEditPanel, "New Relationship...", SWT.PUSH);
+		Button btnAddRelationship = toolkit.createButton(relationshipEditPanel, Messages.EntityEditor_NewRelationshipBtn, SWT.PUSH);
 		btnAddRelationship.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAddRelationship.addSelectionListener(new SelectionAdapter() {
 
@@ -1268,12 +1271,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		ToolItem deleteRelationship = new ToolItem(toolbar, SWT.NONE);
 		deleteRelationship.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteRelationship.setToolTipText("delete the selected relationship");
+		deleteRelationship.setToolTipText(Messages.EntityEditor_deleteRelationshiptooltip);
 		deleteRelationship.addListener(SWT.Selection, e-> deleteRelationship());
 		
 		ToolItem editRelationship = new ToolItem(toolbar, SWT.NONE);
 		editRelationship.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-		editRelationship.setToolTipText("edit the selected relationship");
+		editRelationship.setToolTipText(Messages.EntityEditor_editRelationshiptooltip);
 		editRelationship.addListener(SWT.Selection, e-> {
 			IStructuredSelection sel = (IStructuredSelection) relationshipTree.getSelection();
 			if (!sel.isEmpty()){
@@ -1336,27 +1339,27 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		
 		TreeViewerColumn colType = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
-		colType.getColumn().setText("Relationship");
+		colType.getColumn().setText(Messages.EntityEditor_RelationshipColumnName);
 		colType.getColumn().setWidth(150);
 		colType.setLabelProvider(new RelationshipLabelProvider(0));
 		
 		TreeViewerColumn colRelationshipSrc = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
-		colRelationshipSrc.getColumn().setText("Source Relation");
+		colRelationshipSrc.getColumn().setText(Messages.EntityEditor_RelSourceColumnName);
 		colRelationshipSrc.getColumn().setWidth(150);
 		colRelationshipSrc.setLabelProvider(new RelationshipLabelProvider(1));
 		
 		TreeViewerColumn colRelationshipTrg = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
-		colRelationshipTrg.getColumn().setText("Target Relation");
+		colRelationshipTrg.getColumn().setText(Messages.EntityEditor_RelTargetColumnName);
 		colRelationshipTrg.getColumn().setWidth(150);
 		colRelationshipTrg.setLabelProvider(new RelationshipLabelProvider(2));
 		
 		TreeViewerColumn colSource = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
-		colSource.getColumn().setText("Source");
+		colSource.getColumn().setText(Messages.EntityEditor_RelCreateSourceColumnName);
 		colSource.getColumn().setWidth(75);
 		colSource.setLabelProvider(new RelationshipLabelProvider(3));
 		
 		TreeViewerColumn colAttributes = new TreeViewerColumn(relationshipTree, SWT.DEFAULT);
-		colAttributes.getColumn().setText("Attributes");
+		colAttributes.getColumn().setText(Messages.EntityEditor_RelAttributeColumnName);
 		colAttributes.setLabelProvider(new RelationshipLabelProvider(4));
 		relationshipTree.getTree().addPaintListener(new PaintListener() {			
 			@Override
@@ -1416,7 +1419,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					mnuOpen = new MenuItem(thumbMenu,SWT.DEFAULT,0);
 					mnuOpen.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY));
 					if (r.getSourceEntity().equals(getEntity())){
-						mnuOpen.setText(MessageFormat.format("Open {0}",r.getTargetEntity().getIdAttributeAsText()));
+						mnuOpen.setText(MessageFormat.format(Messages.EntityEditor_OpenTargetMenuLabel,r.getTargetEntity().getIdAttributeAsText()));
 						mnuOpen.addSelectionListener(new SelectionAdapter() {
 							@Override
 							public void widgetSelected(SelectionEvent e) {
@@ -1424,7 +1427,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 							}
 						});
 					}else if (r.getTargetEntity().equals(getEntity())){
-						mnuOpen.setText(MessageFormat.format("Open {0}",r.getSourceEntity().getIdAttributeAsText()));
+						mnuOpen.setText(MessageFormat.format(Messages.EntityEditor_OpenSourceMenuLabel,r.getSourceEntity().getIdAttributeAsText()));
 						mnuOpen.addSelectionListener(new SelectionAdapter() {
 							@Override
 							public void widgetSelected(SelectionEvent e) {
@@ -1438,7 +1441,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				
 					if (mnuEdit == null){
 						mnuEdit = new MenuItem(thumbMenu,SWT.DEFAULT);
-						mnuEdit.setText("Edit Attributes");
+						mnuEdit.setText(Messages.EntityEditor_EditAttributeMneuLabel);
 						mnuEdit.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 						mnuEdit.addSelectionListener(new SelectionAdapter(){
 							@Override
@@ -1496,14 +1499,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		tblRecords.getTable().setHeaderVisible(true);
 		tblRecords.getTable().setLinesVisible(true);
 		
-		String[] columns = new String[]{"Short Name", "Date Recieved", "Date Modified"};
+		String[] columns = new String[]{Messages.EntityEditor_ShortNameColumnLabel, Messages.EntityEditor_DateRecColumnLabel, Messages.EntityEditor_DateModColumnLabel};
 		ColumnLabelProvider[] lbls = new ColumnLabelProvider[]{
 				new RecordLabelProvider(RecordLabelProvider.RecordField.TITLE),
 				new RecordLabelProvider(RecordLabelProvider.RecordField.DATE_CREATED),
 				new RecordLabelProvider(RecordLabelProvider.RecordField.LAST_MODIFIED)
 		};
 		int[] width = new int[]{400, 100, 100};
-		tblRecords.getTable().setData("LBLPROVIDER", lbls[0]);
+		tblRecords.getTable().setData(TBLRECORD_LBLPROVIDER_KEY, lbls[0]);
 		for (int i = 0; i < columns.length; i ++){
 			TableViewerColumn col = new TableViewerColumn(tblRecords, SWT.NONE);
 			col.setLabelProvider(lbls[i]);
@@ -1539,7 +1542,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		tblRecords.getTable().setMenu(recordsMenu);
 		
 		MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
-		open.setText("Open");
+		open.setText(Messages.EntityEditor_OpenRecordMnuItem);
 		open.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1567,7 +1570,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		attachmentEditPanel.setLayout(createGridLayoutNoMargin(1));
 		attachmentEditPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Button btnAddAttachment = toolkit.createButton(attachmentEditPanel, "Add...", SWT.PUSH);
+		Button btnAddAttachment = toolkit.createButton(attachmentEditPanel, Messages.EntityEditor_AddAttachmentBtn, SWT.PUSH);
 		btnAddAttachment.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {	
@@ -1629,7 +1632,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			private void createMenu(){		
 				if (mnuOpen == null){
 					mnuOpen = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuOpen.setText("Open");
+					mnuOpen.setText(Messages.EntityEditor_OpenAttachmentMnuItem);
 					mnuOpen.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {
@@ -1641,7 +1644,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 				if (mnuSearch == null){
 					mnuSearch = new MenuItem(thumbMenu, SWT.DEFAULT);
-					mnuSearch.setText("Search");
+					mnuSearch.setText(Messages.EntityEditor_SearchAttachMnu);
 					mnuSearch.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ATTACHMENT_SEARCH));
 					mnuSearch.addSelectionListener(new SelectionAdapter(){
 						@Override
@@ -1681,7 +1684,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 					if (mnuPrimary == null){
 						mnuPrimary = new MenuItem(thumbMenu,SWT.DEFAULT);
-						mnuPrimary.setText("Set as Primary Image");
+						mnuPrimary.setText(Messages.EntityEditor_SetPrimaryImageMenu);
 						mnuPrimary.addSelectionListener(new SelectionAdapter(){
 							@Override
 							public void widgetSelected(SelectionEvent e) {
@@ -1717,7 +1720,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				if (mnuProperties == null){
 					new MenuItem(thumbMenu, SWT.SEPARATOR);
 					mnuProperties = new MenuItem(thumbMenu, SWT.DEFAULT);
-					mnuProperties.setText("Properties...");
+					mnuProperties.setText(Messages.EntityEditor_PropertiesMnuItem);
 					mnuProperties.addSelectionListener(new SelectionAdapter(){
 						@Override
 						public void widgetSelected(SelectionEvent e) {
@@ -1782,7 +1785,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		Listener[] ls = txtScratchpad.getListeners(SWT.Modify);
 		for (Listener l : ls) txtScratchpad.removeListener(SWT.Modify, l);
 		if (entity.getComment() == null){ 
-			txtScratchpad.setText("");
+			txtScratchpad.setText(""); //$NON-NLS-1$
 		}else{
 			txtScratchpad.setText(entity.getComment());
 		}
@@ -1889,10 +1892,10 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 					fieldEditors.add(e);
 				}else{
-					Label key = toolkit.createLabel(part, a.getAttribute().getName() + ":");
+					Label key = toolkit.createLabel(part, a.getAttribute().getName() + ":"); //$NON-NLS-1$
 					key.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 					
-					String text = "";
+					String text = ""; //$NON-NLS-1$
 					for (IntelEntityAttributeValue v : entity.getAttributes()){
 						if (v.getAttribute().equals(a.getAttribute())){
 							text = attributeLabelProvider.getText(v);
@@ -1955,7 +1958,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					tmp.setAttribute(etype.getIdAttribute());
 					editor.updateValue(tmp);
 					if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), etype, SmartDB.getCurrentConservationArea(), session, entity.getUuid())){
-						String warnMessage = "Duplicate Identifiers - an entity with this identifier already exists in the database"; 
+						String warnMessage = Messages.EntityEditor_DuplciateIdWarning; 
 						editor.setWarningMessage(warnMessage);
 					}else{
 						editor.setWarningMessage(null);
@@ -2059,16 +2062,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 				if (r.getSourceObject() == null){
 					switch(r.getSource()){
 					case ENTITY:
-						return "Entity";
+						return Messages.EntityEditor_EntitySrcLabel;
 					case RECORD: 
-						return "Record";
+						return Messages.EntityEditor_RecordSrcLabel;
 					}
 				}else{
 					switch(r.getSource()){
 					case ENTITY:
-						return MessageFormat.format("Entity: {0}", ((IntelEntity)r.getSourceObject()).getIdAttributeAsText());
+						return MessageFormat.format(Messages.EntityEditor_EntitySrcLabel2, ((IntelEntity)r.getSourceObject()).getIdAttributeAsText());
 					case RECORD: 
-						return MessageFormat.format("Record: {0}", ((IntelRecord)r.getSourceObject()).getTitle());
+						return MessageFormat.format(Messages.EntityEditor_RecordSrcLabel2, ((IntelRecord)r.getSourceObject()).getTitle());
 					}
 				}
 			}
@@ -2077,15 +2080,15 @@ public class EntityEditor extends EditorPart implements MapPart{
 				
 				StringBuilder sb = new StringBuilder();
 				IntelEntityRelationship relation = (IntelEntityRelationship)element;
-				if (relation.getAttributes() == null) return "";
+				if (relation.getAttributes() == null) return ""; //$NON-NLS-1$
 				
 				for (IntelRelationshipTypeAttribute attribute: relation.getRelationshipType().getAttributes()){
 					for (IntelEntityRelationshipAttributeValue value : relation.getAttributes()){
 						if (value.getAttribute().equals(attribute.getAttribute())){
 							sb.append(value.getAttribute().getName());
-							sb.append(": ");
+							sb.append(": "); //$NON-NLS-1$
 							sb.append(la.getText(value));
-							sb.append(" / ");
+							sb.append(" / "); //$NON-NLS-1$
 							break;
 						}
 					}
@@ -2096,7 +2099,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				return sb.toString();
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 		}
 	}
 

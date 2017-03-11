@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.udig.entity;
 
 import org.locationtech.udig.catalog.IServiceInfo;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * @author Emily
@@ -29,9 +30,9 @@ import org.locationtech.udig.catalog.IServiceInfo;
 public class IntelEntityServiceInfo extends IServiceInfo{
 
 	public IntelEntityServiceInfo(IntelEntityService service){
-		this.description = "service for providing intel record locations for entities";
-		this.keywords = new String[]{"Intelligence", "Location", "Record", "Entity"};
-		this.title = "Intelligence Record Entity Service";
+		this.description = Messages.IntelEntityServiceInfo_description;
+		this.keywords = new String[]{Messages.IntelEntityServiceInfo_keyword1, Messages.IntelEntityServiceInfo_keyword2, Messages.IntelEntityServiceInfo_keyword3, Messages.IntelEntityServiceInfo_keyword4};
+		this.title = Messages.IntelEntityServiceInfo_title;
 	}
 	
 }

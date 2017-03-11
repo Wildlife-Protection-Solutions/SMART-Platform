@@ -35,8 +35,8 @@ import org.wcs.smart.i2.model.IntelEntity;
 public interface IIntelEntitySearch {
 
 	public enum Type{
-		BASIC("basic"),
-		ADVANCED("adv");
+		BASIC("basic"), //$NON-NLS-1$
+		ADVANCED("adv"); //$NON-NLS-1$
 		
 		public String key;
 		
@@ -45,7 +45,7 @@ public interface IIntelEntitySearch {
 		}
 	}
 	
-	public static final String SEPARATOR = ";";
+	public static final String SEPARATOR = ";"; //$NON-NLS-1$
 	
 	/**
 	 * Maximum number of results returned in an entity search
@@ -85,7 +85,7 @@ public interface IIntelEntitySearch {
 				it.getPrimaryAttachment().getCopyFromLocation();
 				it.getPrimaryAttachment().computeFileLocation(session);
 			} catch (Exception e) {
-				Intelligence2PlugIn.log("Unable to compute attachment location", e);
+				Intelligence2PlugIn.log("Unable to compute attachment location", e); //$NON-NLS-1$
 			}
 		}
 		return it;

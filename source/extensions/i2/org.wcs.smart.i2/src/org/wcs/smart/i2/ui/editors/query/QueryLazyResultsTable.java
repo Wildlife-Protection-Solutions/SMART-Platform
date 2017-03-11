@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
@@ -82,7 +83,7 @@ public class QueryLazyResultsTable extends Composite{
 		
 		resultCnt = new Label(comp, SWT.NONE);
 		resultCnt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		resultCnt.setText("Counter");
+		resultCnt.setText(Messages.QueryLazyResultsTable_ResultsCntLabel);
 		
 		createTable(comp);
 		table.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -162,7 +163,7 @@ public class QueryLazyResultsTable extends Composite{
 	private void disposeResults(){
 		if (currentResults == null) return;
 		final IPagedQueryResultSet toDispose = currentResults;
-		Job disposeJob = new Job("dispose query results"){
+		Job disposeJob = new Job("dispose query results"){ //$NON-NLS-1$
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -172,13 +173,14 @@ public class QueryLazyResultsTable extends Composite{
 					toDispose.dispose(s);
 					s.getTransaction().commit();
 				}catch (Exception ex){
-					Intelligence2PlugIn.log("Error disposing of query results", ex);
+					Intelligence2PlugIn.log(Messages.QueryLazyResultsTable_DisplayError, ex);
 				}finally{
 					s.close();
 				}
 				return Status.OK_STATUS;
 			}
 		};
+		disposeJob.setSystem(true);
 		disposeJob.schedule();
 	}
 	
@@ -199,14 +201,14 @@ public class QueryLazyResultsTable extends Composite{
 		if (result == null){
 			table.setItemCount(0);
 			table.setInput(null);
-			resultCnt.setText("");
+			resultCnt.setText(""); //$NON-NLS-1$
 		}else{
 			table.setItemCount(result.getItemCount());
 			table.setInput(result);	
 			if (result instanceof IntelObservationQueryResults){
-				resultCnt.setText(MessageFormat.format("{0} observations | {1} locations",result.getItemCount(), ((IntelObservationQueryResults)result).getWaypointCount()));
+				resultCnt.setText(MessageFormat.format(Messages.QueryLazyResultsTable_CntLabel1,result.getItemCount(), ((IntelObservationQueryResults)result).getWaypointCount()));
 			}else{
-				resultCnt.setText(MessageFormat.format("{0} observations",result.getItemCount()));
+				resultCnt.setText(MessageFormat.format(Messages.QueryLazyResultsTable_CntLabel2,result.getItemCount()));
 			}
 			
 			createTableColumns( result.getQueryColumns() );

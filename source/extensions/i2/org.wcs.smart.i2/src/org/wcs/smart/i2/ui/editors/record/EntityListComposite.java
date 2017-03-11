@@ -55,6 +55,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
@@ -188,7 +189,7 @@ public class EntityListComposite extends Composite{
 	}
 	
 	public void linkEntity(final IntelEntity entity){
-		Job linkEntity = new Job("link entity job"){
+		Job linkEntity = new Job("link entity job"){ //$NON-NLS-1$
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -247,7 +248,7 @@ public class EntityListComposite extends Composite{
 							Display.getDefault().syncExec(() -> {
 								init();
 								
-								String message = MessageFormat.format("{0} added to {1}", idText, getEditor().getRecord().getTitle());
+								String message = MessageFormat.format(Messages.EntityListComposite_EntityLinkAdded, idText, getEditor().getRecord().getTitle());
 								TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), message);
 								ti.open();
 								

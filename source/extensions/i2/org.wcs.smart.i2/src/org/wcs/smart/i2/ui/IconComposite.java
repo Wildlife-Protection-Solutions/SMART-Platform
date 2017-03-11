@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Label;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Simple composite that allows users to select an icon.  The image is 
@@ -96,10 +97,10 @@ public class IconComposite extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fileChooser = new FileDialog(getShell(), SWT.OPEN);
-		        fileChooser.setText("Select image icon");
+		        fileChooser.setText(Messages.IconComposite_FileChooserMsg);
 		        fileChooser.setFilterPath(lastDir);
 		        fileChooser.setFilterExtensions(new String[] { "*.gif; *.jpg; *.png; *.ico; *.bmp" }); //$NON-NLS-1$
-		        fileChooser.setFilterNames(new String[] { "images " + " (gif, jpeg, png, ico, bmp)" });
+		        fileChooser.setFilterNames(new String[] { Messages.IconComposite_imageslabel + " (gif, jpeg, png, ico, bmp)" }); //$NON-NLS-1$
 		        String filename = fileChooser.open();
 		        if (filename != null){
 		        	loadImage(filename);
@@ -131,7 +132,7 @@ public class IconComposite extends Composite {
 			image.setImage(AWTSWTImageUtils.convertToSWTImage(img));
 			fireChange();
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Could not read image file: " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.IconComposite_InvalidFile + ex.getMessage(), ex);
 		}
 	}
 	
@@ -150,7 +151,7 @@ public class IconComposite extends Composite {
 			BufferedImage swtImage = ImageIO.read(in);
 			image.setImage(AWTSWTImageUtils.convertToSWTImage(swtImage));
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error reading icon from database." + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.IconComposite_ReadError + ex.getMessage(), ex);
 			image.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
 		}
 	}

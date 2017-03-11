@@ -48,6 +48,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RelationshipTypeManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
@@ -99,7 +100,7 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 			
 		}catch (Exception ex){
 			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Unable to save changes: " +ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.RelationshipGroupDialog_SaveError +ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -149,7 +150,7 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 		});
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Types:");
+		l.setText(Messages.RelationshipGroupDialog_TypesLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
 		lstTypes = new TableViewer(parent);
@@ -166,9 +167,9 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 		});
 		lstTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 
-		setTitle("Relationship Group");
-		getShell().setText("Relationship Group");
-		setMessage("Configure relationship group");
+		setTitle(Messages.RelationshipGroupDialog_Title);
+		getShell().setText(Messages.RelationshipGroupDialog_Title);
+		setMessage(Messages.RelationshipGroupDialog_Message);
 		
 		return parent;
 	}
@@ -214,7 +215,7 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 				}
 			});
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(MessageFormat.format("Error loading relationship group: {0}", ex.getMessage()), ex);
+			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.RelationshipGroupDialog_LoadError, ex.getMessage()), ex);
 		}
 	}
 	

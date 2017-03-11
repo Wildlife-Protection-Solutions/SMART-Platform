@@ -79,6 +79,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.RunQueryJob;
@@ -101,7 +102,7 @@ import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
  */
 public class IntelQueryEditor extends EditorPart implements MapPart{
 
-	public static final String ID = "org.wcs.smart.i2.editor.query";
+	public static final String ID = "org.wcs.smart.i2.editor.query"; //$NON-NLS-1$
 
 	private boolean isDirty = false;
 	
@@ -138,7 +139,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 	public void doSave(IProgressMonitor monitor) {
 		String queryString = validateQuery();
 		if (queryString == null){
-			MessageDialog.openError(getSite().getShell(), "ERROR", "Cannot save an invalid query.");
+			MessageDialog.openError(getSite().getShell(), Messages.IntelQueryEditor_ErrorDialogTitle, Messages.IntelQueryEditor_InvalidQuery);
 			return;
 		}
 		query.setQueryString(queryString);
@@ -152,7 +153,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Error saving query: " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_ErrorSavingQuery + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -174,15 +175,15 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 	public void doSaveAs() {
 		String queryString = validateQuery();
 		if (queryString == null){
-			MessageDialog.openError(getSite().getShell(), "ERROR", "Cannot save an invalid query.");
+			MessageDialog.openError(getSite().getShell(), Messages.IntelQueryEditor_ErrorDialogTitle, Messages.IntelQueryEditor_InvalidQuery);
 			return;
 		}
 		query.setQueryString(queryString);
 		
-		InputDialog newName = new InputDialog(getSite().getShell(), "Save As", "Enter the name for the query", MessageFormat.format("Copy of {0}", query.getName()), new IInputValidator() {
+		InputDialog newName = new InputDialog(getSite().getShell(), Messages.IntelQueryEditor_SaveAsTitle, Messages.IntelQueryEditor_SaveAsMessage, MessageFormat.format(Messages.IntelQueryEditor_DefaultQueryName, query.getName()), new IInputValidator() {
 			@Override
 			public String isValid(String newText) {
-				if (newText == null || newText.trim().length() == 0) return "Name must be provided.";
+				if (newText == null || newText.trim().length() == 0) return Messages.IntelQueryEditor_NameRequireError;
 				return null;
 			}
 		});
@@ -206,7 +207,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Error cloning query: " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_CloneError + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -316,31 +317,31 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		saveItem = new ToolItem(headerToolbar, SWT.PUSH);
 		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
 		saveItem.addListener(SWT.Selection, (event)->IntelQueryEditor.this.getSite().getPage().saveEditor(IntelQueryEditor.this, false));
-		saveItem.setToolTipText("save query");
+		saveItem.setToolTipText(Messages.IntelQueryEditor_saveTooltip);
 		
 		ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
 		saveAsItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEAS_EDIT));
 		saveAsItem.addListener(SWT.Selection, (event)->doSaveAs());
-		saveAsItem.setToolTipText("save query as new query");
+		saveAsItem.setToolTipText(Messages.IntelQueryEditor_saveAsTooltip);
 		
 		ToolItem exportItem = new ToolItem(headerToolbar, SWT.PUSH);
 		exportItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EXPORT_QUERY));
 		exportItem.addListener(SWT.Selection, (event)->exportQuery());
-		exportItem.setToolTipText("export query results");
+		exportItem.setToolTipText(Messages.IntelQueryEditor_ExportTooltip);
 		
 		runItem[0] = new ToolItem(headerToolbar, SWT.PUSH);
 		runItem[0].setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
 		runItem[0].addListener(SWT.Selection, (event)->runQuery());
-		runItem[0].setToolTipText("run query");
+		runItem[0].setToolTipText(Messages.IntelQueryEditor_RunTooltip);
 		
 		createDatePart(main, toolkit);
 		
 		SashForm core = new SashForm(main, SWT.VERTICAL);
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartSection resultsSection = new SmartSection(core, toolkit, "Results"){
+		SmartSection resultsSection = new SmartSection(core, toolkit, Messages.IntelQueryEditor_ResultsSectionLabel){
 			public void populateHeaderAdditions(Composite parent){
-				dataTabList = new SectionTabHeader(new String[]{"Table", "Map"}, parent, toolkit);
+				dataTabList = new SectionTabHeader(new String[]{Messages.IntelQueryEditor_TabSectionsLabel, Messages.IntelQueryEditor_MapSectionLabel}, parent, toolkit);
 				((GridLayout)dataTabList.getLayout()).marginHeight = 0;
 				((GridLayout)dataTabList.getLayout()).marginWidth = 20;
 			}
@@ -353,7 +354,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		createResultSection(c, toolkit);
 		
-		SmartSection definitionSection = new SmartSection(core, toolkit, "Definition");
+		SmartSection definitionSection = new SmartSection(core, toolkit, Messages.IntelQueryEditor_DefinitionSelctionLabel);
 		c = toolkit.createComposite(definitionSection);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -388,7 +389,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		
 		Composite runQueryComp = toolkit.createComposite(stackPanel);
 		runQueryComp.setLayout(new GridLayout());
-		Hyperlink l = toolkit.createHyperlink(runQueryComp, "Run Query...", SWT.NONE);
+		Hyperlink l = toolkit.createHyperlink(runQueryComp, Messages.IntelQueryEditor_RunQueryLink, SWT.NONE);
 		l.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -411,7 +412,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 	
 	private void exportQuery(){
 		if (resultsTable.getCurrentResults() == null){
-			MessageDialog.openInformation(getSite().getShell(), "Export", "Query must be run before you can export the query results");
+			MessageDialog.openInformation(getSite().getShell(), Messages.IntelQueryEditor_ExportTitle, Messages.IntelQueryEditor_ExportMsg);
 			return;
 		}
 		
@@ -458,7 +459,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 			return queryString;
 		}catch (Exception ex){
 			for(ToolItem i : runItem) i.setEnabled(false);
-			panel.setErrorMessage("Query is invalid", ex);
+			panel.setErrorMessage(Messages.IntelQueryEditor_InvalidQueryError, ex);
 			return null;
 		}
 	}
@@ -504,7 +505,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		
 		ToolBar headerToolbar = new ToolBar(main, SWT.FLAT);
 		runItem[1] = new ToolItem(headerToolbar, SWT.PUSH);
-		runItem[1].setToolTipText("run query");
+		runItem[1].setToolTipText(Messages.IntelQueryEditor_runTooltip);
 		runItem[1].setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
 		runItem[1].addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -530,7 +531,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		return this.query;
 	}
 	
-	private Job loadQueryJob = new Job("loading query"){
+	private Job loadQueryJob = new Job(Messages.IntelQueryEditor_loadQueryJobname){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -543,7 +544,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 			if (((QueryEditorInput)getEditorInput()).isNew()){
 				uuid = null;
 				IntelRecordObservationQuery temp = new IntelRecordObservationQuery();
-				temp.setName("<New Query>");
+				temp.setName(Messages.IntelQueryEditor_defaultQueryName);
 				temp.updateName(SmartDB.getCurrentLanguage(), temp.getName());
 				temp.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), temp.getName());
 				temp.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -555,7 +556,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 				try{
 					IntelRecordObservationQuery temp = (IntelRecordObservationQuery)s.get(IntelRecordObservationQuery.class, uuid);
 					if (temp == null){
-						Intelligence2PlugIn.displayLog("Query not found.", null);
+						Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_QueryNotfoundError, null);
 						closeEditor();
 						return Status.OK_STATUS;
 					}
@@ -567,12 +568,12 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 						generatedDropItems = DropItemFactory.generateDropItems(parsedQuery.getFilter(), s);
 						filterType = parsedQuery.getFilterType();
 					}catch(Exception ex){
-						DropItem di = new ErrorDropItem("Unable to parse query: " + ex.getMessage());
+						DropItem di = new ErrorDropItem(Messages.IntelQueryEditor_QueryParseError + ex.getMessage());
 						generatedDropItems.add(di);
 					}
 					
 				}catch (Exception ex){
-					Intelligence2PlugIn.displayLog("Error loading query from database: " + ex.getMessage(), ex);
+					Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_LoadError + ex.getMessage(), ex);
 					getSite().getPage().closeEditor(IntelQueryEditor.this, false);
 					return Status.OK_STATUS;
 				}finally{
@@ -590,7 +591,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 						resultsTable.setInput(null);
 						mapPanel.updateQueryLayers(null);
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
-						errorPanel.setError("Error running query: " + ex.getMessage());
+						errorPanel.setError(Messages.IntelQueryEditor_RunError + ex.getMessage());
 						stackPanel.layout(true);
 					});
 				}
@@ -611,7 +612,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 						resultsTable.setInput(null);
 						mapPanel.updateQueryLayers(null);
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
-						errorPanel.setError("Cancelled");
+						errorPanel.setError(Messages.IntelQueryEditor_CancelledError);
 						stackPanel.layout(true);
 					});
 				}

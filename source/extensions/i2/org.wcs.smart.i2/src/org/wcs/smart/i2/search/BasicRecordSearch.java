@@ -55,58 +55,58 @@ public class BasicRecordSearch implements IRecordSearch{
 	@Override
 	public IntelRecordResult doSearch(Session session, IProgressMonitor monitor) {
 		Long startTime = System.nanoTime();
-		String hql = " FROM IntelRecord ";
+		String hql = " FROM IntelRecord "; //$NON-NLS-1$
 		
 		boolean where = false;
 		if (source != null){
 			if (!where){
 				where = true;
-				hql += " WHERE ";
+				hql += " WHERE "; //$NON-NLS-1$
 			}
-			hql += " recordSource = :source ";
+			hql += " recordSource = :source "; //$NON-NLS-1$
 		}
 		if (narrativeSearch != null){
 			if (where){
-				hql += " AND ";
+				hql += " AND "; //$NON-NLS-1$
 			}else{
 				where = true;
-				hql += " WHERE ";
+				hql += " WHERE "; //$NON-NLS-1$
 			}
-			hql += " lower(description) like :narrative ";
+			hql += " lower(description) like :narrative "; //$NON-NLS-1$
 		}
 		if (titleSearch != null){
 			if (where){
-				hql += " AND ";
+				hql += " AND "; //$NON-NLS-1$
 			}else{
 				where = true;
-				hql += " WHERE ";
+				hql += " WHERE "; //$NON-NLS-1$
 			}
-			hql += " lower(title) like :title ";
+			hql += " lower(title) like :title "; //$NON-NLS-1$
 		}
 		
-		Query query = session.createQuery("SELECT count(*) " + hql);
+		Query query = session.createQuery("SELECT count(*) " + hql); //$NON-NLS-1$
 		if (source != null){
-			query.setParameter("source", source);
+			query.setParameter("source", source); //$NON-NLS-1$
 		}
 		if (narrativeSearch != null){
-			query.setParameter("narrative", "%" + narrativeSearch.toLowerCase() + "%");
+			query.setParameter("narrative", "%" + narrativeSearch.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		if (titleSearch != null){
-			query.setParameter("title", "%" + titleSearch.toLowerCase() + "%");
+			query.setParameter("title", "%" + titleSearch.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		
 		long cnt = (long) query.uniqueResult();
 		
-		query = session.createQuery("SELECT uuid, title, recordSource.uuid, status, description " + hql);
+		query = session.createQuery("SELECT uuid, title, recordSource.uuid, status, description " + hql); //$NON-NLS-1$
 		query.setMaxResults(IRecordSearch.MAX_RESULT_CNT);
 		if (source != null){
-			query.setParameter("source", source);
+			query.setParameter("source", source); //$NON-NLS-1$
 		}
 		if (narrativeSearch != null){
-			query.setParameter("narrative", "%" + narrativeSearch.toLowerCase() + "%");
+			query.setParameter("narrative", "%" + narrativeSearch.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		if (titleSearch != null){
-			query.setParameter("title", "%" + titleSearch.toLowerCase() + "%");
+			query.setParameter("title", "%" + titleSearch.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		List<Object[]> items = query.list();
 		List<IntelRecordSearchResultItem> resultItems = new ArrayList<>();
@@ -144,8 +144,8 @@ public class BasicRecordSearch implements IRecordSearch{
 					int rangeEnd = rangeStart + (eIndex - sIndex);
 					
 					matchRanges.add(new int[]{rangeStart, rangeEnd});
-					localMatch.append("..." + narrative.substring(start, end) + "...");
-					localMatch.append("\n\n");
+					localMatch.append("..." + narrative.substring(start, end) + "..."); //$NON-NLS-1$ //$NON-NLS-2$
+					localMatch.append("\n\n"); //$NON-NLS-1$
 				}
 			}
 			

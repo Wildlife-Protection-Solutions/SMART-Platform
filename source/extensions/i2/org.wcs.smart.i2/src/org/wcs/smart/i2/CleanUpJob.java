@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Cleans up temporary directory of entity exports.
@@ -45,7 +46,7 @@ public class CleanUpJob implements ILoginHandler {
 
 	@Override
 	public void onLogin() throws Exception {
-		Job j = new Job("clean up exported entities job"){
+		Job j = new Job(Messages.CleanUpJob_jobname){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

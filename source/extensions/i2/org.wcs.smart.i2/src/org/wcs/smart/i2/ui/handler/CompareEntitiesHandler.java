@@ -26,6 +26,7 @@ import java.util.List;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.editors.EntityComparisonEditor;
@@ -54,11 +55,11 @@ public class CompareEntitiesHandler {
 				type = e.getEntityType();
 			}else{
 				if (!e.getEntityType().equals(type)){
-					throw new Exception("Cannot compare entities of different types.");
+					throw new Exception(Messages.CompareEntitiesHandler_DifferentTypeError);
 				}
 			}
 		}
-		if (entities.isEmpty()) throw new Exception("Must select as least on entity.");
+		if (entities.isEmpty()) throw new Exception(Messages.CompareEntitiesHandler_EntityRequired);
 		
 		//add to existing comparison editor if of same type
 		for (MPart p : pService.getParts()){

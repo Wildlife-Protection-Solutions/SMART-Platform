@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2;
 
+import java.util.Locale;
+
 import org.wcs.smart.ISharedLabelProvider;
 /**
  * Label provider for intelligence module.
@@ -30,4 +32,9 @@ import org.wcs.smart.ISharedLabelProvider;
  */
 public interface IIntelligenceLabelProvider extends ISharedLabelProvider{
 
+	public static final Object QUERY_COLUMN_CATEGORY_LABEL = new Object();
+	public static final Object OBS_COUNT_LABEL = new Object();
+	
+	public String getDataSourceProductName(String dataSetType, Locale l);
+	
 }

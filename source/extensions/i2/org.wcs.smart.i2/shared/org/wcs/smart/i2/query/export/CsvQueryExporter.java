@@ -91,7 +91,7 @@ public class CsvQueryExporter implements IQueryExporter{
 							Geometry g = (Geometry) results.getQueryColumns().get(i).getValue(item);
 							data[i] = JTS.transform(g, transform).toText();
 						}catch (Exception ex){
-							data[i] = "Error parsing geometry: " + ex.getMessage();
+							data[i] = "Error parsing geometry: " + ex.getMessage(); //$NON-NLS-1$
 						}
 					}else{
 						data[i] = results.getQueryColumns().get(i).getValue(item,l);
@@ -111,7 +111,7 @@ public class CsvQueryExporter implements IQueryExporter{
 	
 	@Override
 	public String getExtension(){
-		return "csv";
+		return "csv"; //$NON-NLS-1$
 	}
 
 	@Override

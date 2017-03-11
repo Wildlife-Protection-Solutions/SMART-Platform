@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.i2.birt.entity.location;
 
+import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 
@@ -40,29 +44,27 @@ import com.vividsolutions.jts.io.ParseException;
 public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public static enum Column{
-		ENTITY_UUID("location:entity_uuid", "Entity UUID", java.sql.Types.VARCHAR),
-		ID("location:id", "ID", java.sql.Types.VARCHAR),
-		GEOM("location:geom", "Geometry", java.sql.Types.JAVA_OBJECT),
-		DATE("location:date", "Date", java.sql.Types.DATE),
-		COMMENT("location:comment", "Comment", java.sql.Types.VARCHAR),
-		OBSERVATION("location:observation", "Observation", java.sql.Types.VARCHAR);
+		ENTITY_UUID("location:entity_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ID("location:id", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		GEOM("location:geom", java.sql.Types.JAVA_OBJECT), //$NON-NLS-1$
+		DATE("location:date",  java.sql.Types.DATE), //$NON-NLS-1$
+		COMMENT("location:comment", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		OBSERVATION("location:observation", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		String id;
-		String name;
 		int type;
 		
-		Column(String id, String name, int type){
+		Column(String id, int type){
 			this.id = id;
-			this.name = name;
 			this.type = type;
 		}
-		public String getColumnName(){
-			return this.name;
+		public String getColumnName(Locale l){
+			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
 		public String getId(){
 			return this.id;
 		}
-		public Object getValue(IntelEntityLocation location) {
+		public Object getValue(IntelEntityLocation location, Locale l) {
 			if (this == ENTITY_UUID) return location.getEntity().getUuid();
 			if (this == ID) return location.getLocation().getId();
 			if (this == GEOM) {
@@ -75,11 +77,14 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 			}
 			if (this == DATE) return location.getLocation().getDateTime();
 			if (this == COMMENT) return location.getLocation().getComment();
-			if (this == OBSERVATION) return "TODO:";
+			if (this == OBSERVATION) return MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.OBS_COUNT_LABEL, l), location.getLocation().getObservations().size());
 			return null;
 		}
 	}
-	public EntityLocationDatasetResultSetMetadata(){
+	
+	private Locale l;
+	public EntityLocationDatasetResultSetMetadata(Locale l){
+		this.l = l;
 	}
 	
 	/**
@@ -104,7 +109,7 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].getColumnName(l);
 	}
 
 	/**

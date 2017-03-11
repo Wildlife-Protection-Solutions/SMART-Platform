@@ -82,6 +82,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -185,7 +186,7 @@ public class RecordSummaryPage extends EditorPart{
 		headerLabel.setText(recordEditor.getRecord().getTitle());
 		entityPanel.refreshEntities();
 		lblLastModified.setText(DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
-		lblLastModifiedBy.setText(recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy()));
+		lblLastModifiedBy.setText(recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy())); //$NON-NLS-1$
 	}
 	
 	public void linkEntity(IntelEntity toLink){
@@ -220,7 +221,7 @@ public class RecordSummaryPage extends EditorPart{
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 5;
 		((GridLayout)buttonPanel.getLayout()).horizontalSpacing = 0;
 		
-		headerLabel = toolkit.createLabel(buttonPanel, "");
+		headerLabel = toolkit.createLabel(buttonPanel, ""); //$NON-NLS-1$
 		FontData fd = headerLabel.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
 		fd.setHeight(fd.getHeight() + 1);
@@ -239,11 +240,11 @@ public class RecordSummaryPage extends EditorPart{
 		sashForm = new SashForm(parent, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		detailSection = createSectionHeader(sashForm, toolkit, "Details");
+		detailSection = createSectionHeader(sashForm, toolkit, Messages.RecordSummaryPage_DetailsSection);
 		
 		Color c = toolkit.getColors().getColor(IFormColors.TB_BG);
 		Color e2 = new Color(getSite().getShell().getDisplay(), ColorUtil.blend(c.getRGB(), new RGB(255,255,255),50));
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Summary", "History"}, detailSection, toolkit, e2);
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.RecordSummaryPage_SummarySection, Messages.RecordSummaryPage_HistorySection}, detailSection, toolkit, e2);
 		tabList.addDisposeListener(e->e2.dispose());
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
@@ -262,7 +263,7 @@ public class RecordSummaryPage extends EditorPart{
 		tabList.setContent(new Composite[]{summaryPart, historyPart}, tabPart);
 		tabList.selectTab(0);
 		
-		SmartSection expEntities = new SmartSection(sashForm, toolkit, "Entities"){
+		SmartSection expEntities = new SmartSection(sashForm, toolkit, Messages.RecordSummaryPage_EntitiesSection){
 			@Override
 			public void populateHeaderAdditions(Composite parent){
 			
@@ -281,8 +282,8 @@ public class RecordSummaryPage extends EditorPart{
 				Font boldfont = new Font(bits.getDisplay(), fd);
 				
 				bits.addListener(SWT.Dispose, e->{smallerfont.dispose();boldfont.dispose();});
-				Hyperlink list = toolkit.createHyperlink(bits, "list", SWT.NONE);
-				Hyperlink details = toolkit.createHyperlink(bits, "details", SWT.NONE);
+				Hyperlink list = toolkit.createHyperlink(bits, Messages.RecordSummaryPage_EntityListLink, SWT.NONE);
+				Hyperlink details = toolkit.createHyperlink(bits, Messages.RecordSummaryPage_EntityDetailLink, SWT.NONE);
 				list.setBackground(bits.getBackground());
 				details.setBackground(bits.getBackground());
 				list.setFont(boldfont);
@@ -317,7 +318,7 @@ public class RecordSummaryPage extends EditorPart{
 		((GridData)entityPanel.getLayoutData()).horizontalSpan = 0;
 		((GridData)entityPanel.getLayoutData()).verticalSpan = 0;
 				
-		SmartSection expAttachments = createSectionHeader(sashForm, toolkit, "Attachments");
+		SmartSection expAttachments = createSectionHeader(sashForm, toolkit, Messages.RecordSummaryPage_AttachmentsSection);
 		attachmentPanel = new AttachmentListComposite(expAttachments, toolkit, recordEditor);
 		attachmentPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -363,7 +364,7 @@ public class RecordSummaryPage extends EditorPart{
 			}
 		}
 		
-		headerLabel.setText(recordEditor.getRecord().getTitle() == null ? "" : recordEditor.getRecord().getTitle());
+		headerLabel.setText(recordEditor.getRecord().getTitle() == null ? "" : recordEditor.getRecord().getTitle()); //$NON-NLS-1$
 		
 		Composite header = new Composite(summaryPart, SWT.NONE);
 		header.setLayout(new GridLayout(2, false));
@@ -375,7 +376,7 @@ public class RecordSummaryPage extends EditorPart{
 		leftPart.setLayout(new GridLayout(2, false));
 		leftPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		toolkit.createLabel(leftPart, "Title:");
+		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_TitleLabel);
 		int style = SWT.BORDER;
 		if (!recordEditor.getEditMode()){
 			style = SWT.NONE;
@@ -392,7 +393,7 @@ public class RecordSummaryPage extends EditorPart{
 		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtShortName.setTextLimit(IntelRecord.MAX_TITLE_LENGTH);
 		
-		toolkit.createLabel(leftPart, "Status:");
+		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_StatusLabel);
 		if (recordEditor.getEditMode()){
 			TableComboViewer cmbStatus = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
@@ -432,7 +433,7 @@ public class RecordSummaryPage extends EditorPart{
 			temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridLayout)temp.getLayout()).marginWidth = 0;
 			((GridLayout)temp.getLayout()).marginHeight = 0;
-			Label l = toolkit.createLabel(temp, "");
+			Label l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
 			l.setImage(RecordLabelProvider.getRecordStatusImage(recordEditor.getRecord().getStatus()));
 			
 			l = toolkit.createLabel(temp,  RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
@@ -440,7 +441,7 @@ public class RecordSummaryPage extends EditorPart{
 			
 		}
 		
-		toolkit.createLabel(leftPart, "Source:");
+		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_SourceLabel);
 		if (recordEditor.getEditMode()){
 			TableComboViewer cmbSource = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbSource.getControl(), true, true);
@@ -456,7 +457,7 @@ public class RecordSummaryPage extends EditorPart{
 			((GridLayout)temp.getLayout()).marginWidth = 0;
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			
-			Label l = toolkit.createLabel(temp, "");
+			Label l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
 			Image img = null;
 			if (recordEditor.getRecord().getRecordSource() != null && recordEditor.getRecord().getRecordSource().getIcon() != null){
 				try{
@@ -476,8 +477,8 @@ public class RecordSummaryPage extends EditorPart{
 		rightPart.setLayout(new GridLayout(1, false));
 		rightPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		Hyperlink lnkNarrative = toolkit.createHyperlink(rightPart, "Narrative...", SWT.NONE);
-		lnkNarrative.setToolTipText("opens narrative in new window");
+		Hyperlink lnkNarrative = toolkit.createHyperlink(rightPart, Messages.RecordSummaryPage_NarrativeLabel, SWT.NONE);
+		lnkNarrative.setToolTipText(Messages.RecordSummaryPage_narrativetooltip);
 		lnkNarrative.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		lnkNarrative.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -486,9 +487,9 @@ public class RecordSummaryPage extends EditorPart{
 			}
 		});
 
-		Hyperlink lnkScratchpad = toolkit.createHyperlink(rightPart, "Scratchpad...", SWT.NONE);
+		Hyperlink lnkScratchpad = toolkit.createHyperlink(rightPart, Messages.RecordSummaryPage_ScratchpadLink, SWT.NONE);
 		lnkScratchpad.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		lnkScratchpad.setToolTipText("opens scratchpad in new window");
+		lnkScratchpad.setToolTipText(Messages.RecordSummaryPage_scratchpadtooltip);
 		lnkScratchpad.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -518,28 +519,28 @@ public class RecordSummaryPage extends EditorPart{
 		Composite infoComp = toolkit.createComposite(historyPart);
 		infoComp.setLayout(new GridLayout(2, false));
 		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Label l = toolkit.createLabel(infoComp, "Created: ");
+		Label l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_CreateLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		l = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateCreated() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateCreated()));
+		l = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateCreated() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateCreated())); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		l = toolkit.createLabel(infoComp, "Modified: ");
+		l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_ModifiedLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		lblLastModified = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateModified() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
+		lblLastModified = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateModified() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified())); //$NON-NLS-1$
 		lblLastModified.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		l = toolkit.createLabel(infoComp, "Created By: ");
+		l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_CreatedByLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		l = toolkit.createLabel(infoComp, recordEditor.getRecord().getCreatedBy() == null ? "" :  SmartLabelProvider.getFullLabel(recordEditor.getRecord().getCreatedBy()));
+		l = toolkit.createLabel(infoComp, recordEditor.getRecord().getCreatedBy() == null ? "" :  SmartLabelProvider.getFullLabel(recordEditor.getRecord().getCreatedBy())); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		l = toolkit.createLabel(infoComp, "Last Modified By: ");
+		l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_ModifiedByLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		lblLastModifiedBy = toolkit.createLabel(infoComp, recordEditor.getRecord().getLastModifiedBy() == null ? "" :  SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy()));
+		lblLastModifiedBy = toolkit.createLabel(infoComp, recordEditor.getRecord().getLastModifiedBy() == null ? "" :  SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy())); //$NON-NLS-1$
 		lblLastModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		
@@ -574,7 +575,7 @@ public class RecordSummaryPage extends EditorPart{
 		
 		if (source == null) return;
 		if (source.getAttributes().size() > 0){
-			Label l = toolkit.createLabel(srcAttributePanel, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+			Label l = toolkit.createLabel(srcAttributePanel, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		}
 		ScrolledComposite sc = new ScrolledComposite(srcAttributePanel, SWT.V_SCROLL);
@@ -618,7 +619,7 @@ public class RecordSummaryPage extends EditorPart{
 						});
 					}
 				}else{
-					Label l = toolkit.createLabel(content, name + ":");
+					Label l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
 					l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 					Composite tmp  = toolkit.createComposite(content, SWT.NONE);
@@ -634,8 +635,8 @@ public class RecordSummaryPage extends EditorPart{
 					editor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					toolkit.adapt(editor);
 					
-					Hyperlink link = toolkit.createHyperlink(tmp, "link...", SWT.NONE);
-					link.setToolTipText("Link entities to record");
+					Hyperlink link = toolkit.createHyperlink(tmp, Messages.RecordSummaryPage_linkentitesLabel, SWT.NONE);
+					link.setToolTipText(Messages.RecordSummaryPage_linkentitiestooltip);
 					link.addHyperlinkListener(new HyperlinkAdapter() {
 						@Override
 						public void linkActivated(HyperlinkEvent e) {
@@ -651,12 +652,12 @@ public class RecordSummaryPage extends EditorPart{
 					});
 				}
 			}else{
-				String value = "";
+				String value = ""; //$NON-NLS-1$
 				if (v != null){
 					value = v.getAttributeValueAsString(Locale.getDefault(), crs);
 				}
 				
-				Label l = toolkit.createLabel(content, name + ":");
+				Label l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
 				l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 				
 				l = toolkit.createLabel(content,value);
@@ -680,7 +681,7 @@ public class RecordSummaryPage extends EditorPart{
 	 * when not in read only mode we do not need to do this
 	 */
 	private void loadListAttribute(final HashMap<IntelRecordAttributeValue, Label> attributes){
-		Job j = new Job("loading attribute values"){
+		Job j = new Job(Messages.RecordSummaryPage_loadingAttributesJob){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final HashMap<Label, String> labels = new HashMap<>();
@@ -689,23 +690,23 @@ public class RecordSummaryPage extends EditorPart{
 				try{
 					for (Entry<IntelRecordAttributeValue,Label> v : attributes.entrySet()){
 						if (v.getKey().getAttributeListItems().isEmpty()){
-							labels.put(v.getValue(), "");
+							labels.put(v.getValue(), ""); //$NON-NLS-1$
 						}else{
 							StringBuilder sb = new StringBuilder();
-							sb.append("(" + v.getKey().getAttributeListItems().size() + ") ");
+							sb.append("(" + v.getKey().getAttributeListItems().size() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 							if (v.getKey().getAttribute().getAttribute() != null){
 								//attributes
 								for (IntelRecordAttributeValueList l : v.getKey().getAttributeListItems()){
 									String lbl = ((IntelAttributeListItem)session.get(IntelAttributeListItem.class, l.getId().getElementUuid())).getName();
 									sb.append(lbl);
-									sb.append(", ");
+									sb.append(", "); //$NON-NLS-1$
 								}
 							}else if(v.getKey().getAttribute().getEntityType() != null){
 								//entity types
 								for (IntelRecordAttributeValueList l : v.getKey().getAttributeListItems()){
 									String lbl = ((IntelEntity)session.get(IntelEntity.class, l.getId().getElementUuid())).getIdAttributeAsText();
 									sb.append(lbl);
-									sb.append(", ");
+									sb.append(", "); //$NON-NLS-1$
 								}
 							}
 							labels.put(v.getValue(), sb.substring(0, sb.length()-2));
@@ -797,7 +798,7 @@ public class RecordSummaryPage extends EditorPart{
 			}
 		}
 		if (showError){
-			MessageDialog.openError(getSite().getShell(), "Error", "Record contains invalid attribute values.  You must fix these before you can save the editor");
+			MessageDialog.openError(getSite().getShell(), Messages.RecordSummaryPage_ErrorDialogTitle, Messages.RecordSummaryPage_ErrorDialogMessage);
 			return false;
 		}
 			
@@ -859,7 +860,7 @@ public class RecordSummaryPage extends EditorPart{
 	 * @param cmbSource
 	 */
 	private void loadRecordSources(final Viewer cmbSource){
-		Job srcLoader = new Job("load record sources"){
+		Job srcLoader = new Job(Messages.RecordSummaryPage_loadingSourcesJobName){
 
 			@SuppressWarnings("unchecked")
 			@Override
@@ -868,7 +869,7 @@ public class RecordSummaryPage extends EditorPart{
 				Session s = HibernateManager.openSession();
 				try{
 					List<IntelRecordSource> sources = s.createCriteria(IntelRecordSource.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.list();
 					sources.forEach(src -> {
 						src.getName();
@@ -885,7 +886,7 @@ public class RecordSummaryPage extends EditorPart{
 				}finally{
 					s.close();
 				}
-				allInput.add(0, "");
+				allInput.add(0, ""); //$NON-NLS-1$
 				Display.getDefault().syncExec(()->{
 					if (cmbSource.getControl().isDisposed()) return;
 					

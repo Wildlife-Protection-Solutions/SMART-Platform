@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 
@@ -37,10 +38,10 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 public class RecordImportConfig {
 
 	public enum Column{
-		TITLE ("Record Title"), 
-		SOURCE ("Record Source"),
-		NARRATIVE ("Record Narrative"),
-		SCRATCHPAD ("record Scratchpad");
+		TITLE (Messages.RecordImportConfig_RecordTitleColumnName), 
+		SOURCE (Messages.RecordImportConfig_RecordSourceColumnName),
+		NARRATIVE (Messages.RecordImportConfig_RecordNarrativeColumnName),
+		SCRATCHPAD (Messages.RecordImportConfig_RecordScratchpadColumnName);
 		
 		private String gui;
 		

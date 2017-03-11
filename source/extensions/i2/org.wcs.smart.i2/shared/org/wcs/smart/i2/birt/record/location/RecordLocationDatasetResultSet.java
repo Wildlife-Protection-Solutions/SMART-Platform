@@ -72,16 +72,16 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 			AbstractIntelBirtConnection connection, 
 			HashMap<Integer, Object> parameters,
 			RecordParameterMetadata pmetadata) {
-//		this.connection = connection;
+
 		this.metadata = metadata;
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		
 		Criteria c = connection.getSession().createCriteria(IntelLocation.class)
-				.add(Restrictions.in("conservationArea", connection.getConservationAreas()));
+				.add(Restrictions.in("conservationArea", connection.getConservationAreas())); //$NON-NLS-1$
 		
 		if (index >= 0){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
-			c.add(Restrictions.eq("record.uuid", recordUuid));
+			c.add(Restrictions.eq("record.uuid", recordUuid)); //$NON-NLS-1$
 		}
 		
 		results = c.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
@@ -146,7 +146,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 	 */
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return "";
+		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}
 

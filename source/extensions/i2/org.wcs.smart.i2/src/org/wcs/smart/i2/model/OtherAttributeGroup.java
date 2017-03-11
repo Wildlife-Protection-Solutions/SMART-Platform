@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.model;
 
+import org.wcs.smart.i2.internal.Messages;
+
 /**
  * Object holder to represent attributes that are not associated with 
  * any attribute group.
@@ -37,6 +39,6 @@ public class OtherAttributeGroup {
 	}
 	
 	public String getName(){
-		return "Other";
+		return Messages.OtherAttributeGroup_GroupName;
 	}
 }

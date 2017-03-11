@@ -53,6 +53,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
@@ -115,11 +116,11 @@ public class RecordDescriptionPage extends EditorPart{
 		sashForm = new SashForm(parent, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartSection narrativeSection = new SmartSection(sashForm, toolkit, "Narrative"){
+		SmartSection narrativeSection = new SmartSection(sashForm, toolkit, Messages.RecordDescriptionPage_NarrativeSection){
 			public void populateHeaderAdditions(Composite parent){
 				Hyperlink l = createHyperlink(parent, FieldType.NARRATIVE);
 				l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-				l.setToolTipText("Opens narrative in separate window");
+				l.setToolTipText(Messages.RecordDescriptionPage_narrativetooltip);
 			}
 		};
 		
@@ -128,11 +129,11 @@ public class RecordDescriptionPage extends EditorPart{
 		narrativePart.setLayout(new GridLayout());
 		narrativePart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartSection expEntities = new SmartSection(sashForm, toolkit, "Scratchpad"){
+		SmartSection expEntities = new SmartSection(sashForm, toolkit, Messages.RecordDescriptionPage_ScratchpadSection){
 			public void populateHeaderAdditions(Composite parent){
 				Hyperlink l = createHyperlink(parent, FieldType.SCRATCHPAD);
 				l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-				l.setToolTipText("Opens scratchpad in separate window");
+				l.setToolTipText(Messages.RecordDescriptionPage_scratchpadtooltip);
 			}
 		};
 		
@@ -213,7 +214,7 @@ public class RecordDescriptionPage extends EditorPart{
 
 	
 	private Hyperlink createHyperlink(Composite parent, RecordNarrativeView.FieldType type){
-		Hyperlink open = toolkit.createHyperlink(parent, "open...", SWT.NONE);
+		Hyperlink open = toolkit.createHyperlink(parent, Messages.RecordDescriptionPage_openlink, SWT.NONE);
 		open.setBackground(parent.getBackground());
 		open.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -229,7 +230,7 @@ public class RecordDescriptionPage extends EditorPart{
 		text.setMenu(menu);
 		
 		MenuItem search = new MenuItem(menu, SWT.CASCADE);
-		search.setText("Search Entity -> ");
+		search.setText(Messages.RecordDescriptionPage_SearchEntityMenuItem);
 		search.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {				
@@ -240,7 +241,7 @@ public class RecordDescriptionPage extends EditorPart{
 		
 		if (IntelSecurityManager.INSTANCE.canCreateEntity()){
 			MenuItem newEntity = new MenuItem(menu, SWT.CASCADE);
-			newEntity.setText("New Entity ... ");
+			newEntity.setText(Messages.RecordDescriptionPage_NewEntityMenuItem);
 			newEntity.addSelectionListener(new SelectionAdapter() {			
 				@Override
 				public void widgetSelected(SelectionEvent e) {				
@@ -256,7 +257,7 @@ public class RecordDescriptionPage extends EditorPart{
 		new MenuItem(menu, SWT.SEPARATOR);
 		
 		MenuItem cut = new MenuItem(menu, SWT.PUSH);
-		cut.setText("Cut");
+		cut.setText(Messages.RecordDescriptionPage_Cut);
 		cut.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -264,7 +265,7 @@ public class RecordDescriptionPage extends EditorPart{
 			}
 		});
 		MenuItem copy = new MenuItem(menu, SWT.PUSH);
-		copy.setText("Copy");
+		copy.setText(Messages.RecordDescriptionPage_Copy);
 		copy.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -272,7 +273,7 @@ public class RecordDescriptionPage extends EditorPart{
 			}
 		});
 		MenuItem paste = new MenuItem(menu, SWT.PUSH);
-		paste.setText("Paste");
+		paste.setText(Messages.RecordDescriptionPage_Paste);
 		paste.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -281,7 +282,7 @@ public class RecordDescriptionPage extends EditorPart{
 		});
 		
 		MenuItem delete = new MenuItem(menu, SWT.PUSH);
-		delete.setText("Delete");
+		delete.setText(Messages.RecordDescriptionPage_Delete);
 		delete.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -295,7 +296,7 @@ public class RecordDescriptionPage extends EditorPart{
 		new MenuItem(menu, SWT.SEPARATOR);
 
 		MenuItem selectAll = new MenuItem(menu, SWT.PUSH);
-		selectAll.setText("Select All");
+		selectAll.setText(Messages.RecordDescriptionPage_SelectAll);
 		selectAll.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {

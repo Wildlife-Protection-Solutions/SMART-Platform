@@ -59,9 +59,9 @@ public class IntelEntityAttributeFeatureReader implements FeatureReader<SimpleFe
 		Session s = HibernateManager.openSession();
 		try{
 			
-			Query q = s.createQuery("FROM IntelEntityAttributeValue WHERE id.entity.uuid = :entityUuid and id.attribute.type = :type");
-			q.setParameter("entityUuid", entityUuid);
-			q.setParameter("type", IntelAttribute.AttributeType.POSITION);
+			Query q = s.createQuery("FROM IntelEntityAttributeValue WHERE id.entity.uuid = :entityUuid and id.attribute.type = :type"); //$NON-NLS-1$
+			q.setParameter("entityUuid", entityUuid); //$NON-NLS-1$
+			q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
 			
 			List<IntelEntityAttributeValue> value = q.list();
 			
@@ -115,7 +115,7 @@ public class IntelEntityAttributeFeatureReader implements FeatureReader<SimpleFe
 	private static SimpleFeature getEntityAttributeAsFeature(IntelEntityAttributeValue location, SimpleFeatureType ftype){
 		Object data[] = new Object[3];		
 		data[0] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(location.getNumberValue(), location.getNumberValue2()));
-		data[1] = ftype.getName() + "." + UuidUtils.uuidToString(location.getAttribute().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		data[1] = ftype.getName() + "." + UuidUtils.uuidToString(location.getAttribute().getUuid()); //$NON-NLS-1$
 		data[2] = location.getAttribute().getName();
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}

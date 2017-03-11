@@ -61,6 +61,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -73,7 +74,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class FileWizardPage extends WizardPage{
 
-	public static final String FILE_PAGE = "org.wcs.smart.i2.ui.entity.importer.file";
+	public static final String FILE_PAGE = "org.wcs.smart.i2.ui.entity.importer.file"; //$NON-NLS-1$
 	
 	private Text txtFile;
 	private TableComboViewer cmbEntityType;
@@ -122,34 +123,34 @@ public class FileWizardPage extends WizardPage{
     	//validate file
     	if (!txtFile.getText().isEmpty()){
         	if (!Files.exists(Paths.get(txtFile.getText()))){
-        		setErrorMessage("File does not exist");
+        		setErrorMessage(Messages.FileWizardPage_FileNotFound);
         		return false;
         	}
     	}
     	
     	if (!cmbEntityType.getSelection().isEmpty() && 
     			!(((StructuredSelection)cmbEntityType.getSelection()).getFirstElement() instanceof IntelEntityType)){
-    		setErrorMessage("Invalid entity type");
+    		setErrorMessage(Messages.FileWizardPage_InvalidEntityType);
     		return false;
     	}
     	
     	try{
     		delimCombo.getDelimiter();
     	}catch (Exception ex){
-    		setErrorMessage("Invalid delimiter: " + ex.getMessage());
+    		setErrorMessage(Messages.FileWizardPage_InvalidDelimiter + ex.getMessage());
     		return false;
     	}
         
     	Object x= ((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
     	if ( x == null || !(x instanceof Projection)){
-    		setErrorMessage("valid projection not selected");
+    		setErrorMessage(Messages.FileWizardPage_InvalidProjection);
     		return false;
     	}
     	
     	try{
     		DateTimeFormatter.ofPattern(cmbDateFormat.getCombo().getText());
     	}catch (Exception ex){
-    		setErrorMessage("Invalid date format");
+    		setErrorMessage(Messages.FileWizardPage_InvalidDateFormat);
     		return false;
     	}
     	
@@ -169,8 +170,8 @@ public class FileWizardPage extends WizardPage{
 		upper.setLayout(new GridLayout(3, false));
 		
 		Label l = new Label(upper, SWT.NONE);
-		l.setText("Entity Type:");
-		l.setToolTipText("the entity type to import");
+		l.setText(Messages.FileWizardPage_ETLabel);
+		l.setToolTipText(Messages.FileWizardPage_ETtooltip);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		cmbEntityType = new TableComboViewer(upper, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
@@ -181,7 +182,7 @@ public class FileWizardPage extends WizardPage{
 		cmbEntityType.addSelectionChangedListener(event-> getWizard().getContainer().updateButtons());
 		
 		l = new Label(upper, SWT.NONE);
-		l.setText("File:");
+		l.setText(Messages.FileWizardPage_FileLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		txtFile = new Text(upper, SWT.BORDER);
@@ -189,13 +190,13 @@ public class FileWizardPage extends WizardPage{
 		txtFile.addListener(SWT.Modify, e->getWizard().getContainer().updateButtons());
 		
 		Button btnFileSelector = new Button(upper, SWT.PUSH);
-		btnFileSelector.setText("...");
+		btnFileSelector.setText("..."); //$NON-NLS-1$
 		btnFileSelector.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-				fd.setFilterExtensions(new String[]{"*.csv", "*.*"});
-				fd.setFilterNames(new String[] {"Comma Separated Values (*.csv)", "All Files (*.*)"});
+				fd.setFilterExtensions(new String[]{"*.csv", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterNames(new String[] {Messages.FileWizardPage_CSVFileName, Messages.FileWizardPage_AllFileName});
 				
 				String f = fd.open();
 				if (f != null){
@@ -205,15 +206,15 @@ public class FileWizardPage extends WizardPage{
 			}
 		});
 		l = new Label(upper, SWT.NONE);
-		l.setText("Field Delimiter:");
+		l.setText(Messages.FileWizardPage_DelimiterLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		delimCombo = new DelimiterCombo(upper, SWT.DEFAULT);
 		delimCombo.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2, 1));
 		
 		l = new Label(upper, SWT.NONE);
-		l.setText("Skip First Line:");
-		l.setToolTipText("skip the first line of the csv file");
+		l.setText(Messages.FileWizardPage_SkipLineLabel);
+		l.setToolTipText(Messages.FileWizardPage_SkipLinkTooltip);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		chSkipFirstLine = new Button(upper, SWT.CHECK);
@@ -221,8 +222,8 @@ public class FileWizardPage extends WizardPage{
 		chSkipFirstLine.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2, 1));
 		
 		l = new Label(upper, SWT.NONE);
-		l.setText("Date Format:");
-		l.setToolTipText("select a format or enter a custom format for date attribute; you can ignore if you have no date attributes to import");
+		l.setText(Messages.FileWizardPage_DateFormat);
+		l.setToolTipText(Messages.FileWizardPage_dateformattooltip);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		
@@ -233,12 +234,12 @@ public class FileWizardPage extends WizardPage{
 		String[] dateFormats = new String[]{
 				DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.MEDIUM, null, IsoChronology.INSTANCE, Locale.getDefault()),
 				DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.SHORT, null, IsoChronology.INSTANCE, Locale.getDefault()),
-				"d/M/y",
-				"d-M-y",
-				"M/d/y",
-				"M-d-y",
-				"y/M/d",
-				"y-M-d"
+				"d/M/y", //$NON-NLS-1$
+				"d-M-y", //$NON-NLS-1$
+				"M/d/y", //$NON-NLS-1$
+				"M-d-y", //$NON-NLS-1$
+				"y/M/d", //$NON-NLS-1$
+				"y-M-d" //$NON-NLS-1$
 		};
 		cmbDateFormat.setInput(dateFormats);
 		cmbDateFormat.setSelection(new StructuredSelection(dateFormats[0]));
@@ -246,8 +247,8 @@ public class FileWizardPage extends WizardPage{
 		
 		
 		l = new Label(upper, SWT.NONE);
-		l.setText("Projection:");
-		l.setToolTipText("for entities with position attributes select the projection of the import data");
+		l.setText(Messages.FileWizardPage_ProjectionLabel);
+		l.setToolTipText(Messages.FileWizardPage_projectiontooltip);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		cmbProjection = new ComboViewer(upper, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -268,11 +269,11 @@ public class FileWizardPage extends WizardPage{
 		loadEntityTypes.schedule();
 		setControl(upper);
 		
-		setTitle("File");
-		setMessage("Select the import file and type of entity to import");
+		setTitle(Messages.FileWizardPage_FileLabel2);
+		setMessage(Messages.FileWizardPage_FileTooltip);
 	}
 	
-	private Job loadEntityTypes = new Job("load entity types"){
+	private Job loadEntityTypes = new Job(Messages.FileWizardPage_LoadTypeJobName){
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -282,13 +283,13 @@ public class FileWizardPage extends WizardPage{
 			Session s = HibernateManager.openSession();
 			try{
 				types.addAll(s.createCriteria(IntelEntityType.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list());
 				types.forEach(t -> t.getName());
 				
 				
 				projections.addAll(s.createCriteria(Projection.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 						.list());
 				projections.forEach(p->{
 					p.getName();

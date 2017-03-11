@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 
 /**
@@ -85,12 +86,12 @@ public class AttachmentView {
 		ToolItem btnZoomIn = new ToolItem(toolbar, SWT.PUSH);
 		btnZoomIn.addListener(SWT.Selection, e->zoomIn());
 		btnZoomIn.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_IMG_ZOOMIN));
-		btnZoomIn.setToolTipText("Zoom In");
+		btnZoomIn.setToolTipText(Messages.AttachmentView_zoomintooltip);
 		
 		ToolItem btnZoomOut = new ToolItem(toolbar, SWT.PUSH);
 		btnZoomOut.addListener(SWT.Selection, e->zoomOut());
 		btnZoomOut.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_IMG_ZOOMOUT));
-		btnZoomOut.setToolTipText("Zoom Out");
+		btnZoomOut.setToolTipText(Messages.AttachmentView_zoomouttooltip);
 		
 		ToolItem btnRefresh = new ToolItem(toolbar, SWT.PUSH);
 		btnRefresh.addListener(SWT.Selection, e->{
@@ -98,7 +99,7 @@ public class AttachmentView {
 			draw.redraw();
 		});
 		btnRefresh.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-		btnRefresh.setToolTipText("Reset");
+		btnRefresh.setToolTipText(Messages.AttachmentView_resettooltip);
 		
 		Point tbsize = toolbar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		toolbar.setBounds(5, 5, tbsize.x, tbsize.y);

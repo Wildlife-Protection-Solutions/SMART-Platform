@@ -38,6 +38,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.ui.views.AttachmentView;
 
@@ -55,7 +56,7 @@ public class OpenAttachmentViewHandler {
 			rawImage = new Image(Display.getDefault(), attachment
 					.getAttachmentFile().getAbsolutePath());
 		}catch (Exception ex){
-			MessageDialog.openError(context.get(Shell.class), "Invalid File", "Not a supported image format");
+			MessageDialog.openError(context.get(Shell.class), Messages.OpenAttachmentViewHandler_InvalidTitle, Messages.OpenAttachmentViewHandler_InvalidMsg);
 			return;
 		}
 		

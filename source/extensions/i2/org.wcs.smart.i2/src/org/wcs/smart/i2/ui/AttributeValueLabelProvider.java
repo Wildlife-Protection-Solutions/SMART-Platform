@@ -36,6 +36,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -62,7 +63,7 @@ public class AttributeValueLabelProvider extends LabelProvider {
 		if (crs != null) return crs;
 		
 		//this opens a session so do in job
-		Job j = new Job("load projection"){
+		Job j = new Job("load projection"){ //$NON-NLS-1$
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -112,7 +113,7 @@ public class AttributeValueLabelProvider extends LabelProvider {
 			return super.getText(element);
 		}
 		if (value == null){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
 		if (value instanceof String){
@@ -137,9 +138,9 @@ public class AttributeValueLabelProvider extends LabelProvider {
 			}else{
 				try{
 					Coordinate c = ReprojectUtils.reproject(((Point) value).getX(), ((Point) value).getY(), GeometryUtils.SMART_CRS, getCrs());
-					return "POINT (" + c.x + " " + c.y + ")";
+					return "POINT (" + c.x + " " + c.y + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}catch (Exception ex){
-					return "ERROR: " + ex.getMessage();
+					return Messages.AttributeValueLabelProvider_ErrorLabel + ex.getMessage();
 				}
 			}
 		}else{

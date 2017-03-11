@@ -34,6 +34,7 @@ import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
+import org.wcs.smart.i2.internal.Messages;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -47,7 +48,7 @@ public class IntelEntityGeoResourceInfo extends IGeoResourceInfo {
 	private Logger logger = Logger.getLogger(IntelEntityGeoResourceInfo.class.getName());
 	
 	public IntelEntityGeoResourceInfo( IntelEntityGeoResource resource, IProgressMonitor monitor){
-		this.title = "Intelligence Entity" ;
+		this.title = Messages.IntelEntityGeoResourceInfo_Name ;
 		computeBounds(resource, monitor);
 	}
 	

@@ -29,6 +29,7 @@ import java.util.Locale;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 
 /**
@@ -47,8 +48,8 @@ public class DataModelColumn extends AbstractQueryColumn{
 	 * Creates a new category data model column
 	 * @param level
 	 */
-	public DataModelColumn(int level) {
-		super(MessageFormat.format("Category {0}", level), "category:" + level);
+	public DataModelColumn(int level, Locale l) {
+		super(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.QUERY_COLUMN_CATEGORY_LABEL, l), level), "category:" + level); //$NON-NLS-1$
 		this.level = level;
 	}
 
@@ -57,7 +58,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 	 * @param attribute
 	 */
 	public DataModelColumn(Attribute attribute){
-		super(attribute.getName(), "attribute:" + attribute.getKeyId());
+		super(attribute.getName(), "attribute:" + attribute.getKeyId()); //$NON-NLS-1$
 		this.attributeKey = attribute.getKeyId();
 		this.type = attribute.getType();
 	}
@@ -119,7 +120,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 	@Override
 	public String getValue(IResultItem item, Locale l){
 		Object toFormat = getValue(item);
-		if (toFormat == null) return "";
+		if (toFormat == null) return ""; //$NON-NLS-1$
 		if (getDataType() == Type.STRING) return (String)toFormat;
 		if (getDataType() == Type.DATE) return DateFormat.getDateInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
 		if (getDataType() == Type.NUMERIC) return ((Number)toFormat).toString();

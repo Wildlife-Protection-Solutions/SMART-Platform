@@ -49,12 +49,12 @@ public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 		layout.addView(RecordsView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
 		
 		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
-			IFolderLayout bottomLeft = layout.createFolder("org.wcs.smart.i2.assessment.bottomleft", IPageLayout.BOTTOM,0.7f, RecordsView.ID);
+			IFolderLayout bottomLeft = layout.createFolder("org.wcs.smart.i2.assessment.bottomleft", IPageLayout.BOTTOM,0.7f, RecordsView.ID); //$NON-NLS-1$
 			bottomLeft.addView(WorkingSetView.ID);
 			layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
 		}
 		
-		IFolderLayout right = layout.createFolder("org.wcs.smart.i2.assessment.right", IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA);
+		IFolderLayout right = layout.createFolder("org.wcs.smart.i2.assessment.right", IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		right.addView(EntitySearchView.ID);
 		right.addView(LayersView.ID);
 		right.addPlaceholder(RecordNarrativeView.ID);

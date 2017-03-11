@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 
 /**
@@ -61,7 +62,7 @@ public enum EntityTypeManager {
 	
 	public void canDelete(IntelEntityType type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){
-			throw new Exception("Unknown error occurrs while deleteing entity type.");
+			throw new Exception(Messages.EntityTypeManager_DeleteError);
 		}
 	}
 	
@@ -75,11 +76,11 @@ public enum EntityTypeManager {
 	public void deleteEntityType(IntelEntityType type, Session session) throws Exception{
 		
 		//update relationships references to null
-		Query q = session.createQuery("UPDATE IntelRelationshipType SET sourceEntityType = null where sourceEntityType = :type");
+		Query q = session.createQuery("UPDATE IntelRelationshipType SET sourceEntityType = null where sourceEntityType = :type"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("UPDATE IntelRelationshipType SET targetEntityType = null where targetEntityType = :type");
+		q = session.createQuery("UPDATE IntelRelationshipType SET targetEntityType = null where targetEntityType = :type"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.birt.record;
 
 import java.math.BigDecimal;
@@ -22,6 +43,11 @@ import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Intelligence record attribute dataset results
+ * @author Emily
+ *
+ */
 public class RecordAttributeDatasetResultSet implements IResultSet {
 
 	private long m_maxRows = -1;
@@ -48,15 +74,15 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 		this.connection = connection;
 		this.metadata = metadata;
 		Criteria c = connection.getSession().createCriteria(IntelRecordAttributeValue.class)
-				.createAlias("record", "r")
-				.createAlias("attribute", "a")
-				.add(Restrictions.in("r.conservationArea",connection.getConservationAreas()))
-				.addOrder(Order.asc("a.order"));
+				.createAlias("record", "r") //$NON-NLS-1$ //$NON-NLS-2$
+				.createAlias("attribute", "a") //$NON-NLS-1$ //$NON-NLS-2$
+				.add(Restrictions.in("r.conservationArea",connection.getConservationAreas())) //$NON-NLS-1$
+				.addOrder(Order.asc("a.order")); //$NON-NLS-1$
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		if (index >= 0){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
-			c.add(Restrictions.eq("r.uuid", recordUuid));
+			c.add(Restrictions.eq("r.uuid", recordUuid)); //$NON-NLS-1$
 		}
 		
 		results = c.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
@@ -121,7 +147,7 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 	 */
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return "";
+		if (lastRowItem == null) return ""; //$NON-NLS-1$
 		return lastRowItem.toString();
 	}
 
@@ -138,7 +164,7 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 				connection.getProjectionProvider().getProjection().getParsedCoordinateReferenceSystem(), 
 				connection.getSession());
 		}catch (Exception ex){
-			return "ERROR: " + ex.getMessage();
+			return "ERROR: " + ex.getMessage(); //$NON-NLS-1$
 		}
 	}
 

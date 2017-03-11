@@ -55,11 +55,11 @@ public class FeatureGenerator {
 	/**
 	 * Point location layer
 	 */
-	public static final Name POINT_TYPE = new NameImpl("org.wcs.smart.i2.query.point", "Point Locations");
+	public static final Name POINT_TYPE = new NameImpl("org.wcs.smart.i2.query.point", "Point Locations"); //$NON-NLS-1$ //$NON-NLS-2$
 	/**
 	 * Polygon location layer
 	 */
-	public static final Name POLYGON_TYPE = new NameImpl("org.wcs.smart.i2.query.polygon", "Polygon Locations");
+	public static final Name POLYGON_TYPE = new NameImpl("org.wcs.smart.i2.query.polygon", "Polygon Locations"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	/**
 	 * Converts a query result item to a feature
@@ -78,9 +78,9 @@ public class FeatureGenerator {
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append(ii.getLocationId());
-			sb.append(".");
-			sb.append((new SimpleDateFormat("yyyMMdd")).format(ii.getLocationDate()));
-			sb.append(".");
+			sb.append("."); //$NON-NLS-1$
+			sb.append((new SimpleDateFormat("yyyMMdd")).format(ii.getLocationDate())); //$NON-NLS-1$
+			sb.append("."); //$NON-NLS-1$
 			sb.append(ii.getObservationUuid() == null ? UuidUtils.uuidToString(ii.getLocationUuid()) : UuidUtils.uuidToString(ii.getObservationUuid()));
 			data.add(sb.toString()); 
 		}else{
@@ -136,21 +136,21 @@ public class FeatureGenerator {
 	public static SimpleFeatureType generateFeatureType(String geometryType, Name typeName, List<IQueryColumn> columns, boolean forShape) throws SchemaException{
 
 		Set<String> usedNames = new HashSet<>();
-		usedNames.add("name");//not a valid column name
-		usedNames.add("the_geom");
-		usedNames.add("fid");
+		usedNames.add("name");//not a valid column name //$NON-NLS-1$
+		usedNames.add("the_geom"); //$NON-NLS-1$
+		usedNames.add("fid"); //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("the_geom:" + geometryType + ":srid=4326,");
-		sb.append("fid:String,");
+		sb.append("the_geom:" + geometryType + ":srid=4326,"); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("fid:String,"); //$NON-NLS-1$
 		for (IQueryColumn c : columns){
 			if (c.getDataType() != Type.GEOMETRY && c.isVisible()){
 				String name = generateFieldName(c.getColumnName(), usedNames, forShape);
 				usedNames.add(name.toLowerCase());
 				sb.append(name);
-				sb.append(":");
+				sb.append(":"); //$NON-NLS-1$
 				sb.append(c.getDataType().getFeatureType());
-				sb.append(",");
+				sb.append(","); //$NON-NLS-1$
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1);

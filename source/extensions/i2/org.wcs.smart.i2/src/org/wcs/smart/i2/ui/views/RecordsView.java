@@ -95,6 +95,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
@@ -174,7 +175,7 @@ public class RecordsView {
 			}
 		};
 		
-		SectionTabHeader tabList = new SectionTabHeader(new String[]{"Unprocessed", "In Progress", "All", "Basic Search"}, thisParent, toolkit, thisParent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.RecordsView_unprocessedSection, Messages.RecordsView_inprogressSection, Messages.RecordsView_allSection, Messages.RecordsView_basicSection}, thisParent, toolkit, thisParent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 //		((GridData)tabList.getLayoutData()).verticalIndent = 2;
 		
@@ -273,8 +274,8 @@ public class RecordsView {
 		nameColumn.setLabelProvider(provider);
 		nameColumn.getColumn().setWidth(200);
 		
-		Hyperlink export = toolkit.createHyperlink(allRecordsSection, "Export...", SWT.NONE);
-		export.setToolTipText("exports list of records to csv file");
+		Hyperlink export = toolkit.createHyperlink(allRecordsSection, Messages.RecordsView_exportlink, SWT.NONE);
+		export.setToolTipText(Messages.RecordsView_exporttooltip);
 		export.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -356,7 +357,7 @@ public class RecordsView {
 		control.getControl().setMenu(m);
 	
 		MenuItem mi = new MenuItem(m, SWT.PUSH);
-		mi.setText("Open...");
+		mi.setText(Messages.RecordsView_OpenMenu);
 		mi.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -383,7 +384,7 @@ public class RecordsView {
 		
 		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			MenuItem miDelete = new MenuItem(m, SWT.PUSH);
-			miDelete.setText("Delete");
+			miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			miDelete.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -395,12 +396,12 @@ public class RecordsView {
 							toDelete.add(x);
 						}
 					}
-					if (MessageDialog.openConfirm(context.get(Shell.class), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected records?", toDelete.size()))){
+					if (MessageDialog.openConfirm(context.get(Shell.class), Messages.RecordsView_DeleteTitle, MessageFormat.format(Messages.RecordsView_DeleteMessage, toDelete.size()))){
 						ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
 						try {
 							pmd.run(true, true, (monitor)-> RecordManager.INSTANCE.deleteRecords(toDelete, context,monitor));
 						} catch (Exception ex) {
-							Intelligence2PlugIn.displayLog("Error deleting records: " + ex.getMessage(), ex);
+							Intelligence2PlugIn.displayLog(Messages.RecordsView_DeleteErrorMessage + ex.getMessage(), ex);
 						}
 						refreshView();
 					}
@@ -418,7 +419,7 @@ public class RecordsView {
 		}
 		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
 			MenuItem miAdd = new MenuItem(m, SWT.PUSH);
-			miAdd.setText("Add To Working Set");
+			miAdd.setText(Messages.RecordsView_AddToWs);
 			miAdd.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
 			miAdd.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -504,7 +505,7 @@ public class RecordsView {
 		}
 	}
 
-	Job loadRecordsJob = new Job("Loading Intelligence Records"){
+	Job loadRecordsJob = new Job(Messages.RecordsView_LoadingIntelRecordsJobName){
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -514,7 +515,7 @@ public class RecordsView {
 			final List<IntelRecordSource> sources = new ArrayList<>();
 			try{
 				sources.addAll(s.createCriteria(IntelRecordSource.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.list());
 			}finally{
 				s.close();
@@ -550,11 +551,11 @@ public class RecordsView {
 			s = HibernateManager.openSession();
 			try{
 				List<IntelRecord> records = s.createCriteria(IntelRecord.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 						.add(Restrictions.or(
-								Restrictions.eq("status", IntelRecord.Status.PROCESSING),
-								Restrictions.eq("status", IntelRecord.Status.NEW)))
-						.addOrder(Order.asc("dateCreated"))
+								Restrictions.eq("status", IntelRecord.Status.PROCESSING), //$NON-NLS-1$
+								Restrictions.eq("status", IntelRecord.Status.NEW))) //$NON-NLS-1$
+						.addOrder(Order.asc("dateCreated")) //$NON-NLS-1$
 						.list();
 				for (IntelRecord r : records){
 					if (r.getRecordSource() != null){
@@ -584,8 +585,8 @@ public class RecordsView {
 			s = HibernateManager.openSession();
 			final List<RecordEditorInput> allRecords = new ArrayList<RecordEditorInput>();
 			try{
-				Query q = s.createQuery("SELECT title, uuid, dateCreated, recordSource.uuid, status FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc");
-				q.setParameter("ca", SmartDB.getCurrentConservationArea());
+				Query q = s.createQuery("SELECT title, uuid, dateCreated, recordSource.uuid, status FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc"); //$NON-NLS-1$
+				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				List<Object[]> items = q.list();
 				for (Object[] item : items){
 					allRecords.add(new RecordEditorInput((String)item[0], (UUID)item[1], (Date)item[2], (UUID)item[3], (IntelRecord.Status)item[4]));
@@ -615,7 +616,7 @@ public class RecordsView {
 		private String filterString;
 		
 		public void setFilterString(String filterString){
-			this.filterString = ".*" + filterString.toUpperCase() + ".*";
+			this.filterString = ".*" + filterString.toUpperCase() + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		@Override

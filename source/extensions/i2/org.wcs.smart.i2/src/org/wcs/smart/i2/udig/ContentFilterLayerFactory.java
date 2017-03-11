@@ -64,7 +64,7 @@ public class ContentFilterLayerFactory extends LayerFactoryImpl {
 		setMap(map);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public ContentFilterLayerImpl createLayer(IGeoResource resource) throws IOException {
 		IService service = resource.service(ProgressManager.instance().get());

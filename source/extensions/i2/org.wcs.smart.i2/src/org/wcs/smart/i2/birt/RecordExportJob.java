@@ -51,6 +51,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
@@ -67,7 +68,7 @@ public class RecordExportJob extends Job {
 	private EmitterInfo format;
 	
 	public RecordExportJob(IntelRecord record, EmitterInfo format) {
-		super("Exporting Intelligence Record");
+		super(Messages.RecordExportJob_JobName);
 		this.record = record;
 		this.format = format;
 	}
@@ -91,7 +92,7 @@ public class RecordExportJob extends Job {
 		//get the template
 		Path reportFile = IntelReportManager.INSTANCE.getRecordTemplate(SmartDB.getCurrentConservationArea());
 		if (reportFile == null || !Files.exists(reportFile)){
-			throw new Exception("BIRT template is not configured for intelligence record.  You must configure the template before you can export the record.");
+			throw new Exception(Messages.RecordExportJob_NoTemplate);
 			
 		}
 		//create the pdf file output location
@@ -100,19 +101,19 @@ public class RecordExportJob extends Job {
 			try {
 				Files.createDirectory(outputFile);
 			} catch (IOException e) {
-				throw new Exception(MessageFormat.format("Unable to create directory {0} to generate pdf file to.", outputFile.toString()), e);
+				throw new Exception(MessageFormat.format(Messages.RecordExportJob_DirectoryError, outputFile.toString()), e);
 			}
 		}
 
 		
-		String fileName = record.getTitle() + "." + (new SimpleDateFormat("MMMddyyyy")).format(new Date());
+		String fileName = record.getTitle() + "." + (new SimpleDateFormat("MMMddyyyy")).format(new Date()); //$NON-NLS-1$ //$NON-NLS-2$
 		fileName = URLUtils.cleanFilename(fileName);
 		Path current = outputFile;
-		outputFile = current.resolve(fileName + "." + format.getFormat());
+		outputFile = current.resolve(fileName + Messages.RecordExportJob_5 + format.getFormat());
 		if (Files.exists(outputFile)){
 			int cnt = 1;
 			while(cnt < 1000){
-				outputFile = current.resolve(fileName + "." + cnt + "." + format.getFormat());
+				outputFile = current.resolve(fileName + "." + cnt + "." + format.getFormat()); //$NON-NLS-1$ //$NON-NLS-2$
 				if (!Files.exists(outputFile)){
 					break;
 				}
@@ -149,7 +150,7 @@ public class RecordExportJob extends Job {
 				if (session.isOpen()) session.close();
 			}
 		}catch (Exception ex){
-			throw new Exception(MessageFormat.format("Unable to export intelligence record. {0}", ex.getMessage(), ex));
+			throw new Exception(MessageFormat.format(Messages.RecordExportJob_ExportError, ex.getMessage(), ex));
 		}
 		
 		//delete on exit

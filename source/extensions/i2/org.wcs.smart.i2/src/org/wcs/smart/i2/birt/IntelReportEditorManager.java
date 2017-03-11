@@ -117,7 +117,7 @@ public class IntelReportEditorManager implements IReportEditorManager{
 							}
 							//duplicate name - lets add a number and try again
 						}
-						newName = coreName + " - " + cnt;
+						newName = coreName + " - " + cnt; //$NON-NLS-1$
 						cnt++;
 					}
 				}
@@ -223,7 +223,7 @@ public class IntelReportEditorManager implements IReportEditorManager{
 		if (editor.getEditorInput() instanceof IntelEntityTypeEditorInput){
 			IntelEntityTypeEditorInput in = getEditorInputLocal();
 			//if we are editing a SMART report update the name; otherwise leave it alone 
-			editor.setPartName(in.getEntityType().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+			editor.setPartName(in.getEntityType().getName()); 
 		}
 	}
 

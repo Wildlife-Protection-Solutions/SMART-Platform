@@ -74,7 +74,7 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 	}
 		
 	private static IntelAttributeFilter createCore(String key){
-		String bits[] = key.split(":");
+		String bits[] = key.split(":"); //$NON-NLS-1$
 		IntelAttribute.AttributeType type = parseType(bits[1]);
 		String attributeKey = bits[2];
 		String entityTypeKey = null;
@@ -91,7 +91,7 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 				return t;
 			}
 		}
-		throw new IllegalStateException(attributeType + " is not a valid attribute type identifier");
+		throw new IllegalStateException(attributeType + " is not a valid attribute type identifier"); //$NON-NLS-1$
 	}
 
 
@@ -145,12 +145,12 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 	@Override
 	public String getUniqueColumnIdentifier(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("ia_");
+		sb.append("ia_"); //$NON-NLS-1$
 		sb.append(attributeKey);
-		sb.append("_");
+		sb.append("_"); //$NON-NLS-1$
 		if (entityTypeKey != null){
 			sb.append(entityTypeKey);
-			sb.append("_");
+			sb.append("_"); //$NON-NLS-1$
 		}
 		
 		switch(attributeType){
@@ -158,9 +158,9 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 			break;
 		case DATE:
 			sb.append(operator.name());
-			sb.append("_");
+			sb.append("_"); //$NON-NLS-1$
 			sb.append(dateValues[0].getTime());
-			sb.append("_");
+			sb.append("_"); //$NON-NLS-1$
 			sb.append(dateValues[1].getTime());
 			break;
 		case LIST:
@@ -168,14 +168,16 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 			break;
 		case NUMERIC:
 			sb.append(operator.name());
-			sb.append("_");
+			sb.append("_"); //$NON-NLS-1$
 			sb.append(numberValue);
 			break;
 		case TEXT:
 			sb.append(operator.name());
-			sb.append("_");
+			sb.append("_"); //$NON-NLS-1$
 			sb.append(stringValue);
 			break;
+		case POSITION:
+			throw new UnsupportedOperationException("position attributes not supported in queries"); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}

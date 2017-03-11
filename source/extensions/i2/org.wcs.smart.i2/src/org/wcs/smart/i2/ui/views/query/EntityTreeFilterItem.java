@@ -33,6 +33,7 @@ import javax.imageio.ImageIO;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.ImageData;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
@@ -54,7 +55,7 @@ public class EntityTreeFilterItem extends BasicTreeFilterItem {
 	private String dropLabel = null;
 	
 	public EntityTreeFilterItem(IntelEntityType type){
-		super(MessageFormat.format("Any {0}", type.getName()));
+		super(MessageFormat.format(Messages.EntityTreeFilterItem_AnyOption, type.getName()));
 		dropLabel = getName();
 		entity = null;
 		typeKey = type.getKeyId();
@@ -95,9 +96,9 @@ public class EntityTreeFilterItem extends BasicTreeFilterItem {
 	public DropItem[] asDropItem() {
 		String queryKey = null;
 		if (entity == null){
-			queryKey = "entitytype:" + typeKey;  
+			queryKey = "entitytype:" + typeKey;   //$NON-NLS-1$
 		}else{
-			queryKey = "entity:" + UuidUtils.uuidToString(entity);
+			queryKey = "entity:" + UuidUtils.uuidToString(entity); //$NON-NLS-1$
 		}
 		return new DropItem[]{new TextDropItem(dropLabel, queryKey)};
 	}

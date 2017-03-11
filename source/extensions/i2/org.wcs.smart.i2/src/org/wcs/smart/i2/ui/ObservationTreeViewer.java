@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 
@@ -49,7 +50,7 @@ public class ObservationTreeViewer {
 		
 		TreeViewerColumn categoryCol = new TreeViewerColumn(viewer, SWT.NONE);
 		categoryCol.getColumn().setWidth(150);
-		categoryCol.getColumn().setText("Category");
+		categoryCol.getColumn().setText(Messages.ObservationTreeViewer_CategoryLabel);
 		categoryCol.setLabelProvider(new ColumnLabelProvider(){
 			public String getText(Object element){
 				if (element instanceof IntelObservation){
@@ -63,13 +64,13 @@ public class ObservationTreeViewer {
 		
 		TreeViewerColumn attributeCol = new TreeViewerColumn(viewer, SWT.NONE);
 		attributeCol.getColumn().setWidth(800);
-		attributeCol.getColumn().setText("Attribute");
+		attributeCol.getColumn().setText(Messages.ObservationTreeViewer_AttributeLabel);
 		attributeCol.setLabelProvider(new ColumnLabelProvider(){
 			public String getText(Object element){
 				if (element instanceof IntelObservationAttribute){
 					return ((IntelObservationAttribute)element).getAttributeValueAsString(Locale.getDefault());
 				}
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 		});
 	}

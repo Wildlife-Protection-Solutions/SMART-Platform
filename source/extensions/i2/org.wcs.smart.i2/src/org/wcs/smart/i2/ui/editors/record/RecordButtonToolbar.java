@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors.record;
 
 import org.eclipse.birt.core.framework.IConfigurationElement;
@@ -30,7 +51,14 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.internal.Messages;
 
+/**
+ * Button toolbar for records
+ * 
+ * @author Emily
+ *
+ */
 public class RecordButtonToolbar extends Composite{
 
 
@@ -73,7 +101,7 @@ public class RecordButtonToolbar extends Composite{
 		buttonBar.addListener(SWT.Dispose, e->formatsOpMenu.dispose());
 		EmitterInfo pdfEmitter = null;
 		for (EmitterInfo einfo : ReportEngineManager.getBirtReportEngine().getEmitterInfo()){
-			if (einfo.getFormat().equalsIgnoreCase("PDF")){
+			if (einfo.getFormat().equalsIgnoreCase("PDF")){ //$NON-NLS-1$
 				pdfEmitter = einfo;
 			}
 			MenuItem mi = new MenuItem(formatsOpMenu,SWT.PUSH);
@@ -96,7 +124,7 @@ public class RecordButtonToolbar extends Composite{
 		}
 		saveItem = new ToolItem(buttonBar, SWT.PUSH);
 		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-		saveItem.setToolTipText("save");
+		saveItem.setToolTipText(Messages.RecordButtonToolbar_savetooltip);
 		saveItem.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent event){
 				recordEditor.getSite().getPage().saveEditor(recordEditor, false);
@@ -112,7 +140,7 @@ public class RecordButtonToolbar extends Composite{
 		final EmitterInfo pdfFormat = pdfEmitter;
 		printItem = new ToolItem(buttonBar, SWT.DROP_DOWN);
 		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
-		printItem.setToolTipText("print to pdf");
+		printItem.setToolTipText(Messages.RecordButtonToolbar_pdftooltip);
 		printItem.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent event){
@@ -126,7 +154,7 @@ public class RecordButtonToolbar extends Composite{
 			    	if (pdfFormat != null){
 			    		IntelReportManager.INSTANCE.exportRecord(recordEditor.getRecord(), pdfFormat);
 			    	}else{	
-			    		MessageDialog.openError(recordEditor.getSite().getShell(), "Error", "Could not find PDF exporter.");
+			    		MessageDialog.openError(recordEditor.getSite().getShell(), Messages.RecordButtonToolbar_PDFErrorDialog, Messages.RecordButtonToolbar_PDFErrorMsg);
 			    	}
 			    }
 			}	
@@ -134,13 +162,13 @@ public class RecordButtonToolbar extends Composite{
 		
 		ToolItem refreshItem = new ToolItem(buttonBar, SWT.PUSH);
 		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-		refreshItem.setToolTipText("refresh record");
+		refreshItem.setToolTipText(Messages.RecordButtonToolbar_refreshtooltip);
 		refreshItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean doAction = true;
 				if (recordEditor.isDirty()){
-					if (!MessageDialog.openConfirm(recordEditor.getSite().getShell(), "Refresh", "Changes will be lost.  Are you sure you want to refresh?")){
+					if (!MessageDialog.openConfirm(recordEditor.getSite().getShell(), Messages.RecordButtonToolbar_RefreshDialog, Messages.RecordButtonToolbar_RefreshMsg)){
 						doAction = false;
 					}
 				}
@@ -153,11 +181,11 @@ public class RecordButtonToolbar extends Composite{
 		
 		deleteItem = new ToolItem(buttonBar, SWT.PUSH);
 		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteItem.setToolTipText("delete record");
+		deleteItem.setToolTipText(Messages.RecordButtonToolbar_deleteTooltip);
 		deleteItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (MessageDialog.openConfirm(recordEditor.getSite().getShell(), "Delete", "Are you sure you want to delete this record.  This action cannot be undone.")){
+				if (MessageDialog.openConfirm(recordEditor.getSite().getShell(), Messages.RecordButtonToolbar_DeleteDialogTitle, Messages.RecordButtonToolbar_DeleteDialogMsg)){
 					RecordManager.INSTANCE.deleteRecord(recordEditor.getRecord(), recordEditor.getContext());
 				}
 			}
@@ -170,7 +198,7 @@ public class RecordButtonToolbar extends Composite{
 		
 		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
 		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-		wsetItem.setToolTipText("add to current working set");
+		wsetItem.setToolTipText(Messages.RecordButtonToolbar_addtooltip);
 		wsetItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -181,7 +209,7 @@ public class RecordButtonToolbar extends Composite{
 		
 		editItem = new ToolItem(buttonBar, SWT.CHECK);
 		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
-		editItem.setToolTipText("enable or disable editing of record");
+		editItem.setToolTipText(Messages.RecordButtonToolbar_edittooltip);
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

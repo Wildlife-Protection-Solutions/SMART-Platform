@@ -26,6 +26,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Intelligence record attributes.  A wizard page with no options. 
@@ -47,7 +48,7 @@ public class IntelRecordAttributesWizardPage extends IntelRecordDetailsWizardPag
 	@Override
 	public void createPageCustomControl(Composite parent) {
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("There are no configuration options for this layer.");
+		l.setText(Messages.IntelRecordAttributesWizardPage_NotConfigurable);
 		setControl(parent);
 	}
 
@@ -58,6 +59,6 @@ public class IntelRecordAttributesWizardPage extends IntelRecordDetailsWizardPag
 	
 	@Override
 	public String getName(){
-		return "Record Attributes";
+		return Messages.IntelRecordAttributesWizardPage_Name;
 	}
 }

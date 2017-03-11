@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.internal.ui.util.DataUtil;
@@ -83,10 +84,12 @@ import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDatasetResultSetMetad
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
+import org.wcs.smart.i2.birt.entity.location.EntityLocationDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetResultSetMetadata;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -139,7 +142,7 @@ public enum EntityReportGenerator {
 		rdh.getParameters().add(shandler);
 		
 		//add intelligence data source
-		String dataSourceName = "Intelligence Data Source";
+		String dataSourceName = Messages.EntityReportGenerator_IntelligenceDataSourceName;
 		OdaDataSourceHandle datasource = rdh.getElementFactory().newOdaDataSource(dataSourceName, IntelBirtDataSource.ODA_DATA_SOURCE_ID);
 		rdh.getDataSources().add(datasource);
 		DataSourceDesign dSource = modelAdapter.createDataSourceDesign(datasource);
@@ -193,7 +196,7 @@ public enum EntityReportGenerator {
 					if (paramDesign.getParameterDefinitions().size() > 0) {
 						for (ParameterDefinition param : paramDesign.getParameterDefinitions()) {
 							//will be linked automatically below
-							param.setDefaultScalarValue("TODO: Link to Report Parameter");
+							param.setDefaultScalarValue(Messages.EntityReportGenerator_LinkToReportParameter);
 						}
 					}
 				}
@@ -242,37 +245,37 @@ public enum EntityReportGenerator {
 	private void initializeValue(ReportDesignHandle rdh, HashMap<String,OdaDataSetHandle> datasetHandles, IntelEntityType type, boolean hasPosition) throws Exception{
 		ElementFactory factory = rdh.getElementFactory();
 		
-		StyleHandle headerStyle = factory.newStyle("HeaderStyle");
+		StyleHandle headerStyle = factory.newStyle("HeaderStyle"); //$NON-NLS-1$
 		headerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_WEIGHT, DesignChoiceConstants.FONT_WEIGHT_BOLD);
-		headerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana");
-		headerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "14pt");
-		headerStyle.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "3px");
-		headerStyle.setProperty(IStyleModel.PADDING_TOP_PROP, "3px");
-		headerStyle.setProperty(IStyleModel.PADDING_LEFT_PROP, "3px");
-		headerStyle.setProperty(IStyleModel.PADDING_RIGHT_PROP, "3px");
+		headerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana"); //$NON-NLS-1$
+		headerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "14pt"); //$NON-NLS-1$
+		headerStyle.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "3px"); //$NON-NLS-1$
+		headerStyle.setProperty(IStyleModel.PADDING_TOP_PROP, "3px"); //$NON-NLS-1$
+		headerStyle.setProperty(IStyleModel.PADDING_LEFT_PROP, "3px"); //$NON-NLS-1$
+		headerStyle.setProperty(IStyleModel.PADDING_RIGHT_PROP, "3px"); //$NON-NLS-1$
 		headerStyle.setProperty(IStyleModel.BORDER_BOTTOM_STYLE_PROP, DesignChoiceConstants.LINE_STYLE_SOLID);
-		headerStyle.setProperty(IStyleModel.BORDER_BOTTOM_WIDTH_PROP, "1px");
+		headerStyle.setProperty(IStyleModel.BORDER_BOTTOM_WIDTH_PROP, "1px"); //$NON-NLS-1$
 		rdh.getStyles().add(headerStyle);
 		
-		StyleHandle sectionHeaderStyle = factory.newStyle("SectionHeaderStyle");
+		StyleHandle sectionHeaderStyle = factory.newStyle("SectionHeaderStyle"); //$NON-NLS-1$
 		sectionHeaderStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_WEIGHT, DesignChoiceConstants.FONT_WEIGHT_BOLD);
-		sectionHeaderStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana");
-		sectionHeaderStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "10pt");
-		sectionHeaderStyle.setProperty(IStyleModel.BACKGROUND_COLOR_PROP, "#E2E4E6");
-		sectionHeaderStyle.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "3px");
-		sectionHeaderStyle.setProperty(IStyleModel.PADDING_TOP_PROP, "3px");
-		sectionHeaderStyle.setProperty(IStyleModel.PADDING_LEFT_PROP, "3px");
-		sectionHeaderStyle.setProperty(IStyleModel.PADDING_RIGHT_PROP, "3px");
+		sectionHeaderStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana"); //$NON-NLS-1$
+		sectionHeaderStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "10pt"); //$NON-NLS-1$
+		sectionHeaderStyle.setProperty(IStyleModel.BACKGROUND_COLOR_PROP, "#E2E4E6"); //$NON-NLS-1$
+		sectionHeaderStyle.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "3px"); //$NON-NLS-1$
+		sectionHeaderStyle.setProperty(IStyleModel.PADDING_TOP_PROP, "3px"); //$NON-NLS-1$
+		sectionHeaderStyle.setProperty(IStyleModel.PADDING_LEFT_PROP, "3px"); //$NON-NLS-1$
+		sectionHeaderStyle.setProperty(IStyleModel.PADDING_RIGHT_PROP, "3px"); //$NON-NLS-1$
 		rdh.getStyles().add(sectionHeaderStyle);
 		
-		StyleHandle tableStyle = factory.newStyle("TableStyle");
-		tableStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana");
-		tableStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "8pt");
+		StyleHandle tableStyle = factory.newStyle("TableStyle"); //$NON-NLS-1$
+		tableStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana"); //$NON-NLS-1$
+		tableStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "8pt"); //$NON-NLS-1$
 		rdh.getStyles().add(tableStyle);
 		
-		StyleHandle footerStyle = factory.newStyle("FooterStyle");
-		footerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana");
-		footerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "6pt");
+		StyleHandle footerStyle = factory.newStyle("FooterStyle"); //$NON-NLS-1$
+		footerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_FAMILY, "Verdana"); //$NON-NLS-1$
+		footerStyle.setProperty(DesignChoiceConstants.CHOICE_FONT_SIZE, "6pt"); //$NON-NLS-1$
 		rdh.getStyles().add(footerStyle);
 		
 		OdaDataSetHandle entityDataset = datasetHandles.get(EntityDataset.DATASET_TYPE);
@@ -281,12 +284,12 @@ public enum EntityReportGenerator {
 		
 		headerId.setDataSet(entityDataset);
 		ComputedColumn cc = StructureFactory.createComputedColumn();
-		cc.setProperty("name", "ID");
-		cc.setDisplayName("ID");
-		cc.setDataType("string");
-		cc.setExpression("dataSetRow[\"ID\"]");
+		cc.setProperty("name", EntityDatasetResultSetMetadata.Column.ID.getColumnName(Locale.getDefault())); //$NON-NLS-1$
+		cc.setDisplayName(EntityDatasetResultSetMetadata.Column.ID.getColumnName(Locale.getDefault()));
+		cc.setDataType("string"); //$NON-NLS-1$
+		cc.setExpression("dataSetRow[\"" + EntityDatasetResultSetMetadata.Column.ID.getColumnName(Locale.getDefault()) + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
 		headerId.getColumnBindings().addItem(cc);
-		headerId.setResultSetColumn("ID");
+		headerId.setResultSetColumn(EntityDatasetResultSetMetadata.Column.ID.getColumnName(Locale.getDefault()));
 		headerId.setStyleName(headerStyle.getName());
 				
 		rdh.getBody().add(headerId);
@@ -304,69 +307,69 @@ public enum EntityReportGenerator {
 		}
 		
 		ImageHandle primaryImage = factory.newImage(null);
-		primaryImage.setWidth("2in");
-		primaryImage.setHeight("2in");
+		primaryImage.setWidth("2in"); //$NON-NLS-1$
+		primaryImage.setHeight("2in"); //$NON-NLS-1$
 		primaryImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
 		primaryImage.setProportionalScale(true);
-		primaryImage.setURL("row[\""+ EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getColumnName() +"\"]");
+		primaryImage.setURL("row[\""+ EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getColumnName(Locale.getDefault()) +"\"]"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		/* hide if no image */
 		HideRule visibility = StructureFactory.createHideRule();
 		visibility.setFormat(DesignChoiceConstants.FORMAT_TYPE_ALL);
-		visibility.setExpression("row[\""+ EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getColumnName() +"\"] == null");
+		visibility.setExpression("row[\""+ EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getColumnName(Locale.getDefault()) +"\"] == null"); //$NON-NLS-1$ //$NON-NLS-2$
 		primaryImage.getPropertyHandle(IReportItemModel.VISIBILITY_PROP).addItem(visibility);
 		
 		headerGrid.getCell(1, 1).getContent().add(primaryImage);
-		((ColumnHandle)headerGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "2.2in");
+		((ColumnHandle)headerGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "2.2in"); //$NON-NLS-1$
 		
 		GridHandle infoGrid = factory.newGridItem(null, 2, 5);
 		infoGrid.setStyleName(tableStyle.getName());
-		((ColumnHandle)infoGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "1.3in");
+		((ColumnHandle)infoGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "1.3in"); //$NON-NLS-1$
 		headerGrid.getCell(1, 2).getContent().add(infoGrid);
 		
 		int row = 1;
 		LabelHandle l = factory.newLabel(null);
-		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.TYPE.getColumnName()));
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.TYPE.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		DataItemHandle di = factory.newDataItem(null);
-		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.TYPE.getColumnName());
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.TYPE.getColumnName(Locale.getDefault()));
 		infoGrid.getCell(row,2).getContent().add(di);		
 		row++;
 		
 		l = factory.newLabel(null);
-		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.DATE_CREATED.getColumnName()));
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.DATE_CREATED.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.DATE_CREATED.getColumnName());
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.DATE_CREATED.getColumnName(Locale.getDefault()));
 		infoGrid.getCell(row,2).getContent().add(di);
 		row++;
 		
 		l = factory.newLabel(null);
-		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.DATE_MODIFIED.getColumnName()));
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.DATE_MODIFIED.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.DATE_MODIFIED.getColumnName());
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.DATE_MODIFIED.getColumnName(Locale.getDefault()));
 		infoGrid.getCell(row,2).getContent().add(di);
 		row++;
 		
 		l = factory.newLabel(null);
-		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.CREATED_BY.getColumnName()));
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.CREATED_BY.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.CREATED_BY.getColumnName());
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.CREATED_BY.getColumnName(Locale.getDefault()));
 		infoGrid.getCell(row,2).getContent().add(di);
 		row++;
 		
 		l = factory.newLabel(null);
-		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.MODIFIED_BY.getColumnName()));
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.MODIFIED_BY.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.MODIFIED_BY.getColumnName());
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.MODIFIED_BY.getColumnName(Locale.getDefault()));
 		infoGrid.getCell(row,2).getContent().add(di);
 		
 		//spacer
@@ -389,7 +392,7 @@ public enum EntityReportGenerator {
 		
 		for (IntelEntityTypeAttributeGroup group : groups){
 			l = factory.newLabel(null);
-			l.setText("Attributes - " + group.getName());
+			l.setText(Messages.EntityReportGenerator_AttributeHeader + group.getName());
 			l.setStyleName(sectionHeaderStyle.getName());
 			rdh.getBody().add(l);
 			
@@ -401,11 +404,11 @@ public enum EntityReportGenerator {
 			for (ComputedColumn c : entityColumns){
 				attributeGrid.getColumnBindings().addItem(c);
 			}
-			((ColumnHandle)attributeGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "20%");
+			((ColumnHandle)attributeGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "20%"); //$NON-NLS-1$
 			int rowcnt = 1;
 			for (IntelEntityTypeAttribute a : group2attribute.get(group)){
 				l = factory.newLabel(null);
-				l.setText(a.getAttribute().getName() + ":");
+				l.setText(a.getAttribute().getName() + ":"); //$NON-NLS-1$
 				attributeGrid.getCell(rowcnt,1).getContent().add(l);
 				
 				di = factory.newDataItem(null);
@@ -421,7 +424,7 @@ public enum EntityReportGenerator {
 		}
 		if (group2attribute.get(null) != null){
 			l = factory.newLabel(null);
-			l.setText("Attributes - " + OtherAttributeGroup.INSTANCE.getName());
+			l.setText(Messages.EntityReportGenerator_AttributeHeader + OtherAttributeGroup.INSTANCE.getName());
 			l.setStyleName(sectionHeaderStyle.getName());
 			rdh.getBody().add(l);
 			
@@ -433,12 +436,12 @@ public enum EntityReportGenerator {
 			for (ComputedColumn c : entityColumns){
 				attributeGrid.getColumnBindings().addItem(c);
 			}
-			((ColumnHandle)attributeGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "20%");
+			((ColumnHandle)attributeGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "20%"); //$NON-NLS-1$
 
 			int rowcnt = 1;
 			for (IntelEntityTypeAttribute a : group2attribute.get(null)){
 				l = factory.newLabel(null);
-				l.setText(a.getAttribute().getName() + ":");
+				l.setText(a.getAttribute().getName() + ":"); //$NON-NLS-1$
 				attributeGrid.getCell(rowcnt,1).getContent().add(l);
 				
 				di = factory.newDataItem(null);
@@ -455,7 +458,7 @@ public enum EntityReportGenerator {
 		
 		/* ----- Attachments Table ----- */
 		l = factory.newLabel(null);
-		l.setText("Attachments");
+		l.setText(Messages.EntityReportGenerator_AttachmentHeader);
 		l.setStyleName(sectionHeaderStyle.getName());
 		rdh.getBody().add(l);
 		
@@ -468,22 +471,22 @@ public enum EntityReportGenerator {
 		for (ComputedColumn c : attachmentsColumns){
 			attachmentsTable.getColumnBindings().addItem(c);
 		}
-		((ColumnHandle)attachmentsTable.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "1.2in");
+		((ColumnHandle)attachmentsTable.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "1.2in"); //$NON-NLS-1$
 		
 		ImageHandle attachImage = factory.newImage(null);
-		attachImage.setWidth("1in");
-		attachImage.setHeight("1in");
+		attachImage.setWidth("1in"); //$NON-NLS-1$
+		attachImage.setHeight("1in"); //$NON-NLS-1$
 		attachImage.setProportionalScale(true);
 		attachImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
-		attachImage.setURL("row[\"" + EntityAttachmentDatasetResultSetMetadata.Column.PATH.getColumnName() + "\"]");
+		attachImage.setURL("row[\"" + EntityAttachmentDatasetResultSetMetadata.Column.PATH.getColumnName(Locale.getDefault()) + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
 		attachmentsTable.getCell(attachmentsTable.getDetail().getSlotID(), -1, 1, 1).getContent().add(attachImage);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn(EntityAttachmentDatasetResultSetMetadata.Column.FILE_NAME.getColumnName());
+		di.setResultSetColumn(EntityAttachmentDatasetResultSetMetadata.Column.FILE_NAME.getColumnName(Locale.getDefault()));
 		attachmentsTable.getCell(attachmentsTable.getDetail().getSlotID(), -1, 1, 2).getContent().add(di);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn(EntityAttachmentDatasetResultSetMetadata.Column.DATE_CREATED.getColumnName());
+		di.setResultSetColumn(EntityAttachmentDatasetResultSetMetadata.Column.DATE_CREATED.getColumnName(Locale.getDefault()));
 		attachmentsTable.getCell(attachmentsTable.getDetail().getSlotID(), -1, 1, 2).getContent().add(di);
 				
 		
@@ -493,19 +496,19 @@ public enum EntityReportGenerator {
 		rdh.getBody().add(l);
 				
 		l = factory.newLabel(null);
-		l.setText("Relationships");
+		l.setText(Messages.EntityReportGenerator_RelationshipHeader);
 		l.setStyleName(sectionHeaderStyle.getName());
 		rdh.getBody().add(l);
 		
 		List<String> names = new ArrayList<String>();
 		
 		List<String> toExclude = new ArrayList<String>();
-		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.ENTITY_UUID.getColumnName());
-		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.SOURCE_RELATION_UUID.getColumnName());
-		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.TARGET_RELATION_UUID.getColumnName());
-		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.GROUP_KEY.getColumnName());
-		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.GROUP_NAME.getColumnName());
-		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.RELATIONSHIP_TYPE_KEY.getColumnName());
+		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.ENTITY_UUID.getColumnName(Locale.getDefault()));
+		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.SOURCE_RELATION_UUID.getColumnName(Locale.getDefault()));
+		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.TARGET_RELATION_UUID.getColumnName(Locale.getDefault()));
+		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.GROUP_KEY.getColumnName(Locale.getDefault()));
+		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.GROUP_NAME.getColumnName(Locale.getDefault()));
+		toExclude.add(EntityRelationDatasetResultSetMetadata.Column.RELATIONSHIP_TYPE_KEY.getColumnName(Locale.getDefault()));
 		
 		TableHandle relationsTable = factory.newTableItem(null,2);
 		relationsTable.setDataSet(datasetHandles.get(EntityRelationDataset.DATASET_TYPE));
@@ -527,7 +530,7 @@ public enum EntityReportGenerator {
 		
 		relationsTable.getHeader().get(0).setProperty(DesignChoiceConstants.CHOICE_FONT_WEIGHT,DesignChoiceConstants.FONT_WEIGHT_BOLD);
 		relationsTable.getHeader().get(0).setProperty(IStyleModel.BORDER_BOTTOM_STYLE_PROP, DesignChoiceConstants.LINE_STYLE_SOLID);
-		relationsTable.getHeader().get(0).setProperty(IStyleModel.BORDER_BOTTOM_WIDTH_PROP, "1px");
+		relationsTable.getHeader().get(0).setProperty(IStyleModel.BORDER_BOTTOM_WIDTH_PROP, "1px"); //$NON-NLS-1$
 		relationsTable.getDetail().get(0).setProperty(IStyleModel.TEXT_ALIGN_PROP, DesignChoiceConstants.TEXT_ALIGN_CENTER);
 		
 		int colindex = 1;
@@ -549,15 +552,15 @@ public enum EntityReportGenerator {
 		rdh.getBody().add(l);
 				
 		l = factory.newLabel(null);
-		l.setText("Records");
+		l.setText(Messages.EntityReportGenerator_RecordHeader);
 		l.setStyleName(sectionHeaderStyle.getName());
 		rdh.getBody().add(l);
 		
 		
 		names = new ArrayList<String>();
 		toExclude = new ArrayList<String>();
-		toExclude.add(EntityRecordDatasetResultSetMetadata.Column.ENTITY_UUID.getColumnName());
-		toExclude.add(EntityRecordDatasetResultSetMetadata.Column.STATUS.getColumnName());
+		toExclude.add(EntityRecordDatasetResultSetMetadata.Column.ENTITY_UUID.getColumnName(Locale.getDefault()));
+		toExclude.add(EntityRecordDatasetResultSetMetadata.Column.STATUS.getColumnName(Locale.getDefault()));
 		
 		TableHandle recordsTable = factory.newTableItem(null,2);
 		recordsTable.setDataSet(datasetHandles.get(EntityRecordDataset.DATASET_TYPE));
@@ -577,7 +580,7 @@ public enum EntityReportGenerator {
 		}
 		recordsTable.getHeader().get(0).setProperty(DesignChoiceConstants.CHOICE_FONT_WEIGHT,DesignChoiceConstants.FONT_WEIGHT_BOLD);
 		recordsTable.getHeader().get(0).setProperty(IStyleModel.BORDER_BOTTOM_STYLE_PROP, DesignChoiceConstants.LINE_STYLE_SOLID);
-		recordsTable.getHeader().get(0).setProperty(IStyleModel.BORDER_BOTTOM_WIDTH_PROP, "1px");
+		recordsTable.getHeader().get(0).setProperty(IStyleModel.BORDER_BOTTOM_WIDTH_PROP, "1px"); //$NON-NLS-1$
 		recordsTable.getDetail().get(0).setProperty(IStyleModel.TEXT_ALIGN_PROP, DesignChoiceConstants.TEXT_ALIGN_CENTER);
 		
 		colindex = 1;
@@ -590,13 +593,13 @@ public enum EntityReportGenerator {
 			di.setResultSetColumn(s);
 			recordsTable.getCell(relationsTable.getDetail().getSlotID(), -1, 1, colindex).getContent().add(di);
 			
-			if (s.equalsIgnoreCase(EntityRecordDatasetResultSetMetadata.Column.DATE_MODIFIED.getColumnName()) || 
-					s.equalsIgnoreCase(EntityRecordDatasetResultSetMetadata.Column.DATE_RECIEVED.getColumnName())){
-				((ColumnHandle)recordsTable.getColumns().get(colindex-1).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "9em");
-			}else if (s.equalsIgnoreCase(EntityRecordDatasetResultSetMetadata.Column.TITLE.getColumnName())){
-				((ColumnHandle)recordsTable.getColumns().get(colindex-1).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "13em");
+			if (s.equalsIgnoreCase(EntityRecordDatasetResultSetMetadata.Column.DATE_MODIFIED.getColumnName(Locale.getDefault())) || 
+					s.equalsIgnoreCase(EntityRecordDatasetResultSetMetadata.Column.DATE_RECIEVED.getColumnName(Locale.getDefault()))){
+				((ColumnHandle)recordsTable.getColumns().get(colindex-1).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "9em"); //$NON-NLS-1$
+			}else if (s.equalsIgnoreCase(EntityRecordDatasetResultSetMetadata.Column.TITLE.getColumnName(Locale.getDefault()))){
+				((ColumnHandle)recordsTable.getColumns().get(colindex-1).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "13em"); //$NON-NLS-1$
 				((ColumnHandle)recordsTable.getColumns().get(colindex-1).getElement().getHandle(rdh.getModule())).setProperty(IStyleModel.TEXT_ALIGN_PROP, DesignChoiceConstants.TEXT_ALIGN_LEFT);
-			}else if (s.equalsIgnoreCase(EntityRecordDatasetResultSetMetadata.Column.DESCRIPTION.getColumnName())){
+			}else if (s.equalsIgnoreCase(EntityRecordDatasetResultSetMetadata.Column.DESCRIPTION.getColumnName(Locale.getDefault()))){
 				((ColumnHandle)recordsTable.getColumns().get(colindex-1).getElement().getHandle(rdh.getModule())).setProperty(IStyleModel.TEXT_ALIGN_PROP, DesignChoiceConstants.TEXT_ALIGN_LEFT);
 			}
 			colindex++;
@@ -608,14 +611,14 @@ public enum EntityReportGenerator {
 		rdh.getBody().add(l);
 
 		l = factory.newLabel(null);
-		l.setText("Locations");
+		l.setText(Messages.EntityReportGenerator_LocationHeader);
 		l.setStyleName(sectionHeaderStyle.getName());
 		l.setProperty(IStyleModel.PAGE_BREAK_BEFORE_PROP, DesignChoiceConstants.PAGE_BREAK_BEFORE_ALWAYS);
 		rdh.getBody().add(l);
 		
 		ExtendedItemHandle map = factory.newExtendedItem(null, SmartMapItem.EXTENSION_NAME);
-		map.setWidth("7in");
-		map.setHeight("7in");
+		map.setWidth("7in"); //$NON-NLS-1$
+		map.setHeight("7in"); //$NON-NLS-1$
 		map.setProperty( SmartMapItem.SMART_BASEMAP_PROP, SmartMapItem.DEFAULT_BASEMAP_KEY);
 		rdh.getBody().add(map);
 		
@@ -624,13 +627,13 @@ public enum EntityReportGenerator {
 		pointLayer.setDataSet(layersHandle);
 		pointLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName());
 		pointLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POINT.toString());
-		pointLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, "location:geom");
+		pointLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, EntityLocationDatasetResultSetMetadata.Column.GEOM.getId());
 		
 		ExtendedItemHandle polyLayer = factory.newExtendedItem(null, LayerItem.EXTENSION_NAME);
 		polyLayer.setDataSet(layersHandle);
 		polyLayer.setProperty(LayerItem.SMART_LAYERNAME_PROP, layersHandle.getDisplayName());
 		polyLayer.setProperty(LayerItem.SMART_LAYERTYPE_PROP, MapLayerInfo.LayerType.POLYGON.toString());
-		polyLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP, "location:geom");
+		polyLayer.setProperty(LayerItem.SMART_GEOMCOLUMN_PROP,EntityLocationDatasetResultSetMetadata.Column.GEOM.getId());
 		
 		PropertyHandle layershandle = map.getPropertyHandle(SmartMapItem.SMART_LAYER_PROP2);
 		layershandle.add(pointLayer);
@@ -647,7 +650,7 @@ public enum EntityReportGenerator {
 		}
 	
 		/* footer */
-		SimpleMasterPageHandle masterHandle = factory.newSimpleMasterPage("MasterPage");
+		SimpleMasterPageHandle masterHandle = factory.newSimpleMasterPage("MasterPage"); //$NON-NLS-1$
 		rdh.getMasterPages().add(masterHandle);
 		
 		//entity id and date parameters
@@ -656,16 +659,16 @@ public enum EntityReportGenerator {
 		di = factory.newDataItem(null);
 		di.setDataSet(entityDataset);
 		footerGrid1.setProperty(IStyleModel.BORDER_TOP_STYLE_PROP, DesignChoiceConstants.LINE_STYLE_SOLID);
-		footerGrid1.setProperty(IStyleModel.BORDER_TOP_WIDTH_PROP, "1px");
+		footerGrid1.setProperty(IStyleModel.BORDER_TOP_WIDTH_PROP, "1px"); //$NON-NLS-1$
 		masterHandle.getPageFooter().add(footerGrid1);
 		
 		ComputedColumn c = StructureFactory.createComputedColumn();
-		c.setProperty("name", "ID_Date_Time");
-		c.setDisplayName("ID_Date_Time");
-		c.setDataType("string");
-		c.setExpression("dataSetRow[\"ID\"] + \"\\n\" + Formatter.format(params[\"" + DataSourceParameter.START_DATE.getName() + "\"].value, 'MMM dd, YYYY') + \" to \" + Formatter.format(params[\"" + DataSourceParameter.END_DATE.getName() + "\"].value, 'MMM dd, YYYY')");
+		c.setProperty("name", "ID_Date_Time"); //$NON-NLS-1$ //$NON-NLS-2$
+		c.setDisplayName("ID_Date_Time"); //$NON-NLS-1$
+		c.setDataType("string"); //$NON-NLS-1$
+		c.setExpression("dataSetRow[\"" + EntityDatasetResultSetMetadata.Column.ID.getColumnName(Locale.getDefault()) + "\"] + \"\\n\" + Formatter.format(params[\"" + DataSourceParameter.START_DATE.getName() + "\"].value, 'MMM dd, YYYY') + \" to \" + Formatter.format(params[\"" + DataSourceParameter.END_DATE.getName() + "\"].value, 'MMM dd, YYYY')");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		di.getColumnBindings().addItem(c);
-		di.setResultSetColumn("ID_Date_Time");
+		di.setResultSetColumn("ID_Date_Time"); //$NON-NLS-1$
 		footerGrid1.getCell(1, 1).getContent().add(di);
 		
 		
@@ -676,34 +679,34 @@ public enum EntityReportGenerator {
 		AutoTextHandle pageNumber = factory.newAutoText(null);
 		pageNumber.setProperty(IStyleModel.TEXT_ALIGN_PROP, DesignChoiceConstants.TEXT_ALIGN_RIGHT);
 		pageNumber.setAutoTextType(DesignChoiceConstants.AUTO_TEXT_PAGE_NUMBER);
-		pageNumber.setProperty(IStyleModel.PADDING_TOP_PROP, "0pt");
-		pageNumber.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "0pt");
-		pageNumber.setProperty(IStyleModel.PADDING_LEFT_PROP, "0pt");
-		pageNumber.setProperty(IStyleModel.PADDING_RIGHT_PROP, "0pt");
+		pageNumber.setProperty(IStyleModel.PADDING_TOP_PROP, "0pt"); //$NON-NLS-1$
+		pageNumber.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "0pt"); //$NON-NLS-1$
+		pageNumber.setProperty(IStyleModel.PADDING_LEFT_PROP, "0pt"); //$NON-NLS-1$
+		pageNumber.setProperty(IStyleModel.PADDING_RIGHT_PROP, "0pt"); //$NON-NLS-1$
 		
 		LabelHandle of = factory.newLabel(null);
-		of.setText("of");
+		of.setText(Messages.EntityReportGenerator_OfLabel);
 		of.setProperty(IStyleModel.TEXT_ALIGN_PROP, DesignChoiceConstants.TEXT_ALIGN_CENTER);
-		of.setProperty(IStyleModel.PADDING_TOP_PROP, "0pt");
-		of.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "0pt");
-		of.setProperty(IStyleModel.PADDING_LEFT_PROP, "0pt");
-		of.setProperty(IStyleModel.PADDING_RIGHT_PROP, "0pt");
+		of.setProperty(IStyleModel.PADDING_TOP_PROP, "0pt"); //$NON-NLS-1$
+		of.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "0pt"); //$NON-NLS-1$
+		of.setProperty(IStyleModel.PADDING_LEFT_PROP, "0pt"); //$NON-NLS-1$
+		of.setProperty(IStyleModel.PADDING_RIGHT_PROP, "0pt"); //$NON-NLS-1$
 		
 		AutoTextHandle totalPageNumber = factory.newAutoText(null);
 		totalPageNumber.setProperty(IStyleModel.TEXT_ALIGN_PROP, DesignChoiceConstants.TEXT_ALIGN_LEFT);
 		totalPageNumber.setAutoTextType(DesignChoiceConstants.AUTO_TEXT_TOTAL_PAGE);
-		totalPageNumber.setProperty(IStyleModel.PADDING_TOP_PROP, "0pt");
-		totalPageNumber.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "0pt");
-		totalPageNumber.setProperty(IStyleModel.PADDING_LEFT_PROP, "0pt");
-		totalPageNumber.setProperty(IStyleModel.PADDING_RIGHT_PROP, "0pt");
+		totalPageNumber.setProperty(IStyleModel.PADDING_TOP_PROP, "0pt"); //$NON-NLS-1$
+		totalPageNumber.setProperty(IStyleModel.PADDING_BOTTOM_PROP, "0pt"); //$NON-NLS-1$
+		totalPageNumber.setProperty(IStyleModel.PADDING_LEFT_PROP, "0pt"); //$NON-NLS-1$
+		totalPageNumber.setProperty(IStyleModel.PADDING_RIGHT_PROP, "0pt"); //$NON-NLS-1$
 		
 		footerGrid2.getCell(1, 1).getContent().add(pageNumber);
 		footerGrid2.getCell(1, 2).getContent().add(of);
 		footerGrid2.getCell(1, 3).getContent().add(totalPageNumber);
 		
-		footerGrid2.getColumns().get(0).setProperty(ITableColumnModel.WIDTH_PROP, "2em");
-		footerGrid2.getColumns().get(1).setProperty(ITableColumnModel.WIDTH_PROP, "2em");
-		footerGrid2.getColumns().get(2).setProperty(ITableColumnModel.WIDTH_PROP, "2em");
+		footerGrid2.getColumns().get(0).setProperty(ITableColumnModel.WIDTH_PROP, "2em"); //$NON-NLS-1$
+		footerGrid2.getColumns().get(1).setProperty(ITableColumnModel.WIDTH_PROP, "2em"); //$NON-NLS-1$
+		footerGrid2.getColumns().get(2).setProperty(ITableColumnModel.WIDTH_PROP, "2em"); //$NON-NLS-1$
 		
 		footerGrid1.getCell(1, 2).getContent().add(footerGrid2);
 		footerGrid1.getCell(1, 2).setProperty(IStyleModel.TEXT_ALIGN_PROP, DesignChoiceConstants.TEXT_ALIGN_RIGHT);

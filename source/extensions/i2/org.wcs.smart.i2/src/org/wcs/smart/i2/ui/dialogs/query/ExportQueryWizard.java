@@ -41,6 +41,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.export.IQueryExporter;
@@ -69,7 +70,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		this.query = query;
 		this.queryResults = results;
 		
-		setWindowTitle("Export Query");
+		setWindowTitle(Messages.ExportQueryWizard_Title);
 		setDialogSettings(Intelligence2PlugIn.getDefault().getDialogSettings());
 		Session s = HibernateManager.openSession();
 		try{
@@ -143,17 +144,17 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		try {
 			final IQueryExporter exporter = getQueryExporter();
 			if (exporter == null){
-				throw new Exception("No exporter selected");
+				throw new Exception("No exporter selected"); //$NON-NLS-1$
 			}
 			final HashMap<IQueryExporter.ExportOption, Object> options = page2.getOptions();
 			final Path output = page2.getFile();
 			getDialogSettings().put(LAST_DIR_KEY, output.getParent().toString());
 			if (Files.exists(output)){
-				if (!MessageDialog.openConfirm(getShell(), "Overwrite", MessageFormat.format("The files ''{0}'' exists.  Do you want to overwrite?", output.toString()))){
+				if (!MessageDialog.openConfirm(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle, MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMsg, output.toString()))){
 					return false;
 				}
 			}else if (!Files.exists(output.getParent())){
-				if (!MessageDialog.openConfirm(getShell(), "Create Directory", MessageFormat.format("The directory ''{0}'' does not exist.  Do you want to create it?", output.getParent().toString()))){
+				if (!MessageDialog.openConfirm(getShell(), Messages.ExportQueryWizard_CreateDialogTitle, MessageFormat.format(Messages.ExportQueryWizard_CreateDialogMessage, output.getParent().toString()))){
 					return false;
 				}
 				Files.createDirectories(output.getParent());
@@ -173,7 +174,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	}
 	
 	private void displayError(Exception ex){
-		Intelligence2PlugIn.displayLog(MessageFormat.format("Error exporting query results: {0}", ex.getMessage()), ex);
+		Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.ExportQueryWizard_ExportError, ex.getMessage()), ex);
 	}
 	/**
 	 * Exports a single query to the selected format/file.

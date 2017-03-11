@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -59,12 +60,12 @@ public enum RecordManager {
 		
 		record = (IntelRecord) session.get(IntelRecord.class, record.getUuid());
 
-		Query q = session.createQuery("DELETE FROM IntelEntityLocation where id.location IN (FROM IntelLocation ll WHERE ll.record = :record)");
-		q.setParameter("record", record);
+		Query q = session.createQuery("DELETE FROM IntelEntityLocation where id.location IN (FROM IntelLocation ll WHERE ll.record = :record)"); //$NON-NLS-1$
+		q.setParameter("record", record); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("DELETE FROM IntelWorkingSetRecord where id.record = :record");
-		q.setParameter("record", record);
+		q = session.createQuery("DELETE FROM IntelWorkingSetRecord where id.record = :record"); //$NON-NLS-1$
+		q.setParameter("record", record); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		session.delete(record);
@@ -80,10 +81,10 @@ public enum RecordManager {
 
 	public void deleteRecords(List<? extends Object> records, IEclipseContext context, IProgressMonitor monitor){
 		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
-			MessageDialog.openError(context.get(Shell.class), "Error", "Insufficient privileges");
+			MessageDialog.openError(context.get(Shell.class), Messages.RecordManager_ErrorTitle, Messages.RecordManager_InsufficientPrivileges);
 			return;
 		}
-		monitor.beginTask("Deleting records", records.size());
+		monitor.beginTask(Messages.RecordManager_Progress1, records.size());
 		Session s = HibernateManager.openSession(new AttachmentInterceptor());
 		List<IntelEntity> entities = new ArrayList<IntelEntity>();
 		List<IntelRecord> deleted = new ArrayList<IntelRecord>();
@@ -113,7 +114,7 @@ public enum RecordManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Error deleting record. " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.RecordManager_DeleteError + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -125,7 +126,7 @@ public enum RecordManager {
 	}
 	public void deleteRecord(IntelRecord record, IEclipseContext context){
 		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
-			MessageDialog.openError(context.get(Shell.class), "Error", "Insufficient privileges");
+			MessageDialog.openError(context.get(Shell.class), Messages.RecordManager_ErrorTitle, Messages.RecordManager_InsufficientPrivileges);
 			return;
 		}
 		Session s = HibernateManager.openSession(new AttachmentInterceptor());
@@ -140,7 +141,7 @@ public enum RecordManager {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog("Error deleting record. " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.RecordManager_DeleteError + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -156,7 +157,7 @@ public enum RecordManager {
 		try{
 			record = (IntelRecord) s.get(IntelRecord.class, recordUuid);
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error deleting record. " + ex.getMessage(), ex);
+			Intelligence2PlugIn.displayLog(Messages.RecordManager_DeleteError + ex.getMessage(), ex);
 			return;
 		}
 		if (record != null){

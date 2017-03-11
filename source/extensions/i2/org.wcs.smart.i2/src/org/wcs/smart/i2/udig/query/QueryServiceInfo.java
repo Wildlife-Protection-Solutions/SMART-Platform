@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.udig.query;
 
 import org.locationtech.udig.catalog.IServiceInfo;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Smart service information.
@@ -31,9 +32,9 @@ import org.locationtech.udig.catalog.IServiceInfo;
 public class QueryServiceInfo extends IServiceInfo{
 
 	public QueryServiceInfo(QueryService service){
-		this.description = "Intelligence query service";
-		this.keywords = new String[]{"Intelligence", "Query", "Observation", "Record"};
-		this.title = "Intelligence Queries";
+		this.description = Messages.QueryServiceInfo_Description;
+		this.keywords = new String[]{Messages.QueryServiceInfo_keyword1, Messages.QueryServiceInfo_keyword2, Messages.QueryServiceInfo_keyword3, Messages.QueryServiceInfo_keyword4};
+		this.title = Messages.QueryServiceInfo_Title;
 	}
 	
 }

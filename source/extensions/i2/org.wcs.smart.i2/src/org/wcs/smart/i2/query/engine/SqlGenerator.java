@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.Operator;
 
 /**
@@ -49,11 +50,11 @@ public class SqlGenerator {
 	
 	public static String generateDateClause(Date[] filter, String fieldName){
 		if (filter[0] == null && filter[1] != null){
-			return " ( cast(" + fieldName + " as date) <= '" + (new java.sql.Date(filter[1].getTime())).toString()+ "' ) ";
+			return " ( cast(" + fieldName + " as date) <= '" + (new java.sql.Date(filter[1].getTime())).toString()+ "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (filter[0] != null && filter[1] == null){
-			return " ( cast(" + fieldName + " as date) >= '" + (new java.sql.Date(filter[0].getTime())).toString()+ "' ) ";
+			return " ( cast(" + fieldName + " as date) >= '" + (new java.sql.Date(filter[0].getTime())).toString()+ "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (filter[0] != null && filter[1] != null){
-			return " ( cast(" + fieldName + " as date) >= '" + (new java.sql.Date(filter[0].getTime())).toString() + "'  AND cast(" + fieldName + " as date) <= '" + (new java.sql.Date(filter[1].getTime())).toString()  + "' ) ";
+			return " ( cast(" + fieldName + " as date) >= '" + (new java.sql.Date(filter[0].getTime())).toString() + "'  AND cast(" + fieldName + " as date) <= '" + (new java.sql.Date(filter[1].getTime())).toString()  + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		return null;
 	}
@@ -62,66 +63,66 @@ public class SqlGenerator {
 	public static String operatorToSql(Operator op) throws Exception{
 		switch(op){
 		case AND:
-			return "and";
+			return "and"; //$NON-NLS-1$
 		case BETWEEN:
-			return "between";
+			return "between"; //$NON-NLS-1$
 		case BRACKETS:
-			return "()";
+			return "()"; //$NON-NLS-1$
 		case BRACKET_CLOSE:
-			return ")";
+			return ")"; //$NON-NLS-1$
 		case BRACKET_OPEN:
-			return "(";
+			return "("; //$NON-NLS-1$
 		case EQUALS:
-			return "=";
+			return "="; //$NON-NLS-1$
 		case GREATERTHAN:
-			return ">";
+			return ">"; //$NON-NLS-1$
 		case GREATERTHANEQUALS:
-			return ">=";
+			return ">="; //$NON-NLS-1$
 		case LESSTHAN:
-			return "<";
+			return "<"; //$NON-NLS-1$
 		case LESSTHANEQUALS:
-			return "<=";
+			return "<="; //$NON-NLS-1$
 		case NOT:
-			return "not";
+			return "not"; //$NON-NLS-1$
 		case NOTEQUALS:
-			return "<>";
+			return "<>"; //$NON-NLS-1$
 		case NOT_BETWEEN:
-			return "not between";
+			return "not between"; //$NON-NLS-1$
 		case OR:
-			return "or";
+			return "or"; //$NON-NLS-1$
 		case STR_CONTAINS:
-			return "like";
+			return "like"; //$NON-NLS-1$
 		case STR_EQUALS:
-			return "=";
+			return "="; //$NON-NLS-1$
 		case STR_NOTCONTAINS:
-			return "not like";
+			return "not like"; //$NON-NLS-1$
 		default:
 			break;
 			
 		}
-		throw new Exception(MessageFormat.format("Operator {0}  not supported.", op.getKey()));
+		throw new Exception(MessageFormat.format(Messages.SqlGenerator_OpNotSupported, op.getKey()));
 	}
 	
 	public static void switchTables(String tempTable, String obsTable, boolean locationIndex, boolean observationIndex, Session s){
 		StringBuilder sql = new StringBuilder();
-		sql.append("DROP TABLE " + obsTable);
+		sql.append("DROP TABLE " + obsTable); //$NON-NLS-1$
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
-		sql.append("RENAME TABLE " + tempTable + " TO " + obsTable);
+		sql.append("RENAME TABLE " + tempTable + " TO " + obsTable); //$NON-NLS-1$ //$NON-NLS-2$
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 		
 		if (locationIndex){
 			sql = new StringBuilder();
-			sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)");
+			sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			logString(sql.toString());
 			s.createSQLQuery(sql.toString()).executeUpdate();
 		}
 		if (observationIndex){
 			sql = new StringBuilder();
-			sql.append("CREATE INDEX observation_uuid_idx on " + obsTable + " (observation_uuid)");
+			sql.append("CREATE INDEX observation_uuid_idx on " + obsTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			logString(sql.toString());
 			s.createSQLQuery(sql.toString()).executeUpdate();
 		}

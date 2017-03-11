@@ -69,6 +69,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -94,11 +95,11 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class AttributeFieldEditor {
 
-	private static final String SELELECTION_KEY = "sel";
-	private IntelAttribute attribute;
-	private boolean isMulti;
-	private Composite parent;
+	private static final String SELELECTION_KEY = "sel"; //$NON-NLS-1$
 	
+	private IntelAttribute attribute;
+	
+	private Composite parent;
 	private Text txtValue;
 	private Text txtValue2;
 	private Label lblProj;
@@ -109,15 +110,14 @@ public class AttributeFieldEditor {
 	private Button btnChDateTime;
 	private Button btnChOnOff;
 	private ControlDecoration cd;
+	
+	private boolean isMulti;
 	private String warnMessage;
-	
 	private String name = null;
-	
-	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
-	
 	private CoordinateReferenceSystem crs = GeometryUtils.SMART_CRS;
 	private String crsLabel = null;
 	
+	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
 	
 	/**
 	 * Assumption is the parent layout is a 2 column grid layout
@@ -207,7 +207,7 @@ public class AttributeFieldEditor {
 					Double.parseDouble(txtValue.getText());
 				}
 			}catch(Exception ex){
-				msg = "Unable to parse number from text";
+				msg = Messages.AttributeFieldEditor_InvalidNumber;
 			}
 		}
 		if (attribute.getType() == AttributeType.POSITION){
@@ -221,7 +221,7 @@ public class AttributeFieldEditor {
 					y = Double.parseDouble(txtValue2.getText());
 				}
 			}catch(Exception ex){
-				msg = "Unable to positiong coorindate numbers from text";
+				msg = Messages.AttributeFieldEditor_InvalidCoordinate;
 			}
 			//try to reproject to database crs
 			if (x != null && y != null){
@@ -230,7 +230,7 @@ public class AttributeFieldEditor {
 					try{
 						ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 					}catch (Exception ex){
-						msg = "Unable to reproject position attribute to database projection";
+						msg = Messages.AttributeFieldEditor_ReprojectionError;
 					}
 				}
 			}
@@ -302,7 +302,7 @@ public class AttributeFieldEditor {
 				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
-			if (isMulti) throw new IllegalStateException("Multi select lists not supported for entity relationship attributes");
+			if (isMulti) throw new IllegalStateException(Messages.AttributeFieldEditor_MultiSelectNotSupportedRelationships);
 			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
 			if (!selection.isEmpty()){
 				Object item = selection.getFirstElement();
@@ -487,7 +487,7 @@ public class AttributeFieldEditor {
 				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
-			if (isMulti) throw new IllegalStateException("Multi select lists not supported for entity attributes");
+			if (isMulti) throw new IllegalStateException(Messages.AttributeFieldEditor_MultiSelectNotSupportedAttributes);
 			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
 			if (!selection.isEmpty()){
 				Object item = selection.getFirstElement();
@@ -625,15 +625,15 @@ public class AttributeFieldEditor {
 	
 	private void initPositionValues(Double value1, Double value2){
 		if (value1 == null || value2 == null){
-			txtValue.setText("");
-			txtValue2.setText("");
+			txtValue.setText(""); //$NON-NLS-1$
+			txtValue2.setText(""); //$NON-NLS-1$
 		}
 		
 		//get view projection
 		
 		lblProj.setToolTipText(crsLabel);
 		if (crsLabel.length() > 10){
-			crsLabel = crsLabel.substring(0, 10) + "...";
+			crsLabel = crsLabel.substring(0, 10) + "..."; //$NON-NLS-1$
 		}
 		lblProj.setText(crsLabel);
 		if (crs == GeometryUtils.SMART_CRS){
@@ -645,7 +645,7 @@ public class AttributeFieldEditor {
 				txtValue.setText(String.valueOf(viewCoordinate.x));
 				txtValue2.setText(String.valueOf(viewCoordinate.y));
 			} catch (Exception e) {
-				Intelligence2PlugIn.displayLog("Unable to reproject position attribute to view projection.", e);
+				Intelligence2PlugIn.displayLog(Messages.AttributeFieldEditor_ReprojectionError2, e);
 				txtValue.setText(String.valueOf(value1));
 				txtValue2.setText(String.valueOf(value2));
 			}
@@ -680,7 +680,7 @@ public class AttributeFieldEditor {
 				Coordinate c = ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 				return new Double[]{c.x, c.y};
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog("Unable to reproject position attribute to database projection", ex);
+				Intelligence2PlugIn.displayLog(Messages.AttributeFieldEditor_ReprojectionError3, ex);
 				return new Double[]{x,y};
 			}
 		}
@@ -689,7 +689,7 @@ public class AttributeFieldEditor {
 	
 	private void createControl(){
 		Label l = new Label(parent, SWT.NONE);
-		l.setText(this.name + ":");
+		l.setText(this.name + ":"); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		if (attribute.getType() == AttributeType.TEXT){
@@ -722,7 +722,7 @@ public class AttributeFieldEditor {
 				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 				cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
 				List<Object> items = new ArrayList<Object>();
-				items.add("");
+				items.add(""); //$NON-NLS-1$
 				items.addAll(attribute.getAttributeList());
 				cmbViewer.setInput(items);
 				cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -815,7 +815,7 @@ public class AttributeFieldEditor {
 			cd = createDecoration(txtValue);
 				
 			l = new Label(c, SWT.NONE);
-			l.setText(":");
+			l.setText(":"); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 
 			txtValue2 = new Text(c, SWT.NONE);
@@ -846,7 +846,7 @@ public class AttributeFieldEditor {
 			
 			
 			Hyperlink link = new Hyperlink(c, SWT.NONE);
-			link.setText("map...");
+			link.setText(Messages.AttributeFieldEditor_maplink);
 			link.setUnderlined(true);
 			link.setForeground(link.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
 			link.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -898,7 +898,7 @@ public class AttributeFieldEditor {
 			protected String getTextLabel(Collection<?> objects){
 				String value = super.getTextLabel(objects);
 				if (!objects.isEmpty()){
-					value = "(" + objects.size() + ") " + value;
+					value = "(" + objects.size() + ") " + value; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return value;
 			}

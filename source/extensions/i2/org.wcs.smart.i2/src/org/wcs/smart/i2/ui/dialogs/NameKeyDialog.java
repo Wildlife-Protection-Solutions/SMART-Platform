@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 
 /**
@@ -56,7 +57,7 @@ public class NameKeyDialog<T extends NamedKeyItem> extends Dialog{
 	}
 
 	protected String getTitle(){
-		return "New Item";
+		return Messages.NameKeyDialog_Title;
 	}
 	
 	public Point getInitialSize(){

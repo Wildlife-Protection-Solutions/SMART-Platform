@@ -67,6 +67,7 @@ import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -86,9 +87,9 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class NewEntityDialog extends TitleAreaDialog{
 
-	private static final String LAST_TYPE_KEY = "org.wcs.smart.i2.ui.dialogs.newentity.lasttype";
+	private static final String LAST_TYPE_KEY = "org.wcs.smart.i2.ui.dialogs.newentity.lasttype"; //$NON-NLS-1$
 	
-	private static final String MESSAGE = "Create a new entity";
+	private static final String MESSAGE = Messages.NewEntityDialog_Message;
 	
 	private TableComboViewer cmbEntityType;	
 	private Composite attributePanel;
@@ -101,7 +102,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 	@Inject
 	private IEclipseContext context;
 	
-	private Job loadEntityTypes = new Job("load entity types"){
+	private Job loadEntityTypes = new Job(Messages.NewEntityDialog_LoadingJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -177,7 +178,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 		if (x instanceof IntelEntityType){
 			type = (IntelEntityType)x;
 		}else{
-			MessageDialog.openWarning(getShell(), "Error", "Invalid type selected for entity");
+			MessageDialog.openWarning(getShell(), Messages.NewEntityDialog_ErrorDialogTitle, Messages.NewEntityDialog_InvalidType);
 			return;
 		}
 		newEntity = new IntelEntity();
@@ -204,7 +205,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			if (session.getTransaction().isActive()) session.getTransaction().rollback();
-			MessageDialog.openWarning(getShell(), "Error", "Could not save entity: " + ex.getMessage());
+			MessageDialog.openWarning(getShell(), Messages.NewEntityDialog_ErrorDialogTitle, Messages.NewEntityDialog_SaveError + ex.getMessage());
 			Intelligence2PlugIn.log(ex.getMessage(), ex);
 			newEntity = null;
 			return;
@@ -255,7 +256,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 		
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Entity Type:");
+		l.setText(Messages.NewEntityDialog_EntityTypeLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		
@@ -283,8 +284,8 @@ public class NewEntityDialog extends TitleAreaDialog{
 		attributePanel = new Composite(parent, SWT.NONE);
 		attributePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
-		setTitle("New Entity");
-		getShell().setText("New Entity");
+		setTitle(Messages.NewEntityDialog_Title);
+		getShell().setText(Messages.NewEntityDialog_Title);
 		setMessage(MESSAGE);
 		
 		loadEntityTypes.setSystem(true);
@@ -414,7 +415,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 					tmp.setAttribute(etype.getIdAttribute());
 					editor.updateValue(tmp);
 					if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), etype, SmartDB.getCurrentConservationArea(), session, null)){
-						String warnMessage = "Duplicate Identifiers - an entity with this identifier already exists in the database"; 
+						String warnMessage = Messages.NewEntityDialog_DuplicateIdMsg; 
 						setMessage(warnMessage, IMessageProvider.WARNING);
 						editor.setWarningMessage(warnMessage);
 					}else{

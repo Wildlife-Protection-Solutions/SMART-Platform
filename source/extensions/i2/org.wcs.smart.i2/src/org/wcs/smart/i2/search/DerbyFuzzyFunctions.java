@@ -34,7 +34,7 @@ import org.apache.commons.codec.language.DoubleMetaphone;
 public class DerbyFuzzyFunctions {
 
 	private static final DoubleMetaphone DOUBLE_METAPHONE = new DoubleMetaphone();
-	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+");
+	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+"); //$NON-NLS-1$
 	
 	/**
 	 * Determines if one metaphone is contained within a set of metaphones represented
@@ -95,7 +95,7 @@ public class DerbyFuzzyFunctions {
 		StringBuilder sb = new StringBuilder();
 		for(String x : found){
 			sb.append(x);
-			sb.append(" ");
+			sb.append(" "); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}

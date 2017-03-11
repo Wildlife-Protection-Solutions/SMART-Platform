@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Adds and or upgrades intelligence plugin
@@ -44,7 +45,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 public class AddIntelligenceJob extends Job {
 
 	public AddIntelligenceJob() {
-		super("Add Intelligence Plug In");
+		super(Messages.AddIntelligenceJob_JobName);
 	}
 
 	@Override
@@ -62,10 +63,10 @@ public class AddIntelligenceJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					Intelligence2PlugIn.displayLog("Error installing intelligence plugin.", ex);
+					Intelligence2PlugIn.displayLog(Messages.AddIntelligenceJob_InstallError, ex);
 				}
 			});
-			return new Status(IStatus.ERROR, Intelligence2PlugIn.PLUGIN_ID, 1, "Error installing intelligence plugin.", ex); 
+			return new Status(IStatus.ERROR, Intelligence2PlugIn.PLUGIN_ID, 1, Messages.AddIntelligenceJob_InstallError, ex); 
 		} finally {
 			session.close();
 		}
@@ -83,6 +84,7 @@ public class AddIntelligenceJob extends Job {
 		IntelligenceDatabaseUpgrader.upgrade(Intelligence2PlugIn.DB_VERSION_1, session);
 	}
 	
+	@SuppressWarnings("nls")
 	private void createTables(Session session){
 		String[] sql = new String[]{
 				 // Create Tables

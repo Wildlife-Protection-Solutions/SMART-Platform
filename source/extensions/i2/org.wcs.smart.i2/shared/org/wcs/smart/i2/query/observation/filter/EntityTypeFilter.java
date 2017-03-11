@@ -31,7 +31,7 @@ package org.wcs.smart.i2.query.observation.filter;
 public class EntityTypeFilter implements IQueryFilter, IColumnIdentifierProvider {
 
 	public static EntityTypeFilter create(String key){
-		return new EntityTypeFilter(key.split(":")[1]);
+		return new EntityTypeFilter(key.split(":")[1]); //$NON-NLS-1$
 	}
 	
 	private String typeKey;
@@ -47,7 +47,7 @@ public class EntityTypeFilter implements IQueryFilter, IColumnIdentifierProvider
 	@Override
 	public String getUniqueColumnIdentifier(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("et_");
+		sb.append("et_"); //$NON-NLS-1$
 		sb.append(typeKey);
 		return sb.toString();
 	}

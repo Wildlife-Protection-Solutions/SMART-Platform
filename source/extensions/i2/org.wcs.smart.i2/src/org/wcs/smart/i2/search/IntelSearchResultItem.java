@@ -35,7 +35,7 @@ import org.wcs.smart.i2.model.IntelEntity;
  */
 public class IntelSearchResultItem implements IAdaptable {
 	
-	private static final DecimalFormat DFORMAT = new DecimalFormat("0.000");
+	private static final DecimalFormat DFORMAT = new DecimalFormat("0.000"); //$NON-NLS-1$
 	
 	private String matchedString;
 	private UUID entityUuid;

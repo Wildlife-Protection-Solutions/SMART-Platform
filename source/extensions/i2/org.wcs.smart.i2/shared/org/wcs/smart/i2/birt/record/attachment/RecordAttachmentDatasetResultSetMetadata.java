@@ -22,11 +22,14 @@
 package org.wcs.smart.i2.birt.record.attachment;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.util.UuidUtils;
@@ -39,22 +42,20 @@ import org.wcs.smart.util.UuidUtils;
 public class RecordAttachmentDatasetResultSetMetadata implements IResultSetMetaData {
 	
 	public static enum Column{
-		RECORD_UUID("recordattachment:entity_uuid", "Record UUID", java.sql.Types.VARCHAR),
-		FILE_NAME("recordattachment:filename", "Name", java.sql.Types.VARCHAR),
-		DATE_CREATED("recordattachment:date_created", "Date Created", java.sql.Types.DATE),
-		PATH("recordattachment:path", "Path", java.sql.Types.VARCHAR);
+		RECORD_UUID("recordattachment:entity_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		FILE_NAME("recordattachment:filename", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		DATE_CREATED("recordattachment:date_created", java.sql.Types.DATE), //$NON-NLS-1$
+		PATH("recordattachment:path",java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		String id;
-		String name;
 		int type;
 		
-		Column(String id, String name, int type){
+		Column(String id, int type){
 			this.id = id;
-			this.name = name;
 			this.type = type;
 		}
-		public String getColumnName(){
-			return this.name;
+		public String getColumnName(Locale l){
+			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
 		public String getId(){
 			return this.id;
@@ -70,7 +71,7 @@ public class RecordAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 				return record.getAttachment().getDateCreated();
 			case PATH:
 				try {
-					return "file:/" + record.getAttachment().getAttachmentFile().getCanonicalPath();
+					return "file:/" + record.getAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
 				} catch (IOException e) {
 					Logger.getLogger(RecordAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}
@@ -83,7 +84,9 @@ public class RecordAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 		}
 	}
 	
-	public RecordAttachmentDatasetResultSetMetadata(){
+	private Locale l;
+	public RecordAttachmentDatasetResultSetMetadata(Locale l){
+		this.l = l;
 	}
 	
 	/**
@@ -108,7 +111,7 @@ public class RecordAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return Column.values()[index-1].name;
+		return Column.values()[index-1].getColumnName(l);
 	}
 
 	/**

@@ -144,7 +144,7 @@ public enum Operator {
 		for (Operator o : Operator.values()){
 			if (op.equalsIgnoreCase(o.key)) return o;
 		}
-		throw new IllegalStateException("Operator not supported: " + op);
+		throw new IllegalStateException("Operator not supported: " + op); //$NON-NLS-1$
 	}
 }
 

@@ -44,8 +44,8 @@ public class IntelHibernateManager {
 	
 	public static IntelAttribute getAttribute(String keyId, ConservationArea ca, Session session){ 
 		IntelAttribute attribute = (IntelAttribute)session.createCriteria(IntelAttribute.class)
-			.add(Restrictions.eq("conservationArea", ca))
-			.add(Restrictions.eq("keyId", keyId))
+			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+			.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
 			.uniqueResult();
 		return attribute;
 	}
@@ -54,16 +54,16 @@ public class IntelHibernateManager {
 	public static IntelAttributeListItem getAttributeListItem(IntelAttribute attribute, String keyId, Session session){ 
 		if (attribute == null) return null;
 		IntelAttributeListItem listitem = (IntelAttributeListItem)session.createCriteria(IntelAttributeListItem.class)
-			.add(Restrictions.eq("attribute", attribute))
-			.add(Restrictions.eq("keyId", keyId))
+			.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
+			.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
 			.uniqueResult();
 		return listitem;
 	}
 	
 	public static IntelEntityType getEntityType(String keyId, ConservationArea ca, Session session){ 
 		IntelEntityType type = (IntelEntityType)session.createCriteria(IntelEntityType.class)
-			.add(Restrictions.eq("conservationArea", ca))
-			.add(Restrictions.eq("keyId", keyId))
+			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+			.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
 			.uniqueResult();
 		return type;
 	}

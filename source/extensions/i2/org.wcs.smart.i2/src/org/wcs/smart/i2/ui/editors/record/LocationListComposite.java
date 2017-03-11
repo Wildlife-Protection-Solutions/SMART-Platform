@@ -78,6 +78,7 @@ import org.wcs.smart.gpx.GPSBabel;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -85,7 +86,7 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.DateCellEditor;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.FileLocationParser;
-import org.wcs.smart.i2.ui.GeometryDialog;
+import org.wcs.smart.i2.ui.WKTGeometryDialog;
 import org.wcs.smart.i2.ui.ObservationDialog;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.dialogs.GPSDeviceSelectionDialog;
@@ -145,7 +146,7 @@ public class LocationListComposite extends Composite{
 		TableViewerEditor.create(tblObservations, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
 
 		TableViewerColumn geomTypeColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
-		geomTypeColumn.getColumn().setText("");
+		geomTypeColumn.getColumn().setText(""); //$NON-NLS-1$
 		geomTypeColumn.getColumn().setWidth(25);
 		geomTypeColumn.setLabelProvider(new ColumnLabelProvider() {
 			
@@ -160,7 +161,7 @@ public class LocationListComposite extends Composite{
 			}
 			@Override
 			public String getText(Object element) {
-				return "";
+				return ""; //$NON-NLS-1$
 			}
 			
 			@Override
@@ -174,7 +175,7 @@ public class LocationListComposite extends Composite{
 		});
 		
 		TableViewerColumn idColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
-		idColumn.getColumn().setText("ID");
+		idColumn.getColumn().setText(Messages.LocationListComposite_IdColumn);
 		idColumn.getColumn().setWidth(100);
 		idColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -188,7 +189,7 @@ public class LocationListComposite extends Composite{
 		idColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.ID));
 		
 		TableViewerColumn dateColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
-		dateColumn.getColumn().setText("Date");
+		dateColumn.getColumn().setText(Messages.LocationListComposite_DateColumn);
 		dateColumn.getColumn().setWidth(100);
 		dateColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -202,7 +203,7 @@ public class LocationListComposite extends Composite{
 		dateColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.DATE));
 		
 		TableViewerColumn timeColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
-		timeColumn.getColumn().setText("Time");
+		timeColumn.getColumn().setText(Messages.LocationListComposite_TimeColumn);
 		timeColumn.getColumn().setWidth(100);
 		timeColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -216,7 +217,7 @@ public class LocationListComposite extends Composite{
 		timeColumn.setEditingSupport(new LocationTableEditor(tblObservations, Column.TIME));
 		
 		TableViewerColumn commentColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
-		commentColumn.getColumn().setText("Comment");
+		commentColumn.getColumn().setText(Messages.LocationListComposite_CommentColumn);
 		commentColumn.getColumn().setWidth(200);
 		commentColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -231,7 +232,7 @@ public class LocationListComposite extends Composite{
 		
 		
 		TableViewerColumn obsColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
-		obsColumn.getColumn().setText("Observation");
+		obsColumn.getColumn().setText(Messages.LocationListComposite_ObsColumn);
 		obsColumn.getColumn().setWidth(200);
 		obsColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -243,7 +244,7 @@ public class LocationListComposite extends Composite{
 					}else{
 						cnt = ((IntelLocation)element).getObservations().size();
 					}
-					return MessageFormat.format("{0} Observation", cnt);
+					return MessageFormat.format(Messages.LocationListComposite_ObsLabel, cnt);
 				}
 				return super.getText(element);
 			}
@@ -252,7 +253,7 @@ public class LocationListComposite extends Composite{
 		
 		
 		TableViewerColumn entityListColumn = new TableViewerColumn(tblObservations, SWT.LEFT);
-		entityListColumn.getColumn().setText("Entities");
+		entityListColumn.getColumn().setText(Messages.LocationListComposite_EntitiesColumn);
 		entityListColumn.getColumn().setWidth(200);
 		entityListColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -263,17 +264,17 @@ public class LocationListComposite extends Composite{
 					for (IntelEntityLocation l : editor.getEntityLocationLinks()){
 						if (l.getLocation().equals(element)){
 							sb.append(l.getEntity().getIdAttributeAsText());
-							sb.append("; ");
+							sb.append("; "); //$NON-NLS-1$
 							cnt++;
 						}
 					}
 					
 					if (sb.length() > 0){
-						sb.insert(0, "(" + cnt + ") ");
+						sb.insert(0, "(" + cnt + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 						return sb.substring(0, sb.length() - 2);
 					}
 					
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}
@@ -337,11 +338,11 @@ public class LocationListComposite extends Composite{
 				
 				if (IntelSecurityManager.INSTANCE.canLinkLocationsToEntities()){
 					addLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
-					addLinkItem.setText("Add Entity Link ");
+					addLinkItem.setText(Messages.LocationListComposite_AddEntityLink);
 					addLinkItem.setEnabled(selection != null);
 					
 					dropLinkItem = new MenuItem(linkEntities, SWT.CASCADE);
-					dropLinkItem.setText("Drop Entity Link ");
+					dropLinkItem.setText(Messages.LocationListComposite_DropEntityLink);
 					dropLinkItem.setEnabled(selection != null);
 					
 					Menu linkSubMenu = new Menu(addLinkItem);
@@ -374,7 +375,7 @@ public class LocationListComposite extends Composite{
 					}
 					if (toAdd.size() > 0){
 						MenuItem linkToAll = new MenuItem(linkSubMenu, SWT.PUSH);
-						linkToAll.setText("All");
+						linkToAll.setText(Messages.LocationListComposite_AddAllOption);
 						linkToAll.addSelectionListener(addEntityLinkListener);
 						new MenuItem(linkSubMenu, SWT.SEPARATOR);
 						for (IntelEntity entity : toAdd){
@@ -390,11 +391,11 @@ public class LocationListComposite extends Composite{
 					}else{
 						MenuItem noMore = new MenuItem(linkSubMenu, SWT.PUSH);
 						noMore.setEnabled(false);
-						noMore.setText("No Options");
+						noMore.setText(Messages.LocationListComposite_AddNoOptionsFound);
 					}
 					if (toDrop.size() > 0){
 						MenuItem linkToAll = new MenuItem(dropLinkSubMenu, SWT.PUSH);
-						linkToAll.setText("All");
+						linkToAll.setText(Messages.LocationListComposite_DropallOption);
 						linkToAll.addSelectionListener(dropEntityLinkListener);
 						new MenuItem(dropLinkSubMenu, SWT.SEPARATOR);
 						for (IntelEntity entity : toDrop){
@@ -410,14 +411,14 @@ public class LocationListComposite extends Composite{
 					}else{
 						MenuItem noMore = new MenuItem(dropLinkSubMenu, SWT.PUSH);
 						noMore.setEnabled(false);
-						noMore.setText("No Options");
+						noMore.setText(Messages.LocationListComposite_DropNoOptions);
 					}
 				}
 				
 				new MenuItem(linkEntities, SWT.SEPARATOR);
 						
 				deleteItem = new MenuItem(linkEntities, SWT.PUSH);
-				deleteItem.setText(MessageFormat.format("{0} Location", DialogConstants.DELETE_BUTTON_TEXT));
+				deleteItem.setText(MessageFormat.format(Messages.LocationListComposite_DeleteMenuItem, DialogConstants.DELETE_BUTTON_TEXT));
 				deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 				deleteItem.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -431,7 +432,7 @@ public class LocationListComposite extends Composite{
 				deleteItem.setEnabled(selection != null);
 				
 				editObsItem = new MenuItem(linkEntities, SWT.PUSH);
-				editObsItem.setText("Edit Observations...");
+				editObsItem.setText(Messages.LocationListComposite_EditObsMenuItem);
 				editObsItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 				editObsItem.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -449,7 +450,7 @@ public class LocationListComposite extends Composite{
 				editObsItem.setEnabled(selection != null);
 				
 				editGeometry = new MenuItem(linkEntities, SWT.PUSH);
-				editGeometry.setText("Edit Geometry...");
+				editGeometry.setText(Messages.LocationListComposite_EditGeomMnuItem);
 				editGeometry.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
 				editGeometry.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -457,7 +458,7 @@ public class LocationListComposite extends Composite{
 						Object selection = ((IStructuredSelection)tblObservations.getSelection()).getFirstElement();
 						if (selection instanceof IntelLocation){
 							try{
-								GeometryDialog gd = new GeometryDialog(getShell(), ((IntelLocation)selection).getGeometry());
+								WKTGeometryDialog gd = new WKTGeometryDialog(getShell(), ((IntelLocation)selection).getGeometry());
 								if (gd.open() == Window.OK){
 									((IntelLocation)selection).setGeometry(gd.getNewGeometry());
 									editor.locationsUpdated();
@@ -473,18 +474,18 @@ public class LocationListComposite extends Composite{
 				new MenuItem(linkEntities, SWT.SEPARATOR);
 						
 				importItem = new MenuItem(linkEntities, SWT.CASCADE);
-				importItem.setText("Import Locations...");
+				importItem.setText(Messages.LocationListComposite_ImportLocationMnuItem);
 					
 				Menu importOp = new Menu(importItem);
 				importItem.setMenu(importOp);
 						
 				MenuItem importFile = new MenuItem(importOp, SWT.PUSH);
-				importFile.setText("Import From File...");
+				importFile.setText(Messages.LocationListComposite_ImportFromFileMenu);
 				importFile.addListener(SWT.Selection, evt->{
 					importLocationsFromFile();
 				});
 				MenuItem importGps = new MenuItem(importOp, SWT.PUSH);
-				importGps.setText("Import From GPS Device...");
+				importGps.setText(Messages.LocationListComposite_ImportFromGpsOp);
 				importGps.addListener(SWT.Selection, evt->{
 					importLocationsFromGps();
 				});
@@ -557,12 +558,12 @@ public class LocationListComposite extends Composite{
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Loading waypoints from GPS device", IProgressMonitor.UNKNOWN);
+					monitor.beginTask(Messages.LocationListComposite_GPSTaskName, IProgressMonitor.UNKNOWN);
 					try{
 						File f = GPSBabel.getData(gpsDialog.getDeviceType(), Collections.singleton(GPSDataImport.ImportType.WAYPOINT));
 						locations[0] = importGpx(f, monitor);
 					}catch (Exception ex){
-						Intelligence2PlugIn.displayLog("Unable to import waypoints from GPS device.", ex);
+						Intelligence2PlugIn.displayLog(Messages.LocationListComposite_GPSError, ex);
 						return;
 					}
 				}
@@ -587,12 +588,12 @@ public class LocationListComposite extends Composite{
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Loading locations from GPX File", IProgressMonitor.UNKNOWN);
+					monitor.beginTask(Messages.LocationListComposite_GPXTaxName, IProgressMonitor.UNKNOWN);
 					final String[] file = new String[]{null};
 					Display.getDefault().syncExec(()->{
 						FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-						fd.setFilterExtensions(new String[]{"*.gpx", "*.*"});
-						fd.setFilterNames(new String[]{"GPX Files (*.gpx)", "All Files (*.*)"});
+						fd.setFilterExtensions(new String[]{"*.gpx", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+						fd.setFilterNames(new String[]{Messages.LocationListComposite_GpxFileOption, Messages.LocationListComposite_AllFileOption});
 						file[0] = fd.open();	
 					});
 					
@@ -610,7 +611,7 @@ public class LocationListComposite extends Composite{
 	
 	private void displayInfo(List<?> items){
 		if (items != null && items.size() > 0){
-			TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format("{0} locations imported and added to the record.", items.size()));
+			TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format(Messages.LocationListComposite_LocationsAddedMsg, items.size()));
 			infodialog.open();
 		}
 	}
@@ -683,7 +684,7 @@ public class LocationListComposite extends Composite{
 				//Fire changes
 				LocationListComposite.this.editor.locationsUpdated();
 			}else{
-				MessageDialog.openError(getShell(), "Error", error);
+				MessageDialog.openError(getShell(), Messages.LocationListComposite_ErrorTitle, error);
 			}
 		}
 
@@ -693,7 +694,7 @@ public class LocationListComposite extends Composite{
 				return ((IntelLocation)element).getId();
 			}else if (col == Column.COMMENT){
 				String value = ((IntelLocation)element).getComment();
-				if (value == null) return "";
+				if (value == null) return ""; //$NON-NLS-1$
 				return value;
 			}else if (col == Column.DATE || col == Column.TIME){
 				return ((IntelLocation)element).getDateTime();
@@ -708,13 +709,13 @@ public class LocationListComposite extends Composite{
 				String vv = value == null? null:((String)value).trim();
 				if (col == Column.ID){
 					if (vv == null||vv.isEmpty()){
-						return "ID is required";
+						return Messages.LocationListComposite_IdRequired;
 					}else if (vv != null && vv.length() > IntelLocation.ID_MAX_LENGTH){
-						return MessageFormat.format("ID is must be fewer than {0} characters.", IntelLocation.ID_MAX_LENGTH);
+						return MessageFormat.format(Messages.LocationListComposite_IdInvalid, IntelLocation.ID_MAX_LENGTH);
 					}
 				}else if (col == Column.COMMENT){
 					if (vv != null && vv.length() > IntelLocation.COMMENT_MAX_LENGTH){
-						return MessageFormat.format("Comment is must be fewer than {0} characters.", IntelLocation.COMMENT_MAX_LENGTH);
+						return MessageFormat.format(Messages.LocationListComposite_CommentInvalid, IntelLocation.COMMENT_MAX_LENGTH);
 					}
 				}
 			}
