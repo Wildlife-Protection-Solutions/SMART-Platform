@@ -21,6 +21,8 @@
  */
 package org.wcs.smart;
 
+import org.wcs.smart.ca.Employee;
+
 
 /**
  * Label provider for core SMART items.Must provide values
@@ -59,4 +61,6 @@ public interface ICoreLabelProvider extends ISharedLabelProvider {
 	public static final String CA_TABLENAME_KEY = "catablenamekey"; //$NON-NLS-1$
 	public static final String EMPLOYEE_TABLENAME_KEY = "employeetablenamekey"; //$NON-NLS-1$
 	public static final String STATION_TABLENAME_KEY = "stationtablenamekey"; //$NON-NLS-1$
+	
+	public String getEmployeeShortLabel(Employee e);
 }

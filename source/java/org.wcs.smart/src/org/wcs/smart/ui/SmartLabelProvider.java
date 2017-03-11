@@ -202,10 +202,15 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 	 * 
 	 * @return the employee short label which does not include the id; only the given and family names
 	 */
+	@Override
+	public String getEmployeeShortLabel(Employee e){
+		return getShortLabel(e);
+	}
+
 	public static String getShortLabel(Employee e){
 		return SmartLabelProvider.formatName(e.getGivenName(), e.getFamilyName());
 	}
-
+	
 	/**
 	 * 
 	 * @return the employee long name label which includes given name, family name and id
