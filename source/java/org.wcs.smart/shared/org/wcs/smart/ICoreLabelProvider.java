@@ -21,6 +21,8 @@
  */
 package org.wcs.smart;
 
+import java.util.Locale;
+
 import org.wcs.smart.ca.Employee;
 
 
@@ -62,5 +64,5 @@ public interface ICoreLabelProvider extends ISharedLabelProvider {
 	public static final String EMPLOYEE_TABLENAME_KEY = "employeetablenamekey"; //$NON-NLS-1$
 	public static final String STATION_TABLENAME_KEY = "stationtablenamekey"; //$NON-NLS-1$
 	
-	public String getEmployeeShortLabel(Employee e);
+	public String getEmployeeShortLabel(Employee e, Locale l);
 }

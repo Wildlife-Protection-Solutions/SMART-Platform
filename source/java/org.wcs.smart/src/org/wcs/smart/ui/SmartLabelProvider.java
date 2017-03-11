@@ -203,7 +203,7 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 	 * @return the employee short label which does not include the id; only the given and family names
 	 */
 	@Override
-	public String getEmployeeShortLabel(Employee e){
+	public String getEmployeeShortLabel(Employee e, Locale l){
 		return getShortLabel(e);
 	}
 

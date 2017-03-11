@@ -80,9 +80,9 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 			case SCRATCHPAD:
 				return record.getComment();
 			case CREATED_BY:
-				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(record.getCreatedBy());
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(record.getCreatedBy(), l);
 			case LAST_MODIFIED_BY:
-				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(record.getLastModifiedBy());
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(record.getLastModifiedBy(), l);
 			case CREATED:
 				return record.getDateCreated();
 			case LAST_MODIFIED:
