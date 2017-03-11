@@ -306,7 +306,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			    while ( i.hasNext() ) {
 			    	toBeMoved.add( ((PatrolLeg)i.next()) );
 			    }
-			    MovePatrolLegDialog movePatrolLegDialog = new MovePatrolLegDialog(getShell(), toBeMoved, session);
+			    MovePatrolLegDialog movePatrolLegDialog = new MovePatrolLegDialog(getShell(), toBeMoved);
 				if (movePatrolLegDialog.open() == Window.OK){
 					for(PatrolLeg pld : toBeMoved){
 						legs.remove(pld);

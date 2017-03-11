@@ -228,6 +228,15 @@
                style="push"
                tooltip="%popup.delete.command.tooltip">
          </command>
+         <command
+               commandId="org.wcs.smart.patrol.view.MergePatrols"
+               icon="images/icons/etool16/patrol.png"
+               label="%popup.merge.command.label"
+               mnemonic="%popup.merge.command.mnemonic"
+               style="push"
+               tooltip="%popup.merge.command.tooltip">
+         </command>
+         
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -318,6 +327,10 @@
       <command
             id="org.wcs.smart.patrol.patrolScreens"
             name="%command.name.screenconfiguration">
+      </command>
+      <command
+            id="org.wcs.smart.patrol.view.MergePatrols"
+            name="Merge Patrols">
       </command>
    </extension>
    <extension
@@ -435,6 +448,30 @@
       <handler
             class="org.wcs.smart.patrol.internal.ui.properties.handlers.PartolScreenOptionsMetaHandler$PatrolScreenOptionsMetaHandlerWrapper"
             commandId="org.wcs.smart.patrol.patrolScreens">
+      </handler>
+      <handler
+            class="org.wcs.smart.patrol.internal.ui.views.MergePatrolsHandler$MergePatrolsHandlerWrapper"
+            commandId="org.wcs.smart.patrol.view.MergePatrols">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with variable="selection">
+            	<not>
+            	<or>
+            	<count value="0"/>
+            	<count value="1"/>
+            	</or>
+            	</not>
+           		<iterate ifEmpty="false" operator="or">
+                  <instanceof value="org.wcs.smart.patrol.ui.PatrolEditorInput"/>
+               </iterate>
+            </with>
+         </enabledWhen>
+      
       </handler>
    </extension>
    <extension

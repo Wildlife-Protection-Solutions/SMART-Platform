@@ -722,9 +722,6 @@
       <contribution
             class="org.wcs.smart.plan.xml.patrol.PatrolPlanXmlExtraDataContribution">
       </contribution>
-      <contribution
-            class="org.wcs.smart.plan.XmlExtraDataContribution1">
-      </contribution>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">

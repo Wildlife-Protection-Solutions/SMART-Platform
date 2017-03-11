@@ -1,3 +1,25 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package org.wcs.smart.patrol.internal.ui;
 
 import java.util.ArrayList;
@@ -14,11 +36,19 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+/**
+ * Dialog to let you name the new Patrol you create when using the "Split leg into new Patrol" button
+ * You can move more than one leg, they all go into a single, new patrol.
+ * 
+ * @author Jeff
+ * @since 5.0.0
+ * 
+ */
+
 
 public class MovePatrolLegDialog extends TitleAreaDialog{
 
@@ -27,13 +57,18 @@ public class MovePatrolLegDialog extends TitleAreaDialog{
 	private Patrol newPatrol;
 	private Text txtPatrolId;
 	private Patrol originalPatrol;
-	private Session s;
 	
-	public MovePatrolLegDialog(Shell parentShell, ArrayList<PatrolLeg> patrolLegs, Session s) {
+	
+	/**
+	 * Creates a new move patrol leg dialog 
+	 * 
+	 * @param parentShell parent shell
+	 * @param patrolLeg legs to move into new patrols
+	 */
+	public MovePatrolLegDialog(Shell parentShell, ArrayList<PatrolLeg> patrolLegs) {
 		super(parentShell);
 		this.legsToMove = patrolLegs;
 		originalPatrol = legsToMove.get(0).getPatrol();
-		this.s = s;
 	}
 	
 
@@ -43,7 +78,10 @@ public class MovePatrolLegDialog extends TitleAreaDialog{
 		return true;
 	}
 	
-	
+	/**
+	 * Create the dialog elements
+	 * 
+	 **/
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
@@ -55,16 +93,16 @@ public class MovePatrolLegDialog extends TitleAreaDialog{
 		patrolIdComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		lbl = new Label(patrolIdComp, SWT.NONE);
-		lbl.setText("New Patrol ID");
+		lbl.setText(Messages.MovePatrolLegDialog_NewPatrolID);
 		txtPatrolId = new Text(patrolIdComp, SWT.BORDER);
 		txtPatrolId.setTextLimit(PatrolLeg.ID_MAX_SIZE);
-		txtPatrolId.setText("(split from)" + legsToMove.get(0).getPatrol().getId() );
+		txtPatrolId.setText(Messages.MovePatrolLegDialog_SplitText + legsToMove.get(0).getPatrol().getId() );
 		txtPatrolId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtPatrolId.setTextLimit(32);
 	
-		setMessage("Select a Patrol ID for the New Patrol.");
-		getShell().setText("Split Legs into a New Patrol");
-		setTitle("Create New Patrol");
+		setMessage(Messages.MovePatrolLegDialog_SelectNewID);
+		getShell().setText(Messages.MovePatrolLegDialog_SplitLegsButton);
+		setTitle(Messages.MovePatrolLegDialog_CreateNewPatrol);
 		return parent;
 	}
 	
