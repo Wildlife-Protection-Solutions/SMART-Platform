@@ -84,4 +84,9 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 	public static String getFullName(Employee e, Locale l){
 		return MessageFormat.format(Messages.getString("SmartLabelProvider.EmployeeNameFormat_0Give_1Family",l), e.getGivenName(), e.getFamilyName()); //$NON-NLS-1$
 	}
+
+	@Override
+	public String getEmployeeShortLabel(Employee e, Locale l) {
+		return getFullName(e, l);
+	}
 }

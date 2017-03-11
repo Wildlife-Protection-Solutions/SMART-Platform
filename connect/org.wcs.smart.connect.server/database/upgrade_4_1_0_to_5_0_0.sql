@@ -696,4 +696,11 @@ ADD CONSTRAINT i_recordattributelist_valueuuid_fk
 FOREIGN KEY (value_uuid) 
 REFERENCES smart.i_record_attribute_value (uuid) ON DELETE CASCADE DEFERRABLE;
 
+
+
+
+insert into connect.plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.i2')
 insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.i2');
+
+-- UPDATE CONNECT VERSION
+update connect.connect_version set version = '5.0.0', last_updated = now();
