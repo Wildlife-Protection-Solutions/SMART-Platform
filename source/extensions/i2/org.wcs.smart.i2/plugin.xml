@@ -168,17 +168,17 @@
       <perspective
             class="org.wcs.smart.i2.ui.IntelDataAnalysisPerspective"
             id="org.wcs.smart.i2.IntelDataAnalysisPerspective"
-            name="Intelligence Data Analysis Perspective">
+            name="%DataAnalysisPerspectiveName">
       </perspective>
       <perspective
             class="org.wcs.smart.i2.ui.IntelDataAssessmentPerspective"
             id="org.wcs.smart.i2.IntelDataAssessmentPerspective"
-            name="Intelligence Data Assessment Perspective">
+            name="%DataAssessmentPerspectiveName">
       </perspective>
       <perspective
             class="org.wcs.smart.i2.birt.IntelEntityReportPerspective"
             id="org.wcs.smart.i2.report.entity.edit"
-            name="Intelligence Entity Template BIRT Editor">
+            name="%BirtPerspectiveName">
       </perspective>
    </extension>
    <extension
@@ -212,15 +212,15 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
          <menu
                id="org.wcs.smart.i2.menu.main"
-               label="Intelligence 2">
+               label="%IntelligenceMenuItem">
             <command
                   commandId="org.wcs.smart.i2.command.record.new"
-                  label="New Record"
+                  label="%NewRecordCommandName"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.entity.new"
-                  label="New Entity"
+                  label="%NewEntityCommandName"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -232,7 +232,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
-                  label="New Record Query"
+                  label="%NewQueryCommandName"
                   style="push">
             </command>
             <separator
@@ -241,7 +241,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.i2.command.attributelist.show"
-                  label="Intelligence Attributes..."
+                  label="%EditAttributesCommandName"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -253,7 +253,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.entitytypelist.show"
-                  label="Entity Types..."
+                  label="%EditEntityTypesCommandName"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -265,7 +265,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.relationshiptypelist.show"
-                  label="Relationship Types..."
+                  label="%EditRelationshipTypeCommandName"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -277,7 +277,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.relationshipgrouplist.show"
-                  label="Relationship Groups..."
+                  label="%EditRelationshipGroupCommandName"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -289,7 +289,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.record.configuration"
-                  label="Configure Records..."
+                  label="%ConfigureRecordSourceCommandName"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -306,7 +306,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/obj16/template.png"
-                  label="Edit BIRT Templates..."
+                  label="%EditPrintTemplatesCommandName"
                   style="push">
                <parameter
                      name="org.wcs.smart.perspectiveid"
@@ -321,15 +321,15 @@
                </visibleWhen>
             </command>
             <menu
-                  label="Import Data From File">
+                  label="%ImportDataMenuItem">
                <command
                      commandId="org.wcs.smart.i2.entity.import"
-                     label="Import Entities..."
+                     label="%ImportEntitiesCommandName"
                      style="push">
                </command>
                <command
                      commandId="org.wcs.smart.i2.command.record.import"
-                     label="Import Records..."
+                     label="%ImportRecordsCommandName"
                      style="push">
                </command>
             </menu>
@@ -340,7 +340,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/obj16/assessment.png"
-                  label="Data Assessment Mode">
+                  label="%DataAssesmentModeCommandName">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
@@ -349,7 +349,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/obj16/analysis.png"
-                  label="Data Analysis Mode">
+                  label="%DataAnalysisModeCommandName">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
@@ -391,8 +391,8 @@
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/obj16/analysis.png"
-                  label="Data Analysis Mode"
-                  tooltip="open intelligence analysis mode">
+                  label="%DataAnalysisModeCommandName2"
+                  tooltip="%DataAnalysisModeTooltip">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
@@ -416,8 +416,8 @@
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/obj16/assessment.png"
-                  label="Data Assessment Mode"
-                  tooltip="open intelligence assessment mode">
+                  label="%DataAssesmentModeCommandName2"
+                  tooltip="%DataAsessmentModeTooltip">
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
@@ -473,7 +473,7 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
-                  label="Save As..."
+                  label="%SaveAsCommand"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -530,7 +530,7 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.saveAs"
-               label="Save As...">
+               label="%SaveAsCommand2">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -552,9 +552,9 @@
          <command
                commandId="org.eclipse.ui.file.export"
                id="x"
-               label="Export Map"
+               label="%ExportMapCommandName"
                style="push"
-               tooltip="export the current map">
+               tooltip="%ExportMapCommandTooltip">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -597,7 +597,7 @@
          <command
                commandId="org.wcs.smart.i2.entity.template.querybindings.fix"
                style="push"
-               tooltip="fixes problems with query bindings in the reports">
+               tooltip="%FixBindingTooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -605,7 +605,7 @@
             locationURI="toolbar:org.wcs.smart.i2.view.entitysearch">
          <command
                commandId="org.wcs.smart.i2.command.entity.new"
-               label="New Entity"
+               label="%NewEntityCommandName2"
                style="push">
             <visibleWhen
                   checkEnabled="false">
@@ -637,7 +637,7 @@
             class="org.wcs.smart.i2.ui.views.EntitySearchView$EntitySearchViewWrapper"
             icon="images/icons/obj16/entity_list.png"
             id="org.wcs.smart.i2.view.entitysearch"
-            name="Entity Search"
+            name="%EntitySearchViewName"
             restorable="true">
       </view>
       <view
@@ -645,28 +645,28 @@
             class="org.wcs.smart.i2.ui.views.WorkingSetView$WorkingSetViewWrapper"
             icon="images/icons/obj16/working_set.png"
             id="org.wcs.smart.i2.ui.view.workingset"
-            name="Working Set"
+            name="%WorkingSetViewName"
             restorable="true">
       </view>
       <view
             class="org.wcs.smart.i2.ui.views.RecordsView$RecordsViewWrapper"
             icon="images/icons/obj16/script_list.png"
             id="org.wcs.smart.i2.ui.view.records"
-            name="Records"
+            name="%RecordsListViewName"
             restorable="true">
       </view>
       <view
             class="org.wcs.smart.i2.ui.views.QueryView$QueryViewWrapper"
             icon="images/icons/obj16/entity_query.png"
             id="org.wcs.smart.i2.ui.view.queries"
-            name="Queries"
+            name="%QueriesViewName"
             restorable="true">
       </view>
       <view
             class="org.wcs.smart.i2.ui.views.IntelligenceTemplatesView$IntelligenceTemplatesViewWrapper"
             icon="images/icons/obj16/entity.png"
             id="org.wcs.smart.i2.view.entitytypelist"
-            name="Intelligence Templates View"
+            name="%IntelTemplatesVeiw"
             restorable="true">
       </view>
       <view
@@ -674,7 +674,7 @@
             class="org.wcs.smart.i2.ui.views.RecordNarrativeView$RecordsNarrativeViewWrapper"
             icon="images/icons/obj16/script.png"
             id="org.wcs.smart.i2.record.editor.narrative"
-            name="Record View Part"
+            name="%RecordNarrativeView"
             restorable="true">
       </view>
       <view
@@ -682,7 +682,7 @@
             class="org.wcs.smart.i2.ui.views.FileSearchView$FileSearchViewWrapper"
             icon="images/icons/obj16/attachment_search.png"
             id="org.wcs.smart.i2.ui.view.filesearch"
-            name="File Search"
+            name="%FileSearchView"
             restorable="true">
       </view>
    </extension>
@@ -692,71 +692,71 @@
             class="org.wcs.smart.i2.ui.editors.QueryEditor"
             default="false"
             id="org.wcs.smart.i2.editor.query"
-            name="Intelligence Query Editor">
+            name="%QueryEditorName">
       </editor>
       <editor
             class="org.wcs.smart.i2.ui.editors.record.RecordEditor"
             default="false"
             icon="images/icons/obj16/script.png"
             id="org.wcs.smart.i2.editor.record"
-            name="Intelligence Record Query">
+            name="%RecordEditorName">
       </editor>
       <editor
             class="org.wcs.smart.i2.ui.editors.EntityEditor"
             default="false"
             id="org.wcs.smart.i2.editor.entity"
-            name="Entity Editor">
+            name="%EntityEditorName">
       </editor>
       <editor
             class="org.wcs.smart.i2.ui.editors.IntelligenceMapEditor"
             default="false"
             icon="images/icons/eview16/map.png"
             id="org.wcs.smart.i2.editor.map"
-            name="Map">
+            name="%MapViewName">
       </editor>
       <editor
             class="org.wcs.smart.i2.ui.editors.EntityComparisonEditor"
             default="false"
             id="org.wcs.smart.i2.editor.entity.compare"
-            name="Entity Comparison Editor">
+            name="%EntityCompareEditorName">
       </editor>
       <editor
             class="org.wcs.smart.i2.ui.editors.query.IntelQueryEditor"
             default="false"
             icon="images/icons/obj16/entity_query.png"
             id="org.wcs.smart.i2.editor.query"
-            name="Query Editor">
+            name="%QueryEditorNames">
       </editor>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.i2.command.entitytypelist.show"
-            name="Entity Types...">
+            name="%ShowEntityTypesCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.attributelist.show"
-            name="Intelligence Attributes...">
+            name="%ShowAttributesCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.relationshiptypelist.show"
-            name="Relationship Types...">
+            name="%ShowRelationshipTypesCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.entity.new"
-            name="New Entity">
+            name="%NewEntityCommandName3">
       </command>
       <command
             id="org.wcs.smart.i2.command.relationshipgrouplist.show"
-            name="Relationship Groups...">
+            name="%ShowRelationshipGroupsCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.record.new"
-            name="New Intelligence Record">
+            name="%NewRecordCommandName3">
       </command>
       <command
             id="org.wcs.smart.i2.command.perspective.open"
-            name="Show Perspective">
+            name="%ShowPerpsectiveCommandName">
          <commandParameter
                id="org.wcs.smart.perspectiveid"
                name="Perspective ID"
@@ -765,31 +765,31 @@
       </command>
       <command
             id="org.wcs.smart.i2.command.record.view.refresh"
-            name="Refresh Records View">
+            name="%RefreshRecordsCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.entity.template.querybindings.fix"
-            name="Refresh DataSet Query Bindings">
+            name="%RefreshBindingsCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.entity.import"
-            name="Import Entities">
+            name="%ImportEntitiesCommandName3">
       </command>
       <command
             id="org.wcs.smart.i2.command.record.import"
-            name="Import Records">
+            name="%ImportRecordsCommandName3">
       </command>
       <command
             id="org.wcs.smart.i2.command.query.record.new"
-            name="New Query">
+            name="%NewQueryName3">
       </command>
       <command
             id="org.wcs.smart.i2.command.query.refresh"
-            name="Refresh Query List">
+            name="%RefreshQueryListCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.record.configuration"
-            name="Configure Records...">
+            name="%ConfigureRecordsCommandName">
       </command>
    </extension>
    <extension
@@ -939,20 +939,20 @@
             class="org.wcs.smart.i2.ui.editors.record.DrawPolygonTool"
             icon="images/icons/obj16/polygon_add.png"
             id="org.wcs.smart.i2.record.polygon.draw"
-            name="Draw Area"
+            name="%DrawAreaTool"
             onToolbar="false"
             toolCursorId="org.wcs.smart.cross"
-            tooltip="draw the area for the record">
+            tooltip="%DrawAreaTooltip">
       </modalTool>
       <modalTool
             categoryId="org.wcs.smart.ui.map.tool"
             class="org.wcs.smart.i2.ui.editors.record.DrawPointTool"
             icon="images/icons/obj16/point_add.png"
             id="org.wcs.smart.i2.record.point.draw"
-            name="Draw Point"
+            name="%DrawPointTool"
             onToolbar="false"
             toolCursorId="org.wcs.smart.cross"
-            tooltip="adds a point location">
+            tooltip="%DrawPointTooltip">
       </modalTool>
    </extension>
    <extension
@@ -1795,7 +1795,7 @@
       <page
             class="org.wcs.smart.i2.ui.FuzzyPreferencePage"
             id="org.wcs.smart.i2.fuzzymatching"
-            name="Fuzzy String Matching ">
+            name="%FuzzyStringMatchingPage">
       </page>
    </extension>
    <extension
