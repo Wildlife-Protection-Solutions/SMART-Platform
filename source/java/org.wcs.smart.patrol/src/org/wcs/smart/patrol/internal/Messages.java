@@ -682,6 +682,11 @@ public class Messages extends NLS {
 	public static String XmlToPatrolConverter_Warning_StationNoFound;
 	public static String XmlToPatrolConverter_Warning_TemNotFound;
 	public static String XmlToPatrolConverter_Warning_TreeItemNotFound;
+	public static String MovePatrolLegDialog_CreateNewPatrol;
+	public static String MovePatrolLegDialog_NewPatrolID;
+	public static String MovePatrolLegDialog_SelectNewID;
+	public static String MovePatrolLegDialog_SplitLegsButton;
+	public static String MovePatrolLegDialog_SplitText;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
