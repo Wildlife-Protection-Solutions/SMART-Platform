@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.birt.record;
 
-import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;

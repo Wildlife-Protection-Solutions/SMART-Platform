@@ -804,7 +804,7 @@ public class RecordSummaryPage extends EditorPart{
 			
 		IntelRecord r = recordEditor.getRecord();
 		if (r.getRecordSource() == null){
-			r.getAttributes().clear();
+			if (r.getAttributes() != null) r.getAttributes().clear();
 		}else{
 			//remove any attributes that are not associated with the source
 			List<IntelRecordAttributeValue> toRemove = new ArrayList<IntelRecordAttributeValue>();

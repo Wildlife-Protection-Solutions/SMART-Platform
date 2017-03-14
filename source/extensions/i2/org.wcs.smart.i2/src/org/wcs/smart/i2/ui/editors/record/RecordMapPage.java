@@ -214,8 +214,10 @@ public class RecordMapPage extends SmartMapEditorPart {
     	}
 
     	locationPanel.refreshTable();
-    	for (IntelRecordAttributeValue v : recordEditor.getRecord().getAttributes()){
-    		attributeLayer.refreshLayerRecord(v);
+    	if (recordEditor.getRecord().getAttributes() != null){
+    		for (IntelRecordAttributeValue v : recordEditor.getRecord().getAttributes()){
+    			attributeLayer.refreshLayerRecord(v);
+    		}
     	}
 	}
 
