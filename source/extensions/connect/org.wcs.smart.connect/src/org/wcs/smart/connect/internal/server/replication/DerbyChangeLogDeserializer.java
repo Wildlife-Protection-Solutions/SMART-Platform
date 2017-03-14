@@ -35,8 +35,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
