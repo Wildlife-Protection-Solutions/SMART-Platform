@@ -801,10 +801,11 @@ public class RecordSummaryPage extends EditorPart{
 			MessageDialog.openError(getSite().getShell(), Messages.RecordSummaryPage_ErrorDialogTitle, Messages.RecordSummaryPage_ErrorDialogMessage);
 			return false;
 		}
-			
+		
 		IntelRecord r = recordEditor.getRecord();
+		if (r.getAttributes() == null) r.setAttributes(new ArrayList<>());
 		if (r.getRecordSource() == null){
-			if (r.getAttributes() != null) r.getAttributes().clear();
+			r.getAttributes().clear();
 		}else{
 			//remove any attributes that are not associated with the source
 			List<IntelRecordAttributeValue> toRemove = new ArrayList<IntelRecordAttributeValue>();
