@@ -157,15 +157,8 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 			}
 		}catch (ConflictException i){
 			if (!it.getFileName().endsWith(".qix")) throw i; //$NON-NLS-1$
-			if (it.getAction() != Action.FS_UPDATE) throw i; 
-
-			//this are udig index files and are likely to be modified
-			//only care if updates
-			if (it.getAction() ==  Action.FS_UPDATE){
-				ConnectPlugIn.log("The qix file is has been modified on client and server causing potential conflict.  This conflict is ignored and file is overwriteen as this is likely a shp index file.", i); //$NON-NLS-1$
-				//do the action anyways
-			}
-			
+			//this are udig index files and are likely to be rebuilt for various reasons, but this is not an issue
+			ConnectPlugIn.log("The qix file is has been modified on client and server causing potential conflict.  This conflict is ignored and file is overwriteen as this is likely a shp index file.", i); //$NON-NLS-1$
 		}
 
 		// Conflict checking data records
