@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.patrol;
 
-import java.util.ArrayList;
-
 import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Patrol;
 
