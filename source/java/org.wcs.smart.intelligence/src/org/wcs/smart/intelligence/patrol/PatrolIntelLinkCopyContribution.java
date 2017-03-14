@@ -51,10 +51,4 @@ public class PatrolIntelLinkCopyContribution implements IPatrolEditContribution 
 		}
 	}
 
-	@Override
-	public void mergePatrols(Patrol mergedPatrol, Patrol[] originalPatrols) {
-		// TODO Auto-generated method stub
-
-	}
-
 }

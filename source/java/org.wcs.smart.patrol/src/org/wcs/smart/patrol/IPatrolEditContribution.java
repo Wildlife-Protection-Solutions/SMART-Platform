@@ -44,15 +44,5 @@ public interface IPatrolEditContribution {
 	 */
 	public void splitPatrol(Session s, Patrol originalPatrol, Patrol newPatrol);
 	
-	
-
-	/**
-	 * Called when multiple patrols are merged into a single patrol
-	 * 
-	 * @param mergedPatrol the new merged patrol
-	 * @param originalPatrols the original patrols merged into a single patrol
-	 * 
-	 */
-	public void mergePatrols(Patrol mergedPatrol, Patrol[] originalPatrols);
 
 }
