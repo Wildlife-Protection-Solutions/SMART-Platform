@@ -320,16 +320,19 @@
                   </test>
                </visibleWhen>
             </command>
-            <command
-                  commandId="org.wcs.smart.i2.entity.import"
-                  label="Import Entities..."
-                  style="push">
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.record.import"
-                  label="Import Records..."
-                  style="push">
-            </command>
+            <menu
+                  label="Import Data From File">
+               <command
+                     commandId="org.wcs.smart.i2.entity.import"
+                     label="Import Entities..."
+                     style="push">
+               </command>
+               <command
+                     commandId="org.wcs.smart.i2.command.record.import"
+                     label="Import Records..."
+                     style="push">
+               </command>
+            </menu>
             <separator
                   name="org.wcs.smart.i2.separator3"
                   visible="true">

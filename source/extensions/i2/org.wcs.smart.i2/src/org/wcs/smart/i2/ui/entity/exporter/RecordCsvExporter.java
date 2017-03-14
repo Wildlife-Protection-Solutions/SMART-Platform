@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -85,8 +86,6 @@ public class RecordCsvExporter implements ICsvDataExporter {
 		data[i++] = Messages.RecordCsvExporter_TitleColumn;
 		data[i++] = Messages.RecordCsvExporter_DateCreatedColumn;
 		data[i++] = Messages.RecordCsvExporter_DateModifiedColumn;
-		data[i++] = Messages.RecordCsvExporter_CreatedByColumn;
-		data[i++] = Messages.RecordCsvExporter_ModifiedByColumn;
 		data[i++] = Messages.RecordCsvExporter_StatusColumn;
 		data[i++] = Messages.RecordCsvExporter_Sourcecolumn;
 		for (IntelRecordSourceAttribute ia : attributes){
@@ -116,8 +115,6 @@ public class RecordCsvExporter implements ICsvDataExporter {
 				data[i++] = r.getTitle();
 				data[i++] = DateFormat.getDateInstance().format(r.getDateCreated());
 				data[i++] = DateFormat.getDateInstance().format(r.getDateModified());
-				data[i++] = SmartLabelProvider.getShortLabel(r.getCreatedBy());
-				data[i++] = SmartLabelProvider.getShortLabel(r.getLastModifiedBy());
 				data[i++] = ll.getLabel(r.getStatus(), Locale.getDefault());
 				data[i++] = r.getRecordSource() == null ? "" : r.getRecordSource().getName(); //$NON-NLS-1$
 				
@@ -208,7 +205,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 			
 			@Override
 			public String getActionButtonText() {
-				return "records"; //$NON-NLS-1$
+				return IDialogConstants.OK_LABEL;
 			}
 			
 			@Override
