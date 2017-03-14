@@ -57,6 +57,8 @@ public class IntelRecordAttributeValueList {
 	}
 	
 	public boolean equals(Object other){
+		if (other == null) return false;
+		if (this == other) return true;
 		if (other.getClass().equals(IntelRecordAttributeValueList.class)){
 			return id.equals(((IntelRecordAttributeValueList)other).id);
 		}

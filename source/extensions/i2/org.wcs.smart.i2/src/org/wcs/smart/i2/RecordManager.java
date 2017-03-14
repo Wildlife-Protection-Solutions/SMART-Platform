@@ -96,6 +96,9 @@ public enum RecordManager {
 					record = (IntelRecord) s.get(IntelRecord.class, ((IntelRecord) x).getUuid());		
 				}else if (x instanceof RecordEditorInput){
 					record = (IntelRecord) s.get(IntelRecord.class, ((RecordEditorInput) x).getUuid());
+				}else{
+					//this should never happen but if we don't have a record then ignore
+					continue;
 				}
 				monitor.subTask(record.getTitle());
 				for (IntelEntityRecord r : record.getEntities()){

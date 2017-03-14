@@ -78,8 +78,6 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 	private Composite mappingPanel;
 	private ScrolledComposite sc ;
 	private List<ComboViewer> mappings = null;
-	
-	private IntelEntityType lastType = null;
 	private Path lastFile = null;
 	
 	protected AttributeMappingWizardPage() {
@@ -148,7 +146,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (lastType != null && lastFile != null){
+			if (lastFile != null){
 				if (lastFile.equals(((ImportRecordWizard)getWizard()).getImportConfiguration().getFile())){
 					//same type & same file; lets not update details 
 					return Status.OK_STATUS;

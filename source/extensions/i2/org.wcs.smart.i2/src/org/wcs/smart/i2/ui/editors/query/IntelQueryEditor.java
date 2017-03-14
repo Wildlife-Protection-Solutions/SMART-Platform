@@ -78,6 +78,7 @@ import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -122,17 +123,18 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 	private FilterDefinitionPanel panel;
 	private ToolItem[] runItem = new ToolItem[2];
 	private ToolItem saveItem;
+	private ToolItem wsetItem;
 
 	//results area
 	private Composite stackPanel;
 	private QueryLazyResultsTable resultsTable;
 	private ProgressPanel progressPanel;
 	private ErrorPanel errorPanel;
-	
 	private QueryMapPanel mapPanel;
 	
 	private boolean isInitializing = false;
 	private RunQueryJob runJob;
+	private List<EventHandler> eventHandles;
 	
 	
 	@Override
@@ -171,6 +173,13 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		
 	}
 
+	@Override
+	public void dispose(){
+		super.dispose();
+		//remove all event subscriptions
+		if (eventHandles != null) eventHandles.forEach((h)->eventBroker.unsubscribe(h));
+	}
+	
 	@Override
 	public void doSaveAs() {
 		String queryString = validateQuery();
@@ -259,7 +268,8 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 				
 		eventBroker = context.get(IEventBroker.class);
 		
-		eventBroker.subscribe(IntelEvents.QUERY_DELETED, new EventHandler() {
+		eventHandles = new ArrayList<>();
+		EventHandler handler = new EventHandler() {
 			@SuppressWarnings("rawtypes")
 			@Override
 			public void handleEvent(Event event) {
@@ -280,7 +290,13 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 				}
 				
 			}
-		});
+		};
+		eventBroker.subscribe(IntelEvents.QUERY_DELETED, handler);
+		eventHandles.add(handler);
+		
+		handler = (e) -> wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+		eventHandles.add(handler);
+		eventBroker.subscribe(IntelEvents.ACTIVE_WS_SET, handler);
 		
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginWidth = 0;
@@ -323,6 +339,12 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		saveAsItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEAS_EDIT));
 		saveAsItem.addListener(SWT.Selection, (event)->doSaveAs());
 		saveAsItem.setToolTipText(Messages.IntelQueryEditor_saveAsTooltip);
+		
+		wsetItem = new ToolItem(headerToolbar, SWT.PUSH);
+		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+		wsetItem.addListener(SWT.Selection, (event)->WorkingSetManager.INSTANCE.addToActiveWorkingSet(getQuery(), context));
+		wsetItem.setToolTipText(Messages.IntelQueryEditor_AddWsTooltip);
+		wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
 		
 		ToolItem exportItem = new ToolItem(headerToolbar, SWT.PUSH);
 		exportItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EXPORT_QUERY));

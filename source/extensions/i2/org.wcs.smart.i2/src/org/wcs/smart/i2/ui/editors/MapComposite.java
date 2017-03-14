@@ -28,7 +28,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -104,9 +103,7 @@ public class MapComposite extends Composite implements MapPart{
 	private Button lblSRID;
 	protected MapViewer mapViewer;
 	protected MapToolComposite tools;
-	
-	private Date[] dateFilter = null;
-	
+		
 	private IPartListener2 partlistener = new IPartListener2(){
 	        public void partActivated( IWorkbenchPartReference partRef ) {
 	            if (partRef.getPart(false) == editor) {
@@ -310,10 +307,6 @@ public class MapComposite extends Composite implements MapPart{
         registerFeatureFlasher();
 	}
 
-	public Date[] getDateFilter(){
-		return dateFilter;
-	}
-	
 		
 	private void updateLabel() {
 		editor.getSite().getShell().getDisplay().asyncExec(new Runnable() {

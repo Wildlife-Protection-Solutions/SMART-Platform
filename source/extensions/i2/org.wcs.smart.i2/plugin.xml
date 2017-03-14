@@ -689,12 +689,6 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.wcs.smart.i2.ui.editors.QueryEditor"
-            default="false"
-            id="org.wcs.smart.i2.editor.query"
-            name="%QueryEditorName">
-      </editor>
-      <editor
             class="org.wcs.smart.i2.ui.editors.record.RecordEditor"
             default="false"
             icon="images/icons/obj16/script.png"

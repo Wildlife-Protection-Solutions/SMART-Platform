@@ -141,12 +141,12 @@ public class DropItemFactory {
 		IntelEntityType type = null; 
 		if (filter.getTypeKey() != null){
 			type = IntelHibernateManager.getEntityType(filter.getTypeKey(),SmartDB.getCurrentConservationArea(), session);
-			if (type == null){
-				ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidEntityType, filter.getTypeKey()));
-				return Collections.singletonList(item);	
+			if (type != null){
+				return Collections.singletonList(new TextDropItem(type.getName(), "entitytype:" + type.getKeyId())); //$NON-NLS-1$
 			}
 		}
-		return Collections.singletonList(new TextDropItem(type.getName(), "entitytype:" + type.getKeyId())); //$NON-NLS-1$
+		ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidEntityType, filter.getTypeKey()));
+		return Collections.singletonList(item);
 	}
 	
 

@@ -36,7 +36,7 @@ import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
  */
 public class BasicTreeFilterItem extends FilterTreeItem {
 
-	protected List<FilterTreeItem> kids = null;
+	protected volatile List<FilterTreeItem> kids = null;
 	protected FilterTreeItem parent;
 	protected ImageDescriptor image;
 	

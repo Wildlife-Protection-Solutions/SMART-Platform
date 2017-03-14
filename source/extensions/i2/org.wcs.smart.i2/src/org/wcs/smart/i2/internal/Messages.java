@@ -658,6 +658,7 @@ public class Messages extends NLS {
 	public static String IntelObservationQueryEngine_Progress5;
 	public static String IntelObservationQueryEngine_Progress6;
 	public static String IntelObservationQueryEngine_Progress7;
+	public static String IntelQueryEditor_AddWsTooltip;
 	public static String IntelQueryEditor_CancelledError;
 	public static String IntelQueryEditor_CloneError;
 	public static String IntelQueryEditor_defaultQueryName;
@@ -1143,6 +1144,7 @@ public class Messages extends NLS {
 	public static String WorkingSetListDialog_renametooltip;
 	public static String WorkingSetListDialog_SaveError;
 	public static String WorkingSetListDialog_Title;
+	public static String WorkingSetListDialog_WsNotFound;
 	public static String WorkingSetManager_EntityError;
 	public static String WorkingSetManager_EntityRemoveError;
 	public static String WorkingSetManager_InvalidWorkingSet;

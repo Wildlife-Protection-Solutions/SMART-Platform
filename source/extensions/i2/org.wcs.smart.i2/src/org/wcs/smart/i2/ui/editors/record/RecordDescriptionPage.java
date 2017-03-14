@@ -328,6 +328,8 @@ public class RecordDescriptionPage extends EditorPart{
 		}else if (type == FieldType.SCRATCHPAD){
 			txt = txtScratchpad;
 			recordEditor.getRecord().setComment(text);
+		}else{
+			return;
 		}
 		
 		Listener[] ls = txt.getListeners(SWT.Modify);

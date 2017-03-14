@@ -296,6 +296,10 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		Session s = HibernateManager.openSession();
 		try{
 			toRename = (IntelWorkingSet) s.get(IntelWorkingSet.class, toRename.getUuid());
+			if (toRename == null){
+				Intelligence2PlugIn.displayLog(Messages.WorkingSetListDialog_WsNotFound, null);
+				return;
+			}
 			toRename.getNames().size();
 		}finally{
 			s.close();
@@ -315,7 +319,7 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 				s.close();
 			}
 			lastSelection = new StructuredSelection(toRename);
-			if (toRename != null) eventBroker.send(IntelEvents.WS_MODIFIED, toRename);
+			eventBroker.send(IntelEvents.WS_MODIFIED, toRename);
 			loadWorkingsets.schedule();
 		}
 	}

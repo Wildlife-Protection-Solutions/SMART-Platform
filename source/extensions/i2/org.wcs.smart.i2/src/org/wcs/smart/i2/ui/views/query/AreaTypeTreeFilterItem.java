@@ -51,7 +51,7 @@ public class AreaTypeTreeFilterItem extends DeferredTreeFilterItem {
 	
 	@Override
 	public List<FilterTreeItem> getChildren() {
-		if (kids == null ){
+		if (kids == null){
 			synchronized (LOCK) {
 				if (kids == null){
 					Session s = HibernateManager.openSession();

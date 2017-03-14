@@ -39,6 +39,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -74,13 +75,14 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 	
 	public EntityRelationshipListShell(Shell owner, IntelEntity srcEntity){
 		this(owner, srcEntity, null);
+		entityOptions = Collections.singletonList(Messages.EntityRelationshipListShell_NoEntitiesFound);
 		
-		EntitySearchView view = ((EntitySearchViewWrapper) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-				.findView(EntitySearchView.ID)).getComponent();
-		if (view != null){
-			entityOptions = view.getEntities().stream().map(e->e.getEntity()).collect(Collectors.toList());
-		}else{
-			entityOptions = Collections.singletonList(Messages.EntityRelationshipListShell_NoEntitiesFound);
+		IViewPart vpart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(EntitySearchView.ID);
+		if (vpart != null){
+			EntitySearchView view = ((EntitySearchViewWrapper)vpart).getComponent();
+			if (view != null){
+				entityOptions = view.getEntities().stream().map(e->e.getEntity()).collect(Collectors.toList());
+			}
 		}
 	}
 	

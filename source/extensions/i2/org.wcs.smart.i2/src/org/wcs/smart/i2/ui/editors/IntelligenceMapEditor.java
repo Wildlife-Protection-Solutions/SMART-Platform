@@ -190,16 +190,18 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 				}catch (Exception ex){
 					Intelligence2PlugIn.log(ex.getMessage(), ex);
 				}
-				for (IGeoResource rr : allItems){
-					for (Layer l : getMap().getLayersInternal()){
-						if (l.getGeoResource().getID().equals(rr.getID())){
-							if (l.isVisible() != visibility){
-								allVisible = false;
+				if (allItems != null){
+					for (IGeoResource rr : allItems){
+						for (Layer l : getMap().getLayersInternal()){
+							if (l.getGeoResource().getID().equals(rr.getID())){
+								if (l.isVisible() != visibility){
+									allVisible = false;
+								}
+								break;
 							}
-							break;
 						}
+						if (!allVisible) break;
 					}
-					if (!allVisible) break;
 				}
 				if (allVisible){
 					if (!visibility){
@@ -425,9 +427,11 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 					queries = (List<IntelRecordObservationQuery>) data;
 				}
 				//rerun query
-				WorkingSetQueryLayersJob refreshJob = queryLayersJob.clone();
-				refreshJob.setQueriesToUpdate(queries);
-				refreshJob.schedule();
+				if (queryLayersJob != null){
+					WorkingSetQueryLayersJob refreshJob = queryLayersJob.clone();
+					refreshJob.setQueriesToUpdate(queries);
+					refreshJob.schedule();
+				}
 			}
 		};
 		parentContext.get(IEventBroker.class).subscribe(IntelEvents.QUERY_MODIFIED, handler);
@@ -661,18 +665,19 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		if (configureLayersJob == null){
 			configureLayersJob = new WorkingSetMapLayersJob(getMap(), parentContext, visibilityListener);
 		}
-		if (queryLayersJob== null){
-			queryLayersJob = new WorkingSetQueryLayersJob(getMap(), parentContext, visibilityListener);
-		}
 		configureLayersJob.schedule();
-		queryLayersJob.schedule();
+		getWorkingSetQueryLayersJob().schedule();
 	}
 	
 	private void rerunQueryLayers(){
-		if (queryLayersJob== null){
+		getWorkingSetQueryLayersJob().schedule();
+	}
+	
+	private synchronized WorkingSetQueryLayersJob getWorkingSetQueryLayersJob(){
+		if (queryLayersJob == null){
 			queryLayersJob = new WorkingSetQueryLayersJob(getMap(), parentContext, visibilityListener);
 		}
-		queryLayersJob.schedule();
+		return queryLayersJob;
 	}
 	
 	private void updateLabel() {

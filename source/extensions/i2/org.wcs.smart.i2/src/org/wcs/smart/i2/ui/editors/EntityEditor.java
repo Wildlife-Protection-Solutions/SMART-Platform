@@ -699,6 +699,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		attributeLabelProvider.dispose();
 		super.dispose();
 	}
+	
+	
 	private void maximizeMainPanel(int index){
 		int totalHeight = mainSash.getClientArea().height;
 		int weights[] = new int[mainSashMinSize.length];

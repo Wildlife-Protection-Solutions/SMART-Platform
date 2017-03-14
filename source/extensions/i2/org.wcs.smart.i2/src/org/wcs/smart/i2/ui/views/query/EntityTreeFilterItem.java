@@ -50,7 +50,6 @@ public class EntityTreeFilterItem extends BasicTreeFilterItem {
 
 	private UUID entity;
 	private String typeKey;
-	private BasicTreeFilterItem parent;
 	
 	private String dropLabel = null;
 	
@@ -101,11 +100,6 @@ public class EntityTreeFilterItem extends BasicTreeFilterItem {
 			queryKey = "entity:" + UuidUtils.uuidToString(entity); //$NON-NLS-1$
 		}
 		return new DropItem[]{new TextDropItem(dropLabel, queryKey)};
-	}
-
-	@Override
-	public FilterTreeItem getParent() {
-		return parent;
 	}
 
 }
