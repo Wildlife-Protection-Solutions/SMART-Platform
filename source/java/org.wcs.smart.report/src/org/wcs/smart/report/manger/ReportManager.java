@@ -345,7 +345,7 @@ public class ReportManager {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle){
 				OdaDataSetHandle h = (OdaDataSetHandle)dataset;
-				if (h.getExtensionID().equals(SMART_DATASET_TYPE)){
+				if (h.getExtensionID().equals(SMART_DATASET_TYPE) && !h.getQueryText().isEmpty()){
 					reportQueries.add(new ReportQuery(r, UuidUtils.stringToUuid(h.getQueryText().split(":")[1]))); //$NON-NLS-1$
 				}
 			}

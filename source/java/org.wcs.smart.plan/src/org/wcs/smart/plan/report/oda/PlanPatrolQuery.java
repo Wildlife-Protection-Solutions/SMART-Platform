@@ -95,12 +95,19 @@ public class PlanPatrolQuery extends SmartQuery {
 	 */
 	public IResultSet executeQuery() throws OdaException {
 		
+		if (parameters.get(PlanTargetParameterMetaData.PLAN_UUID_PARAM) == null){
+			//no plan uuids; use date parameters
+			this.wrapperObject.prepare(this, connection);
+			return wrapperObject.executeQuery(this, connection);
+		}
+		
 		String[] planUuids = ((String)parameters.get(PlanTargetParameterMetaData.PLAN_UUID_PARAM)).split(","); //$NON-NLS-1$
 		try{
 			updateQueryFilter((PatrolQuery)this.smartQuery, planUuids[0], connection.getSession());
 		}catch (Exception ex){
 			throw new OdaException(ex);
 		}
+		
 		
 		//set query dates
 		//this is necessary to run the query that is created for this patrol
