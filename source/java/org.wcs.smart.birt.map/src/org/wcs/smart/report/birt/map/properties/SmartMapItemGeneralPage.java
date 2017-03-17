@@ -115,7 +115,6 @@ public class SmartMapItemGeneralPage extends AttributesUtil.PageWrapper {
 			provider = new UnitPropertyDescriptorProvider(
 					ReportItemHandle.HEIGHT_PROP,
 					SmartMapItem.EXTENSION_NAME);
-//					ReportDesignConstants.EXTENDED_ITEM);
 			ComplexUnitSection heightPropSelection = new ComplexUnitSection(
 					provider.getDisplayName(), contentpane, true);
 			heightPropSelection.setProvider(provider);
@@ -124,11 +123,21 @@ public class SmartMapItemGeneralPage extends AttributesUtil.PageWrapper {
 			heightPropSelection.setGridPlaceholder(2, true);
 			sections.add(heightPropSelection);
 
+			//dpi
+			provider = new DpiPropertyProvider(
+					SmartMapItem.SMART_DPI,
+					SmartMapItem.EXTENSION_NAME);
+			
+			DpiComboSection dpiSection = new DpiComboSection(provider.getDisplayName(), contentpane, true);
+			dpiSection.setProvider(provider);
+			dpiSection.setWidth(200);
+			sections.add(dpiSection);
+			
 			for (Section sec : sections) {
 				sec.createSection();
 				sec.layout();
 			}
-
+			
 			contentpane.layout(true);
 			contentpane.redraw();
 		}

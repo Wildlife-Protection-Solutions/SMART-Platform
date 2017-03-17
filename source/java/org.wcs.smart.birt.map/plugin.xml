@@ -84,6 +84,35 @@
                   name="org.wcs.smart.report.birt.MapLayer">
             </elementType>
          </property>
+         <property
+               canInherit="true"
+               defaultDisplayName="%mapitem.parameter.dpi"
+               defaultValue="org.wcs.smart.birt.map.dpi.96"
+               isEncryptable="false"
+               name="org.wcs.smart.birt.map.dpi"
+               subType="integer"
+               type="choice">
+            <choice
+                  defaultDisplayName="72"
+                  name="org.wcs.smart.birt.map.dpi.72"
+                  value="72">
+            </choice>
+            <choice
+                  defaultDisplayName="96"
+                  name="org.wcs.smart.birt.map.dpi.96"
+                  value="96">
+            </choice>
+            <choice
+                  defaultDisplayName="150"
+                  name="org.wcs.smart.birt.map.dpi.150"
+                  value="150">
+            </choice>
+            <choice
+                  defaultDisplayName="300"
+                  name="org.wcs.smart.birt.map.dpi.300"
+                  value="300">
+            </choice>
+         </property>
       </reportItem>
       <reportItem
             class="org.wcs.smart.report.birt.map.item.LayerItemFactory"

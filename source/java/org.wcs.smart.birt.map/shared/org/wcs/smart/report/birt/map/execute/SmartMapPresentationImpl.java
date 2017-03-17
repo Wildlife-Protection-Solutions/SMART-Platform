@@ -107,6 +107,10 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 
+	public static final int MIN_DPI = 72;
+	public static final int DEFAULT_DPI = 96;
+	public static final int MAX_DPI = 300;
+	
 	private SmartMapItem mapItem;
 
 	/**
@@ -140,9 +144,13 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 	 * @see org.eclipse.birt.report.engine.extension.ReportItemPresentationBase#onRowSets(org.eclipse.birt.report.engine.extension.IRowSet[])
 	 */
 	public Object onRowSets(IRowSet[] rowSets) throws BirtException {
-
-		int localdpi = 96;// (int)(dpi*1.5);
 		
+		int localdpi = 96;
+		if (mapItem.getDPI() != null){
+			localdpi = mapItem.getDPI();
+			if (localdpi < 72 || localdpi > 4000) localdpi = 96;
+		}
+			
 		int iwidth = BirtMapUtils.getWidthInPx(modelHandle, localdpi);
 		int iheight = BirtMapUtils.getHeightInPx(modelHandle, localdpi);
 
@@ -350,7 +358,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 	private void addErrorMessage(Graphics2D g, String error, int width,
 			int height) {
 		g.setFont(g.getFont().deriveFont(Font.BOLD));
-		if (error == null || error.isEmpty()) error = "Unknown Error";
+		if (error == null || error.isEmpty()) error = "Unknown Error"; //$NON-NLS-1$
 		String[] bits = error.split("\n"); //$NON-NLS-1$
 
 		int fh = g.getFontMetrics().getHeight();

@@ -127,12 +127,12 @@ public class EmptyFeatureSource extends ContentFeatureSource {
 		
 		String geomName = mapInfo.getGeometryColumn();
 		
-		List<?> items = handle.getListProperty("columnHints");
+		List<?> items = handle.getListProperty("columnHints"); //$NON-NLS-1$
 		if (items != null){
 			for(Object c : items){
-				String n = ((ColumnHint)c).getStringProperty(handle.getModule(), "columnName"); 
+				String n = ((ColumnHint)c).getStringProperty(handle.getModule(), "columnName");  //$NON-NLS-1$
 				if (n.equals(geomName)){
-					String o = ((ColumnHint)c).getStringProperty(handle.getModule(), "alias");
+					String o = ((ColumnHint)c).getStringProperty(handle.getModule(), "alias"); //$NON-NLS-1$
 					if (o != null) geomName = o;
 					break; 
 				}

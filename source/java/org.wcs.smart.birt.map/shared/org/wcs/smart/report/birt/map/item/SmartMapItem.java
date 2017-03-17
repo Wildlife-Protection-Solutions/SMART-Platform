@@ -30,6 +30,7 @@ import org.eclipse.birt.report.model.api.PropertyHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.extension.ExtendedElementException;
 import org.eclipse.birt.report.model.api.extension.ReportItem;
+import org.eclipse.birt.report.model.api.metadata.IChoice;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -82,6 +83,10 @@ public class SmartMapItem extends ReportItem {
 	 * map bounds property group
 	 */
 	public static final String SMART_BOUNDS_GROUP = "org.wcs.smart.report.birt.map.bounds"; //$NON-NLS-1$
+	/**
+	 * map dpi setting
+	 */
+	public static final String SMART_DPI = "org.wcs.smart.birt.map.dpi"; //$NON-NLS-1$
 	
 	private ExtendedItemHandle handle;
 
@@ -148,9 +153,6 @@ public class SmartMapItem extends ReportItem {
 		try{
 			int oldindex = getLayersProperty().getListValue().indexOf(layerHandles.getHandle());
 			getLayersProperty().moveItem(oldindex, oldindex+offset);
-//			for (LayerItem i : layerHandles){
-//				getLayersProperty().add(i.getHandle(), cnt++);	
-//			}
 		}catch ( Exception e ){
 			stack.rollback( );
 			throw e;
@@ -222,7 +224,6 @@ public class SmartMapItem extends ReportItem {
 	 * @throws SemanticException
 	 */
 	public void setMapBounds(ReferencedEnvelope e) throws SemanticException{
-		
 		if (e == null){
 			handle.setProperty(SMART_BOUNDS_XMIN_PROP, null);
 			handle.setProperty(SMART_BOUNDS_XMAX_PROP, null);
@@ -237,15 +238,29 @@ public class SmartMapItem extends ReportItem {
 			handle.setProperty(SMART_BOUNDS_SRID_PROP, e.getCoordinateReferenceSystem().toWKT());
 		}
 	}
+
+	/**
+	 * Gets the DPI setting as an integer
+	 * @return
+	 */
+	public Integer getDPI(){
+		String key = handle.getStringProperty(SMART_DPI);
+		for (IChoice c : handle.getChoices(SMART_DPI)){
+			if (c.getName().equals(key)){
+				return Integer.valueOf((String)c.getValue());
+			}
+		}
+		return null;
+	}
 	
-//	public IBirtMapLayerManager findMapLayerManager(DataSetHandle handle){
-//		List<IBirtMapLayerManager> birtlayers = BirtMapUtils.getMapLayerExtensions();
-//		for (IBirtMapLayerManager l : birtlayers){
-//			if (l.canAddToMap(handle)){
-//				return l;
-//			}
-//		}	
-//		return null;
-//	}
+	/**
+	 * Sets the map dpi setting
+	 * @param dpi
+	 * @throws SemanticException
+	 */
+	public void setDPI(int dpi) throws SemanticException{
+		handle.setProperty(SMART_DPI, String.valueOf(dpi));
+	}
+	
 	
 }
