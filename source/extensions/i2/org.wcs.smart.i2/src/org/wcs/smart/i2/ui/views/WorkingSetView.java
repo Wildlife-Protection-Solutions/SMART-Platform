@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
@@ -755,6 +756,12 @@ public class WorkingSetView {
 	@Inject
 	@Optional
 	private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) Object query){
+		refreshWithDelay();
+	}
+	
+	@Optional
+	@Inject
+	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
 		refreshWithDelay();
 	}
 	

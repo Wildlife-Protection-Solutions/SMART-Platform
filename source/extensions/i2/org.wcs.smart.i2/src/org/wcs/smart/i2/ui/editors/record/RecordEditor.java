@@ -732,7 +732,11 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}else{
 			
 			try {
-				lastIcon = AWTSWTImageUtils.createSWTImage(record.getRecordSource().getIconAsImage());
+				if (record.getRecordSource().getIcon() != null){
+					lastIcon = AWTSWTImageUtils.createSWTImage(record.getRecordSource().getIconAsImage());
+				}else{
+					lastIcon = null;
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

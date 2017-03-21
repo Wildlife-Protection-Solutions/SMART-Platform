@@ -1823,5 +1823,11 @@
             id="org.wcs.smart.i2.ca.clone">
       </templateCloner>
    </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.i2.plugin.ChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
 
 </plugin>

@@ -84,7 +84,7 @@ public class IntelHibernateManager {
 		List<IntelAttribute> types = session.createCriteria(IntelAttribute.class)
 			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
 			.list();
-		types.sort((IntelAttribute a, IntelAttribute b) -> Collator.getInstance().compare(a.getName(), b.getName()));
+		types.sort((IntelAttribute a, IntelAttribute b) -> Collator.getInstance().compare(a.getName() == null ? "" : a.getName(), b.getName() == null ? "" : b.getName())); //$NON-NLS-1$ //$NON-NLS-2$
 		return types;
 	}
 	
