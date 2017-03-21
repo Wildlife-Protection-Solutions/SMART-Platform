@@ -211,9 +211,12 @@ public class QueryEditorUtils {
 					if (!qf.isRootFolder()){
 						newQuery.setFolder(qf);
 						newQuery.setIsShared(qf.getEmployee() == null);
-					
 					}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
+						newQuery.setFolder(null);
 						newQuery.setIsShared(true);
+					}else{
+						newQuery.setFolder(null);
+						newQuery.setIsShared(false);
 					}
 					//set the owner
 					if (newQuery.getIsShared() && SmartDB.isMultipleAnalysis()){
