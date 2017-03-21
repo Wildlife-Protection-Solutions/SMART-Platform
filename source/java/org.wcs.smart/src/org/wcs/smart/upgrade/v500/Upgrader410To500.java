@@ -31,7 +31,7 @@ public class Upgrader410To500 implements IDatabaseUpgrader {
 				public void execute(Connection c) throws SQLException {
 					try {
 						c.setAutoCommit(false);
-						upgrade(c, s, monitor);
+						upgrade(c, monitor);
 						c.setAutoCommit(true);
 					} catch (final Exception e) {
 						thrownException = new Exception(
@@ -49,7 +49,7 @@ public class Upgrader410To500 implements IDatabaseUpgrader {
 		monitor.done();
 	}
 
-	private void upgrade(Connection c, Session session, IProgressMonitor monitor)
+	private void upgrade(Connection c, IProgressMonitor monitor)
 			throws Exception {
 		@SuppressWarnings("nls")
 		String[] sql = new String[] {

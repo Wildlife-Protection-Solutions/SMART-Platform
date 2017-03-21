@@ -28,13 +28,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.id.UUIDGenerationStrategy;
+import org.hibernate.id.UUIDGenerator;
+import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.jdbc.Work;
+import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -57,6 +61,7 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 	
 	private String dbUrl = null;
 	private Exception thrownException = null;
+	
 	
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception{
@@ -449,30 +454,13 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 		c.commit();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private static void upgradeCcaaQueriesAndReports(Session s, Connection c)
 			throws SQLException {
-		HashMap<String, Employee> ccaaUsers = new HashMap<String, Employee>();
+		HashMap<String, UUID> ccaaUsers = getCcaaEmployees(c);
 
-		ConservationArea ccaa = (ConservationArea) s.load(
-				ConservationArea.class, ConservationArea.MULTIPLE_CA);
-
-		List<Employee> existingUsers = (List<Employee>) s
-				.createCriteria(Employee.class)
-				.add(Restrictions.eq("conservationArea", ccaa)) //$NON-NLS-1$
-				.add(Restrictions.ne("uuid", Employee.SHARED_UUID)) //$NON-NLS-1$
-				.list();
-		for (Employee e : existingUsers) {
-			if (e.getSmartUserId() != null) {
-				ccaaUsers.put(e.getSmartUserId(), e);
-			}
-		}
-		upgradeCCAAQueryUser("smart.report", //$NON-NLS-1$
-				"creator_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
-		upgradeCCAAQueryUser("smart.report_folder", //$NON-NLS-1$
-				"employee_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
-		upgradeCCAAQueryUser("smart.query_folder", //$NON-NLS-1$
-				"employee_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
+		upgradeCCAAQueryUser("smart.report", "creator_uuid", s, c, ccaaUsers); //$NON-NLS-1$ //$NON-NLS-2$
+		upgradeCCAAQueryUser("smart.report_folder", "employee_uuid", s, c, ccaaUsers); //$NON-NLS-1$ //$NON-NLS-2$
+		upgradeCCAAQueryUser("smart.query_folder", "employee_uuid", s, c, ccaaUsers); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		// --- Queries ---
 		// we only worry about the query tables we know about; plugins are
@@ -489,9 +477,25 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 				"smart.PATROL_QUERY" //$NON-NLS-1$
 		};
 		for (String table : queryTables) {
-			upgradeCCAAQueryUser(table,
-					"creator_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
+			upgradeCCAAQueryUser(table, "creator_uuid", s, c, ccaaUsers); //$NON-NLS-1$
 		}
+	}
+	
+	private static HashMap<String, UUID> getCcaaEmployees(Connection c) throws SQLException{
+		HashMap<String, UUID> ccaaUsers = new HashMap<String, UUID>();
+
+		String query = "SELECT smartuserid, uuid from smart.employee where ca_uuid = ? and uuid != ?"; //$NON-NLS-1$
+		PreparedStatement q = c.prepareStatement(query);
+		q.setBytes(1, UuidUtils.uuidToByte(ConservationArea.MULTIPLE_CA));
+		q.setBytes(2, UuidUtils.uuidToByte(Employee.SHARED_UUID));
+		try(ResultSet rs = q.executeQuery()){
+			while(rs.next()){
+				String is = rs.getString(1);
+				UUID uuid = UuidUtils.byteToUUID(rs.getBytes(2));
+				ccaaUsers.put(is, uuid);
+			}
+		}
+		return ccaaUsers;
 	}
 	
 	/**
@@ -505,64 +509,95 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 	 * @param tableNames
 	 * @throws SQLException
 	 */
-	@SuppressWarnings("unchecked")
-	public static void updateCCAAQueryTables(Session s, Connection c, String[] tableNames) throws SQLException{
-		ConservationArea ccaa = (ConservationArea) s.get(
-				ConservationArea.class, ConservationArea.MULTIPLE_CA);
-		HashMap<String, Employee> ccaaUsers = new HashMap<String, Employee>();
-
-		List<Employee> existingUsers = (List<Employee>) s
-				.createCriteria(Employee.class)
-				.add(Restrictions.eq("conservationArea", ccaa)) //$NON-NLS-1$
-				.add(Restrictions.ne("uuid", Employee.SHARED_UUID)) //$NON-NLS-1$
-				.list();
-		for (Employee e : existingUsers) {
-			if (e.getSmartUserId() != null) {
-				ccaaUsers.put(e.getSmartUserId(), e);
-			}
-		}
+	public static void updateCCAAQueryTables(Session s, Connection c, String[] tableNames) throws SQLException{		
+		HashMap<String, UUID> ccaaUsers = getCcaaEmployees(c);
 		for (String table : tableNames) {
-			upgradeCCAAQueryUser(table,
-					"creator_uuid", s, c, ccaaUsers, ccaa); //$NON-NLS-1$
+			upgradeCCAAQueryUser(table, "creator_uuid", s, c, ccaaUsers); //$NON-NLS-1$
 		}
 	}
 	
-	private static void upgradeCCAAQueryUser(String tableName, String employeeName, Session session, Connection c,HashMap<String, Employee> ccaaUsers, ConservationArea ccaa) throws SQLException{
-		String sql = "SELECT uuid, " + employeeName + " FROM " + tableName + " WHERE ca_uuid = ? AND " + employeeName + " != ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		PreparedStatement ps = c.prepareStatement(sql);
-		ps.setBytes(1, UuidUtils.uuidToByte(ConservationArea.MULTIPLE_CA));
-		ps.setBytes(2, UuidUtils.uuidToByte(Employee.SHARED_UUID));
+	private static void upgradeCCAAQueryUser(String tableName, String employeeName, Session session, Connection c,HashMap<String, UUID> ccaaUsers) throws SQLException{
 		
-		sql = "UPDATE " + tableName + " SET " + employeeName + " = ?  WHERE uuid = ? ";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		PreparedStatement updateps = c.prepareStatement(sql);
+		UUIDGenerator uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
+		Properties prop = new Properties();
+		prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
+		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
+		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 		
-		try(ResultSet rs = ps.executeQuery()){
-			while(rs.next()){
-				byte[] uuid = rs.getBytes(1);
-				UUID employee = UuidUtils.byteToUUID(rs.getBytes(2));
+		String sql = "SELECT distinct " + employeeName + " FROM " + tableName + " WHERE ca_uuid = ? AND " + employeeName + " != ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		
+		try(PreparedStatement getUsers = c.prepareStatement(sql)){
+			getUsers.setBytes(1, UuidUtils.uuidToByte(ConservationArea.MULTIPLE_CA));
+			getUsers.setBytes(2, UuidUtils.uuidToByte(Employee.SHARED_UUID));
+			
+			sql = "UPDATE " + tableName + " SET " + employeeName + " = ?  WHERE " + employeeName + " = ? ";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			
+			
+			try(PreparedStatement updateTable = c.prepareStatement(sql);
+				ResultSet usersRs = getUsers.executeQuery();
+				PreparedStatement getEmployeeDetails = c.prepareStatement("SELECT ca_uuid, smartuserid, smartuserlevel FROM smart.employee WHERE uuid = ?")){ //$NON-NLS-1$
 				
-				Employee e = (Employee)session.get(Employee.class, employee);
-				if (e.getConservationArea().getIsCcaa()) continue;
-				
-				Employee newe = ccaaUsers.get(e.getSmartUserId());
-				if (newe == null){
-					newe = new Employee();
-					newe = new Employee();
-					newe.setGender(Employee.DB_MALE);
-					newe.setSmartUserId(e.getSmartUserId());
-					newe.setGivenName(newe.getSmartUserId());
-					newe.setFamilyName(""); //$NON-NLS-1$
-					newe.setStartEmploymentDate(new Date());
-					newe.setId(newe.getSmartUserId());
-					newe.setConservationArea(ccaa);
-					newe.setSmartUserLevelKeys( UserLevelManager.ADMIN.getKey() );
-					session.save(newe);
-					session.flush();
-					ccaaUsers.put(newe.getSmartUserId(), newe);
+				while(usersRs.next()){
+					UUID employeeUuid = UuidUtils.byteToUUID(usersRs.getBytes(1));
+					
+					getEmployeeDetails.setBytes(1, UuidUtils.uuidToByte(employeeUuid));
+					
+					String smartUserId = null;
+					int userlevel = 0;
+					try(ResultSet re = getEmployeeDetails.executeQuery()){
+						if (re.next()){
+							//this is a ccaa employee we don't need to do anything
+							if (UuidUtils.byteToUUID(re.getBytes(1)).equals(ConservationArea.MULTIPLE_CA)) continue;
+							smartUserId = re.getString(2);
+							userlevel = re.getInt(3); 
+						}else{
+							SmartPlugIn.log("Error upgrading ccaa users; employee not found", null); //$NON-NLS-1$
+						}
+					}
+					
+					//create a new ccaa user with the given info
+					//see if a new user has already been created for this user
+					UUID newuuid = ccaaUsers.get(smartUserId);
+					if (newuuid == null){
+						
+						Employee newe = new Employee();
+						newe.setGender(Employee.DB_MALE);
+						newe.setSmartUserId(smartUserId);
+						newe.setGivenName(newe.getSmartUserId());
+						newe.setFamilyName(""); //$NON-NLS-1$
+						newe.setStartEmploymentDate(new Date());
+						newe.setId(newe.getSmartUserId());
+						newe.setSmartUserLevelKeys( UserLevelManager.ADMIN.getKey() );
+						
+						newuuid = (UUID)uuidGenerator.generate((SessionImplementor) session, newe);
+						newe.setUuid(newuuid);
+						ccaaUsers.put(newe.getSmartUserId(), newe.getUuid());
+						
+						//add employee
+						String insertemployeesql = "INSERT INTO smart.employee (uuid, ca_uuid, id, givenname, familyname, startemploymentdate, smartuserid, smartpassword, smartuserlevel, datecreated, gender) values "; //$NON-NLS-1$
+						insertemployeesql += "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
+						
+						try(PreparedStatement psinsert = c.prepareStatement(insertemployeesql)){
+							psinsert.setBytes(1, UuidUtils.uuidToByte(newe.getUuid()));
+							psinsert.setBytes(2, UuidUtils.uuidToByte(ConservationArea.MULTIPLE_CA));
+							psinsert.setString(3, newe.getId());
+							psinsert.setString(4, newe.getGivenName());
+							psinsert.setString(5, ""); //$NON-NLS-1$
+							psinsert.setDate(6, new java.sql.Date(newe.getStartEmploymentDate().getTime()));
+							psinsert.setString(7, newe.getSmartUserId());
+							psinsert.setString(8, newe.getSmartPassword());
+							psinsert.setInt(9, userlevel);
+							psinsert.setDate(10, new java.sql.Date((new Date()).getTime()));
+							psinsert.setString(11, String.valueOf(newe.getGender()));
+							
+							psinsert.executeUpdate();
+						}
+					}
+					
+					updateTable.setBytes(1, UuidUtils.uuidToByte(newuuid));
+					updateTable.setBytes(2, UuidUtils.uuidToByte(employeeUuid));
+					updateTable.executeUpdate();
 				}
-				updateps.setBytes(1, UuidUtils.uuidToByte(newe.getUuid()));
-				updateps.setBytes(2, uuid);
-				updateps.executeUpdate();
 			}
 		}
 	}

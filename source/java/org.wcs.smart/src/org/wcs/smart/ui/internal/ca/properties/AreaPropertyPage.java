@@ -511,7 +511,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_UpdatingAreas + ": " + e.getMessage(), e);
+			SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_UpdatingAreas + ": " + e.getMessage(), e); //$NON-NLS-1$
 		}
 	}
 	

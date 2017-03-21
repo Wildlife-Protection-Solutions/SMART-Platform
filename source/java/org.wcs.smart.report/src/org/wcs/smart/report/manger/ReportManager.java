@@ -89,8 +89,15 @@ public class ReportManager {
 	public static boolean canModifyCaReports(){
 		if (SmartDB.getCurrentConservationArea().getIsCcaa()){
 			for (Employee e : SmartDB.getConservationAreaConfiguration().getEmployees()){
-				if (!(UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER))){
-					return false;
+				if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER)) continue;
+			
+				//check if employee is in current ca configuration
+				for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+					if (ca.getUuid().equals(e.getConservationArea().getUuid())){
+						if (!(UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER))){
+							return false;
+						}
+					}	
 				}
 			}
 			return true;

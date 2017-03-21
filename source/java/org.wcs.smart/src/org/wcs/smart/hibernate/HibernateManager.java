@@ -364,7 +364,7 @@ public class HibernateManager extends SmartHibernateManager{
 			
 			List<ConservationArea> areas = new ArrayList<ConservationArea>();
 			for (Employee e : es){
-				if (!e.getConservationArea().getIsCcaa()){
+				if (!e.getConservationArea().getIsCcaa() && e.getEndEmploymentDate() == null){
 					if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.ANALYST)){
 						if (validatePassword(password, e)){
 							areas.add(e.getConservationArea());
@@ -389,6 +389,7 @@ public class HibernateManager extends SmartHibernateManager{
 	}
 	
 	private static boolean validatePassword(String password, String employeePassword){
+		if (employeePassword == null) return false;
 		return BCrypt.checkpw(password, employeePassword);
 	}
 	

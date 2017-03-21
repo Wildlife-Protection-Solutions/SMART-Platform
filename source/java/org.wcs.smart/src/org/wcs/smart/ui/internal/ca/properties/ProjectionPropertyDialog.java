@@ -48,7 +48,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.locationtech.udig.ui.CRSChooserDialog;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
