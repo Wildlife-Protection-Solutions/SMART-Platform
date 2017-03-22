@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -240,6 +241,29 @@ public class DerbyRestoreEngine {
 		/* need to login as admin user to perform upgrade */
 		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
+		//check to install all plugins in backup and also installed in current version
+		StringBuilder missingPlugins = new StringBuilder();
+		s = HibernateManager.openSession();
+		try{
+			Map<String,String> backupVersions = UpgradeEngine.getVersions(s);
+			for (String pluginId : backupVersions.keySet()){
+				if (!versions.keySet().contains(pluginId)){
+					missingPlugins.append(pluginId);
+					missingPlugins.append("\n"); //$NON-NLS-1$
+				}
+			}
+			
+			
+		}finally{
+			s.close();
+		}
+		if (missingPlugins.length() > 0){
+			HibernateManager.endSessionFactory(true, true);
+			cleanUp(new File[] { temp });
+			throw new Exception(Messages.DerbyRestoreEngine_MissingSystemPlugins + "\n\n" + missingPlugins.toString()); //$NON-NLS-1$
+		}
+		
+		/* Do the upgrade/restore */
 		String datastore = SmartContext.INSTANCE.getFilestoreLocation();
 		SmartContext.INSTANCE.setFilestoreLocation(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 		try{

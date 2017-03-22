@@ -602,6 +602,7 @@ public class Messages extends NLS {
 	public static String DerbyRestoreEngine_InvalidUserDialogMessage;
 	public static String DerbyRestoreEngine_InvalidUserDialogTitle;
 	public static String DerbyRestoreEngine_MissingPlugins;
+	public static String DerbyRestoreEngine_MissingSystemPlugins;
 	public static String DerbyRestoreEngine_Progress_CleanUp;
 	public static String DerbyRestoreEngine_Progress_ExtractingBackup;
 	public static String DerbyRestoreEngine_Progress_MovingFiles;
