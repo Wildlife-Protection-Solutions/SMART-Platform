@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -112,7 +114,7 @@ public class SmartProperties {
 	 * @return default value for system preference
 	 */
 	public String getSystemDefaultValue(String key){
-		return SmartPlugIn.getDefault().getPreferenceStore().getDefaultString(key);
+		return DefaultScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID).get(key, ""); //$NON-NLS-1$
 	}
 	
 	/**
@@ -138,7 +140,7 @@ public class SmartProperties {
 	 * @return
 	 */
 	private String getSystemProperty(String key){
-		return SmartPlugIn.getDefault().getPreferenceStore().getString(key);
+		return ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID).get(key, getSystemDefaultValue(key));
 	}
 	
 	/**
@@ -152,9 +154,9 @@ public class SmartProperties {
 	 */
 	public void setKey(String key, String value) throws Exception{
 		if (key.equals(PROP_GPS_BABEL)){
-			SmartPlugIn.getDefault().getPreferenceStore().setValue(key, value);
+			ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID).put(key, value);
 		}else if (key.equals(SYSPROP_DATASTORE)){
-			SmartPlugIn.getDefault().getPreferenceStore().setValue(key, value);
+			ConfigurationScope.INSTANCE.getNode(SmartPlugIn.PLUGIN_ID).put(key, value);
 		}
 	}
 }
