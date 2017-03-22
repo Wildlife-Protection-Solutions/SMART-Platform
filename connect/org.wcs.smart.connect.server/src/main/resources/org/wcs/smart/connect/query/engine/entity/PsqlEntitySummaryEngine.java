@@ -1057,7 +1057,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 			throws SQLException {
 		super.buildTemporaryTableIndexes(c, tableName);
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append("CREATE INDEX " + getIndexName(tableName) + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}

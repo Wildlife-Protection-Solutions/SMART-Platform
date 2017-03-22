@@ -270,7 +270,15 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @return
 	 */
 	public String createTempTableName(){
-		return "query_temp_" + System.nanoTime(); //$NON-NLS-1$
+		return "query_temp.query_temp_" + System.nanoTime(); //$NON-NLS-1$
+	}
+
+	public String getIndexName(String tableName){
+		int index = tableName.lastIndexOf('.');
+		if (index > 0){
+			return tableName.substring(index + 1);
+		}
+		return tableName;
 	}
 
 	/**
@@ -397,7 +405,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 */
 	public void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_ob_uuid_idx on " +  tableName + "(ob_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append("CREATE INDEX " + getIndexName(tableName) + "_ob_uuid_idx on " +  tableName + "(ob_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
@@ -675,7 +683,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		
 		//create some indexes and analyze
 		//analyze is important here for performance
-		String sql = "create index " + queryDataTable + "_categories_uuid_idx on " + queryDataTable + "_categories(uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String sql = "create index " + getIndexName(queryDataTable) + "_categories_uuid_idx on " + queryDataTable + "_categories(uuid)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logger.finest(sql);
 		c.createStatement().execute(sql);
 		

@@ -354,7 +354,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		
 		// -- create index
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + waypointTable + "_wpuuid_idx on " + waypointTable + " (wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append("CREATE INDEX " + engine.getIndexName(waypointTable) + "_wpuuid_idx on " + waypointTable + " (wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -451,7 +451,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX "); //$NON-NLS-1$
-			sql.append(colName + "_wp_uuid_idx on "); //$NON-NLS-1$
+			sql.append(engine.getIndexName(colName) + "_wp_uuid_idx on "); //$NON-NLS-1$
 			sql.append(colName + "(wp_uuid) "); //$NON-NLS-1$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());

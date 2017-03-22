@@ -472,7 +472,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 
 		// -- create index
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + observationTable + "_obuuid_idx on " + observationTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append("CREATE INDEX " + engine.getIndexName(observationTable) + "_obuuid_idx on " + observationTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
@@ -601,7 +601,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 				// - create index
 				sql = new StringBuilder();
 				sql.append("create index "); //$NON-NLS-1$
-				sql.append(attributeTempTable);
+				sql.append(engine.getIndexName(attributeTempTable));
 				sql.append("__observation_uuid_idx on "); //$NON-NLS-1$
 				sql.append(attributeTempTable);
 				sql.append("(observation_uuid)"); //$NON-NLS-1$
@@ -759,7 +759,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 				// - create index
 				sql = new StringBuilder();
 				sql.append("create index "); //$NON-NLS-1$
-				sql.append(lTempTable);
+				sql.append(engine.getIndexName(lTempTable));
 				sql.append("_mission_uuid_idx on "); //$NON-NLS-1$
 				sql.append(lTempTable);
 				sql.append("(mission_uuid)"); //$NON-NLS-1$
@@ -926,7 +926,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 				// - create index
 				sql = new StringBuilder();
 				sql.append("create index "); //$NON-NLS-1$
-				sql.append(lTempTable);
+				sql.append(engine.getIndexName(lTempTable));
 				sql.append("_su_uuid_idx on "); //$NON-NLS-1$
 				sql.append(lTempTable);
 				sql.append("(sampling_unit_uuid)"); //$NON-NLS-1$

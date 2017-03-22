@@ -702,5 +702,10 @@ REFERENCES smart.i_record_attribute_value (uuid) ON DELETE CASCADE DEFERRABLE;
 insert into connect.plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.i2')
 insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.i2');
 
+create schema query_temp;
+
+--MANUALLY DELETE ALL TEMPORARY QUERY TABLES
+select 'DROP TABLE ' || table_schema || '.' || table_name from information_schema.tables where table_schema = 'smart' and table_name like 'query\_temp\_%';
+
 -- UPDATE CONNECT VERSION
 update connect.connect_version set version = '5.0.0', last_updated = now();

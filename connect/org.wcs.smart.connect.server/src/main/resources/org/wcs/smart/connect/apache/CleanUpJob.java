@@ -141,6 +141,9 @@ public class CleanUpJob implements Runnable {
 			
 			//clean up data queue items
 			cleanUpDataQueue(s);
+			
+			//clean up temporary tables
+			cleanupQueryTempTables(s);
 		}finally{
 			s.close();
 		}
@@ -365,4 +368,26 @@ public class CleanUpJob implements Runnable {
 		}
 	}
 	
+	/*
+	 * delete all query temp tables
+	 */
+	private void cleanupQueryTempTables(Session s){
+		String query = "select table_schema || '.' || table_name from information_schema.tables where table_schema = 'query_temp' and table_name like 'query\\_temp\\_%'"; //$NON-NLS-1$
+		
+		s.beginTransaction();
+		try{
+			@SuppressWarnings("unchecked")
+			List<String> tablesToDrop = s.createSQLQuery(query).list();
+			for (String table : tablesToDrop){
+				try{
+					s.createSQLQuery("DROP TABLE " + table).executeUpdate(); //$NON-NLS-1$
+				}catch (Exception ex){
+					logger.log(Level.WARNING, "Unable to drop temporary query table : " + table); //$NON-NLS-1$
+				}
+			}
+		}finally{
+			s.getTransaction().commit();
+		}
+		
+	}
 }

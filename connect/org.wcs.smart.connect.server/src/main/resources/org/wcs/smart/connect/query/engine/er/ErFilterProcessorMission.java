@@ -430,7 +430,7 @@ public class ErFilterProcessorMission implements IFilterProcessor {
 				// - create index
 				sql = new StringBuilder();
 				sql.append("create index "); //$NON-NLS-1$
-				sql.append(lTempTable);
+				sql.append(engine.getIndexName(lTempTable));
 				sql.append("_mission_uuid_idx on "); //$NON-NLS-1$
 				sql.append(lTempTable);
 				sql.append("(mission_uuid)"); //$NON-NLS-1$
@@ -595,7 +595,7 @@ public class ErFilterProcessorMission implements IFilterProcessor {
 				// - create index
 				sql = new StringBuilder();
 				sql.append("create index "); //$NON-NLS-1$
-				sql.append(lTempTable);
+				sql.append(engine.getIndexName(lTempTable));
 				sql.append("_su_uuid_idx on "); //$NON-NLS-1$
 				sql.append(lTempTable);
 				sql.append("(sampling_unit_uuid)"); //$NON-NLS-1$

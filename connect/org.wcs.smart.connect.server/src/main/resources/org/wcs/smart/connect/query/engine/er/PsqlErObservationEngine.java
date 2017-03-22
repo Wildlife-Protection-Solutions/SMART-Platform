@@ -307,7 +307,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("create index "); //$NON-NLS-1$
-		sql.append(tableName);
+		sql.append(getIndexName(tableName));
 		sql.append("_ob_category_uuid_idx on "); //$NON-NLS-1$
 		sql.append(tableName);
 		sql.append("(ob_category_uuid)"); //$NON-NLS-1$
