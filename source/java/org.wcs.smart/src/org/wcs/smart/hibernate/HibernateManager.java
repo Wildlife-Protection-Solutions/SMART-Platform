@@ -359,7 +359,7 @@ public class HibernateManager extends SmartHibernateManager{
 		try{
 			
 			List<Employee> es = x.createCriteria(Employee.class)
-					.add(Restrictions.eq("smartUserId", userName)) //$NON-NLS-1$
+					.add(Restrictions.eq("smartUserId", userName).ignoreCase()) //$NON-NLS-1$
 					.list();
 			
 			List<ConservationArea> areas = new ArrayList<ConservationArea>();

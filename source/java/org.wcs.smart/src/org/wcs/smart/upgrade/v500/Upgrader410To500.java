@@ -8,6 +8,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -22,7 +23,7 @@ public class Upgrader410To500 implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception {
-		monitor.beginTask("Upgrading from 4.1.0 to 5.0.0", 1);
+		monitor.beginTask(Messages.Upgrader410To500_UpgradeTaskName, 1);
 		thrownException = null;
 		final Session s = HibernateManager.openSession();
 		try {
@@ -35,7 +36,7 @@ public class Upgrader410To500 implements IDatabaseUpgrader {
 						c.setAutoCommit(true);
 					} catch (final Exception e) {
 						thrownException = new Exception(
-								"Error upgrading from 4.1.0 to 5.0.0", e);
+								Messages.Upgrader410To500_UpgradeError, e);
 					}
 				}
 			});
@@ -51,20 +52,20 @@ public class Upgrader410To500 implements IDatabaseUpgrader {
 
 	private void upgrade(Connection c, IProgressMonitor monitor)
 			throws Exception {
-		@SuppressWarnings("nls")
+
 		String[] sql = new String[] {
-				"ALTER TABLE smart.employee ADD COLUMN usertemp VARCHAR(5000)",
-				"UPDATE smart.employee set usertemp = case when smartuserlevel = 0 THEN 'ADMIN' when smartuserlevel = 1 THEN 'MANAGER' WHEN smartuserlevel = 2  THEN 'ANALYST' when smartuserlevel=3 THEN 'DATAENTRY' ELSE null END",
-				"ALTER TABLE smart.employee DROP COLUMN smartuserlevel",
-				"ALTER TABLE smart.employee ADD COLUMN smartuserlevel VARCHAR(5000)",
-				"UPDATE smart.employee SET smartuserlevel = usertemp",
-				"ALTER TABLE smart.employee DROP COLUMN usertemp",
+				"ALTER TABLE smart.employee ADD COLUMN usertemp VARCHAR(5000)", //$NON-NLS-1$
+				"UPDATE smart.employee set usertemp = case when smartuserlevel = 0 THEN 'ADMIN' when smartuserlevel = 1 THEN 'MANAGER' WHEN smartuserlevel = 2  THEN 'ANALYST' when smartuserlevel=3 THEN 'DATAENTRY' ELSE null END", //$NON-NLS-1$
+				"ALTER TABLE smart.employee DROP COLUMN smartuserlevel", //$NON-NLS-1$
+				"ALTER TABLE smart.employee ADD COLUMN smartuserlevel VARCHAR(5000)", //$NON-NLS-1$
+				"UPDATE smart.employee SET smartuserlevel = usertemp", //$NON-NLS-1$
+				"ALTER TABLE smart.employee DROP COLUMN usertemp", //$NON-NLS-1$
 
 	            // #1425: Enable CT to take waypoint at beginning rather than end of observation
-	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN instant_gps BOOLEAN",
-	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN photo_first BOOLEAN",
+	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN instant_gps BOOLEAN", //$NON-NLS-1$
+	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN photo_first BOOLEAN", //$NON-NLS-1$
 	            
-	            "CREATE FUNCTION smart.trackIntersects(wkb1 blob, wkb2 blob) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.trackIntersects' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT"
+	            "CREATE FUNCTION smart.trackIntersects(wkb1 blob, wkb2 blob) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.trackIntersects' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT" //$NON-NLS-1$
 		};
 
 		for (String s : sql) {

@@ -243,7 +243,7 @@ public class SmartStartUp {
 					try{
 						ccaaUser = (Employee)session.createCriteria(Employee.class)
 								.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-								.add(Restrictions.eq("smartUserId", users.get(0).getSmartUserId())) //$NON-NLS-1$
+								.add(Restrictions.eq("smartUserId", users.get(0).getSmartUserId()).ignoreCase()) //$NON-NLS-1$
 								.uniqueResult();
 						if (ccaaUser == null){
 							ccaaUser = new Employee();
