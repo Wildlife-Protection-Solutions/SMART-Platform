@@ -38,6 +38,8 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
@@ -46,8 +48,10 @@ import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyMetadataPackager;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -162,9 +166,14 @@ public class ChangeLogPackager {
 			endRevision = items.get(items.size() - 1).getRevision();
 		}
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
+		//must be admin user otherwise you might not have permission to access tables
+		SmartDB.DbUser currentUser = SmartDB.DbUser.ADMIN;
+		if (SmartDB.getCurrentEmployee() != null){
+			currentUser = SmartDB.getCurrentUser();
+		}
+		Session s = HibernateManager.lockDatabase(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 		try{
+			s.beginTransaction();
 			s.doWork(new Work(){
 	
 				@Override
@@ -197,8 +206,14 @@ public class ChangeLogPackager {
 					}
 				}});
 		}finally{
-			s.getTransaction().rollback();
-			s.close();
+			try{
+				s.getTransaction().rollback();
+				s.close();
+			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
+			}
+			
+			HibernateManager.unlockDatabase(currentUser.getUserName(), currentUser.getPassword());
 		}
 		
 	}
