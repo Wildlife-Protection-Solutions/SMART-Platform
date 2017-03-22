@@ -225,6 +225,16 @@ public class SmartDB {
 	 */
 	public static DbUser findDbUser(Employee user){
 
+		for (String s : user.getSmartUserLevels()){
+			if (!s.equals(UserLevelManager.ADMIN.getKey()) &&
+				!s.equals(UserLevelManager.MANAGER.getKey()) &&
+				!s.equals(UserLevelManager.ANALYST.getKey()) &&
+				!s.equals(UserLevelManager.DATA_ENTRY.getKey())){
+				//some other account
+				return DbUser.ADMIN;
+			}
+		}
+		
 		if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ADMIN)){
 			return DbUser.ADMIN;
 		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.MANAGER)){
