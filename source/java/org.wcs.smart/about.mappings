@@ -1,1 +1,2 @@
-0=$org.wcs.smart.version$
+0=$org.wcs.smart.version.simple$
+1=$org.wcs.smart.version$
