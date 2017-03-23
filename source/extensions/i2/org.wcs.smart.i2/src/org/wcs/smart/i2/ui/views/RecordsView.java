@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.i2.ui.views;
 
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +41,7 @@ import javax.inject.Inject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
@@ -46,6 +50,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -71,16 +76,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
@@ -103,6 +106,7 @@ import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
+import org.wcs.smart.i2.xml.RecordXmlExporter;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
@@ -115,6 +119,8 @@ import org.wcs.smart.ui.properties.FilterComposite;
 public class RecordsView {
 
 	public static final String ID = "org.wcs.smart.i2.ui.view.records"; //$NON-NLS-1$
+	
+	private static final String DIR_PREF_KEY = ID + ".export.dir"; //$NON-NLS-1$
 
 	@Inject
 	private IEclipseContext context;
@@ -274,17 +280,6 @@ public class RecordsView {
 		nameColumn.setLabelProvider(provider);
 		nameColumn.getColumn().setWidth(200);
 		
-		Hyperlink export = toolkit.createHyperlink(allRecordsSection, Messages.RecordsView_exportlink, SWT.NONE);
-		export.setToolTipText(Messages.RecordsView_exporttooltip);
-		export.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				doExport();
-			}
-		});
-		
-		
-		
 		Composite basicSearch = toolkit.createComposite(tabPart);
 		basicSearch.setLayout(new GridLayout());
 		((GridLayout)basicSearch.getLayout()).marginWidth = 0;
@@ -417,6 +412,9 @@ public class RecordsView {
 				public void menuHidden(MenuEvent e) {}
 			});
 		}
+		
+		new MenuItem(m, SWT.SEPARATOR);
+		
 		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
 			MenuItem miAdd = new MenuItem(m, SWT.PUSH);
 			miAdd.setText(Messages.RecordsView_AddToWs);
@@ -444,7 +442,68 @@ public class RecordsView {
 				public void menuHidden(MenuEvent e) {}
 			});
 		}
+		
+		MenuItem miExport = new MenuItem(m, SWT.CASCADE);
+		miExport.setText(Messages.RecordsView_ExportMenuOption);
+		
+		Menu exportMenu = new Menu(miExport);
+		miExport.setMenu(exportMenu);
+		MenuItem miExportCsv = new MenuItem(exportMenu, SWT.PUSH);
+		miExportCsv.setText(Messages.RecordsView_ExportToCsv);
+		miExportCsv.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				List<UUID> toExport = new ArrayList<UUID>();
+				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+					Object x = (Object) iterator.next();	
+					if (x instanceof IntelRecord){
+						WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
+						toExport.add(((IntelRecord)x).getUuid());
+					}else if (x instanceof RecordEditorInput){
+						toExport.add(((RecordEditorInput)x).getUuid());
+					}
+				}
+				doCsvExport(toExport);
+			}
+		});
+		m.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				miExportCsv.setEnabled(!control.getSelection().isEmpty());
+			}
 			
+			@Override
+			public void menuHidden(MenuEvent e) {}
+		});	
+		
+		MenuItem miExportXml = new MenuItem(exportMenu, SWT.PUSH);
+		miExportXml.setText(Messages.RecordsView_ExportToXml);
+		miExportXml.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				List<UUID> toExport = new ArrayList<UUID>();
+				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+					Object x = (Object) iterator.next();	
+					if (x instanceof IntelRecord){
+						WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
+						toExport.add(((IntelRecord)x).getUuid());
+					}else if (x instanceof RecordEditorInput){
+						toExport.add(((RecordEditorInput)x).getUuid());
+					}
+				}
+				doXmlExport(toExport);
+			}
+		});
+		m.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				miExportXml.setEnabled(!control.getSelection().isEmpty());
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {}
+		});	
+		
 		
 	}
 	
@@ -455,23 +514,74 @@ public class RecordsView {
 		loadRecordsJob.schedule();
 	}
 
-	private void doExport(){
-		List<UUID> toExport = new ArrayList<UUID>();
+	private void doXmlExport(List<UUID> toExport){
+		if (toExport == null  || toExport.isEmpty()) return;
 		
-		List<?> sel = (List<?>) lstAllRecords.getInput();
-		if (lstAllRecords.getFilters().length > 0){
-			Object[] x = lstAllRecords.getFilters()[0].filter(lstAllRecords, (Object)null, sel.toArray());
-			sel = Arrays.asList(x);
+		//need to get a file
+		DirectoryDialog dd = new DirectoryDialog(context.get(Shell.class));
+		String ppath = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(DIR_PREF_KEY);
+		if (ppath != null){
+			dd.setFilterPath(ppath);
 		}
+		dd.setText(Messages.RecordsView_SelectFolder);
+		String path = dd.open();
+		if (path == null) return;
+		Intelligence2PlugIn.getDefault().getPreferenceStore().putValue(DIR_PREF_KEY, path);
 		
-		if (sel == null) return;
-		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-			Object item = (Object) iterator.next();
-			if (item instanceof RecordEditorInput){
-				toExport.add(((RecordEditorInput) item).getUuid());
+		final Path folder = Paths.get(path);
+		if (!Files.exists(folder)){
+			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.RecordsView_CreateDirTitle,
+					MessageFormat.format(Messages.RecordsView_CreateDirMessage, folder.toString()))){
+				return;
 			}
 		}
-		if (toExport.isEmpty()) return;
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
+		try{
+			pmd.run(true,  true, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				
+				monitor.beginTask(Messages.RecordsView_XmlTaskName, toExport.size());
+				
+				RecordXmlExporter exporter = new RecordXmlExporter(folder);
+				int cnt = 0;
+				for (UUID record : toExport){
+					try{
+						if (exporter.exportRecord(record, new SubProgressMonitor(monitor, 1))) cnt ++;
+					}catch (Exception ex){
+						Display.getDefault().syncExec(()->{
+							MessageDialog.openError(context.get(Shell.class), Messages.RecordsView_ErrorTitle, Messages.RecordsView_ErrorMessage + ex.getMessage());
+						});
+						Intelligence2PlugIn.log(ex.getMessage(), ex);
+					}
+					if (monitor.isCanceled()) break;
+				}
+				
+				if (monitor.isCanceled()){
+					Display.getDefault().syncExec(()->{
+						MessageDialog.openInformation(context.get(Shell.class), Messages.RecordsView_CancelledTitle, Messages.RecordsView_CanclledUser);
+					});
+				}else{
+					
+					final int totalCnt = cnt;
+					Display.getDefault().syncExec(()->{
+						MessageDialog.openInformation(context.get(Shell.class), Messages.RecordsView_ExportCompleteTitle, MessageFormat.format(Messages.RecordsView_ExportCompleteMessage, totalCnt, toExport.size(), folder.toString()));
+					});
+				}
+				monitor.done();
+				
+			}
+			});
+		}catch (Exception ex){
+			Intelligence2PlugIn.displayLog(Messages.RecordsView_ErrorMessage2 + ex.getMessage(), ex);
+		}		
+	}
+	
+	private void doCsvExport(List<UUID> toExport){
+		if (toExport == null  || toExport.isEmpty()) return;
 		RecordCsvExporter exporter = new RecordCsvExporter(toExport);
 		CsvExportDialog dialog = new CsvExportDialog(context.get(Shell.class), exporter.createExportConfiguration());
 		dialog.open();		

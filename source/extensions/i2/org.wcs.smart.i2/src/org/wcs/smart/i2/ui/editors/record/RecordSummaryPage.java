@@ -542,7 +542,7 @@ public class RecordSummaryPage extends EditorPart{
 		
 		lblLastModifiedBy = toolkit.createLabel(infoComp, recordEditor.getRecord().getLastModifiedBy() == null ? "" :  SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy())); //$NON-NLS-1$
 		lblLastModifiedBy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
+		historyPart.layout();
 		
 
 		

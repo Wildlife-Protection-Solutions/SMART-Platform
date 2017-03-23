@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+ targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record" 
+ elementFormDefault="qualified">
+
+    <element name="IntelRecord" type="tns:RecordType"></element>
+    
+    <complexType name="RecordType">
+    	<sequence>
+    		<element name="title" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="status" type="string"></element>
+    		<element name="source" type="tns:LabelUuid"></element>
+    		<element name="narrative" type="string"></element>
+    		<element name="scratchpad" type="string"></element>
+    		<element name="attributes" type="tns:RecordAttributeType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="entities" type="tns:LabelUuid"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="attachments" type="tns:AttachmentType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="locations" type="tns:LocationType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="LabelUuid">
+    	<sequence>
+    		<element name="name" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="uuid" type="string" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="AttachmentType">
+    	<sequence>
+    		<element name="filename" type="string" maxOccurs="1" minOccurs="1"></element>
+    		<element name="entities" type="tns:LabelUuid" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="LocationType">
+    	<sequence>
+    		<element name="id" type="string"></element>
+    		<element name="datetime" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="comment" type="string"></element>
+    		<element name="geometry" type="hexBinary" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="entities" type="tns:LabelUuid"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="observation" type="tns:ObservationType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="ObservationType">
+    	<sequence>
+    		<element name="category" type="tns:LabelUuid" maxOccurs="1" minOccurs="1"></element>
+    		<element name="attributes"
+    			type="tns:ObservationAttributeType" maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="RecordAttributeType">
+    	<sequence>
+    		<choice>
+    			<element name="attribute" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
+    			<element name="entity" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
+    		</choice>
+
+    		<element name="string_value" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="number_value_1" type="double" maxOccurs="1" minOccurs="0"></element>
+    		<element name="number_value_2" type="double" maxOccurs="1" minOccurs="0"></element>
+    		<element name="list_value" type="tns:LabelUuid" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="ObservationAttributeType">
+    	<sequence>
+    		<element name="attribute" type="tns:LabelUuid" maxOccurs="1" minOccurs="1"></element>
+    		<element name="string_value" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="number_value" type="double" maxOccurs="1" minOccurs="0"></element>
+    		<element name="list_value" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
+    		<element name="tree_value" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+</schema>
