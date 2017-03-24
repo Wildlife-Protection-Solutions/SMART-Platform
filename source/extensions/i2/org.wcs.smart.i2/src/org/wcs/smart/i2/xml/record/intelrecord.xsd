@@ -70,12 +70,9 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.rec
     
     <complexType name="RecordAttributeType">
     	<sequence>
-    		<choice>
-    			<element name="attribute" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
-    			<element name="entity" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
-    		</choice>
 
-    		<element name="string_value" type="string" maxOccurs="1" minOccurs="0"></element>
+            <element name="record_attribute" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
+            <element name="string_value" type="string" maxOccurs="1" minOccurs="0"></element>
     		<element name="number_value_1" type="double" maxOccurs="1" minOccurs="0"></element>
     		<element name="number_value_2" type="double" maxOccurs="1" minOccurs="0"></element>
     		<element name="list_value" type="tns:LabelUuid" maxOccurs="unbounded" minOccurs="0"></element>

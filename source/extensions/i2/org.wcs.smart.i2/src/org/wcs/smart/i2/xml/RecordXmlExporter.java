@@ -36,6 +36,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -68,6 +69,9 @@ import org.wcs.smart.util.ZipUtil;
 
 /**
  * Converts Intelligences Record to XML/zip file
+ * 
+ * Entities and record source attributes are looked up by uuid so users will need to 
+ * import into a Conservation Area with these uuids (share between SAME Conservation Area).
  * @author Emily
  *
  */
@@ -75,7 +79,9 @@ public class RecordXmlExporter {
 
 	public static final String DATE_FORMAT_STR = ("yyyy-MM-dd HH:mm:ss.SSS");  //$NON-NLS-1$
 	
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.i2.xml.record"; //$NON-NLS-1$
+	public static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.i2.xml.record"; //$NON-NLS-1$
+	
+	public static final String ATTACHMENT_DIR = "attachments"; //$NON-NLS-1$
 	
 	public static void writeRecord(RecordType record, OutputStream file) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
@@ -156,6 +162,7 @@ public class RecordXmlExporter {
 						}else if (attribute.getAttribute().getEntityType() != null){
 							aUuid.setName(attribute.getAttribute().getEntityType().getKeyId());
 						}
+						xmlAttributeValue.setRecordAttribute(aUuid);
 						
 						xmlAttributeValue.setNumberValue1(attribute.getNumberValue());
 						xmlAttributeValue.setNumberValue2(attribute.getNumberValue2());
@@ -220,7 +227,7 @@ public class RecordXmlExporter {
 								
 								LabelUuid xmlCategory = factory.createLabelUuid();
 								xmlCategory.setUuid(UuidUtils.uuidToString(observation.getCategory().getUuid()));
-								xmlCategory.setName(observation.getCategory().getKeyId());
+								xmlCategory.setName(observation.getCategory().getHkey());
 								
 								xmlObservation.setCategory(xmlCategory);
 								
@@ -258,20 +265,30 @@ public class RecordXmlExporter {
 			}finally{
 				session.close();
 			}
-					
-			Path xmlFile = Files.createTempDirectory("smart").resolve(fileName + ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
+			Path xmlFile = tempDir.resolve(fileName + ".xml"); //$NON-NLS-1$
 			try(OutputStream out = Files.newOutputStream(xmlFile)){
 				writeRecord(xmlRecord, out);
 			}
+			Path attachDir = null;
+			if (attachmentsToInclude.size() > 0){
+				attachDir = tempDir.resolve(ATTACHMENT_DIR);
+				Files.createDirectory(attachDir);
+				for (File f : attachmentsToInclude){
+					Files.copy(f.toPath(), attachDir.resolve(f.getName()));
+				}
+			}
 			
+			File[] zip = new File[]{xmlFile.toFile()};
+			if (attachDir != null){
+				zip = new File[]{xmlFile.toFile(), attachDir.toFile()};
+			}
 			//zip of Files
-			
-			attachmentsToInclude.add(0, xmlFile.toFile());
-			ZipUtil.createZip(attachmentsToInclude.toArray(new File[attachmentsToInclude.size()]), outputFile.toFile(), new SubProgressMonitor(monitor,1));
+			ZipUtil.createZip(zip, outputFile.toFile(), new SubProgressMonitor(monitor,1));
 			
 			try{
-				Files.deleteIfExists(xmlFile);
-				Files.deleteIfExists(xmlFile.getParent());
+				FileUtils.deleteDirectory(tempDir.toFile());
 			}catch (Exception ex){
 				ex.printStackTrace();
 			}

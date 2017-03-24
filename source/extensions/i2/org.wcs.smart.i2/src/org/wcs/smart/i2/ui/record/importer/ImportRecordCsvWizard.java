@@ -46,7 +46,7 @@ import org.wcs.smart.i2.record.importer.RecordImportEngine;
  * @author Emily
  *
  */
-public class ImportRecordWizard extends Wizard implements IPageChangingListener  {
+public class ImportRecordCsvWizard extends Wizard implements IPageChangingListener  {
 	
 	private FileWizardPage filePage;
 	private AttributeMappingWizardPage mappingPage;
@@ -60,7 +60,7 @@ public class ImportRecordWizard extends Wizard implements IPageChangingListener 
 	 * Create a new wizard
 	 * @param importer csv importer
 	 */
-	public ImportRecordWizard(){
+	public ImportRecordCsvWizard(){
 		super();
 		
 		setWindowTitle(Messages.ImportRecordWizard_Title);

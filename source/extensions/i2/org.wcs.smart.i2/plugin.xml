@@ -332,6 +332,11 @@
                      label="%ImportRecordsCommandName"
                      style="push">
                </command>
+               <command
+                     commandId="org.wcs.smart.i2.command.record.import.xml"
+                     label="Import Records from XML..."
+                     style="push">
+               </command>
             </menu>
             <separator
                   name="org.wcs.smart.i2.separator3"
@@ -785,6 +790,10 @@
             id="org.wcs.smart.i2.command.record.configuration"
             name="%ConfigureRecordsCommandName">
       </command>
+      <command
+            id="org.wcs.smart.i2.command.record.import.xml"
+            name="Import Records From XML">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -883,8 +892,12 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.i2.ui.record.importer.ImportRecordHandler$ImportRecordHandlerWrapper"
+            class="org.wcs.smart.i2.ui.record.importer.ImportRecordCsvHandler$ImportRecordCsvHandlerWrapper"
             commandId="org.wcs.smart.i2.command.record.import">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.record.importer.ImportRecordXmlHandler$ImportRecordXmlHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.record.import.xml">
       </handler>
    </extension>
    <extension

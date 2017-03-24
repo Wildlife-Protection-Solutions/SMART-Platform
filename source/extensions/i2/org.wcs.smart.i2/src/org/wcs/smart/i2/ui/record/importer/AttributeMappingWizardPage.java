@@ -57,7 +57,6 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.record.importer.RecordImportConfig;
 
@@ -147,7 +146,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (lastFile != null){
-				if (lastFile.equals(((ImportRecordWizard)getWizard()).getImportConfiguration().getFile())){
+				if (lastFile.equals(((ImportRecordCsvWizard)getWizard()).getImportConfiguration().getFile())){
 					//same type & same file; lets not update details 
 					return Status.OK_STATUS;
 				}
@@ -167,7 +166,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 			}
 			
 			//create the column headers from the csv file
-			Path file = ((ImportRecordWizard)getWizard()).getImportConfiguration().getFile();
+			Path file = ((ImportRecordCsvWizard)getWizard()).getImportConfiguration().getFile();
 			lastFile = file;
 			String[] headers = null;
 			try(CSVReader reader = new CSVReader(Files.newBufferedReader(file))){

@@ -36,17 +36,17 @@ import org.eclipse.swt.widgets.Shell;
  * @author Emily
  *
  */
-public class ImportRecordHandler {
+public class ImportRecordCsvHandler {
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context){
-		WizardDialog wd = new WizardDialog(activeShell, ContextInjectionFactory.make(ImportRecordWizard.class, context));
+		WizardDialog wd = new WizardDialog(activeShell, ContextInjectionFactory.make(ImportRecordCsvWizard.class, context));
 		wd.open();
 	}
 	
 	// E3
-	public static class ImportRecordHandlerWrapper extends DIHandler<ImportRecordHandler> {
-		public ImportRecordHandlerWrapper() {
-			super(ImportRecordHandler.class);
+	public static class ImportRecordCsvHandlerWrapper extends DIHandler<ImportRecordCsvHandler> {
+		public ImportRecordCsvHandlerWrapper() {
+			super(ImportRecordCsvHandler.class);
 		}
 	}
 }

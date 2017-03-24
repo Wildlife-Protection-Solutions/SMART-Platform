@@ -524,6 +524,7 @@ public class RecordsView {
 			dd.setFilterPath(ppath);
 		}
 		dd.setText(Messages.RecordsView_SelectFolder);
+		dd.setMessage(Messages.RecordsView_DdMessage );
 		String path = dd.open();
 		if (path == null) return;
 		Intelligence2PlugIn.getDefault().getPreferenceStore().putValue(DIR_PREF_KEY, path);
