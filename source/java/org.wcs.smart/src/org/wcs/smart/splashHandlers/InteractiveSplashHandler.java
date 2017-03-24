@@ -114,6 +114,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 */
 	public InteractiveSplashHandler() {
 		widgets = new ArrayList<Control>();
+	    String version = System.getProperty("org.wcs.smart.version"); //$NON-NLS-1$
+	    System.setProperty("org.wcs.smart.version.simple", version.substring(0, version.lastIndexOf('.'))); //$NON-NLS-1$
 	}
 	
 	/*
@@ -161,11 +163,11 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			txtPassword.setFocus();
 		} else {
 			//TODO: remove smart/smart before build
-			//cmbUserName.setText("smart"); //$NON-NLS-1$
+//			cmbUserName.setText("smart"); //$NON-NLS-1$
 			cmbUserName.setFocus();
 		}
 		//TODO: remove smart/smart before build
-		//txtPassword.setText("smart"); //$NON-NLS-1$
+//		txtPassword.setText("smart"); //$NON-NLS-1$
 		
 		doEventLoop();
 	}
@@ -335,7 +337,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		//version label
 		Label lblVersion = new Label(right, SWT.RIGHT);
-		lblVersion.setText(MessageFormat.format(Messages.InteractiveSplashHandler_VersionLabel, new Object[]{System.getProperty("org.wcs.smart.version")})); //$NON-NLS-1$
+		lblVersion.setText(MessageFormat.format(Messages.InteractiveSplashHandler_VersionLabel, new Object[]{System.getProperty("org.wcs.smart.version.simple")})); //$NON-NLS-1$
 		lblVersion.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1));
 		final Color blue = new Color(lblVersion.getDisplay(), 50, 74,115);
 		lblVersion.setForeground(blue);
