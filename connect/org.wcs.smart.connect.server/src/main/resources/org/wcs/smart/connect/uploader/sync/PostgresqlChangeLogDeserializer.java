@@ -149,12 +149,12 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 		for(Entry<String, Object> dataitem : data.entrySet()){
 			String colName = dataitem.getKey();
 			Object obj = dataitem.getValue();	
-			sb.append(colName + " = ");
+			sb.append(colName + " = "); //$NON-NLS-1$
 			if (obj instanceof Date ){
 				//do this to avoid time zone issues
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 				params.add(sdf.format((Date)obj));
-				sb.append("cast(? as timestamp), ");
+				sb.append("cast(? as timestamp), "); //$NON-NLS-1$
 			}else{
 				sb.append("?, "); //$NON-NLS-1$
 				params.add(obj);
@@ -200,9 +200,9 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 			
 			if (obj instanceof Date ){
 				//do this to avoid time zone issues
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 				params.add(sdf.format((Date)obj));
-				values.append("cast(? as timestamp),");
+				values.append("cast(? as timestamp),"); //$NON-NLS-1$
 			}else{
 				values.append("?,"); //$NON-NLS-1$
 				params.add(obj);

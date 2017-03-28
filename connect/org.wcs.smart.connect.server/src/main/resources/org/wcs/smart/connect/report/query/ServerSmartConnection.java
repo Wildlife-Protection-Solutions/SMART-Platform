@@ -41,7 +41,6 @@ import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.report.execute.SmartReportRunner;
 
 /**
  * Implementation class of IConnection for SMART ODA runtime driver.

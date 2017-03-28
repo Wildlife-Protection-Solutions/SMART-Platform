@@ -83,7 +83,7 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public ResultSet getResultSet(final Session session) {
-		final String dataQuerySort = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql; //$NON-NLS-1$
+		final String dataQuerySort = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		final String dataQuery = "SELECT ca_id, ca_name, intel_uuid, intel_name, intel_datereceived, intel_fromdate, intel_todate, intel_sourceuuid, intel_source, intel_patrolid, intel_informantid, intel_description, st_asbinary(intel_locations) as intel_locations FROM " + engine.getQueryDataTable();//$NON-NLS-1$
 
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
@@ -159,6 +159,6 @@ public class RecordIntelligenceQueryResult extends AbstractDbFeatureResultSet {
 	
 	@Override
 	public void updateSortColumn(Session session) throws SQLException {
-		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid");
+		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
 }

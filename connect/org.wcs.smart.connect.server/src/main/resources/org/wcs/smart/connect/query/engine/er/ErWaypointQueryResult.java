@@ -110,10 +110,10 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet {
 			public ResultSet execute(Connection c) throws SQLException {
 				if(sortColumn != null){
 					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$
+							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " +engine.getQueryDataTable());
+						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " +engine.getQueryDataTable()); //$NON-NLS-1$
 			}
 		});
 	}
@@ -163,7 +163,7 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet {
 	@Override
 	public void updateSortColumn(Session session) throws SQLException {
 		//pass in the specific column name prefixes and suffixes to customize the SQL to this type of Query
-		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".wp_", "_mLIST", "_TREE", "uuid");
+		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".wp_", "_mLIST", "_TREE", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
 
 }

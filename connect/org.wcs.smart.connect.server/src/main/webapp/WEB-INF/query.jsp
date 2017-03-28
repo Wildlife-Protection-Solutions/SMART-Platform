@@ -185,7 +185,7 @@
 						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
 						  </tr>
 						  <tr >
-						     <td colspan=3 align="center"><input id="createlinkbutton" class="close" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>
+						     <td colspan=3 align="center"><input id="createlinkbutton" class="button close" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>
 						  </tr>
 						  <tr >
 						     <td colspan=3><input id="createdlink" class="hide linkdialog" type="text"/></td>
@@ -194,7 +194,7 @@
 	   				</fieldset>	   				
 	   			</div>
 	   			<div>
-	   				<input id="close" class="close" type="button" value="<fmt:message key="query.closebutton"/>" />
+	   				<input id="close" class="button close" type="button" value="<fmt:message key="query.closebutton"/>" />
 	   			</div>
    			</div>
     	</form>

@@ -200,7 +200,7 @@ public class ReportApi extends HttpServlet{
 						options.setImageHandler(new HTMLServerImageHandler());
 						options.setOutputStream(bos);
 		
-						IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal() == null ? "" : request.getUserPrincipal().getName());
+						IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal() == null ? "" : request.getUserPrincipal().getName()); //$NON-NLS-1$
 		
 						Map<Object,Object> items = task.getAppContext();
 						items.put(BirtConstants.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));

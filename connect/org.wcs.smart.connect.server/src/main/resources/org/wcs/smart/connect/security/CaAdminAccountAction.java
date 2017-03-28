@@ -63,6 +63,7 @@ public class CaAdminAccountAction implements ISmartConnectAction{
 		return new String[]{};
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
 		List<ResourceOption> ops = new ArrayList<ResourceOption>();

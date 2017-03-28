@@ -93,8 +93,8 @@ public class ReportAction implements ISmartConnectAction{
 		
 		for (UUID id : uuidList){
 			ConservationAreaInfo info = (ConservationAreaInfo)s.createCriteria(ConservationAreaInfo.class)
-					.add(Restrictions.eq("uuid", id))
-					.uniqueResult(); //$NON-NLS-1$
+					.add(Restrictions.eq("uuid", id))  //$NON-NLS-1$
+					.uniqueResult();
 			ResourceOption ro =  new ResourceOption(Messages.getString("QueryAction.AllQueriesfromCA", l)+ info.getLabel(), info.getUuid()); //$NON-NLS-1$
 			ops.add(ro);
 		}

@@ -32,9 +32,23 @@
 <div><div id="message" class="msgsection"></div></div>
 
 <div>
- 	<p class="infomessage"><fmt:message key="sharedlinks.createnewdetails" /></p>
- 	<p class="smart-warninghighlight"><fmt:message key="query.sharingDescriptionAll2" /></p>
+ 	<p class="smart-warninghighlight"><fmt:message key="query.sharingDescriptionAll2"/></p>
 </div>
+
+
+<div style="display:table; border-collapse: collapse;">
+<div style="display:table-row;">
+  <div style="display:table-cell; white-space:nowrap; padding: 10px 25px 10px 0px"><fmt:message key="sharedlinks.linktitle" /></div>
+  <div style="display:table-cell;padding: 10px 10px 10px 0px"><p><fmt:message key="sharedlinks.linkinfo" /></p></div>
+</div>
+<div style="display:table-row; " >
+  <div style="display:table-cell; white-space:nowrap;padding: 10px 25px 10px 0px"><fmt:message key="sharedlinks.tokentitle" /></div>
+  <div style="display:table-cell;padding: 10px 10px 10px 0px"> <fmt:message key="sharedlinks.tokeninfo" /><p style="margin:5px 0px 5px 0px"><button id="opentokendialog" class="button" type="button"><fmt:message key="sharedlinks.maketoken" /></button></p></div>
+</div>
+</div>
+
+
+
 
 <div class="top-spacer" style="margin-left: -20px"> 
   <div id="linktable" class="linktable table-cell smart-table">
@@ -50,25 +64,17 @@
  
 </div>
 
-<div>
-<p>
-<br>
-<fmt:message key="sharedlinks.createtokensentence" /><button id="opentokendialog" type="button"><fmt:message key="sharedlinks.maketoken" /></button>
-</p>
-</div>
+
 
 </div>
-
-
 <%@include file="footer.jsp" %>
 
 
 <div id="SharedLinksDialog" style="display: none;" class="level2dialog">
   <div class="dialog-title"><fmt:message key="sharedlinks.maketoken" /></div>
-  	<form id="sharedlinkform" name="sharedlinkform">
-     		<div style="text-align: right">
-
-					<fieldset class="linkdialog">
+  	<div id="sharedlinkform" style="text-align: right">
+     		
+					<fieldset class="linkdialog" style="border:0px; margin:0px;padding:0px">
 						<p><span class="smart-warninghighlight"><fmt:message key="sharedlinks.tokenwarning"/></span></p>
 						
 						<table class="top-spacer" style="width:100%">
@@ -84,30 +90,31 @@
 								<option value=518400><fmt:message key="sharedlinks.oneyear"/></option>
 								<option value=-1><fmt:message key="sharedlinks.custom"/></option>
 							</select>
-						  </td>
+						   </td>
 						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
 						  </tr>
 						  <tr>
-						   <td colspan=2><fmt:message key="sharedlinks.sourceip"/></td><td><input id="allowedIp" type="text" name="allowedIp" value="" style='width:125px'> </td>
+						   <td ><fmt:message key="sharedlinks.sourceip"/></td>
+						   <td colspan=2><input id="allowedIp" type="text" name="allowedIp" style="width:100%" value=""> </td>
 						  </tr>
 						  <tr>
 						   <td colspan=3><fmt:message key="sharedlinks.sourceip2"/></td>
 						  </tr>
-						  
-						  <tr >
-						     <td colspan=3 align="center"><input id="createtokenbutton" class="close" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>
+						  <tr>
+						   <td colspan=3 align="center"><input id="createtokenbutton" class="close button" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>
 						  </tr>
 						  <tr >
-						     <td colspan=3><input id="createdlink" class="hide linkdialog" type="text"/></td>
+						     <td colspan=3 ><input id="createdlink" class="hide linkdialog" type="text"/></td>
 						  </tr>
 						</table>
 	   				</fieldset>	   				
 
 	   			<div>
-	   				<input id="close" class="close" type="button" value="<fmt:message key="query.closebutton"/>" />
+	   			    
+	   				<input id="close" class="close button" type="button" value="<fmt:message key="query.closebutton"/>" />
 	   			</div>
-   			</div>
-    	</form>
+   			
+    	</div>
 </div>
 
 </body>

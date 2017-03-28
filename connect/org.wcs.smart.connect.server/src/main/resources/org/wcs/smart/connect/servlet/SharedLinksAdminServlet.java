@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 /**
@@ -56,8 +57,9 @@ public class SharedLinksAdminServlet extends HttpServlet {
 		Session s = HibernateManager.getSession(request.getServletContext());
 		try{
 			s.beginTransaction();
-			//only allow admin 
-			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
+			//only allow admin or caadmin
+			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY) &&
+					!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY)){
 				//do not allow
 				response.sendError(Status.UNAUTHORIZED.getStatusCode());
 				return;

@@ -132,10 +132,10 @@ public class GeoJsonExporter {
 						fjson.writeFeatureCollection(collection, writer);
 						geoJsonOutput = writer.toString();
 						if(crsWriter != null){//add the project to the JSON, the JSON library kinda sucks and has no way to write it in automatically from what I can tell...
-							geoJsonOutput = "{\"crs\":" + crsWriter.toString() + "," + geoJsonOutput.substring(1);  //the substring pulls off the opening bracket of the json. Replaces the { at the start and add the crs value/object into the json   
+							geoJsonOutput = "{\"crs\":" + crsWriter.toString() + "," + geoJsonOutput.substring(1);  //the substring pulls off the opening bracket of the json. Replaces the { at the start and add the crs value/object into the json    //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					}else{
-						geoJsonOutput = "{}";
+						geoJsonOutput = "{}"; //$NON-NLS-1$
 					}
 					
 				}catch (Exception ex){

@@ -93,7 +93,7 @@ public class ApiAuthorizationFilter implements Filter {
 			chain.doFilter(request, response);
 			return;
 		}
-		String tokenString= request.getParameter("token");
+		String tokenString= request.getParameter("token"); //$NON-NLS-1$
 		
 		if(tokenString != null){
 			UUID token = UUID.fromString(tokenString);
@@ -103,7 +103,7 @@ public class ApiAuthorizationFilter implements Filter {
 			try{
 				link = QueryManager.INSTANCE.findSharedLink(token, session);
 				if(link == null){
-					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidUuid", request.getLocale()));
+					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidUuid", request.getLocale())); //$NON-NLS-1$
 					return;
 				}
 				link.setOwnerUsername( ((SmartUser)session.get(SmartUser.class, link.getOwnerUuid())).getUsername() );
@@ -116,7 +116,7 @@ public class ApiAuthorizationFilter implements Filter {
 				java.util.Date today = new java.util.Date();
 				Timestamp now = new Timestamp(today.getTime());
 				if(link.getExpiresAt().before(now)){
-					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale()));
+					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale())); //$NON-NLS-1$
 					return;
 				}else{
 					String userip = request.getRemoteAddr();

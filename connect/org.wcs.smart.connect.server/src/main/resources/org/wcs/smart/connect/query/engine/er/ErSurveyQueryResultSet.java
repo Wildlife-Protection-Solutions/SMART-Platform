@@ -318,29 +318,29 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 		
 		if(type == null){
 			//lets see if this is a mission attribute
-			String tableSortField = "sortKeyTxt";
-			if (sortColumn.toLowerCase().startsWith("ma_")){
+			String tableSortField = "sortKeyTxt"; //$NON-NLS-1$
+			if (sortColumn.toLowerCase().startsWith("ma_")){ //$NON-NLS-1$
 				String missionAttributeKey = sortColumn.substring(3);
 				Attribute.AttributeType maType = getMissionAttributeType(session, missionAttributeKey, caFilter);
 				if (maType != null){
 				
 					sortColumn = engine.getMissionAttributeColumnName(missionAttributeKey);
 					if (maType != null && maType == Attribute.AttributeType.NUMERIC){
-						tableSortField = "sortKeyDbl";
+						tableSortField = "sortKeyDbl"; //$NON-NLS-1$
 					}
 				}else{
 					//ma_0 etc. which would work but cannot be sure what column we are actually sorting on					
 				}
 
 			}
-			if (sortColumn.toLowerCase().startsWith("su_")){
+			if (sortColumn.toLowerCase().startsWith("su_")){ //$NON-NLS-1$
 				String samplingUnitAttributeKey = sortColumn.substring(3);
 				Attribute.AttributeType maType = getSamplingUnitAttributeType(session, samplingUnitAttributeKey, caFilter);
 				if (maType != null){
 				
 					sortColumn = engine.getSamplingUnitAttributeColumnName(samplingUnitAttributeKey);
 					if (maType != null && maType == Attribute.AttributeType.NUMERIC){
-						tableSortField = "sortKeyDbl";
+						tableSortField = "sortKeyDbl"; //$NON-NLS-1$
 					}
 				}else{
 					//ma_0 etc. which would work but cannot be sure what column we are actually sorting on					
@@ -352,7 +352,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 			StringBuilder sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
-			sql.append(" SET " + tableSortField + " = " + sortColumn); //$NON-NLS-1$
+			sql.append(" SET " + tableSortField + " = " + sortColumn); //$NON-NLS-1$ //$NON-NLS-2$
 			session.createSQLQuery(sql.toString()).executeUpdate();
 			
 		}else{
@@ -395,10 +395,10 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
-				sql.append("(SELECT rl." + value + " FROM "); //$NON-NLS-1$
+				sql.append("(SELECT rl." + value + " FROM "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
 				sql.append(queryDataTable);
-				sql.append(tableListSuffix + " rl on rl." + uuidColumn + " = wpoa.list_element_uuid "); //$NON-NLS-1$
+				sql.append(tableListSuffix + " rl on rl." + uuidColumn + " = wpoa.list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
 				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
@@ -412,9 +412,9 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 				sql.append("UPDATE ");//$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
-				sql.append("(SELECT rl." + value + " FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append("(SELECT rl." + value + " FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(queryDataTable);
-				sql.append(tableTreeSuffix + " rl on rl." + uuidColumn + " = wpoa.tree_node_uuid "); //$NON-NLS-1$
+				sql.append(tableTreeSuffix + " rl on rl." + uuidColumn + " = wpoa.tree_node_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
 				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$

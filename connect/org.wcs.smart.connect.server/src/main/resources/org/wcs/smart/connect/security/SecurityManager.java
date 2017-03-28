@@ -52,7 +52,7 @@ public enum SecurityManager {
 	 */
 	private boolean isActive(Session s, String username){
 		Long roleCnt = (Long)s.createCriteria(SmartUserRole.class)
-				.add(Restrictions.eq("id.username", username))
+				.add(Restrictions.eq("id.username", username)) //$NON-NLS-1$
 				.setProjection(Projections.rowCount())
 				.uniqueResult();
 				
@@ -121,7 +121,7 @@ public enum SecurityManager {
 		Criteria c2 = s.createCriteria(SmartUserAction.class);
 				c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
 				.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$
-				.add(Restrictions.eq("resource", resource))
+				.add(Restrictions.eq("resource", resource)) //$NON-NLS-1$
 				.setProjection(Projections.rowCount());
 		Long cnt3 = (Long) c2.uniqueResult();
 		if (cnt3 > 0){
@@ -144,8 +144,8 @@ public enum SecurityManager {
 
 		Criteria c = s.createCriteria(SmartUserAction.class);
 		Criterion r2 = Restrictions.or(
-				Restrictions.eq("action", AdminAccountAction.KEY),
-				Restrictions.eq("action", CaAdminAccountAction.KEY));
+				Restrictions.eq("action", AdminAccountAction.KEY), //$NON-NLS-1$
+				Restrictions.eq("action", CaAdminAccountAction.KEY)); //$NON-NLS-1$
 		
 		c.add(Restrictions.eq("username", username)); //$NON-NLS-1$
 		

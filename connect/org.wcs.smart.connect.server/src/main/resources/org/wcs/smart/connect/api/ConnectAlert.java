@@ -758,9 +758,9 @@ public class ConnectAlert extends HttpServlet {
     	    		//add ca name/label and type label
     	    		ConservationAreaInfo ca = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, obj.getCa().getUuid());
     	    		if(ca != null){
-    	    			properties.put("caname", ca.getLabel());
+    	    			properties.put("caname", ca.getLabel()); //$NON-NLS-1$
     	    		}else{
-    	    			properties.put("caname", "");
+    	    			properties.put("caname", ""); //$NON-NLS-1$ //$NON-NLS-2$
     	    		}
     	    		
 

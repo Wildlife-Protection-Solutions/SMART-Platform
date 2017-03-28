@@ -83,7 +83,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		fields.append("p_station,p_team,p_mandate,p_transporttype,p_leader,p_pilot"); //$NON-NLS-1$
 		if (sortFields != null){
 			for (String s : sortFields){
-				fields.append(",");
+				fields.append(","); //$NON-NLS-1$
 				fields.append(s);
 			}
 		}
@@ -290,7 +290,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				"pl_end_date", //$NON-NLS-1$
 				//"pld_patrol_day", 
 				"plm_leader",  //$NON-NLS-1$
-				"plm_pilot", "pl_uuid", "pld_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"plm_pilot", "pl_uuid", "pld_uuid" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < ca.length; i++) {

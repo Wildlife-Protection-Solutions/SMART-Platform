@@ -90,8 +90,8 @@ public class AlertAction implements ISmartConnectAction{
 		
 		for (UUID id : uuidList){
 			ConservationAreaInfo info = (ConservationAreaInfo)s.createCriteria(ConservationAreaInfo.class)
-					.add(Restrictions.eq("uuid", id))
-					.uniqueResult(); //$NON-NLS-1$
+					.add(Restrictions.eq("uuid", id)) //$NON-NLS-1$
+					.uniqueResult(); 
 				
 			ResourceOption ro = new ResourceOption(info.getLabel(), info.getUuid());
 			ops.add(ro);

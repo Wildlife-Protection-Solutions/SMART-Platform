@@ -42,10 +42,13 @@ public class SharedLink extends ConnectUuidItem{
 	private UUID ownerUuid;
 	private UUID caUuid;
 	private Timestamp expiresAt;
-	private String url; 
-	private int expiresAfter;
+	private Timestamp dateCreated;
+	private String url;
 	private boolean isUserToken;
 	private String allowedIp;
+	
+	@Transient
+	private int expiresAfter; //for json objects in minutes
 	
 	
 	@Column(name="allowed_ip")
@@ -84,19 +87,28 @@ public class SharedLink extends ConnectUuidItem{
 		this.url = url;
 	}
 	
-	@Column(name="expires_after")
-	public int getExpiresAfter() {
-		return expiresAfter;
+	@Column(name="date_created")
+	public Timestamp getDateCreated(){
+		return this.dateCreated;
 	}
-	public void setExpiresAfter(int expiresAfter) {
-		this.expiresAfter = expiresAfter;
+
+	public void setDateCreated(Timestamp dateCreated) {
+		this.dateCreated = dateCreated;
+	}
+	
+	@Column(name="is_user_token")
+	public boolean isUserToken() {
+		return isUserToken;
+	}
+	public void setUserToken(boolean isUserToken) {
+		this.isUserToken = isUserToken;
 	}
 	
 	@Column(name="ca_uuid")
-	public UUID getCaUuid() {
+	public UUID getConservationArea() {
 		return caUuid;
 	}
-	public void setCaUuid(UUID caUuid) {
+	public void setConservationArea(UUID caUuid) {
 		this.caUuid = caUuid;
 	}
 	
@@ -108,11 +120,24 @@ public class SharedLink extends ConnectUuidItem{
 		this.ownerUsername = ownerUsername;
 	}
 	
-	@Column(name="is_user_token")
-	public boolean isUserToken() {
-		return isUserToken;
+	@Transient
+	/**
+	 * The amount of time the link should be valid
+	 * for in minutes.
+	 * @return
+	 */
+	public int getExpiresAfter(){
+		return this.expiresAfter;
 	}
-	public void setUserToken(boolean isUserToken) {
-		this.isUserToken = isUserToken;
+
+	@Transient
+	/**
+	 * The amount of time the link should be valid
+	 * for in minutes.
+	 * @return
+	 */
+	public void setExpiresAfter(int expiresAfter){
+		this.expiresAfter = expiresAfter;
 	}
+
 }

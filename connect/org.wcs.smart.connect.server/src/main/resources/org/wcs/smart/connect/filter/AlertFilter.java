@@ -154,9 +154,9 @@ public class AlertFilter {
 	
 	@SuppressWarnings("unchecked")
 	public List<Alert> getAlerts(Session s, String username){
-		Criteria c = s.createCriteria(Alert.class,"alerts");
-		c.createAlias("alerts.ca", "ca"); 
-		c.setFetchMode("alerts.ca", FetchMode.JOIN);
+		Criteria c = s.createCriteria(Alert.class,"alerts"); //$NON-NLS-1$
+		c.createAlias("alerts.ca", "ca");  //$NON-NLS-1$ //$NON-NLS-2$
+		c.setFetchMode("alerts.ca", FetchMode.JOIN); //$NON-NLS-1$
 		
 		
 		List<Alert> emptyList = new ArrayList<Alert>();

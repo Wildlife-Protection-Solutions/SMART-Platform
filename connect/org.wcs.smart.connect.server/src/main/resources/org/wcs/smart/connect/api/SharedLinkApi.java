@@ -24,6 +24,7 @@ package org.wcs.smart.connect.api;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -78,10 +79,12 @@ import org.wcs.smart.util.UuidUtils;
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
 public class SharedLinkApi extends HttpServlet{
-	private final Logger logger = Logger.getLogger(SharedLinkApi.class.getName());
-	private static final long serialVersionUID = 1L;
 	
 	public static final String PATH = "sharedlink"; //$NON-NLS-1$
+	
+	private final Logger logger = Logger.getLogger(SharedLinkApi.class.getName());
+	
+	private static final long serialVersionUID = 1L;
 	
 	@Context private ServletContext context;
 	@Context private HttpServletResponse response;
@@ -107,8 +110,8 @@ public class SharedLinkApi extends HttpServlet{
 			if(SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY)){
 				//only return links from the CA(s) they are CaAdmin users for
 				Criteria c = s.createCriteria(SmartUserAction.class)
-						.add(Restrictions.eq("username", request.getUserPrincipal().getName() ))
-						.add(Restrictions.eq("action", CaAdminAccountAction.KEY));
+						.add(Restrictions.eq("username", request.getUserPrincipal().getName() )) //$NON-NLS-1$
+						.add(Restrictions.eq("action", CaAdminAccountAction.KEY)); //$NON-NLS-1$
 				
 				List<SmartUserAction> list = (ArrayList<SmartUserAction>)c.list();
 		
@@ -116,7 +119,7 @@ public class SharedLinkApi extends HttpServlet{
 				for(SmartUserAction a : list ){//loop over each CA they are admins of
 					UUID caUuid = a.getResource();
 					
-					List<SharedLink> temp = s.createCriteria(SharedLink.class).add(Restrictions.eq("caUuid", caUuid)).list(); 
+					List<SharedLink> temp = s.createCriteria(SharedLink.class).add(Restrictions.eq("conservationArea", caUuid)).list();  //$NON-NLS-1$
 					for(SharedLink t : temp){//add all shared links from this CA
 						links.add(t);
 						t.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, t.getOwnerUuid())).getUsername() );
@@ -166,7 +169,7 @@ public class SharedLinkApi extends HttpServlet{
 			}
 
 			//some verification the URL is valid before we just accept any URL that users want to circumvent basic auth for.
-			Pattern pattern = Pattern.compile("api/(.*?)\\?");
+			Pattern pattern = Pattern.compile("api/(.*?)\\?"); //$NON-NLS-1$
 			Matcher matcher = pattern.matcher(newLink.getUrl());
 			if(matcher.find()){
 				String stringUuid = matcher.group(1);
@@ -176,7 +179,7 @@ public class SharedLinkApi extends HttpServlet{
 				Report report = (Report) s.get(Report.class, uuid);
 							
 				if (query == null && report == null){
-					throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid link requested, must have a valid report or query uuid.");
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.InvalidReportQueryLink", request.getLocale())); //$NON-NLS-1$
 				}
 				
 				boolean hasAccessQuery = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, uuid);
@@ -190,34 +193,33 @@ public class SharedLinkApi extends HttpServlet{
 					hasAccessAllReports = SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid());
 				}
 				if(!hasAccessQuery && !hasAccessReport && !hasAccessAllQueries && !hasAccessAllReports){
-					throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid link requested, must have user-access to the report or query requested.");
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.NoAccess", request.getLocale())); //$NON-NLS-1$
 				}
 				
 				//set CA uuid
 				if(query != null){
-					newLink.setCaUuid(query.getConservationArea().getUuid());
+					newLink.setConservationArea(query.getConservationArea().getUuid());
 				}else{
-					newLink.setCaUuid(report.getConservationArea().getUuid());
+					newLink.setConservationArea(report.getConservationArea().getUuid());
 				}
 				
-				//clean up any old, expired links. Seems like a vaguely reasonable place to do it: the more you create, the more often the clean-up occurs.
-				SQLQuery q = s.createSQLQuery("delete from connect.shared_links where expires_after != 0 AND expires_at < (select now())");
-				q.executeUpdate();
+				deleteExpiredLinks(s);
 			}
 		    
-			//set expiration date			
+			//set expiration date
+			Date created = new Date();
+			newLink.setDateCreated(new Timestamp(created.getTime()));
 			int mins = newLink.getExpiresAfter();
 			if (mins == 0){
 				//never expire
 				newLink.setExpiresAt(new Timestamp(4102444800000l));
 			}else if (mins > 0){
-				//long is important here or else anything over 35790 mins or so breaks the Integer limit when converted to milliseconds 
-				java.util.Date date= new java.util.Date();
-				long now = date.getTime();
+				//long is important here or else anything over 35790 mins or so breaks the Integer limit when converted to milliseconds
+				long now = created.getTime();
 				long ex = now + ((long)mins*1000*60);
 				newLink.setExpiresAt(new Timestamp(ex));
 			}else{
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "invalid expiresAfter value provided (valid values: 0 - 2147483647).");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.InvalidExpiresAfterValue",request.getLocale())); //$NON-NLS-1$
 			}
 
 			
@@ -237,6 +239,13 @@ public class SharedLinkApi extends HttpServlet{
 			s.getTransaction().commit();
 		}
 		return newLink;
+	}
+
+	private void deleteExpiredLinks(Session s) {
+		//clean up any old, expired links. Seems like a vaguely reasonable place to do it: 
+		//the more you create, the more often the clean-up occurs.
+		SQLQuery q = s.createSQLQuery("DELETE FROM connect.shared_links WHERE expires_at < now()"); //$NON-NLS-1$
+		q.executeUpdate();
 	}
 	
 	
@@ -271,18 +280,19 @@ public class SharedLinkApi extends HttpServlet{
 		try{
 		    
 			//set expiration date			
+			Date created = new Date();
+			newLink.setDateCreated(new Timestamp(created.getTime()));
 			int mins = newLink.getExpiresAfter();
 			if (mins == 0){
 				//never expire
 				newLink.setExpiresAt(new Timestamp(4102444800000l));
 			}else if (mins > 0){
 				//long is important here or else anything over 35790 mins or so breaks the Integer limit when converted to milliseconds 
-				java.util.Date date= new java.util.Date();
-				long now = date.getTime();
+				long now = created.getTime();
 				long ex = now + ((long)mins*1000*60);
 				newLink.setExpiresAt(new Timestamp(ex));
 			}else{
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "invalid expiresAfter value provided (valid values: 0 - 2147483647).");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.InvalidExplireValue",request.getLocale())); //$NON-NLS-1$
 			}
 
 			
@@ -295,12 +305,11 @@ public class SharedLinkApi extends HttpServlet{
 			
 			s.save(newLink);
 			
-			//clean up any old, expired links. Seems like a vaguely reasonable place to do it: the more you create, the more often the clean-up occurs.
-			SQLQuery q = s.createSQLQuery("delete from connect.shared_links where expires_after != 0 AND expires_at < (select now())");
-			q.executeUpdate();
+			//clean up any old, expired links. Seems like a vaguely reasonable place to do it: 
+			//the more you create, the more often the clean-up occurs.
+			deleteExpiredLinks(s);
 			
 		}catch(Exception e){
-			e.printStackTrace();
 			throw e;
 		}finally{
 			s.getTransaction().commit();
@@ -329,7 +338,7 @@ public class SharedLinkApi extends HttpServlet{
 			toDelete = HibernateManager.getSharedLink(s, uuid);
 			if (toDelete == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
-						MessageFormat.format(Messages.getString("SharedLink.NotFound", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
+						MessageFormat.format("", uuid));  //$NON-NLS-1$
 			}
 			
 			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){

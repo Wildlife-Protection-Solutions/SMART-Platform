@@ -83,6 +83,7 @@ function refreshLinkList(){
  	oReq.open("Get", SHAREDLINKURL, true);
  	oReq.send();
 }
+
 function getLinkListCallBack(){
 	if (this.status != 200) {
 		var msg = i18n("sharedlink.error") + ": ";
@@ -112,6 +113,7 @@ function createLinkTable(){
 	var parent = document.querySelector("div.linktable");
 
  	for (var i = 0; i < links.length; i ++){
+ 		
  		var openlink = SHAREDLINKSERVLETURL + "?uuid=" + links[i].uuid;
  		
  		var date = new Date(links[i].expiresAt);
@@ -121,12 +123,18 @@ function createLinkTable(){
  		
  		row.dataset.uuid = links[i].uuid;
 
- 		var aTag1 = document.createElement('a');
- 		aTag1.setAttribute('href',openlink);
- 		aTag1.setAttribute('target',"_blank");
- 		aTag1.innerHTML = resolve(openlink);
- 		aTag1.title="Open Link in New Tab"
- 		row.childNodes[0].appendChild(aTag1);
+ 		if (links[i].userToken){
+ 			var aTag1 = document.createElement('p');
+ 			aTag1.innerHTML = "token=" + links[i].uuid;
+	 		row.childNodes[0].appendChild(aTag1);
+ 		}else{
+	 		var aTag1 = document.createElement('a');
+	 		aTag1.setAttribute('href',openlink);
+	 		aTag1.setAttribute('target',"_blank");
+	 		aTag1.innerHTML = resolve(openlink);
+	 		aTag1.title="Open Link in New Tab"
+	 		row.childNodes[0].appendChild(aTag1);
+ 		}
  		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="deleteca delete-icon";

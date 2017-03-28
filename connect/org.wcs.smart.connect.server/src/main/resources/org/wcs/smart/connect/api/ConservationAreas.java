@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.MessageFormat;
@@ -62,6 +63,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.GenericJDBCException;
@@ -225,12 +227,28 @@ public class ConservationAreas extends HttpServlet{
 						proxy.setOrganization(smartca.getOrganization());
 						proxy.setOwner(smartca.getOwner());
 						
-						if(includeSpatialBoundaries){
-							proxy.setAdministrativeAreasJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.ADMIN + "'").uniqueResult() );
-							proxy.setCaBoundaryJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "'").uniqueResult() );
-							proxy.setBufferedManagementAreaJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  ) from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.BA + "'").uniqueResult() );
-							proxy.setManagementSectorsJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  )  from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.MNGT + "'").uniqueResult() );
-							proxy.setPatrolSectorsJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  )  from smart.area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.PATRL + "'").uniqueResult() );
+						if(includeSpatialBoundaries){							
+							StringBuilder sb = new StringBuilder();
+							sb.append("select st_asgeojson(1,  st_force2d(st_collect(geom))) "); //$NON-NLS-1$
+							sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
+							sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
+							
+							SQLQuery query = s.createSQLQuery(sb.toString());
+							query.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+							query.setParameter("type", AreaType.ADMIN.name()); //$NON-NLS-1$
+							proxy.setAdministrativeAreasJson((String)query.uniqueResult() );
+							
+							query.setParameter("type", AreaType.CA.name()); //$NON-NLS-1$
+							proxy.setCaBoundaryJson((String)query.uniqueResult() );
+							
+							query.setParameter("type", AreaType.BA.name()); //$NON-NLS-1$
+							proxy.setBufferedManagementAreaJson((String)query.uniqueResult() );
+							
+							query.setParameter("type", AreaType.MNGT.name()); //$NON-NLS-1$
+							proxy.setManagementSectorsJson((String)query.uniqueResult() );
+							
+							query.setParameter("type", AreaType.PATRL.name()); //$NON-NLS-1$
+							proxy.setPatrolSectorsJson((String)query.uniqueResult() );
 						}
 					}
 					proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, ca.getUuid()));
@@ -243,12 +261,25 @@ public class ConservationAreas extends HttpServlet{
 					
 					//Check FILTERS
 					boolean passedBoundary = false;
-					if(caJsonFilter != null && !caJsonFilter.equals("")){
+					if(caJsonFilter != null && !caJsonFilter.equals("")){ //$NON-NLS-1$
 						if(smartca == null){ //no-data CAs should not be returned when there is a geojson filter
 							passedBoundary = false;
 						}else{
 							//if the JSON passed in contains the CABoundry, return true;
-							Boolean result = (Boolean)s.createSQLQuery("Select st_contains(  (Select st_geomfromgeojson('" + caJsonFilter + "')) ,  (Select geom from area_geometries where ca_uuid = '" + smartca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "')  )").uniqueResult();
+							StringBuilder sb = new StringBuilder();
+							sb.append("SELECT count(*) FROM  "); //$NON-NLS-1$
+							sb.append (" (SELECT st_geomfromgeojson(:json) as the_geom) as a, "); //$NON-NLS-1$
+							sb.append(" smart.area_geometries b WHERE b.ca_uuid = :ca AND b.area_type = :area and st_intersects(a.the_geom, b.geom)"); //$NON-NLS-1$
+							sb.append(" LIMIT 1"); //$NON-NLS-1$
+							
+							
+							SQLQuery query = s.createSQLQuery(sb.toString());
+							query.setParameter("json", caJsonFilter); //$NON-NLS-1$
+							query.setParameter("ca", smartca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+							query.setParameter("area", AreaType.CA.name()); //$NON-NLS-1$
+							Boolean result = ((BigInteger)query.uniqueResult()).intValue() > 0;
+							
+									
 							if(result != null && result == true){
 								passedBoundary=true;//can't cast straight to a bool because the result is null if there is no caBoundary layer
 							}else{
@@ -259,7 +290,7 @@ public class ConservationAreas extends HttpServlet{
 						passedBoundary=true; //no filter provided or it is blank, assume they want everything
 					}
 					boolean passedOrg = false;
-					if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase().contains(organizationFilter.toUpperCase())) ){
+					if(organizationFilter == null || organizationFilter.equals("") || (proxy.getOrganization() != null && proxy.getOrganization().toUpperCase().contains(organizationFilter.toUpperCase())) ){ //$NON-NLS-1$
 						passedOrg = true;
 					}else{
 						passedOrg = false;
@@ -669,12 +700,29 @@ public class ConservationAreas extends HttpServlet{
 				proxy.setOrganization(ca.getOrganization());
 				proxy.setOwner(ca.getOwner());
 				
-				proxy.setAdministrativeAreasJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  )  from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.ADMIN + "'").uniqueResult() );
-				proxy.setCaBoundaryJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  )  from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.CA + "'").uniqueResult() );
-				proxy.setBufferedManagementAreaJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  ) from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.BA + "'").uniqueResult() );
-				proxy.setManagementSectorsJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  )  from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.MNGT + "'").uniqueResult() );
-				proxy.setPatrolSectorsJson((String)s.createSQLQuery("select st_asgeojson(1,  st_force2d(st_collect(geom))  )  from smart.area_geometries where ca_uuid = '" + ca.getUuid().toString() + "' and area_type = '" + AreaType.PATRL + "'").uniqueResult() );
+				StringBuilder sb = new StringBuilder();
+				sb.append("select st_asgeojson(1,  st_force2d(st_collect(geom))) "); //$NON-NLS-1$
+				sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
+				sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
+				
+				SQLQuery query = s.createSQLQuery(sb.toString());
+				query.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+				query.setParameter("type", AreaType.ADMIN.name()); //$NON-NLS-1$
+				proxy.setAdministrativeAreasJson((String)query.uniqueResult() );
+				
+				query.setParameter("type", AreaType.CA.name()); //$NON-NLS-1$
+				proxy.setCaBoundaryJson((String)query.uniqueResult() );
+				
+				query.setParameter("type", AreaType.BA.name()); //$NON-NLS-1$
+				proxy.setBufferedManagementAreaJson((String)query.uniqueResult() );
+				
+				query.setParameter("type", AreaType.MNGT.name()); //$NON-NLS-1$
+				proxy.setManagementSectorsJson((String)query.uniqueResult() );
+				
+				query.setParameter("type", AreaType.PATRL.name()); //$NON-NLS-1$
+				proxy.setPatrolSectorsJson((String)query.uniqueResult() );
 			}
+			
 			proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid()));
 			return Response.ok().entity(proxy).build();
 		}catch (SmartConnectException ex){
@@ -752,10 +800,10 @@ public class ConservationAreas extends HttpServlet{
 			if (serverDelete == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
-			if((version.equals(null) || version.equals("")) && serverDelete.getVersion()==null){
+			if((version.equals(null) || version.equals("")) && serverDelete.getVersion()==null){ //$NON-NLS-1$
 				//no problem, you can delete unversioned CAs without a version paramater.
-			}else if((version == null || version.equals("")) || !(serverDelete.getVersion().equals(UUID.fromString(version))) ){ //null version no longer acceptable at this point, or it doens't match the version
-				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionDoesNotExist" + serverDelete.getVersion() + "  -- " + UUID.fromString(version), SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+			}else if((version == null || version.equals("")) || !(serverDelete.getVersion().equals(UUID.fromString(version))) ){ //null version no longer acceptable at this point, or it doens't match the version //$NON-NLS-1$
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionDoesNotExist" + serverDelete.getVersion() + "  -- " + UUID.fromString(version), SmartUtils.getRequestLocale(request))); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			validateDelete(serverDelete.getUuid(), s);
 

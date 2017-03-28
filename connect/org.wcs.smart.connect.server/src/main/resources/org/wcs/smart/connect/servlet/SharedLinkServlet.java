@@ -59,13 +59,13 @@ public class SharedLinkServlet extends HttpServlet {
 		SharedLink link;
 		UUID uuid; 
 		try{
-			uuid = UUID.fromString(request.getParameter("uuid"));
+			uuid = UUID.fromString(request.getParameter("uuid")); //$NON-NLS-1$
 		}catch(Exception e){
-			response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidUuid", request.getLocale()));
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidUuid", request.getLocale())); //$NON-NLS-1$
 			return;
 		}
 		String path = null;
-		String username = "";
+		String username = ""; //$NON-NLS-1$
 		
 		Session s = HibernateManager.getSession(request.getServletContext());
 		s.beginTransaction();
@@ -79,7 +79,7 @@ public class SharedLinkServlet extends HttpServlet {
 			java.util.Date today = new java.util.Date();
 			Timestamp now = new Timestamp(today.getTime());
 			if(link.getExpiresAt().before(now)){
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale()));
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale())); //$NON-NLS-1$
 				return;
 			}
 			
@@ -87,7 +87,7 @@ public class SharedLinkServlet extends HttpServlet {
 			if(link.getAllowedIp() == null || link.getAllowedIp().equals(userip)){
 				//all good, IP is blank or matches
 			}else{
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidIp", request.getLocale())+ " " + userip );
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.InvalidIp", request.getLocale())+ " " + userip ); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}
 			
@@ -104,7 +104,7 @@ public class SharedLinkServlet extends HttpServlet {
 			RequestDispatcher rd = request.getRequestDispatcher(path);
 			rd.forward(wrappedRequest, response); //wrapped request actually works nicer here to, no code to look for j_username anymore.
 		}else{
-			response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkNotFound", request.getLocale()));
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkNotFound", request.getLocale())); //$NON-NLS-1$
 		}
 	}
 

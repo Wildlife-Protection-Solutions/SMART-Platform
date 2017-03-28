@@ -812,7 +812,9 @@ public class ConnectUserAction extends HttpServlet {
 		
 		//is the resource a Conservation Area
 		if(resourceUuid != null){
-			ConservationArea ca = (ConservationArea) s.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid",resourceUuid)).uniqueResult();
+			ConservationArea ca = (ConservationArea) s.createCriteria(ConservationArea.class)
+					.add(Restrictions.eq("uuid",resourceUuid)) //$NON-NLS-1$
+					.uniqueResult(); 
 			if (ca != null){
 				//is the user an admin ca?
 				for (UUID u : list){
@@ -835,7 +837,9 @@ public class ConnectUserAction extends HttpServlet {
 		
 		
 		//same as above but now we check reports
-		Report r = (Report)s.createCriteria(Report.class).add(Restrictions.eq("uuid", resourceUuid)).uniqueResult();
+		Report r = (Report)s.createCriteria(Report.class)
+				.add(Restrictions.eq("uuid", resourceUuid)) //$NON-NLS-1$
+				.uniqueResult(); 
 		if(r != null ){
 			for (UUID u : list){
 				if(u.equals(r.getConservationArea().getUuid() ) ){

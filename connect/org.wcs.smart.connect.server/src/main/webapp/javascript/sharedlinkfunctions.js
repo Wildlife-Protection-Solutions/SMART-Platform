@@ -61,7 +61,6 @@ function linkCreated(){
 	
 	document.getElementById("quickMinSelect").disabled=true;
 	document.getElementById("expiresAfter").disabled=true;
-	
 }
 
 
@@ -83,6 +82,7 @@ function tokenCreated(){
 	
 	document.getElementById("quickMinSelect").disabled=true;
 	document.getElementById("expiresAfter").disabled=true;
+	document.getElementById("allowedIp").disabled=true;
 	
 	refreshLinkList();
 	

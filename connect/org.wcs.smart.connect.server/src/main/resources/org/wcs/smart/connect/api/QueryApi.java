@@ -105,8 +105,8 @@ public class QueryApi extends HttpServlet{
 	public static final String PATH = "query"; //$NON-NLS-1$
 	
 	public enum Direction{ 
-		UP("ASC"), 
-		DOWN("DESC");
+		UP("ASC"),  //$NON-NLS-1$
+		DOWN("DESC"); //$NON-NLS-1$
 		 
 		public String sql;
 		
@@ -158,7 +158,7 @@ public class QueryApi extends HttpServlet{
 
 		UUID uuid = UuidUtils.stringToUuid(queryUuid);
 		QueryApi.Direction sortDirectionInt = QueryApi.Direction.UP;
-		if(sortDirection != null && (sortDirection.toLowerCase().equals("descending") || sortDirection.toLowerCase().equals("desc") ) ){
+		if(sortDirection != null && (sortDirection.toLowerCase().equals("descending") || sortDirection.toLowerCase().equals("desc") ) ){  //$NON-NLS-1$//$NON-NLS-2$
 				sortDirectionInt = QueryApi.Direction.DOWN;
 		}
 		
@@ -255,9 +255,9 @@ public class QueryApi extends HttpServlet{
 			result = engine.executeQuery(query, params);
 			
 			ProjectionProvider prjProvider = null;
-			if(srid != null && !srid.equals("")){
+			if(srid != null && !srid.equals("")){ //$NON-NLS-1$
 				Projection prj = new Projection();
-				prj.setParsedCoordinateReferenceSystem(CRS.decode("EPSG:" + srid, true));
+				prj.setParsedCoordinateReferenceSystem(CRS.decode("EPSG:" + srid, true)); //$NON-NLS-1$
 				prjProvider= new ProjectionProvider(prj);
 			}else{
 				//assume to default projection

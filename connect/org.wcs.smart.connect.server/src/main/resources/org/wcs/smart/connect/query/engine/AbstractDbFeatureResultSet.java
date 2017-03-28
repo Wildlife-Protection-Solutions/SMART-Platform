@@ -280,10 +280,10 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
-				sql.append("(SELECT rl." + value + " FROM "); //$NON-NLS-1$
+				sql.append("(SELECT rl." + value + " FROM "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
 				sql.append(queryDataTable);
-				sql.append(tableListSuffix + " rl on rl." + uuidColumn + " = wpoa.list_element_uuid "); //$NON-NLS-1$
+				sql.append(tableListSuffix + " rl on rl." + uuidColumn + " = wpoa.list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
 				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
@@ -297,9 +297,9 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				sql.append("UPDATE ");//$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
-				sql.append("(SELECT rl." + value + " FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
+				sql.append("(SELECT rl." + value + " FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(queryDataTable);
-				sql.append(tableTreeSuffix + " rl on rl." + uuidColumn + " = wpoa.tree_node_uuid "); //$NON-NLS-1$
+				sql.append(tableTreeSuffix + " rl on rl." + uuidColumn + " = wpoa.tree_node_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
 				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
