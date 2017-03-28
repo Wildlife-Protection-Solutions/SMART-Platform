@@ -137,6 +137,7 @@ labels_en= {
 "ca.errorcreatingca":"Error creating new Conservation Area",
 "ca.unauthorized":"Unauthorized",
 "ca.erroroccurred":"Error occurred.",
+"ca.loadinglabel":"loading...",
 "query.refreshingqueries": "Refreshing Queries Table...",
 "query.runquery":"Run Query",
 "query.noqueriesfound":"No queries found. Try a different search or contact your adminsitrator to give you permissions to queries you are looking for.",

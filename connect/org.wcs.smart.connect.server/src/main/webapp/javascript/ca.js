@@ -66,6 +66,23 @@ function cancelCaDownload(){
 }
 
 function showcainfo(){
+	
+	var loadinglabel = i18n("ca.loadinglabel");
+	
+	document.querySelector("#infolabel").innerHTML = loadinglabel;
+	document.querySelector("#infostatus").innerHTML = loadinglabel;
+	document.querySelector("#infouuid").innerHTML = loadinglabel;
+	document.querySelector("#infodescription").innerHTML = loadinglabel;
+	document.querySelector("#infodesignation").innerHTML = loadinglabel;
+	document.querySelector("#infoversion").innerHTML = loadinglabel;
+	document.querySelector("#inforevision").innerHTML = loadinglabel;
+	document.querySelector("#infoorganization").innerHTML = loadinglabel;
+	document.querySelector("#infopointofcontact").innerHTML = loadinglabel;
+	document.querySelector("#infolocation").innerHTML = loadinglabel;
+	document.querySelector("#infoowner").innerHTML = loadinglabel;
+	
+	displayDialog('caInfoDialog', 'main');
+	
 	var cauuid = this.dataset.cauuid;
 	var geturl = CAURL + '/' + encodeURIComponent(cauuid);
 	var oReq = new XMLHttpRequest();
@@ -103,7 +120,6 @@ function showcainfodialog(){
 	document.querySelector("#infolocation").innerHTML = ca.location;
 	document.querySelector("#infoowner").innerHTML = ca.owner;
 	
-	displayDialog('caInfoDialog', 'main');
 	return false;
 }
 
