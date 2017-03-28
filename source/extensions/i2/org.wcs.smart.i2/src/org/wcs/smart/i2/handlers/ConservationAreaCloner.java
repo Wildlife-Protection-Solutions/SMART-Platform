@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.handlers;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,7 +82,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			//clone record template
 			Path source = IntelReportManager.INSTANCE.getRecordTemplate(engine.getTemplateCa());
 			Path target = IntelReportManager.INSTANCE.getRecordTemplate(engine.getNewCa());
-			FileUtils.copyFile(source.toFile(), target.toFile());
+			if (Files.exists(source)) FileUtils.copyFile(source.toFile(), target.toFile());
 			monitor.worked(1);
 		}finally{
 			monitor.done();
