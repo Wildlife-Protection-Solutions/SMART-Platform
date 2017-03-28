@@ -49,25 +49,17 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	private IDatabaseConnectionProvider provider = null;
 	private Session session = null;
 	private ScrollableResults itemCursor = null;
-		
+	private UUID ca;
 	private boolean createTransaction = false;
+	private AreaType atype;
 	
 	public SmartFeatureReader(UUID ca,
 			AreaType type,SimpleFeatureType ftype, 
 			IDatabaseConnectionProvider dbProvider) {
+		this.ca = ca;
 		this.provider = dbProvider;
-		this.session = dbProvider.openSession();
-		if (!session.getTransaction().isActive()){
-			this.session.beginTransaction();
-			createTransaction = true;
-		}
-		
-		itemCursor = session.createCriteria(Area.class)
-				.add(Restrictions.eq("conservationArea.uuid", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("type", type)).setReadOnly(true).setCacheable(false).scroll(ScrollMode.FORWARD_ONLY); //$NON-NLS-1$
-		
-		
 		this.ftype = ftype;
+		this.atype = type;
 	}
 	
 
@@ -76,14 +68,16 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public void close() throws IOException {
-		itemCursor.close();
-		if (createTransaction){
-			//we created this session/transaction so we need to cleanup
-			//otherwise somebody else created it and we are just using it; so
-			//donot cleanup
-			session.getTransaction().rollback();
+		if (itemCursor != null) itemCursor.close();
+		if (session != null){
+			if (createTransaction){
+				//we created this session/transaction so we need to cleanup
+				//otherwise somebody else created it and we are just using it; so
+				//donot cleanup
+				session.getTransaction().rollback();
+			}
+			provider.finishSession(session);
 		}
-		provider.finishSession(session);
 	}
 
 	/* (non-Javadoc)
@@ -99,6 +93,19 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	 */
 	@Override
 	public boolean hasNext() throws IOException {
+		if (itemCursor == null){
+			this.session = provider.openSession();
+			if (!session.getTransaction().isActive()){
+				this.session.beginTransaction();
+				createTransaction = true;
+			}
+			
+			itemCursor = session.createCriteria(Area.class)
+					.add(Restrictions.eq("conservationArea.uuid", ca)) //$NON-NLS-1$
+					.add(Restrictions.eq("type", atype)).setReadOnly(true) //$NON-NLS-1$
+					.setCacheable(false).scroll(ScrollMode.FORWARD_ONLY); 
+			
+		}
 		return itemCursor.next();
 	}
 
