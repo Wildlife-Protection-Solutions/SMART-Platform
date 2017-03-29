@@ -34,6 +34,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.search.DerbyFuzzyFunctions;
+
 /**
  * Model class of i_entity_attribute_value.
  * 
@@ -87,6 +90,35 @@ public class IntelEntityAttributeValue extends IntelValueItem{
 	
 	public void setMetaphone(String meta){
 		this.meta = meta;
+	}
+	
+	@Override
+	public void setAttributeListItem(IntelAttributeListItem listItem){
+		super.setAttributeListItem(listItem);
+		setMetaphone(null);
+	}
+		
+
+	@Override
+	public void setStringValue(String stringValue){
+		this.stringValue = stringValue;
+		if (getAttribute().getType() == AttributeType.TEXT){
+			setMetaphone(DerbyFuzzyFunctions.doubleMetaphone(stringValue));
+		}else{
+			setMetaphone(null);
+		}
+	}
+	
+	@Override
+	public void setNumberValue(Double doubleValue){
+		super.setNumberValue(doubleValue);
+		setMetaphone(null);
+	}
+	
+	@Override
+	public void setNumberValue2(Double doubleValue){
+		super.setNumberValue2(doubleValue);
+		setMetaphone(null);
 	}
 	
 	/**

@@ -193,15 +193,10 @@ public class AddIntelligenceJob extends Job {
 				"ALTER TABLE smart.i_record_attribute_value ADD CONSTRAINT irecordattvalue_attributeuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.i_recordsource_attribute (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.i_record ADD CONSTRAINT irecord_sourceuuid_fk FOREIGN KEY (source_uuid) REFERENCES smart.i_recordsource (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.i_record_attribute_value_list ADD CONSTRAINT i_recordattributelist_valueuuid_fk FOREIGN KEY (value_uuid) REFERENCES smart.i_record_attribute_value (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE",
-				
-				 
+								 
 				 // FUNCTIONS AND TRIGGERS FOR METAPHONE FUZZY SEARCH
 				 "create function smart.metaphoneContains (metaphone varchar(4), searchstring varchar(32600))  returns boolean LANGUAGE JAVA PARAMETER STYLE JAVA DETERMINISTIC NO SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME 'org.wcs.smart.i2.search.DerbyFuzzyFunctions.metaphoneContains'",
-				 "create function smart.double_metaphone (string varchar(32600))  returns varchar(32600) LANGUAGE JAVA PARAMETER STYLE JAVA DETERMINISTIC NO SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME 'org.wcs.smart.i2.search.DerbyFuzzyFunctions.doubleMetaphone'",
-				 "GRANT EXECUTE ON FUNCTION smart.double_metaphone TO admin,data_entry,manager,analyst",
 				 "GRANT EXECUTE ON FUNCTION smart.metaphoneContains TO admin,data_entry,manager,analyst",
-				 "create trigger i_entity_attribute_value_insert_trg AFTER INSERT ON smart.i_entity_attribute_value REFERENCING NEW AS NEW FOR EACH ROW UPDATE smart.i_entity_attribute_value set metaphone = smart.double_metaphone(new.string_value) where entity_uuid = new.entity_uuid and attribute_uuid = new.attribute_uuid",
-				 "create trigger i_entity_attribute_value_update_trg AFTER UPDATE of string_value ON smart.i_entity_attribute_value REFERENCING NEW AS NEW FOR EACH ROW UPDATE smart.i_entity_attribute_value set metaphone = smart.double_metaphone(new.string_value) where entity_uuid = new.entity_uuid and attribute_uuid = new.attribute_uuid"
 		};
 		
 		session.doWork(new Work(){
