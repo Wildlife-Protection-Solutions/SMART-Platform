@@ -38,7 +38,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -661,12 +664,18 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		return this;
 	}
 	
-	private void setWorkingSet(){
+	private synchronized void setWorkingSet(){
 		if (configureLayersJob == null){
 			configureLayersJob = new WorkingSetMapLayersJob(getMap(), parentContext, visibilityListener);
+			configureLayersJob.addJobChangeListener(new JobChangeAdapter() {
+				@Override
+				public void done(IJobChangeEvent event) {
+					getWorkingSetQueryLayersJob().schedule();			
+				}
+			});
 		}
 		configureLayersJob.schedule();
-		getWorkingSetQueryLayersJob().schedule();
+		
 	}
 	
 	private void rerunQueryLayers(){

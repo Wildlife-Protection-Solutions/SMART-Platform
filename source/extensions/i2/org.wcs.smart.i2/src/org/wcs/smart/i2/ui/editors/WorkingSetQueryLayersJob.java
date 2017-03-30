@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -110,18 +111,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		IntelWorkingSet workingset = null;
-		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
-			Session s = HibernateManager.openSession();
-			try{
-				workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-				if (workingset.getQueries() != null){
-					workingset.getQueries().forEach(e->e.getQuery().getName());
-				}
-			}finally{
-				s.close();
-			}
-		}
-	
+		
 		//remove all existing query layers from map
 		List<ILayer> layersToRemove = new ArrayList<ILayer>();
 		List<ILayer> currentMapLayers = new ArrayList<ILayer>();
@@ -146,6 +136,18 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 			map.sendCommandASync(cmd);
 		}
 					
+		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
+			Session s = HibernateManager.openSession();
+			try{
+				workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
+				if (workingset.getQueries() != null){
+					workingset.getQueries().forEach(e->e.getQuery().getName());
+				}
+			}finally{
+				s.close();
+			}
+		}
+		
 		if (workingset != null){
 			Date[] dates = null;
 			String dateFilter = workingset.getEntityDateFilter();
@@ -192,6 +194,29 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 					
 					@Override
 					protected void onComplete(IPagedQueryResultSet results) {
+						UUID ws = WorkingSetManager.INSTANCE.getActiveWorkingSet();
+						if (ws == null) return;
+						
+						
+						//ensure the query is still part of the working set; it might have been deleted by the user
+						boolean add = false;
+						Session s = HibernateManager.openSession();
+						try{
+							IntelWorkingSet temp = (IntelWorkingSet) s.get(IntelWorkingSet.class, ws);
+							if (temp.getQueries() != null){
+								for (IntelWorkingSetQuery tq : temp.getQueries()){
+									if (tq.equals(query)){
+										add = true;
+										break;
+									}
+								}
+							}
+						}finally{
+							s.close();
+						}
+						if (!add) return;
+						
+						
 						if (results == null){
 							//Do something better here - show something on tree with error image overlay
 							Intelligence2PlugIn.displayLog(Messages.WorkingSetQueryLayersJob_QueryRunError, null);
