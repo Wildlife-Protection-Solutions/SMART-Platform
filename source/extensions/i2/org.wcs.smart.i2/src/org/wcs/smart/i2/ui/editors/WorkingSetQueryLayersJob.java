@@ -9,6 +9,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -46,9 +47,26 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 
 	private List<IntelRecordObservationQuery> queriesToUpdate = null;
 	
+	/*
+	 * simple mutex so this job is only run once at a time
+	 */
+	private static final ISchedulingRule MUTEX = new ISchedulingRule() {
+		
+		@Override
+		public boolean isConflicting(ISchedulingRule rule) {
+			return (rule == MUTEX);
+		}
+		
+		@Override
+		public boolean contains(ISchedulingRule rule) {
+			return (rule == MUTEX);
+		}
+	};
+	
 	public WorkingSetQueryLayersJob(Map map, IEclipseContext context, ILayerListener... layerlisteners){
 		super(map, context, layerlisteners);
 		setName("loading working set query map layers"); //$NON-NLS-1$
+		setRule(MUTEX);
 	}
 	
 	public WorkingSetQueryLayersJob clone(){
@@ -106,7 +124,9 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 	
 		//remove all existing query layers from map
 		List<ILayer> layersToRemove = new ArrayList<ILayer>();
-		for (ILayer l : map.getLayersInternal()){
+		List<ILayer> currentMapLayers = new ArrayList<ILayer>();
+		currentMapLayers.addAll(map.getMapLayers());
+		for (ILayer l : currentMapLayers){
 			try{
 				if (canDelete(l, monitor)){
 					layersToRemove.add(l);

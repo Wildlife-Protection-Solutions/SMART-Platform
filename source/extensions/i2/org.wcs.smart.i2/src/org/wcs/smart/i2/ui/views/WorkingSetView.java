@@ -217,12 +217,12 @@ public class WorkingSetView {
 		DateFilterComposite.DateFilter[] defaultFilters = new DateFilter[]{
 				DateFilter.LAST_30_DAYS,
 				DateFilter.LAST_60_DAYS,
-				DateFilter.LAST_YEAR,
+				DateFilter.LAST_1_YEARS,
 				DateFilter.LAST_5_YEARS,
 				DateFilter.ALL,
 				DateFilter.CUSTOM
 		};
-		DateFilterComposite.DateFilter initialDateFilter = DateFilter.LAST_YEAR;
+		DateFilterComposite.DateFilter initialDateFilter = DateFilter.LAST_1_YEARS;
 		dateComp = new DateFilterDropDownComposite(core, defaultFilters, initialDateFilter);
 		toolkit.adapt(dateComp);
 		((GridLayout)dateComp.getLayout()).marginWidth = 5;
