@@ -56,6 +56,10 @@ public class QueryDataSource extends ContentDataStore{
 	public QueryDataSource(IPagedQueryResultSet results){
 		this.results = results;
 	}
+	
+	public void setResults(IPagedQueryResultSet results){
+		this.results = results;
+	}
 
 	/**
 	 * @see org.geotools.data.AbstractDataStore#dispose()

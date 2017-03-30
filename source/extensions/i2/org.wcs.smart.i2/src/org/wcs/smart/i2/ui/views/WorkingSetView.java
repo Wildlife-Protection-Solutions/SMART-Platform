@@ -46,6 +46,7 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -401,7 +402,7 @@ public class WorkingSetView {
 		});
 		
 		MenuItem delete = new MenuItem(menu, SWT.PUSH);
-		delete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		delete.setText(Messages.WorkingSetView_RemoveLabel);
 		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		delete.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -479,6 +480,9 @@ public class WorkingSetView {
 				}
 				if (s != null && s instanceof IStructuredSelection) {
 					IStructuredSelection sel = (IStructuredSelection)s;
+					List<RecordEditorInput> records = new ArrayList<>();
+					List<IntelEntity> entities = new ArrayList<>();
+					List<UUID> queries = new ArrayList<>();
 					for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 						Object element = (Object)iterator.next();
 						
@@ -499,16 +503,21 @@ public class WorkingSetView {
 						}
 						
 						if (element instanceof IntelRecord){
-							WorkingSetManager.INSTANCE.addToActiveWorkingSet(new RecordEditorInput((IntelRecord)element), context);
+							records.add(new RecordEditorInput((IntelRecord) element));
+							
 						}else if (element instanceof RecordEditorInput){
-							WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput)element, context);
+							records.add((RecordEditorInput) element);
 						}else if (element instanceof IntelEntity){
-							WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelEntity)element, context);		
+							entities.add((IntelEntity) element);
+									
 						}else if (element instanceof IntelRecordObservationQuery){
-							WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(((IntelRecordObservationQuery)element).getUuid(), context);
+							queries.add(((IntelRecordObservationQuery)element).getUuid());
 						}
 						
 					}
+					WorkingSetManager.INSTANCE.addRecordInputToActiveWorkingSetRecord(records, context);
+					WorkingSetManager.INSTANCE.addEntityToActiveWorkingSet(entities, context);
+					WorkingSetManager.INSTANCE.addQueryUuidToActiveWorkingSet(queries, context);
 				}
 				
 				parent.removePaintListener(paintListener);
@@ -549,37 +558,41 @@ public class WorkingSetView {
 				toDeleteItems.add((IntelWorkingSetItem) x);
 			}
 		}
+		List<IntelRecord> records = new ArrayList<>();
+		List<IntelEntity> entities = new ArrayList<>();
+		List<IntelRecordObservationQuery> queries = new ArrayList<>();
 		for (IntelWorkingSetItem toDelete: toDeleteItems){
 			if (toDelete.getCategory() == IntelWorkingSetCategory.ENTITY){
-				IntelEntity i = null;
 				Session s = HibernateManager.openSession();
 				try{
-					i = (IntelEntity) s.get(IntelEntity.class, toDelete.getUuid());
+					IntelEntity i = (IntelEntity) s.get(IntelEntity.class, toDelete.getUuid());
 					i.getIdAttributeAsText();
+					entities.add(i);
 				}finally{
 					s.close();
 				}
-				WorkingSetManager.INSTANCE.removeFromWorkingSet(i, context);
 			}else if (toDelete.getCategory() == IntelWorkingSetCategory.RECORD){
-				IntelRecord i = null;
 				Session s = HibernateManager.openSession();
 				try{
-					i = (IntelRecord) s.get(IntelRecord.class, toDelete.getUuid());
+					IntelRecord i = (IntelRecord) s.get(IntelRecord.class, toDelete.getUuid());
+					records.add(i);
 				}finally{
 					s.close();
 				}
-				WorkingSetManager.INSTANCE.removeFromWorkingSet(i, context);
 			}else if (toDelete.getCategory() == IntelWorkingSetCategory.QUERIES){
-				IntelRecordObservationQuery i = null;
 				Session s = HibernateManager.openSession();
 				try{
-					i = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, toDelete.getUuid());
+					IntelRecordObservationQuery i = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, toDelete.getUuid());
+					queries.add(i);
 				}finally{
 					s.close();
 				}
-				WorkingSetManager.INSTANCE.removeFromWorkingSet(i, context);
+				
 			}
 		}
+		WorkingSetManager.INSTANCE.removeRecordFromWorkingSet(records, context);
+		WorkingSetManager.INSTANCE.removeEntityFromWorkingSet(entities, context);
+		WorkingSetManager.INSTANCE.removeQueryFromWorkingSet(queries, context);
 	}
 
 
@@ -827,6 +840,7 @@ public class WorkingSetView {
 	 */
 	public static IntelWorkingSet createWorkingSet(Shell activeShell){
 		String name = getWorkingsetName(activeShell, null);
+		if (name == null) return null;
 		
 		IntelWorkingSet workingSet = new IntelWorkingSet();
 		workingSet.setConservationArea(SmartDB.getCurrentConservationArea());

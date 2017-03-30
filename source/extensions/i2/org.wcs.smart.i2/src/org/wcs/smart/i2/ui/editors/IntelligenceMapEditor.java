@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -115,9 +116,13 @@ import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
+import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
+import org.wcs.smart.i2.udig.query.QueryDataSourceFactory;
+import org.wcs.smart.i2.udig.query.QueryService;
+import org.wcs.smart.i2.udig.query.QueryService.State;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.views.LayerVisibleEvent;
@@ -400,6 +405,12 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		EventHandler handler = new EventHandler() {
 			@Override
 			public void handleEvent(Event event) {
+				List<ILayer> toDelete = new ArrayList<>();
+				for (ILayer l : getMap().getMapLayers()){
+					Object x = l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY) ;
+					if (x != null && ((Boolean)x)) toDelete.add(l);
+				}
+				WorkingSetMapLayersJob.removeLayers(getMap(), toDelete);
 				setWorkingSet();
 			}
 		};
@@ -679,6 +690,19 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	}
 	
 	private void rerunQueryLayers(){
+		//reset the state of the layers
+		//then refresh
+		for (ILayer l : getMap().getMapLayers()){
+			if (l.getGeoResource().canResolve(QueryService.class)){
+				try{
+					QueryService currentService = l.getGeoResource().resolve(QueryService.class, new NullProgressMonitor());
+					currentService.setState(State.NO_RESULTS);						
+				}catch (Exception ex){
+					ex.printStackTrace();
+				}
+				
+			}
+		}
 		getWorkingSetQueryLayersJob().schedule();
 	}
 	

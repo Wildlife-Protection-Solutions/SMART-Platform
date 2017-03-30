@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.editors.query;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -342,7 +343,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		
 		wsetItem = new ToolItem(headerToolbar, SWT.PUSH);
 		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-		wsetItem.addListener(SWT.Selection, (event)->WorkingSetManager.INSTANCE.addToActiveWorkingSet(getQuery(), context));
+		wsetItem.addListener(SWT.Selection, (event)->WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(Collections.singleton(getQuery()), context));
 		wsetItem.setToolTipText(Messages.IntelQueryEditor_AddWsTooltip);
 		wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
 		

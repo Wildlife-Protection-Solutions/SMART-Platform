@@ -54,15 +54,23 @@ public class QueryService extends IService {
 	 */
 	public static final String SERVICE_ID = "org.wcs.smart.patrol.udig.catalog.i2.query"; //$NON-NLS-1$
 	
+	public enum State{
+		NO_RESULTS,
+		SCHEDULED,
+		RESULTS
+	}
+	
+	private State state;
+	
 	private Map<String, Serializable> params;
 	private URL url;	
 	private volatile List<QueryGeoResource> members;
 	private DataStore ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
-	
 	private IPagedQueryResultSet results;
-	
 	private String queryName;
+	
+	
 	/**
 	 * Creates a new query service .
 	 * 
@@ -75,6 +83,7 @@ public class QueryService extends IService {
 		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, queryUuid);
 		this.url = QueryServiceExtension.createURL(this.params);
 		this.queryName = queryName;
+		this.state = results == null ? State.NO_RESULTS : State.RESULTS;
 	}
 
 	
@@ -82,6 +91,17 @@ public class QueryService extends IService {
 		return this.queryName;
 	}
 	
+	/**
+	 * 
+	 * @return the state of the query service results
+	 */
+	public synchronized State getState(){
+		return this.state;
+	}
+	
+	public synchronized void setState(State state){
+		this.state = state;
+	}
 	/**
 	 * @return the query 
 	 */
@@ -98,11 +118,6 @@ public class QueryService extends IService {
 	public void refresh(IProgressMonitor monitor) throws IOException{
 		for (IGeoResource member : resources(monitor)){
 			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
-		}
-		if (ds != null){
-			for (String name : ds.getTypeNames()){
-				ds.removeSchema(name);
-			}
 		}
 	}	
 	
@@ -200,11 +215,12 @@ public class QueryService extends IService {
             dsInstantiationLock.lock();
             try {
                 if (ds == null) {
-                	if (results != null){
+//                	if (results != null){
                 		ds = new QueryDataSource(getResultSet());
-                	}else{
-                		throw new IOException("Unable to create datastore - query results not provided."); //$NON-NLS-1$
-                    }
+//                	}else{
+////                		throw new IOException("Unable to create datastore - query results not provided."); //$NON-NLS-1$
+//                		ds = null;
+//                    }
                 }
             } finally {
                 dsInstantiationLock.unlock();

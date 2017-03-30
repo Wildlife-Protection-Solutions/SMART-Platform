@@ -23,8 +23,10 @@ package org.wcs.smart.i2;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -89,246 +91,275 @@ public enum WorkingSetManager {
 		s.delete(set);
 	}
 	
-	public void addToActiveWorkingSet(RecordEditorInput input, IEclipseContext context){
-		if (activeWorkingSet == null) return;
+	public void addRecordInputToActiveWorkingSetRecord(Collection<RecordEditorInput> inputs, IEclipseContext context){
+		if (activeWorkingSet == null || inputs.isEmpty()) return;
 		IntelWorkingSet wset = null;
-		boolean found = false;
+		boolean modified = false;
 		Session s = HibernateManager.openSession();
 		try{
-			s.beginTransaction();
-			wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
-			IntelRecord record = (IntelRecord) s.get(IntelRecord.class, input.getUuid());
-			if (wset != null){
-				for (IntelWorkingSetRecord r : wset.getRecords()){
-					if (r.getRecord().equals(record)){
-						found = true;
-						break;
+			for (RecordEditorInput input : inputs){
+				try{
+					s.beginTransaction();
+					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
+					IntelRecord record = (IntelRecord) s.get(IntelRecord.class, input.getUuid());
+					if (wset != null){
+						boolean found = false;
+						for (IntelWorkingSetRecord r : wset.getRecords()){
+							if (r.getRecord().equals(record)){
+								found = true;
+								break;
+							}
+						}
+						
+						if (!found){
+							IntelWorkingSetRecord wsrecord = new IntelWorkingSetRecord();
+							wsrecord.setRecord(record);
+							wsrecord.setIsVisible(true);
+							wsrecord.setWorkingSet(wset);
+							s.save(wsrecord);
+							wset.getRecords().add(wsrecord);
+							modified = true;
+						}
 					}
-				}
-				
-				if (!found){
-					IntelWorkingSetRecord wsrecord = new IntelWorkingSetRecord();
-					wsrecord.setRecord(record);
-					wsrecord.setIsVisible(true);
-					wsrecord.setWorkingSet(wset);
-					s.save(wsrecord);
-					wset.getRecords().add(wsrecord);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordError, input.getName(), ex.getMessage()), ex);
 				}
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordError, input.getName(), ex.getMessage()), ex);
-			return;
 		}finally{
 			s.close();
 		}
-		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
+		if (wset != null && modified) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
-	public void addToActiveWorkingSet(IntelRecord record, IEclipseContext context){
-		if (activeWorkingSet == null) return;
+	public void addRecordToActiveWorkingSet(Collection<IntelRecord> records, IEclipseContext context){
+		if (activeWorkingSet == null || records.isEmpty()) return;
 		IntelWorkingSet wset = null;
-		boolean found = false;
+		boolean modified = false;
 		Session s = HibernateManager.openSession();
 		try{
-			s.beginTransaction();
-			wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
-			if (wset != null){
-				for (IntelWorkingSetRecord r : wset.getRecords()){
-					if (r.getRecord().equals(record)){
-						found = true;
-						break;
+			for (IntelRecord record : records){
+				try{
+					s.beginTransaction();
+					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
+					if (wset != null){
+						boolean found = false;
+						for (IntelWorkingSetRecord r : wset.getRecords()){
+							if (r.getRecord().equals(record)){
+								found = true;
+								break;
+							}
+						}
+						
+						if (!found){
+							IntelWorkingSetRecord wsrecord = new IntelWorkingSetRecord();
+							wsrecord.setIsVisible(true);
+							wsrecord.setRecord(record);
+							wsrecord.setWorkingSet(wset);
+							s.save(wsrecord);
+							wset.getRecords().add(wsrecord);
+							modified = true;
+						}
 					}
-				}
-				
-				if (!found){
-					IntelWorkingSetRecord wsrecord = new IntelWorkingSetRecord();
-					wsrecord.setIsVisible(true);
-					wsrecord.setRecord(record);
-					wsrecord.setWorkingSet(wset);
-					s.save(wsrecord);
-					wset.getRecords().add(wsrecord);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordError, record.getTitle(), ex.getMessage()), ex);
 				}
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordError, record.getTitle(), ex.getMessage()), ex);
-			return;
 		}finally{
 			s.close();
 		}
-		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
+		if (wset != null && modified ) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
-	public void addToActiveWorkingSet(IntelEntity entity, IEclipseContext context){
-		if (activeWorkingSet == null) return;
+	public void addEntityToActiveWorkingSet(Collection<IntelEntity> entities, IEclipseContext context){
+		if (activeWorkingSet == null || entities.isEmpty()) return;
 		IntelWorkingSet wset = null;
-		boolean found = false;
+		boolean modified = false;
 		Session s = HibernateManager.openSession();
 		try{
-			s.beginTransaction();
-			wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
-			if (wset != null){
-				for (IntelWorkingSetEntity r : wset.getEntities()){
-					if (r.getEntity().equals(entity)){
-						found = true;
-						break;
+			for (IntelEntity entity : entities){
+				try{
+					s.beginTransaction();
+					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
+					if (wset != null){
+						boolean found = false;
+						for (IntelWorkingSetEntity r : wset.getEntities()){
+							if (r.getEntity().equals(entity)){
+								found = true;
+								break;
+							}
+						}
+						
+						if (!found){
+							IntelWorkingSetEntity wsrecord = new IntelWorkingSetEntity();
+							wsrecord.setEntity(entity);
+							wsrecord.setWorkingSet(wset);
+							wsrecord.setIsVisible(true);
+							s.save(wsrecord);
+							wset.getEntities().add(wsrecord);
+							modified = true;
+						}
 					}
-				}
-				
-				if (!found){
-					IntelWorkingSetEntity wsrecord = new IntelWorkingSetEntity();
-					wsrecord.setEntity(entity);
-					wsrecord.setWorkingSet(wset);
-					wsrecord.setIsVisible(true);
-					s.save(wsrecord);
-					wset.getEntities().add(wsrecord);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_EntityError, entity.getIdAttributeAsText(Locale.getDefault()), ex.getMessage()), ex);
 				}
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_EntityError, entity.getIdAttributeAsText(Locale.getDefault()), ex.getMessage()), ex);
-			return;
 		}finally{
 			s.close();
 		}
-		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
+		if (wset != null && !modified) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
-	public void addQueryToActiveWorkingSet(UUID queryUuid, IEclipseContext context){
-		if (activeWorkingSet == null) return;
+	public void addQueryUuidToActiveWorkingSet(Collection<UUID> queryUuids, IEclipseContext context){
+		if (activeWorkingSet == null || queryUuids.isEmpty()) return;
 		IntelWorkingSet wset = null;
 		Session s = HibernateManager.openSession();
-		boolean found = false;
-		String queryName = queryUuid.toString();
+		boolean modified = false;
 		try{
-			s.beginTransaction();
-			
-			IntelRecordObservationQuery query = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
-			if (query == null) throw new Exception(Messages.WorkingSetManager_QueryNotFound);
-			
-			queryName = query.getName();
-			wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
-			if (wset != null){
+			for (UUID queryUuid : queryUuids){
+				String queryName = queryUuid.toString();
+				try{
+					s.beginTransaction();
 				
-				for (IntelWorkingSetQuery r : wset.getQueries()){
-					if (r.getQuery().equals(query)){
-						found = true;
-						break;
+					IntelRecordObservationQuery query = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
+					if (query == null) throw new Exception(Messages.WorkingSetManager_QueryNotFound);
+					
+					queryName = query.getName();
+					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
+					if (wset != null){
+						boolean found = false;				
+						for (IntelWorkingSetQuery r : wset.getQueries()){
+							if (r.getQuery().equals(query)){
+								found = true;
+								break;
+							}
+						}
+						
+						if (!found){
+							IntelWorkingSetQuery wsrecord = new IntelWorkingSetQuery();
+							wsrecord.setQuery(query);
+							wsrecord.setWorkingSet(wset);
+							wsrecord.setIsVisible(true);
+							s.save(wsrecord);
+							wset.getQueries().add(wsrecord);
+							modified = true;
+						}
 					}
-				}
-				
-				if (!found){
-					IntelWorkingSetQuery wsrecord = new IntelWorkingSetQuery();
-					wsrecord.setQuery(query);
-					wsrecord.setWorkingSet(wset);
-					wsrecord.setIsVisible(true);
-					s.save(wsrecord);
-					wset.getQueries().add(wsrecord);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_QueryError, queryName, ex.getMessage()), ex);
 				}
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_QueryError, queryName, ex.getMessage()), ex);
-			return;
 		}finally{
 			s.close();
 		}
-		if (wset != null && !found) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
+		if (wset != null && modified) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
-	public void addToActiveWorkingSet(IntelRecordObservationQuery query, IEclipseContext context){
-		addQueryToActiveWorkingSet(query.getUuid(), context);
+	public void addQueryToActiveWorkingSet(Collection<IntelRecordObservationQuery> query, IEclipseContext context){
+		addQueryUuidToActiveWorkingSet(query.stream().map(a->a.getUuid()).collect(Collectors.toList()), context);
 	}
 	
-	public void removeFromWorkingSet(IntelRecordObservationQuery query, IEclipseContext context){
-		if (activeWorkingSet == null) return;
+	public void removeQueryFromWorkingSet(Collection<IntelRecordObservationQuery> queries, IEclipseContext context){
+		if (activeWorkingSet == null || queries.isEmpty()) return;
 		IntelWorkingSet wset = null;
 		Session s = HibernateManager.openSession();
 		try{
-			s.beginTransaction();
-			wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
-			if (wset != null){
-				IntelWorkingSetQuery wsrecord = null;
-				for (IntelWorkingSetQuery r : wset.getQueries()){
-					if (r.getQuery().equals(query)){
-						wsrecord = r;
-						break;
+			for (IntelRecordObservationQuery query : queries){
+				try{
+					s.beginTransaction();
+					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
+					if (wset != null){
+						IntelWorkingSetQuery wsrecord = null;
+						for (IntelWorkingSetQuery r : wset.getQueries()){
+							if (r.getQuery().equals(query)){
+								wsrecord = r;
+								break;
+							}
+						}
+						if (wsrecord != null){
+							wset.getQueries().remove(wsrecord);
+						}
 					}
-				}
-				if (wsrecord != null){
-					wset.getQueries().remove(wsrecord);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_QueryRemoveError, query.getName(), ex.getMessage()), ex);
 				}
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_QueryRemoveError, query.getName(), ex.getMessage()), ex);
-			return;
 		}finally{
 			s.close();
 		}
 		if (wset != null) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
-	public void removeFromWorkingSet(IntelEntity entity, IEclipseContext context){
-		if (activeWorkingSet == null) return;
+	public void removeEntityFromWorkingSet(Collection<IntelEntity> entities, IEclipseContext context){
+		if (activeWorkingSet == null || entities.isEmpty()) return;
 		IntelWorkingSet wset = null;
 		Session s = HibernateManager.openSession();
 		try{
-			s.beginTransaction();
-			wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
-			if (wset != null){
-				IntelWorkingSetEntity wsrecord = null;
-				for (IntelWorkingSetEntity r : wset.getEntities()){
-					if (r.getEntity().equals(entity)){
-						wsrecord = r;
-						break;
+			for (IntelEntity entity : entities){
+				try{
+					s.beginTransaction();
+					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
+					if (wset != null){
+						IntelWorkingSetEntity wsrecord = null;
+						for (IntelWorkingSetEntity r : wset.getEntities()){
+							if (r.getEntity().equals(entity)){
+								wsrecord = r;
+								break;
+							}
+						}
+						if (wsrecord != null){					
+							wset.getEntities().remove(wsrecord);
+						}
 					}
-				}
-				if (wsrecord != null){					
-					wset.getEntities().remove(wsrecord);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_EntityRemoveError, entity.getIdAttributeAsText(), ex.getMessage()), ex);
 				}
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_EntityRemoveError, entity.getIdAttributeAsText(), ex.getMessage()), ex);
-			return;
 		}finally{
 			s.close();
 		}
 		if (wset != null) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
-	public void removeFromWorkingSet(IntelRecord record, IEclipseContext context){
-		if (activeWorkingSet == null) return;
+	public void removeRecordFromWorkingSet(Collection<IntelRecord> records, IEclipseContext context){
+		if (activeWorkingSet == null || records.isEmpty()) return;
 		IntelWorkingSet wset = null;
 		Session s = HibernateManager.openSession();
 		try{
-			s.beginTransaction();
-			wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
-			if (wset != null){
-				IntelWorkingSetRecord wsrecord = null;
-				for (IntelWorkingSetRecord r : wset.getRecords()){
-					if (r.getRecord().equals(record)){
-						wsrecord = r;
-						break;
+			for (IntelRecord record : records){
+				s.beginTransaction();
+			
+				try{
+					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
+					if (wset != null){
+						IntelWorkingSetRecord wsrecord = null;
+						for (IntelWorkingSetRecord r : wset.getRecords()){
+							if (r.getRecord().equals(record)){
+								wsrecord = r;
+								break;
+							}
+						}
+						if (wsrecord != null){
+							wset.getRecords().remove(wsrecord);
+						}
 					}
-				}
-				if (wsrecord != null){
-					wset.getRecords().remove(wsrecord);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordRemoveError, record.getTitle(), ex.getMessage()), ex);
 				}
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordRemoveError, record.getTitle(), ex.getMessage()), ex);
-			return;
 		}finally{
 			s.close();
 		}
@@ -352,6 +383,7 @@ public enum WorkingSetManager {
 		clone.setEntities(new ArrayList<IntelWorkingSetEntity>());
 		clone.setQueries(new ArrayList<IntelWorkingSetQuery>());
 		clone.setRecords(new ArrayList<IntelWorkingSetRecord>());
+		clone.setEntityDateFilter(toCopy.getEntityDateFilter());
 		
 		if (toCopy.getEntities() != null){
 			toCopy.getEntities().forEach((e)->{

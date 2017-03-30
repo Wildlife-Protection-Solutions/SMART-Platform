@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
+import java.util.Collections;
+
 import org.eclipse.birt.core.framework.IConfigurationElement;
 import org.eclipse.birt.report.designer.internal.ui.util.UIHelper;
 import org.eclipse.birt.report.engine.api.EmitterInfo;
@@ -202,7 +204,7 @@ public class RecordButtonToolbar extends Composite{
 		wsetItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				WorkingSetManager.INSTANCE.addToActiveWorkingSet(recordEditor.getRecord(), recordEditor.getContext());
+				WorkingSetManager.INSTANCE.addRecordToActiveWorkingSet(Collections.singleton(recordEditor.getRecord()), recordEditor.getContext());
 			}
 		});
 		wsetItem.setEnabled(false);

@@ -82,6 +82,15 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
          }	
 	}
 
+	public static  URL generateResourceURL(UUID queryUuid, String dataType) {
+		try{
+			String part = "smart://smartdb/i2/query/" + UuidUtils.uuidToString(queryUuid) + "#" + dataType; //$NON-NLS-1$ //$NON-NLS-2$
+			return new URL(null, part, CorePlugin.RELAXED_HANDLER);
+		 } catch (MalformedURLException e) {
+             throw new IllegalArgumentException("malformed url", e); //$NON-NLS-1$
+         }	
+	}
+	
 	public String getQueryName(){
 		return ((QueryService)service).getQueryName();
 	}
@@ -159,8 +168,10 @@ public class QueryGeoResource extends IGeoResource implements IWorkingSetResourc
 	@Override
 	public <T> T resolve(Class<T> adaptee, IProgressMonitor monitor)
 			throws IOException {
-		if (adaptee.isAssignableFrom(((QueryService)service).getResultSet().getClass())){
-			return adaptee.cast(((QueryService)service).getResultSet());
+		if (((QueryService)service).getResultSet() != null){
+			if (adaptee.isAssignableFrom(((QueryService)service).getResultSet().getClass())){
+				return adaptee.cast(((QueryService)service).getResultSet());
+			}
 		}
 		if (adaptee.isAssignableFrom(IGeoResourceInfo.class)) {
 			return adaptee.cast(super.getInfo(monitor));

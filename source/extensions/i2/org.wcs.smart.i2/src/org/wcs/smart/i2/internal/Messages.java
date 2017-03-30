@@ -1217,6 +1217,7 @@ public class Messages extends NLS {
 	public static String WorkingSetView_NewWsError;
 	public static String WorkingSetView_NotSelectedLabel;
 	public static String WorkingSetView_OpenMenuItem;
+	public static String WorkingSetView_RemoveLabel;
 	public static String WorkingSetView_SaveDateError;
 	public static String WorkingSetView_SaveVisibilityError;
 	public static String WorkingSetView_selectTooltip;

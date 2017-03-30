@@ -28,6 +28,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1042,7 +1043,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		wsetItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				WorkingSetManager.INSTANCE.addToActiveWorkingSet(getEntity(), context);
+				WorkingSetManager.INSTANCE.addEntityToActiveWorkingSet(Collections.singleton(getEntity()), context);
 			}
 		});
 		wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());

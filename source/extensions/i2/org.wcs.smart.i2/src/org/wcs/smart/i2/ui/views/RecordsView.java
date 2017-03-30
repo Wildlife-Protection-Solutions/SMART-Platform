@@ -422,14 +422,17 @@ public class RecordsView {
 			miAdd.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
+					List<RecordEditorInput> toAdd = new ArrayList<>();
 					for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
 						Object x = (Object) iterator.next();	
 						if (x instanceof IntelRecord){
-							WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
+							toAdd.add(new RecordEditorInput((IntelRecord) x));
 						}else if (x instanceof RecordEditorInput){
-							WorkingSetManager.INSTANCE.addToActiveWorkingSet((RecordEditorInput) x, context);
+							toAdd.add((RecordEditorInput) x);
+							
 						}
 					}
+					WorkingSetManager.INSTANCE.addRecordInputToActiveWorkingSetRecord(toAdd, context);
 				}
 			});
 			m.addMenuListener(new MenuListener() {
@@ -457,7 +460,6 @@ public class RecordsView {
 				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
 					Object x = (Object) iterator.next();	
 					if (x instanceof IntelRecord){
-						WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
 						toExport.add(((IntelRecord)x).getUuid());
 					}else if (x instanceof RecordEditorInput){
 						toExport.add(((RecordEditorInput)x).getUuid());
@@ -485,7 +487,6 @@ public class RecordsView {
 				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
 					Object x = (Object) iterator.next();	
 					if (x instanceof IntelRecord){
-						WorkingSetManager.INSTANCE.addToActiveWorkingSet((IntelRecord) x, context);
 						toExport.add(((IntelRecord)x).getUuid());
 					}else if (x instanceof RecordEditorInput){
 						toExport.add(((RecordEditorInput)x).getUuid());

@@ -496,9 +496,7 @@ public class EntitySearchResultTable extends Composite {
 		mnuWorkingset.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for (IntelEntity ie : getCurrentSelection()){
-					WorkingSetManager.INSTANCE.addToActiveWorkingSet(ie, context);
-				}
+				WorkingSetManager.INSTANCE.addEntityToActiveWorkingSet(getCurrentSelection(), context);
 			}
 		});
 		

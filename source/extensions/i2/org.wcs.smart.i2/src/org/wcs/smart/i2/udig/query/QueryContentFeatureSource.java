@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.udig.query;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.geotools.data.FeatureReader;
 import org.geotools.data.Query;
@@ -62,7 +63,11 @@ public class QueryContentFeatureSource extends ContentFeatureSource {
 			geomType = "Polygon"; //$NON-NLS-1$
 		}
 		try{
-			return FeatureGenerator.generateFeatureType(geomType, entry.getName(), source.getResultSet().getQueryColumns());
+			if (source.getResultSet() == null){
+				return FeatureGenerator.generateFeatureType(geomType, entry.getName(), Collections.emptyList());
+			}else{
+				return FeatureGenerator.generateFeatureType(geomType, entry.getName(), source.getResultSet().getQueryColumns());
+			}
 		}catch (SchemaException ex){
 			throw new IOException(ex);
 		}

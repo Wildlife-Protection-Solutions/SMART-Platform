@@ -455,14 +455,17 @@ public class QueryView {
 			miAdd.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
+					List<UUID> queries = new ArrayList<>();
 					for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
 						Object x = (Object) iterator.next();	
 						if (x instanceof QueryProxy){
-							WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(((QueryProxy) x).getUuid(), context);
+							queries.add(((QueryProxy) x).getUuid());
 						}
 					}
+					WorkingSetManager.INSTANCE.addQueryUuidToActiveWorkingSet(queries, context);
 				}
 			});
+			
 			m.addMenuListener(new MenuListener() {
 				@Override
 				public void menuShown(MenuEvent e) {

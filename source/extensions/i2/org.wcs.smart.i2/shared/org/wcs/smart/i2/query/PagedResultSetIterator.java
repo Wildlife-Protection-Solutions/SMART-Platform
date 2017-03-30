@@ -38,13 +38,21 @@ public class PagedResultSetIterator {
 	private ScrollableResults resultSet;
 	
 	
+	/**
+	 * results can be null if results not computed yest
+	 * @param results
+	 * @param session
+	 */
 	public PagedResultSetIterator(IPagedQueryResultSet results, Session session){
 		this.results = results;
 		this.session = session;
-		resultSet = session.createSQLQuery("SELECT * FROM " + results.getQueryDataTable()).scroll(); //$NON-NLS-1$
+		if (results != null){
+			resultSet = session.createSQLQuery("SELECT * FROM " + results.getQueryDataTable()).scroll(); //$NON-NLS-1$
+		}
 	}
 	
 	public boolean hasNext(){
+		if (results == null) return false;
 		return resultSet.next();
 	}
 	

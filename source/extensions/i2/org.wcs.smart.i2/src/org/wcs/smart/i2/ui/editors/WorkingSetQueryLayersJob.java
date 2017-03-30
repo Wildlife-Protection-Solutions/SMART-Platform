@@ -1,6 +1,5 @@
 package org.wcs.smart.i2.ui.editors;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,18 +8,17 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
-import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ID;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.ILayerListener;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -31,9 +29,10 @@ import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.RunQueryJob;
+import org.wcs.smart.i2.udig.query.QueryDataSourceFactory;
 import org.wcs.smart.i2.udig.query.QueryGeoResource;
 import org.wcs.smart.i2.udig.query.QueryService;
-import org.wcs.smart.i2.udig.query.QueryServiceExtension;
+import org.wcs.smart.i2.udig.query.QueryService.State;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**
@@ -88,54 +87,10 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 		}
 	}
 	
-	private boolean canDelete(ILayer layer, IProgressMonitor monitor) throws IOException{
-		
-		Object x = layer.getBlackboard().get(WS_MAP_LAYER_KEY) ;
-		if (x != null && ((Boolean)x)){
-			if (layer.getGeoResource().canResolve(QueryService.class)){
-				if (queriesToUpdate == null) return true;
-				
-				QueryService service = layer.getGeoResource().resolve(QueryService.class, monitor);
-				for (IntelRecordObservationQuery q : queriesToUpdate){
-					if (q.getUuid().equals(service.getConnectionParams().get(QueryServiceExtension.QUERY_UUID_KEY))){
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-		
-	}
-	
-	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		IntelWorkingSet workingset = null;
 		
-		//remove all existing query layers from map
-		List<ILayer> layersToRemove = new ArrayList<ILayer>();
-		List<ILayer> currentMapLayers = new ArrayList<ILayer>();
-		currentMapLayers.addAll(map.getMapLayers());
-		for (ILayer l : currentMapLayers){
-			try{
-				if (canDelete(l, monitor)){
-					layersToRemove.add(l);
-					//dispose of query service
-					QueryService service = l.getGeoResource().resolve(QueryService.class, monitor);
-					if (!service.isDisposed()){
-						service.dispose(monitor);
-						CatalogPlugin.getDefault().getLocalCatalog().remove(service);
-					}
-				}
-			}catch (Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
-			}
-		}
-		if (!layersToRemove.isEmpty()){
-			DeleteLayersCommand cmd = new DeleteLayersCommand(layersToRemove.toArray(new ILayer[layersToRemove.size()]));
-			map.sendCommandASync(cmd);
-		}
-					
 		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
 			Session s = HibernateManager.openSession();
 			try{
@@ -176,9 +131,29 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 				}
 			}else{
 				queries= workingset.getQueries();
-				
 			}
 			for (IntelWorkingSetQuery query: queries){
+				QueryService existing = null;
+				for (ILayer l : map.getMapLayers()){
+					if (l.getGeoResource().canResolve(QueryService.class)){
+						try{
+							QueryService currentService = l.getGeoResource().resolve(QueryService.class, new NullProgressMonitor());
+							if (currentService.getConnectionParams().get(QueryDataSourceFactory.QUERY_UUID.key).equals(query.getQuery().getUuid())){
+								existing = currentService;
+								break;
+							}
+							
+						}catch (Exception ex){
+							ex.printStackTrace();
+						}
+					}
+				}
+				if (existing == null) continue;
+				
+				//if we request specific queries we want to make sure they are done
+				//regardless of if results existing already or not
+				if (queriesToUpdate == null && existing.getState() != State.NO_RESULTS) continue;	
+				existing.setState(State.SCHEDULED);
 				
 				RunQueryJob job = new RunQueryJob(query.getQuery()) {
 					
@@ -223,15 +198,36 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 							return;
 						}
 						//add a new query service with associated layers
-						List<IGeoResource> toAdd = new ArrayList<>();
+						List<LayerInfo> toAdd = new ArrayList<>();
 						HashMap<ID, StyleBlackboard>layerStyles = new HashMap<>();
-						List<IGeoResource> visible = new ArrayList<>();
+						
+						
+						//lets find the layers on the map and update;
+						//I tried to set the results in the query service but the layer caches all sorts of information
+						//that I cannot clear out; so we are going to remove and add back the layers;
+						//this is a bit annoying as it changes the layer order
+						List<ILayer> toRemove = new ArrayList<ILayer>();
+						for (ILayer l : map.getMapLayers()){
+							if (l.getGeoResource().canResolve(QueryService.class)){
+								try{
+									QueryService currentService = l.getGeoResource().resolve(QueryService.class, new NullProgressMonitor());
+									if (currentService.getConnectionParams().get(QueryDataSourceFactory.QUERY_UUID.key).equals(query.getQuery().getUuid())){
+										toRemove.add(l);
+									}
+									
+								}catch (Exception ex){
+									ex.printStackTrace();
+								}
+							}
+						}
+						removeLayers(map, toRemove);
+						
 						
 						QueryService service = new QueryService(results, query.getQuery().getUuid(), query.getQuery().getName());
-						computeLayers(toAdd, visible, layerStyles, query, service, monitor);
-						
-						for (IGeoResource r : toAdd){
-							ID styleId = getLayerStyleIdentifier(r);
+						computeLayers(toAdd, layerStyles, query, service, false, monitor);
+						service.setState(State.RESULTS);
+						for (LayerInfo r : toAdd){
+							ID styleId = getLayerStyleIdentifier(r.resource);
 							if (layerStyles.get(styleId) == null){
 								//look for query style
 								String style = query.getQuery().getStyle();
@@ -239,8 +235,8 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 								if (style != null){
 									try{
 										styles = StyleManager.INSTANCE.fromStringMap(style);
-										if (styles.get(r.getIdentifier().getRef()) != null){
-											layerStyles.put(styleId, styles.get(r.getIdentifier().getRef()));
+										if (styles.get(r.resource.getIdentifier().getRef()) != null){
+											layerStyles.put(styleId, styles.get(r.resource.getIdentifier().getRef()));
 										}
 									}catch (Exception ex){
 										Intelligence2PlugIn.log(ex.getMessage(), ex);
@@ -248,9 +244,11 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 								}
 							}
 						}
-						addLayers(toAdd, visible, layerStyles, false,  null);
+						addLayers(toAdd, layerStyles,  null);
 					}
 				};
+				//only run one at a time so that we don't consume all db connections running queries
+				job.setRule(WS_QUERY_MUTEX);
 				job.setDateFilter(dates);
 				job.schedule();
 			}
@@ -258,5 +256,17 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 		return Status.OK_STATUS;
 	}
 	
+	private final static ISchedulingRule WS_QUERY_MUTEX = new ISchedulingRule() {
+		
+		@Override
+		public boolean isConflicting(ISchedulingRule rule) {
+			return rule == this;
+		}
+		
+		@Override
+		public boolean contains(ISchedulingRule rule) {
+			return rule == this;
+		}
+	};
 	
 }

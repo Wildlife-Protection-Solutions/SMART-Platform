@@ -40,15 +40,21 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -314,7 +320,35 @@ public class BasicRecordSearchPanel extends Composite {
 				}
 			}
 		});
-		
+		tblResults.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelRecordSelectionTransfer.getTransfer()}, new DragSourceAdapter(){
+			private ISelection getSelection(){
+				List<RecordEditorInput> selection = new ArrayList<>();
+				IStructuredSelection sel = (IStructuredSelection) tblResults.getSelection();
+				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+					Object o= iterator.next();
+					if (o instanceof IntelRecordSearchResultItem){
+						IntelRecordSearchResultItem x = (IntelRecordSearchResultItem) o;
+						selection.add(new RecordEditorInput(x.getTitle(), x.getRecordUuid(), null, x.getRecordSourceUuid(), x.getStatus()));
+					}
+					
+				}
+				return new StructuredSelection(selection);
+			}
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				IntelRecordSelectionTransfer.getTransfer().setSelection(getSelection());				
+			}
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				if (IntelRecordSelectionTransfer.getTransfer().isSupportedType(event.dataType)) {
+					event.data = getSelection();
+				}
+			}
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				IntelRecordSelectionTransfer.getTransfer().setSelection(null);
+			}
+		});
 		
 		searchTime = new Label(results, SWT.NONE);
 		searchTime.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -393,14 +427,17 @@ public class BasicRecordSearchPanel extends Composite {
 	}
 	
 	private void addToWorkingset(){
+		List<RecordEditorInput> toAdd = new ArrayList<RecordEditorInput>();
 		for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();	
 			if (x instanceof IntelRecordSearchResultItem){
 				RecordEditorInput e = new RecordEditorInput(null, ((IntelRecordSearchResultItem) x).getRecordUuid(), null, ((IntelRecordSearchResultItem) x).getRecordSourceUuid(), null);
-				WorkingSetManager.INSTANCE.addToActiveWorkingSet(e, context);
+				toAdd.add(e);
 			}
 		}
+		WorkingSetManager.INSTANCE.addRecordInputToActiveWorkingSetRecord(toAdd, context);
 	}
+	
 	private void openSelection(){
 		IStructuredSelection sel = (IStructuredSelection) tblResults.getSelection();
 		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {

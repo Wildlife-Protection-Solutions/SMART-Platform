@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -25,6 +26,7 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.ILayerListener;
+import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.LayerEvent;
 import org.locationtech.udig.project.LayerEvent.EventType;
 import org.locationtech.udig.project.internal.Layer;
@@ -47,12 +49,14 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
+import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
+import org.wcs.smart.i2.udig.query.QueryGeoResource;
 import org.wcs.smart.i2.udig.query.QueryService;
 import org.wcs.smart.i2.udig.record.IntelRecordService;
 import org.wcs.smart.i2.udig.record.IntelRecordServiceExtension;
@@ -69,11 +73,23 @@ import org.wcs.smart.util.UuidUtils;
 public class WorkingSetMapLayersJob extends Job {
 	
 	public static final String WS_MAP_LAYER_KEY = "org.wcs.smart.i2.ws.map.wslayer"; //$NON-NLS-1$
-	
+		
 	protected Map map;
 	protected ILayerListener[] listeners;
 	protected IEclipseContext context;
 	
+	private ISchedulingRule MUTEX = new ISchedulingRule() {
+		
+		@Override
+		public boolean isConflicting(ISchedulingRule rule) {
+			return rule == this;
+		}
+		
+		@Override
+		public boolean contains(ISchedulingRule rule) {
+			return rule == this;
+		}
+	};
 	/*
      * listener that listens for style changes and saves them to the working
      * set item
@@ -146,16 +162,36 @@ public class WorkingSetMapLayersJob extends Job {
 		this.map = map;
 		this.context = context;
 		this.listeners = layerlisteners;
+		setRule(MUTEX);
 	}
 	
+	public static void removeLayers(IMap map, List<ILayer> toRemove){
+		if (toRemove == null || toRemove.isEmpty()) return;
+		for (ILayer l : toRemove){
+			if (!l.getGeoResource().canResolve(QueryService.class)) continue;
+			try{
+				QueryService service = l.getGeoResource().resolve(QueryService.class, new NullProgressMonitor());
+				if (!service.isDisposed()){
+					service.dispose(new NullProgressMonitor());
+					CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+				}
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}
+		}
+		DeleteLayersCommand cmd = new DeleteLayersCommand(toRemove.toArray(new ILayer[toRemove.size()]));
+		map.sendCommandSync(cmd);		
+	}
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		
 		IntelWorkingSet workingset = null;
 		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
 			Session s = HibernateManager.openSession();
 			try{
 				workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
+				if (workingset == null) return Status.OK_STATUS; //ws not found
 				if (workingset.getEntities() != null){
 					workingset.getEntities().forEach(e->e.getEntity().getIdAttributeAsText());
 				}
@@ -169,72 +205,93 @@ public class WorkingSetMapLayersJob extends Job {
 				s.close();
 			}
 		}
-	
-		//remove all layers from map
+		if (workingset == null){
+			//delete all working set layers 
+			List<ILayer> layersToRemove = new ArrayList<ILayer>();
+			for (ILayer l : map.getLayersInternal()){
+				Object x = l.getBlackboard().get(WS_MAP_LAYER_KEY) ;
+				if (x != null && ((Boolean)x)) layersToRemove.add(l);
+			}
+			removeLayers(map, layersToRemove);
+			return Status.OK_STATUS;
+		}
+		
+					
+		//parse date filter
+		Date[] dates = null;
+		String dateFilter = workingset.getEntityDateFilter();
+		try{
+			String[] bits = dateFilter.split(":"); //$NON-NLS-1$
+			DateFilter initFilter = DateFilter.valueOf(bits[0]);
+			if (initFilter == DateFilter.CUSTOM){
+				dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
+			}else{
+				dates = new Date[]{initFilter.getStartDate(), initFilter.getEndDate()};
+			}
+		}catch (Exception ex){
+			Intelligence2PlugIn.log(Messages.WorkingSetMapLayersJob_ParseError + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$
+		}
+			
+		List<LayerInfo> toAdd = new ArrayList<LayerInfo>();
+		java.util.Map<ID, StyleBlackboard> layerStyles = new HashMap<ID, StyleBlackboard>();
+		for (IntelWorkingSetEntity layer : workingset.getEntities()){
+			HashMap<String, Serializable> params = new HashMap<String,Serializable>();
+			params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString( layer.getEntity().getUuid()));
+			IntelEntityService service = createEntityService(params);
+			computeLayers(toAdd, layerStyles, layer, service, true, monitor);
+		}
+			
+		for (IntelWorkingSetRecord layer : workingset.getRecords()){
+			HashMap<String, Serializable> params = new HashMap<String,Serializable>();
+			params.put(IntelRecordServiceExtension.RECORD_UUID_KEY, UuidUtils.uuidToString(layer.getRecord().getUuid()));
+			IntelRecordService service = createRecordService(params);
+			computeLayers(toAdd, layerStyles, layer, service, false, monitor);
+			
+		}
+		
+		for (IntelWorkingSetQuery query : workingset.getQueries()){
+			QueryService service = new QueryService(null, query.getQuery().getUuid(), query.getQuery().getName());
+			computeLayers(toAdd, layerStyles, query, service, false, monitor);
+		}
+		
+		
+		//filter layers to add based on what's already on the map
 		List<ILayer> layersToRemove = new ArrayList<ILayer>();
 		for (ILayer l : map.getLayersInternal()){
 			Object x = l.getBlackboard().get(WS_MAP_LAYER_KEY) ;
 			if (x != null && ((Boolean)x)){
-				layersToRemove.add(l);
-		
-				if (l.getGeoResource().canResolve(QueryService.class)){
-					try{
-						QueryService service = l.getGeoResource().resolve(QueryService.class, monitor);
-						if (!service.isDisposed()){
-							service.dispose(monitor);
-							CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+				boolean found = false;
+				for(LayerInfo f : toAdd){
+					
+					if (f.resource instanceof QueryGeoResource){
+						if (l.getGeoResource().canResolve(QueryGeoResource.class)){
+							try{
+								if (((QueryGeoResource)f.resource).getFixedID().equals(l.getGeoResource().resolve(QueryGeoResource.class, null).getFixedID())){
+									found = true;
+									toAdd.remove(f);	//already exists we don't need to add it again
+									break;			
+								}
+							}catch (Exception ex){
+								ex.printStackTrace();
+							}
 						}
-					}catch (Exception ex){
-						Intelligence2PlugIn.log(ex.getMessage(), ex);
+					}else{
+						if (f.resource.getID().equals(l.getGeoResource().getID())){
+							found = true;
+							toAdd.remove(f);	//already exists we don't need to add it again
+							break;
+						}
 					}
 				}
-			}
-		}
-		if (!layersToRemove.isEmpty()){
-			DeleteLayersCommand cmd = new DeleteLayersCommand(layersToRemove.toArray(new ILayer[layersToRemove.size()]));
-			map.sendCommandASync(cmd);
-		}
-					
-		if (workingset != null){
-			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-			List<IGeoResource> visible = new ArrayList<IGeoResource>();
-			java.util.Map<ID, StyleBlackboard> layerStyles = new HashMap<ID, StyleBlackboard>();
-			for (IntelWorkingSetEntity entity: workingset.getEntities()){
-				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
-				params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString(entity.getEntity().getUuid()));
-				IntelEntityService service = createEntityService(params);
-				computeLayers(toAdd, visible, layerStyles, entity, service, monitor);
-			}
-			
-			Date[] dates = null;
-			String dateFilter = workingset.getEntityDateFilter();
-			try{
-				String[] bits = dateFilter.split(":"); //$NON-NLS-1$
-				DateFilter initFilter = DateFilter.valueOf(bits[0]);
-				if (initFilter == DateFilter.CUSTOM){
-					dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
-				}else{
-					dates = new Date[]{initFilter.getStartDate(), initFilter.getEndDate()};
+				if (!found){
+					layersToRemove.add(l);
 				}
-			}catch (Exception ex){
-				Intelligence2PlugIn.log(Messages.WorkingSetMapLayersJob_ParseError + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$
 			}
-			
-			addLayers(toAdd, visible, layerStyles, true, dates);
-			
-			toAdd = new ArrayList<IGeoResource>();
-			layerStyles = new HashMap<ID, StyleBlackboard>();
-			visible = new ArrayList<IGeoResource>();
-			for (IntelWorkingSetRecord record: workingset.getRecords()){
-				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
-				params.put(IntelRecordServiceExtension.RECORD_UUID_KEY, UuidUtils.uuidToString(record.getRecord().getUuid()));
-				IntelRecordService service = createRecordService(params);
-				computeLayers(toAdd, visible, layerStyles, record, service, monitor);
-			}
-			addLayers(toAdd, visible, layerStyles, false,  null);
-			
-			//query layers are dealt with in WorkingSetQueryLayerJob		
 		}
+		removeLayers(map, layersToRemove);
+		addLayers(toAdd, layerStyles, dates);
+		//query layers are dealt with in WorkingSetQueryLayerJob		
+		
 		return Status.OK_STATUS;
 	}
 	
@@ -270,9 +327,9 @@ public class WorkingSetMapLayersJob extends Job {
 	
 	
 	//compute the layers to add to map from service
-	protected void computeLayers(List<IGeoResource> toAdd, List<IGeoResource> visible,
+	protected void computeLayers(List<LayerInfo> toAdd,
 			java.util.Map<ID, StyleBlackboard> layerStyles, 
-			IWorkingSetMapLayer item, IService service, IProgressMonitor monitor){
+			IWorkingSetMapLayer item, IService service, boolean canFilter, IProgressMonitor monitor){
 		java.util.Map<String, StyleBlackboard> styles = null;
 		try{ 
 			styles = StyleManager.INSTANCE.fromStringMap(item.getMapStyle());
@@ -281,11 +338,7 @@ public class WorkingSetMapLayersJob extends Job {
 		}
 		try {
 			for (IGeoResource r : service.resources(monitor)){
-				toAdd.add(r);
-				if (item.getIsVisible()){
-					visible.add(r);
-				}
-				
+				toAdd.add(new LayerInfo(r,item, canFilter));
 				if (styles != null) layerStyles.put(getLayerStyleIdentifier(r), styles.get(getLayerStyleIdentifier(r).toString()));
 			}
 		} catch (IOException ex) {
@@ -294,13 +347,12 @@ public class WorkingSetMapLayersJob extends Job {
 	}
 	
 	//add layers to map
-	protected void addLayers(List<IGeoResource> toAdd, List<IGeoResource> visibleLayers, java.util.Map<ID, StyleBlackboard> layerStyles, 
-			boolean canFilter, Date[] dates){
+	protected void addLayers(List<LayerInfo> toAdd, java.util.Map<ID, StyleBlackboard> layerStyles, Date[] dates){
 		Set<IService> services = new HashSet<IService>();
 		IProgressMonitor m = new NullProgressMonitor();
-		for (IGeoResource r : toAdd){
+		for (LayerInfo r : toAdd){
 			try {
-				IService s = (IService)r.resolve(IService.class, m);
+				IService s = (IService)r.resource.resolve(IService.class, m);
 				if (s != null) services.add(s);
 			} catch (IOException e) {
 				Intelligence2PlugIn.log(e.getMessage(), e);
@@ -310,17 +362,28 @@ public class WorkingSetMapLayersJob extends Job {
 		ICatalog c = CatalogPlugin.getDefault().getLocalCatalog();
 		services.forEach(x -> c.remove(x));
 		
-		if (canFilter){
+		List<IGeoResource> filterResources = new ArrayList<>();
+		List<IGeoResource> noFilterResources = new ArrayList<>();
+		for (LayerInfo l : toAdd){
+			if (l.canFilter){
+				filterResources.add(l.resource);
+			}else{
+				noFilterResources.add(l.resource);
+			}
+		}
+		
+		if (!filterResources.isEmpty()){
 			Filter f = null;
-			 if (dates != null){
-				 f = IntelEntityDataSource.createDateFilter(dates[0], dates[1]);
-			 }
-			AddContentFilterLayersCommand addCmd = new AddContentFilterLayersCommand(toAdd, 1, f){
+			if (dates != null) {
+				f = IntelEntityDataSource.createDateFilter(dates[0], dates[1]);
+			}
+			AddContentFilterLayersCommand addCmd = new AddContentFilterLayersCommand(filterResources, 1, f){
 				 public void run( IProgressMonitor monitor ) throws Exception {
 					 super.run(monitor);
 					 
 					 for (Layer layer : getLayers()){
 						 layer.getBlackboard().put(WS_MAP_LAYER_KEY, Boolean.TRUE);
+						 
 						 //configure style and visibility
 						 ID styleId = getLayerStyleIdentifier(layer.getGeoResource());
 						 StyleBlackboard bb = layerStyles.get(styleId);
@@ -329,10 +392,10 @@ public class WorkingSetMapLayersJob extends Job {
 						 }
 						 
 						 boolean visible = false;
-						 for(IGeoResource rr : visibleLayers){
-							 if (getLayerStyleIdentifier(rr).equals(styleId)){
-								 visible = true;
-								 break;
+						 for(LayerInfo rr : toAdd){
+							 if (getLayerStyleIdentifier(rr.resource).equals(styleId)){
+								visible = rr.layerObject.getIsVisible();
+								break;
 							 }
 						 }
 						 if(!visible) layer.setVisible(visible);
@@ -345,9 +408,10 @@ public class WorkingSetMapLayersJob extends Job {
 					 }
 				 }
 			};
-			map.sendCommandASync(addCmd);
-		}else{
-			AddLayersCommand addCmd = new AddLayersCommand(toAdd, 1) {
+			map.sendCommandSync(addCmd);
+		}
+		if (!noFilterResources.isEmpty()){
+			AddLayersCommand addCmd = new AddLayersCommand(noFilterResources, 1) {
 				public void run(IProgressMonitor monitor) throws Exception {
 					super.run(monitor);
 					for (Layer layer : getLayers()) {
@@ -361,13 +425,13 @@ public class WorkingSetMapLayersJob extends Job {
 							layer.setStyleBlackboard(bb);
 						}
 						boolean visible = false;
-						for (IGeoResource rr : visibleLayers) {
-							if (getLayerStyleIdentifier(rr).equals(styleId)) {
-								visible = true;
+						for(LayerInfo rr : toAdd){
+							if (getLayerStyleIdentifier(rr.resource).equals(styleId)){
+								visible = rr.layerObject.getIsVisible();
 								break;
 							}
 						}
-						if (!visible)layer.setVisible(visible);
+						if(!visible) layer.setVisible(visible);
 						
 						//then add listeners
 						layer.addListener(styleListener);
@@ -378,10 +442,8 @@ public class WorkingSetMapLayersJob extends Job {
 					}
 				}
 			};
-			map.sendCommandASync(addCmd);
+			map.sendCommandSync(addCmd);
 		}
-		
-	
 	}
 
 	/*
@@ -431,6 +493,17 @@ public class WorkingSetMapLayersJob extends Job {
 		}
 		public void setService(IService s){
 			this.service = s;
+		}
+	};
+	
+	class LayerInfo{
+		IGeoResource resource;
+		IWorkingSetMapLayer layerObject;
+		boolean canFilter;
+		public LayerInfo(IGeoResource resource, IWorkingSetMapLayer layerObject, boolean canFilter){
+			this.resource = resource;
+			this.layerObject = layerObject;
+			this.canFilter = canFilter;
 		}
 	};
 }
