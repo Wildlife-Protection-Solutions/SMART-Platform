@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.i2.ui.views;
 
+import java.awt.image.BufferedImage;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -46,9 +48,9 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -73,6 +75,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -85,6 +88,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
@@ -98,6 +102,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
@@ -909,8 +914,32 @@ public class WorkingSetView {
 								items.add(i);
 							}
 							
+							HashMap<IntelRecordSource, ImageDescriptor> sourceImages = new HashMap<>();
 							for (IntelWorkingSetRecord record : ws.getRecords()){
-								IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
+								ImageDescriptor img =  Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD);
+								if (record.getRecord().getRecordSource() != null){
+									img = sourceImages.get(record.getRecord().getRecordSource());
+									if (img == null){
+										//get image descriptor for record source	
+										img = new ImageDescriptor() {
+											
+											@Override
+											public ImageData getImageData() {
+												try{
+													BufferedImage image = record.getRecord().getRecordSource().getIconAsImage();
+													if (image != null){
+														return AWTSWTImageUtils.convertToSWTImage(image).getImageData();
+													}
+												}catch (Exception ex){
+													
+												}
+												return null;
+											}
+										};
+										sourceImages.put(record.getRecord().getRecordSource(), img);
+									}
+								}
+								IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(),img);
 								items.add(i);
 							}
 							for (IntelWorkingSetQuery query : ws.getQueries()){

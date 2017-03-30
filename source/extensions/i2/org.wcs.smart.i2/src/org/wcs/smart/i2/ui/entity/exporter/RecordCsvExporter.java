@@ -45,7 +45,6 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
-import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.GeometryUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
