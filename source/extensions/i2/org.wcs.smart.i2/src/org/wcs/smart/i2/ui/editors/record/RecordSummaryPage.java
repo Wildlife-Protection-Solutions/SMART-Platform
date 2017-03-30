@@ -469,8 +469,10 @@ public class RecordSummaryPage extends EditorPart{
 			final Image toDispose= img;
 			l.setImage(toDispose);
 			l.addDisposeListener(e->{if (toDispose != null) toDispose.dispose();});
-			l = toolkit.createLabel(temp,  recordEditor.getRecord().getRecordSource().getName());
-			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			if (recordEditor.getRecord().getRecordSource() != null){
+				l = toolkit.createLabel(temp,  recordEditor.getRecord().getRecordSource().getName());
+				l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			}
 		}
 			
 		Composite rightPart = new Composite(header, SWT.NONE);
@@ -573,11 +575,11 @@ public class RecordSummaryPage extends EditorPart{
 		}
 		editorFields = new HashMap<IntelRecordSourceAttribute, Object>();
 		
+		Label sepl = toolkit.createLabel(srcAttributePanel, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+		sepl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		if (source == null) return;
-		if (source.getAttributes().size() > 0){
-			Label l = toolkit.createLabel(srcAttributePanel, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		}
+		
 		ScrolledComposite sc = new ScrolledComposite(srcAttributePanel, SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		sc.setExpandHorizontal(true);
