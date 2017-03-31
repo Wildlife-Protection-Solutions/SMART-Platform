@@ -38,7 +38,7 @@ public class DerbyFuzzyFunctions {
 	
 	/**
 	 * Determines if one metaphone is contained within a set of metaphones represented
-	 * by a single space deleminted string.
+	 * by a single space delimited string.
 	 * @param string a single metaphone value
 	 * @param metaphone a collection of metaphone values separated by a space (use doubleMetaphone
 	 * function to generate this string).
