@@ -29,6 +29,8 @@ labels_en= {
 "alert.location":"Location: ",
 "alert.description":"Description: ",
 "alert.importance":"Importance: ",
+"quicklink.areyousuredelete":"Are you sure you want to Delete the Quicklink?",
+"quicklink.deletequicklink":"Delete Quicklink",
 "settings.blanktypename":"Type Name cannot be blank, please enter a value.",
 "settings.updatestyle": "Change style",
 "settings.deletestyle": "Delete style",

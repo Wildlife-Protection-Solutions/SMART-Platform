@@ -12,7 +12,6 @@
 	
 	<script type="text/javascript" >
 		var SHAREDLINKSERVLETURL = "${pageContext.request.contextPath}" + "/noa/sharedlink/";
-		var SHARED_LINK_URL = "../api/sharedlink/";
 		var cas = {
 				<c:forEach var="cas" items="${cas}">
 				    '${cas.caUuid}': '${cas.label}',

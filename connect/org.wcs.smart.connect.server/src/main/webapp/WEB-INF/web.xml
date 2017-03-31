@@ -9,6 +9,16 @@
 		<servlet-name>home</servlet-name>
 		<jsp-file>/WEB-INF/home.jsp</jsp-file>
 	</servlet>
+	<servlet>
+		<servlet-name>dashboardbeta</servlet-name>
+		<jsp-file>/WEB-INF/dashboardbeta.jsp</jsp-file>
+	</servlet>
+	<servlet>
+		<servlet-name>dashboardbetaadmin</servlet-name>
+		<jsp-file>/WEB-INF/dashboardbetaadmin.jsp</jsp-file>
+	</servlet>
+	
+	
 	<servlet-mapping>
 		<servlet-name>home</servlet-name>
 		<url-pattern>/connect/home</url-pattern>
@@ -16,6 +26,14 @@
 	<servlet-mapping>
 		<servlet-name>home</servlet-name>
 		<url-pattern>/connect</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>dashboardbeta</servlet-name>
+		<url-pattern>/connect/dashboardbeta</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>dashboardbetaadmin</servlet-name>
+		<url-pattern>/connect/dashboardbetaadmin</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>

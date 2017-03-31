@@ -51,6 +51,10 @@ import org.wcs.smart.connect.dataqueue.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.connect.model.Dashboard;
+import org.wcs.smart.connect.model.Quicklink;
+import org.wcs.smart.connect.model.UserQuicklink;
+import org.wcs.smart.connect.model.UsersDefaultDashboard;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
@@ -221,6 +225,7 @@ public enum SmartTable {
 	CTPATROLLINK(CtPatrolLink.class, ".patrolLeg.patrol.conservationArea"),
 	CTMISSIONLINK(CtMissionLink.class, ".mission.survey.surveyDesign.conservationArea"),
 	CMPTPROPPROFILE(ConfigurableModelCtPropertiesProfile.class, ".id.model.conservationArea"),
+	DASHBOARD(Dashboard.class, null),
 	DMOBJECT(DmObject.class,null),
 	ENTITY(Entity.class,".entityType.conservationArea"),
 	ENTITYATTRIBUTE(EntityAttribute.class,".entityType.conservationArea"),
@@ -282,6 +287,7 @@ public enum SmartTable {
 	PROJECTION(Projection.class,null),
 	QUERY(Query.class,null),
 	QUERYFOLDER(QueryFolder.class,null),
+	QUICKLINK(Quicklink.class, null),
 	RANK(Rank.class,".agency.conservationArea"),
 	REPORT(Report.class, null),
 	REPORTFOLDER(ReportFolder.class, null),
@@ -310,6 +316,8 @@ public enum SmartTable {
 	TEAM(Team.class,null),
 	TRACK(Track.class,".patrolLegDay.patrolLeg.patrol.conservationArea"),
 	UUIDITEM(UuidItem.class,null),
+	USERSQUICKLINKLIST(UserQuicklink.class, null),
+	USERSDEFAULTDASHBOARD(UsersDefaultDashboard.class, null),
 	WAYPOINT(Waypoint.class,null),
 	WAYPOINTATTACHMENT(WaypointAttachment.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATION(WaypointObservation.class,".waypoint.conservationArea"),

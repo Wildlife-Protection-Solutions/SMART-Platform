@@ -24,7 +24,7 @@ function createSharedLink(){
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = linkCreated;
-	oReq.open("POST", SHARED_LINK_URL, true);
+	oReq.open("POST", SHAREDLINKURL, true);
 	oReq.setRequestHeader("Content-type", "application/json");
 	oReq.send(JSON.stringify(jsonData));
 	return false;
@@ -37,7 +37,7 @@ function createToken(){
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = tokenCreated;
-	oReq.open("POST", SHARED_LINK_URL + "token/", true);
+	oReq.open("POST", SHAREDLINKURL + "token/", true);
 	oReq.setRequestHeader("Content-type", "application/json");
 	oReq.send(JSON.stringify(jsonData));
 	return false;
@@ -84,6 +84,9 @@ function tokenCreated(){
 	document.getElementById("expiresAfter").disabled=true;
 	document.getElementById("allowedIp").disabled=true;
 	
-	refreshLinkList();
+	if(document.getElementById('linktable') != null){
+		refreshLinkList();
+	}//otherwise this is not the admin shared link page, so we don't need to refresh the list.
+
 	
 }

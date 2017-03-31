@@ -9,15 +9,9 @@ alter table smart.CONFIGURABLE_MODEL ADD COLUMN instant_gps BOOLEAN;
 alter table smart.CONFIGURABLE_MODEL ADD COLUMN photo_first BOOLEAN;
 
 alter table connect.shared_links ADD COLUMN is_user_token BOOLEAN;
-UPDATE connect.shared_links SET is_user_token = false;
-
 alter table connect.shared_links ADD COLUMN allowed_ip VARCHAR(24);
-ALTER TABLE connect.shared_links ADD COLUMN date_created timestamp NOT NULL DEFAULT now();
 ALTER TABLE connect.shared_links ALTER COLUMN is_user_token set NOT NULL;
 ALTER TABLE connect.shared_links ALTER COLUMN url DROP NOT null;
-ALTER TABLE connect.shared_links ALTER COLUMN ca_uuid DROP NOT NULL;
-ALTER TABLE connect.shared_links DROP COLUMN expires_after;
-
 
 CREATE OR REPLACE FUNCTION smart.trackIntersects(geom1 bytea, geom2 bytea) RETURNS BOOLEAN AS $$
 DECLARE
@@ -347,6 +341,7 @@ CREATE TABLE smart.i_recordsource
 	icon bytea,
 	PRIMARY KEY (uuid)
 );
+
 
 --FOREIGN KEYs
 
@@ -701,15 +696,84 @@ FOREIGN KEY (value_uuid)
 REFERENCES smart.i_record_attribute_value (uuid) ON DELETE CASCADE DEFERRABLE;
 
 
+--Tables to Support Quicklinks and DashBoards 
+
+CREATE TABLE connect.dashboards
+(
+	uuid uuid not null,
+	label char(256),
+	report_uuid_1 uuid,
+	report_uuid_2 uuid,
+	date_range1 int not null,
+	date_range2 int not null,
+	custom_date1_from text,
+	custom_date1_to text,
+	custom_date2_from text,
+	custom_date2_to text,
+	report_parameterlist_1 text,
+	report_parameterlist_2 text,
+	PRIMARY KEY (uuid)
+);
+
+CREATE TABLE connect.users_default_dashboard 
+(
+	user_uuid uuid not null,
+	dashboard_uuid uuid not null,
+	date_range1 int not null,
+	date_range2 int not null,
+	custom_date1_from text,
+	custom_date1_to text,
+	custom_date2_from text,
+	custom_date2_to text,
+	report_parameterlist_1 text,
+	report_parameterlist_2 text,
+	PRIMARY KEY (user_uuid)
+);
+
+ALTER TABLE connect.users_default_dashboard
+ADD CONSTRAINT default_dashboard_user_fk
+FOREIGN KEY (user_uuid) 
+REFERENCES connect.users(uuid) ON DELETE CASCADE DEFERRABLE;
+
+ALTER TABLE connect.users_default_dashboard
+ADD CONSTRAINT default_dashboard_dashboard_fk
+FOREIGN KEY (dashboard_uuid) 
+REFERENCES connect.dashboards(uuid) ON DELETE CASCADE DEFERRABLE;
 
 
-insert into connect.plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.i2')
-insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.i2');
+CREATE TABLE connect.quicklinks
+(
+	uuid uuid not null,
+	url text not null,
+	label char(256),
+	created_on timestamp not null,
+	created_by_user_uuid uuid not null,
+	is_admin_created boolean not null,
+	PRIMARY KEY (uuid)
+);
 
-create schema query_temp;
+ALTER TABLE connect.quicklinks
+ADD CONSTRAINT quicklink_user_fk
+FOREIGN KEY (created_by_user_uuid) 
+REFERENCES connect.users(uuid) ON DELETE CASCADE DEFERRABLE;
 
---MANUALLY DELETE ALL TEMPORARY QUERY TABLES
-select 'DROP TABLE ' || table_schema || '.' || table_name from information_schema.tables where table_schema = 'smart' and table_name like 'query\_temp\_%';
 
--- UPDATE CONNECT VERSION
-update connect.connect_version set version = '5.0.0', last_updated = now();
+CREATE TABLE connect.user_quicklinks 
+(
+	uuid uuid not null,
+	user_uuid uuid not null,
+	quicklink_uuid uuid not null,
+	label_override char(256),
+	link_order int,
+	PRIMARY KEY (uuid)
+);
+
+ALTER TABLE connect.user_quicklinks
+ADD CONSTRAINT quicklink_user_fk
+FOREIGN KEY (user_uuid) 
+REFERENCES connect.users(uuid) ON DELETE CASCADE DEFERRABLE;
+
+ALTER TABLE connect.user_quicklinks
+ADD CONSTRAINT userquicklink_quicklink_fk
+FOREIGN KEY (quicklink_uuid) 
+REFERENCES connect.quicklinks(uuid) ON DELETE CASCADE DEFERRABLE;

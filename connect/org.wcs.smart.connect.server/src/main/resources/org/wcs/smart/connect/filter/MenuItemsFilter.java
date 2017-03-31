@@ -54,6 +54,7 @@ public class MenuItemsFilter implements Filter {
 
 	private enum Page{
 		HOME("MenuItemsFilter.HomePageLabel", ConnectRESTApplication.SERVLET_PATH + "home", null), //$NON-NLS-1$ //$NON-NLS-2$
+		DASHBOARDBETA("MenuItemsFilter.DashboardBetaLabel", ConnectRESTApplication.SERVLET_PATH + "dashboardbeta", null), //$NON-NLS-1$ //$NON-NLS-2$
 		ACCOUNT("MenuItemsFilter.MyAccountLabel", ConnectRESTApplication.SERVLET_PATH + "myaccount", null), //$NON-NLS-1$ //$NON-NLS-2$
 		CA("MenuItemsFilter.CaLabel", ConnectRESTApplication.SERVLET_PATH + "ca", null), //$NON-NLS-1$ //$NON-NLS-2$
 		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY), //$NON-NLS-1$ //$NON-NLS-2$

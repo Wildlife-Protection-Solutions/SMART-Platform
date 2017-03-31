@@ -63,6 +63,7 @@
 
 			displayError(msg);
 		}
+		return false;
 	}
 
 
@@ -112,6 +113,9 @@
     <div class="block infotext"><fmt:message key="myaccount.emailinfo"/></div>
     <a class="block top-spacer" href="javascript:displayDialog('passwordDialog', 'main');"><fmt:message key="myaccount.changepassword"/></a>
     <input class="block button top-spacer" style="min-width: 100px" type="submit" value="<fmt:message key="myaccount.save"/>" id="submit" />
+    
+    <p><bR></p>
+    <p><h2>Alternate Access to Your Account:</h2><button class="button" onClick="displayDialogCenter('SharedLinksDialog');return false;">Create a Token</button>Tokens can be used for programmatic access using your account credentials, treat a token like your password and keep it secure!
   </form>
 </div>
 
@@ -165,14 +169,21 @@
 						  </td>
 						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
 						  </tr>
+						  <tr>
+						   <td colspan=2><fmt:message key="sharedlinks.sourceip"/></td><td><input id="allowedIp" type="text" name="allowedIp" value="" style='width:125px'> </td>
+						  </tr>
+						  <tr>
+						   <td colspan=3><fmt:message key="sharedlinks.sourceip2"/></td>
+						  </tr>
+						  
 						  <tr >
-						     <td colspan=3 align="center"><input id="createlinkbutton" class="close" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>
+						     <td colspan=3 align="center"><input id="createtokenbutton" class="close" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>
 						  </tr>
 						  <tr >
 						     <td colspan=3><input id="createdlink" class="hide linkdialog" type="text"/></td>
 						  </tr>
 						</table>
-	   				</fieldset>	   				
+	   				</fieldset>	   			  				
 	   			</div>
 	   			<div>
 	   				<input id="close" class="close" type="button" value="<fmt:message key="query.closebutton"/>" />

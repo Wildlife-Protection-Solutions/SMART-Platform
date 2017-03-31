@@ -102,7 +102,7 @@ public class ConnectUser extends HttpServlet {
 	}
 	
 	/**
-	 * Get all Active User.
+	 * Get all Active Users.
 	 * <p>URL: ../server/api/connectuser/
 	 * <p>Call Type: GET
 	 * 
@@ -148,6 +148,27 @@ public class ConnectUser extends HttpServlet {
 			s.getTransaction().commit();
 		}
 	}
+	
+	/**
+	 * Returns whether the current user is an admin user or not.
+	 * <p>URL: ../server/api/iscurrentuseradmin/
+	 * <p>Call Type: GET
+	 * 
+	 * @return Returns a JSON SmartUser object for the selected user 
+	 */
+	
+	@GET
+    @Path("/iscurrentuseradmin/")
+    public boolean isCurrentUserAnAdmin(){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			return SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY);
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+	
 
 	/**
 	 * Gets a single user's details

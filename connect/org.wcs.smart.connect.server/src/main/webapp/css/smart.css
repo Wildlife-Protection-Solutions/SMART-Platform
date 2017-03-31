@@ -339,7 +339,25 @@ h2{
 	float: right;
 	cursor: pointer;
 }
+.up-icon{
+	background-image: url("images/uparrow.png");
+	width:16px;
+	height: 14px;
+	background-repeat: no-repeat;
+	display: block;
+	float: right;
+	cursor: pointer;
+}
 
+.down-icon{
+	background-image: url("images/downarrow.png");
+	width:16px;
+	height: 14px;
+	background-repeat: no-repeat;
+	display: block;
+	float: right;
+	cursor: pointer;
+}
 
 #map { 
 	height: 100%;
@@ -422,6 +440,9 @@ div.scrollable {
 .date-input{
 	width: 8em;
 	float: left;
+}
+.date-input-center{
+	width: 8em;
 }
 .date-text{
 	float: left;
@@ -521,6 +542,23 @@ div.scrollable {
 .tabselected{
 	color: #3A4469;
 	font-weight:bold;
+}
+
+/* Dashboard Beta styling*/
+#report-wrapper {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+#report1 {
+  width: 49%;
+  display: inline-block;
+  min-width:200px;
+}
+#report2 {
+  width: 50%;
+  display: inline-block;
+  min-width:200px;
 }
 
 	
