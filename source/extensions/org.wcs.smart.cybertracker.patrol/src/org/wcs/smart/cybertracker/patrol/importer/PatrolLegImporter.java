@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.patrol.importer;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -36,7 +37,6 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
@@ -137,6 +137,10 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 
 			if (!displayWarnings(ctPatrol))
 				return false;
+			
+
+			//resize images if required
+			processImages(Collections.singletonList(leg),session);
 			
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.survey.importer;
 
+import java.awt.image.BufferedImage;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -36,21 +37,27 @@ import java.util.TreeSet;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.ImageProcessor;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.ImportWarningDialog;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
+import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.importer.TimeDataContainer.TimeCut;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
@@ -70,7 +77,9 @@ import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SharedUtils;
@@ -160,6 +169,9 @@ public class MissionImporter extends AbstractSmartImporter {
 			//import tracks
 			appendTracks(ctSurvey, mission);
 
+			//process images
+			processImages(mission, session);
+			
 			if (!displayWarnings(ctSurvey))
 				return null;
 
@@ -552,4 +564,77 @@ public class MissionImporter extends AbstractSmartImporter {
 		return DateFormat.getDateTimeInstance().format(ctSurvey.getStartDate()) + "  [" + ctSurvey.getSurveyDesignKey() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	/**
+	 * Process all images;  This resizes the images as defined by the Cybertracker properties 
+	 * for the conservation area.
+	 * 
+	 * @param legs the legs to process images for
+	 * @param session
+	 */
+	protected void processImages(Mission mission, Session session){
+		if (mission == null) return;
+		ConservationArea ca = mission.getSurvey().getSurveyDesign().getConservationArea();
+		CyberTrackerPropertiesOption opResize = getImageResizeOption(ca, session);
+		
+		if (opResize == null || opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name())) return;
+		
+		
+		List<ISmartAttachment> attachments = new ArrayList<>();
+		for (MissionDay l : mission.getMissionDays()){			
+			for (SurveyWaypoint pw : l.getWaypoints()){
+				if (pw.getWaypoint().getAttachments() == null) continue;
+				for (WaypointAttachment attachment : pw.getWaypoint().getAttachments()){
+					attachments.add(attachment);
+				}
+				if (pw.getWaypoint().getObservations() != null){
+					for (WaypointObservation wo : pw.getWaypoint().getObservations()){
+						if (wo.getAttachments() == null) continue;
+						for (ObservationAttachment attachment : wo.getAttachments()){
+							attachments.add(attachment);
+						}
+					}		
+				}
+			}
+		}
+		
+		//TODO: this needs testing; inparticular the attachment.getCopyFromLocation() option
+		double maxsizebytes = getImageMaxSizeOption(ca, session) * 1048576l;
+		if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.AUTO.name())){
+			//attempt to resize image automatically
+			int[] size = getImageAutoResizeSizeOption(ca, session);		
+			for (ISmartAttachment attachment : attachments){
+				//only process new attachments
+				if (attachment.getCopyFromLocation() != null && attachment.getCopyFromLocation().length() >= maxsizebytes){
+					ImageProcessor.processAttachment(attachment,size[0], size[1]);
+				}
+			}	
+		}else if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.MANUAL.name())){
+			//prompt user for image size
+			Point[] allSize = new Point[]{null};
+			for (ISmartAttachment attachment : attachments){
+				//only process new attachments
+				if (attachment.getCopyFromLocation() != null && attachment.getCopyFromLocation().length() < maxsizebytes) continue;
+				final BufferedImage image = ImageProcessor.readImage(attachment.getCopyFromLocation());
+				if (image == null) continue;
+				
+				Point[] size = new Point[]{null};
+				if (allSize[0] != null){
+					size[0] = allSize[0];
+				}else{
+					//prompt
+					Display.getDefault().syncExec(()->{
+						ReSizeImageDialog dialog = new ReSizeImageDialog(Display.getDefault().getActiveShell(),attachment,image);
+						int open = dialog.open();
+						size[0] = dialog.getImageSize();
+						if (open == IDialogConstants.YES_TO_ALL_ID){
+							allSize[0] = size[0];	
+						}
+						
+					});
+				}
+				if (size[0] == null || size[0].x == -1 || size[0].y == -1) continue; //do not resize
+				ImageProcessor.processAttachment(attachment, size[0].x, size[0].y);	
+			}
+		}
+	}
 }

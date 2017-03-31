@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

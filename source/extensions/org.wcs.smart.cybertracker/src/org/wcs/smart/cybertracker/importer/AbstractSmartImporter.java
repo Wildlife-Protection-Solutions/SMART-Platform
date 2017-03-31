@@ -44,8 +44,10 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -61,6 +63,9 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.ImageSizeOption;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
@@ -94,6 +99,70 @@ public abstract class AbstractSmartImporter {
 	public static DateFormat createCyberTrackerDateFormatter() {
 		DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT); //will this always work or CT might provide different format depending on locale settings?
 		return formatter;
+	}
+	
+	/**
+	 * Gets the cybertracker image resize option
+	 * @param ca
+	 * @param session
+	 * @return
+	 */
+	public static CyberTrackerPropertiesOption getImageResizeOption(ConservationArea ca, Session session){
+		return  (CyberTrackerPropertiesOption)session.createCriteria(CyberTrackerPropertiesOption.class)
+					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+					.add(Restrictions.eq("optionId", OptionID.RESIZE_IMAGE)) //$NON-NLS-1$
+					.uniqueResult();
+	}
+	
+	/**
+	 * Gets the maximum files size for cybertracker image attachments before it
+	 * attempts to resize it.  Returns 0 if value not set.
+	 * @param ca
+	 * @param session
+	 * @return
+	 */
+	public static double getImageMaxSizeOption(ConservationArea ca, Session session){
+		CyberTrackerPropertiesOption opImageMaxSize = (CyberTrackerPropertiesOption)session.createCriteria(CyberTrackerPropertiesOption.class)
+					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+					.add(Restrictions.eq("optionId", OptionID.MAX_IMAGE_SIZE)) //$NON-NLS-1$
+					.uniqueResult();
+		if (opImageMaxSize == null || opImageMaxSize.getDoubleValue() == null) return 0;
+		return opImageMaxSize.getDoubleValue();
+	}
+	
+	/**
+	 * Gets the target width/height to resize image to.
+	 * 
+	 * @param ca
+	 * @param session
+	 * @return
+	 */
+	public static int[] getImageAutoResizeSizeOption(ConservationArea ca, Session session){
+		
+		CyberTrackerPropertiesOption opImageSize = (CyberTrackerPropertiesOption)session.createCriteria(CyberTrackerPropertiesOption.class)
+					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+					.add(Restrictions.eq("optionId", OptionID.IMAGE_SIZE)) //$NON-NLS-1$
+					.uniqueResult();
+		
+		if (opImageSize == null) return new int[]{-1,-1};
+		if (opImageSize.getStringValue().startsWith(ImageSizeOption.CUSTOM.name())){
+			String[] bits = opImageSize.getStringValue().split(CyberTrackerPropertiesOption.PROP_SEP); 
+			int width = -1;
+			int height = -1;
+			try{
+				width = Integer.parseInt(bits[1]);
+				height = Integer.parseInt(bits[2]);
+			}catch(Exception ex){}
+			return new int[]{width, height};
+		}else{
+			for (ImageSizeOption op : ImageSizeOption.values()){
+				if (opImageSize.getStringValue().equalsIgnoreCase(op.name())){
+					return new int[]{op.width, op.height};
+				}
+			}
+		}
+		
+		return new int[]{-1,-1};
 	}
 	
 	protected DateFormat getFilenameDateFormat() {
@@ -555,7 +624,7 @@ public abstract class AbstractSmartImporter {
 		}
 	}
 
-	public void addAttachments(Waypoint wp, S s, Map<String, E> eMap, String namePrefix) {
+	public void addAttachments(Waypoint wp, S s, Map<String, E> eMap, String namePrefix, Session session)  {
 		String mediaFolder = null;
 		try {
 			mediaFolder = PdaUtil.getCTMediaFolder();
@@ -574,16 +643,17 @@ public abstract class AbstractSmartImporter {
 					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_ExportMedia_FileNotFound, mediaFolder, a.getV()));
 					continue;
 				}
-				if (wp.getAttachments() == null) {
-					wp.setAttachments(new ArrayList<WaypointAttachment>());
-				}
-
+				
 				//create user friendly file name
 				int index = a.getV().lastIndexOf('.');
 				String ext = index >= 0 ? a.getV().substring(index) : ""; //$NON-NLS-1$
 				String fileName = namePrefix + "_Waypoint_" + wp.getId() + (fileCnt == 0 ? "" : "_" + fileCnt) + ext; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				fileCnt++;
 				
+				if (wp.getAttachments() == null) {
+					wp.setAttachments(new ArrayList<WaypointAttachment>());
+				}
+
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setWaypoint(wp);
 				attachment.setFilename(fileName);
@@ -593,6 +663,7 @@ public abstract class AbstractSmartImporter {
 		}
 	}
 
+	
 	/**
 	 * NOTE: This method must never return original list as this list can be changed in future.
 	 */

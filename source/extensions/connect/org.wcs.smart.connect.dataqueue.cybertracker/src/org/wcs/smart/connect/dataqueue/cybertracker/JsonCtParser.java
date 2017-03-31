@@ -42,21 +42,31 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.connect.dataqueue.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.ImageProcessor;
 import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
+import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
+import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -130,6 +140,78 @@ public class JsonCtParser {
 		}
 		
 		return true;
+	}
+		
+	/**
+	 * 
+	 * @param waypoint the waypoint to size
+	 * @param selectedSize the size to apply to the waypoint (to support apply to all); can be null
+	 * @param session
+	 * @return
+	 */
+	public static Point processImages(Waypoint waypoint, Point selectedSize, Session session){
+		final Point[] selectAllSize = new Point[]{selectedSize};
+		
+		if (waypoint == null) return selectAllSize[0];
+		
+		ConservationArea ca = waypoint.getConservationArea();
+		CyberTrackerPropertiesOption opResize =  AbstractSmartImporter.getImageResizeOption(ca, session);
+		
+		if (opResize == null || opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name())) return selectAllSize[0];
+		
+		double maxsizebytes =  AbstractSmartImporter.getImageMaxSizeOption(ca, session) * 1048576l;
+		List<ISmartAttachment> attachments = new ArrayList<>();
+		if (waypoint.getAttachments() != null ){
+			for (WaypointAttachment attachment : waypoint.getAttachments()){
+				if (attachment.getCopyFromLocation().length() >= maxsizebytes)
+					attachments.add(attachment);
+			}
+		}
+		if (waypoint.getObservations() != null){
+			for (WaypointObservation wo : waypoint.getObservations()){
+				if (wo.getAttachments() == null) continue;
+				for (ObservationAttachment attachment : wo.getAttachments()){
+					if (attachment.getCopyFromLocation().length() >= maxsizebytes)
+						attachments.add(attachment);
+				}						
+			}
+		}
+		
+		
+		if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.AUTO.name())){
+			//attempt to resize image automatically
+			int[] size = AbstractSmartImporter.getImageAutoResizeSizeOption(ca, session);		
+			for (ISmartAttachment attachment : attachments){
+				ImageProcessor.processAttachment(attachment,size[0], size[1]);
+			}	
+		}else if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.MANUAL.name())){
+			//prompt user for image size
+			for (ISmartAttachment attachment : attachments){
+				if (attachment.getCopyFromLocation().length() < maxsizebytes) continue;
+				final BufferedImage image = ImageProcessor.readImage(attachment.getCopyFromLocation());
+				if (image == null) continue;
+				
+				Point[] size = new Point[]{null};
+
+				if (selectAllSize[0] != null){
+					size[0] = selectAllSize[0];
+				}else{
+					//prompt
+					Display.getDefault().syncExec(()->{
+						ReSizeImageDialog dialog = new ReSizeImageDialog(Display.getDefault().getActiveShell(),attachment,image);
+						int open = dialog.open();
+						size[0] = dialog.getImageSize();
+						if (open == IDialogConstants.YES_TO_ALL_ID){
+							selectAllSize[0] = size[0];	
+						}
+						
+					});
+				}
+				if (size[0] == null || size[0].x == -1 || size[0].y == -1) continue; //do not resize
+				ImageProcessor.processAttachment(attachment, size[0].x, size[0].y);	
+			}
+		}
+		return selectAllSize[0];
 	}
 	/**
 	 * Time in seconds

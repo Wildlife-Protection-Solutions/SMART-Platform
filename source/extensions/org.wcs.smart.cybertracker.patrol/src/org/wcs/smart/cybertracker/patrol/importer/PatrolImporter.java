@@ -98,6 +98,9 @@ public class PatrolImporter extends AbstractPatrolImporter {
 			if (!displayWarnings(ctPatrol))
 				return null;
 
+			//resize images if required
+			processImages(patrol.getLegs(),session);
+			
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
 		} catch (final Exception e) {

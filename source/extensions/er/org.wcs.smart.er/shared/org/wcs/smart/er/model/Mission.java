@@ -208,7 +208,7 @@ public class Mission extends UuidItem{
 	@Transient
 	public File getFilestoreLocation(ConservationArea ca){
 		return new File(
-				ca 
+				ca.getFileDataStoreLocation()
 				+ File.separator 
 				+ SurveyDesign.SURVEY_FILESTORE_LOC
 				+ File.separator

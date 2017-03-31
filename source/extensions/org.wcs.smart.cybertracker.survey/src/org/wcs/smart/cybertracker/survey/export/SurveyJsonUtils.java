@@ -94,9 +94,11 @@ public class SurveyJsonUtils {
 		if (su != null){
 			if (startsWith(su, JsonSurveyKey.SAMPLING_UNIT.key)){
 				String suUuid = su.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
-				SamplingUnit suu = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suUuid));
-				if (suu != null){
-					startSu = suu;
+				if (suUuid != null&& !suUuid.equalsIgnoreCase("null")){ //$NON-NLS-1$
+					SamplingUnit suu = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suUuid));
+					if (suu != null){
+						startSu = suu;
+					}
 				}
 			}
 		}

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.patrol.importer;
 
+import java.awt.image.BufferedImage;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -31,14 +32,19 @@ import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.cybertracker.ImageProcessor;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.ImportWarningDialog;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.ImportError;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
@@ -47,9 +53,12 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
+import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
@@ -204,7 +213,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		Waypoint wp = findOrAddWaypoint(legDay, s, eMap);
 		addObservations(wp, s, eMap, session);
 		String prefix = getFilenameDateFormat().format(legDay.getDate()) + "_Leg_"+leg.getId(); //$NON-NLS-1$
-		addAttachments(wp, s, eMap, prefix);
+		addAttachments(wp, s, eMap, prefix, session);
 	}
 
 	/**
@@ -309,4 +318,75 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		return isOk[0];
 	}
 
+	/**
+	 * Process all images;  This resizes the images as defined by the Cybertracker properties 
+	 * for the conservation area.
+	 * 
+	 * @param legs the legs to process images for
+	 * @param session
+	 */
+	protected void processImages(List<PatrolLeg> legs, Session session){
+		if (legs.size() == 0);
+		ConservationArea ca = legs.get(0).getPatrol().getConservationArea();
+		CyberTrackerPropertiesOption opResize = getImageResizeOption(ca, session);
+		
+		if (opResize == null || opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name())) return;
+		
+		
+		List<ISmartAttachment> attachments = new ArrayList<>();
+		for (PatrolLeg l : legs){
+			for (PatrolLegDay pld : l.getPatrolLegDays()){
+				for (PatrolWaypoint pw : pld.getWaypoints()){
+					if (pw.getWaypoint().getAttachments() == null) continue;
+					for (WaypointAttachment attachment : pw.getWaypoint().getAttachments()){
+						attachments.add(attachment);
+					}
+					if (pw.getWaypoint().getObservations() != null){
+						for (WaypointObservation wo : pw.getWaypoint().getObservations()){
+							if (wo.getAttachments() == null) continue;
+							for (ObservationAttachment attachment : wo.getAttachments()){
+								attachments.add(attachment);
+							}
+						}		
+					}
+				}
+			}
+		}
+		double maxsizebytes = getImageMaxSizeOption(ca, session) * 1048576l;
+		if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.AUTO.name())){
+			//attempt to resize image automatically
+			int[] size = getImageAutoResizeSizeOption(ca, session);		
+			for (ISmartAttachment attachment : attachments){
+				if (attachment.getCopyFromLocation().length() >= maxsizebytes){
+					ImageProcessor.processAttachment(attachment,size[0], size[1]);
+				}
+			}	
+		}else if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.MANUAL.name())){
+			//prompt user for image size
+			Point[] allSize = new Point[]{null};
+			for (ISmartAttachment attachment : attachments){
+				if (attachment.getCopyFromLocation().length() < maxsizebytes) continue;
+				final BufferedImage image = ImageProcessor.readImage(attachment.getCopyFromLocation());
+				if (image == null) continue;
+				
+				Point[] size = new Point[]{null};
+				if (allSize[0] != null){
+					size[0] = allSize[0];
+				}else{
+					//prompt
+					Display.getDefault().syncExec(()->{
+						ReSizeImageDialog dialog = new ReSizeImageDialog(Display.getDefault().getActiveShell(),attachment,image);
+						int open = dialog.open();
+						size[0] = dialog.getImageSize();
+						if (open == IDialogConstants.YES_TO_ALL_ID){
+							allSize[0] = size[0];	
+						}
+						
+					});
+				}
+				if (size[0] == null || size[0].x == -1 || size[0].y == -1) continue; //do not resize
+				ImageProcessor.processAttachment(attachment, size[0].x, size[0].y);	
+			}
+		}
+	}
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.cybertracker.datasource" name="Data Source for CyberTracker" schema="schema/org.wcs.smart.cybertracker.datasource.exsd"/>
-   <extension-point id="org.wcs.smart.cybertracker.alert" name="Alert Data for CyberTracker" schema="schema/org.wcs.smart.cybertracker.alert.exsd"/>
+   <extension-point id="org.wcs.smart.cybertracker.datasource" name="%extension-point.name" schema="schema/org.wcs.smart.cybertracker.datasource.exsd"/>
+   <extension-point id="org.wcs.smart.cybertracker.alert" name="%extension-point.name.0" schema="schema/org.wcs.smart.cybertracker.alert.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -36,6 +36,11 @@
             <command
                   commandId="org.wcs.smart.cybertracker.properties"
                   label="%cybertracker.properties.command.label"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.cybertracker.imageprocessingop"
+                  label="%imageops.handler"
                   style="push">
             </command>
             <separator
@@ -111,6 +116,10 @@
             id="org.wcs.smart.cybertracker.properties"
             name="%cybertracker.properties.command.name">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.imageprocessingop"
+            name="%imageops.command">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -121,6 +130,10 @@
       <handler
             class="org.wcs.smart.cybertracker.handler.CyberTrackerPropertiesHandler$CyberTrackerPropertiesHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.properties">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.handler.CyberTrackerImgProcessingOpHandler$CyberTrackerImgProcessingOpHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.imageprocessingop">
       </handler>
    </extension>
    <extension
@@ -159,6 +172,10 @@
       <image
             commandId="org.wcs.smart.cybertracker.import"
             icon="images/etool16/import.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.cybertracker.imageprocessingop"
+            icon="images/etool16/camera.png">
       </image>
    </extension>
    <extension

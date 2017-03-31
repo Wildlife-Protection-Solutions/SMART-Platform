@@ -38,6 +38,7 @@ import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
@@ -99,6 +100,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	private Set<Patrol> modifiedPatrols;
 	private Set<Patrol> newPatrols = new HashSet<>();
 	private HashMap<UUID, CtPatrolLink> newPatrolLinks;
+	
+	//resize value for apply to all option
+	private Point allSize = null;
 	
 	public PatrolJsonProcessor() {
 		warnings = new ArrayList<String>();
@@ -199,6 +203,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				wp.setId(observationCounter);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
+				allSize = JsonCtParser.processImages(wp, allSize, session);
 				
 				if (sighting.containsKey(ScreensUtil.RESULT_PAUSED)){
 					//patrol paused; no observation; record only as track point
@@ -709,4 +714,6 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}
 		return sb.toString();
 	}
+	
+	
 }

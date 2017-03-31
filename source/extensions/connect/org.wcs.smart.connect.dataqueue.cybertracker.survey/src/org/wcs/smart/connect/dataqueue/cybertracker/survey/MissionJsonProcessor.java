@@ -38,6 +38,7 @@ import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -105,6 +106,9 @@ public class MissionJsonProcessor implements IJsonProcessor {
 	private Set<Mission> modifiedMissions;
 	private Set<Mission> newMissions = new HashSet<>();
 	private HashMap<UUID, CtMissionLink> newMissionLinks;
+	
+	//resize value for apply to all option
+	private Point allSize = null;
 	
 	public MissionJsonProcessor() {
 		warnings = new ArrayList<String>();
@@ -228,6 +232,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				wp.setId(observationCounter);
 				wp.setSourceId(SurveyWaypointSource.KEY);
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
+				allSize = JsonCtParser.processImages(wp, allSize, session);
 				
 				if (sighting.containsKey(ScreensUtil.RESULT_PAUSED)){
 					//patrol paused; no observation; record only as track point

@@ -45,10 +45,41 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.ct_properties_option")
 public class CyberTrackerPropertiesOption extends UuidItem {
 	
+	public static final String PROP_SEP = ";"; //$NON-NLS-1$
+	
 	public enum OptionID {
-		STORAGE_TIME
+		STORAGE_TIME,
+		RESIZE_IMAGE,	//how images should be resized;  stored as the name() value of on of the ImageReiszeOption enum values
+		IMAGE_SIZE,		//the target image size; either the name() of one of ImageSizeOption or Custom;width;height
+		MAX_IMAGE_SIZE;	//any images larger than this size will be resized; all others will be ignored image size provided in MB
 	}
 
+	public enum ImageResizeOption{
+		NONE,
+		AUTO,
+		MANUAL;
+	}
+	
+	public enum ImageSizeOption{
+		KP300(640, 480),
+		MP1(1280, 960),
+		MP2(1600, 1200),
+		MP3(2048, 1536),
+		MP5(2560, 1920),
+		MP6(2816, 2112),
+		MP8(3264, 2468),
+		MP12(4200, 2800),
+		CUSTOM(-1, -1);
+		
+		public int width;
+		public int height;
+		
+		ImageSizeOption(int width, int height){
+			this.width = width;
+			this.height = height;
+		}
+	}
+	
 	private ConservationArea conservationArea;
 	private OptionID optionId;
 	private Double doubleValue;
