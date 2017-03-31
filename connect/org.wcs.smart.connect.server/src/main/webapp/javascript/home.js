@@ -41,7 +41,7 @@ function updateLinkList(){
 
 function writeLinkList(){
 	simpleDiv = document.getElementById('simpleview');
-	simpleDiv.innertHTML = "";
+	simpleDiv.innerHTML = "";
 	
  	var links = JSON.parse(this.responseText);
  	for (var i = 0; i < links.length; i++){
