@@ -159,7 +159,6 @@ public class DashboardBetaApi extends HttpServlet {
 	@GET
     @Path("/{uuid}")
     public Dashboard getDashboard(@PathParam("uuid") UUID uuid){
-		isAdminUser();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -171,7 +170,7 @@ public class DashboardBetaApi extends HttpServlet {
 	
 	
 	/**
-	 * Create a new Dashboard - must be an admin to do this
+	 * Create or Update a new Dashboard - must be an admin to do this
 	 * URL: ../server/api/dashboardbeta
 	 * Call Type: POST
 	 * Payload: A GeoJSON object that has properties that match the Java attributes of a DashBoard
@@ -304,7 +303,6 @@ public class DashboardBetaApi extends HttpServlet {
 			}
 		
 			s.saveOrUpdate(d);
-			s.getTransaction().commit();			
 			
 			//override the user-customizable portions of the dashboard then return to the user Dashboard object.
 			dashboard = (Dashboard)s.createCriteria(Dashboard.class).add(Restrictions.eq("uuid",d.getDashboardUuid())).uniqueResult();
@@ -317,7 +315,8 @@ public class DashboardBetaApi extends HttpServlet {
 			dashboard.setDateRange2(d.getDateRange2());
 
 			response.setStatus(Response.Status.CREATED.getStatusCode());
-
+			s.getTransaction().commit();
+			
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();

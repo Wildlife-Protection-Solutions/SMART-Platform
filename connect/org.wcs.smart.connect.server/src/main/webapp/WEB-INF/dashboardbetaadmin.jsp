@@ -31,12 +31,12 @@
     		<option value=0>Select the First Report Here</option>
     		</select>
     		<select id='filterDate1' class='updateChange' name="time_filter" style="margin-bottom:3px">
-				<option value=1><fmt:message key="sharedlinks.oneday"/></option>
-				<option value=7><fmt:message key="sharedlinks.oneweek"/></option>
-				<option value=30><fmt:message key="sharedlinks.onemonth"/></option>
-				<option value=180><fmt:message key="sharedlinks.sixmonths"/></option>
-				<option value=365><fmt:message key="sharedlinks.oneyear"/></option>
-				<option value=-1><fmt:message key="sharedlinks.custom"/></option>
+				<option value=1><fmt:message key="dashboardbeta.oneday"/></option>
+				<option value=7><fmt:message key="dashboardbeta.oneweek"/></option>
+				<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
+				<option value=180><fmt:message key="dashboardbeta.sixmonths"/></option>
+				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
+				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
 			</select>
 			<button class="button" onClick="rerunReport1(); return false;">Re-Run</button>
 			<button id="editCasButton1" onclick="displayDialog('caSelector1', 'main'); return false" class="button" style="display:none">Edit CAs</button>
@@ -45,10 +45,8 @@
     		<input disabled type="text" name="report1To" id="report1To" class="date-input-center">
     		<div id="customparameters1"></div>
 		</form>
-      	<iframe id="iframe1" src="" width="100%" height="500" frameborder="0" allowfullscreen sandbox="allow-scripts">
-  			<p> <a id=link1' href="">No iframe support found: click here to run the report.
-			</a></p>
-		</iframe>
+		<img id="loading1" src="../css/images/loading.svg">
+      	<div id="iframe1div"></div>
     	</div>
     	<div id="report2">
     	<form id="report2form" name="report2form">
@@ -59,12 +57,12 @@
     		<option value=0>Select the Second Report Here</option>
     		</select>
     		<select id='filterDate2' class='updateChange' name="time_filter" style="margin-bottom:3px">
-				<option value=1><fmt:message key="sharedlinks.oneday"/></option>
-				<option value=7><fmt:message key="sharedlinks.oneweek"/></option>
-				<option value=30><fmt:message key="sharedlinks.onemonth"/></option>
-				<option value=180><fmt:message key="sharedlinks.sixmonths"/></option>
-				<option value=365><fmt:message key="sharedlinks.oneyear"/></option>
-				<option value=-1><fmt:message key="sharedlinks.custom"/></option>
+				<option value=1><fmt:message key="dashboardbeta.oneday"/></option>
+				<option value=7><fmt:message key="dashboardbeta.oneweek"/></option>
+				<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
+				<option value=180><fmt:message key="dashboardbeta.sixmonths"/></option>
+				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
+				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
 			</select>
 			<button class="button" onClick="rerunReport2(); return false;">Re-Run</button>
 			<button id="editCasButton2" onclick="displayDialog('caSelector2', 'main'); return false" class="button" style="display:none">Edit CAs</button>
@@ -73,11 +71,8 @@
     		<input disabled type="text" name="report2To" id="report2To" class="date-input-center">
     		<div id="customparameters2"></div>
 		</form>
-    	
-      	<iframe id="iframe2" src="" width="100%" height="500" frameborder="0" allowfullscreen sandbox="allow-scripts">
-  			<p> <a id="link2" href="">No iframe support found: click here to run the report.
-			</a></p>
-		</iframe>
+    	<img id="loading2" src="../css/images/loading.svg">
+      	<div id="iframe2div"></div>
 
     	</div>
   	</div>

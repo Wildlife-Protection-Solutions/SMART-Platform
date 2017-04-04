@@ -25,6 +25,8 @@ window.onload = function(){
 	}else{
 		document.getElementById('pageheader').innerHTML = document.getElementById('pageheader').innerHTML + " - Create New Dash Board";
 		document.getElementById('dashboarduuid').value = 0;
+		document.getElementById('loading1').style.display = "none";
+		document.getElementById('loading2').style.display = "none";
 	}
 	
 	initDatePickers();

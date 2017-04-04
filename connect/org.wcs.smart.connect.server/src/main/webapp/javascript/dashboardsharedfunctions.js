@@ -9,7 +9,7 @@ function getReport2ParametersForUi(){
 
 //get the possible parameters and put input boxes on the UI for users to fill out.
 function getReportParametersForUi(num){
-	//clear custom paramater from any previous reports
+	//clear custom parameter from any previous reports
 	if(num ==1){
 		var parent = document.getElementById("customparameters1");
 		var uuidhidden = document.getElementById('report1selecthidden');
@@ -43,28 +43,20 @@ function getReportParametersForUi(num){
 	oReq.open("Get", REPORTURL  + uuid + "/params", true);
 	oReq.send();
 	
-	var oReq = new XMLHttpRequest();
-	if(num==1){
-		oReq.onload = checkForCCAAReport1;
-	}else{
-		oReq.onload = checkForCCAAReport2;
-	}
-	oReq.open("Get", REPORTURL  + "definition/" + uuid , true);
-	oReq.send();
 }
 
 function showParamaterSelection1(){
 	var json = JSON.parse(this.responseText);
-	showParamaterSelection("customparameters1", json);
+	showParamaterSelection("customparameters1", json, 1);
 }
 
 function showParamaterSelection2(){
 	var json = JSON.parse(this.responseText);
-	showParamaterSelection("customparameters2", json);
+	showParamaterSelection("customparameters2", json,2);
 }
 
 
-function showParamaterSelection(divid, json){
+function showParamaterSelection(divid, json, num){
 	var parent = document.getElementById(divid);
 	parent.innerHTML = "";
 	
@@ -94,6 +86,26 @@ function showParamaterSelection(divid, json){
  			addTextboxParamater(json[i], parent, true);
  		}
  	}
+ 	
+ 	
+ 	if(num ==1){
+		var uuidhidden = document.getElementById('report1selecthidden');
+ 	}else{
+		var uuidhidden = document.getElementById('report2selecthidden');
+ 	}
+ 	var uuid = uuidhidden.value;
+ 	
+ 	
+ 	//now get the CCAA stuff if needed.
+	var oReq = new XMLHttpRequest();
+	if(num==1){
+		oReq.onload = checkForCCAAReport1;
+	}else{
+		oReq.onload = checkForCCAAReport2;
+	}
+	oReq.open("Get", REPORTURL  + "definition/" + uuid , true);
+	oReq.send();
+
  }
 
 function checkForCCAAReport1(){
@@ -118,23 +130,22 @@ function checkForCCAAReport(num, report){
 	if(report.isCcaa){
 		getCaList(num);
 		if(num == 1){
-			displayDialog('caSelector1', "main");
+//			displayDialog('caSelector1', "main");
 			document.getElementById('editCasButton1').style.display = "inline-block";
 		}else{
-			displayDialog('caSelector2', "main");
+//			displayDialog('caSelector2', "main");
 			document.getElementById('editCasButton2').style.display = "inline-block";
 		}
 	//hide the button if it is no longer a CCAA report
 	}else{
+		parseParametersIntoInputs(num);//need to parse custom params, this is also called after the chain of ajax from getCaList() 10 lines above, so it is run once in each case of this if/else, if that isn't obvious... I keep forgetting it. 
 		if(num == 1){
 			document.getElementById('editCasButton1').style.display = "none";
 		}else{
 			document.getElementById('editCasButton2').style.display = "none";
 		}
 	}
-	setTimeout(function(){
-		parseParametersIntoInputs(num);
-	}, 250);
+	
 }
 
 function addTextboxParamater(param, parent, newGroup){
@@ -150,10 +161,39 @@ function addTextboxParamater(param, parent, newGroup){
 	newInput.style.width="100%";
 	newInput.type = "text";
 
+	newInput.oninput = updateReportCustomParamsHiddenValue;
+	newInput.onpropertychange = newInput.oninput;
+    
+    
 	f.appendChild(newInput);
 	parent.insertBefore(f, parent.childNodes[4]);
 
+	
 }
+
+function addBooleanParamater(param, parent, newGroup){
+	if(newGroup == true){
+		var f = document.createElement("fieldset");
+		f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+	}else{
+		var f = document.createElement("p");
+	}
+
+	var newList = document.createElement("select");
+	newList.setAttribute("id", param.name);
+	var optionT = new Option("true", "true");
+	var optionF = new Option("false", "false");
+	//Here we append that text node to our drop down list.
+	newList.appendChild(optionT);
+	newList.appendChild(optionF);
+	newList.style.width="100%";
+	
+	newList.onchange = function(){updateReportCustomParamsHiddenValue();};
+
+	f.appendChild(newList);
+	parent.insertBefore(f, parent.childNodes[4]);
+}
+
 
 //check if the user selected or deselected "custom dates" and grey/de-grey the custom inputs. 
 function checkForCustomDates(){
@@ -282,6 +322,22 @@ function getDashboard(uuid){
 }
 
 function updateReportsFromDashBoardJson(){
+	
+	if (this.status != 200 && this.status != 201) {
+		var msg = "";
+		if (this.status == 401){
+			msg += i18n("dashboard.unauthorized");
+		}else{
+			try {
+				msg = JSON.parse(this.responseText).error
+			} catch (err) {
+			}
+		}
+		displayError(msg);
+		return;
+	}
+
+	
 	var dashboard = JSON.parse(this.responseText);
 	if(dashboard.uuid != null){
 		document.getElementById('report1selecthidden').value = dashboard.reportUuid1;
@@ -305,6 +361,8 @@ function updateReportsFromDashBoardJson(){
 		}
 	}else{
 		document.getElementById('pageheader').innerHTML = "No Default Dashboard Selected Yet";
+		document.getElementById('loading1').style.display = "none";
+		document.getElementById('loading2').style.display = "none";
 	}
 	
 	if(document.getElementById('report1select') != null){ //if we are on the admin page
@@ -312,9 +370,12 @@ function updateReportsFromDashBoardJson(){
 		getReport2ParametersForUi();
 	}
 	checkForCustomDates();
-	setTimeout(function(){
-		runReports();
-	}, 200);
+	
+	if(dashboard.uuid != null){
+		setTimeout(function(){
+			runReports();
+		}, 500);
+	}
 }
 
 //actually run the reports and put the results in the iframes
@@ -323,19 +384,47 @@ function runReports(){
 	rerunReport2();
 }
 function rerunReport1(){
-	if(document.getElementById('report1select') != null){ //if we are on the admin page
-		document.getElementById('report1paramshidden').value = getRepor1CustomParameters();
+	var framediv = document.getElementById("iframe1div");
+	while (framediv.firstChild) {
+	    framediv.removeChild(framediv.firstChild);
 	}
+	document.getElementById('loading1').style.display = "inline-block";
+	
+	var iframe = createIframe();
+	document.getElementById('iframe1div').appendChild(iframe);
+	iframe.src = resolve(generateRelativeUrl(REPORTURL, 1));
 
-	document.getElementById('iframe1').src = resolve(generateRelativeUrl(REPORTURL, 1));
+	iframe.onload = function(){
+		frame1load();
+	};
 }
 
 function rerunReport2(){
-	if(document.getElementById('report2select') != null){ //if we are on the admin page
-		document.getElementById('report2paramshidden').value = getRepor2CustomParameters();
+	var framediv = document.getElementById("iframe2div");
+	while (framediv.firstChild) {
+	    framediv.removeChild(framediv.firstChild);
 	}
+	document.getElementById('loading2').style.display = "inline-block";
+	
+	var iframe = createIframe();
+	iframe.src = resolve(generateRelativeUrl(REPORTURL, 2));
+	document.getElementById('iframe2div').appendChild(iframe);
+	
+	iframe.onload = function(){
+		frame2load();
+	};
+}
 
-	document.getElementById('iframe2').src = resolve(generateRelativeUrl(REPORTURL, 2));
+function createIframe(){
+	var iframe= document.createElement('iframe');
+	iframe.width = "100%";
+	iframe.height = "100%";
+	iframe.setAttribute('frameborder', 0);
+	iframe.allowfullscreen = true;
+	iframe.sandbox = "allow-scripts";
+	iframe.style.display = "none";
+
+	return iframe;
 }
 
 function generateRelativeUrl(root, report){
@@ -467,6 +556,8 @@ function populateCaList(num, response){
 		parent.appendChild(document.createElement('br'));
 	}			
 	parent.appendChild(document.createElement('br'));
+	
+	parseParametersIntoInputs(num);
 }
 
 function selectAllCas1(){
@@ -593,6 +684,18 @@ function parseParametersIntoInputs(num){
 				input.value = value;
 			}
 		}
+		
+		//pull out any ca filters and check off the correct boxes
+		for(var i=0; i < params2.length; i++){
+			var name = params2[i];
+			if(name.substring(0,10) == "&cafilter="){
+				name = name.split("=")[1];
+			}
+			var input = getElementInsideContainer("caCheckboxes2",name);
+			if(input != null){
+				input.checked = true;
+			}
+		}
 	}
 }
 
@@ -613,3 +716,20 @@ function getElementInsideContainer(containerID, childID) {
 function updateHiddenParams(){
 	params1 = document.getElementById('report1paramshidden').value;
 }
+
+
+function frame1load(){
+	document.getElementById('loading1').style.display = "none";
+	document.getElementById('iframe1div').firstChild.style.display = "block";
+}
+
+function frame2load(){
+	document.getElementById('loading2').style.display = "none";
+	document.getElementById('iframe2div').firstChild.style.display = "block";
+}
+
+function updateReportCustomParamsHiddenValue(){
+	document.getElementById('report1paramshidden').value = getRepor1CustomParameters();
+	document.getElementById('report2paramshidden').value = getRepor2CustomParameters();
+}
+

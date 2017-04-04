@@ -29,6 +29,7 @@ labels_en= {
 "alert.location":"Location: ",
 "alert.description":"Description: ",
 "alert.importance":"Importance: ",
+"dashboard.unauthorized":"You are Not Authorized to View that Dashboard",
 "quicklink.areyousuredelete":"Are you sure you want to Delete the Quicklink?",
 "quicklink.deletequicklink":"Delete Quicklink",
 "settings.blanktypename":"Type Name cannot be blank, please enter a value.",
