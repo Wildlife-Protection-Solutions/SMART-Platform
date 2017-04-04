@@ -156,7 +156,8 @@ public class MapToolComposite {
 	 */
 	public ToolItem getTool(String id){
 		for (ToolItem it : items){
-			if (  ((ToolProxy)it.getData()).getId().equals(id) ){
+			if (it.isDisposed()) continue;
+			if (((ToolProxy)it.getData()).getId().equals(id)){
 				return it;
 			}
 		}
