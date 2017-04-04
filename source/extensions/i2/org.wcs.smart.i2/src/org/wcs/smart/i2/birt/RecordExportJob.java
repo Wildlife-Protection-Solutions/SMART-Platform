@@ -88,7 +88,7 @@ public class RecordExportJob extends Job {
 	
 	@SuppressWarnings("unchecked")
 	protected Path runRecord() throws Exception{
-		
+		if (record == null) throw new Exception("Record not loaded."); //$NON-NLS-1$
 		//get the template
 		Path reportFile = IntelReportManager.INSTANCE.getRecordTemplate(SmartDB.getCurrentConservationArea());
 		if (reportFile == null || !Files.exists(reportFile)){

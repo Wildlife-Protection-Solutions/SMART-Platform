@@ -267,15 +267,18 @@ public enum RecordReportGenerator {
 			headerGrid.getColumnBindings().addItem(c);
 		}
 		
+		String createdByLabel = RecordDatasetResultSetMetadata.Column.CREATED.getColumnName(Locale.getDefault()) + " Label"; //$NON-NLS-1$
+		String modifiedByLabel = RecordDatasetResultSetMetadata.Column.LAST_MODIFIED.getColumnName(Locale.getDefault()) + " Label"; //$NON-NLS-1$
+		
 		cc = StructureFactory.createComputedColumn();
-		cc.setProperty("name", RecordDatasetResultSetMetadata.Column.CREATED.getColumnName(Locale.getDefault())); //$NON-NLS-1$
+		cc.setProperty("name", createdByLabel); //$NON-NLS-1$
 		cc.setDisplayName(RecordDatasetResultSetMetadata.Column.CREATED.getColumnName(Locale.getDefault()));
 		cc.setDataType("string"); //$NON-NLS-1$
 		cc.setExpression("dataSetRow[\"" + RecordDatasetResultSetMetadata.Column.CREATED.getColumnName(Locale.getDefault()) + "\"] + \" (\" + dataSetRow[\"" + RecordDatasetResultSetMetadata.Column.CREATED_BY.getColumnName(Locale.getDefault()) + "\"] + \")\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		headerGrid.getColumnBindings().addItem(cc);
 		
 		cc = StructureFactory.createComputedColumn();
-		cc.setProperty("name", RecordDatasetResultSetMetadata.Column.LAST_MODIFIED.getColumnName(Locale.getDefault())); //$NON-NLS-1$
+		cc.setProperty("name", modifiedByLabel); //$NON-NLS-1$
 		cc.setDisplayName(RecordDatasetResultSetMetadata.Column.LAST_MODIFIED.getColumnName(Locale.getDefault()));
 		cc.setDataType("string"); //$NON-NLS-1$
 		cc.setExpression("dataSetRow[\"" + RecordDatasetResultSetMetadata.Column.LAST_MODIFIED.getColumnName(Locale.getDefault()) + "\"] + \" (\" + dataSetRow[\"" + RecordDatasetResultSetMetadata.Column.LAST_MODIFIED_BY.getColumnName(Locale.getDefault()) + "\"] + \")\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -299,7 +302,7 @@ public enum RecordReportGenerator {
 		headerGrid.getCell(row,1).getContent().add(l);
 		
 		di = factory.newDataItem(null);
-		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.CREATED.getColumnName(Locale.getDefault()));
+		di.setResultSetColumn(createdByLabel);
 		headerGrid.getCell(row,2).getContent().add(di);		
 		row++;
 		
@@ -309,7 +312,7 @@ public enum RecordReportGenerator {
 		headerGrid.getCell(row,1).getContent().add(l);
 				
 		di = factory.newDataItem(null);
-		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.LAST_MODIFIED.getColumnName(Locale.getDefault()));
+		di.setResultSetColumn(modifiedByLabel);
 		headerGrid.getCell(row,2).getContent().add(di);
 		row++;
 		
