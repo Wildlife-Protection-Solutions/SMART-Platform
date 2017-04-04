@@ -317,7 +317,6 @@ function listOfAdminLinksCallback(){
 function manageQuicklinks(){
 	displayDialog("manageQuicklinksDialog", "main");
 	redrawtable();
-	return false;
 }
 
 function redrawtable(){

@@ -1,10 +1,9 @@
 var DashboardAPIURL = "../api/dashboardbeta";
 var REPORTURL = "../api/report/";
+var CAURL = "../api/conservationarea/withdataonly";
 var action = null;
 
 var picker1, picker2, picker3, picker4;
-
-var parameterNames = new Array();
 
 /* configure events on html elements */
 window.onload = function(){
@@ -33,9 +32,10 @@ window.onload = function(){
 	
 	document.getElementById('filterDate1').addEventListener("change", checkForCustomDates);
 	document.getElementById('filterDate2').addEventListener("change", checkForCustomDates);
+	checkForCustomDates();
 	
-	document.getElementById('report1select').addEventListener("change", getReport1Parameters);
-	document.getElementById('report2select').addEventListener("change", getReport2Parameters);
+	document.getElementById('report1select').addEventListener("change", getReport1ParametersForUi);
+	document.getElementById('report2select').addEventListener("change", getReport2ParametersForUi);
 	
 }
 
@@ -91,4 +91,5 @@ function ReportCreated(){
 		displayDialog('errorDialog','main');
 	}
 }
+
 

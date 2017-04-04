@@ -541,3 +541,21 @@ function populateCaList(){
 	}			
 }
 
+function selectAll(parent){
+	var parent = document.getElementById('cafilteroptions'); 
+	var children = parent.children;
+	for (var i = 0; i < children.length; i++) {
+	   var child = children[i].children[0];
+	   child.checked = true;
+	}
+}
+
+function selectNone(parent){
+	var parent = document.getElementById('cafilteroptions');
+	var children = parent.children;
+	for (var i = 0; i < children.length; i++) {
+	   var child = children[i].children[0];
+	   child.checked = false;
+	}
+}
+

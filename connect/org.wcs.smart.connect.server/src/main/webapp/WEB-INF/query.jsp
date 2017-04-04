@@ -141,6 +141,8 @@
      		
      		<fieldset id="cafilter" style="height:150px; overflow:auto;">
 	     		<legend><fmt:message key="query.cafilters"/></legend>
+	     		<p><a href="javascript:selectAll();">select all</a>
+					<a href="javascript:selectNone();">select none</a>
 	     		<div id="cafilteroptions"></div>
      		</fieldset>
      		<div style="text-align: right">

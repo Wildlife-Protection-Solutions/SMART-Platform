@@ -725,8 +725,6 @@ CREATE TABLE connect.users_default_dashboard
 	custom_date1_to text,
 	custom_date2_from text,
 	custom_date2_to text,
-	report_parameterlist_1 text,
-	report_parameterlist_2 text,
 	PRIMARY KEY (user_uuid)
 );
 

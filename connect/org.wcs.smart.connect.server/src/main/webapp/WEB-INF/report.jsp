@@ -99,6 +99,8 @@
 	     		<div style="font-size:0.9em; margin-bottom:3px">
 	     			<div class="warn-icon" style="display:inline-block; float:left"></div>
 	     			<div><fmt:message key="report.ccaabindingwarn"/></div>
+	     			<p><a href="javascript:selectAll();">select all</a>
+					<a href="javascript:selectNone();">select none</a>
 	     		</div>
 	     		
 	     		<div id="cafilteroptions"></div>

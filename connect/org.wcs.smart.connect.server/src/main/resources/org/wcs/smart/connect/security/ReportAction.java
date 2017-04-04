@@ -34,7 +34,7 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.report.model.Report;
 
 /**
- * Query actions.  This actions controls which users can view/run Queries
+ * Report actions.  This actions controls which users can view/run reports
  * 
  * 
  * @author Jeff

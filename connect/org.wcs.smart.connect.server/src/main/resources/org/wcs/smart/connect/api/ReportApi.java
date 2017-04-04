@@ -71,6 +71,7 @@ import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.birt.SmartRunAndRender;
@@ -298,7 +299,7 @@ public class ReportApi extends HttpServlet{
 	}
 	
 	/*
-	 * returns all Queries the user is able to view 
+	 * returns all Reports the user is able to view 
 	 */
 	
 	@GET
@@ -310,12 +311,12 @@ public class ReportApi extends HttpServlet{
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
 		try{
-			//Check if they access to All Queries, if so it's simple, return them all
+			//Check if they access to All Reports, if so it's simple, return them all
 			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, null)){
 				 return getReports(s, request.getLocale(), false);
 			}
 			
-			//short circuit check for access to > 0 queries, if not, return nothing. 
+			//short circuit check for access to > 0 reports, if not, return nothing. 
 			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY)){
 				 return allowed;
 			}
@@ -323,11 +324,11 @@ public class ReportApi extends HttpServlet{
 			//Get all Queries and check each one for specific permission to this user.
 			List<ReportProxy> all = getReports(s, request.getLocale(), false);
 			for (ReportProxy q : all){
-				//Do they have access to all queries from this CA? if yes then add it.
+				//Do they have access to all reports from this CA? if yes then add it.
 				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, q.getCaUuid())){
 					allowed.add(q);
 				}else{
-					//Do they have specific permission to this query? if yes then add it.
+					//Do they have specific permission to this report? if yes then add it.
 					if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, q.getUuid())){
 						allowed.add(q);
 					}
@@ -371,8 +372,47 @@ public class ReportApi extends HttpServlet{
 		return proxies;
 	}
 	
+	/**
+	 * Returns the report requested, not the results of the report, but the report definition/DB row
+	 * URL: ../server/api/report/definition/{uuid}
+	 * Call Type: GET
+	 * 
+	 * @parameter = the report uuid, passed in through the url
+	 * @return Returns a JSON representation of a Report object 
+	 */
+	@GET
+	@Path("/definition/{reportuuid}")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public ReportProxy getReport(@PathParam("reportuuid") String reportUuid){
+		UUID uuid = UuidUtils.stringToUuid(reportUuid);
+		
+		Session s = HibernateManager.getSession(context, request.getLocale());
+		s.beginTransaction();
+		Report r = null;
+		ReportProxy proxy = null;
+		try{		
+			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, uuid)){
+				r = (Report) s.createCriteria(Report.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
+				proxy = new ReportProxy(r.getUuid(), r.getName(),  
+						r.getConservationArea().getId(), r.getId(), r.getShared(), 
+						r.getConservationArea().getUuid(),
+						r.getConservationArea().getIsCcaa());
+			}
+		}finally{
+			s.getTransaction().rollback();
+		}
+		return proxy;
+	}
 	
-
+	
+	/**
+	 * Returns all of the parameters of the given report
+	 * URL: ../server/api/report/{uuid}/params
+	 * Call Type: GET
+	 * 
+	 * @parameter = the report uuid, passed in through the url
+	 * @return Returns a JSON list of ReportParameter objects 
+	 */
 	@GET
     @Path("/{reportuuid}/params")
 	@Produces({ MediaType.APPLICATION_JSON })

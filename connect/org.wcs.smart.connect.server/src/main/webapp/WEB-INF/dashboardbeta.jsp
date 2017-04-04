@@ -20,6 +20,7 @@
     	<div id="report1">
     	<form id="report1form" name="report1form">
     		<input id="report1selecthidden" type="hidden"/>
+    		<input id="report1paramshidden" type="hidden"/>
     		<select id='filterDate1' class='updateChange' name="time_filter" style="margin-bottom:3px">
 				<option value=1><fmt:message key="sharedlinks.oneday"/></option>
 				<option value=7><fmt:message key="sharedlinks.oneweek"/></option>
@@ -35,14 +36,12 @@
     		<input type="text" id="report1To" class="date-input-center">
 		</form>
       	<iframe id="iframe1" src="" width="100%" height="500" frameborder="0" allowfullscreen sandbox="allow-scripts">
-  			<p> <a id=link1' href="">
-    		Fallback link for browsers that don't support iframes
-			</a></p>
 		</iframe>
     	</div>
     	<div id="report2">
     	<form id="report2form" name="report2form">
     		<input id="report2selecthidden" type="hidden"/>
+    		<input id="report2paramshidden" type="hidden"/>
     		<select id='filterDate2' class='updateChange' name="time_filter" style="margin-bottom:3px">
 				<option value=1><fmt:message key="sharedlinks.oneday"/></option>
 				<option value=7><fmt:message key="sharedlinks.oneweek"/></option>
@@ -59,9 +58,6 @@
 		</form>
     	
       	<iframe id="iframe2" src="" width="100%" height="500" frameborder="0" allowfullscreen sandbox="allow-scripts">
-  			<p> <a id="link2" href="">
-    		Fallback link for browsers that don't support iframes
-			</a></p>
 		</iframe>
 
     	</div>

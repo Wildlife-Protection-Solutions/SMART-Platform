@@ -7,6 +7,7 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 	<title><fmt:message key="home.pagetitle"/></title>
 	
 </head>
@@ -16,6 +17,7 @@
 	<%@include file="menu.jsp" %>
 	<div id= "main">
 	<div id="pageheader" class="pageheader"><fmt:message key="dashboardbeta.title"/></div>
+	<div><div id="message" class="msgsection"></div></div>
 	<div id="dashboardLabeldiv">Dashboard Name:<Input id="dashboardlabeltext" type="text" value="New Dashboard"/>
 		<input type="hidden" id="dashboarduuid" name="reportuuid"/>
 	</div>
@@ -23,6 +25,8 @@
     	<div id="report1">
     	<form id="report1form" name="report1form">
     		<input id="report1selecthidden" type="hidden"/>
+    		<input id="report1paramshidden" type="hidden"/>
+    		<input id="report1isccaa" type="hidden"/>
     		<select id='report1select' class='updateChange' name="report1" style="margin-bottom:3px"> 
     		<option value=0>Select the First Report Here</option>
     		</select>
@@ -33,20 +37,24 @@
 				<option value=180><fmt:message key="sharedlinks.sixmonths"/></option>
 				<option value=365><fmt:message key="sharedlinks.oneyear"/></option>
 				<option value=-1><fmt:message key="sharedlinks.custom"/></option>
-			</select><br>
+			</select>
+			<button class="button" onClick="rerunReport1(); return false;">Re-Run</button>
+			<button id="editCasButton1" onclick="displayDialog('caSelector1', 'main'); return false" class="button" style="display:none">Edit CAs</button>
+			<br>
     		<input disabled type="text" name="report1From" id="report1From" class="date-input-center"> -
     		<input disabled type="text" name="report1To" id="report1To" class="date-input-center">
     		<div id="customparameters1"></div>
 		</form>
       	<iframe id="iframe1" src="" width="100%" height="500" frameborder="0" allowfullscreen sandbox="allow-scripts">
-  			<p> <a id=link1' href="">
-    		Fallback link for browsers that don't support iframes
+  			<p> <a id=link1' href="">No iframe support found: click here to run the report.
 			</a></p>
 		</iframe>
     	</div>
     	<div id="report2">
     	<form id="report2form" name="report2form">
     		<input id="report2selecthidden" type="hidden"/>
+    		<input id="report2paramshidden" type="hidden"/>
+    		<input id="report2isccaa" type="hidden"/>
     		<select id='report2select' class='updateChange' name="report2" style="margin-bottom:3px"> 
     		<option value=0>Select the Second Report Here</option>
     		</select>
@@ -57,15 +65,17 @@
 				<option value=180><fmt:message key="sharedlinks.sixmonths"/></option>
 				<option value=365><fmt:message key="sharedlinks.oneyear"/></option>
 				<option value=-1><fmt:message key="sharedlinks.custom"/></option>
-			</select><br>
+			</select>
+			<button class="button" onClick="rerunReport2(); return false;">Re-Run</button>
+			<button id="editCasButton2" onclick="displayDialog('caSelector2', 'main'); return false" class="button" style="display:none">Edit CAs</button>
+			<br>
 			<input disabled type="text" name="report2From" id="report2From" class="date-input-center" > - 
     		<input disabled type="text" name="report2To" id="report2To" class="date-input-center">
     		<div id="customparameters2"></div>
 		</form>
     	
       	<iframe id="iframe2" src="" width="100%" height="500" frameborder="0" allowfullscreen sandbox="allow-scripts">
-  			<p> <a id="link2" href="">
-    		Fallback link for browsers that don't support iframes
+  			<p> <a id="link2" href="">No iframe support found: click here to run the report.
 			</a></p>
 		</iframe>
 
@@ -82,6 +92,24 @@
 <div id="errorDialog" style="display: none;" class="dialog">
 	<div id="errorText"></div>
 	<button id="errorOKButton" class="button" onClick="closeDialog('errorDialog');">OK</button>
+</div>
+
+<div id="caSelector1" style="display: none;" class="dialog">
+	<div class="dialog-title">Select the CAs to Include in the Left-Side Report</div>
+	<p><a href="javascript:selectAllCas1();">select all</a>
+		<a href="javascript:selectNoneCas1();">select none</a>
+	<div id="caCheckboxes1" class="caSelector">
+	</div>
+	<button class="button" onClick="closeDialog('caSelector1');">OK</button>
+</div>
+
+<div id="caSelector2" style="display: none;" class="dialog">
+	<div class="dialog-title">Select the CAs to Include in the Right-Side Report</div>
+	<p><a href="javascript:selectAllCas2();">select all</a>
+		<a href="javascript:selectNoneCas2();">select none</a>
+	<div id="caCheckboxes2" class="caSelector">
+	</div>
+	<button class="button" onClick="closeDialog('caSelector2');">OK</button>
 </div>
 
 </body>

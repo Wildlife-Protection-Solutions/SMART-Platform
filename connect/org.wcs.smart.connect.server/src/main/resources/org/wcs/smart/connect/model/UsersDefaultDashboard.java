@@ -45,8 +45,6 @@ public class UsersDefaultDashboard{
 	private String customDate1To;
 	private String customDate2From;
 	private String customDate2To;
-	private String parameterList1; 
-	private String parameterList2;
 	
 	
 	@Id
@@ -113,23 +111,6 @@ public class UsersDefaultDashboard{
 	}
 	public void setCustomDate2To(String customDate2To) {
 		this.customDate2To = customDate2To;
-	}
-	
-	@Column(name="report_parameterlist_1")
-	public String getParameterList1() {
-		return parameterList1;
-	}
-	public void setParameterList1(String parameterList1) {
-		this.parameterList1 = parameterList1;
-	}
-	
-	
-	@Column(name="report_parameterlist_2")
-	public String getParameterList2() {
-		return parameterList2;
-	}
-	public void setParameterList2(String parameterList2) {
-		this.parameterList2 = parameterList2;
 	}
 	
 }

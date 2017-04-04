@@ -121,8 +121,7 @@ public class DashboardBetaApi extends HttpServlet {
 			dashboard.setCustomDate2To(dd.getCustomDate2To());
 			dashboard.setDateRange1(dd.getDateRange1());
 			dashboard.setDateRange2(dd.getDateRange2());
-			dashboard.setParameterList1(dd.getParameterList1());
-			dashboard.setParameterList2(dd.getParameterList2());
+
 			return dashboard; 
 		}finally{
 			s.getTransaction().rollback();
@@ -235,7 +234,7 @@ public class DashboardBetaApi extends HttpServlet {
 	 * URL: ../server/api/dashboardbeta/{uuid}
 	 * Call Type: DELETE
 	 * 
-	 * @return Returns a JSON representation of Dashboard object, teh one you just deleted 
+	 * @return Returns a JSON representation of Dashboard object, the one you just deleted 
 	 */
 	@DELETE
     @Path("/{uuid}")
@@ -303,12 +302,6 @@ public class DashboardBetaApi extends HttpServlet {
 			if(userDefault.getDateRange2() != 0){
 				d.setDateRange2(userDefault.getDateRange2());
 			}
-			if(userDefault.getParameterList1() != null){
-				d.setParameterList1(userDefault.getParameterList1());
-			}
-			if(userDefault.getParameterList2() != null){
-				d.setParameterList2(userDefault.getParameterList2());
-			}
 		
 			s.saveOrUpdate(d);
 			s.getTransaction().commit();			
@@ -322,8 +315,6 @@ public class DashboardBetaApi extends HttpServlet {
 			dashboard.setCustomDate2To(d.getCustomDate2To());
 			dashboard.setDateRange1(d.getDateRange1());
 			dashboard.setDateRange2(d.getDateRange2());
-			dashboard.setParameterList1(d.getParameterList1());
-			dashboard.setParameterList2(d.getParameterList2());
 
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 
@@ -380,8 +371,6 @@ public class DashboardBetaApi extends HttpServlet {
 			d.setCustomDate2To(dashboard.getCustomDate2To());
 			d.setDateRange1(dashboard.getDateRange1());
 			d.setDateRange2(dashboard.getDateRange2());
-			d.setParameterList1(dashboard.getParameterList1());
-			d.setParameterList2(dashboard.getParameterList2());
 		
 			s.saveOrUpdate(d);
 			s.getTransaction().commit();
