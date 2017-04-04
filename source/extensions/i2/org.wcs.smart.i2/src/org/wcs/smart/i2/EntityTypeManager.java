@@ -130,6 +130,11 @@ public enum EntityTypeManager {
 		q = session.createQuery("delete from IntelEntityTypeAttribute ii WHERE ii.id.entityType = :type"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
+
+		//delete all attribute groups 		
+		q = session.createQuery("delete from IntelEntityTypeAttributeGroup WHERE entityType = :type"); //$NON-NLS-1$
+		q.setParameter("type", type); //$NON-NLS-1$
+		q.executeUpdate();
 		
 		//delete all record source attribute values
 		q = session.createQuery("delete from IntelRecordAttributeValue ii where ii.attribute in ( FROM IntelRecordSourceAttribute ii where ii.entityType = :type )"); //$NON-NLS-1$

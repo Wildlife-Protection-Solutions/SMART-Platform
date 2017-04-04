@@ -90,8 +90,7 @@ public class NameKeyDialog<T extends NamedKeyItem> extends Dialog{
 				modified();
 			}
 		});
-		keyComp.initFields(item, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
-		
+		keyComp.initFields(item, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());		
 		
 		getShell().setText(getTitle());
 		
@@ -99,8 +98,11 @@ public class NameKeyDialog<T extends NamedKeyItem> extends Dialog{
 	}
 	
 	private void modified(){
-		keyComp.validate();
-		if (getButton(IDialogConstants.OK_ID) != null) getButton(IDialogConstants.OK_ID).setEnabled(true);
+		if (!keyComp.validate()){
+			if (getButton(IDialogConstants.OK_ID) != null) getButton(IDialogConstants.OK_ID).setEnabled(true);
+		}else{
+			if (getButton(IDialogConstants.OK_ID) != null) getButton(IDialogConstants.OK_ID).setEnabled(false);
+		}
 	}
 	
 	public T getUpdatedItem(){

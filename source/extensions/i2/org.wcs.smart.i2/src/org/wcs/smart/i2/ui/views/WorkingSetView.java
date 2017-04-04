@@ -232,11 +232,14 @@ public class WorkingSetView {
 		dateComp = new DateFilterDropDownComposite(core, defaultFilters, initialDateFilter);
 		toolkit.adapt(dateComp);
 		((GridLayout)dateComp.getLayout()).marginWidth = 5;
+		dateComp.setEnabled(false);
 		dateComp.addChangeListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (isInitializing) return;
+				if (WorkingSetManager.INSTANCE.getActiveWorkingSet() == null) return;
+				
 				Date[] dFilters = getDateFilters();		
 				
 				String dateFilter = dateComp.getDateFilter().name();
