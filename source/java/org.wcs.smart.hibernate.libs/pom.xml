@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 	
 	<properties>
-		<hibernate.version>4.2.18.Final</hibernate.version>
+		<hibernate.version>4.2.21.Final</hibernate.version>
 		<derby.version>10.12.1.1</derby.version>
     </properties>
     

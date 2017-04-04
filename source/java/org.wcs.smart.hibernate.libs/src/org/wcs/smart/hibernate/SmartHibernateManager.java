@@ -60,7 +60,9 @@ public class SmartHibernateManager {
 	 */
 	private static final long SESSION_WAIT_COUNT = 10;
 	
+	private static final Object sessionFactoryLock = new Object();
 	
+	private static Configuration hibernateConfiguration = null;	
 	protected static SessionFactory sessionFactory = null;
 
 	private static final String MAPPING_ID = "org.wcs.smart.hibernate.mapping"; //$NON-NLS-1$
@@ -68,21 +70,18 @@ public class SmartHibernateManager {
 	private static String userName = "login"; //$NON-NLS-1$
 	private static String passWord = "smrt"; //$NON-NLS-1$
 	private static String databaseLocation = ""; //$NON-NLS-1$
-	
-	private static ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
 
 	/*
 	 * collection of all sessions opened 
 	 */
-	private static final List<Session> allSessions = Collections.synchronizedList(new ArrayList<Session>());
+	private static final List<Session> openSessions = Collections.synchronizedList(new ArrayList<Session>());
 	
 	/*
 	 * Lock for database locking.  This is necessary
 	 * when applying changes or packaging changes.
 	 */
 	private static Semaphore thisLock = new Semaphore(1);
-	
-	private static final Object sessionFactoryLock = new Object();
+
 	/**
 	 * Sets the database connection parameters.
 	 * @param dbLocation the derby database location
@@ -111,24 +110,24 @@ public class SmartHibernateManager {
 	private static final void createSessionFactory(){
 		synchronized (sessionFactoryLock) {
 			if (sessionFactory == null){
-				Configuration config = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml")); //$NON-NLS-1$
-				
-				config.setProperty("hibernate.connection.username", userName); //$NON-NLS-1$
-				config.setProperty("hibernate.connection.password", passWord); //$NON-NLS-1$
-				config.setProperty("hibernate.connection.url", "jdbc:derby:" + databaseLocation + ";create=false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-				//add mapping classes
-				for (Class<?> c: getMappings()){
-					config.addAnnotatedClass(c);
+				if (hibernateConfiguration == null){
+					hibernateConfiguration = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml")); //$NON-NLS-1$
+					//add mapping classes
+					for (Class<?> c: getMappings()){
+						hibernateConfiguration.addAnnotatedClass(c);
+					}
 				}
 				
-				ServiceRegistry service = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();
-				sessionFactory = config.buildSessionFactory(service);
-				
+				hibernateConfiguration.setProperty("hibernate.connection.username", userName); //$NON-NLS-1$
+				hibernateConfiguration.setProperty("hibernate.connection.password", passWord); //$NON-NLS-1$
+				hibernateConfiguration.setProperty("hibernate.connection.url", "jdbc:derby:" + databaseLocation + ";create=false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+				ServiceRegistry service = new ServiceRegistryBuilder().applySettings(hibernateConfiguration.getProperties()).buildServiceRegistry();
+				sessionFactory = hibernateConfiguration.buildSessionFactory(service);
 				if (!((SessionFactoryImplementor)sessionFactory).getDialect().supportsSequences()){
 					//fail
 					throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
-				}	
+				}
 			}
 		}
 	}
@@ -140,15 +139,10 @@ public class SmartHibernateManager {
 	 */
 	public static String toSql(String hqlQueryText) {
 		if (hqlQueryText != null && hqlQueryText.trim().length() > 0) {
-
-			final QueryTranslatorFactory translatorFactory = ((SessionFactoryImpl) sessionFactory)
-					.getSettings().getQueryTranslatorFactory();
-
+			final QueryTranslatorFactory translatorFactory = ((SessionFactoryImpl) sessionFactory).getSettings().getQueryTranslatorFactory();
 			final SessionFactoryImplementor factory = (SessionFactoryImplementor) sessionFactory;
-
 			final QueryTranslator translator = translatorFactory
-					.createQueryTranslator(hqlQueryText, hqlQueryText,
-							Collections.EMPTY_MAP, factory);
+					.createQueryTranslator(hqlQueryText, hqlQueryText, Collections.EMPTY_MAP, factory);
 			translator.compile(Collections.EMPTY_MAP, false);
 			return translator.getSQLString();
 		}
@@ -167,17 +161,16 @@ public class SmartHibernateManager {
 	public static Session lockDatabase(String username, String password) throws Exception{
 		//acquire lock
 		thisLock.acquire();
-		
 		//finish or close all sessions
 		int cnt = 0;
-		while(allSessions.size() > 0 && cnt < SESSION_WAIT_COUNT){
+		while(openSessions.size() > 0 && cnt < SESSION_WAIT_COUNT){
 			//wait for thread to be closed
 			try {
 				Thread.sleep( SESSION_CLOSE_WAIT );
 			} catch (InterruptedException e) {}
 			cnt++;
 		}
-		if (allSessions.size() > 0){
+		if (openSessions.size() > 0){
 			//TODO: warn users or log???
 			closeAllSessions();
 		}
@@ -200,12 +193,12 @@ public class SmartHibernateManager {
 	 * @param password the password to connect after unlocking 
 	 */
 	public static void unlockDatabase(String username, String password){
-		thisLock.release();
 		if (username != null){
 			SmartHibernateManager.endSessionFactoryNoLock();
 			userName = username;
 			passWord = password;
 		}
+		thisLock.release();
 	}
 	
 	/**
@@ -248,27 +241,16 @@ public class SmartHibernateManager {
 		if (sessionFactory == null){
 			createSessionFactory();
 		}
-		Session session = (Session) sessionMapsThreadLocal.get();
-		if (session == null || !session.isOpen() ){
-			if (interceptor == null){
-				session = sessionFactory.openSession();
-			}else{
-				session = sessionFactory.withOptions().interceptor(interceptor).openSession();
-			}
-			//add to thread
-			sessionMapsThreadLocal.set(session);
-			
-			//add to session collection with listener to remove when closed
-			allSessions.add(session);
-			final Session tmp = session;
-			session.addEventListeners(new BaseSessionEventListener() {
-				private static final long serialVersionUID = 1L;
-				@Override
-				public void end() {
-					allSessions.remove(tmp)	;
-				}	
-			});
+		Session session = null;
+		if (interceptor == null){
+			session = sessionFactory.openSession();
+		}else{
+			session = sessionFactory.withOptions().interceptor(interceptor).openSession();
 		}
+
+		//add to session collection with listener to remove when closed
+		openSessions.add(session);
+		session.addEventListeners(new SessionEndListener(session));
 		
 		if (interceptor != null && interceptor instanceof SessionInterceptor){
 			((SessionInterceptor)interceptor).setSession(session);
@@ -282,7 +264,8 @@ public class SmartHibernateManager {
 			if (sessionFactory != null){
 				//clear the thread local; this should not be a problem but 
 				//this will clear any sessions linked to old session factory
-				sessionMapsThreadLocal = new ThreadLocal<Session>();
+				closeAllSessions();
+				sessionFactory.close();
 			}
 			sessionFactory = null;	
 		}
@@ -296,14 +279,15 @@ public class SmartHibernateManager {
 		thisLock.acquire();
 		try{
 			int cnt = 0;
-			while(allSessions.size() > 0 && cnt < SESSION_WAIT_COUNT){
+			
+			while(openSessions.size() > 0 && cnt < SESSION_WAIT_COUNT){
 				//wait for thread to be closed
 				try {
 					Thread.sleep( SESSION_CLOSE_WAIT );
 				} catch (InterruptedException e) {}
 				cnt++;
 			}
-			if (allSessions.size() > 0 && !force){
+			if (openSessions.size() > 0 && !force){
 				throw new Exception("Could not end current database session.  There are still active transactions.");
 			}else if (force){
 				closeAllSessions();
@@ -323,8 +307,8 @@ public class SmartHibernateManager {
 		//modifies the allSessions list which causes
 		//a concurrent mod exception;
 		List<Session> toClose = new ArrayList<Session>();
-		synchronized (allSessions) {
-			toClose.addAll(allSessions);
+		synchronized (openSessions) {
+			toClose.addAll(openSessions);
 		}
 		for(Session s : toClose){
 			//a listener on the session removes it from the all
@@ -361,7 +345,7 @@ public class SmartHibernateManager {
 	 * @param clazz the mapped hibernate query
 	 * @return the ca_property 
 	 */
-	private static HashMap<Class<?>, Object[]> hibernateClassMetadata = null;;
+	private static HashMap<Class<?>, Object[]> hibernateClassMetadata = null;
 	public static final String getHqlExportQuery(Class<?> clazz) throws ClassNotFoundException, InvalidRegistryObjectException{
 		readClassMetadata();
 		Object[] values = hibernateClassMetadata.get(clazz);
@@ -392,4 +376,19 @@ public class SmartHibernateManager {
 		}
 	}
 	
+	private static class SessionEndListener extends BaseSessionEventListener {
+		private Session session;
+		private static final long serialVersionUID = 1L;
+		public SessionEndListener(Session session){
+			this.session = session;
+		}
+		
+		@Override
+		public void end() {
+//			Session tmp = sessionMapsThreadLocal.get(Thread.currentThread());
+//			if (tmp != null){
+				openSessions.remove(session)	;
+//			}
+		}	
+	};
 }
