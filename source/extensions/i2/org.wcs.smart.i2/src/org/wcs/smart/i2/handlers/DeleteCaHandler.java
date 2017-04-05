@@ -166,6 +166,11 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordAttributeValueList")); //$NON-NLS-1$
+		q = session.createQuery("delete from IntelRecordAttributeValueList ii where ii.id.value in (SELECT v FROM IntelRecordAttributeValue v join v.record r where r.conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordAttributeValue")); //$NON-NLS-1$
 		q = session.createQuery("delete from IntelRecordAttributeValue ii where ii.record in (from IntelRecord where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
