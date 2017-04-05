@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -140,6 +141,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				Session s = HibernateManager.openSession();
 				try{
 					temp = (IntelRecord) s.get(IntelRecord.class, uuid);
+					if (temp == null) return Status.OK_STATUS; //not found
 					temp.getCreatedBy().getFamilyName();
 					temp.getLastModifiedBy().getFamilyName();
 					if (temp.getAttachments().size() > 0){

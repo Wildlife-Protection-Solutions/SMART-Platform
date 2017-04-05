@@ -141,7 +141,7 @@ public class QueryView {
 	private IAreaModifiedListener areaListener = new IAreaModifiedListener() {
 		@Override
 		public void areasUpdated(AreaType type) {
-			sourceModified();
+			Display.getDefault().asyncExec(()->sourceModified());
 		}
 	};
 	private IDataModelListener dmListener = new IDataModelListener() {

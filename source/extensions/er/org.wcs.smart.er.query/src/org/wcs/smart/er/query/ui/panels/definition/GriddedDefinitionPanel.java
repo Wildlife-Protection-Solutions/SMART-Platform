@@ -114,17 +114,23 @@ public class GriddedDefinitionPanel extends
 			Job j = new Job(
 					Messages.SurveyObservationQuery_loadingDesignJobName) {
 
+				@SuppressWarnings("unchecked")
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
+					List<SurveyDesign> results = null; 
 					Session s = HibernateManager.openSession();
-					List<?> results = s
+					try{
+						results = s
 							.createCriteria(SurveyDesign.class)
 							.add(Restrictions.eq("keyId", sq.getSurveyDesign())) //$NON-NLS-1$
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.list(); 
-
+					}finally{
+						s.close();
+					}
+					
 					if (results.size() > 0) {
-						final SurveyDesign sd = (SurveyDesign) results.get(0);
+						final SurveyDesign sd = results.get(0);
 						Display.getDefault().syncExec(new Runnable() {
 							@Override
 							public void run() {
