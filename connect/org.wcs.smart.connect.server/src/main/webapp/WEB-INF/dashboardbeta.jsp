@@ -31,8 +31,8 @@
 				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
 				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
 			</select>
-			<button class="button" onClick="rerunReport1(); return false;">Re-Run</button>
-			<button id="savedatebutton1" class="button" onClick="updateDateOnReport1(); return false;" disabled>Save Date as Default</button>
+			<button class="button" onClick="rerunReport1(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
+			<button id="savedatebutton1" class="button" onClick="updateDateOnReport1(); return false;" disabled><fmt:message key="dashboardbeta.datedefault"/></button>
 			<br>
     		<input type="text" id="report1From" class="date-input-center"> -
     		<input type="text" id="report1To" class="date-input-center">
@@ -53,8 +53,8 @@
 				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
 				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
 			</select>
-			<button class="button" onClick="rerunReport2(); return false;">Re-Run</button>
-			<button id="savedatebutton2" class="button" onClick="updateDateOnReport2(); return false;" disabled>Save Date as Default</button>
+			<button class="button" onClick="rerunReport2(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
+			<button id="savedatebutton2" class="button" onClick="updateDateOnReport2(); return false;" disabled><fmt:message key="dashboardbeta.datedefault"/></button>
 			<br>
 			<input type="text" id="report2From" class="date-input-center"> - 
     		<input type="text" id="report2To" class="date-input-center">
@@ -69,13 +69,13 @@
   		<form>
   			<p id="dashboardList" >
   				<select id="admin-selectlist" name="admin-selectlist"></select>
-  				<button onClick="showDashboard(); return false;" class="button"> Show Selected Dashboard</button> 
-  				<button onClick="setDashboardDefaultToSelectedDashboard(); return false;" class="button" > Set as Default Dashboard</button>
+  				<button onClick="showDashboard(); return false;" class="button"> <fmt:message key="dashboardbeta.viewdashboard"/></button> 
+  				<button onClick="setDashboardDefaultToSelectedDashboard(); return false;" class="button" > <fmt:message key="dashboardbeta.saveasdefaultdashboard"/></button>
   			</p>
   			<p id="adminoptions" style="display:none">
-  				<button onClick="editDashboard(); return false;" class="button">Edit Dashboard</button> 
-  				<button onClick="createNewDashboard(); return false;" class="button">Create New Dashboard</button>
-	  			<button onClick="deleteDashboard(); return false;" class="button">Delete Dashboard</button> 
+  				<button onClick="editDashboard(); return false;" class="button"><fmt:message key="dashboardbeta.editdashboard"/></button> 
+	  			<button onClick="deleteDashboard(); return false;" class="button"><fmt:message key="dashboardbeta.deletedashboard"/></button>
+	  			<button onClick="createNewDashboard(); return false;" class="button"><fmt:message key="dashboardbeta.createdashboard"/></button> 
   			</p>
   		</form>
   	</div>
@@ -84,7 +84,7 @@
 
 <div id="errorDialog" style="display: none;" class="dialog">
 	<div id="errorText"></div>
-	<button id="errorOKButton" class="button" onClick="closeDialog('errorDialog');">OK</button>
+	<button id="errorOKButton" class="button" onClick="closeDialog('errorDialog');"><fmt:message key="dashboardbeta.ok"/></button>
 </div>
 
 

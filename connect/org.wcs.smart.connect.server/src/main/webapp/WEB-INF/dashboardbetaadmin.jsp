@@ -38,8 +38,8 @@
 				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
 				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
 			</select>
-			<button class="button" onClick="rerunReport1(); return false;">Re-Run</button>
-			<button id="editCasButton1" onclick="displayDialog('caSelector1', 'main'); return false" class="button" style="display:none">Edit CAs</button>
+			<button class="button" onClick="rerunReport1(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
+			<button id="editCasButton1" onclick="editcas1(); return false" class="button" style="display:none"><fmt:message key="dashboardbeta.editcas"/></button>
 			<br>
     		<input disabled type="text" name="report1From" id="report1From" class="date-input-center"> -
     		<input disabled type="text" name="report1To" id="report1To" class="date-input-center">
@@ -64,8 +64,8 @@
 				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
 				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
 			</select>
-			<button class="button" onClick="rerunReport2(); return false;">Re-Run</button>
-			<button id="editCasButton2" onclick="displayDialog('caSelector2', 'main'); return false" class="button" style="display:none">Edit CAs</button>
+			<button class="button" onClick="rerunReport2(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
+			<button id="editCasButton2" onClick="editcas2(); return false;" class="button" style="display:none"><fmt:message key="dashboardbeta.editcas"/></button>
 			<br>
 			<input disabled type="text" name="report2From" id="report2From" class="date-input-center" > - 
     		<input disabled type="text" name="report2To" id="report2To" class="date-input-center">
@@ -78,7 +78,7 @@
   	</div>
   	<div id="configuration">
   		<form>
-  			<p id="adminoptions"><button id="saveButton" onClick="saveOrEditDashboard(); return false;" class="button">Create New Dashboard</button></p>
+  			<p id="adminoptions"><button id="saveButton" onClick="saveOrEditDashboard(); return false;" class="button"><fmt:message key="dashboardbeta.createdashboard"/></button></p>
   		</form>
   	</div>
 	</div>
@@ -86,25 +86,25 @@
 
 <div id="errorDialog" style="display: none;" class="dialog">
 	<div id="errorText"></div>
-	<button id="errorOKButton" class="button" onClick="closeDialog('errorDialog');">OK</button>
+	<button id="errorOKButton" class="button" onClick="closeDialog('errorDialog');"><fmt:message key="dashboardbeta.ok"/></button>
 </div>
 
 <div id="caSelector1" style="display: none;" class="dialog">
-	<div class="dialog-title">Select the CAs to Include in the Left-Side Report</div>
-	<p><a href="javascript:selectAllCas1();">select all</a>
-		<a href="javascript:selectNoneCas1();">select none</a>
+	<div class="dialog-title"><fmt:message key="dashboardbeta.leftsidecas"/></div>
+	<p><a href="javascript:selectAllCas1();"><fmt:message key="dashboardbeta.selectall"/></a>
+		<a href="javascript:selectNoneCas1();"><fmt:message key="dashboardbeta.selectnone"/></a>
 	<div id="caCheckboxes1" class="caSelector">
 	</div>
-	<button class="button" onClick="closeDialog('caSelector1');">OK</button>
+	<button class="button" onClick="caSelectorUpdated(1)"><fmt:message key="dashboardbeta.ok"/></button>
 </div>
 
 <div id="caSelector2" style="display: none;" class="dialog">
-	<div class="dialog-title">Select the CAs to Include in the Right-Side Report</div>
-	<p><a href="javascript:selectAllCas2();">select all</a>
-		<a href="javascript:selectNoneCas2();">select none</a>
+	<div class="dialog-title"><fmt:message key="dashboardbeta.rightsidecas"/></div>
+	<p><a href="javascript:selectAllCas2();"><fmt:message key="dashboardbeta.selectall"/></a>
+		<a href="javascript:selectNoneCas2();"><fmt:message key="dashboardbeta.selectnone"/></a>
 	<div id="caCheckboxes2" class="caSelector">
 	</div>
-	<button class="button" onClick="closeDialog('caSelector2');">OK</button>
+	<button class="button" onClick="caSelectorUpdated(2)"><fmt:message key="dashboardbeta.ok"/></button>
 </div>
 
 </body>

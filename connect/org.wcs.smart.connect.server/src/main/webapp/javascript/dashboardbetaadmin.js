@@ -20,10 +20,10 @@ window.onload = function(){
 		var uuid = /uuid=([^&]+)/.exec(url)[1];
 		getDashboard(uuid);
 		saveButton.innerHTML = "Save Edits";
-		document.getElementById('pageheader').innerHTML = document.getElementById('pageheader').innerHTML + " - Edit Dash Board ID: "+ uuid;
+		document.getElementById('pageheader').innerHTML = document.getElementById('pageheader').innerHTML + i18n("dashboard.editdashboard");
 		document.getElementById('dashboarduuid').value = uuid;
 	}else{
-		document.getElementById('pageheader').innerHTML = document.getElementById('pageheader').innerHTML + " - Create New Dash Board";
+		document.getElementById('pageheader').innerHTML = document.getElementById('pageheader').innerHTML + i18n("dashboard.createdashboard");
 		document.getElementById('dashboarduuid').value = 0;
 		document.getElementById('loading1').style.display = "none";
 		document.getElementById('loading2').style.display = "none";
@@ -46,7 +46,7 @@ function saveOrEditDashboard(){
 	form1 = document.getElementById('report1form');
 	form2 = document.getElementById('report2form');
 	if(form1.report1.value == 0 || form2.report2.value == 0){
-		document.getElementById('errorText').innerHTML = "You must select a report in each of the two drop downs to save a valid Dashboard.";
+		document.getElementById('errorText').innerHTML = i18n("dashboard.mustselectreports");
 		displayDialog('errorDialog','main');
 		return false;
 	}
@@ -86,12 +86,21 @@ function ReportCreated(){
 		document.getElementById('errorOKButton').onclick = function(){
 			window.location.href = "dashboardbeta";
 		};
-		document.getElementById('errorText').innerHTML = "Dashboard Successfully Created or Edited. You will be returned to your Dashboard Page now.";
+		document.getElementById('errorText').innerHTML = i18n("dashboard.createsuccess");
 		displayDialog('errorDialog','main');
 	}else{
-		document.getElementById('errorText').innerHTML = "Dashboard was NOT Created, something went wrong with the request.";
+		document.getElementById('errorText').innerHTML = i18n("dashboard.createfailure");
 		displayDialog('errorDialog','main');
 	}
+}
+
+function caSelectorUpdated(num){
+	if(num == 1){
+		closeDialog('caSelector1');
+	}else{
+		closeDialog('caSelector2');
+	}
+	updateReportCustomParamsHiddenValue();
 }
 
 

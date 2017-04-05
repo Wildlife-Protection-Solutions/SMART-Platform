@@ -114,8 +114,10 @@
     <a class="block top-spacer" href="javascript:displayDialog('passwordDialog', 'main');"><fmt:message key="myaccount.changepassword"/></a>
     <input class="block button top-spacer" style="min-width: 100px" type="submit" value="<fmt:message key="myaccount.save"/>" id="submit" />
     
+    <!-- 
     <p><bR></p>
     <p><h2>Alternate Access to Your Account:</h2><button class="button" onClick="displayDialogCenter('SharedLinksDialog');return false;">Create a Token</button>Tokens can be used for programmatic access using your account credentials, treat a token like your password and keep it secure!
+     -->
   </form>
 </div>
 

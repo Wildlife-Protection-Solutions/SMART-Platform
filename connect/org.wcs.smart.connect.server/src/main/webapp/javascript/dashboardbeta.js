@@ -40,7 +40,7 @@ function setDashboardDefaultToCurrentSettings(){
 	form2 = document.getElementById('report2form');
 	
 	if(uuid == null || uuid == ""){
-		document.getElementById('errorText').innerHTML = "You must select a report in each of the two drop downs to save a valid Dashboard.";
+		document.getElementById('errorText').innerHTML = i18n("dashboard.mustselectreports"); 
 		displayDialog('errorDialog','main');
 		return false;
 	}
@@ -122,7 +122,7 @@ function userCallback(){
 function deleteDashboard(){
 	var e = document.getElementById('admin-selectlist');
 	
-	displayConfirmDialog("Permanenly Delete Dashboard",  "Are you sure you want to permanently delete the Dashboard, '" + e.options[e.selectedIndex].innerText + "'? This will remove it for all users currently using this Dashboard.", function(){
+	displayConfirmDialog(i18n("dashboard.delete"), i18n("dashboard.areyousuredelete") + e.options[e.selectedIndex].innerText + i18n("dashboard.thiswillremove"), function(){
 		var oReq = new XMLHttpRequest();
 	 	oReq.onload = function(){location.reload()};
 	 	oReq.open("Delete", DashboardAPIURL + "/" + e.options[e.selectedIndex].value , true);

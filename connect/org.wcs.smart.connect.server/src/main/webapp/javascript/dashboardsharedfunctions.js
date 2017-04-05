@@ -28,7 +28,7 @@ function getReportParametersForUi(num){
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
-	parent.innerHTML = "<font style='color:red'>Loading custom parameters.</font>";
+	parent.innerHTML = "<font style='color:red'>" +i18n("dashboard.loadingparameters") + "</font>";
 	
 	var uuid = uuidhidden.value;
 	
@@ -360,7 +360,7 @@ function updateReportsFromDashBoardJson(){
 			document.getElementById('dashboardlabeltext').value = dashboard.label;
 		}
 	}else{
-		document.getElementById('pageheader').innerHTML = "No Default Dashboard Selected Yet";
+		document.getElementById('pageheader').innerHTML = i18n("dashboard.nodefaultdashboard");
 		document.getElementById('loading1').style.display = "none";
 		document.getElementById('loading2').style.display = "none";
 	}
@@ -489,11 +489,12 @@ function resolve(url) {
 	  return resolved_url;
 }
 
-function editCasButton1(){
-	displayDialog('caSelector1', main);
+function editcas1(){
+	displayDialog('caSelector1', 'report1');
 }
-function editCasButton2(){
-	displayDialog('caSelector2', main);
+
+function editcas2(){
+	displayDialog('caSelector2', 'report2');
 }
 
 function getCaList(num){
@@ -732,4 +733,3 @@ function updateReportCustomParamsHiddenValue(){
 	document.getElementById('report1paramshidden').value = getRepor1CustomParameters();
 	document.getElementById('report2paramshidden').value = getRepor2CustomParameters();
 }
-

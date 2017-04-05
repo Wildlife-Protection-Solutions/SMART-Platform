@@ -91,6 +91,31 @@ public class SharedLinkApi extends HttpServlet{
 	@Context private HttpServletRequest request;
 	
 	
+	//this function throws an unauthorized exception if the user is not an admin 
+	private void isAdminUser(){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
+				logger.info("User " + request.getUserPrincipal().getName() + " does not have user accounts permissions."); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+			}
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+
+	private boolean isCaAdminUser(){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+	
+	
 	/**
 	 * List all Shared Links
 	 * URL: ../server/api/sharedlink/
@@ -275,6 +300,9 @@ public class SharedLinkApi extends HttpServlet{
 	@POST
     @Path("/token/")
     public SharedLink createToken(SharedLink newLink) {
+		if(!isCaAdminUser()){
+			isAdminUser();//throws an exception if invalid user.
+		}
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
