@@ -264,6 +264,10 @@ public abstract class SimpleQuery extends StyledQuery {
 		
 	}
 	
+	@Transient
+	public boolean isColumnVisible(QueryColumn column) {
+		return column.isVisible();
+	}
 	
 	
 	@Transient

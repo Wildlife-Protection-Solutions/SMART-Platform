@@ -65,7 +65,11 @@ public class Upgrader410To500 implements IDatabaseUpgrader {
 	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN instant_gps BOOLEAN", //$NON-NLS-1$
 	            "alter table smart.CONFIGURABLE_MODEL ADD COLUMN photo_first BOOLEAN", //$NON-NLS-1$
 	            
-	            "CREATE FUNCTION smart.trackIntersects(wkb1 blob, wkb2 blob) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.trackIntersects' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT" //$NON-NLS-1$
+	            "CREATE FUNCTION smart.trackIntersects(wkb1 blob, wkb2 blob) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.trackIntersects' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
+
+	            // #1366: Deactivate columns without values in queries
+				"ALTER TABLE smart.observation_query ADD COLUMN show_data_columns_only BOOLEAN", //$NON-NLS-1$ //PatrolObservationQuery
+				"ALTER TABLE smart.obs_observation_query ADD COLUMN show_data_columns_only BOOLEAN", //$NON-NLS-1$ //ObsObservationQuery
 		};
 
 		for (String s : sql) {

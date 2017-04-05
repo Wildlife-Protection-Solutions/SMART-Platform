@@ -19,40 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model;
+package org.wcs.smart.query.common.model;
 
 
 /**
+ * Indicates that query supports automatic column configuration.
  * 
- * A column in the results table that contains 
- * a category from the datamodel.
- * 
- * <p>There should be one column for each
- * "level" in the datamodel category tree.</p>
- * 
- * @author Emily
- * @since 1.0.0
+ * @author elitvin
+ * @since 5.0.0
  */
-public abstract class CategoryQueryColumn extends QueryColumn{
-	
-	public static final String KEY_PREFIX = "category:"; //$NON-NLS-1$
+public interface IColumnAutoConfigQuery {
 
-	protected int level;	//the category level in the database.
-		
 	/**
-	 * Creates a new category column
-	 * 
-	 * @param name the name
-	 * @param level the level in the data model this column represents
+	 * @return true if query will automatically display only columns that have data.
 	 */
-	public CategoryQueryColumn(String name, int level){
-		super(name, KEY_PREFIX + level, ColumnType.STRING);
-		this.level = level;
-	}
+	public boolean isShowDataColumnsOnly();
 
-	public static String getDbColumnName(String key) {
-		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-		return key;
-	}
+	/**
+	 * Setter for automatically display only columns that have data.
+	 * @param showDataColumnsOnly
+	 */
+	public void setShowDataColumnsOnly(Boolean showDataColumnsOnly);
 	
 }

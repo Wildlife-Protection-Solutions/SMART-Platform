@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.common.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -38,7 +39,9 @@ import org.wcs.smart.query.model.IPagedQuery;
  */
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public abstract class ObservationQuery extends SimpleQuery implements IPagedQuery{
+public abstract class ObservationQuery extends SimpleQuery implements IPagedQuery, IColumnAutoConfigQuery {
+
+	private boolean showDataColumnsOnly = true;
 
 	/**
 	 * Creates a new observation query with the default
@@ -46,6 +49,15 @@ public abstract class ObservationQuery extends SimpleQuery implements IPagedQuer
 	 */
 	protected ObservationQuery(){
 		super();
+	}
+
+	@Column(name = "show_data_columns_only")
+	public boolean isShowDataColumnsOnly() {
+		return showDataColumnsOnly;
+	}
+
+	public void setShowDataColumnsOnly(Boolean showDataColumnsOnly) {
+		this.showDataColumnsOnly = Boolean.TRUE.equals(showDataColumnsOnly); //null <==> false
 	}
 
 }

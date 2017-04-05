@@ -80,8 +80,12 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion.equals(ERQueryPlugIn.DB_VERSION_1)) {
 			upgradeV1ToV2(session);
 			upgradeV2ToV3(session);
+			upgradeV3ToV4(session);
 		} else if (currentVersion.equals(ERQueryPlugIn.DB_VERSION_2)) {
 			upgradeV2ToV3(session);
+			upgradeV3ToV4(session);
+		} else if (currentVersion.equals(ERQueryPlugIn.DB_VERSION_3)) {
+			upgradeV3ToV4(session);
 		}
 	}
 
@@ -174,5 +178,18 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 				"smart.SURVEY_SUMMARY_QUERY" //$NON-NLS-1$
 		};
 		Upgrader331To400.updateCCAAQueryTables(s, c, queryTables);
+	}
+
+	private static void upgradeV3ToV4(Session session) {
+		String[] sql = new String[] {
+	            // #1366: Deactivate columns without values in queries
+				"ALTER TABLE smart.survey_observation_query ADD COLUMN show_data_columns_only BOOLEAN", //$NON-NLS-1$ //SurveyObservationQuery
+		};
+
+		for (String s : sql) {
+			ERQueryPlugIn.log(s, null);
+			session.createSQLQuery(s).executeUpdate();
+		}
+		HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_4, session);
 	}
 }

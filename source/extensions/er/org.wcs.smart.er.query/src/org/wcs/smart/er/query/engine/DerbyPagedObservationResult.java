@@ -27,12 +27,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
+import org.wcs.smart.query.model.QueryColumn;
 
 
 /**
@@ -45,6 +47,8 @@ import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 public class DerbyPagedObservationResult extends AbstractSurveyPagedResult implements IObservationPagedQueryResultSet, ISurveyQueryMissionResult{
 
 	private int wpCount = 0;
+
+	private Set<String> dataColumns = null;
 	
 	public DerbyPagedObservationResult(String queryTempTable, DerbySurveyQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
@@ -128,5 +132,13 @@ public class DerbyPagedObservationResult extends AbstractSurveyPagedResult imple
 		this.wpCount = wpCount;
 	}
 
+	@Override
+	public boolean isDataColumn(QueryColumn column) {
+		return dataColumns != null && dataColumns.contains(column.getKey());
+	}
+	
+	public void setDataColumns(Set<String> dataColumns) {
+		this.dataColumns = dataColumns;
+	}
 
 }

@@ -47,7 +47,11 @@ public class EntityQueryPlugIn extends AbstractUIPlugin {
 	
 	//released in SMART 4.0
 	public static final String DB_VERSION_3 = "3.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_3; //current version
+
+	//released in SMART 5.0
+	public static final String DB_VERSION_4 = "4.0"; //$NON-NLS-1$
+	
+	public static final String DB_VERSION = DB_VERSION_4; //current version
 	
 	/**
 	 * Entity grid query icon

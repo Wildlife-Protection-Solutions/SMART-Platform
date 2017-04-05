@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.wcs.smart.query.common.engine.CleanUpQueryJob;
+import org.wcs.smart.query.common.engine.IColumnInfoProvider;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.internal.Messages;
@@ -176,6 +177,14 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		
 	}
 
+	public boolean isColumnDisplayed(QueryColumn column) {
+		if (input instanceof IColumnInfoProvider) {
+			IColumnInfoProvider columnInfoProvider = (IColumnInfoProvider) input;
+			return columnInfoProvider.isDataColumn(column);
+		}
+		return true; //default behavior
+	}
+	
 	/**
 	 * Job which is responsible for updating particular set of items in current table.
 	 * 

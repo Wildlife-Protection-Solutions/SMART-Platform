@@ -27,6 +27,7 @@ public class Messages extends NLS {
 	public static String DerbyMissionEngine_ProgressAdditionalData;
 	public static String DerbyMissionEngine_ProgressMissionLeader;
 	public static String DerbyMissionEngine_ProgressMissionProperties;
+	public static String DerbyObservationEngine_FindDataColumns;
 	public static String DerbyObservationEngine_populatingObserverProgress;
 	public static String DerbyObservationEngine_progress1;
 	public static String DerbyObservationEngine_progress2;

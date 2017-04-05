@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,6 +42,7 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
 import org.wcs.smart.hibernate.SmartDB;
@@ -52,6 +54,8 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -145,6 +149,36 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 							result.setWpCount(rs.getInt(1));
 						}
 					}
+					
+					monitor.subTask(Messages.DerbyEntityObservationEngine_FindDataColumns);
+					HashSet<String> dataColumns = new HashSet<>();
+					
+					//looking for attributes that have at least one value
+					try(ResultSet rs = c.createStatement().executeQuery("select distinct a.keyid from "+queryDataTable+" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid")) { //$NON-NLS-1$ //$NON-NLS-2$
+						while (rs.next()) { 
+							dataColumns.add(AttributeQueryColumn.KEY_PREFIX + rs.getString(1));
+						}
+					}
+					//looking for fixed columns that have at least one value
+					for (FixedQueryColumn.FixedColumns fc : FixedQueryColumn.FixedColumns.values()) {
+						String dbColumn = FixedQueryColumn.getDbColumnName(fc.getKey());
+						if (checkColumnHasValues(c, queryDataTable, dbColumn)) {
+							dataColumns.add(fc.getKey());
+						}
+					}
+
+					//looking for category columns that have at least one value
+					int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
+					for (int i = 0; i < numCategory; i++) {
+						String key = CategoryQueryColumn.KEY_PREFIX + i;
+						String dbColumn = CategoryQueryColumn.getDbColumnName(key);
+						if (checkColumnHasValues(c, queryDataTable, dbColumn)) {
+							dataColumns.add(key);
+						}
+					}
+					
+					result.setDataColumns(dataColumns);
+					
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {

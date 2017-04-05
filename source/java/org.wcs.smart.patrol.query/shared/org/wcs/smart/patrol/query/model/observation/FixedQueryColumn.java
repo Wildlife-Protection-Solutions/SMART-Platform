@@ -42,6 +42,13 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class FixedQueryColumn extends QueryColumn {
 
+	private static final String[][] FIXED_COLUMN_KEY_TO_ROW  = {
+		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
+		{"patrolleg", "pl"}, //$NON-NLS-1$ //$NON-NLS-2$
+		{"patrol", "p"}, //$NON-NLS-1$ //$NON-NLS-2$
+		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
+	};
+	
 	/**
 	 * The defined fixed columns.
 	 */
@@ -186,4 +193,13 @@ public class FixedQueryColumn extends QueryColumn {
 		FixedQueryColumn newColumn = new FixedQueryColumn(this.column, l);
 		return newColumn;
 	}
+	
+	public static String getDbColumnName(String key) {
+		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
+			key = key.replace(data[0], data[1]);
+		}
+		return key;
+	}
+	
 }

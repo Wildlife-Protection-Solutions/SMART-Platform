@@ -38,6 +38,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -56,6 +57,7 @@ import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
 public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryPropertyProvider {
 
 	protected CheckboxTableViewer columnViewer;
+	protected Button btnShowDataColumnsOnly;
 	
 	public AbstractColumnQueryPropertyProvider() {
 	}
@@ -67,12 +69,27 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 	
 	@Override
 	public abstract boolean isValid(IQueryType query);
-	
+
 	@Override
 	public Composite createComposite(Composite parent, Query query){
 		Composite panel = new Composite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout(1, false));
 		
+		btnShowDataColumnsOnly = null;
+		if (query instanceof IColumnAutoConfigQuery) {
+			btnShowDataColumnsOnly = new Button(panel, SWT.CHECK);
+			btnShowDataColumnsOnly.setText(Messages.AbstractColumnQueryPropertyProvider_ShowDataColumnsOnly);		
+			btnShowDataColumnsOnly.setToolTipText(Messages.AbstractColumnQueryPropertyProvider_ShowDataColumnsOnlyTooltip);
+			boolean isShowOnlyDataColumns = ((IColumnAutoConfigQuery) query).isShowDataColumnsOnly();
+			btnShowDataColumnsOnly.setSelection(isShowOnlyDataColumns);
+			btnShowDataColumnsOnly.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					updateColumnTableState();
+					fireChangeMade();
+				}
+			});
+		}
 		
 		Label lblTableColumns = new Label(panel, SWT.NONE);
 		lblTableColumns.setText(Messages.QueryPropertiesDialog_ColumnsLabel);
@@ -110,6 +127,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 			}
 		});
 		
+		updateColumnTableState();
 		return panel;
 	}
 	
@@ -160,6 +178,10 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 		});
 		
 	}
+
+	protected void updateColumnTableState() {
+		columnViewer.getTable().setEnabled(btnShowDataColumnsOnly == null || btnShowDataColumnsOnly.isDisposed() || !btnShowDataColumnsOnly.getSelection());
+	}
 	
 	/**
 	 * Called when save is selected on the dialog;
@@ -167,11 +189,20 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 	 */
 	@Override
 	public String save(Query query, Session session){
-		List<QueryColumn> cols = (List<QueryColumn>)columnViewer.getInput();
+		@SuppressWarnings("unchecked")
+		List<QueryColumn> cols = (List<QueryColumn>) columnViewer.getInput();
 		for (QueryColumn col : cols){
 			col.setVisible( columnViewer.getChecked(col) );
 		}
+		persistShowDataColumnsOption(query, session);
 		((SimpleQuery) query).updateVisibleColumns(cols);
 		return null;
 	}
+	
+	protected void persistShowDataColumnsOption(Query query, Session session) {
+		if (btnShowDataColumnsOnly != null && query instanceof IColumnAutoConfigQuery) {
+			IColumnAutoConfigQuery q = (IColumnAutoConfigQuery) query;
+			q.setShowDataColumnsOnly(btnShowDataColumnsOnly.getSelection());
+		}
+	}	
 }

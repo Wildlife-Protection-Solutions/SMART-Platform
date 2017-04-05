@@ -33,6 +33,8 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
  * @since 1.0.0
  */
 public abstract class AttributeQueryColumn extends QueryColumn {
+	
+	public static final String KEY_PREFIX = "attribute:"; //$NON-NLS-1$
 
 	protected String attributeKey = null;
 	
@@ -44,7 +46,7 @@ public abstract class AttributeQueryColumn extends QueryColumn {
 	 * @param type the type of the attribute column
 	 */
 	public AttributeQueryColumn(String name, String attributeId, AttributeType type){
-		super(name, "attribute:" + attributeId, null); //$NON-NLS-1$
+		super(name, KEY_PREFIX + attributeId, null);
 		this.attributeKey = attributeId;
 		
 		ColumnType ctype = ColumnType.STRING;

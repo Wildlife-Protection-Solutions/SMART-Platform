@@ -41,6 +41,10 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class FixedQueryColumn extends QueryColumn {
 
+	private static final String[][] FIXED_COLUMN_KEY_TO_ROW  = {
+		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
+	};
+	
 	/**
 	 * The defined fixed columns.
 	 */
@@ -139,4 +143,13 @@ public class FixedQueryColumn extends QueryColumn {
 		FixedQueryColumn newColumn = new FixedQueryColumn(this.column, this.l);
 		return newColumn;
 	}
+
+	public static String getDbColumnName(String key) {
+		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
+			key = key.replace(data[0], data[1]);
+		}
+		return key;
+	}
+	
 }

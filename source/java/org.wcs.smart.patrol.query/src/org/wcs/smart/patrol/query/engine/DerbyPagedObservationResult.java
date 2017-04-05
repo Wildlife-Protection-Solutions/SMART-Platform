@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.swt.SWT;
@@ -36,6 +37,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
@@ -60,13 +62,6 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet implements IObservationPagedQueryResultSet{
 	
-	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
-		{"patrolleg", "pl"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"patrol", "p"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
-	};
-	
 	private String queryTempTable;
 	private int wpCount = 0;
 	private Envelope bounds = null;
@@ -77,6 +72,8 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	private int direction = SWT.UP;
 	private boolean hasSortColumns = false;
 	
+	private Set<String> dataColumns = null;
+
 	private DerbyPatrolQueryEngine engine;
 
 	public DerbyPagedObservationResult(String queryTempTable, DerbyPatrolQueryEngine engine) {
@@ -316,10 +313,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
 			String key = sortColumn.getKey();
-			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
-				key = key.replace(data[0], data[1]);
-			}
+			key = FixedQueryColumn.getDbColumnName(key);			
 			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
 				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (sortColumn.getType() == ColumnType.STRING){
@@ -330,7 +324,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		}
 		if (sortColumn instanceof PatrolCategoryQueryColumn) {
 			String key = sortColumn.getKey();
-			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
+			key = ObservationCategoryQueryColumn.getDbColumnName(key);
 			result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (sortColumn instanceof PatrolAttributeQueryColumn) {
@@ -474,6 +468,15 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 
 	protected void setWpCount(int wpCount) {
 		this.wpCount = wpCount;
+	}
+
+	@Override
+	public boolean isDataColumn(QueryColumn column) {
+		return dataColumns != null && dataColumns.contains(column.getKey());
+	}
+	
+	public void setDataColumns(Set<String> dataColumns) {
+		this.dataColumns = dataColumns;
 	}
 	
 	@Override

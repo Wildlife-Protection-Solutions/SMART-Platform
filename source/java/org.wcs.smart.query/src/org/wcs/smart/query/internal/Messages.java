@@ -5,6 +5,8 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.query.internal.messages"; //$NON-NLS-1$
 	public static String DerbyFilterToSqlGenerator_FilterTypeNotSupported;
+	public static String AbstractColumnQueryPropertyProvider_ShowDataColumnsOnly;
+	public static String AbstractColumnQueryPropertyProvider_ShowDataColumnsOnlyTooltip;
 	public static String AbstractPagedQueryResultSet_ErrorLoadingQueryResults;
 	public static String AbstractValueDropItem_ChangeRate;
 	public static String AbstractValueDropItem_ComputeRate;

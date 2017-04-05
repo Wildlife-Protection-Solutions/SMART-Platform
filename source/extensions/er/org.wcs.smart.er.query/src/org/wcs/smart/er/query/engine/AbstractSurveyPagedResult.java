@@ -55,6 +55,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.util.UuidUtils;
@@ -90,14 +91,6 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		this.direction = direction;
 	}
 	
-	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-		{"waypoint", "wp"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"su_id", "samplingunit_id"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"su_buffer", "samplingunit_buffer"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"wp_time", "wp_date"} //$NON-NLS-1$ //$NON-NLS-2$
-	};
-	
-	
 	protected String buildSortSql() {
 		if (sortColumn == null || direction == SWT.NONE)
 			return ""; //$NON-NLS-1$
@@ -105,10 +98,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof SurveyQueryColumn) {
 			String key = sortColumn.getKey();
-			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
-				key = key.replace(data[0], data[1]);
-			}
+			key = SurveyQueryColumn.getDbColumnName(key);
 			if (sortColumn.getKey().equals(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
 				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (sortColumn.getType() == ColumnType.STRING){
@@ -118,7 +108,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 			}
 		}else if (sortColumn instanceof SurveyCategoryQueryColumn) {
 			String key = sortColumn.getKey();
-			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
+			key = CategoryQueryColumn.getDbColumnName(key);
 			result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}else if (sortColumn instanceof SurveyAttributeQueryColumn ||
 				sortColumn instanceof MissionPropertyQueryColumn ||

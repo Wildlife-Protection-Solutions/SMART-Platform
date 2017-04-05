@@ -40,6 +40,13 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class SurveyQueryColumn extends QueryColumn {
 
+	private static final String[][] FIXED_COLUMN_KEY_TO_ROW  = {
+		{"waypoint", "wp"}, //$NON-NLS-1$ //$NON-NLS-2$
+		{"su_id", "samplingunit_id"}, //$NON-NLS-1$ //$NON-NLS-2$
+		{"su_buffer", "samplingunit_buffer"}, //$NON-NLS-1$ //$NON-NLS-2$
+		{"wp_time", "wp_date"} //$NON-NLS-1$ //$NON-NLS-2$
+	};
+		
 	/**
 	 * The defined fixed columns.
 	 */
@@ -180,4 +187,13 @@ public class SurveyQueryColumn extends QueryColumn {
 		SurveyQueryColumn newColumn = new SurveyQueryColumn(this.column, l);
 		return newColumn;
 	}
+
+	public static String getDbColumnName(String key) {
+		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
+			key = key.replace(data[0], data[1]);
+		}
+		return key;
+	}
+	
 }

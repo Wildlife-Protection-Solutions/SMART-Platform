@@ -36,7 +36,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author Emily
  *
  */
-public interface IPagedQueryResultSet extends IQueryResult{
+public interface IPagedQueryResultSet extends IQueryResult {
 	/**
 	 * Reasonable page size for ui tables
 	 */

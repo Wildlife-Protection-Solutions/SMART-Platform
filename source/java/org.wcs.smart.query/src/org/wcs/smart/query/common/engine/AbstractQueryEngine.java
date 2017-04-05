@@ -23,7 +23,9 @@ package org.wcs.smart.query.common.engine;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,6 +34,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -293,4 +296,17 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 
 	@Override
 	public abstract boolean canExecute(String querytype);
+	
+	protected boolean checkColumnHasValues(Connection c, String tableName, String columnName) {
+		try(ResultSet rs = c.createStatement().executeQuery("select count (*) from "+tableName+" where "+columnName+" is not null")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (rs.next()) {
+				int count = rs.getInt(1);
+				return count > 0;
+			}
+		} catch (SQLException e) {
+			SmartPlugIn.log(MessageFormat.format("No column with name ''{1}'' found in table ''{0}''.", tableName, columnName), e); //$NON-NLS-1$
+		}
+		return false;
+	}
+	
 }

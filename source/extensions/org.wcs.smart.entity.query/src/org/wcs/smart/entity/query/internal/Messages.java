@@ -8,6 +8,7 @@ public class Messages extends NLS {
 	public static String AddEntityQueryJob_InstallError;
 	public static String AddEntityQueryJob_Progress1;
 	public static String ConservationAreaTreeNode_Name;
+	public static String DerbyEntityObservationEngine_FindDataColumns;
 	public static String DerbyEntityObservationEngine_ObserverProgress;
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
 	public static String DerbyGridEngine_Progress_CreatingObservationTable;

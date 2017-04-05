@@ -19,40 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model;
+package org.wcs.smart.query.common.engine;
 
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
+ * Interface for class that can provide additional information for query result columns.
  * 
- * A column in the results table that contains 
- * a category from the datamodel.
- * 
- * <p>There should be one column for each
- * "level" in the datamodel category tree.</p>
- * 
- * @author Emily
- * @since 1.0.0
+ * @author elitvin
+ * @since 5.0.0
  */
-public abstract class CategoryQueryColumn extends QueryColumn{
-	
-	public static final String KEY_PREFIX = "category:"; //$NON-NLS-1$
+public interface IColumnInfoProvider {
 
-	protected int level;	//the category level in the database.
-		
 	/**
-	 * Creates a new category column
-	 * 
-	 * @param name the name
-	 * @param level the level in the data model this column represents
+	 * Indicates if the column contains any data.
+	 * @param column
+	 * @return
 	 */
-	public CategoryQueryColumn(String name, int level){
-		super(name, KEY_PREFIX + level, ColumnType.STRING);
-		this.level = level;
-	}
-
-	public static String getDbColumnName(String key) {
-		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-		return key;
-	}
+	public boolean isDataColumn(QueryColumn column);
 	
 }

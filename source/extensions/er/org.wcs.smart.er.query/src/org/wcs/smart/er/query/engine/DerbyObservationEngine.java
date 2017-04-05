@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -47,6 +48,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
@@ -55,6 +57,8 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -149,7 +153,39 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 							result.setWpCount(rs.getInt(1));
 						}
 					}
-					monitor.worked(10);
+					monitor.worked(5);
+					
+					//lookup for columns that have data
+					monitor.subTask(Messages.DerbyObservationEngine_FindDataColumns);
+					HashSet<String> dataColumns = new HashSet<>();
+					
+					//looking for attributes that have at least one value
+					try(ResultSet rs = c.createStatement().executeQuery("select distinct a.keyid from "+queryDataTable+" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid")) { //$NON-NLS-1$ //$NON-NLS-2$
+						while (rs.next()) { 
+							dataColumns.add(AttributeQueryColumn.KEY_PREFIX + rs.getString(1));
+						}
+					}
+					//looking for fixed columns that have at least one value
+					for (SurveyQueryColumn.FixedColumns fc : SurveyQueryColumn.FixedColumns.values()) {
+						String dbColumn = SurveyQueryColumn.getDbColumnName(fc.getKey());
+						if (checkColumnHasValues(c, queryDataTable, dbColumn)) {
+							dataColumns.add(fc.getKey());
+						}
+					}
+
+					//looking for category columns that have at least one value
+					int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
+					for (int i = 0; i < numCategory; i++) {
+						String key = CategoryQueryColumn.KEY_PREFIX + i;
+						String dbColumn = CategoryQueryColumn.getDbColumnName(key);
+						if (checkColumnHasValues(c, queryDataTable, dbColumn)) {
+							dataColumns.add(key);
+						}
+					}
+					
+					result.setDataColumns(dataColumns);
+					monitor.worked(5);
+					
 				}catch(Exception ex){
 					throw new SQLException(ex);
 				} finally {

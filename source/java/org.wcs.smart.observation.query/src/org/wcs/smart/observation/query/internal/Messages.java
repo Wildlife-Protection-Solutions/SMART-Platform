@@ -12,6 +12,7 @@ public class Messages extends NLS {
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
 	public static String DerbyGridEngine_Progress_CreatingObservationTable;
 	public static String DerbyGridEngine_Progress_RunningQuery;
+	public static String DerbyObservationEngine_FindDataColumns;
 	public static String DerbyObservationEngine_Observers;
 	public static String DerbyObservationEngine_Progress_CaInfo;
 	public static String DerbyObservationEngine_Progress_CategoryData;

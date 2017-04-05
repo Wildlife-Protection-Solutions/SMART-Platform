@@ -136,6 +136,7 @@ public class QueryEditorTableContent {
 						infoSection.updateControls(items);
 					}
 					resultsTable.setInput(items);
+					resultsTable.updateColumnsVisibility(editor.getQueryInternal(), editor);
 					showTable();
 				}
 			}

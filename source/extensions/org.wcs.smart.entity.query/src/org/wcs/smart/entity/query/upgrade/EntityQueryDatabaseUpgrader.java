@@ -76,8 +76,12 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentVersion.equals(EntityQueryPlugIn.DB_VERSION_1)){
 			upgradeV1ToV2(session);
 			upgradeV2ToV3(session);
+			upgradeV3ToV4(session);
 		}else if (currentVersion.equals(EntityQueryPlugIn.DB_VERSION_2)){
 			upgradeV2ToV3(session);
+			upgradeV3ToV4(session);
+		}else if (currentVersion.equals(EntityQueryPlugIn.DB_VERSION_3)){
+			upgradeV3ToV4(session);
 		}
 	}
 	
@@ -150,4 +154,19 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 		Upgrader331To400.updateCCAAQueryTables(s, c, queryTables);
 		
 	}
+	
+	private static void upgradeV3ToV4(Session session){
+		String[] sql = new String[]{
+	            // #1366: Deactivate columns without values in queries
+				"ALTER TABLE smart.entity_observation_query ADD COLUMN show_data_columns_only BOOLEAN", //$NON-NLS-1$ //EntityObservationQuery
+		};
+		
+		for (String s : sql){
+			EntityQueryPlugIn.log(s, null);
+			session.createSQLQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_4, session);
+	}
+	
 }

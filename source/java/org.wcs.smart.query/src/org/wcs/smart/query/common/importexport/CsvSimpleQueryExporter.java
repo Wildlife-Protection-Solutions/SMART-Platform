@@ -33,11 +33,13 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.query.common.engine.IColumnInfoProvider;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.importexport.IQueryExporter;
@@ -169,10 +171,13 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		//filter visible columns 
 		//in SMART this returns all possible query columns; we only want to include visible query columns
 
-		List<QueryColumn> columns = (((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider));
+		SimpleQuery simpleQuery = (SimpleQuery) query;
+		List<QueryColumn> columns = simpleQuery.computeQueryColumns(Locale.getDefault(), null, provider);
+		boolean isDataFiltering = query instanceof IColumnAutoConfigQuery && result instanceof IColumnInfoProvider && ((IColumnAutoConfigQuery)simpleQuery).isShowDataColumnsOnly();
 		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
-			QueryColumn column = (QueryColumn) iterator.next();
-			if (!column.isVisible()){
+			QueryColumn column = iterator.next();
+			boolean isVisibleColumn = isDataFiltering ? ((IColumnInfoProvider)result).isDataColumn(column) : column.isVisible();
+			if (!isVisibleColumn){
 				iterator.remove();
 			}
 		}

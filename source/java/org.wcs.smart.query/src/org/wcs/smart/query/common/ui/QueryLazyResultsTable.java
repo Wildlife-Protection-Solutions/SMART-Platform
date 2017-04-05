@@ -25,6 +25,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
+import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Lazy query results table for a given query.
@@ -82,4 +85,15 @@ public abstract class QueryLazyResultsTable extends QueryResultsTable {
 		return contentProvider;
 	}
 	
+	@Override
+	public boolean isColumnDisplayed(SimpleQuery query, QueryColumn c) {
+		if (query instanceof IColumnAutoConfigQuery) {
+			IColumnAutoConfigQuery q = (IColumnAutoConfigQuery) query;
+			if (q.isShowDataColumnsOnly()) {
+				return contentProvider.isColumnDisplayed(c);
+			}
+		}
+		return super.isColumnDisplayed(query, c);
+	}
+
 }

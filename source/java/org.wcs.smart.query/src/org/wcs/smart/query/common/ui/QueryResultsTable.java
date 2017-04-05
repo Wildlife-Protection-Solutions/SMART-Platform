@@ -103,25 +103,32 @@ public abstract class QueryResultsTable {
 		}
 		setInput(null);
 	}
-	
+
+	public boolean isColumnDisplayed(final SimpleQuery query, QueryColumn c) {
+		return c.isVisible();
+	}
+
+	public void updateColumnsVisibility(final SimpleQuery query, final IProjectionProvider prjProvider) {
+		List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
+		for (QueryTableViewerColumn column : tableViewerColumns){
+			column.getColumn().setProjectionProvider(prjProvider);
+			for (QueryColumn c : cols){
+				if (column.getColumn().equals(c)){
+					if (isColumnDisplayed(query, c)){
+						column.show();
+					}else{
+						column.hide();
+					}
+					break;
+				}
+			}
+		}
+	}
 	
 	public void initQuery(final SimpleQuery query, final IProjectionProvider prjProvider){
 		if (tableViewerColumns != null){
 			//columns already created; lets update visibility
-			List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
-			for (QueryTableViewerColumn column : tableViewerColumns){
-				column.getColumn().setProjectionProvider(prjProvider);
-				for (QueryColumn c : cols){
-					if (column.getColumn().equals(c)){
-						if (c.isVisible()){
-							column.show();
-						}else{
-							column.hide();
-						}
-						break;
-					}
-				}
-			}
+			updateColumnsVisibility(query, prjProvider);
 			return;
 		}
 
