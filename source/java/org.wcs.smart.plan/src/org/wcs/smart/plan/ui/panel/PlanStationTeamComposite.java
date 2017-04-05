@@ -114,6 +114,8 @@ public class PlanStationTeamComposite extends PlanComposite {
 				stations = PatrolHibernateManager.getActiveStations(plan.getConservationArea(), session);
 			}catch (Exception ex){
 				SmartPatrolPlugIn.displayLog(Messages.PlanStationTeamComposite_TeamStation_NotFound_Error, ex);
+				
+			}finally{
 				session.close();
 			}
 			

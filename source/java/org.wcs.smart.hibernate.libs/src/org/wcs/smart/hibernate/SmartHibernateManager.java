@@ -156,6 +156,8 @@ public class SmartHibernateManager {
 	 * any other sessions from being granted.  MUST call unlock 
 	 * database when complete.  Once locked it closes the session
 	 * factory and opens a new session using the given username and password.
+	 * 
+	 * An exception is thrown if open session remains after trying to close
 	 * @return
 	 */
 	public static Session lockDatabase(String username, String password) throws Exception{
@@ -163,6 +165,7 @@ public class SmartHibernateManager {
 		thisLock.acquire();
 		//finish or close all sessions
 		int cnt = 0;
+		
 		while(openSessions.size() > 0 && cnt < SESSION_WAIT_COUNT){
 			//wait for thread to be closed
 			try {
@@ -170,10 +173,14 @@ public class SmartHibernateManager {
 			} catch (InterruptedException e) {}
 			cnt++;
 		}
+		
 		if (openSessions.size() > 0){
-			//TODO: warn users or log???
-			closeAllSessions();
+			//rather force closing all the sessions we fail.  This means we have to make sure
+			//we close sessions once we use them.  Open sessions will prevent connect from syncing
+			thisLock.release();
+			throw new Exception("Unable to obtain exclusive database access.  Ensure no other actions are being performed and try again."); //$NON-NLS-1$
 		}
+		
 		//ensure all sessions are closed
 		SmartHibernateManager.endSessionFactoryNoLock();
 		if (username != null){
@@ -262,8 +269,6 @@ public class SmartHibernateManager {
 	protected static void endSessionFactoryNoLock(){
 		synchronized (sessionFactoryLock) {
 			if (sessionFactory != null){
-				//clear the thread local; this should not be a problem but 
-				//this will clear any sessions linked to old session factory
 				closeAllSessions();
 				sessionFactory.close();
 			}
@@ -385,10 +390,7 @@ public class SmartHibernateManager {
 		
 		@Override
 		public void end() {
-//			Session tmp = sessionMapsThreadLocal.get(Thread.currentThread());
-//			if (tmp != null){
-				openSessions.remove(session)	;
-//			}
+			openSessions.remove(session);
 		}	
 	};
 }

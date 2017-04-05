@@ -31,6 +31,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.internal.Messages;
@@ -175,8 +176,14 @@ public class PlanIdNameDescComposite extends PlanComposite {
 	private boolean isIdValid() {
 		boolean idIsSimple = SmartUtils.isSimpleString(id.getText(),
 				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Plan.MAX_ID_LENGTH, 2);
-
-		if(PlanHibernateManager.isDuplicatePlanId( HibernateManager.openSession(), id.getText(), currentPlan.getUuid())){
+		boolean isDup = false;
+		Session s = HibernateManager.openSession();
+		try{
+			isDup = PlanHibernateManager.isDuplicatePlanId( s, id.getText(), currentPlan.getUuid()); 
+		}finally{
+			s.close();
+		}
+		if(isDup){
 			idDecoration.show();
 			idDecoration.setDescriptionText(Messages.PlanIdNameDescComposite_IdExists_Error);
 			setErrorMessage(Messages.PlanIdNameDescComposite_IdExists_Error);

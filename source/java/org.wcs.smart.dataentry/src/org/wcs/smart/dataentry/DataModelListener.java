@@ -119,6 +119,8 @@ public class DataModelListener implements IDataModelListener {
 				session.getTransaction().rollback();
 			}
 			throw ex;
+		}finally{
+			session.close();
 		}
 	}
 

@@ -182,7 +182,7 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 				return false;
 			}
 		}
-
+		if (getSession() != null && getSession().isOpen()) getSession().close();
 		return super.close();  
 	}
 	
