@@ -743,7 +743,7 @@ CREATE TABLE connect.quicklinks
 (
 	uuid uuid not null,
 	url text not null,
-	label char(256),
+	label varchar(256),
 	created_on timestamp not null,
 	created_by_user_uuid uuid not null,
 	is_admin_created boolean not null,
@@ -761,7 +761,7 @@ CREATE TABLE connect.user_quicklinks
 	uuid uuid not null,
 	user_uuid uuid not null,
 	quicklink_uuid uuid not null,
-	label_override char(256),
+	label_override varchar(256),
 	link_order int,
 	PRIMARY KEY (uuid)
 );
