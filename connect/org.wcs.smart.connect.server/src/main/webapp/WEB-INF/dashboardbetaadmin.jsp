@@ -18,7 +18,7 @@
 	<div id= "main">
 	<div id="pageheader" class="pageheader"><fmt:message key="dashboardbeta.title"/></div>
 	<div><div id="message" class="msgsection"></div></div>
-	<div id="dashboardLabeldiv">Dashboard Name:<Input id="dashboardlabeltext" type="text" value="New Dashboard"/>
+	<div id="dashboardLabeldiv"><fmt:message key="dashboardbeta.dashbaordname"/><Input id="dashboardlabeltext" type="text" value="New Dashboard"/>
 		<input type="hidden" id="dashboarduuid" name="reportuuid"/>
 	</div>
 	<div id="report-wrapper">

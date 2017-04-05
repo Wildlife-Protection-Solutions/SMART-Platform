@@ -72,28 +72,28 @@ function writeLinkList(){
  		
 		var upicon = document.createElement("a");
  		upicon.className="up-icon";
- 		upicon.title="Re-order Quicklink higher";
+ 		upicon.title= i18n("quicklinks.reorderhigher");
  		upicon.onclick = updateQuicklinkLowerOrderValue;
 		upicon.href="";
  		row.childNodes[2].appendChild(upicon);
  		
  		var downicon = document.createElement("a");
  		downicon.className="down-icon";
- 		downicon.title="Re-order Quicklink lower";
+ 		downicon.title=i18n("quicklinks.reorderlower");
  		downicon.onclick = updateQuicklinkHigherOrderValue;
 		downicon.href="";
  		row.childNodes[2].appendChild(downicon);
 
 	 	var updateicon = document.createElement("a");
  		updateicon.className="update-icon";
- 		updateicon.title="update Quicklink";
+ 		updateicon.title=i18n("quicklinks.updatequicklink");
  		updateicon.onclick = updateUserQuicklink;
  		updateicon.href="";
  		row.childNodes[2].appendChild(updateicon);
  		
  		var deleteicon = document.createElement("a");
 	 	deleteicon.className="delete-icon";
-	 	deleteicon.title="delete Quicklink";
+	 	deleteicon.title=i18n("quicklinks.deletequicklink");
 	 	deleteicon.onclick = deleteUserQuicklink;
 	 	deleteicon.href="";
 	 	row.childNodes[2].appendChild(deleteicon);
