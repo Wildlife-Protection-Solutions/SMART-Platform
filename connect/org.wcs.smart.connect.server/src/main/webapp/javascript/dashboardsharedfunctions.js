@@ -346,6 +346,14 @@ function updateReportsFromDashBoardJson(){
 		document.getElementById('report1paramshidden').value = dashboard.parameterList1;
 		document.getElementById('report2paramshidden').value = dashboard.parameterList2;
 		
+		if (document.getElementById('reportdate1') != null){
+			document.getElementById('reportdate1').innerHTML = dashboard.customDate1From + " - " + dashboard.customDate1To;
+			document.getElementById('reportdate1').parentElement.style.display="block";
+		
+			document.getElementById('reportdate2').innerHTML = dashboard.customDate2From + " - " + dashboard.customDate2To;
+			document.getElementById('reportdate2').parentElement.style.display="block";
+		}
+		
 		document.getElementById('filterDate1').value = dashboard.dateRange1;
 		document.getElementById('filterDate2').value = dashboard.dateRange2;
 		document.getElementById('report1From').value = dashboard.customDate1From;
@@ -355,12 +363,12 @@ function updateReportsFromDashBoardJson(){
 		
 		//if we are not are the admin page we can write the label in the header, otherwise we put it in the input box on the admin page
 		if(document.getElementById('report1select') == null){
-			document.getElementById('pageheader').innerHTML = dashboard.label;
+			document.getElementById('dashboardtitle').innerHTML = dashboard.label;
 		}else{//on the admin page we also have a label input box
 			document.getElementById('dashboardlabeltext').value = dashboard.label;
 		}
 	}else{
-		document.getElementById('pageheader').innerHTML = i18n("dashboard.nodefaultdashboard");
+		document.getElementById('dashboardtitle').innerHTML = i18n("dashboard.nodefaultdashboard");
 		document.getElementById('loading1').style.display = "none";
 		document.getElementById('loading2').style.display = "none";
 	}
@@ -397,6 +405,11 @@ function rerunReport1(){
 	iframe.onload = function(){
 		frame1load();
 	};
+	
+	if(picker1.getDate() != null && document.getElementById('rpoertdate1') != null ){
+		
+		document.getElementById('reportdate1').innerHTML = picker1.toString("MMM DD, YYYY") + " - " + picker2.toString("MMM DD, YYYY");
+	}
 }
 
 function rerunReport2(){
@@ -413,19 +426,24 @@ function rerunReport2(){
 	iframe.onload = function(){
 		frame2load();
 	};
+
+	if(picker3.getDate() != null && document.getElementById('rpoertdate2') != null ){
+		document.getElementById('reportdate2').innerHTML = picker3.toString("MMM DD, YYYY") + " - " + picker4.toString("MMM DD, YYYY");
+	}
 }
 
 function createIframe(){
 	var iframe= document.createElement('iframe');
 	iframe.width = "100%";
-	iframe.height = "100%";
+	//iframe.height = "100%";
 	iframe.setAttribute('frameborder', 0);
 	iframe.allowfullscreen = true;
 	iframe.sandbox = "allow-scripts";
 	iframe.style.display = "none";
-
+	iframe.style.flexGrow = 1;
 	return iframe;
 }
+
 
 function generateRelativeUrl(root, report){
 	if(report == 1){//get the data from the inputs for report #1 

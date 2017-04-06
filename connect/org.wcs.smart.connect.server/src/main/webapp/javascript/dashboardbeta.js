@@ -19,7 +19,6 @@ window.onload = function(){
 	document.getElementById('filterDate2').addEventListener("change", date2Changed);
 	
 	getDashBoards();
-	
 	getUserDetails();
 }
 
@@ -133,6 +132,9 @@ function deleteDashboard(){
 function showDashboard(){
 	var e = document.getElementById('admin-selectlist');
 	getDashboard(e.options[e.selectedIndex].value);
+	
+	document.getElementById("report1form").style.display="none";
+	document.getElementById("report2form").style.display="none";
 }
 
 function updateDateOnReport1(){
@@ -155,8 +157,8 @@ function updateDateOnReport2(){
 	form2 = document.getElementById('report2form');
 	data = {
 		    "dateRange2": form2.time_filter.value,
-		    "customDate2From": form2.report1From.value,
-		    "customDate2To": form2.report1To.value
+		    "customDate2From": form2.report2From.value,
+		    "customDate2To": form2.report2To.value
 		    };
 	
 	var oReq = new XMLHttpRequest();

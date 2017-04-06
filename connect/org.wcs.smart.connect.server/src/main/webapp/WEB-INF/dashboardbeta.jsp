@@ -16,66 +16,84 @@
 	<%@include file="header.jsp" %>
 	<%@include file="menu.jsp" %>
 	<div id= "main">
-	<div id="pageheader" class="pageheader"><fmt:message key="dashboardbeta.title"/></div>
+	<div id="pageheader" class="pageheader"><span id="dashboardtitle"><fmt:message key="dashboardbeta.title"/></span>
+	</div>
+	
+	<div style="padding-top: 5px">
+	<select id="admin-selectlist" class="uielement" name="admin-selectlist"></select>
+	<button onClick="showDashboard(); return false;" class="button" style="padding:1px"> <fmt:message key="dashboardbeta.viewdashboard"/></button>
+
+	
+	</div>
 	<div><div id="message" class="msgsection"></div></div>
-	<div id="report-wrapper">
-    	<div id="report1">
-    	<form id="report1form" name="report1form">
-    		<input id="report1selecthidden" type="hidden"/>
-    		<input id="report1paramshidden" type="hidden"/>
-    		<select id='filterDate1' class='updateChange' name="time_filter" style="margin-bottom:3px">
-				<option value=1><fmt:message key="dashboardbeta.oneday"/></option>
-				<option value=7><fmt:message key="dashboardbeta.oneweek"/></option>
-				<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
-				<option value=180><fmt:message key="dashboardbeta.sixmonths"/></option>
-				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
-				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
-			</select>
-			<button class="button" onClick="rerunReport1(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
-			<button id="savedatebutton1" class="button" onClick="updateDateOnReport1(); return false;" disabled><fmt:message key="dashboardbeta.datedefault"/></button>
-			<br>
-    		<input type="text" id="report1From" class="date-input-center"> -
-    		<input type="text" id="report1To" class="date-input-center">
-		</form>
-		<img id="loading1" src="../css/images/loading.svg">
-      	<div id="iframe1div"></div>
+	
+	<div id="report-wrapper" style="height: 80vh">
+    	<div id="report1" style="height: 100%">
+    	<div style="display:flex; flex-flow:column; height:100%">
+			
+    	  	<div style="display:flex; flex-flow:column; flex-grow:1">
+    	  	<img id="loading1" src="../css/images/loading.svg">
+    	  	<div id="iframe1div" style="flex-grow:1; display:flex;"></div>
+    	  	</div>
+    	  	 
+      		<div style="display:none;"><span id="reportdate1" ></span><a href="" onClick="document.getElementById('report1form').style.display='block'; return false;">change...</a>
+      		<form id="report1form" name="report1form" style="display:none">
+    			<input id="report1selecthidden" type="hidden"/>
+    			<input id="report1paramshidden" type="hidden"/>
+				<select id='filterDate1' class='updateChange uielement' name="time_filter" style="margin-bottom:3px">
+					<option value=1><fmt:message key="dashboardbeta.oneday"/></option>
+					<option value=7><fmt:message key="dashboardbeta.oneweek"/></option>
+					<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
+					<option value=180><fmt:message key="dashboardbeta.sixmonths"/></option>
+					<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
+					<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
+				</select>
+				<span><input type="text" id="report1From" class="date-input-center uielement"> - <input type="text" id="report1To" class="date-input-center uielement"></span>
+				<button style="padding:1px" class="button" onClick="rerunReport1(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
+				<button id="savedatebutton1" style="padding:1px" class="button" onClick="updateDateOnReport1(); return false;" disabled><fmt:message key="dashboardbeta.datedefault"/></button>
+    		</form>
+    		</div>
+    	</div>
     	</div>
     	
-    	<div id="report2">
-    	<form id="report2form" name="report2form">
-    		<input id="report2selecthidden" type="hidden"/>
-    		<input id="report2paramshidden" type="hidden"/>
-    		<select id='filterDate2' class='updateChange' name="time_filter" style="margin-bottom:3px">
-				<option value=1><fmt:message key="dashboardbeta.oneday"/></option>
-				<option value=7><fmt:message key="dashboardbeta.oneweek"/></option>
-				<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
-				<option value=180><fmt:message key="dashboardbeta.sixmonths"/></option>
-				<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
-				<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
-			</select>
-			<button class="button" onClick="rerunReport2(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
-			<button id="savedatebutton2" class="button" onClick="updateDateOnReport2(); return false;" disabled><fmt:message key="dashboardbeta.datedefault"/></button>
-			<br>
-			<input type="text" id="report2From" class="date-input-center"> - 
-    		<input type="text" id="report2To" class="date-input-center">
-		</form>
-    	<img id="loading2" src="../css/images/loading.svg">
-      	<div id="iframe2div"></div>
-		</iframe>
-
+    	<div id="report2" style="height:100%">
+	    	<div style="display:flex; flex-flow:column; height:100%">
+	    	
+    	  	<div style=" display:flex; flex-flow:column; flex-grow:1">
+    	  	<img id="loading2" src="../css/images/loading.svg">
+    	  	<div id="iframe2div" style="flex-grow:1; display:flex;">
+    	  	</div>
+    	  	</div>
+			<div style="display:none;"><span id="reportdate2" ></span><a href="" onClick="document.getElementById('report2form').style.display='block'; return false;">change...</a>
+    		<form id="report2form" name="report2form" style="display:none">
+    			<input id="report2selecthidden" type="hidden"/>
+    			<input id="report2paramshidden" type="hidden"/>
+    		
+    			<select id='filterDate2' class='updateChange uielement' name="time_filter" style="margin-bottom:3px">
+					<option value=1><fmt:message key="dashboardbeta.oneday"/></option>
+					<option value=7><fmt:message key="dashboardbeta.oneweek"/></option>
+					<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
+					<option value=180><fmt:message key="dashboardbeta.sixmonths"/></option>
+					<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
+					<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
+				</select>
+				<span><input type="text" id="report2From" class="date-input-center uielement"> - <input type="text" id="report2To" class="date-input-center uielement"></span>
+				<button style="padding:1px" class="button" onClick="rerunReport2(); return false;"><fmt:message key="dashboardbeta.runreport"/></button>
+				<button id="savedatebutton2" style="padding:1px" class="button" onClick="updateDateOnReport2(); return false;" disabled><fmt:message key="dashboardbeta.datedefault"/></button>
+				
+    		</form>
+    		</div>
+    		</div>
     	</div>
   	</div>
-  	<div id="configuration">
+  	<div id="configuration" style="border-top: 1px solid; padding-top:5px">
   		<form>
-  			<p id="dashboardList" >
-  				<select id="admin-selectlist" name="admin-selectlist"></select>
-  				<button onClick="showDashboard(); return false;" class="button"> <fmt:message key="dashboardbeta.viewdashboard"/></button> 
-  				<button onClick="setDashboardDefaultToSelectedDashboard(); return false;" class="button" > <fmt:message key="dashboardbeta.saveasdefaultdashboard"/></button>
-  			</p>
+  			
   			<p id="adminoptions" style="display:none">
-  				<button onClick="editDashboard(); return false;" class="button"><fmt:message key="dashboardbeta.editdashboard"/></button> 
-	  			<button onClick="deleteDashboard(); return false;" class="button"><fmt:message key="dashboardbeta.deletedashboard"/></button>
-	  			<button onClick="createNewDashboard(); return false;" class="button"><fmt:message key="dashboardbeta.createdashboard"/></button> 
+  				<a href="" onClick="setDashboardDefaultToSelectedDashboard(); return false;"><fmt:message key="dashboardbeta.saveasdefaultdashboard"/></a>
+  				<a href="" onClick="editDashboard(); return false;"><fmt:message key="dashboardbeta.editdashboard"/></a> 
+	  			<a href="" onClick="deleteDashboard(); return false;" ><fmt:message key="dashboardbeta.deletedashboard"/></a>
+	  			<a href="" onClick="createNewDashboard(); return false;" ><fmt:message key="dashboardbeta.createdashboard"/></a> 
   			</p>
   		</form>
   	</div>

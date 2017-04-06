@@ -42,18 +42,18 @@
 		<div class="table-cell smart-table" style="display:block">
 			<div class="table-row">
 				<div class="table-cell smart-table-cell"><fmt:message key="quicklinks.url"/></div>
-				<div class="table-cell smart-table-cell"><input name="url" type=text style="width:400px"/></div>
+				<div class="table-cell smart-table-cell"><input name="url" type=text class="formtext" style="width:400px"/></div>
 			</div>
 			<div class="table-row">
 				<div class="table-cell smart-table-cell"><fmt:message key="quicklinks.label"/></div>
-				<div class="table-cell smart-table-cell"><input name="label" type=text maxlength=256 style="width:400px"/></div>
+				<div class="table-cell smart-table-cell"><input name="label" type=text class="formtext" maxlength=256 style="width:400px"/></div>
 			</div>
 		</div>
 		<button name="addbutton" onClick="addLink(); return false;" class="button" > 
 		<fmt:message key="quicklinks.createquicklink"/></button>
 		<fmt:message key="quicklinks.or"/> 
 		<button name="addToAllButton" id="addToAllButton" onClick="addLinktoAll(); return false;" style="display:none" class="button" > <fmt:message key="quicklinks.createandaddtoall"/></button>
-		<p id="addfromadmin" style="display:none"><select id="admin-selectlist" name="admin-selectlist"></select> <button onClick="addFromAdminList(); return false;" class="button" > <fmt:message key="quicklinks.addtolist"/></button></p>
+		<p id="addfromadmin" style="display:none"><select id="admin-selectlist" name="admin-selectlist" class="uielement"></select> <button onClick="addFromAdminList(); return false;" class="button" > <fmt:message key="quicklinks.addtolist"/></button></p>
 		</form>
 		
 		<p id="managemylinks" style="font-size: 0.9em"><br><a href="javascript:manageMylinks();"><fmt:message key="quicklinks.managemylinks"/></a></p>

@@ -80,11 +80,23 @@ h2{
 	font-size: 1.2em;
 }
 
+.uielement{
+	border-radius: 3px;
+	border: 1px solid #BBC6F5;
+	padding:2px;
+}
+.uielement:focus{
+	border: 1px solid #72A6C8;/*#21B6E3;*/ /*#4F5F88;*/
+}
+
 .formtext{
 	border-radius: 3px;
 	border: 1px solid #BBC6F5;
 	padding: 4px;
 	width:100%;
+}
+.formtext:focus{
+	border: 1px solid #72A6C8;/*#21B6E3;*/ /*#4F5F88;*/
 }
 
 .table-cell{
@@ -101,10 +113,7 @@ h2{
 .table-row{
 	display:table-row;
 }
-.formtext:focus{
-	border: 1px solid #72A6C8;/*#21B6E3;*/ /*#4F5F88;*/
-	
-}
+
 .quicklink{
 	font-weight: bold;
 	font-size:1.1em;
@@ -363,6 +372,14 @@ h2{
 	display: block;
 	float: right;
 	cursor: pointer;
+}
+
+.dashboard-section{
+	margin-top:10px;
+	padding-top:5px;
+	border-radius:3px;
+	border: 1px solid  #72A6C8;
+	margin-bottom: 10px;
 }
 
 #map { 
