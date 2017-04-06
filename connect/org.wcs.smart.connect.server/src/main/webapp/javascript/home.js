@@ -25,12 +25,17 @@ window.onload = function(){
 }
 
 function updateLinkList(){
-	var objects = document.querySelectorAll("tr.linkrow");
+	
+	var parent = document.getElementById("simpleview");
+	while (parent.firstChild) {
+		parent.removeChild(parent.firstChild);
+	}
+	
+	var objects = document.querySelectorAll("div.linkrow");
 	for (var i = 0; i < objects.length; i++){
 		var ele = objects[i];
 		ele.parentElement.removeChild(ele);
 	}
-	
 	
 	var oReq = new XMLHttpRequest();
  	oReq.onload = writeLinkList;
@@ -40,34 +45,39 @@ function updateLinkList(){
 
 
 function writeLinkList(){
-	simpleDiv = document.getElementById('simpleview');
-	simpleDiv.innerHTML = "";
+	var parent = document.getElementById('myquicklinklist');
+	var listview = document.getElementById("simpleview");
 	
  	var links = JSON.parse(this.responseText);
  	for (var i = 0; i < links.length; i++){
  		link = links[i];
- 		htmllink = document.createElement("a");
+ 		
+ 		//update main ui
+ 		var plink = document.createElement("p");
+ 		plink.className = "quicklink"
+ 		var htmllink = document.createElement("a");
  		htmllink.href =  addhttp(link.url);
  		htmllink.text =  link.label;
  		htmllink.target = "_blank";
+ 		plink.appendChild(htmllink);
+ 		listview.appendChild(plink);
  		
- 		htmllink2 = document.createElement("a");
- 		htmllink2.href =  addhttp(link.url);
- 		htmllink2.text =  link.label;
- 		htmllink2.target = "_blank";
  		
- 		simpleDiv.appendChild(htmllink2);
- 		simpleDiv.appendChild(document.createElement("br")); 
+ 		//update user table
+ 		var row = tableCreateRow(parent, 
+					[null, link.order + "", null], 
+					"linkrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+	
+ 		row.dataset.linkuuid = link.uuid;
+ 		row.dataset.linkurl = link.url;
+ 		row.dataset.linkorder = link.order;
+ 		row.dataset.linklabel = link.label;
+ 		row.dataset.linknumber = i;
  		
- 		var parent = document.getElementById('quicklinklist');
- 		
- 		var row = tableCreateRowTDs(parent,
- 				[null, link.order,null], 
- 				"linkrow smart-table-rowon");
- 		row.id = "linkRow" + i;
- 		row.dataset.uuid = link.uuid;
- 		row.dataset.order = link.order;
-
+ 		var htmllink = document.createElement("a");
+ 		htmllink.href =  addhttp(link.url);
+ 		htmllink.text =  link.label;
+ 		htmllink.target = "_blank";
  		row.childNodes[0].appendChild(htmllink);
  		
 		var upicon = document.createElement("a");
@@ -101,7 +111,7 @@ function writeLinkList(){
  	}
 }
 
-function sendLink(APIurl, returnFunction){
+function sendLink(apiUrl, returnFunction){
 	var url = document.querySelector("input[name=url]").value;
 	var label = document.querySelector("input[name=label]").value;
 	
@@ -111,9 +121,8 @@ function sendLink(APIurl, returnFunction){
 	
 	var oReq = new XMLHttpRequest();
  	oReq.onload = returnFunction;
- 	oReq.open("POST", APIurl, true);
-	oReq.setRequestHeader("Accept","application/json");
-	oReq.setRequestHeader("Content-Type","application/json");
+ 	oReq.open("POST", apiUrl, true);
+ 	oReq.setRequestHeader("Content-Type", "application/json"); 	
  	oReq.send(JSON.stringify(jsonData));
  	return false;
 }
@@ -134,8 +143,7 @@ function addLinkToMyList(){
 	var oReq = new XMLHttpRequest();
  	oReq.onload = actionComplete();
  	oReq.open("Get", QuicklinksURL + "/addtolist/?quicklinkUuid=" + quicklink.uuid, true);
-	oReq.setRequestHeader("Accept","application/json");
-	oReq.setRequestHeader("Content-Type","application/json");
+ 	oReq.setRequestHeader("Content-type", "application/json");
  	oReq.send();
  	return false;
 }
@@ -155,29 +163,23 @@ function manageActionComplete(){
 }
 
 function updateQuicklinkLowerOrderValue(){
-	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var order = this.parentElement.parentElement.getAttribute('data-order');
-	var rowIndex = this.parentElement.parentElement.rowIndex;
-	var newOrder = this.parentElement.parentElement.parentElement.rows[rowIndex -1].getAttribute('data-order');
-	if(newOrder == null){
-		newOrder = order -1;
-	}else{
-		newOrder--;
+	var uuid = this.parentElement.parentElement.dataset.linkuuid;
+	var prev = this.parentElement.parentElement.previousElementSibling;
+	var newOrder = this.parentElement.parentElement.dataset.linkorder;
+	if (prev != null){
+		newOrder = parseInt(prev.dataset.linkorder) - 1;
 	}
-	updateOrder(uuid, newOrder);// make it lower than the previous existing
-								// order
-	return false;
+	updateOrder(uuid, newOrder);// make it higher than the next existing order
+	return false;	
 }
 
 function updateQuicklinkHigherOrderValue(){
-	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var rowIndex = this.parentElement.parentElement.rowIndex;
-	if(this.parentElement.parentElement.parentElement.rows.length > rowIndex + 1){
-		var newOrder = this.parentElement.parentElement.parentElement.rows[rowIndex +1].getAttribute('data-order');
-	}else{
-		var newOrder = this.parentElement.parentElement.getAttribute('data-order');
+	var uuid = this.parentElement.parentElement.dataset.linkuuid;
+	var next = this.parentElement.parentElement.nextElementSibling;
+	var newOrder = this.parentElement.parentElement.dataset.linkorder;
+	if (next != null){
+		newOrder = parseInt(next.dataset.linkorder) + 1;
 	}
-	newOrder++;
 	updateOrder(uuid, newOrder);// make it higher than the next existing order
 	return false;	
 }
@@ -214,7 +216,7 @@ function deleteQuicklink(){
 
 function deleteUserQuicklink(){
 	
-	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	var uuid = this.parentElement.parentElement.getAttribute('data-linkuuid');
 	var deleteURL = QuicklinksURL + "/user/" + uuid;
 	displayConfirmDialog(i18n("quicklink.deletequicklink"),  i18n("quicklink.areyousuredelete") , function(){
 		
@@ -233,9 +235,9 @@ function deleteUserQuicklink(){
 
 function updateUserQuicklink(){
 	displayDialog('updateUserQuicklinkDialog', 'main');
-	document.querySelector("input[name=update-uuid]").value = this.parentElement.parentElement.getAttribute('data-uuid');
-	document.querySelector("input[name=update-label]").value = this.parentElement.parentElement.cells[0].childNodes[0].innerText
-	document.querySelector("input[name=update-order]").value = this.parentElement.parentElement.getAttribute('data-order');
+	document.querySelector("input[name=update-uuid]").value = this.parentElement.parentElement.getAttribute('data-linkuuid');
+	document.querySelector("input[name=update-label]").value = this.parentElement.parentElement.getAttribute('data-linklabel');
+	document.querySelector("input[name=update-order]").value = this.parentElement.parentElement.getAttribute('data-linkorder');
 	return false;
 }
 
@@ -320,7 +322,7 @@ function manageQuicklinks(){
 }
 
 function redrawtable(){
-		var oReq = new XMLHttpRequest();
+	var oReq = new XMLHttpRequest();
  	oReq.onload = writeManageAllQuicklinksTable;
  	oReq.open("Get", QuicklinksURL , true);
  	oReq.send();
@@ -333,7 +335,8 @@ function writeManageAllQuicklinksTable(){
 
 
 function redrawManageAllTable(links){
-	var objects = document.querySelectorAll("tr.quicklinkrow");
+	
+	var objects = document.querySelectorAll("div.quicklinkrow");
 	for (var i = 0; i < objects.length; i++){
 		var ele = objects[i];
 		ele.parentElement.removeChild(ele);
@@ -343,18 +346,19 @@ function redrawManageAllTable(links){
 
  	for (var i = 0; i < links.length; i++){
  		link = links[i];
- 		htmllink = document.createElement("a");
+
+ 		
+ 		var row = tableCreateRow(tablediv,
+ 				[null, timeConverter(link.createdOn), link.adminCreated + "", null], 
+ 				"quicklinkrow smart-table-rowon " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		
+ 		row.dataset.uuid = link.uuid;
+ 		row.dataset.url = link.url;
+ 		
+ 		var htmllink = document.createElement("a");
  		htmllink.href =  addhttp(link.url);
  		htmllink.text =  link.label;
  		htmllink.target = "_blank";
- 		
- 		var row = tableCreateRowTDs(tablediv,
- 				[null, timeConverter(link.createdOn), link.adminCreated,null], 
- 				"quicklinkrow smart-table-rowon");
- 		row.id = "quicklinkRow" + i;
- 		row.dataset.uuid = link.uuid;
- 		row.dataset.url = link.url;
-
  		row.childNodes[0].appendChild(htmllink);
 
 	 	var updateicon = document.createElement("a");

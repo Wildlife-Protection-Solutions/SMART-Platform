@@ -392,7 +392,7 @@ public class ReportApi extends HttpServlet{
 		ReportProxy proxy = null;
 		try{		
 			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, uuid)){
-				r = (Report) s.createCriteria(Report.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
+				r = (Report) s.createCriteria(Report.class).add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
 				proxy = new ReportProxy(r.getUuid(), r.getName(),  
 						r.getConservationArea().getId(), r.getId(), r.getShared(), 
 						r.getConservationArea().getUuid(),

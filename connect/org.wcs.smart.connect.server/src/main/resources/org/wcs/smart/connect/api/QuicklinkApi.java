@@ -46,6 +46,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -65,12 +66,11 @@ import org.wcs.smart.connect.security.SecurityManager;
  * @author Jeff
  *
  */
-
-
 @Path(ConnectRESTApplication.PATH_SEPERATOR + QuicklinkApi.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
 public class QuicklinkApi extends HttpServlet {
+	
 	private static final long serialVersionUID = 1L;
 	
 	private final Logger logger = Logger.getLogger(QuicklinkApi.class.getName());
@@ -122,7 +122,9 @@ public class QuicklinkApi extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return s.createCriteria(Quicklink.class).addOrder(Order.desc("adminCreated")).addOrder(Order.asc("createdOn")).list();
+			return s.createCriteria(Quicklink.class)
+					.addOrder(Order.desc("adminCreated")) //$NON-NLS-1$
+					.addOrder(Order.asc("createdOn")).list(); //$NON-NLS-1$
 		}finally{
 			s.getTransaction().rollback();
 		}
@@ -143,7 +145,9 @@ public class QuicklinkApi extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return s.createCriteria(Quicklink.class).add(Restrictions.eq("adminCreated", true)).addOrder(Order.asc("label")).list();
+			return s.createCriteria(Quicklink.class)
+					.add(Restrictions.eq("adminCreated", true)) //$NON-NLS-1$
+					.addOrder(Order.asc("label")).list(); //$NON-NLS-1$
 		}finally{
 			s.getTransaction().rollback();
 		}
@@ -168,9 +172,9 @@ public class QuicklinkApi extends HttpServlet {
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			toUpdate = (Quicklink)s.createCriteria(Quicklink.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
+			toUpdate = (Quicklink)s.createCriteria(Quicklink.class).add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
 			if (toUpdate == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "QuickLink Not Found."); 
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "QuickLink Not Found.");  //$NON-NLS-1$
 			}
 			if(Quicklink.getLabel() != null){
 				toUpdate.setLabel(Quicklink.getLabel());
@@ -211,9 +215,9 @@ public class QuicklinkApi extends HttpServlet {
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			toDelete = (Quicklink)s.createCriteria(Quicklink.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
+			toDelete = (Quicklink)s.createCriteria(Quicklink.class).add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
 			if (toDelete == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "QuickLink Not Found."); 
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "QuickLink Not Found.");  //$NON-NLS-1$
 			}
 			s.delete(toDelete);
 			s.flush();
@@ -275,7 +279,9 @@ public class QuicklinkApi extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			List<Object[]> results = s.createQuery("Select q.url, u.labelOverride, u.order, u.uuid from UserQuicklink u join u.quicklink q where u.userUuid = '" + uuid + "' order by u.order").list();
+			Query query = s.createQuery("Select q.url, u.labelOverride, u.order, u.uuid from UserQuicklink u join u.quicklink q where u.userUuid = :uuid order by u.order"); //$NON-NLS-1$
+			query.setParameter("uuid", uuid); //$NON-NLS-1$
+			List<Object[]> results = query.list();
 			for (Object[] row : results) {
 				list.add(new QuicklinkWrapper((String)row[0], (String)row[1], (int)row[2], (UUID)row[3]));
 			}
@@ -295,7 +301,8 @@ public class QuicklinkApi extends HttpServlet {
 	 * Create a new Quicklink
 	 * URL: ../server/api/quicklink/
 	 * Call Type: POST
-	 * Payload: A GeoJSON object that has properties that match the Java attributes of a Quicklink, leaving out the uuid which will get created in the Database automatically.
+	 * Payload: A GeoJSON object that has properties that match the Java attributes of a Quicklink, 
+	 * leaving out the uuid which will get created in the Database automatically.
 	 * 
 	 * @return Returns a JSON Quicklink object for the created Quicklink,
 	 */
@@ -315,7 +322,7 @@ public class QuicklinkApi extends HttpServlet {
 			s.getTransaction().rollback();
 		}
 		if(userUuid == null){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid or Unathorized user trying to create a Quicklink, try logging back in." ); 
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid or Unathorized user trying to create a Quicklink, try logging back in." );  //$NON-NLS-1$
 		}
 		q.setCreatedBy(userUuid);
 		q.setCreatedOn(new Timestamp(Instant.now().toEpochMilli()));
@@ -387,7 +394,8 @@ public class QuicklinkApi extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			Quicklink quicklink = (Quicklink)s.createCriteria(Quicklink.class).add(Restrictions.eq("uuid", quicklinkUuid)).uniqueResult();
+			Quicklink quicklink = (Quicklink)s.createCriteria(Quicklink.class)
+					.add(Restrictions.eq("uuid", quicklinkUuid)).uniqueResult(); //$NON-NLS-1$
 			listEntry.setLabelOverride(quicklink.getLabel());
 			listEntry.setOrder(100);
 			listEntry.setQuicklink(quicklink);
@@ -421,17 +429,23 @@ public class QuicklinkApi extends HttpServlet {
 		s.beginTransaction();
 		try{
 			SmartUser user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
-			toDelete = (UserQuicklink)s.createCriteria(UserQuicklink.class).add(Restrictions.eq("uuid", uuid)).add(Restrictions.eq("userUuid",user.getUuid())).uniqueResult();
+			toDelete = (UserQuicklink)s.createCriteria(UserQuicklink.class)
+					.add(Restrictions.eq("uuid", uuid)) //$NON-NLS-1$
+					.add(Restrictions.eq("userUuid",user.getUuid())).uniqueResult(); //$NON-NLS-1$
 			if (toDelete == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "User's QuickLink Not Found."); 
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "User's QuickLink Not Found.");  //$NON-NLS-1$
 			}
 			s.delete(toDelete);
 			
 			// if no one else is using this quicklink and the user is the creator, remove it as well. Quickly clean up user-created links that no one else needs 
 			@SuppressWarnings("unchecked")
-			ArrayList<UserQuicklink> othersLeft = (ArrayList<UserQuicklink>)s.createCriteria(UserQuicklink.class).add(Restrictions.eq("quicklink.uuid", toDelete.getQuicklink().getUuid())).list();
+			ArrayList<UserQuicklink> othersLeft = (ArrayList<UserQuicklink>)s.createCriteria(UserQuicklink.class)
+				.add(Restrictions.eq("quicklink.uuid", toDelete.getQuicklink().getUuid())) //$NON-NLS-1$
+				.list();
 			if(othersLeft.size() == 0){
-				Quicklink ql = (Quicklink)s.createCriteria(Quicklink.class).add(Restrictions.eq("uuid", toDelete.getQuicklink().getUuid())).add(Restrictions.eq("createdBy", user.getUuid())).uniqueResult();
+				Quicklink ql = (Quicklink)s.createCriteria(Quicklink.class)
+						.add(Restrictions.eq("uuid", toDelete.getQuicklink().getUuid())) //$NON-NLS-1$
+						.add(Restrictions.eq("createdBy", user.getUuid())).uniqueResult(); //$NON-NLS-1$
 				if(ql != null){
 					s.delete(ql);
 				}
@@ -470,9 +484,11 @@ public class QuicklinkApi extends HttpServlet {
 		s.beginTransaction();
 		try{
 			SmartUser user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
-			toUpdate = (UserQuicklink)s.createCriteria(UserQuicklink.class).add(Restrictions.eq("uuid", uuid)).add(Restrictions.eq("userUuid",user.getUuid())).uniqueResult();
+			toUpdate = (UserQuicklink)s.createCriteria(UserQuicklink.class)
+					.add(Restrictions.eq("uuid", uuid)) //$NON-NLS-1$
+					.add(Restrictions.eq("userUuid",user.getUuid())).uniqueResult(); //$NON-NLS-1$
 			if (toUpdate == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, "User's QuickLink Not Found."); 
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "User's QuickLink Not Found.");  //$NON-NLS-1$
 			}
 			if(userQuicklink.getLabelOverride() != null){
 				toUpdate.setLabelOverride(userQuicklink.getLabelOverride());
@@ -510,6 +526,7 @@ public class QuicklinkApi extends HttpServlet {
 	
 	@POST
     @Path("/addtoall/")
+	@SuppressWarnings("unchecked")
     public Quicklink addQuicklinkToAll(Quicklink quicklink) {
 		Quicklink q = new Quicklink();
 		UUID userUuid = null; 
@@ -524,7 +541,7 @@ public class QuicklinkApi extends HttpServlet {
 		}
 		isAdminUser();//throws an exception if it fails.
 		if(userUuid == null){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid or Unathorized user trying to create a Quicklink, try logging back in." ); 
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid or Unathorized user trying to create a Quicklink, try logging back in." );  //$NON-NLS-1$
 		}
 		
 		q.setCreatedBy(userUuid);
@@ -537,7 +554,7 @@ public class QuicklinkApi extends HttpServlet {
 		s.beginTransaction();
 		try{
 			s.save(q);
-			@SuppressWarnings("unchecked")
+			
 			ArrayList<SmartUser> users = (ArrayList<SmartUser>) s.createCriteria(SmartUser.class).list();
 			for(SmartUser u : users){
 				UserQuicklink ql = new UserQuicklink();
