@@ -180,10 +180,12 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 
 		
 		//Set the ID of the new patrol
-		Patrol pId =  (Patrol)((IStructuredSelection)patrolId.getSelection()).getFirstElement();
+		Object selection =  ((IStructuredSelection)patrolId.getSelection()).getFirstElement();
+		Patrol patrol;
 		
-		if(pId instanceof Patrol){
-			newPatrol.setId(pId.getId());
+		if(selection instanceof Patrol){
+			patrol = (Patrol)selection;
+			newPatrol.setId(patrol.getId());
 		}else{
 			newPatrol.setId(txtPatrolId.getText());
 		}
