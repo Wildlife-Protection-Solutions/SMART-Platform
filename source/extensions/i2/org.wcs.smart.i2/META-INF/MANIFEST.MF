@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Intelligence 2 PlugIn
+Bundle-Name: Advanced Intelligence PlugIn
 Bundle-SymbolicName: org.wcs.smart.i2;singleton:=true
 Bundle-Version: 5.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

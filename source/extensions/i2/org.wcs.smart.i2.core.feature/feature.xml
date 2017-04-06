@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.i2.core.feature"
-      label="Intelligence II Core Plugin"
+      label="Advanced Intelligence Core Plugin"
       version="5.0.0.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.i2"
       license-feature="org.wcs.smart.smart.feature">
 
    <description>
-      An intelligence plugin for tracking records, entities
+      An advanced intelligence plugin for tracking records, entities
 and relationships.
    </description>
 

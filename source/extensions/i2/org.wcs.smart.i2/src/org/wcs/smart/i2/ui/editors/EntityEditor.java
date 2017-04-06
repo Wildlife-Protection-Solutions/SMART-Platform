@@ -263,6 +263,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 			Session s = HibernateManager.openSession();
 			try{
 				temp = (IntelEntity) s.get(IntelEntity.class, input.getUuid());
+				if (temp == null){
+					//close editor
+					closeEditor();
+					return Status.OK_STATUS;
+				}
 				temp.getEntityType().getIcon();
 				for(IntelEntityTypeAttribute a : temp.getEntityType().getAttributes()){
 					a.getAttribute().getName();
@@ -540,6 +545,10 @@ public class EntityEditor extends EditorPart implements MapPart{
 		return false;
 	}
 	
+	private void closeEditor(){
+		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
+	}
+	
 	private void subscribeToEvents(){
 		eventHandles = new ArrayList<EventHandler>();
 		
@@ -554,7 +563,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				Object data = event.getProperty(IEventBroker.DATA);
 				if (data != null ){
 					if (data.equals(entity)){
-						getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(EntityEditor.this, false);
+						closeEditor();
 					}else if (data instanceof Collection){
 						Collection<?> items = (Collection<?>) data;
 						items.forEach(x->{

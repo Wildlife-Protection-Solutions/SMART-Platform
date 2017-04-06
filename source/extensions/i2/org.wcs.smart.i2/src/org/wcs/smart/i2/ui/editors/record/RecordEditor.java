@@ -141,7 +141,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				Session s = HibernateManager.openSession();
 				try{
 					temp = (IntelRecord) s.get(IntelRecord.class, uuid);
-					if (temp == null) return Status.OK_STATUS; //not found
+					if (temp == null){
+						closeEditor();
+						return Status.OK_STATUS; //not found
+					}
 					temp.getCreatedBy().getFamilyName();
 					temp.getLastModifiedBy().getFamilyName();
 					if (temp.getAttachments().size() > 0){
@@ -393,6 +396,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		setDirty(true);
 	}
 	
+	private void closeEditor(){
+		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void createPages() {
@@ -419,7 +426,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				
 				if (data != null){
 					for (IntelRecord r : items){
-						if (r.equals(record)) getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
+						if (r.equals(record)) closeEditor();
 					}
 				}
 			});
