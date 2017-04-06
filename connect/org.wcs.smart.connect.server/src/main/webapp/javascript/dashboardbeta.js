@@ -113,9 +113,18 @@ function getUserDetails(){
 
 function userCallback(){
 	var admin = JSON.parse(this.responseText);
-	if(admin){
-		document.getElementById('adminoptions').style.display = "block";
+	
+	var adminElement = 	document.getElementById('adminoptions');
+	var allkids = adminElement.getElementsByClassName("dashboard-adminonly")
+	
+	for (var i = 0; i < allkids.length; i++) {
+		if (admin){
+			allkids[i].style.display = "inline";
+		}else{
+			allkids[i].style.display = "none";
+		}
 	}
+	adminElement.style.display = "inline";
 }
 
 function deleteDashboard(){

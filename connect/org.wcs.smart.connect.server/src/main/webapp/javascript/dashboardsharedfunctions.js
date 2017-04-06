@@ -396,7 +396,7 @@ function rerunReport1(){
 	while (framediv.firstChild) {
 	    framediv.removeChild(framediv.firstChild);
 	}
-	document.getElementById('loading1').style.display = "inline-block";
+	document.getElementById('loading1').style.display = "block";
 	
 	var iframe = createIframe();
 	document.getElementById('iframe1div').appendChild(iframe);
@@ -417,7 +417,7 @@ function rerunReport2(){
 	while (framediv.firstChild) {
 	    framediv.removeChild(framediv.firstChild);
 	}
-	document.getElementById('loading2').style.display = "inline-block";
+	document.getElementById('loading2').style.display = "block";
 	
 	var iframe = createIframe();
 	iframe.src = resolve(generateRelativeUrl(REPORTURL, 2));
@@ -435,12 +435,11 @@ function rerunReport2(){
 function createIframe(){
 	var iframe= document.createElement('iframe');
 	iframe.width = "100%";
-	//iframe.height = "100%";
+	iframe.height = "100%";
 	iframe.setAttribute('frameborder', 0);
 	iframe.allowfullscreen = true;
 	iframe.sandbox = "allow-scripts";
 	iframe.style.display = "none";
-	iframe.style.flexGrow = 1;
 	return iframe;
 }
 

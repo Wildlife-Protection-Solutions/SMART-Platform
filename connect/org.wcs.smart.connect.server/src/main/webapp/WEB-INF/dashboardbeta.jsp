@@ -27,16 +27,25 @@
 	</div>
 	<div><div id="message" class="msgsection"></div></div>
 	
-	<div id="report-wrapper" style="height: 80vh">
-    	<div id="report1" style="height: 100%">
-    	<div style="display:flex; flex-flow:column; height:100%">
-			
-    	  	<div style="display:flex; flex-flow:column; flex-grow:1">
-    	  	<img id="loading1" src="../css/images/loading.svg">
-    	  	<div id="iframe1div" style="flex-grow:1; display:flex;"></div>
-    	  	</div>
-    	  	 
-      		<div style="display:none;"><span id="reportdate1" ></span><a href="" onClick="document.getElementById('report1form').style.display='block'; return false;">change...</a>
+	<div id="report-wrapper" style="height: 80vh; display:table">
+	<div style="display:table-row">
+    	<div id="report1" style="display:table-cell; width:50%">
+			<div style="height:100%">
+   	  			<img id="loading1" style="display:block" src="../css/images/loading.svg">
+   	  			<div id="iframe1div" style="height:100%"></div>
+			</div>
+    	</div>	 
+    	
+    	<div id="report2" style="display:table-cell; width:50%">
+			<div style="height:100%">
+   	  			<img id="loading2" style="display:block" src="../css/images/loading.svg">
+   	  			<div id="iframe2div" style="height:100%"></div>
+			</div>
+    	</div>
+    </div>
+    <div style="display:table-row">
+    	<div style="display:table-cell; width:50%; height:1px">
+      		<div style="display:none;"><span id="reportdate1" ></span><a href="" onClick="document.getElementById('report1form').style.display='block'; return false;" style="padding-left:4px; font-size:0.9em"><fmt:message key="dashboardbeta.change"/></a>
       		<form id="report1form" name="report1form" style="display:none">
     			<input id="report1selecthidden" type="hidden"/>
     			<input id="report1paramshidden" type="hidden"/>
@@ -53,18 +62,10 @@
 				<button id="savedatebutton1" style="padding:1px" class="button" onClick="updateDateOnReport1(); return false;" disabled><fmt:message key="dashboardbeta.datedefault"/></button>
     		</form>
     		</div>
-    	</div>
-    	</div>
+		</div>
     	
-    	<div id="report2" style="height:100%">
-	    	<div style="display:flex; flex-flow:column; height:100%">
-	    	
-    	  	<div style=" display:flex; flex-flow:column; flex-grow:1">
-    	  	<img id="loading2" src="../css/images/loading.svg">
-    	  	<div id="iframe2div" style="flex-grow:1; display:flex;">
-    	  	</div>
-    	  	</div>
-			<div style="display:none;"><span id="reportdate2" ></span><a href="" onClick="document.getElementById('report2form').style.display='block'; return false;">change...</a>
+    	<div style="display:table-cell; width:50%; height:1px">
+	    	<div style="display:none;"><span id="reportdate2" ></span><a href="" onClick="document.getElementById('report2form').style.display='block'; return false;" style="padding-left:4px; font-size:0.9em"><fmt:message key="dashboardbeta.change"/></a>
     		<form id="report2form" name="report2form" style="display:none">
     			<input id="report2selecthidden" type="hidden"/>
     			<input id="report2paramshidden" type="hidden"/>
@@ -83,17 +84,17 @@
 				
     		</form>
     		</div>
-    		</div>
+    	</div>
     	</div>
   	</div>
   	<div id="configuration" style="border-top: 1px solid; padding-top:5px">
   		<form>
   			
   			<p id="adminoptions" style="display:none">
-  				<a href="" onClick="setDashboardDefaultToSelectedDashboard(); return false;"><fmt:message key="dashboardbeta.saveasdefaultdashboard"/></a>
-  				<a href="" onClick="editDashboard(); return false;"><fmt:message key="dashboardbeta.editdashboard"/></a> 
-	  			<a href="" onClick="deleteDashboard(); return false;" ><fmt:message key="dashboardbeta.deletedashboard"/></a>
-	  			<a href="" onClick="createNewDashboard(); return false;" ><fmt:message key="dashboardbeta.createdashboard"/></a> 
+  				<a class="dashboard-alluser" href="" onClick="setDashboardDefaultToSelectedDashboard(); return false;"><fmt:message key="dashboardbeta.saveasdefaultdashboard"/></a>
+  				<a class="dashboard-adminonly" href="" onClick="editDashboard(); return false;"><fmt:message key="dashboardbeta.editdashboard"/></a> 
+	  			<a class="dashboard-adminonly" href="" onClick="deleteDashboard(); return false;" ><fmt:message key="dashboardbeta.deletedashboard"/></a>
+	  			<a class="dashboard-adminonly" href="" onClick="createNewDashboard(); return false;" ><fmt:message key="dashboardbeta.createdashboard"/></a> 
   			</p>
   		</form>
   	</div>
