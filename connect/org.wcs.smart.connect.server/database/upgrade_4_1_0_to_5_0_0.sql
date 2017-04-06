@@ -696,12 +696,16 @@ FOREIGN KEY (value_uuid)
 REFERENCES smart.i_record_attribute_value (uuid) ON DELETE CASCADE DEFERRABLE;
 
 
+--Update Sharedlinks to allow for longer URLS
+Alter table connect.shared_links alter column url type varchar(262143);
+
+
 --Tables to Support Quicklinks and DashBoards 
 
 CREATE TABLE connect.dashboards
 (
 	uuid uuid not null,
-	label char(256),
+	label varchar(256),
 	report_uuid_1 uuid,
 	report_uuid_2 uuid,
 	date_range1 int not null,

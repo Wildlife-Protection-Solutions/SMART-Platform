@@ -242,7 +242,7 @@ function updateUserQuicklink(){
 }
 
 function updateQuicklink(){
-	displayDialog('updateQuicklinkDialog', this.parentElement.parentElement.id);
+	displayDialog('updateQuicklinkDialog', this.parentElement.parentElement.parentElement.id);
 	document.querySelector("input[name=update-qluuid]").value = this.parentElement.parentElement.getAttribute('data-uuid');
 	document.querySelector("input[name=update-url]").value = this.parentElement.parentElement.getAttribute('data-url');
 	
