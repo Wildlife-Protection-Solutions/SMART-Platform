@@ -233,13 +233,16 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 				validateData();
 			}
 		});
+		Session s = HibernateManager.openSession();
 		try{
-			SmartConnection tempConnection = new TempConnection(HibernateManager.openSession());
+			SmartConnection tempConnection = new TempConnection(s);
 			Map<TableCategory, List<SmartBirtTable>> tables = SmartBirtTableUtils.getInstance().getBirtTables(tempConnection);
 			smartTables.setInput(tables);
 			smartTables.expandAll();
 		}catch (Exception ex){
 			Activator.log(ex.getLocalizedMessage(), ex);
+		}finally{
+			s.close();
 		}
 		
 		setPageComplete(false);

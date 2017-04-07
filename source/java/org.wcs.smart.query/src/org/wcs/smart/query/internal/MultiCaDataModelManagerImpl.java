@@ -486,7 +486,7 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public String getAttributeListItemLabel(Session session, UUID cauuid, UUID keyuuid ){
-		return SmartLabelProvider.getDescription(keyuuid, cauuid);
+		return SmartLabelProvider.getDescription(keyuuid, cauuid, session);
 	}
 
 	
@@ -501,7 +501,7 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public String getAttributeTreeNodeLabel(Session session, UUID cauuid, UUID keyuuid){
-		return SmartLabelProvider.getDescription(keyuuid, cauuid);
+		return SmartLabelProvider.getDescription(keyuuid, cauuid, session);
 	}
 	
 	/**

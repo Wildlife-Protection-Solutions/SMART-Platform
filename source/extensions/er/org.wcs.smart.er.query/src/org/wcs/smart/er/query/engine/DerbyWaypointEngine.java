@@ -228,7 +228,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
 					byte[] cauuid = rs.getBytes(2);
-					String value = SmartLabelProvider.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid));
+					String value = SmartLabelProvider.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid), session);
 					statement.setBytes(1, uuid);
 					statement.setString(2, value);
 					statement.addBatch();
@@ -280,7 +280,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
 					byte[] cauuid = rs.getBytes(2);
-					String value = SmartLabelProvider.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid));
+					String value = SmartLabelProvider.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid), session);
 					statement.setBytes(1, uuid);
 					statement.setString(2, value);
 					statement.addBatch();

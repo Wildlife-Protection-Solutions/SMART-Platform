@@ -129,7 +129,7 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 	 */
 	@Transient
 	public static synchronized String getDescription(UUID elementuuid,
-			UUID cauuid) {
+			UUID cauuid, Session session) {
 		String description = ""; //$NON-NLS-1$
 		if (elementuuid == null || cauuid == null) {
 			return description;
@@ -156,11 +156,11 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 			return description;
 		}
 
-		Session s = HibernateManager.openSession();
-		Label lbl = (Label) s.get(Label.class, id);
+		Label lbl = (Label) session.get(Label.class, id);
 		if (lbl != null) {
 			description = lbl.getValue();
 		}
+		
 		return description;
 	}
 
