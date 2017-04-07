@@ -236,5 +236,7 @@ labels_en= {
 "pickaday.thu":"Thu",
 "pickaday.fri":"Fri",
 "pickaday.sat":"Sat",
+"dialog.ok":"OK",
+"dialog.cancel":"Cancel",
 "":""
 }

@@ -151,7 +151,9 @@ function checkForCCAAReport(num, report){
 function addTextboxParamater(param, parent, newGroup){
 	if(newGroup == true){
 		var f = document.createElement("fieldset");
-		f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+		var displayText = param.displayText;
+		if (displayText == null) displayText = param.name;
+		f.innerHTML = "<legend>" + displayText + ":" + "</legend>";
 	}else{
 		var f = document.createElement("p");
 	}
@@ -164,17 +166,16 @@ function addTextboxParamater(param, parent, newGroup){
 	newInput.oninput = updateReportCustomParamsHiddenValue;
 	newInput.onpropertychange = newInput.oninput;
     
-    
 	f.appendChild(newInput);
 	parent.insertBefore(f, parent.childNodes[4]);
-
-	
 }
 
 function addBooleanParamater(param, parent, newGroup){
 	if(newGroup == true){
 		var f = document.createElement("fieldset");
-		f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+		var displayText = param.displayText;
+		if (displayText == null) displayText = param.name;
+		f.innerHTML = "<legend>" + displayText + ":" + "</legend>";
 	}else{
 		var f = document.createElement("p");
 	}
@@ -261,9 +262,9 @@ function reportsCallback(){
  		var opt = document.createElement('option');
  		var opt2 = document.createElement('option');
  	    opt.value = report.uuid
- 	    opt.innerHTML = report.name;
+ 	    opt.innerHTML = report.name + " [" + report.conservationArea + "]";
  	    opt2.value = report.uuid
-	    opt2.innerHTML = report.name;
+	    opt2.innerHTML = report.name + " [" + report.conservationArea + "]";
  	    select1.appendChild(opt);
  	    select2.appendChild(opt2);
  	}
@@ -364,6 +365,13 @@ function updateReportsFromDashBoardJson(){
 		//if we are not are the admin page we can write the label in the header, otherwise we put it in the input box on the admin page
 		if(document.getElementById('report1select') == null){
 			document.getElementById('dashboardtitle').innerHTML = dashboard.label;
+			document.getElementById('dashboardtitle').dataset.uuid = dashboard.uuid;
+			
+			var op = document.querySelectorAll('#admin-selectlist > option[value="' + dashboard.uuid + '"]')
+			if (op != null && op[0] != null){
+				op[0].selected = true;
+			}
+			
 		}else{//on the admin page we also have a label input box
 			document.getElementById('dashboardlabeltext').value = dashboard.label;
 		}
@@ -560,6 +568,7 @@ function populateCaList(num, response){
 	
 	var cas = JSON.parse(response.responseText);
 	for (var i = 0; i < cas.length; i ++){
+		if (cas[i].uuid == '00000000-0000-0000-0000-000000000000') continue; //do not add ccaa to list
 		var checkbox = document.createElement('input');
 		checkbox.type = "checkbox";
 		checkbox.name = cas[i].uuid;
@@ -614,6 +623,14 @@ function selectNone(parent){
 function getRepor1CustomParameters(){
 	var str = "";
 	
+	//get custom parameters
+	var parent = document.getElementById("customparameters1");
+	var children = parent.children;  
+	for (var i = 0; i < children.length; i++) {
+		 var child = children[i].children[1]; //get the actual "input" element
+		 str = str + child.id + "," + child.value;
+	 }
+	
 	//get list of CAs for CCAA reports if necessary
 	if(document.getElementById('report1isccaa').value == "true"){
 		str = str + "&cafilter=";
@@ -626,20 +643,19 @@ function getRepor1CustomParameters(){
 			 } 
 		 }
 	}
-	
+	return str;
+}
+
+function getRepor2CustomParameters(){
+	var str = "";
 	//get custom parameters
-	var parent = document.getElementById("customparameters1");
+	var parent = document.getElementById("customparameters2");
 	var children = parent.children;  
 	for (var i = 0; i < children.length; i++) {
 		 var child = children[i].children[1]; //get the actual "input" element
 		 str = str + child.id + "," + child.value;
 	 }
 	
-	return str;
-}
-
-function getRepor2CustomParameters(){
-	var str = "";
 	if(document.getElementById('report2isccaa').value == "true"){
 		str = str + "&cafilter=";
 		var parent = document.getElementById('caCheckboxes2');
@@ -651,24 +667,15 @@ function getRepor2CustomParameters(){
 			 } 
 		 }
 	}
-
-	//get custom parameters
-	var parent = document.getElementById("customparameters2");
-	var children = parent.children;  
-	for (var i = 0; i < children.length; i++) {
-		 var child = children[i].children[1]; //get the actual "input" element
-		 str = str + child.id + "," + child.value;
-	 }
-
-	
 	return str;
-
 }
 
 function parseParametersIntoInputs(num){
 	if(num == 1){
 		var params1str = document.getElementById('report1paramshidden').value; 
-		var params1 = params1str.split(','); 
+		var queryparts = params1str.split('&cafilter=');
+		
+		var params1 = queryparts[0].split(',');
 
 		//pull out any custom parameters
 		for(var i=0; i < params1.length; i+=2){
@@ -681,19 +688,22 @@ function parseParametersIntoInputs(num){
 		}
 		
 		//pull out any ca filters and check off the correct boxes
-		for(var i=0; i < params1.length; i++){
-			var name = params1[i];
-			if(name.substring(0,10) == "&cafilter="){
-				name = name.split("=")[1];
-			}
-			var input = getElementInsideContainer("caCheckboxes1",name);
-			if(input != null){
-				input.checked = true;
+		if (queryparts[1] != null){
+			var cafilter = queryparts[1].split(',');
+			for(var i=0; i < cafilter.length; i++){
+				var input = getElementInsideContainer("caCheckboxes1",cafilter[i]);
+				if(input != null){
+					input.checked = true;
+				}
 			}
 		}
 	}else{
-		var params2str = document.getElementById('report2paramshidden').value;
-		var params2 = params2str.split(',');
+		var params2str = document.getElementById('report2paramshidden').value; 
+		var queryparts = params2str.split('&cafilter=');
+		
+		var params2 = queryparts[0].split(',');
+
+		//pull out any custom parameters
 		for(var i=0; i < params2.length; i+=2){
 			var name = params2[i];
 			var value = params2[i+1];
@@ -704,14 +714,13 @@ function parseParametersIntoInputs(num){
 		}
 		
 		//pull out any ca filters and check off the correct boxes
-		for(var i=0; i < params2.length; i++){
-			var name = params2[i];
-			if(name.substring(0,10) == "&cafilter="){
-				name = name.split("=")[1];
-			}
-			var input = getElementInsideContainer("caCheckboxes2",name);
-			if(input != null){
-				input.checked = true;
+		if (queryparts[1] != null){
+			var cafilter = queryparts[1].split(',');
+			for(var i=0; i < cafilter.length; i++){
+				var input = getElementInsideContainer("caCheckboxes2",cafilter[i]);
+				if(input != null){
+					input.checked = true;
+				}
 			}
 		}
 	}

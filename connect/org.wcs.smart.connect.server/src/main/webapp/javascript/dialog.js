@@ -28,7 +28,7 @@ function displayConfirmDialog(title, message, onOkay){
 	var okButton = document.createElement('input')
 	okButton.type = "button";
 	okButton.setAttribute("class", "button top-spacer");
-	okButton.value = "OK";
+	okButton.value = i18n("dialog.ok");;
 	okButton.style.paddingLeft = "20px";
 	okButton.style.paddingRight = "20px";
 	
@@ -36,7 +36,7 @@ function displayConfirmDialog(title, message, onOkay){
 	cancelButton.style.marginLeft = "5px";
 	cancelButton.type = "button";
 	cancelButton.setAttribute("class", "button top-spacer");
-	cancelButton.value = "CANCEL";
+	cancelButton.value = i18n("dialog.cancel");
 	
 	buttonDiv.appendChild(okButton);
 	buttonDiv.appendChild(cancelButton);

@@ -47,7 +47,7 @@ function saveOrEditDashboard(){
 	form2 = document.getElementById('report2form');
 	if(form1.report1.value == 0 || form2.report2.value == 0){
 		document.getElementById('errorText').innerHTML = i18n("dashboard.mustselectreports");
-		displayDialog('errorDialog','main');
+		displayDialogCenter('errorDialog');
 		return false;
 	}
 	
@@ -87,10 +87,10 @@ function ReportCreated(){
 			window.location.href = "dashboardbeta";
 		};
 		document.getElementById('errorText').innerHTML = i18n("dashboard.createsuccess");
-		displayDialog('errorDialog','main');
+		displayDialogCenter('errorDialog');
 	}else{
 		document.getElementById('errorText').innerHTML = i18n("dashboard.createfailure");
-		displayDialog('errorDialog','main');
+		displayDialogCenter('errorDialog');
 	}
 }
 

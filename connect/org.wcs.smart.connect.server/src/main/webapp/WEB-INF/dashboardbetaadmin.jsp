@@ -19,11 +19,11 @@
 	<div id="pageheader" class="pageheader"><fmt:message key="dashboardbeta.title"/></div>
 	<div><div id="message" class="msgsection"></div></div>
 	
-	<div id="dashboardLabeldiv" style="margin-top:10px"><fmt:message key="dashboardbeta.dashbaordname"/><input id="dashboardlabeltext" class="uielement" type="text" style="margin-left:5px; width:300px" value="New Dashboard"/>
+	<div id="dashboardLabeldiv" style="margin-top:10px; margin-bottom:10px"><fmt:message key="dashboardbeta.dashbaordname"/><input id="dashboardlabeltext" class="uielement" type="text" style="margin-left:5px; width:300px" value="New Dashboard"/>
 		<input type="hidden" id="dashboarduuid" name="reportuuid"/>
 	</div>
-	<div id="report-wrapper">
-    	<div id="report1" style="margin-top: 10px"  class="dashboard-section">
+	<div id="report-wrapper" style="display:table">
+    	<div id="report1" class="dashboard-section" style="display:table-cell">
     	<form id="report1form" name="report1form" style="border-bottom:1px solid #72A6C8; padding-bottom: 5px;" >
     		<input id="report1selecthidden" type="hidden"/>
     		<input id="report1paramshidden" type="hidden"/>
@@ -52,7 +52,7 @@
 		<img id="loading1" src="../css/images/loading.svg">
       	<div id="iframe1div"></div>
     	</div>
-    	<div id="report2" class="dashboard-section">
+    	<div id="report2" class="dashboard-section" style="display:table-cell">
     	<form id="report2form" name="report2form" style="border-bottom:1px solid #72A6C8; padding-bottom: 5px;">
     		<input id="report2selecthidden" type="hidden"/>
     		<input id="report2paramshidden" type="hidden"/>
@@ -84,7 +84,7 @@
 
     	</div>
   	</div>
-  	<div id="configuration">
+  	<div id="configuration" style="margin-top:10px">
   		<form>
   			<p id="adminoptions"><button id="saveButton" onClick="saveOrEditDashboard(); return false;" class="button"><fmt:message key="dashboardbeta.createdashboard"/></button></p>
   		</form>
@@ -94,7 +94,9 @@
 
 <div id="errorDialog" style="display: none;" class="dialog">
 	<div id="errorText"></div>
-	<button id="errorOKButton" class="button" onClick="closeDialog('errorDialog');"><fmt:message key="dashboardbeta.ok"/></button>
+	<div style="text-align:right">
+	<button style="width:60px" id="errorOKButton" class="button" onClick="closeDialog('errorDialog');"><fmt:message key="dashboardbeta.ok"/></button>
+	</div>
 </div>
 
 <div id="caSelector1" style="display: none;" class="dialog">
@@ -103,7 +105,9 @@
 		<a href="javascript:selectNoneCas1();"><fmt:message key="dashboardbeta.selectnone"/></a>
 	<div id="caCheckboxes1" class="caSelector">
 	</div>
-	<button class="button" onClick="caSelectorUpdated(1)"><fmt:message key="dashboardbeta.ok"/></button>
+	<div style="text-align:right">
+	<button style="width:60px" class="button" onClick="caSelectorUpdated(1)"><fmt:message key="dashboardbeta.ok"/></button>
+	</div>
 </div>
 
 <div id="caSelector2" style="display: none;" class="dialog">
@@ -112,7 +116,9 @@
 		<a href="javascript:selectNoneCas2();"><fmt:message key="dashboardbeta.selectnone"/></a>
 	<div id="caCheckboxes2" class="caSelector">
 	</div>
-	<button class="button" onClick="caSelectorUpdated(2)"><fmt:message key="dashboardbeta.ok"/></button>
+	<div style="text-align:right">
+	<button style="width:60px" class="button" onClick="caSelectorUpdated(2)"><fmt:message key="dashboardbeta.ok"/></button>
+	</div>
 </div>
 
 </body>

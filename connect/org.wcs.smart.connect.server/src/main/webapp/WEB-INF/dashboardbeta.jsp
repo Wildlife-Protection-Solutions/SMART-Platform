@@ -103,7 +103,9 @@
 
 <div id="errorDialog" style="display: none;" class="dialog">
 	<div id="errorText"></div>
-	<button id="errorOKButton" class="button" onClick="closeDialog('errorDialog');"><fmt:message key="dashboardbeta.ok"/></button>
+	<div style="text-align:right; width:50px">
+		<button id="errorOKButton" class="button" onClick="closeDialog('errorDialog');"><fmt:message key="dashboardbeta.ok"/></button>
+	</div>
 </div>
 
 
