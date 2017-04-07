@@ -72,6 +72,7 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
@@ -573,7 +574,7 @@ public class MissionImporter extends AbstractSmartImporter {
 	 */
 	protected void processImages(Mission mission, Session session){
 		if (mission == null) return;
-		ConservationArea ca = mission.getSurvey().getSurveyDesign().getConservationArea();
+		ConservationArea ca = ((SurveyDesign) session.get(SurveyDesign.class, mission.getSurvey().getSurveyDesign().getUuid())).getConservationArea();
 		CyberTrackerPropertiesOption opResize = getImageResizeOption(ca, session);
 		
 		if (opResize == null || opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name())) return;
