@@ -145,7 +145,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 		});
 		
 		/* - SECTION BELOW GENERATES RANDOM TEST DATA -*/
-		
+		/*
 		g = new Group(c, SWT.NONE);
 		g.setText("Random Sample Data Generation");
 		g.setLayout(new GridLayout());
@@ -423,7 +423,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 				}
 			}
 		});	
-		
+		*/
 		return c;
 	}
 
