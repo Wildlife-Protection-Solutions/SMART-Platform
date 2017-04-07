@@ -148,6 +148,9 @@ h2{
 }
 
 #userheader{
+	position:absolute;
+	top: 0px;
+	right:0px;
 	text-align:left;
 	margin-left: 5px;
 }
