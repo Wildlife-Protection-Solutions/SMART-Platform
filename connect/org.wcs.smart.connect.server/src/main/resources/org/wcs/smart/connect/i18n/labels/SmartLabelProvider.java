@@ -76,6 +76,12 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(CA_DESCRIPTION_KEY)) return Messages.getString("SmartLabelProvider.CaDescription", l); //$NON-NLS-1$
 		if (value.equals(CA_DESIGNATION_KEY)) return Messages.getString("SmartLabelProvider.CaDesignation", l); //$NON-NLS-1$
 		if (value.equals(CA_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.CaTableName", l); //$NON-NLS-1$
+		
+		if (value.equals(CA_ORGANIZATION_KEY)) return Messages.getString("SmartLabelProvider.CaOrganization", l); //$NON-NLS-1$
+		if (value.equals(CA_POINTOFCONTACT_KEY)) return Messages.getString("SmartLabelProvider.CaPointOfContact", l); //$NON-NLS-1$
+		if (value.equals(CA_COUNTRY_KEY)) return Messages.getString("SmartLabelProvider.CaCountry", l); //$NON-NLS-1$
+		if (value.equals(CA_OWNER_KEY)) return Messages.getString("SmartLabelProvider.CaOwner", l); //$NON-NLS-1$
+		
 		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.EmployeeTableName", l); //$NON-NLS-1$
 		if (value.equals(STATION_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.StationsTableName", l); //$NON-NLS-1$
 		return null;
