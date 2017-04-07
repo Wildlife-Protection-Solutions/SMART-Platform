@@ -30,10 +30,6 @@ END;
 $$LANGUAGE plpgsql;
 
 
-update connect.connect_plugin_version set version = '5.0.0' where plugin_id = 'org.wcs.smart';
-update connect.ca_plugin_version set version = '5.0.0' where plugin_id = 'org.wcs.smart';
-update connect.connect_version set version = '5.0.0';
-
 --Below are all the tables to support new intelligence plugin
 CREATE TABLE smart.i_attachment
 (
@@ -779,3 +775,23 @@ ALTER TABLE connect.user_quicklinks
 ADD CONSTRAINT userquicklink_quicklink_fk
 FOREIGN KEY (quicklink_uuid) 
 REFERENCES connect.quicklinks(uuid) ON DELETE CASCADE DEFERRABLE;
+
+-- UPDATES TO SUPPORT DISABLING QUERY COLUMNS
+ALTER TABLE smart.observation_query ADD COLUMN show_data_columns_only BOOLEAN;
+ALTER TABLE smart.obs_observation_query ADD COLUMN show_data_columns_only BOOLEAN;
+ALTER TABLE smart.survey_observation_query ADD COLUMN show_data_columns_only BOOLEAN;
+ALTER TABLE smart.entity_observation_query ADD COLUMN show_data_columns_only BOOLEAN;
+
+
+-- UPDATES TO VERSIONS
+
+INSERT INTO connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.i2', '1.0');
+
+UPDATE connect.connect_plugin_version SET version = '4.0' WHERE plugin_id = 'org.wcs.smart.entity.query';
+UPDATE connect.connect_plugin_version SET version = '4.0' WHERE plugin_id = 'org.wcs.smart.er.query';
+UPDATE connect.ca_plugin_version SET version = '4.0' WHERE plugin_id = 'org.wcs.smart.entity.query';
+UPDATE connect.ca_plugin_version SET version = '4.0' WHERE plugin_id = 'org.wcs.smart.er.query';
+
+update connect.connect_plugin_version set version = '5.0.0' where plugin_id = 'org.wcs.smart';
+update connect.ca_plugin_version set version = '5.0.0' where plugin_id = 'org.wcs.smart';
+update connect.connect_version set version = '5.0.0';
