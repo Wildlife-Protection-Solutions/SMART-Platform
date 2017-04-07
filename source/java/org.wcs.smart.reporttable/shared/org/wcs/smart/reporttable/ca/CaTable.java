@@ -44,7 +44,11 @@ public class CaTable extends SmartBirtTable {
 		ID(ICoreLabelProvider.CA_ID_KEY, "ID", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		NAME(ICoreLabelProvider.CA_NAME_KEY, "Name", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		DESCRIPTION(ICoreLabelProvider.CA_DESCRIPTION_KEY, "Description", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		DESIGNATION(ICoreLabelProvider.CA_DESIGNATION_KEY, "Designation", java.sql.Types.VARCHAR); //$NON-NLS-1$
+		DESIGNATION(ICoreLabelProvider.CA_DESIGNATION_KEY, "Designation", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ORGANIZATION(ICoreLabelProvider.CA_ORGANIZATION_KEY, "Organization", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		POINTOFCONTACT(ICoreLabelProvider.CA_POINTOFCONTACT_KEY, "Point Of Contact", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		COUNTRY(ICoreLabelProvider.CA_COUNTRY_KEY, "Country", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		OWNER(ICoreLabelProvider.CA_OWNER_KEY, "Owner", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		private String name;
 		private int type;
@@ -75,6 +79,14 @@ public class CaTable extends SmartBirtTable {
 				return e.getDescription();
 			case DESIGNATION:
 				return e.getDesignation();
+			case OWNER:
+				return e.getOwner();
+			case ORGANIZATION:
+				return e.getOrganization();
+			case POINTOFCONTACT:
+				return e.getPointOfContact();
+			case COUNTRY:
+				return e.getCountry();
 			}
 			return null;
 		}

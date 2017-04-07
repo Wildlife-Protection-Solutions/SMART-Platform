@@ -1007,10 +1007,14 @@ public class Messages extends NLS {
 	public static String SmartLabelProvider_CaColumnName;
 	public static String SmartLabelProvider_CaIdColumnName;
 	public static String SmartLabelProvider_CaTableName;
+	public static String SmartLabelProvider_countrycolumnname;
 	public static String SmartLabelProvider_DescriptionColumnName;
 	public static String SmartLabelProvider_DesignationColumnName;
 	public static String SmartLabelProvider_EmployeeTableName;
 	public static String SmartLabelProvider_GeometryLabel;
+	public static String SmartLabelProvider_Organizationcolumnname;
+	public static String SmartLabelProvider_ownercolumnname;
+	public static String SmartLabelProvider_pointofcontactcolumnname;
 	public static String SmartLabelProvider_StationActiveColumnName;
 	public static String SmartLabelProvider_StationsTableName;
 	public static String SmartLayerStyleInterceptor_StyleError;

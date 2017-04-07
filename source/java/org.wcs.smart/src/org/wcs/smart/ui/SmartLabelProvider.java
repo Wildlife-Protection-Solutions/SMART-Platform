@@ -35,7 +35,6 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -113,6 +112,11 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(CA_TABLENAME_KEY)) return Messages.SmartLabelProvider_CaTableName;
 		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return Messages.SmartLabelProvider_EmployeeTableName;
 		if (value.equals(STATION_TABLENAME_KEY)) return Messages.SmartLabelProvider_StationsTableName;
+		
+		if (value.equals(CA_ORGANIZATION_KEY)) return Messages.SmartLabelProvider_Organizationcolumnname;
+		if (value.equals(CA_POINTOFCONTACT_KEY)) return Messages.SmartLabelProvider_pointofcontactcolumnname;
+		if (value.equals(CA_COUNTRY_KEY)) return Messages.SmartLabelProvider_countrycolumnname;
+		if (value.equals(CA_OWNER_KEY)) return Messages.SmartLabelProvider_ownercolumnname;
 		return null;
 	}
 
