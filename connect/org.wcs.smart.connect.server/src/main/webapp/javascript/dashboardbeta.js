@@ -35,6 +35,9 @@ function getReportIds(){
 
 
 function setDashboardDefaultToSelectedDashboard(){
+	if(!IsValidDashboardShown()){
+		return false;
+	}
 	var uuid = document.getElementById('dashboardtitle').dataset.uuid ;
 	
 	var oReq = new XMLHttpRequest();
@@ -68,6 +71,9 @@ function listOfDashboardsCallback(){
 }
 
 function editDashboard(){
+	if(!IsValidDashboardShown()){
+		return false;
+	}
 	var uuid = document.getElementById('dashboardtitle').dataset.uuid ;
 	window.location.href = "dashboardbetaadmin?action=edit&uuid=" + uuid;
 }
@@ -100,6 +106,9 @@ function userCallback(){
 }
 
 function deleteDashboard(){
+	if(!IsValidDashboardShown()){
+		return false;
+	}
 	var uuid = document.getElementById('dashboardtitle').dataset.uuid;
 	var title = document.getElementById('dashboardtitle').innerHTML ;
 	displayConfirmDialog(i18n("dashboard.delete"), i18n("dashboard.areyousuredelete") + title + i18n("dashboard.thiswillremove"), function(){
@@ -111,6 +120,7 @@ function deleteDashboard(){
 }
 
 function showDashboard(){
+	hideInfo();
 	var e = document.getElementById('admin-selectlist');
 	getDashboard(e.options[e.selectedIndex].value);
 	
@@ -150,8 +160,22 @@ function updateDateOnReport2(){
 	oReq.send(JSON.stringify(data));
 }
 
-
 function reportChanged(){
-	document.getElementById('savedatebutton1').style.display = "none";
-	document.getElementById('savedatebutton2').style.display = "none";
+	if(document.getElementById('dashboardtitle').dataset.uuid != document.getElementById('admin-selectlist').value){
+		document.getElementById('savedatebutton1').style.display = "none";
+		document.getElementById('savedatebutton2').style.display = "none";
+	}else{
+		document.getElementById('savedatebutton1').style.display = "inline-block";
+		document.getElementById('savedatebutton2').style.display = "inline-block";
+	}
+}
+
+function IsValidDashboardShown(){
+	var uuid = document.getElementById('dashboardtitle').dataset.uuid;
+	if(uuid == "" || uuid == null){
+		displayError("You do not have a valid Dashboard Loaded, use the 'View Dashboard' button then try again, or create a new Dashboard if none exist yet");
+		return false;
+	}
+	hideInfo();
+	return true;
 }
