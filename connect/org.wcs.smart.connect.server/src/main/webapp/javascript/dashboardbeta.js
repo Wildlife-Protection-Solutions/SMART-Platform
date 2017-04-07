@@ -17,6 +17,7 @@ window.onload = function(){
 	document.getElementById('filterDate2').addEventListener("change", checkForCustomDates);
 	document.getElementById('filterDate1').addEventListener("change", date1Changed);
 	document.getElementById('filterDate2').addEventListener("change", date2Changed);
+	document.getElementById('admin-selectlist').addEventListener("change", reportChanged);
 	
 	getDashBoards();
 	getUserDetails();
@@ -147,4 +148,10 @@ function updateDateOnReport2(){
 	oReq.setRequestHeader("Accept","application/json");
 	oReq.setRequestHeader("Content-Type","application/json");
 	oReq.send(JSON.stringify(data));
+}
+
+
+function reportChanged(){
+	document.getElementById('savedatebutton1').style.display = "none";
+	document.getElementById('savedatebutton2').style.display = "none";
 }
