@@ -367,6 +367,7 @@ public enum QueryManager {
 		q.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		q.setMaxResults(1);
 		Object[] x = (Object[])q.uniqueResult();
+		if (x == null) return 0;
 		return (Integer)x[1];
 	}
 
