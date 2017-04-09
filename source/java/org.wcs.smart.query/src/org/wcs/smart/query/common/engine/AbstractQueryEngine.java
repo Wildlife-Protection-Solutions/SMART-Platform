@@ -304,7 +304,13 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 				return count > 0;
 			}
 		} catch (SQLException e) {
-			SmartPlugIn.log(MessageFormat.format("No column with name ''{1}'' found in table ''{0}''.", tableName, columnName), e); //$NON-NLS-1$
+			if (e.getSQLState().equalsIgnoreCase("42X04") && e.getErrorCode() == 20000) { //$NON-NLS-1$
+				//usually this is ok behavior which happens when specific column is not present in query output; add logging just in case
+				SmartPlugIn.logInfo(MessageFormat.format("No column with name ''{1}'' found in table ''{0}''.", tableName, columnName)); //$NON-NLS-1$
+			} else {
+				//this is something unexpected
+				SmartPlugIn.log(MessageFormat.format("Unexpected error while checking column with name ''{1}'' for values in table ''{0}''.", tableName, columnName), e); //$NON-NLS-1$
+			}
 		}
 		return false;
 	}
