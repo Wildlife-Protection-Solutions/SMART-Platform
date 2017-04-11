@@ -203,8 +203,6 @@ public class RecordXmlImporter {
 			try{
 				FileUtils.deleteDirectory(p.toFile());
 			}catch (Exception ex){
-				//TODO:
-				ex.printStackTrace();
 			}
 		}		
 	}

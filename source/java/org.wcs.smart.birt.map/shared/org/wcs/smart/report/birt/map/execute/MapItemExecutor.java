@@ -139,7 +139,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 		//delete all temporary raster files
 		for (File f : cleanUp){
 			try{
-				f.delete();
+				if (!f.delete()) f.deleteOnExit();	//if we cannot delete now try on exit 
 			}catch (Throwable t){
 				Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, t.getMessage(), t);
 			}

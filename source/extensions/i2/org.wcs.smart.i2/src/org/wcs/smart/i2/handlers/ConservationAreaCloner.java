@@ -133,11 +133,13 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setIcon(ia.getIcon());
 			clone.setIdAttribute((IntelAttribute)engine.getNewConservationItem(ia.getIdAttribute()));
 			if (ia.getBirtTemplate() != null){
+				clone.setBirtTemplate(ia.getBirtTemplate());
 				Path source = IntelReportManager.INSTANCE.getEntityTemplate(ia);
 				Path target = IntelReportManager.INSTANCE.getEntityTemplate(clone);
-				if (Files.exists(source)){
-					clone.setBirtTemplate(ia.getBirtTemplate());
+				if (Files.exists(source)){	
 					FileUtils.copyFile(source.toFile(), target.toFile());
+				}else{
+					clone.setBirtTemplate(null);
 				}
 			}
 			

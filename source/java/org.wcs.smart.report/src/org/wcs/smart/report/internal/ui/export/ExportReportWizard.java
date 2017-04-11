@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -181,68 +182,74 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 			ReportPlugIn.displayLog(e1.getMessage(), e1);
 			return;
 		}
-		
-		final List<String> errors = new ArrayList<String>();
-		ReportDefintionExporter defexporter = new ReportDefintionExporter();
-		HashMap<Report, File> exports = new HashMap<Report, File>();
-		
-		for (Report r : selectedReports){
-			File file = new File(tempDir, r.getId() + System.nanoTime() + ".zip"); //$NON-NLS-1$
-			try {
-				defexporter.exportReport(file, r, null, new NullProgressMonitor());
-				exports.put(r, file);
-			} catch (Exception e) {
-				ReportPlugIn.log(e.getMessage(), e);
-				errors.add(MessageFormat.format(Messages.ExportReportWizard_ExportError, r.getName(), e.getMessage()));
-			}
+		try{
+			final List<String> errors = new ArrayList<String>();
+			ReportDefintionExporter defexporter = new ReportDefintionExporter();
+			HashMap<Report, File> exports = new HashMap<Report, File>();
 			
-			if (monitor.isCanceled()){
-				return;
-			}
-		}
-		List<String> caInfo = new ArrayList<String>();
-		for (ConservationArea ca : cas){
-			Employee e = ImportQueryUtil.findEmployee(ca);
-			RootReportFolder folder = null;
-			if (ReportManager.canModifyCaReports()){
-				folder = RootReportFolder.CA_ROOT_FOLDER;
-			}else if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ANALYST)){
-				folder = RootReportFolder.USER_ROOT_FOLDER;
-			}else{
-				//error
-			}
-			int incnt = 0;
-			for (Entry<Report, File> export : exports.entrySet()){
-				try{
-					ImportReportEngine importer = new ImportReportEngine();
-					importer.importReport(export.getValue(), folder, ca);
-					incnt++;
-				}catch (Exception ex){
-					ReportPlugIn.log(ex.getMessage(), ex);
-					errors.add(MessageFormat.format(Messages.ExportReportWizard_ExportError, export.getKey().getName(), ex.getMessage()));
+			for (Report r : selectedReports){
+				File file = new File(tempDir, r.getId() + System.nanoTime() + ".zip"); //$NON-NLS-1$
+				try {
+					defexporter.exportReport(file, r, null, new NullProgressMonitor());
+					exports.put(r, file);
+				} catch (Exception e) {
+					ReportPlugIn.log(e.getMessage(), e);
+					errors.add(MessageFormat.format(Messages.ExportReportWizard_ExportError, r.getName(), e.getMessage()));
+				}
+				
+				if (monitor.isCanceled()){
+					return;
 				}
 			}
-			caInfo.add(MessageFormat.format(Messages.ExportReportWizard_ImportComplete, ca.getNameLabel(), incnt, selectedReports.size() ));
-		}
-		ExportReportEngine.exportReports(selectedReports, tempDir, null, defexporter);
-		
-		errors.add(0, ""); //$NON-NLS-1$
-		for (String info : caInfo){
-			errors.add(0, info);
-		}
-		
-		Display.getDefault().syncExec(new Runnable(){
-
-			@Override
-			public void run() {
-				WarningDialog wd = new WarningDialog(getShell(), 
-						Messages.ExportReportWizard_DialogTitle, Messages.ExportReportWizard_DialogMessage, errors);
-				wd.open();		
+			List<String> caInfo = new ArrayList<String>();
+			for (ConservationArea ca : cas){
+				Employee e = ImportQueryUtil.findEmployee(ca);
+				RootReportFolder folder = null;
+				if (ReportManager.canModifyCaReports()){
+					folder = RootReportFolder.CA_ROOT_FOLDER;
+				}else if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ANALYST)){
+					folder = RootReportFolder.USER_ROOT_FOLDER;
+				}else{
+					//error
+				}
+				int incnt = 0;
+				for (Entry<Report, File> export : exports.entrySet()){
+					try{
+						ImportReportEngine importer = new ImportReportEngine();
+						importer.importReport(export.getValue(), folder, ca);
+						incnt++;
+					}catch (Exception ex){
+						ReportPlugIn.log(ex.getMessage(), ex);
+						errors.add(MessageFormat.format(Messages.ExportReportWizard_ExportError, export.getKey().getName(), ex.getMessage()));
+					}
+				}
+				caInfo.add(MessageFormat.format(Messages.ExportReportWizard_ImportComplete, ca.getNameLabel(), incnt, selectedReports.size() ));
+			}
+			ExportReportEngine.exportReports(selectedReports, tempDir, null, defexporter);
+			
+			errors.add(0, ""); //$NON-NLS-1$
+			for (String info : caInfo){
+				errors.add(0, info);
 			}
 			
-		});
-		
+			Display.getDefault().syncExec(new Runnable(){
+
+				@Override
+				public void run() {
+					WarningDialog wd = new WarningDialog(getShell(), 
+							Messages.ExportReportWizard_DialogTitle, Messages.ExportReportWizard_DialogMessage, errors);
+					wd.open();		
+				}
+				
+			});
+			
+		}finally{
+			try{
+				FileUtils.deleteDirectory(tempDir);
+			}catch(Exception ex){}
+		}
 	}
+	
 	/**
 	 * @see org.eclipse.jface.dialogs.IPageChangingListener#handlePageChanging(org.eclipse.jface.dialogs.PageChangingEvent)
 	 */

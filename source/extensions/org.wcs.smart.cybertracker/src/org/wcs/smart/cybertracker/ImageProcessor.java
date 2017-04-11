@@ -66,7 +66,6 @@ public class ImageProcessor {
 					outImage.toFile().deleteOnExit();
 				}
 			}
-			
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
