@@ -312,7 +312,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 				SmartPlugIn.log(MessageFormat.format("Unexpected error while checking column with name ''{1}'' for values in table ''{0}''.", tableName, columnName), e); //$NON-NLS-1$
 			}
 		}
-		return false;
+		return true; //it is safer to assume that column that we were unable to find may have values and display it to user
 	}
 	
 }
