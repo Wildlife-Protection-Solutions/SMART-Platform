@@ -150,6 +150,10 @@ public class FixedQueryColumn extends QueryColumn {
 	}
 
 	public static String getDbColumnName(String key) {
+		if (key.equals(FixedColumns.WAYPOINT_DATE.getKey())) {
+			//both fixed columns are mapped to the same DB column
+			key = FixedColumns.WAYPOINT_TIME.getKey();
+		}
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
 			key = key.replace(data[0], data[1]);

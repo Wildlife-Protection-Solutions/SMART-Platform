@@ -411,10 +411,6 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
 			String key = sortColumn.getKey();
-			if (sortColumn.getKey().equals(
-					FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())) {
-				key = FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey();
-			}
 			key = FixedQueryColumn.getDbColumnName(key);
 			if (sortColumn.getKey().equals(
 					FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())) {
