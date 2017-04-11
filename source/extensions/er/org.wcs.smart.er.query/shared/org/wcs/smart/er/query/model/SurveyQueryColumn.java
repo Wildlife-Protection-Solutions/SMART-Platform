@@ -189,6 +189,10 @@ public class SurveyQueryColumn extends QueryColumn {
 	}
 
 	public static String getDbColumnName(String key) {
+		if (FixedColumns.WAYPOINT_OBSERVER.getKey().equals(key)) {
+			//specific case (need this to fix column sorting and filtering based on value)
+			return "ob_observer"; //$NON-NLS-1$
+		}
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
 			key = key.replace(data[0], data[1]);
