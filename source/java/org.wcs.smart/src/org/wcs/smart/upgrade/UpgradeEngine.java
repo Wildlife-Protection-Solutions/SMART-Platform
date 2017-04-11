@@ -225,6 +225,7 @@ public class UpgradeEngine {
 			}
 	
 			//run all installers/upgraders
+			monitor.subTask(Messages.UpgradeEngine_pluginssubtask);
 			List<IDatabaseUpgrader> extensions = getExtensions();
 			for (IDatabaseUpgrader upgrader : extensions) {
 				//execute install/upgrade

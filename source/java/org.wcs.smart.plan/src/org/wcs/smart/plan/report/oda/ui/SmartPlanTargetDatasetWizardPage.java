@@ -82,10 +82,10 @@ public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 		all.setLayout(new GridLayout());
 		
 		btnOpDate = new Button(all, SWT.RADIO);
-		btnOpDate.setText("Filter Targets By Plan Start Date");
+		btnOpDate.setText(Messages.SmartPlanTargetDatasetWizardPage_FilterByStartDate);
 		
 		btnOpUuid = new Button(all, SWT.RADIO);
-		btnOpUuid.setText("Filter Targets By Plan UUID");
+		btnOpUuid.setText(Messages.SmartPlanTargetDatasetWizardPage_FilterByUuid);
 				
 		btnIncludeKids = new Button(all, SWT.CHECK);
 		btnIncludeKids.setText(Messages.SmartPlanTargetDatasetWizardPage_SubPlansOnlyButtonName);

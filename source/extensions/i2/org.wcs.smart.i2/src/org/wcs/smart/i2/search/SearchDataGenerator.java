@@ -254,6 +254,7 @@ public class SearchDataGenerator {
 		return value;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private static IntelRecordAttributeValue generateEntityValue(IntelRecordSourceAttribute a, List<String> strings, Session session){
 		IntelRecordAttributeValue value = new IntelRecordAttributeValue();
 		value.setAttribute(a);
@@ -337,6 +338,7 @@ public class SearchDataGenerator {
 		return value;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private static IntelObservationAttribute generateValue(Attribute a, List<String> strings, Session session){
 		IntelObservationAttribute value = new IntelObservationAttribute();
 		value.setAttribute(a);

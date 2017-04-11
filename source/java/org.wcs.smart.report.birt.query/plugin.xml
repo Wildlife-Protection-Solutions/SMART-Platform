@@ -263,8 +263,7 @@
    <extension
          point="org.wcs.smart.report.birt.maplayer">
       <RasterCreator
-            class="org.wcs.smart.data.oda.smart.impl.GriddedQueryRasterCreator"
-            oda_dataset_id="org.wcs.smart.data.oda.smart.smartQueryDataset">
+            class="org.wcs.smart.data.oda.smart.impl.GriddedQueryRasterCreator">
       </RasterCreator>
    </extension>
 

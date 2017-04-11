@@ -183,7 +183,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 				if (Arrays.equals(pluuid, lastPlUuid)){
 					if (!Arrays.equals(plduuid, lastPldUuid)){
 						//same patrol; different leg
-						lastItem.addTrack(rs.getBytes("r_track"));
+						lastItem.addTrack(rs.getBytes("r_track")); //$NON-NLS-1$
 					}
 				}else{
 					PatrolQueryResultItem it = asQueryResultItem(rs, session);
@@ -229,7 +229,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 			sb.append("r." + results[i] + " as r_" + results[i]); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
-		sb.append(", t.geometry as r_track");
+		sb.append(", t.geometry as r_track"); //$NON-NLS-1$
 		return sb.toString();
 	}
 
@@ -249,9 +249,9 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		sql.append(" on " + tablePrefix.get(ConservationArea.class) //$NON-NLS-1$
 				+ ".uuid = r.p_ca_uuid "); //$NON-NLS-1$
 
-		sql.append("LEFT JOIN ");
+		sql.append("LEFT JOIN "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(Track.class));
-		sql.append(" ON " + tablePrefix(Track.class) + ".patrol_leg_day_uuid = r.pld_uuid");
+		sql.append(" ON " + tablePrefix(Track.class) + ".patrol_leg_day_uuid = r.pld_uuid");  //$NON-NLS-1$//$NON-NLS-2$
 		
 		return sql.toString();
 	}

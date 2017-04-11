@@ -48,15 +48,15 @@ public class PlanTargetResultSetMetadata implements IResultSetMetaData {
 
 	public enum Column {
 		
-		TARGE_TNAME(Messages.PlanTargetResultSetMetadata_TargetNameColumnLabel, "TargetName", java.sql.Types.VARCHAR),
-		TARGET_DESCRIPTION(Messages.PlanTargetResultSetMetadata_TargetDescriptionColumnLabel, "TargetDescription", java.sql.Types.VARCHAR),
-		STATUS_DESCRIPTION(Messages.PlanTargetResultSetMetadata_StatusDescriptionTargetLabel, "StatusDescription", java.sql.Types.VARCHAR),
-		STATUS_KEY(Messages.PlanTargetResultSetMetadata_StatusKeyTargetLabel, "targetStatus", java.sql.Types.VARCHAR),
-		PLAN_ID(Messages.PlanTargetResultSetMetadata_PlanIdColumnLabel, "PlanId", java.sql.Types.VARCHAR),
+		TARGE_TNAME(Messages.PlanTargetResultSetMetadata_TargetNameColumnLabel, "TargetName", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		TARGET_DESCRIPTION(Messages.PlanTargetResultSetMetadata_TargetDescriptionColumnLabel, "TargetDescription", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		STATUS_DESCRIPTION(Messages.PlanTargetResultSetMetadata_StatusDescriptionTargetLabel, "StatusDescription", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		STATUS_KEY(Messages.PlanTargetResultSetMetadata_StatusKeyTargetLabel, "targetStatus", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		PLAN_ID(Messages.PlanTargetResultSetMetadata_PlanIdColumnLabel, "PlanId", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		GEOMETRY(Messages.PlanTargetResultSetMetadata_TargetPointsGeomColumnName, GEOM_COLUMN_NAME, java.sql.Types.JAVA_OBJECT),
 	
-		PLAN_START_DATE("Plan Start Date", "PlanStartDate", java.sql.Types.DATE),
-		PLAN_END_DATE("Plan End Date", "PlanEndDate", java.sql.Types.DATE);
+		PLAN_START_DATE(Messages.PlanTargetResultSetMetadata_StartDateColumnName, "PlanStartDate", java.sql.Types.DATE), //$NON-NLS-1$
+		PLAN_END_DATE(Messages.PlanTargetResultSetMetadata_EndDateColumnName, "PlanEndDate", java.sql.Types.DATE); //$NON-NLS-1$
 		
 		public String name;
 		public String key;

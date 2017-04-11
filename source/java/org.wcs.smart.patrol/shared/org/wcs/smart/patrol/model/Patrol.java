@@ -306,7 +306,7 @@ public class Patrol extends UuidItem {
 				newLeg.setEndDate(cal.getTime());
 				newLeg.setPatrol(this);
 				newLeg.setType(getLegs().get(0).getType());//set it to the same type as the first leg, assuming they keep the same type for this empty/filler leg.
-				newLeg.setId("Automatically Created Patrol Leg");
+				newLeg.setId("Automatically Created Patrol Leg"); //$NON-NLS-1$
 				this.getLegs().add(newLeg);
 				newLeg.createLegDays(session);
 			}

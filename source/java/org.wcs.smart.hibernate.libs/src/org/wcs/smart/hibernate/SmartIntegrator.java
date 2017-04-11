@@ -34,14 +34,14 @@ import org.hibernate.metamodel.source.MetadataImplementor;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 
 /**
- * Hibernate integrator that looks for extensions and applys them.
+ * Hibernate integrator that looks for extensions and applies them.
  * 
  * @author Emily
  *
  */
 public class SmartIntegrator implements Integrator {
 	
-	public static final String EXTENSION_ID = "org.wcs.smart.hibernate.interceptor";
+	public static final String EXTENSION_ID = "org.wcs.smart.hibernate.interceptor"; //$NON-NLS-1$
 	
 	//http://in.relation.to/2012/01/09/event-listener-registration/
 	
@@ -82,7 +82,7 @@ public class SmartIntegrator implements Integrator {
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
 		try {
 			for (IConfigurationElement e : config) {
-				if (e.getName().equalsIgnoreCase("integrator")){	
+				if (e.getName().equalsIgnoreCase("integrator")){	 //$NON-NLS-1$
 					items.add((Integrator)e.createExecutableExtension("class")); //$NON-NLS-1$
 				}
 			}

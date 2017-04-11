@@ -96,7 +96,7 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 		if (smartQuery == null) {
 			smartQuery = QueryHibernateManager.getInstance().findQuery(connection.getSession(),  uuid, queryType);
 			if (smartQuery == null){
-				throw new OdaException("SMART Query not found");
+				throw new OdaException("SMART Query not found"); //$NON-NLS-1$
 			}
 		}
 	}

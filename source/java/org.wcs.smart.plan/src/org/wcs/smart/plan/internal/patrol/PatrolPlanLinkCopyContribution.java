@@ -40,7 +40,7 @@ public class PatrolPlanLinkCopyContribution implements IPatrolEditContribution {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void splitPatrol(Session s, Patrol originalPatrol, Patrol newPatrol) {
-		Criteria c = s.createCriteria(PatrolPlan.class).add(Restrictions.eq("id.patrol", originalPatrol)); //$NON-NLS-1$ //$NON-NLS-2$
+		Criteria c = s.createCriteria(PatrolPlan.class).add(Restrictions.eq("id.patrol", originalPatrol)); //$NON-NLS-1$
 		for(PatrolPlan pp : ((ArrayList<PatrolPlan>)c.list())){
 			PatrolPlan newPp = new PatrolPlan();
 			newPp.setPatrol(newPatrol);

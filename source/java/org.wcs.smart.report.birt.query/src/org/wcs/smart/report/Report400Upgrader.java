@@ -317,11 +317,11 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 				if (dataset.size() != layers.size()){
 					dataset.clear();
 					for (String l : layers){
-						NodeList allnodes = doc.getElementsByTagName("xml-property");
+						NodeList allnodes = doc.getElementsByTagName("xml-property"); //$NON-NLS-1$
 						boolean found = false;
 						for (int x = 0; x < allnodes.getLength(); x ++){
 							Node node = allnodes.item(x);
-							if (!node.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equals("queryText")) continue;
+							if (!node.getAttributes().getNamedItem(NAME_ATT_NAME).getTextContent().equals("queryText")) continue; //$NON-NLS-1$
 							
 							if (!node.getTextContent().contains(l)) continue;
 							//this is the dataset
@@ -331,8 +331,8 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 						}
 						
 						if (!found){
-							//cannot upgrade report blah blah balh
-							throw new Exception ("Cannot find dataset for report map layer.");
+							//cannot upgrade report
+							throw new Exception ("Cannot find dataset for report map layer."); //$NON-NLS-1$
 						}
 					}
 				}

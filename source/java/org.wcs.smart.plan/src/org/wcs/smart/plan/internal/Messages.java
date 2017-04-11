@@ -210,7 +210,9 @@ public class Messages extends NLS {
 	public static String PlanTargetDataSourceFactory_PlanUuidParameterName;
 	public static String PlanTargetDataSourceFactory_ReadOnly;
 	public static String PlanTargetGeoResource_ErrorGeneratingStyle;
+	public static String PlanTargetResultSetMetadata_EndDateColumnName;
 	public static String PlanTargetResultSetMetadata_PlanIdColumnLabel;
+	public static String PlanTargetResultSetMetadata_StartDateColumnName;
 	public static String PlanTargetResultSetMetadata_StatusDescriptionTargetLabel;
 	public static String PlanTargetResultSetMetadata_StatusKeyTargetLabel;
 	public static String PlanTargetResultSetMetadata_TargetDescriptionColumnLabel;
@@ -250,6 +252,8 @@ public class Messages extends NLS {
 	public static String SmartPlanDatasetMetadata_DatasetName;
 	public static String SmartPlanDataSourceWizardPage_DataSourceNotConfigurable;
 	public static String SmartPlanPlugIn_Error;
+	public static String SmartPlanTargetDatasetWizardPage_FilterByStartDate;
+	public static String SmartPlanTargetDatasetWizardPage_FilterByUuid;
 	public static String SmartPlanTargetDatasetWizardPage_SubPlansOnlyButtonName;
 	public static String SmartPlanTargetDatasetWizardPage_SubPlansOnlyButtonTooltip;
 	public static String SpatialPlanTargetPropertyPage_Description_Label;

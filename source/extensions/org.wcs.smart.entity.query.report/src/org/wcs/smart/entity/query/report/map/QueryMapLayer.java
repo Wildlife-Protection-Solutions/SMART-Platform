@@ -24,7 +24,6 @@ package org.wcs.smart.entity.query.report.map;
 import java.util.Collections;
 import java.util.List;
 
-import org.wcs.smart.data.oda.smart.impl.GriddedQueryRasterCreator;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;

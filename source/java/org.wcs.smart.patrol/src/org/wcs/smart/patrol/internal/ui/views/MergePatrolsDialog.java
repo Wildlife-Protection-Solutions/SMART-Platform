@@ -49,7 +49,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolManager;
@@ -253,47 +252,47 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 						InterruptedException {
 					monitor.beginTask(Messages.MergePatrolsDialog_MergingPatrols, patrolsToMerge.size());
 					
-					
 					session.beginTransaction();
-					Patrol newPatrol = (Patrol)session.createCriteria(Patrol.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
 					
-					for(Patrol p : patrolsToMerge){
-					  for(PatrolLeg pl : p.getLegs()){
-						PatrolLeg legClone = pl.simpleClone();
-						legClone.setPatrolLegDays(new ArrayList<PatrolLegDay>());
-						if (pl.getPatrolLegDays() != null && pl.getPatrolLegDays().size() > 0){
-							//Clone Leg Days as well
-							for (PatrolLegDay pld : pl.getPatrolLegDays()){
-								PatrolLegDay legdayClone = pld.clone();
-								
-								ArrayList<PatrolWaypoint> allWaypoints = new ArrayList<PatrolWaypoint>();
-								
-								for(PatrolWaypoint wp : pld.getWaypoints()){
-									Waypoint toClone = wp.getWaypoint();
-									if (toClone.getUuid() != null){
-										toClone = (Waypoint)session.merge(toClone);
+					Patrol newPatrol = (Patrol) session.get(Patrol.class, uuid);
+					for (Patrol p : patrolsToMerge) {
+						for (PatrolLeg pl : p.getLegs()) {
+							PatrolLeg legClone = pl.simpleClone();
+							legClone.setPatrolLegDays(new ArrayList<PatrolLegDay>());
+							if (pl.getPatrolLegDays() != null
+									&& pl.getPatrolLegDays().size() > 0) {
+								// Clone Leg Days as well
+								for (PatrolLegDay pld : pl.getPatrolLegDays()) {
+									PatrolLegDay legdayClone = pld.clone();
+
+									ArrayList<PatrolWaypoint> allWaypoints = new ArrayList<PatrolWaypoint>();
+
+									for (PatrolWaypoint wp : pld.getWaypoints()) {
+										Waypoint toClone = wp.getWaypoint();
+										if (toClone.getUuid() != null) {
+											toClone = (Waypoint) session
+													.merge(toClone);
+										}
+										Waypoint wpclone = toClone
+												.clone(session);
+
+										PatrolWaypoint pw = new PatrolWaypoint();
+										pw.setWaypoint(wpclone);
+										pw.setPatrolLegDay(legdayClone);
+										allWaypoints.add(pw);
 									}
-									Waypoint wpclone = toClone.clone(session);
-									
-									PatrolWaypoint pw = new PatrolWaypoint();
-									pw.setWaypoint(wpclone);
-									pw.setPatrolLegDay(legdayClone);
-									allWaypoints.add(pw);
+									legdayClone.setWaypoints(allWaypoints);
+									legdayClone.setPatrolLeg(legClone);
+									legClone.getPatrolLegDays()
+											.add(legdayClone);
 								}
-								legdayClone.setWaypoints(allWaypoints); 
-								legdayClone.setPatrolLeg(legClone);
-								legClone.getPatrolLegDays().add(legdayClone);
 							}
+							legClone.setPatrol(newPatrol);
+							newPatrol.getLegs().add(legClone);
 						}
-						legClone.setPatrol(newPatrol);
-						newPatrol.getLegs().add(legClone);
-					  }	
 					}
 					
-
-					
 					try {
-//						PatrolHibernateManager.savePatrol(newPatrol, session,  true);
 						newPatrol.createLegs(session);
 						PatrolHibernateManager.savePatrol(newPatrol, session,  true);
 					} catch (Exception e1) {

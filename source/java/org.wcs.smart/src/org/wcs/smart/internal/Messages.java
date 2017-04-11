@@ -1165,6 +1165,7 @@ public class Messages extends NLS {
 	public static String UpgradeEngine_Plugin_Missing;
 	public static String UpgradeEngine_Plugin_UpgradeMessage;
 	public static String UpgradeEngine_Plugin_WrongVersion;
+	public static String UpgradeEngine_pluginssubtask;
 	public static String UpgradeEngine_subprogress1;
 	public static String UpgradeEngine_subprogress2;
 	public static String UpgradeEngine_subprogress3;

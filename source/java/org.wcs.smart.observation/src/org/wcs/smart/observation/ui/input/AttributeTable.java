@@ -96,7 +96,7 @@ public class AttributeTable {
 				column.setResizable(true);
 				column.setMoveable(false);
 				String name = attributes.get(i).getName();
-				int width = gc.textExtent(name == null? "" : name ).x + 20;
+				int width = gc.textExtent(name == null? "" : name ).x + 20;  //$NON-NLS-1$
 				if (width < 60){
 					width = 60;
 				}

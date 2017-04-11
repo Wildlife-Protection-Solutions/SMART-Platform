@@ -15,7 +15,7 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart.observation.query,
  org.wcs.smart.p2
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.wcs.smart.entity.query.engine,
  org.wcs.smart.entity.query.map.udig,
  org.wcs.smart.entity.query.model,

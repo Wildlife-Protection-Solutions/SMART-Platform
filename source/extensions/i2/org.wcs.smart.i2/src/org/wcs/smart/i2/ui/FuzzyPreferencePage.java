@@ -21,14 +21,9 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -44,17 +39,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelAnalystUserLevel;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelRelationshipType;
-import org.wcs.smart.i2.search.SearchDataGenerator;
 import org.wcs.smart.i2.search.SearchManager;
 import org.wcs.smart.user.UserLevelManager;
 

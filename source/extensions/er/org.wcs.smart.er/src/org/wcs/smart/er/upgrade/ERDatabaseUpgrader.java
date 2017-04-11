@@ -59,6 +59,8 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		}catch (Exception ex){
 			session.getTransaction().rollback();
 			throw ex;
+		} finally { 
+			session.close();
 		}
 		monitor.done();
 	}

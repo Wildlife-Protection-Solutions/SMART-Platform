@@ -35,7 +35,7 @@ public class IncidentManager {
 	 */
 	public String canEdit(Waypoint waypoint, ObservationOptions ops){
 		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
-			return "Insufficient privleges";
+			return Messages.IncidentManager_Insufficientprivleges;
 		}
 		if (ops.getEditTime() == null || ops.getEditTime() < 0){
 			return null;

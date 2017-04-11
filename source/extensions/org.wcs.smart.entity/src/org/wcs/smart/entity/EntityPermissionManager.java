@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.entity;
 
-import org.wcs.smart.ca.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.user.UserLevelManager;
 

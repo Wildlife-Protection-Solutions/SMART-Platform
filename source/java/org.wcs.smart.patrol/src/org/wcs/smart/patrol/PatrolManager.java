@@ -81,7 +81,7 @@ public class PatrolManager {
 	 */
 	public String canEdit(Patrol patrol, ObservationOptions ops){
 		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST, UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
-			return "Insufficient privileges"; 
+			return Messages.PatrolManager_InsufficientUserRights;
 		}
 			
 		if (ops.getEditTime() == null || ops.getEditTime() < 0){

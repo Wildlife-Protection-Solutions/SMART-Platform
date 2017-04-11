@@ -110,6 +110,7 @@ public class PlanTargetResultSet  implements IResultSet {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public PlanTargetResultSet(Date startDate, Date endDate,
 			PlanTargetResultSetMetadata metadata, SmartConnection connection) {
 
@@ -119,12 +120,12 @@ public class PlanTargetResultSet  implements IResultSet {
 		session = connection.getSession();
 
 		Criteria c = session.createCriteria(Plan.class)
-				.add(Restrictions.in("conservationArea",  connection.getConservationAreas()));
+				.add(Restrictions.in("conservationArea",  connection.getConservationAreas())); //$NON-NLS-1$
 		if (startDate != null){
-			c.add(Restrictions.ge("startDate", startDate));
+			c.add(Restrictions.ge("startDate", startDate)); //$NON-NLS-1$
 		}
 		if (endDate != null){
-			c.add(Restrictions.le("startDate", endDate));
+			c.add(Restrictions.le("startDate", endDate)); //$NON-NLS-1$
 		}
 		
 		List<Plan> searchplans = c.list();

@@ -883,7 +883,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
 					groupByInnerSql.append(".datetime) as char(4))) || '-' || trim(cast(month("); //$NON-NLS-1$
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
-					groupByInnerSql.append(".datetime) as char(2))) || '-' || trim(cast(day(");
+					groupByInnerSql.append(".datetime) as char(2))) || '-' || trim(cast(day("); //$NON-NLS-1$
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
 					groupByInnerSql.append(".datetime) as char(2))) )"); //$NON-NLS-1$
 					groupByInnerSql.append(" as wp_date_time_" + itemcnt); //$NON-NLS-1$
