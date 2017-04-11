@@ -367,9 +367,9 @@
          <command
                commandId="org.wcs.smart.query.create.unknown"
                icon="images/icons/obj16/compound_query.png"
-               label="New Compound Query..."
+               label="%newcompound.command.label"
                style="pulldown"
-               tooltip="Creates a new compound query">
+               tooltip="%newcompound.command.tooltip">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="compound">
@@ -818,9 +818,9 @@
          <command
                commandId="org.wcs.smart.query.create.unknown"
                icon="images/icons/obj16/compound_query.png"
-               label="New Compound Query"
+               label="%newcompound.command.label.0"
                style="pulldown"
-               tooltip="Creates a new compound query">
+               tooltip="%newcompound.command.tooltip.0">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="compound">
@@ -833,9 +833,9 @@
          <command
                commandId="org.wcs.smart.query.create.unknown"
                icon="images/icons/obj16/compound_query.png"
-               label="New Compound Query"
+               label="%newcompound.command.label.1"
                style="pulldown"
-               tooltip="Creates a new compound query">
+               tooltip="%newcompound.command.tooltip.1">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="compound">
@@ -1167,7 +1167,7 @@
    <extension
          point="org.wcs.smart.query.queryType">
       <QueryCategory
-            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;Compound Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;Displays results of multiple existing queries on a single map.  Date ranges and styles of individual queries are customizable.&lt;/p&gt;&lt;/p&gt;"
+            html_description="%newcompound.html_description"
             id="org.wcs.smart.query.type.compound"
             name="Compound Query">
       </QueryCategory>
@@ -1197,7 +1197,7 @@
             default="false"
             icon="images/icons/obj16/compound_query.png"
             id="org.wcs.smart.query.editor.compound"
-            name="Compound Query Editor">
+            name="%compoundquery.editor.name">
       </editor>
    </extension>
    <extension

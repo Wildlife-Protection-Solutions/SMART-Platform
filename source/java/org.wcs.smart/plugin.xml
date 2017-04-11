@@ -385,9 +385,9 @@
             <command
                   commandId="org.wcs.smart.command.ccaa.users.show"
                   icon="images/icons/etool16/user.png"
-                  label="Manager Users..."
+                  label="%manageusers.command.label"
                   style="push"
-                  tooltip="manages ccaa users">
+                  tooltip="%manauserusers.command.tooltip">
             </command>
             <command
                   commandId="org.eclipse.ui.file.export"
@@ -937,7 +937,7 @@
       </command>
       <command
             id="org.wcs.smart.command.ccaa.users.show"
-            name="Manager Users...">
+            name="%manageusers.command.name">
       </command>
    </extension>
    <extension
@@ -1534,7 +1534,7 @@
       <style
             class="org.wcs.smart.udig.style.SmartGridCellStyleContent"
             id="org.wcs.smart.query.grid.style.border"
-            name="SMART Grid Border Style">
+            name="%gridborder.style.name">
       </style>
    </extension>
    <extension

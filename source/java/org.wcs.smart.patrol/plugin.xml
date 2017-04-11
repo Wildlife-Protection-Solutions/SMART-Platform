@@ -330,7 +330,7 @@
       </command>
       <command
             id="org.wcs.smart.patrol.view.MergePatrols"
-            name="Merge Patrols">
+            name="%mergepatrol.command.name">
       </command>
    </extension>
    <extension
