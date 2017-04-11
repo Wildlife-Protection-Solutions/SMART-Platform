@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -48,6 +49,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -177,7 +181,6 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 		Patrol newPatrol = new Patrol();
 		newPatrol.setLegs(new ArrayList<PatrolLeg>());
 
-
 		
 		//Set the ID of the new patrol
 		Object selection =  ((IStructuredSelection)patrolId.getSelection()).getFirstElement();
@@ -232,11 +235,14 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 		newPatrol.setMandate(objectiveId.getMandate());
 		newPatrol.setPatrolType(PatrolType.Type.MIXED);
 		newPatrol.setTeam(stationId.getTeam());
+
 		
 		//Save the new Patrol
 		session.save(newPatrol);
 		session.flush();
 		session.getTransaction().commit();
+
+		final UUID uuid = newPatrol.getUuid();
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
@@ -247,7 +253,9 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 						InterruptedException {
 					monitor.beginTask(Messages.MergePatrolsDialog_MergingPatrols, patrolsToMerge.size());
 					
+					
 					session.beginTransaction();
+					Patrol newPatrol = (Patrol)session.createCriteria(Patrol.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
 					
 					for(Patrol p : patrolsToMerge){
 					  for(PatrolLeg pl : p.getLegs()){
@@ -256,25 +264,47 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 						if (pl.getPatrolLegDays() != null && pl.getPatrolLegDays().size() > 0){
 							//Clone Leg Days as well
 							for (PatrolLegDay pld : pl.getPatrolLegDays()){
-								PatrolLegDay clone = pld.clone();
+								PatrolLegDay legdayClone = pld.clone();
 								
 								ArrayList<PatrolWaypoint> allWaypoints = new ArrayList<PatrolWaypoint>();
 								
 								for(PatrolWaypoint wp : pld.getWaypoints()){
+									Waypoint toClone = wp.getWaypoint();
+									if (toClone.getUuid() != null){
+										toClone = (Waypoint)session.merge(toClone);
+									}
+									Waypoint wpclone = toClone.clone(session);
+									
 									PatrolWaypoint pw = new PatrolWaypoint();
-									pw.setPatrolLegDay(clone);
-									pw.setWaypoint(wp.getWaypoint());
+									pw.setWaypoint(wpclone);
+									pw.setPatrolLegDay(legdayClone);
 									allWaypoints.add(pw);
 								}
-								clone.setWaypoints(allWaypoints); 
-								clone.setPatrolLeg(legClone);
-								legClone.getPatrolLegDays().add(clone);
+								legdayClone.setWaypoints(allWaypoints); 
+								legdayClone.setPatrolLeg(legClone);
+								legClone.getPatrolLegDays().add(legdayClone);
 							}
 						}
 						legClone.setPatrol(newPatrol);
 						newPatrol.getLegs().add(legClone);
 					  }	
 					}
+					
+
+					
+					try {
+//						PatrolHibernateManager.savePatrol(newPatrol, session,  true);
+						newPatrol.createLegs(session);
+						PatrolHibernateManager.savePatrol(newPatrol, session,  true);
+					} catch (Exception e1) {
+						SmartPatrolPlugIn.displayLog(
+								Messages.MergePatrolsDialog_MergeError,
+								e1);
+						session.getTransaction().rollback();
+						e1.printStackTrace();
+					}
+					session.getTransaction().commit();
+
 					
 					//delete all the original patrols 
 					for (Patrol p: patrolsToMerge){
@@ -285,7 +315,6 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 									Messages.DeletePatrolHandler_Error_CouldNotDeletePatrol, e);
 						}
 					}
-					session.getTransaction().commit();
 					monitor.done();
 				}
 			});

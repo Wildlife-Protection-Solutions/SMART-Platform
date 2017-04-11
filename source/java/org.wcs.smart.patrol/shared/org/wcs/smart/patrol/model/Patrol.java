@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.model;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +46,7 @@ import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -272,6 +274,48 @@ public class Patrol extends UuidItem {
 		for (PatrolLeg leg : getLegs()){
 			leg.createLegDays(session);
 		}
+		return null;
+	}
+	
+	
+	/**
+	 * Creates leg objects to fill in any days where no leg exist. We can't have "blank" days in between the start and end of a patrol in the current model.
+	 * for the patrol.
+	 */
+	@Transient
+	public Collection<PatrolLegDay> createLegs(Session session){
+		
+		//determine start & end dates
+		Calendar cal = SharedUtils.convertDate( SharedUtils.getDatePart(getStartDate(), false) );
+		Calendar calEnd= SharedUtils.convertDate( SharedUtils.getDatePart(getEndDate(), false) );
+
+		while (cal.before(calEnd) || cal.equals(calEnd) ){
+			boolean legFound = false;
+			for (PatrolLeg leg : getLegs()){
+				Calendar legStart = SharedUtils.convertDate( SharedUtils.getDatePart(leg.getStartDate(), false));
+				Calendar legEnd = SharedUtils.convertDate( SharedUtils.getDatePart(leg.getEndDate(), false));
+				if(cal.equals(legStart) || cal.equals(legEnd) ||  (cal.after(legStart) && cal.before(legEnd)) ){
+					legFound = true;
+					break;
+				}
+			}
+
+			if(legFound == false){
+				PatrolLeg newLeg = new PatrolLeg();
+				newLeg.setStartDate(cal.getTime());
+				newLeg.setEndDate(cal.getTime());
+				newLeg.setPatrol(this);
+				newLeg.setType(getLegs().get(0).getType());//set it to the same type as the first leg, assuming they keep the same type for this empty/filler leg.
+				newLeg.setId("Automatically Created Patrol Leg");
+				this.getLegs().add(newLeg);
+				newLeg.createLegDays(session);
+			}
+			
+			
+			cal.add(Calendar.DAY_OF_MONTH, 1);
+		}
+		
+		
 		return null;
 	}
 	

@@ -212,4 +212,5 @@ public class PatrolLegDay extends UuidItem {
 		}
 		return clone;
 	}
+	
 }
