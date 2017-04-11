@@ -113,16 +113,16 @@ public class MissionImporter extends AbstractSmartImporter {
 		for (String warning : ctSurvey.getWarnings()) {
 			addWarning(warning);
 		}
-		
-		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		//check if duplicate any of existing mission
-		if (!checkDuplicate(ctSurvey, session)){
-			return null;
-		}
 
 		boolean fireSurveyAdded = false;
 		boolean fireMissionAdded = false;
+		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
+			//check if duplicate any of existing mission
+			if (!checkDuplicate(ctSurvey, session)){
+				return null;
+			}
+			
 			session.beginTransaction();
 			if (survey == null) {
 				//this mean that user wants a new survey to be created
@@ -192,8 +192,7 @@ public class MissionImporter extends AbstractSmartImporter {
 				}
 			});
 			return null;
-		}
-		finally {
+		} finally {
 			session.close();
 		}
 	}
