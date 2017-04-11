@@ -77,12 +77,14 @@ public class ConnectStartupContextListener implements ServletContextListener{
             logger.info("Terminating Hibernate sessionFactory"); //$NON-NLS-1$
             sessionFactory.close();
         }
+		sce.getServletContext().setAttribute(HibernateManager.CONTEXT_KEY, null);
 		
 		//shutdown job pool
 		ExecutorService scheduler = (ExecutorService)sce.getServletContext().getAttribute(EXECUTOR_KEY);
 		if (scheduler != null){
 			scheduler.shutdown();
 		}
+		sce.getServletContext().setAttribute(EXECUTOR_KEY, null);
 		
 		BirtEngine.destroyBirtEngine();
 	}
