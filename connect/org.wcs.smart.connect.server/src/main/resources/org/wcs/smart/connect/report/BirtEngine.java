@@ -35,6 +35,7 @@ import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
+import org.eclipse.core.internal.registry.RegistryProviderFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.locationtech.udig.catalog.internal.wms.WmsPlugin;
@@ -162,6 +163,8 @@ public class BirtEngine {
 		birtEngine.destroy();
 		Platform.shutdown();
 		birtEngine = null;
+		
+		RegistryProviderFactory.releaseDefault();
 	}
 
 	public Object clone() throws CloneNotSupportedException {

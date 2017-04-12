@@ -21,22 +21,50 @@
  */
 package org.wcs.smart.connect.hibernate;
 
+import java.beans.Introspector;
+import java.lang.reflect.Method;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.spi.IIORegistry;
+import javax.imageio.spi.IIOServiceProvider;
+import javax.media.jai.JAI;
+import javax.media.jai.OperationRegistry;
+import javax.media.jai.RegistryElementDescriptor;
+import javax.media.jai.RegistryMode;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import org.apache.commons.logging.LogFactory;
+import org.geotools.data.DataAccessFinder;
+import org.geotools.data.DataStoreFinder;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.factory.Hints;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.ReferencingFactoryFinder;
+import org.geotools.referencing.factory.AbstractAuthorityFactory;
+import org.geotools.referencing.factory.DeferredAuthorityFactory;
+import org.geotools.referencing.operation.DefaultMathTransformFactory;
+import org.geotools.util.WeakCollectionCleaner;
 import org.hibernate.SessionFactory;
 import org.hibernate.annotations.common.reflection.MetadataProviderInjector;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
+import org.opengis.referencing.AuthorityFactory;
 import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
@@ -82,15 +110,182 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		//shutdown job pool
 		ExecutorService scheduler = (ExecutorService)sce.getServletContext().getAttribute(EXECUTOR_KEY);
 		if (scheduler != null){
-			scheduler.shutdown();
+			try{
+				scheduler.shutdown();
+			}finally{
+				try{
+					scheduler.shutdownNow();
+				}finally{}
+			}
 		}
 		sce.getServletContext().setAttribute(EXECUTOR_KEY, null);
 		
+		//clean up BIRT
 		BirtEngine.destroyBirtEngine();
+		
+		
+		//destroy geotools stuff
+		
+		//jdbc drivers
+		ClassLoader webappClassLoader = getClass().getClassLoader();
+		Enumeration<Driver> drivers = DriverManager.getDrivers();
+		Set<Driver> driversToUnload = new HashSet<>();
+		while (drivers.hasMoreElements()) {
+			Driver driver = drivers.nextElement();
+			try {
+				// the driver class loader can be null if the driver comes from the JDK, such as the sun.jdbc.odbc.JdbcOdbcDriver
+				ClassLoader driverClassLoader = driver.getClass().getClassLoader();
+				if (driverClassLoader != null && webappClassLoader.equals(driverClassLoader)) {
+					driversToUnload.add(driver);
+				}
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		}
+		for (Driver driver : driversToUnload) {
+			try {
+				DriverManager.deregisterDriver(driver);
+				logger.info("Unregistered JDBC driver " + driver); //$NON-NLS-1$
+			} catch (Exception e) {
+				logger.log(Level.SEVERE, "Could now unload driver " + driver.getClass(), e); //$NON-NLS-1$
+			}
+		}
+		try {
+			Class<?> h2Driver = Class.forName("org.h2.Driver"); //$NON-NLS-1$
+			Method m = h2Driver.getMethod("unload"); //$NON-NLS-1$
+			m.invoke(null);
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "Failed to unload the H2 driver", e); //$NON-NLS-1$
+		}
+        
+		
+		org.geotools.referencing.wkt.Formattable.cleanupThreadLocals(); 
+		
+		disposeAuthorityFactories(ReferencingFactoryFinder.getCoordinateOperationAuthorityFactories(null));
+		disposeAuthorityFactories(ReferencingFactoryFinder.getCRSAuthorityFactories(null));
+		disposeAuthorityFactories(ReferencingFactoryFinder.getCSAuthorityFactories(null));
+		
+		WeakCollectionCleaner.DEFAULT.exit();
+        DeferredAuthorityFactory.exit();
+        CRS.cleanupThreadLocals();
+        CRS.reset("all"); //$NON-NLS-1$
+        ReferencingFactoryFinder.reset();
+        CommonFactoryFinder.reset();
+        DataStoreFinder.reset();
+        DataAccessFinder.reset();
+        DefaultMathTransformFactory.cleanupThreadLocals();
+        
+        
+        Object o = Hints.getSystemDefault(Hints.EXECUTOR_SERVICE);
+		if (o != null && o instanceof ThreadPoolExecutor) {
+			final ThreadPoolExecutor executor = (ThreadPoolExecutor) o;
+			try {
+				executor.shutdown();
+			} finally {
+				try {
+					executor.shutdownNow();
+				} finally {
+				}
+			}
+		}
+		
+		//IMAGE IO STUFF
+		// unload everything that JAI ImageIO can still refer to
+        // We need to store them and unregister later to avoid concurrent modification exceptions
+		final IIORegistry ioRegistry = IIORegistry.getDefaultInstance();
+		Set<IIOServiceProvider> providersToUnload = new HashSet<>();
+		for (Iterator<Class<?>> cats = ioRegistry.getCategories(); cats.hasNext();) {
+			Class<?> category = cats.next();
+			for (Iterator<?> it = ioRegistry.getServiceProviders(category,false); it.hasNext();) {
+				final IIOServiceProvider provider = (IIOServiceProvider) it.next();
+				if (webappClassLoader.equals(provider.getClass().getClassLoader())) {
+					providersToUnload.add(provider);
+				}
+			}
+		}
+        for (IIOServiceProvider provider : providersToUnload) {
+            ioRegistry.deregisterServiceProvider(provider);
+        }
+        
+        // unload everything that JAI can still refer to
+		final OperationRegistry opRegistry = JAI.getDefaultInstance()
+				.getOperationRegistry();
+		for (String mode : RegistryMode.getModeNames()) {
+			for (Iterator<?> descriptors = opRegistry.getDescriptors(mode).iterator(); descriptors != null && descriptors.hasNext();) {
+				RegistryElementDescriptor red = (RegistryElementDescriptor) descriptors.next();
+				int factoryCount = 0;
+				int unregisteredCount = 0;
+				// look for all the factories for that operation
+				for (Iterator<?> factories = opRegistry.getFactoryIterator(
+						mode, red.getName()); factories != null
+						&& factories.hasNext();) {
+					Object factory = factories.next();
+					if (factory == null) {
+						continue;
+					}
+                    factoryCount++;
+                    
+					if (webappClassLoader.equals(factory.getClass().getClassLoader())) {
+						boolean unregistered = false;
+						// we need to scan against all "products" to unregister
+						// the factory
+						Vector<?> orderedProductList = opRegistry.getOrderedProductList(mode, red.getName());
+						if (orderedProductList != null) {
+							for (Iterator<?> products = orderedProductList.iterator(); products != null && products.hasNext();) {
+								String product = (String) products.next();
+								try {
+									opRegistry.unregisterFactory(mode, red.getName(), product, factory);
+								} catch (Throwable t) {
+									// may fail due to the factory not being
+									// registered against that product
+								}
+							}
+						}
+						if (unregistered) {
+							unregisteredCount++;
+						}
+
+					}
+				}
+                
+				// if all the factories were unregistered, get rid of the descriptor as well
+				if (factoryCount > 0 && unregisteredCount == factoryCount) {
+					opRegistry.unregisterDescriptor(red);
+				}
+            }
+        }
+        
+        // flush all javabean introspection caches as this too can keep a webapp classloader from being unloaded
+        Introspector.flushCaches();
+        
+        LogFactory.release(Thread.currentThread().getContextClassLoader());
+		
+		// GeoTools/GeoServer have a lot of finalizers and until they are run the JVM
+        // itself wil keepup the class loader...
+        try {
+            System.gc();
+            System.runFinalization();
+        }catch(Throwable t){
+        	t.printStackTrace();
+        }
 	}
 
+	private void disposeAuthorityFactories(Set<? extends AuthorityFactory> factories){
+		if (factories == null) return;
+		try{
+			for (AuthorityFactory af : factories) {
+				if(af instanceof AbstractAuthorityFactory) {
+					((AbstractAuthorityFactory) af).dispose();
+				}
+			}
+		}catch(Throwable e){
+			logger.log(Level.WARNING, "Error occurred trying to dispose authority factories", e); //$NON-NLS-1$
+		}
+	}
+	
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
+		System.setProperty("org.eclipse.emf.common.util.ReferenceClearingQueue", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		System.setProperty("org.geotools.referencing.forceXY", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		logger.info("Configuring Hibernate SessionFactory"); //$NON-NLS-1$
