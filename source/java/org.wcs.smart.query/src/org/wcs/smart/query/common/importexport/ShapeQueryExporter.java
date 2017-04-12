@@ -51,11 +51,13 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.engine.IColumnInfoProvider;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
@@ -204,9 +206,11 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 			}
 		};
 		List<QueryColumn> columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
+		boolean isDataFiltering = query instanceof IColumnAutoConfigQuery && results instanceof IColumnInfoProvider && ((IColumnAutoConfigQuery)query).isShowDataColumnsOnly();
 		for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
-			QueryColumn column = (QueryColumn) iterator.next();
-			if (!column.isVisible()){
+			QueryColumn column = iterator.next();
+			boolean isVisibleColumn = isDataFiltering ? ((IColumnInfoProvider)results).isDataColumn(column) : column.isVisible();
+			if (!isVisibleColumn){
 				iterator.remove();
 			}
 		}
