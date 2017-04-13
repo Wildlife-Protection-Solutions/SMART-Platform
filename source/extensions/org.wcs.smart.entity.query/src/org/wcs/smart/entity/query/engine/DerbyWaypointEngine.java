@@ -99,7 +99,9 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
 				//for different parts of the queries
-				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
+				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				c.setAutoCommit(true);
 				try {			
 					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
 					
@@ -121,13 +123,12 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 					}
 				}catch (Exception ex){
 					throw new SQLException(ex);
-
 				} finally {
 					if (filterer != null) filterer.dropTemporaryTables(c);
 					if (monitor.isCanceled()) dropTables(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 
 		});

@@ -135,33 +135,37 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyEntitySightingEngine_ProgressTaskName, 3);
 
-				monitor.subTask(Messages.DerbyEntitySightingEngine_Progress1);
-				createResultsTable(c);
-				monitor.worked(1);
-
-				monitor.subTask(Messages.DerbyEntitySightingEngine_Progress2);
-				populateDataTable(c, session);
-				monitor.worked(1);
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				c.setAutoCommit(true);
+				try{
+					monitor.subTask(Messages.DerbyEntitySightingEngine_Progress1);
+					createResultsTable(c);
+					monitor.worked(1);
+	
+					monitor.subTask(Messages.DerbyEntitySightingEngine_Progress2);
+					populateDataTable(c, session);
+					monitor.worked(1);
+					
+					monitor.subTask(Messages.DerbyEntitySightingEngine_Progress3);
+					addCategoryLabels(c, session);
+					monitor.worked(1);
+					
+					
+					//setting waypoint count
 				
-				monitor.subTask(Messages.DerbyEntitySightingEngine_Progress3);
-				addCategoryLabels(c, session);
-				monitor.worked(1);
-				
-				
-				//setting waypoint count
-			
-				try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable + "")) { //$NON-NLS-1$ //$NON-NLS-2$
-					if (rs.next()) {
-						result.setItemCount(rs.getInt(1));
+					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable + "")) { //$NON-NLS-1$ //$NON-NLS-2$
+						if (rs.next()) {
+							result.setItemCount(rs.getInt(1));
+						}
+					 }
+	
+					if (monitor.isCanceled()){
+						dropTables(c);
+						result.setItemCount(0);
 					}
-				 }
-
-				if (monitor.isCanceled()){
-					dropTables(c);
-					result.setItemCount(0);
+				}finally{
+					c.setAutoCommit(false);
 				}
-				
-				c.commit();
 			}
 		});
 		if (monitor.isCanceled()){

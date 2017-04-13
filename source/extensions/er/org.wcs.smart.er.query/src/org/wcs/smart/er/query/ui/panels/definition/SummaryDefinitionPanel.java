@@ -227,20 +227,24 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					Session s = HibernateManager.openSession();
-					List<?> results = s
+					try{
+						List<?> results = s
 							.createCriteria(SurveyDesign.class)
 							.add(Restrictions.eq("keyId", sq.getSurveyDesign())) //$NON-NLS-1$
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.list(); 
 
-					if (results.size() > 0) {
-						final SurveyDesign sd = (SurveyDesign) results.get(0);
-						Display.getDefault().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								refreshPanel(sd);
-							}
-						});
+						if (results.size() > 0) {
+							final SurveyDesign sd = (SurveyDesign) results.get(0);
+							Display.getDefault().syncExec(new Runnable() {
+								@Override
+								public void run() {
+									refreshPanel(sd);
+								}
+							});
+						}
+					}finally{
+						s.close();
 					}
 
 					return Status.OK_STATUS;

@@ -120,8 +120,10 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 		return fIterator.hasNext();
 	}
 
-	private Session getSession(){
-		if (session == null) session = HibernateManager.openSession();
+	private synchronized Session getSession(){
+		if (session == null){
+			session = HibernateManager.openSession();
+		}
 		return session;
 	}
 	

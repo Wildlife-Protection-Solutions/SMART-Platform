@@ -180,6 +180,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {		
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				c.setAutoCommit(true);
 				try {
 					monitor.beginTask(Messages.DerbySummaryEngine_ProcessingQueryProgress, query.getQueryDefinition().getValuePart().getValueItems().size()*10 + 40);
 					
@@ -312,8 +314,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 		});
 

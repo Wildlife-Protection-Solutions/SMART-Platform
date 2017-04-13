@@ -150,7 +150,7 @@ public class WaypointFilterProcessor {
 		
 		//create indexes to help with performance
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE INDEX " + obsTable + "_location_uuid_idx on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
 		if (monitor.isCanceled()) return null;
 		s.createSQLQuery(sql.toString()).executeUpdate();

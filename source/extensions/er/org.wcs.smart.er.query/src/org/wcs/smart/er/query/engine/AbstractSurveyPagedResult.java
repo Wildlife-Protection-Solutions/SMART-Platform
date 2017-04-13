@@ -674,24 +674,26 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		}
 		return null;
 	}
-	
 
-	
 	public List<byte[]> getMissionUuids() {
 		final Session session = HibernateManager.openSession();
-		final List<byte[]> uuids = new ArrayList<byte[]>();
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				String sql = "SELECT distinct mission_uuid FROM " + queryTempTable; //$NON-NLS-1$
-				try(ResultSet rs = c.createStatement().executeQuery(sql)){
-					while(rs.next()){
-						uuids.add(rs.getBytes(1));
+		try{
+			final List<byte[]> uuids = new ArrayList<byte[]>();
+			session.doWork(new Work(){
+				@Override
+				public void execute(Connection c) throws SQLException {
+					String sql = "SELECT distinct mission_uuid FROM " + queryTempTable; //$NON-NLS-1$
+					try(ResultSet rs = c.createStatement().executeQuery(sql)){
+						while(rs.next()){
+							uuids.add(rs.getBytes(1));
+						}
 					}
-				}
-			}});
-		
-		return uuids;
+				}});
+			
+			return uuids;
+		}finally{
+			session.close();
+		}
 	}
 	
 	@Override

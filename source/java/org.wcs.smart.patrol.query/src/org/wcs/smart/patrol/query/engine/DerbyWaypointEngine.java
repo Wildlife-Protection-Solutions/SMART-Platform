@@ -103,6 +103,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
 				
 				IFilterProcessor filterer = null;
@@ -116,8 +117,11 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
 				//for different parts of the queries
-				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
+				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));
 				
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				//need to make sure we cleanup all temp tables correctly
+				c.setAutoCommit(true);
 				try {			
 					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
@@ -143,8 +147,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 					filterer.dropTemporaryTables(c);
 					if (monitor.isCanceled()) dropTables(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 
 		});

@@ -165,7 +165,8 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 				//otherwise different date filters will be computed
 				//for different parts of the queries
 				final DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-				
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				c.setAutoCommit(true);
 				
 				try {
 					monitor.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
@@ -274,8 +275,8 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 		});
 

@@ -123,7 +123,9 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 				//otherwise different date filters will be computed
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-				
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				//need to make sure we cleanup all temp tables correctly
+				c.setAutoCommit(true);
 				try {			
 					try{
 						ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
@@ -186,8 +188,8 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 					filterer.dropTemporaryTables(c);
 					if (monitor.isCanceled()) dropTables(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 
 		});

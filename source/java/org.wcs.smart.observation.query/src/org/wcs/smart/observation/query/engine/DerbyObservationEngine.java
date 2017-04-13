@@ -106,7 +106,9 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 			@Override
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
-				IFilterProcessor filterer = null;			
+				IFilterProcessor filterer = null;		
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				c.setAutoCommit(true);
 				try {
 					filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
 					
@@ -176,8 +178,8 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 					if (filterer != null) filterer.dropTemporaryTables(c);
 					if (monitor.isCanceled()) dropTables(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 
 		});

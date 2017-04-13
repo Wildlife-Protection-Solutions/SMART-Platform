@@ -117,6 +117,8 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 			
 			@Override
 			public void execute(Connection c) throws SQLException {
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				c.setAutoCommit(true);
 				try{
 					//create temp table for holding reuslts
 					StringBuilder sql = new StringBuilder();
@@ -276,10 +278,10 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 						rowCnt = rs.getInt(1);
 					}
 					results = new DerbyPagedIntellResults(queryDataTable, rowCnt, RecordQueryIntelligenceEngine.this, query);
-					
-					c.commit();
 				}catch (Exception ex){
 					throw new SQLException (ex);
+				}finally{
+					c.setAutoCommit(false);
 				}
 			}
 		});

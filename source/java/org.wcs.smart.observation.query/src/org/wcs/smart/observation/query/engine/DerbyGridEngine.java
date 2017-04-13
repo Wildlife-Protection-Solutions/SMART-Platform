@@ -112,7 +112,8 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 			@Override
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyGridEngine_Progress_RunningQuery, 4);
-
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				c.setAutoCommit(true);
 				try {
 					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
 					IValueItem valueItem = query.getQueryDefinition().getValuePart();				
@@ -135,8 +136,8 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 					// ensure temporary tables get dropped
 					dropTemporaryGridTable(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 		});
 		myResults.setResultsMetadata(GridMetadata.computeMetadata(myResults.getData()));

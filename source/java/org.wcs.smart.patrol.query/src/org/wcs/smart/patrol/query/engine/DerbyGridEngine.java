@@ -140,6 +140,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				
 				monitor.beginTask(Messages.DerbyGridEngine_Progress_RunningQuery, 4);
 
 				//create a date filter that caches the dates so the same
@@ -148,6 +149,9 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				//for different parts of the queries
 				dateFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				//need to make sure we cleanup all temp tables correctly
+				c.setAutoCommit(true);
 				try {
 					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
 					IValueItem valueItem = query.getQueryDefinition().getValuePart();
@@ -217,8 +221,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 					// ensure temporary tables get dropped
 					dropTemporaryGridTable(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 		});
 		myResults.setResultsMetadata(GridMetadata.computeMetadata(myResults.getData()));

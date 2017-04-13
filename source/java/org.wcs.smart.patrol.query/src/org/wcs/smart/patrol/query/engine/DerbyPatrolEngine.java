@@ -104,6 +104,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				
 				monitor.beginTask(Messages.DerbyPatrolEngine_Progress_RunningQuery, 4);
 				IFilterProcessor filterer = null;
 				try{
@@ -117,7 +118,9 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 				//otherwise different date filters will be computed
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-				
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				//need to make sure we cleanup all temp tables correctly
+				c.setAutoCommit(true);	
 				try {
 					try{
 						ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
@@ -138,8 +141,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 					// ensure temporary tables get dropped
 					filterer.dropTemporaryTables(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 		});
 		return myResults;

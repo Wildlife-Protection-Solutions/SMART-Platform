@@ -207,6 +207,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				//need to make sure we cleanup all temp tables correctly
+				c.setAutoCommit(true);
 				monitor.beginTask(Messages.DerbySummaryEngine_Progress_RunningQuery, ldef.getValuePart().getValueItems().size() + 5);
 
 				try {
@@ -280,8 +283,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					// ensure temporary tables get dropped
 					dropTableInternal(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 		});
 		return sumResults ;

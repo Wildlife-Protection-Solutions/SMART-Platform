@@ -165,7 +165,8 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 				//for different parts of the queries
 				final DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
-				
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				c.setAutoCommit(true);
 				try {
 					monitor.beginTask(Messages.DerbySummaryEngine_Progress_RunningQuery, query.getQueryDefinition().getValuePart().getValueItems().size() + 5);
 					
@@ -277,8 +278,8 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 		});
 

@@ -218,8 +218,8 @@ public enum WorkingSetManager {
 	public void addQueryUuidToActiveWorkingSet(Collection<UUID> queryUuids, IEclipseContext context){
 		if (activeWorkingSet == null || queryUuids.isEmpty()) return;
 		IntelWorkingSet wset = null;
-		Session s = HibernateManager.openSession();
 		boolean modified = false;
+		Session s = HibernateManager.openSession();
 		try{
 			for (UUID queryUuid : queryUuids){
 				String queryName = queryUuid.toString();

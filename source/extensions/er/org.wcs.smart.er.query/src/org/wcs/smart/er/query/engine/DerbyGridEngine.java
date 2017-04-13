@@ -161,7 +161,8 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				//otherwise different date filters will be computed
 				//for different parts of the queries
 				dateFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-				
+				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
+				c.setAutoCommit(true);
 				try {
 					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
 					IValueItem valueItem = query.getQueryDefinition().getValuePart();
@@ -235,8 +236,8 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 					// ensure temporary tables get dropped
 					dropTemporaryGridTable(c);
 					monitor.done();
+					c.setAutoCommit(false);
 				}
-				c.commit();
 			}
 
 		});

@@ -116,13 +116,13 @@ public class SqlGenerator {
 		
 		if (locationIndex){
 			sql = new StringBuilder();
-			sql.append("CREATE INDEX location_uuid_idx on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("CREATE INDEX " + obsTable + "_location_uuid_idx on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
 			s.createSQLQuery(sql.toString()).executeUpdate();
 		}
 		if (observationIndex){
 			sql = new StringBuilder();
-			sql.append("CREATE INDEX observation_uuid_idx on " + obsTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("CREATE INDEX " + obsTable + "_observation_uuid_idx on " + obsTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
 			s.createSQLQuery(sql.toString()).executeUpdate();
 		}

@@ -113,6 +113,7 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 			s.close();
 		}catch (Exception ex){
 			ERQueryPlugIn.displayLog(Messages.SurveyIdGroupByDropItem_LoadError, ex);
+		}finally{
 			s.close();
 		}
 		

@@ -127,11 +127,15 @@ public class SurveyQueryProxyWrapper extends QueryProxy{
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
                  	   Session s = HibernateManager.openSession();
-                 	   List<?> results = s.createCriteria(SurveyDesign.class)
-                         .add(Restrictions.eq("keyId", sdKey)) //$NON-NLS-1$
-                         .add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-                 	   if (results.size() > 0){
-                 		   surveydesign = (SurveyDesign) results.get(0);
+                 	   try{
+                 		   List<?> results = s.createCriteria(SurveyDesign.class)
+                 				   .add(Restrictions.eq("keyId", sdKey)) //$NON-NLS-1$
+                 				   .add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+                 		   if (results.size() > 0){
+                 			   surveydesign = (SurveyDesign) results.get(0);
+                 		   }
+                 	   }finally{
+                 		   s.close();
                  	   }
                  	   return Status.OK_STATUS;
 					}};
