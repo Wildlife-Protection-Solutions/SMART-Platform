@@ -229,7 +229,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 			((NewPatrolWizardPage) lastPage).updateModel(this.patrol, getSession());
 		}
 
-		Session session = PatrolHibernateManager.openSession();
+		Session session = getSession();//PatrolHibernateManager.openSession();
 		session.beginTransaction();
 		boolean ret = true;
 		try{
