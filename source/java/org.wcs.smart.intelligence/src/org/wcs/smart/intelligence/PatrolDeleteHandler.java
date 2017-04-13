@@ -22,9 +22,7 @@
 package org.wcs.smart.intelligence;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -96,19 +94,11 @@ public class PatrolDeleteHandler implements IPatrolDeleteHandler {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<Intelligence> getIntelligenceIds(Patrol patrol, Session session) throws Exception{
 		Query q = session.createQuery("from Intelligence i where i.patrol = :p"); //$NON-NLS-1$
 		q.setParameter("p", patrol); //$NON-NLS-1$
 		return q.list();
-//		List<?> ids = q.list();
-//		List<Intelligence> result = new ArrayList<Intelligence>();
-//		for (Object object : ids) {
-//			UUID uuid = (UUID) object;
-//			Intelligence i = new Intelligence();
-//			i.setUuid(uuid);
-//			result.add(i);
-//		}
-//		return result;
 	}
 
 	private void deleteIntelligences(Patrol patrol, Session session) throws Exception{
