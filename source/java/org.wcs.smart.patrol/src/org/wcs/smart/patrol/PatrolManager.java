@@ -164,7 +164,7 @@ public class PatrolManager {
 				monitor.worked(1);
 
 			}catch (Exception ex){
-				session.getTransaction().rollback();
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
 				throw ex;
 			}
 		}finally{
