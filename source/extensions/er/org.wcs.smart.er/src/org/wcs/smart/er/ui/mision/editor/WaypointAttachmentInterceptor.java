@@ -73,7 +73,7 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 						if (wp.getWaypoint().getAttachments() != null){
 							for (ISmartAttachment att : wp.getWaypoint().getAttachments()){
 								try {
-									att.computeFileLocation(HibernateManager.openSession());
+									att.computeFileLocation(session);
 									toDelete.add(att.getAttachmentFile());
 								} catch (Exception e) {
 									EcologicalRecordsPlugIn.log(e.getMessage(), e);
@@ -85,7 +85,7 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 								if (wo.getAttachments()!= null){
 									for (ObservationAttachment att : wo.getAttachments()){
 										try {
-											att.computeFileLocation(HibernateManager.openSession());
+											att.computeFileLocation(session);
 											toDelete.add(att.getAttachmentFile());
 										} catch (Exception e) {
 											EcologicalRecordsPlugIn.log(e.getMessage(), e);
