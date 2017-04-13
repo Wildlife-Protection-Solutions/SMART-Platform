@@ -36,6 +36,7 @@ import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.PatrolItemComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolSaveException;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -130,7 +131,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	}
 
 	private boolean savePatrolInternal() {
-		Session s = HibernateManager.openSession();
+		Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		
 		try{
 			s.beginTransaction();
