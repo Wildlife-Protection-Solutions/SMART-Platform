@@ -168,9 +168,12 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog implements Sele
 			session = HibernateManager.openSession();
 			close = true;
 		}
-		compTransportType.setValues(newLeg, session);
-		if (close){
-			session.close();
+		try{
+			compTransportType.setValues(newLeg, session);
+		}finally{
+			if (close){
+				session.close();
+			}
 		}
 		
 		compTransportType.addChangeListener(new IPatrolItemChangeListener() {

@@ -84,9 +84,7 @@ public class MergePatrolsHandler {
 		ArrayList<Patrol> patrols = new ArrayList<Patrol>();
 		
 		Session session = HibernateManager.openSession();
-
 		try {
-		
 			session.beginTransaction();
 			for(PatrolEditorInput pei : toMerge){
 				patrols.add((Patrol)session.load(Patrol.class, pei.getUuid()));
@@ -101,7 +99,7 @@ public class MergePatrolsHandler {
 			session.getTransaction().rollback();
 			SmartPatrolPlugIn.displayLog("There was a problem loading the Patrols, merge failed." + "\n\n" + ex.getLocalizedMessage(),ex); //$NON-NLS-1$ //$NON-NLS-2$
 		}finally{
-			
+			session.close();
 		}
 		
 		return;
