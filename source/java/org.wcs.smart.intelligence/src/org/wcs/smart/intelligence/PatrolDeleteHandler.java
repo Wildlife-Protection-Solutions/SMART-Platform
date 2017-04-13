@@ -97,17 +97,18 @@ public class PatrolDeleteHandler implements IPatrolDeleteHandler {
 	}
 	
 	private List<Intelligence> getIntelligenceIds(Patrol patrol, Session session) throws Exception{
-		Query q = session.createQuery("select i.uuid from Intelligence i where i.patrol = :p"); //$NON-NLS-1$
+		Query q = session.createQuery("from Intelligence i where i.patrol = :p"); //$NON-NLS-1$
 		q.setParameter("p", patrol); //$NON-NLS-1$
-		List<?> ids = q.list();
-		List<Intelligence> result = new ArrayList<Intelligence>();
-		for (Object object : ids) {
-			UUID uuid = (UUID) object;
-			Intelligence i = new Intelligence();
-			i.setUuid(uuid);
-			result.add(i);
-		}
-		return result;
+		return q.list();
+//		List<?> ids = q.list();
+//		List<Intelligence> result = new ArrayList<Intelligence>();
+//		for (Object object : ids) {
+//			UUID uuid = (UUID) object;
+//			Intelligence i = new Intelligence();
+//			i.setUuid(uuid);
+//			result.add(i);
+//		}
+//		return result;
 	}
 
 	private void deleteIntelligences(Patrol patrol, Session session) throws Exception{
