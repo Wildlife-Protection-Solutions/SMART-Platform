@@ -90,6 +90,7 @@ public class EntityExportReportJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		monitor.beginTask(Messages.EntityExportReportJob_ProgressMsg, entities.size());
 		for (IntelEntity e : entities){
+			if (e == null) continue;
 			monitor.subTask(e.getIdAttributeAsText(Locale.getDefault()));
 			try{
 				final Path out = runEntityType(e, dFilter);

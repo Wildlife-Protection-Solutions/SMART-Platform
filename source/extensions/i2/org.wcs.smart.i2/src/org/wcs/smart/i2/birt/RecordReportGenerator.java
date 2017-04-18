@@ -465,6 +465,9 @@ public enum RecordReportGenerator {
 		attachImage.setSource(DesignChoiceConstants.IMAGE_REF_TYPE_URL);
 		attachImage.setProportionalScale(true);
 		attachImage.setURL("row[\"" + RecordAttachmentDatasetResultSetMetadata.Column.PATH.getColumnName(Locale.getDefault()) + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
+		visibility = StructureFactory.createHideRule();
+		visibility.setFormat(DesignChoiceConstants.FORMAT_TYPE_ALL);
+		visibility.setExpression("row[\""+ RecordAttachmentDatasetResultSetMetadata.Column.PATH.getColumnName(Locale.getDefault()) +"\"] == null"); //$NON-NLS-1$ //$NON-NLS-2$
 		attachImage.getPropertyHandle(IReportItemModel.VISIBILITY_PROP).addItem(visibility);
 		
 		attachmentTable.getCell(entityTable.getDetail().getSlotID(), -1, 1, 1).getContent().add(attachImage);

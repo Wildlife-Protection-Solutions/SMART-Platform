@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.birt.entity.attachment;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,8 +75,8 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 			if (this == FILE_NAME) return location.getAttachment().getFilename();
 			if (this == PATH){
 				try {
-					return "file://" + location.getAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
-				} catch (IOException e) {
+					return location.getAttachment().getAttachmentFile().getCanonicalFile().toURI().toString();
+				} catch (Exception e) {
 					Logger.getLogger(EntityAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}
 				return null;

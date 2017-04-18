@@ -71,7 +71,7 @@ public class RecordAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 				return record.getAttachment().getDateCreated();
 			case PATH:
 				try {
-					return "file://" + record.getAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
+					return record.getAttachment().getAttachmentFile().getCanonicalFile().toURI().toString();
 				} catch (IOException e) {
 					Logger.getLogger(RecordAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}

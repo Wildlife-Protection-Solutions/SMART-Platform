@@ -73,7 +73,7 @@ public class RecordEntityDatasetResultSetMetadata implements IResultSetMetaData 
 			case ENTITY_IMAGE:
 				if (entityrecord.getEntity().getPrimaryAttachment() == null) return null;
 				try {
-					return "file://" + entityrecord.getEntity().getPrimaryAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
+					return entityrecord.getEntity().getPrimaryAttachment().getAttachmentFile().getCanonicalFile().toURI().toString();
 				} catch (IOException e) {
 					Logger.getLogger(EntityAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}
