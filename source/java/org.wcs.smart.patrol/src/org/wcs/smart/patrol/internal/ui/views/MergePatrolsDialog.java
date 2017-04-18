@@ -23,13 +23,14 @@
 package org.wcs.smart.patrol.internal.ui.views;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -175,16 +176,15 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 	 */
 	@Override
 	protected void okPressed() {
-		session.beginTransaction();
+
 		//Make a new Patrol to put everything into:
 		Patrol newPatrol = new Patrol();
 		newPatrol.setLegs(new ArrayList<PatrolLeg>());
-
 		
 		//Set the ID of the new patrol
-		Object selection =  ((IStructuredSelection)patrolId.getSelection()).getFirstElement();
-		Patrol patrol;
+		Object selection = ((IStructuredSelection)patrolId.getSelection()).getFirstElement();
 		
+		Patrol patrol;		
 		if(selection instanceof Patrol){
 			patrol = (Patrol)selection;
 			newPatrol.setId(patrol.getId());
@@ -207,6 +207,10 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 		for(Patrol p :patrolsToMerge){
 			if(p.isArmed())isArmed = true;
 			allComments += p.getComment() + " -- "; //$NON-NLS-1$
+		}
+		if (allComments.length() > Patrol.MAX_COMMENT_LENGTH){
+			MessageDialog.openInformation(getShell(), Messages.MergePatrolsDialog_WarningDialogTitle, MessageFormat.format(Messages.MergePatrolsDialog_MergeCommentWarning, Patrol.MAX_COMMENT_LENGTH));
+			allComments = allComments.substring(0, Patrol.MAX_COMMENT_LENGTH);
 		}
 		
 		//gather start/end dates
@@ -235,13 +239,11 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 		newPatrol.setPatrolType(PatrolType.Type.MIXED);
 		newPatrol.setTeam(stationId.getTeam());
 
-		
-		//Save the new Patrol
-		session.save(newPatrol);
-		session.flush();
-		session.getTransaction().commit();
+		if (newPatrol.getStartDate().getTime() + Patrol.MAX_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < newPatrol.getEndDate().getTime()){
+			MessageDialog.openError(getShell(), Messages.MergePatrolsDialog_ErrorDialogTitle, MessageFormat.format(Messages.MergePatrolsDialog_PatrolToLong, Patrol.MAX_PATROL_LENGTH_DAYS));
+			return;
+		}
 
-		final UUID uuid = newPatrol.getUuid();
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
@@ -250,11 +252,13 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask(Messages.MergePatrolsDialog_MergingPatrols, patrolsToMerge.size());
+					monitor.beginTask(Messages.MergePatrolsDialog_MergingPatrols, patrolsToMerge.size()+1);
 					
 					session.beginTransaction();
 					
-					Patrol newPatrol = (Patrol) session.get(Patrol.class, uuid);
+					session.save(newPatrol);
+					session.flush();
+					
 					for (Patrol p : patrolsToMerge) {
 						for (PatrolLeg pl : p.getLegs()) {
 							PatrolLeg legClone = pl.simpleClone();
@@ -287,6 +291,7 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 							legClone.setPatrol(newPatrol);
 							newPatrol.getLegs().add(legClone);
 						}
+						monitor.worked(1);
 					}
 					
 					try {

@@ -160,6 +160,8 @@ public class Messages extends NLS {
 	public static String MergePatrolLegDialog_ShellText;
 	public static String MergePatrolsDialog_CustomPatrolId;
 	public static String MergePatrolsDialog_EnterCustomId;
+	public static String MergePatrolsDialog_ErrorDialogTitle;
+	public static String MergePatrolsDialog_MergeCommentWarning;
 	public static String MergePatrolsDialog_MergeError;
 	public static String MergePatrolsDialog_MergeInstructions;
 	public static String MergePatrolsDialog_MergePatrols;
@@ -168,7 +170,9 @@ public class Messages extends NLS {
 	public static String MergePatrolsDialog_Note2;
 	public static String MergePatrolsDialog_ObjectiveAndMandate;
 	public static String MergePatrolsDialog_PatrolId;
+	public static String MergePatrolsDialog_PatrolToLong;
 	public static String MergePatrolsDialog_StationAndTeam;
+	public static String MergePatrolsDialog_WarningDialogTitle;
 	public static String MoveWaypointDialog_DialogMessage;
 	public static String MoveWaypointDialog_DialogTitle;
 	public static String MoveWaypointDialog_MoveTo_Label;
