@@ -270,11 +270,9 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 									for (PatrolWaypoint wp : pld.getWaypoints()) {
 										Waypoint toClone = wp.getWaypoint();
 										if (toClone.getUuid() != null) {
-											toClone = (Waypoint) session
-													.merge(toClone);
+											toClone = (Waypoint) session.merge(toClone);
 										}
-										Waypoint wpclone = toClone
-												.clone(session);
+										Waypoint wpclone = toClone.clone(session);
 
 										PatrolWaypoint pw = new PatrolWaypoint();
 										pw.setWaypoint(wpclone);
@@ -283,8 +281,7 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 									}
 									legdayClone.setWaypoints(allWaypoints);
 									legdayClone.setPatrolLeg(legClone);
-									legClone.getPatrolLegDays()
-											.add(legdayClone);
+									legClone.getPatrolLegDays().add(legdayClone);
 								}
 							}
 							legClone.setPatrol(newPatrol);

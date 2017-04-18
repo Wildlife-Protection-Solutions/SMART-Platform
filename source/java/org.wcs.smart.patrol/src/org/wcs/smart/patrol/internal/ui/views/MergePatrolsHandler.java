@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 
 
@@ -83,7 +84,7 @@ public class MergePatrolsHandler {
 		}
 		ArrayList<Patrol> patrols = new ArrayList<Patrol>();
 		
-		Session session = HibernateManager.openSession();
+		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
 			session.beginTransaction();
 			for(PatrolEditorInput pei : toMerge){
