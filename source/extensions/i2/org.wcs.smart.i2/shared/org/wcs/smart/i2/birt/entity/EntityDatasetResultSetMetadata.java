@@ -85,7 +85,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 				if (entity.getPrimaryAttachment() == null){
 					return null;
 				}
-				return "file:/" + entity.getPrimaryAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
+				return "file://" + entity.getPrimaryAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
 			}
 			return null;
 		}

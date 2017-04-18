@@ -76,7 +76,7 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 			if (this == FILE_NAME) return location.getAttachment().getFilename();
 			if (this == PATH){
 				try {
-					return "file:/" + location.getAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
+					return "file://" + location.getAttachment().getAttachmentFile().getCanonicalPath(); //$NON-NLS-1$
 				} catch (IOException e) {
 					Logger.getLogger(EntityAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
 				}
