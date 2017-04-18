@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART BIRT Map Indonesian Fragment
+Bundle-SymbolicName: org.wcs.smart.birt.map.nl_in
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.birt.map;bundle-version="4.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: org.wcs.smart

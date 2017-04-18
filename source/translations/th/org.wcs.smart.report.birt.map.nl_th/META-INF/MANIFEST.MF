@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: SMART BIRT Map Thai Fragment
-Bundle-SymbolicName: org.wcs.smart.report.birt.map.nl_th
-Bundle-Version: 4.0.1
-Fragment-Host: org.wcs.smart.report.birt.map;bundle-version="4.0.1"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Vendor: org.wcs.smart

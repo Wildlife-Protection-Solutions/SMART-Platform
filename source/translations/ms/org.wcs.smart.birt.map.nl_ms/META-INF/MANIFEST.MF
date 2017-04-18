@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.wcs.smart.birt.map Malay NLS Support
+Bundle-SymbolicName: org.wcs.smart.birt.map.nl_ms
+Bundle-Version: 4.0.1
+Fragment-Host: org.wcs.smart.birt.map;bundle-version="4.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Localization: OSGI-INF/l10n/bundle
+Bundle-Vendor: org.wcs.smart
