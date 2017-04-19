@@ -79,10 +79,12 @@ public class Messages extends NLS {
 	public static String AttributeListPanel_ConfirmTitle;
 	public static String AttributeManager_DeleteError;
 	public static String AttributeMappingWizardPage_AttributeInfoJobName;
+	public static String AttributeMappingWizardPage_ColumnLabel;
 	public static String AttributeMappingWizardPage_FileReadError;
 	public static String AttributeMappingWizardPage1_FileReadError;
 	public static String AttributeMappingWizardPage1_IntelAttribute;
 	public static String AttributeMappingWizardPage1_loadingAttributeJobName;
+	public static String AttributeMappingWizardPage_MappingLabel;
 	public static String AttributeMappingWizardPage_MappingMsg;
 	public static String AttributeMappingWizardPage_Message;
 	public static String AttributeMappingWizardPage1_Message;

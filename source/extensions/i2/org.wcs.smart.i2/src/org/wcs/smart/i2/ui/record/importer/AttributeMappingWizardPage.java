@@ -241,6 +241,12 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 				}
 				mappings = new ArrayList<>();
 				
+				Label headerLabel1 = new Label(mappingPanel, SWT.NONE);
+				headerLabel1.setText(Messages.AttributeMappingWizardPage_ColumnLabel);
+				Label headerLabel2 = new Label(mappingPanel, SWT.NONE);
+				headerLabel2.setText(Messages.AttributeMappingWizardPage_MappingLabel);
+				Label headerLabel3 = new Label(mappingPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+				headerLabel3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 				for (int i = 0; i < fheaders.length; i ++){
 	
 					Label l = new Label(mappingPanel, SWT.NONE);

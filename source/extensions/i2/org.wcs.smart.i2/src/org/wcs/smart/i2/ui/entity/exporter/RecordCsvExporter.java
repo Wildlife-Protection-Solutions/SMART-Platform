@@ -38,6 +38,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -57,6 +58,8 @@ import au.com.bytecode.opencsv.CSVWriter;
  */
 public class RecordCsvExporter implements ICsvDataExporter {
 
+	private static final String LAST_FILE_KEY = "org.wcs.smart.i2.ui.entity.exporter.RecordCsvExport.LAST_FILE"; //$NON-NLS-1$
+	
 	private List<UUID> uuids = null;
 	
 	public RecordCsvExporter(List<UUID> recordsToExport){
@@ -69,6 +72,15 @@ public class RecordCsvExporter implements ICsvDataExporter {
 	public boolean exportCsvFile(File file, char delimiter,
 			ConservationArea ca, boolean headers, IProgressMonitor monitor,
 			Session session) throws Exception {
+		
+		//update last file name
+		String lastFile = file.getName();
+		if (lastFile.lastIndexOf('.') > 0){
+			lastFile = lastFile.substring(0, lastFile.lastIndexOf('.'));
+		}
+		Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_FILE_KEY, lastFile);
+		
+		
 		monitor.beginTask(Messages.RecordCsvExporter_TaskName, uuids.size() + 2);
 		monitor.worked(1);
 		
@@ -80,7 +92,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 		List<IntelRecordSourceAttribute> attributes = q.list();
 		
 		
-		String[] data = new String[attributes.size() + 7];
+		String[] data = new String[attributes.size() + 5];
 		int i = 0;
 		data[i++] = Messages.RecordCsvExporter_TitleColumn;
 		data[i++] = Messages.RecordCsvExporter_DateCreatedColumn;
@@ -199,7 +211,9 @@ public class RecordCsvExporter implements ICsvDataExporter {
 			
 			@Override
 			public String getDefaultFileName() {
-				return "records"; //$NON-NLS-1$
+				String lastFile = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(LAST_FILE_KEY);
+				if (lastFile == null || lastFile.isEmpty()) return "records"; //$NON-NLS-1$
+				return lastFile;
 			}
 			
 			@Override
