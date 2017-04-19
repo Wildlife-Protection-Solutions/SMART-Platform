@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.patrol.feature.nl.es"
       label="SMART Patrol CyberTracker Spanish Language Pack"
-      version="4.0.1"
+      version="5.0.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 
