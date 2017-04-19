@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.cybertracker.survey.feature.nl.lo"
       label="SMART Survey CyberTracker Loas Language Pack"
-      version="4.0.1"
+      version="5.0.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 
