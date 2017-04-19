@@ -47,7 +47,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.report.birt.map.nl_mn"
+         id="org.wcs.smart.birt.map.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"

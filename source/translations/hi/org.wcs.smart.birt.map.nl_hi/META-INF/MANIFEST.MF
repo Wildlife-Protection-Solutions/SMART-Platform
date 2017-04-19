@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.wcs.smart.birt.map Hindi NLS Support
-Bundle-SymbolicName: org.wcs.smart.report.birt.map.nl_hi
+Bundle-SymbolicName: org.wcs.smart.birt.map.nl_hi
 Bundle-Version: 4.0.1
 Fragment-Host: org.wcs.smart.birt.map;bundle-version="4.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
