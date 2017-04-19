@@ -111,9 +111,6 @@
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.in_5.0.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.in" version="5.0.0">
       <category name="cybertracker"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.lo_4.0.1.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.lo" version="4.0.1">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.mn_5.0.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.mn" version="5.0.0">
       <category name="cybertracker"/>
    </feature>
@@ -272,6 +269,9 @@
    </feature>
    <feature url="features/org.wcs.smart.connect.dataqueue.feature.nl_es_5.0.0.jar" id="org.wcs.smart.connect.dataqueue.feature.nl_es" version="5.0.0">
       <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.lo_5.0.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.lo" version="5.0.0">
+      <category name="cybertracker"/>
    </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>
