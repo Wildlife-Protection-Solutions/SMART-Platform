@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.plan.feature.nl.in"
       label="Plan Indonesian Language Pack"
-      version="4.0.1"
+      version="5.0.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 
