@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CyberTracker Patrol Data Queue Processor Khmer Fragment
 Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.cybertracker.patrol.nl_km
-Bundle-Version: 4.0.1
-Fragment-Host: org.wcs.smart.connect.dataqueue.cybertracker.patrol;bundle-version="4.0.1"
+Bundle-Version: 5.0.0
+Fragment-Host: org.wcs.smart.connect.dataqueue.cybertracker.patrol;bundle-version="5.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart
