@@ -212,9 +212,10 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 			boolean isVisibleColumn = isDataFiltering ? ((IColumnInfoProvider)results).isDataColumn(column) : column.isVisible();
 			if (!isVisibleColumn){
 				iterator.remove();
+			}else{
+				column.setVisible(true);
 			}
 		}
-		
 		//get all data in default projection and reproject when we write out features
 		if (results instanceof IPagedQueryResultSet){
 			super.setData((IPagedQueryResultSet)results, columns, file);

@@ -59,6 +59,9 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 	protected CheckboxTableViewer columnViewer;
 	protected Button btnShowDataColumnsOnly;
 	
+	protected Link selectAll;
+	protected Link deselectAll;
+	
 	public AbstractColumnQueryPropertyProvider() {
 	}
 
@@ -104,7 +107,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 		hyperlinkComposite.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false) );
 		hyperlinkComposite.setLayout(new GridLayout(3, false));
 		
-		Link selectAll = new Link(hyperlinkComposite, SWT.NONE);
+		selectAll = new Link(hyperlinkComposite, SWT.NONE);
 		selectAll.setText("<a>" + Messages.QueryPropertiesDialog_SelectAllLabel + "</a>");  //$NON-NLS-1$//$NON-NLS-2$
 		selectAll.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -117,7 +120,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
 		gd.heightHint = selectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		lbl.setLayoutData(gd);
-		Link deselectAll = new Link(hyperlinkComposite, SWT.NONE);
+		deselectAll = new Link(hyperlinkComposite, SWT.NONE);
 		deselectAll.setText("<a>" + Messages.QueryPropertiesDialog_DeSelectAllLabel + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		deselectAll.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -180,7 +183,10 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 	}
 
 	protected void updateColumnTableState() {
-		columnViewer.getTable().setEnabled(btnShowDataColumnsOnly == null || btnShowDataColumnsOnly.isDisposed() || !btnShowDataColumnsOnly.getSelection());
+		boolean enabled = btnShowDataColumnsOnly == null || btnShowDataColumnsOnly.isDisposed() || !btnShowDataColumnsOnly.getSelection();
+		columnViewer.getTable().setEnabled(enabled);
+		selectAll.setEnabled(enabled);
+		deselectAll.setEnabled(enabled);
 	}
 	
 	/**

@@ -33,6 +33,7 @@ import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -66,8 +67,20 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		}catch (Exception ex){
 			//TODO: log me
 		}
+		
+		//observation queries that are flagged with show
+		//data columns only should import all columns
+		boolean isObs = false;
+		boolean includeAll = false;
+		if (query instanceof ObservationQuery){
+			isObs = true;
+			if (((ObservationQuery)query).isShowDataColumnsOnly()){
+				includeAll = true;
+			}
+		}
+		
 		for (QueryColumn col : query.computeQueryColumns(connection.getCurrentLocale(), connection.getSession(), provider)){
-			if (col.isVisible()){
+			if ((isObs && (includeAll || col.isVisible())) || (!isObs && col.isVisible())){
 				vis.add(col);
 			}
 		}
