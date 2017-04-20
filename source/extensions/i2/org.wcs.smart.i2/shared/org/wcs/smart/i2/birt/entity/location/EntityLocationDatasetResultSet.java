@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -96,13 +97,27 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		int index2 = pmetadata.findParameterIndex(DataSourceParameter.END_DATE.getName());
 		if (index1 > 0 && index2 > 0){
 			Date startDate = (Date) parameters.get(index1);
+			Calendar start = Calendar.getInstance();
+			start.setTime(startDate);
+			start.set(Calendar.HOUR_OF_DAY, 0);
+			start.set(Calendar.MINUTE, 0);
+			start.set(Calendar.SECOND, 0);
+			start.set(Calendar.MILLISECOND, 0);
+			
 			Date endDate = (Date) parameters.get(index2);
+			Calendar end = Calendar.getInstance();
+			end.setTime(endDate);
+			end.set(Calendar.HOUR_OF_DAY, end.getActualMaximum(Calendar.HOUR_OF_DAY));
+			end.set(Calendar.MINUTE, end.getActualMaximum(Calendar.MINUTE));
+			end.set(Calendar.SECOND, end.getActualMaximum(Calendar.SECOND));
+			end.set(Calendar.MILLISECOND, end.getActualMaximum(Calendar.MILLISECOND));
+			
 			if (startDate != null && endDate != null){
 				q1 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
 				q2 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
 				
-				values.put("start", startDate); //$NON-NLS-1$
-				values.put("end", endDate); //$NON-NLS-1$
+				values.put("start", start.getTime()); //$NON-NLS-1$
+				values.put("end", end.getTime()); //$NON-NLS-1$
 			}
 		}
 		
