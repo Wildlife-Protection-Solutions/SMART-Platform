@@ -218,7 +218,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_41;
 	public static String CyberTrackerPropertiesDialog_42;
 	public static String CyberTrackerPropertiesDialog_43;
-	public static String CyberTrackerPropertiesDialog_44;
 	public static String CyberTrackerPropertiesDialog_45;
 	public static String CyberTrackerPropertiesDialog_46;
 	public static String CyberTrackerPropertiesDialog_48;

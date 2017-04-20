@@ -848,7 +848,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	    	public void widgetSelected(SelectionEvent e) {
 	    		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
 	    		dlg.setFilterNames(new String[] {Messages.CyberTrackerPropertiesDialog_43});
-	    		dlg.setFilterExtensions(new String[] {Messages.CyberTrackerPropertiesDialog_44});
+	    		dlg.setFilterExtensions(new String[] {"*.ecw"}); //$NON-NLS-1$
 	    		String fn = dlg.open();
 	    		if (fn != null) {
 	    			txtFileName.setText(fn);

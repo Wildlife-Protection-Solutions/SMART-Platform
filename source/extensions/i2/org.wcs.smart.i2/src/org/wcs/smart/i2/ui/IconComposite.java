@@ -99,8 +99,8 @@ public class IconComposite extends Composite {
 				FileDialog fileChooser = new FileDialog(getShell(), SWT.OPEN);
 		        fileChooser.setText(Messages.IconComposite_FileChooserMsg);
 		        fileChooser.setFilterPath(lastDir);
-		        fileChooser.setFilterExtensions(new String[] { "*.gif; *.jpg; *.png; *.ico; *.bmp" }); //$NON-NLS-1$
-		        fileChooser.setFilterNames(new String[] { Messages.IconComposite_imageslabel + " (gif, jpeg, png, ico, bmp)" }); //$NON-NLS-1$
+		        fileChooser.setFilterExtensions(new String[] { "*.gif;*.jpg;*.png;*.ico;*.bmp;*.jpeg", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
+		        fileChooser.setFilterNames(new String[] { Messages.IconComposite_imageslabel + " (gif, jpg, jpeg, png, ico, bmp)", Messages.IconComposite_AllFiles }); //$NON-NLS-1$
 		        String filename = fileChooser.open();
 		        if (filename != null){
 		        	loadImage(filename);

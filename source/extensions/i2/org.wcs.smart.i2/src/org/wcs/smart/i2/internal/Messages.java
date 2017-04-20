@@ -499,6 +499,7 @@ public class Messages extends NLS {
 	public static String GPSDeviceSelectionDialog_ErrorLoadingOptions;
 	public static String GPSDeviceSelectionDialog_Message;
 	public static String GPSDeviceSelectionDialog_Title;
+	public static String IconComposite_AllFiles;
 	public static String IconComposite_FileChooserMsg;
 	public static String IconComposite_imageslabel;
 	public static String IconComposite_InvalidFile;
