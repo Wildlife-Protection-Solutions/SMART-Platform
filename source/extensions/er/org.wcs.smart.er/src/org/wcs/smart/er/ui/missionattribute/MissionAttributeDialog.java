@@ -205,6 +205,7 @@ public class MissionAttributeDialog extends TitleAreaDialog implements Selection
 			if (DeleteManager.canDelete(ma, session)){
 				attributes.remove(ma);
 				session.delete(ma);
+				session.flush();
 				lstAttributes.refresh();
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}

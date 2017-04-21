@@ -218,6 +218,7 @@ public class SamplingUnitAttributeDialog extends TitleAreaDialog implements Sele
 			if (DeleteManager.canDelete(ma, session)){
 				attributes.remove(ma);
 				session.delete(ma);
+				session.flush();
 				sortAttributes();
 				getButton(IDialogConstants.OK_ID).setEnabled(true);
 			}
