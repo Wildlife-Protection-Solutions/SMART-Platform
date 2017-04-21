@@ -277,7 +277,7 @@ public enum IntelReportManager {
 			
 			Path p = getEntityTemplate(entityType);
 			if (!Files.exists(p.getParent())){
-				Files.createDirectory(p.getParent());
+				Files.createDirectories(p.getParent());
 			}
 			if (!Files.exists(p)){
 				Session s = HibernateManager.openSession();
