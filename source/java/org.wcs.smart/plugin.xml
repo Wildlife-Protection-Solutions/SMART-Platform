@@ -17,7 +17,7 @@
  <extension-point id="org.wcs.smart.changelog.handler" name="Replication Event Handler" schema="schema/org.wcs.smart.changelog.handler.exsd"/>
  <extension-point id="org.wcs.smart.userlevel" name="SMART User Level" schema="schema/org.wcs.smart.userlevel.exsd"/>
    <extension
-         id="org.wcs.smart"
+         id="product"
          name="Smart Application"
          point="org.eclipse.core.runtime.applications">
       <application
@@ -30,10 +30,10 @@
       </application>
    </extension>
    <extension
-         id="smartapp"
+         id="smart"
          point="org.eclipse.core.runtime.products">
       <product
-            application="org.wcs.smart"
+            application="org.wcs.smart.product"
             name="SMART">
          <property
                name="windowImages"
@@ -84,7 +84,7 @@
             id="org.wcs.smart.splashHandlers.interactive">
       </splashHandler>
       <splashHandlerProductBinding
-            productId="org.wcs.smart.smartapp"
+            productId="org.wcs.smart.smart"
             splashId="org.wcs.smart.splashHandlers.interactive">
       </splashHandlerProductBinding>
    </extension>
@@ -1577,7 +1577,7 @@
             id="org.wcs.smart.udig.legend.LegendRenderer"
             name="Smart Legend Renderer">
       </renderer>
-   </extension> 
+   </extension>
 
 </plugin>
 
