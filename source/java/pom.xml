@@ -14,6 +14,9 @@
 		<module>org.wcs.smart.patrol</module>
 		<module>org.wcs.smart.query</module>
 		<module>org.wcs.smart.observation</module>
+		
+		<module>../extensions/i2/org.wcs.smart.i2/pom.xml</module>
+		<module>../extensions/connect/org.wcs.smart.connect/pom.xml</module>
 	</modules>
 	
 	
