@@ -182,9 +182,10 @@ public class EntityRelationshipExporter {
 			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg4);
 			
 			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(relationships))){
-				String[] data = new String[relationshipAttributes.size() + 5];
+				String[] data = new String[relationshipAttributes.size() + 6];
 				int i = 0;
 				data[i++] = Messages.EntityRelationshipExporter_RelationshipUuidColumnName;
+				data[i++] = "Relationship Type";
 				data[i++] = Messages.EntityRelationshipExporter_SrcEntityUuid;
 				data[i++] = Messages.EntityRelationshipExporter_SrcEntityId;
 				data[i++] = Messages.EntityRelationshipExporter_TargetEntityUuid;
@@ -199,6 +200,7 @@ public class EntityRelationshipExporter {
 					data = new String[data.length];
 					i=0;
 					data[i++] = UuidUtils.uuidToString(e.getUuid());
+					data[i++] = e.getRelationshipType().getName();
 					data[i++] = UuidUtils.uuidToString(e.getSourceEntity().getUuid());
 					data[i++] = e.getSourceEntity().getIdAttributeAsText();
 					data[i++] = UuidUtils.uuidToString(e.getTargetEntity().getUuid());
@@ -248,10 +250,28 @@ public class EntityRelationshipExporter {
 		return sb.toString();
 	}
 	
+	
+	/**
+	 * Determines the entity file name by cleaning the provided name
+	 * then adding _relationships.csv to it
+	 * 
+	 * @param dir
+	 * @param name
+	 * @return
+	 */
 	public static Path getEntityFile(Path dir, String name){
 		name = cleanFilename(name);
 		return dir.resolve(name + "_entities.csv"); //$NON-NLS-1$
 	}
+	
+	/**
+	 * Determines the relationship file name by cleaning the provided name
+	 * then adding _relationships.csv to it
+	 * 
+	 * @param dir
+	 * @param name
+	 * @return
+	 */
 	public static  Path getRelationshipFile(Path dir, String name){
 		name = cleanFilename(name);
 		return dir.resolve(name + "_relationships.csv"); //$NON-NLS-1$
