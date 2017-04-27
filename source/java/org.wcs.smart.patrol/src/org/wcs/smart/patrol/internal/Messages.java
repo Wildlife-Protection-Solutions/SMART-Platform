@@ -484,6 +484,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_Comment_Label;
 	public static String PatrolSummaryEditor_ConfDialog_UpdateTime_Message;
 	public static String PatrolSummaryEditor_ConfDialog_UpdateTime_Title;
+	public static String PatrolSummaryEditor_ConvertToMultiLeg;
 	public static String PatrolSummaryEditor_Edit_Tooltip;
 	public static String PatrolSummaryEditor_EndDate_Label;
 	public static String PatrolSummaryEditor_Error_CannotEdit;
@@ -535,6 +536,8 @@ public class Messages extends NLS {
 	public static String PatrolTransportChangeDialog_TimeLabel;
 	public static String PatrolTransportChangeDialog_TransportChangeLegIdentifier;
 	public static String PatrolTransportComposite_Error_NoTransportType;
+	public static String PatrolTransportComposite_PilotLabel;
+	public static String PatrolTransportComposite_PilotRequired;
 	public static String PatrolTransportComposite_Title;
 	public static String PatrolTransportComposite_TransportType_Lable;
 	public static String PatrolTransportCsvExportConfig_DialogMessage;

@@ -63,6 +63,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
@@ -90,6 +91,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.ArmedComposite;
 import org.wcs.smart.patrol.internal.ui.CommentComposite;
+import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.internal.ui.EmployeeLeaderPilotComposite;
 import org.wcs.smart.patrol.internal.ui.ObjectiveComposite;
 import org.wcs.smart.patrol.internal.ui.PatrolIdComposite;
@@ -382,9 +384,36 @@ public class PatrolSummaryEditor extends EditorPart {
 		editDates.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				if (showEditDialog(new PatrolLegsComposite(true))){
-					editor.createDayPages();
-					recheckForMultiPatrol();
+				if (!isMulti){
+					if (showEditDialog(new DateComposite(){
+						@Override
+						public Composite createComponent(Composite parent, int style) {
+							Composite main = super.createComponent(parent, style);
+							
+							Link link = new Link((Composite)main.getChildren()[0], SWT.NONE);
+							link.setText("<a>" + Messages.PatrolSummaryEditor_ConvertToMultiLeg + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+							link.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1));
+							link.addListener(SWT.MouseUp, event -> {
+								//close this dialog
+								main.getShell().close();
+								if (showEditDialog(new PatrolLegsComposite(true))){
+									editor.createDayPages();
+									recheckForMultiPatrol();
+								}
+								
+							} );
+							return main;
+						
+						}})){
+						editor.createDayPages();
+						recheckForMultiPatrol();
+					}
+				}else{
+					//multi leg
+					if (showEditDialog(new PatrolLegsComposite(true))){
+						editor.createDayPages();
+						recheckForMultiPatrol();
+					}
 				}
 			}
 		});

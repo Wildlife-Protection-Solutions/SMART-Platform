@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,7 +46,9 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
 
 /**
  *  Patrol item composite for selecting patrol transport type. 
@@ -135,6 +139,29 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 		if (pm != null){
 			patrolLeg.setType(pm);
 			patrolLeg.getPatrol().recalculateType();
+			
+			if (pm.getPatrolType().requiresPilot()){
+				//prompt for pilot
+				boolean hasPilot = false;
+				for (PatrolLegMember member : patrolLeg.getMembers()){
+					if (member.getIsPilot()){
+						hasPilot = true;
+						break;
+					}
+				}
+				if (!hasPilot){
+					//as for pilot
+					EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(patrolTypeViewer.getControl().getShell(), Messages.PatrolTransportComposite_PilotLabel, 
+							MessageFormat.format(Messages.PatrolTransportComposite_PilotRequired, pm.getName()), EmployeeSelectorDialog.Type.PILOT,patrolLeg);
+					if (dialog.open() != Window.OK) return false;  //not pilot selected
+				}
+				
+			}else{
+				//remove all pilots
+				for (PatrolLegMember member : patrolLeg.getMembers()){
+					member.setIsPilot(false);
+				}
+			}
 			return true;
 		}else{
 			SmartPatrolPlugIn.displayLog(Messages.PatrolTransportComposite_Error_NoTransportType, null);
