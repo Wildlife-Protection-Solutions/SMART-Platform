@@ -543,13 +543,13 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 					getEmployeeDetails.setBytes(1, UuidUtils.uuidToByte(employeeUuid));
 					
 					String smartUserId = null;
-					int userlevel = 0;
+					Object userlevel = 0;
 					try(ResultSet re = getEmployeeDetails.executeQuery()){
 						if (re.next()){
 							//this is a ccaa employee we don't need to do anything
 							if (UuidUtils.byteToUUID(re.getBytes(1)).equals(ConservationArea.MULTIPLE_CA)) continue;
 							smartUserId = re.getString(2);
-							userlevel = re.getInt(3); 
+							userlevel = re.getObject(3); 
 						}else{
 							SmartPlugIn.log("Error upgrading ccaa users; employee not found", null); //$NON-NLS-1$
 						}
@@ -586,7 +586,7 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 							psinsert.setDate(6, new java.sql.Date(newe.getStartEmploymentDate().getTime()));
 							psinsert.setString(7, newe.getSmartUserId());
 							psinsert.setString(8, newe.getSmartPassword());
-							psinsert.setInt(9, userlevel);
+							psinsert.setObject(9, userlevel);
 							psinsert.setDate(10, new java.sql.Date((new Date()).getTime()));
 							psinsert.setString(11, String.valueOf(newe.getGender()));
 							
