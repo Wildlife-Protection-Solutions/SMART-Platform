@@ -18,8 +18,8 @@
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="uieditor" minOccurs="1" maxOccurs="unbounded"/>
-            <element ref="edit" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="uieditor" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="edit" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>

@@ -2,7 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.wcs.smart.patrol.wizardpage" name="New Patrol Wizard Page " schema="schema/org.wcs.smart.patrol.wizardpage.exsd"/>
-   <extension-point id="org.wcs.smart.patrol.editorContribution" name="Patrol Editor Contribution" schema="schema/org.wcs.smart.patrol.editorContribution.exsd"/>
    <extension-point id="org.wcs.smart.patrol.contribution" name="Patrol Contribution" schema="schema/org.wcs.smart.patrol.contribution.exsd"/>
    <extension-point id="org.wcs.smart.patrol.xml" name="XML Export/Import Contribution" schema="schema/org.wcs.smart.patrol.xml.exsd"/>
    <extension

@@ -36,10 +36,11 @@ public interface IPatrolEditContribution {
 	public static final String EXTENSION_ID = "org.wcs.smart.patrol.contribution"; //$NON-NLS-1$
 	
 	/**
-	 * Called when the patrol is split from one patrol into mutliple patrols.
+	 * Called when the patrol is split from one patrol into multiple patrols.
+	 * Called once for each new patrol created from the original patrol.
 	 * 
 	 * @param originalPatrol the original patrol
-	 * @param newPatrols the new patrol
+	 * @param newPatrol the new patrol
 	 * 
 	 */
 	public void splitPatrol(Session s, Patrol originalPatrol, Patrol newPatrol);

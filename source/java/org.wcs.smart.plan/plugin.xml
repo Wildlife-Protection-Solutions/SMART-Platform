@@ -671,15 +671,6 @@
       </class>
    </extension>
    <extension
-         point="org.wcs.smart.patrol.editorContribution">
-      <uieditor
-            class="org.wcs.smart.plan.internal.ui.patrol.PatrolPlanContribution">
-      </uieditor>
-      <edit
-            class="org.wcs.smart.plan.internal.patrol.PatrolPlanLinkCopyContribution">
-      </edit>
-   </extension>
-   <extension
          point="org.wcs.smart.patrol.contribution">
       <uieditor
             class="org.wcs.smart.plan.internal.ui.patrol.PatrolPlanContribution">

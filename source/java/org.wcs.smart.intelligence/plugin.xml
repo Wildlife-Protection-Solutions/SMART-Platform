@@ -818,19 +818,10 @@
       </editor>
    </extension>
    <extension
-         point="org.wcs.smart.patrol.editorContribution">
-      <uieditor
-            class="org.wcs.smart.intelligence.ui.patrol.ReportedIntelligenceContribution">
-      </uieditor>
+         point="org.wcs.smart.patrol.contribution">
       <uieditor
             class="org.wcs.smart.intelligence.ui.patrol.MotivationIntelligenceContribution">
       </uieditor>
-      <edit
-            class="org.wcs.smart.intelligence.patrol.PatrolIntelLinkCopyContribution">
-      </edit>
-   </extension>
-   <extension
-         point="org.wcs.smart.patrol.contribution">
       <uieditor
             class="org.wcs.smart.intelligence.ui.patrol.ReportedIntelligenceContribution">
       </uieditor>
