@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -326,6 +327,10 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 	private void deleteItem(){
 		IntelWorkingSet toDelete = getSelectedItem();
 		if (toDelete == null) return;
+		
+		if (!MessageDialog.openQuestion(getParentShell(), Messages.WorkingSetListDialog_DeleteWs, MessageFormat.format(Messages.WorkingSetListDialog_DeleteWsMsg, toDelete.getName()))){
+			return;
+		}
 		
 		boolean deleteok = false;
 		Session s = HibernateManager.openSession();

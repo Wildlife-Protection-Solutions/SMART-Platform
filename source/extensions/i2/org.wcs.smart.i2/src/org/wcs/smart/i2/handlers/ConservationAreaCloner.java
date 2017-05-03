@@ -44,6 +44,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 
 /**
  * Clones intelligence template details
@@ -220,6 +221,18 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				}
 				group.getRelationshipTypes().add(clone);
 				engine.getSession().save(group);	
+			}
+			
+			if (g.getAttributes() != null){
+				clone.setAttributes(new ArrayList<>(g.getAttributes().size()));
+				for (IntelRelationshipTypeAttribute a : g.getAttributes()){
+					IntelRelationshipTypeAttribute aclone = new IntelRelationshipTypeAttribute();
+					aclone.setRelationshipType(clone);
+					aclone.setOrder(a.getOrder());
+					aclone.setAttribute((IntelAttribute)engine.getNewConservationItem(a.getAttribute()));
+					
+					clone.getAttributes().add(aclone);
+				}
 			}
 			
 			engine.getSession().save(clone);

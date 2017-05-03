@@ -1188,6 +1188,8 @@ public class Messages extends NLS {
 	public static String WorkingSetListDialog_createcopyLabel;
 	public static String WorkingSetListDialog_DefaultCopyWsName;
 	public static String WorkingSetListDialog_DeleteError;
+	public static String WorkingSetListDialog_DeleteWs;
+	public static String WorkingSetListDialog_DeleteWsMsg;
 	public static String WorkingSetListDialog_deletetooltip;
 	public static String WorkingSetListDialog_loadingJobName;
 	public static String WorkingSetListDialog_Message;
