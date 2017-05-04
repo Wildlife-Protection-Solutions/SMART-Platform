@@ -92,7 +92,6 @@ import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
 
-import com.drew.lang.annotations.NotNull;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
@@ -595,7 +594,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 * @param p
 	 * @param dateTime
 	 */
-	public void addNewLocation(@NotNull Geometry p, Date dateTime){
+	public void addNewLocation(Geometry p, Date dateTime){
+		if (p == null) return;
 		IntelLocation newLocation = new IntelLocation();
 		newLocation.setComment(null);
 		newLocation.setDateTime(dateTime == null ? record.getDateCreated() : dateTime);
@@ -603,7 +603,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		addNewLocations(Collections.singletonList(newLocation));
 	}
 	
-	public void addNewLocations(@NotNull List<IntelLocation> newLocations){
+	public void addNewLocations(List<IntelLocation> newLocations){
+		if (newLocations == null) return;
 		if (record.getLocations() == null) record.setLocations(new ArrayList<IntelLocation>());
 		
 		for (IntelLocation newLocation : newLocations){

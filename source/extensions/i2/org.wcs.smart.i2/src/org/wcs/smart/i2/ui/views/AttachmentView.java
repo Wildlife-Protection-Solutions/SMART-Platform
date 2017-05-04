@@ -42,9 +42,11 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
@@ -53,6 +55,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Simple view for displaying an image attachment
@@ -69,6 +72,7 @@ public class AttachmentView {
 	private Image rawImage;
 	private Image screenImage;
 	private AffineTransform transform = null;
+	private Transform exifTransform = null;
 	
 	@Inject
 	private IEclipseContext context;
@@ -111,6 +115,25 @@ public class AttachmentView {
 		parent.addListener(SWT.Resize, e-> draw.setBounds(thisParent.getClientArea()));
 		
 		rawImage = context.get(Image.class);
+		IntelAttachment att = context.get(IntelAttachment.class);
+		exifTransform = SmartUtils.getExifImageTransform(att.getAttachmentFile(), rawImage.getBounds().width, rawImage.getBounds().height);
+		
+		if (exifTransform != null){
+			//transform image
+//			float t[] = new float[6];
+//			exifTransform.getElements(t);
+			
+			int size = Math.max(rawImage.getBounds().width, rawImage.getBounds().height);
+			int w = (int) (rawImage.getBounds().width );
+			int h = (int) (rawImage.getBounds().height);
+			
+	        Image newImage = new Image(Display.getDefault(), size, size);
+			GC gc3 = new GC(newImage);
+			gc3.setTransform(exifTransform);
+			gc3.drawImage(rawImage, 0,0);
+			rawImage.dispose();
+			rawImage = newImage;
+		}
 		
 		draw.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		draw.addPaintListener(new PaintListener() {
@@ -121,15 +144,12 @@ public class AttachmentView {
 					if (transform == null){
 						//initial zoom
 						transform = new AffineTransform();
-						Rectangle rect = draw.getClientArea();
-						int w = rect.width, h = rect.height;
+						int w = rawImage.getBounds().width, h = rawImage.getBounds().height;
 						/* zooming center */
 						double dx = ((double) w) / 2;
 						double dy = ((double) h) / 2;
-						
 						double xscale = (draw.getClientArea().width * 1.0) / rawImage.getBounds().width;
 						double yscale = (draw.getClientArea().height * 1.0) / rawImage.getBounds().height;
-						
 						centerZoom(dx, dy, Math.min(xscale, yscale), transform);
 						return;
 					}
@@ -148,6 +168,8 @@ public class AttachmentView {
 					if (screenImage != null) {
 						screenImage.dispose();
 					}
+					
+					
 					screenImage = new Image(draw.getDisplay(), clientRect.width, clientRect.height);
 					GC newGC = new GC(screenImage);
 					newGC.setClipping(clientRect);

@@ -4,8 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="shared"/>
-	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor-2.9.1.jar" sourcepath="C:/Users/Emily/.m2/repository/com/drewnoakes/metadata-extractor/2.9.1/metadata-extractor-2.9.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xmpcore-5.1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/java-string-similarity-0.19.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcip-annotations-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.6.jar"/>
