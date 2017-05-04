@@ -41,6 +41,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.locationtech.udig.catalog.URLUtils;
@@ -49,6 +50,11 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifIFD0Directory;
 
 /**
  * General utility functions.
@@ -591,4 +597,61 @@ public class SmartUtils {
 		return toReplace.replaceAll(search, replace);
 	}
 	
+	public static Transform getExifImageTransform(File file, int width, int height){
+		
+		Metadata metadata = null;
+		try {
+			metadata = ImageMetadataReader.readMetadata(file.getAbsoluteFile());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		ExifIFD0Directory exifIFD0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+		int orientation = 1;
+		try {
+			if (exifIFD0Directory != null) orientation = exifIFD0Directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+		} catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+			return null;
+		}	
+		
+		Transform imageTransform = new Transform(Display.getDefault());
+		switch (orientation) {
+		case 1:
+			return null; //default
+		case 2: // Flip X
+			imageTransform.scale(-1.0f, 1.0f);
+			imageTransform.translate(-width, 0);
+			break;
+		case 3: // PI rotation
+			imageTransform.translate(width, height);
+			imageTransform.rotate(180f);
+			break;
+		case 4: // Flip Y
+			imageTransform.scale(1.0f, -1.0f);
+			imageTransform.translate(0, -height);
+			break;
+		case 5: // - PI/2 and Flip X
+			imageTransform.rotate(-90f);
+			imageTransform.scale(-1.0f, 1.0f);
+			break;
+		case 6: // -PI/2 and -width
+			imageTransform.translate(height, 0);
+			imageTransform.rotate(90);
+			break;
+		case 7: // PI/2 and Flip
+			imageTransform.scale(-1.0f, 1.0f);
+			imageTransform.translate(-height, 0);
+			imageTransform.translate(0, width);
+			imageTransform.rotate(270f);
+			break;
+		case 8: // PI / 2
+			imageTransform.translate(0, width);
+			imageTransform.rotate(270f);
+			break;
+		default:
+			return null;
+		}
+		return imageTransform;
+	}
 }

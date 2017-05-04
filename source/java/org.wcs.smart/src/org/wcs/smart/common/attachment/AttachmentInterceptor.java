@@ -22,6 +22,7 @@
 package org.wcs.smart.common.attachment;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +87,7 @@ public class AttachmentInterceptor extends SessionInterceptor {
     		ISmartAttachment attachment = (ISmartAttachment) entity;
     		try {
     			attachment.computeFileLocation(session);
-				toDelete.add(attachment.getAttachmentFile());
+				toDelete.add(attachment.getAttachmentFile().getCanonicalFile());
 			} catch (Exception ex) {
 				SmartPlugIn.log("Unable to delete attachment", ex); //$NON-NLS-1$
 			}
@@ -151,6 +152,7 @@ public class AttachmentInterceptor extends SessionInterceptor {
     					}
     				}
     				attachment.setCopyFromLocation(null);
+    				attachment.computeFileLocation(to);
     			}
     		}
     		
