@@ -143,6 +143,10 @@ public class AttachmentTable extends Composite implements Listener {
 		redraw.schedule();
 	}
 	
+	public void refreshThumbnails(){
+		redraw.schedule();
+	}
+	
 	
 	
 	private Job redraw = new Job("redraw thumbnails"){ //$NON-NLS-1$
@@ -221,29 +225,13 @@ public class AttachmentTable extends Composite implements Listener {
 					thumbs.add(new ThumbInfo(a));
 				}
 			}else{
-				//let's merge file
-				List<ThumbInfo> old = thumbs;
+				for (ThumbInfo t : thumbs){
+					t.thumb.disposeImage();
+				}
+				
 				thumbs = new ArrayList<AttachmentTable.ThumbnailComposite.ThumbInfo>();
 				for (ISmartAttachment file : fileNames){
-					ThumbInfo found = null;
-					for (ThumbInfo o : old){
-						if (o.file.equals(file)){
-							found = o;
-							break;
-						}
-					}
-					if (found != null){
-						old.remove(found);
-						thumbs.add(found);
-					}else{
-						thumbs.add(new ThumbInfo(file));
-					}
-				}
-				for (ThumbInfo i : old){
-					if (i.thumb != null){
-						//dispose of unused images
-						i.thumb.disposeImage();
-					}
+					thumbs.add(new ThumbInfo(file));
 				}
 			}
 			int index = 0;

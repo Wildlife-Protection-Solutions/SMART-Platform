@@ -115,6 +115,7 @@ public class AttachmentListComposite extends Composite{
 			private MenuItem mnuDelete;
 			private MenuItem mnulinkTo;
 			private MenuItem mnuProperties;
+			private MenuItem mnuRefresh;
 			private MenuItem mnuSep;
 			
 			private Menu thumbMenu;
@@ -289,6 +290,17 @@ public class AttachmentListComposite extends Composite{
 						mnulinkTo = null;
 					}
 				}
+				if (mnuRefresh == null){
+					mnuRefresh = new MenuItem(thumbMenu,SWT.DEFAULT);
+					mnuRefresh.setText("Refresh Images...");
+					mnuRefresh.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							attachmentTable.refreshThumbnails();
+						}
+					});
+				}
+				
 				if (mnuProperties == null){
 					mnuProperties = new MenuItem(thumbMenu,SWT.DEFAULT);
 					mnuProperties.setText(Messages.AttachmentListComposite_PropertiesItem);
