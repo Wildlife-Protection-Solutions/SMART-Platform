@@ -292,7 +292,7 @@ public class AttachmentListComposite extends Composite{
 				}
 				if (mnuRefresh == null){
 					mnuRefresh = new MenuItem(thumbMenu,SWT.DEFAULT);
-					mnuRefresh.setText("Refresh Images...");
+					mnuRefresh.setText(Messages.AttachmentListComposite_Refresh);
 					mnuRefresh.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {

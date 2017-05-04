@@ -37,6 +37,7 @@ public class Messages extends NLS {
 	public static String AttachmentListComposite_ProcessingError;
 	public static String AttachmentListComposite_ProcessingFilesTask;
 	public static String AttachmentListComposite_PropertiesItem;
+	public static String AttachmentListComposite_Refresh;
 	public static String AttachmentListComposite_SearchItem;
 	public static String AttachmentPropertiesDialog_CreatedByLabel;
 	public static String AttachmentPropertiesDialog_CreatedOnLabel;
