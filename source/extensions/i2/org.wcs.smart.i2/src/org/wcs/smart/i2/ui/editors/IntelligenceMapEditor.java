@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -113,8 +114,12 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
+import org.wcs.smart.i2.model.IntelWorkingSetEntity;
+import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
@@ -446,6 +451,55 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 			}
 		};
 		parentContext.get(IEventBroker.class).subscribe(IntelEvents.QUERY_MODIFIED, handler);
+		handlers.add(handler);
+		
+		
+		handler = new EventHandler() {
+			@Override
+			public void handleEvent(Event event) {
+				//refresh map
+				//only if the record is part of the working set
+				boolean refresh = false;
+				Session s = HibernateManager.openSession();
+				try{
+					IntelWorkingSet set = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
+					Object data = (Object) event.getProperty(IEventBroker.DATA);
+					Collection<?> items= null;
+					if (data instanceof IntelRecord){
+						items = Collections.singletonList(data);
+					}else if(data instanceof IntelEntity){
+						items = Collections.singletonList(data);
+					}else if (data instanceof Collection){
+						items = (Collection<?>) data;
+					}else{
+						return;
+					}
+					for (IntelWorkingSetRecord r : set.getRecords()){
+						if (items.contains(r.getRecord())){
+							refresh = true;
+							break;
+						}
+					}
+					if (!refresh){
+						for (IntelWorkingSetEntity r : set.getEntities()){
+							if (items.contains(r.getEntity())){
+								refresh = true;
+								break;
+							}
+						}	
+					}
+					
+				}finally{
+					s.close();
+				}
+				if (refresh){
+					mapViewer.getRenderManager().refresh(null);
+				}
+				
+			}
+		};
+		parentContext.get(IEventBroker.class).subscribe(IntelEvents.RECORD_MODIFIED, handler);
+		parentContext.get(IEventBroker.class).subscribe(IntelEvents.ENTITY_MODIFIED, handler);
 		handlers.add(handler);
 		
 		handler = new EventHandler() {

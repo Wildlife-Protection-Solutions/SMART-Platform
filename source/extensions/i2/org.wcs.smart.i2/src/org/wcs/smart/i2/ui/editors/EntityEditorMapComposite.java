@@ -154,13 +154,13 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	private DateFilterDropDownComposite dateComp;
 	private Date[] dateFilter = null;
 	
-    private List<ContentFilterLayerImpl> locationLayers = null;
+    private List<ContentFilterLayerImpl> locationLayers = null; //record locations layers
 	
     private FormToolkit toolkit;
     private TableViewer locationTable;
     
     private IntelEntityService service = null;
-    private LocationAttributeMapLayer locationLayer;
+    private LocationAttributeMapLayer locationLayer;	//entity attribute layer
     
 	public EntityEditorMapComposite(Composite parent, EntityEditor parentEditor, FormToolkit toolkit) {
 		super(parent, SWT.NONE);
@@ -556,6 +556,11 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			//refresh existing layers
 			getMap().getRenderManager().refresh(null);
 
+			//necessary to refresh layer
+			for (ContentFilterLayerImpl layer : locationLayers){
+				 layer.setContentFilter(layer.getContentFilter());
+			 }
+			
 			//refresh attribute geometries
 			for (IntelEntityAttributeValue v : editor.getEntity().getAttributes()){
 				if (v.getAttribute().getType() == AttributeType.POSITION){
