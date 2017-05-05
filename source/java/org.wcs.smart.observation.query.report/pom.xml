@@ -8,8 +8,8 @@
 		<version>6.0.0-SNAPSHOT</version>
 	</parent>
 	
-	<name>SMART Observation Module</name>
-	<artifactId>org.wcs.smart.observation</artifactId>
+	<name>SMART Observation Query Report Module</name>
+	<artifactId>org.wcs.smart.observation.query.report</artifactId>
   	<packaging>eclipse-plugin</packaging>
 	<version>6.0.0-SNAPSHOT</version>
 
