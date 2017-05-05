@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.wcs.smart</groupId>
+	<artifactId>smart</artifactId>
+	<version>6.0.0-SNAPSHOT</version>
+	<name>SMART</name>
+	<packaging>pom</packaging>
+	
+	<modules>
+		<module>org.wcs.smart/pom-libs.xml</module>
+		<module>org.wcs.smart.hibernate.libs/pom-libs.xml</module>
+		<module>org.wcs.smart.patrol/pom-libs.xml</module>
+		<!--<module>org.wcs.smart.query/pom-libs.xml</module>-->
+		<!--<module>org.wcs.smart.observation/pom-libs.xml</module>-->
+		
+		<!--<module>../extensions/i2/org.wcs.smart.i2/pom.xml</module>-->
+		<!--<module>../extensions/connect/org.wcs.smart.connect/pom.xml</module>-->
+	</modules>
+	
+	
+	<repositories>
+		<repository>
+			<id>opengeo</id>
+			<name>OpenGeo Maven Repository</name>
+			<url>http://repo.opengeo.org</url>
+			<snapshots><enabled>false</enabled></snapshots>
+    		</repository>
+	</repositories>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.4.1</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}/lib</directory>
+							<includes>
+								<include>*.*</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<overWrite>true</overWrite>
+							<outputDirectory>${basedir}/lib</outputDirectory>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+							<excludeScope>provided</excludeScope>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
