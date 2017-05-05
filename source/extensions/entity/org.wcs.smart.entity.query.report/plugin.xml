@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.report.birt.query.queryDataset">
+      <QueryTypeDataset
+            class="org.wcs.smart.entity.query.report.data.EntityReportQuery"
+            queryTypeKey="entitygrid">
+      </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.entity.query.report.data.EntityReportQuery"
+            metadataProvider="org.wcs.smart.entity.query.report.data.SummaryMetadataProvider"
+            queryTypeKey="entitysummary">
+      </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.entity.query.report.data.EntityReportQuery"
+            queryTypeKey="entityobservation">
+      </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.entity.query.report.data.EntityReportQuery"
+            queryTypeKey="entitywaypoint">
+      </QueryTypeDataset>
+   </extension>
+   <extension
+         point="org.wcs.smart.report.birt.maplayer">
+      <MapLayer
+            maplayer="org.wcs.smart.entity.query.report.map.QueryMapLayer">
+      </MapLayer>
+      <StyleProvider
+            styleprovider="org.wcs.smart.entity.query.report.data.QueryStyleProvider">
+      </StyleProvider>
+   </extension>
+
+</plugin>

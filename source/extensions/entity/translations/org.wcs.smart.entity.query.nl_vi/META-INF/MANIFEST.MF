@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART Vietnamese Entity Tracker Query Fragment
+Bundle-SymbolicName: org.wcs.smart.entity.query.nl_vi
+Bundle-Version: 6.0.0
+Fragment-Host: org.wcs.smart.entity.query;bundle-version="6.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: org.wcs.smart

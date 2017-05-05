@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/entitytype" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/entitytype" 
+elementFormDefault="qualified">
+
+    <element name="EntityType" type="tns:EntityType"></element>
+    
+    <complexType name="EntityType">
+    	<sequence>
+    		<element name="names" type="tns:LabelType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="attributes" type="tns:EntityAttribute"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="dmAttribute" type="tns:DataModelAttribute"></element>
+    	</sequence>
+    	<attribute name="keyid" type="string"></attribute>
+    	<attribute name="status" type="string"></attribute>
+    	<attribute name="type" type="string"></attribute>
+    </complexType>
+
+    <complexType name="EntityAttribute">
+    	<sequence>
+    		<element name="aliases" type="tns:LabelType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="dmAttribute" type="tns:DataModelAttribute" maxOccurs="1" minOccurs="1"></element>
+    	</sequence>
+    	<attribute name="keyid" type="string"></attribute>
+    	<attribute name="isRequired" type="boolean"></attribute>
+    	<attribute name="isPrimary" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="LabelType">
+    	<attribute name="languageCode" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    	<attribute name="isDefault" type="boolean"></attribute>
+    </complexType>
+
+	<complexType name="DataModelAttribute">
+    	<sequence>
+    		<element name="aggregations" type="tns:AggregationType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="qa_minmax" type="tns:MinMaxType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="qa_regex" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="names" type="tns:LabelType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="values" type="tns:ListNode"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="tree" type="tns:TreeNodeType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="isrequired" type="boolean"></attribute>
+    	<attribute name="type">
+    		<simpleType>
+    			<restriction base="string">
+    				<enumeration value="NUMBERIC"></enumeration>
+    				<enumeration value="TEXT"></enumeration>
+    				<enumeration value="BOOLEAN"></enumeration>
+    				<enumeration value="LIST"></enumeration>
+    				<enumeration value="TREE"></enumeration>
+    				<enumeration value="DATE"></enumeration>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    </complexType>
+    
+     <complexType name="AggregationType">
+    	<attribute name="aggregation" type="string"></attribute>
+    </complexType>
+    
+    <complexType name="MinMaxType">
+    	<sequence>
+    		<element name="MinValue" type="double" maxOccurs="1" minOccurs="0"></element>
+    		<element name="MaxValue" type="double" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+    
+     <complexType name="TreeNodeType">
+    	<sequence>
+    		<element name="names" type="tns:LabelType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="children" type="tns:TreeNodeType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="isactive" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="ListNode">
+    	<sequence>
+    		<element name="names" type="tns:LabelType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="isactive" type="boolean"></attribute>
+    </complexType>
+    
+</schema>

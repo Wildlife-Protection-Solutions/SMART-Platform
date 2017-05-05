@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART Entity Tracker PlugIn
+Bundle-SymbolicName: org.wcs.smart.entity;singleton:=true
+Bundle-Version: 6.0.0.qualifier
+Bundle-Activator: org.wcs.smart.entity.EntityPlugIn
+Bundle-Vendor: org.wcs.smart
+Require-Bundle: org.eclipse.ui.forms,
+ org.locationtech.udig.style.sld,
+ org.wcs.smart.observation,
+ org.wcs.smart.query,
+ org.wcs.smart.report.birt.query,
+ org.eclipse.help,
+ org.wcs.smart.p2
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Export-Package: org.wcs.smart.entity,
+ org.wcs.smart.entity.event,
+ org.wcs.smart.entity.model
