@@ -328,7 +328,7 @@ public class QueryView {
 				}
 			}
 		}
-		
+		if (addTo == null) return; //no query open
 		IStructuredSelection selection = (IStructuredSelection) filterTree.getSelection();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object element = (Object) iterator.next();
