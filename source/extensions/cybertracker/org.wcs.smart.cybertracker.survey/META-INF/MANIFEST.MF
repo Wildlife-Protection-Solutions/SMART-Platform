@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Survey CyberTracker
+Bundle-SymbolicName: org.wcs.smart.cybertracker.survey;singleton:=true
+Bundle-Version: 6.0.0.qualifier
+Bundle-Activator: org.wcs.smart.cybertracker.survey.SurveyCyberTrackerPlugIn
+Require-Bundle: org.eclipse.ui.forms,
+ org.wcs.smart,
+ org.wcs.smart.dataentry,
+ org.wcs.smart.p2,
+ org.wcs.smart.cybertracker,
+ org.wcs.smart.er,
+ org.wcs.smart.observation
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: org.wcs.smart
+Export-Package: org.wcs.smart.cybertracker.survey.export,
+ org.wcs.smart.cybertracker.survey.model

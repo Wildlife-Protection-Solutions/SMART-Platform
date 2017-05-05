@@ -1,0 +1,7 @@
+provides.0.namespace=org.wcs.smart.cybertracker
+provides.0.name=onInstall
+provides.0.version=4.0.0
+
+provides.1.namespace=org.wcs.smart.cybertracker
+provides.1.name=onUninstall
+provides.1.version=4.0.0

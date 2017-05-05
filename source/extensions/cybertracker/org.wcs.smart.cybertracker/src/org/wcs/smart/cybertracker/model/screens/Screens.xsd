@@ -1,0 +1,305 @@
+<xs:schema version="1.0" 
+attributeFormDefault="unqualified" 
+elementFormDefault="qualified"
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/cybertracker" 
+xmlns:cts="http://www.smartconservationsoftware.org/xml/1.0/cybertracker"
+xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:complexType name="Map">
+		<xs:sequence>
+			<xs:element type="xs:string" name="Name" />
+			<xs:element type="xs:string" name="FileName" />
+			<xs:element type="xs:string" name="Lock100" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="MovingMaps">
+		<xs:sequence>
+			<xs:element name="Items" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Item" maxOccurs="unbounded" minOccurs="0">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element type="xs:string" name="Id" />
+									<xs:element type="cts:Map" name="Map" minOccurs="1" maxOccurs="1"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Node">
+		<xs:sequence>
+			<xs:element name="Items" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element type="xs:string" name="Value" maxOccurs="unbounded" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element type="xs:string" name="Id" />
+			<xs:element type="xs:string" name="Name" />
+			<xs:element type="xs:string" name="DataClass" />
+			<xs:element name="Data">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element type="xs:string" name="Name" />
+						<xs:element type="xs:double" name="SightingAccuracy" minOccurs="0" />
+						<xs:element type="xs:int" name="SightingFixCount" minOccurs="0" />
+						<xs:element type="xs:int" name="WaypointTimer" minOccurs="0" />
+						<xs:element type="xs:int" name="GpsTimeZone" minOccurs="0" />
+						<xs:element type="xs:int" name="GpsSkipTimeout" minOccurs="0" />
+						<xs:element type="xs:string" name="KioskMode" />
+						<xs:element type="xs:string" name="BigScroller" />
+						<xs:element type="xs:int" name="NextId" minOccurs="0" />
+						<xs:element type="xs:string" name="TemplateId" />
+						<xs:element type="cts:Controls" name="Controls" minOccurs="0"/>
+						<xs:element type="xs:string" name="DownloadTargetKey" />
+						<xs:element type="xs:string" name="ForceTitleBar" />
+						<xs:element type="xs:string" name="BigTitle" />
+						<xs:element type="xs:string" name="BigTab" />
+						<xs:element type="xs:string" name="DisableEditing" />
+						<xs:element type="xs:string" name="UseSD" />
+						<xs:element type="xs:string" name="TestTime" />
+						<xs:element type="xs:string" name="ResetStateOnSync" />
+						<xs:element type="xs:string" name="ClearOnNext" />
+						<xs:element type="xs:double" name="WaypointAccuracy" minOccurs="0" />
+						<xs:element type="xs:string" name="GpsTimeSync" />
+						<xs:element type="xs:string" name="ManualOnSkip" />
+						<xs:element type="xs:string" name="ManualMapOnSkip" />
+						<xs:element type="xs:string" name="ManualAllowSkip" />
+						<xs:element type="xs:string" name="SimpleCamera" />
+						<xs:element type="xs:int" name="Projection" minOccurs="0" />
+						<xs:element type="xs:int" name="UTMZone" minOccurs="0" />
+						<xs:element type="cts:MovingMaps" name="MovingMaps" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element type="cts:Node" name="Node" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Controls">
+		<xs:sequence>
+			<xs:element name="Control" maxOccurs="unbounded" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element type="xs:string" name="Type" />
+						<xs:element type="xs:string"
+							name="LockProperties" />
+						<xs:element type="xs:int" name="Id"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="BorderWidth"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="BorderStyle"
+							minOccurs="0" />
+						<xs:element type="xs:string" name="Color" />
+						<xs:element type="xs:string" name="Transparent" />
+						<xs:element type="xs:int" name="Align"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="Left"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="Top"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="Width"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="Height"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="ButtonWidth"
+							minOccurs="0" />
+						<xs:element type="xs:int"
+							name="ButtonBorderWidth" minOccurs="0" />
+						<xs:element type="xs:string"
+							name="Translate__NextScreenId" />
+						<xs:element type="xs:string"
+							name="Translate__Font" />
+						<xs:element type="xs:string" name="TextColor" />
+						<xs:element type="xs:int" name="MinHeight"
+							minOccurs="0" />
+						<xs:element type="xs:string"
+							name="UseScreenName" />
+						<!--						<xs:element type="cts:PagesType" name="Pages" />	-->
+						<xs:element type="xs:string" name="Caption" />
+						<xs:element type="xs:string"
+							name="Translate__Element" />
+						<xs:element type="xs:int" name="Version"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="ItemHeight"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="ColumnCount"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="Attribute"
+							minOccurs="0" />
+						<xs:element type="xs:int"
+							name="AttributeDetails" minOccurs="0" />
+						<xs:element type="xs:int" name="ListMode"
+							minOccurs="0" />
+						<xs:element type="xs:string"
+							name="Translate__Elements" />
+						<xs:element type="xs:string"
+							name="Translate__Links" />
+						<xs:element type="xs:string"
+							name="Translate__RadioElement" />
+						<xs:element type="xs:int" name="ButtonHeight"
+							minOccurs="0" />
+						<xs:element type="xs:int"
+							name="ButtonBorderStyle" minOccurs="0" />
+						<xs:element type="xs:string"
+							name="Translate__ButtonFont" minOccurs="0" />
+						<xs:element type="xs:int" name="DisplayHeight"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="MinValue"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="MaxValue"
+							minOccurs="0" />
+						<xs:element type="xs:string"
+							name="Translate__MajorScreenId" />
+						<xs:element type="xs:string"
+							name="Translate__MinorScreenId" />
+						<xs:element type="xs:string" name="ShowEdit" />
+						<xs:element type="xs:string" name="ShowGPS" />
+						<xs:element type="xs:string" name="ShowMajor" />
+						<xs:element type="xs:string" name="ShowMinor" />
+						<xs:element type="xs:string" name="ShowBack" />
+						<xs:element type="xs:string" name="ShowNext" />
+						<xs:element type="xs:string"
+							name="AutoRadioNext" />
+						<xs:element type="cts:Controls" name="Controls"
+							minOccurs="0" />
+						<xs:element type="xs:string" name="Stretch" />
+						<xs:element type="xs:string"
+							name="Proportional" />
+						<xs:element type="xs:string"
+							name="FilterEnabled" />
+						<xs:element type="xs:string"
+							name="Translate__Filter" />
+						<xs:element type="xs:string" name="Formula" />
+						<xs:element type="xs:string" name="Hidden" />
+						<xs:element type="xs:string"
+							name="Translate__TargetScreenId0" />
+						<xs:element type="xs:string"
+							name="Translate__TargetScreenId1" />
+						<xs:element type="xs:string"
+							name="ResultGlobalValue" />
+						<xs:element type="xs:string"
+							name="Translate__ResultElementId" />
+						<xs:element type="xs:double"
+							name="SightingAccuracy" minOccurs="0" />
+						<xs:element type="xs:int"
+							name="SightingFixCount" minOccurs="0" />
+						<xs:element type="xs:double"
+							name="WaypointAccuracy" minOccurs="0" />
+						<xs:element type="xs:int" name="WaypointTimer"
+							minOccurs="0" />
+						<xs:element type="xs:string"
+							name="UseRangeFinderForAltitude" />
+						<xs:element type="xs:string"
+							name="Translate__ElementId" />
+						<xs:element type="xs:string" name="Unique" />
+						<xs:element type="xs:int" name="MinChecks"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="MaxChecks"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="ButtonSpacingX"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="ButtonSpacingY"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="Decimals"
+							minOccurs="0" />
+						<xs:element type="xs:string" name="Password"
+							minOccurs="0" />
+						<xs:element type="xs:int"
+							name="PasswordAutoNext" minOccurs="0" />
+						<xs:element type="xs:string" name="AutoHeight" />
+						<xs:element type="xs:string" name="Required" />
+						<xs:element type="xs:string"
+							name="RequireSetValue" />
+						<xs:element type="xs:string"
+							name="Translate__SkipScreenId" />
+						<xs:element type="xs:int" name="MaxLength"
+							minOccurs="0" />
+						<xs:element type="xs:string" name="Value" />
+						<xs:element type="xs:string"
+							name="NumberChecks" />
+						<xs:element type="xs:string"
+							name="RadioBlockNext" />
+						<xs:element type="xs:string"
+							name="Translate__DateId" />
+						<xs:element type="xs:string"
+							name="Translate__TimeId" />
+						<xs:element type="xs:string" name="AutoConnect" />
+						<xs:element type="xs:string" name="TakeGPS" />
+						<xs:element type="xs:int" name="Alignment"
+							minOccurs="0" />
+						<xs:element type="xs:int" name="Style"
+							minOccurs="0" />
+						<xs:element type="xs:string" name="ShowCaption" />
+						<xs:element type="xs:string" name="Active" />
+						<xs:element type="xs:string" name="Url" />
+						<xs:element type="xs:string" name="UserName" />
+						<xs:element type="xs:int" name="Level"
+							minOccurs="0" />
+						<xs:element type="xs:string" name="CaId" />
+						<xs:element type="xs:string" name="Description" />
+						<xs:element type="xs:string" name="AlertType" />
+						<xs:element type="xs:int" name="PingFrequency"
+							minOccurs="0" />
+						<xs:element type="xs:string"
+							name="Translate__PatrolElementId" />
+						<xs:element type="xs:string" name="PingOnly" />
+						<xs:element type="xs:int" name="Protocol"
+							minOccurs="0" />
+						<xs:element name="Enabled"
+							type="xs:string">
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+<!--
+	<xs:complexType name="PagesType">
+		<xs:sequence>
+			<xs:element name="Page" maxOccurs="unbounded" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element type="xs:int" name="BorderWidth" />
+						<xs:element type="xs:int" name="BorderStyle" />
+						<xs:element type="xs:string" name="Composite" />
+						<xs:element type="xs:string" name="Visible" minOccurs="0" />
+						<xs:element type="xs:string" name="Transparent" />
+						<xs:element type="xs:int" name="Align" />
+						<xs:element type="xs:int" name="Left" />
+						<xs:element type="xs:int" name="Top" />
+						<xs:element type="xs:int" name="Width" />
+						<xs:element type="xs:int" name="Height" />
+						<xs:element type="cts:ControlsType" name="Controls" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+-->
+
+	<xs:element name="Screens">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Root">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element type="xs:string" name="Id" />
+							<xs:element type="xs:string" name="Name" />
+							<xs:element type="cts:Node" name="Node" maxOccurs="unbounded" minOccurs="0" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>
