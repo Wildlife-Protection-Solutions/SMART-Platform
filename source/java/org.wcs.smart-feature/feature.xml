@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart.smart.feature"
+      id="org.wcs.smart-feature"
       label="SMART Feature"
-      version="5.0.0.qualifier"
+      version="6.0.0.qualifier"
       provider-name="org.wcs.smart">
 
    <description url="http://www.smartconservationtools.org">
@@ -92,7 +92,7 @@ limitations under the License.
          version="0.0.0"/>
 
    <includes
-         id="org.wcs.smart.udig.feature"
+         id="org.wcs.smart.udig-feature"
          version="0.0.0"/>
 
    <includes
@@ -100,11 +100,11 @@ limitations under the License.
          version="0.0.0"/>
 
    <includes
-         id="org.wcs.smart.birtfeature"
+         id="org.wcs.smart.birt-feature"
          version="0.0.0"/>
 
    <includes
-         id="org.wcs.smart.p2.feature"
+         id="org.wcs.smart.p2-feature"
          version="0.0.0"/>
 
    <plugin
