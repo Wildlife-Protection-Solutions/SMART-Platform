@@ -707,6 +707,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		if (eventHandles != null) eventHandles.forEach((h)->eventBroker.unsubscribe(h));
 		
 		attributeLabelProvider.dispose();
+		if (mapPart != null) mapPart.dispose();
 		super.dispose();
 	}
 	
