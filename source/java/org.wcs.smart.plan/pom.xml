@@ -8,9 +8,9 @@
 		<version>6.0.0-SNAPSHOT</version>
 	</parent>
 	
-	<name>SMART Query Module</name>
-	<artifactId>org.wcs.smart.query</artifactId>
+	<name>SMART Plan Module</name>
+	<artifactId>org.wcs.smart.plan</artifactId>
   	<packaging>eclipse-plugin</packaging>
 	<version>6.0.0-SNAPSHOT</version>
-	
+
 </project>

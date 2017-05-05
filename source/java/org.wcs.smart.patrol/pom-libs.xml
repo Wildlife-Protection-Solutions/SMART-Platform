@@ -4,13 +4,12 @@
 	
 	<parent>
 		<groupId>org.wcs.smart</groupId>
-		<artifactId>smart-tycho</artifactId>
+		<artifactId>smart</artifactId>
 		<version>6.0.0-SNAPSHOT</version>
 	</parent>
 	
-	<name>SMART Query Module</name>
-	<artifactId>org.wcs.smart.query</artifactId>
-  	<packaging>eclipse-plugin</packaging>
+	<name>SMART Patrol Module</name>
+	<artifactId>org.wcs.smart.patrol</artifactId>
+  	<packaging>pom</packaging>
 	<version>6.0.0-SNAPSHOT</version>
-	
 </project>

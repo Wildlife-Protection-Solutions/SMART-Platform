@@ -4,12 +4,12 @@
 	
 	<parent>
 		<groupId>org.wcs.smart</groupId>
-		<artifactId>smart-tycho</artifactId>
+    		<artifactId>smart-tycho</artifactId>
 		<version>6.0.0-SNAPSHOT</version>
 	</parent>
 	
-	<name>SMART Query Module</name>
-	<artifactId>org.wcs.smart.query</artifactId>
+	<name>SMART BIRT Tables Module</name>
+	<artifactId>org.wcs.smart.reporttable</artifactId>
   	<packaging>eclipse-plugin</packaging>
 	<version>6.0.0-SNAPSHOT</version>
 	
