@@ -549,23 +549,25 @@ public class ImportReportEngine {
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
 		ReportDesignHandle rdh = session.openDesign(reportFile.getAbsolutePath());
-		
-		List<?> datasets = rdh.getDataSets().getContents();
-		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
-			DataSetHandle dataset = (DataSetHandle) iterator.next();
-			if (dataset instanceof OdaDataSetHandle){
-				OdaDataSetHandle handle = (OdaDataSetHandle)dataset;
-				if (handle.getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
-					//smart dataset
-					if (!processQuery(handle.getQueryText().split(":")[1],  //$NON-NLS-1$
-							queryDir, handle, sharedReport, reportEmployee, importCa)){
-						return false;
+		try{
+			List<?> datasets = rdh.getDataSets().getContents();
+			for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
+				DataSetHandle dataset = (DataSetHandle) iterator.next();
+				if (dataset instanceof OdaDataSetHandle){
+					OdaDataSetHandle handle = (OdaDataSetHandle)dataset;
+					if (handle.getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
+						//smart dataset
+						if (!processQuery(handle.getQueryText().split(":")[1],  //$NON-NLS-1$
+								queryDir, handle, sharedReport, reportEmployee, importCa)){
+							return false;
+						}
 					}
 				}
 			}
+			rdh.save();
+		}finally{
+			rdh.close();
 		}
-		rdh.save();
-		rdh.close();
 		return true;
 	}
 	
