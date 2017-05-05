@@ -2,9 +2,9 @@
 <feature
       id="org.wcs.smart.connect.dataqueue.cybertracker.feature"
       label="Core SMART CyberTracker DataQueue Processors (Required)"
-      version="5.0.0.qualifier"
+      version="6.0.0.qualifier"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart.feature">
+      license-feature="org.wcs.smart-feature">
 
    <description>
       Core processing tools for processing JSON data sent by CyberTracker to Connect. Includes support for processing Patrol data.

@@ -1,33 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	
+	<modelVersion>4.0.0</modelVersion>
+	
 	<parent>
 		<groupId>org.wcs.smart</groupId>
-		<artifactId>smart</artifactId>
-		<version>2.0.0</version>
+		<artifactId>smart-tycho</artifactId>
+		<version>6.0.0-SNAPSHOT</version>
+		<relativePath>../../java</relativePath>
 	</parent>
 	
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.wcs.smart</groupId>
-	<artifactId>smartconnect</artifactId>
-	<version>2.0.0</version>
 	<name>SMART Connect Module</name>
-	<packaging>pom</packaging>
+	<artifactId>org.wcs.smart.connect</artifactId>
+  	<packaging>eclipse-plugin</packaging>
+	<version>6.0.0-SNAPSHOT</version>
 	
-	<properties>
-		<resteasy.version>3.0.13.Final</resteasy.version>
-    </properties>
-    	
-	<dependencies>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
-		<dependency>
-    		<groupId>org.jboss.resteasy</groupId>
-    		<artifactId>resteasy-jackson2-provider</artifactId>
-    		<version>${resteasy.version}</version>
-		</dependency>
-	</dependencies>
 </project>
