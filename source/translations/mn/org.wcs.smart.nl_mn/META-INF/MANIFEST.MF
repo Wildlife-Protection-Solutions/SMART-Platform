@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.wcs.smart Mongolian NLS Support
 Bundle-SymbolicName: org.wcs.smart.nl_mn;singleton:=true
-Bundle-Version: 5.0.0
-Fragment-Host: org.wcs.smart;bundle-version="5.0.0"
+Bundle-Version: 6.0.0
+Fragment-Host: org.wcs.smart;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

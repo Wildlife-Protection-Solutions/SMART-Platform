@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spanish Help Translation
 Bundle-SymbolicName: org.wcs.smart.help.nl_es
-Bundle-Version: 5.0.0
+Bundle-Version: 6.0.0
 Bundle-Vendor: org.wcs.smart
-Fragment-Host: org.wcs.smart.help;bundle-version="5.0.0"
+Fragment-Host: org.wcs.smart.help;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

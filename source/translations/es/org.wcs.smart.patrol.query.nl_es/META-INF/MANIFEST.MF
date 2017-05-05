@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Spanish Patrol Query Fragment
 Bundle-SymbolicName: org.wcs.smart.patrol.query.nl_es
-Bundle-Version: 5.0.0
-Fragment-Host: org.wcs.smart.patrol.query;bundle-version="5.0.0"
+Bundle-Version: 6.0.0
+Fragment-Host: org.wcs.smart.patrol.query;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

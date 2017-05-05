@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.wcs.smart.patrol French NLS Support
 Bundle-SymbolicName: org.wcs.smart.patrol.nl_fr
-Bundle-Version: 5.0.0
-Fragment-Host: org.wcs.smart.patrol;bundle-version="5.0.0"
+Bundle-Version: 6.0.0
+Fragment-Host: org.wcs.smart.patrol;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: OSGI-INF/l10n/bundle
 Bundle-Vendor: org.wcs.smart
