@@ -459,6 +459,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 			public void handleEvent(Event event) {
 				//refresh map
 				//only if the record is part of the working set
+				if (!WorkingSetManager.INSTANCE.isSet()) return;
 				boolean refresh = false;
 				Session s = HibernateManager.openSession();
 				try{

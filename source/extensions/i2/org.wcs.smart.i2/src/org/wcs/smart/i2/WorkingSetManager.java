@@ -56,6 +56,10 @@ public enum WorkingSetManager {
 	
 	private UUID activeWorkingSet = null;
 	
+	/**
+	 * 
+	 * @return true if a working set is active, false otherwise
+	 */
 	public boolean isSet(){
 		return activeWorkingSet != null;
 	}

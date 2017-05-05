@@ -87,6 +87,7 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
 import org.wcs.smart.util.E3Utils;
@@ -313,6 +314,13 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			s.clear();
 			s.saveOrUpdate(record);
 			s.flush();
+			
+			for (IntelEntityAttachment entityAttachment : summaryPage.getRemovedEntityAttachments()){
+				s.delete(entityAttachment);
+				entityAttachment.getEntity().getEntityAttachments().remove(entityAttachment);
+				modifiedEntities.add(entityAttachment.getEntity());
+			}
+			
 			
 			for (IntelEntityAttachment entityAttachments : summaryPage.getNewAttachments()){
 				s.save(entityAttachments);
@@ -730,6 +738,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 	}
 	
+	public void showMessage(String message){
+		TransparentInfoDialog infodialog = new TransparentInfoDialog(getSite().getShell(), message);
+		infodialog.open();	
+	}
 	
 	private Image lastIcon = null;
 	private void updateImageIcon(){

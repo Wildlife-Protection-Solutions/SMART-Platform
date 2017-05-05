@@ -25,7 +25,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -51,6 +53,7 @@ import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
@@ -80,7 +83,10 @@ public class AttachmentListComposite extends Composite{
 	private RecordEditor editor;
 	
 	private List<IntelEntityAttachment> newEntityAttachments = new ArrayList<IntelEntityAttachment>();
+	private List<IntelEntityAttachment> deleteEntityAttachments = new ArrayList<IntelEntityAttachment>();
+	
 	private List<IntelRecordAttachment> attachmentsToDelete = new ArrayList<IntelRecordAttachment>();
+	
 	
 	public AttachmentListComposite(Composite parent, FormToolkit toolkit, RecordEditor editor){
 		super(parent, SWT.NONE);
@@ -117,7 +123,7 @@ public class AttachmentListComposite extends Composite{
 			private MenuItem mnuProperties;
 			private MenuItem mnuRefresh;
 			private MenuItem mnuSep;
-			
+			private MenuItem mnuunlink;
 			private Menu thumbMenu;
 			
 			
@@ -223,7 +229,10 @@ public class AttachmentListComposite extends Composite{
 						mnulinkTo.dispose();
 						mnulinkTo = null;
 					}
-					
+					if (mnuunlink != null){
+						mnuunlink.dispose();
+						mnuunlink = null;
+					}
 					if (IntelSecurityManager.INSTANCE.canLinkAttachmentsToEntities()){
 						mnulinkTo = new MenuItem(this.thumbMenu, SWT.CASCADE,index);
 						mnulinkTo.setText(Messages.AttachmentListComposite_LinkEntityItem);
@@ -242,30 +251,111 @@ public class AttachmentListComposite extends Composite{
 								
 								@Override
 								public void widgetSelected(SelectionEvent e) {
+									boolean changes = false;
 									for (IntelAttachment attachment : attachmentTable.getSelection()){
 										IntelEntityAttachment a = new IntelEntityAttachment();
 										a.setEntity(entity.getEntity());
 										a.setAttachment(attachment);
 										
+										boolean exists = false;
 										//determine if this attachment already exists
 										for (IntelEntityAttachment existing : getNewEntityAttachments()){
 											if (existing.getAttachment().equals(a.getAttachment())){
-												continue;
+												exists = true;
+												break;
 											}
 										}
+										if (exists) continue;
 										for (IntelEntityAttachment existing : entity.getEntity().getEntityAttachments()){
 											if (existing.getAttachment().equals(a.getAttachment())){
-												continue;
+												exists = true;
+												break;
 											}
 										}
-										
+										if (exists) continue;
 										getNewEntityAttachments().add(a);
+										changes = true;
 									}
-									editor.setDirty(true);
-									editor.getSummaryPage().getEntityPanel().init();
+									if (changes){
+										editor.setDirty(true);
+										editor.getSummaryPage().getEntityPanel().init();
+									}else{
+										editor.showMessage("Attachments already linked to entities");
+									}
 									
 								}
 							});
+						}
+						index ++;
+						
+						
+						mnuunlink = new MenuItem(this.thumbMenu, SWT.CASCADE,index);
+						mnuunlink.setText("Unlink From Entity...");
+						
+						Menu mnuEntitiesUnlink = new Menu(mnuunlink);
+						mnuunlink.setMenu(mnuEntitiesUnlink);
+						
+						if (attachmentTable.getSelection().size() > 0){
+							IntelAttachment ia = attachmentTable.getSelection().get(0);
+							
+							Set<IntelEntity> eas = new HashSet<>();
+							for (IntelEntityRecord entity : editor.getRecord().getEntities()){
+								for (IntelEntityAttachment ea : entity.getEntity().getEntityAttachments()){
+									if (!ea.getAttachment().equals(ia)) continue;
+									eas.add(ea.getEntity());
+								}
+							}
+							for (IntelEntityAttachment ea : getNewEntityAttachments()){
+								eas.add(ea.getEntity());
+							}
+							for (IntelEntity ea : eas){
+								MenuItem eItem = new MenuItem(mnuEntitiesUnlink, SWT.DEFAULT);
+								eItem.setText(ea.getIdAttributeAsText());
+								if (ea.getEntityType().getIcon() != null){
+									eItem.setImage(EntityTypeLabelProvider.createImageDescriptor(ea.getEntityType()).createImage());
+									eItem.addListener(SWT.Dispose, (event) -> {if (eItem.getImage() != null) eItem.getImage().dispose();});
+								}
+								
+								eItem.addSelectionListener(new SelectionAdapter() {
+										
+									@Override
+									public void widgetSelected(SelectionEvent e) {
+										boolean changes = false;
+										for (IntelAttachment attachment : attachmentTable.getSelection()){
+											
+											IntelEntityAttachment iea = null;
+											for (IntelEntityAttachment existing : ea.getEntityAttachments()){
+												if (existing.getAttachment().equals(attachment)){
+													iea = existing;
+													break;
+												}
+											}
+											if (iea != null){
+												iea.getEntity().getEntityAttachments().remove(iea);
+												getRemovedEntityAttachments().add(iea);
+												changes = true;
+												continue;
+											}
+											
+											for (IntelEntityAttachment existing : getNewEntityAttachments()){
+												if (existing.getAttachment().equals(attachment)){
+													iea = existing;
+													break;
+												}
+											}	
+											
+											if (iea != null){
+												getNewEntityAttachments().remove(iea);
+												changes = true;
+											}
+										}
+										if (changes){
+											editor.setDirty(true);
+											editor.getSummaryPage().getEntityPanel().init();
+										}
+									}
+								});
+							}
 						}
 						index ++;
 					}
@@ -373,8 +463,7 @@ public class AttachmentListComposite extends Composite{
 				List<IntelLocation> added =  (List<IntelLocation>)locations[0];
 				editor.addNewLocations(added);
 				if (added.size() > 0){
-					TransparentInfoDialog infodialog = new TransparentInfoDialog(getShell(), MessageFormat.format(Messages.AttachmentListComposite_LocationsParsedMsg, added.size(), toSearch.size()));
-					infodialog.open();	
+					editor.showMessage(MessageFormat.format(Messages.AttachmentListComposite_LocationsParsedMsg, added.size(), toSearch.size()));
 				}
 			}
 			
@@ -408,6 +497,10 @@ public class AttachmentListComposite extends Composite{
 		return newEntityAttachments;
 	}
 
+	public List<IntelEntityAttachment> getRemovedEntityAttachments(){
+		return deleteEntityAttachments;
+	}
+	
 	public List<IntelRecordAttachment> getAttachmentsToDelete(){
 		return attachmentsToDelete;
 	}
