@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart.er.feature.nl.es"
+      id="org.wcs.smart.er.feature.nl_es"
       label="SMART Ecological Records Spanish Language Pack"
-      version="5.0.0"
+      version="6.0.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart.feature">
+      license-feature="org.wcs.smart-feature">
 
    <description>
       The Spanish translations for the Ecological Records Spanish plugin.

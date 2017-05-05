@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Thai Ecological Records Report Fragment
 Bundle-SymbolicName: org.wcs.smart.er.query.report.nl_th
-Bundle-Version: 5.0.0
-Fragment-Host: org.wcs.smart.er.query.report;bundle-version="5.0.0"
+Bundle-Version: 6.0.0
+Fragment-Host: org.wcs.smart.er.query.report;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

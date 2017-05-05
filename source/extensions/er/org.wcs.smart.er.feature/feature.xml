@@ -2,9 +2,9 @@
 <feature
       id="org.wcs.smart.er.feature"
       label="Core SMART Ecological Records Module (Required)"
-      version="5.0.0.qualifier"
+      version="6.0.0.qualifier"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart.feature">
+      license-feature="org.wcs.smart-feature">
 
    <description>
       This plugin allows for creating, modifying and querying surveys.
