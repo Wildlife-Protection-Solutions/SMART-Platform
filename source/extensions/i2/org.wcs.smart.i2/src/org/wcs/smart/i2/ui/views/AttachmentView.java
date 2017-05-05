@@ -119,15 +119,13 @@ public class AttachmentView {
 		exifTransform = SmartUtils.getExifImageTransform(att.getAttachmentFile(), rawImage.getBounds().width, rawImage.getBounds().height);
 		
 		if (exifTransform != null){
-			//transform image
-//			float t[] = new float[6];
-//			exifTransform.getElements(t);
+			float[] bounds = new float[]{0,0,rawImage.getBounds().width, rawImage.getBounds().height};
+			exifTransform.transform(bounds);
 			
-			int size = Math.max(rawImage.getBounds().width, rawImage.getBounds().height);
-			int w = (int) (rawImage.getBounds().width );
-			int h = (int) (rawImage.getBounds().height);
+			int newWidth = (int)Math.abs(bounds[2] - bounds[0]);
+			int newHeight = (int)Math.abs(bounds[3] - bounds[1]);
 			
-	        Image newImage = new Image(Display.getDefault(), size, size);
+	        Image newImage = new Image(Display.getDefault(), newWidth, newHeight);
 			GC gc3 = new GC(newImage);
 			gc3.setTransform(exifTransform);
 			gc3.drawImage(rawImage, 0,0);
