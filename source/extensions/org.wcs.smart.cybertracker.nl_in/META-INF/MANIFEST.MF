@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: SMART Indonesian Cybertracker Fragment
-Bundle-SymbolicName: org.wcs.smart.cybertracker.nl_in
-Bundle-Version: 5.0.0
-Fragment-Host: org.wcs.smart.cybertracker;bundle-version="5.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Vendor: org.wcs.smart
