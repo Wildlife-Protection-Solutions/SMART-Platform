@@ -431,12 +431,12 @@ RETURNS NULL ON NULL INPUT;
 	}
 	
 	/**
-	 * finds all attributes, first looking at parent attributes
-	 * and working way down to the children
-	 * 
-	 * @param attributes list to populate
-	 * @param onlyEnabled <code>true</code> to include only enabled, <code>false</code> to include 
-	 * only in-active and <code>null</code> to include all
+	 * Gets attributes that are active or inactive.  Only searches the direct category - does not get 
+	 * attributes inherited from parents.
+	 * @param active <code>true</code> for active only attributes, 
+	 * <code>false</code> for in-active only attributes
+	 * <code>null</code> for all attributes
+	 * @return list of only active or inactive attributes
 	 */
 	@Transient
 	public void getAllAttribute(List<Attribute> attributes, Boolean onlyEnabled){
@@ -450,8 +450,10 @@ RETURNS NULL ON NULL INPUT;
 	}
 
 	/**
-	 * finds all category attributes, first looking at parent attributes
-	 * and working way down to the children
+	 * Finds all category attributes, first looking at parent attributes
+	 * and working way down to the children.  The results are new CategoryAttribute
+	 * objects with the category set to the current category. 
+	 * 
 	 * 
 	 * @param category attributes list to populate
 	 * @param onlyEnabled <code>true</code> to include only enabled, <code>false</code> to include 
@@ -459,11 +461,20 @@ RETURNS NULL ON NULL INPUT;
 	 */
 	@Transient
 	public void getAllCategoryAttribute(List<CategoryAttribute> attributes, Boolean onlyEnabled){
+		getCategoryAttributes(attributes, onlyEnabled, this);
+	}
+	
+	private void getCategoryAttributes(List<CategoryAttribute> attributes, Boolean onlyEnabled, Category root){
 		if (getParent() != null){
-			getParent().getAllCategoryAttribute(attributes, onlyEnabled);
+			getParent().getCategoryAttributes(attributes, onlyEnabled, root);
 		}
 		List<CategoryAttribute> atts = getAttributes(onlyEnabled);
-		attributes.addAll(atts);
+		for (CategoryAttribute att: atts){
+			CategoryAttribute clone = new CategoryAttribute(root, att.getAttribute());
+			clone.setIsActive(att.getIsActive());
+			clone.setOrder(att.getOrder());
+			attributes.add(clone);
+		}
 	}
 	
 	/**
