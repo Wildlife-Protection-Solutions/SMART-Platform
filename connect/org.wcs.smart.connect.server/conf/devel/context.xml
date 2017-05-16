@@ -10,15 +10,15 @@
 		</Realm>
   	</Realm>
   	
-	<ResourceLink global="org.wcs.smart.connect.datasource.postgresql" name="jdbc/smart"/>
-	<ResourceLink global="smartconnect.filestorelocation" name="smartconnect.filestorelocation"/>
-	<ResourceLink global="smartconnect.dataqueue_cleanup_days" name="smartconnect.dataqueue_cleanup_days"/>
-	<ResourceLink global="smartconnect.spatial_ref_sys_table" name="smartconnect.spatial_ref_sys_table"/>
-	<ResourceLink global="smartconnect.number_background_threads" name="smartconnect.number_background_threads"/>
-	<ResourceLink global="smartconnect.work_item_history_days_available" name="smartconnect.work_item_history_days_available"/>
-	<ResourceLink global="smartconnect.changelog_cleanup_days" name="smartconnect.changelog_cleanup_days"/>
-	<ResourceLink global="smartconnect.ca_export_days_available" name="smartconnect.ca_export_days_available"/>
-	<ResourceLink global="smartconnect.sync_download_hours_available" name="smartconnect.sync_download_hours_available"/>
-	<ResourceLink global="smartconnect.cleanup_task_interval_hours" name="smartconnect.cleanup_task_interval_hours"/>
+	<ResourceLink global="org.wcs.smart.connect.datasource.postgresql" name="jdbc/smart" type="javax.sql.DataSource"/>
+	<ResourceLink global="smartconnect.filestorelocation" name="smartconnect.filestorelocation" type="java.lang.String"/>
+	<ResourceLink global="smartconnect.dataqueue_cleanup_days" name="smartconnect.dataqueue_cleanup_days" type="java.lang.Integer"/>
+	<ResourceLink global="smartconnect.spatial_ref_sys_table" name="smartconnect.spatial_ref_sys_table" type="java.lang.String"/>
+	<ResourceLink global="smartconnect.number_background_threads" name="smartconnect.number_background_threads" type="java.lang.Integer"/>
+	<ResourceLink global="smartconnect.work_item_history_days_available" name="smartconnect.work_item_history_days_available" type="java.lang.Integer"/>
+	<ResourceLink global="smartconnect.changelog_cleanup_days" name="smartconnect.changelog_cleanup_days" type="java.lang.Integer"/>
+	<ResourceLink global="smartconnect.ca_export_days_available" name="smartconnect.ca_export_days_available" type="java.lang.Integer"/>
+	<ResourceLink global="smartconnect.sync_download_hours_available" name="smartconnect.sync_download_hours_available" type="java.lang.Integer"/>
+	<ResourceLink global="smartconnect.cleanup_task_interval_hours" name="smartconnect.cleanup_task_interval_hours" type="java.lang.Integer"/>
 	<ResourceLink global="mail/Session" name="mail/Session"/>
 </Context>
