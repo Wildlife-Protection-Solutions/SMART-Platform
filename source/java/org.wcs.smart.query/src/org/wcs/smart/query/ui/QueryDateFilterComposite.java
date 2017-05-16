@@ -47,14 +47,12 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
-import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -211,9 +209,7 @@ public class QueryDateFilterComposite extends Composite {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof IDateFilter){
-					return SmartContext.INSTANCE.getClass(IQueryDateLabelProvider.class).getLabel(
-							element,
-							Locale.getDefault());
+					return ((IDateFilter)element).getGuiName(Locale.getDefault());
 				}
 				return super.getText(element);
 			}
