@@ -131,6 +131,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	
 	private boolean hasAreaFilter = false;
 	private Session session;
+	private PatrolSummaryQuery query;
+	
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -176,7 +178,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
 
-		final PatrolSummaryQuery query = (PatrolSummaryQuery) lquery;
+		query = (PatrolSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 		SumQueryDefinition def = null;
@@ -459,7 +461,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			af.changeGeometryType(geomType);
 		}
 		IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(
-				qFilter.getFilterType(), tableName);
+				qFilter.getFilterType(), tableName, query);
 		try{
 			rfilterer.processFilter(c, qFilter.getFilter(), localDateFilter, caFilter, needsObservationRate, false, monitor);
 		}finally{
@@ -1158,10 +1160,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null){
-						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( PatrolFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					fromSql.append(" and "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = x'" + UuidUtils.uuidToString(query.getConservationArea().getUuid()) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+//						
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(" and "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".area_type = " + p1); //$NON-NLS-1$ 
@@ -1194,10 +1195,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					fromSql.append(tablePrefix(Track.class) + ".geometry, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null ){
-						fromSql.append(" and ");//$NON-NLS-1$
-						fromSql.append( PatrolFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					fromSql.append(" and ");//$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = x'" + UuidUtils.uuidToString(query.getConservationArea().getUuid()) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 					fromSql.append(" and ");//$NON-NLS-1$
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(areaPrefix + ".area_type = " + p1);//$NON-NLS-1$

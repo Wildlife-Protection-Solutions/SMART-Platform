@@ -300,7 +300,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				hasTrackFilter = needstracks[0];
 			}
 			
-			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, sdFilter);
+			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, sdFilter, query);
 			try{
 				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, 
 					needsObservation, false, new SubProgressMonitor(monitor, 90));

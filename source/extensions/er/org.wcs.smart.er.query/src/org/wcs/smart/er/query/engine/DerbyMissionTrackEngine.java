@@ -105,7 +105,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
-				IFilterProcessor filterer = new FilterProcessorMission(queryDataTable, DerbyMissionTrackEngine.this, filter);
+				IFilterProcessor filterer = new FilterProcessorMission(queryDataTable, DerbyMissionTrackEngine.this, filter, query);
 				
 				
 				//create a date filter that caches the dates so the same

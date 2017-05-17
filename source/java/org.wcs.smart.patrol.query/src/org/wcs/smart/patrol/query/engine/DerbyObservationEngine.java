@@ -113,7 +113,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
 				IFilterProcessor filterer = null;
 				try{
-					filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, query);
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				}

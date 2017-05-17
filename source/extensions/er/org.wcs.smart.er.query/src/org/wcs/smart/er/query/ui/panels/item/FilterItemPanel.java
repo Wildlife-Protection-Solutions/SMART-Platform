@@ -173,10 +173,10 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 			nodes.add(new SurveyDataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		}
 		
-		if (!SmartDB.isMultipleAnalysis()){
-			areaNode = new AreaTreeNode(Messages.SurveyFilterItemPanel_AreaFilterTreeNode);
-			nodes.add(areaNode);
-		}
+		
+		areaNode = new AreaTreeNode(Messages.SurveyFilterItemPanel_AreaFilterTreeNode);
+		nodes.add(areaNode);
+		
 		nodes.add(new OperatorsTreeNode());
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE, nodes);

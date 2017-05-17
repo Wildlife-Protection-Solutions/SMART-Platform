@@ -40,6 +40,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.util.UuidUtils;
 
@@ -137,11 +138,11 @@ public abstract class DerbyEntityQueryEngine extends AbstractQueryEngine{
 	 * @param queryDataTable
 	 * @return
 	 */
-	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable){
+	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
 		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new FilterProcessor(queryDataTable, this);
+			return new FilterProcessor(queryDataTable, this, query);
 		}else{
-			return new WaypointFilterProcessor(queryDataTable, this);
+			return new WaypointFilterProcessor(queryDataTable, this, query);
 		}
 	}
 	

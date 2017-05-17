@@ -116,10 +116,10 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
 		nodes.add(new PatrolFilterTreeItem());
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
-		if (!SmartDB.isMultipleAnalysis()){
-			areaNode = new AreaTreeNode(Messages.QueryFilterPanel_TreeNodeLabel);
-			nodes.add(areaNode);
-		}
+		
+		areaNode = new AreaTreeNode(Messages.QueryFilterPanel_TreeNodeLabel);
+		nodes.add(areaNode);
+		
 		nodes.add(new OperatorsTreeNode());
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE, nodes);

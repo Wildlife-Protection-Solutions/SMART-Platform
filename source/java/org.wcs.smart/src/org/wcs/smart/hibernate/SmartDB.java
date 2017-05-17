@@ -197,8 +197,6 @@ public class SmartDB {
 			//new user
 			current = findDbUser(user);
 			HibernateManager.setUserName(current.username, current.password);
-		}else{
-			current = null;
 		}
 		currentEmployee = user;
 		SmartDB.plainTextPassword = plainTextPassword;

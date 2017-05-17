@@ -122,10 +122,10 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
 		groupbynodes.add(new PatrolGroupByTreeItem());
 		groupbynodes.add(new DateTreeNode());
-		if (!SmartDB.isMultipleAnalysis()){
-			areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_TreeNodeLabel);
-			groupbynodes.add(areaTreeNode);
-		}
+		
+		areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_TreeNodeLabel);
+		groupbynodes.add(areaTreeNode);
+		
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
 		
 		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();

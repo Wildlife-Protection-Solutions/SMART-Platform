@@ -108,7 +108,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 				
 				IFilterProcessor filterer = null;
 				try{
-					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, query);
 				}catch (Exception ex){
 					throw new SQLException (ex);
 				}

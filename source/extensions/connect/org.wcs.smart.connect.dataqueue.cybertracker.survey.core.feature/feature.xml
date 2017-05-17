@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.connect.dataqueue.cybertracker.survey.core.feature"
       label="SMART CyberTracker DataQueue Mission Processor"
-      version="5.0.0.qualifier"
+      version="5.0.1.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 

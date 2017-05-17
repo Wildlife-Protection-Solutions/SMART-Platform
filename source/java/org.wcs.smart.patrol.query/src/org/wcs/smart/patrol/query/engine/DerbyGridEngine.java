@@ -261,7 +261,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				needsObservation = true;
 			}
 			
-			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable);
+			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, query);
 			try{
 				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, needsObservation, false, monitor);
 			}finally{

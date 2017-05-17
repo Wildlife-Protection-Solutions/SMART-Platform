@@ -226,7 +226,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 						}
 					}
 					
-					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable);
+					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, query);
 					try{
 						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, monitor);
 					}finally{
@@ -248,7 +248,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 						rateTable = createTempTableName();
 						
 						
-						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable);
+						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, query);
 						try{
 							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, monitor);
 						}finally{
@@ -263,7 +263,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupBy, query.getQueryDefinition().getValuePart(),
-							caFilter,monitor);
+							query, monitor);
 					
 					if (monitor.isCanceled() || data == null){
 						return ;
@@ -358,13 +358,13 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 	private HashMap<SummaryResultKey, Double> computeSummaryValues(Connection c,
 			Session s, 
 			GroupByPart groupBy, 
-			ValuePart values, ConservationAreaFilter caFilter,
+			ValuePart values, Query query,
 			IProgressMonitor monitor) throws SQLException{
 	
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
 			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
-			HashMap<SummaryResultKey, Double> data =computeValueItem(c, s, groupBy, it, caFilter, valueTable) ; 
+			HashMap<SummaryResultKey, Double> data =computeValueItem(c, s, groupBy, it, query, valueTable) ; 
 			if (data != null){
 				results.putAll( data );	
 			}
@@ -393,7 +393,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			Session s,
 			GroupByPart groupBy, 
 			IValueItem it, 
-			ConservationAreaFilter caFilter,
+			Query query,
 			String dataTable) throws SQLException {
 		
 		clearParameters();
@@ -403,9 +403,9 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			return results;
 		}
 		if (it instanceof AttributeValueItem){
-			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter));
+			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, query));
 		}else if (it instanceof CategoryValueItem){
-			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
+			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, query));
 		}
 		if (results != null){
 			cachedValueToResults.put(cacheKey, results); 
@@ -427,7 +427,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			AttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
+			AttributeValueItem attributeItem, Query query) throws SQLException{
 		
 		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
 			StringBuilder fromSql = new StringBuilder();
@@ -437,7 +437,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			StringBuilder groupByInnerSql = new StringBuilder();
 
 			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql,
-					attributeItem, caFilter);
+					attributeItem, query);
 
 			String valueSql = "temp.ob_uuid"; //$NON-NLS-1$
 			if (attributeItem.getCategoryKey() != null) {
@@ -510,7 +510,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			StringBuilder groupBySql = new StringBuilder();
 			StringBuilder groupByInnerSql = new StringBuilder();
 
-			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, caFilter);
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, query);
 			
 			String valueSql = ""; //$NON-NLS-1$
 			
@@ -598,7 +598,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			StringBuilder groupBySql = new StringBuilder();
 			StringBuilder groupByInnerSql = new StringBuilder();
 
-			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, caFilter);
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, query);
 			
 			String valueSql = ""; //$NON-NLS-1$
 			
@@ -747,7 +747,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			String dataTable,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			CategoryValueItem categoryItem, ConservationAreaFilter caFilter) throws SQLException{
+			CategoryValueItem categoryItem, Query query) throws SQLException{
 		
 		StringBuilder fromSql = new StringBuilder();
 		
@@ -755,7 +755,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
 
-		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, categoryItem, caFilter);
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, categoryItem, query);
 		
 		String valueSql = ""; //$NON-NLS-1$
 		StringBuilder valueAggSql = new StringBuilder();
@@ -820,7 +820,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 	private void createGroupBySql(GroupByPart groupBy,
 			StringBuilder fromSql,
 			StringBuilder groupBySql, 
-			StringBuilder groupByInnerSql, IValueItem value, ConservationAreaFilter caFilter) throws SQLException{
+			StringBuilder groupByInnerSql, IValueItem value, Query query) throws SQLException{
 		areaGroupByPrefix.clear();
 		
 		int itemcnt = 1;
@@ -855,10 +855,8 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null){
-						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( EntityFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					fromSql.append(" and ");//$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = x'" + UuidUtils.uuidToString(query.getConservationArea().getUuid()) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 					fromSql.append(" and "); //$NON-NLS-1$
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(areaPrefix + ".area_type = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$

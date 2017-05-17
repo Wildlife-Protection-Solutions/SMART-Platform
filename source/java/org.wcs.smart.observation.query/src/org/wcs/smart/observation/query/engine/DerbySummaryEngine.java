@@ -223,7 +223,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 						}
 					}
 					
-					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable);
+					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, query);
 					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					try{
 						filterer.processFilter(c, valueFilter.getFilter(), dFilter, cafilter, needsObservationValue, false, monitor);
@@ -246,7 +246,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 						rateTable = createTempTableName();
 						
 						
-						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable);
+						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, query);
 						try{
 							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, cafilter, needsObservationRate, false, monitor);
 						}finally{
@@ -260,7 +260,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 					}
 					
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
-							allGroupBy, def.getValuePart(), cafilter, monitor);
+							allGroupBy, def.getValuePart(), query, monitor);
 					
 					if (monitor.isCanceled() || data == null){
 						return ;
@@ -351,13 +351,13 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 	private HashMap<SummaryResultKey, Double> computeSummaryValues(Connection c,
 			Session s, 
 			GroupByPart groupBy, 
-			ValuePart values, ConservationAreaFilter caFilter,
+			ValuePart values, Query query,
 			IProgressMonitor monitor) throws SQLException{
 	
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
 			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
-			HashMap<SummaryResultKey, Double> data =computeValueItem(c, s, groupBy, it, caFilter, valueTable) ; 
+			HashMap<SummaryResultKey, Double> data =computeValueItem(c, s, groupBy, it, query, valueTable) ; 
 			if (data != null){
 				results.putAll( data );	
 			}
@@ -386,7 +386,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			Session s,
 			GroupByPart groupBy, 
 			IValueItem it, 
-			ConservationAreaFilter caFilter,
+			Query query,
 			String dataTable) throws SQLException {
 		
 		String cacheKey = it.asString() + "_" + groupBy.asString() + "_" + dataTable; //$NON-NLS-1$ //$NON-NLS-2$
@@ -395,9 +395,9 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			return results;
 		}
 		if (it instanceof AttributeValueItem){
-			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter));
+			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, query));
 		}else if (it instanceof CategoryValueItem){
-			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
+			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, query));
 		}
 		if (results != null){
 			cachedValueToResults.put(cacheKey, results); 
@@ -419,7 +419,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			AttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
+			AttributeValueItem attributeItem, Query query) throws SQLException{
 		
 		clearParameters();
 		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
@@ -430,7 +430,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			StringBuilder groupByInnerSql = new StringBuilder();
 
 			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql,
-					attributeItem, caFilter);
+					attributeItem, query);
 
 			String valueSql = "temp.ob_uuid"; //$NON-NLS-1$
 			if (attributeItem.getCategoryKey() != null) {
@@ -502,7 +502,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			StringBuilder groupBySql = new StringBuilder();
 			StringBuilder groupByInnerSql = new StringBuilder();
 
-			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, caFilter);
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, query);
 			
 			String valueSql = ""; //$NON-NLS-1$
 			
@@ -589,7 +589,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			StringBuilder groupBySql = new StringBuilder();
 			StringBuilder groupByInnerSql = new StringBuilder();
 
-			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, caFilter);
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, query);
 			
 			String valueSql = ""; //$NON-NLS-1$
 			
@@ -736,7 +736,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 			String dataTable,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			CategoryValueItem categoryItem, ConservationAreaFilter caFilter) throws SQLException{
+			CategoryValueItem categoryItem, Query query) throws SQLException{
 		
 		clearParameters();
 		StringBuilder fromSql = new StringBuilder();
@@ -745,7 +745,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 		StringBuilder groupBySql = new StringBuilder();
 		StringBuilder groupByInnerSql = new StringBuilder();
 
-		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, categoryItem, caFilter);
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, categoryItem, query);
 		
 		String valueSql = ""; //$NON-NLS-1$
 		StringBuilder valueAggSql = new StringBuilder();
@@ -811,7 +811,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 	private void createGroupBySql(GroupByPart groupBy,
 			StringBuilder fromSql,
 			StringBuilder groupBySql, 
-			StringBuilder groupByInnerSql, IValueItem value, ConservationAreaFilter caFilter) throws SQLException{
+			StringBuilder groupByInnerSql, IValueItem value, Query query) throws SQLException{
 		areaGroupByPrefix.clear();
 		
 		int itemcnt = 1;
@@ -846,10 +846,8 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null){
-						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( ObservationFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					fromSql.append(" and ");//$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = x'" + UuidUtils.uuidToString(query.getConservationArea().getUuid()) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 					fromSql.append(" and "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 					

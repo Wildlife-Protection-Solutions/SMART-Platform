@@ -24,7 +24,7 @@ package org.wcs.smart.observation.query.engine.visitor;
 import java.util.HashSet;
 
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -42,6 +42,7 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	private HashSet<String> addedTableNames = new HashSet<String>();
 	private StringBuilder sql;
 	private IQueryEngine engine;
+	private ConservationArea queryCa;
 	
 	/**
 	 * Creates a new visitor
@@ -50,9 +51,10 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	 * @param usedTables list of tables already added to sql (Track.class)
 	 * only needs to be added once
 	 */
-	public AreaFilterVisitor(StringBuilder sql, IQueryEngine engine){
+	public AreaFilterVisitor(StringBuilder sql, IQueryEngine engine, ConservationArea queryCa){
 		this.sql = sql;
 		this.engine = engine;
+		this.queryCa = queryCa;
 	}
 	
 	
@@ -66,13 +68,14 @@ public class AreaFilterVisitor implements IFilterVisitor{
 				
 				String p1 = engine.addParameterValue(ff.getType().name()); 
 				String p2 = engine.addParameterValue(ff.getKey()); 
+				String p3 = engine.addParameterValue(queryCa.getUuid());
 				
 				sql.append(" left join "); //$NON-NLS-1$
 				sql.append(engine.tableName(Area.class));
 				sql.append(" as "); //$NON-NLS-1$
 				sql.append( areaTableName);
 				sql.append(" on "); //$NON-NLS-1$
-				sql.append( areaTableName +".ca_uuid = " + engine.tablePrefix(Waypoint.class) + ".ca_uuid and "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append( areaTableName +".ca_uuid = " + p3 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append( areaTableName +".area_type = " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$ 
 				sql.append(areaTableName + ".keyid = " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ 
 				

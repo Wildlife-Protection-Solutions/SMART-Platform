@@ -130,10 +130,9 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 				new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.OBSERVER}));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 
-		if (!SmartDB.isMultipleAnalysis()){
-			areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters);
-			nodes.add(areaTreeNode);
-		}
+		areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters);
+		nodes.add(areaTreeNode);
+		
 		nodes.add(new OperatorsTreeNode());
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE, nodes);

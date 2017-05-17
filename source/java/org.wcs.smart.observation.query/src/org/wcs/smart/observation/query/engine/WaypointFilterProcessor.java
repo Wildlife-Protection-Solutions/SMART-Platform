@@ -40,6 +40,7 @@ import org.wcs.smart.observation.query.engine.visitor.AreaFilterVisitor;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryFilter;
@@ -63,17 +64,19 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	private String waypointTable;
 	
 	private AbstractDerbyObservationQueryEngine engine;
-
+	private Query query;
+	
 	/**
 	 * Creates a new process filter
 	 * 
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public WaypointFilterProcessor(String tableName, AbstractDerbyObservationQueryEngine engine){
+	public WaypointFilterProcessor(String tableName, AbstractDerbyObservationQueryEngine engine, Query query){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.waypointTable = engine.createTempTableName();
+		this.query = query;
 	}
 	
 	/**
@@ -253,7 +256,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
-		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine);
+		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, query.getConservationArea());
 		queryFilter.accept(av);
 
 		sql.append(engine.appendFromClause(usedTables));

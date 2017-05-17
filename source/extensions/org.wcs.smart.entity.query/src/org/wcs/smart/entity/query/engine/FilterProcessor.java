@@ -41,6 +41,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -61,6 +62,7 @@ public class FilterProcessor implements IFilterProcessor {
 	
 	private DerbyEntityQueryEngine engine;
 	private EntityAttributeFilterVisitor entityVisitor;
+	private Query query;
 	
 	private HasObservationFilterVisitor observationFilterVisitor = new HasObservationFilterVisitor();
 	
@@ -70,9 +72,10 @@ public class FilterProcessor implements IFilterProcessor {
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public FilterProcessor(String tableName, DerbyEntityQueryEngine engine){
+	public FilterProcessor(String tableName, DerbyEntityQueryEngine engine, Query query){
 		this.tableName = tableName;
 		this.engine = engine;
+		this.query = query;
 		this.observationTable = engine.createTempTableName();
 	}
 	
@@ -281,7 +284,7 @@ public class FilterProcessor implements IFilterProcessor {
 				}
 		}
 		
-		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine);
+		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, query.getConservationArea());
 		queryFilter.accept(areaVisitor);
 
 		entityVisitor = new EntityAttributeFilterVisitor(sql, engine, caFilter, c);

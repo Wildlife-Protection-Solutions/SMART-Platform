@@ -390,6 +390,21 @@
                   tooltip="%manauserusers.command.tooltip">
             </command>
             <command
+                  commandId="org.wcs.smart.command.ca.areas.show"
+                  icon="images/icons/etool16/area_polygon.png"
+                  label="%boundaries.command.label"
+                  mnemonic="%boundaries.command.mnemonic"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+               </visibleWhen>
+            </command>
+            <command
                   commandId="org.eclipse.ui.file.export"
                   id="x"
                   label="%exportmap.command.label"
@@ -1010,12 +1025,6 @@
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowAreaPropertyPageHandler$ShowAreaPropertyPageHandlerWrapper"
             commandId="org.wcs.smart.command.ca.areas.show">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.DeleteConservationArea$DeleteConservationAreaWrapper"
@@ -1194,7 +1203,7 @@
       </class>
       <class
             class="org.wcs.smart.ca.Area"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </class>
       <class
             class="org.wcs.smart.ca.datamodel.Aggregation"

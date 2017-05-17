@@ -145,10 +145,10 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 		groupbynodes.add(new GeneralTreeNode(Messages.EntitySummaryItemPanel_GeneralItemsLabel, generalItems ));
 		
 		groupbynodes.add(new DateTreeNode());
-		if (!SmartDB.isMultipleAnalysis()){
-			areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_AreaGroupBy);
-			groupbynodes.add(areaTreeNode);
-		}
+		
+		areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_AreaGroupBy);
+		groupbynodes.add(areaTreeNode);
+		
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
 		
 		entityNode = new EntityTypeTreeNode(Type.GROUPBY);

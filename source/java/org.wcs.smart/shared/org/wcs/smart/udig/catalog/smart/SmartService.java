@@ -83,9 +83,6 @@ public class SmartService extends ISessionService {
 	 */
 	@Override
 	public Status getStatus() {
-		if (isMultipleCa()){
-			return Status.RESTRICTED_ACCESS;
-		}
 		return Status.CONNECTED;
 	}
 
@@ -106,14 +103,6 @@ public class SmartService extends ISessionService {
 	public URL getIdentifier() {
 		return this.url;
 	}
-	
-	private UUID getConservationAreaUuid(){
-		return (UUID)params.get(SmartServiceExtension.CA_UUID_KEY);
-	}
-	
-	private boolean isMultipleCa(){
-		return ConservationArea.MULTIPLE_CA.equals(getConservationAreaUuid());
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -129,11 +118,8 @@ public class SmartService extends ISessionService {
 			synchronized (this) {
 				if (members == null){
 					ArrayList<SmartGeoResource> temp = new ArrayList<>();
-					//these are only valid for single-cas
-					if (!isMultipleCa()){
-						for (int i = 0; i < Area.AreaType.values().length; i ++){
-							temp.add(new SmartGeoResource(this, Area.AreaType.values()[i]));
-						}
+					for (int i = 0; i < Area.AreaType.values().length; i ++){
+						temp.add(new SmartGeoResource(this, Area.AreaType.values()[i]));
 					}
 					this.members = temp;
 				}

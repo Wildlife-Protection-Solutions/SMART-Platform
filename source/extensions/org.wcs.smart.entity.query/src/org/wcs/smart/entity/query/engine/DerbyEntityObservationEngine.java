@@ -128,7 +128,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				c.setAutoCommit(true);
 				try {			
-					filterer = DerbyEntityObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					filterer = DerbyEntityObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, query);
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, 

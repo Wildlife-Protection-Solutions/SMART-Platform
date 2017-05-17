@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.connect.dataqueue.cybertracker.feature"
       label="Core SMART CyberTracker DataQueue Processors (Required)"
-      version="5.0.0.qualifier"
+      version="5.0.1.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 

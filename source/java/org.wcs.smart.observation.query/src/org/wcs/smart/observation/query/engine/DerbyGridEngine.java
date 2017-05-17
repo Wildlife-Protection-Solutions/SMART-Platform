@@ -176,7 +176,7 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 				needsObservation = true;
 			}
 			
-			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable);
+			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, query);
 			//create a date filter that caches the dates so the same
 			//dates are used for all parts of the query;
 			//otherwise different date filters will be computed

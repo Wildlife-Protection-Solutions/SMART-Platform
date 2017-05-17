@@ -122,10 +122,10 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 		surveyNode = new SurveyGroupByTreeItem();
 		groupbynodes.add(surveyNode);
 		groupbynodes.add(new DateTreeNode());
-		if (!SmartDB.isMultipleAnalysis()){
-			areaTreeNode = new AreaTreeNode(Messages.GroupByValueItemPanel_AreaGroupByNode);
-			groupbynodes.add(areaTreeNode);
-		}
+		
+		areaTreeNode = new AreaTreeNode(Messages.GroupByValueItemPanel_AreaGroupByNode);
+		groupbynodes.add(areaTreeNode);
+		
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
 		
 		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();

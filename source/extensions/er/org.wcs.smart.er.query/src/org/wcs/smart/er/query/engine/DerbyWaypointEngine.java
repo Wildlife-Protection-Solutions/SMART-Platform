@@ -118,7 +118,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				c.setAutoCommit(true);
 				try {			
-					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter, query);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, 
 							true, true, new SubProgressMonitor(monitor, 50));

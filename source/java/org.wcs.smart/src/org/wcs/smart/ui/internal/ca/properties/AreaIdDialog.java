@@ -115,6 +115,7 @@ public class AreaIdDialog extends TitleAreaDialog {
 		Object[] attributes = atts.toArray(new Object[atts.size()]);
 				
 		Language l = SmartDB.getCurrentConservationArea().getDefaultLanguage();
+		if (l == null) l = SmartDB.getCurrentLanguage();
 		Label lbl = new Label(main, SWT.NONE);
 		lbl.setText(l.getDisplayName() + "*:"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -123,7 +124,7 @@ public class AreaIdDialog extends TitleAreaDialog {
 		atts.add(""); //$NON-NLS-1$
 		attributes = atts.toArray(new Object[atts.size()]);
 		for (Language lang : SmartDB.getCurrentConservationArea().getLanguages()){
-			if (lang.isDefault()) continue;
+			if (lang.equals(l)) continue;
 			lbl = new Label(main, SWT.NONE);
 			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 			lbl.setText(lang.getDisplayName() + ":"); //$NON-NLS-1$

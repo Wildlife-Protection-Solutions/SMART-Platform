@@ -253,7 +253,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 					
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
-					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter);
+					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter, query);
 					try{
 						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, new SubProgressMonitor(monitor, 10));
 					}finally{
@@ -279,7 +279,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						monitor.worked(10);
 					}else{
 						rateTable = createTempTableName();
-						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, surveyFilter);
+						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, surveyFilter, query);
 						try{
 							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, new SubProgressMonitor(monitor, 10));
 						}finally{
@@ -297,7 +297,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					monitor.subTask(Messages.DerbySummaryEngine_ProgressValues);
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupBy, query.getQueryDefinition().getValuePart(),
-							caFilter, new SubProgressMonitor(monitor, query.getQueryDefinition().getValuePart().getValueItems().size() * 10));
+							query, new SubProgressMonitor(monitor, query.getQueryDefinition().getValuePart().getValueItems().size() * 10));
 					
 					if (monitor.isCanceled() || data == null){
 						return ;
@@ -393,14 +393,14 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	private HashMap<SummaryResultKey, Double> computeSummaryValues(Connection c,
 			Session s, 
 			GroupByPart groupBy, 
-			ValuePart values, ConservationAreaFilter caFilter,
+			ValuePart values, Query query,
 			IProgressMonitor monitor) throws SQLException{
 		monitor.beginTask(Messages.DerbySummaryEngine_ProgressValues2, values.getValueItems().size());
 		
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
 			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
-			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, caFilter, valueTable) ; 
+			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, query, valueTable) ; 
 			if (data != null){
 				results.putAll( data );	
 			}
@@ -430,7 +430,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			Session s,
 			GroupByPart groupBy, 
 			IValueItem it, 
-			ConservationAreaFilter caFilter,
+			Query query,
 			String dataTable) throws SQLException {
 		
 		usedTables = new HashSet<Class<?>>();
@@ -441,13 +441,13 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			return results;
 		}
 		if (it instanceof AttributeValueItem){
-			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter));
+			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, query));
 		}else if (it instanceof CategoryValueItem){
-			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
+			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, query));
 		}else if (it instanceof CombinedValueItem){
-			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, caFilter));
+			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, query));
 		}else if (it instanceof MissionValueItem){
-			results = getSurveySummaryValue(dataTable, c, s, groupBy, (MissionValueItem)it, caFilter);
+			results = getSurveySummaryValue(dataTable, c, s, groupBy, (MissionValueItem)it, query);
 		}
 		if (results != null){
 			cachedValueToResults.put(cacheKey, results); 
@@ -469,7 +469,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			MissionValueItem valueItem, ConservationAreaFilter caFilter) throws SQLException{
+			MissionValueItem valueItem, Query query) throws SQLException{
 		
 		clearParameters();
 		
@@ -482,7 +482,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		
 		fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
 		
-		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, valueItem, caFilter);
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, valueItem, query);
 		
 		boolean hasAreaGroupBy = false;
 		for (IGroupBy groupby : groupBy.getGroupBys()){
@@ -663,7 +663,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			String dataTableName,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			AttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
+			AttributeValueItem attributeItem, Query query) throws SQLException{
 		
 		clearParameters();
 		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
@@ -674,7 +674,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			StringBuilder groupByInnerSql = new StringBuilder();
 
 			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql,
-					attributeItem, caFilter);
+					attributeItem, query);
 
 			String valueSql = "temp.ob_uuid"; //$NON-NLS-1$
 			if (attributeItem.getCategoryKey() != null) {
@@ -747,7 +747,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			StringBuilder groupBySql = new StringBuilder();
 			StringBuilder groupByInnerSql = new StringBuilder();
 
-			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, caFilter);
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, query);
 			
 			String valueSql = ""; //$NON-NLS-1$
 			
@@ -835,7 +835,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			StringBuilder groupBySql = new StringBuilder();
 			StringBuilder groupByInnerSql = new StringBuilder();
 
-			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, caFilter);
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, query);
 			
 			String valueSql = ""; //$NON-NLS-1$
 			
@@ -984,9 +984,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	private HashMap<SummaryResultKey, Double> getCombinedValue(
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			CombinedValueItem item, ConservationAreaFilter caFilter) throws SQLException{
+			CombinedValueItem item, Query query) throws SQLException{
 		
-		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, valueTable);
+		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), query, valueTable);
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		boolean needsGroupBy = false;
 		if (item.getPart2() instanceof MissionValueItem && ((MissionValueItem)item.getPart2()).requiresGroupByFilter()){
@@ -994,7 +994,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		}
 		
 		if (!needsGroupBy){
-			HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
+			HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), query, rateTable);
 			if (values2.values().size() != 1){
 				throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterValues);
 			}
@@ -1015,7 +1015,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				results.put(key, value);
 			}
 		}else{
-			HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, groupBy, item.getPart2(), caFilter, rateTable);
+			HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, groupBy, item.getPart2(), query, rateTable);
 			
 
 			for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
@@ -1055,7 +1055,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			String dataTable,
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			CategoryValueItem categoryItem, ConservationAreaFilter caFilter) throws SQLException{
+			CategoryValueItem categoryItem, Query query) throws SQLException{
 		
 		clearParameters();
 		
@@ -1065,7 +1065,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 
 		
 		fromSql.append(dataTable + " temp "); //$NON-NLS-1$
-		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, categoryItem, caFilter);
+		createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, categoryItem, query);
 		
 		String valueSql = ""; //$NON-NLS-1$
 		StringBuilder valueAggSql = new StringBuilder();
@@ -1131,7 +1131,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	private void createGroupBySql(GroupByPart groupBy,
 			StringBuilder fromSql,
 			StringBuilder groupBySql, 
-			StringBuilder groupByInnerSql, IValueItem value, ConservationAreaFilter caFilter) throws SQLException{
+			StringBuilder groupByInnerSql, IValueItem value, Query query) throws SQLException{
 		areaGroupByPrefix.clear();
 		
 		int itemcnt = 1;
@@ -1166,10 +1166,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null){
-						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( SurveyFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					fromSql.append(" and ");//$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = x'" + UuidUtils.uuidToString(query.getConservationArea().getUuid()) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 					fromSql.append(" and "); //$NON-NLS-1$
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(areaPrefix + ".area_type = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1202,10 +1200,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					fromSql.append(tablePrefix(MissionTrack.class) + ".geometry, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null ){
-						fromSql.append(" and ");//$NON-NLS-1$
-						fromSql.append( SurveyFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					fromSql.append(" and ");//$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = x'" + UuidUtils.uuidToString(query.getConservationArea().getUuid()) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					
 					fromSql.append(" and ");//$NON-NLS-1$
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(areaPrefix + ".area_type = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$

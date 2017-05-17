@@ -47,6 +47,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -66,6 +67,7 @@ public class FilterProcessor implements IFilterProcessor {
 	private String observationTable;
 	
 	private DerbyPatrolQueryEngine engine;
+	private Query query;
 	
 	private HasObservationFilterVisitor observationFilterVisitor = new HasObservationFilterVisitor();
 	
@@ -75,10 +77,11 @@ public class FilterProcessor implements IFilterProcessor {
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public FilterProcessor(String tableName, DerbyPatrolQueryEngine engine){
+	public FilterProcessor(String tableName, DerbyPatrolQueryEngine engine, Query query){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.observationTable = engine.createTempTableName();
+		this.query = query;
 	}
 	
 	/**
@@ -329,7 +332,7 @@ public class FilterProcessor implements IFilterProcessor {
 
 		
 		// area filters
-		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables);
+		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
 		queryFilter.accept(areaVisitor);
 		
 		sql.append(engine.appendFromClause(usedTables));

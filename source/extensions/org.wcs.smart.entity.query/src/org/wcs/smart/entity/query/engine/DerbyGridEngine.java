@@ -186,7 +186,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 			
 			try{
 				ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
-				filterer = super.getFilterProcessor(filter.getFilterType(), dataTable);
+				filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, query);
 				filterer.processFilter(c, filter.getFilter(), dFilter, caFilter, 
 					needsObservation, false, monitor);
 			}catch (Exception ex){
