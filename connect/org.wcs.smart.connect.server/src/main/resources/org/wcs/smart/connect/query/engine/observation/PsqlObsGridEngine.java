@@ -189,7 +189,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 			
 			try{
 				parseConservationAreaFilterInternal(query);
-				filterer.processFilter(c, filter.getFilter(), dFilter, caFilter, needsObservation, false);
+				filterer.processFilter(c, filter.getFilter(), dFilter, query,  caFilter, needsObservation, false);
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}

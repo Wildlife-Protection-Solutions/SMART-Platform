@@ -95,7 +95,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 					parseConservationAreaFilterInternal(lquery);
 					
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							caFilter, true, true);
+							query, caFilter, true, true);
 					
 					populateTemporaryTableExtra(c, caFilter, session);
 					

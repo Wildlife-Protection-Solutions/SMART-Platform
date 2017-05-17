@@ -110,7 +110,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 					DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));
 					
 					parseConservationAreaFilterInternal(query);
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, caFilter, true, true);
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, query, caFilter, true, true);
 					populateTemporaryTableExtra(c, caFilter, session);
 					
 					//item cnt

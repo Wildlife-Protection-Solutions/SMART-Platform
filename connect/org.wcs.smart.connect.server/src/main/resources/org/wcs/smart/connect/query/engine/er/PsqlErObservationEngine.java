@@ -125,7 +125,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 				try {
 					filterer = getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							caFilter, 
+							query, caFilter, 
 							true, true);
 					
 					populateTemporaryTableExtra(c, session,filter, caFilter,  query);

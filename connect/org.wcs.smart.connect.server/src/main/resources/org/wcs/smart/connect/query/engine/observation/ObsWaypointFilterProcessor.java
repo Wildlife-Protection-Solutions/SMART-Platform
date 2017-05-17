@@ -40,6 +40,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.query.engine.visitor.AreaFilterVisitor;
 import org.wcs.smart.query.common.engine.NamedPreparedStatement;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryFilter;
@@ -105,7 +106,8 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 	 */
 	@Override
 	public void processFilter(Connection c, IFilter queryFilter, 
-			DateFilter dateFilter, ConservationAreaFilter caFilter, 
+			DateFilter dateFilter, Query query,
+			ConservationAreaFilter caFilter, 
 			boolean populateObservation,
 			boolean includeEmptyObservations) throws SQLException{
 		
@@ -116,7 +118,7 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 		}
 		createWaypointTable(c, qFilter, dateFilter, caFilter);
 		createTemporaryTable(c);
-		populateTemporaryTable(qFilter, dateFilter, caFilter, 
+		populateTemporaryTable(qFilter, dateFilter, query, caFilter, 
 				includeEmptyObservations, c, populateObservation);
 	}
 	
@@ -177,6 +179,7 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 	 */
 	private void populateTemporaryTable(IFilter queryFilter,
 			DateFilter dateFilter, 
+			Query query,
 			ConservationAreaFilter caFilter,
 			boolean onlyObservations,
 			Connection c,
@@ -235,7 +238,7 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
-		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine);
+		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, query.getConservationArea());
 		queryFilter.accept(av);
 
 		sql.append(engine.appendFromClause(usedTables));

@@ -46,7 +46,6 @@ import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
-import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
 import org.wcs.smart.intelligence.query.IntelligencePatrolGroupBy;
 import org.wcs.smart.observation.model.Waypoint;
@@ -133,6 +132,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 	private GroupByPart allGroupByParts;
 	private ValuePart valuePart;
 	
+	private PatrolSummaryQuery query ;
 	private boolean hasAreaFilter = false;
 	
 	@Override
@@ -174,7 +174,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
 
-		final PatrolSummaryQuery query = (PatrolSummaryQuery) lquery;
+		query = (PatrolSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale)parameters.get(Locale.class.getName());
 		
@@ -436,7 +436,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		IFilterProcessor rfilterer = PsqlPatrolSummaryEngine.this.getFilterProcessor(
 				qFilter.getFilterType(), tableName);
 		try{
-			rfilterer.processFilter(c, qFilter.getFilter(), localDateFilter, caFilter, needsObservationRate, false);
+			rfilterer.processFilter(c, qFilter.getFilter(), localDateFilter, query, caFilter, needsObservationRate, false);
 		}finally{
 			rfilterer.dropTemporaryTables(c);
 		}
@@ -1124,10 +1124,11 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null){
-						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					
+					String ca = addParameterValue(query.getConservationArea().getUuid());
+					fromSql.append(" and "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = " + ca + ""); //$NON-NLS-1$ //$NON-NLS-2$
+					
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(" and "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".area_type = " + p1); //$NON-NLS-1$ 
@@ -1160,10 +1161,11 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 					fromSql.append(tablePrefix(Track.class) + ".geometry, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null ){
-						fromSql.append(" and ");//$NON-NLS-1$
-						fromSql.append( PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					
+					String ca = addParameterValue(query.getConservationArea().getUuid());
+					fromSql.append(" and "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = " + ca + ""); //$NON-NLS-1$ //$NON-NLS-2$
+					
 					fromSql.append(" and ");//$NON-NLS-1$
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(areaPrefix + ".area_type = " + p1);//$NON-NLS-1$

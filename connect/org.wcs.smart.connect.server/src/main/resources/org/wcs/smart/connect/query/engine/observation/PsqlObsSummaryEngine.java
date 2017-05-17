@@ -44,7 +44,6 @@ import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
-import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -101,7 +100,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 	
 	private SummaryQueryResult sumResults = null;
 	private HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults;
-	
+	private ObservationSummaryQuery query;
 	private String valueWaypointTable;
 	
 	private boolean needsObservationValue = false;
@@ -151,7 +150,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
 	
-		final ObservationSummaryQuery query = (ObservationSummaryQuery) lquery;
+		query = (ObservationSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale)parameters.get(Locale.class.getName());
 		
@@ -331,7 +330,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 		IFilterProcessor rfilterer = PsqlObsSummaryEngine.this.getFilterProcessor(
 				valueFilter.getFilterType(), tableName);
 		try{
-			rfilterer.processFilter(c, valueFilter.getFilter(), localDateFilter, caFilter, needsObservationValue, false);
+			rfilterer.processFilter(c, valueFilter.getFilter(), localDateFilter, query, caFilter, needsObservationValue, false);
 		}finally{
 			rfilterer.dropTemporaryTables(c);
 		}
@@ -819,10 +818,9 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null){
-						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					String ca = addParameterValue(query.getConservationArea().getUuid());
+					fromSql.append(" and "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = " + ca + ""); //$NON-NLS-1$ //$NON-NLS-2$
 					fromSql.append(" and "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 					

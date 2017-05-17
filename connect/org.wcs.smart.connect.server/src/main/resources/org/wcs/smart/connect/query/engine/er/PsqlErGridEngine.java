@@ -308,7 +308,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			
 			IFilterProcessor filterer = getFilterProcessor(filter.getFilterType(), dataTable, sdFilter);
 			try{
-				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, 
+				filterer.processFilter(c, filter.getFilter(), dateFilter, query, caFilter, 
 					needsObservation, false);
 			}finally{
 				filterer.dropTemporaryTables(c);

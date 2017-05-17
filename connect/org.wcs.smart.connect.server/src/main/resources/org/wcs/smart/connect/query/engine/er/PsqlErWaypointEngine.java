@@ -117,7 +117,7 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				try {			
 					filterer = PsqlErWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, query,
 							caFilter, 
 							true, true);
 					

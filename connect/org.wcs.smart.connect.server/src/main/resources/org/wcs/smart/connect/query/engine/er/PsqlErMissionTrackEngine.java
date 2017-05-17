@@ -117,7 +117,7 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				try {	
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							caFilter, false, false);
+							query, caFilter, false, false);
 					
 					populateTemporaryTableExtra(c, session,filter, caFilter, query);
 					

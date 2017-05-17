@@ -127,7 +127,7 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 						needsObservations = vv.hasObservationFilter();
 					}
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							caFilter, 
+							query, caFilter, 
 							needsObservations, false);
 					
 					populateTemporaryTableExtra(c, session, query, sdFilter, caFilter);

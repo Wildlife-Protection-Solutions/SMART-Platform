@@ -190,7 +190,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 			try{
 				parseConservationAreaFilterInternal(query);
 				filterer = getFilterProcessor(filter.getFilterType(), dataTable);
-				filterer.processFilter(c, filter.getFilter(), dFilter, caFilter, 
+				filterer.processFilter(c, filter.getFilter(), dFilter, query, caFilter, 
 					needsObservation, false);
 			}catch (Exception ex){
 				throw new SQLException(ex);

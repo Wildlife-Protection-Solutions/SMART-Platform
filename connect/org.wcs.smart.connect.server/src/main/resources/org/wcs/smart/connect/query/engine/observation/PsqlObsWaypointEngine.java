@@ -108,7 +108,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 				try {		
 					parseConservationAreaFilterInternal(query);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							caFilter, false, true);
+							query, caFilter, false, true);
 					
 					populateTemporaryTableExtra(c, session);
 					

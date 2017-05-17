@@ -49,7 +49,6 @@ import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
-import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -127,6 +126,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 	
 	private String rateTable;
 	private String valueTable;
+	private SurveySummaryQuery query ;
 	
 	private HashSet<Class<?>> usedTables;
 	
@@ -170,7 +170,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
 
-		final SurveySummaryQuery query = (SurveySummaryQuery) lquery;
+		query = (SurveySummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale)parameters.get(Locale.class.getName());
 		
@@ -251,7 +251,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 					
 					IFilterProcessor filterer = PsqlErSummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter);
 					try{
-						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false);
+						filterer.processFilter(c, valueFilter.getFilter(), dFilter, query, caFilter, needsObservationValue, false);
 					}finally{
 						try{
 							filterer.dropTemporaryTables(c);
@@ -270,7 +270,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 						rateTable = createTempTableName();
 						IFilterProcessor rfilterer = PsqlErSummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, surveyFilter);
 						try{
-							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false);
+							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query, caFilter, needsObservationRate, false);
 						}finally{
 							rfilterer.dropTemporaryTables(c);
 						}
@@ -1122,10 +1122,9 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 					fromSql.append(tablePrefix(Waypoint.class) + ".y, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null){
-						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					String ca = addParameterValue(query.getConservationArea().getUuid());
+					fromSql.append(" and "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = " + ca + ""); //$NON-NLS-1$ //$NON-NLS-2$
 					fromSql.append(" and "); //$NON-NLS-1$
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(areaPrefix + ".area_type = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1158,10 +1157,9 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 					fromSql.append(tablePrefix(MissionTrack.class) + ".geometry, "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
 					fromSql.append(")"); //$NON-NLS-1$
-					if (caFilter != null ){
-						fromSql.append(" and ");//$NON-NLS-1$
-						fromSql.append( PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
-					}
+					String ca = addParameterValue(query.getConservationArea().getUuid());
+					fromSql.append(" and "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".ca_uuid = " + ca + ""); //$NON-NLS-1$ //$NON-NLS-2$
 					fromSql.append(" and ");//$NON-NLS-1$
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(areaPrefix + ".area_type = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$

@@ -145,7 +145,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				
 				try {
 					parseConservationAreaFilterInternal(lquery);
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, caFilter, false, false);
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, query, caFilter, false, false);
 					getResults(c, session);
 					
 					c.commit();

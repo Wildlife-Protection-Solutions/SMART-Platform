@@ -276,7 +276,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			
 			IFilterProcessor filterer = getFilterProcessor(filter.getFilterType(), dataTable);
 			try{
-				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, needsObservation, false);
+				filterer.processFilter(c, filter.getFilter(), dateFilter, query, caFilter, needsObservation, false);
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}
