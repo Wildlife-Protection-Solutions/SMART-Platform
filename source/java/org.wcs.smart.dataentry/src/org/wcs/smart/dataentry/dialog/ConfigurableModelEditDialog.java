@@ -38,7 +38,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -111,21 +110,9 @@ public class ConfigurableModelEditDialog extends TitleAreaDialog {
 	public Control createDialogArea(Composite parent){
 		getShell().setText( Messages.ConfigurableModelEditDialog_Title);
 		Composite composite = (Composite) super.createDialogArea(parent);
-
-		//Create an outer composite for spacing
-		ScrolledComposite scrolled = new ScrolledComposite(composite, SWT.V_SCROLL | SWT.H_SCROLL );
-		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		// always show the focus control
-		scrolled.setShowFocusedControl(true);
-		scrolled.setExpandHorizontal(true);
-		scrolled.setExpandVertical(true);
-		
-		Composite c = createContent(scrolled);
+		Composite c = createContent(composite);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		scrolled.setContent(c);
-		scrolled.setMinSize(scrolled.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		return composite;
 	}

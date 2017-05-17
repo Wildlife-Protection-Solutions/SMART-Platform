@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
@@ -164,10 +165,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 				updateRightPanelState();
 			}
 		});
-
+		
 		Composite rightPanel = new Composite(container, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
-
+		
+		
 		Composite buttonPanel = new Composite(rightPanel, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(3, false));
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
@@ -195,9 +197,23 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			controlButtons.put(cbtn,btn);
 		}		
 		
-		infoInnerPanel = new Group(rightPanel, SWT.NONE);
-		((Group)infoInnerPanel).setText(Messages.ConfigurableModelEditDialog_PropertiesLabel);
+		Group area = new Group(rightPanel, SWT.NONE);
+		((Group)area).setText(Messages.ConfigurableModelEditDialog_PropertiesLabel);
 		
+		area.setLayout(new GridLayout());
+		area.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)area.getLayout()).marginWidth = 0;
+		((GridLayout)area.getLayout()).marginHeight = 0;
+		ScrolledComposite scrolled = new ScrolledComposite(area, SWT.V_SCROLL | SWT.H_SCROLL );
+		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		// always show the focus control
+		scrolled.setShowFocusedControl(true);
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
+		
+		infoInnerPanel = new Composite(scrolled, SWT.NONE);
+
 		StackLayout layout = new StackLayout();
 		layout.marginHeight = 2;
 		infoInnerPanel.setLayout(layout);
@@ -254,6 +270,9 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		
 		container.setWeights(new int[]{40,60});
 		
+
+		scrolled.setContent(infoInnerPanel);
+		scrolled.setMinSize(infoInnerPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		//set  language
 		((ConfigurableModelLabelProvider)modelTreeViewer.getLabelProvider()).setLanguage(languageViewer.getCurrentSelection());
 		modelTreeViewer.refresh();

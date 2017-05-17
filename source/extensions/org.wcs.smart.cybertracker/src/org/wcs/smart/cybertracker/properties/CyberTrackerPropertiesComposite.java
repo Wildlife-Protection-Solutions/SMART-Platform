@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -155,22 +156,45 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		TabItem fieldmapTab = new TabItem (tabFolder, SWT.NONE);
 		fieldmapTab.setText (Messages.CyberTrackerPropertiesDialog_2);
 		
-		Composite generalContainer = new Composite(tabFolder, SWT.None);
+		ScrolledComposite generalScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
+		generalScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		generalScroll.setShowFocusedControl(true);
+		generalScroll.setExpandHorizontal(true);
+		generalScroll.setExpandVertical(true);
+		
+		Composite generalContainer = new Composite(generalScroll, SWT.None);
 		generalContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
 		generalContainer.setLayout(new GridLayout(2, false));
 		
-		Composite gpsContainer = new Composite(tabFolder, SWT.None);
+		generalScroll.setContent(generalContainer);
+		
+		
+		ScrolledComposite gpsScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
+		gpsScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		gpsScroll.setShowFocusedControl(true);
+		gpsScroll.setExpandHorizontal(true);
+		gpsScroll.setExpandVertical(true);
+		
+		Composite gpsContainer = new Composite(gpsScroll, SWT.None);
 		gpsContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
 		gpsContainer.setLayout(new GridLayout(2, false));
+		gpsScroll.setContent(gpsContainer);
 		
-		Composite fieldmapContainer = new Composite(tabFolder, SWT.None);
+		
+		ScrolledComposite mapScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
+		mapScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		mapScroll.setShowFocusedControl(true);
+		mapScroll.setExpandHorizontal(true);
+		mapScroll.setExpandVertical(true);
+		
+		Composite fieldmapContainer = new Composite(mapScroll, SWT.None);
 		fieldmapContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
 		fieldmapContainer.setLayout(new GridLayout(2, false));
+		mapScroll.setContent(fieldmapContainer);
 		
-		
-		generalTab.setControl(generalContainer);
-		gpsTab.setControl(gpsContainer);
-		fieldmapTab.setControl(fieldmapContainer);
+		generalTab.setControl(generalScroll);
+		gpsTab.setControl(gpsScroll);
+		fieldmapTab.setControl(mapScroll);
 		
 		
 		Label lblUseTitleBar = new Label(generalContainer, SWT.NONE);
@@ -874,6 +898,12 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});	
+		
+		
+		
+		generalScroll.setMinSize(generalScroll.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		mapScroll.setMinSize(mapScroll.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		gpsScroll.setMinSize(gpsScroll.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
 	public void addPropsChangeListener(IPropsChangeListener pcl) {
