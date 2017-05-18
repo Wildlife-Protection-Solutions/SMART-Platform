@@ -34,8 +34,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -68,7 +66,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -82,13 +79,13 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.search.BasicRecordSearch;
 import org.wcs.smart.i2.search.IntelRecordResult;
 import org.wcs.smart.i2.search.IntelRecordSearchResultItem;
+import org.wcs.smart.i2.ui.DeleteRecordHandler;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
@@ -382,21 +379,15 @@ public class BasicRecordSearchPanel extends Composite {
 			delete.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					List<RecordEditorInput> toDelete = new ArrayList<>();
+					List<Object> toDelete = new ArrayList<>();
 					for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
 						Object x = (Object) iterator.next();
 						if (x instanceof IntelRecordSearchResultItem){
 							IntelRecordSearchResultItem item = (IntelRecordSearchResultItem) x;
-							toDelete.add(new RecordEditorInput(null, item.getRecordUuid(), null, item.getRecordSourceUuid(), null));
+							toDelete.add(new RecordEditorInput(item.getTitle(), item.getRecordUuid(), null, item.getRecordSourceUuid(), null));
 						}
 					}
-					if (MessageDialog.openConfirm(context.get(Shell.class), Messages.BasicRecordSearchPanel_DeleteDialogTitle, MessageFormat.format(Messages.BasicRecordSearchPanel_DeleteDialogMsg, toDelete.size()))){
-						ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
-						try {
-							pmd.run(true, true, (monitor)-> RecordManager.INSTANCE.deleteRecords(toDelete, context,monitor));
-						} catch (Exception ex) {
-							Intelligence2PlugIn.displayLog(Messages.BasicRecordSearchPanel_DeleteError + ex.getMessage(), ex);
-						}
+					if ((new DeleteRecordHandler()).deleteRecords(toDelete, context)){
 						doSearch();
 					}
 				}

@@ -50,10 +50,10 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.ui.DeleteRecordHandler;
 
 /**
  * Button toolbar for records
@@ -187,9 +187,7 @@ public class RecordButtonToolbar extends Composite{
 		deleteItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (MessageDialog.openConfirm(recordEditor.getSite().getShell(), Messages.RecordButtonToolbar_DeleteDialogTitle, Messages.RecordButtonToolbar_DeleteDialogMsg)){
-					RecordManager.INSTANCE.deleteRecord(recordEditor.getRecord(), recordEditor.getContext());
-				}
+				(new DeleteRecordHandler()).deleteRecords(Collections.singleton(recordEditor.getRecord()), recordEditor.getContext());
 			}
 		});
 		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){

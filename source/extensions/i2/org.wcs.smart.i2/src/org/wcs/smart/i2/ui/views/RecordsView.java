@@ -95,12 +95,12 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.ui.DeleteRecordHandler;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
@@ -391,17 +391,12 @@ public class RecordsView {
 							toDelete.add(x);
 						}
 					}
-					if (MessageDialog.openConfirm(context.get(Shell.class), Messages.RecordsView_DeleteTitle, MessageFormat.format(Messages.RecordsView_DeleteMessage, toDelete.size()))){
-						ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
-						try {
-							pmd.run(true, true, (monitor)-> RecordManager.INSTANCE.deleteRecords(toDelete, context,monitor));
-						} catch (Exception ex) {
-							Intelligence2PlugIn.displayLog(Messages.RecordsView_DeleteErrorMessage + ex.getMessage(), ex);
-						}
+					if ((new DeleteRecordHandler()).deleteRecords(toDelete, context)){
 						refreshView();
 					}
 				}
 			});
+			
 			m.addMenuListener(new MenuListener() {
 				@Override
 				public void menuShown(MenuEvent e) {

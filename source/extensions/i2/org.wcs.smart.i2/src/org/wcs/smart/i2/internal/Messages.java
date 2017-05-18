@@ -102,9 +102,6 @@ public class Messages extends NLS {
 	public static String AttributeValueLabelProvider_ErrorLabel;
 	public static String BasicEntitySearch_taskName;
 	public static String BasicRecordSearchPanel_AddToWsMenuItem;
-	public static String BasicRecordSearchPanel_DeleteDialogMsg;
-	public static String BasicRecordSearchPanel_DeleteDialogTitle;
-	public static String BasicRecordSearchPanel_DeleteError;
 	public static String BasicRecordSearchPanel_ExportLink;
 	public static String BasicRecordSearchPanel_ExportTooltip;
 	public static String BasicRecordSearchPanel_NarrativeLabel;
@@ -145,6 +142,9 @@ public class Messages extends NLS {
 	public static String DeleteIntelAttributeListItemAdvisor_EntityError;
 	public static String DeleteIntelAttributeListItemAdvisor_InvalidObject;
 	public static String DeleteIntelAttributeListItemAdvisor_RelationshipError;
+	public static String DeleteRecordHandler_DeleteConfirmMulti;
+	public static String DeleteRecordHandler_DeleteConfirmSingle;
+	public static String DeleteRecordHandler_InvalidPassword;
 	public static String DrawPointTool_InvalidPointMsg;
 	public static String DrawPolygonTool_InvalidPolygonMsg;
 	public static String DropItem_DeleteItemTooltip;
@@ -864,8 +864,6 @@ public class Messages extends NLS {
 	public static String QueryView_RenameMenuItem;
 	public static String QueryView_SaveQuerySection;
 	public static String RecordButtonToolbar_addtooltip;
-	public static String RecordButtonToolbar_DeleteDialogMsg;
-	public static String RecordButtonToolbar_DeleteDialogTitle;
 	public static String RecordButtonToolbar_deleteTooltip;
 	public static String RecordButtonToolbar_edittooltip;
 	public static String RecordButtonToolbar_PDFErrorDialog;
@@ -876,11 +874,9 @@ public class Messages extends NLS {
 	public static String RecordButtonToolbar_refreshtooltip;
 	public static String RecordButtonToolbar_savetooltip;
 	public static String RecordCsvExporter_ConfigTitle;
-	public static String RecordCsvExporter_CreatedByColumn;
 	public static String RecordCsvExporter_DateCreatedColumn;
 	public static String RecordCsvExporter_DateModifiedColumn;
 	public static String RecordCsvExporter_ErrorMsg;
-	public static String RecordCsvExporter_ModifiedByColumn;
 	public static String RecordCsvExporter_ProgressMsg;
 	public static String RecordCsvExporter_Sourcecolumn;
 	public static String RecordCsvExporter_StatusColumn;
@@ -1032,9 +1028,7 @@ public class Messages extends NLS {
 	public static String RecordsView_CreateDirTitle;
 	public static String RecordsView_DdMessage;
 	public static String RecordsView_DeleteErrorMessage;
-	public static String RecordsView_DeleteMessage;
 	public static String RecordsView_DeleteTitle;
-	public static String RecordsView_exportlink;
 	public static String RecordsView_ErrorMessage;
 	public static String RecordsView_ErrorMessage2;
 	public static String RecordsView_ErrorTitle;
@@ -1043,7 +1037,6 @@ public class Messages extends NLS {
 	public static String RecordsView_ExportMenuOption;
 	public static String RecordsView_ExportToCsv;
 	public static String RecordsView_ExportToXml;
-	public static String RecordsView_exporttooltip;
 	public static String RecordsView_inprogressSection;
 	public static String RecordsView_LoadingIntelRecordsJobName;
 	public static String RecordsView_OpenMenu;
