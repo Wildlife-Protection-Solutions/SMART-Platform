@@ -50,7 +50,7 @@
    
    
    
-   
+   <!--
   <feature url="features/org.wcs.smart.feature.nl_es_6.0.0.jar" id="org.wcs.smart.feature.nl_es" version="6.0.0">
       <category name="languagepacks"/>
    </feature>
@@ -279,7 +279,7 @@
    <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl_lo_6.0.0.jar" id="org.wcs.smart.cybertracker.survey.feature.nl_lo" version="6.0.0">
       <category name="cybertracker"/>
    </feature>
-   
+   -->
    
    
    
