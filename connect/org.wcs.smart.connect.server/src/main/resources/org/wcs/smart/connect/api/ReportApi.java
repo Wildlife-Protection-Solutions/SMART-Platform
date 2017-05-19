@@ -114,13 +114,10 @@ public class ReportApi extends HttpServlet{
 	/**
 	 * Runs a query and returns the results.
 	 * 
-	 * @param queryUuid
-	 * @param format
-	 * @param start
-	 * @param end
-	 * @param filter
-	 * @param delimiter
-	 * @param cafilter
+	 * @param reportuuid - The report UUID, passed in as part of the URL 
+	 * @param format  - html, pdf, doc, odt are the options.
+	 * @param parameterList - any custom parameters in a comma separated list, eg. &parameterList=param1,value1,param2,value2
+	 * @param cafilter - only run against CAs listed in this parameter, comma separated list of UUIDs.
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -298,9 +295,13 @@ public class ReportApi extends HttpServlet{
 		return cas;
 	}
 	
-	/*
-	 * returns all Reports the user is able to view 
-	 */
+	/**
+	 * returns all Reports the user is able to view
+	 * 
+	 * @param username - The report UUID, passed in as part of the URL 
+	 * @return
+	 *
+	 **/
 	
 	@GET
     @Path("")

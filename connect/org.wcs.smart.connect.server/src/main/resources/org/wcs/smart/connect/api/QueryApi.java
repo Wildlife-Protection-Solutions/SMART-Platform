@@ -127,8 +127,8 @@ public class QueryApi extends HttpServlet{
 	 * @param queryuuid		provided in the URL, the uuid of the query requested
 	 * @param format	requested format, not all options makes sense for all query types: csv, shp, tif, geojson
 	 * @param srid		srid that any spatial data results should be returned in
-	 * @param start_date	start date of query, number of milliseconds since the epoch
-	 * @param end_date	end date of query, number of milliseconds since the epoch
+	 * @param start_date	start date of query, in the form yyyy-MM-dd
+	 * @param end_date	end date of query, in the form yyyy-MM-dd
 	 * @param date_filter	date field type, not all make sense for all queries: waypointdate, patrolstart, patrolend, missiontrackdate, missionstartdate, missionenddate, intellreceiveddate
 	 * @param delimiter	delimiter override to use in CSV format
 	 * @param cafilter	comma separated list of CA uuids, only query these CAs.

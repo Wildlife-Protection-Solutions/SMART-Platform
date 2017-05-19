@@ -137,6 +137,9 @@ public class ConnectUserAction extends HttpServlet {
 	/**
 	 * Lists all available actions.
 	 * 
+	 * <p>URL: /server/api/privileges/actions
+	 * <p>METHOD: GET
+	 * 
 	 * @return
 	 */
 	@GET
@@ -201,6 +204,9 @@ public class ConnectUserAction extends HttpServlet {
 	/**
 	 * Lists all available roles.
 	 * 
+	 * <p>URL: /server/api/privileges/roles
+	 * <p>METHOD: GET
+	 * 
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -232,7 +238,8 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * Lists all roles and actions associated with a given user.
-	 * 
+	 * <p>URL: /server/api/privileges/user/{username}
+	 * <p>METHOD: GET
 	 * @param username
 	 * @return
 	 */
@@ -308,6 +315,8 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * Removes an action from a given user.
+	 * <p>URL: /server/api/privileges/user/{username}/action/{action}
+	 * <p>METHOD: DELETE
 	 * 
 	 * @param username
 	 * @param action
@@ -322,6 +331,8 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * Removes an action and specific resource from a given user.
+	 * <p>URL: /server/api/privileges/user/{username}/action/{action}/{resource}
+	 * <p>METHOD: DELETE
 	 * 
 	 * @param username
 	 * @param action
@@ -385,6 +396,9 @@ public class ConnectUserAction extends HttpServlet {
 	 * Creates a new role. Uses the name property of the action
 	 * object and generated a new uuid string as the role id;
 	 * 
+	 * <p>URL: /server/api/privileges/roles
+	 * <p>METHOD: POST
+	 * 
 	 * @param username
 	 * @param action
 	 */
@@ -414,6 +428,9 @@ public class ConnectUserAction extends HttpServlet {
 	/**
 	 * Updates the role name. Uses the name property of the action
 	 * object and generated a new uuid string as the role id;
+	 * 
+	 * <p>URL: /server/api/privileges/roles/{rolesid}
+	 * <p>METHOD: PUT
 	 * 
 	 * @param username
 	 * @param action
@@ -447,6 +464,9 @@ public class ConnectUserAction extends HttpServlet {
 	/**
 	 * Removes a role from the system, includes removing any user
 	 * links to the role.
+	 * 
+	 * <p>URL: /server/api/privileges/roles/{rolesid}
+	 * <p>METHOD: DELETE
 	 * 
 	 * @param username
 	 * @param action
@@ -484,6 +504,9 @@ public class ConnectUserAction extends HttpServlet {
 	/**
 	 * Removes an action from a given role.
 	 * 
+	 * <p>URL: /server/api/privileges/roles/{roleid}/action/{action}
+	 * <p>METHOD: DELETE
+	 * 
 	 * @param username
 	 * @param action
 	 */
@@ -496,6 +519,9 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * Removes an action and specific resource from a given role.
+	 * 
+	 * <p>URL: /server/api/privileges/roles/{roleid}/action/{action}/{resource}
+	 * <p>METHOD: DELETE
 	 * 
 	 * @param username
 	 * @param action
@@ -549,6 +575,10 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * Adds a new action for a given user.
+	 * 
+	 * <p>URL: /server/api/privileges/user/{username}/action/{action}
+	 * <p>METHOD: POST
+	 * 
 	 * @param username
 	 * @param actionKey
 	 */
@@ -561,6 +591,10 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * Add a new action with a specific resource for a given user.
+	 * 
+	 * <p>URL: /server/api/privileges/user/{username}/action/{action}/{resource}
+	 * <p>METHOD: POST
+	 * 
 	 * @param username
 	 * @param actionKey
 	 * @param resourceKey
@@ -613,6 +647,10 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * Gets all actions associated with a given role
+	 * 
+	 * <p>URL: /server/api/privileges/roles/{roleid}/action
+	 * <p>METHOD: GET
+	 * 
 	 * @param roleid
 	 */
 	@SuppressWarnings("unchecked")
@@ -656,6 +694,10 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * Adds a new action to a role.
+	 * 
+	 * <p>URL: /server/api/privileges/roles/{roleid}/action/{action}
+	 * <p>METHOD: POST
+	 * 
 	 * @param username
 	 * @param actionKey
 	 */
@@ -712,6 +754,9 @@ public class ConnectUserAction extends HttpServlet {
 	/**
 	 * Removes an role from a given user.
 	 * 
+	 * <p>URL: /server/api/privileges/user/{username}/role/{role}
+	 * <p>METHOD: DELETE
+	 * 
 	 * @param username
 	 * @param action
 	 */
@@ -756,6 +801,10 @@ public class ConnectUserAction extends HttpServlet {
 	
 	/**
 	 * Adds a new action for a given user.
+	 * 
+	 * <p>URL: /server/api/privileges/user/{username}/role/{role}
+	 * <p>METHOD: POST
+	 * 
 	 * @param username
 	 * @param actionKey
 	 */
