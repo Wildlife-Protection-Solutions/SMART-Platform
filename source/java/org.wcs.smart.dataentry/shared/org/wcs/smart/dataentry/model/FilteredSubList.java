@@ -60,7 +60,7 @@ public abstract class FilteredSubList<T> implements List<T> {
 
 	@Override
 	public void add(int index, T element) {
-		int sourceIndex = source.indexOf(filteredList.get(index));
+		int sourceIndex = index < filteredList.size() ? source.indexOf(filteredList.get(index)) : source.size();
 		if (sourceIndex < 0) {
 			throw new IllegalStateException("Item exists in filtered list but not in source list"); //$NON-NLS-1$
 		}
