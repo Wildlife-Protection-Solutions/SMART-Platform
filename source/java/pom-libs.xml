@@ -12,11 +12,8 @@
 		<module>org.wcs.smart/pom-libs.xml</module>
 		<module>org.wcs.smart.hibernate.libs/pom-libs.xml</module>
 		<module>org.wcs.smart.patrol/pom-libs.xml</module>
-		<!--<module>org.wcs.smart.query/pom-libs.xml</module>-->
-		<!--<module>org.wcs.smart.observation/pom-libs.xml</module>-->
-		
-		<!--<module>../extensions/i2/org.wcs.smart.i2/pom.xml</module>-->
-		<!--<module>../extensions/connect/org.wcs.smart.connect/pom.xml</module>-->
+		<module>../extensions/i2/org.wcs.smart.i2/pom-libs.xml</module>
+		<module>../extensions/connect/org.wcs.smart.connect/pom-libs.xml</module>
 	</modules>
 	
 	

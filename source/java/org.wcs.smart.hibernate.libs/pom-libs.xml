@@ -7,6 +7,7 @@
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart</artifactId>
 		<version>6.0.0-SNAPSHOT</version>
+		<relativePath>../pom-libs.xml</relativePath>
 	</parent>
 	
 	<name>SMART Hibernate Libraries Module</name>
