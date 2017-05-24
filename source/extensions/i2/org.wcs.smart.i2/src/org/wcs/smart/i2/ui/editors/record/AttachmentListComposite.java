@@ -259,7 +259,7 @@ public class AttachmentListComposite extends Composite{
 										boolean exists = false;
 										//determine if this attachment already exists
 										for (IntelEntityAttachment existing : getNewEntityAttachments()){
-											if (existing.getAttachment().equals(a.getAttachment())){
+											if (existing.equals(a)){
 												exists = true;
 												break;
 											}
@@ -279,7 +279,7 @@ public class AttachmentListComposite extends Composite{
 										editor.setDirty(true);
 										editor.getSummaryPage().getEntityPanel().init();
 									}else{
-										editor.showMessage("Attachments already linked to entities");
+										editor.showMessage(Messages.AttachmentListComposite_AttachmentsLinked);
 									}
 									
 								}
@@ -289,7 +289,7 @@ public class AttachmentListComposite extends Composite{
 						
 						
 						mnuunlink = new MenuItem(this.thumbMenu, SWT.CASCADE,index);
-						mnuunlink.setText("Unlink From Entity...");
+						mnuunlink.setText(Messages.AttachmentListComposite_UnlinkMenuOption);
 						
 						Menu mnuEntitiesUnlink = new Menu(mnuunlink);
 						mnuunlink.setMenu(mnuEntitiesUnlink);

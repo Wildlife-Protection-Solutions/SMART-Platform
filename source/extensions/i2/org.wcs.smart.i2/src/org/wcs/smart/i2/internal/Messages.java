@@ -30,6 +30,7 @@ public class Messages extends NLS {
 	public static String AdvancedEntitySearchPanel_SaveDialogTitle;
 	public static String AdvancedEntitySearchPanel_SaveSearchlink;
 	public static String AttachmentListComposite_AddAttachmentItem;
+	public static String AttachmentListComposite_AttachmentsLinked;
 	public static String AttachmentListComposite_LinkEntityItem;
 	public static String AttachmentListComposite_LocationsParsedMsg;
 	public static String AttachmentListComposite_openMenuItem;
@@ -39,6 +40,7 @@ public class Messages extends NLS {
 	public static String AttachmentListComposite_PropertiesItem;
 	public static String AttachmentListComposite_Refresh;
 	public static String AttachmentListComposite_SearchItem;
+	public static String AttachmentListComposite_UnlinkMenuOption;
 	public static String AttachmentPropertiesDialog_CreatedByLabel;
 	public static String AttachmentPropertiesDialog_CreatedOnLabel;
 	public static String AttachmentPropertiesDialog_Message;
@@ -311,6 +313,7 @@ public class Messages extends NLS {
 	public static String EntityRelationshipExportDialog_Title;
 	public static String EntityRelationshipExporter_EntityColumnName;
 	public static String EntityRelationshipExporter_ProgressMsg;
+	public static String EntityRelationshipExporter_RelationshipType;
 	public static String EntityRelationshipExporter_RelationshipUuidColumnName;
 	public static String EntityRelationshipExporter_SrcEntityId;
 	public static String EntityRelationshipExporter_SrcEntityUuid;

@@ -185,7 +185,7 @@ public class EntityRelationshipExporter {
 				String[] data = new String[relationshipAttributes.size() + 6];
 				int i = 0;
 				data[i++] = Messages.EntityRelationshipExporter_RelationshipUuidColumnName;
-				data[i++] = "Relationship Type";
+				data[i++] = Messages.EntityRelationshipExporter_RelationshipType;
 				data[i++] = Messages.EntityRelationshipExporter_SrcEntityUuid;
 				data[i++] = Messages.EntityRelationshipExporter_SrcEntityId;
 				data[i++] = Messages.EntityRelationshipExporter_TargetEntityUuid;
