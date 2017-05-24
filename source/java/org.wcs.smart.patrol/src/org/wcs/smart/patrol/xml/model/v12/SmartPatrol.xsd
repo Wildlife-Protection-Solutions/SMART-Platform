@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.2/patrol" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.2/patrol"
+elementFormDefault="qualified">
+
+  	
+    <complexType name="PatrolType">
+    	<sequence>
+    		<element name="objective" type="tns:ObjectiveType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="team" type="tns:LabelType" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="station" type="tns:LabelType" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="legs" type="tns:PatrolLegType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="comment" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="extraData" type="tns:ExtraDataType" maxOccurs="unbounded" minOccurs="0"/>
+    	</sequence>
+    	<attribute name="patrolType">
+    		<simpleType>
+    			<restriction base="string">
+    				<enumeration value="GROUND"></enumeration>
+    				<enumeration value="AIR"></enumeration>
+    				<enumeration value="MARINE"></enumeration>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="startDate" type="date"></attribute>
+    	<attribute name="endDate" type="date"></attribute>
+    	<attribute name="isArmed" type="boolean"></attribute>
+    	<attribute name="id" type="string" use="optional"></attribute>
+    </complexType>
+
+    <complexType name="ObjectiveType">
+    	<sequence>
+    		<element name="description" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="PatrolLegType">
+    	<sequence>
+    		<element name="transportType" type="tns:LabelType"
+    			maxOccurs="1" minOccurs="1">
+    		</element>
+    		<element name="members" type="tns:PatrolMemberType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="days" type="tns:PatrolLegDayType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="mandate" type="tns:LabelType" maxOccurs="1" minOccurs="1"></element>
+    	</sequence>
+    	<attribute name="startDate" type="date"></attribute>
+    	<attribute name="endDate" type="date"></attribute>
+    	<attribute name="id" type="string"></attribute>
+    </complexType>
+
+    <complexType name="PatrolMemberType">
+    	<attribute name="givenName" type="string"></attribute>
+    	<attribute name="familyName" type="string"></attribute>
+    	<attribute name="employeeId" type="string"></attribute>
+    	<attribute name="isPilot" type="boolean"></attribute>
+    	<attribute name="isLeader" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="PatrolLegDayType">
+    	<sequence>
+    		<element name="waypoints" type="tns:WaypointType" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="track" type="tns:TrackType" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="date" type="date"></attribute>
+    	<attribute name="startTime" type="time"></attribute>
+    	<attribute name="endTime" type="time"></attribute>
+    	<attribute name="restMinutes" type="double"></attribute>
+    </complexType>
+
+    <complexType name="WaypointType">
+    	<sequence>
+    		<element name="direction" type="float" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="distance" type="float" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="comment" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="attachments" type="string"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="observations"
+    			type="tns:WaypointObservationType" maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="id" type="int"></attribute>
+    	<attribute name="x" type="double"></attribute>
+    	<attribute name="y" type="double"></attribute>
+    	<attribute name="time" type="time"></attribute>
+    </complexType>
+
+    <complexType name="TrackType">
+    	<attribute name="geom" type="string">
+    		<annotation>
+    			<documentation>The WKB representation of the track geometry in lat/long (EPSG:4326) projection.  The x value is the longitude, the y value the latitude and the z value is the date/time of the track point.  The z date/time value is stored as long value that represents the number of milliseconds since January 1, 1970, 00:00:00 GMT.</documentation>
+    		</annotation></attribute>
+    	<attribute name="distance" type="double">
+    		<annotation>
+    			<documentation>The total distance in km of the track.</documentation>
+    		</annotation></attribute>
+    </complexType>
+
+    <complexType name="WaypointObservationType">
+    	<sequence>
+    		<element name="attributes"
+    			type="tns:WaypointObservationAttributeType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    		<element name="attachments" type="string"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="observer" type="tns:PatrolMemberType" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="categoryKey" type="string"></attribute>
+    </complexType>
+
+    <complexType name="WaypointObservationAttributeType">
+    	<sequence>
+    		<element name="sValue" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="dValue" type="double" maxOccurs="1" minOccurs="0"></element>
+    		<element name="itemKey" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="bValue" type="boolean" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="attributeKey" type="string"></attribute>
+    </complexType>
+
+    <complexType name="LabelType">
+    	<attribute name="languageCode" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    </complexType>
+
+    <complexType name="ExtraDataType">
+    	<sequence>
+            <element name="stringKey" type="tns:ExtraDataStringKeyType" maxOccurs="unbounded" minOccurs="0"/>
+            <element name="dateKey" type="tns:ExtraDataDateKeyType" maxOccurs="unbounded" minOccurs="0"/>
+            <element name="labelKey" type="tns:ExtraDataLabelKeyType" maxOccurs="unbounded" minOccurs="0"/>
+    	</sequence>
+    	<attribute name="type" type="string"/>
+    </complexType>
+
+    <complexType name="ExtraDataStringKeyType">
+    	<attribute name="key" type="string"/>
+    	<attribute name="value" type="string"/>
+    </complexType>
+
+    <complexType name="ExtraDataDateKeyType">
+    	<attribute name="key" type="string"/>
+    	<attribute name="value" type="date"/>
+    </complexType>
+
+    <complexType name="ExtraDataLabelKeyType">
+    	<sequence>
+            <element name="label" type="tns:LabelType" maxOccurs="unbounded" minOccurs="1"/>
+    	</sequence>
+    	<attribute name="key" type="string"/>
+    </complexType>
+
+    <element name="patrol" type="tns:PatrolType"/>
+</schema>

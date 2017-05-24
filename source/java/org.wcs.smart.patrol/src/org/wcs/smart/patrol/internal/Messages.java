@@ -78,6 +78,8 @@ public class Messages extends NLS {
 	public static String EditPatrolLegDialog_LegId_Label;
 	public static String EditPatrolLegDialog_LegStartDate_Label;
 	public static String EditPatrolLegDialog_LegStartTime_Label;
+	public static String EditPatrolLegDialog_MandateLabel;
+	public static String EditPatrolLegDialog_MandateRequired;
 	public static String EditPatrolLegDialog_Members_Label;
 	public static String EditPatrolLegDialog_Op_EndOfDay;
 	public static String EditPatrolLegDialog_Op_StartOfDay;
@@ -301,6 +303,8 @@ public class Messages extends NLS {
 	public static String PatrolImporter_Progress_Saving;
 	public static String PatrolImporter_Progress_TaskName;
 	public static String PatrolImporter_Progress_Validating;
+	public static String PatrolImporter_ReadingProgress;
+	public static String PatrolImporter_UnableToProcessFile;
 	public static String PatrolImporter_Warn_DataDuplicate;
 	public static String PatrolImporter_Warn_SameId;
 	public static String PatrolLabelProvider_DescriptionColumnName;
@@ -438,6 +442,7 @@ public class Messages extends NLS {
 	public static String PatrolLegTable_LegPilot_ColumnName;
 	public static String PatrolLegTable_LegStartDate_ColumnName;
 	public static String PatrolLegTable_LegTranportType_ColumnName;
+	public static String PatrolLegTable_Mandate_ColumnName;
 	public static String PatrolListView_LoadingLabel;
 	public static String PatrolListView_Progress_LoadingPatrols;
 	public static String PatrolListView_UpdatePatrolJobName;
@@ -498,6 +503,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_LegPilot_ColumnName;
 	public static String PatrolSummaryEditor_LegStart_ColumnName;
 	public static String PatrolSummaryEditor_LegTransport_ColumnName;
+	public static String PatrolSummaryEditor_Mandate_ColumnName;
 	public static String PatrolSummaryEditor_Mandate_Label;
 	public static String PatrolSummaryEditor_Member_Label;
 	public static String PatrolSummaryEditor_MultiLegPatrol_Label;
@@ -670,6 +676,8 @@ public class Messages extends NLS {
 	public static String XmlToPatrolConverter_InvalidDateString;
 	public static String XmlToPatrolConverter_InvalidPatrolId;
 	public static String XmlToPatrolConverter_ObserverNotFound;
+	public static String XmlToPatrolConverter_ReadError;
+	public static String XmlToPatrolConverter2_ReadError;
 	public static String XmlToPatrolConverter_Warning_AttachmentFileNotFound;
 	public static String XmlToPatrolConverter_Warning_AttributeNotFound;
 	public static String XmlToPatrolConverter_Warning_CategoryNotFound;

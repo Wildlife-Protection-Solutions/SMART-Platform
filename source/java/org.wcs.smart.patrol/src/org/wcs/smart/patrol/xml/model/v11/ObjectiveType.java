@@ -6,7 +6,7 @@
 //
 
 
-package org.wcs.smart.patrol.xml.model;
+package org.wcs.smart.patrol.xml.model.v11;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

@@ -19,18 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.xml;
+package org.wcs.smart.patrol.xml.model.v11;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -63,14 +71,11 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
-import org.wcs.smart.patrol.xml.model.PatrolLegType;
-import org.wcs.smart.patrol.xml.model.PatrolMemberType;
-import org.wcs.smart.patrol.xml.model.PatrolType;
-import org.wcs.smart.patrol.xml.model.TrackType;
-import org.wcs.smart.patrol.xml.model.WaypointObservationAttributeType;
-import org.wcs.smart.patrol.xml.model.WaypointObservationType;
-import org.wcs.smart.patrol.xml.model.WaypointType;
+import org.wcs.smart.patrol.xml.PatrolXmlManager;
+import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
+import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
+import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
+import org.wcs.smart.patrol.xml.in.IXmlToPatrolConverter;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
@@ -81,14 +86,14 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class XmlToPatrolConverter {
+public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	
 	private Session session;
 	private ConservationArea ca;
 
 	private Patrol patrol;
 	private List<String> warnings = new ArrayList<String>();
-	
+	private PatrolType xml;
 	private File attachmentLocation = null;
 	
 	
@@ -112,13 +117,50 @@ public class XmlToPatrolConverter {
 	
 	
 	/**
-	 * Imports a patrol from an xml object.
+	 * Reads patrol data from an xml file.
+	 * <p>
+	 * User is required to close input stream.
+	 * </p>
+	 * 
+	 * @param file input stream to read patrol data from
+	 * @return
+	 * @throws JAXBException
+	 */
+	public static PatrolType readDataModel(InputStream file) throws JAXBException{
+		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.patrol.xml.model.v11"); //$NON-NLS-1$
+		Unmarshaller un = context.createUnmarshaller();	
+		@SuppressWarnings("unchecked")
+		JAXBElement<PatrolType> o = (JAXBElement<PatrolType>) un.unmarshal(file);
+		PatrolType x = o.getValue();
+		return x;
+	}
+	
+	/**
+	 * Must be called after convertFile
+	 */
+	public List<IConvertedExtraData> convertExtraData(){
+		if (xml == null) return Collections.emptyList();
+		List<IConvertedExtraData> convertedExtraData = new ArrayList<IConvertedExtraData>();
+		for (IXmlExtraDataContribution edc : XmlExtraDataContributionFactory.getContributions()) {
+			IConvertedExtraData extraData = edc.fromXml(xml.getExtraData());
+			if (extraData != null) {
+				if (extraData.getWarnings() != null) {
+					warnings.addAll(extraData.getWarnings());
+				}
+				convertedExtraData.add(extraData);
+			}
+		}
+		return convertedExtraData;
+	}
+	
+	/**
+	 * Imports a patrol from an xml file.
 	 * <p>
 	 * Use getImportedPatrol() to retrieve the imported
 	 * patrol object.
 	 * </p>
-	 * <p>User getWarings() to retireve any warnings
-	 * that ocurred during the import process.
+	 * <p>User getWarings() to retrieve any warnings
+	 * that occurred during the import process.
 	 * </p> 
 	 * @param xml
 	 * @param session
@@ -126,7 +168,13 @@ public class XmlToPatrolConverter {
 	 * @param attachmentLocation
 	 * @throws Exception
 	 */
-	public void fromXml(PatrolType xml, boolean keepIDs, Session session, ConservationArea ca, File attachmentLocation) throws Exception {
+	public void convertFile(File xmlFile, Session session, ConservationArea ca, File attachmentLocation) throws Exception {
+		
+		try(InputStream is = new FileInputStream(xmlFile)){
+			xml = readDataModel(is);
+		}
+		if (xml == null) throw new Exception(Messages.XmlToPatrolConverter2_ReadError);
+		
 		this.session = session;
 		this.ca = ca;
 		this.attachmentLocation = attachmentLocation;
@@ -138,36 +186,24 @@ public class XmlToPatrolConverter {
 		patrol.setEndDate(xml.getEndDate().toGregorianCalendar().getTime());
 		patrol.setStartDate(xml.getStartDate().toGregorianCalendar().getTime());
 		patrol.setComment(xml.getComment());
-		if (keepIDs) {
-			patrol.setId(xml.getId());
-			//validate patrol id
-			if (! SmartUtils.isSimpleString(patrol.getId(), 
-					SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
-				throw new Exception(MessageFormat.format(Messages.XmlToPatrolConverter_InvalidPatrolId,
-						patrol.getId(), Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc));
-			}
-				
-		}
+		patrol.setId(xml.getId());
 		
 		patrol.setPatrolType(org.wcs.smart.patrol.model.PatrolType.Type.valueOf(xml.getPatrolType().toUpperCase()));
 		if (xml.getObjective() != null){
 			patrol.setObjective(xml.getObjective().getDescription());
 		}
 
+		PatrolMandate mandate = null;
 		if (xml.getMandate() != null){
-			PatrolMandate m = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), "PatrolMandate"); //$NON-NLS-1$
-			if (m == null){
+			mandate = (PatrolMandate) findValue(xml.getMandate().getLanguageCode(), xml.getMandate().getValue(), "PatrolMandate"); //$NON-NLS-1$
+			if (mandate == null){
 				//ERROR
 				throw new Exception(
 						MessageFormat.format(
 								Messages.XmlToPatrolConverter_Error_MandateNotFound,
 								new Object[]{xml.getMandate().getValue(), xml.getMandate().getLanguageCode()})
-								);
-			}else{
-				patrol.setMandate(m);
+								);	
 			}
-		}else{
-			patrol.setMandate(null);
 		}
 		if (xml.getStation() != null){
 			Station station = (Station) findValue(xml.getStation().getLanguageCode(), xml.getStation().getValue(), "Station"); //$NON-NLS-1$
@@ -190,16 +226,17 @@ public class XmlToPatrolConverter {
 		
 		patrol.setLegs(new ArrayList<PatrolLeg>());
 		for (PatrolLegType legxml : xml.getLegs()){
-			patrol.getLegs().add(convertPatrolLeg(legxml, patrol));
+			patrol.getLegs().add(convertPatrolLeg(legxml, patrol, mandate));
 		}		
 	}
 	
-	private PatrolLeg convertPatrolLeg(PatrolLegType xml, Patrol parent) throws Exception{
+	private PatrolLeg convertPatrolLeg(PatrolLegType xml, Patrol parent, PatrolMandate mandate) throws Exception{
 		PatrolLeg leg = new PatrolLeg();
 		leg.setEndDate(xml.getEndDate().toGregorianCalendar().getTime());
 		leg.setId(xml.getId());
 		leg.setPatrol(parent);		
 		leg.setStartDate(xml.getStartDate().toGregorianCalendar().getTime());
+		leg.setMandate(mandate);
 		
 		PatrolTransportType ttype = 
 				(PatrolTransportType)findTransportationValue(xml.getTransportType().getLanguageCode(), xml.getTransportType().getValue(), patrol.getPatrolType());

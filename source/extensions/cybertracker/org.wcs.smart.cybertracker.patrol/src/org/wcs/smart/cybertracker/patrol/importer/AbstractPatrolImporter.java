@@ -177,6 +177,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		}
 		leg.setStartDate(ctPatrol.getStartDate());
 		leg.setEndDate(ctPatrol.getEndDate());
+		leg.setMandate(ctPatrol.getMandate());
 		List<PatrolLegMember> legMembers = new ArrayList<PatrolLegMember>();
 		for (Employee e : ctPatrol.getMembers()) {
 			PatrolLegMember plm = new PatrolLegMember();

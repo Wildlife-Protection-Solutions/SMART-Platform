@@ -6,12 +6,18 @@
 //
 
 
-package org.wcs.smart.patrol.xml.model;
+package org.wcs.smart.patrol.xml.model.v11;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
+
+import org.wcs.smart.patrol.xml.model.ExtraDataDateKeyType;
+import org.wcs.smart.patrol.xml.model.ExtraDataLabelKeyType;
+import org.wcs.smart.patrol.xml.model.ExtraDataStringKeyType;
+import org.wcs.smart.patrol.xml.model.ExtraDataType;
+import org.wcs.smart.patrol.xml.model.LabelType;
 
 
 /**
@@ -31,7 +37,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Patrol_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.1/patrol", "patrol");
+    public final static QName _Patrol_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.1/patrol", "patrol");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.patrol.xml.model

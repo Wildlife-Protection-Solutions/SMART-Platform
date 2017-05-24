@@ -43,7 +43,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolMandate;
 
 /**
@@ -52,7 +52,7 @@ import org.wcs.smart.patrol.model.PatrolMandate;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolMandateComposite extends PatrolItemComposite{
+public class PatrolMandateComposite extends PatrolLegItemComposite{
 
 	private ComboViewer patrolMandateViewer = null;
 
@@ -100,11 +100,11 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
-	public void setValues(Patrol p, Session session) {
+	public void setValues(PatrolLeg leg, Session session) {
 		session.beginTransaction();
 		List<PatrolMandate> mandates = null;
 		try{
-			mandates = PatrolHibernateManager.getActiveMandates(p.getConservationArea(), session);
+			mandates = PatrolHibernateManager.getActiveMandates(leg.getPatrol().getConservationArea(), session);
 			session.getTransaction().rollback();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.PatrolMandateComposite_Error_LoadingMandates, ex);
@@ -123,12 +123,12 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 			patrolMandateViewer.setSelection(new StructuredSelection(mandates.get(0)));
 		}
 
-		if (p.getMandate() == null){
-			if (p.getTeam() != null && p.getTeam().getMandate() != null){
-	    		patrolMandateViewer.setSelection(new StructuredSelection(p.getTeam().getMandate()));
+		if (leg.getMandate() == null){
+			if (leg.getPatrol().getTeam() != null && leg.getPatrol().getTeam().getMandate() != null){
+	    		patrolMandateViewer.setSelection(new StructuredSelection(leg.getPatrol().getTeam().getMandate()));
 	    	}	
 		}else{
-			patrolMandateViewer.setSelection(new StructuredSelection(p.getMandate()));
+			patrolMandateViewer.setSelection(new StructuredSelection(leg.getMandate()));
 		}
 
 	}
@@ -136,12 +136,12 @@ public class PatrolMandateComposite extends PatrolItemComposite{
 	/**
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#updatePatrol(org.wcs.smart.patrol.model.Patrol)
 	 */
-	public boolean updatePatrol(Patrol p, Session session) {
+	public boolean updatePatrol(PatrolLeg leg) {
 		PatrolMandate pm = (PatrolMandate) ((IStructuredSelection)patrolMandateViewer.getSelection()).getFirstElement();
 		if (pm != null){
-			p.setMandate(pm);
+			leg.setMandate(pm);
 		}else{
-			p.setMandate(null);
+			leg.setMandate(null);
 		}
 		return true;
 		

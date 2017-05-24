@@ -73,6 +73,7 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog implements Sele
 	private Button opCustom;
 	private Collection<PatrolLeg> legsToUpdate;
 	private PatrolTransportComposite compTransportType;
+	private PatrolMandateComposite compMandate;
 	private Session session;
 	
 	/**
@@ -160,8 +161,13 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog implements Sele
 		/* new leader/pilot */
 		compTransportType = new PatrolTransportComposite();
 		
+		compMandate = new PatrolMandateComposite();
+		
 		Composite c = compTransportType.createComponent(parent, SWT.NONE);
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		Composite m = compMandate.createComponent(parent, SWT.NONE);
+		m.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		boolean close = false;
 		if (!session.isOpen()){
@@ -170,18 +176,16 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog implements Sele
 		}
 		try{
 			compTransportType.setValues(newLeg, session);
+			compMandate.setValues(newLeg, session);
 		}finally{
 			if (close){
 				session.close();
 			}
 		}
+		IPatrolItemChangeListener listener = ()->validate();
 		
-		compTransportType.addChangeListener(new IPatrolItemChangeListener() {
-			@Override
-			public void itemChanged() {
-				validate();	
-			}
-		});
+		compTransportType.addChangeListener(listener);
+		compMandate.addChangeListener(listener);
 		
 		setTitle(MessageFormat.format(Messages.PatrolTransportChangeDialog_DialogTitle2, existingLeg.getId()));
 		super.getShell().setText(Messages.PatrolTransportChangeDialog_DialogTitle);
@@ -204,6 +208,9 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog implements Sele
 		if (error == null && compTransportType.getSelectedTransportType().equals(existingLeg.getType())){
 			error = Messages.PatrolTransportChangeDialog_NewTransportTypeError;
 		}
+		if (error == null)
+			error = compMandate.getErrorMessage();
+	
 		
 		Date newStart = getNewDate();
 		
@@ -240,6 +247,7 @@ public class PatrolTransportChangeDialog extends TitleAreaDialog implements Sele
 		newLeg.setEndDate(existingLeg.getEndDate());
 		newLeg.setStartDate(newStart);
 		compTransportType.updatePatrol(newLeg);
+		compMandate.updatePatrol(newLeg);
 		
 		if (!newLeg.getType().getPatrolType().requiresPilot()) {
 			//this is needed to clear pilot if changed from transport type with pilot to transport type without pilot

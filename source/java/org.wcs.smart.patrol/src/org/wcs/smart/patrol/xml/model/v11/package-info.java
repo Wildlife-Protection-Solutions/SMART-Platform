@@ -6,4 +6,4 @@
 //
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.1/patrol", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-package org.wcs.smart.patrol.xml.model;
+package org.wcs.smart.patrol.xml.model.v11;

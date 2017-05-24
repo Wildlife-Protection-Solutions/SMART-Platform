@@ -328,7 +328,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		}
 
 		monitor.subTask(Messages.DerbyObservationEngine_Progress_MandateData);
-		populateTemporaryTableNameObjExtra("p_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		populateTemporaryTableNameObjExtra("pl_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		monitor.worked(2);
 		if (monitor.isCanceled()){
 			return;
@@ -529,7 +529,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		sql.append(tablePrefix(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Patrol.class) + ".mandate_uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class) + ".mandate_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$
@@ -567,7 +567,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
-		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_type varchar(6),"); //$NON-NLS-1$
 		sql.append("p_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_startdate date,"); //$NON-NLS-1$

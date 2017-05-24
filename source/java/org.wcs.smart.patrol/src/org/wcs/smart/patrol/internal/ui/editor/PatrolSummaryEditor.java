@@ -61,6 +61,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
@@ -161,8 +162,8 @@ public class PatrolSummaryEditor extends EditorPart {
 	
 	private Composite top, left;
 	private Table employeeTable; 
-	private Label transportTypelbl, multiLegTextlbl;
-	private Hyperlink editLinkTransportType;
+	private Label transportTypelbl, multiLegTextlbl, mandateLbl;
+	private Hyperlink editLinkTransportType, editLinkMandate;
 
 	/**
 	 * listener for patrol change events.
@@ -276,14 +277,21 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 		
 		transportTypelbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_TransportType_Label);
+		transportTypelbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		txtTransport = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
 		txtTransport.setEditable(false);
 		txtTransport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		editLinkTransportType = createEditLink(toolkit, left, new PatrolTransportComposite());
-		if (editor.getPatrol().getLegs().size() > 1 ){//hide if it is a multi-leg patrols, you have to edit this per-leg in that case. 
+		editLinkTransportType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+		if (editor.getPatrol().getLegs().size() > 1 ){
+			//hide if it is a multi-leg patrols, you have to edit this per-leg in that case. 
 			txtTransport.setVisible(false);
 			transportTypelbl.setVisible(false);
 			editLinkTransportType.setVisible(false);
+			((GridData)txtTransport.getLayoutData()).exclude = true;
+			((GridData)transportTypelbl.getLayoutData()).exclude = true;
+			((GridData)editLinkTransportType.getLayoutData()).exclude = true;
 		}
 		
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Armed_Label);
@@ -293,12 +301,24 @@ public class PatrolSummaryEditor extends EditorPart {
 		createEditLink(toolkit, left, new ArmedComposite()); 
 		
 		
-		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Mandate_Label);
+		mandateLbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Mandate_Label);
+		mandateLbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		txtMandate = toolkit.createText(left, "", SWT.NONE); //$NON-NLS-1$
 		txtMandate.setEditable(false);
 		txtMandate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtMandate.getLayoutData()).widthHint = WIDTH_HINT;
-		createEditLink(toolkit, left, new PatrolMandateComposite()); 
+		editLinkMandate = createEditLink(toolkit, left, new PatrolMandateComposite());
+		editLinkMandate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		if (editor.getPatrol().getLegs().size() > 1 ){
+			//hide if it is a multi-leg patrols, you have to edit this per-leg in that case. 
+			txtMandate.setVisible(false);
+			mandateLbl.setVisible(false);
+			editLinkMandate.setVisible(false);
+			((GridData)txtMandate.getLayoutData()).exclude = true;
+			((GridData)mandateLbl.getLayoutData()).exclude = true;
+			((GridData)editLinkMandate.getLayoutData()).exclude = true;
+		}
 		
 		lbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_Team_Label);
 		txtTeam= toolkit.createText(left, ""); //$NON-NLS-1$
@@ -406,6 +426,8 @@ public class PatrolSummaryEditor extends EditorPart {
 			editEmployee.setVisible(false);
 			multiLegTextlbl.setVisible(true);
 		}
+		
+		left.getParent().layout(true, true);
 		
 		((GridData)employeeTable.getLayoutData()).widthHint = WIDTH_HINT;
 		((GridData)employeeTable.getLayoutData()).heightHint = EMPLOYEE_LIST_HEIGHT_HINT;
@@ -617,11 +639,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			} else {
 				txtStation.setText(patrol.getStation().getName());
 			}
-			if (patrol.getMandate() != null) {
-				txtMandate.setText(patrol.getMandate().getName());
-			} else {
-				txtMandate.setText(Messages.PatrolSummaryEditor_NoManadateLabel);
-			}
+		
 			if (patrol.getComment() != null){
 				txtComment.setText(patrol.getComment());
 			}else{
@@ -678,6 +696,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			updateDateTable();
 			if (!isMulti){
 				txtTransport.setText(patrol.getFirstLeg().getType().getName());
+				txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
 			}
 		}finally{
 			session.getTransaction().rollback();
@@ -836,20 +855,29 @@ public class PatrolSummaryEditor extends EditorPart {
 		refreshPatrolSummaryTable();
 		
 		Patrol patrol = editor.getPatrol();
-		if (patrol.getLegs().size() <=1){
+		Control[] cs = new Control[]{txtTransport, transportTypelbl, editLinkMandate, txtMandate, mandateLbl, editLinkMandate};
+		
+		if (patrol.getLegs().size() <= 1){
+			for (Control c: cs){
+				c.setVisible(true);
+				((GridData)c.getLayoutData()).exclude = false;
+			}
+			cs[0].getParent().layout(true, true);
+			
 			txtTransport.setText(patrol.getFirstLeg().getType().getName());
-			transportTypelbl.setVisible(true);
-			txtTransport.setVisible(true);
-			editLinkTransportType.setVisible(true);
+			txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
+			
 			editEmployee.setVisible(true);
 			multiLegTextlbl.setVisible(false);
 		}else{
-			txtTransport.setVisible(false);
-			transportTypelbl.setVisible(false);
-			editLinkTransportType.setVisible(false);
+			for (Control c: cs){
+				c.setVisible(false);
+				((GridData)c.getLayoutData()).exclude = true;
+			}
 			editEmployee.setVisible(false);
 			multiLegTextlbl.setVisible(true);
-
+			
+			cs[0].getParent().layout(true, true);
 		}
 	}
 	
@@ -875,6 +903,7 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 		TOTALPATROLHOURS(Messages.PatrolSummaryEditor_LegTotalPatrolHours_ColumnName, 1, false),
 		TOTALHOURSINFIELD(Messages.PatrolSummaryEditor_LegTotalActivePatrolHours_ColumnName, 1, false),
 		TRANSPORT(Messages.PatrolSummaryEditor_LegTransport_ColumnName, 1, true),
+		MANDATE(Messages.PatrolSummaryEditor_Mandate_ColumnName, 1, true),
 		LEADER(Messages.PatrolSummaryEditor_LegLeader_ColumnName, 1, true),
 		PILOT(Messages.PatrolSummaryEditor_LegPilot_ColumnName, 1, true);
 		
@@ -901,6 +930,8 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 			if (column == PatrolLegDayColumn.DAY){
 				Date d = ((PatrolLegDay) element).getDate();
 				return DateFormat.getDateInstance(DateFormat.MEDIUM).format(d) + " " + dayOfWeekFormatter.format(d) ; //$NON-NLS-1$
+			}else if (column == PatrolLegDayColumn.MANDATE){
+				return ((PatrolLegDay) element).getPatrolLeg().getMandate().getName();
 			}else if (column == PatrolLegDayColumn.DISTANCE){
 				if (((PatrolLegDay) element).getTrack() != null){
 					return String.valueOf( ((PatrolLegDay) element).getTrack().getDistance() );

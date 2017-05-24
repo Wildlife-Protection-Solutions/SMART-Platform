@@ -235,7 +235,6 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 		newPatrol.setComment(allComments);
 		newPatrol.setEndDate(endDate);
 		newPatrol.setStartDate(startDate);
-		newPatrol.setMandate(objectiveId.getMandate());
 		newPatrol.setPatrolType(PatrolType.Type.MIXED);
 		newPatrol.setTeam(stationId.getTeam());
 

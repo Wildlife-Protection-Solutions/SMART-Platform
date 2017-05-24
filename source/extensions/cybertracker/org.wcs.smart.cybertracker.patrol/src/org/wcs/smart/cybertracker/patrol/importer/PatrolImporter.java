@@ -127,7 +127,6 @@ public class PatrolImporter extends AbstractPatrolImporter {
 		p.setArmed(ctPatrol.isArmed());
 		p.setTeam(ctPatrol.getTeam());
 		p.setStation(ctPatrol.getStation());
-		p.setMandate(ctPatrol.getMandate());
 		p.setObjective(ctPatrol.getObjective());
 		p.setComment(ctPatrol.getComment());
 		p.setStartDate(ctPatrol.getStartDate());

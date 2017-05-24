@@ -62,6 +62,7 @@ public class PatrolLeg extends UuidItem {
 	private Date startDate;
 	private Date endDate;
 	private PatrolTransportType type;
+	private PatrolMandate mandate;
 	private String id;
 
 	private List<PatrolLegMember> members;
@@ -98,6 +99,16 @@ public class PatrolLeg extends UuidItem {
 	}
 	public void setType(PatrolTransportType type) {
 		this.type = type;
+	}
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="mandate_uuid", referencedColumnName="uuid")
+	public PatrolMandate getMandate() {
+		return mandate;
+	}
+
+	public void setMandate(PatrolMandate mandate) {
+		this.mandate = mandate;
 	}
 	
 	@Column(name="id")
@@ -233,6 +244,7 @@ public class PatrolLeg extends UuidItem {
 		clone.setEndDate(endDate);
 		//type
 		clone.setType(type);
+		clone.setMandate(mandate);
 		//members
 		clone.setMembers(new ArrayList<PatrolLegMember>());
 		for (PatrolLegMember mem : members){

@@ -22,7 +22,6 @@
 package org.wcs.smart.patrol.xml.in;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -52,11 +51,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
-import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
-import org.wcs.smart.patrol.xml.XmlToPatrolConverter;
 import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
-import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
-import org.wcs.smart.patrol.xml.model.PatrolType;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -100,7 +95,6 @@ public class PatrolImporter {
 	 */
 	private static Patrol importXmlToPatrol(File zipFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		
-		PatrolType ptype = null;
 		//unzip 
 		monitor.subTask(Messages.PatrolImporter_Progress_ProcessingFile);
 		File directory = unzip(zipFile);
@@ -110,6 +104,8 @@ public class PatrolImporter {
 		monitor.worked(1);
 		
 		//file xml file
+		IXmlToPatrolConverter converter = null;
+		File xmlFile = null;
 		String[] files = directory.list();
 		if (files != null){
 			monitor.subTask(Messages.PatrolImporter_Progress_ReadingFile);
@@ -117,22 +113,16 @@ public class PatrolImporter {
 				File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 				if (f.isFile()){
 					//lets try reading the 
-					
-					try(FileInputStream in = new FileInputStream(f)){
-						ptype = PatrolXmlManager.readDataModel(in);
-					}catch (Exception ex){
-						SmartPatrolPlugIn.log(null, ex);
-						ptype = null;
-					}
-					if (ptype != null){
-						//we've found it!
+					converter = PatrolXmlManager.findVersion(f);
+					if (converter != null){
+						//we've found the patrol xml file; otherwise we probably found an attachment file
+						xmlFile = f;
 						break;
 					}
 				}
 			}
 		}
-		if (ptype == null){
-			
+		if (converter == null){
 			try{
 				FileUtils.deleteDirectory(directory);
 			}catch (Exception ex){
@@ -142,7 +132,7 @@ public class PatrolImporter {
 		}
 		monitor.worked(1);
 		
-		Patrol p = convertAndSave(ptype, config, directory, zipFile, monitor);
+		Patrol p = convertAndSave(converter, config, directory, xmlFile, monitor);
 		
 		monitor.subTask(Messages.PatrolImporter_Progress_RemovingTempFiles);
 		try{
@@ -161,16 +151,11 @@ public class PatrolImporter {
 	 * @throws Exception
 	 */
 	private static Patrol importPatrolFromFile(File xmlFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
-		PatrolType ptype = null;
-		try(FileInputStream in = new FileInputStream(xmlFile)){
-			monitor.subTask(Messages.PatrolImporter_Progress_ReadingXml);
-			ptype = PatrolXmlManager.readDataModel(in);
-			monitor.worked(1);
+		IXmlToPatrolConverter converter = PatrolXmlManager.findVersion(xmlFile);
+		if (converter == null){
+			throw new Exception(MessageFormat.format(Messages.PatrolImporter_UnableToProcessFile, xmlFile));
 		}
-		if (ptype == null){
-			throw new Exception(Messages.PatrolImporter_Error_ReadingPatrolXmlFile);
-		}
-		return convertAndSave(ptype, config, null, xmlFile, monitor);
+		return convertAndSave(converter, config, null, xmlFile, monitor);
 	}
 
 	/**
@@ -188,20 +173,35 @@ public class PatrolImporter {
 	 * @return created Patrol or null
 	 * @throws Exception
 	 */
-	private static Patrol  convertAndSave(PatrolType xmlPatrol, final ImportConfig config, 
+	private static Patrol  convertAndSave(IXmlToPatrolConverter converter, final ImportConfig config, 
 			File attachmentDirectory, File sourceFile, IProgressMonitor monitor) throws Exception {
-		XmlToPatrolConverter converter = new XmlToPatrolConverter();
+		
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
+			monitor.subTask(Messages.PatrolImporter_ReadingProgress);
+			converter.convertFile(sourceFile, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
+			
+			Patrol imported = converter.getImportedPatrol();
+			if (!config.isKeepIDs()){
+				imported.setId(null);
+			}
+			
 			monitor.subTask(Messages.PatrolImporter_Progress_Validating);
 			//check if a patrol in the database with the given patrol id already exists
-			if (xmlPatrol.getId() != null){
-				if (PatrolHibernateManager.isDuplicateId(xmlPatrol.getId(), SmartDB.getCurrentConservationArea(), session)){
+			if (imported.getId() != null){
+				
+				if (!SmartUtils.isSimpleString(imported.getId(), 
+						SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
+					throw new Exception(MessageFormat.format(Messages.XmlToPatrolConverter_InvalidPatrolId,
+							imported.getId(), Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc));
+				}
+				
+				if (PatrolHibernateManager.isDuplicateId(imported.getId(), SmartDB.getCurrentConservationArea(), session)){
 					
 					if (!config.isIgnoreWarnings()) {
 						//duplicate patrol id
 						final boolean[] cont = new boolean[]{true};
-						final String pid = xmlPatrol.getId();
+						final String pid = imported.getId();
 						Display.getDefault().syncExec(new Runnable(){
 
 							@Override
@@ -224,15 +224,14 @@ public class PatrolImporter {
 						}
 					} else {
 						//duplicate patrol id but user chose to ignore warnings
-						String pid = xmlPatrol.getId();
+						String pid = imported.getId();
 						String fileName = sourceFile.getName();
-						String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_Warn_SameId, xmlPatrol.getId(), fileName) : MessageFormat.format(Messages.PatrolImporter_Warn_DataDuplicate, pid, fileName);
+						String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_Warn_SameId, imported.getId(), fileName) : MessageFormat.format(Messages.PatrolImporter_Warn_DataDuplicate, pid, fileName);
 						config.addWarning(message, sourceFile);
 					}
 				}
 			}		
 			monitor.subTask(Messages.PatrolImporter_Progress_ConvertingPatrol);
-			converter.fromXml(xmlPatrol, config.isKeepIDs(), session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 		} finally {
 			if (session.isOpen()){
 				session.close();
@@ -242,16 +241,7 @@ public class PatrolImporter {
 		List<String> warnings = new ArrayList<String>();
 		warnings.addAll(converter.getWarnings());
 		//converting extra data
-		List<IConvertedExtraData> convertedExtraData = new ArrayList<IConvertedExtraData>();
-		for (IXmlExtraDataContribution edc : XmlExtraDataContributionFactory.getContributions()) {
-			IConvertedExtraData extraData = edc.fromXml(xmlPatrol.getExtraData());
-			if (extraData != null) {
-				if (extraData.getWarnings() != null) {
-					warnings.addAll(extraData.getWarnings());
-				}
-				convertedExtraData.add(extraData);
-			}
-		}
+		List<IConvertedExtraData> convertedExtraData = converter.convertExtraData();
 		monitor.worked(1);
 
 		//display reported conversion warnings if they present
@@ -319,8 +309,6 @@ public class PatrolImporter {
 	 * @throws Exception
 	 */
 	private static File unzip(File zipFile) throws Exception{
-		
-		
 		File tempDir = null;
 		try(ZipFile zout = new ZipFile(zipFile)) {
 			tempDir = File.createTempFile(zipFile.getName(),

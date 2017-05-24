@@ -217,9 +217,6 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 
 		if (!equal(patrol.getStation(), ctPatrol.getStation()))
 			result.add(MessageFormat.format(Messages.PatrolLegImporter_MetaWarning_Station, labelFor(patrol.getStation()), labelFor(ctPatrol.getStation())));
-
-		if (!equal(patrol.getMandate(), ctPatrol.getMandate()))
-			result.add(MessageFormat.format(Messages.PatrolLegImporter_MetaWarning_Mandate, labelFor(patrol.getMandate()), labelFor(ctPatrol.getMandate())));
 		
 		return result;
 	}

@@ -1199,6 +1199,8 @@ public class Messages extends NLS {
 	public static String Upgrader401To410_UpgradeMsg;
 	public static String Upgrader410To500_UpgradeError;
 	public static String Upgrader410To500_UpgradeTaskName;
+	public static String Upgrader500To600_ErrorMessage;
+	public static String Upgrader500To600_ProgressMessage;
 	public static String UserLoginInfo_ReadError;
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;

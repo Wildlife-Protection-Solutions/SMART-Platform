@@ -509,7 +509,6 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		p.setArmed(ct.isArmed());
 		p.setComment(ct.getComment());
-		p.setMandate(ct.getMandate());
 		p.setObjective(ct.getObjective());
 		p.setPatrolType(ct.getPatrolType());
 		p.setStation(ct.getStation());
@@ -517,6 +516,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		// create new leg and add members and set transport type
 		PatrolLeg pl = p.addLeg();
+		pl.setMandate(ct.getMandate());
 		pl.setPatrolLegDays(new ArrayList<PatrolLegDay>());
 		pl.setStartDate(SmartUtils.combineDateTime(dStartDate, TIMEFORMAT.parse(startTime)));
 		pl.setEndDate(SharedUtils.getDatePart(dStartDate, true));

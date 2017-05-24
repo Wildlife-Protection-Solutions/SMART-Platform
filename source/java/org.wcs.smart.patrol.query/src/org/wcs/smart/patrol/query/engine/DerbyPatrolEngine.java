@@ -211,7 +211,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		
 		String[] results = {"p_ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"p_station_uuid", "p_team_uuid",  //$NON-NLS-1$ //$NON-NLS-2$
-				"p_objective", "p_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"p_objective", "pl_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"pl_transport_uuid", "pl_id", //$NON-NLS-1$ //$NON-NLS-2$
 				"pl_start_date", //$NON-NLS-1$
 				"pl_end_date", //$NON-NLS-1$
@@ -276,7 +276,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
-		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_type varchar(6),"); //$NON-NLS-1$
 		sql.append("p_is_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_start_date date,"); //$NON-NLS-1$
@@ -314,7 +314,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		sql.append(tablePrefix(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Patrol.class) + ".mandate_uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class) + ".mandate_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$
@@ -380,7 +380,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		it.setStation(getName(UuidUtils.byteToUUID(rs.getBytes("r_p_station_uuid")), cauuid, session));				 //$NON-NLS-1$
 		it.setTeam(getName(UuidUtils.byteToUUID(rs.getBytes("r_p_team_uuid")), cauuid, session));				 //$NON-NLS-1$
 		it.setObjective(rs.getString("r_p_objective")); //$NON-NLS-1$
-		it.setMandate(getName(UuidUtils.byteToUUID(rs.getBytes("r_p_mandate_uuid")), cauuid, session)); //$NON-NLS-1$
+		it.setMandate(getName(UuidUtils.byteToUUID(rs.getBytes("r_pl_mandate_uuid")), cauuid, session)); //$NON-NLS-1$
 		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("r_p_type"))); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("r_p_is_armed")); //$NON-NLS-1$
 		it.setTransportType(getName(UuidUtils.byteToUUID(rs.getBytes("r_pl_transport_uuid")), cauuid, session)); //$NON-NLS-1$

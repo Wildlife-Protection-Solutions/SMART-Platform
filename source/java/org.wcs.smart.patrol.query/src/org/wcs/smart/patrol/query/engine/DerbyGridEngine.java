@@ -721,7 +721,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		sql.append(tablePrefix(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Patrol.class) + ".mandate_uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class) + ".mandate_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$

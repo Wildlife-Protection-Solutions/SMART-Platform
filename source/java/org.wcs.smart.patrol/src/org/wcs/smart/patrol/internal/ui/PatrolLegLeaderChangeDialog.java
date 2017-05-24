@@ -92,6 +92,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog implements Sele
 			newmem.setPatrolLeg(newLeg);
 			members.add(newmem);
 		}
+		newLeg.setMandate(patrolLeg.getMandate());
 		newLeg.setMembers(members);
 		newLeg.setPatrol(existingLeg.getPatrol());
 		newLeg.setType(existingLeg.getType());

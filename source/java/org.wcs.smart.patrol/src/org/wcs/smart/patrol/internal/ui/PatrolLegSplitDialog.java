@@ -620,6 +620,9 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		PatrolLeg legA = new PatrolLeg();
 		PatrolLeg legB = new PatrolLeg();
 		
+		legA.setMandate(existingLeg.getMandate());
+		legB.setMandate(existingLeg.getMandate());
+		
 		//dates		
 		Date stime  = SmartUtils.getDate(startDate);
 		if (opCustom.getSelection()){
@@ -650,7 +653,6 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		
 		legA.setId( legAId );
 		legB.setId( legBId );
-		
 		
 		legA.setType((PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement());
 		legB.setType((PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeB.getSelection()).getFirstElement());
@@ -710,6 +712,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			PatrolLeg legC = new PatrolLeg();
 			legC.setStartDate(etime);
 			legC.setEndDate(existingLeg.getEndDate());
+			legC.setMandate(existingLeg.getMandate());
 			
 			String legCId = existingLeg.getId() + Messages.PatrolLegSplitDialog_EndLeg_LegId_Postfix;
 			if (legCId.length() > PatrolLeg.ID_MAX_SIZE){

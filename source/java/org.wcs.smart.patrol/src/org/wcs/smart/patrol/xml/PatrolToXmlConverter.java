@@ -42,15 +42,15 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.xml.model.LabelType;
-import org.wcs.smart.patrol.xml.model.ObjectiveType;
-import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
-import org.wcs.smart.patrol.xml.model.PatrolLegType;
-import org.wcs.smart.patrol.xml.model.PatrolMemberType;
-import org.wcs.smart.patrol.xml.model.PatrolType;
-import org.wcs.smart.patrol.xml.model.TrackType;
-import org.wcs.smart.patrol.xml.model.WaypointObservationAttributeType;
-import org.wcs.smart.patrol.xml.model.WaypointObservationType;
-import org.wcs.smart.patrol.xml.model.WaypointType;
+import org.wcs.smart.patrol.xml.model.v12.ObjectiveType;
+import org.wcs.smart.patrol.xml.model.v12.PatrolLegDayType;
+import org.wcs.smart.patrol.xml.model.v12.PatrolLegType;
+import org.wcs.smart.patrol.xml.model.v12.PatrolMemberType;
+import org.wcs.smart.patrol.xml.model.v12.PatrolType;
+import org.wcs.smart.patrol.xml.model.v12.TrackType;
+import org.wcs.smart.patrol.xml.model.v12.WaypointObservationAttributeType;
+import org.wcs.smart.patrol.xml.model.v12.WaypointObservationType;
+import org.wcs.smart.patrol.xml.model.v12.WaypointType;
 import org.wcs.smart.util.SmartUtils;
 
 public class PatrolToXmlConverter {
@@ -81,7 +81,6 @@ public class PatrolToXmlConverter {
 		/* objective */
 		ObjectiveType obj = new ObjectiveType();
 		obj.setDescription(p.getObjective());
-//		obj.setRating(p.getObjectiveRating());
 		xml.setObjective(obj);
 		
 		/* patrol type */
@@ -92,9 +91,6 @@ public class PatrolToXmlConverter {
 		
 		/* team */
 		xml.setTeam(createLabel(p, p.getTeam()));
-
-		/* mandate */
-		xml.setMandate(createLabel(p, p.getMandate()));
 
 		/* legs */
 		for (PatrolLeg leg: p.getLegs()){
@@ -125,6 +121,7 @@ public class PatrolToXmlConverter {
 		xml.setStartDate(SmartUtils.toXmlDate(leg.getStartDate()));
 		xml.setId(leg.getId());
 		xml.setTransportType(createLabel(leg.getPatrol(), leg.getType()));
+		xml.setMandate(createLabel(leg.getPatrol(), leg.getMandate()));
 		
 		for (PatrolLegMember member : leg.getMembers()){
 			xml.getMembers().add(convertPatrolMemeber(member));

@@ -48,7 +48,7 @@ import org.wcs.smart.patrol.xml.PatrolXmlManager;
 import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
 import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.model.ExtraDataType;
-import org.wcs.smart.patrol.xml.model.PatrolType;
+import org.wcs.smart.patrol.xml.model.v12.PatrolType;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 

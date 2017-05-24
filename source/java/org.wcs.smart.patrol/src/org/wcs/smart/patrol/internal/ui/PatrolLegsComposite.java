@@ -65,6 +65,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -94,7 +95,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	
 	private ArrayList<PatrolLeg> legs;
 	
-	private List<PatrolTransportType> typeOps ; 
+	private List<PatrolTransportType> typeOps ;
+	private List<PatrolMandate> mandateOps ; 
 	private List<Employee> allEmployes; 
 	
 	private Date patrolStartDate;
@@ -261,7 +263,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				PatrolLeg toEdit = (PatrolLeg)((IStructuredSelection)patrolLegViewer.getSelection()).getFirstElement();
-				EditPatrolLegDialog patrolLegDialog = new EditPatrolLegDialog(getShell(), toEdit, allEmployes, typeOps, patrolStartDate, patrolEndDate);
+				EditPatrolLegDialog patrolLegDialog = new EditPatrolLegDialog(getShell(), toEdit, allEmployes, typeOps, mandateOps, patrolStartDate, patrolEndDate);
 				if (patrolLegDialog.open() == Window.OK){
 					sortAndRefresh();
 					fireChangeListeners();
@@ -427,6 +429,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		session.beginTransaction();
 		try{
 			typeOps = PatrolHibernateManager.getActivePatrolTransporationTypes(patrol.getConservationArea(), session); 
+			mandateOps = PatrolHibernateManager.getActiveMandates(patrol.getConservationArea(), session);
 			allEmployes = PatrolHibernateManager.getActiveEmployees(patrol.getConservationArea(), session);
 			session.getTransaction().rollback();
 		}catch (Exception ex){
@@ -512,6 +515,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 						existing.setEndDate(updatedLeg.getEndDate());
 						existing.setStartDate(updatedLeg.getStartDate());
 						existing.setType(updatedLeg.getType());
+						existing.setMandate(updatedLeg.getMandate());
 						
 						//remove existing members
 						for (PatrolLegMember m : existing.getMembers()){

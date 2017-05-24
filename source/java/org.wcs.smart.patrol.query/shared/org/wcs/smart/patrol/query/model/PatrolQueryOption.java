@@ -42,8 +42,8 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	
 	PILOT( "pilot", "employee_uuid", PatrolLegMember.class, Employee.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 	
-	MANDATE("mandate", "mandate_uuid", Patrol.class, PatrolMandate.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
-	MANDATE_KEY("mandatekey", "mandate_uuid", Patrol.class, PatrolMandate.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
+	MANDATE("mandate", "mandate_uuid", PatrolLeg.class, PatrolMandate.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
+	MANDATE_KEY("mandatekey", "mandate_uuid", PatrolLeg.class, PatrolMandate.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
 	
 	PATROL_TYPE("patroltype", "patrol_type", Patrol.class, null, PatrolQueryOptionType.STRING), //$NON-NLS-2$ //$NON-NLS-1$
 	

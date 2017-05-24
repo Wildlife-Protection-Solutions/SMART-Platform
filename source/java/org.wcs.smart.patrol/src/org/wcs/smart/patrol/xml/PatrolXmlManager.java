@@ -21,18 +21,20 @@
  */
 package org.wcs.smart.patrol.xml;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.wcs.smart.patrol.xml.model.ObjectFactory;
-import org.wcs.smart.patrol.xml.model.PatrolType;
+import org.w3c.dom.Document;
+import org.wcs.smart.patrol.xml.in.IXmlToPatrolConverter;
+
 
 /**
  * Manager for reading and writing patrol xml files.
@@ -40,29 +42,11 @@ import org.wcs.smart.patrol.xml.model.PatrolType;
  * @since 1.0.0
  */
 public class PatrolXmlManager {
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.patrol.xml.model"; //$NON-NLS-1$
+	
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.patrol.xml.model.v12"; //$NON-NLS-1$
 	
 	public static final String ATTACHMENT_DIR_NAME = "attachments"; //$NON-NLS-1$
-	
-	/**
-	 * Reads patrol data from an xml file.
-	 * <p>
-	 * User is required to close input stream.
-	 * </p>
-	 * 
-	 * @param file input stream to read patrol data from
-	 * @return
-	 * @throws JAXBException
-	 */
-	public static PatrolType readDataModel(InputStream file) throws JAXBException{
-		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
-		Unmarshaller un = context.createUnmarshaller();	
-		@SuppressWarnings("unchecked")
-		JAXBElement<PatrolType> o = (JAXBElement<PatrolType>) un.unmarshal(file);
-		PatrolType x = o.getValue();
-		return x;
-	}
-	
+		
 	/**
 	 * Writes a xml patrol object to a file.
 	 * <p>
@@ -73,14 +57,43 @@ public class PatrolXmlManager {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
-	public static void writeDataModel(PatrolType patrol, OutputStream file) throws JAXBException, IOException{
+	public static void writeDataModel(org.wcs.smart.patrol.xml.model.v12.PatrolType patrol, OutputStream file) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
 		
-		ObjectFactory objFactor = new ObjectFactory();
+		org.wcs.smart.patrol.xml.model.v12.ObjectFactory objFactor = new org.wcs.smart.patrol.xml.model.v12.ObjectFactory();
 		
-		JAXBElement<PatrolType> element = objFactor.createPatrol(patrol);
+		JAXBElement<org.wcs.smart.patrol.xml.model.v12.PatrolType> element = objFactor.createPatrol(patrol);
 		marshaller.marshal(element, file);
+	}
+
+	/**
+	 * Finds the xml converter to use based on the version in the xml file.
+	 * @param xmlFile
+	 * @return
+	 */
+	public static IXmlToPatrolConverter findVersion(File xmlFile){
+		try{
+			DocumentBuilderFactory factory =
+					DocumentBuilderFactory.newInstance();
+					DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(xmlFile);
+			String nodeName = doc.getFirstChild().getNodeName();
+			String ns = ""; //$NON-NLS-1$
+			if (nodeName.indexOf(':') > 0){
+				ns = ":" + nodeName.substring(0, nodeName.indexOf(':')); //$NON-NLS-1$
+			}
+			String version = doc.getFirstChild().getAttributes().getNamedItem("xmlns" + ns).getTextContent(); //$NON-NLS-1$
+			if (version.equals(org.wcs.smart.patrol.xml.model.v11.ObjectFactory._Patrol_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.patrol.xml.model.v11.XmlToPatrolConverter();
+			}else if (version.equals(org.wcs.smart.patrol.xml.model.v12.ObjectFactory._Patrol_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.patrol.xml.model.v12.XmlToPatrolConverter();
+			}
+		}catch (Exception ex){
+			//invalid xml file
+			return null;
+		}
+		return null;
 	}
 }

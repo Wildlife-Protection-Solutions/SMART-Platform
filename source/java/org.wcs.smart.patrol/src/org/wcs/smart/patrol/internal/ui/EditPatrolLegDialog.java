@@ -59,6 +59,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SharedUtils;
@@ -94,8 +95,11 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	private ComboViewer groupALeader;
 	private ComboViewer groupAPilot;
 	private ComboViewer cmbTransportTypeA;
+	private ComboViewer cmbMandateA;
 	private List<Employee> patrolMembers;
+	
 	private List<PatrolTransportType> typeOps;
+	private List<PatrolMandate> mandateOps;
 	
 	private Date patrolEndDate;
 	private Date patrolStartDate;
@@ -112,11 +116,13 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	 * @param patrolStartDate patrol start date 
 	 * @param patrolEndDate patrol end date
 	 */
-	public EditPatrolLegDialog(Shell parentShell, PatrolLeg patrolLeg,  List<Employee> patrolMembers, List<PatrolTransportType> typeOps, Date patrolStartDate, Date patrolEndDate) {
+	public EditPatrolLegDialog(Shell parentShell, PatrolLeg patrolLeg,  List<Employee> patrolMembers, 
+			List<PatrolTransportType> typeOps, List<PatrolMandate> mandateOps, Date patrolStartDate, Date patrolEndDate) {
 		super(parentShell);
 		this.editLeg = patrolLeg;
 		this.patrolMembers = patrolMembers;
 		this.typeOps = typeOps;
+		this.mandateOps = mandateOps;
 		this.patrolEndDate = patrolEndDate;
 		this.patrolStartDate = patrolStartDate;
 	}
@@ -179,7 +185,9 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		Composite right = new Composite(compEmployees, SWT.NONE);
 		right.setLayout(new GridLayout(2, false));
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
+	
+		cmbMandateA = createMandateComboViewer(right);
+		
 		cmbTransportTypeA = createTransportTypeComboViewer(right);
 	
 		lbl = new Label(right, SWT.NONE);
@@ -205,7 +213,6 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateGroupAPilotState();
-				
 			}
 		});
 		updateGroupAPilotState();
@@ -326,6 +333,30 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		cmbTransportType.setSelection(new StructuredSelection(editLeg.getType()));
 		cmbTransportType.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		return cmbTransportType;
+	}
+	
+	/*
+	 * Transport type combo viewer
+	 */
+	private ComboViewer createMandateComboViewer(Composite parent){
+		Composite ttype = new Composite(parent, SWT.NONE);
+		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		ttype.setLayout(new GridLayout(2, false));
+		
+		Label lbl = new Label(ttype, SWT.NONE);
+		lbl.setText(Messages.EditPatrolLegDialog_MandateLabel);
+		ComboViewer cmb = new ComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN);
+		cmb.setLabelProvider(new LabelProvider(){
+			public String getText(Object element) {
+				if (element instanceof PatrolMandate) return ((PatrolMandate)element).getName();
+				return super.getText(element);
+			}
+		});
+		cmb.setContentProvider(ArrayContentProvider.getInstance());
+		cmb.setInput( mandateOps );
+		cmb.setSelection(new StructuredSelection(editLeg.getMandate()));
+		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		return cmb;
 	}
 	
 
@@ -529,6 +560,9 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		if (this.groupALeader.getSelection().isEmpty()){
 			return Messages.EditPatrolLegDialog_Error_NoLeader;
 		}
+		if (this.cmbMandateA.getSelection().isEmpty()){
+			return Messages.EditPatrolLegDialog_MandateRequired;
+		}
 		PatrolTransportType pttA = (PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement();
 		if (this.groupAPilot != null && pttA.getPatrolType().requiresPilot() && this.groupAPilot.getSelection().isEmpty()){
 			return Messages.EditPatrolLegDialog_Error_NoPilot;
@@ -573,6 +607,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		
 		//update transport type
 		editLeg.setType((PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement());
+		editLeg.setMandate((PatrolMandate) ((IStructuredSelection)this.cmbMandateA.getSelection()).getFirstElement());
 		
 		//update leader
 		Employee leaderA =   (Employee) ((IStructuredSelection)this.groupALeader.getSelection()).getFirstElement();

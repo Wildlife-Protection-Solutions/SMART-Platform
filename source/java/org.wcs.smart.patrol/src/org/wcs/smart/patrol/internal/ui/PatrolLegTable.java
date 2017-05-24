@@ -60,7 +60,8 @@ public class PatrolLegTable {
 	private enum LegColumn {
 		LEGID(Messages.PatrolLegTable_LegId_ColumnName), 
 		STARTDATE(Messages.PatrolLegTable_LegStartDate_ColumnName), 
-		ENDDATE(Messages.PatrolLegTable_LegEndDate_ColumnName), 
+		ENDDATE(Messages.PatrolLegTable_LegEndDate_ColumnName),
+		MANDATE(Messages.PatrolLegTable_Mandate_ColumnName),
 		TRANSPORTTYPE(Messages.PatrolLegTable_LegTranportType_ColumnName), 
 		LEADER(Messages.PatrolLegTable_LegLeader_ColumnName), 
 		PILOT(Messages.PatrolLegTable_LegPilot_ColumnName), 
@@ -208,6 +209,8 @@ public class PatrolLegTable {
 					return ""; //$NON-NLS-1$
 				}
 				return SmartLabelProvider.getFullLabel(pld.getLeader().getMember());
+			}else if (this.column == LegColumn.MANDATE){
+				return pld.getMandate().getName();
 			}else if (this.column == LegColumn.ENDDATE){
 				return DATE_TIME_FORMAT.format( pld.getEndDate() );
 			}else if (this.column == LegColumn.PILOT){

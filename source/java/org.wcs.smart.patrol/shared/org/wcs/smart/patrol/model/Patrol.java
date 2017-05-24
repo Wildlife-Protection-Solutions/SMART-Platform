@@ -90,7 +90,6 @@ public class Patrol extends UuidItem {
 	private Team team;
 	private String id;
 	private String objective;
-	private PatrolMandate mandate;
 	private PatrolType.Type patrolType;
 	private boolean isArmed;
 	private Date startDate;
@@ -158,16 +157,6 @@ public class Patrol extends UuidItem {
 
 	public void setObjective(String objective) {
 		this.objective = objective;
-	}
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="mandate_uuid", referencedColumnName="uuid")
-	public PatrolMandate getMandate() {
-		return mandate;
-	}
-
-	public void setMandate(PatrolMandate mandate) {
-		this.mandate = mandate;
 	}
 
 	@Column(name="patrol_type")
@@ -361,7 +350,6 @@ public class Patrol extends UuidItem {
 		clone.setConservationArea(ca);
 		clone.setEndDate(endDate);
 		clone.setId(id);
-		clone.setMandate(mandate);
 		clone.setObjective(objective);
 		clone.setPatrolType(patrolType);
 		clone.setStartDate(startDate);
