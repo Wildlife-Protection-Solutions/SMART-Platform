@@ -82,6 +82,14 @@ public class Messages extends NLS {
 	public static String PatrolFilter_TransportTypeNotFound;
 	public static String PatrolFilterTreeItem_PatrolFiltersTreeItem;
 	public static String PatrolGpxQueryExporter_GPX_ExporterName;
+	public static String PatrolGridNoDataFilterPanel_CustomOp;
+	public static String PatrolGridNoDataFilterPanel_CustomTooltip;
+	public static String PatrolGridNoDataFilterPanel_DefaultOp;
+	public static String PatrolGridNoDataFilterPanel_DefaultTooltip;
+	public static String PatrolGridNoDataFilterPanel_NoneOp;
+	public static String PatrolGridNoDataFilterPanel_NoneTooltip;
+	public static String PatrolGridNoDataFilterPanel_OptionRequired;
+	public static String PatrolGridNoDataFilterPanel_TabName;
 	public static String PatrolGridQueryType_PatrolGriddedQueryTypeName;
 	public static String PatrolGroupBy_CouldNotParse;
 	public static String PatrolGroupBy_CouldNotResolveFilter;

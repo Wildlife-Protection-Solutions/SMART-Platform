@@ -22,8 +22,11 @@
 package org.wcs.smart.patrol.query.exportimport;
 
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.query.common.importexport.GridQueryDefinitionExporter;
+import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.xml.model.QueryType;
@@ -44,6 +47,23 @@ public class PatrolGridQueryDefinitionExporter extends GridQueryDefinitionExport
 		return PatrolGriddedQuery.class.isAssignableFrom(query.getClass());		
 	}
 
+	@Override
+	public void writeQuerySpecifics(Query query, QueryType xmlQuery)
+			throws Exception {
+		super.writeQuerySpecifics(query, xmlQuery);
+		PatrolGridQueryDefinition def = (PatrolGridQueryDefinition)((GriddedQuery)query).getQueryDefinition();
+				
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		try{
+			if (def.getZeroDataFilter() != null){
+				processFilter(def.getZeroDataFilter().getFilter(), xmlQuery, s);
+			}
+		}finally{
+			s.getTransaction().rollback();
+			s.close();
+		}
+	}
 	/*
 	 * Process the filter
 	 */

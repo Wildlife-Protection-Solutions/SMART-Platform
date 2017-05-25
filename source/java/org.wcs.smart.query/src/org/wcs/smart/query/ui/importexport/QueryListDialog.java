@@ -111,6 +111,7 @@ public class QueryListDialog extends TitleAreaDialog{
 		queryTree.getTree().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
 		queryTree.setInput(Messages.QueryListDialog_LoadingLabel);
+		queryTree.addDoubleClickListener(e->okPressed());
 		
 		loadQueriesJob.setSystem(true);
 		loadQueriesJob.schedule();

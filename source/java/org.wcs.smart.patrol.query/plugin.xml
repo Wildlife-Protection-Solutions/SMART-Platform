@@ -22,6 +22,12 @@
             isSingleCa="true"
             panel="org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel">
       </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.patrol.query.PatrolGridNoDataFilterPanel"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.patrol.query.ui.definition.PatrolGridNoDataFilterPanel">
+      </QueryDefinitionPanel>
    </extension>
    <extension
          point="org.wcs.smart.query.queryItemPanel">
@@ -96,6 +102,10 @@
          </DefinitionPanel>
          <DefinitionPanel
                id="org.wcs.smart.query.conservationAreaPanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.patrol.query.PatrolGridNoDataFilterPanel"
+               itemPanelId="org.wcs.smart.query.patrol.filterPanel">
          </DefinitionPanel>
       </QueryType>
       <QueryType

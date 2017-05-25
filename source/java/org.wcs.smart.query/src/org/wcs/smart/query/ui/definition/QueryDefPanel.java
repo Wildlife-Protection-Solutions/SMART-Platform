@@ -102,15 +102,22 @@ public class QueryDefPanel {
 	/**
 	 * Adds the drop item to the appropriate panel
 	 * @param dropItem drop item to add
-	 * @param itemPanelId the item panel that sourced the drop item
+	 * @param itemPanelId the item panel that created the drop item
 	 */
 	public void addItem(DropItem dropItem, String itemPanelId){
-		for (IDefinitionPanel p : dropPanels){
-			String itemId = QueryTypeManager.INSTANCE.getQueryItemPanel(queryType, p.getId());
+		IDefinitionPanel panel = null;
+		if (dropPanels.size() == 1){
+			panel = dropPanels.get(0);
+		}else if (dropPanels.size() > 1){
+			panel = (IDefinitionPanel) tabFolder.getSelection()[0].getData();
+		}
+		if (panel != null){
+			String itemId = QueryTypeManager.INSTANCE.getQueryItemPanel(queryType, panel.getId());
 			if (itemId != null && itemId.equals(itemPanelId)){
-				p.addItem(dropItem);
+				panel.addItem(dropItem);
 			}
 		}
+		
 		parentView.validate();
 	}
 	
@@ -145,6 +152,8 @@ public class QueryDefPanel {
 		return main;
 	}
 	
+	private TabFolder tabFolder ;
+	
 	private Composite createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -173,15 +182,15 @@ public class QueryDefPanel {
 				QueryPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		} else {
-			final TabFolder tf = new TabFolder(main, SWT.NONE);
-			tf.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			tabFolder = new TabFolder(main, SWT.NONE);
+			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			for (int i = 0; i < panelIds.length; i++) {
-				TabItem item = new TabItem(tf, SWT.NONE);
+				TabItem item = new TabItem(tabFolder, SWT.NONE);
 
 				IDefinitionPanel pnl = parentView.getPart().getContext().get(DefinitionPanelManager.class).createDefinitionPanel(panelIds[i]);
 				if (pnl != null) {
 					item.setText(pnl.getGuiName());
-					Composite comp = pnl.createComposite(tf);
+					Composite comp = pnl.createComposite(tabFolder);
 					item.setControl(comp);
 					item.setData(pnl);
 
@@ -194,19 +203,19 @@ public class QueryDefPanel {
 				}
 
 			}
-			tf.pack();
-			tf.addSelectionListener(new SelectionAdapter() {
+			tabFolder.pack();
+			tabFolder.addSelectionListener(new SelectionAdapter() {
 
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					TabItem[] sel = tf.getSelection();
+					TabItem[] sel = tabFolder.getSelection();
 					if (sel.length > 0) {
 						setQueryDefinitionPanel(((IDefinitionPanel) sel[0]
 								.getData()).getId());
 					}
 				}
 			});
-			setQueryDefinitionPanel(((IDefinitionPanel) tf.getItem(0).getData())
+			setQueryDefinitionPanel(((IDefinitionPanel) tabFolder.getItem(0).getData())
 					.getId());
 
 		}

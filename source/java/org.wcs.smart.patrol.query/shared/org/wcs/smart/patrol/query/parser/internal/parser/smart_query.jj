@@ -93,6 +93,7 @@ TOKEN :
 | < NOT_CONTAINS : "notcontains" >
 | < STREQUALS : "equals" >
 | < BETWEEN : "between" >
+| < COLON : ":" >
 }
 
 TOKEN : /* Numeric Constants */
@@ -254,11 +255,13 @@ SumQueryDefinition SumQuery() :
 	}
 }
 
-GridQueryDefinition GridQuery() :
+PatrolGridQueryDefinition GridQuery() :
 {
 	IValueItem value = null;
 	QueryFilter valueFilter = null;
 	QueryFilter rateFilter = null;
+	QueryFilter zeroFilter = null;
+	PatrolGridQueryDefinition.ZeroFilterOption zeroOp = null;
 	Double gridSize = null;
 }
 {
@@ -275,9 +278,16 @@ GridQueryDefinition GridQuery() :
 	(
 	  rateFilter = QueryFilterInternal()
 	)?
+	(		< QUERY_SPLITTER > 
+		< DM_KEY >		{		  zeroOp = PatrolGridQueryDefinition.ZeroFilterOption.fromKey(token.image);
+		}
+		< QUERY_SPLITTER > 
+	  	(	  	  zeroFilter = QueryFilterInternal()
+	  	)?
+	)?
 	< EOF >
 	{
-    	return GridQueryDefinition.createQuery(value, gridSize, valueFilter, rateFilter);
+    	return PatrolGridQueryDefinition.createQuery(value, gridSize, valueFilter, rateFilter, zeroOp, zeroFilter);
 	}
 }
 

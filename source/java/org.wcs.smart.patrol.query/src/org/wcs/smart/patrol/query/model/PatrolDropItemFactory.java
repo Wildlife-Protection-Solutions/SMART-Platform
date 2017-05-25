@@ -54,6 +54,7 @@ import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueIte
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.patrol.query.ui.PatrolOptionData;
+import org.wcs.smart.patrol.query.ui.definition.PatrolGridNoDataFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
@@ -75,7 +76,6 @@ import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
-import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IGroupByViewer;
@@ -415,11 +415,11 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			
 		}else if(proxy.getQuery().getTypeKey().equals(PatrolGriddedQuery.KEY)){
 			PatrolGriddedQuery q = (PatrolGriddedQuery) proxy.getQuery();
-			GridQueryDefinition def = q.getQueryDefinition();
-			
+			PatrolGridQueryDefinition def = (PatrolGridQueryDefinition) q.getQueryDefinition();
 			
 			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
 			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
+			proxy.setDropItems(PatrolGridNoDataFilterPanel.ID , def.getZeroDataFilter() == null ? null : asDropItems(def.getZeroDataFilter().getFilter(), session));
 			
 			DropItem valueItem = null;
 			try{

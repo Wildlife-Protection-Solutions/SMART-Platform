@@ -30,6 +30,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -37,6 +39,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
@@ -100,6 +104,7 @@ public class ExportQueryListPage extends WizardPage {
 		queryList.setLabelProvider(new QueryListLabelProvider());
 		queryList.setInput(queries);
 		
+		
 		Composite buttons = new Composite(main, SWT.NONE);
 		buttons.setLayout(new GridLayout());
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -110,16 +115,7 @@ public class ExportQueryListPage extends WizardPage {
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				QueryListDialog dialog = new QueryListDialog(getShell());
-				if (dialog.open() == QueryListDialog.OK){
-					for (QueryEditorInput in : dialog.getSelectedQueries()){
-						if (!queries.contains(in)){
-							queries.add(in);
-						}
-					}
-					queryList.refresh();
-					validate();
-				}
+				add();
 			}
 		});
 		
@@ -129,21 +125,57 @@ public class ExportQueryListPage extends WizardPage {
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection)queryList.getSelection();
-				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-					Object object = (Object) iterator.next();
-					queries.remove(object);
-				}
-				queryList.refresh();
-				validate();
+				remove();
 			}
 			
+		});
+		
+		Menu menu = new Menu(queryList.getControl());
+		queryList.getControl().setMenu(menu);
+		MenuItem add = new MenuItem(menu,SWT.DEFAULT);
+		add.setText(DialogConstants.ADD_BUTTON_TEXT);
+		add.addListener(SWT.Selection, e->add());
+		
+		MenuItem remove = new MenuItem(menu,SWT.DEFAULT);
+		remove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		remove.addListener(SWT.Selection, e->remove());
+		menu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				remove.setEnabled(!queryList.getSelection().isEmpty());
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
 		});
 		
 		setTitle(Messages.ExportQueryListPage_PageTitle);
 		setMessage(Messages.ExportQueryListPage_PageMessage);
 		setPageComplete(false);
 		setControl(main);
+	}
+	
+	private void add(){
+		QueryListDialog dialog = new QueryListDialog(getShell());
+		if (dialog.open() == QueryListDialog.OK){
+			for (QueryEditorInput in : dialog.getSelectedQueries()){
+				if (!queries.contains(in)){
+					queries.add(in);
+				}
+			}
+			queryList.refresh();
+			validate();
+		}
+	}
+	private void remove(){
+		IStructuredSelection sel = (IStructuredSelection)queryList.getSelection();
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			Object object = (Object) iterator.next();
+			queries.remove(object);
+		}
+		queryList.refresh();
+		validate();
 	}
 	
 	private void validate(){

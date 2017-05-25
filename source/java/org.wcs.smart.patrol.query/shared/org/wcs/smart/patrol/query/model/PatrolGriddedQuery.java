@@ -32,7 +32,6 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.IQueryColumnProvider;
-import org.wcs.smart.query.model.summary.GridQueryDefinition;
 
 /**
  * A class to represent a summary query.
@@ -61,14 +60,14 @@ public class PatrolGriddedQuery extends GriddedQuery {
 	 * @return 
 	 */
 	@Transient
-	protected GridQueryDefinition parseQuery() throws Exception {
+	protected PatrolGridQueryDefinition parseQuery() throws Exception {
 
 		if (strQuery == null || strQuery.length() == 0){
 			return null;
 		}
 		try(InputStream is = new ByteArrayInputStream(strQuery.getBytes())){
 			Parser parser = new Parser(is);
-			GridQueryDefinition myQuery = parser.GridQuery();
+			PatrolGridQueryDefinition myQuery = parser.GridQuery();
 			return myQuery;
 		}
 	}

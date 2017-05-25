@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryValidator;
@@ -65,6 +66,9 @@ public class PatrolGriddedQueryDefImporter extends GriddedQueryDefinitionImporte
 			warnings.addAll(validator.validate(def.getRateFilter().getFilter()));
 		}
 		
+		if (((PatrolGridQueryDefinition)def).getZeroDataFilter() != null){
+			warnings.addAll(validator.validate(((PatrolGridQueryDefinition)def).getZeroDataFilter().getFilter()));
+		}
 		//process value items
 		warnings.addAll(validator.validate(def.getValuePart()));
 		

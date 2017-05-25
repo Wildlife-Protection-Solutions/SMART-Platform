@@ -38,6 +38,7 @@ import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
+import org.wcs.smart.patrol.query.ui.definition.PatrolGridNoDataFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
@@ -168,7 +169,7 @@ public class PatrolGridQueryType implements IMappableQueryType {
 		
 		String filters= ""; //$NON-NLS-1$
 		String definition = ""; //$NON-NLS-1$
-		
+		String nodatafilter = ""; //$NON-NLS-1$
 		for (IDefinitionPanel p : components){
 			if (p.getId().equals(SimpleValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
@@ -179,9 +180,11 @@ public class PatrolGridQueryType implements IMappableQueryType {
 				}
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
 				query.setConservationAreaFilter(p.getQueryPart());
+			}else if (p.getId().equals(PatrolGridNoDataFilterPanel.ID)){
+				nodatafilter = p.getQueryPart();
 			}
 		}
-		summary.setQuery(definition + "|" + filters); //$NON-NLS-1$
+		summary.setQuery(definition + "|" + filters + "|" + nodatafilter); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	
@@ -192,6 +195,7 @@ public class PatrolGridQueryType implements IMappableQueryType {
 	public String validateQuery(List<IDefinitionPanel> components) {
 		String filters= ""; //$NON-NLS-1$
 		String definition = ""; //$NON-NLS-1$
+		String nodatafilter = ""; //$NON-NLS-1$
 		
 		// validate each panel
 		for (IDefinitionPanel p : components){
@@ -204,12 +208,14 @@ public class PatrolGridQueryType implements IMappableQueryType {
 				filters = p.getQueryPart();
 			}else if (p.getId().equals(PatrolGriddedQueryDefinitionPanel.ID)){
 				definition = p.getQueryPart();
+			}else if (p.getId().equals(PatrolGridNoDataFilterPanel.ID)){
+				nodatafilter = p.getQueryPart();
 			}
 			
 		}
 		
 		//validate query
-		String queryString = definition + "|" + filters; //$NON-NLS-1$
+		String queryString = definition + "|" + filters + "|" + nodatafilter; //$NON-NLS-1$ //$NON-NLS-2$
 		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			parser.GridQuery();

@@ -31,6 +31,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
@@ -49,7 +50,6 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.QueryFilter;
-import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IGroupBy.GroupByType;
@@ -330,9 +330,10 @@ public class PatrolQueryTemplateCloner implements
 	private String cloneGriddedQueryDefinition(String griddedQueryStr, ConservationAreaClonerEngine engine) {
 		try{
 			Parser parser = new Parser(new ByteArrayInputStream(griddedQueryStr.getBytes()));
-			GridQueryDefinition def = parser.GridQuery();
+			PatrolGridQueryDefinition def = parser.GridQuery();
 			updateQueryFilter(def.getRateFilter(), engine);
 			updateQueryFilter(def.getValueFilter(), engine);
+			updateQueryFilter(def.getZeroDataFilter(), engine);
 			return def.asQuery();
 		}catch (Throwable ex){
 			QueryPlugIn.log("Error cloning query definition: " + griddedQueryStr, ex); //$NON-NLS-1$
