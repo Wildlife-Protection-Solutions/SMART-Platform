@@ -4,15 +4,15 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart</artifactId>
-		<version>5.0.0-SNAPSHOT</version>
+		<version>6.0.0-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
 	
+	<groupId>org.wcs.smart</groupId>
 	<artifactId>org.wcs.smart.birt</artifactId>
 	<name>SMART BIRT Core Shared Component</name>
-	<version>${smart.version}</version>
 	<packaging>bundle</packaging>
 	
 	<dependencies>
