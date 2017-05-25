@@ -127,7 +127,7 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 		it.setStation(rs.getString("p_station"));				 //$NON-NLS-1$
 		it.setTeam(rs.getString("p_team"));				 //$NON-NLS-1$
 		it.setObjective(rs.getString("r_p_objective")); //$NON-NLS-1$
-		it.setMandate(rs.getString("p_mandate")); //$NON-NLS-1$
+		it.setMandate(rs.getString("pl_mandate")); //$NON-NLS-1$
 		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("r_p_type"))); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("r_p_is_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$

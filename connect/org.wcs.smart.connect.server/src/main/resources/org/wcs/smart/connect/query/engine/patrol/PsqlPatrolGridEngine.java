@@ -719,7 +719,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		sql.append(tablePrefix(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Patrol.class) + ".mandate_uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class) + ".mandate_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$
@@ -754,7 +754,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		sql.append("p_station_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_team_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
-		sql.append("p_mandate_uuid  uuid,"); //$NON-NLS-1$
+		sql.append("pl_mandate_uuid  uuid,"); //$NON-NLS-1$
 		sql.append("p_type varchar(6),"); //$NON-NLS-1$
 		sql.append("p_is_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_start_date date,"); //$NON-NLS-1$

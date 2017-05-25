@@ -77,10 +77,10 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		StringBuilder fields = new StringBuilder();
 		fields.append("ca_id,ca_name, r_p_ca_uuid, r_p_uuid,"); //$NON-NLS-1$
 		fields.append("r_p_id,r_p_start_date,r_p_end_date,r_p_station_uuid,"); //$NON-NLS-1$
-		fields.append("r_p_team_uuid,r_p_objective,r_p_mandate_uuid,r_p_type,"); //$NON-NLS-1$
+		fields.append("r_p_team_uuid,r_p_objective,r_pl_mandate_uuid,r_p_type,"); //$NON-NLS-1$
 		fields.append("r_p_is_armed,r_pl_transport_uuid,r_pl_id,r_pl_start_date,"); //$NON-NLS-1$
 		fields.append("r_pl_end_date,r_plm_leader,r_plm_pilot,r_pl_uuid,"); //$NON-NLS-1$
-		fields.append("p_station,p_team,p_mandate,p_transporttype,p_leader,p_pilot"); //$NON-NLS-1$
+		fields.append("p_station,p_team,pl_mandate,p_transporttype,p_leader,p_pilot"); //$NON-NLS-1$
 		if (sortFields != null){
 			for (String s : sortFields){
 				fields.append(","); //$NON-NLS-1$
@@ -211,7 +211,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		String[][] columnsToAdd = new String[][]{
 				{"p_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_team","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
-				{"p_mandate","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"pl_mandate","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_transporttype","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_leader","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_pilot","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -225,7 +225,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		
 		updateLabel(c, queryDataTable, "r_p_station_uuid", "p_station");  //$NON-NLS-1$//$NON-NLS-2$
 		updateLabel(c, queryDataTable, "r_p_team_uuid", "p_team");  //$NON-NLS-1$//$NON-NLS-2$
-		updateLabel(c, queryDataTable, "r_p_mandate_uuid", "p_mandate");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "r_pl_mandate_uuid", "pl_mandate");  //$NON-NLS-1$//$NON-NLS-2$
 		updateLabel(c, queryDataTable, "r_pl_transport_uuid", "p_transporttype");  //$NON-NLS-1$//$NON-NLS-2$
 		
 		StringBuilder sql = new StringBuilder();
@@ -284,7 +284,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		
 		String[] results = {"p_ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"p_station_uuid", "p_team_uuid",  //$NON-NLS-1$ //$NON-NLS-2$
-				"p_objective", "p_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"p_objective", "pl_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"pl_transport_uuid", "pl_id", //$NON-NLS-1$ //$NON-NLS-2$
 				"pl_start_date", //$NON-NLS-1$
 				"pl_end_date", //$NON-NLS-1$
@@ -348,7 +348,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		sql.append("p_station_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_team_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
-		sql.append("p_mandate_uuid  uuid,"); //$NON-NLS-1$
+		sql.append("pl_mandate_uuid  uuid,"); //$NON-NLS-1$
 		sql.append("p_type varchar(6),"); //$NON-NLS-1$
 		sql.append("p_is_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_start_date date,"); //$NON-NLS-1$
@@ -386,7 +386,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		sql.append(tablePrefix(Patrol.class) + ".station_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".team_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".objective, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Patrol.class) + ".mandate_uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class) + ".mandate_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".patrol_type, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".is_armed, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".start_date, "); //$NON-NLS-1$

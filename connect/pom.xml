@@ -15,7 +15,7 @@
 	</modules>
 	
 	<properties>
-		<smart.version>5.0.0-SNAPSHOT</smart.version>
+		<smart.version>6.0.0-SNAPSHOT</smart.version>
         	<geotools.version>14.1</geotools.version>
         	<jts.version>1.13</jts.version>
         	<hibernate.version>4.2.18.Final</hibernate.version>
