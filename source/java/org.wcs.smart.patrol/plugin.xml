@@ -220,6 +220,15 @@
             allPopups="true"
             locationURI="popup:org.wcs.smart.patrol.ui.PatrolListView">
          <command
+               commandId="org.wcs.smart.patrol.open"
+               label="Open"
+               style="push">
+         </command>
+         <separator
+               name="org.wcs.smart.patrol.separator1"
+               visible="true">
+         </separator>
+         <command
                commandId="org.wcs.smart.patrol.view.DeletePatrol"
                icon="images/icons/etool16/patrol_delete.png"
                label="%popup.delete.command.label"
@@ -330,6 +339,10 @@
       <command
             id="org.wcs.smart.patrol.view.MergePatrols"
             name="%mergepatrol.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.patrol..open"
+            name="Open Patrol">
       </command>
    </extension>
    <extension
@@ -471,6 +484,28 @@
             </with>
          </enabledWhen>
       
+      </handler>
+      <handler
+            class="org.wcs.smart.patrol.ui.OpenPatrolHandler$OpenPatrolHandlerWrapper"
+            commandId="org.wcs.smart.patrol.open">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <instanceof
+                        value="org.wcs.smart.patrol.ui.PatrolEditorInput">
+                  </instanceof>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
    </extension>
    <extension

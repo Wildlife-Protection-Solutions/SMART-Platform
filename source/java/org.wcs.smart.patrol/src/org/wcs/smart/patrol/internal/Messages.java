@@ -56,6 +56,11 @@ public class Messages extends NLS {
 	public static String DeletePatrolHandler_MultiDeleteConfirmation;
 	public static String DeletePatrolHandler_ProgressTaskName;
 	public static String EditPatrolDateLegsDialog_Title;
+	public static String EditPatrolDatesDialog_LoadError;
+	public static String EditPatrolDatesDialog_Message;
+	public static String EditPatrolDatesDialog_SaveError;
+	public static String EditPatrolDatesDialog_ShellTitle;
+	public static String EditPatrolDatesDialog_Title;
 	public static String EditPatrolItemDialog_Error_CouldNoSaveChanges;
 	public static String EditPatrolItemDialog_Error_DialotTitle;
 	public static String EditPatrolLegDialog_AddEmployees_ToolTip;
@@ -195,7 +200,13 @@ public class Messages extends NLS {
 	public static String ObjectiveComposite_Objective_Label;
 	public static String ObjectiveComposite_PatrolObjectiveTooLongError;
 	public static String ObjectiveComposite_Title;
+	public static String OpenPatrolHandler_CancelBtn;
+	public static String OpenPatrolHandler_DialogTitle;
+	public static String OpenPatrolHandler_EditButtons;
 	public static String OpenPatrolHandler_OpenPatrolError;
+	public static String OpenPatrolHandler_ProceedBtn;
+	public static String OpenPatrolHandler_TooLongError;
+	public static String OpenPatrolHandler_TooLongProceed;
 	public static String Patrol_SystemGenerateId_Name;
 	public static String PatrolArmedWizardPage_PageMessage;
 	public static String PatrolArmedWizardPage_Title;

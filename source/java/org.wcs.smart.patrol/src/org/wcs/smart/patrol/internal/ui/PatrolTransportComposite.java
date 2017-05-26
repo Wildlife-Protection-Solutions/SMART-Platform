@@ -158,8 +158,10 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 				
 			}else{
 				//remove all pilots
-				for (PatrolLegMember member : patrolLeg.getMembers()){
-					member.setIsPilot(false);
+				if (patrolLeg.getMembers() != null){
+					for (PatrolLegMember member : patrolLeg.getMembers()){
+						member.setIsPilot(false);
+					}
 				}
 			}
 			return true;
