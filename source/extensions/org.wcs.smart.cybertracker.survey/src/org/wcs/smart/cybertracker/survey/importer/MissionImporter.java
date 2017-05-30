@@ -196,6 +196,12 @@ public class MissionImporter extends AbstractSmartImporter {
 			session.close();
 		}
 	}
+	
+	protected void addObservations(Waypoint wp, S s, Map<String, E> eMap, Session session) {
+		super.addObservations(wp, s, eMap, session);
+		String prefix = getFilenameDateFormat().format(wp.getDateTime()); 
+		addAttachments(wp, s, eMap, prefix, session);
+	}
 
 	private Survey createNewSurvey(CyberTrackerSurvey ctSurvey, String id) {
 		Survey survey = new Survey();
