@@ -52,7 +52,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 
@@ -609,7 +608,9 @@ public class SmartUtils {
 		ExifIFD0Directory exifIFD0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 		int orientation = 1;
 		try {
-			if (exifIFD0Directory != null) orientation = exifIFD0Directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+			if (exifIFD0Directory != null && exifIFD0Directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)){
+				orientation = exifIFD0Directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+			}
 		} catch (Exception ex) {
 			SmartPlugIn.log(ex.getMessage(), ex);
 			return null;
