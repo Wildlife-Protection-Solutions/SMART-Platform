@@ -244,8 +244,16 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 				session.delete(pl);
 			}
 			
-			//TODO: we need to create patrol leg day objects for all legs as they may not exist
-			
+			if (patrol.getLegs().size() == 1){
+				//if there is only one leg, make sure it expands the entire date range
+				//and a day exists for each leg
+				patrol.getFirstLeg().setStartDate(startDate);
+				patrol.getFirstLeg().setEndDate(endDate);
+				patrol.getFirstLeg().createLegDays(session);
+			}else{
+				//ideally here we make sure there are legs for day etc.
+				//but for now we'll leave this up to the user.
+			}
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.EditPatrolDatesDialog_SaveError + ex.getMessage(), ex);
