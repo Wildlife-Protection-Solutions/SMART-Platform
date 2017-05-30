@@ -88,49 +88,17 @@ public class OpenPatrolHandler {
 		(new ShowFieldDataPerspective()).execute(PatrolListView.ID,activeWindow);
 		
 		try {
+			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			IWorkbenchPage page = window.getActivePage();
+			Shell activeShell = activeWindow.getContext().get(Shell.class);
 			for(PatrolEditorInput pi: patrols){
 				//validate patrol
-				
-				Session s = HibernateManager.openSession();
-				Patrol patrol = null;
-				boolean canEdit = false;
-				try{
-					patrol = (Patrol)s.get(Patrol.class, pi.getUuid());
-					if (patrol == null) continue; //patrol not found so we cannot open it
-					canEdit = null == PatrolManager.getInstance().canEdit(patrol, ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s));	
-				}finally{
-					s.close();
+				if (page.findEditor(pi) == null){
+					//editor not open; lets check the dates
+					boolean doopen = checkDates(pi, activeShell);
+					if (!doopen) continue;
 				}
 				
-				long patrolLengthMills = pi.getEndDate().getTime() - pi.getStartDate().getTime();
-				long patrolLengthDays = (long)Math.ceil(patrolLengthMills / (24 * 60 * 60 * 1000l));
-				if (patrolLengthDays > Patrol.MAX_PATROL_LENGTH_DAYS){
-					//warning with an option to edit dates
-					String[] buttons = new String[]{Messages.OpenPatrolHandler_CancelBtn, Messages.OpenPatrolHandler_ProceedBtn};
-					String message = MessageFormat.format(Messages.OpenPatrolHandler_TooLongProceed, pi.getPatrolId(), patrolLengthDays, Patrol.MAX_PATROL_LENGTH_DAYS);
-					if (canEdit){
-						buttons = new String[]{Messages.OpenPatrolHandler_CancelBtn, Messages.OpenPatrolHandler_ProceedBtn, Messages.OpenPatrolHandler_EditButtons};
-						message = MessageFormat.format(Messages.OpenPatrolHandler_TooLongError, pi.getPatrolId(), patrolLengthDays, Patrol.MAX_PATROL_LENGTH_DAYS);
-					}
-					Shell activeShell = activeWindow.getContext().get(Shell.class);
-					MessageDialog md = new MessageDialog(activeShell,
-							Messages.OpenPatrolHandler_DialogTitle, null, message, MessageDialog.WARNING,
-							buttons, buttons.length - 1);
-					int ret = md.open();
-					if (ret == 0){
-						//cancel
-						return;
-					}
-					if (ret == 2){
-						//show edit dates dialog
-						EditPatrolDatesDialog pdd = new EditPatrolDatesDialog(activeShell, pi);
-						if (pdd.open() == Window.CANCEL) return;
-					}
-				}
-				
-				
-				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-				IWorkbenchPage page = window.getActivePage();
 				IEditorPart part = page.openEditor(pi, PatrolEditor.ID);
 				if (part instanceof PatrolEditor && initSelection != null){
 					((PatrolEditor)part).findAndShow(initSelection);
@@ -146,6 +114,45 @@ public class OpenPatrolHandler {
 		openPatrol(patrolInput, null, activeWindow);
 	}
 	
+	private boolean checkDates(PatrolEditorInput pi, Shell activeShell){
+		Session s = HibernateManager.openSession();
+		Patrol patrol = null;
+		boolean canEdit = false;
+		try{
+			patrol = (Patrol)s.get(Patrol.class, pi.getUuid());
+			if (patrol == null) return false; //patrol not found so we cannot open it
+			canEdit = null == PatrolManager.getInstance().canEdit(patrol, ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s));	
+		}finally{
+			s.close();
+		}
+		
+		long patrolLengthMills = pi.getEndDate().getTime() - pi.getStartDate().getTime();
+		long patrolLengthDays = (long)Math.ceil(patrolLengthMills / (24 * 60 * 60 * 1000l));
+		if (patrolLengthDays > Patrol.MAX_PATROL_LENGTH_DAYS){
+			//warning with an option to edit dates
+			String[] buttons = new String[]{Messages.OpenPatrolHandler_CancelBtn, Messages.OpenPatrolHandler_ProceedBtn};
+			String message = MessageFormat.format(Messages.OpenPatrolHandler_TooLongProceed, pi.getPatrolId(), patrolLengthDays, Patrol.MAX_PATROL_LENGTH_DAYS);
+			if (canEdit){
+				buttons = new String[]{Messages.OpenPatrolHandler_CancelBtn, Messages.OpenPatrolHandler_ProceedBtn, Messages.OpenPatrolHandler_EditButtons};
+				message = MessageFormat.format(Messages.OpenPatrolHandler_TooLongError, pi.getPatrolId(), patrolLengthDays, Patrol.MAX_PATROL_LENGTH_DAYS);
+			}
+			
+			MessageDialog md = new MessageDialog(activeShell,
+					Messages.OpenPatrolHandler_DialogTitle, null, message, MessageDialog.WARNING,
+					buttons, buttons.length - 1);
+			int ret = md.open();
+			if (ret == 0){
+				//cancel
+				return false;
+			}
+			if (ret == 2){
+				//show edit dates dialog
+				EditPatrolDatesDialog pdd = new EditPatrolDatesDialog(activeShell, pi);
+				if (pdd.open() == Window.CANCEL) return false;
+			}
+		}
+		return true;
+	}
 	
 	//E3
 	public static class OpenPatrolHandlerWrapper extends DIHandler<OpenPatrolHandler>{
