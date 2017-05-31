@@ -589,6 +589,7 @@ public class Messages extends NLS {
 	public static String PatrolTypePropertyPage_MaxSpeed_ColumnTooltip;
 	public static String PatrolTypePropertyPage_PageName;
 	public static String PatrolTypePropertyPage_PatrolType_ColumnHeader;
+	public static String PatrolTypePropertyPage_PatrolTypeColumnName;
 	public static String PatrolTypePropertyPage_TransportOptionsLabel;
 	public static String PatrolTypePropertyPage_TransportType_ColumnHeader;
 	public static String PatrolTypePropertyPage_TypesLabel;
