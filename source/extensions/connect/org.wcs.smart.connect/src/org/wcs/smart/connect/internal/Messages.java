@@ -355,6 +355,7 @@ public class Messages extends NLS {
 	public static String ServerPanel_UseExistingCert;
 	public static String ServerWizardPage_Message;
 	public static String ServerWizardPage_Title;
+	public static String SmartConnect_connectError;
 	public static String SmartConnect_ConnectionError;
 	public static String SmartConnect_DialogTitle;
 	public static String SmartConnect_DownloadFailed;
@@ -362,6 +363,7 @@ public class Messages extends NLS {
 	public static String SmartConnect_GeneralError;
 	public static String SmartConnect_InvalidUserNameError;
 	public static String SmartConnect_NoUrlError;
+	public static String SmartConnect_ServerErrorMsg;
 	public static String SmartConnect_SizeConfirmMessage;
 	public static String SmartConnect_SshError1;
 	public static String SmartConnect_SshError2;
