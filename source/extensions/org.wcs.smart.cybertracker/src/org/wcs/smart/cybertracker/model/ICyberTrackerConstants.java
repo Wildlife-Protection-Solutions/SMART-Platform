@@ -33,7 +33,7 @@ public interface ICyberTrackerConstants {
 	 * The version number to use for checking against the CT
 	 * registry version number
 	 */
-	public static final String INSTALL_MIN_VERSION  = "3.00.0443"; //$NON-NLS-1$
+	public static final String INSTALL_MIN_VERSION  = "3.00.0444"; //$NON-NLS-1$
 	/**
 	 * The version number to display if the current
 	 * version CT is not compatible 
@@ -52,7 +52,7 @@ public interface ICyberTrackerConstants {
 	 * I don't use those digits.  
 	 * 
 	 */
-	public static final String DISPLAY_MIN_VERSION  = "3.443"; //$NON-NLS-1$
+	public static final String DISPLAY_MIN_VERSION  = "3.444"; //$NON-NLS-1$
 	
 	public static final String SMART_CTX_FILENEME = "smart.ctx"; //$NON-NLS-1$
 	public static final String SMART_CTX_DOWNLOAD_FOLDER = "CyberTracker"; //$NON-NLS-1$
