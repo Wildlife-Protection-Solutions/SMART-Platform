@@ -388,6 +388,15 @@ public class ImportReportEngine {
 			}
 		}
 		
+		//make sure default language has a name
+		if (r.findNameNull(r.getConservationArea().getDefaultLanguage()) == null){
+			if (r.getNames().isEmpty()){
+				r.setName(Messages.ImportReportEngine_NoNameReportName);
+			}else{
+				r.setName(r.getNames().iterator().next().getValue());
+			}
+			r.updateName(r.getConservationArea().getDefaultLanguage(), r.getName());
+		}
 		if (version == null || !version.equals(ReportDefintionExporter.VERSION_2)){
 			Display.getDefault().syncExec(new Runnable(){
 				@Override

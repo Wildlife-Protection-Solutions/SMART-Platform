@@ -244,7 +244,11 @@ public class LazyReportContentProvider extends BaseWorkbenchContentProvider{
 				}else if (b instanceof ReportFolder && !(a instanceof ReportFolder)){
 					return 1;
 				}else if (a instanceof Report && b instanceof Report){
-					return Collator.getInstance().compare(((Report)a).getName(), ((Report)b).getName());
+					String n1 = ((Report)a).getName();
+					String n2 = ((Report)b).getName();
+					if (n1 == null) n1 = ""; //$NON-NLS-1$
+					if (n2 == null) n2 = ""; //$NON-NLS-1$
+					return Collator.getInstance().compare(n1, n2);
 				}
 				return Collator.getInstance().compare(a.toString(),b.toString());
 		}});

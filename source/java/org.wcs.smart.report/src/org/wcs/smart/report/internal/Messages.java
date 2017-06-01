@@ -96,6 +96,7 @@ public class Messages extends NLS {
 	public static String ImportReportEngine_ImportQuery_WarningDialog_Title;
 	public static String ImportReportEngine_ImportQueryJobName;
 	public static String ImportReportEngine_ImportReport_DialogTitle;
+	public static String ImportReportEngine_NoNameReportName;
 	public static String ImportReportEngine_OpImportNewQuery;
 	public static String ImportReportEngine_OpImportNewQuery_2;
 	public static String ImportReportEngine_OpOverwirteExisting;

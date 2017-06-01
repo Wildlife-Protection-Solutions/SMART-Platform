@@ -355,7 +355,7 @@ public class ReportApi extends HttpServlet{
 		
 		List<Report> reports = session.createCriteria(Report.class).list();
 		for (Report r : reports){
-			ReportProxy proxy = new ReportProxy(r.getUuid(), r.getName(),  
+			ReportProxy proxy = new ReportProxy(r.getUuid(), r.getName() == null ? "" : r.getName(),  
 					r.getConservationArea().getId(), r.getId(), r.getShared(), 
 					r.getConservationArea().getUuid(),
 					r.getConservationArea().getIsCcaa());
