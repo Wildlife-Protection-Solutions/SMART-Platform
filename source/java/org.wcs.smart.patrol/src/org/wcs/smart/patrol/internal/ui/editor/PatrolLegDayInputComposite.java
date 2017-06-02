@@ -107,6 +107,7 @@ import org.wcs.smart.observation.ui.ObservationCellEditor;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
+import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.importwp.PatrolImportGpsDataWizard;
@@ -862,11 +863,13 @@ public class PatrolLegDayInputComposite {
 			column.getColumn().setMoveable(false);
 			column.getColumn().setWidth(25);
 
-			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH){
-				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
-			}
 			if(columntype == OtColumn.EAST || columntype == OtColumn.NORTH){
 				column.getColumn().setToolTipText(prj.getName());
+				if (PatrolManager.getInstance().canEditWaypointLocations() == null){
+					column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));	
+				}
+			}else{
+				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
 			}
 			
 			observationTableColumns.put(columntype, column);
@@ -982,6 +985,10 @@ public class PatrolLegDayInputComposite {
 		}
 		if (needSave){
 			editor.getPatrolEditor().save(Collections.singleton((PatrolWaypoint)element));
+			if (column == OtColumn.EAST || column == OtColumn.NORTH){
+				//update map
+				editor.getPatrolEditor().getMap().getRenderManager().refresh(null);
+			}
 		}
 		observationTable.refresh();
 		

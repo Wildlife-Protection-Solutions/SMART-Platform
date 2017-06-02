@@ -49,7 +49,10 @@ import org.wcs.smart.ui.map.tool.BBoxInfoTool;
  */
 public class MapToolComposite {
 
-	
+	/**
+	 * Tool id for seperator in tool bar
+	 */
+	public static final String SEPERATOR_TOOL_ID = "tool.seperator"; //$NON-NLS-1$
 	
 	//these tools will only work in a view or editor part.  If using in a dialog
 	//you need to use custom tools (see MapComposite.java)
@@ -67,11 +70,13 @@ public class MapToolComposite {
 	public static final String[] DEFAULT_MAP_TOOLS = {
 		AddLayerTool.ID, 
 		SetBasemapTool.ID, 
+		SEPERATOR_TOOL_ID,
 		UDIG_ZOOM_EXTENT_ID,
 		UDIG_PAN_ID,
 		UDIG_ZOOM_ID,
 		UDIG_ZOOM_IN_ID,
 		UDIG_ZOOM_OUT_ID,
+		SEPERATOR_TOOL_ID,
 		SmartDistanceTool.ID,
 		//InfoTool.ID,
 		BBoxInfoTool.ID};
@@ -114,7 +119,12 @@ public class MapToolComposite {
 		IToolManager toolManager = ApplicationGIS.getToolManager();
 		
 		for (int i = 0; i < tools.length; i ++){
-			ToolProxy found = ((ToolManager)toolManager).findToolProxy(tools[i]);
+			String id = tools[i];
+			if (id.equals(SEPERATOR_TOOL_ID)){
+				new ToolItem(toolBar, SWT.SEPARATOR);
+				continue;
+			}
+			ToolProxy found = ((ToolManager)toolManager).findToolProxy(id);
 			if (found instanceof ModalTool){
 				int style = SWT.CHECK;
 				if (found.getType() != 1){	//modal tool proxy

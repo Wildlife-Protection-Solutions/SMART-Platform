@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
+import java.awt.Point;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,26 +31,44 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.geotools.referencing.CRS;
+import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.render.IViewportModel;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
+import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.udig.catalog.PatrolService;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.udig.EditPointTool;
+import org.wcs.smart.udig.IMapEditManager;
+import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
+import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.JobUtil;
+import org.wcs.smart.util.ReprojectUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Page for the editor for displaying a map
@@ -64,7 +84,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	
 	private PatrolService patrolService = null;
 	private LoadDefaultLayersJob loadDefaultLayers;
-	
+		
 	private Job addLayerJob = new Job(Messages.PatrolMapPageEditor_AddLayersJobName) {
 		
 		@SuppressWarnings("unchecked")
@@ -130,6 +150,19 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    
 	public PatrolMapPageEditor(PatrolEditor parent){
 		this.parentEditor = parent;
+		
+		List<String> tools = new ArrayList<String>();
+		for (String tool : MapToolComposite.DEFAULT_MAP_TOOLS){
+			tools.add(tool);
+		}
+		if (PatrolManager.getInstance().canEditWaypointLocations() == null){
+			tools.add(MapToolComposite.SEPERATOR_TOOL_ID);
+			tools.add(EditPointTool.ID);
+			tools.add(UndoTool.ID);
+			tools.add(MapToolComposite.SEPERATOR_TOOL_ID);
+			
+		}
+		this.mapTools = tools.toArray(new String[tools.size()]);
 	}
 	
 	public MultiPageEditorPart getParentEditor() {
@@ -179,6 +212,11 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 		super.createPartControl(parent);
         addLayers();
         PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, patrolUpdatedListeners);
+        
+        if (PatrolManager.getInstance().canEditWaypointLocations() == null){
+        	getMap().getBlackboard().put(IMapEditManager.class.getCanonicalName(), getEditManager());
+        	tools.getTool(UndoTool.ID).setEnabled(false);
+        }
 	}
 
     
@@ -200,5 +238,144 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
     }
 
 
+    private IMapEditManager getEditManager(){
+    	return new IMapEditManager() {
+			
+			@Override
+			public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
+				if (!(feature instanceof PatrolWaypoint)) return ;
+				
+				PatrolWaypoint pw = (PatrolWaypoint) feature;
+				Coordinate crspx = vm.pixelToWorld(x, y);
+				//convert to lat/long
+				if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
+					try{
+						crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+					}catch (Exception ex){
+						SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_MoveErrorReproject + ex.getMessage(), ex);
+						return;
+					}
+				}
+				
+				double origx = pw.getWaypoint().getX();
+				double origy = pw.getWaypoint().getY();
+				
+				boolean modified = false;
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					pw.getWaypoint().setX(crspx.x);
+					pw.getWaypoint().setY(crspx.y);
+					s.update(pw.getWaypoint());
+					s.getTransaction().commit();
+					modified = true;
+				}catch (Exception ex){
+					try{
+						if (s.getTransaction().isActive()) s.getTransaction().rollback();
+					}catch (Exception ex2){
+						SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_MoveErrorDb + ex.getMessage(), ex);
+						return;
+					}
+					pw.getWaypoint().setX(origx);
+					pw.getWaypoint().setY(origy);
+				}finally{
+					s.close();
+				}
+				if (modified){
+					addUndo(pw, origx, origy);
+					PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, pw.getPatrolLegDay());
+					WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
+				}
+			}
+			
+			@Override
+			public Object findFeature(int x, int y, IViewportModel vm) {
+				try{
+					Coordinate crspx = vm.pixelToWorld(x, y);
+					//convert to lat/long
+					if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
+						crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+					}
+					double max = Double.MAX_VALUE;
+					PatrolWaypoint toEdit = null;
+					for(PatrolLeg pl : parentEditor.getPatrol().getLegs()){
+						for (PatrolLegDay pld : pl.getPatrolLegDays()){
+							for (PatrolWaypoint pw : pld.getWaypoints()){
+								double distance = crspx.distance(new Coordinate(pw.getWaypoint().getX(), pw.getWaypoint().getY()));
+								if (distance < max){
+									max = distance;
+									toEdit = pw;
+								}
+							}
+						}
+					}
+					Coordinate pnt = ReprojectUtils.reproject(toEdit.getWaypoint().getX(), toEdit.getWaypoint().getY(), SmartDB.DATABASE_CRS, vm.getCRS());
+					
+					Point exitPnt = vm.worldToPixel(pnt);
+					
+					if (Math.abs(exitPnt.getX() - x) > 5 || Math.abs(exitPnt.getY() - y) > 5) return null;
+					return toEdit;
+				}catch (Exception ex){
+					SmartPatrolPlugIn.log(ex.getMessage(), ex);
+					return null;
+				}
+			}
+			
+			private List<Object> undoCommands = new ArrayList<>();
+			
+			private void addUndo(PatrolWaypoint wp, double x, double y){
+				undoCommands.add(0, new Object[]{wp, x, y});
+				if (undoCommands.size() > 100){
+					undoCommands.remove(undoCommands.size() - 1);
+				}
+				updateToolbar();
+			}
+			
+			
+			@Override
+			public synchronized void undo() {
+				if (undoCommands.isEmpty()) return;
+				
+				Session s = HibernateManager.openSession();
+				try{
+					Object c = undoCommands.remove(0);
+					s.beginTransaction();
+					Object[] data = (Object[])c;
+					
+					PatrolWaypoint pw = (PatrolWaypoint) data[0];
+					double x = (double) data[1];
+					double y = (double) data[2];
+					
+					pw.getWaypoint().setX(x);
+					pw.getWaypoint().setY(y);
+					s.update(pw.getWaypoint());
+					s.getTransaction().commit();
+					
+					Display.getDefault().syncExec(()->{
+						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, pw.getPatrolLegDay());
+						WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
+					});
+				}catch (Exception ex){
+					if (s.getTransaction().isActive()) s.getTransaction().rollback();
+					SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_UndoError + ex.getMessage(), ex);	
+				}finally{
+					s.close();
+				}
+				updateToolbar();
+			}
+			
+			private void updateToolbar(){
+				Display.getDefault().syncExec(()->{
+					ToolItem ti = tools.getTool(UndoTool.ID);
+					if (ti != null) ti.setEnabled(!undoCommands.isEmpty());
+				});
+			}
+			
+			@Override
+			public boolean canUndo() {
+				return !undoCommands.isEmpty();
+			}
+		};
+    }
 }
 

@@ -97,6 +97,7 @@ import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -531,14 +532,19 @@ public class MissionDayComposite {
 			column.getColumn().setMoveable(false);
 			column.getColumn().setWidth(25);
 
-			if(columntype != OtColumn.EAST && columntype != OtColumn.NORTH) {
-				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
-			}else{
+			
+			
+			if(columntype == OtColumn.EAST || columntype == OtColumn.NORTH) {
 				if (editor.getMissionEditor().getViewProjection() != null){
 					column.getColumn().setToolTipText(editor.getMissionEditor().getViewProjection().getName());
 				}else{
 					column.getColumn().setToolTipText( lcrs.getName().toString());
 				}
+				if (SurveyPermissionManager.INSTANCE.canEditWaypointLocations() == null){
+					column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));	
+				}
+			}else{
+				column.setEditingSupport(new ObservationTableCellModifier(column.getViewer(), columntype));
 			}
 			
 			observationTableColumns.put(columntype, column);
@@ -1063,6 +1069,10 @@ public class MissionDayComposite {
 		
 		if (needSave){
 			editor.getMissionEditor().save(Collections.singleton((SurveyWaypoint)element));
+			if (column == OtColumn.EAST || column == OtColumn.NORTH){
+				//update map
+				editor.getMissionEditor().getMap().getRenderManager().refresh(null);
+			}
 		}
 		observationTable.refresh();
 	}

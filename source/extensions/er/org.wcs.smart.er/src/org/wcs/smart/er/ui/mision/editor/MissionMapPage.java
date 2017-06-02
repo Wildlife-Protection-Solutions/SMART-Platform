@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,18 +31,39 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.geotools.referencing.CRS;
+import org.hibernate.Session;
+import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.mision.udig.MissionService;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.udig.EditPointTool;
+import org.wcs.smart.udig.IMapEditManager;
+import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
+import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.JobUtil;
+import org.wcs.smart.util.ReprojectUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Mission editor map page displaying tracks
@@ -67,7 +89,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 			/* mission track and waypoint layers */
 			missionService = new MissionService(parentEditor.getMission());
 			suService = new SamplingUnitService(parentEditor.getMission().getSurvey().getSurveyDesign());
-			
+
 			try {
 				List<IGeoResource> allLayers = new ArrayList<IGeoResource>();
 				List<IGeoResource> tmp = (List<IGeoResource>) suService.resources(monitor);
@@ -125,6 +147,19 @@ public class MissionMapPage extends SmartMapEditorPart {
 	
 	public MissionMapPage(MissionEditor parent) {
 		this.parentEditor = parent;
+		
+		List<String> tools = new ArrayList<String>();
+		for (String tool : MapToolComposite.DEFAULT_MAP_TOOLS){
+			tools.add(tool);
+		}
+		if (SurveyPermissionManager.INSTANCE.canEditWaypointLocations() == null){
+			tools.add(MapToolComposite.SEPERATOR_TOOL_ID);
+			tools.add(EditPointTool.ID);
+			tools.add(UndoTool.ID);
+			tools.add(MapToolComposite.SEPERATOR_TOOL_ID);
+			
+		}
+		this.mapTools = tools.toArray(new String[tools.size()]);
 	}
 	
 	public MultiPageEditorPart getParentEditor() {
@@ -142,12 +177,21 @@ public class MissionMapPage extends SmartMapEditorPart {
 	public void dispose() {
 		JobUtil.stopJobs(loadDefaultLayers, addLayerJob, refreshJob);
 		super.dispose();
+		
+		CatalogPlugin.getDefault().getLocalCatalog().remove(missionService);
+		missionService.dispose(null);
+		missionService = null;
 	}
 	
 	@Override
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
         addLayers();
+        
+        if (SurveyPermissionManager.INSTANCE.canEditWaypointLocations() == null){
+        	getMap().getBlackboard().put(IMapEditManager.class.getCanonicalName(), getEditManager());
+        	tools.getTool(UndoTool.ID).setEnabled(false);
+        }
 	}
 
 	private void addLayers() {
@@ -160,4 +204,140 @@ public class MissionMapPage extends SmartMapEditorPart {
 		loadDefaultLayers.schedule();
 	}
 	
+	
+	private IMapEditManager getEditManager(){
+    	return new IMapEditManager() {
+			
+			@Override
+			public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
+				if (!(feature instanceof SurveyWaypoint)) return ;
+				
+				SurveyWaypoint pw = (SurveyWaypoint) feature;
+				Coordinate crspx = vm.pixelToWorld(x, y);
+				//convert to lat/long
+				if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
+					try{
+						crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.displayLog(Messages.MissionMapPage_MoveReprojectError + ex.getMessage(), ex);
+						return;
+					}
+				}
+				
+				double origx = pw.getWaypoint().getX();
+				double origy = pw.getWaypoint().getY();
+				
+				boolean modified = false;
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					pw.getWaypoint().setX(crspx.x);
+					pw.getWaypoint().setY(crspx.y);
+					s.update(pw.getWaypoint());
+					s.getTransaction().commit();
+					modified = true;
+				}catch (Exception ex){
+					try{
+						if (s.getTransaction().isActive()) s.getTransaction().rollback();
+					}catch (Exception ex2){
+						EcologicalRecordsPlugIn.displayLog(Messages.MissionMapPage_MoveDbError + ex.getMessage(), ex);
+						return;
+					}
+					pw.getWaypoint().setX(origx);
+					pw.getWaypoint().setY(origy);
+				}finally{
+					s.close();
+				}
+				if (modified){
+					addUndo(pw, origx, origy);
+					SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
+					WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
+				}
+			}
+			
+			@Override
+			public Object findFeature(int x, int y, IViewportModel vm) {
+				try{
+					Coordinate crspx = vm.pixelToWorld(x, y);
+					//convert to lat/long
+					if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
+						crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+					}
+					double max = Double.MAX_VALUE;
+					SurveyWaypoint toEdit = null;
+					for(MissionDay md : parentEditor.getMission().getMissionDays()){
+						for (SurveyWaypoint pw : md.getWaypoints()){
+							double distance = crspx.distance(new Coordinate(pw.getWaypoint().getX(), pw.getWaypoint().getY()));
+							if (distance < max){
+								max = distance;
+								toEdit = pw;
+							}
+						}
+					}
+					Coordinate pnt = ReprojectUtils.reproject(toEdit.getWaypoint().getX(), toEdit.getWaypoint().getY(), SmartDB.DATABASE_CRS, vm.getCRS());					
+					Point exitPnt = vm.worldToPixel(pnt);
+					if (Math.abs(exitPnt.getX() - x) > 5 || Math.abs(exitPnt.getY() - y) > 5) return null;
+					return toEdit;
+				}catch (Exception ex){
+					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+					return null;
+				}
+			}
+			
+			private List<Object> undoCommands = new ArrayList<>();
+			
+			private void addUndo(SurveyWaypoint wp, double x, double y){
+				undoCommands.add(0, new Object[]{wp, x, y});
+				if (undoCommands.size() > 100){
+					undoCommands.remove(undoCommands.size() - 1);
+				}
+				updateToolbar();
+			}
+			
+			
+			@Override
+			public synchronized void undo() {
+				if (undoCommands.isEmpty()) return;
+				
+				Session s = HibernateManager.openSession();
+				try{
+					Object c = undoCommands.remove(0);
+					s.beginTransaction();
+					Object[] data = (Object[])c;
+					
+					SurveyWaypoint pw = (SurveyWaypoint) data[0];
+					double x = (double) data[1];
+					double y = (double) data[2];
+					
+					pw.getWaypoint().setX(x);
+					pw.getWaypoint().setY(y);
+					s.update(pw.getWaypoint());
+					s.getTransaction().commit();
+					
+					Display.getDefault().syncExec(()->{
+						SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
+						WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
+					});
+				}catch (Exception ex){
+					if (s.getTransaction().isActive()) s.getTransaction().rollback();
+					EcologicalRecordsPlugIn.displayLog(Messages.MissionMapPage_UndoError + ex.getMessage(), ex);	
+				}finally{
+					s.close();
+				}
+				updateToolbar();
+			}
+			
+			private void updateToolbar(){
+				Display.getDefault().syncExec(()->{
+					ToolItem ti = tools.getTool(UndoTool.ID);
+					if (ti != null) ti.setEnabled(!undoCommands.isEmpty());
+				});
+			}
+			
+			@Override
+			public boolean canUndo() {
+				return !undoCommands.isEmpty();
+			}
+		};
+    }
 }

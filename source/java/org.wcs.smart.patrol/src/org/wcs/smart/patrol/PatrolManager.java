@@ -101,6 +101,12 @@ public class PatrolManager {
 		}
 	}
 	
+	public String canEditWaypointLocations(){
+		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
+			return Messages.PatrolManager_InsufficientUserRights;
+		}
+		return null;
+	}
 	/**
 	 * Deletes a given patrol.  Once the patrol is deleted
 	 * a patrol delete event is fired

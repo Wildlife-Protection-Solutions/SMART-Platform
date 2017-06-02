@@ -47,6 +47,17 @@ public class SurveyPermissionManager {
 	
 	/**
 	 * 
+	 * @return message if the user cannot edit waypoint locations
+	 */
+	public String canEditWaypointLocations(){
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
+			return null;
+		}
+		return Messages.SurveyPermissionManager_InsufficientPrivileges;
+	}
+	
+	/**
+	 * 
 	 * @return error string if the current user cannot delete a survey design
 	 */
 	public String canDeleteSurveyDesign(){

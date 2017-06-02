@@ -1413,6 +1413,32 @@
             id="org.wcs.smart.cross"
             image="images/pointers/cursor.png">
       </toolCursor>
+      <modalTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.udig.EditPointTool"
+            icon="images/icons/etool16/move_point.png"
+            id="org.wcs.smart.map.tool.edit.point"
+            name="Edit Point Tool"
+            onToolbar="true"
+            toolCursorId="org.wcs.smart.cursor.move"
+            tooltip="move waypoint">
+      </modalTool>
+      <toolCursor
+            hotspotX="16"
+            hotspotY="16"
+            id="org.wcs.smart.cursor.move"
+            image="images/pointers/move_cursor.png">
+      </toolCursor>
+      <actionTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.udig.UndoTool"
+            icon="images/icons/etool16/undo.png"
+            id="org.wcs.smart.map.tool.edit.undo"
+            name="Undo"
+            onToolbar="false"
+            tooltip="undo last edit">
+         <enablement></enablement>
+      </actionTool>
    </extension>
    <extension
          point="org.wcs.smart.ca.export">

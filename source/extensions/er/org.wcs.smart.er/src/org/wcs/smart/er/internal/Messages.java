@@ -425,8 +425,14 @@ public class Messages extends NLS {
 	public static String MissionImportHandler_9;
 	public static String MissionMapPage_AddLayersJob_Error;
 	public static String MissionMapPage_AddLayersJob_Title;
+	public static String MissionMapPage_MoveDbError;
+
+	public static String MissionMapPage_MoveReprojectError;
+
 	public static String MissionMapPage_RefreshLayersJob_Error;
 	public static String MissionMapPage_RefreshLayersJob_Title;
+
+	public static String MissionMapPage_UndoError;
 	public static String MissionMetaConfigDialog_Message;
 
 	public static String MissionMetaConfigDialog_Title;
