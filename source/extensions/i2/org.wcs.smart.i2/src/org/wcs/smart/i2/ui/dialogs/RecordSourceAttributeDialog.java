@@ -847,8 +847,8 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	
