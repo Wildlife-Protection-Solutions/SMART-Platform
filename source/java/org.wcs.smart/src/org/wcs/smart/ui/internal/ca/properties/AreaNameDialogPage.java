@@ -144,7 +144,11 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		tableViewer.getTable().setLayoutData(gd);
 
 		createKeyColumn();
-		createColumn(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		Language defaultLang = SmartDB.getCurrentConservationArea().getDefaultLanguage();
+		if (defaultLang == null){
+			defaultLang = SmartDB.getCurrentLanguage();
+		}
+		createColumn(defaultLang);
 		List<Language> sortedLangs = new ArrayList<Language>();
 		sortedLangs.addAll(SmartDB.getCurrentConservationArea().getLanguages());
 		Collections.sort(sortedLangs, new Comparator<Language>() {
@@ -155,7 +159,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			}
 		});
 		for (Language l : sortedLangs) {
-			if (l.isDefault()) continue;
+			if (l.equals(defaultLang)) continue;
 			createColumn(l);
 		}
 		
