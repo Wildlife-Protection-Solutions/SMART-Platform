@@ -433,6 +433,8 @@ public class Messages extends NLS {
 	public static String MissionMapPage_RefreshLayersJob_Title;
 
 	public static String MissionMapPage_UndoError;
+
+	public static String MissionMapPage_WaypointLbl;
 	public static String MissionMetaConfigDialog_Message;
 
 	public static String MissionMetaConfigDialog_Title;

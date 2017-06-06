@@ -40,6 +40,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -52,6 +54,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
@@ -188,6 +192,25 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 				}
 			});
 
+			Menu menu = new Menu(pointsListViewer.getControl());
+			
+			MenuItem deleteItem = new MenuItem(menu, SWT.PUSH);
+			deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			deleteItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			deleteItem.addListener(SWT.Selection, (e)-> removePoints());
+			
+			menu.addMenuListener(new MenuListener() {
+				@Override
+				public void menuShown(MenuEvent e) {
+					deleteItem.setEnabled(!pointsListViewer.getSelection().isEmpty());
+				}
+				@Override
+				public void menuHidden(MenuEvent e) {
+				}
+			});
+			pointsListViewer.getControl().setMenu(menu);
+			
+			
 			//========point coordinates manual input part========
 			Composite coordsComposite = new Composite(pointsComposite, SWT.NONE);
 			coordsComposite.setLayout(new GridLayout(2, false));
@@ -256,16 +279,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 			removeButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					IStructuredSelection sel = (IStructuredSelection) pointsListViewer
-							.getSelection();
-					if (!sel.isEmpty()) {
-						for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-							points.remove(iterator.next());
-						}
-						updateMapConposite();
-						fireLocationPointsChangeListeners();
-					}
-					pointsListViewer.refresh();
+					removePoints();
 				}
 			});
 		}
@@ -329,6 +343,18 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		}
 	}	
 
+	private void removePoints(){
+		IStructuredSelection sel = (IStructuredSelection) pointsListViewer.getSelection();
+		if (sel.isEmpty()) return;
+		
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			points.remove(iterator.next());
+		}
+		updateMapConposite();
+		fireLocationPointsChangeListeners();
+		pointsListViewer.refresh();
+	}
+	
 	@Override
 	public void pointSelected(double x, double y) {
 		handleAddPoint(x, y);

@@ -23,6 +23,8 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -256,7 +258,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 			}
 			
 			@Override
-			public Object findFeature(int x, int y, IViewportModel vm) {
+			public EditPoint findFeature(int x, int y, IViewportModel vm) {
 				try{
 					Coordinate crspx = vm.pixelToWorld(x, y);
 					//convert to lat/long
@@ -277,7 +279,13 @@ public class MissionMapPage extends SmartMapEditorPart {
 					Coordinate pnt = ReprojectUtils.reproject(toEdit.getWaypoint().getX(), toEdit.getWaypoint().getY(), SmartDB.DATABASE_CRS, vm.getCRS());					
 					Point exitPnt = vm.worldToPixel(pnt);
 					if (Math.abs(exitPnt.getX() - x) > 5 || Math.abs(exitPnt.getY() - y) > 5) return null;
-					return toEdit;
+					
+					StringBuilder sb = new StringBuilder();
+					sb.append(MessageFormat.format(Messages.MissionMapPage_WaypointLbl, toEdit.getWaypoint().getId()));
+					sb.append("\n"); //$NON-NLS-1$
+					sb.append(DateFormat.getDateTimeInstance().format(toEdit.getWaypoint().getDateTime()));
+					
+					return new EditPoint(exitPnt, toEdit, sb.toString());
 				}catch (Exception ex){
 					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 					return null;

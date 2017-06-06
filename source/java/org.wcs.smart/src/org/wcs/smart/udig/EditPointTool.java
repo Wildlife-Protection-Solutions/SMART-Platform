@@ -24,6 +24,7 @@ package org.wcs.smart.udig;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -32,6 +33,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.tool.AbstractModalTool;
+import org.locationtech.udig.ui.graphics.ViewportGraphics;
+import org.wcs.smart.udig.IMapEditManager.EditPoint;
 
 /**
  * Tool for moving point features.  The tool looks for a IEditPointManager
@@ -47,8 +50,12 @@ public class EditPointTool extends AbstractModalTool{
 	
 	private Point screenLocation = null;
 	private Point startPoint = null;
-	private Object feature;
+	private EditPoint hoverPoint = null;
+	private EditPoint feature;
+	
 	private DrawPointCommand feedbackCommand;
+	private HoverPointCommand hoverCommand;
+
 	
 	private Listener cancelListener = new Listener() {
 		@Override
@@ -87,6 +94,49 @@ public class EditPointTool extends AbstractModalTool{
 	};
 	
 	
+	private class HoverPointCommand extends AbstractDrawCommand{
+		@Override
+		public Rectangle getValidArea() {
+			return null;
+		}
+
+		@Override
+		public void run(IProgressMonitor monitor) throws Exception {
+			if (hoverPoint != null){
+				graphics.setColor(Color.YELLOW);
+				graphics.setLineWidth(3);
+				graphics.drawOval(hoverPoint.getMapPoint().x - 6, hoverPoint.getMapPoint().y - 6, 12, 12);
+				
+				if(hoverPoint.getInfoString() == null) return;
+				int startX = hoverPoint.getMapPoint().x + 5;
+				int startY = hoverPoint.getMapPoint().y + 5;
+				
+				graphics.setColor(new Color(255,255,255,200));
+				
+				String[] parts = hoverPoint.getInfoString().split("\n"); //$NON-NLS-1$
+				
+				int width = 0;
+				int height = 0;
+				for (String p : parts){
+					Rectangle2D bounds = graphics.getStringBounds(p);
+					width = (int)Math.max(width, bounds.getWidth());
+					height += bounds.getHeight();
+				}
+				
+				graphics.fillRoundRect(startX, startY, width+10, height+10, 5, 5);
+				
+				graphics.setColor(Color.BLACK);
+				
+				int y = startY + 5;
+				for (String p : parts){
+					graphics.drawString(p, startX + 5, y, ViewportGraphics.ALIGN_LEFT, ViewportGraphics.ALIGN_BOTTOM);
+					y += graphics.getStringBounds(p).getHeight();
+				}
+				
+			}
+		}
+	};
+	
 	public EditPointTool() {
 		super(MOUSE | MOTION);
 	}
@@ -122,6 +172,7 @@ public class EditPointTool extends AbstractModalTool{
      * @see MapMouseEvent
      */
     public void mousePressed( MapMouseEvent e ) {
+    	disposeHover();
     	if ((e.buttons & MapMouseEvent.BUTTON1) != MapMouseEvent.BUTTON1) return;
     	IMapEditManager manager = getEditManager();
     	if (manager == null) return;
@@ -130,7 +181,7 @@ public class EditPointTool extends AbstractModalTool{
     	if (feature == null) return;
   
     	screenLocation = new Point(e.x, e.y);
-    	startPoint = new Point(e.x, e.y);
+    	startPoint = feature.getMapPoint();
     	if (feedbackCommand == null){
     		feedbackCommand = new DrawPointCommand();
     		getContext().getViewportPane().addDrawCommand(feedbackCommand);
@@ -160,7 +211,7 @@ public class EditPointTool extends AbstractModalTool{
     	
     	//if point outside visible map area then don't drop
     	if (!(e.x < 0 || e.y < 0 || e.x > getContext().getViewportPane().getWidth() || e.y > getContext().getViewportPane().getHeight())){
-    		manager.moveFeature(feature, e.x, e.y, getContext().getViewportModel());	
+    		manager.moveFeature(feature.getFeature(), e.x, e.y, getContext().getViewportModel());	
     	}
     	
     	feature = null;
@@ -185,5 +236,41 @@ public class EditPointTool extends AbstractModalTool{
 		}
 	}
     
+    /**
+     * This method may be overridden by subclasses
+     * 
+     * @see org.locationtech.udig.project.ui.render.displayAdapter.MapMouseMotionListener#mouseHovered(MapMouseEvent)
+     */
+    public void mouseHovered( MapMouseEvent e ) { 
+    	IMapEditManager manager = getEditManager();
+    	if (manager == null) return;
+
+    	hoverPoint = manager.findFeature(e.x, e.y, getContext().getViewportModel());
+    	if (hoverPoint == null) return;
+    	if (hoverCommand == null){
+    		hoverCommand = new HoverPointCommand();
+    		getContext().getViewportPane().addDrawCommand(hoverCommand);
+    	}
+    	redraw();
+    }
+ 
+    /**
+     * This method may be overridden by subclasses
+     * 
+     * @see org.locationtech.udig.project.ui.render.displayAdapter.MapMouseMotionListener#mouseMoved(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
+     */
+    public void mouseMoved( MapMouseEvent e ) { 
+    	disposeHover();
+    }
     
+    private void disposeHover(){
+    	if (hoverPoint != null){
+    		hoverPoint = null;
+    		if (hoverCommand != null){
+    			hoverCommand.dispose();
+    			hoverCommand = null;
+    		}
+    		redraw();
+    	}
+    }
 }

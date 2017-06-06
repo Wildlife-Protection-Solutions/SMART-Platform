@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.incident.ui;
 
+import java.awt.Point;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -31,28 +32,41 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.referencing.CRS;
+import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.render.IViewportModel;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.style.Style;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.udig.EditPointTool;
+import org.wcs.smart.udig.IMapEditManager;
+import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
+import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -80,6 +94,19 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	 */
 	public IncidentMapPage(IncidentEditor e){
 		this.parent = e;
+		
+		List<String> tools = new ArrayList<String>();
+		for (String tool : MapToolComposite.DEFAULT_MAP_TOOLS){
+			tools.add(tool);
+		}
+		if (this.parent.canEdit() == null){
+			tools.add(MapToolComposite.SEPERATOR_TOOL_ID);
+			tools.add(EditPointTool.ID);
+			tools.add(UndoTool.ID);
+			tools.add(MapToolComposite.SEPERATOR_TOOL_ID);
+			
+		}
+		this.mapTools = tools.toArray(new String[tools.size()]);
 	}
 	
 	@Override
@@ -99,6 +126,11 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		
 		addPointsLayer();
 		updatePointsLayer();
+		
+		if (this.parent.canEdit() == null){
+        	getMap().getBlackboard().put(IMapEditManager.class.getCanonicalName(), getEditManager());
+        	tools.getTool(UndoTool.ID).setEnabled(false);
+        }
 	}
 
 	/**
@@ -249,4 +281,132 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		"</styleEntry>"; //$NON-NLS-1$
 	
 	}
+	
+	
+	private IMapEditManager getEditManager(){
+    	return new IMapEditManager() {
+    		private List<Object> undoCommands = new ArrayList<>();
+			@Override
+			public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
+				if (!(feature instanceof Waypoint)) return ;
+				
+				Waypoint pw = (Waypoint) feature;
+				Coordinate crspx = vm.pixelToWorld(x, y);
+				//convert to lat/long
+				if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
+					try{
+						crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+					}catch (Exception ex){
+						IncidentPlugIn.displayLog("Unable to reproduce incident: " + ex.getMessage(), ex);
+						return;
+					}
+				}
+				
+				double origx = pw.getX();
+				double origy = pw.getY();
+				
+				boolean modified = false;
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					pw.setX(crspx.x);
+					pw.setY(crspx.y);
+					s.update(pw);
+					s.getTransaction().commit();
+					modified = true;
+				}catch (Exception ex){
+					try{
+						if (s.getTransaction().isActive()) s.getTransaction().rollback();
+					}catch (Exception ex2){
+						IncidentPlugIn.displayLog("Unable to save changes to waypoint: " + ex.getMessage(), ex);
+						return;
+					}
+					pw.setX(origx);
+					pw.setY(origy);
+				}finally{
+					s.close();
+				}
+				if (modified){
+					addUndo(pw, origx, origy);
+					
+//					SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
+					WaypointEventManager.getInstance().waypointModified(pw);
+				}
+			}
+			
+			@Override
+			public EditPoint findFeature(int x, int y, IViewportModel vm) {
+				try{
+					Coordinate crspx = vm.pixelToWorld(x, y);
+					//convert to lat/long
+					if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
+						crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+					}
+					Coordinate pnt = ReprojectUtils.reproject(parent.getIncident().getX(), parent.getIncident().getY(), SmartDB.DATABASE_CRS, vm.getCRS());
+					Point exitPnt = vm.worldToPixel(pnt);
+					if (Math.abs(exitPnt.getX() - x) > 5 || Math.abs(exitPnt.getY() - y) > 5) return null;
+					
+					return new EditPoint(exitPnt, parent.getIncident());
+				}catch (Exception ex){
+					IncidentPlugIn.log(ex.getMessage(), ex);
+					return null;
+				}
+			}
+			
+			
+			
+			private void addUndo(Waypoint wp, double x, double y){
+				undoCommands.add(0, new Object[]{wp, x, y});
+				if (undoCommands.size() > 100){
+					undoCommands.remove(undoCommands.size() - 1);
+				}
+				updateToolbar();
+			}
+			
+			
+			@Override
+			public synchronized void undo() {
+				if (undoCommands.isEmpty()) return;
+				
+				Session s = HibernateManager.openSession();
+				try{
+					Object c = undoCommands.remove(0);
+					s.beginTransaction();
+					Object[] data = (Object[])c;
+					
+					Waypoint pw = (Waypoint) data[0];
+					double x = (double) data[1];
+					double y = (double) data[2];
+					
+					pw.setX(x);
+					pw.setY(y);
+					s.update(pw);
+					s.getTransaction().commit();
+					
+					Display.getDefault().syncExec(()->{
+//						SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
+						WaypointEventManager.getInstance().waypointModified(pw);
+					});
+				}catch (Exception ex){
+					if (s.getTransaction().isActive()) s.getTransaction().rollback();
+					IncidentPlugIn.displayLog("Error undoing waypoint move command: " + ex.getMessage(), ex);	
+				}finally{
+					s.close();
+				}
+				updateToolbar();
+			}
+			
+			private void updateToolbar(){
+				Display.getDefault().syncExec(()->{
+					ToolItem ti = tools.getTool(UndoTool.ID);
+					if (ti != null) ti.setEnabled(!undoCommands.isEmpty());
+				});
+			}
+			
+			@Override
+			public boolean canUndo() {
+				return !undoCommands.isEmpty();
+			}
+		};
+    }
 }

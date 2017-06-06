@@ -57,6 +57,7 @@ public class SelectionTool extends AbstractModalTool {
 
 	@Override
 	public void mousePressed(MapMouseEvent e) {
+		if ((e.button & MapMouseEvent.BUTTON1) != MapMouseEvent.BUTTON1) return;
 		super.mousePressed(e);
 		MapPart mapEditor = ((ViewportPane) e.source).getMapEditor();
 		ViewportModel viewportModel = mapEditor.getMap().getViewportModelInternal();

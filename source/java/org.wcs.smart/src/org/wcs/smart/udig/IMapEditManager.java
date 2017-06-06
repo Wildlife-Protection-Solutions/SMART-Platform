@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.udig;
 
+import java.awt.Point;
+
 import org.locationtech.udig.project.render.IViewportModel;
 
 /**
@@ -39,7 +41,7 @@ public interface IMapEditManager{
 	 * @param y the screen y coordinate to search
 	 * @return
 	 */
-	public Object findFeature(int x, int y, IViewportModel vm);
+	public EditPoint findFeature(int x, int y, IViewportModel vm);
 	
 	/**
 	 * Move the feature to the new location.  Location 
@@ -61,4 +63,51 @@ public interface IMapEditManager{
 	 * @return true if these is something to undo, false otherwise
 	 */
 	public boolean canUndo();
+	
+	
+	/**
+	 * Class used by edit manager to determine details about the feature object
+	 * being editted.
+	 * 
+	 * @author Emily
+	 *
+	 */
+	public class EditPoint{
+		
+		private Object feature;
+		private Point mapPoint;
+		private String infoString;
+		
+		/**
+		 * Creates a new edit point.
+		 * @param mapPoint the geometry of the point in map coordinates
+		 * @param feature the feature to edit
+		 */
+		public EditPoint(Point mapPoint, Object feature){
+			this(mapPoint, feature, null);
+		}
+		
+		/**
+		 * 
+		 * @param mapPoint the geometry of the point in map coordinates
+		 * @param feature the feature to edit
+		 * @param infoString an info to string to display on hover (for multi-line use \n seperator)
+		 */
+		public EditPoint(Point mapPoint, Object feature, String infoString){
+			this.feature = feature;
+			this.mapPoint = mapPoint;
+			this.infoString = infoString;
+		}
+		
+		public String getInfoString(){
+			return infoString;
+		}
+		public Object getFeature(){
+			return this.feature;
+		}
+		
+		public Point getMapPoint(){
+			return this.mapPoint;
+		}
+	}
 }

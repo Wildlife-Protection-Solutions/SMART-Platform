@@ -68,6 +68,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
@@ -608,6 +609,7 @@ public class IncidentSummaryPage extends EditorPart {
 				public void linkActivated(HyperlinkEvent e) {
 					EditIncidentDialog d = new EditIncidentDialog(getSite().getShell(), panelId, editor.getIncident());
 					d.open();
+					ApplicationGIS.getToolManager().setCurrentEditor(editor);
 					initData(editor.getIncident());
 				}
 			});

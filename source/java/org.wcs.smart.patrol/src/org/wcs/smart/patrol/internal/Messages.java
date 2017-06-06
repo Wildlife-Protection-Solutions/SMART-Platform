@@ -478,6 +478,7 @@ public class Messages extends NLS {
 	public static String PatrolMapPageEditor_RefreshPatrolLayers_Job;
 	public static String PatrolMapPageEditor_UndoError;
 	public static String PatrolMapPageEditor_UnknownError;
+	public static String PatrolMapPageEditor_WaypointLbl;
 	public static String PatrolMemberWizardPage_Error_NoEmployees;
 	public static String PatrolMemberWizardPage_PageMessage;
 	public static String PatrolMemberWizardPage_SelectEmployees_Label;
