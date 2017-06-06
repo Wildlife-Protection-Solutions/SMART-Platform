@@ -60,8 +60,8 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 	private File[] files;
 
 	private enum StorageColumn {
-		FILENAME(Messages.CyberTrackerFileImportDialog_Column_Filename),
-		FILEDATE (Messages.CyberTrackerFileImportDialog_Column_Date);		
+		FILEDATE (Messages.CyberTrackerFileImportDialog_Column_Date),
+		FILENAME(Messages.CyberTrackerFileImportDialog_Column_Filename);
 		
 		private String name;
 		
@@ -120,17 +120,6 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 		storageViewer.getTable().setLinesVisible(true);
 		final StorageViewerSorter sorter = new StorageViewerSorter();
 
-		final TableViewerColumn colFirstName = new TableViewerColumn(storageViewer, SWT.NONE);
-		colFirstName.getColumn().setWidth(300);
-		colFirstName.getColumn().setText(StorageColumn.FILENAME.getName());
-		colFirstName.setLabelProvider(new StorageFileNameLabelProvider());
-		colFirstName.getColumn().addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				sorter.setSortColumn(StorageColumn.FILENAME, colFirstName);
-			}
-		});	
-
 		final TableViewerColumn colDate = new TableViewerColumn(storageViewer, SWT.NONE);
 		colDate.getColumn().setWidth(150);
 		colDate.getColumn().setText(StorageColumn.FILEDATE.getName());
@@ -139,6 +128,17 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				sorter.setSortColumn(StorageColumn.FILEDATE, colDate);
+			}
+		});	
+		
+		final TableViewerColumn colFirstName = new TableViewerColumn(storageViewer, SWT.NONE);
+		colFirstName.getColumn().setWidth(300);
+		colFirstName.getColumn().setText(StorageColumn.FILENAME.getName());
+		colFirstName.setLabelProvider(new StorageFileNameLabelProvider());
+		colFirstName.getColumn().addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				sorter.setSortColumn(StorageColumn.FILENAME, colFirstName);
 			}
 		});	
 
@@ -152,6 +152,10 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 			}
 		});
 
+		//by default sort by date desc
+		sorter.setSortColumn(StorageColumn.FILEDATE, colDate);
+		sorter.setSortColumn(StorageColumn.FILEDATE, colDate);
+		
 		btnFromFile = new Button(container, SWT.RADIO);
 		btnFromFile.setSelection(false);
 		gd = new GridData(SWT.FILL, SWT.CENTER,true, false);
