@@ -72,4 +72,5 @@ public interface IQueryResultInfoProvider {
 	 * @return trye if works with ccaa query results
 	 */
 	public boolean supportsCcaa();
+
 }

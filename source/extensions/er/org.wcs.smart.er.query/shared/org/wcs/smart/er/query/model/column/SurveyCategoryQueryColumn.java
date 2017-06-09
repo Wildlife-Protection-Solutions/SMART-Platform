@@ -56,7 +56,9 @@ public class SurveyCategoryQueryColumn extends CategoryQueryColumn {
 
 	@Override
 	public QueryColumn clone() {
-		return new SurveyCategoryQueryColumn(getName(), level);
+		QueryColumn clone = new SurveyCategoryQueryColumn(getName(), level);
+		clone.setEdit(canEdit());
+		return clone;
 	}
 
 }

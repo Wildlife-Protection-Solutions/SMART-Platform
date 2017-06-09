@@ -15,6 +15,7 @@ Export-Package: org.wcs.smart.observation,
  org.wcs.smart.observation.common.importwp.csv,
  org.wcs.smart.observation.events,
  org.wcs.smart.observation.model,
+ org.wcs.smart.observation.udig,
  org.wcs.smart.observation.ui,
  org.wcs.smart.observation.ui.input
 Bundle-ClassPath: .

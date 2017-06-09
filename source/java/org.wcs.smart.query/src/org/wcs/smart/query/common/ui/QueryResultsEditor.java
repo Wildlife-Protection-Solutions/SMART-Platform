@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -88,7 +90,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	protected QueryMapPageEditor page2;
 	private boolean isDirty = false;
 	private Projection currentPrj = null;
-	
+	private boolean editMode = false;
 	/*
 	 * Listener for changes to area names/ids
 	 */
@@ -619,6 +621,35 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 */
 	public abstract Query createNewQuery(IQueryType type);
 	
+	
+	/**
+	 * Creates a new query of the given type
+	 * @param type
+	 * @return
+	 */
+	public boolean canEditResults(){
+		return false;
+	}
+	
+	/**
+	 * Gets the edit mode state
+	 * @return
+	 */
+	public boolean getEditMode(){
+		return this.editMode;
+	}
+	/**
+	 * Sets if edit mode is enabled or disabled
+	 * @param enabled
+	 */
+	public void setEditMode(boolean enabled){
+		if (canEditResults()){
+			this.editMode = enabled;
+		}else{
+			this.editMode = false;
+		}
+	}
+	
 	/**
 	 * Creates a query service for the map 
 	 * @return
@@ -642,5 +673,13 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 */
 	protected abstract CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns);
 	
-	
+	/**
+	 * Editing options for the column
+	 *  
+	 * @param column 
+	 * @return editing options for the column, or null if not supported
+	 */
+	protected EditingSupport getEditingSupport(ColumnViewer viewer, QueryColumn column){ 
+		return null;
+	}
 }

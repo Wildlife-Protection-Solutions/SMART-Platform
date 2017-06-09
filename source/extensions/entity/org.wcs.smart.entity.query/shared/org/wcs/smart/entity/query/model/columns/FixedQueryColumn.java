@@ -146,6 +146,7 @@ public class FixedQueryColumn extends QueryColumn {
 	@Override
 	public QueryColumn clone() {
 		FixedQueryColumn newColumn = new FixedQueryColumn(this.column, this.l);
+		newColumn.setEdit(canEdit());
 		return newColumn;
 	}
 

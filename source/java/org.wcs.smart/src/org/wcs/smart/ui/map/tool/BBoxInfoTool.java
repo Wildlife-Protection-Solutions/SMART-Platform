@@ -21,27 +21,35 @@
  */
 package org.wcs.smart.ui.map.tool;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.HashSet;
-import java.util.Set;
+import java.awt.geom.Rectangle2D;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.commands.SelectionBoxCommand;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.tool.ModalTool;
 import org.locationtech.udig.project.ui.tool.SimpleTool;
 import org.locationtech.udig.tool.info.internal.InfoView2;
+import org.locationtech.udig.ui.graphics.ViewportGraphics;
+import org.wcs.smart.ui.map.tool.IInfoToolProvider.InfoPoint;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * A tool that puts a BBOX Filter on the layer's Filter
+ * A tool that puts a BBOX Filter on the layer's Filter.  
+ * Also adds the ability to display additional details on mouse hover over
+ * features.  To use this feature put a IInfoToolProvider on the layers blackboard with
+ * the key IInfoToolProvider.class.getCanonicalName.  Currently designed to support
+ * points and will highlight the area selected with a yellow dot.
  * 
  * @author egouge
  * @since 1.0
@@ -57,9 +65,57 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 
 	private boolean selecting;
 
-	org.locationtech.udig.project.ui.commands.SelectionBoxCommand shapeCommand;
+	private org.locationtech.udig.project.ui.commands.SelectionBoxCommand shapeCommand;
+    
+    private InfoPoint infoPoint;
 
-    Set<String> selectedFids = new HashSet<String>();
+    /*
+     * for displaying hover details
+     */
+    private HoverPointCommand hoverCommand;
+    
+    private class HoverPointCommand extends AbstractDrawCommand{
+		@Override
+		public Rectangle getValidArea() {
+			return null;
+		}
+
+		@Override
+		public void run(IProgressMonitor monitor) throws Exception {
+			if (infoPoint != null){
+				graphics.setColor(Color.YELLOW);
+				graphics.setLineWidth(3);
+				graphics.drawOval(infoPoint.getMapPoint().x - 6, infoPoint.getMapPoint().y - 6, 12, 12);
+				
+				if (infoPoint.getInfoString() == null) return;
+				int startX = infoPoint.getMapPoint().x + 5;
+				int startY = infoPoint.getMapPoint().y + 5;
+				
+				graphics.setColor(new Color(255,255,255,200));
+				
+				String[] parts = infoPoint.getInfoString().split("\n"); //$NON-NLS-1$
+				
+				int width = 0;
+				int height = 0;
+				for (String p : parts){
+					Rectangle2D bounds = graphics.getStringBounds(p);
+					width = (int)Math.max(width, bounds.getWidth());
+					height += bounds.getHeight();
+				}
+				
+				graphics.fillRoundRect(startX, startY, width+10, height+10, 5, 5);
+				
+				graphics.setColor(Color.BLACK);
+				
+				int y = startY + 5;
+				for (String p : parts){
+					graphics.drawString(p, startX + 5, y, ViewportGraphics.ALIGN_LEFT, ViewportGraphics.ALIGN_BOTTOM);
+					y += graphics.getStringBounds(p).getHeight();
+				}
+				
+			}
+		}
+	};
     
 	/**
 	 * Creates a new instance of BBoxSelection
@@ -68,6 +124,14 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 		super(MOUSE | MOTION);
 	}
     
+	/*
+	 * Find the info provider for mousing over
+	 */
+	private IInfoToolProvider getInfoProvider(){
+		IInfoToolProvider provider = (IInfoToolProvider) getContext().getMap().getBlackboard().get(IInfoToolProvider.class.getCanonicalName());
+		return provider;
+	}
+	
 	/**
 	 * @see org.locationtech.udig.project.ui.tool.SimpleTool#onMouseDragged(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
 	 */
@@ -104,7 +168,7 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 			ReferencedEnvelope bounds = null;
 			if (start == null || start.equals(end)) {
 				bounds = getContext()
-						.getBoundingBox(e.getPoint(),3);
+						.getBoundingBox(e.getPoint(),5);
 			} else {
 				Coordinate c1 = context.getMap().getViewportModel()
 						.pixelToWorld(start.x, start.y);
@@ -150,4 +214,41 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
         }); 
 	}
 
+	/**
+     * This method may be overridden by subclasses
+     * 
+     * @see org.locationtech.udig.project.ui.render.displayAdapter.MapMouseMotionListener#mouseHovered(MapMouseEvent)
+     */
+    protected void onMouseHovered( MapMouseEvent e ) { 
+    	IInfoToolProvider manager = getInfoProvider();
+    	if (manager == null) return;
+
+    	infoPoint = manager.findFeature(e.x, e.y, getContext().getViewportModel());
+    	if (infoPoint == null) return;
+    	if (hoverCommand == null){
+    		hoverCommand = new HoverPointCommand();
+    		getContext().getViewportPane().addDrawCommand(hoverCommand);
+    		getContext().getViewportPane().repaint();
+    	}
+    }
+ 
+    /**
+     * This method may be overridden by subclasses
+     * 
+     * @see org.locationtech.udig.project.ui.render.displayAdapter.MapMouseMotionListener#mouseMoved(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
+     */
+    public void onMouseMoved( MapMouseEvent e ) { 
+    	disposeHover();
+    }
+    
+    private void disposeHover(){
+    	if (infoPoint != null){
+    		infoPoint = null;
+    		if (hoverCommand != null){
+    			hoverCommand.dispose();
+    			hoverCommand = null;
+    		}
+    		getContext().getViewportPane().repaint();
+    	}
+    }
 }

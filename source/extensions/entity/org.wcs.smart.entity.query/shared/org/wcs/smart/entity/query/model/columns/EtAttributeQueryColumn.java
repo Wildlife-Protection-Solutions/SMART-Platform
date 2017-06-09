@@ -11,17 +11,6 @@ public class EtAttributeQueryColumn extends AttributeQueryColumn {
 	public EtAttributeQueryColumn(String name, String attributeId, AttributeType type){
 		super(name, attributeId, type);
 	}
-	
-	/**
-	 * Creates a new column with the given column type.
-	 * @param name
-	 * @param key the query column full key of the form "attribute:<ATTRIBUTEID>"
-	 * @param type
-	 */
-	public EtAttributeQueryColumn(String name, String key, ColumnType type){
-		super(name, key, type);
-	}
-
 
 	/**
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
@@ -45,7 +34,8 @@ public class EtAttributeQueryColumn extends AttributeQueryColumn {
 	 */
 	@Override
 	public QueryColumn clone() {
-		QueryColumn newColumn = new EtAttributeQueryColumn(getName(), getKey(), getType());
+		QueryColumn newColumn = new EtAttributeQueryColumn(getName(), getAttributeId(), getAttributeType());
+		newColumn.setEdit(canEdit());
 		return newColumn;
 	}
 

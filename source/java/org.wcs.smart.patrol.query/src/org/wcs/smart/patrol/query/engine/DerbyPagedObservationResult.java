@@ -25,29 +25,49 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.swt.SWT;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
+import org.wcs.smart.query.common.model.IUpdateableResultSet;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
+import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -60,7 +80,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet implements IObservationPagedQueryResultSet{
+public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet implements IObservationPagedQueryResultSet, IUpdateableResultSet{
 	
 	private String queryTempTable;
 	private int wpCount = 0;
@@ -490,5 +510,437 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		});
 	}
 
+	
+	private void updateWaypointPosition(Waypoint wp, double newX, double newY, Session session){
+		wp.setX(newX);
+		wp.setY(newY);
+		
+		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_x = :x, wp_y = :y WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("x", newX); //$NON-NLS-1$
+		q.setParameter("y", newY); //$NON-NLS-1$
+		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+		q.executeUpdate();
+		
+	}
+	private void updateWaypointDistance(Waypoint wp, float newDistance, Session session){
+		wp.setDistance(newDistance);
+		
+		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_distance = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("id", newDistance); //$NON-NLS-1$
+		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+		q.executeUpdate();
+	}
+	
+	private void updateWaypointDirection(Waypoint wp, float newDirection, Session session){
+		wp.setDirection(newDirection);
+		
+		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_direction = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("id", newDirection); //$NON-NLS-1$
+		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+		q.executeUpdate();	
+	}
+	
+	private void updateWaypointId(Waypoint wp, int newId, Session session){
+		wp.setId(newId);
+		
+		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_id = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("id", newId); //$NON-NLS-1$
+		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+		q.executeUpdate();
+	}
+	
+	private void updateWaypointTime(Waypoint wp, Date newTime, Session session){
+		Date dttime = SmartUtils.combineDateTime(wp.getDateTime(), newTime);
+		wp.setDateTime(dttime);
+		
+		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_time = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("id", newTime); //$NON-NLS-1$
+		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+		q.executeUpdate();
+	}
+	
+	private void updateWaypointComment(Waypoint wp, String newComment, Session session){
+		wp.setComment(newComment);
+		
+		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_comment = :cmt WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("cmt", newComment); //$NON-NLS-1$
+		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+		
+		q.executeUpdate();
+	}
+	
+	private boolean updateAttribute(WaypointObservation wo, String attributeKey, Object newValue, Session session){
+		WaypointObservationAttribute toUpdate = null;
+		for (WaypointObservationAttribute woa : wo.getAttributes()){
+			if (woa.getAttribute().getKeyId().equals(attributeKey)){
+				toUpdate = woa;
+			}
+		}
+		if (toUpdate == null) return false;
+		
+		boolean updated = false;
+		switch(toUpdate.getAttribute().getType()){
+			case BOOLEAN:
+				if (newValue instanceof Boolean){
+					Boolean newBoolean = (Boolean)newValue;
+					if ((toUpdate.getNumberValue() > 0.5 && !newBoolean) || (toUpdate.getNumberValue() < 0.5 && newBoolean)){
+						if (newBoolean){
+							toUpdate.setNumberValue(1.0);
+						}else{
+							toUpdate.setNumberValue(0.0);
+						}
+						updated = true;
+					}
+				}
+				break;
+			case DATE:
+				if (newValue instanceof Date){
+					Date newDate = (Date)newValue;
+					if (!SharedUtils.isSameDate(newDate,  toUpdate.getDateValue())){
+						toUpdate.setDateValue(newDate);
+						updated = true;
+					}
+				}
+				break;
+			case LIST:
+				if (newValue instanceof AttributeListItem){
+					AttributeListItem newItem = (AttributeListItem)newValue;
+					if (!newItem.equals(toUpdate.getAttributeListItem())){
+						toUpdate.setAttributeListItem(newItem);
+						updated = true;
+						
+						//add label to query results if necessary
+						if (engine instanceof DerbyObservationEngine){
+							((DerbyObservationEngine)engine).addListLabel(session, newItem);
+						}
+					}
+				}
+				break;
+			case NUMERIC:
+				if (newValue instanceof Double){
+					Double newDouble = (Double)newValue;
+					if (toUpdate.getNumberValue() != newDouble){
+						toUpdate.setNumberValue(newDouble);
+						updated = true;
+					}
+				}
+				break;
+			case TEXT:
+				if (newValue instanceof String){
+					String newString = (String)newValue;
+					if (!toUpdate.getStringValue().equals(newString)){
+						toUpdate.setStringValue(newString);
+						updated = true;
+					}
+				}
+				break;
+			case TREE:
+				break;
+		}
+		return updated;
+	}
+
+	@Override
+	public boolean canUpdate(Class<? extends IResultItem> item) {
+		return (item.equals(PatrolQueryResultItem.class));
+	}
+
+	@Override
+	public boolean update(QueryColumn column, IResultItem item, Object newValue) {
+		if (!(item instanceof PatrolQueryResultItem)) return false;
+		
+		if (column instanceof FixedQueryColumn){
+			return updateWaypointDetails((FixedQueryColumn)column, (PatrolQueryResultItem)item, newValue);
+		}else if (column instanceof AttributeQueryColumn){
+			return updateAttributeColumn((AttributeQueryColumn)column, (PatrolQueryResultItem)item, newValue);
+		}else if (column instanceof CategoryQueryColumn){
+			return updateObservation((PatrolQueryResultItem)item, newValue);
+		}
+		return false;
+	}
+	
+	public boolean deleteObservation(UUID observationUuid){
+		Session s = HibernateManager.openSession(new AttachmentInterceptor());
+		try{
+			s.getTransaction().begin();
+			Waypoint wp = null;
+			WaypointObservation wo = (WaypointObservation) s.get(WaypointObservation.class, observationUuid);
+			if (wo == null) return false;
+			wp = wo.getWaypoint();
+			s.delete(wo);
+			
+			//update category names in query results table
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT count(*) FROM " + queryTempTable + " WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+			SQLQuery queryUpdate = s.createSQLQuery(sql.toString());
+			queryUpdate.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+			Integer cnt = (Integer)queryUpdate.uniqueResult();
+			if (cnt > 1){
+				sql = new StringBuilder();
+				sql.append(" DELETE FROM " + queryTempTable + " WHERE ob_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				queryUpdate = s.createSQLQuery(sql.toString());
+				queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
+				queryUpdate.executeUpdate();
+			}else{
+				sql = new StringBuilder();
+				sql.append(" UPDATE " + queryTempTable + " SET ob_uuid = null,"); //$NON-NLS-1$ //$NON-NLS-2$
+				for (int j = 0; j < ((DerbyObservationEngine)engine).getCategoryCount(); j++) {
+					sql.append("category_" + j + " = null, "); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				sql.deleteCharAt(sql.length() - 1);
+				sql.deleteCharAt(sql.length() - 1);
+				sql.append(" WHERE ob_uuid = :uuid "); //$NON-NLS-1$
+				queryUpdate = s.createSQLQuery(sql.toString());
+				queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
+				queryUpdate.executeUpdate();
+			}
+			s.getTransaction().commit();
+			
+		}catch(Exception ex){
+			//TODO:
+			ex.printStackTrace();
+			s.getTransaction().rollback();
+			return false;
+		}finally{
+			s.close();
+		}
+		//TODO: fire necessary events
+		return true;
+	}
+	
+	public boolean updateObservation(PatrolQueryResultItem item, Object newValue){
+		if (!(newValue instanceof WaypointObservation)) return false;
+		WaypointObservation newOb = (WaypointObservation)newValue;
+		
+		if (newOb.getUuid() == null && item.getObservationUuid() != null) return false;	//cannot add a new feature to a row that already has an observation
+		
+		Session s = HibernateManager.openSession();
+		try{
+			s.getTransaction().begin();
+			
+			WaypointObservation wo;
+			if (newOb.getUuid() == null){
+				//new
+				Waypoint wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
+				if (wp.getObservations() == null) wp.setObservations(new ArrayList<>());
+				wo = newOb;
+				wp.getObservations().add(wo);
+				wo.setWaypoint(wp);
+				s.save(wo);
+			}else{
+				wo = (WaypointObservation) s.get(WaypointObservation.class, newOb.getUuid());
+				if (wo == null) return false;
+				if (wo.getAttributes() != null){
+					for (WaypointObservationAttribute a : wo.getAttributes()){
+						s.delete(a);
+					}
+					wo.getAttributes().clear();
+					s.flush();
+				}
+				wo.setCategory(newOb.getCategory());
+				if (wo.getAttributes() == null) wo.setAttributes(new ArrayList<>());
+				for (WaypointObservationAttribute newA : newOb.getAttributes()){
+					wo.getAttributes().add(newA);
+					newA.setObservation(wo);
+				}
+			}
+			
+			//update category names in query results table
+			List<String> names = new ArrayList<>();
+			Category c = wo.getCategory();
+			while(c != null){
+				names.add(0, c.getName());
+				c = c.getParent();
+			}
+			HashMap<String,Object> params = new HashMap<>();
+			StringBuilder sql = new StringBuilder();
+			sql.append("UPDATE " + queryTempTable + " SET "); //$NON-NLS-1$ //$NON-NLS-2$
+			if (item.getObservationUuid()==null){
+				sql.append("ob_uuid = :obuuid, "); //$NON-NLS-1$
+				params.put("obuuid", wo.getUuid()); //$NON-NLS-1$
+			}
+			
+			for (int j = 0; j < ((DerbyObservationEngine)engine).getCategoryCount(); j++) {
+				if (j > 0){
+					sql.append(", "); //$NON-NLS-1$
+				}
+				sql.append("category_"); //$NON-NLS-1$
+				sql.append(j);
+				if (j < names.size()){
+					sql.append("= :cat"); //$NON-NLS-1$
+					sql.append(j);
+					params.put("cat" + j, names.get(j)); //$NON-NLS-1$
+				}else{
+					sql.append(" = null"); //$NON-NLS-1$
+				}
+			}
+			sql.append(" WHERE "); //$NON-NLS-1$
+			if (item.getObservationUuid() == null){
+				sql.append("wp_uuid = :uuid"); //$NON-NLS-1$
+				params.put("uuid", wo.getWaypoint().getUuid()); //$NON-NLS-1$
+			}else{
+				sql.append("ob_uuid = :uuid"); //$NON-NLS-1$
+				params.put("uuid", wo.getUuid()); //$NON-NLS-1$
+			}
+			
+			SQLQuery queryUpdate = s.createSQLQuery(sql.toString());
+			for (Entry<String,Object> e : params.entrySet()){
+				queryUpdate.setParameter(e.getKey(), e.getValue());
+			}
+			queryUpdate.executeUpdate();
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			ex.printStackTrace();
+			return false;
+		}finally{
+			s.close();
+		}
+		return true;
+	}
+	
+	private boolean updateAttributeColumn(AttributeQueryColumn column, PatrolQueryResultItem item, Object value){
+		PatrolLegDay pld = null;
+		WaypointObservation wpo = null;
+		boolean change = false;
+		Session s = HibernateManager.openSession();
+		try {
+			s.getTransaction().begin();
+			wpo = (WaypointObservation) s.get(WaypointObservation.class, item.getObservationUuid());
+			if (wpo != null) {
+				PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wpo.getWaypoint())).uniqueResult(); //$NON-NLS-1$
+				
+				if (pw != null) {
+					pld = pw.getPatrolLegDay();
+					pld.getPatrolLeg().getPatrol().getId();
+					
+					//update attribute value
+					change = updateAttribute(wpo, column.getAttributeId(), value, s);
+				}
+			}
+			s.getTransaction().commit();
+		} catch (Exception ex) {
+			// TODO: cannot update do something here
+			s.getTransaction().rollback();
+			ex.printStackTrace();
+			return false;
+		} finally {
+			s.close();
+		}
+
+		if (change) {
+			WaypointEventManager.getInstance().waypointModified(wpo.getWaypoint());
+			// TODO: this does not refresh properly
+			PatrolEventManager.getInstance().patrolChanged(
+					PatrolEventManager.PATROL_DATES_LEG,
+					pld.getPatrolLeg().getPatrol());
+
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean updateWaypointDetails(FixedQueryColumn column, PatrolQueryResultItem item, Object value){
+		Waypoint wp = null;
+		PatrolLegDay pld = null;
+		boolean change = false;
+		Session s = HibernateManager.openSession();
+		try {
+			s.getTransaction().begin();
+			wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
+			if (wp != null) {
+				PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).uniqueResult(); //$NON-NLS-1$
+				
+				if (pw != null) {
+					pld = pw.getPatrolLegDay();
+					pld.getPatrolLeg().getPatrol().getId();
+					switch (column.getColumn()) {
+
+					case WAYPOINT_COMMENT:
+						if (value instanceof String) {
+							if (!value.equals(wp.getComment())) {
+								change = true;
+								updateWaypointComment(wp,(String) value, s);
+							}
+						}
+						break;
+					case WAYPOINT_TIME:
+						if (value instanceof Date) {
+							Date newDate = (Date) value;
+							if (!SharedUtils.isSameTime(newDate,
+									wp.getDateTime())) {
+								change = true;
+								updateWaypointTime(wp, newDate, s);
+							}
+						}
+						break;
+					case WAYPOINT_DIRECTION:
+						if (value instanceof Double) {
+							float newValue = ((Double) value).floatValue();
+							if (newValue != wp.getDirection()) {
+								change = true;
+								updateWaypointDirection(wp, newValue, s);
+							}
+						}
+						break;
+					case WAYPOINT_DISTANCE:
+						if (value instanceof Double) {
+							float newValue = ((Double) value).floatValue();
+							if (newValue != wp.getDistance()) {
+								change = true;
+								updateWaypointDistance(wp, newValue, s);
+							}
+						}
+						break;
+					case WAYPOINT_ID:
+						if (value instanceof Integer) {
+							if (!value.equals(wp.getId())) {
+								change = true;
+								updateWaypointId(wp, (Integer) value, s);
+							}
+						}
+						break;
+					case WAYPOINT_X:
+						if (value instanceof Double) {
+							if (!value.equals(wp.getX())) {
+								change = true;
+								updateWaypointPosition(wp, (Double) value, wp.getY(), s);
+							}
+						}
+						break;
+					case WAYPOINT_Y:
+						if (value instanceof Double) {
+							if (!value.equals(wp.getX())) {
+								change = true;
+								updateWaypointPosition(wp, wp.getX(), (Double) value, s);
+							}
+						}
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			s.getTransaction().commit();
+		} catch (Exception ex) {
+			// TODO: cannot update do something here
+			s.getTransaction().rollback();
+			ex.printStackTrace();
+			return false;
+		} finally {
+			s.close();
+		}
+
+		if (change) {
+			WaypointEventManager.getInstance().waypointModified(wp);
+			// TODO: this does not refresh properly
+			PatrolEventManager.getInstance().patrolChanged(
+					PatrolEventManager.PATROL_DATES_LEG,
+					pld.getPatrolLeg().getPatrol());
+
+			return true;
+		}
+		return false;
+	}
 
 }

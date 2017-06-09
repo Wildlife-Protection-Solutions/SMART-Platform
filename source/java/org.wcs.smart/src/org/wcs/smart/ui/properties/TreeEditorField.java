@@ -176,7 +176,14 @@ public class TreeEditorField  {
 		txtText = new Text(dropDownComposite, SWT.NONE);
 		txtText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-		tree = new TreeDropDown(parent.getShell());
+		tree = new TreeDropDown(parent.getShell()){
+			@Override
+			public void hide(){
+				tree.setText(""); //$NON-NLS-1$
+				updateSelection(lastValidSelection);
+				super.hide();
+			}
+		};
 		tree.getTreeViewer().setContentProvider(new AttributeTreeContentProvider(true, false));
 		tree.getTreeViewer().setLabelProvider(new AttributeTreeLabelProvider());
 		
@@ -279,30 +286,34 @@ public class TreeEditorField  {
 	 * shows the tree
 	 */
 	private void showTree(boolean focus){
-		tree.positionAndShow(dropDownComposite, null, null, new ISelectionListener() {
-			
-			@Override
-			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-				if (selection == null){
-					//should revert back to previous selection
-					updateSelection(lastValidSelection);
-				}else if (selection.isEmpty()){
-					//nothing selected
-					updateSelection(null);
-				}else{
-					//pick first selection
-					Object x = ((IStructuredSelection)selection).getFirstElement();
-					if (x instanceof AttributeTreeNode) {
-						updateSelection((AttributeTreeNode) x);
-					} else {
-						updateSelection(null);										
+		if (tree.isVisible()){
+			tree.hide();
+		}else{
+			tree.positionAndShow(dropDownComposite, null, null, new ISelectionListener() {
+				
+				@Override
+				public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+					if (selection == null){
+						//should revert back to previous selection
+						updateSelection(lastValidSelection);
+					}else if (selection.isEmpty()){
+						//nothing selected
+						updateSelection(null);
+					}else{
+						//pick first selection
+						Object x = ((IStructuredSelection)selection).getFirstElement();
+						if (x instanceof AttributeTreeNode) {
+							updateSelection((AttributeTreeNode) x);
+						} else {
+							updateSelection(null);										
+						}
 					}
+					tree.hide();
 				}
-				tree.hide();
+			});
+			if (focus){
+				tree.setFocus();
 			}
-		});
-		if (focus){
-			tree.setFocus();
 		}
 	}
 	/**

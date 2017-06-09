@@ -169,6 +169,7 @@ public class SightingQueryColumn extends QueryColumn{
 	public QueryColumn clone() {
 		SightingQueryColumn clone = new SightingQueryColumn(getName(), getKey(), getType(), dbCol);
 		clone.setProjectionProvider(prjProvider);
+		clone.setEdit(canEdit());
 		return clone;
 	}
 	

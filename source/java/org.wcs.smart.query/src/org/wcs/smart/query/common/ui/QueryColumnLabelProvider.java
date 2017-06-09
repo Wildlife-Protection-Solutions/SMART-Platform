@@ -22,6 +22,9 @@
 package org.wcs.smart.query.common.ui;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -32,17 +35,56 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class QueryColumnLabelProvider extends ColumnLabelProvider{
 
-	protected QueryColumn col;
+	protected QueryColumn column;
 
+	protected boolean isEditing;
+	
+	private Color lightRed;
+	
 	public QueryColumnLabelProvider(QueryColumn col){
-		this.col = col;
+		this.column = col;
 	}
 
 	@Override
+	public void dispose(){
+		super.dispose();
+		if (lightRed != null){
+			lightRed.dispose();
+			lightRed = null;
+		}
+	}
+	@Override
 	public String getText(Object element){
+		if (element == null) return "";
 		if (element instanceof IResultItem){
-			return col.getValueAsString( col.getValue((IResultItem)element));
+			return column.getValueAsString( column.getValue((IResultItem)element));
 		}
 		return element.toString();
+	}
+	
+	@Override
+	public Color getForeground(Object element) {
+		if (!isEditing) return null;
+		if (column.canEdit()){
+			return Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED);
+		}
+		return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
+	}
+	
+	@Override
+	public Color getBackground(Object element) {
+		if (!isEditing) return null;
+		if (column.canEdit()){
+			return lightRed;
+		}
+		return null;
+	}
+	
+	
+	public void setEditMode(boolean isEditing){
+		if (isEditing && lightRed == null){
+			lightRed = new Color(Display.getDefault(),255,230,230);
+		}
+		this.isEditing = isEditing;
 	}
 }

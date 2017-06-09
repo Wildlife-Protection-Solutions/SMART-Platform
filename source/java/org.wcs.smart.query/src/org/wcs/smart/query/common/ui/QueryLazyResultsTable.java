@@ -41,6 +41,7 @@ public abstract class QueryLazyResultsTable extends QueryResultsTable {
 
 	private QueryLazyResultsContentProvider contentProvider;
 	
+	
 	/**
 	 * Creates the table widget
 	 * @param parent the parent widget

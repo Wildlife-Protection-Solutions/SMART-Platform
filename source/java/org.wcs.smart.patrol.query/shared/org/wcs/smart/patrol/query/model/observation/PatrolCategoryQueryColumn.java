@@ -82,6 +82,7 @@ public class PatrolCategoryQueryColumn extends CategoryQueryColumn{
 	@Override
 	public QueryColumn clone() {
 		PatrolCategoryQueryColumn newColumn = new PatrolCategoryQueryColumn(super.getName(), level);
+		newColumn.setEdit(canEdit());
 		return newColumn;
 	}
 

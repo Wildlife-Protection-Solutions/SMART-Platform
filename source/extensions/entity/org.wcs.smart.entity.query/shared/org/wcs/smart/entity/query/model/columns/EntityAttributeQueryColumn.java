@@ -114,6 +114,7 @@ public class EntityAttributeQueryColumn extends QueryColumn {
 	@Override
 	public QueryColumn clone() {
 		QueryColumn newColumn = new EntityAttributeQueryColumn(getName(),entityKey, entityAttributeKey, getType());
+		newColumn.setEdit(canEdit());
 		return newColumn;
 	}
 }

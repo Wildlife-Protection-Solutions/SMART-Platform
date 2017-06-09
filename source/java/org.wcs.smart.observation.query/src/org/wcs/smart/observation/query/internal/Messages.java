@@ -91,6 +91,11 @@ public class Messages extends NLS {
 	public static String WaypointSourceGroupByDropItem_FiltersLabel;
 	public static String WaypointSourceGroupByDropItem_WaypointSourceLabel;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String EditObservationDialog_EditMessage;
+	public static String EditObservationDialog_ErrorDialogTitle;
+	public static String EditObservationDialog_NewMessage;
+	public static String EditObservationDialog_ShellTitle;
+	public static String EditObservationDialog_Title;
 	public static String ObservationDropItemFactory_QueryItemNotSupported;
 	public static String ObservationGridQueryType_QueryName;
 	public static String ObservationQueryTemplateCloner_GridProgress;

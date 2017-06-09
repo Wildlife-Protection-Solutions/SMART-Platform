@@ -137,7 +137,18 @@ public class PatrolQueryColumnCache {
 						add = patrolOps.getTrackObserver();
 					}
 					if (add){
-						cols.add(new FixedQueryColumn(item, Locale.getDefault()));
+						QueryColumn toAdd = new FixedQueryColumn(item, Locale.getDefault());
+						cols.add(toAdd);
+						
+						if (item == FixedQueryColumn.FixedColumns.WAYPOINT_ID ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_X ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_Y ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||
+								item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
+							toAdd.setEdit(true);
+						}
 					}
 				}
 
@@ -146,7 +157,9 @@ public class PatrolQueryColumnCache {
 				// add data model category columns
 				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 				for (int i = 0; i < numCategory; i++) {
-					cols.add(new PatrolCategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader1, i), i));
+					QueryColumn toAdd = new PatrolCategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader1, i), i);
+					toAdd.setEdit(true);
+					cols.add(toAdd);
 				}
 					
 				//sort attributes alphabetically
@@ -160,7 +173,9 @@ public class PatrolQueryColumnCache {
 					
 				for (Attribute att : atts) {
 					String name = att.getName();
-					cols.add(new PatrolAttributeQueryColumn(name, att.getKeyId(), att.getType()));
+					QueryColumn toAdd = new PatrolAttributeQueryColumn(name, att.getKeyId(), att.getType());
+					toAdd.setEdit(true);
+					cols.add(toAdd);
 				}
 				queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 				

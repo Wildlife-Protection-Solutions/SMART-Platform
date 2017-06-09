@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.common.ui;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -31,11 +32,17 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.ColumnViewerEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerEditor;
+import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -46,8 +53,10 @@ import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryEditCommand;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -59,12 +68,18 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public abstract class QueryResultsTable {
 
+	private static final String EDIT_SET_KEY = "EDIT"; //$NON-NLS-1$
+
 	private static final String INITQUERYTABLE_JOBNAME = Messages.QueryResultsTable_InitQueryResultsTableJobName;
 	
 	protected TableViewer table;
 	protected QueryTableViewerColumn[] tableViewerColumns;
 	
 	private QueryResultItemComparator sorter;
+	private boolean editMode = false;
+	
+	private Query query = null;
+	
 	
 	/**
 	 * Creates the table widget
@@ -82,6 +97,7 @@ public abstract class QueryResultsTable {
 		table.setItemCount(0);
 		sorter = new QueryResultItemComparator(table);
 		table.setComparator(sorter);
+		
 		
 		return table;
 	}
@@ -125,6 +141,109 @@ public abstract class QueryResultsTable {
 		}
 	}
 	
+	/**
+	 * Updates the edit mode of the table.
+	 * @param canEdit
+	 */
+	public void setEditMode(boolean canEdit){
+		this.editMode = canEdit;
+		createMenu();
+		for (QueryTableViewerColumn c : tableViewerColumns){
+			if (c.getLabelProvider() instanceof QueryColumnLabelProvider){
+				((QueryColumnLabelProvider)c.getLabelProvider()).setEditMode(canEdit);
+			}
+			
+			if (editMode){
+				EditingSupport support = getEditingSupport(c.getTableColumn().getViewer(), c.getColumn());
+				if (support != null){
+					c.getTableColumn().setEditingSupport(support);
+				}else{
+					c.getTableColumn().setEditingSupport(null);
+				}
+			}else{
+				c.getTableColumn().setEditingSupport(null);
+			}
+		}
+		
+		if (canEdit && table.getData(EDIT_SET_KEY) == null){
+			TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(table, new FocusCellHighlighter(table){});
+			ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(table) {
+				protected boolean isEditorActivationEvent(
+						ColumnViewerEditorActivationEvent event) {
+					return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
+							|| event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
+							|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
+							|| event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
+				}
+			};
+			
+			TableViewerEditor.create(table, focusCellManager, actSupport, ColumnViewerEditor.TABBING_HORIZONTAL | ColumnViewerEditor.TABBING_MOVE_TO_ROW_NEIGHBOR | ColumnViewerEditor.KEYBOARD_ACTIVATION);
+			table.setData(EDIT_SET_KEY, Boolean.TRUE);
+		}
+		
+		table.refresh(true);
+	}
+	
+	private void createMenu(){
+		
+		Menu menuTable = table.getControl().getMenu();
+		if(menuTable != null && !menuTable.isDisposed()){
+			menuTable.dispose();
+		}
+		if (query == null) return;
+		IQueryType queryType = QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey());
+		if (queryType.getResultProviders().length > 0) {
+			menuTable = new Menu(table.getControl());
+			table.getControl().setMenu(menuTable);
+
+			List<IQueryEditCommand> editItems = new ArrayList<>();
+			for (final IQueryResultInfoProvider item : queryType.getResultProviders()) {
+				// Create menu item
+				if (!SmartDB.isMultipleAnalysis() || item.supportsCcaa()){
+					if (!(item instanceof IQueryEditCommand) || (item instanceof IQueryEditCommand && editMode)){
+						if (item instanceof IQueryEditCommand){
+							editItems.add((IQueryEditCommand) item);
+							continue;
+						}
+						MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
+						if (item.getImage() != null){
+							miTest.setImage(item.getImage());
+						}
+						miTest.setText(item.getName());
+						miTest.addListener(SWT.Selection, e->{
+							IStructuredSelection selection = (IStructuredSelection) table.getSelection();
+							if (!selection.isEmpty()) {
+								Object x = selection.getFirstElement();
+								item.doWork(x);
+							}
+						});
+					}
+				}
+			}
+			if (!editItems.isEmpty()) new MenuItem(menuTable, SWT.SEPARATOR);
+			
+			for (final IQueryEditCommand item : editItems) {
+				MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
+				if (item.getImage() != null){
+					miTest.setImage(item.getImage());
+				}
+				miTest.setText(item.getName());
+				miTest.addListener(SWT.Selection, e->{
+					IStructuredSelection selection = (IStructuredSelection) table.getSelection();
+					if (!selection.isEmpty()) {
+						Object x = selection.getFirstElement();
+						if (item.doWork(x, query.getCachedResults())){
+							if (getTable().getContentProvider() instanceof QueryLazyResultsContentProvider) {
+								((QueryLazyResultsContentProvider) getTable().getContentProvider()).clear();
+							}
+							getTable().refresh(true);
+						}
+					}
+				});
+			}
+		}
+	}
+	
 	public void initQuery(final SimpleQuery query, final IProjectionProvider prjProvider){
 		if (tableViewerColumns != null){
 			//columns already created; lets update visibility
@@ -135,36 +254,8 @@ public abstract class QueryResultsTable {
 		List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
 		tableViewerColumns = createColumns(table,cols);
 		table.refresh(true);
-						
-
-		IQueryType queryType = QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey());
-		if (queryType.getResultProviders().length > 0) {
-			Menu menuTable = new Menu(table.getControl());
-			table.getControl().setMenu(menuTable);
-
-			for (final IQueryResultInfoProvider item : queryType.getResultProviders()) {
-				// Create menu item
-				if (!SmartDB.isMultipleAnalysis() || item.supportsCcaa()){
-					MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
-					if (item.getImage() != null){
-						miTest.setImage(item.getImage());
-					}
-					miTest.setText(item.getName());
-					miTest.addSelectionListener(new SelectionAdapter() {
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-							IStructuredSelection selection = (IStructuredSelection) table.getSelection();
-							if (!selection.isEmpty()) {
-								Object x = selection.getFirstElement();
-								item.doWork(x);
-							}
-						}
-					});
-				}
-			}
-		}
-					
-
+		this.query = query;
+		createMenu();
 	}
 	
 	public void initQuery(final GriddedQuery query){
@@ -172,6 +263,7 @@ public abstract class QueryResultsTable {
 			//columns already created
 			return;
 		}
+		this.query = query;
 		Job job = new Job(INITQUERYTABLE_JOBNAME){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -236,9 +328,24 @@ public abstract class QueryResultsTable {
 	 */
 	public abstract CellLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns);
 	
+	/**
+	 * Get the editing support for a given query column.  Can return null
+	 * if query column not editable.
+	 * 
+	 * @param viewer
+	 * @param column
+	 * @return
+	 */
+	public EditingSupport getEditingSupport(ColumnViewer viewer, QueryColumn column){
+		return null;
+	}
 	
 	protected IQueryColumnSorter getColumnSorter() {
 		return sorter;
+	}
+	
+	public TableViewer getTable(){
+		return this.table;
 	}
 	
 }

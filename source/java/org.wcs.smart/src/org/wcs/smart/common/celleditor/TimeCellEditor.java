@@ -24,7 +24,6 @@ package org.wcs.smart.common.celleditor;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -39,10 +38,8 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class TimeCellEditor extends CellEditor{
+public class TimeCellEditor extends DateCellEditor{
 
-	private DateTime dt;
-	
 	/**
 	 * @param parent  parent composite
 	 */
@@ -71,16 +68,6 @@ public class TimeCellEditor extends CellEditor{
 		return dt;
 	}
 	
-    /**
-     * Handles a default selection event from the text control by applying the editor
-     * value and deactivating this cell editor.
-     * 
-     */
-    protected void handleDefaultSelection() {
-        // same with enter-key handling code in keyReleaseOccured(e);
-        fireApplyEditorValue();
-        deactivate();
-    }
 
 	/**
 	 * Returns a Date object of the time selected.
@@ -89,14 +76,6 @@ public class TimeCellEditor extends CellEditor{
 	@Override
 	protected Object doGetValue() {
 		return SmartUtils.getTime(dt);
-	}
-
-	/**
-	 * @see org.eclipse.jface.viewers.CellEditor#doSetFocus()
-	 */
-	@Override
-	protected void doSetFocus() {
-		dt.setFocus();
 	}
 
 	/**
@@ -115,13 +94,4 @@ public class TimeCellEditor extends CellEditor{
 		}
 	}
 
-	/** Re-size so entri cell is displayed
-	 * @see org.eclipse.jface.viewers.CellEditor#getLayoutData()
-	 */
-	@Override
-	public LayoutData getLayoutData() {
-		LayoutData data = super.getLayoutData();
-		data.minimumHeight = dt.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
-		return data;
-	}
 }

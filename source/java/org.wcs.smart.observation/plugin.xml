@@ -258,5 +258,15 @@
             commandId="org.wcs.smart.observation.perspective.show">
       </handler>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.wcs.smart.observation.udig.WaypointSimpleFeature"
+            class="org.wcs.smart.observation.udig.WaypointSimpleFeatureAdapterFactory">
+         <adapter
+               type="org.wcs.smart.observation.model.Waypoint">
+         </adapter>
+      </factory>
+   </extension>
 
 </plugin>

@@ -116,6 +116,9 @@ public class FixedQueryColumn extends QueryColumn {
 		return null;
 	}
 
+	public FixedColumns getColumn(){
+		return this.column;
+	}
 	/**
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
 	 */
@@ -191,6 +194,7 @@ public class FixedQueryColumn extends QueryColumn {
 	@Override
 	public QueryColumn clone() {
 		FixedQueryColumn newColumn = new FixedQueryColumn(this.column, l);
+		newColumn.setEdit(canEdit());
 		return newColumn;
 	}
 	

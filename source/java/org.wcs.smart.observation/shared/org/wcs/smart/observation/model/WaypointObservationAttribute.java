@@ -197,6 +197,72 @@ public class WaypointObservationAttribute {
 		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 	}
 	
+	
+	/**
+	 * 
+	 * @return the value of the observation based
+	 * on the attribute type.
+	 */
+	@Transient
+	public Object setAttributeValue(Object newValue){
+		AttributeType type = getAttribute().getType();
+		switch(type){
+		case BOOLEAN:
+			if (newValue instanceof Boolean){
+				if ((Boolean)newValue){
+					setNumberValue(1.0);
+				}else{
+					setNumberValue(0.0);
+				}
+			}else if (newValue instanceof Double){
+				if (((Double)newValue) > 0.5){
+					setNumberValue(1.0);
+				}else{
+					setNumberValue(0.0);
+				}
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for boolean attribute"); //$NON-NLS-1$
+			}
+			break;
+		case DATE:
+			if (newValue instanceof Date){
+				setDateValue((Date)newValue);
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for date attribute"); //$NON-NLS-1$
+			}
+			break;
+		case LIST:
+			if (newValue instanceof AttributeListItem){
+				setAttributeListItem((AttributeListItem)newValue);
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for list attribute"); //$NON-NLS-1$
+			}
+			break;
+		case NUMERIC:
+			if (newValue instanceof Number){
+				setNumberValue( ((Number)newValue).doubleValue());
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for numberic attribute"); //$NON-NLS-1$
+			}
+			break;
+		case TEXT:
+			if (newValue instanceof String){
+				setStringValue( (String)newValue );
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for string attribute"); //$NON-NLS-1$
+			}
+			break;
+		case TREE:
+			if (newValue instanceof AttributeTreeNode ){
+				setAttributeTreeNode( (AttributeTreeNode)newValue );
+			}else{
+				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for tree attribute"); //$NON-NLS-1$
+			}
+			break;		
+		}
+		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
+	}
+	
 	/**
 	 * Date attribute types are stored
 	 * as in the string field in the ISO8601 format

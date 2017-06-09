@@ -81,6 +81,7 @@ public class ObservationCategoryQueryColumn extends CategoryQueryColumn{
 	@Override
 	public QueryColumn clone() {
 		ObservationCategoryQueryColumn newColumn = new ObservationCategoryQueryColumn(getName(), level);
+		newColumn.setEdit(canEdit());
 		return newColumn;
 	}
 

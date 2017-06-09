@@ -30,10 +30,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
 

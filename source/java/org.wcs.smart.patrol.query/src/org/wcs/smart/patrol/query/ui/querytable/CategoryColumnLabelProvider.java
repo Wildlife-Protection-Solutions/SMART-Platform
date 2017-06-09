@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.patrol.query.ui.querytable;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -36,11 +36,11 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  * @since 1.0.0
  */
-public class CategoryColumnLabelProvider extends ColumnLabelProvider {
-	private QueryColumn column;
+public class CategoryColumnLabelProvider extends QueryColumnLabelProvider {
+	
 
 	public CategoryColumnLabelProvider(QueryColumn column) {
-		this.column = column;
+		super(column);
 	}
 
 	/*

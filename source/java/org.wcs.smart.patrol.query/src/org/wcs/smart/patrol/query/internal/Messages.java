@@ -206,6 +206,7 @@ public class Messages extends NLS {
 	public static String WaypointFilterProcessor_filterProgress;
 	public static String WaypointFilterProcessor_progress1;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String EditObservationResultInfoProvider_EditLabel;
 
 	static {
 		// initialize resource bundle

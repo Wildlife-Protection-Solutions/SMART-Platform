@@ -33,9 +33,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -491,6 +493,23 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		}
 	}
 
+	/**
+	 * Add a label to the temporary attribute list label table
+	 * @param s
+	 * @param item
+	 */
+	public void addListLabel(Session s, AttributeListItem item){
+		String sql = "SELECT count(*) FROM " + queryDataTable + "_list WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
+		SQLQuery q = s.createSQLQuery(sql);
+		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
+		if ((Integer)q.uniqueResult() == 0){
+			sql = " INSERT INTO " + queryDataTable + "_list (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
+			q = s.createSQLQuery(sql);
+			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
+			q.setParameter("label",  item.getName()); //$NON-NLS-1$
+			q.executeUpdate();
+		}
+	}
 	
 	/**
 	 * Wrapper class for populating linked data (additional columns)
@@ -648,6 +667,10 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		return it;
 	}
 
+	public int getCategoryCount(){
+		return this.categoryCount;
+	}
+	
 	@Override
 	protected void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {

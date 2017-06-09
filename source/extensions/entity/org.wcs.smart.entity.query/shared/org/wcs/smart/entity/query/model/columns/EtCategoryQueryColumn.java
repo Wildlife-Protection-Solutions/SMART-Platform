@@ -81,6 +81,7 @@ public class EtCategoryQueryColumn extends CategoryQueryColumn{
 	@Override
 	public QueryColumn clone() {
 		EtCategoryQueryColumn newColumn = new EtCategoryQueryColumn(getName(), level);
+		newColumn.setEdit(canEdit());
 		return newColumn;
 	}
 

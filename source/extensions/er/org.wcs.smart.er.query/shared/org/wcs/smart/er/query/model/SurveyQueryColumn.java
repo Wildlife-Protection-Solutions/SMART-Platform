@@ -185,6 +185,7 @@ public class SurveyQueryColumn extends QueryColumn {
 	@Override
 	public QueryColumn clone() {
 		SurveyQueryColumn newColumn = new SurveyQueryColumn(this.column, l);
+		newColumn.setEdit(canEdit());
 		return newColumn;
 	}
 

@@ -25,6 +25,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -284,13 +286,37 @@ public class QueryEditorTableContent {
 	 */
 	private Composite createTableResultsComposite(Composite parent, FormToolkit toolkit) {
 		Composite main = toolkit.createComposite(parent);
-		main.setLayout(new GridLayout(1, false));
+		
+		int size = 1;
+		if (editor.canEditResults()) size = 2;
+		main.setLayout(new GridLayout(size, false));
 		
 		infoSection = createInfoSection();
 		if (infoSection != null){
 			Composite comp = toolkit.createComposite(main);
 			infoSection.createControls(comp, toolkit);
+			comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		}
+		if (editor.canEditResults()){
+			Hyperlink hl = toolkit.createHyperlink(main, "edit results", SWT.NONE);
+			hl.setData(Boolean.FALSE);
+			hl.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					hl.setData(!(Boolean)hl.getData());
+					editor.setEditMode((boolean)hl.getData());
+					if ((Boolean)hl.getData()){
+						hl.setText("exit edit mode");
+					}else{
+						hl.setText("edit results");
+					}
+					hl.getParent().layout(true);
+					resultsTable.setEditMode(editor.getEditMode());
+					
+				}
+			});
+		}
+		
 		
 		resultsTable = new QueryLazyResultsTable(){
 			@Override
@@ -298,10 +324,14 @@ public class QueryEditorTableContent {
 				return editor.getColumnLabelProvider(column, allColumns);
 			}
 			
+			@Override
+			public EditingSupport getEditingSupport(ColumnViewer viewer, QueryColumn column) {
+				return editor.getEditingSupport(viewer, column);
+			}
 		};
 
 		TableViewer viewer = resultsTable.createTable(main);
-		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, size, 1));
 		toolkit.adapt(viewer.getTable());
 
 		editor.getSite().setSelectionProvider(viewer);

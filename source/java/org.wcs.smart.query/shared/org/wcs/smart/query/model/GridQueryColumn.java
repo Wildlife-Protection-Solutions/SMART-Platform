@@ -102,6 +102,7 @@ public class GridQueryColumn extends QueryColumn{
 	@Override
 	public QueryColumn clone() {
 		GridQueryColumn newColumn = new GridQueryColumn(this.column, l);
+		newColumn.setEdit(canEdit());
 		return newColumn;
 	}
 

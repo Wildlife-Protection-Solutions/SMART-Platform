@@ -34,6 +34,7 @@ import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.udig.WaypointSimpleFeature;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
@@ -76,7 +77,7 @@ public class SurveyResultItemFeature {
 		data.add(it.asGeometry(SurveyQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY));
 		data.add(it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
 		addQueryColumnData(it, ftype, columns, data);
-		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
+		return new WaypointSimpleFeature(SimpleFeatureBuilder.build(ftype, data, (String)data.get(1)), it.getWaypointUuid());
 	}
 	
 	/**

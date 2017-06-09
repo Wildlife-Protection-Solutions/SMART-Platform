@@ -38,17 +38,6 @@ public class SurveyAttributeQueryColumn extends AttributeQueryColumn {
 	public SurveyAttributeQueryColumn(String name, String attributeId, AttributeType type) {
 		super(name, attributeId, type);
 	}
-
-	/**
-	 * Creates a new column with the given column type.
-	 * @param name
-	 * @param key the query column full key of the form "attribute:<ATTRIBUTEID>"
-	 * @param type
-	 */
-	public SurveyAttributeQueryColumn(String name, String key, ColumnType type){
-		super(name, key, type);
-		this.attributeKey = key.split(":")[1]; //$NON-NLS-1$
-	}
 	
 	@Override
 	public Object getValue(IResultItem item) {
@@ -64,7 +53,9 @@ public class SurveyAttributeQueryColumn extends AttributeQueryColumn {
 
 	@Override
 	public QueryColumn clone() {
-		return new SurveyAttributeQueryColumn(getName(), getKey(), getType());
+		QueryColumn newColumn = new SurveyAttributeQueryColumn(getName(), getAttributeId(), getAttributeType());
+		newColumn.setEdit(canEdit());
+		return newColumn;
 	}
 
 }

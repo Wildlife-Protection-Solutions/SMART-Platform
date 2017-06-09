@@ -72,6 +72,7 @@ public abstract class QueryColumn implements Cloneable{
 	private String name;
 	private ColumnType type;
 	private boolean isVisible = true;
+	private boolean canEdit = false;
 	
 	protected IProjectionProvider prjProvider;
 	
@@ -247,6 +248,23 @@ public abstract class QueryColumn implements Cloneable{
 		}
 		return ""; //$NON-NLS-1$
 
+	}
+	
+	/**
+	 * 
+	 * @return true if column can be edited, false otherwise
+	 */
+	public boolean canEdit(){
+		return canEdit;
+	}
+	
+	/**
+	 * Sets the editable state of the column
+	 * @param isEditable
+	 * @return
+	 */
+	public void setEdit(boolean isEditable){
+		this.canEdit = isEditable;
 	}
 	
 	/** 

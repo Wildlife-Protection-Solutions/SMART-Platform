@@ -27,6 +27,7 @@ import java.util.List;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.observation.udig.WaypointSimpleFeature;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
@@ -60,7 +61,7 @@ public class QueryResultItemFeature {
 				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));
 			}
 		}
-		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));
+		return new WaypointSimpleFeature(SimpleFeatureBuilder.build(ftype, data, (String)data.get(1)), it.getWaypointUuid());
 	}
 	
 	

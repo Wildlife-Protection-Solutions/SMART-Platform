@@ -203,7 +203,7 @@ public class ReplicationStatusContribution implements
 			
 			String message = null;
 			ServerStatus status = ServerStatus.ERROR;
-			
+			if (!DerbyReplicationManager.INSTANCE.getCachedReplicationState()) return Status.OK_STATUS;
 			Session session = HibernateManager.openSession();
 			
 			try{

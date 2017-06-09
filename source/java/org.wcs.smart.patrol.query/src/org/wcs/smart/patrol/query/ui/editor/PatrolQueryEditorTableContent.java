@@ -332,8 +332,7 @@ public class PatrolQueryEditorTableContent {
 		};
 
 		TableViewer viewer = resultsTable.createTable(main);
-		viewer.getTable().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
+		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(viewer.getTable());
 
 		return main;

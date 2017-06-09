@@ -81,7 +81,9 @@ public class SamplingUnitAttributeQueryColumn  extends QueryColumn {
 
 	@Override
 	public QueryColumn clone() {
-		return new SamplingUnitAttributeQueryColumn(getName(), getKey(), getType());
+		QueryColumn clone = new SamplingUnitAttributeQueryColumn(getName(), getKey(), getType());
+		clone.setEdit(canEdit());
+		return clone;
 	}
 
 }

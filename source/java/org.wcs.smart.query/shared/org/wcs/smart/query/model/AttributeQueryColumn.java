@@ -37,7 +37,7 @@ public abstract class AttributeQueryColumn extends QueryColumn {
 	public static final String KEY_PREFIX = "attribute:"; //$NON-NLS-1$
 
 	protected String attributeKey = null;
-	
+	protected AttributeType attributeType;
 	/**
 	 * Creates a new attribute column.
 	 * 
@@ -48,7 +48,7 @@ public abstract class AttributeQueryColumn extends QueryColumn {
 	public AttributeQueryColumn(String name, String attributeId, AttributeType type){
 		super(name, KEY_PREFIX + attributeId, null);
 		this.attributeKey = attributeId;
-		
+		this.attributeType = type;
 		ColumnType ctype = ColumnType.STRING;
 		if (type == AttributeType.NUMERIC ){
 			ctype = ColumnType.NUMBER;
@@ -60,15 +60,13 @@ public abstract class AttributeQueryColumn extends QueryColumn {
 		super.setType(ctype);
 	}
 	
-	/**
-	 * Creates a new column with the given column type.
-	 * @param name
-	 * @param key the query column full key of the form "attribute:<ATTRIBUTEID>"
-	 * @param type
-	 */
-	public AttributeQueryColumn(String name, String key, ColumnType type){
-		super(name, key, type);
-		this.attributeKey = key.split(":")[1]; //$NON-NLS-1$
+	public AttributeType getAttributeType(){
+		return this.attributeType;
 	}
-
+	
+	public String getAttributeId(){
+		return getKey().substring(KEY_PREFIX.length());
+	}
+	
+	
 }

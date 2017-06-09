@@ -81,7 +81,9 @@ public class MissionPropertyQueryColumn extends QueryColumn {
 
 	@Override
 	public QueryColumn clone() {
-		return new MissionPropertyQueryColumn(getName(), getKey(), getType());
+		QueryColumn clone = new MissionPropertyQueryColumn(getName(), getKey(), getType());
+		clone.setEdit(canEdit());
+		return clone;
 	}
 
 }

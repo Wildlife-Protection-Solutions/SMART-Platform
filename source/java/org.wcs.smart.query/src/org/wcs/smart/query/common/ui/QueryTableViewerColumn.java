@@ -40,7 +40,7 @@ public class QueryTableViewerColumn {
 	
 	private QueryColumn column;
 	private TableViewerColumn tcolumn;
-
+	private CellLabelProvider lblProvider;
 	/**
 	 * Adds the given column to the table viewer.
 	 * 
@@ -49,7 +49,7 @@ public class QueryTableViewerColumn {
 	 */
 	public QueryTableViewerColumn(TableViewer viewer, QueryColumn column, final IQueryColumnSorter sorter, CellLabelProvider lblProvider) {
 		this.column = column;
-		
+		this.lblProvider = lblProvider;
 		tcolumn = new TableViewerColumn(viewer, SWT.NONE);
 		tcolumn.getColumn().setText(SmartUtils.formatStringForLabel(column.getName()));
 		tcolumn.getColumn().setWidth(100);
@@ -72,6 +72,9 @@ public class QueryTableViewerColumn {
 		});
 	}
 	
+	public CellLabelProvider getLabelProvider(){
+		return this.lblProvider;
+	}
 	public boolean isVisible(){
 		return tcolumn.getColumn().getWidth() > 0;
 	}

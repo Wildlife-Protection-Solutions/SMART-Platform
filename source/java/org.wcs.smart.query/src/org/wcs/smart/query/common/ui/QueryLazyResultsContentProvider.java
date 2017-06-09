@@ -93,13 +93,28 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		}
 	}
 
+	/**
+	 * Clear the viewer and all cached results causing the query results
+	 * to be reloaded from the database
+	 */
+	public void clear(){
+		loadingIndexes.clear();
+		for (int i = 0; i < viewer.getTable().getItemCount(); i ++){
+			viewer.clear(i);
+		}
+	}
+	
 	@Override
 	public void updateElement(final int index) {
 		//due to weird implementation of AbstractTableViewer.virtualSetSelectionToWidget() line 974
 		//and due to this method is called on selection change in AbstractTableViewer.getVirtualSelection() line 510
 		//we do NOT want to reload data every time as we are displaying static content
-		if (viewer.getElementAt(index) != null || loadingIndexes.contains(index))
+		if (viewer.getElementAt(index) != null || loadingIndexes.contains(index)){
+			//EG: this is the only way I can get the table to refresh properly
+			//if refresh is called 
+			viewer.replace(viewer.getElementAt(index) , index);
 			return;
+		}
 		if (index < 0 || index >= viewer.getTable().getItemCount())
 			return;
 

@@ -71,4 +71,25 @@ public class SharedUtils {
 	}
 
 	public static final String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
+
+	/**
+	 * Compares the hour, minute, second and millisecond values of
+	 * the two date objects and returns true if they are the same, 
+	 * false otherwise
+	 * 
+	 * @param dt
+	 * @return date only date
+	 */
+	public static boolean isSameTime(Date date1, Date date2) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date1);
+		Calendar calendar2 = Calendar.getInstance();
+		calendar2.setTime(date2);
+		
+		int[] compare = new int[]{Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND};
+		for (int field : compare){
+			if( calendar.get(field) != calendar2.get(field) ) return false;
+		}
+		return true;
+	}
 }
