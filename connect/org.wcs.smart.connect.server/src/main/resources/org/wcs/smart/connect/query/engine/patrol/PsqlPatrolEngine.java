@@ -379,7 +379,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	@Override
 	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".id, "); //$NON-NLS-1$

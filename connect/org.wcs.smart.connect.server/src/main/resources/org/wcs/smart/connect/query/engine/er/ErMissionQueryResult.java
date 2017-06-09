@@ -115,7 +115,14 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
 				StringBuilder sb = new StringBuilder();
-				try(ResultSet rs = c.getMetaData().getColumns(null, null, engine.getQueryDataTable(), null)){
+				String schema = null;
+				String tablename = engine.getQueryDataTable();
+				int position = tablename.indexOf('.');
+				if (position >= 0){
+					schema = tablename.substring(0, position);
+					tablename = tablename.substring(position+1);
+				}
+				try(ResultSet rs = c.getMetaData().getColumns(null, schema, tablename, null)){
 					while(rs.next()){
 						sb.append("foo." + rs.getString(4)); //$NON-NLS-1$
 						sb.append(","); //$NON-NLS-1$
@@ -127,8 +134,7 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 				+ engine.getQueryDataTable()
 				+ " foo left join " + engine.tableName(MissionDay.class) + " c on c.mission_uuid = foo.mission_uuid  " //$NON-NLS-1$ //$NON-NLS-2$
 				+ " left join " + engine.tableName(MissionTrack.class) + " bar on  bar.mission_day_uuid = c.uuid " //$NON-NLS-1$ //$NON-NLS-2$
-				+ " GROUP BY " //$NON-NLS-1$
-				+ sb.toString().substring(0, sb.length() - 1);
+				+ " GROUP BY " + sb.toString().substring(0, sb.length() - 1);  //$NON-NLS-1$  //$NON-NLS-2$
 				
 				if(sortColumn != null){
 					sql += " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql;//$NON-NLS-1$ //$NON-NLS-2$
