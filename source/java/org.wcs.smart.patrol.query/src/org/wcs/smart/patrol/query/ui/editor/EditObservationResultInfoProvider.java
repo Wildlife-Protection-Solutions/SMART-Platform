@@ -25,11 +25,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.observation.query.ui.EditObservationDialog;
 import org.wcs.smart.patrol.query.engine.DerbyPagedObservationResult;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.ui.edit.EditObservationDialog;
 import org.wcs.smart.query.model.IQueryEditCommand;
 
 /**
@@ -55,7 +56,12 @@ public class EditObservationResultInfoProvider extends IQueryEditCommand {
 		PatrolQueryResultItem item = (PatrolQueryResultItem)resultItem;
 		EditObservationDialog dialog = new EditObservationDialog(Display.getDefault().getActiveShell(), item.getObservationUuid());
 		if (dialog.open() == Window.OK){
-			return (((DerbyPagedObservationResult)result).updateObservation(item, dialog.getUpdatedObservation()));
+			try{
+				return (((DerbyPagedObservationResult)result).updateObservation(item, dialog.getUpdatedObservation()));
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.EditObservationResultInfoProvider_DeleteError + ex.getMessage(), ex);
+				return false;
+			}
 		}
 		return false;
 	}

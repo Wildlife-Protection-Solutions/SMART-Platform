@@ -8,6 +8,7 @@ public class Messages extends NLS {
 	public static String AbstractColumnQueryPropertyProvider_ShowDataColumnsOnly;
 	public static String AbstractColumnQueryPropertyProvider_ShowDataColumnsOnlyTooltip;
 	public static String AbstractPagedQueryResultSet_ErrorLoadingQueryResults;
+	public static String AbstractQueryColumnEditor_UpdateError;
 	public static String AbstractValueDropItem_ChangeRate;
 	public static String AbstractValueDropItem_ComputeRate;
 	public static String AbstractValueDropItem_EncounterRatePerRatio;
@@ -119,6 +120,11 @@ public class Messages extends NLS {
 	public static String DeleteItemHandler_ErrorDeletingQueryB;
 	public static String DeleteItemHandler_ErrorQueryNotFound;
 	public static String DropItem_deleteitemTooltip;
+	public static String EditObservationDialog_EditMessage;
+	public static String EditObservationDialog_ErrorDialogTitle;
+	public static String EditObservationDialog_NewMessage;
+	public static String EditObservationDialog_ShellTitle;
+	public static String EditObservationDialog_Title;
 	public static String EmployeeDeleteAdvisor_ErrorOwnsFolders;
 	public static String EmployeeDeleteAdvisor_ErrorOwnsQueries;
 	public static String EmployeeDeleteAdvisor_InvalidTypeError;
@@ -441,6 +447,7 @@ public class Messages extends NLS {
 	public static String ObserverGroupByDropItem_FiltersLabel;
 	public static String ObserverGroupByDropItem_IncludedLabel;
 	public static String ObserverGroupByDropItem_ObserverLabel;
+	public static String QueryEditorTableContent_EditTooltip;
 	public static String QueryEditorTableContent_NaLabel;
 	public static String QueryEditorTableContent_NumberOfIncidentLabel;
 	public static String QueryEditorTableContent_NumberOfRecordsLabel1;

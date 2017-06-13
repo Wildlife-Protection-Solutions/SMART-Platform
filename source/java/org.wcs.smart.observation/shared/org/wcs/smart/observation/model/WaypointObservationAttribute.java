@@ -200,15 +200,17 @@ public class WaypointObservationAttribute {
 	
 	/**
 	 * 
-	 * @return the value of the observation based
-	 * on the attribute type.
+	 * @return sets the value of the given attribute based on the attribute type
+	 * and type of object supplied
 	 */
 	@Transient
-	public Object setAttributeValue(Object newValue){
+	public void setAttributeValue(Object newValue){
 		AttributeType type = getAttribute().getType();
 		switch(type){
 		case BOOLEAN:
-			if (newValue instanceof Boolean){
+			if (newValue == null){
+				setNumberValue(null);
+			}else if (newValue instanceof Boolean){
 				if ((Boolean)newValue){
 					setNumberValue(1.0);
 				}else{
@@ -225,42 +227,58 @@ public class WaypointObservationAttribute {
 			}
 			break;
 		case DATE:
-			if (newValue instanceof Date){
+			if (newValue == null){
+				setDateValue(null);
+			}else if (newValue instanceof Date){
 				setDateValue((Date)newValue);
 			}else{
 				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for date attribute"); //$NON-NLS-1$
 			}
 			break;
 		case LIST:
-			if (newValue instanceof AttributeListItem){
+			if (newValue == null){
+				setAttributeListItem(null);
+			}else if (newValue instanceof AttributeListItem){
 				setAttributeListItem((AttributeListItem)newValue);
 			}else{
 				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for list attribute"); //$NON-NLS-1$
 			}
 			break;
 		case NUMERIC:
-			if (newValue instanceof Number){
+			if (newValue == null){
+				setNumberValue(null);
+			} else if (newValue instanceof Number){
 				setNumberValue( ((Number)newValue).doubleValue());
 			}else{
 				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for numberic attribute"); //$NON-NLS-1$
 			}
 			break;
 		case TEXT:
-			if (newValue instanceof String){
-				setStringValue( (String)newValue );
+			if (newValue == null){
+				setStringValue(null);
+			}else if (newValue instanceof String){
+				if (((String)newValue).length() == 0){
+					setStringValue(null);	
+				}else{
+					setStringValue( (String)newValue );
+				}
 			}else{
 				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for string attribute"); //$NON-NLS-1$
 			}
 			break;
 		case TREE:
-			if (newValue instanceof AttributeTreeNode ){
+			if (newValue == null){
+				setAttributeTreeNode(null);
+			}else if (newValue instanceof AttributeTreeNode ){
 				setAttributeTreeNode( (AttributeTreeNode)newValue );
 			}else{
 				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for tree attribute"); //$NON-NLS-1$
 			}
 			break;		
+		default:
+			throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 		}
-		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
+		
 	}
 	
 	/**

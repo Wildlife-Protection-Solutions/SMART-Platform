@@ -28,7 +28,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.query.engine.DerbyPagedObservationResult;
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.IQueryEditCommand;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -60,23 +62,30 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 			deleteWp = true;
 		}else{
 			MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), 
-				"Delete Patrol Observations", null,
-				MessageFormat.format("Do you want to delete the observation ({0}) or the entire waypoint?", item.getCategories()[item.getCategories().length - 1]),
+				Messages.DeleteObservationResultInfoProvider_DeleteTitle, null,
+				MessageFormat.format(Messages.DeleteObservationResultInfoProvider_DeleteMsg, item.getCategories()[item.getCategories().length - 1]),
 				MessageDialog.QUESTION, 
-				new String[]{"Delete Observation", "Delete Waypoint", "Cancel"}, 1);
+				new String[]{Messages.DeleteObservationResultInfoProvider_DeleteObsBtn, Messages.DeleteObservationResultInfoProvider_DeleteWpBtn, Messages.DeleteObservationResultInfoProvider_CancelBtn}, 0);
 			int index = md.open();
 			if (index == 2) return false;
 			if (index == 1) deleteWp = true;
 		}
 		
 		if (deleteWp){
-			System.out.println("Delete Waypoint");
-			return true;
+			try{
+				return ((DerbyPagedObservationResult)results).deleteWaypoint(item.getWaypointUuid());
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.DeleteObservationResultInfoProvider_DeleteWpError + ex.getMessage(), ex);
+				return false;
+			}
 		}else{
-			System.out.println("Delete Observation Only");
-			return ((DerbyPagedObservationResult)results).deleteObservation(item.getObservationUuid());
+			try{
+				return ((DerbyPagedObservationResult)results).deleteObservation(item.getObservationUuid());
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.DeleteObservationResultInfoProvider_DeleteObsError + ex.getMessage(), ex);
+				return false;
+			}
 		}
-
 	}
 
 

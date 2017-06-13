@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.ui;
+package org.wcs.smart.query.common.ui.edit;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,13 +41,16 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
 import org.wcs.smart.common.celleditor.DateCellEditor;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
+import org.wcs.smart.common.celleditor.TreeViewerCellEditor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -67,7 +70,15 @@ public class CellEditorFactory {
 	}
 	
 	public static TextCellEditor newTextCellEditor(Composite parent) {
-		return new TextCellEditor(parent);
+		return new TextCellEditor(parent){
+			@Override
+			public LayoutData getLayoutData() {
+				LayoutData layoutData = super.getLayoutData();
+				layoutData.verticalAlignment = SWT.CENTER;
+				layoutData.minimumHeight = getControl().computeSize(SWT.DEFAULT, SWT.DEFAULT,true).y;
+				return layoutData;
+			}
+		};
 	}
 
 	public static DateCellEditor newDateCellEditor(Composite parent) {
@@ -178,4 +189,62 @@ public class CellEditorFactory {
 		return listCellEditor;
 	}
 
+	
+	/**
+	 * Creates a tree drop down editor for attributes of tree types
+	 * 
+	 * @param parent
+	 * @param attributeKey
+	 * @return
+	 */
+	public static TreeViewerCellEditor newAttributeTreeCellEditor(Composite parent, String attributeKey){
+		
+		TreeViewerCellEditor treeCellEditor = new TreeViewerCellEditor(parent, SWT.READ_ONLY | SWT.DROP_DOWN);
+		treeCellEditor.setContentProvider(new AttributeTreeContentProvider(true, false));
+		
+		treeCellEditor.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				if (element instanceof AttributeTreeNode){
+					return ((AttributeTreeNode)element).getName();
+				}
+				return super.getText(element);
+			}
+		});
+		treeCellEditor.setInput(DialogConstants.LOADING_TEXT);
+			
+		Job j = new Job("load tree nodes"){ //$NON-NLS-1$
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				final List<AttributeTreeNode> items = new ArrayList<>();
+				Session s = HibernateManager.openSession();
+				try{
+					final Attribute dmAttribute = (Attribute)s.createCriteria(Attribute.class)
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+							.add(Restrictions.eq("keyId", attributeKey)).uniqueResult(); //$NON-NLS-1$
+					if (dmAttribute == null) return Status.OK_STATUS;
+					if (dmAttribute.getType() != AttributeType.TREE) return Status.OK_STATUS;
+					
+					List<AttributeTreeNode> nodes = new ArrayList<>(dmAttribute.getActiveTreeNodes());
+					while(!nodes.isEmpty()){
+						AttributeTreeNode toVisit = nodes.remove(0);
+						toVisit.getName();
+						nodes.addAll(toVisit.getActiveChildren());
+					}
+					items.addAll(dmAttribute.getActiveTreeNodes());
+				}finally{
+					s.close();
+				}
+				Display.getDefault().syncExec(()->{
+					if (!treeCellEditor.getControl().isDisposed()){
+						treeCellEditor.setInput(items);
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		j.schedule();
+		
+		return treeCellEditor;
+	}
 }

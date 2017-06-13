@@ -21,13 +21,11 @@
  */
 package org.wcs.smart.common.celleditor;
 
-import java.lang.reflect.Method;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -35,61 +33,34 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPart;
+import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 
 /**
- * A modified copy of the org.eclipse.jface.viewers.ComboVoxViewerCellEditor that
- * displays the combo box immediately on editor selection.
+ * Tree editor for editing table cells with drop down tree.
  * 
  * @author Emily
  *
  */
-public class ComboBoxViewerCellEditor extends CellEditor {
+public class TreeViewerCellEditor extends CellEditor {
 
 	/**
 	 * The custom combo box control.
 	 */
-	protected ComboViewer viewer;
+	protected TreeDropDownViewer treeViewer;
 
 	protected Object selectedValue;
-
-	/**
-	 * The list is dropped down when the activation is done through the mouse
-	 */
-	public static final int DROP_DOWN_ON_MOUSE_ACTIVATION = 1;
-
-	/**
-	 * The list is dropped down when the activation is done through the keyboard
-	 */
-	public static final int DROP_DOWN_ON_KEY_ACTIVATION = 1 << 1;
-
-	/**
-	 * The list is dropped down when the activation is done without
-	 * ui-interaction
-	 */
-	public static final int DROP_DOWN_ON_PROGRAMMATIC_ACTIVATION = 1 << 2;
-
-	/**
-	 * The list is dropped down when the activation is done by traversing from
-	 * cell to cell
-	 */
-	public static final int DROP_DOWN_ON_TRAVERSE_ACTIVATION = 1 << 3;
-
-	private int activationStyle = SWT.NONE;
-
-
 
 	/**
 	 * Default ComboBoxCellEditor style
@@ -102,7 +73,7 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 	 * @param parent
 	 *            the parent control
 	 */
-	public ComboBoxViewerCellEditor(Composite parent) {
+	public TreeViewerCellEditor(Composite parent) {
 		this(parent, defaultStyle);
 	}
 
@@ -114,106 +85,47 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 	 * @param style
 	 *            the style bits
 	 */
-	public ComboBoxViewerCellEditor(Composite parent, int style) {
+	public TreeViewerCellEditor(Composite parent, int style) {
 		super(parent, style);
 		setValueValid(true);
 	}
 
 	@Override
 	public void activate(ColumnViewerEditorActivationEvent activationEvent) {
-		super.activate(activationEvent);
-		if (activationStyle != SWT.NONE) {
-			boolean dropDown = false;
-			if ((activationEvent.eventType == ColumnViewerEditorActivationEvent.MOUSE_CLICK_SELECTION || activationEvent.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION)
-					&& (activationStyle & DROP_DOWN_ON_MOUSE_ACTIVATION) != 0 ) {
-				dropDown = true;
-			} else if (activationEvent.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED
-					&& (activationStyle & DROP_DOWN_ON_KEY_ACTIVATION) != 0 ) {
-				dropDown = true;
-			} else if (activationEvent.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC
-					&& (activationStyle & DROP_DOWN_ON_PROGRAMMATIC_ACTIVATION) != 0) {
-				dropDown = true;
-			} else if (activationEvent.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
-					&& (activationStyle & DROP_DOWN_ON_TRAVERSE_ACTIVATION) != 0) {
-				dropDown = true;
-			}
-
-			if (dropDown) {
-				getControl().getDisplay().asyncExec(new Runnable() {
-
-					@Override
-					public void run() {
-						((CCombo) getControl()).setListVisible(true);
-					}
-
-				});
-
-			}
-		}
+		super.activate(activationEvent);		
+		treeViewer.clearSearchText();
 	}
 
-	/**
-	 * This method allows to control how the combo reacts when activated
-	 *
-	 * @param activationStyle
-	 *            the style used
-	 */
-	public void setActivationStyle(int activationStyle) {
-		this.activationStyle = activationStyle;
-	}
-
-	
 	@Override
 	protected Control createControl(Composite parent) {
-
-		CCombo comboBox = new CCombo(parent, getStyle());
-		comboBox.setFont(parent.getFont());
-		viewer = new ComboViewer(comboBox);
-
-		comboBox.addKeyListener(new KeyAdapter() {
-			// hook key pressed - see PR 14201
+		treeViewer = new TreeDropDownViewer(parent);
+		treeViewer.setSelectionListener(new ISelectionListener() {
+			
 			@Override
-			public void keyPressed(KeyEvent e) {
-				keyReleaseOccured(e);
-			}
-		});
-
-		comboBox.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetDefaultSelected(SelectionEvent event) {
-				applyEditorValueAndDeactivate();
-			}
-
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				ISelection selection = viewer.getSelection();
-				if (selection.isEmpty()) {
-					selectedValue = null;
-				} else {
-					selectedValue = ((IStructuredSelection) selection)
-							.getFirstElement();
-				}
+			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 				applyEditorValueAndDeactivate();
 			}
 		});
-
-		comboBox.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				if (e.detail == SWT.TRAVERSE_ESCAPE
-						|| e.detail == SWT.TRAVERSE_RETURN) {
-					e.doit = false;
-				}
-			}
-		});
-
-		comboBox.addFocusListener(new FocusAdapter() {
+		treeViewer.getFilteredTree().getFilterControl().addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				ComboBoxViewerCellEditor.this.focusLost();
+				TreeViewerCellEditor.this.focusLost();
 			}
 		});
-		return comboBox;
+		
+		Tree tree = treeViewer.getTreeViewer().getTree();
+		tree.setFont(parent.getFont());
+		tree.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.ESC){
+					fireCancelEditor();
+				}
+			}
+		});
+		
+
+		return treeViewer.getComposite();
 	}
 
 	/**
@@ -231,29 +143,10 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 
 	@Override
 	protected void doSetFocus() {
-		viewer.getControl().setFocus();
-		
-		try{
-			CCombo comboBox = (CCombo) getControl();				
-			Method method = CCombo.class.getDeclaredMethod("dropDown", boolean.class); //$NON-NLS-1$
-			method.setAccessible(true);
-			method.invoke(comboBox, true);
-		}catch (Exception ex){
-			ex.printStackTrace();
-		}
+		treeViewer.getTreeViewer().getControl().setFocus();
 	}
 
-	public void recomputeSize(){
-		try{
-			CCombo comboBox = (CCombo) getControl();				
-			Method method = CCombo.class.getDeclaredMethod("dropDown", boolean.class); //$NON-NLS-1$
-			method.setAccessible(true);
-			method.invoke(comboBox, false);
-			method.invoke(comboBox, true);
-		}catch (Exception ex){
-			ex.printStackTrace();
-		}
-	}
+	
 	/**
 	 * The <code>ComboBoxCellEditor</code> implementation of this
 	 * <code>CellEditor</code> framework method sets the minimum width of the
@@ -265,17 +158,17 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 	@Override
 	public LayoutData getLayoutData() {
 		LayoutData layoutData = super.getLayoutData();
-		if ((viewer.getControl() == null) || viewer.getControl().isDisposed()) {
+		if ((treeViewer.getTreeViewer().getControl() == null) || treeViewer.getTreeViewer().getControl().isDisposed()) {
 			layoutData.minimumWidth = 60;
 		} else {
 			// make the comboBox 10 characters wide
-			GC gc = new GC(viewer.getControl());
+			GC gc = new GC(treeViewer.getTreeViewer().getControl());
 			layoutData.minimumWidth = (gc.getFontMetrics()
 					.getAverageCharWidth() * 10) + 10;
 			gc.dispose();
 		}
-		layoutData.verticalAlignment = SWT.CENTER;
-		layoutData.minimumHeight = getControl().computeSize(SWT.DEFAULT, SWT.DEFAULT,true).y;
+		layoutData.minimumHeight = 200;
+		layoutData.verticalAlignment = SWT.TOP;
 		return layoutData;
 	}
 
@@ -287,12 +180,12 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 	 */
 	@Override
 	protected void doSetValue(Object value) {
-	    Assert.isTrue(viewer != null);
+	    Assert.isTrue(treeViewer != null);
 	    selectedValue = value;
 	    if (value == null) {
-	        viewer.setSelection(StructuredSelection.EMPTY);
+	    	treeViewer.getTreeViewer().setSelection(StructuredSelection.EMPTY);
 	    } else {
-	        viewer.setSelection(new StructuredSelection(value));
+	    	treeViewer.getTreeViewer().setSelection(new StructuredSelection(value));
 	    }
 	}
 
@@ -302,7 +195,7 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 	 * @see StructuredViewer#setLabelProvider(IBaseLabelProvider)
 	 */
 	public void setLabelProvider(IBaseLabelProvider labelProvider) {
-		viewer.setLabelProvider(labelProvider);
+		treeViewer.getTreeViewer().setLabelProvider(labelProvider);
 	}
 
 	/**
@@ -312,19 +205,7 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 	 * @since 3.7
 	 */
 	public void setContentProvider(IStructuredContentProvider provider) {
-		viewer.setContentProvider(provider);
-	}
-
-	/**
-	 * @param provider
-	 *            the content provider used
-	 * @see StructuredViewer#setContentProvider(IContentProvider)
-	 * @deprecated As of 3.7, replaced by
-	 *             {@link #setContentProvider(IStructuredContentProvider)}
-	 */
-	@Deprecated
-	public void setContenProvider(IStructuredContentProvider provider) {
-		viewer.setContentProvider(provider);
+		treeViewer.getTreeViewer().setContentProvider(provider);
 	}
 
 	/**
@@ -333,14 +214,14 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 	 * @see StructuredViewer#setInput(Object)
 	 */
 	public void setInput(Object input) {
-		viewer.setInput(input);
+		treeViewer.getTreeViewer().setInput(input);
 	}
 
 	/**
 	 * @return get the viewer
 	 */
-	public ComboViewer getViewer() {
-		return viewer;
+	public TreeViewer getViewer() {
+		return treeViewer.getTreeViewer();
 	}
 
 	/**
@@ -348,7 +229,7 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 	 */
 	void applyEditorValueAndDeactivate() {
 		// must set the selection before getting value
-		ISelection selection = viewer.getSelection();
+		ISelection selection = treeViewer.getTreeViewer().getSelection();
 		if (selection.isEmpty()) {
 			selectedValue = null;
 		} else {
@@ -372,9 +253,7 @@ public class ComboBoxViewerCellEditor extends CellEditor {
 
 	@Override
 	protected void focusLost() {
-		if (isActivated()) {
-			applyEditorValueAndDeactivate();
-		}
+		fireCancelEditor();
 	}
 
 	@Override

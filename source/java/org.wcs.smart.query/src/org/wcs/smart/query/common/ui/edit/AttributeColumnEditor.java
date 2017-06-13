@@ -19,13 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.ui;
+package org.wcs.smart.query.common.ui.edit;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
+import org.wcs.smart.common.celleditor.TreeViewerCellEditor;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 
@@ -38,6 +39,7 @@ import org.wcs.smart.query.model.AttributeQueryColumn;
 public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 
 	private ComboBoxViewerCellEditor listCellEditor;
+	private TreeViewerCellEditor treeCellEditor;
 	
 	public AttributeColumnEditor (ColumnViewer viewer, AttributeQueryColumn queryColumn, QueryResultsEditor editor ){
 		super(viewer, queryColumn, editor);
@@ -64,8 +66,7 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 		case TEXT:
 			return getTextCellEditor();
 		case TREE:
-			//TODO: a tree attribute editor
-			break;
+			return getTreeCellEditor();
 		}
 		return null;
 	}
@@ -90,4 +91,10 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 		return listCellEditor;
 	}
 
+	private CellEditor getTreeCellEditor(){
+		if (treeCellEditor == null){
+			treeCellEditor = CellEditorFactory.newAttributeTreeCellEditor((Composite) getViewer().getControl(), ((AttributeQueryColumn)queryColumn).getAttributeId());
+		}
+		return treeCellEditor;
+	}
 }

@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
@@ -113,72 +114,71 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 			@Override
 			public InfoPoint findFeature(int x, int y, IViewportModel vm) {
 				try{
-				IQueryResult r = getQueryInternal().getCachedResults();
-				if (r == null) return null;
-				
-				Coordinate world = vm.pixelToWorld(x, y);
-				Coordinate db = ReprojectUtils.reproject(world.x, world.y, vm.getCRS(), SmartDB.DATABASE_CRS);
-				
-				if (r instanceof IPagedQueryResultSet){
-					HashMap<UUID, Set<PatrolQueryResultItem>> items = new HashMap<>();
+					IQueryResult r = getQueryInternal().getCachedResults();
+					if (r == null) return null;
 					
-					try(IQueryResultSetIterator<? extends IResultItem> fIterator = ((IPagedQueryResultSet)r).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE)){
-						double distance = Double.POSITIVE_INFINITY;
+					Coordinate world = vm.pixelToWorld(x, y);
+					Coordinate db = ReprojectUtils.reproject(world.x, world.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+					
+					if (r instanceof IPagedQueryResultSet){
+						HashMap<UUID, Set<PatrolQueryResultItem>> items = new HashMap<>();
 						
-						while(fIterator.hasNext()){
-							PatrolQueryResultItem i = (PatrolQueryResultItem) fIterator.next();
-							Coordinate c = new Coordinate(i.getWaypointX(null), i.getWaypointY(null));
-							double d = c.distance(db);
+						try(IQueryResultSetIterator<? extends IResultItem> fIterator = ((IPagedQueryResultSet)r).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE)){
+							double distance = Double.POSITIVE_INFINITY;
 							
-							if (d < distance){
-								items.clear();
-								HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
-								if (set == null){
-									set = new HashSet<>();
-									items.put(i.getWaypointUuid(), set);
-								}
-								set.add(i);
+							while(fIterator.hasNext()){
+								PatrolQueryResultItem i = (PatrolQueryResultItem) fIterator.next();
+								Coordinate c = new Coordinate(i.getWaypointX(null), i.getWaypointY(null));
+								double d = c.distance(db);
 								
-								distance = d;
-							}else if (d == distance){
-								HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
-								if (set == null){
-									set = new HashSet<>();
-									items.put(i.getWaypointUuid(), set);
+								if (d < distance){
+									items.clear();
+									HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
+									if (set == null){
+										set = new HashSet<>();
+										items.put(i.getWaypointUuid(), set);
+									}
+									set.add(i);
+									
+									distance = d;
+								}else if (d == distance){
+									HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
+									if (set == null){
+										set = new HashSet<>();
+										items.put(i.getWaypointUuid(), set);
+									}
+									set.add(i);
 								}
-								set.add(i);
 							}
 						}
-					}
-					if (items.isEmpty()) return null;
-					
-					PatrolQueryResultItem first = items.values().iterator().next().iterator().next();
-					
-					Coordinate px = ReprojectUtils.reproject(first.getWaypointX(null), first.getWaypointY(null), SmartDB.DATABASE_CRS, vm.getCRS());
-					Point pnt = vm.worldToPixel(px);
-					if (pnt.distance(x, y) > 5) return null;
-					StringBuilder sb = new StringBuilder();
-					
-					for (Set<PatrolQueryResultItem> i : items.values()){
-						if (sb.length() != 0) sb.append("\n"); //$NON-NLS-1$
-						first = i.iterator().next();
-						sb.append(first.getPatrolId() + " (" + first.getWaypointId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-						sb.append("\n"); //$NON-NLS-1$
-						sb.append(DateFormat.getDateTimeInstance().format(SmartUtils.combineDateTime(first.getWpDateTime(), first.getWaypointTime())));
-						sb.append("\n"); //$NON-NLS-1$
-						for (PatrolQueryResultItem result : i){
-							if (result.getCategories() != null && result.getCategories().length > 0){
-								sb.append(result.getCategories()[result.getCategories().length-1]);
-								sb.append("\n"); //$NON-NLS-1$
+						if (items.isEmpty()) return null;
+						
+						PatrolQueryResultItem first = items.values().iterator().next().iterator().next();
+						
+						Coordinate px = ReprojectUtils.reproject(first.getWaypointX(null), first.getWaypointY(null), SmartDB.DATABASE_CRS, vm.getCRS());
+						Point pnt = vm.worldToPixel(px);
+						if (pnt.distance(x, y) > 5) return null;
+						StringBuilder sb = new StringBuilder();
+						
+						for (Set<PatrolQueryResultItem> i : items.values()){
+							if (sb.length() != 0) sb.append("\n"); //$NON-NLS-1$
+							first = i.iterator().next();
+							sb.append(first.getPatrolId() + " (" + first.getWaypointId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+							sb.append("\n"); //$NON-NLS-1$
+							sb.append(DateFormat.getDateTimeInstance().format(SmartUtils.combineDateTime(first.getWpDateTime(), first.getWaypointTime())));
+							sb.append("\n"); //$NON-NLS-1$
+							for (PatrolQueryResultItem result : i){
+								if (result.getCategories() != null && result.getCategories().length > 0){
+									sb.append(result.getCategories()[result.getCategories().length-1]);
+									sb.append("\n"); //$NON-NLS-1$
+								}
 							}
 						}
+						
+						return new InfoPoint(vm.worldToPixel(px), null, sb.toString());	
 					}
-					
-					return new InfoPoint(vm.worldToPixel(px), null, sb.toString());
-					
-				}
-				// TODO Auto-generated method stub
 				}catch (Exception ex){
+					SmartPatrolPlugIn.log(ex.getMessage(), ex);
 					ex.printStackTrace();
 				}
 				return null;

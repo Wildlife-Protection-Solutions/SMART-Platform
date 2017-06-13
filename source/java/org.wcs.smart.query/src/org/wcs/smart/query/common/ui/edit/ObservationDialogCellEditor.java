@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.ui;
+package org.wcs.smart.query.common.ui.edit;
 
 import java.util.UUID;
 
@@ -89,6 +89,14 @@ public class ObservationDialogCellEditor extends CellEditor {
 	protected Control createControl(Composite parent) {		
 		Label label = new Label(parent, SWT.NONE);
 		return label;
+	}
+	
+	@Override
+	public LayoutData getLayoutData() {
+		LayoutData layoutData = super.getLayoutData();
+		layoutData.verticalAlignment = SWT.CENTER;
+		layoutData.minimumHeight = getControl().computeSize(SWT.DEFAULT, SWT.DEFAULT,true).y;
+		return layoutData;
 	}
 
 	/**

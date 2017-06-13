@@ -36,11 +36,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -96,6 +99,7 @@ public class QueryEditorTableContent {
 		if (stackComposite.isDisposed()) return;
 		setQueryName(query);
 		resultsTable.initQuery(query, editor);
+		refreshQueryDetails();
 	}
 
 	/**
@@ -143,6 +147,12 @@ public class QueryEditorTableContent {
 				}
 			}
 		});
+	}
+	
+	private void refreshQueryDetails(){
+		if (tableComp.isDisposed()) return;
+		if (infoSection == null) return;
+		infoSection.updateControls((IPagedQueryResultSet)resultsTable.getTable().getInput());
 	}
 	
 	/**
@@ -298,22 +308,17 @@ public class QueryEditorTableContent {
 			comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		}
 		if (editor.canEditResults()){
-			Hyperlink hl = toolkit.createHyperlink(main, "edit results", SWT.NONE);
-			hl.setData(Boolean.FALSE);
-			hl.addHyperlinkListener(new HyperlinkAdapter() {
-				@Override
-				public void linkActivated(HyperlinkEvent e) {
-					hl.setData(!(Boolean)hl.getData());
-					editor.setEditMode((boolean)hl.getData());
-					if ((Boolean)hl.getData()){
-						hl.setText("exit edit mode");
-					}else{
-						hl.setText("edit results");
-					}
-					hl.getParent().layout(true);
-					resultsTable.setEditMode(editor.getEditMode());
-					
-				}
+			ToolBar tb = new ToolBar(main, SWT.NONE);
+			
+			ToolItem btnEdit = new ToolItem(tb, SWT.CHECK);
+			btnEdit.setToolTipText(Messages.QueryEditorTableContent_EditTooltip);
+			btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			
+			btnEdit.setData(Boolean.FALSE);
+			btnEdit.addListener(SWT.Selection, e-> {
+				btnEdit.setData(!(Boolean)btnEdit.getData());
+				editor.setEditMode((boolean)btnEdit.getData());
+				resultsTable.setEditMode(editor);
 			});
 		}
 		

@@ -23,9 +23,9 @@ package org.wcs.smart.patrol.query.ui.editor;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
-import org.wcs.smart.observation.query.ui.AbstractQueryColumnEditor;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
+import org.wcs.smart.query.common.ui.edit.AbstractQueryColumnEditor;
 
 /**
  * Column editor for the waypoint columns in the query results table.

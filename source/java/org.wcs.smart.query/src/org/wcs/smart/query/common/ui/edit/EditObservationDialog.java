@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.ui;
+package org.wcs.smart.query.common.ui.edit;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -42,12 +42,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
 import org.wcs.smart.ui.properties.CategoryTreeDropDown;
@@ -85,7 +87,7 @@ public class EditObservationDialog extends TitleAreaDialog{
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT,true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		//getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	
 	@Override
@@ -197,7 +199,10 @@ public class EditObservationDialog extends TitleAreaDialog{
 						Category c = (Category) session.get(Category.class, categoryViewer.getValue().getUuid());
 						List<Attribute> allatts = new ArrayList<>();
 						c.getAllAttribute(allatts, true);
-						if (!c.equals(lastCategory)) configureAttribute(allatts);
+						if (!c.equals(lastCategory)){
+							loadTrees(allatts);
+							configureAttribute(allatts);
+						}
 						lastCategory = c;
 					}finally{
 						session.close();
@@ -215,6 +220,7 @@ public class EditObservationDialog extends TitleAreaDialog{
 			attributeComposite.setExpandVertical(true);
 			
 			lastCategory = category;
+			loadTrees(allAttributes);
 			configureAttribute(allAttributes);
 		}finally{
 			s.close();
@@ -230,7 +236,19 @@ public class EditObservationDialog extends TitleAreaDialog{
 		return parent;
 	}
 
-
+	private void loadTrees(List<Attribute> allAttributes){
+		List<AttributeTreeNode> toload = new ArrayList<>();
+		for (Attribute a : allAttributes){
+			if (a.getType() != AttributeType.TREE) continue;
+			if (a.getActiveTreeNodes() == null) continue;
+			toload.addAll(a.getActiveTreeNodes());
+			while(!toload.isEmpty()){
+				AttributeTreeNode n = toload.remove(0);
+				n.getName();
+				toload.addAll(n.getActiveChildren());
+			}
+		}
+	}
 	private void configureAttribute(List<Attribute> allAttributes){
 		if (attributeKidComposite != null){
 			attributeKidComposite.dispose();

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.query.ui;
+package org.wcs.smart.query.common.ui.edit;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -31,10 +31,12 @@ import org.wcs.smart.common.celleditor.DateCellEditor;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.common.ui.QueryLazyResultsContentProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -68,10 +70,20 @@ public abstract class AbstractQueryColumnEditor extends EditingSupport {
 		if (! (resultSet instanceof IUpdateableResultSet)) return;
 		IUpdateableResultSet results = (IUpdateableResultSet) resultSet;
 		if (!results.canUpdate(((IResultItem)element).getClass())) return;
-		if (results.update(queryColumn, (IResultItem)element, value)){
+		
+		boolean wasUpdated = false;
+		try{
+			wasUpdated = results.update(queryColumn, (IResultItem)element, value);
+		}catch (Exception ex){
+			QueryPlugIn.displayLog(Messages.AbstractQueryColumnEditor_UpdateError + ex.getMessage(), ex);
+			return;
+		}
+		
+		if (wasUpdated){
 			if (getViewer().getContentProvider() instanceof QueryLazyResultsContentProvider) {
 				((QueryLazyResultsContentProvider) getViewer().getContentProvider()).clear();
 			}
+			editor.refreshQueryProperties();
 			getViewer().refresh(true);
 		}
 	}

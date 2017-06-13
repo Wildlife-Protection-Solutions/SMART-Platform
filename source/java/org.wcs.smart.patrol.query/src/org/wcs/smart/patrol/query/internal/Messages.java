@@ -5,6 +5,13 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.patrol.query.internal.messages"; //$NON-NLS-1$
 	public static String AttributeValueItem_AggNoSupported;
+	public static String DeleteObservationResultInfoProvider_CancelBtn;
+	public static String DeleteObservationResultInfoProvider_DeleteMsg;
+	public static String DeleteObservationResultInfoProvider_DeleteObsBtn;
+	public static String DeleteObservationResultInfoProvider_DeleteObsError;
+	public static String DeleteObservationResultInfoProvider_DeleteTitle;
+	public static String DeleteObservationResultInfoProvider_DeleteWpBtn;
+	public static String DeleteObservationResultInfoProvider_DeleteWpError;
 	public static String DerbyFilterToSqlGenerator_DateFilteNotSupported;
 	public static String DerbyGridEngine_Error_PatrolValueNotSupported;
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
@@ -206,6 +213,7 @@ public class Messages extends NLS {
 	public static String WaypointFilterProcessor_filterProgress;
 	public static String WaypointFilterProcessor_progress1;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String EditObservationResultInfoProvider_DeleteError;
 	public static String EditObservationResultInfoProvider_EditLabel;
 
 	static {

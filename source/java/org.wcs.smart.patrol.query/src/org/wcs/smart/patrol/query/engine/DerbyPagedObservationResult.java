@@ -40,7 +40,9 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -50,14 +52,13 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
 import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
@@ -98,13 +99,6 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 
 	public DerbyPagedObservationResult(String queryTempTable, DerbyPatrolQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
-		this.engine = engine;
-	}
-
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyPatrolQueryEngine engine) {
-		this.queryTempTable = queryTempTable;
-		this.itemCount = itemCount;
-		this.wpCount = wpCount;
 		this.engine = engine;
 	}
 	
@@ -635,6 +629,18 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				}
 				break;
 			case TREE:
+				if (newValue instanceof AttributeTreeNode){
+					AttributeTreeNode newItem = (AttributeTreeNode)newValue;
+					if (!newItem.equals(toUpdate.getAttributeTreeNode())){
+						toUpdate.setAttributeTreeNode(newItem);
+						updated = true;
+						
+						//add label to query results if necessary
+						if (engine instanceof DerbyObservationEngine){
+							((DerbyObservationEngine)engine).addTreeLabel(session, newItem);
+						}
+					}
+				}
 				break;
 		}
 		return updated;
@@ -646,9 +652,8 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	}
 
 	@Override
-	public boolean update(QueryColumn column, IResultItem item, Object newValue) {
+	public boolean update(QueryColumn column, IResultItem item, Object newValue) throws Exception{
 		if (!(item instanceof PatrolQueryResultItem)) return false;
-		
 		if (column instanceof FixedQueryColumn){
 			return updateWaypointDetails((FixedQueryColumn)column, (PatrolQueryResultItem)item, newValue);
 		}else if (column instanceof AttributeQueryColumn){
@@ -659,16 +664,76 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		return false;
 	}
 	
-	public boolean deleteObservation(UUID observationUuid){
+	public boolean deleteWaypoint(UUID waypointUuid) throws Exception{
 		Session s = HibernateManager.openSession(new AttachmentInterceptor());
+		Waypoint wp = null;
+		Patrol p = null;
 		try{
 			s.getTransaction().begin();
-			Waypoint wp = null;
+			
+			Waypoint wo = (Waypoint) s.get(Waypoint.class, waypointUuid);
+			if (wo == null) return false;
+			wp = wo;
+			
+			//find patrol updated for events
+			PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
+					.add(Restrictions.eq("id.waypoint", wp)) //$NON-NLS-1$
+					.uniqueResult();
+			if (pw == null) throw new Exception("No patrol link found for waypoint.  Waypoint will not be deleted."); //$NON-NLS-1$
+			s.delete(pw);
+			s.delete(wp);
+			
+			p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
+			p.equals(p);	//required to prevent patrol equals from failing in event manager
+			
+			s.flush();
+			
+			//update category names in query results table
+			StringBuilder sql = new StringBuilder();
+			sql.append(" DELETE FROM " + queryTempTable + " WHERE wp_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			SQLQuery queryUpdate = s.createSQLQuery(sql.toString());
+			queryUpdate.setParameter("uuid", waypointUuid); //$NON-NLS-1$
+			queryUpdate.executeUpdate();
+				
+			((DerbyObservationEngine) engine).updateResultCount(s, this);
+			
+			s.getTransaction().commit();
+			
+		}catch(Exception ex){
+			s.getTransaction().rollback();
+			throw ex;
+		}finally{
+			s.close();
+		}
+		
+		WaypointEventManager.getInstance().waypointModified(wp);
+		if (p != null){
+			PatrolEventManager.getInstance().patrolSaved(p, true);
+		}
+		return true;
+	}
+	
+	public boolean deleteObservation(UUID observationUuid) throws Exception{
+		Session s = HibernateManager.openSession(new AttachmentInterceptor());
+		Waypoint wp = null;
+		Patrol p = null;
+		try{
+			s.getTransaction().begin();
+			
 			WaypointObservation wo = (WaypointObservation) s.get(WaypointObservation.class, observationUuid);
 			if (wo == null) return false;
 			wp = wo.getWaypoint();
 			s.delete(wo);
 			
+			//find patrol updated for events
+			PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
+					.add(Restrictions.eq("id.waypoint", wp)) //$NON-NLS-1$
+					.uniqueResult();
+			if (pw != null){
+				p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
+				p.equals(p);	//required to prevent patrol equals from failing in event manager
+			}
+				
 			//update category names in query results table
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT count(*) FROM " + queryTempTable + " WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -681,6 +746,8 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				queryUpdate = s.createSQLQuery(sql.toString());
 				queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
 				queryUpdate.executeUpdate();
+				
+				((DerbyObservationEngine) engine).updateResultCount(s, this);
 			}else{
 				sql = new StringBuilder();
 				sql.append(" UPDATE " + queryTempTable + " SET ob_uuid = null,"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -697,22 +764,25 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 			s.getTransaction().commit();
 			
 		}catch(Exception ex){
-			//TODO:
-			ex.printStackTrace();
 			s.getTransaction().rollback();
-			return false;
+			throw ex;
 		}finally{
 			s.close();
 		}
-		//TODO: fire necessary events
+		
+		WaypointEventManager.getInstance().waypointModified(wp);
+		if (p != null){
+			PatrolEventManager.getInstance().patrolSaved(p, true);
+		}
 		return true;
 	}
 	
-	public boolean updateObservation(PatrolQueryResultItem item, Object newValue){
+	public boolean updateObservation(PatrolQueryResultItem item, Object newValue) throws Exception{
 		if (!(newValue instanceof WaypointObservation)) return false;
 		WaypointObservation newOb = (WaypointObservation)newValue;
 		
 		if (newOb.getUuid() == null && item.getObservationUuid() != null) return false;	//cannot add a new feature to a row that already has an observation
+		if (newOb.getUuid() == null && newOb.getCategory() == null) return false;//nothing to do
 		
 		Session s = HibernateManager.openSession();
 		try{
@@ -788,19 +858,32 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				queryUpdate.setParameter(e.getKey(), e.getValue());
 			}
 			queryUpdate.executeUpdate();
+			
+			//add label to query results if necessary
+			if (engine instanceof DerbyObservationEngine){
+				for (WaypointObservationAttribute a : wo.getAttributes()){
+					if (a.getAttribute().getType() == AttributeType.LIST){
+						if (a.getAttributeListItem() != null){
+							((DerbyObservationEngine)engine).addListLabel(s, a.getAttributeListItem());
+						}
+					}else if (a.getAttribute().getType() == AttributeType.TREE){
+						((DerbyObservationEngine)engine).addTreeLabel(s, a.getAttributeTreeNode());
+					}
+				}
+			}
+			
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			ex.printStackTrace();
-			return false;
+			throw ex;
 		}finally{
 			s.close();
 		}
 		return true;
 	}
 	
-	private boolean updateAttributeColumn(AttributeQueryColumn column, PatrolQueryResultItem item, Object value){
-		PatrolLegDay pld = null;
+	private boolean updateAttributeColumn(AttributeQueryColumn column, PatrolQueryResultItem item, Object value) throws Exception{
+		Patrol p = null;
 		WaypointObservation wpo = null;
 		boolean change = false;
 		Session s = HibernateManager.openSession();
@@ -811,38 +894,33 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wpo.getWaypoint())).uniqueResult(); //$NON-NLS-1$
 				
 				if (pw != null) {
-					pld = pw.getPatrolLegDay();
-					pld.getPatrolLeg().getPatrol().getId();
-					
+					p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
+					p.equals(p);	//required to prevent patrol equals from failing in event manager
 					//update attribute value
 					change = updateAttribute(wpo, column.getAttributeId(), value, s);
 				}
 			}
 			s.getTransaction().commit();
 		} catch (Exception ex) {
-			// TODO: cannot update do something here
 			s.getTransaction().rollback();
-			ex.printStackTrace();
-			return false;
+			throw ex;
 		} finally {
 			s.close();
 		}
 
 		if (change) {
 			WaypointEventManager.getInstance().waypointModified(wpo.getWaypoint());
-			// TODO: this does not refresh properly
-			PatrolEventManager.getInstance().patrolChanged(
-					PatrolEventManager.PATROL_DATES_LEG,
-					pld.getPatrolLeg().getPatrol());
-
+			if (p != null){
+				PatrolEventManager.getInstance().patrolSaved(p, true);
+			}
 			return true;
 		}
 		return false;
 	}
 	
-	private boolean updateWaypointDetails(FixedQueryColumn column, PatrolQueryResultItem item, Object value){
+	private boolean updateWaypointDetails(FixedQueryColumn column, PatrolQueryResultItem item, Object value) throws Exception{
 		Waypoint wp = null;
-		PatrolLegDay pld = null;
+		Patrol p = null;
 		boolean change = false;
 		Session s = HibernateManager.openSession();
 		try {
@@ -852,10 +930,10 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).uniqueResult(); //$NON-NLS-1$
 				
 				if (pw != null) {
-					pld = pw.getPatrolLegDay();
-					pld.getPatrolLeg().getPatrol().getId();
+					p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
+					p.equals(p); //necessary for using outside session
+					
 					switch (column.getColumn()) {
-
 					case WAYPOINT_COMMENT:
 						if (value instanceof String) {
 							if (!value.equals(wp.getComment())) {
@@ -923,24 +1001,19 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 			}
 			s.getTransaction().commit();
 		} catch (Exception ex) {
-			// TODO: cannot update do something here
 			s.getTransaction().rollback();
-			ex.printStackTrace();
-			return false;
+			throw ex;
 		} finally {
 			s.close();
 		}
 
 		if (change) {
 			WaypointEventManager.getInstance().waypointModified(wp);
-			// TODO: this does not refresh properly
-			PatrolEventManager.getInstance().patrolChanged(
-					PatrolEventManager.PATROL_DATES_LEG,
-					pld.getPatrolLeg().getPatrol());
-
+			if (p != null){
+				PatrolEventManager.getInstance().patrolSaved(p, true);
+			}
 			return true;
 		}
 		return false;
 	}
-
 }

@@ -47,5 +47,5 @@ public interface IUpdateableResultSet {
 	 * @param newValue
 	 * @return true if value updated, false if not updated
 	 */
-	public boolean update(QueryColumn column, IResultItem item, Object newValue);
+	public boolean update(QueryColumn column, IResultItem item, Object newValue) throws Exception;
 }

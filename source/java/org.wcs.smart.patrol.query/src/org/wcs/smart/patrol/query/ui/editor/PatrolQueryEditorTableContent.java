@@ -73,7 +73,7 @@ public class PatrolQueryEditorTableContent {
 	
 	private QueryResultsTable resultsTable;
 	private Composite runQueryComp;
-	private Composite tableComp;;
+	private Composite tableComp;
 	private Composite stackComposite;
 	private Form frmQueryArea;
 	private PatrolQueryResultsEditor editor;

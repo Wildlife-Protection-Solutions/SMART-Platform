@@ -145,12 +145,12 @@ public abstract class QueryResultsTable {
 	 * Updates the edit mode of the table.
 	 * @param canEdit
 	 */
-	public void setEditMode(boolean canEdit){
-		this.editMode = canEdit;
-		createMenu();
+	public void setEditMode(QueryResultsEditor editor){
+		this.editMode = editor.getEditMode();
+		createMenu(editor);
 		for (QueryTableViewerColumn c : tableViewerColumns){
 			if (c.getLabelProvider() instanceof QueryColumnLabelProvider){
-				((QueryColumnLabelProvider)c.getLabelProvider()).setEditMode(canEdit);
+				((QueryColumnLabelProvider)c.getLabelProvider()).setEditMode(editMode);
 			}
 			
 			if (editMode){
@@ -165,7 +165,7 @@ public abstract class QueryResultsTable {
 			}
 		}
 		
-		if (canEdit && table.getData(EDIT_SET_KEY) == null){
+		if (editMode && table.getData(EDIT_SET_KEY) == null){
 			TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(table, new FocusCellHighlighter(table){});
 			ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(table) {
 				protected boolean isEditorActivationEvent(
@@ -184,7 +184,7 @@ public abstract class QueryResultsTable {
 		table.refresh(true);
 	}
 	
-	private void createMenu(){
+	private void createMenu(QueryResultsEditor editor){
 		
 		Menu menuTable = table.getControl().getMenu();
 		if(menuTable != null && !menuTable.isDisposed()){
@@ -236,6 +236,7 @@ public abstract class QueryResultsTable {
 							if (getTable().getContentProvider() instanceof QueryLazyResultsContentProvider) {
 								((QueryLazyResultsContentProvider) getTable().getContentProvider()).clear();
 							}
+							if (editor != null) editor.refreshQueryProperties();
 							getTable().refresh(true);
 						}
 					}
@@ -255,7 +256,7 @@ public abstract class QueryResultsTable {
 		tableViewerColumns = createColumns(table,cols);
 		table.refresh(true);
 		this.query = query;
-		createMenu();
+		createMenu(null);
 	}
 	
 	public void initQuery(final GriddedQuery query){

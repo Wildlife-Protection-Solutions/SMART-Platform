@@ -35,6 +35,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -48,7 +49,10 @@ import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
 /**
  * Tree viewer that displays a tree in a box similar
- * to a combo box.
+ * to a combo box.  Parent can be another control (ex. table for
+ * a cell editor), or a shell in which case this control
+ * is created in a separate shell.
+ * 
  * 
  * @author Emily
  * @since 1.0.0
@@ -63,7 +67,8 @@ public class TreeDropDownViewer {
 	
 	
 	/**
-	 * Creates a new tree drop down viewer 
+	 * Creates a new tree drop down viewer inside a separate shell.
+	 * 
 	 * @param parent outer shell
 	 */
 	public TreeDropDownViewer(Shell parent){
@@ -95,6 +100,55 @@ public class TreeDropDownViewer {
 		createComposite(main);
 	}
 	
+	/**
+	 *  Creates a new tree drop down viewer inside an existing control
+	 * @param parent
+	 */
+	public TreeDropDownViewer(Composite parent){
+		
+		main = new Composite(parent, SWT.SINGLE |SWT.BORDER | SWT.RESIZE);
+		
+		main.addListener(SWT.Traverse, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				if (event.detail == SWT.TRAVERSE_ESCAPE){
+					event.doit = false;
+					hide();
+				}
+			}});
+		
+		GridLayout gl = new GridLayout(1, false);
+		gl.horizontalSpacing = 0;
+		gl.verticalSpacing = 0;
+		gl.marginWidth = 0;
+		gl.marginHeight = 0;
+		main.setLayout(gl);
+		createComposite(main);
+	}
+	
+	/**
+	 * 
+	 * @return the viewer composite 
+	 */
+	public Composite getComposite(){
+		return main;
+	}
+	
+	/**
+	 * 
+	 * @return the filtered tree  
+	 */
+	public FilteredTree getFilteredTree(){
+		return fTree;
+	}
+	
+	/**
+	 * 
+	 * @return the tree viewer
+	 */
+	public TreeViewer getTreeViewer(){
+		return this.attributeTreeViewer;
+	}
 	
 	/**
 	 * Sets the current datamodel attribute to display
@@ -108,10 +162,7 @@ public class TreeDropDownViewer {
 		attributeTreeViewer.refresh();
 	}
 	
-	public TreeViewer getTreeViewer(){
-		return this.attributeTreeViewer;
-	}
-	
+
 	private void createComposite(Composite parent){
 		
 		patternFilter = new PatternFilter() {
@@ -156,12 +207,20 @@ public class TreeDropDownViewer {
 	}
 	
 	/**
+	 * Sets the listener that is fired when a tree item is selected
+	 * @param onSelected
+	 */
+	public void setSelectionListener(ISelectionListener onSelected){
+		this.onSelected = onSelected;
+	}
+	
+	/**
 	 * Moves the shell to the required location and displays the tree.
 	 * 
 	 * @param obj the parent object (used for positioning)
 	 * @param onSelected selection listener to fire when item from tree is selected
 	 */
-	public void positionAndShow(Composite obj, ISelectionListener onSelected){
+	public void positionAndShow(Control obj, ISelectionListener onSelected){
 		fTree.clearText();
 		this.onSelected = onSelected;
 		Rectangle r = obj.getBounds();
@@ -174,6 +233,13 @@ public class TreeDropDownViewer {
 		main.setVisible(true);
 		
 		attributeTreeViewer.getTree().setFocus();
+	}
+	
+	/**
+	 * Clears the search text
+	 */
+	public void clearSearchText(){
+		fTree.clearText();
 	}
 	
 	/**

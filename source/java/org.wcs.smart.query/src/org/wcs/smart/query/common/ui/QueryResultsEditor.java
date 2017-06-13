@@ -286,6 +286,11 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		page2.refresh();
 	}
 	
+	public void refreshQueryProperties(){
+		page1.initPage();
+		page2.refresh();
+	}
+	
 	/**
 	 * @return the query results display table
 	 */

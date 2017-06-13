@@ -102,6 +102,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		for (int i = 0; i < viewer.getTable().getItemCount(); i ++){
 			viewer.clear(i);
 		}
+		viewer.getTable().setItemCount(input.getItemCount());
 	}
 	
 	@Override
@@ -113,6 +114,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 			//EG: this is the only way I can get the table to refresh properly
 			//if refresh is called 
 			viewer.replace(viewer.getElementAt(index) , index);
+			
 			return;
 		}
 		if (index < 0 || index >= viewer.getTable().getItemCount())

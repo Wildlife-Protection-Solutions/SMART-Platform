@@ -38,6 +38,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -141,20 +142,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 					
 					if (monitor.isCanceled()) return;
 					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
-					//setting result size
-					
-					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)){ //$NON-NLS-1$
-						if (rs.next()) { 
-							result.setItemCount(rs.getInt(1));
-						}
-					}
 
-					//setting waypoint count
-					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp")) {  //$NON-NLS-1$//$NON-NLS-2$
-						if (rs.next()) { 
-							result.setWpCount(rs.getInt(1));
-						}
-					}
 					
 					//lookup for columns that have data
 					monitor.subTask(Messages.DerbyObservationEngine_FindDataColumns);
@@ -186,6 +174,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 					
 					result.setDataColumns(dataColumns);
 					
+					updateResultCount(session, result);
 				} finally {
 					filterer.dropTemporaryTables(c);
 					if (monitor.isCanceled()) dropTables(c);
@@ -198,6 +187,15 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		return result;
 	}
 
+	public void updateResultCount(Session s, DerbyPagedObservationResult results){
+		//setting result size
+		Integer count = (Integer) s.createSQLQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
+		results.setItemCount(count);
+		
+		Integer wcount = (Integer) s.createSQLQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp").uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+		results.setWpCount(wcount);
+	}
+	
 	/**
 	 * Drop the created temporary tables.
 	 * 
@@ -499,11 +497,31 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 	 * @param item
 	 */
 	public void addListLabel(Session s, AttributeListItem item){
+		if (item == null) return;
 		String sql = "SELECT count(*) FROM " + queryDataTable + "_list WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
 		SQLQuery q = s.createSQLQuery(sql);
 		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 		if ((Integer)q.uniqueResult() == 0){
 			sql = " INSERT INTO " + queryDataTable + "_list (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
+			q = s.createSQLQuery(sql);
+			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
+			q.setParameter("label",  item.getName()); //$NON-NLS-1$
+			q.executeUpdate();
+		}
+	}
+	
+	/**
+	 * Add a label to the temporary attribute list label table
+	 * @param s
+	 * @param item
+	 */
+	public void addTreeLabel(Session s, AttributeTreeNode item){
+		if (item == null) return;
+		String sql = "SELECT count(*) FROM " + queryDataTable + "_tree WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
+		SQLQuery q = s.createSQLQuery(sql);
+		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
+		if ((Integer)q.uniqueResult() == 0){
+			sql = " INSERT INTO " + queryDataTable + "_tree (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
 			q = s.createSQLQuery(sql);
 			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 			q.setParameter("label",  item.getName()); //$NON-NLS-1$
