@@ -97,4 +97,5 @@ public abstract class QueryLazyResultsTable extends QueryResultsTable {
 		return super.isColumnDisplayed(query, c);
 	}
 
+
 }

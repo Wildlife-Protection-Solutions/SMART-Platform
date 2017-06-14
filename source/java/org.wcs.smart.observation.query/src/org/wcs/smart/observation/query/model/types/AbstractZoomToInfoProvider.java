@@ -34,6 +34,7 @@ import org.locationtech.udig.project.internal.command.navigation.SetViewportBBox
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.util.E3Utils;
@@ -70,7 +71,7 @@ public abstract class AbstractZoomToInfoProvider implements IQueryResultInfoProv
 	 * a given waypoint.
 	 */
 	@Override
-	public abstract void doWork(Object resultItem);	
+	public abstract void doWork(IResultItem resultItem);	
 	
 	/**
 	 * Zooms to the provided coordinates.  Coordinates must be in lat long.

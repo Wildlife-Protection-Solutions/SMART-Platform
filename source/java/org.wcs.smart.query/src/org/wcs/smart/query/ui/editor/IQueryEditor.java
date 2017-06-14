@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.editor;
 
+import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.query.model.QueryProxy;
 
 /**
@@ -60,4 +61,32 @@ public interface IQueryEditor {
 	 * @param dirty
 	 */
 	public void setDirty(boolean dirty);
+	
+	
+	/**
+	 * Determines if the query results can be edited
+	 * inside the query editor
+	 * @param type
+	 * @return
+	 */
+	public default boolean canEditResults(){
+		return false;
+	}
+	
+	/**
+	 * Returns if editing is enabled or disabled.  Only
+	 * value if canEditResults returns true
+	 * @param type
+	 * @return
+	 */
+	public default boolean getEditMode(){
+		return false;
+	}
+	
+	/**
+	 * Adds a listener that is fired when the edit mode
+	 * is modified.
+	 * @param l
+	 */
+	public default void addEditModeModifiedListener(Listener l){}
 }

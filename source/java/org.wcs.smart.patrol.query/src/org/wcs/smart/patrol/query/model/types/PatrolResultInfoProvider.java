@@ -34,6 +34,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 
 /**
@@ -56,7 +57,7 @@ public class PatrolResultInfoProvider implements IQueryResultInfoProvider {
 	}
 	
 	@Override
-	public void doWork(Object resultItem) {
+	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof PatrolQueryResultItem) {
 			PatrolQueryResultItem it = (PatrolQueryResultItem)resultItem;
 			
@@ -85,6 +86,11 @@ public class PatrolResultInfoProvider implements IQueryResultInfoProvider {
 	@Override
 	public Image getImage() {
 		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON);
+	}
+	
+	@Override
+	public boolean supportsMap(){
+		return true;
 	}
 
 }

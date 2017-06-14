@@ -89,6 +89,7 @@ public class QueryEditorTableContent {
 	public QueryEditorTableContent(Composite parent, QueryResultsEditor editor, FormToolkit toolkit) {
 		this.editor = editor;
 		createContent(parent, toolkit);
+		editor.addEditModeModifiedListener(e->resultsTable.setEditMode(editor));
 	}
 
 	/**
@@ -318,7 +319,6 @@ public class QueryEditorTableContent {
 			btnEdit.addListener(SWT.Selection, e-> {
 				btnEdit.setData(!(Boolean)btnEdit.getData());
 				editor.setEditMode((boolean)btnEdit.getData());
-				resultsTable.setEditMode(editor);
 			});
 		}
 		

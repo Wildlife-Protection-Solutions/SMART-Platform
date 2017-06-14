@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.intelligence.ui.handlers.OpenIntelligenceHandler;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 
 /**
@@ -55,7 +56,7 @@ public class IntellInfoProvider implements IQueryResultInfoProvider {
 	}
 	
 	@Override
-	public void doWork(Object resultItem) {
+	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof IntelligenceRecordResultItem){
 			UUID intellUuid = ((IntelligenceRecordResultItem)resultItem).getUuid();
 			IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);

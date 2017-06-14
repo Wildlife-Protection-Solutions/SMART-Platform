@@ -31,6 +31,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 
 /**
@@ -57,7 +58,7 @@ public abstract class AbstractObservationInfoProvider implements IQueryResultInf
 	 * a given waypoint.
 	 */
 	@Override
-	public abstract void doWork(Object resultItem);
+	public abstract void doWork(IResultItem resultItem);
 	
 	
 	protected void showItem(UUID waypointUuid, String waypointSourceKey){
@@ -92,5 +93,5 @@ public abstract class AbstractObservationInfoProvider implements IQueryResultInf
 	public boolean supportsCcaa() {
 		return false;
 	}
-
+	
 }

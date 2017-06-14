@@ -30,6 +30,7 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.edit.EditObservationDialog;
 import org.wcs.smart.query.model.IQueryEditCommand;
 
@@ -52,7 +53,7 @@ public class EditObservationResultInfoProvider extends IQueryEditCommand {
 	}
 
 	@Override
-	public boolean doWork(Object resultItem, IQueryResult result) {
+	public boolean doWork(IResultItem resultItem, IQueryResult result) {
 		PatrolQueryResultItem item = (PatrolQueryResultItem)resultItem;
 		EditObservationDialog dialog = new EditObservationDialog(Display.getDefault().getActiveShell(), item.getObservationUuid());
 		if (dialog.open() == Window.OK){

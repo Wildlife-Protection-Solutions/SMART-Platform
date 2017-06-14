@@ -198,7 +198,12 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Goto Icon
 	 */
 	public static final String GOTO_ICON = "org.wsc.smart.GOTO"; //$NON-NLS-1$
+
 	
+	/**
+	 * Edit Icon
+	 */
+	public static final String EDIT_ICON = "org.wsc.smart.EDIT_ICON"; //$NON-NLS-1$
 	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
@@ -397,6 +402,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(ZOOM_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/elcl16/zoom_tool.png")); //$NON-NLS-1$
 	 
 	     reg.put(GOTO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
+	     reg.put(EDIT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit.png")); //$NON-NLS-1$
 	}
 	
 	/**

@@ -135,11 +135,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					//setting result size
 					
-					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)) { //$NON-NLS-1$
-						if (rs.next()) { 
-							result.setItemCount(rs.getInt(1));
-						}
-					}
+					updateResultCount(session, result);
 				}catch (Exception ex){
 					throw new SQLException(ex);
 
@@ -153,6 +149,13 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 
 		});
 		return result;
+	}
+	
+	public void updateResultCount(Session s, DerbyPagedWaypointResult results){
+		//setting result size
+		Integer count = (Integer) s.createSQLQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
+		results.setItemCount(count);
+		
 	}
 
 	/**

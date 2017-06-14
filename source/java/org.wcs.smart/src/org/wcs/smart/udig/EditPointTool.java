@@ -142,7 +142,7 @@ public class EditPointTool extends AbstractModalTool{
 	}
 
 	private IMapEditManager getEditManager(){
-		Object x = getContext().getMap().getBlackboard().get(IMapEditManager.class.getCanonicalName());
+		Object x = getContext().getMap().getBlackboard().get(IMapEditManager.BLACKBOARD_KEY);
 		if (x instanceof IMapEditManager) return (IMapEditManager)x;
 		return null;
 	}

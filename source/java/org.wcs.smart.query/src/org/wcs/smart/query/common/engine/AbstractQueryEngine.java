@@ -121,6 +121,14 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	}
 
 	/**
+	 * Drop all tables associated with the query results.
+	 * @param c
+	 * @throws SQLException
+	 */
+	public void dropTables(Connection c) throws SQLException {
+	}
+	
+	/**
 	 * Creates a temporary query table 
 	 * 
 	 * @return

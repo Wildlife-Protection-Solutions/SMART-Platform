@@ -28,6 +28,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.observation.query.model.types.AbstractObservationInfoProvider;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Entity query info provider than opens the source waypoint record
@@ -40,7 +41,7 @@ import org.wcs.smart.observation.query.model.types.AbstractObservationInfoProvid
 public class EntityResultItemProvider extends AbstractObservationInfoProvider {
 
 	@Override
-	public void doWork(Object resultItem) {
+	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof EntityQueryResultItem) {
 			UUID waypointUuid = ((EntityQueryResultItem) resultItem).getWaypointUuid();
 			String waypointSourceKey = ((EntityQueryResultItem) resultItem).getSourceId();

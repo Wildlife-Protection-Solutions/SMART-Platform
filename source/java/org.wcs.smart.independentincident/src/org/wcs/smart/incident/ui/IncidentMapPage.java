@@ -128,7 +128,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		updatePointsLayer();
 		
 		if (this.parent.canEdit() == null){
-        	getMap().getBlackboard().put(IMapEditManager.class.getCanonicalName(), getEditManager());
+        	getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, getEditManager());
         	tools.getTool(UndoTool.ID).setEnabled(false);
         }
 	}

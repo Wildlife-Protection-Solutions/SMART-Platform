@@ -36,6 +36,11 @@ import org.locationtech.udig.project.render.IViewportModel;
 public interface IInfoToolProvider {
 
 	/**
+	 * Key to use to place provider on blackboard
+	 */
+	public static final String BLACKBOARD_KEY = IInfoToolProvider.class.getCanonicalName();
+	
+	/**
 	 * Find the feature at the given (x,y) screen coordinate
 	 * 
 	 * @param x

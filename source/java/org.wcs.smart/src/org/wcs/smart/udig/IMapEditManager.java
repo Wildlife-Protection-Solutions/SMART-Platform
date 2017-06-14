@@ -23,6 +23,7 @@ package org.wcs.smart.udig;
 
 import java.awt.Point;
 
+import org.locationtech.udig.project.IEditManager;
 import org.locationtech.udig.project.render.IViewportModel;
 
 /**
@@ -32,6 +33,11 @@ import org.locationtech.udig.project.render.IViewportModel;
  *
  */
 public interface IMapEditManager{
+	
+	/**
+	 * Map blackboard key for the edit manager
+	 */
+	public static final String BLACKBOARD_KEY = IEditManager.class.getCanonicalName();
 	
 	/**
 	 * find the point feature to move; return null if no point to remove

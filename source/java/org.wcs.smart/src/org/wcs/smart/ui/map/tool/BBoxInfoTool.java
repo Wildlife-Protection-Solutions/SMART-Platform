@@ -128,7 +128,7 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 	 * Find the info provider for mousing over
 	 */
 	private IInfoToolProvider getInfoProvider(){
-		IInfoToolProvider provider = (IInfoToolProvider) getContext().getMap().getBlackboard().get(IInfoToolProvider.class.getCanonicalName());
+		IInfoToolProvider provider = (IInfoToolProvider) getContext().getMap().getBlackboard().get(IInfoToolProvider.BLACKBOARD_KEY);
 		return provider;
 	}
 	

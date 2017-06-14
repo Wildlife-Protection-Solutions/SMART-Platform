@@ -48,6 +48,7 @@ public class PatrolGriddedEditor extends GriddedEditor  {
 	public GriddedQuery createQuery(){
 		return PatrolQueryFactory.createGriddedQuery();
 	}
+
 }
 
 	

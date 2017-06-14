@@ -50,7 +50,7 @@ public class UndoTool extends AbstractActionTool{
 	}
 	
 	private IMapEditManager getEditManager(){
-		Object x = getContext().getMap().getBlackboard().get(IMapEditManager.class.getCanonicalName());
+		Object x = getContext().getMap().getBlackboard().get(IMapEditManager.BLACKBOARD_KEY);
 		if (x instanceof IMapEditManager) return (IMapEditManager)x;
 		return null;
 	}

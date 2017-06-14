@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener2;
@@ -201,6 +202,17 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 		
 	}
 
+	/**
+	 * Enable or disable a tool on the toolbar
+	 * @param toolId
+	 * @param enable
+	 */
+	public void enableTool(String toolId, boolean enable){
+		if (tools == null ) return;
+		ToolItem ti = tools.getTool(toolId);
+		if (ti == null) return; 
+		ti.setEnabled(enable);
+	}
 
 	/** Does nothing; there is nothing to save.
 	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
@@ -410,6 +422,10 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         
     public Map getMap() {
         return mapViewer.getMap();
+    }
+    
+    public MapViewer getMapViewer(){
+    	return mapViewer;
     }
 	
     @Override

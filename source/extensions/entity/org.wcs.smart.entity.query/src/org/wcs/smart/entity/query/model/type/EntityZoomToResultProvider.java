@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Zoom to provider for entity data queries.
@@ -37,7 +38,7 @@ import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
 public class EntityZoomToResultProvider extends AbstractZoomToInfoProvider {
 
 	@Override
-	public void doWork(Object resultItem) {
+	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof EntityQueryResultItem) {
 			EntityQueryResultItem item = (EntityQueryResultItem) resultItem;
 			zoomTo(item.getWaypointX(null), item.getWaypointY(null));

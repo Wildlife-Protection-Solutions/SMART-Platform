@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -216,8 +215,8 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
         PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, patrolUpdatedListeners);
         
         if (PatrolManager.getInstance().canEditWaypointLocations() == null){
-        	getMap().getBlackboard().put(IMapEditManager.class.getCanonicalName(), getEditManager());
-        	tools.getTool(UndoTool.ID).setEnabled(false);
+        	getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, getEditManager());
+        	enableTool(UndoTool.ID, false);
         }
 	}
 
@@ -375,8 +374,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 			
 			private void updateToolbar(){
 				Display.getDefault().syncExec(()->{
-					ToolItem ti = tools.getTool(UndoTool.ID);
-					if (ti != null) ti.setEnabled(!undoCommands.isEmpty());
+					enableTool(UndoTool.ID, !undoCommands.isEmpty());
 				});
 			}
 			

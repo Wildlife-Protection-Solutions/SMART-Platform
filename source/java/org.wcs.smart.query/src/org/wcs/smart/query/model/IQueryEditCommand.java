@@ -22,6 +22,7 @@
 package org.wcs.smart.query.model;
 
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * interface for adding menu items to a results table 
@@ -36,10 +37,10 @@ public abstract class IQueryEditCommand implements IQueryResultInfoProvider{
 	 * @Return true if result set updated, false if no changes
 	 * @param resultItem
 	 */
-	public abstract boolean doWork(Object resultItem, IQueryResult results);
+	public abstract boolean doWork(IResultItem resultItem, IQueryResult results);
 
 	@Override
-	public void doWork(Object resultItem){
+	public void doWork(IResultItem resultItem){
 		throw new UnsupportedOperationException("doWork(resultItem) not support for editing item; call doWork(resultItem, reuslts, table) instead"); //$NON-NLS-1$
 	}
 	

@@ -214,6 +214,7 @@ public class PatrolObservationQueryType implements IMappableQueryType {
 		return new IQueryResultInfoProvider[]{
 				new PatrolResultInfoProvider(),
 				new PatrolZoomToResultProvider(),
+				//new ShowInTableInfoProvider(),
 				new EditObservationResultInfoProvider(),
 				new DeleteObservationResultInfoProvider()
 		};

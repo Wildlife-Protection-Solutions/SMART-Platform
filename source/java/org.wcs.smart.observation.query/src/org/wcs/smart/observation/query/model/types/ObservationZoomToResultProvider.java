@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Zoom to provider for all data queries.
@@ -36,7 +37,7 @@ import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 public class ObservationZoomToResultProvider extends AbstractZoomToInfoProvider {
 
 	@Override
-	public void doWork(Object resultItem) {
+	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof ObservationQueryResultItem) {
 			ObservationQueryResultItem item = (ObservationQueryResultItem) resultItem;
 			zoomTo(item.getWaypointX(null), item.getWaypointY(null));

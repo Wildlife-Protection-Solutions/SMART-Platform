@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellHighlighter;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
@@ -50,6 +51,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
@@ -199,6 +201,7 @@ public abstract class QueryResultsTable {
 			List<IQueryEditCommand> editItems = new ArrayList<>();
 			for (final IQueryResultInfoProvider item : queryType.getResultProviders()) {
 				// Create menu item
+				if (!item.supportsTable()) continue;
 				if (!SmartDB.isMultipleAnalysis() || item.supportsCcaa()){
 					if (!(item instanceof IQueryEditCommand) || (item instanceof IQueryEditCommand && editMode)){
 						if (item instanceof IQueryEditCommand){
@@ -214,7 +217,7 @@ public abstract class QueryResultsTable {
 							IStructuredSelection selection = (IStructuredSelection) table.getSelection();
 							if (!selection.isEmpty()) {
 								Object x = selection.getFirstElement();
-								item.doWork(x);
+								if (x instanceof IResultItem) item.doWork((IResultItem)x);
 							}
 						});
 					}
@@ -232,12 +235,10 @@ public abstract class QueryResultsTable {
 					IStructuredSelection selection = (IStructuredSelection) table.getSelection();
 					if (!selection.isEmpty()) {
 						Object x = selection.getFirstElement();
-						if (item.doWork(x, query.getCachedResults())){
-							if (getTable().getContentProvider() instanceof QueryLazyResultsContentProvider) {
-								((QueryLazyResultsContentProvider) getTable().getContentProvider()).clear();
+						if (x instanceof IResultItem){
+							if (item.doWork((IResultItem)x, query.getCachedResults())){
+								editor.refreshResults();
 							}
-							if (editor != null) editor.refreshQueryProperties();
-							getTable().refresh(true);
 						}
 					}
 				});
@@ -349,5 +350,12 @@ public abstract class QueryResultsTable {
 		return this.table;
 	}
 	
+	/**
+	 * selects and reveal the given item
+	 * @param item
+	 */
+	public void revealSelection(IResultItem item){
+		table.setSelection(new StructuredSelection(item), true);
+	}
 }
 

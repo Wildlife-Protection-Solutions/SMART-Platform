@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.ui.editor;
 
 import java.awt.Point;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,12 @@ import java.util.UUID;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -40,15 +47,19 @@ import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
+import org.wcs.smart.query.model.IQueryEditCommand;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.ReprojectUtils;
@@ -92,8 +103,13 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 	protected void createPages() {
 		super.createPages();
 		
-		if (((QueryEditorInput)getEditorInput()).getType().getKey().equals(PatrolObservationQuery.KEY)){
-			page2.getMap().getBlackboard().put(IInfoToolProvider.class.getCanonicalName(), getObservationQueryInfoProvider());
+		if (((QueryEditorInput)getEditorInput()).getType().getKey().equals(PatrolObservationQuery.KEY) || 
+				((QueryEditorInput)getEditorInput()).getType().getKey().equals(PatrolWaypointQuery.KEY)){
+			page2.getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, getObservationQueryInfoProvider());
+		}
+		
+		if (canEditResults()){
+			page2.getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, new MapWaypointEditManager(this));
 		}
 	}
 	
@@ -106,13 +122,15 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 		}
 		return false;
 	}
-		
-
-	
+			
 	private IInfoToolProvider getObservationQueryInfoProvider(){
 		return new IInfoToolProvider(){
 			@Override
 			public InfoPoint findFeature(int x, int y, IViewportModel vm) {
+				//clear menu
+				Menu m = page2.getMapViewer().getMenu();
+				if (m != null) m.dispose();
+				page2.getMapViewer().getControl().setMenu(null);
 				try{
 					IQueryResult r = getQueryInternal().getCachedResults();
 					if (r == null) return null;
@@ -175,6 +193,7 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 							}
 						}
 						
+						createMenu(page2.getMapViewer().getControl(), first);
 						return new InfoPoint(vm.worldToPixel(px), null, sb.toString());	
 					}
 				}catch (Exception ex){
@@ -184,8 +203,68 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 				return null;
 			}
 			
-		};
+			private void createMenu(Control control, PatrolQueryResultItem toUpdate){
+				
+				Menu existingMenu = control.getMenu();
+				if(existingMenu != null && !existingMenu.isDisposed()){
+					existingMenu.dispose();
+				}
+				if (query == null) return;
+				IQueryType queryType = QueryTypeManager.INSTANCE.findQueryType(getQuery().getTypeKey());
+				if (queryType.getResultProviders().length > 0) {
+					Menu menuTable = new Menu(control);
+					control.setMenu(menuTable);
+					control.addListener(SWT.MouseMove, new Listener(){
+
+						@Override
+						public void handleEvent(Event event) {
+							control.removeListener(SWT.MouseMove, this);
+							menuTable.dispose();
+							control.setMenu(null);
+						}
+					
+					});
+
+					List<IQueryEditCommand> editItems = new ArrayList<>();
+					for (final IQueryResultInfoProvider item : queryType.getResultProviders()) {
+						// Create menu item
+						if (!SmartDB.isMultipleAnalysis() || item.supportsCcaa()){
+							if (!item.supportsMap()) continue;
+							if (!(item instanceof IQueryEditCommand) || (item instanceof IQueryEditCommand && getEditMode())){
+								if (item instanceof IQueryEditCommand){
+									editItems.add((IQueryEditCommand) item);
+									continue;
+								}
+								MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
+								if (item.getImage() != null){
+									miTest.setImage(item.getImage());
+								}
+								miTest.setText(item.getName());
+								miTest.addListener(SWT.Selection, e->{
+									
+									item.doWork(toUpdate);
+									
+								});
+							}
+						}
+					}
+					if (!editItems.isEmpty()) new MenuItem(menuTable, SWT.SEPARATOR);
+					
+					for (final IQueryEditCommand item : editItems) {
+						MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
+						if (item.getImage() != null){
+							miTest.setImage(item.getImage());
+						}
+						miTest.setText(item.getName());
+						miTest.addListener(SWT.Selection, e->{
+							if (item.doWork(toUpdate, getQuery().getCachedResults())){
+								refreshResults();
+							}
+							
+						});
+					}
+				}
+			}
+		};	
 	}
-
-
 }

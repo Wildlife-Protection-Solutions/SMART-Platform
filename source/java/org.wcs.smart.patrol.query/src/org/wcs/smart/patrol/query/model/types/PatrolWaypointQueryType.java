@@ -39,6 +39,7 @@ import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
+import org.wcs.smart.patrol.query.ui.editor.DeleteObservationResultInfoProvider;
 import org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -211,7 +212,8 @@ public class PatrolWaypointQueryType implements IMappableQueryType {
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
 				new PatrolResultInfoProvider(),
-				new PatrolZoomToResultProvider()
+				new PatrolZoomToResultProvider(),
+				new DeleteObservationResultInfoProvider()
 		};
 	}
 	

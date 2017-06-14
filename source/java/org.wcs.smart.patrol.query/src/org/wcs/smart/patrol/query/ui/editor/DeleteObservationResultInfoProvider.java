@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.query.ui.editor;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -28,10 +29,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.query.engine.DerbyPagedObservationResult;
+import org.wcs.smart.patrol.query.engine.IWaypointUpdateableResultSet;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryEditCommand;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -54,12 +57,17 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 	}
 
 	@Override
-	public boolean doWork(Object resultItem, IQueryResult results){
+	public boolean doWork(IResultItem resultItem, IQueryResult results){
 		PatrolQueryResultItem item = (PatrolQueryResultItem)resultItem;
 		
 		boolean deleteWp = false;
 		if (item.getCategories() == null || item.getCategories().length == 0){
 			deleteWp = true;
+			
+			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.DeleteObservationResultInfoProvider_DeleteWaypointTitle,
+					MessageFormat.format(Messages.DeleteObservationResultInfoProvider_DeleteWaypointMsg, item.getWaypointId(), DateFormat.getDateInstance().format(item.getWpDateTime())))){
+				return false;
+			}
 		}else{
 			MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), 
 				Messages.DeleteObservationResultInfoProvider_DeleteTitle, null,
@@ -73,12 +81,14 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 		
 		if (deleteWp){
 			try{
-				return ((DerbyPagedObservationResult)results).deleteWaypoint(item.getWaypointUuid());
+				if (results instanceof IWaypointUpdateableResultSet)
+					return ((IWaypointUpdateableResultSet)results).deleteWaypoint(item.getWaypointUuid());
+				return false;
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(Messages.DeleteObservationResultInfoProvider_DeleteWpError + ex.getMessage(), ex);
 				return false;
 			}
-		}else{
+		}else if (results instanceof DerbyPagedObservationResult){
 			try{
 				return ((DerbyPagedObservationResult)results).deleteObservation(item.getObservationUuid());
 			}catch (Exception ex){
@@ -86,6 +96,8 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 				return false;
 			}
 		}
+		return false;
+		
 	}
 
 
@@ -93,5 +105,11 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 	public boolean supportsCcaa() {
 		return false;
 	}
+	
+	@Override
+	public boolean supportsMap(){
+		return true;
+	}
+
 
 }

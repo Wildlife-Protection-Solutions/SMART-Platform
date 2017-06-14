@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Zoom to provider for survey data queries.
@@ -36,7 +37,7 @@ import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
 public class SurveyZoomToResultProvider extends AbstractZoomToInfoProvider {
 
 	@Override
-	public void doWork(Object resultItem) {
+	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof SurveyQueryResultItem) {
 			SurveyQueryResultItem item = (SurveyQueryResultItem) resultItem;
 			

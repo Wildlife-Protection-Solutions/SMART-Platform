@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Observation info provider for all data queries and opens
@@ -39,7 +40,7 @@ import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 public class ObservationResultInfoProvider extends AbstractObservationInfoProvider {
 
 	@Override
-	public void doWork(Object resultItem) {
+	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof ObservationQueryResultItem) {
 			UUID waypointUuid = ((ObservationQueryResultItem) resultItem).getWaypointUuid();
 			String waypointSourceKey = ((ObservationQueryResultItem) resultItem).getSourceId();

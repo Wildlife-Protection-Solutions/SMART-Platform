@@ -22,6 +22,7 @@
 package org.wcs.smart.query.model;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.internal.Messages;
 
 /**
@@ -65,12 +66,28 @@ public interface IQueryResultInfoProvider {
 	 * 
 	 * @param resultItem
 	 */
-	public void doWork(Object resultItem);
+	public void doWork(IResultItem resultItem);
 	
 	/**
 	 * 
-	 * @return trye if works with ccaa query results
+	 * @return true if works with ccaa query results
 	 */
 	public boolean supportsCcaa();
+	
+	
+	/**
+	 * 
+	 * @return true if works on map page 
+	 */
+	public default boolean supportsMap(){
+		return false;
+	}
 
+	/**
+	 * 
+	 * @return true if works on table page 
+	 */
+	public default boolean supportsTable(){
+		return true;
+	}
 }

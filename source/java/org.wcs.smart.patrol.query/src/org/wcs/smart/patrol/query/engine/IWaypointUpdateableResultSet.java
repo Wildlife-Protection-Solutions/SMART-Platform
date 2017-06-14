@@ -19,30 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.editor;
+package org.wcs.smart.patrol.query.engine;
 
-import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.wcs.smart.query.common.model.udig.IQueryService;
+import java.util.UUID;
+
+import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.common.model.IUpdateableResultSet;
 
 /**
- * Query editors that include a map page.
  * 
  * @author Emily
  *
  */
-public interface IMapQueryEditor extends IQueryEditor {
+public interface IWaypointUpdateableResultSet extends IUpdateableResultSet{
 
 	/**
-	 * Creates a query service for the map 
+	 * Delete the waypoint from the result set
+	 * @param WaypointUuid
 	 * @return
+	 * @throws Exception
 	 */
-	public abstract IQueryService createQueryService();
+	boolean deleteWaypoint(UUID WaypointUuid) throws Exception;
 	
 	/**
-	 * Activate the map page of the editor and zooms 
-	 * to the given envelope. Envelope can be null if
-	 * should not zoom.
+	 * Update the waypoint position from the result set
+	 * @param pw
+	 * @param x
+	 * @param y
+	 * @return
+	 * @throws Exception
 	 */
-	public void showMapPage(ReferencedEnvelope env);
+	boolean updateWaypointPosition(PatrolQueryResultItem  pw, Double x, Double y) throws Exception;
 
 }

@@ -191,7 +191,7 @@ public class MissionMapPage extends SmartMapEditorPart {
         addLayers();
         
         if (SurveyPermissionManager.INSTANCE.canEditWaypointLocations() == null){
-        	getMap().getBlackboard().put(IMapEditManager.class.getCanonicalName(), getEditManager());
+        	getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, getEditManager());
         	tools.getTool(UndoTool.ID).setEnabled(false);
         }
 	}

@@ -35,6 +35,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 
 /**
@@ -57,7 +58,7 @@ public class SurveyResultInfoProvider implements IQueryResultInfoProvider {
 	}
 	
 	@Override
-	public void doWork(Object resultItem) {
+	public void doWork(IResultItem resultItem) {
 		UUID missionUuid = null;
 		String missionId = null;
 		UUID waypointUuid = null;

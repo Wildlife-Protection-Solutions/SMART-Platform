@@ -10,6 +10,8 @@ public class Messages extends NLS {
 	public static String DeleteObservationResultInfoProvider_DeleteObsBtn;
 	public static String DeleteObservationResultInfoProvider_DeleteObsError;
 	public static String DeleteObservationResultInfoProvider_DeleteTitle;
+	public static String DeleteObservationResultInfoProvider_DeleteWaypointMsg;
+	public static String DeleteObservationResultInfoProvider_DeleteWaypointTitle;
 	public static String DeleteObservationResultInfoProvider_DeleteWpBtn;
 	public static String DeleteObservationResultInfoProvider_DeleteWpError;
 	public static String DerbyFilterToSqlGenerator_DateFilteNotSupported;
@@ -215,6 +217,7 @@ public class Messages extends NLS {
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
 	public static String EditObservationResultInfoProvider_DeleteError;
 	public static String EditObservationResultInfoProvider_EditLabel;
+	public static String MapWaypointEditManager_MoveError;
 
 	static {
 		// initialize resource bundle

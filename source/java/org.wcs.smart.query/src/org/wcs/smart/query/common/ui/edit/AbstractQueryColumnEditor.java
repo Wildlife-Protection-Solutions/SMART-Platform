@@ -80,11 +80,7 @@ public abstract class AbstractQueryColumnEditor extends EditingSupport {
 		}
 		
 		if (wasUpdated){
-			if (getViewer().getContentProvider() instanceof QueryLazyResultsContentProvider) {
-				((QueryLazyResultsContentProvider) getViewer().getContentProvider()).clear();
-			}
-			editor.refreshQueryProperties();
-			getViewer().refresh(true);
+			editor.refreshResults();
 		}
 	}
 

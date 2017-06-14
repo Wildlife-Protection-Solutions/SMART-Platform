@@ -330,7 +330,8 @@ public class PatrolQueryEditorTableContent {
 				return PatrolTableColumn.getLabelProvider(column, allColumns);
 			}
 		};
-
+		
+		
 		TableViewer viewer = resultsTable.createTable(main);
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(viewer.getTable());

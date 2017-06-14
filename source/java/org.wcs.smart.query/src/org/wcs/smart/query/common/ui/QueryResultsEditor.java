@@ -22,6 +22,7 @@
 package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -34,7 +35,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -74,6 +77,8 @@ import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.udig.IMapEditManager;
+import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.util.ReprojectUtils;
 
 /**
@@ -95,6 +100,8 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 * Listener for changes to area names/ids
 	 */
 	private IAreaModifiedListener areaListener = null;
+	
+	private List<Listener> editModeModified = new ArrayList<Listener>();
 	
 	/**
 	 * Job to run the query and refresh the results
@@ -625,21 +632,13 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 * @return
 	 */
 	public abstract Query createNewQuery(IQueryType type);
-	
-	
-	/**
-	 * Creates a new query of the given type
-	 * @param type
-	 * @return
-	 */
-	public boolean canEditResults(){
-		return false;
-	}
+
 	
 	/**
 	 * Gets the edit mode state
 	 * @return
 	 */
+	@Override
 	public boolean getEditMode(){
 		return this.editMode;
 	}
@@ -653,7 +652,36 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		}else{
 			this.editMode = false;
 		}
+		for (Listener l : editModeModified){
+			l.handleEvent(null);
+		}
 	}
+	
+	@Override
+	public void addEditModeModifiedListener(Listener l){
+		editModeModified.add(l);
+	}
+	
+	
+	/**
+	 * Refreshes the map and viewer after edits completed
+	 */
+	public void refreshResults(){
+		TableViewer viewer = getQueryResultsTable().getTable();
+		if (viewer.getContentProvider() instanceof QueryLazyResultsContentProvider) {
+			((QueryLazyResultsContentProvider) viewer.getContentProvider()).clear();
+		}
+		refreshQueryProperties();
+		viewer.refresh(true);
+		
+		IMapEditManager mgr = (IMapEditManager) getMap().getBlackboard().get(IMapEditManager.BLACKBOARD_KEY);
+		if (mgr != null){
+			page2.enableTool(UndoTool.ID, canEditResults() && getEditMode() && mgr.canUndo());
+		}
+		
+		getMap().getRenderManager().refresh(null);
+	}
+	
 	
 	/**
 	 * Creates a query service for the map 

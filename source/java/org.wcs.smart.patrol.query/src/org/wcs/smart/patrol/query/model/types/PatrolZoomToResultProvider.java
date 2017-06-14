@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -40,7 +41,7 @@ import com.vividsolutions.jts.geom.Geometry;
 public class PatrolZoomToResultProvider extends AbstractZoomToInfoProvider {
 
 	@Override
-	public void doWork(Object resultItem) {
+	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof PatrolQueryResultItem) {
 			PatrolQueryResultItem item = (PatrolQueryResultItem) resultItem;
 			if (item.getWaypointUuid() != null){
