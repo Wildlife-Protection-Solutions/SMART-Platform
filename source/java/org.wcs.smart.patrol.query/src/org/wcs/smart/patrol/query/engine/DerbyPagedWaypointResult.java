@@ -68,6 +68,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		{"patrol", "p"}, //$NON-NLS-1$ //$NON-NLS-2$
 		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
 	};
+	private final static NullComparator NULL_COMPARATOR = new NullComparator(false);
 	
 	protected String queryTempTable;
 	protected Envelope bounds = null;
@@ -235,9 +236,6 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		return false;
 	}
 
-	 private final static NullComparator NULL_COMPARATOR =
-             new NullComparator(false);
-	
 	private boolean updateWaypointDetails(FixedQueryColumn column, PatrolQueryResultItem item, Object value) throws Exception{
 		Waypoint wp = null;
 		Patrol p = null;

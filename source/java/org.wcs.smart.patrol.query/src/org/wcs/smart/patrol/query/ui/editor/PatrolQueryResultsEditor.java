@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.ui.editor;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -31,8 +32,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -40,7 +46,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
-import org.locationtech.udig.project.internal.command.navigation.ZoomCommand;
+import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
@@ -50,11 +56,13 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
@@ -67,11 +75,13 @@ import org.wcs.smart.query.event.QueryAreaModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -91,6 +101,9 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	
 	private IAreaModifiedListener areaListener = null;
 	private Projection projection = null;
+	
+	private boolean editMode = false;
+	private List<Listener> editModeModified = new ArrayList<>();
 	
 	Job runQueryJob = new Job(Messages.PatrolQueryResultsEditor_RunQueryJobName) {
 		@Override
@@ -207,7 +220,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	public void showMapPage(ReferencedEnvelope env) {
 		if (env != null){
 			page2.setInitialZoom(env);
-			getMap().sendCommandSync(new ZoomCommand(env));
+			getMap().sendCommandSync(new SetViewportBBoxCommand(env));
 		}
 		for (int i = 0; i < getPageCount(); i ++){
 			if (getEditor(i) == page2){
@@ -340,8 +353,68 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		}finally{
 			showBusy(false);
 		}
+		
+//		if (((QueryEditorInput)getEditorInput()).getType().getKey().equals(PatrolQuery.KEY)){
+//			page2.getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, getObservationQueryInfoProvider());
+//		}
+//		
+//		if (canEditResults()){
+//			page2.getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, new MapWaypointEditManager(this));
+//		}
 	}
 
+	
+	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
+		return PatrolTableColumn.getLabelProvider(column, allColumns);
+	}
+	
+	
+	protected EditingSupport getEditingSupport(ColumnViewer viewer, QueryColumn column) {
+		EditingSupport s = QueryColumnEditingSupport.getCellEditor(viewer, column, this);
+		if (s != null) return s;
+		return null;
+	}
+	
+	@Override
+	public boolean canEditResults(){
+		if (!UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)) return false;
+		String queryType = ((QueryEditorInput)getEditorInput()).getType().getKey();
+		if (queryType.equals(PatrolQuery.KEY)){
+			return true;
+		}
+		return false;
+	}
+	
+	
+
+	/**
+	 * Gets the edit mode state
+	 * @return
+	 */
+	@Override
+	public boolean getEditMode(){
+		return this.editMode;
+	}
+	/**
+	 * Sets if edit mode is enabled or disabled
+	 * @param enabled
+	 */
+	public void setEditMode(boolean enabled){
+		if (canEditResults()){
+			this.editMode = enabled;
+		}else{
+			this.editMode = false;
+		}
+		for (Listener l : editModeModified){
+			l.handleEvent(null);
+		}
+	}
+	
+	@Override
+	public void addEditModeModifiedListener(Listener l){
+		editModeModified.add(l);
+	}
+	
 	/**
 	 * Re-run the query and refresh the results.
 	 */
@@ -548,5 +621,18 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	@Override
 	public IQueryService createQueryService() {
 		return new QueryService((SimpleQuery)getQuery(), this);
+	}
+	
+	
+	/**
+	 * Refreshes the map and viewer after edits completed
+	 */
+	@Override
+	public void refreshResults(){
+		TableViewer viewer = getQueryResultsTable().getTable();
+		page1.refreshCount();
+		page2.refresh();
+		viewer.refresh(true);
+		getMap().getRenderManager().refresh(null);
 	}
 }

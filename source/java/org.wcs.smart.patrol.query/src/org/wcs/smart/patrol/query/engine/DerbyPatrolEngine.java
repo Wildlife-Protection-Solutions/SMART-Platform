@@ -50,7 +50,6 @@ import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -67,7 +66,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 
-	private MemoryQueryResult<PatrolQueryResultItem> myResults;
+	private PatrolQueryMemoryResult myResults;
 	private String queryDataTable;
 	private Session session;
 	
@@ -133,7 +132,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 						return;
 					}
 					monitor.subTask(Messages.DerbyPatrolEngine_Progress_LoadingResults);
-					myResults = new MemoryQueryResult<PatrolQueryResultItem>(getResults(c, session));
+					myResults = new PatrolQueryMemoryResult(getResults(c, session));
 					
 					monitor.worked(1);
 				} finally {
@@ -390,7 +389,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		it.setLeader(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_leader")), session)); //$NON-NLS-1$
 		it.setPilot(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_pilot")), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("r_track")); //$NON-NLS-1$
-
+		it.setPatrolLegUuid(UuidUtils.byteToUUID(rs.getBytes("r_pl_uuid"))); //$NON-NLS-1$
+		
 		return it;
 	}
 	

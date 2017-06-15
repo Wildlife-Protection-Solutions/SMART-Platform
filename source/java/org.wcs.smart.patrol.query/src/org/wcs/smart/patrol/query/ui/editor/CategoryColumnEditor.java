@@ -25,10 +25,10 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.common.ui.edit.AbstractQueryColumnEditor;
 import org.wcs.smart.query.common.ui.edit.CellEditorFactory;
 import org.wcs.smart.query.model.CategoryQueryColumn;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
 
 /**
  * Column editor for category columns.
@@ -41,7 +41,7 @@ public class CategoryColumnEditor extends AbstractQueryColumnEditor {
 	
 	private CellEditor categoryCellEditor = null;
 
-	public CategoryColumnEditor (ColumnViewer viewer, CategoryQueryColumn queryColumn, QueryResultsEditor editor ){
+	public CategoryColumnEditor (ColumnViewer viewer, CategoryQueryColumn queryColumn, IQueryEditor editor ){
 		super(viewer, queryColumn, editor);
 	}
 	

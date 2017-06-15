@@ -74,6 +74,14 @@ public interface IQueryEditor {
 	}
 	
 	/**
+	 * Gets a list of edit tools to include as tools in the map
+	 * editor.  Must not be null, can be an empty array.
+	 * @return
+	 */
+	public default String[] getEditTools(){
+		return new String[]{};
+	}
+	/**
 	 * Returns if editing is enabled or disabled.  Only
 	 * value if canEditResults returns true
 	 * @param type
@@ -89,4 +97,10 @@ public interface IQueryEditor {
 	 * @param l
 	 */
 	public default void addEditModeModifiedListener(Listener l){}
+	
+	
+	/** 
+	 * Refresh the query ui after an edit is made
+	 */
+	public default void refreshResults(){}
 }

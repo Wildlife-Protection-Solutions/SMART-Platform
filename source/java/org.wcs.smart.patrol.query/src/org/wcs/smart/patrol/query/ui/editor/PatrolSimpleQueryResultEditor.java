@@ -58,7 +58,10 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
+import org.wcs.smart.udig.UndoTool;
+import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.ReprojectUtils;
@@ -87,6 +90,32 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 		return PatrolQueryFactory.createQuery(type);
 	}
 	
+	@Override
+	public String[] getEditTools(){
+		return new String[]{
+				MapToolComposite.SEPERATOR_TOOL_ID,
+				EditPointTool.ID,
+				UndoTool.ID,
+				MapToolComposite.SEPERATOR_TOOL_ID
+		};
+	}
+	
+	private void updateEditTools(){		
+		if (canEditResults()){
+			page2.enableTool(EditPointTool.ID, getEditMode());
+			IMapEditManager mgr = (IMapEditManager) getMap().getBlackboard().get(IMapEditManager.BLACKBOARD_KEY);
+			if (mgr != null && mgr.canUndo()){
+				page2.enableTool(UndoTool.ID, getEditMode());	
+			}else{
+				page2.enableTool(UndoTool.ID, false);
+			}
+		}else{
+			page2.enableTool(UndoTool.ID, false);
+			page2.enableTool(EditPointTool.ID, false);
+		}
+	}
+	
+	@Override
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
 		return PatrolTableColumn.getLabelProvider(column, allColumns);
 	}
@@ -110,6 +139,10 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 		if (canEditResults()){
 			page2.getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, new MapWaypointEditManager(this));
 		}
+		addEditModeModifiedListener(e->{
+			updateEditTools();
+		});	
+		updateEditTools();
 	}
 	
 	@Override

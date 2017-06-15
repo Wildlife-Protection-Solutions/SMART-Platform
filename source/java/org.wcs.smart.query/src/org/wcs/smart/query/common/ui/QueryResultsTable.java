@@ -60,6 +60,7 @@ import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
 
 /**
  * Creates a query results table for a given query.
@@ -147,7 +148,7 @@ public abstract class QueryResultsTable {
 	 * Updates the edit mode of the table.
 	 * @param canEdit
 	 */
-	public void setEditMode(QueryResultsEditor editor){
+	public void setEditMode(IQueryEditor editor){
 		this.editMode = editor.getEditMode();
 		createMenu(editor);
 		for (QueryTableViewerColumn c : tableViewerColumns){
@@ -186,7 +187,7 @@ public abstract class QueryResultsTable {
 		table.refresh(true);
 	}
 	
-	private void createMenu(QueryResultsEditor editor){
+	private void createMenu(IQueryEditor editor){
 		
 		Menu menuTable = table.getControl().getMenu();
 		if(menuTable != null && !menuTable.isDisposed()){

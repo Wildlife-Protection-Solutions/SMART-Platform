@@ -322,7 +322,21 @@ public class PatrolQueryColumnCache {
 								}
 							}
 							if (add){
-								cols.add(new FixedQueryColumn(item, Locale.getDefault()));
+								FixedQueryColumn c = new FixedQueryColumn(item, Locale.getDefault());
+								if ( item == FixedQueryColumn.FixedColumns.PATROL_ARMED || 
+										item == FixedQueryColumn.FixedColumns.PATROL_ID || 
+										item == FixedQueryColumn.FixedColumns.PATROL_LEG_ID ||
+										item == FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER ||
+										item == FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT ||
+										item == FixedQueryColumn.FixedColumns.PATROL_MANDATE ||
+										item == FixedQueryColumn.FixedColumns.PATROL_OBJETIVE ||
+										item == FixedQueryColumn.FixedColumns.PATROL_STATION ||
+										item == FixedQueryColumn.FixedColumns.PATROL_TEAM ||
+										item == FixedQueryColumn.FixedColumns.TRANSPORT_TYPE ){
+									c.setEdit(true);
+								}
+								
+								cols.add(c);
 							}
 								
 						}

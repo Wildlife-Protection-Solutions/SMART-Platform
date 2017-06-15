@@ -52,9 +52,6 @@ import org.wcs.smart.query.model.QueryStyleParser;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
-import org.wcs.smart.udig.EditPointTool;
-import org.wcs.smart.udig.IMapEditManager;
-import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -210,14 +207,10 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 			maptoolids.add(tool);
 		}
 		if (parentEditor.canEditResults()){
-			maptoolids.add(MapToolComposite.SEPERATOR_TOOL_ID);
-			maptoolids.add(EditPointTool.ID);
-			maptoolids.add(UndoTool.ID);
-			maptoolids.add(MapToolComposite.SEPERATOR_TOOL_ID);
-			
-			parentEditor.addEditModeModifiedListener(e->{
-				updateEditTools();
-			});			
+			for (String tool : parentEditor.getEditTools()){
+				maptoolids.add(tool);
+			}
+		
 		}
 		this.mapTools = maptoolids.toArray(new String[maptoolids.size()]);
 	}
@@ -254,24 +247,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
 		loadDefaultLayers.schedule();
 		addInitialZoomFunction();
-		
-		updateEditTools();
 	}  
 
-	private void updateEditTools(){		
-		if (parentEditor.canEditResults()){
-			super.enableTool(EditPointTool.ID, parentEditor.getEditMode());
-			IMapEditManager mgr = (IMapEditManager) getMap().getBlackboard().get(IMapEditManager.BLACKBOARD_KEY);
-			if (mgr != null && mgr.canUndo()){
-				super.enableTool(UndoTool.ID, parentEditor.getEditMode());	
-			}else{
-				super.enableTool(UndoTool.ID, false);
-			}
-		}else{
-			super.enableTool(UndoTool.ID, false);
-			super.enableTool(EditPointTool.ID, false);
-		}
-	}
+	
 	
     /**
      * @see org.wcs.smart.ui.map.SmartMapEditorPart#dispose()

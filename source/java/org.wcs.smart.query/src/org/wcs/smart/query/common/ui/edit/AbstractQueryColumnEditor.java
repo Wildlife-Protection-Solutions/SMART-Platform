@@ -24,6 +24,7 @@ package org.wcs.smart.query.common.ui.edit;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
@@ -34,10 +35,10 @@ import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
-import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
 
 /**
  * Abstract class to support editing in query results table.
@@ -55,9 +56,9 @@ public abstract class AbstractQueryColumnEditor extends EditingSupport {
 	private ComboBoxViewerCellEditor booleanCellEditor = null;;
 
 	protected QueryColumn queryColumn;
-	protected QueryResultsEditor editor;
+	protected IQueryEditor editor;
 	
-	public AbstractQueryColumnEditor (ColumnViewer viewer, QueryColumn queryColumn, QueryResultsEditor editor ){
+	public AbstractQueryColumnEditor (ColumnViewer viewer, QueryColumn queryColumn, IQueryEditor editor ){
 		super(viewer);
 		this.queryColumn = queryColumn;
 		this.editor = editor;
@@ -66,7 +67,7 @@ public abstract class AbstractQueryColumnEditor extends EditingSupport {
 	@Override
 	protected void setValue(Object element, Object value) {
 		if (!(element instanceof IResultItem)) return;
-		Object resultSet = editor.getQuery().getCachedResults();
+		Object resultSet = editor.getQueryProxy().getQuery().getCachedResults();
 		if (! (resultSet instanceof IUpdateableResultSet)) return;
 		IUpdateableResultSet results = (IUpdateableResultSet) resultSet;
 		if (!results.canUpdate(((IResultItem)element).getClass())) return;
@@ -101,9 +102,9 @@ public abstract class AbstractQueryColumnEditor extends EditingSupport {
 
 	@Override
 	protected boolean canEdit(Object element) {
-		if (editor.getQuery().getCachedResults() instanceof IUpdateableResultSet && 
+		if (editor.getQueryProxy().getQuery().getCachedResults() instanceof IUpdateableResultSet && 
 				element instanceof IResultItem &&
-				((IUpdateableResultSet)editor.getQuery().getCachedResults()).canUpdate(((IResultItem)element).getClass())){
+				((IUpdateableResultSet)editor.getQueryProxy().getQuery().getCachedResults()).canUpdate(((IResultItem)element).getClass())){
 			return true;
 		}
 		return false;
@@ -151,4 +152,10 @@ public abstract class AbstractQueryColumnEditor extends EditingSupport {
 		return booleanCellEditor;
 	}
 
+	protected CellEditor getBooleanCellEditor(LabelProvider lblProvider) {
+		if (booleanCellEditor == null) {
+			booleanCellEditor = CellEditorFactory.newBooleanCellEditor((Composite) getViewer().getControl(), lblProvider);
+		}
+		return booleanCellEditor;
+	}
 }

@@ -46,6 +46,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
+import org.locationtech.udig.project.internal.command.navigation.ZoomCommand;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
@@ -54,6 +55,7 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
@@ -80,6 +82,8 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.util.ReprojectUtils;
+
+import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Editor for displaying query results.  The editor includes two pages

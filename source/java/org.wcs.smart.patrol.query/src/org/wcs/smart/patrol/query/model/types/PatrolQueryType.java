@@ -39,6 +39,7 @@ import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
+import org.wcs.smart.patrol.query.ui.editor.DeletePatrolResultInfoProvider;
 import org.wcs.smart.patrol.query.ui.editor.PatrolQueryResultsEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -214,7 +215,8 @@ public class PatrolQueryType implements IMappableQueryType {
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
 				new PatrolResultInfoProvider(),
-				new PatrolZoomToResultProvider()
+				new PatrolZoomToResultProvider(),
+				new DeletePatrolResultInfoProvider()
 		};
 	}
 

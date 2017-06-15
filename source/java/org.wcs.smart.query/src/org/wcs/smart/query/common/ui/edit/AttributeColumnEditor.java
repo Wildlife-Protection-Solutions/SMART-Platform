@@ -27,8 +27,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
 import org.wcs.smart.common.celleditor.TreeViewerCellEditor;
-import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
 
 /**
  * Cell editor for editing attribute query column results.
@@ -41,7 +41,7 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 	private ComboBoxViewerCellEditor listCellEditor;
 	private TreeViewerCellEditor treeCellEditor;
 	
-	public AttributeColumnEditor (ColumnViewer viewer, AttributeQueryColumn queryColumn, QueryResultsEditor editor ){
+	public AttributeColumnEditor (ColumnViewer viewer, AttributeQueryColumn queryColumn, IQueryEditor editor ){
 		super(viewer, queryColumn, editor);
 	}
 

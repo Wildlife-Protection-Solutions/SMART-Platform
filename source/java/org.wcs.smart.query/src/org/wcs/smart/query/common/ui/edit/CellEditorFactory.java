@@ -101,11 +101,11 @@ public class CellEditorFactory {
 	
 	/**
 	 * Creates a drop down cell list editor that includes true and false values
+	 * with custom labels
 	 * @param parent
 	 * @return
 	 */
-	public static ComboBoxViewerCellEditor newBooleanCellEditor(Composite parent){
-		
+	public static ComboBoxViewerCellEditor newBooleanCellEditor(Composite parent, LabelProvider provider){
 		ComboBoxViewerCellEditor editor = new ComboBoxViewerCellEditor(parent, SWT.READ_ONLY | SWT.DROP_DOWN){
 			@Override
 			protected void doSetFocus() {
@@ -124,7 +124,17 @@ public class CellEditorFactory {
 			}
 		};
 		editor.setContentProvider(ArrayContentProvider.getInstance());
-		editor.setLabelProvider(new LabelProvider(){
+		editor.setLabelProvider(provider);
+		editor.setInput(new Object[]{Boolean.TRUE, Boolean.FALSE});
+		return editor;
+	}
+	/**
+	 * Creates a drop down cell list editor that includes true and false values
+	 * @param parent
+	 * @return
+	 */
+	public static ComboBoxViewerCellEditor newBooleanCellEditor(Composite parent){
+		return newBooleanCellEditor(parent, new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof Boolean){
 					return element.toString();
@@ -132,8 +142,7 @@ public class CellEditorFactory {
 				return super.getText(element);
 			}
 		});
-		editor.setInput(new Object[]{Boolean.TRUE, Boolean.FALSE});
-		return editor;
+		
 	}
 	
 	

@@ -158,6 +158,14 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	}
 	
 	/**
+	 * Refreshes query count label
+	 */
+	public void refreshCount(){
+		content.refreshCount();
+	}
+	
+	
+	/**
 	 * Displays the progress bar
 	 */
 	public void showProgressArea(){

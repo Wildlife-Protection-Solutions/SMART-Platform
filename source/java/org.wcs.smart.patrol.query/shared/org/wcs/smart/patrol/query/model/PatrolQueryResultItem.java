@@ -31,17 +31,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -89,6 +82,7 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private UUID patrolUuid;
 	private boolean armed;
 	private String patrolLegId;
+	private UUID patrolLegUuid;
 	private String transportType;
 	private Date plStartDate;
 	private Date plEndDate;
@@ -313,6 +307,21 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 */
 	public void setPatrolType(PatrolType.Type patrolType) {
 		this.patrolType = patrolType;
+	}
+	
+	/**
+	 * (optional)
+	 * @return the patrol leg uuid 
+	 */
+	public UUID getPatrolLegUuid() {
+		return patrolLegUuid;
+	}
+	/**
+	 * sets the patrol leg uuid (optional)
+	 * @param patrolUuid the patrol uuid
+	 */
+	public void setPatrolLegUuid(UUID legUuid) {
+		this.patrolLegUuid = legUuid;
 	}
 	
 	/**
@@ -585,7 +594,8 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	
 	@Override
 	public int hashCode(){
-		return Objects.hash(waypointUuid, observationUuid);
+		return Objects.hash(patrolUuid, patrolLegUuid, waypointUuid, observationUuid);
+		
 	}
 	
 	@Override
@@ -593,7 +603,11 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 		if (other == this) return true;
 		if (other == null) return false;
 		if (!other.getClass().equals(getClass())) return false;
-		return Objects.equals(waypointUuid, ((PatrolQueryResultItem)other).waypointUuid) && 
-				Objects.equals(observationUuid, ((PatrolQueryResultItem)other).observationUuid);
+		PatrolQueryResultItem o = (PatrolQueryResultItem) other;
+		
+		return Objects.equals(patrolLegUuid, o.patrolLegUuid) &&
+				Objects.equals(patrolUuid, o.patrolUuid) &&
+				Objects.equals(waypointUuid, o.waypointUuid) && 
+				Objects.equals(observationUuid, o.observationUuid);
 	}
 }

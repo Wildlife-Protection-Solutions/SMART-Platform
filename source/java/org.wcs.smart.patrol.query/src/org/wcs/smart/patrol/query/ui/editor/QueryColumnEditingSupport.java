@@ -30,6 +30,7 @@ import org.wcs.smart.query.common.ui.edit.AttributeColumnEditor;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
 
 /**
  * Editing support manager for editing patrol query results in the 
@@ -41,7 +42,7 @@ import org.wcs.smart.query.model.QueryColumn;
 public class QueryColumnEditingSupport {
 
 	
-	public static EditingSupport getCellEditor(ColumnViewer viewer, QueryColumn column, QueryResultsEditor editor){
+	public static EditingSupport getCellEditor(ColumnViewer viewer, QueryColumn column, IQueryEditor editor){
 		if (column instanceof FixedQueryColumn){
 			return getCellEditor(viewer, (FixedQueryColumn)column, editor);
 		}else if (column instanceof AttributeQueryColumn){
@@ -52,7 +53,7 @@ public class QueryColumnEditingSupport {
 		return null;
 	}
 	
-	private static EditingSupport getCellEditor(ColumnViewer viewer, FixedQueryColumn column, QueryResultsEditor editor){
+	private static EditingSupport getCellEditor(ColumnViewer viewer, FixedQueryColumn column, IQueryEditor editor){
 		if (column.getColumn() == FixedColumns.WAYPOINT_ID ||
 			column.getColumn() == FixedColumns.WAYPOINT_TIME ||
 			column.getColumn() == FixedColumns.WAYPOINT_X ||
@@ -63,14 +64,27 @@ public class QueryColumnEditingSupport {
 			
 			return new WaypointColumnEditor(viewer, column, editor);
 		}
+		if (column.getColumn() == FixedColumns.PATROL_ID ||
+			column.getColumn() == FixedColumns.PATROL_STATION ||
+			column.getColumn() == FixedColumns.PATROL_TEAM ||
+			column.getColumn() == FixedColumns.PATROL_OBJETIVE ||
+			column.getColumn() == FixedColumns.PATROL_MANDATE ||
+			column.getColumn() == FixedColumns.PATROL_ARMED ||
+			column.getColumn() == FixedColumns.PATROL_LEG_ID ||
+			column.getColumn() == FixedColumns.PATROL_LEG_LEADER ||
+			column.getColumn() == FixedColumns.PATROL_LEG_PILOT ||
+			column.getColumn() == FixedColumns.TRANSPORT_TYPE){
+				
+				return new PatrolColumnEditor(viewer, column, editor);
+			}
 		return null;
 	}
 	
-	private static EditingSupport getCellEditor(ColumnViewer viewer, AttributeQueryColumn column, QueryResultsEditor editor){
+	private static EditingSupport getCellEditor(ColumnViewer viewer, AttributeQueryColumn column, IQueryEditor editor){
 		return new AttributeColumnEditor(viewer, column, editor);
 	}
 	
-	private static EditingSupport getCellEditor(ColumnViewer viewer, CategoryQueryColumn column, QueryResultsEditor editor){
+	private static EditingSupport getCellEditor(ColumnViewer viewer, CategoryQueryColumn column, IQueryEditor editor){
 		return new CategoryColumnEditor(viewer, column, editor);
 	}
 }

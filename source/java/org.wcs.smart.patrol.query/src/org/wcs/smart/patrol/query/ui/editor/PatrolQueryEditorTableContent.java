@@ -27,6 +27,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -38,11 +40,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
@@ -101,7 +106,8 @@ public class PatrolQueryEditorTableContent {
 	public void initValues(PatrolQuery query) {
 		updateName(query);
 		resultsTable.initQuery(query, editor);
-//		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null, editor));
+
+		editor.addEditModeModifiedListener(e->resultsTable.setEditMode(editor));
 	}
 
 	/**
@@ -154,6 +160,25 @@ public class PatrolQueryEditorTableContent {
 		});
 	}
 	
+	public void refreshCount(){
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (tableComp.isDisposed()){
+					//window closed nothing to update
+					return;
+				}
+				Object obj = resultsTable.getTable().getInput();
+				if (obj instanceof List){
+					List l = (List)obj;
+					lblNumResults.setText(String.valueOf(l.size()));
+					lblNumPatrols.setText(String.valueOf(computeNumberOfPatrols(l)));
+					lblNumResults.getParent().getParent().layout();
+				}
+				
+			}
+		});
+	}
 	private int computeNumberOfPatrols(Collection<PatrolQueryResultItem> items){
 		HashSet<Integer> keys = new HashSet<Integer>();
 		int cnt = 0;
@@ -307,10 +332,11 @@ public class PatrolQueryEditorTableContent {
 		main.setLayout(new GridLayout(1, false));
 		
 		Composite comp = toolkit.createComposite(main);
-		GridLayout layout = new GridLayout(7,false);
+		GridLayout layout = new GridLayout(editor.canEditResults() ? 9 : 8, false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		comp.setLayout(layout);
+		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		toolkit.createLabel(comp,  Messages.PatrolQueryEditorTableContent_NumberOfPatrolsLabel);
 		lblNumPatrols = toolkit.createLabel(comp, Messages.PatrolQueryEditorTableContent_NALabel);
@@ -324,10 +350,32 @@ public class PatrolQueryEditorTableContent {
 		toolkit.createLabel(comp,  Messages.PatrolQueryEditorTableContent_NumberofRecordsLabel);
 		lblNumResults = toolkit.createLabel(comp, Messages.PatrolQueryEditorTableContent_NALabel);
 	
+		l = toolkit.createLabel(comp, ""); //$NON-NLS-1$
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		if (editor.canEditResults()){
+			ToolBar tb = new ToolBar(comp, SWT.NONE);
+			tb.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			ToolItem btnEdit = new ToolItem(tb, SWT.CHECK);
+			btnEdit.setToolTipText(Messages.PatrolQueryEditorTableContent_edittooltip);
+			btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			
+			btnEdit.setData(Boolean.FALSE);
+			btnEdit.addListener(SWT.Selection, e-> {
+				btnEdit.setData(!(Boolean)btnEdit.getData());
+				editor.setEditMode((boolean)btnEdit.getData());
+			});
+		}
+		
 		resultsTable = new QueryResultsTable(){
 			@Override
 			public CellLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {
 				return PatrolTableColumn.getLabelProvider(column, allColumns);
+				
+			}
+			
+			@Override
+			public EditingSupport getEditingSupport(ColumnViewer viewer, QueryColumn column) {
+				return editor.getEditingSupport(viewer, column);
 			}
 		};
 		

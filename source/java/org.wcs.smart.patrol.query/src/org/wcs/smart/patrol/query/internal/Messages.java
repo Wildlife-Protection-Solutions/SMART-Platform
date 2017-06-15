@@ -14,6 +14,8 @@ public class Messages extends NLS {
 	public static String DeleteObservationResultInfoProvider_DeleteWaypointTitle;
 	public static String DeleteObservationResultInfoProvider_DeleteWpBtn;
 	public static String DeleteObservationResultInfoProvider_DeleteWpError;
+	public static String DeletePatrolResultInfoProvider_ConfirmDelete;
+	public static String DeletePatrolResultInfoProvider_DeleteTitle;
 	public static String DerbyFilterToSqlGenerator_DateFilteNotSupported;
 	public static String DerbyGridEngine_Error_PatrolValueNotSupported;
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
@@ -117,6 +119,7 @@ public class Messages extends NLS {
 	public static String PatrolListDropItem_LoadingJobName;
 	public static String PatrolListDropItem_LoadingLabel;
 	public static String PatrolQueryDataSource_SchemaError;
+	public static String PatrolQueryEditorTableContent_edittooltip;
 	public static String PatrolQueryEditorTableContent_NALabel;
 	public static String PatrolQueryEditorTableContent_NumberOfPatrolsLabel;
 	public static String PatrolQueryEditorTableContent_NumberofRecordsLabel;
@@ -125,6 +128,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_AgencyLabel;
 	public static String PatrolQueryLabelProvider_RankLabel;
 	public static String PatrolQueryLabelProvider_TotalActivePatrolHours;
+	public static String PatrolQueryMemoryResult_DeleteError;
 	public static String PatrolQueryOptions_CaGroupByOptionName;
 	public static String PatrolQueryOptions_ErrorInvalidPatrolFilterValue;
 	public static String PatrolQueryOptions_QueryOpArmed;
