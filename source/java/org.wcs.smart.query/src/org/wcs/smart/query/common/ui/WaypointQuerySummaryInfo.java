@@ -57,6 +57,6 @@ public class WaypointQuerySummaryInfo implements ISummaryInfo {
 		}else{
 			lblNumResults.setText(String.valueOf(resultSet.getItemCount()));
 		}
-		lblNumResults.getParent().getParent().layout();
+		lblNumResults.getParent().layout(true);
 	}
 }

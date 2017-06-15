@@ -73,7 +73,7 @@ public class ObservationQuerySummaryInfo implements ISummaryInfo {
 		if (resultSet != null && resultSet instanceof IObservationPagedQueryResultSet ){
 			lblIncidentCnt.setText(String.valueOf(((IObservationPagedQueryResultSet)resultSet).getWpCount()));
 		}
-		lblNumResults.getParent().getParent().layout();
+		lblNumResults.getParent().layout(true);
 	}
 
 }

@@ -39,10 +39,9 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.engine.IWaypointUpdateableResultSet;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.ISearchabledResultSet;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.util.ReprojectUtils;
@@ -108,40 +107,50 @@ public class MapWaypointEditManager implements IMapEditManager {
 	@Override
 	public EditPoint findFeature(int x, int y, IViewportModel vm) {
 		try{
-			Coordinate world = vm.pixelToWorld(x, y);
-			Coordinate db = ReprojectUtils.reproject(world.x, world.y, vm.getCRS(), SmartDB.DATABASE_CRS);
-	
-			if (editor.getQuery().getCachedResults() instanceof IPagedQueryResultSet){
-				HashMap<UUID, Set<PatrolQueryResultItem>> items = new HashMap<>();
+			if (editor.getQuery().getCachedResults() instanceof ISearchabledResultSet){
+				int xll = x - 5;
+				int yll = y - 5;
+				int xur = x + 5;
+				int yur = y + 5;
 				
-				try(IQueryResultSetIterator<? extends IResultItem> fIterator = ((IPagedQueryResultSet)editor.getQuery().getCachedResults()).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE)){
-					double distance = Double.POSITIVE_INFINITY;
+				Coordinate world = vm.pixelToWorld(x, y);
+				Coordinate worldll = vm.pixelToWorld(xll, yll);
+				Coordinate worldur = vm.pixelToWorld(xur, yur);
+				
+				Coordinate db = ReprojectUtils.reproject(world.x, world.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+				Coordinate dbll = ReprojectUtils.reproject(worldll.x, worldll.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+				Coordinate dbur = ReprojectUtils.reproject(worldur.x, worldur.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+				
+				HashMap<UUID, Set<PatrolQueryResultItem>> items = new HashMap<>();
+				List<IResultItem> searchResults = ((ISearchabledResultSet)editor.getQuery().getCachedResults()).search(dbll.x, dbll.y, dbur.x, dbur.y);
+				
+				double distance = Double.POSITIVE_INFINITY;
+				
+				for (IResultItem pi : searchResults){
+					PatrolQueryResultItem i = (PatrolQueryResultItem)pi;
+					Coordinate c = new Coordinate(i.getWaypointX(null), i.getWaypointY(null));
+					double d = c.distance(db);
 					
-					while(fIterator.hasNext()){
-						PatrolQueryResultItem i = (PatrolQueryResultItem) fIterator.next();
-						Coordinate c = new Coordinate(i.getWaypointX(null), i.getWaypointY(null));
-						double d = c.distance(db);
-						
-						if (d < distance){
-							items.clear();
-							HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
-							if (set == null){
-								set = new HashSet<>();
-								items.put(i.getWaypointUuid(), set);
-							}
-							set.add(i);
-							
-							distance = d;
-						}else if (d == distance){
-							HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
-							if (set == null){
-								set = new HashSet<>();
-								items.put(i.getWaypointUuid(), set);
-							}
-							set.add(i);
+					if (d < distance){
+						items.clear();
+						HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
+						if (set == null){
+							set = new HashSet<>();
+							items.put(i.getWaypointUuid(), set);
 						}
+						set.add(i);
+						
+						distance = d;
+					}else if (d == distance){
+						HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
+						if (set == null){
+							set = new HashSet<>();
+							items.put(i.getWaypointUuid(), set);
+						}
+						set.add(i);
 					}
 				}
+				
 				if (items.isEmpty()) return null;
 				
 				Entry<UUID, Set<PatrolQueryResultItem>> item = items.entrySet().iterator().next();

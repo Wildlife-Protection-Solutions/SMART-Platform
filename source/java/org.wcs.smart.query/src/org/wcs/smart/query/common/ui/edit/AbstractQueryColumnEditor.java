@@ -34,10 +34,10 @@ import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
-import org.wcs.smart.query.common.ui.QueryLazyResultsContentProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 /**
  * Abstract class to support editing in query results table.
@@ -87,7 +87,11 @@ public abstract class AbstractQueryColumnEditor extends EditingSupport {
 	@Override
 	protected Object getValue(Object element) {
 		if (element instanceof IResultItem) {
-			return queryColumn.getValue((IResultItem) element);
+			Object value = queryColumn.getValue((IResultItem)element);
+			if (value == null && queryColumn.getType() == ColumnType.STRING){
+				return ""; //$NON-NLS-1$
+			}
+			return value;
 		}
 		return null;
 	}

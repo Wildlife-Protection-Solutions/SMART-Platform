@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +38,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.hibernate.type.StringType;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.events.WaypointEventManager;
@@ -44,10 +46,12 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
+import org.wcs.smart.query.common.model.ISearchabledResultSet;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
@@ -56,7 +60,7 @@ import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IUpdateableResultSet, IWaypointUpdateableResultSet{
+public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IUpdateableResultSet, IWaypointUpdateableResultSet, ISearchabledResultSet{
 	
 	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
 		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"
@@ -252,7 +256,8 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 					switch (column.getColumn()) {
 					case WAYPOINT_COMMENT:
 						if (value instanceof String) {
-							if (!value.equals(wp.getComment())) {
+							if (((String) value).length() == 0) value = null;
+							if (NULL_COMPARATOR.compare(value, wp.getComment()) != 0) {
 								change = true;
 								updateWaypointComment(wp,(String) value, s);
 							}
@@ -386,7 +391,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		wp.setComment(newComment);
 		
 		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_comment = :cmt WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("cmt", newComment); //$NON-NLS-1$
+		q.setParameter("cmt", newComment,  StringType.INSTANCE); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		
 		q.executeUpdate();
@@ -478,5 +483,50 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Search for all results items within the bounding box.  The bound
+	 * box values must be supplied in lat/lon coordinates
+	 */
+	@Override
+	public List<IResultItem> search(double x1, double y1, double x2, double y2) {
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT * FROM "); //$NON-NLS-1$
+		sb.append(queryTempTable);
+		sb.append(" WHERE wp_x >= "); //$NON-NLS-1$
+		sb.append(Math.min(x1,x2));
+		sb.append(" AND wp_x <= "); //$NON-NLS-1$
+		sb.append(Math.max(x1,x2));
+		sb.append(" AND wp_y >= "); //$NON-NLS-1$
+		sb.append(Math.min(y1,y2));
+		sb.append(" AND wp_y <= "); //$NON-NLS-1$
+		sb.append(Math.max(y1,y2));
+		
+		List<IResultItem> items = new ArrayList<IResultItem>();
+		
+		Session session = HibernateManager.openSession();
+		try{
+			session.doWork(new Work(){
+				@Override
+				public void execute(Connection connection) throws SQLException {
+					ResultSet rs = connection.createStatement().executeQuery(sb.toString());
+					while(rs.next()){
+						System.out.println("item"); //$NON-NLS-1$
+						IResultItem item = engine.asQueryResultItem(rs, session);
+						items.add(item);
+					}
+				}
+				
+			});
+		}catch (Exception ex){
+			PatrolQueryPlugIn.log(ex.getMessage(), ex);
+			return Collections.emptyList();
+		}finally{
+			session.close();
+		}
+		
+		return items;
 	}
 }

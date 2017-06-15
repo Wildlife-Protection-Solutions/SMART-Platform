@@ -74,7 +74,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implements IObservationPagedQueryResultSet, IWaypointUpdateableResultSet{
+public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implements IObservationPagedQueryResultSet, IWaypointUpdateableResultSet {
 	
 	private int wpCount = 0;
 
@@ -706,5 +706,8 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 		}
 		return false;
 	}
+
+
+	
 	
 }
