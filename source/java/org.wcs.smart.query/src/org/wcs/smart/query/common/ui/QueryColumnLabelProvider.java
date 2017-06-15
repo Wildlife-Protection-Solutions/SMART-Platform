@@ -29,7 +29,11 @@ import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
- * Label provider for simple query column
+ * Label provider for simple query column.  This label provides
+ * changes the color of the cells based on the 
+ * isEditing flag.  Users should extend this label provider
+ * if their query results will be editable.
+ * 
  * @author Emily
  *
  */
@@ -55,7 +59,7 @@ public class QueryColumnLabelProvider extends ColumnLabelProvider{
 	}
 	@Override
 	public String getText(Object element){
-		if (element == null) return "";
+		if (element == null) return ""; //$NON-NLS-1$
 		if (element instanceof IResultItem){
 			return column.getValueAsString( column.getValue((IResultItem)element));
 		}

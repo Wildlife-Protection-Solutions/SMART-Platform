@@ -138,7 +138,6 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 			loadingIndexes.contains(index);
 		maskItems(from);
 		Job job = new LoadCellDataJob(from);
-		job.setRule(CELL_JOB_MUTEX);
 		job.schedule();
 		
 	}
@@ -202,6 +201,33 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		return true; //default behavior
 	}
 	
+	
+	/**
+	 * Searches the result set for the given item.  When found it selects
+	 * and shows the row containing the element
+	 * @param element
+	 */
+	public void setSelection(Object element){
+		for (int i = 0; i < input.getItemCount(); i ++){
+			if (viewer.getElementAt(i) != null && viewer.getElementAt(i).equals(element)){
+				viewer.getTable().setSelection(i);
+				viewer.getTable().showSelection();
+				return;
+			}
+		}
+		for (int i = 0; i < input.getItemCount(); i += pageSize){
+			final List<? extends IResultItem> data = input.getData(i, pageSize);
+			for (int j = 0; j < data.size(); j ++){
+				IResultItem item = data.get(j);
+				if (item.equals(element)){
+					viewer.replace(data.get(j), i+j);
+					viewer.getTable().setSelection(i+j);
+					viewer.getTable().showSelection();
+					return;
+				}
+			}
+		}
+	}
 	/**
 	 * Job which is responsible for updating particular set of items in current table.
 	 * 
@@ -215,6 +241,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		public LoadCellDataJob(int from) {
 			super(MessageFormat.format(Messages.QueryLazyResultsContentProvider_LoadJob_Title, from, from + pageSize));
 			this.from = from;
+			setRule(CELL_JOB_MUTEX);
 		}
 
 		@Override

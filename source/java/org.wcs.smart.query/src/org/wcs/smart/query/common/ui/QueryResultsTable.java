@@ -351,11 +351,16 @@ public abstract class QueryResultsTable {
 	}
 	
 	/**
-	 * selects and reveal the given item
+	 * Find, select and reveal the given item.
+	 * 
 	 * @param item
 	 */
 	public void revealSelection(IResultItem item){
-		table.setSelection(new StructuredSelection(item), true);
+		if (table.getContentProvider() instanceof QueryLazyResultsContentProvider){
+			((QueryLazyResultsContentProvider)table.getContentProvider()).setSelection(item);
+		}else{
+			table.setSelection(new StructuredSelection(item),  true);
+		}
 	}
 }
 

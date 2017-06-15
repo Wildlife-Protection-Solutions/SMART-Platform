@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -580,5 +581,19 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 			return wp;
 		}
 		return null;
+	}
+	
+	@Override
+	public int hashCode(){
+		return Objects.hash(waypointUuid, observationUuid);
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other == this) return true;
+		if (other == null) return false;
+		if (!other.getClass().equals(getClass())) return false;
+		return Objects.equals(waypointUuid, ((PatrolQueryResultItem)other).waypointUuid) && 
+				Objects.equals(observationUuid, ((PatrolQueryResultItem)other).observationUuid);
 	}
 }

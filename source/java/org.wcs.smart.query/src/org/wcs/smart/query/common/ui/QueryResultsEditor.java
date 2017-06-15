@@ -244,6 +244,15 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		}
 	}
 	
+	public void showTablePage() {
+		for (int i = 0; i < getPageCount(); i ++){
+			if (getEditor(i) == page1){
+				setActivePage(i);
+				return;
+			}
+		}
+	}
+	
 	/**
 	 * @see org.eclipse.ui.part.MultiPageEditorPart#dispose()
 	 */

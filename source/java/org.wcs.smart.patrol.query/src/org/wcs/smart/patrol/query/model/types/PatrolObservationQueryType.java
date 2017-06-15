@@ -45,6 +45,7 @@ import org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.ui.ShowInTableInfoProvider;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
@@ -214,7 +215,7 @@ public class PatrolObservationQueryType implements IMappableQueryType {
 		return new IQueryResultInfoProvider[]{
 				new PatrolResultInfoProvider(),
 				new PatrolZoomToResultProvider(),
-				//new ShowInTableInfoProvider(),
+				new ShowInTableInfoProvider(),
 				new EditObservationResultInfoProvider(),
 				new DeleteObservationResultInfoProvider()
 		};

@@ -510,6 +510,7 @@ public class Messages extends NLS {
 	public static String ListHelpWizardPage_PageTitle;
 	public static String ListItem_Inactive;
 	public static String ShapeQueryExporter_ExporterName;
+	public static String ShowInTableInfoProvider_Label;
 	public static String SimpleQueryExporter_Error_ExportFailed;
 	public static String SimpleQueryExporter_Error_QueryNotRun;
 	public static String SimpleQueryExporter_Progress_CleanUp;
