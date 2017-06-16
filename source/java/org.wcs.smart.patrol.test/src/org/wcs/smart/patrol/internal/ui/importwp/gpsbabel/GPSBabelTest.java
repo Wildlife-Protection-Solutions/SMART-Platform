@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.junit.Test;
-import org.wcs.smart.observation.common.importwp.gpsbabel.GPSBabel;
+import org.wcs.smart.gpx.GPSBabel;
 
 /**
  * Test for reading gps babel supported formats.

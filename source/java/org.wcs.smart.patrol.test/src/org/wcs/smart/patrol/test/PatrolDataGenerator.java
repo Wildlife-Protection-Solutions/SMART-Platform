@@ -72,12 +72,12 @@ public class PatrolDataGenerator {
 	
 		Random random = new Random();
 		
-		int numberPatrols = 500;
+		int numberPatrols = 20;
 		int daysPerPatrol = 3;
 		
 		int numEmployees = 4;
 		
-		int waypoints = 30;
+		int waypoints = 100;
 		
 		List<String> words = getStringValues();
 		List<PatrolMandate> mandates = session.createCriteria(PatrolMandate.class)
@@ -136,8 +136,8 @@ public class PatrolDataGenerator {
 //			p.setId("TRK_" + i + "_" + PatrolHibernateManager.generatePatrolId(p, session));
 			p.setId(PatrolHibernateManager.generatePatrolId(p, session));
 			
-			p.setMandate(mandates.get( random.nextInt(mandates.size() - 1) ));
-			p.setTeam(teams.get( random.nextInt(mandates.size() - 1) ));
+			
+			p.setTeam(teams.get( random.nextInt(teams.size() - 1) ));
 			p.setStation(stations.get(random.nextInt(stations.size() - 1)));
 			PatrolType.Type pt = PatrolType.Type.values()[random.nextInt(PatrolType.Type.values().length - 1)];
 			p.setPatrolType(pt);
@@ -147,7 +147,7 @@ public class PatrolDataGenerator {
 			p.getLegs().add(pl);
 			pl.setPatrol(p);
 			pl.setId("Leg 1");
-			
+			pl.setMandate(mandates.get( random.nextInt(mandates.size() - 1) ));
 			
 			Date startDate = new Date(random.nextInt(3) + 2013-1900, random.nextInt(11),  random.nextInt(28), 0, 0, 0);
 			Calendar temp = Calendar.getInstance();
@@ -177,13 +177,20 @@ public class PatrolDataGenerator {
 			pl.setEndDate(endDate);
 			
 			List<PatrolTransportType> types = transports.get(p.getPatrolType());
-			pl.setType(types.get(random.nextInt(types.size() - 1)));
+			if (types.size() == 1){
+				pl.setType(types.get(0));
+			}else{
+				pl.setType(types.get(random.nextInt(types.size() - 1)));
+			}
 			
 			temp.setTime(startDate);
 			
 			session.save(p);
 			session.flush();
 			session.clear();
+			
+			double cx = (random.nextInt(5238) + 112700) / 10000.0;
+			double cy = -1 * ((random.nextInt(10093) + 350) / 10000.0);
 			
 			for (int k = 0; k < daysPerPatrol; k++){
 				System.out.println("patrol day: " + k + "/" + daysPerPatrol);
@@ -204,7 +211,7 @@ public class PatrolDataGenerator {
 				session.clear();
 				
 				Coordinate[] trackPnts = new Coordinate[waypoints];
-				
+
 				for (int x = 0; x < waypoints; x ++){
 //					System.out.println(x + ":" + waypoints);
 					PatrolWaypoint pw = new PatrolWaypoint();
@@ -226,15 +233,16 @@ public class PatrolDataGenerator {
 					wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 					wp.setObservations(new ArrayList<WaypointObservation>());
 					
-					double cx = (random.nextInt(5238) + 112700) / 10000.0;
-					double cy = -1 * ((random.nextInt(10093) + 350) / 10000.0);
+					cx += ((random.nextInt(1000)) / 100000.0) * (random.nextInt(10) <= 5 ? -1 : 1);
+					cy += ((random.nextInt(1000)) / 100000.0) * (random.nextInt(10) <= 5 ? -1 : 1);
 					
 					trackPnts[x] = new Coordinate(cx,cy);
 					
 					wp.setX(cx);
 					wp.setY(cy);
 					
-					for (int y = 0; y < 3; y ++){
+					int size = random.nextInt(8);
+					for (int y = 0; y < size; y ++){
 						WaypointObservation ob = new WaypointObservation();
 						ob.setWaypoint(wp);
 						wp.getObservations().add(ob);
