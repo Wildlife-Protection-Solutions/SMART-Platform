@@ -511,7 +511,6 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 				public void execute(Connection connection) throws SQLException {
 					ResultSet rs = connection.createStatement().executeQuery(sb.toString());
 					while(rs.next()){
-						System.out.println("item"); //$NON-NLS-1$
 						IResultItem item = engine.asQueryResultItem(rs, session);
 						items.add(item);
 					}

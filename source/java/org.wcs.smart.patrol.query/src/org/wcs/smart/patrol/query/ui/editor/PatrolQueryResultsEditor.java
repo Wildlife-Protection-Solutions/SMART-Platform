@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.patrol.query.ui.editor;
 
+import java.awt.Point;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,9 +40,13 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -47,6 +55,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
+import org.locationtech.udig.project.render.IViewportModel;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
@@ -57,6 +66,8 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
@@ -64,6 +75,8 @@ import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -74,6 +87,9 @@ import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryAreaModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
+import org.wcs.smart.query.model.IQueryEditCommand;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryProxy;
@@ -81,7 +97,14 @@ import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.user.UserLevelManager;
+import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SmartUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -355,7 +378,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		}
 		
 //		if (((QueryEditorInput)getEditorInput()).getType().getKey().equals(PatrolQuery.KEY)){
-//			page2.getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, getObservationQueryInfoProvider());
+			page2.getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, getPatrolInfoProvider());
 //		}
 //		
 //		if (canEditResults()){
@@ -560,6 +583,15 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		
 	}
 	
+	public void showTablePage() {
+		for (int i = 0; i < getPageCount(); i ++){
+			if (getEditor(i) == page1){
+				setActivePage(i);
+				return;
+			}
+		}
+	}
+	
 	/**
 	 * @return the editor input as query input
 	 */
@@ -634,5 +666,130 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		page2.refresh();
 		viewer.refresh(true);
 		getMap().getRenderManager().refresh(null);
+	}
+	
+	
+	
+	private IInfoToolProvider getPatrolInfoProvider(){
+		return new IInfoToolProvider(){
+			@Override
+			public InfoPoint findFeature(int x, int y, IViewportModel vm) {
+				//clear menu
+				Menu m = page2.getMapViewer().getMenu();
+				if (m != null) m.dispose();
+				page2.getMapViewer().getControl().setMenu(null);
+				try{
+					IQueryResult r = getQueryInternal().getCachedResults();
+					if (r == null) return null;
+										
+					Coordinate world = vm.pixelToWorld(x, y);
+					
+					Coordinate db = ReprojectUtils.reproject(world.x, world.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+					
+					if (r instanceof MemoryQueryResult){
+						MemoryQueryResult<PatrolQueryResultItem> results = (MemoryQueryResult<PatrolQueryResultItem>)r;
+						double distance = Double.POSITIVE_INFINITY;
+						PatrolQueryResultItem nearest = null;
+						com.vividsolutions.jts.geom.Point toTest = GeometryFactoryProvider.getFactory().createPoint(db);
+						for (PatrolQueryResultItem ri : results.getData()){
+							Geometry g = ri.asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
+							if (g.getEnvelopeInternal().contains(db)){
+								double d = g.distance(toTest);
+								if (d < distance){
+									distance = d;
+									nearest = ri;
+								}
+							}
+						}
+
+						if (nearest == null) return null;
+						Geometry g = nearest.asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
+						Coordinate[] c = DistanceOp.nearestPoints(g, toTest);
+						if (c.length == 0) return null;
+		
+						Coordinate px = ReprojectUtils.reproject(c[0].x, c[0].y, SmartDB.DATABASE_CRS, vm.getCRS());
+						Point pnt = vm.worldToPixel(px);
+						if (pnt.distance(x, y) > 5) return null;
+						StringBuilder sb = new StringBuilder();
+						
+						sb.append(nearest.getPatrolId());
+						sb.append(" ("); //$NON-NLS-1$
+						sb.append(nearest.getPatrolLegId());
+						sb.append(")\n"); //$NON-NLS-1$
+						sb.append(DateFormat.getDateInstance().format(nearest.getPatrolLegStartDate()) + " - " + DateFormat.getDateInstance().format(nearest.getPatrolLegEndDate()) ); //$NON-NLS-1$
+							
+						createMenu(page2.getMapViewer().getControl(), nearest);
+						return new InfoPoint(pnt, null, sb.toString());	
+					}
+				}catch (Exception ex){
+					SmartPatrolPlugIn.log(ex.getMessage(), ex);
+					ex.printStackTrace();
+				}
+				return null;
+			}
+			
+			private void createMenu(Control control, PatrolQueryResultItem toUpdate){
+				
+				Menu existingMenu = control.getMenu();
+				if(existingMenu != null && !existingMenu.isDisposed()){
+					existingMenu.dispose();
+				}
+				if (query == null) return;
+				IQueryType queryType = QueryTypeManager.INSTANCE.findQueryType(getQuery().getTypeKey());
+				if (queryType.getResultProviders().length > 0) {
+					Menu menuTable = new Menu(control);
+					control.setMenu(menuTable);
+					control.addListener(SWT.MouseMove, new Listener(){
+
+						@Override
+						public void handleEvent(Event event) {
+							control.removeListener(SWT.MouseMove, this);
+							menuTable.dispose();
+							control.setMenu(null);
+						}
+					
+					});
+
+					List<IQueryEditCommand> editItems = new ArrayList<>();
+					for (final IQueryResultInfoProvider item : queryType.getResultProviders()) {
+						// Create menu item
+						if (!SmartDB.isMultipleAnalysis() || item.supportsCcaa()){
+							if (!item.supportsMap()) continue;
+							if (!(item instanceof IQueryEditCommand) || (item instanceof IQueryEditCommand && getEditMode())){
+								if (item instanceof IQueryEditCommand){
+									editItems.add((IQueryEditCommand) item);
+									continue;
+								}
+								MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
+								if (item.getImage() != null){
+									miTest.setImage(item.getImage());
+								}
+								miTest.setText(item.getName());
+								miTest.addListener(SWT.Selection, e->{
+									
+									item.doWork(toUpdate);
+									
+								});
+							}
+						}
+					}
+					if (!editItems.isEmpty()) new MenuItem(menuTable, SWT.SEPARATOR);
+					
+					for (final IQueryEditCommand item : editItems) {
+						MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
+						if (item.getImage() != null){
+							miTest.setImage(item.getImage());
+						}
+						miTest.setText(item.getName());
+						miTest.addListener(SWT.Selection, e->{
+							if (item.doWork(toUpdate, getQuery().getCachedResults())){
+								refreshResults();
+							}
+							
+						});
+					}
+				}
+			}
+		};	
 	}
 }
