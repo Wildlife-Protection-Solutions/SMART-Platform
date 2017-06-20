@@ -287,7 +287,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 
 		
 		Label lblShowEdit = new Label(generalContainer, SWT.NONE);
-		lblShowEdit.setText(Messages.CyberTrackerPropertiesDialog_ShowEdit);
+		lblShowEdit.setText(Messages.CyberTrackerPropertiesDialog_ShowEdit1);
 		lblShowEdit.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowEdit_Tooltip);
 
 		btnShowEdit = new Button(generalContainer, SWT.CHECK);

@@ -252,7 +252,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_Projection_Tooltip;
 	public static String CyberTrackerPropertiesDialog_SaveProfile_Error;
 	public static String CyberTrackerPropertiesDialog_SaveProfile_Task;
-	public static String CyberTrackerPropertiesDialog_ShowEdit;
+	public static String CyberTrackerPropertiesDialog_ShowEdit1;
 	public static String CyberTrackerPropertiesDialog_ShowEdit_Tooltip;
 	public static String CyberTrackerPropertiesDialog_ShowGPS;
 	public static String CyberTrackerPropertiesDialog_ShowGPS_Tooltip;
