@@ -319,10 +319,10 @@ public class ImportReportCaListPage extends WizardPage {
 		lid.setElement(new UuidItem(item));
 		lid.setLanguage(match);
 		
-		org.wcs.smart.ca.Label ll = (org.wcs.smart.ca.Label) session.load(org.wcs.smart.ca.Label.class, lid);
+		org.wcs.smart.ca.Label ll = (org.wcs.smart.ca.Label) session.get(org.wcs.smart.ca.Label.class, lid);
 		if (ll == null){
 			lid.setLanguage(currentCa.getDefaultLanguage());
-			ll = (org.wcs.smart.ca.Label) session.load(org.wcs.smart.ca.Label.class, lid);
+			ll = (org.wcs.smart.ca.Label) session.get(org.wcs.smart.ca.Label.class, lid);
 			if (ll != null){
 				return ll.getValue();
 			}
