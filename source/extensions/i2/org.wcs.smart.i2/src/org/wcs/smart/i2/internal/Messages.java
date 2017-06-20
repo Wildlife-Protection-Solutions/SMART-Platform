@@ -661,6 +661,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_TimeColumnLabel;
 	public static String IntelligenceLabelProviderImpl_TitleColumnLabel;
 	public static String IntelligenceMapEditor_MapName;
+	public static String IntelligenceMapEditor_refreshmapjob;
 	public static String IntelligenceTemplatesView_refreshJobName;
 	public static String IntelligenceTemplatesView_RecordTemplateName;
 	public static String IntelligenceTemplatesView_ResetMenuItem;

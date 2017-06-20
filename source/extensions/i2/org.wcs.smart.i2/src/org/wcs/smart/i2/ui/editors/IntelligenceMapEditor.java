@@ -165,6 +165,35 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
     
     private boolean handlingLayerVisibility = false;
     
+    private Date[] refreshMapJobDates = null;;
+    private Job refreshMapJob = new Job(Messages.IntelligenceMapEditor_refreshmapjob){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			Date[] newDates = refreshMapJobDates;
+			if (newDates != null){
+				Filter udigDateFilter = IntelEntityDataSource.createDateFilter(newDates[0], newDates[1]);
+				boolean refresh = false;
+				for (Layer l : getMap().getLayersInternal()){
+					Boolean x = (Boolean) l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
+					if (x == null || !x) continue;
+					if (!l.getGeoResource().canResolve(IWorkingSetResource.class)) continue;
+					
+					if (l instanceof ContentFilterLayerImpl){
+						((ContentFilterLayerImpl) l).setContentFilter(udigDateFilter);
+						refresh = true;
+					}
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				}
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				rerunQueryLayers();
+				if (refresh) getMap().getRenderManager().refresh(null);
+			}
+			return Status.OK_STATUS;
+		}
+    	
+    };
+		
     private ILayerListener visibilityListener = new ILayerListener() {
 
 		@Override
@@ -511,21 +540,27 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 				handlingLayerVisibility = true;
 				try{
 					LayerVisibleEvent visibleLayers = (LayerVisibleEvent) event.getProperty(IEventBroker.DATA);
-					for (Layer l : getMap().getLayersInternal()){
-						Boolean x = (Boolean) l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
-						if (x == null || !x) continue;
-						if (!l.getGeoResource().canResolve(IWorkingSetResource.class)) continue;
-						try {
-							UUID uuid = (l.getGeoResource().resolve(IWorkingSetResource.class, null)).getResourceId();
-							if (visibleLayers.allVisible.contains(uuid)){
-								l.setVisible(true);
+					getMap().getRenderManagerInternal().disableRendering();
+					try{
+						for (Layer l : getMap().getLayersInternal()){
+							Boolean x = (Boolean) l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
+							if (x == null || !x) continue;
+							if (!l.getGeoResource().canResolve(IWorkingSetResource.class)) continue;
+							try {
+								UUID uuid = (l.getGeoResource().resolve(IWorkingSetResource.class, null)).getResourceId();
+								if (visibleLayers.allVisible.contains(uuid)){
+									l.setVisible(true);
+								}
+								if (visibleLayers.notVisible.contains(uuid)){
+									l.setVisible(false);
+								}
+								
+							} catch (IOException e) {
+								e.printStackTrace();
 							}
-							if (visibleLayers.notVisible.contains(uuid)){
-								l.setVisible(false);
-							}
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+						}	
+					}finally{
+						getMap().getRenderManagerInternal().enableRendering();
 					}
 				}finally{
 					handlingLayerVisibility = false;
@@ -539,23 +574,9 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		handler = new EventHandler() {
 			@Override
 			public void handleEvent(Event event) {
-				Date[] newDates = (Date[]) event.getProperty(IEventBroker.DATA);
-				if (newDates != null){
-					Filter udigDateFilter = IntelEntityDataSource.createDateFilter(newDates[0], newDates[1]);
-					boolean refresh = false;
-					for (Layer l : getMap().getLayersInternal()){
-						Boolean x = (Boolean) l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
-						if (x == null || !x) continue;
-						if (!l.getGeoResource().canResolve(IWorkingSetResource.class)) continue;
-						
-						if (l instanceof ContentFilterLayerImpl){
-							((ContentFilterLayerImpl) l).setContentFilter(udigDateFilter);
-							refresh = true;
-						}
-					}
-					rerunQueryLayers();
-					if (refresh) getMap().getRenderManager().refresh(null);
-				}
+				refreshMapJobDates = (Date[]) event.getProperty(IEventBroker.DATA);
+				refreshMapJob.cancel();
+				refreshMapJob.schedule(200);
 			}
 		};
 		parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_LAYER_DATEFILTER, handler);
@@ -755,7 +776,9 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 				
 			}
 		}
-		getWorkingSetQueryLayersJob().schedule();
+		WorkingSetQueryLayersJob j = getWorkingSetQueryLayersJob();
+		j.cancel();
+		getWorkingSetQueryLayersJob().schedule(100);
 	}
 	
 	private synchronized WorkingSetQueryLayersJob getWorkingSetQueryLayersJob(){

@@ -168,6 +168,7 @@ public class WorkingSetMapLayersJob extends Job {
 	public static void removeLayers(IMap map, List<ILayer> toRemove){
 		if (toRemove == null || toRemove.isEmpty()) return;
 		for (ILayer l : toRemove){
+			
 			if (!l.getGeoResource().canResolve(QueryService.class)) continue;
 			try{
 				QueryService service = l.getGeoResource().resolve(QueryService.class, new NullProgressMonitor());
@@ -175,6 +176,7 @@ public class WorkingSetMapLayersJob extends Job {
 					service.dispose(new NullProgressMonitor());
 					CatalogPlugin.getDefault().getLocalCatalog().remove(service);
 				}
+				l.getGeoResource().dispose(new NullProgressMonitor());			
 			}catch (Exception ex){
 				Intelligence2PlugIn.log(ex.getMessage(), ex);
 			}
