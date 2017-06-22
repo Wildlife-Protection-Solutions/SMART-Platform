@@ -786,6 +786,7 @@ function stylePoints(feature, latlng) {
 	var markerIcon = styleMarkerIcon[feature.properties.typeuuid]; 
 	var markerColor = styleMarkerColor[feature.properties.typeuuid];
 	var spinStr = styleSpin[feature.properties.typeuuid];
+	var customIcon = styleCustomIcon[feature.properties.typeuuid];
 	if(spinStr == "true"){
 		spin = true;
 	}else{
@@ -812,8 +813,12 @@ function stylePoints(feature, latlng) {
 	    icon: markerIcon,
 	    iconColor: color,
 	    markerColor: markerColor,
-	    spin: spin
+	    spin: spin,
+	    html: "<b>" + customIcon + "</b>" //bold always looks better to me 
 	  });
+	
+
+	
     return L.marker(latlng, {icon: marker});
 }
 

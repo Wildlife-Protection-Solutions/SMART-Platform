@@ -49,6 +49,7 @@ public class AlertType extends ConnectUuidItem{
 	private String markerIcon;
 	private String markerColor;
 	private Boolean spin;
+	private String customIcon;
 	
 	@Column(name="label")
 	public String getLabel() {
@@ -102,5 +103,13 @@ public class AlertType extends ConnectUuidItem{
 	}
 	public void setSpin(Boolean spin) {
 		this.spin = spin;
+	}
+	
+	@Column(name="custom_icon")
+	public String getCustomIcon() {
+		return customIcon;
+	}
+	public void setCustomIcon(String customIcon) {
+		this.customIcon = customIcon;
 	}
 }

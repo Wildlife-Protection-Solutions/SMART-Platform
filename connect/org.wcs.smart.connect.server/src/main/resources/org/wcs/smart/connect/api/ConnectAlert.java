@@ -176,7 +176,7 @@ public class ConnectAlert extends HttpServlet {
 	 * URL: ../server/api/connectalert/alertTypes/{uuid}
 	 * Call Type: PUT
 	 * Payload: A JSON object of attributes that match the Java attributes, EX:
-	 * 		{"uuid":"d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52","key":"intelligence","label":"Intelligence","color":"#1929FF","opacity":".99","markerIcon":"birthday-cake","markerColor":"red","spin":false} 
+	 * 		{"uuid":"d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52","key":"intelligence","label":"Intelligence","color":"#1929FF","opacity":".99","markerIcon":"birthday-cake","markerColor":"red","spin":false,"customIcon":"99"} 
 	 * 		Only attributes you want to change need to be included.
 	 *  
 	 * @param	uuid	provided in the URL, the uuid of the alert type you are updating.
@@ -218,6 +218,9 @@ public class ConnectAlert extends HttpServlet {
 			if (newAlertType.getMarkerIcon()!= null){
 				toUpdate.setMarkerIcon(newAlertType.getMarkerIcon());
 			}
+			if (newAlertType.getCustomIcon()!= null){
+				toUpdate.setCustomIcon(newAlertType.getCustomIcon());
+			}
 			toUpdate.setSpin(newAlertType.getSpin());
 			
 			
@@ -242,7 +245,7 @@ public class ConnectAlert extends HttpServlet {
 	 * URL: ../server/api/connectalert/alertTypes/{label}
 	 * Call Type: POST
 	 * Payload: A JSON object of attributes that match the Java attributes, EX:
-	 * 		{"label":"New Type Name","color":"5AFF54","opacity":".80","markerIcon":"cloud","markerColor":"blue","spin":"false"}
+	 * 		{"label":"New Type Name","color":"5AFF54","opacity":".80","markerIcon":"cloud","markerColor":"blue","spin":"false","customIcon":"99"}
 	 * 
 	 * @param	label	provided in the URL, the label/name of the new type (the system automatically creates a uuid)
 	 * @return Returns a JSON representation of the new AlertType object created 
@@ -260,6 +263,7 @@ public class ConnectAlert extends HttpServlet {
 		a.setOpacity(newAlertType.getOpacity());
 		a.setMarkerColor(newAlertType.getMarkerColor());
 		a.setMarkerIcon(newAlertType.getMarkerIcon());
+		a.setCustomIcon(newAlertType.getCustomIcon());
 		a.setSpin(newAlertType.getSpin());
 		
 		Session s = HibernateManager.getSession(context);

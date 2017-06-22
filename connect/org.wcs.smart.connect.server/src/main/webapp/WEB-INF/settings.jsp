@@ -298,7 +298,7 @@ background-color: lightsteelblue
       		<label class="top-spacer block"><fmt:message key="settings.markerIcon" />: <i id="exampleIcon" class=""></i></label> 
 			<select id="type_markerIcon" class="type_field" name="type_markerIcon">
 <!-- selected from:		http://fortawesome.github.io/Font-Awesome/icons/ -->				
-			</select> <fmt:message key="settings.oroneof"/> <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/icons/">(<fmt:message key="settings.list" />)</a>:<input type="text" name="iconOveride" id="iconOveride" value=""/>
+			</select> <fmt:message key="settings.oroneof"/> <a title="<fmt:message key="settings.iconHover" />" target="_blank" href="http://fortawesome.github.io/Font-Awesome/icons/">(<fmt:message key="settings.list" />)</a>:<input type="text" name="iconOveride" id="iconOveride" value=""/>
 
 
       		<label class="top-spacer block"><fmt:message key="settings.markerColor"/>:</label>

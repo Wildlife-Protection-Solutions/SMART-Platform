@@ -45,6 +45,11 @@
 	 			"${type.getUuid()}" : "${type.getMarkerIcon()}", 
 			</c:forEach> 
 		};
+	var styleCustomIcon = {
+			<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	 			"${type.getUuid()}" : "${type.getCustomIcon()}", 
+			</c:forEach> 
+		};
 	var styleSpin= {
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
 	 			"${type.getUuid()}" : "${type.getSpin()}", 

@@ -60,6 +60,11 @@ window.onload = function(){
 	document.getElementById("iconOveride").addEventListener("change", updateExampleIconCustom);
 	
 	document.getElementById("btnNewType").onclick = function(){
+		var form = document.getElementById("alerttypesform");
+		form.type_label.value = "";
+		form.type_markerIcon.value = "";
+		form.type_markerColor.value = "";
+		form.type_spin.value = false;
 		displayDialogCenter('typeDialog');
 	 	document.getElementById("updateTypeButton").classList.remove("show");
 		document.getElementById("updateTypeButton").classList.add("hide");
@@ -509,7 +514,13 @@ function showCurrentType() {
 	form.type_markerIcon.value = r.markerIcon;
 	form.type_markerColor.value = r.markerColor;
 	form.type_spin.value = r.spin;
-	form.iconOveride.value = r.markerIcon;
+	
+	if(r.markerIcon == ""){
+		form.iconOveride.value = r.customIcon;
+	}else{
+		form.iconOveride.value = r.markerIcon;
+	}
+		
 	
 	document.getElementById("exampleIcon").className = "fa fa-" + r.markerIcon;
 	
@@ -567,6 +578,15 @@ function createNewType(){
 	var markerIcon = document.querySelector("select[name=type_markerIcon]").value;
 	var markerColor = document.querySelector("select[name=type_markerColor]").value;
 	var spin = document.querySelector("select[name=type_spin]").value;
+	var override = document.getElementById("iconOveride").value
+	if(override != ""){
+		if(override.length < 3){
+			markerIcon = "";
+			customIcon = override;
+		}else{
+			customIcon = "";
+		}
+	}
 	
 	var jsonData = {
 		"label" : typeLabel,
@@ -574,6 +594,7 @@ function createNewType(){
 //		"fillColor" : typeFillColor,
 		"opacity" : typeOpacity,
 		"markerIcon" : markerIcon,
+		"customIcon" : customIcon,
 		"markerColor" : markerColor,
 		"spin" : spin
 	};
@@ -612,7 +633,12 @@ function submitUpdateType(){
 	var markerIcon = document.querySelector("select[name=type_markerIcon]").value;
 	var override = document.getElementById("iconOveride").value
 	if(override != ""){
-		markerIcon = override;
+		if(override.length < 3){
+			markerIcon = "";
+			customIcon = override;
+		}else{
+			customIcon ="";
+		}
 	}
 	
 	var markerColor = document.querySelector("select[name=type_markerColor]").value;
@@ -626,6 +652,7 @@ function submitUpdateType(){
 		"opacity" : typeOpacity,
 		"markerIcon" : markerIcon,
 		"markerColor" : markerColor,
+		"customIcon" : customIcon,
 		"spin" : spin
 	};
 	//make ajax call

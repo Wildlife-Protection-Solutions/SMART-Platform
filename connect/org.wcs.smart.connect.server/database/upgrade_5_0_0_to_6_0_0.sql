@@ -1,3 +1,5 @@
+ALTER TABLE connect.alert_types ADD COLUMN custom_icon varchar(2);
+
 ALTER TABLE smart.patrol_leg ADD COLUMN mandate_uuid UUID;
 
 UPDATE smart.patrol_leg SET mandate_uuid = (SELECT p.mandate_uuid FROM smart.patrol p WHERE p.uuid = smart.patrol_leg.patrol_uuid);
