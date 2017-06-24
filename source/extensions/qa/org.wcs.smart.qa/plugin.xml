@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.wcs.smart.qa" name="org.wcs.smart.qa" schema="schema/org.wcs.smart.qa.exsd"/>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.qa.model.QaError"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.qa.model.QaRoutine"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".qaRoutine.conservationArea"
+            class="org.wcs.smart.qa.model.QaRoutineParameter"
+            supportsCcaa="true">
+      </class>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
+         <menu
+               label="QA">
+            <command
+                  commandId="org.wcs.smart.qa.routines.list"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.qa.validation.manual"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.qa.routines.list"
+            name="Manage QA Routines">
+      </command>
+      <command
+            id="org.wcs.smart.qa.validation.manual"
+            name="Manual Data Validation">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.qa.ui.handler.ShowQaRoutineHandler$ShowQaRoutineHandlerWrapper"
+            commandId="org.wcs.smart.qa.routines.list">
+      </handler>
+      <handler
+            class="org.wcs.smart.qa.ui.handler.NewManualValidationHandler$NewManualValidationHandlerWrapper"
+            commandId="org.wcs.smart.qa.validation.manual">
+      </handler>
+   </extension>
+   <extension
+         point="org.wcs.smart.qa">
+      <qa_routine
+            class="org.wcs.smart.qa.routine.LocationRoutineType">
+         <parameter_collector
+               class="org.wcs.smart.qa.ui.routine.WaypointLocationParameterCollector">
+         </parameter_collector>
+      </qa_routine>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.qa.ui.view.ValidationResultsEditor"
+            default="false"
+            id="org.wcs.smart.qa.data.validatation.manual"
+            name="Manual Data Validation">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.wcs.smart.observation.FieldDataPerspective">
+         <view
+               id="org.wcs.smart.qa.validatation.manual.parameters"
+               minimized="false"
+               relationship="stack"
+               relative="org.wcs.smart.fielddata.datafolder">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.wcs.smart.qa.ui.view.ManualValidationView$ManualValidationViewWrapper"
+            id="org.wcs.smart.qa.validatation.manual.parameters"
+            name="Manual Validation"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>

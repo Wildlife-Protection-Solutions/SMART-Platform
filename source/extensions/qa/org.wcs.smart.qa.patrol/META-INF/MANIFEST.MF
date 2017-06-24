@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Patrol Quality Assurance PlugIn
+Bundle-SymbolicName: org.wcs.smart.qa.patrol;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.wcs.smart.qa.patrol.Activator
+Bundle-Vendor: org.wcs.smart
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.wcs.smart.qa;bundle-version="1.0.0",
+ org.wcs.smart.patrol;bundle-version="6.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.qa">
+      <data_provider
+            class="org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider">
+      </data_provider>
+      <data_provider
+            class="org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider">
+      </data_provider>
+   </extension>
+
+</plugin>
