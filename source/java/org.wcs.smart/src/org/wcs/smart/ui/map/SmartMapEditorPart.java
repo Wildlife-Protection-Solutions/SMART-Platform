@@ -171,7 +171,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
     private FlashFeatureListener selectFeatureListener = new FlashFeatureListener();
     private boolean flashFeatureRegistered = false;
   
-    public abstract MultiPageEditorPart getParentEditor();
+    public abstract EditorPart getParentEditor();
 	
 
     /**
@@ -391,14 +391,16 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 
         UDIGDragDropUtilities.addDropSupport(mapViewer.getViewport().getControl(), this);
         
-        getParentEditor().addPageChangedListener(new IPageChangedListener() {			
-			@Override
-			public void pageChanged(PageChangedEvent event) {
-				if (event.getSelectedPage().equals(SmartMapEditorPart.this)){
-					tools.selectLastTool();
+        if (getParentEditor() instanceof MultiPageEditorPart){
+	        ((MultiPageEditorPart)getParentEditor()).addPageChangedListener(new IPageChangedListener() {			
+				@Override
+				public void pageChanged(PageChangedEvent event) {
+					if (event.getSelectedPage().equals(SmartMapEditorPart.this)){
+						tools.selectLastTool();
+					}
 				}
-			}
-		});
+			});
+        }
 
 	}
 
@@ -574,8 +576,10 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 		@Override
 		public void pageChanged(PageChangedEvent event) {
 			if (event.getSelectedPage() == SmartMapEditorPart.this){
-				getParentEditor().removePageChangedListener(this);
-	
+				 if (getParentEditor() instanceof MultiPageEditorPart){
+					 ((MultiPageEditorPart)getParentEditor()).removePageChangedListener(this);
+				 }
+
 				getMap().getViewportModel().addViewportModelListener(new IViewportModelListener() {
 					
 					@Override
@@ -594,7 +598,8 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 	};
 	
 	protected void addInitialZoomFunction(){
-		getParentEditor().addPageChangedListener(initialZoomListener);
+		if (getParentEditor() instanceof MultiPageEditorPart)
+			((MultiPageEditorPart)getParentEditor()).addPageChangedListener(initialZoomListener);
 	}
 
 }
