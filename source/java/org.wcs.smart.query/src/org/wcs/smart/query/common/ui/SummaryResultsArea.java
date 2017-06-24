@@ -33,9 +33,9 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.ui.ProgressAreaComposite;
 
 /**
  * Area for displaying summary results.

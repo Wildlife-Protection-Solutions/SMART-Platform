@@ -44,6 +44,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -52,7 +53,6 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
-import org.wcs.smart.query.ui.ProgressAreaComposite;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryHeaderComposite;
 import org.wcs.smart.query.ui.QueryPropertiesDialog;
@@ -286,6 +286,7 @@ public class QueryEditorTableContent {
 		runQueryComp = createRunQueryComp(stackComposite, toolkit);
 		tableComp = createTableResultsComposite(stackComposite, toolkit);
 		progressComp = new ProgressAreaComposite(stackComposite);
+		progressComp.setCancelMessages(Messages.ProgressAreaComposite_QueryCancelledStatus, Messages.ProgressAreaComposite_QueryCancelledMsg);
 		progressComp.adapt(toolkit);
 		((StackLayout) stackComposite.getLayout()).topControl = runQueryComp;
 	}
