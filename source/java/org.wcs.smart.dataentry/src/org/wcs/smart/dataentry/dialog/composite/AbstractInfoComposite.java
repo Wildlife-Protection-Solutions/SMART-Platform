@@ -22,7 +22,6 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +29,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -38,22 +36,13 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
@@ -81,7 +70,6 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 
 /**
  * Info composite containing some common logic and building blocks for {@link CmRootNode},  {@link CmNode},  {@link CmAttribute}
@@ -475,119 +463,33 @@ public abstract class AbstractInfoComposite extends Composite {
 	 * @author elitvin
 	 * @since 2.0.0
 	 */
-	protected class TranslatableNameComposite extends Composite implements ISourceObjectChangedListener {
+	protected class TranslatableNameComposite extends TranslateNameComposite implements ISourceObjectChangedListener {
 
-		private Text text;
-		private Button button;
-		
-		private NamedItem item;
 		private boolean internalChange = false; //indicate if text was changed by user or by calling setter
-		private Language currentLanguage = null;
 		
 		public TranslatableNameComposite(Composite parent) {
-			super(parent, SWT.NONE);
-			createControls();
+			super(parent, null);
 		}
 		
-		private void createControls() {
-			GridLayout gd = new GridLayout(2, false);
-			gd.marginBottom=0;
-			gd.marginHeight = 0;
-			gd.marginLeft = 0;
-			gd.marginRight = 0;
-			gd.marginTop = 0;
-			gd.marginWidth = 0;
-			this.setLayout(gd);
-			this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-			text = new Text(this, SWT.BORDER);
-			text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			
-			final ControlDecoration cd = createControlDecoration(text);
-			cd.hide();
-			
-			text.addFocusListener(new FocusListener() {
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (internalChange && item != null) {
-						boolean changed = false;
-						if (text.getText().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
-							MessageDialog.openError(getShell(), Messages.AbstractInfoComposite_ErrorDialogTitle, MessageFormat.format(Messages.AbstractInfoComposite_InvalidNameMessage, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
-							text.setText(item.getName());
-						}else{
-							changed = !item.getName().equals(text.getText());
-							item.setName(text.getText());
-							item.updateName(currentLanguage, item.getName());
-							
-						}
-						if (changed){
-							//only fire if name actually changed
-							fireModelChanged();
-						}
-					}
-					
-				}
-				
-				@Override
-				public void focusGained(FocusEvent e) {
-				}
-			});
-			text.addModifyListener(new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					if (internalChange && item != null) {
-						if (text.getText().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
-							cd.setDescriptionText(MessageFormat.format(Messages.AbstractInfoComposite_InvalidNameMessage, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
-							cd.show();
-						}else{
-							cd.hide();
-						}
-						fireModelChanged();
-						
-					}
-				}
-			});
-			
-			button = new Button(this, SWT.PUSH);
-			button.setText(Messages.TranslatableNameComposite_Button_Translate);
-			button.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					if (item != null){
-						TranslateSimpleListItemDialog translateDialog = new TranslateSimpleListItemDialog(getShell(), item);
-						if (translateDialog.open() == Window.OK){
-							updateText(item);
-							fireModelChanged();
-						}
-						
-					}
-				}
-			});
+		@Override
+		protected void handleChanged() {
+			fireModelChanged();
 		}
 		
-		public Text getText() {
-			return text;
+		@Override
+		protected boolean isInnerChange() {
+			return internalChange;
 		}
 		
-		public Button getButton() {
-			return button;
-		}
-
-		private void updateText(NamedItem item){
-			String l = item.findNameNull(currentLanguage);
-			if (l == null){
-				l = item.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
-			}
-			text.setText(l);
-		}
 		@Override
 		public void sourceObjectChanged(Object newObject, Language language) {
-			currentLanguage = language;
+			setCurrentLanguage(language);
 			if (newObject instanceof NamedItem) {
-				item = (NamedItem) newObject;
-				internalChange = false;
-				updateText(item);
 				internalChange = true;
+				NamedItem ni = (NamedItem) newObject;
+				updateText(ni);
+				setItem(ni);
+				internalChange = false;
 			} else if (newObject instanceof CmRootNode) {
 				CmRootNode root = (CmRootNode) newObject;
 				sourceObjectChanged(root.model, language);
