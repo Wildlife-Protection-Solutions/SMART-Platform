@@ -7,6 +7,7 @@ labels_es = {
  "alert.areyousuredeleteallalerts": "Está seguro de que quiere eliminar TODAS las alertas que cumplan los filtros actuales?",
  "alert.deleteall": "Eliminar todas las alertas que cumplan con los filtros actuales",
  "alert.description": "Descripción: ",
+ "alert.errorcreatingalert": "Error creando Alerta",
  "alert.errordeletealert": "Error al eliminar alerta ",
  "alert.errorgettingalert": "Error consiguiendo detalles para la alerta: ",
  "alert.errorlabel": "Error: ",
@@ -15,7 +16,6 @@ labels_es = {
  "alert.hidefilters": "Ocultar filtros",
  "alert.importance": "Importancia: ",
  "alert.invalidcustomdates": "Las fechas personalizadas no son válidas. No se ha aplicado ningún filtro de fecha a los eventos.",
- "alert.creatingalert": "Error creando Alerta",
  "alert.invalidlat": "Latitud no válida debe ser entre -90 y 90.",
  "alert.invalidlong": "Longitud no válida debe ser entre -180 y 180.",
  "alert.invalidurl": "URL no válido, URL no encontrada",
@@ -29,7 +29,7 @@ labels_es = {
  "alert.toomanyalerts": "Demasiadas alertas fueron encontrados en la base de datos, refine uno o más de los filtros de fecha/tipo/estado/AC para reducir el número de alertas en pantalla.",
  "alert.unabletodetectlocation": "No puede detectar automáticamente la ubicación",
  "alert.unathorized": "No autorizado/La sesión ha caducado",
- "alert.updatenow":"actualizar ahora",
+ "alert.updatenow": "actualizar ahora",
  "ca.cadeleted": "Se eliminaron los datos del Área de Conservación.",
  "ca.confirmdeleteca": "Esta seguro que quiere eliminar el Área de Conservación: ",
  "ca.error": "Error",
@@ -237,4 +237,4 @@ labels_es = {
  "users.userdeleted": " eliminado",
  "users.usernamelabel": "Usuario: ",
  "users.userupdated": " actualizado",
-}
+}\n
