@@ -137,7 +137,6 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_attribute",
 				"DROP TABLE smart.i_recordsource",
 				
-				"DROP FUNCTION smart.double_metaphone",
 				"DROP FUNCTION smart.metaphoneContains",
 		};
 		s.doWork(new Work(){
