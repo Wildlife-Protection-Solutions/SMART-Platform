@@ -91,6 +91,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private Label lblNewPatrol;
 	private PatrolLegTable patrolLegViewer;
 	private Patrol patrol;
+	private Button btnMoveToNewPatrol; 
 	
 	private ArrayList<PatrolLeg> legs;
 	
@@ -294,32 +295,32 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			}
 		});
 
-		
-		final Button btnMoveToNewPatrol = new Button(buttonPanel, SWT.PUSH);
-		btnMoveToNewPatrol.setText(Messages.PatrolLegsComposite_0);
-		btnMoveToNewPatrol.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				IStructuredSelection selection = (IStructuredSelection)patrolLegViewer.getSelection();
-				ArrayList<PatrolLeg> toBeMoved = new ArrayList<PatrolLeg>(); 
-				Iterator<?> i = selection.iterator();
-			    while ( i.hasNext() ) {
-			    	toBeMoved.add( ((PatrolLeg)i.next()) );
-			    }
-			    MovePatrolLegDialog movePatrolLegDialog = new MovePatrolLegDialog(getShell(), toBeMoved);
-				if (movePatrolLegDialog.open() == Window.OK){
-					for(PatrolLeg pld : toBeMoved){
-						legs.remove(pld);
+		if (canEditDates){
+			btnMoveToNewPatrol = new Button(buttonPanel, SWT.PUSH);
+			btnMoveToNewPatrol.setText(Messages.PatrolLegsComposite_0);
+			btnMoveToNewPatrol.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					IStructuredSelection selection = (IStructuredSelection)patrolLegViewer.getSelection();
+					ArrayList<PatrolLeg> toBeMoved = new ArrayList<PatrolLeg>(); 
+					Iterator<?> i = selection.iterator();
+				    while ( i.hasNext() ) {
+				    	toBeMoved.add( ((PatrolLeg)i.next()) );
+				    }
+				    MovePatrolLegDialog movePatrolLegDialog = new MovePatrolLegDialog(getShell(), toBeMoved);
+					if (movePatrolLegDialog.open() == Window.OK){
+						for(PatrolLeg pld : toBeMoved){
+							legs.remove(pld);
+						}
+						sortAndRefresh();
+						fireChangeListeners();
+						//add the new patrol of a list of new ones so we can save it later (users can use the option multiple times beforing saving, we want to save them all).
+						if(movePatrolLegDialog.getNewPatrol() != null) newPatrols.add(movePatrolLegDialog.getNewPatrol());
+						lblNewPatrol.setText(Messages.PatrolLegsComposite_1);
 					}
-					sortAndRefresh();
-					fireChangeListeners();
-					//add the new patrol of a list of new ones so we can save it later (users can use the option multiple times beforing saving, we want to save them all).
-					if(movePatrolLegDialog.getNewPatrol() != null) newPatrols.add(movePatrolLegDialog.getNewPatrol());
-					lblNewPatrol.setText(Messages.PatrolLegsComposite_1);
 				}
-			}
-		});
-
+			});
+		}
 
 		lblNewPatrol = new Label(main, SWT.NONE);
 		lblNewPatrol.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -334,7 +335,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				btnRemoveLeg.setEnabled((numSelected == 1) && legs.size() > 1);
 				btnEditLeg.setEnabled(numSelected == 1);
 				btnmergeLegs.setEnabled(numSelected > 1);
-				btnMoveToNewPatrol.setEnabled(numSelected > 0 && legs.size() > 1 && numSelected != legs.size());
+				if (btnMoveToNewPatrol != null) btnMoveToNewPatrol.setEnabled(numSelected > 0 && legs.size() > 1 && numSelected != legs.size());
 			}
 		});
 		
@@ -344,7 +345,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		btnEditLeg.setEnabled( false );
 		btnChangeTransport.setEnabled(false);
 		btnmergeLegs.setEnabled(false);
-		btnMoveToNewPatrol.setEnabled(false);
+		if (btnMoveToNewPatrol != null) btnMoveToNewPatrol.setEnabled(false);
 		
 		return main;
 	}
@@ -397,6 +398,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	public void setValues(Patrol p, Session session) {
 		this.session = session;
 		this.patrol = p;
+		
 		this.legs = new ArrayList<PatrolLeg>();
 		
 		//clone the legs
@@ -466,6 +468,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public boolean updatePatrol(Patrol p, Session session) {
+		boolean isNew = p.getUuid() == null;
+		
 		if (this.canEditDates){
 			p.setStartDate(patrolStartDate);
 			p.setEndDate(patrolEndDate);
@@ -483,7 +487,6 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		ArrayList<PatrolLeg> allLegs = new ArrayList<PatrolLeg>();
 		allLegs.addAll(legs);
 		session.flush();
-		
 		
 		//if the user used the "split into a new patrol" option, don't delete the points we are going to move
 		session.flush();
@@ -575,47 +578,45 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		//create leg days
 		p.createLegDays(session);
 		p.recalculateType();
-		session.saveOrUpdate(p);
-	
 		
-		for(PatrolLeg l : p.getLegs()){
-			for(PatrolLegDay d : l.getPatrolLegDays()){
-				if(d.getWaypoints() != null){
-					for(PatrolWaypoint w : d.getWaypoints()){
-						session.saveOrUpdate(w);
+		if (!isNew){
+			session.update(p);
+			for(PatrolLeg l : p.getLegs()){
+				for(PatrolLegDay d : l.getPatrolLegDays()){
+					if(d.getWaypoints() != null){
+						for(PatrolWaypoint w : d.getWaypoints()){
+							session.saveOrUpdate(w);
+						}
 					}
 				}
 			}
-		}
-		session.flush();
-		
-		
-		//if we made brand new patrols, save them and copy any plan and intel links there were
-		for(Patrol p2 : newPatrols){
-			session.saveOrUpdate(p2);
-			//save the waypoints, they are not cascaded like everything else.
-			for(PatrolLeg pl : p2.getLegs()){
-				for(PatrolLegDay pld : pl.getPatrolLegDays()){
-					for(PatrolWaypoint pwp : pld.getWaypoints()){
-						//pwp.setPatrolLegDay(pld);
-						session.saveOrUpdate(pwp);
+			session.flush();
+			
+			
+			//if we made brand new patrols, save them and copy any plan and intel links there were
+			for(Patrol p2 : newPatrols){
+				session.saveOrUpdate(p2);
+				//save the waypoints, they are not cascaded like everything else.
+				for(PatrolLeg pl : p2.getLegs()){
+					for(PatrolLegDay pld : pl.getPatrolLegDays()){
+						for(PatrolWaypoint pwp : pld.getWaypoints()){
+							//pwp.setPatrolLegDay(pld);
+							session.saveOrUpdate(pwp);
+						}
 					}
 				}
+				
+				//copy the intel and plan links to the new patrol as well
+				//do this by running the contribution from each plug-in that has links to patrols (intel and plan at the time of writing)
+				List<IPatrolEditContribution> contributions = findContributions();
+				for(IPatrolEditContribution c : contributions){
+					c.splitPatrol(session, patrol, p2);
+				}
+				
+				
+				lblNewPatrol.setText(Messages.PatrolLegsComposite_2);
 			}
-			
-			//copy the intel and plan links to the new patrol as well
-			//do this by running the contribution from each plug-in that has links to patrols (intel and plan at the time of writing)
-			List<IPatrolEditContribution> contributions = findContributions();
-			for(IPatrolEditContribution c : contributions){
-				c.splitPatrol(session, patrol, p2);
-			}
-			
-			
-			lblNewPatrol.setText(Messages.PatrolLegsComposite_2);
 		}
-		
-
-		
 		session.flush();
 		return true;
 			
