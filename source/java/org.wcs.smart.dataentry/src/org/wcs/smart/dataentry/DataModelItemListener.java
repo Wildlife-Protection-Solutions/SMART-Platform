@@ -27,9 +27,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.transaction.Synchronization;
+
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.engine.transaction.spi.LocalStatus;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -37,6 +42,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.IDataModelItemListener;
+import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -67,14 +73,61 @@ public class DataModelItemListener implements IDataModelItemListener {
 	public void deleteItem(Session currentSession, Object itemToDelete)
 			throws Exception {
 		
+		//we cannot add the associatedimageinterceptor to the session as the session is provider by
+		//another plugin so here we manually use it to ensure images are deleted when nodes are deleted
+		//This is not ideal,
+		AssociatedImageInterceptor interceptor = new AssociatedImageInterceptor();
+		currentSession.getTransaction().registerSynchronization(new Synchronization() {
+			@Override
+			public void beforeCompletion() {
+			}
+			
+			@Override
+			public void afterCompletion(int status) {
+				if (status == javax.transaction.Status.STATUS_COMMITTED){
+					//we need any empty transaction that returns true for wasCommitted
+					//for the itercceptor
+					Transaction tx = new Transaction(){
+
+						@Override
+						public boolean isInitiator() { return false; }
+						@Override
+						public void begin() { }
+						@Override
+						public void commit() { }
+						@Override
+						public void rollback() { }
+						@Override
+						public LocalStatus getLocalStatus() { return null; }
+						@Override
+						public boolean isActive() { return false; }
+						@Override
+						public boolean isParticipating() { return false; }
+						@Override
+						public boolean wasCommitted() { return true; }
+						@Override
+						public boolean wasRolledBack() { return false; }
+						@Override
+						public void registerSynchronization( Synchronization synchronization) throws HibernateException { }
+						@Override
+						public void setTimeout(int seconds) { }
+						@Override
+						public int getTimeout() { return 0; }
+						
+					};
+					interceptor.afterTransactionCompletion(tx);
+				}
+				
+			}
+		});
 		if (itemToDelete instanceof Category){
-			categoryDelete(currentSession, (Category)itemToDelete);
+			categoryDelete(currentSession, (Category)itemToDelete, interceptor);
 		}else if (itemToDelete instanceof CategoryAttribute){
-			attributeDelete(currentSession, (CategoryAttribute)itemToDelete);
+			attributeDelete(currentSession, (CategoryAttribute)itemToDelete, interceptor);
 		}else if (itemToDelete instanceof AttributeListItem){
-			listItemDelete(currentSession, (AttributeListItem)itemToDelete);
+			listItemDelete(currentSession, (AttributeListItem)itemToDelete, interceptor);
 		}else if (itemToDelete instanceof AttributeTreeNode){
-			treeNodeDelete(currentSession, (AttributeTreeNode)itemToDelete);
+			treeNodeDelete(currentSession, (AttributeTreeNode)itemToDelete, interceptor);
 		}
 		
 		currentSession.flush();
@@ -86,16 +139,17 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * @param currentSession
 	 * @param c
 	 */
-	private void categoryDelete(Session currentSession, Category c){
+	private void categoryDelete(Session currentSession, Category c, AssociatedImageInterceptor interceptor ){
 		List<CmNode> nodes = currentSession.createCriteria(CmNode.class).add(Restrictions.eq("category", c)).list(); //$NON-NLS-1$
 		for (CmNode n : nodes){
 			if (n.getParent() == null){
 				currentSession.delete(n);	
+				interceptor.onDelete(n, n.getUuid(), null, null, null);
 			}else{
 				n.getParent().getChildren().remove(n);
 				n.setParent(null);
 			}
-			
+
 		}
 	}
 	
@@ -106,18 +160,18 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * @param currentSession
 	 * @param ca
 	 */
-	private void attributeDelete(Session currentSession, CategoryAttribute ca){
-		deleteAttribute(currentSession, ca.getCategory(), ca.getAttribute());
+	private void attributeDelete(Session currentSession, CategoryAttribute ca, AssociatedImageInterceptor interceptor){
+		deleteAttribute(currentSession, ca.getCategory(), ca.getAttribute(), interceptor);
 		List<Category> kids = new ArrayList<Category>();
 		kids.addAll(ca.getCategory().getChildren());
 		while(kids.size() > 0){
 			Category kid = kids.remove(0);
-			deleteAttribute(currentSession, kid, ca.getAttribute());
+			deleteAttribute(currentSession, kid, ca.getAttribute(), interceptor);
 			kids.addAll(kid.getChildren());
 		}
 	}
 	
-	private void deleteAttribute(Session currentSession, Category category, Attribute attribute){
+	private void deleteAttribute(Session currentSession, Category category, Attribute attribute, AssociatedImageInterceptor interceptor){
 		Query q = currentSession.createQuery(
 				"FROM CmAttribute a WHERE a.attribute = :attribute and a.node.category = :category"); //$NON-NLS-1$
 		q.setParameter("attribute", attribute); //$NON-NLS-1$
@@ -127,6 +181,23 @@ public class DataModelItemListener implements IDataModelItemListener {
 		for (CmAttribute a : attributes){
 			a.setAttribute(null);
 			a.getNode().getCmAttributes().remove(a);
+			
+			interceptor.onDelete(a, a.getUuid(),null, null, null);
+			//register delete on children (ensure images are removed)
+			if (a.getList() != null){
+				for (CmAttributeListItem l : a.getList()){
+					interceptor.onDelete(l, l.getUuid(),null, null, null);
+				}
+			}
+			if (a.getTree() != null){
+				List<CmAttributeTreeNode> nodes = new ArrayList<>();
+				nodes.addAll(a.getTree());
+				while(!nodes.isEmpty()){
+					CmAttributeTreeNode n = nodes.remove(0);
+					interceptor.onDelete(n, n.getUuid(),null, null, null);
+					nodes.addAll(n.getChildren());
+				}
+			}
 			
 			//update the order of other attribute
 			for (int i = 0; i < a.getNode().getCmAttributes().size(); i ++){
@@ -140,11 +211,12 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * @param currentSession
 	 * @param li
 	 */
-	private void listItemDelete(Session currentSession, AttributeListItem li){
+	private void listItemDelete(Session currentSession, AttributeListItem li, AssociatedImageInterceptor interceptor){
 		List<CmAttributeListItem> items = currentSession.createCriteria(CmAttributeListItem.class)
 			.add(Restrictions.eq("listItem", li)).list(); //$NON-NLS-1$
 		for (CmAttributeListItem item: items){
 			currentSession.delete(item);
+			interceptor.onDelete(item, item.getUuid(),null, null, null);
 		}
 		deleteAttributeOption(currentSession, li.getUuid());
 	}
@@ -154,11 +226,12 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * @param currentSession
 	 * @param node
 	 */
-	private void treeNodeDelete(Session currentSession, AttributeTreeNode node){
+	private void treeNodeDelete(Session currentSession, AttributeTreeNode node, AssociatedImageInterceptor interceptor){
 		List<CmAttributeTreeNode> nodes = currentSession.createCriteria(CmAttributeTreeNode.class)
 			.add(Restrictions.eq("dmTreeNode", node)).list(); //$NON-NLS-1$
 		for (CmAttributeTreeNode tnode : nodes){
 			currentSession.delete(tnode);
+			interceptor.onDelete(tnode, tnode.getUuid(), null, null, null);
 		}
 		deleteAttributeOption(currentSession, node.getUuid());
 	}
@@ -315,16 +388,12 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 */
 	@Override
 	public void itemEnabledStateChanged(Session currentSession, Object itemToAdd) {
-		
 		if (itemToAdd instanceof CategoryAttribute){
 			CategoryAttribute ca = (CategoryAttribute)itemToAdd;
 			if (ca.getIsActive()){
 				//enabled; add to category
 				addItem(currentSession, ca);
 			}
-
 		}
-
-		
 	}
 }
