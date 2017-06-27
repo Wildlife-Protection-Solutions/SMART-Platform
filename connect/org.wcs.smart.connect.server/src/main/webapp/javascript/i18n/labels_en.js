@@ -29,6 +29,7 @@ labels_en= {
 "alert.location":"Location: ",
 "alert.description":"Description: ",
 "alert.importance":"Importance: ",
+"alert.updatenow":"update now",
 "dashboard.unauthorized":"You are Not Authorized to View that Dashboard",
 "dashboard.mustselectreports":"You must select a report in each of the two drop downs to save a valid Dashboard.",
 "dashboard.delete":"Permanenly Delete Dashboard",

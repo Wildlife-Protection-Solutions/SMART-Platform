@@ -12,12 +12,15 @@ import java.util.HashMap;
 
 public class Mergei18n {
 
-	public static final String[] languages = new String[]{"es"};
+	public static final String[] languages = new String[]{"in"};
 	
+	private static final String WEB_MESSAGES = "C:\\data\\SMART\\Source\\Version5.0.0\\connect\\org.wcs.smart.connect.server\\src\\main\\resources\\org\\wcs\\smart\\connect\\i18n\\";
+	private static final String MESSAGES = "C:\\data\\SMART\\Source\\Version5.0.0\\connect\\org.wcs.smart.connect.server\\src\\main\\resources\\org\\wcs\\smart\\connect\\i18n\\";
+	private static final String JAVASCRIPT = "C:\\data\\SMART\\Source\\Version5.0.0\\connect\\org.wcs.smart.connect.server\\src\\main\\webapp\\javascript\\i18n\\";
 	
 	private void processWebMessages() throws IOException{
 		System.out.println("Web Processing Messages");
-		String path = "C:\\data\\SMART\\Source\\Version4.1.0\\connect\\org.wcs.smart.connect.server\\src\\main\\resources\\org\\wcs\\smart\\connect\\i18n\\";
+		String path = WEB_MESSAGES;
 		String enFile = path + "web_messages_en.properties";
 		String[] tFiles = new String[languages.length];
 		for (int i = 0; i < languages.length; i ++){
@@ -29,7 +32,7 @@ public class Mergei18n {
 	
 	private void processMessages() throws IOException{
 		System.out.println("Processing Messages");
-		String path = "C:\\data\\SMART\\Source\\Version4.1.0\\connect\\org.wcs.smart.connect.server\\src\\main\\resources\\org\\wcs\\smart\\connect\\i18n\\";
+		String path = MESSAGES;
 		String enFile = path + "messages.properties";
 		String[] tFiles = new String[languages.length];
 		for (int i = 0; i < languages.length; i ++){
@@ -110,7 +113,7 @@ public class Mergei18n {
 	
 	private void processJavascript() throws IOException{
 		System.out.println("Javascript Messages");
-		String path = "C:\\data\\SMART\\Source\\Version4.1.0\\connect\\org.wcs.smart.connect.server\\src\\main\\webapp\\javascript\\i18n\\";
+		String path = JAVASCRIPT;
 		String enFile = path + "labels_en.js";
 		String[] tFiles = new String[languages.length];
 		for (int i = 0; i < languages.length; i ++){
@@ -236,8 +239,8 @@ public class Mergei18n {
 	
 	public static void main(String args[]) throws IOException{
 		Mergei18n merger = new Mergei18n();
-//		merger.processMessages();
-//		merger.processWebMessages();
+		merger.processMessages();
+		merger.processWebMessages();
 		merger.processJavascript();
 	}
 }

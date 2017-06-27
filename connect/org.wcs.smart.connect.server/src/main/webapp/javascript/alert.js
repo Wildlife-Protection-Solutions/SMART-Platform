@@ -735,7 +735,7 @@ function updateRealtimeLayer(updatedUrl){
         var month = now.getMonth() + 1;
         if(minutes <10) minutes = "0" + minutes;
         if(seconds<10) seconds = "0" + seconds;
-        document.getElementById("map-info-box").innerHTML = i18n("alert.lastupdated") + now.getDate() + "/" + month + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds + "  <a href='javascript:refreshAlerts()'>update now</a>";
+        document.getElementById("map-info-box").innerHTML = i18n("alert.lastupdated") + now.getDate() + "/" + month + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds + "  <a href='javascript:refreshAlerts()'>" + i18n("alert.updatenow") + "</a>";
     });
     
     realtime.addTo(map);
