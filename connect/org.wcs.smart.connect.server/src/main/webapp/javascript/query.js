@@ -1,4 +1,5 @@
 var SHARED_LINK_URL = "../api/sharedlink/";
+var USER_URL = "../api/connectuser/getCurrent";
 
 var queries;
 var lastSorted;
@@ -538,7 +539,31 @@ function populateCaList(){
 	    	lbl.appendChild(span);
 	    	filterparent.appendChild(lbl);
 	    }
-	}			
+	}
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = setHomeCa;
+	oReq.open("Get", USER_URL, true);
+	oReq.send();
+}
+
+function setHomeCa(){
+	if (this.status != 200) {
+		var msg = i18n("query.error");
+		if (this.status == 401){
+			msg += i18n("query.unauthorized");
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	var parent = document.getElementById('caselect')
+	
+	var users = JSON.parse(this.responseText);
+	parent.value = users.homeCaUuid;
 }
 
 function selectAll(parent){

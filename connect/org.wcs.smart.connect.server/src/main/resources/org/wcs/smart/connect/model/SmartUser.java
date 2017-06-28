@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.model;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -53,6 +54,8 @@ public class SmartUser extends ConnectUuidItem {
 	private String oldpassword;
 	private String resetId;
 	private Date resetDate;
+	
+	private UUID homeCaUuid;
 	
 	
 	@Column(name="username")
@@ -109,6 +112,14 @@ public class SmartUser extends ConnectUuidItem {
 	}
 	public void setResetDatetime(Date reset) {
 		this.resetDate = reset;
+	}
+	
+	@Column(name="home_ca_uuid")
+	public UUID getHomeCaUuid() {
+		return homeCaUuid;
+	}
+	public void setHomeCaUuid(UUID homeCaUuid) {
+		this.homeCaUuid = homeCaUuid;
 	}
 	
 }

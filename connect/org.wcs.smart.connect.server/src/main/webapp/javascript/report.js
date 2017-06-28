@@ -2,6 +2,7 @@ var reports;
 var lastSorted;
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
 var SHARED_LINK_URL = "../api/sharedlink/";
+var USER_URL = "../api/connectuser/getCurrent";
 
 var definedDates = ["report.last30days","report.last60days","report.monthtodate","report.lastmonth","report.yeartodate","report.lastyear","report.alldates","report.custom"];
 var definedDateKeys = ["last30days", "last60days", "monthtodate", "lastmonth", "yeartodate", "lastyear", "alldates", "custom"];
@@ -503,7 +504,32 @@ function populateCaList(){
 	    	filterparent.appendChild(lbl);
 	    }
 	}			
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = setHomeCa;
+	oReq.open("Get", USER_URL, true);
+	oReq.send();
 }
+
+function setHomeCa(){
+	if (this.status != 200) {
+		var msg = i18n("query.error");
+		if (this.status == 401){
+			msg += i18n("query.unauthorized");
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	var parent = document.getElementById('caselect')
+	
+	var users = JSON.parse(this.responseText);
+	parent.value = users.homeCaUuid;
+}
+
 
 
 //get full URL from a relative one, used to give full-url link to users to share.

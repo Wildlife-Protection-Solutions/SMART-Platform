@@ -1,3 +1,5 @@
+ALTER TABLE connect.users add column home_ca_uuid UUID;
+
 ALTER TABLE connect.alert_types ADD COLUMN custom_icon varchar(2);
 
 ALTER TABLE smart.patrol_leg ADD COLUMN mandate_uuid UUID;

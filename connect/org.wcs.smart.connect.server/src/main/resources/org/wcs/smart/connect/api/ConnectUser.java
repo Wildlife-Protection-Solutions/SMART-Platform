@@ -169,6 +169,31 @@ public class ConnectUser extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Gets the current user's details
+	 * <p>URL: ../server/api/connectuser/getCurrent/
+	 * <p>Call Type: GET
+	 * 
+	 * @return Returns a JSON SmartUser object of the currently logged in user 
+	 */
+	
+	@GET
+    @Path("/getCurrent/")
+    public SmartUser getCurrentUser(){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		String username = request.getUserPrincipal().getName();
+		try{
+			SmartUser su = HibernateManager.getUser(s, username);
+			if (su == null){
+				logger.info("User " + username + " not found."); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
+			}
+			return su;
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
 
 	/**
 	 * Gets a single user's details
@@ -372,7 +397,9 @@ public class ConnectUser extends HttpServlet {
 			if (newUser.getResetId() != null){
 				toUpdate.setResetId(newUser.getResetId());
 			}
-			
+			if(newUser.getHomeCaUuid() != null){
+				toUpdate.setHomeCaUuid(newUser.getHomeCaUuid());
+			}
 			s.update(toUpdate);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){

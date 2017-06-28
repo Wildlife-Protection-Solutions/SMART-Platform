@@ -27,7 +27,8 @@
 
 		var newdata = {
 			"username" : user,
-			"email" : email
+			"email" : email,
+			"homeCaUuid": caselect.value
 		};
 
 		//make ajax call
@@ -108,6 +109,8 @@
     <input type="hidden" name="currentuser" value="${username}"/>
     <label class="block top-spacer"><fmt:message key="myaccount.username"/>:</label>
     <input type="text" name="username" class="block formtext" value="${username}"/>
+    <label class="block top-spacer"><fmt:message key="myaccount.homeca" /></label>
+	<select id="caselect" style="max-width:24em"> </select>
     <label class="block top-spacer"><fmt:message key="myaccount.email"/>:</label>
     <input type="text" name="email" class="block formtext" value="${email}"/>
     <div class="block infotext"><fmt:message key="myaccount.emailinfo"/></div>
