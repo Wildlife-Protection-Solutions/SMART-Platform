@@ -421,10 +421,13 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(Messages.EmployeePropertyPage_ProgessDeleteEmployee, toDelete.size());
-					Session s = HibernateManager.openSession();
+					Session s = HibernateManager.openSession();					
 					Transaction tx = s.beginTransaction();
 					try{
 						for (Employee del : toDelete){
+							del = (Employee) s.get(Employee.class, del.getUuid()); //reload employee see #2178
+							if (del == null) continue; //employee not found cannot remove
+							
 							monitor.subTask(SmartLabelProvider.getFullLabel(del));
 							String deleteError = null;
 							try{
@@ -482,9 +485,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		} catch (Exception e) {
 			SmartPlugIn.displayLog(e.getLocalizedMessage(), e);
 		}
-		
-		
-		
+			
 		if (restart[0]){
 			//restart
 			PlatformUI.getWorkbench().restart();
