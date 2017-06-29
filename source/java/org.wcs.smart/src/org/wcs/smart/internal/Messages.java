@@ -25,6 +25,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.internal.messages"; //$NON-NLS-1$
+	public static String AddContentFilterLayersCommand_CmdName;
 	public static String AbstractCsvDialog_Browse_Button;
 	public static String AbstractCsvDialog_ErrorTitle;
 	public static String AbstractCsvDialog_Fail_Error;
