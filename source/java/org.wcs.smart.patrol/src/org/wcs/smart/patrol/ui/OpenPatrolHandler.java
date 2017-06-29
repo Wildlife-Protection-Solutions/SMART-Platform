@@ -47,22 +47,26 @@ public class OpenPatrolHandler {
 
 	public static final String PATROL_PARAM = "patrolinput"; //$NON-NLS-1$
 	public static final String INIT_SELECTION_WP_UUID = "waypointuuid"; //$NON-NLS-1$
+	public static final String INIT_SELECTION_PATROLLEGDAY_UUID = "patrollegdayuuid"; //$NON-NLS-1$
 	
 	@Execute
 	public void openPatrol(@Optional @Named(PATROL_PARAM) PatrolEditorInput patrolInput,
-			@Optional @Named(INIT_SELECTION_WP_UUID) UUID initSelection,
+			@Optional @Named(INIT_SELECTION_WP_UUID) UUID waypointUuid,
+			@Optional @Named(INIT_SELECTION_WP_UUID) UUID patrolLegDayUuid,
 			MWindow activeWindow){
 		
 		if (patrolInput == null) return;
 		
-		(new ShowFieldDataPerspective()).execute(PatrolListView.ID,activeWindow);
+		(new ShowFieldDataPerspective()).execute(PatrolListView.ID, activeWindow);
 		
 		try {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			IWorkbenchPage page = window.getActivePage();
 			IEditorPart part = page.openEditor(patrolInput, PatrolEditor.ID);
-			if (part instanceof PatrolEditor && initSelection != null){
-				((PatrolEditor)part).findAndShow(initSelection);
+			if (part instanceof PatrolEditor && waypointUuid != null){
+				((PatrolEditor)part).findAndShow(waypointUuid);
+			}else if (part instanceof PatrolEditor && patrolLegDayUuid != null){
+				((PatrolEditor)part).findAndShow(patrolLegDayUuid);
 			}
 		} catch (PartInitException e) {
 			SmartPatrolPlugIn.displayLog(Messages.OpenPatrolHandler_OpenPatrolError + e.getLocalizedMessage(), e);
@@ -71,6 +75,10 @@ public class OpenPatrolHandler {
 	
 	public void openPatrol(@Optional @Named(PATROL_PARAM) PatrolEditorInput patrolInput,
 			MWindow activeWindow){
-		openPatrol(patrolInput, null, activeWindow);
+		openPatrol(patrolInput, null, null, activeWindow);
+	}
+	
+	public void openPatrol(@Optional @Named(PATROL_PARAM) PatrolEditorInput patrolInput, UUID waypointUuid, MWindow activeWindow){
+		openPatrol(patrolInput, waypointUuid, null, activeWindow);
 	}
 }

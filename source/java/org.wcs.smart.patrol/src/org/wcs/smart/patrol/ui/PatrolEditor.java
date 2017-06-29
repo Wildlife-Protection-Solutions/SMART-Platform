@@ -268,20 +268,35 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 	
 	/**
-	 * Finds and displays the given waypoint uuid.
+	 * Finds and displays the given element in the patrol editor.
+	 * The uuid object can represent a Waypoint uuid or
+	 * a PatrolLegDay uuid.  If it represents a Waypoint the waypoint
+	 * will be shown and selected in the table.  If it represents a PatrolLegDay
+	 * then the editor for the given day is displayed.
 	 * 
 	 * @param waypointUuid
 	 */
-	public void findAndShow(UUID waypointUuid){
+	public void findAndShow(UUID uuid){
 		PatrolWaypoint wp = null;
+		PatrolLegDay pld = null;
+		long time = -1;
 		Session s = HibernateManager.openSession();
 		
 		try{
+			//search waypoints
 			wp = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
-					.add(Restrictions.eq("id.waypoint.uuid", waypointUuid)) //$NON-NLS-1$
+					.add(Restrictions.eq("id.waypoint.uuid", uuid)) //$NON-NLS-1$
 					.uniqueResult();
-			if (wp == null) return;
-			wp.getPatrolLegDay().getDate();
+			if (wp != null){
+				time = wp.getPatrolLegDay().getDate().getTime();
+			}else{
+				//search patrol leg days
+				pld = (PatrolLegDay)s.get(PatrolLegDay.class, uuid);
+				if (pld != null){
+					time = pld.getDate().getTime();
+				}
+			}
+			
 		}finally{
 			s.close();
 		}
@@ -291,18 +306,19 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			IEditorPart part = getEditor(i);
 			if (part instanceof PatrolDayEditor){
 				final PatrolDayEditor pde = (PatrolDayEditor)part;			
-				if ( ((PatrolDayEditorInput)pde.getEditorInput()).getPatrolDay().getTime() == wp.getPatrolLegDay().getDate().getTime()  ){
+				if ( ((PatrolDayEditorInput)pde.getEditorInput()).getPatrolDay().getTime() == time  ){
 					setActivePage(i);
-						
-					Display.getDefault().asyncExec(new Runnable(){
-						//do this as a job in the display thread so the ui
-						//has a chance to change pages, before it attempts
-						//to scroll to the correct controls
-						@Override
-						public void run() {
-							pde.findAndGoTo(wp2);	
-						}
-					});
+					if (wp2 != null){
+						Display.getDefault().asyncExec(new Runnable(){
+							//do this as a job in the display thread so the ui
+							//has a chance to change pages, before it attempts
+							//to scroll to the correct controls
+							@Override
+							public void run() {
+								pde.findAndGoTo(wp2);	
+							}
+						});
+					}
 					return;
 				}
 			}
