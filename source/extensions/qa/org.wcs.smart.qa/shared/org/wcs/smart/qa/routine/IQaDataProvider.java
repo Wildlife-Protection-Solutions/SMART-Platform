@@ -24,6 +24,7 @@ package org.wcs.smart.qa.routine;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -35,9 +36,13 @@ import org.wcs.smart.ca.ConservationArea;
  * @author Emily
  *
  */
-public interface IQaDataProvider {
+public abstract class IQaDataProvider {
 
-	public String getId();
+	/**
+	 * A unique identifier for the data provider.
+	 * @return
+	 */
+	public abstract String getId();
 	
 	/**
 	 * The name of the data provider
@@ -45,7 +50,7 @@ public interface IQaDataProvider {
 	 * @param l
 	 * @return
 	 */
-	public String getName(Locale l);
+	public abstract String getName(Locale l);
 	
 	/**
 	 * Find all the data between the start and end date.
@@ -55,7 +60,7 @@ public interface IQaDataProvider {
 	 * 
 	 * @return
 	 */
-	public Collection<?> getData(Session session, ConservationArea conservationArea, Date startDate, Date endDate);
+	public abstract Collection<?> getData(Session session, ConservationArea conservationArea, Date startDate, Date endDate);
 	
 	/**
 	 * Determines if a given QA Routine Type supports data
@@ -64,7 +69,7 @@ public interface IQaDataProvider {
 	 * @param type
 	 * @return
 	 */
-	public boolean supportsRoutine(IQaRoutineType type);
+	public abstract boolean supportsRoutine(IQaRoutineType type);
 	
 	/**
 	 * For an object returned by getData call, this function determines the user
@@ -74,7 +79,7 @@ public interface IQaDataProvider {
 	 * @param obj
 	 * @return
 	 */
-	public String getFeatureId(Session session, Object obj);
+	public abstract String getFeatureId(Session session, Object obj);
 	
 	
 	/**
@@ -84,6 +89,18 @@ public interface IQaDataProvider {
 	 * @param obj
 	 * @return
 	 */
-	public UUID getFeatureSource(Session session, Object obj);
-//	public Collection<IFixRoutine> getFixOptions();
+	public abstract UUID getFeatureSource(Session session, Object obj);
+	
+	@Override
+	public boolean equals(Object other){
+		if (other == null) return false;
+		if (!other.getClass().equals(this.getClass())) return false;
+		return Objects.equals(getId(), ((IQaDataProvider)other).getId());
+	}
+	
+	@Override
+	public int hashCode(){
+		return Objects.hash(getId());
+	}
+
 }

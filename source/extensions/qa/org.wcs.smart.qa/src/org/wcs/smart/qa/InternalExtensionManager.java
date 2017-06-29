@@ -21,16 +21,25 @@
  */
 package org.wcs.smart.qa;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.wcs.smart.qa.routine.IQaAction;
+import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.IQaRoutineType;
 import org.wcs.smart.qa.ui.configure.IParameterCollector;
 
 public enum InternalExtensionManager {
 	INSTANCE;
 	
+	private HashMap<String, List<IQaAction>> providerActions = null;
 
 	/**
 	 * Finds the parameter collector for the qa routine type provided
@@ -58,4 +67,38 @@ public enum InternalExtensionManager {
 		return null;
 	}
 
+	
+	public List<IQaAction> getQaActions(IQaDataProvider provider, IEclipseContext context){
+		if (providerActions == null){
+			synchronized (INSTANCE) {
+				if (providerActions == null){
+			
+					providerActions = new HashMap<>();
+					
+					IExtensionRegistry registry = RegistryFactory.getRegistry();
+					IExtensionPoint pnt = registry.getExtensionPoint(RoutineExtensionManager.QA_ROUTINE_TYPE_EXTENSION_ID);
+					IConfigurationElement[] config = pnt.getConfigurationElements();
+					for (IConfigurationElement e : config) {
+						if (e.getName().equals("data_provider")){ //$NON-NLS-1$
+							try{
+								String id = ((IQaDataProvider)e.createExecutableExtension("class")).getId(); //$NON-NLS-1$
+								IConfigurationElement[] kids = e.getChildren("qa_action"); //$NON-NLS-1$
+								List<IQaAction> actions = new ArrayList<>();
+								for (IConfigurationElement kid : kids){
+									IQaAction action = (IQaAction)kid.createExecutableExtension("class");
+									actions.add(action);
+									ContextInjectionFactory.inject(action, context);
+								}
+								providerActions.put(id, actions);
+							}catch (Exception ex){
+								QaPlugIn.log(ex.getMessage(), ex);
+							}
+						}
+					}
+				}
+			}
+		}
+		return providerActions.get(provider.getId());
+
+	}
 }

@@ -68,13 +68,16 @@
 
    <element name="data_provider">
       <complexType>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="qa_action"/>
+         </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.qa.routine.IQaDataProvider"/>
+                  <meta.attribute kind="java" basedOn="org.wcs.smart.qa.routine.IQaDataProvider:"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -90,6 +93,21 @@
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn="org.wcs.smart.qa.ui.configure.IParameterCollector:"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="qa_action">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.qa.routine.IQaAction"/>
                </appinfo>
             </annotation>
          </attribute>

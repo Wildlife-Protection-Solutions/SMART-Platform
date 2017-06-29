@@ -77,18 +77,6 @@
       </editor>
    </extension>
    <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="org.wcs.smart.observation.FieldDataPerspective">
-         <view
-               id="org.wcs.smart.qa.validatation.manual.parameters"
-               minimized="false"
-               relationship="stack"
-               relative="org.wcs.smart.fielddata.datafolder">
-         </view>
-      </perspectiveExtension>
-   </extension>
-   <extension
          point="org.eclipse.ui.views">
       <view
             class="org.wcs.smart.qa.ui.view.ManualValidationView$ManualValidationViewWrapper"

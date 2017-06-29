@@ -15,4 +15,5 @@ Export-Package: org.wcs.smart.qa,
  org.wcs.smart.qa.model,
  org.wcs.smart.qa.routine,
  org.wcs.smart.qa.ui.configure,
- org.wcs.smart.qa.ui.routine
+ org.wcs.smart.qa.ui.routine,
+ org.wcs.smart.qa.ui.view

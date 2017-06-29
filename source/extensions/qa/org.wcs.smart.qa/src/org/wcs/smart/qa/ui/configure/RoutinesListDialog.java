@@ -39,6 +39,8 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -128,6 +130,12 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		}
 		tblRoutines.getTable().setLinesVisible(true);
 		tblRoutines.getTable().setHeaderVisible(true);
+		tblRoutines.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				edit();
+			}
+		});
 		
 		Composite buttonPnl = new Composite(outer, SWT.NONE);
 		buttonPnl.setLayout(new GridLayout());

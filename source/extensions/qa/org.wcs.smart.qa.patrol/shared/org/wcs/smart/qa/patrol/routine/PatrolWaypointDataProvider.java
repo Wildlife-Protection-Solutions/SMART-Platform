@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.qa.patrol.routine;
 
 import java.text.DateFormat;
@@ -18,27 +39,34 @@ import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.IQaRoutineType;
 import org.wcs.smart.qa.routine.LocationRoutineType;
 
-public class PatrolWaypointDataProvider implements IQaDataProvider {
+/**
+ * Data provider for patrol waypoints.
+ * 
+ * @author Emily
+ *
+ */
+public class PatrolWaypointDataProvider extends IQaDataProvider {
 
-	public static final String ID = "org.wcs.smart.qa.dataprovider.patrol.waypoint";
+	public static final String ID = "org.wcs.smart.qa.dataprovider.patrol.waypoint"; //$NON-NLS-1$
 	
 	@Override
 	public String getName(Locale l) {
-		return "Patrol Waypoints";
+		return "Patrol Waypoint";
 	}
 
 	public String getId(){
 		return ID;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
 		List<WaypointLocationData> waypoints = new ArrayList<>();
 		
 		List<Waypoint> pws = session.createCriteria(Waypoint.class)
-				.add(Restrictions.eq("conservationArea", ca))
-				.add(Restrictions.eq("sourceId", PatrolWaypointSource.PATROL_WP_SOURCE_ID))
-				.add(Restrictions.between("dateTime", startDate, endDate))
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.eq("sourceId", PatrolWaypointSource.PATROL_WP_SOURCE_ID)) //$NON-NLS-1$
+				.add(Restrictions.between("dateTime", startDate, endDate)) //$NON-NLS-1$
 				.list();
 		for (Waypoint wp : pws){
 			waypoints.add(new WaypointLocationData(wp));
@@ -50,7 +78,7 @@ public class PatrolWaypointDataProvider implements IQaDataProvider {
 	@Override
 	public String getFeatureId(Session session, Object obj){
 		PatrolWaypoint pw = (PatrolWaypoint) session.createCriteria(PatrolWaypoint.class)
-				.add(Restrictions.eq("id.waypoint", ((WaypointLocationData)obj).getWaypoint()))
+				.add(Restrictions.eq("id.waypoint", ((WaypointLocationData)obj).getWaypoint())) //$NON-NLS-1$
 				.uniqueResult();
 		if (pw == null){
 			return "Patrol Waypoint not found - data error";
@@ -64,6 +92,7 @@ public class PatrolWaypointDataProvider implements IQaDataProvider {
 		sb.append(")");
 		return sb.toString();
 	}
+	
 	@Override
 	public boolean supportsRoutine(IQaRoutineType type) {
 		if (type.getId().equals(LocationRoutineType.ID)) return true;

@@ -41,7 +41,7 @@ public class DatabaseTables {
 	public static void createTables(Session session){
 		String[] sql = new String[]{
 				 // Create Tables
-				"CREATE TABLE smart.qa_error( uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data not null, qa_routine_uuid char(16) for bit data NOT NULL, data_provider_id varchar(128) not null, status varchar(32) NOT NULL, validate_date timestamp NOT NULL, error_id varchar(1024) NOT NULL, error_description varchar(32600), src_identifier char(16) for bit data NOT NULL, geometry blob, PRIMARY KEY (uuid) )",
+				"CREATE TABLE smart.qa_error( uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data not null, qa_routine_uuid char(16) for bit data NOT NULL, data_provider_id varchar(128) not null, status varchar(32) NOT NULL, validate_date timestamp NOT NULL, error_id varchar(1024) NOT NULL, error_description varchar(32600), fix_message varchar(32600), src_identifier char(16) for bit data NOT NULL, geometry blob, PRIMARY KEY (uuid) )",
 				"CREATE TABLE smart.qa_routine(uuid char(16) FOR BIT DATA NOT NULL, ca_uuid char(16) FOR BIT DATA NOT NULL, routine_type_id varchar(1024) NOT NULL, description varchar(32600), auto_check boolean DEFAULT false NOT NULL, PRIMARY KEY (uuid))",
 				"CREATE TABLE smart.qa_routine_parameter( uuid char(16) FOR BIT DATA NOT NULL, qa_routine_uuid char(16) FOR BIT DATA NOT NULL, id varchar(256) NOT NULL, str_value varchar(32600), byte_value blob, PRIMARY KEY (uuid, qa_routine_uuid) )",
 

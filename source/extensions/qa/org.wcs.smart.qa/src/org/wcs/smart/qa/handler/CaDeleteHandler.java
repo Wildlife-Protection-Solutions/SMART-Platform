@@ -49,7 +49,7 @@ public class CaDeleteHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("delete from QaRoutineParameter rp where rp.qaRoutine in (select r from QaRoutine a where conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createQuery("delete from QaRoutineParameter rp where rp.qaRoutine in (FROM QaRoutine a WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		

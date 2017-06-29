@@ -5,9 +5,21 @@
          point="org.wcs.smart.qa">
       <data_provider
             class="org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider">
+         <qa_action
+               class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction">
+         </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.patrol.ui.EditWaypointAction">
+         </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.patrol.ui.DeletePatrolWaypointAction">
+         </qa_action>
       </data_provider>
       <data_provider
             class="org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider">
+         <qa_action
+               class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction">
+         </qa_action>
       </data_provider>
    </extension>
 

@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.qa.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -34,10 +37,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.routine.IQaDataProvider;
-import org.wcs.smart.qa.routine.IQaRoutineType;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
@@ -58,25 +61,53 @@ public class QaError extends UuidItem{
 		NEW,
 		IGNORED,
 		DELETED,
-		FIXED
+		FIXED;
+		
+		public String getGuiName(Locale l){
+			//TODO:
+			return this.name();
+		}
 	}
 	
 	private Status status;
 	private Date validateDate;
 	private String errorId;
 	private String errorDescription;
+	private String fixMessage;
 	private UUID srcId;
 	private QaRoutine routine;
 	private String dataProviderId;
 	private byte[] bytegeom; 	 
+	private ConservationArea conservationArea;
 	
 	@Transient
 	private IQaDataProvider dataProvider;
 	private Geometry geometry;
+	private List<QaError> links;
 	
 	public QaError() {
 	}
 
+	
+	/**
+	 * Get the conservation area.
+	 * 
+	 * @return conservation area
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
+		return this.conservationArea;
+	}
+	
+	/**
+	 * Set the conservation area.
+	 * 
+	 * @param conservationArea
+	 */
+	public void setConservationArea(ConservationArea conservationArea) {
+		this.conservationArea = conservationArea;
+	}
 	
 	/**
 	 * Get the status.
@@ -243,6 +274,20 @@ public class QaError extends UuidItem{
 	}
 	
 	/**
+	 * Details about the fix applied to the qa error
+	 * @return
+	 */
+	@Column(name="fix_message")
+	public String getFixMessage(){
+		return this.fixMessage;
+	}
+	
+	public void setFixMessage(String message){
+		this.fixMessage = message;
+	}
+	
+	
+	/**
 	 * Get the data provider identifier
 	 * 
 	 * @return status
@@ -284,5 +329,32 @@ public class QaError extends UuidItem{
 			}
 		}
 		return geometry;
+	}
+	
+	
+	/**
+	 * Links another qa error with this one.  Links
+	 * are qa errors generated on the same data item by
+	 * different routines. 
+	 * @param g
+	 */
+	@Transient
+	public void addLink(QaError error){
+		getLinks().add(error);
+	}
+	
+	/**
+	 * Links
+	 * are qa errors generated on the same data item by
+	 * different routines. 
+	 * 
+	 * @return
+	 */
+	@Transient
+	public List<QaError> getLinks() {
+		if (links == null){
+			links = new ArrayList<>();
+		}
+		return links;
 	}
 }

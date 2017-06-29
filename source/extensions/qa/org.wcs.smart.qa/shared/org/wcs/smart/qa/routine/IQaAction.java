@@ -21,57 +21,55 @@
  */
 package org.wcs.smart.qa.routine;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
+import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.model.QaRoutine;
 
 /**
- * An interface for implementing a QA Routine type.  These
- * define routines that users can implement with custom
- * parameters for validating data.
+ * An action that can be applied to a QA result item.
  * 
  * @author Emily
  *
  */
-public interface IQaRoutineType {
+public interface IQaAction {
 
+	public static final String DELETE_ACTION_ID = "org.wcs.smart.qa.action.delete"; //$NON-NLS-1$
+	
+	/**
+	 * Perform the action on the set of items.  If supportsMultiple is true
+	 * this list should only have a single item in it.
+	 * 
+	 * @param items
+	 */
+	public void doAction(List<QaError> items);
+	
+	/**
+	 * @return if the action can be applied to multiple items at once.  For example
+	 * delete actions could be applied to multiple actions, but goto source
+	 * do not. 
+	 */
+	public boolean supportsMultiple();
+	
 	/**
 	 * 
-	 * @return the identifier of the QA routine
+	 * @return id of the qa action
 	 */
 	public String getId();
 	
 	/**
-	 * The property QA routine name for the given locale
 	 * 
-	 * @return
+	 * @param l
+	 * @return the name of the qa action
 	 */
 	public String getName(Locale l);
 	
-	
 	/**
-	 * A description of what the QA routine validates
 	 * 
-	 * @return
+	 * @return the image for the action; can return null if no image applicable
 	 */
-	public String getDescription(Locale l);
-
-	
-	/**
-	 * Validates data returns a set of errors.
-	 * 
-	 * @return
-	 */
-	public Collection<QaError> validateData(ValidationTask task, Session session, IProgressMonitor monitor) throws Exception;
-		
-	/**
-	 * Returns a summary of the parameter values from the qa routine for display to the user
-	 * @param routine
-	 * @return
-	 */
-	public String getParameterSummary(QaRoutine routine);
+	public default Image getImage() {
+		return null;
+	}
 }

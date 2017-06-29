@@ -32,8 +32,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
@@ -51,9 +51,12 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 
 /**
- * A QA routine that validates waypoint positions.
+ * A QA routine that validates position of geometry objects.
  * 
- * Expected data providers to provide Waypoint objects.
+ * Expected data providers must provide data objects that extend
+ * the ILocationRoutineData interface.
+ * 
+ * 
  * @author Emily
  *
  */
@@ -187,7 +190,7 @@ public class LocationRoutineType implements IQaRoutineType {
 							
 							QaError error = new QaError();
 							error.setDataProviderId(task.getDataProvider().getId());
-							
+							error.setConservationArea(SmartDB.getCurrentConservationArea());
 							error.setErrorDescription(MessageFormat.format("Point is {0} units outside of area.",distance));
 							error.setErrorId( task.getDataProvider().getFeatureId(session, x));
 							error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
@@ -205,7 +208,7 @@ public class LocationRoutineType implements IQaRoutineType {
 							double distance = pp.polygon.distance(wp.getGeometry());
 							QaError error = new QaError();
 							error.setDataProviderId(task.getDataProvider().getId());
-							
+							error.setConservationArea(SmartDB.getCurrentConservationArea());
 							error.setErrorDescription(MessageFormat.format("Linestring is {0} units outside of area.",distance));
 							error.setErrorId( task.getDataProvider().getFeatureId(session, x));
 							error.setSourceId( task.getDataProvider().getFeatureSource(session, x));

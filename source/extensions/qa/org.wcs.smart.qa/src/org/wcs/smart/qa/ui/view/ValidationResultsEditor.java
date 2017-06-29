@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.qa.ui.view;
 
 import java.text.MessageFormat;
@@ -16,17 +37,17 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.CheckboxCellEditor;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
@@ -38,10 +59,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPersistableElement;
@@ -53,8 +78,6 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
-import org.geotools.data.DataUtilities;
-import org.geotools.data.FeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
@@ -64,10 +87,7 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
@@ -81,8 +101,11 @@ import org.wcs.smart.qa.ValidationEngine;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.map.FeatureFactory;
+import org.wcs.smart.qa.model.map.QaErrorService;
 import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.ValidationTask;
+import org.wcs.smart.udig.AddContentFilterLayersCommand;
+import org.wcs.smart.udig.ContentFilterLayerImpl;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -93,10 +116,13 @@ import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.Point;
 
+/**
+ * Editor part of displaying the results of manual validation routine.
+ * 
+ * @author Emily
+ *
+ */
 public class ValidationResultsEditor extends SmartMapEditorPart {
 	
 	public static final String ID = "org.wcs.smart.qa.data.validatation.manual"; //$NON-NLS-1$
@@ -108,22 +134,32 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 	private FormToolkit toolkit = null;
 	
 	private DateFilterDropDownComposite dateFilter;
-	private TableViewer tblRoutines;
+	private CheckboxTableViewer tblRoutines;
 	
-	private Composite optionsPanel;
-	private Composite resultsPanel;
-	private Composite progressPanel;
+//	private Composite optionsPanel;
+//	private Composite resultsPanel;
+//	private Composite progressPanel;
 	private Composite stackPanel;
 	private ProgressAreaComposite progressComposite;
 	private IEclipseContext parentContext;
+	private Button btnIncludeFixed ;
 	
-	private List<Layer> errorLayers;
 	
-	private Hyperlink lOptions;
-	private Hyperlink lResults;
+	
+//	private Hyperlink lOptions;
+//	private Hyperlink lResults;
 	private Font boldFont, normalFont;
 	
+	private StackPanelItem progressStackItem;
+	private StackPanelItem optionsStackItem;
+	private StackPanelItem resultsStackItem;
+	
 	private Collection<QaError> results = null;
+	
+	private List<Layer> errorLayers;
+	private QaErrorService service = null;
+	
+	private ValidationEngine lastValidationEngine;
 	
 	public static IEditorInput MANUAL_VALIDATION_INPUT =  new IEditorInput() {
 		
@@ -157,14 +193,14 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 			return false;
 		}
 	};
-
 	
 	private enum ResultTableColumn{
 		STATUS("Status"),
 		DATA_TYPE("Data Type"),
 		ROUTINE("Routine"),
 		OBJECT_ID("Source ID"),
-		DESC("Description");
+		DESC("Description"),
+		FIX("Fix");
 		
 		public String title;
 		
@@ -189,7 +225,9 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 			}else if (this == DESC){
 				return error.getErrorDescription();
 			}else if (this == STATUS){
-				return error.getStatus().name();
+				return error.getStatus().getGuiName(Locale.getDefault());
+			}else if (this == FIX){
+				return error.getFixMessage();
 			}
 			return element.toString();
 		}
@@ -199,6 +237,10 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		return this.results;
 	}
 
+	public IEclipseContext getContext(){
+		return this.parentContext;
+	}
+	
 	public void clearResults(){
 		//clear table
 		results = null;
@@ -252,13 +294,17 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 	
 	
 	public void showProgress(){
-		((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
-		stackPanel.layout();
-		
-		lResults.setFont(normalFont);
-		lOptions.setFont(boldFont);
+		progressStackItem.show();
 	}
 	
+	
+	private void disposeService(){
+		if (service != null){
+			service.dispose(new NullProgressMonitor());
+			CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+			service = null;
+		}
+	}
 	public void setResults(Collection<QaError> results){
 		this.results = results;
 		
@@ -268,61 +314,31 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 			}
 		}
 		
-		((StackLayout)stackPanel.getLayout()).topControl = resultsPanel;
-		stackPanel.layout();
-		lResults.setFont(boldFont);
-		lOptions.setFont(normalFont);
-		
 		tblResults.setInput(results);
 		tblResults.getTable().setEnabled(true);
 		lblResultCnt.setText(MessageFormat.format("{0} items found", results.size()));
-		
-
+		lblResultCnt.getParent().layout(true, true);
+		resultsStackItem.show();
 		
 		try{
-			SimpleFeatureType pntSchema = FeatureFactory.createPointQaErrorFeatureType();
-			SimpleFeatureType lineSchema = FeatureFactory.createLineQaErrorFeatureType();
-			
-			IGeoResource pntErrorLayer = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(pntSchema);
-			IGeoResource lineErrorLayer = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(lineSchema);
-			
-			List<SimpleFeature> pntFeatures = new ArrayList<>();
-			List<SimpleFeature> lineFeatures = new ArrayList<>();
-			for (QaError error : results ){
-				if (error.getGeometryObject() != null){
-					
-					if (error.getGeometryObject() instanceof Point){
-						SimpleFeature sf = FeatureFactory.createQaFeature(pntSchema, error, Locale.getDefault());
-						pntFeatures.add(sf);
-					}else if (error.getGeometryObject() instanceof LineString){
-						SimpleFeature sf = FeatureFactory.createQaFeature(lineSchema, error, Locale.getDefault());
-						lineFeatures.add(sf);
-					}else if (error.getGeometryObject() instanceof MultiLineString){
-						SimpleFeature sf = FeatureFactory.createQaFeature(lineSchema, error, Locale.getDefault());
-						lineFeatures.add(sf);
-					}
-				}
-			}
-			pntErrorLayer.resolve(FeatureStore.class, new NullProgressMonitor()).addFeatures(DataUtilities.collection(pntFeatures));
-			lineErrorLayer.resolve(FeatureStore.class, new NullProgressMonitor()).addFeatures(DataUtilities.collection(lineFeatures));
-
+			disposeService();		
+			service = new QaErrorService(results);
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-			toAdd.add(pntErrorLayer);
-			toAdd.add(lineErrorLayer);
-			AddLayersCommand cmd = new AddLayersCommand(toAdd);
+			toAdd.addAll(service.resources(new NullProgressMonitor()));
+			AddContentFilterLayersCommand cmd = new AddContentFilterLayersCommand(toAdd);
 			getMap().sendCommandSync(cmd);
 			errorLayers = cmd.getLayers();
 			for (Layer l : errorLayers){
 				l.setName("Error Results");
+				if (l instanceof ContentFilterLayerImpl){
+					((ContentFilterLayerImpl)l).setContentFilter(FeatureFactory.newStatusFilter());
+				}
 			}
-			
 		}catch (Exception ex){
 			ex.printStackTrace();
 			//TODO:
 		}
-	}
-	
-	
+	}	
 	
 	private void addLayers(){
 		if (loadDefaultLayers != null){
@@ -357,25 +373,16 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		form.setText("Data Validation Results");
 		
 		form.getBody().setLayout(new GridLayout());
-		SashForm sash = new SashForm(form.getBody(),  SWT.VERTICAL);
-		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		
-		Composite resultsArea = toolkit.createComposite(sash);
-		resultsArea.setLayout(new GridLayout());
-		((GridLayout)resultsArea.getLayout()).marginWidth = 0;
-		((GridLayout)resultsArea.getLayout()).marginHeight = 0;
-		
-		
-		Composite header = toolkit.createComposite(resultsArea);
+		Composite header = toolkit.createComposite(form.getBody());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		header.setLayout(new GridLayout(3, false));
 		((GridLayout)header.getLayout()).horizontalSpacing = 10;
 		//((GridLayout)header.getLayout()).marginHeight = 8;
 		header.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		
-		lOptions = toolkit.createHyperlink(header, "Options", SWT.NONE);
-		lResults = toolkit.createHyperlink(header, "Results", SWT.NONE);
+		Hyperlink lOptions = toolkit.createHyperlink(header, "Options", SWT.NONE);
+		Hyperlink lResults = toolkit.createHyperlink(header, "Results", SWT.NONE);
 		Label spacer = toolkit.createLabel(header, "");
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -385,7 +392,6 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		boldFont = new Font(lOptions.getDisplay(), fd);
 		lOptions.addListener(SWT.Dispose, e->boldFont.dispose());
 		
-		lOptions.setFont(boldFont);
 		lOptions.setBackground(header.getBackground());
 		lResults.setBackground(header.getBackground());
 		spacer.setBackground(header.getBackground());
@@ -393,56 +399,73 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		lOptions.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				lOptions.setFont(boldFont);
-				lResults.setFont(normalFont);
-				((StackLayout)stackPanel.getLayout()).topControl = optionsPanel;
-				header.layout();
-				stackPanel.layout();
+				optionsStackItem.show();
 			}
 		});
-		
 		
 		lResults.addHyperlinkListener(new HyperlinkAdapter() {
 
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				lResults.setFont(boldFont);
-				lOptions.setFont(normalFont);
-				if (tblResults.getInput() == null){
-					((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
-				}else{
-					((StackLayout)stackPanel.getLayout()).topControl = resultsPanel;
-				}
-				header.layout();
-				stackPanel.layout();
+				resultsStackItem.show();
 			}
 		});
 
 		
-		stackPanel = toolkit.createComposite(resultsArea, SWT.NONE);
+		stackPanel = toolkit.createComposite(form.getBody(), SWT.NONE);
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
 		stackPanel.setLayout(new StackLayout());
 		
-		optionsPanel = toolkit.createComposite(stackPanel);
+		Composite optionsPanel = toolkit.createComposite(stackPanel);
 		optionsPanel.setLayout(new GridLayout());
 		createParameterArea(optionsPanel);
 		
-		progressPanel = toolkit.createComposite(stackPanel);
+		Composite progressPanel = toolkit.createComposite(stackPanel);
 		progressPanel.setLayout(new GridLayout());
 		progressComposite = new ProgressAreaComposite(progressPanel);
 		progressComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		((StackLayout)stackPanel.getLayout()).topControl = optionsPanel;
-		
-		resultsPanel = toolkit.createComposite(stackPanel);
+		Composite resultsPanel = toolkit.createComposite(stackPanel);
 		resultsPanel.setLayout(new GridLayout());
 		
+		resultsStackItem = new StackPanelItem(lResults, resultsPanel);
+		optionsStackItem = new StackPanelItem(lOptions, optionsPanel);
+		progressStackItem = new StackPanelItem(lResults, progressPanel);
+
+		SashForm sash = new SashForm(resultsPanel,  SWT.VERTICAL);
+		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		lblResultCnt = toolkit.createLabel(resultsPanel, "");
+		Composite tableArea = toolkit.createComposite(sash, SWT.NONE);
+		tableArea.setLayout(new GridLayout());
+		((GridLayout)tableArea.getLayout()).marginWidth = 0;
+		((GridLayout)tableArea.getLayout()).marginHeight = 0;
+		
+		Composite topComp = toolkit.createComposite(tableArea);
+		topComp.setLayout(new GridLayout(3, false));
+		((GridLayout)topComp.getLayout()).marginWidth = 0;
+		((GridLayout)topComp.getLayout()).marginHeight = 0;
+		topComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		lblResultCnt = toolkit.createLabel(topComp, "");
 		lblResultCnt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		tblResults = new TableViewer(resultsPanel, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		btnIncludeFixed = toolkit.createButton(topComp, "Include Resolved Items", SWT.CHECK);
+		btnIncludeFixed.setSelection(false);
+		btnIncludeFixed.addListener(SWT.Selection, e->updateResultsTableFilter());
+		btnIncludeFixed.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		
+		ToolBar tb = new ToolBar(topComp,  SWT.NONE);
+		ToolItem btnRefresh = new ToolItem(tb, SWT.PUSH);
+//		Button btnRefresh = toolkit.createButton(topComp, "", SWT.PUSH);
+		btnRefresh.setToolTipText("Re-run qa routines against the same data.");
+		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		btnRefresh.addListener(SWT.Selection, e->{
+			if (lastValidationEngine != null){
+				executeValidation(lastValidationEngine);
+			}
+		});
+		
+		tblResults = new TableViewer(tableArea, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		tblResults.setContentProvider(ArrayContentProvider.getInstance());
 		toolkit.adapt(tblResults.getTable());
 		tblResults.getTable().setLinesVisible(true);
@@ -460,6 +483,7 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 			});
 		}
 		tblResults.getTable().addListener(SWT.Selection, e->{
+			if (errorLayers == null) return;
 			FilterFactory ff = CommonFactoryFinder.getFilterFactory();
 			
 			List<Filter> selectedFeatures = new ArrayList<>();
@@ -479,24 +503,69 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		
 		});
 		
+		
 		createTableMenu();
-		
-		
+				
 		String[] tools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 1);
 		tools[tools.length - 1] = ClearSelectionTool.ID;
 		mapTools = tools;
 		
 		Composite mapArea = toolkit.createComposite(sash);
-		mapArea.setLayout(new GridLayout());
-		
+		mapArea.setLayout(new GridLayout());	
 		super.createPartControl(mapArea);
-	
 		getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, new QaMapInfoToolProvider(this));
+		
+		optionsStackItem.show();
+		updateResultsTableFilter();
 		
 		sash.setWeights(new int[]{3,5});
         addLayers();
 	}
 
+	private void updateResultsTableFilter(){
+		if (btnIncludeFixed.getSelection()){
+			tblResults.setFilters(new ViewerFilter[]{});
+			
+			if (errorLayers != null){
+				for (Layer l : errorLayers){
+					if (l instanceof ContentFilterLayerImpl){
+						((ContentFilterLayerImpl)l).setContentFilter(Filter.INCLUDE);
+					}
+				}
+				getMap().getRenderManager().refresh(null);
+			}
+		}else{
+			tblResults.setFilters(new ViewerFilter[]{new ViewerFilter() {
+				@Override
+				public boolean select(Viewer viewer, Object parentElement, Object element) {
+					if (element instanceof QaError){
+						if (((QaError) element).getStatus() == QaError.Status.NEW) return true;
+						return false;
+					}
+					return true;
+				}
+			}});
+			
+			if (errorLayers != null){
+				for (Layer l : errorLayers){
+					if (l instanceof ContentFilterLayerImpl){
+						((ContentFilterLayerImpl)l).setContentFilter(FeatureFactory.newStatusFilter());
+					}
+				}
+				getMap().getRenderManager().refresh(null);
+			}
+		}
+	}
+	
+	/**
+	 * Refreshes the results table and the map
+	 */
+	public void refreshResults(){
+		tblResults.refresh();
+		getMap().getRenderManager().refresh(null);
+		clearSelection();
+	}
+	
 	
 	private void createTableMenu(){
 		Menu mnu = new Menu(tblResults.getTable());
@@ -508,12 +577,38 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		
 		MenuItem clearSelection = new MenuItem(mnu, SWT.PUSH);
 		clearSelection.setText("Clear Selection");
-		clearSelection.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		clearSelection.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CLEAR_SELECTION_ICON));
 		clearSelection.addListener(SWT.Selection, e->clearSelection());
 		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem ignoreItem = new MenuItem(mnu, SWT.PUSH);
+		ignoreItem.setText("Ignore");
+//		ignoreItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		ignoreItem.addListener(SWT.Selection, e->updateStatus(QaError.Status.IGNORED));
+		
+		
 		tblResults.getTable().setMenu(mnu);
+		new QaActionMenu(mnu, parentContext, tblResults){
+			@Override
+			public void refresh() {
+				refreshResults();
+			}
+		};
+		
 	}
 	
+	private void updateStatus(QaError.Status newStatus){
+		for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();				
+			if (x instanceof QaError){
+				((QaError) x).setStatus(newStatus);
+			}
+		}
+		clearSelection();
+		tblResults.refresh();
+		getMap().getRenderManager().refresh(null);
+	}
 	
 	public void setSelection(QaError error){
 		clearSelection();
@@ -528,6 +623,7 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		}
 		tblResults.setSelection(null);
 	}
+	
 	private void zoomSelected(){
 		Envelope env = null;
 		for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
@@ -558,8 +654,8 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
         	toolkit.dispose();
         	toolkit = null;
         }
+        disposeService();
         
-//        parentContext.get(EventBroker.class).unsubscribe(executeValidate);
         super.dispose();
       
     }
@@ -572,99 +668,58 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 	
 	private void createParameterArea(Composite parent){
 		Composite panel = toolkit.createComposite(parent, SWT.NONE);
-		panel.setLayout(new GridLayout(2, false));
+		panel.setLayout(new GridLayout());
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
 		
+		Button btnExecute = toolkit.createButton(panel, "Validate Data...", SWT.PUSH);
+		btnExecute.addListener(SWT.Selection, e->validate());
 		
-		toolkit.createLabel(panel, "Date Filter:");
+		Composite dFilter = toolkit.createComposite(panel);
+		dFilter.setLayout(new GridLayout(2, false));
+		dFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)dFilter.getLayout()).marginWidth = 0;
+		((GridLayout)dFilter.getLayout()).marginHeight = 0;
+		
+		toolkit.createLabel(dFilter, "Dates:");
 		DateFilter[] dFilters = new DateFilter[]{
 				DateFilter.LAST_30_DAYS,
 				DateFilter.LAST_60_DAYS,
 				DateFilter.CURRENT_MONTH,
 				DateFilter.CUSTOM};
 		
-		dateFilter = new DateFilterDropDownComposite(panel, dFilters, DateFilter.LAST_30_DAYS);
+		dateFilter = new DateFilterDropDownComposite(dFilter, dFilters, DateFilter.LAST_30_DAYS);
 		toolkit.adapt(dateFilter);
 		
-		toolkit.createLabel(panel, "Data to Validate:");
-		Hyperlink hlink = toolkit.createHyperlink(panel, "refresh list", SWT.NONE);
-		hlink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				loadRoutines();
-			}
-		});
-		hlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		
-		tblRoutines = new TableViewer(panel, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		Table tbl = toolkit.createTable(panel, SWT.CHECK| SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		tblRoutines = new CheckboxTableViewer(tbl);//, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		toolkit.adapt(tblRoutines.getTable());
 		tblRoutines.setContentProvider(ArrayContentProvider.getInstance()); 
 		tblRoutines.getTable().setLinesVisible(true);
 		tblRoutines.getTable().setHeaderVisible(true);
-		tblRoutines.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		tblRoutines.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		tblRoutines.getTable().addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(KeyEvent e) {
+			public void keyPressed(KeyEvent e) {
 				if (e.character == SWT.SPACE){
-					boolean newSelection =  !((DataValidator)((IStructuredSelection)tblRoutines.getSelection()).getFirstElement()).isSelected;
+					Object selection = ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+					boolean newValue = !tblRoutines.getChecked(selection);
+					
 					for (Iterator<?>iterator = ((IStructuredSelection)tblRoutines.getSelection()).iterator(); iterator.hasNext();) {
 						DataValidator type = (DataValidator) iterator.next();
-						type.isSelected = newSelection;
-						
+						tblRoutines.setChecked(type, newValue);
 					}
 					tblRoutines.refresh();
+					e.doit = false;
 				}
 			}
 		});
 		
 		TableViewerColumn checkColumn = new TableViewerColumn(tblRoutines, SWT.CHECK);
 		checkColumn.getColumn().setWidth(30);
-		checkColumn.setLabelProvider(new ColumnLabelProvider(){
-			public String getText(Object element){
-				if (element instanceof DataValidator){
-					if (((DataValidator) element).isSelected()){
-						return "YES"; 
-							
-//						return Character.toString((char)0x2611);
-					}else{
-						return "NO";
-//						return Character.toString((char)0x2610);
-					}
-				}
-				return "";
-			}
-		});
-		
-		checkColumn.setEditingSupport(new EditingSupport(checkColumn.getViewer()) {
-			CellEditor editor = new CheckboxCellEditor(tblRoutines.getTable());;
-			
-			@Override
-			protected void setValue(Object element, Object value) {
-				if (element instanceof DataValidator){
-					((DataValidator)element).isSelected = (Boolean)value;
-					tblRoutines.refresh();
-				}
-			}
-			
-			@Override
-			protected Object getValue(Object element) {
-				if (element instanceof DataValidator){
-					return ((DataValidator) element).isSelected();
-				}
-				return null;
-			}
-			
-			@Override
-			protected CellEditor getCellEditor(Object element) {
-				return editor;
-			}
-			
-			@Override
-			protected boolean canEdit(Object element) {
-				return element instanceof DataValidator;
-			}
-		});
+		checkColumn.setLabelProvider(new ColumnLabelProvider(){});
 		
 		TableViewerColumn dataColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
 		dataColumn.setLabelProvider(new ColumnLabelProvider(){
@@ -704,14 +759,27 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		descColumn.getColumn().setWidth(150);
 		descColumn.getColumn().setText("Routine Description");
 		
+		Hyperlink hlink = toolkit.createHyperlink(panel, "refresh list", SWT.NONE);
+		hlink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				loadRoutines();
+			}
+		});
+		hlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		
 		tblRoutines.setInput(DialogConstants.LOADING_TEXT);
 
-		Button btnExecute = toolkit.createButton(panel, "EXECUTE", SWT.PUSH);
-		btnExecute.addListener(SWT.Selection, e->validate());
+		
 		loadRoutines();
 	}
 
 	private void validate(){
+		if (tblRoutines.getCheckedElements().length == 0){
+			MessageDialog.openInformation(getSite().getShell(), "No Routines Selected", "No validation routines selected.  Nothing to validate.");
+			return;
+		}
+		
 		Date startDate = null;
 		Date endDate = null;
 		if (dateFilter.getDateFilter() == DateFilter.CUSTOM){
@@ -721,17 +789,23 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 			startDate = dateFilter.getDateFilter().getStartDate();
 			endDate = dateFilter.getDateFilter().getEndDate();
 		}
-		ValidationEngine engine = new ValidationEngine();
+		
+		if (startDate.after(endDate)){
+			MessageDialog.openInformation(getSite().getShell(), "Invalid Dates", "Start date is after end date.  Cannot validate data.");
+			return;
+		}
+		
+		lastValidationEngine = new ValidationEngine();
+		
 		
 		//TODO: validate this cast
-		List<Object> items = (List<Object>) tblRoutines.getInput();
-		for (Object x  : items){
-			if (x instanceof DataValidator && ((DataValidator) x).isSelected()){
+		for (Object x  : tblRoutines.getCheckedElements()){
+			if (x instanceof DataValidator){
 				ValidationTask task = new ValidationTask(((DataValidator) x).getRoutine(), ((DataValidator) x).getDataProvider(), startDate, endDate, SmartDB.getCurrentConservationArea());
-				engine.addValidationTask(task);
+				lastValidationEngine.addValidationTask(task);
 			}
 		}
-		executeValidation(engine);
+		executeValidation(lastValidationEngine);
 //		eventBroker.send("SMART_QA/MANUAL/EXECUTE", engine);
 	}
 	
@@ -770,32 +844,47 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 			}
 			Display.getDefault().asyncExec(()->{
 				tblRoutines.setInput(routines);
+				tblRoutines.setAllChecked(true);
 			});
 			return Status.OK_STATUS;
 		}
 		
 	};
+	
 	private class DataValidator{
+		
 		private QaRoutine routine;
 		private IQaDataProvider data;
-		private boolean isSelected;
 		
 		public DataValidator(QaRoutine routine, IQaDataProvider data){
 			this.routine = routine;
 			this.data = data;
-		}
-		
+		}		
 		public QaRoutine getRoutine(){ return routine; }
 		public IQaDataProvider getDataProvider(){ return data; }
-		public boolean isSelected(){ return this.isSelected;  }
-		public void setSelected(boolean isSelected) { this.isSelected = isSelected; }
-		
 	}
 	
-	public static class ManualValidationViewWrapper extends DIViewPart<ManualValidationView>{
-		public ManualValidationViewWrapper(){
-			super(ManualValidationView.class);
+	private class StackPanelItem{
+		Hyperlink  lblHeader;
+		Composite control;
+		
+		public StackPanelItem(Hyperlink  lblHeader, Composite control){
+			this.lblHeader = lblHeader;
+			this.control = control;
+		}
+		
+		public void show(){
+			for (Control c : lblHeader.getParent().getChildren()){
+				c.setFont(normalFont);
+			}
+			lblHeader.setFont(boldFont);
+			if (tblResults.getInput() == null && this == resultsStackItem){
+				((StackLayout)stackPanel.getLayout()).topControl = progressStackItem.control;
+			}else{
+				((StackLayout)stackPanel.getLayout()).topControl = this.control;
+			}
+			lblHeader.getParent().layout();
+			stackPanel.layout();
 		}
 	}
-
 }
