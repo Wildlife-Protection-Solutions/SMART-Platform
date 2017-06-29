@@ -51,7 +51,6 @@ import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
-import org.wcs.smart.i2.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
@@ -60,6 +59,7 @@ import org.wcs.smart.i2.udig.query.QueryGeoResource;
 import org.wcs.smart.i2.udig.query.QueryService;
 import org.wcs.smart.i2.udig.record.IntelRecordService;
 import org.wcs.smart.i2.udig.record.IntelRecordServiceExtension;
+import org.wcs.smart.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.util.UuidUtils;
 

@@ -95,13 +95,13 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelValueItem;
-import org.wcs.smart.i2.udig.AddContentFilterLayersCommand;
-import org.wcs.smart.i2.udig.ContentFilterLayerImpl;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
+import org.wcs.smart.udig.AddContentFilterLayersCommand;
+import org.wcs.smart.udig.ContentFilterLayerImpl;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 

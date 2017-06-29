@@ -39,9 +39,9 @@ import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
-import org.wcs.smart.i2.udig.IFilteringResource;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.LocationLayerType;
+import org.wcs.smart.udig.IFilteringResource;
 
 /**
  * Georesource for a entity record locations

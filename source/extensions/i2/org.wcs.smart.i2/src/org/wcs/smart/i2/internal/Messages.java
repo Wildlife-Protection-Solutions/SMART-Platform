@@ -6,7 +6,6 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.i2.internal.messages"; //$NON-NLS-1$
 	public static String AbstractIntelEntityTypeListWizardPage_EntityTypeRequired;
 	public static String AbstractIntelEntityTypeListWizardPage_LinkParameter;
-	public static String AddContentFilterLayersCommand_CmdName;
 	public static String AddIntelligenceJob_InstallError;
 	public static String AddIntelligenceJob_JobName;
 	public static String AdvancedEntitySearch_AttributeTypeNotSupported;
