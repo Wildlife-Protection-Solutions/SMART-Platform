@@ -16,6 +16,7 @@ Bundle-Activator: org.wcs.smart.patrol.SmartPatrolPlugIn
 Eclipse-RegisterBuddy: org.wcs.smart.hibernate.libs
 Eclipse-BuddyPolicy: global
 Export-Package: org.wcs.smart.patrol,
+ org.wcs.smart.patrol.geotools,
  org.wcs.smart.patrol.meta,
  org.wcs.smart.patrol.model,
  org.wcs.smart.patrol.ui,

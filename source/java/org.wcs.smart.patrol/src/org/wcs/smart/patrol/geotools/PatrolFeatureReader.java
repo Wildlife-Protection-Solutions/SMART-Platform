@@ -29,19 +29,13 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Smart area feature reader
@@ -53,9 +47,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	private SimpleFeatureType ftype;
 	private String thisType;
 	private Iterator<?> fIterator;
-	
-	private SimpleDateFormat trackDt = new SimpleDateFormat("MMMddyyyy");  //$NON-NLS-1$
-	
+
 	public PatrolFeatureReader(Patrol patrol,
 			String type, SimpleFeatureType ftype) {
 		this.ftype = ftype;
@@ -120,46 +112,10 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
 		if (thisType.equals(PatrolDataSource.WAYPOINT_TYPE)){
-			return new PatrolFeature(getWaypointAsFeature((PatrolWaypoint)this.fIterator.next()));
+			return new PatrolFeature(PatrolFeatureFactory.getWaypointAsFeature(ftype, (PatrolWaypoint)this.fIterator.next()));
 		}else if (thisType.equals(PatrolDataSource.TRACK_TYPE)){
-			return new PatrolFeature(getTrackAsFeature((Track)this.fIterator.next()));
+			return new PatrolFeature(PatrolFeatureFactory.getTrackAsFeature(ftype, (Track)this.fIterator.next()));
 		}
 		return null;
-	}
-	
-	
-	private SimpleFeature getWaypointAsFeature(PatrolWaypoint waypoint){
-		//String spec = "geom:Point:srid=4326,fid:String,id:integer,date:Date,time:Time,comment:String";
-		Object data[] = new Object[7];
-		data[0] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()));
-		data[1] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + UuidUtils.uuidToString(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
-		data[2] = waypoint.getWaypoint().getId();
-		data[3] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
-		data[4] = waypoint.getWaypoint().getDateTime();
-		if (waypoint.getWaypoint().getObservations() == null || waypoint.getWaypoint().getObservations().size() == 0){
-			data[5] = ""; //$NON-NLS-1$
-		}else{ 
-			data[5] = waypoint.getWaypoint().getObservationsAsString();
-		}
-		data[6] = waypoint.getWaypoint().getComment();
-		
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
-	}
-	
-	private SimpleFeature getTrackAsFeature(Track track){
-		//String spec = "geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String";
-		String fid = ftype.getName() + "." + trackDt.format(track.getPatrolLegDay().getDate()) + "." + track.getPatrolLegDay().getPatrolLeg().getId();  //$NON-NLS-1$ //$NON-NLS-2$
-		Object data[] = new Object[5];
-		try{
-			data[0] = track.getLineString();
-		}catch (Exception ex){
-			SmartPatrolPlugIn.log(ex.getMessage(), ex);
-		}
-		data[1] = fid;
-		data[2] = track.getDistance();
-		data[3] = track.getPatrolLegDay().getDate();
-		data[4] = track.getPatrolLegDay().getPatrolLeg().getId();
-		
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 }

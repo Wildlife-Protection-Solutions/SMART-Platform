@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
@@ -89,9 +88,9 @@ public class PatrolDataSource extends AbstractDataStore{
 		if (type == null){
 			try {
 				if (typeName.equals(WAYPOINT_TYPE)) {
-					type = createWaypointSchema();
+					type = PatrolFeatureFactory.createWaypointSchema();
 				} else if (typeName.equals(TRACK_TYPE)) {
-					type = createTrackSchema();
+					type = PatrolFeatureFactory.createTrackSchema();
 				}
 			}catch(SchemaException ex){
 				throw new IOException(Messages.PatrolDataSource_Error_CouldNoGenerateSchema + ex.getLocalizedMessage(), ex);
@@ -101,15 +100,5 @@ public class PatrolDataSource extends AbstractDataStore{
 		return type;
 	}
 
-	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		String spec = "the_geom:Point:srid=4326,fid:String,id:Integer,date:Date,time:Date,observation:String,comment:String"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType(WAYPOINT_TYPE, spec);
-		return type;
-	}
-	
-	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType(TRACK_TYPE, spec);
-		return type;
-	}
+
 }
