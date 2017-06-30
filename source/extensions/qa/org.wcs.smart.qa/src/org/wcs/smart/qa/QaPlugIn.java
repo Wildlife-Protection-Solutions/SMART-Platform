@@ -24,6 +24,7 @@ package org.wcs.smart.qa;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -42,6 +43,8 @@ public class QaPlugIn extends AbstractUIPlugin {
 	
 	// The shared instance
 	private static QaPlugIn plugin;
+	
+	public static final String ICON_INTERPOLATE = "org.wcs.smart.qa.icon.interpolate"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor
@@ -70,6 +73,10 @@ public class QaPlugIn extends AbstractUIPlugin {
 		super.stop(context);
 	}
 
+	@Override
+	protected void initializeImageRegistry(ImageRegistry reg) {
+	     reg.put(ICON_INTERPOLATE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/interpolate.png")); //$NON-NLS-1$
+	}
 	/**
 	 * Returns the shared instance
 	 *

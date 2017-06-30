@@ -21,17 +21,23 @@
  */
 package org.wcs.smart.qa.patrol.ui;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaError.Status;
 import org.wcs.smart.qa.routine.IQaAction;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Action implementation for editing waypoint positions.  Applicable
@@ -46,10 +52,13 @@ public class EditWaypointAction implements IQaAction {
 	public void doAction(List<QaError> items) {
 		if (items.isEmpty()) return;
 		QaError item = items.get(0);
-		EditWaypointDetailsDialog dialog = new EditWaypointDetailsDialog(Display.getDefault().getActiveShell(), item.getSourceId());
+		EditWaypointDetailsDialog dialog = new PatrolEditWaypointDialog(Display.getDefault().getActiveShell(), item.getSourceId());
 		if (dialog.open() == Window.OK){
 			item.setStatus(Status.FIXED);
-			item.setFixMessage("Manually moved.");
+			Point pnt = (Point)item.getGeometryObject();
+			Point to = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(dialog.getUpdatedPoint().getX(), dialog.getUpdatedPoint().getY()));
+			item.setFixMessage(MessageFormat.format("Manually moved from ({0}, {1}) to ({2}, {3})", pnt.getX(), pnt.getY(), to.getX(), to.getY()));
+			item.setGeometryObject(to);			
 		}
 	}
 

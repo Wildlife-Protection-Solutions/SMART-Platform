@@ -88,6 +88,7 @@ import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
+import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
@@ -561,6 +562,7 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 	 * Refreshes the results table and the map
 	 */
 	public void refreshResults(){
+		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		tblResults.refresh();
 		getMap().getRenderManager().refresh(null);
 		clearSelection();
@@ -580,14 +582,6 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		clearSelection.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CLEAR_SELECTION_ICON));
 		clearSelection.addListener(SWT.Selection, e->clearSelection());
 		
-		new MenuItem(mnu, SWT.SEPARATOR);
-		
-		MenuItem ignoreItem = new MenuItem(mnu, SWT.PUSH);
-		ignoreItem.setText("Ignore");
-//		ignoreItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		ignoreItem.addListener(SWT.Selection, e->updateStatus(QaError.Status.IGNORED));
-		
-		
 		tblResults.getTable().setMenu(mnu);
 		new QaActionMenu(mnu, parentContext, tblResults){
 			@Override
@@ -597,18 +591,7 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		};
 		
 	}
-	
-	private void updateStatus(QaError.Status newStatus){
-		for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
-			Object x = (Object) iterator.next();				
-			if (x instanceof QaError){
-				((QaError) x).setStatus(newStatus);
-			}
-		}
-		clearSelection();
-		tblResults.refresh();
-		getMap().getRenderManager().refresh(null);
-	}
+
 	
 	public void setSelection(QaError error){
 		clearSelection();

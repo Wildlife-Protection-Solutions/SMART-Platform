@@ -23,14 +23,17 @@ package org.wcs.smart.qa;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
+import org.wcs.smart.qa.routine.IQaAction;
 import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.IQaRoutineType;
+import org.wcs.smart.qa.routine.IgnoreAction;
 
 /**
  * Extensions manager for loading QA Routine extensions.  This only loads details
@@ -110,5 +113,14 @@ public enum RoutineExtensionManager {
 		}
 		this.dataproviders = temp;
 		return dataproviders;
+	}
+	
+	/**
+	 * 
+	 * @return list of actions applicable to all 
+	 * data providers
+	 */
+	public List<IQaAction> getUniversalActions(){
+		return Collections.singletonList(IgnoreAction.INSTANCE);
 	}
 }

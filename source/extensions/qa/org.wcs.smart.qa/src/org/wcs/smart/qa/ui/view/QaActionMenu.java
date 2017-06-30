@@ -23,12 +23,10 @@ package org.wcs.smart.qa.ui.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -38,10 +36,11 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.wcs.smart.qa.ActionEngine;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.routine.IQaAction;
-import org.wcs.smart.qa.routine.IQaDataProvider;
+import org.wcs.smart.qa.routine.IgnoreAction;
 
 /**
  * Generates menu items based on selection provided
@@ -112,6 +111,8 @@ public abstract class QaActionMenu implements MenuListener {
 				}
 			}
 		}
+		actions.put(IgnoreAction.INSTANCE.getId(), IgnoreAction.INSTANCE);
+		
 		for (IQaAction action : actions.values()){
 			if (newItems.size() == 0){
 				newItems.add(new MenuItem(parent, SWT.SEPARATOR));
@@ -123,24 +124,13 @@ public abstract class QaActionMenu implements MenuListener {
 		
 			mi.addListener(SWT.Selection, event->{
 				List<QaError> items = new ArrayList<QaError>();
-				Set<IQaDataProvider> providers = new HashSet<IQaDataProvider>();
-				
 				for (Iterator<?> iterator3 = ((IStructuredSelection)selectionProvider.getSelection()).iterator(); iterator3.hasNext();) {
 					Object x = iterator3.next();
 					if (x instanceof QaError){
-						QaError lErrorItem = (QaError) x;
-						items.add(lErrorItem);
-						providers.add(lErrorItem.getDataProvider());
+						items.add((QaError) x);
 					}
 				}
-				for (IQaDataProvider p : providers){
-					for (IQaAction n : InternalExtensionManager.INSTANCE.getQaActions(p, context)){
-						if (n.getId().equals(action.getId())){
-							n.doAction(items);
-							break;
-						}
-					}
-				}
+				ActionEngine.INSTANCE.performActions(items, action.getId(), context);
 				refresh();
 			});		
 		}				

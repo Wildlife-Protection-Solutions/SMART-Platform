@@ -24,55 +24,42 @@ package org.wcs.smart.qa.routine;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.qa.model.QaError;
 
 /**
- * An action that can be applied to a QA result item.
+ * Updates status to ignore.  This is applicable to
+ * all data providers.
  * 
  * @author Emily
  *
  */
-public interface IQaAction {
+public class IgnoreAction implements IQaAction {
 
-	public static final String DELETE_ACTION_ID = "org.wcs.smart.qa.action.delete"; //$NON-NLS-1$
+	public final static IgnoreAction INSTANCE = new IgnoreAction();
 	
-	/**
-	 * Perform the action on the set of items.  If supportsMultiple is true
-	 * this list should only have a single item in it.
-	 * 
-	 * List or errors may contain items that you cannot perform and action on.  In
-	 * these cases you should skip this item and continue.
-	 * 
-	 * @param items
-	 */
-	public void doAction(List<QaError> items);
-	
-	/**
-	 * @return if the action can be applied to multiple items at once.  For example
-	 * delete actions could be applied to multiple actions, but goto source
-	 * do not. 
-	 */
-	public boolean supportsMultiple();
-	
-	/**
-	 * 
-	 * @return id of the qa action
-	 */
-	public String getId();
-	
-	/**
-	 * 
-	 * @param l
-	 * @return the name of the qa action
-	 */
-	public String getName(Locale l);
-	
-	/**
-	 * 
-	 * @return the image for the action; can return null if no image applicable
-	 */
-	public default Image getImage() {
-		return null;
+	private IgnoreAction(){	
 	}
+	
+	@Override
+	public void doAction(List<QaError> items) {
+		for (QaError i : items){
+			i.setStatus(QaError.Status.IGNORED);
+		}
+	}
+
+	@Override
+	public boolean supportsMultiple() {
+		return true;
+	}
+
+	@Override
+	public String getId() {
+		return "org.wcs.smart.qa.action.ignore"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String getName(Locale l) {
+		return "Ignore";
+	}
+
 }

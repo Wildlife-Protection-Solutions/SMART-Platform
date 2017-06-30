@@ -22,20 +22,16 @@
 package org.wcs.smart.qa.ui.view;
 
 import java.text.DateFormat;
-import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -43,25 +39,46 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.geotools.geometry.jts.JTS;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.ca.Projection;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.render.ViewportModel;
+import org.locationtech.udig.project.render.IViewportModel;
+import org.locationtech.udig.project.render.IViewportModelListener;
+import org.locationtech.udig.project.render.ViewportModelEvent;
+import org.locationtech.udig.project.render.ViewportModelEvent.EventType;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.locationtech.udig.project.ui.viewers.MapViewer;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
-import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.udig.EditPointTool;
+import org.wcs.smart.udig.IMapEditManager;
+import org.wcs.smart.udig.SetBasemapTool;
+import org.wcs.smart.ui.map.LoadDefaultLayersJob;
+import org.wcs.smart.ui.map.MapInfoAreaComposite;
+import org.wcs.smart.ui.map.MapToolComposite;
+import org.wcs.smart.ui.map.tool.PanTool;
+import org.wcs.smart.ui.map.tool.ZoomExtentTool;
+import org.wcs.smart.ui.map.tool.ZoomInTool;
+import org.wcs.smart.ui.map.tool.ZoomOutTool;
+import org.wcs.smart.ui.map.tool.ZoomTool;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * Dialog for editing waypoint details.
@@ -69,96 +86,153 @@ import com.vividsolutions.jts.geom.Point;
  * @author Emily
  *
  */
-public class EditWaypointDetailsDialog extends TitleAreaDialog{
+public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implements MapPart{
 
-	private UUID wpUuid;
-	private Waypoint waypoint; 
+	protected UUID waypointUuid;
 	
 	private Text txtX;
 	private Text txtY;
-	private ComboViewer lstProjection;
-	private Projection currentProjection = null;
 	
+	protected Waypoint waypoint = null;
+	
+	private Double originalX = null;
+	private Double originalY = null;
+	
+	protected Map map;
+	protected MapViewer mapViewer;
+	
+	private boolean isUpdating = false;
+	private boolean fireXYChange = true;
+	
+	/**
+	 * Creates a new dialog for editing waypoint locations
+	 * @param parentShell
+	 * @param wpUuid
+	 */
 	public EditWaypointDetailsDialog(Shell parentShell, UUID wpUuid) {
 		super(parentShell);
-		this.wpUuid = wpUuid;
+		this.waypointUuid = wpUuid;
 	}
 
+	/**
+	 * Add additional background layers to the map.
+	 */
+	protected abstract void initBackgroundLayers();
+	
+	/**
+	 * Update the position feature on the map
+	 * 
+	 * @param newPosition
+	 */
+	protected abstract void updateFeature(Coordinate newPosition);
+	
+	/**
+	 * Add additional tools to the map toolbar
+	 * @param toolbar
+	 */
+	protected void addToolbarContributions(ToolBar toolbar){
+	}
+	
+	@Override
+	public org.eclipse.swt.graphics.Point getInitialSize(){
+		return new org.eclipse.swt.graphics.Point(600,600);
+	}
+	
+	/*
+	 * Updates the waypoint location to the new position.  The new position
+	 * must be in lat/lon.  Updates the local waypoint object and map feature, but 
+	 * does not update the text box values - call updateLabels()
+	 * to update the text box values.
+	 */
+	protected void updateWaypointLocation(Coordinate newPosition){
+		if (isUpdating) return;
+		isUpdating = true;
+		try{
+			setErrorMessage(null);
+			waypoint.setX(newPosition.x);
+			waypoint.setY(newPosition.y);
+			updateFeature(newPosition);
+			validate();
+		}finally{
+			isUpdating = false;
+		}
+		
+	}
+
+	/**
+	 * Updates the x & y labels with the current position value supplied in the
+	 * waypoint object.
+	 */
+	protected void updateLabels(){
+		if (waypoint == null) return;
+		Coordinate display = new Coordinate(waypoint.getX(), waypoint.getY());
+		try {
+			display = ReprojectUtils.reproject(display.x, display.y, SmartDB.DATABASE_CRS, getMap().getViewportModel().getCRS());
+		} catch (Exception e) {
+			QaPlugIn.log(e.getMessage(), e);
+		}
+		fireXYChange = false;
+		try{
+			if (!txtX.getText().equals(String.valueOf(display.x))) txtX.setText(String.valueOf(display.x));
+			if (!txtY.getText().equals(String.valueOf(display.y))) txtY.setText(String.valueOf(display.y));
+		}finally{
+			fireXYChange = true;
+		}
+	}
+	
+	/**
+	 * Reverts the waypoint position back to the original value 
+	 * 
+	 */
+	protected void revert(){
+		updateWaypointLocation(new Coordinate(originalX, originalY));
+		updateLabels();
+	}
+	
+	/**
+	 * Loads the waypoint from the database and initializes 
+	 * ui controls
+	 */
 	private void initControls(){
-		List<Projection> projections = null;
 		Session s = HibernateManager.openSession();
 		try{
-			waypoint = (Waypoint) s.get(Waypoint.class, wpUuid);
+			waypoint = (Waypoint) s.get(Waypoint.class, waypointUuid);
 			if (waypoint != null){
-				waypoint.getX();
-				waypoint.getY();
-			}
-			
-			currentProjection = HibernateManager.getCurrentViewProjection(s);
-			projections = HibernateManager.getCaProjectionList(s);
-			for (Projection p : projections){
-				try{
-					p.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(p.getDefinition()));
-				}catch (Exception ex){
-					//TODO:
-					ex.printStackTrace();
-				}
+				originalX = waypoint.getX();
+				originalY = waypoint.getY();
+			}else{
+				setErrorMessage("Waypoint not found.  Close dialog and rerun validation routines.");
+				return;
 			}
 		}finally{
 			s.close();
 		}
-		
-		if (currentProjection == null){
-			currentProjection = new Projection();
-			currentProjection.setConservationArea(SmartDB.getCurrentConservationArea());
-			currentProjection.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-		}
-		if (!projections.contains(currentProjection)){
-			projections.add(currentProjection);
-		}
-		lstProjection.setInput(projections);
-		lstProjection.setSelection(new StructuredSelection(currentProjection));
-		reprojectPoint(waypoint.getX(),  waypoint.getY());
-		
-		
+		updateLabels();
 		setTitle("Waypoint: " + waypoint.getId() + " - " + DateFormat.getDateTimeInstance().format(waypoint.getDateTime()));
-
+		initBackgroundLayers();
 	}
 	
-	private void reprojectPoint(double x, double y){
-		Projection toprj = (Projection) ((IStructuredSelection)lstProjection.getSelection()).getFirstElement();
-		Coordinate c = new Coordinate(x, y);
-		try {
-			c = ReprojectUtils.reproject(x,  y, currentProjection.getParsedCoordinateReferenceSystem(), toprj.getParsedCoordinateReferenceSystem());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		txtX.setText(String.valueOf(c.x));
-		txtY.setText(String.valueOf(c.y));
+	/**
+	 * 
+	 * @return the updated waypoint
+	 */
+	public Waypoint getUpdatedPoint(){
+		return this.waypoint;
 	}
 	
 	@Override
 	protected void okPressed(){
 		validate();
 		if (!getButton(IDialogConstants.OK_ID).isEnabled()) return;	//data error
-		
-		Coordinate c = new Coordinate(Double.parseDouble(txtX.getText()), Double.parseDouble(txtY.getText()));
-		try {
-			c = ReprojectUtils.reproject(c.x,  c.y, currentProjection.getParsedCoordinateReferenceSystem(), SmartDB.DATABASE_CRS);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-
-			Waypoint wp = (Waypoint) s.get(Waypoint.class, wpUuid);
-			wp.setX(c.x);
-			wp.setY(c.y);
-			
+			Waypoint wp = (Waypoint) s.get(Waypoint.class, waypointUuid);
+			wp.setX(waypoint.getX());
+			wp.setY(waypoint.getY());
+			waypoint.setX(wp.getX());
+			waypoint.setY(wp.getY());
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
@@ -180,141 +254,205 @@ public class EditWaypointDetailsDialog extends TitleAreaDialog{
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		
-		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(2, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Composite coordinateCmp = new Composite(composite, SWT.NONE);
+		coordinateCmp.setLayout(new GridLayout(5, false));
+		coordinateCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label lbl = new Label(main, SWT.NONE);
-		
-		lbl.setText("Projection:");
-
-		
-		lstProjection = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.widthHint = 100;
-		lstProjection.getControl().setLayoutData(gd);
-		lstProjection.setLabelProvider(ProjectionLabelProvider.getInstance());
-		lstProjection.setContentProvider(ArrayContentProvider.getInstance());
-		lstProjection.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		
-		lstProjection.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (txtX.getText().isEmpty() || txtY.getText().isEmpty()) return;
-				try{
-					reprojectPoint(Double.parseDouble(txtX.getText()), Double.parseDouble(txtY.getText()));	
-				}catch (Exception ex){
-					ex.printStackTrace();
-				}
-				currentProjection = (Projection) ((IStructuredSelection)lstProjection.getSelection()).getFirstElement();
-				validate();
-			}
-		});
-		
-		lbl = new Label(main, SWT.NONE);
+		Label lbl = new Label(coordinateCmp, SWT.NONE);
 		lbl.setText("X Coordinate:");
 		
 		ModifyListener validation = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
+				if (!fireXYChange) return;
 				validate();
+				updatePosition.schedule(200);
 			}
 		};
 		
-		txtX = new Text(main, SWT.BORDER);
+		txtX = new Text(coordinateCmp, SWT.BORDER);
 		txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtX.addModifyListener(validation);
-		txtX.addFocusListener(new FocusListener() {
-			@Override
-			public void focusLost(FocusEvent e) {}
-			
-			@Override
-			public void focusGained(FocusEvent e) {
-				txtX.selectAll();
-			}
-		});
+		txtX.addListener(SWT.FocusIn, e-> txtX.selectAll());
 		
-		lbl = new Label(main, SWT.NONE);
+		lbl = new Label(coordinateCmp, SWT.NONE);
 		lbl.setText("Y Coordinate:");
 		
-		txtY = new Text(main, SWT.BORDER);
+		txtY = new Text(coordinateCmp, SWT.BORDER);
 		txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtY.addModifyListener(validation);
-		txtY.addFocusListener(new FocusListener() {
+		txtY.addListener(SWT.FocusIn, e-> txtY.selectAll());
+		
+		Composite mapComposite = new Composite(composite, SWT.NONE);
+		mapComposite.setLayout(new GridLayout(2, false));
+		mapComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		mapViewer = new MapViewer(mapComposite,  SWT.SINGLE | SWT.DOUBLE_BUFFERED);
+		mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		map = (Map) ProjectFactory.eINSTANCE.createMap();
+		map.setName("Edit Waypoint Map");
+		mapViewer.setMap(map);
+		//set default crs
+		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
+		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
+		mapViewer.getMap().getViewportModel().addViewportModelListener(new IViewportModelListener() {
 			@Override
-			public void focusLost(FocusEvent e) {}
-			
-			@Override
-			public void focusGained(FocusEvent e) {
-				txtY.selectAll();
+			public void changed(ViewportModelEvent event) {
+				if (event.getType() == EventType.CRS){
+					Display.getDefault().syncExec(()->updateLabels());
+				}
 			}
 		});
+		ApplicationGIS.getToolManager().setCurrentEditor(this);
+		String[] thisTools = new String[] {
+				SetBasemapTool.ID,
+				ZoomExtentTool.ID,
+				PanTool.ID,
+				ZoomTool.ID,
+				ZoomInTool.ID,
+				ZoomOutTool.ID,
+				MapToolComposite.SEPERATOR_TOOL_ID,
+				EditPointTool.ID};
+
+		MapToolComposite tools = new MapToolComposite(thisTools);
+		tools.createComposite(mapComposite);
+		new MapInfoAreaComposite(mapComposite, SWT.NONE, mapViewer) ;
+
+		tools.selectTool(EditPointTool.ID);
+		getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, getEditManager());
 		
+		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap(), false);
+		defaultLayer.schedule();
+		mapComposite.addListener(SWT.Dispose, e-> defaultLayer.cancel());
 		
+		//add toolbar contributions
+		addToolbarContributions(tools.getToolbar());
+		
+		//add revert option
+		ToolItem btnReset = new ToolItem(tools.getToolbar(), SWT.PUSH);
+		btnReset.setToolTipText("revert back to original value");
+		btnReset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.UNDO_ICON));
+		btnReset.addListener(SWT.Selection, e->revert());
 		
 		
 		getShell().setText("Edit Waypoint");
-//		setTitle(routine.getName());
 		setMessage("Edit waypoint details");
 		
 		initControls();
 		
-		
+		updatePosition.setSystem(true);
 		return composite;
 	}
 	
+	/**
+	 * This is a job and updates the position based on the values
+	 * in the text box.  
+	 */
+	Job updatePosition = new Job("update position"){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			Display.getDefault().syncExec(()->{
+				try{
+					Double x = Double.valueOf(txtX.getText());
+					Double y = Double.valueOf(txtY.getText());
+					Coordinate newC = new Coordinate(x,y);
+					newC = ReprojectUtils.reproject(x, y, getMap().getViewportModelInternal().getCRS(), SmartDB.DATABASE_CRS);
+					updateWaypointLocation(newC);
+				}catch (Exception ex){
+					setErrorMessage("Could not parse new value from x y positions.");
+				}
+			});			
+			return Status.OK_STATUS;
+		}
+		
+	};
 	
 	private void validate(){
-		boolean ok = (findError() == null); 
-
+		boolean ok = true; 
 		Button btn = getButton(IDialogConstants.OK_ID);
 		if (btn != null)btn.setEnabled(ok);
-		 
-	}
-	
-	private String findError(){
-		CoordinateReferenceSystem sourceCrs = null;
-		if (lstProjection.getSelection().isEmpty()){
-			return "A projection must be selected";
-		}
-		try{
-			sourceCrs = ReprojectUtils.stringToCrs( ((Projection)((IStructuredSelection)lstProjection.getSelection()).getFirstElement()).getDefinition()); 
-		}catch (Exception ex){
-			return "Could not parse CRS: " + ex.getLocalizedMessage();
-		}
-		
-		double x = 0;
-		double y = 0;
-		if (txtX.getText().trim().length() == 0){
-			return "X Coordinate value required";
-		}
-		try{
-			x = Double.parseDouble(txtX.getText());
-		}catch (NumberFormatException ex){
-			return "Invalid X Coordinate value";
-		}
-		
-		if (txtY.getText().trim().length() == 0){
-			return "Y Coordinate value required";
-		}
-		try{
-			y = Double.parseDouble(txtY.getText());
-		}catch (NumberFormatException ex){
-			return "Invalid Y Coordinate value";
-		}
-		
-		try{
-			Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x,y));
-			JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
-		}catch (Exception ex){
-			return "(x,y) values do not represent a valid loctation: " + ex.getLocalizedMessage();
-		}
-		
-		return null;
 	}
 	
 	@Override
 	public boolean isResizable(){
 		return true;
 	}
+
+	@Override
+	public Map getMap() {
+		return map;
+	}
+
+	@Override
+	public void openContextMenu() {
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+	}
+
+	@Override
+	public void setSelectionProvider(IMapEditorSelectionProvider selectionProvider) {	
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return null;
+	}
+	
+	/*
+	 * edit manager for moving waypoint on map
+	 */
+	 private IMapEditManager getEditManager(){
+	    	return new IMapEditManager() {
+				
+				@Override
+				public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
+					if (!(feature instanceof Waypoint)) return ;
+					Coordinate crspx = vm.pixelToWorld(x, y);
+					//convert to lat/long
+					if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
+						try{
+							crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+						}catch (Exception ex){
+							QaPlugIn.displayLog("Error reprojecting new location. Location not updated", ex);
+							return;
+						}
+					}
+					updateWaypointLocation(crspx);
+					updateLabels();
+				}
+				
+				@Override
+				public EditPoint findFeature(int x, int y, IViewportModel vm) {
+					try{
+						Coordinate crspx = vm.pixelToWorld(x, y);
+						//convert to lat/long
+						if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){
+							crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+						}
+
+						Coordinate pnt = ReprojectUtils.reproject(waypoint.getX(), waypoint.getY(), SmartDB.DATABASE_CRS, vm.getCRS());
+						java.awt.Point exitPnt = vm.worldToPixel(pnt);
+						if (Math.abs(exitPnt.getX() - x) > 5 || Math.abs(exitPnt.getY() - y) > 5) return null;
+
+						return new EditPoint(exitPnt, waypoint, null);
+						
+					}catch (Exception ex){
+						QaPlugIn.log(ex.getMessage(), ex);
+						return null;
+					}
+				}
+				
+				@Override
+				public synchronized void undo() {
+					//does not support undo
+				}
+				
+				@Override
+				public boolean canUndo() {
+					return false;
+				}
+			};
+	    }
 }
