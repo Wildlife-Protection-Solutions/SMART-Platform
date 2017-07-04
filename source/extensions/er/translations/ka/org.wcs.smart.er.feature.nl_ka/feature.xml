@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.er.feature.nl.ka"
+      label="SMART Ecological Records Georgian Language Pack"
+      version="5.0.0"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.smart.feature">
+
+   <description>
+      The Georgian translations for the Ecological Records plugin.
+   </description>
+
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
+   </copyright>
+
+   <plugin
+         id="org.wcs.smart.er.nl_ka"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.er.query.nl_ka"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.er.query.report.nl_ka"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+</feature>
