@@ -584,6 +584,7 @@ function createNewType(){
 			markerIcon = "";
 			customIcon = override;
 		}else{
+			markerIcon = override
 			customIcon = "";
 		}
 	}
@@ -637,6 +638,7 @@ function submitUpdateType(){
 			markerIcon = "";
 			customIcon = override;
 		}else{
+			markerIcon = override;
 			customIcon ="";
 		}
 	}

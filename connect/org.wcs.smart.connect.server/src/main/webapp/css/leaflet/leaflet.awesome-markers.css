@@ -122,3 +122,106 @@ Version: 1.0
 .awesome-marker-icon-black {
   background-position: -682px 0;
 }
+
+/* legend version of colours, offsets put it in the middle of the icon for a 20x25 div
+*/
+
+/* Colors */
+.awesome-marker-icon-red {
+  background-position: -7px 0px;
+  top: -2px;
+}
+.awesome-marker-icon--legend {
+  background-position: -7px 0px;
+    top: -2px;
+}
+
+.awesome-marker-icon-darkred-legend {
+  background-position: -187px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-lightred-legend {
+  background-position: -367px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-orange-legend {
+  background-position: -43px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-beige-legend {
+  background-position: -403px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-green-legend {
+  background-position: -79px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-darkgreen-legend {
+  background-position: -259px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-lightgreen-legend {
+  background-position: -439px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-blue-legend {
+  background-position: -115px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-darkblue-legend {
+  background-position: -223px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-lightblue-legend {
+  background-position: -475px 0;
+    top: -2px;
+}
+
+.awesome-marker-icon-purple-legend {
+  background-position: -151px 0;
+  top: -2px;
+}
+
+.awesome-marker-icon-darkpurple-legend {
+  background-position: -295px 0;
+  top: -2px;
+}
+
+.awesome-marker-icon-pink-legend {
+  background-position: -511px 0;
+  top: -2px;
+}
+
+.awesome-marker-icon-cadetblue-legend {
+  background-position: -331px 0;
+  top: -2px;
+}
+
+.awesome-marker-icon-white-legend {
+  background-position: -581px 0;
+  top: -2px;
+}
+
+.awesome-marker-icon-gray-legend {
+  background-position: -655px 0;
+  top: -2px;
+}
+
+.awesome-marker-icon-lightgray-legend {
+  background-position: -619px 0;
+  top: -2px;
+}
+
+.awesome-marker-icon-black-legend {
+  background-position: -689px 0;
+  top: -2px;
+}

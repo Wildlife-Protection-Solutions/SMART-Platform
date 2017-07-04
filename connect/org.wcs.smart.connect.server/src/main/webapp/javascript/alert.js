@@ -141,11 +141,6 @@ window.onload = function(){
 	//initialize the map
 	map = new L.Map('map', {center: new L.LatLng(startingLat, startingLong), zoom: startingZoom, layers: activeLayers});
 
-//	redMarker  = L.AwesomeMarkers.icon({
-//	    icon: 'car',
-//	    markerColor: 'red'
-//	  });
-
  
 	getMapFilters();//get the map filter defaults and set them before we make the first call to get alerts/events
 	//also it adds the realtime layer to map once the map filter defaults are setup.
@@ -153,6 +148,8 @@ window.onload = function(){
 	//add layer control to map
 	layerControl = L.control.layers(baseMaps, dataLayers, {position: 'topleft'});
 	layerControl.addTo(map);
+
+	var legend = document.getElementsByClassName("legend");
 	
 //Map setup complete.
 //--------------------------------------------------	
@@ -595,10 +592,12 @@ function hideShowFilters(){
 	var current = document.getElementById('filter-form').style.display;
 	if(current == "none"){
 		document.getElementById('filter-form').style.display = "block";
-		document.getElementById('filter-link').innerHTML = i18n("alert.hidefilters");
+		document.getElementById('filter-link').style.display = "block";
+		document.getElementById('filter-controls').style.minWidth= "267px";
 	}else{
 		document.getElementById('filter-form').style.display = "none";
-		document.getElementById('filter-link').innerHTML = i18n("alert.showfilters");
+		document.getElementById('filter-link').style.display = "block";
+		document.getElementById('filter-controls').style.minWidth = "30px";
 	}
 }
 
@@ -739,49 +738,13 @@ function updateRealtimeLayer(updatedUrl){
     });
     
     realtime.addTo(map);
-//    layerControl.addOverlay(realtime);
 }
-
-
-//----------------------------------------------------------------------------
-//javascript client-side filtering. -Might need to go back to this in future or have some combination. For now it is all server-side
-//(we don't really want to send 1000 alerts every request, then filter out past 24hrs or only active ones etc.)
-
-//function eventFilter(feature, layer){
-//	if(applyFilter("filterImportance",feature.properties.level)
-//			&& applyFilter("filterType",feature.properties.typeuuid) 
-//			&& applyFilter("filterStatus",feature.properties.status)
-//			&& applyFilter("filterCa",feature.properties.cauuid)
-//			&& (applyTextFilter("filterText",feature.properties.desc) || applyTextFilter("filterText",feature.properties.id))
-//			){
-//		return true;
-//	}
-//	return false;
-//}
-//
-//function applyFilter(classname, value){
-//	var options = document.getElementsByClassName(classname);
-//	for (var i = 0; i < options.length; i++){
-//		if(options[i].checked){
-//			if(options[i].value == value) return true;
-//		}
-//	}
-//	return false;
-//}
-//function applyTextFilter(id, value){
-//	var search = document.getElementById(id);
-//	if(search.value == "") return true; //blank text search = show everything.
-//	if(search.value.search(value) > 0 ) return true;
-//	return false;
-//}
-//----------------------------
 
 
 //styles for points
 function stylePoints(feature, latlng) {
 	
 	var color = styleColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
-//	var fillColor = styleFillColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
 	var opacity = styleOpacity[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
 	var markerIcon = styleMarkerIcon[feature.properties.typeuuid]; 
 	var markerColor = styleMarkerColor[feature.properties.typeuuid];
@@ -793,21 +756,7 @@ function stylePoints(feature, latlng) {
 		spin = false;
 	}
 	
-	//various size circles, using icons now, maybe we want both options?
-//	var size = 11 - (feature.properties.level * 1.5);
-//	
-//	if(color == "")color="#000000";
-//	if(fillColor == "")fillColor="#0000ff";
-//	if(opacity == "")opacity="0.5";
-//	var geojsonMarkerOptions = {
-//		    radius: size,
-//		    fillColor: fillColor,
-//		    color: color,
-//		    weight: 1,
-//		    opacity: 1,
-//		    fillOpacity: opacity
-//		};
-//    return L.circleMarker(latlng, geojsonMarkerOptions);
+
 	marker  = L.AwesomeMarkers.icon({
 		prefix: 'fa',
 	    icon: markerIcon,

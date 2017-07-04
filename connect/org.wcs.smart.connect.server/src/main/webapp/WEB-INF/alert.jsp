@@ -24,6 +24,15 @@
 <script type="text/javascript" >
 	var mobile="${mobile}";
 	var tab = ${tab};
+	
+	var styleUuids = [
+			<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	 			"${type.getUuid()}", 
+			</c:forEach> 
+		];
+
+	
+	
 	var styleColors = {
 		<c:forEach var="type" items="${alertTypes}" varStatus="count">
  			"${type.getUuid()}" : "${type.getColor()}", 
@@ -53,6 +62,11 @@
 	var styleSpin= {
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
 	 			"${type.getUuid()}" : "${type.getSpin()}", 
+			</c:forEach> 
+		};
+	var markerLabels= {
+			<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	 			"${type.getUuid()}" : "${type.getLabel()}", 
 			</c:forEach> 
 		};
 
@@ -148,7 +162,7 @@
 
 	
 	<div id="filter-controls">
-		<p style="text-align:center;font-weight:bold;"><a id="filter-link" onClick="hideShowFilters()" style="cursor: pointer;"><fmt:message key="alert.hidefilters"/></a></p>
+		<p style="text-align:center;font-weight:bold;"><a id="filter-link" onClick="hideShowFilters()"  class="filterIcon"></a></p>
 
 		<form id="filter-form" name="filter-form" action="" onsubmit="return false;">
 			<input id="sortBy" type="hidden" name="sortBy" value="date"/>
@@ -178,7 +192,17 @@
 			<p style="clear:both;">
 			<fmt:message key="alert.filters.types" /><br>
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
-     			<input class='filterType updateChange' name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox"> ${type.getLabel()} </input><br> 
+				<div style="min-height: 25px;">
+				
+     			<input style="position: relative; vertical-align: middle; bottom: 1px; height:25px; margin:0px 0px 0px 4px; padding:0px;"  class='filterType updateChange' name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox">  
+
+				<div style="float:left; position:relative; height:24px; width:20px;" class="awesome-marker-icon-${type.getMarkerColor()}-legend awesome-marker leaflet-zoom-animated" >
+					<i style="color:${type.getColor()}" class="fa fa-${type.getMarkerIcon()}">${type.getCustomIcon()}</i><br>
+				</div>
+
+     			${type.getLabel()}
+     			</input><br>
+     			</div> 
 			</c:forEach> 
 			</p>
 			

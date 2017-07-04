@@ -594,6 +594,14 @@ div.caSelector {
   min-width:200px;
 }
 
+.filterIcon{
+	background: url('images/iconsfilter.png') no-repeat 0 0;
+	width: 30px;
+  	height: 30px;
+  	display: block;
+  	cursor: pointer;
+  	float: right;
+}
 	
 /*----------------------------------------------------------------------*/
 /* Tabbed Alerts page styles*/
@@ -679,5 +687,5 @@ article.tabs section h2{
 	-ms-transition: all 500ms ease;
 	-o-transition: all 500ms ease;
 	transition: all 500ms ease;
-} 
+}
 /*end of alerts tab styles ---------------------------------------------------------*/
