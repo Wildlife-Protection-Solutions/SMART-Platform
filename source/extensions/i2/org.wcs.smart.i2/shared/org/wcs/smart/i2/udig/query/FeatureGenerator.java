@@ -55,11 +55,11 @@ public class FeatureGenerator {
 	/**
 	 * Point location layer
 	 */
-	public static final Name POINT_TYPE = new NameImpl("org.wcs.smart.i2.query.point", "Point Locations"); //$NON-NLS-1$ //$NON-NLS-2$
+	public static final Name POINT_TYPE = new NameImpl("org.wcs.smart.i2.query.point", "Point_Locations"); //$NON-NLS-1$ //$NON-NLS-2$
 	/**
 	 * Polygon location layer
 	 */
-	public static final Name POLYGON_TYPE = new NameImpl("org.wcs.smart.i2.query.polygon", "Polygon Locations"); //$NON-NLS-1$ //$NON-NLS-2$
+	public static final Name POLYGON_TYPE = new NameImpl("org.wcs.smart.i2.query.polygon", "Polygon_Locations"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	/**
 	 * Converts a query result item to a feature

@@ -841,6 +841,8 @@ public class Messages extends NLS {
 	public static String QueryFormatPage_FormatOp;
 	public static String QueryFormatPage_Message;
 	public static String QueryFormatPage_Title;
+	public static String QueryGeoResourceInfo_pointQueryLayerName;
+	public static String QueryGeoResourceInfo_polygonQueryLayerName;
 	public static String QueryLazyResultsContentProvider_LoadingResultLbl;
 	public static String QueryLazyResultsTable_CntLabel1;
 	public static String QueryLazyResultsTable_CntLabel2;
