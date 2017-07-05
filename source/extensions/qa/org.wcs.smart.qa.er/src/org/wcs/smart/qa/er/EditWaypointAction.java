@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.patrol.ui;
+package org.wcs.smart.qa.er;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -51,7 +51,7 @@ public class EditWaypointAction implements IQaAction {
 	public void doAction(List<QaError> items) {
 		if (items.isEmpty()) return;
 		QaError item = items.get(0);
-		EditWaypointDetailsDialog dialog = new PatrolEditWaypointDialog(Display.getDefault().getActiveShell(), item.getSourceId());
+		EditWaypointDetailsDialog dialog = new ErEditWaypointDialog(Display.getDefault().getActiveShell(), item.getSourceId());
 		if (dialog.open() == Window.OK){
 			item.setStatus(Status.FIXED);
 			Point pnt = (Point)item.getGeometryObject();
@@ -68,7 +68,7 @@ public class EditWaypointAction implements IQaAction {
 
 	@Override
 	public String getId() {
-		return "org.wcs.smart.qa.patrol.waypoint.edit"; //$NON-NLS-1$
+		return "org.wcs.smart.qa.er.waypoint.edit"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.qa">
+      <data_provider
+            class="org.wcs.smart.qa.incident.IncidentDataProvider">
+         <qa_action
+               class="org.wcs.smart.qa.incident.DeleteIncidentAction">
+         </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.incident.EditIncidentAction">
+         </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.incident.OpenIncidentAction">
+         </qa_action>
+      </data_provider>
+   </extension>
+
+</plugin>

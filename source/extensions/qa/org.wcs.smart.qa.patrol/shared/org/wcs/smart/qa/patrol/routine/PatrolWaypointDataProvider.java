@@ -96,6 +96,7 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 	@Override
 	public boolean supportsRoutine(IQaRoutineType type) {
 		if (type.getId().equals(LocationRoutineType.ID)) return true;
+		if (type.getId().equals(PatrolSpeedRoutineType.ID)) return true;
 		return false;
 	}
 

@@ -19,45 +19,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.patrol.ui;
+package org.wcs.smart.qa.incident;
 
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.jface.window.Window;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.incident.ui.OpenIncidentHandler;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.model.QaError.Status;
 import org.wcs.smart.qa.routine.IQaAction;
-import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
 
 /**
- * Action implementation for editing waypoint positions.  Applicable
- * for PatrolWaypointDataProvider
+ * Opens the source patrol editor.  Works for
+ * results from PatrolWaypointDataProvider or PatrolTrackDataProvider
  * 
  * @author Emily
  *
  */
-public class EditWaypointAction implements IQaAction {
+public class OpenIncidentAction implements IQaAction {
+
+	@Inject
+	private IEclipseContext context;
+	
+	public OpenIncidentAction(){
+	}
 
 	@Override
 	public void doAction(List<QaError> items) {
 		if (items.isEmpty()) return;
 		QaError item = items.get(0);
-		EditWaypointDetailsDialog dialog = new PatrolEditWaypointDialog(Display.getDefault().getActiveShell(), item.getSourceId());
-		if (dialog.open() == Window.OK){
-			item.setStatus(Status.FIXED);
-			Point pnt = (Point)item.getGeometryObject();
-			Point to = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(dialog.getUpdatedPoint().getX(), dialog.getUpdatedPoint().getY()));
-			item.setFixMessage(MessageFormat.format("Manually moved from ({0}, {1}) to ({2}, {3})", pnt.getX(), pnt.getY(), to.getX(), to.getY()));
-			item.setGeometryObject(to);			
+		if (item.getDataProviderId().equals(IncidentDataProvider.ID)){
+			Waypoint pw = null;
+			Session s = HibernateManager.openSession();
+			try{
+				pw = (Waypoint) s.get(Waypoint.class, item.getSourceId());
+			}finally{
+				s.close();
+			}
+			if (pw == null){
+				//not found
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Independent Incident {0} not found", item.getErrorId()));
+				return;
+			}else{
+				(new OpenIncidentHandler()).openIncident(pw.getUuid(), context.get(MWindow.class));	
+			}
 		}
 	}
 
@@ -68,17 +84,16 @@ public class EditWaypointAction implements IQaAction {
 
 	@Override
 	public String getId() {
-		return "org.wcs.smart.qa.patrol.waypoint.edit"; //$NON-NLS-1$
+		return "org.wcs.smart.qa.incident.goto"; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getName(Locale l) {
-		return "Edit Waypoint...";
+		return "Goto Source";
 	}
 
 	@Override
 	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON);
+		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON);
 	}
-
 }

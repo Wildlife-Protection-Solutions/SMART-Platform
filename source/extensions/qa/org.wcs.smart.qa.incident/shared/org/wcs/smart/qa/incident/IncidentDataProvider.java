@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.patrol.routine;
+package org.wcs.smart.qa.incident;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -29,82 +29,63 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.IQaRoutineType;
 import org.wcs.smart.qa.routine.LocationRoutineType;
 
 /**
- * Data provider for providing patrol track data.
+ * QA Data provider for independent incidents
  * 
  * @author Emily
  *
  */
-public class PatrolTrackDataProvider extends IQaDataProvider {
+public class IncidentDataProvider extends IQaDataProvider {
 
-	public static final String ID = "org.wcs.smart.qa.dataprovider.patrol.track"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.qa.dataprovider.incident.waypoint"; //$NON-NLS-1$
 	
 	@Override
 	public String getName(Locale l) {
-		return "Patrol Track";
+		return "Independent Incident";
 	}
 
 	public String getId(){
 		return ID;
 	}
 	
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
-		List<TrackLocationData> tracks = new ArrayList<>();
+		List<IncidentLocationData> waypoints = new ArrayList<>();
 		
-		List<Patrol> patrols = session.createCriteria(Patrol.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.between("startDate", startDate, endDate)) //$NON-NLS-1$
-				.list();
-		for (Patrol p : patrols){
-			for (PatrolLeg pl : p.getLegs()){
-				for (PatrolLegDay pld : pl.getPatrolLegDays()){
-					if ((pld.getDate().equals(endDate) || pld.getDate().before(endDate)) && (pld.getDate().equals(startDate)  || pld.getDate().after(startDate))){
-						Track t = pld.getTrack();
-						try{
-							if (t != null && t.getLineString() != null){
-								tracks.add(new TrackLocationData(t));
-							}
-						}catch (Exception ex){
-							QaPlugIn.log(ex.getMessage(), ex);
-						}
-					}
-				}
-			}
+		Query query = session.createQuery("FROM Waypoint WHERE conservationArea = :ca and sourceId = :source and dateTime between :start AND :end"); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
+		query.setParameter("source",  IndepedentIncidentSource.KEY); //$NON-NLS-1$
+		query.setParameter("start",  startDate); //$NON-NLS-1$
+		query.setParameter("end", endDate); //$NON-NLS-1$
+		List<Waypoint> pws = query.list();
+		for (Waypoint wp : pws){
+			waypoints.add(new IncidentLocationData(wp));
 		}
 		
-		return tracks;
+		return waypoints;
 	}
 
 	@Override
 	public String getFeatureId(Session session, Object obj){
-		Track track = (Track) session.get(Track.class, ((TrackLocationData)obj).getTrack().getUuid());
-
-		if (track == null){
-			return "Patrol Track not found - data error";
+		Waypoint waypoint = (Waypoint) session.get(Waypoint.class, ((IncidentLocationData)obj).getWaypoint().getUuid());
+		if (waypoint == null){
+			return "Indepdence Incident not found - data error";
 		}
 		StringBuilder sb = new StringBuilder();
-		sb.append(track.getPatrolLegDay().getPatrolLeg().getPatrol().getId());
-		if (track.getPatrolLegDay().getPatrolLeg().getPatrol().getLegs().size() > 1){
-			sb.append(" - Leg ");
-			sb.append(track.getPatrolLegDay().getPatrolLeg().getId());
-		}
+		sb.append("Waypoint ID ");
+		sb.append(waypoint.getId());
 		sb.append(" (");
-		sb.append(DateFormat.getDateInstance().format(track.getPatrolLegDay().getDate()));
+		sb.append(DateFormat.getDateTimeInstance().format(waypoint.getDateTime()));
 		sb.append(")");
 		return sb.toString();
 	}
@@ -112,13 +93,12 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 	@Override
 	public boolean supportsRoutine(IQaRoutineType type) {
 		if (type.getId().equals(LocationRoutineType.ID)) return true;
-		if (type.getId().equals(PatrolSpeedRoutineType.ID)) return true;
 		return false;
 	}
 
 	@Override
 	public UUID getFeatureSource(Session session, Object obj) {
-		return ((TrackLocationData)obj).getTrack().getUuid();
+		return ((IncidentLocationData)obj).getWaypoint().getUuid();
 	}
 
 }

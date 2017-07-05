@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.patrol.ui;
+package org.wcs.smart.qa.er;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -34,16 +34,15 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider;
 import org.wcs.smart.qa.routine.IQaAction;
 
 /**
@@ -53,13 +52,13 @@ import org.wcs.smart.qa.routine.IQaAction;
  * @author Emily
  *
  */
-public class DeletePatrolWaypointAction implements IQaAction {
+public class DeleteErWaypointAction implements IQaAction {
 
 	@Override
 	public void doAction(List<QaError> items) {
 		List<QaError> toProcess = new ArrayList<>();
 		for (QaError e : items){
-			if (e.getDataProviderId().equals(PatrolWaypointDataProvider.ID)){
+			if (e.getDataProviderId().equals(ErWaypointDataProvider.ID)){
 				toProcess.add(e);
 			}
 		}
@@ -67,7 +66,7 @@ public class DeletePatrolWaypointAction implements IQaAction {
 			return;
 		}
 		
-		Set<Patrol> modified = new HashSet<>();
+		Set<Mission> modified = new HashSet<>();
 		List<QaError> deleted = new ArrayList<>();
 		List<Waypoint> wpDeleted = new ArrayList<>();
 		Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor());
@@ -85,7 +84,7 @@ public class DeletePatrolWaypointAction implements IQaAction {
 				}
 				if (found) continue;
 				
-				PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
+				SurveyWaypoint pw = (SurveyWaypoint) s.createCriteria(SurveyWaypoint.class)
 						.add(Restrictions.eq("id.waypoint.uuid", item.getSourceId())) //$NON-NLS-1$
 						.uniqueResult();
 				
@@ -95,8 +94,8 @@ public class DeletePatrolWaypointAction implements IQaAction {
 				}else{
 					s.delete(pw);
 					s.delete(pw.getWaypoint());
-					modified.add(pw.getPatrolLegDay().getPatrolLeg().getPatrol());
-					pw.getPatrolLegDay().getPatrolLeg().getPatrol().equals(null);
+					modified.add(pw.getMissionDay().getMission());
+					pw.getMissionDay().getMission().equals(null); //lazy load hibernate
 					deleted.add(item);
 					wpDeleted.add(pw.getWaypoint());
 				}
@@ -116,8 +115,8 @@ public class DeletePatrolWaypointAction implements IQaAction {
 			item.setStatus(QaError.Status.DELETED);
 		}
 		//fire patrol events
-		for (Patrol d : modified){
-			PatrolEventManager.getInstance().patrolSaved(d,true);
+		for (Mission m : modified){
+			SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.MISSION_MODIFIED, m);
 		}
 		//fire waypoint events
 		wpDeleted.forEach(w->WaypointEventManager.getInstance().waypointDeleted(w));

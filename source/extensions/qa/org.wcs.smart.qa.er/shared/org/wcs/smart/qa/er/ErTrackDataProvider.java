@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.patrol.routine;
+package org.wcs.smart.qa.er;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -29,13 +29,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.IQaRoutineType;
@@ -47,13 +46,13 @@ import org.wcs.smart.qa.routine.LocationRoutineType;
  * @author Emily
  *
  */
-public class PatrolTrackDataProvider extends IQaDataProvider {
+public class ErTrackDataProvider extends IQaDataProvider {
 
-	public static final String ID = "org.wcs.smart.qa.dataprovider.patrol.track"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.qa.dataprovider.mission.track"; //$NON-NLS-1$
 	
 	@Override
 	public String getName(Locale l) {
-		return "Patrol Track";
+		return "Mission Track";
 	}
 
 	public String getId(){
@@ -66,15 +65,16 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
 		List<TrackLocationData> tracks = new ArrayList<>();
 		
-		List<Patrol> patrols = session.createCriteria(Patrol.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.between("startDate", startDate, endDate)) //$NON-NLS-1$
-				.list();
-		for (Patrol p : patrols){
-			for (PatrolLeg pl : p.getLegs()){
-				for (PatrolLegDay pld : pl.getPatrolLegDays()){
-					if ((pld.getDate().equals(endDate) || pld.getDate().before(endDate)) && (pld.getDate().equals(startDate)  || pld.getDate().after(startDate))){
-						Track t = pld.getTrack();
+		Query q = session.createQuery("FROM Mission WHERE survey.surveyDesign.conservationArea = :ca AND startDate between :start and :end");
+		q.setParameter("ca", ca);
+		q.setParameter("start", startDate);
+		q.setParameter("end", endDate);
+		List<Mission> missions = q.list();
+		
+		for (Mission m: missions){
+			for (MissionDay md : m.getMissionDays()){
+				if ((md.getDate().equals(endDate) || md.getDate().before(endDate)) && (md.getDate().equals(startDate)  || md.getDate().after(startDate))){
+					for (MissionTrack t : md.getTracks()){
 						try{
 							if (t != null && t.getLineString() != null){
 								tracks.add(new TrackLocationData(t));
@@ -92,19 +92,17 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 
 	@Override
 	public String getFeatureId(Session session, Object obj){
-		Track track = (Track) session.get(Track.class, ((TrackLocationData)obj).getTrack().getUuid());
+		MissionTrack track = (MissionTrack) session.get(MissionTrack.class, ((TrackLocationData)obj).getTrack().getUuid());
 
 		if (track == null){
-			return "Patrol Track not found - data error";
+			return "Mission Track not found - data error";
 		}
 		StringBuilder sb = new StringBuilder();
-		sb.append(track.getPatrolLegDay().getPatrolLeg().getPatrol().getId());
-		if (track.getPatrolLegDay().getPatrolLeg().getPatrol().getLegs().size() > 1){
-			sb.append(" - Leg ");
-			sb.append(track.getPatrolLegDay().getPatrolLeg().getId());
-		}
+		sb.append(track.getId());
+		sb.append(" - ");
+		sb.append(track.getMissionDay().getMission().getId());
 		sb.append(" (");
-		sb.append(DateFormat.getDateInstance().format(track.getPatrolLegDay().getDate()));
+		sb.append(DateFormat.getDateInstance().format(track.getMissionDay().getDate()));
 		sb.append(")");
 		return sb.toString();
 	}
@@ -112,7 +110,6 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 	@Override
 	public boolean supportsRoutine(IQaRoutineType type) {
 		if (type.getId().equals(LocationRoutineType.ID)) return true;
-		if (type.getId().equals(PatrolSpeedRoutineType.ID)) return true;
 		return false;
 	}
 

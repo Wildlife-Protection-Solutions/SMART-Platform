@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.qa">
+      <data_provider
+            class="org.wcs.smart.qa.er.ErTrackDataProvider">
+         <qa_action
+               class="org.wcs.smart.qa.er.DeleteErTrackAction">
+         </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.er.EditTrackAction">
+         </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.er.OpenSourceMissionAction">
+         </qa_action>
+      </data_provider>
+      <data_provider
+            class="org.wcs.smart.qa.er.ErWaypointDataProvider">
+         <qa_action
+               class="org.wcs.smart.qa.er.DeleteErWaypointAction">
+         </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.er.EditWaypointAction">
+         </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.er.OpenSourceMissionAction">
+         </qa_action>
+      </data_provider>
+   </extension>
+
+</plugin>

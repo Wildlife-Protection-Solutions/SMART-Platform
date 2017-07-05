@@ -97,10 +97,12 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.ValidationEngine;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
+import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.model.map.FeatureFactory;
 import org.wcs.smart.qa.model.map.QaErrorService;
 import org.wcs.smart.qa.routine.IQaDataProvider;
@@ -137,18 +139,11 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 	private DateFilterDropDownComposite dateFilter;
 	private CheckboxTableViewer tblRoutines;
 	
-//	private Composite optionsPanel;
-//	private Composite resultsPanel;
-//	private Composite progressPanel;
 	private Composite stackPanel;
 	private ProgressAreaComposite progressComposite;
 	private IEclipseContext parentContext;
 	private Button btnIncludeFixed ;
-	
-	
-	
-//	private Hyperlink lOptions;
-//	private Hyperlink lResults;
+
 	private Font boldFont, normalFont;
 	
 	private StackPanelItem progressStackItem;
@@ -564,8 +559,8 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 	public void refreshResults(){
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		tblResults.refresh();
-		getMap().getRenderManager().refresh(null);
 		clearSelection();
+		updateResultsTableFilter();
 	}
 	
 	
@@ -729,6 +724,19 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		routineColumn.getColumn().setWidth(150);
 		routineColumn.getColumn().setText("Routine To Perform");
 		
+		TableViewerColumn paramColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
+		paramColumn.setLabelProvider(new ColumnLabelProvider(){
+			public String getText(Object element){
+				if (element instanceof DataValidator){
+					QaRoutine routine = ((DataValidator)element).getRoutine();
+					return routine.getRoutineType().getParameterSummary(routine);
+				}
+				return super.getText(element);
+			}
+		});
+		paramColumn.getColumn().setWidth(150);
+		paramColumn.getColumn().setText("Routine Parameters");
+		
 		TableViewerColumn descColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
 		descColumn.setLabelProvider(new ColumnLabelProvider(){
 			public String getText(Object element){
@@ -819,6 +827,10 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 					for (QaRoutine r : dbroutines){
 						if (p.supportsRoutine(r.getRoutineType())){
 							routines.add(new DataValidator(r, p));
+						}
+						for (QaRoutineParameter pp : r.getParameters()){
+							pp.getParameterId();
+							pp.getStringValue();
 						}
 					}
 				}

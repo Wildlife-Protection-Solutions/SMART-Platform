@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.qa.ui.view;
 
+import java.awt.Color;
 import java.text.DateFormat;
 import java.util.UUID;
 
@@ -46,6 +47,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.geotools.referencing.CRS;
+import org.geotools.styling.Graphic;
+import org.geotools.styling.PointSymbolizer;
+import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
@@ -61,6 +66,7 @@ import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.udig.EditPointTool;
@@ -125,6 +131,15 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 	 * @param newPosition
 	 */
 	protected abstract void updateFeature(Coordinate newPosition);
+	
+	/**
+	 * Fire any additional events after saving changes to the waypoint.
+	 * A call to WaypointEventManager.getInstance().waypointModified(wp) is 
+	 * made automatically by the doSave function.
+	 * 
+	 * @param updatedPoint
+	 */
+	protected abstract void fireEvents(Waypoint updatedPoint);
 	
 	/**
 	 * Add additional tools to the map toolbar
@@ -241,6 +256,8 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 		}finally{
 			s.close();
 		}
+		WaypointEventManager.getInstance().waypointModified(waypoint);
+		fireEvents(waypoint);
 		super.okPressed();
 	}
 	
@@ -398,6 +415,18 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 	@Override
 	public IStatusLineManager getStatusLineManager() {
 		return null;
+	}
+	
+	/**
+	 * The default style for the editing layer
+	 * @return
+	 */
+	protected Style getStylingConfig() {
+		StyleBuilder sb = new StyleBuilder();
+		Graphic g = sb.createGraphic(null,  sb.createMark("circle", Color.RED), null, 1, 10, 0); //$NON-NLS-1$
+		PointSymbolizer ps = sb.createPointSymbolizer(g);
+		return sb.createStyle(ps);
+		
 	}
 	
 	/*

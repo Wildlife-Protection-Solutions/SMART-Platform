@@ -20,7 +20,19 @@
          <qa_action
                class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction">
          </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.patrol.ui.DeletePatrolTrackAction">
+         </qa_action>
+         <qa_action
+               class="org.wcs.smart.qa.patrol.ui.EditTrackAction">
+         </qa_action>
       </data_provider>
+      <qa_routine
+            class="org.wcs.smart.qa.patrol.routine.PatrolSpeedRoutineType">
+         <parameter_collector
+               class="org.wcs.smart.qa.patrol.ui.PatrolSpeedParameterCollector">
+         </parameter_collector>
+      </qa_routine>
    </extension>
 
 </plugin>

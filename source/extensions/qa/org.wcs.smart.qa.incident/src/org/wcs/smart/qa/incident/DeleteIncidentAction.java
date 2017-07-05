@@ -19,58 +19,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.patrol.ui;
+package org.wcs.smart.qa.incident;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider;
 import org.wcs.smart.qa.routine.IQaAction;
+import org.wcs.smart.util.UuidUtils;
 
 /**
- * Delete patrol waypoint action.  Applicable for
- * PatrolWaypointDataProvider.
+ * Delete incident action.  Applicable for
+ * IncidentDataProvider.
  * 
  * @author Emily
  *
  */
-public class DeletePatrolWaypointAction implements IQaAction {
+public class DeleteIncidentAction implements IQaAction {
 
 	@Override
 	public void doAction(List<QaError> items) {
 		List<QaError> toProcess = new ArrayList<>();
 		for (QaError e : items){
-			if (e.getDataProviderId().equals(PatrolWaypointDataProvider.ID)){
+			if (e.getDataProviderId().equals(IncidentDataProvider.ID)){
 				toProcess.add(e);
 			}
 		}
-		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected waypoints?  This action cannot be undone.", toProcess.size()))){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected independent incidents?  This action cannot be undone.", toProcess.size()))){
 			return;
 		}
 		
-		Set<Patrol> modified = new HashSet<>();
 		List<QaError> deleted = new ArrayList<>();
 		List<Waypoint> wpDeleted = new ArrayList<>();
-		Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
 			
@@ -85,43 +82,46 @@ public class DeletePatrolWaypointAction implements IQaAction {
 				}
 				if (found) continue;
 				
-				PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
-						.add(Restrictions.eq("id.waypoint.uuid", item.getSourceId())) //$NON-NLS-1$
-						.uniqueResult();
+				Waypoint pw = (Waypoint) s.get(Waypoint.class, item.getSourceId());
 				
 				if (pw == null){
 					item.setStatus(QaError.Status.DELETED);
 					item.setFixMessage("***Could not delete - Waypoint Not Found*** " + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));
 				}else{
 					s.delete(pw);
-					s.delete(pw.getWaypoint());
-					modified.add(pw.getPatrolLegDay().getPatrolLeg().getPatrol());
-					pw.getPatrolLegDay().getPatrolLeg().getPatrol().equals(null);
 					deleted.add(item);
-					wpDeleted.add(pw.getWaypoint());
+					wpDeleted.add(pw);
 				}
 			}
 			s.getTransaction().commit();
-			
-
 		}catch (Exception ex){
-			QaPlugIn.displayLog("An error occurred while removing the selected patrol waypoints.  Refresh QA list and try again, or edit try deleting individual patrol waypoints." + "\n\n", ex);
+			QaPlugIn.displayLog("An error occurred while removing the selected independent incidents.  Refresh QA list and try again, or edit try deleting individual indepdent incidents." + "\n\n", ex);
 			return;
 		}finally{
 			s.close();
 		}
 
 		for (QaError item : deleted){
-			item.setFixMessage("Waypoint Deleted");
+			item.setFixMessage("Incident Deleted");
 			item.setStatus(QaError.Status.DELETED);
 		}
-		//fire patrol events
-		for (Patrol d : modified){
-			PatrolEventManager.getInstance().patrolSaved(d,true);
-		}
-		//fire waypoint events
-		wpDeleted.forEach(w->WaypointEventManager.getInstance().waypointDeleted(w));
+		
+		//delete filestore and fire events
+		wpDeleted.forEach((w)->{
+			File f = new File(new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), IndepedentIncidentSource.FILESTORE_LOC), UuidUtils.getDirectoryPath(w.getUuid()));
+			if (f.exists()){
+				try{
+					FileUtils.forceDelete(f);
+				}catch(Exception ex){
+					QaPlugIn.log("Could not delete incident filestore path: " + ex.getMessage(), ex);
+				}
+			}
 			
+			WaypointEventManager.getInstance().waypointDeleted(w);
+			IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_DELETED, w);
+		});
+		
+
 	}
 
 	@Override

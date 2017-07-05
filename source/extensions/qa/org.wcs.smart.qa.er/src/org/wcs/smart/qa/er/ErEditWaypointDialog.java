@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.patrol.ui;
+package org.wcs.smart.qa.er;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,13 +49,13 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.ui.mision.udig.SurveyFeatureFactory;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.geotools.PatrolFeatureFactory;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
 
@@ -67,24 +67,24 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author Emily
  *
  */
-public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
+public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 
-	private PatrolWaypoint editWaypoint;
+	private SurveyWaypoint editWaypoint;
 	private SimpleFeatureType wpSchema;
 	private FeatureStore<SimpleFeatureType, SimpleFeature> editStore;
 	
-	private PatrolWaypoint previousWaypoint;
-	private PatrolWaypoint nextWaypoint;
+	private SurveyWaypoint previousWaypoint;
+	private SurveyWaypoint nextWaypoint;
 	
 	private ToolItem btnInterpolate ; 
 	
-	public PatrolEditWaypointDialog(Shell parentShell, UUID wpUuid) {
+	public ErEditWaypointDialog(Shell parentShell, UUID wpUuid) {
 		super(parentShell, wpUuid);
 	}
 
 	@Override
 	protected void fireEvents(Waypoint modified){
-		PatrolEventManager.getInstance().patrolSaved(editWaypoint.getPatrolLegDay().getPatrolLeg().getPatrol(), true);
+		SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.MISSION_MODIFIED, editWaypoint.getMissionDay().getMission());
 	}
 	
 	private void interpolate(){
@@ -130,7 +130,7 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 			}catch (ConcurrentModificationException ex){
 				editStore.removeFeatures(Filter.INCLUDE);
 			}
-			editStore.addFeatures(DataUtilities.collection(Collections.singletonList(PatrolFeatureFactory.getWaypointAsFeature(wpSchema, editWaypoint))));
+			editStore.addFeatures(DataUtilities.collection(Collections.singletonList(SurveyFeatureFactory.createWaypointFeature(wpSchema, editWaypoint))));
 			getMap().getRenderManager().refresh(null);
 		} catch (IOException e) {
 			QaPlugIn.log(e.getMessage(), e);
@@ -140,15 +140,15 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void initBackgroundLayers() {
-		List<PatrolWaypoint> waypoints = null;
-		Track patrolTrack = null;
+		List<SurveyWaypoint> waypoints = null;
+		List<MissionTrack> tracks = null;
 		List<IGeoResource> referenceLayers = new ArrayList<>();	
 		IGeoResource editResource = null;
 		ReferencedEnvelope zoomEnv = null;	
 		
 		Session s = HibernateManager.openSession();
 		try{
-			PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
+			SurveyWaypoint pw = (SurveyWaypoint) s.createCriteria(SurveyWaypoint.class)
 					.add(Restrictions.eq("id.waypoint.uuid", waypointUuid)) //$NON-NLS-1$
 					.uniqueResult();
 			editWaypoint = pw;
@@ -156,15 +156,18 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 				setErrorMessage("Waypoint not found.  Close dialog an re-run validation routines.");
 				return;
 			}
-			waypoints = pw.getPatrolLegDay().getWaypoints();
-			pw.getPatrolLegDay().equals(null);//lazy load for hibernate
-			pw.getPatrolLegDay().getPatrolLeg().getPatrol().equals(null);//lazy load for hibernate
+			waypoints = pw.getMissionDay().getWaypoints();
+			waypoints.remove(pw);
+			
+			//lazy loading
+			pw.getMissionDay().equals(null);
+			pw.getMissionDay().getMission().equals(null);
 			
 			//find previous and next waypoint for interpolation
 			double prevDiff = Double.POSITIVE_INFINITY;
 			double nextDiff = Double.POSITIVE_INFINITY;
 			long wpTime = editWaypoint.getWaypoint().getDateTime().getTime();
-			for (PatrolWaypoint ww : waypoints){
+			for (SurveyWaypoint ww : waypoints){
 				if (ww.equals(editWaypoint)) continue;
 				long time = ww.getWaypoint().getDateTime().getTime();
 				if (time <= wpTime && (previousWaypoint == null || (wpTime - time) < prevDiff)){
@@ -179,19 +182,20 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 				
 			}
 			
-			
-			patrolTrack = pw.getPatrolLegDay().getTrack();
-			waypoints.remove(pw);
+			tracks = pw.getMissionDay().getTracks();
 			
 			//create a layer for the track
 			try{
-				if (patrolTrack != null && patrolTrack.getLineString() != null){
-					SimpleFeatureType schema = PatrolFeatureFactory.createTrackSchema();
-					SimpleFeature feature = PatrolFeatureFactory.getTrackAsFeature(schema, patrolTrack);
+				if (tracks != null && !tracks.isEmpty()){
+					SimpleFeatureType schema = SurveyFeatureFactory.createTrackSchema();
+					List<SimpleFeature> features = new ArrayList<>();
+					for (MissionTrack t : tracks){
+						features.add(SurveyFeatureFactory.createTrackFeature(schema, t));
+					}
 					
 					IGeoResource track = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(schema);
 					FeatureStore<SimpleFeatureType, SimpleFeature> fs = track.resolve(FeatureStore.class, new NullProgressMonitor());
-					fs.addFeatures(DataUtilities.collection(Collections.singletonList(feature)));
+					fs.addFeatures(DataUtilities.collection(features));
 					referenceLayers.add(track);
 				}
 			}catch (Exception ex){
@@ -201,10 +205,10 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 			//create a layer for the waypoints
 			if (waypoints != null){
 				try{
-					SimpleFeatureType schema = PatrolFeatureFactory.createWaypointSchema();
+					SimpleFeatureType schema = SurveyFeatureFactory.createWaypointSchema();
 					List<SimpleFeature> features = new ArrayList<>();
-					for (PatrolWaypoint w : waypoints){
-						features.add(PatrolFeatureFactory.getWaypointAsFeature(schema, w));
+					for (SurveyWaypoint w : waypoints){
+						features.add(SurveyFeatureFactory.createWaypointFeature(schema, w));
 					}
 					
 					IGeoResource waypointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(schema);
@@ -219,8 +223,8 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 			
 			//create edit feature
 			try{
-				wpSchema = PatrolFeatureFactory.createWaypointSchema();
-				SimpleFeature editFeature = PatrolFeatureFactory.getWaypointAsFeature(wpSchema, pw);
+				wpSchema = SurveyFeatureFactory.createWaypointSchema();
+				SimpleFeature editFeature = SurveyFeatureFactory.createWaypointFeature(wpSchema, pw);
 				
 				double offset = 0.01;
 				zoomEnv = new ReferencedEnvelope(pw.getWaypoint().getX() - offset, pw.getWaypoint().getX() + offset,  pw.getWaypoint().getY() - offset, pw.getWaypoint().getY() + offset, SmartDB.DATABASE_CRS);

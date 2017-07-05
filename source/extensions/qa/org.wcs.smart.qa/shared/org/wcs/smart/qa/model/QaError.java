@@ -307,8 +307,12 @@ public class QaError extends UuidItem{
 	 */
 	@Transient
 	public void setGeometryObject(Geometry g){
-		WKBWriter writer = new WKBWriter();
-		this.bytegeom = writer.write(g);
+		if (g == null){
+			bytegeom = null;
+		}else{
+			WKBWriter writer = new WKBWriter();
+			this.bytegeom = writer.write(g);
+		}
 		this.geometry = g;
 	}
 	

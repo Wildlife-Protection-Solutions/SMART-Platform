@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ecological Records Quality Assurance PlugIn
+Bundle-SymbolicName: org.wcs.smart.qa.er;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: org.wcs.smart
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.wcs.smart.qa;bundle-version="1.0.0",
+ org.wcs.smart.er;bundle-version="6.0.0",
+ org.locationtech.udig.style.sld

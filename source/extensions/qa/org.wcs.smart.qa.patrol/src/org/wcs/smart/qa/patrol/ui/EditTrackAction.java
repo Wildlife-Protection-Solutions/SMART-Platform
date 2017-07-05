@@ -21,43 +21,77 @@
  */
 package org.wcs.smart.qa.patrol.ui;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.jface.window.Window;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.ui.PatrolTrackPointDialog;
+import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaError.Status;
 import org.wcs.smart.qa.routine.IQaAction;
-import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.LineString;
 
 /**
- * Action implementation for editing waypoint positions.  Applicable
- * for PatrolWaypointDataProvider
+ * Action to open edit track dialog.
  * 
  * @author Emily
  *
  */
-public class EditWaypointAction implements IQaAction {
+public class EditTrackAction  implements IQaAction {
 
 	@Override
 	public void doAction(List<QaError> items) {
 		if (items.isEmpty()) return;
 		QaError item = items.get(0);
-		EditWaypointDetailsDialog dialog = new PatrolEditWaypointDialog(Display.getDefault().getActiveShell(), item.getSourceId());
-		if (dialog.open() == Window.OK){
+		
+		Track track = null;
+		Patrol p = null;
+		Session s = HibernateManager.openSession();
+		try{
+			track = (Track) s.get(Track.class, item.getSourceId());
+			if (track != null){
+				//load hibernate objects necessary for editing
+				p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
+				p.equals(null);
+				track.getPatrolLegDay().equals(null);
+				track.getPatrolLegDay().getTracks().size();
+				int x = track.getGeom().length;
+			}
+		}finally{
+			s.close();
+		}
+		
+		if (track == null){
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Not found", "Track not found");
+			return ;
+		}
+		
+		LineString ls = null;
+		try{
+			ls = track.getLineString();
+		}catch (Exception ex){
+			QaPlugIn.log(ex.getMessage(), ex);
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Not found", "Unable to parse track linestring.  Track should be regenerated or re-imported in the patrol editor.");
+			return ;
+		}
+
+		PatrolTrackPointDialog dialog = new PatrolTrackPointDialog(Display.getDefault().getActiveShell(), track, true);
+		dialog.open();
+		if (!ls.equalsExact(dialog.getEditTrackLineString())){
 			item.setStatus(Status.FIXED);
-			Point pnt = (Point)item.getGeometryObject();
-			Point to = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(dialog.getUpdatedPoint().getX(), dialog.getUpdatedPoint().getY()));
-			item.setFixMessage(MessageFormat.format("Manually moved from ({0}, {1}) to ({2}, {3})", pnt.getX(), pnt.getY(), to.getX(), to.getY()));
-			item.setGeometryObject(to);			
+			item.setFixMessage("Track manually modified.");
+			item.setGeometryObject(dialog.getEditTrackLineString());			
+			PatrolEventManager.getInstance().patrolSaved(p, true);
 		}
 	}
 
@@ -68,12 +102,12 @@ public class EditWaypointAction implements IQaAction {
 
 	@Override
 	public String getId() {
-		return "org.wcs.smart.qa.patrol.waypoint.edit"; //$NON-NLS-1$
+		return "org.wcs.smart.qa.patrol.track.edit"; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getName(Locale l) {
-		return "Edit Waypoint...";
+		return "Edit Track...";
 	}
 
 	@Override
