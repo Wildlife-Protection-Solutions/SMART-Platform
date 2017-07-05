@@ -344,6 +344,15 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 					pointStore.modifyFeatures(pointStore.getSchema().getDescriptor(SELECTED_FIELD).getName(), false, org.opengis.filter.Filter.INCLUDE);
 					//select items
 					pointStore.modifyFeatures(pointStore.getSchema().getDescriptor(SELECTED_FIELD).getName(), true, FACTORY.id(ids));
+				}catch (ConcurrentModificationException ex){					
+					//workaround for geotools bug
+					try {
+						pointStore.modifyFeatures(pointStore.getSchema().getDescriptor(SELECTED_FIELD).getName(), false, org.opengis.filter.Filter.INCLUDE);
+						pointStore.modifyFeatures(pointStore.getSchema().getDescriptor(SELECTED_FIELD).getName(), true, FACTORY.id(ids));
+					} catch (IOException e) {
+						SmartPlugIn.log(e.getMessage(), e);
+					}
+					
 				} catch (IOException e) {
 					SmartPlugIn.log(e.getMessage(), e);
 				}
@@ -483,6 +492,14 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 			try{
 				trackStore.removeFeatures(Filter.INCLUDE);
 				pointStore.removeFeatures(Filter.INCLUDE);
+			}catch (ConcurrentModificationException ex){
+				//workaround for geotools bug
+				try{
+					trackStore.removeFeatures(Filter.INCLUDE);
+					pointStore.removeFeatures(Filter.INCLUDE);
+				}catch(Exception ex2){
+					SmartPlugIn.displayLog(Messages.TrackPointDialog_LayerUpdateError + "\n\n" + ex.getMessage(), ex2); //$NON-NLS-1$
+				}
 			}catch(Exception ex){
 				SmartPlugIn.displayLog(Messages.TrackPointDialog_LayerUpdateError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}					

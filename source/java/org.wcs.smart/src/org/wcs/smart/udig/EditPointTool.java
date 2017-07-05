@@ -113,26 +113,26 @@ public class EditPointTool extends AbstractModalTool{
 				
 				graphics.setColor(new Color(255,255,255,200));
 				
-				String[] parts = hoverPoint.getInfoString().split("\n"); //$NON-NLS-1$
-				
-				int width = 0;
-				int height = 0;
-				for (String p : parts){
-					Rectangle2D bounds = graphics.getStringBounds(p);
-					width = (int)Math.max(width, bounds.getWidth());
-					height += bounds.getHeight();
+				if (hoverPoint.getInfoString() != null && !hoverPoint.getInfoString().isEmpty()){
+					String[] parts = hoverPoint.getInfoString().split("\n"); //$NON-NLS-1$
+					
+					int width = 0;
+					int height = 0;
+					for (String p : parts){
+						Rectangle2D bounds = graphics.getStringBounds(p);
+						width = (int)Math.max(width, bounds.getWidth());
+						height += bounds.getHeight();
+					}
+					
+					graphics.fillRoundRect(startX, startY, width+10, height+10, 5, 5);
+					graphics.setColor(Color.BLACK);
+					
+					int y = startY + 5;
+					for (String p : parts){
+						graphics.drawString(p, startX + 5, y, ViewportGraphics.ALIGN_LEFT, ViewportGraphics.ALIGN_BOTTOM);
+						y += graphics.getStringBounds(p).getHeight();
+					}
 				}
-				
-				graphics.fillRoundRect(startX, startY, width+10, height+10, 5, 5);
-				
-				graphics.setColor(Color.BLACK);
-				
-				int y = startY + 5;
-				for (String p : parts){
-					graphics.drawString(p, startX + 5, y, ViewportGraphics.ALIGN_LEFT, ViewportGraphics.ALIGN_BOTTOM);
-					y += graphics.getStringBounds(p).getHeight();
-				}
-				
 			}
 		}
 	};
