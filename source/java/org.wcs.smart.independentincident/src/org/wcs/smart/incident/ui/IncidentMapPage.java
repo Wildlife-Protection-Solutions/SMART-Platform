@@ -36,10 +36,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.part.MultiPageEditorPart;
-import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -55,9 +53,9 @@ import org.opengis.filter.Filter;
 import org.opengis.style.Style;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IncidentFeatureFactory;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.udig.EditPointTool;
@@ -67,7 +65,6 @@ import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -79,8 +76,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 public class IncidentMapPage extends SmartMapEditorPart {
 
 	private IncidentEditor parent;
-	private static final String SMART_POINT_SPEC = "fid:String,id:Integer,geom:Point:srid=4326"; //$NON-NLS-1$
-	private static final String SMART_POINT_TYPE_NAME = "smart.independentincident"; //$NON-NLS-1$
+
 	
 	private SimpleFeatureType featureType;
 	private ListFeatureCollection featureCollection;
@@ -138,7 +134,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	 */
 	private void addPointsLayer() {
         try {
-			featureType = DataUtilities.createType(SMART_POINT_TYPE_NAME, SMART_POINT_SPEC);
+			featureType = IncidentFeatureFactory.createSimpleIncidentSchema();
 			featureCollection = new ListFeatureCollection(featureType);
 			pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
 			
@@ -196,7 +192,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 		}
 		try {
 			featureCollection.clear();
-			featureCollection.add(createIncidentFeature(featureType));
+			featureCollection.add(IncidentFeatureFactory.createSimpleIncidentFeature(featureType, parent.getIncident()));
 			try{
 				store.removeFeatures(Filter.INCLUDE);
 				store.addFeatures(featureCollection);
@@ -226,21 +222,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	}
 	
 	
-	/**
-	 * Creates a feature from the incident
-	 * @param ftype
-	 * @return
-	 */
-	private SimpleFeature createIncidentFeature(SimpleFeatureType ftype) {
-		Waypoint incident = parent.getIncident();
-		Object data[] = new Object[3];
-		String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$
-		data[0] = name;
-		data[1] = incident.getId();
-		data[2] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(incident.getX(), incident.getY()));
-		SimpleFeature f = SimpleFeatureBuilder.build(ftype, data, name);
-		return f;
-	}
+
 
 	
 	/**
