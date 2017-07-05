@@ -79,19 +79,6 @@ public class MissionTrackFeatureReader implements FeatureReader<SimpleFeatureTyp
 	}
 	
 	private SimpleFeature createFeature(MissionTrack point){
-		String fid = UuidUtils.uuidToString(point.getUuid());
-		Object[] data = new Object[7];
-		data[0] = fid;
-		data[1] = point.getId();
-		data[2] = point.getMissionDay().getDate();
-		data[3] = point.getSamplingUnit() == null ? "" : point.getSamplingUnit().getId(); //$NON-NLS-1$
-		data[4] = point.getMissionDay().getMission().getId();
-		try{
-			data[5] = point.getGeometryLengthKm();
-			data[6] = point.getLineString();
-		}catch (Exception ex){
-			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
-		}
-		return SimpleFeatureBuilder.build(featureType, data, fid);
+		return SurveyFeatureFactory.createTrackFeature(featureType, point);
 	}
 }

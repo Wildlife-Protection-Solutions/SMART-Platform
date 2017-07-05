@@ -26,6 +26,7 @@ Export-Package: org.wcs.smart.er,
  org.wcs.smart.er.ui.handlers,
  org.wcs.smart.er.ui.meta,
  org.wcs.smart.er.ui.mision.editor,
+ org.wcs.smart.er.ui.mision.udig,
  org.wcs.smart.er.ui.surveydesign.editor,
  org.wcs.smart.er.upgrade,
  org.wcs.smart.er.xml

@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.geotools.data.AbstractDataStore;
-import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
@@ -87,9 +86,9 @@ public class MissionDataSource extends AbstractDataStore{
 		if (type == null){
 			try {
 				if (typeName.equals(MISSIONWAYPOINT_TYPE)) {
-					type = createPointSchema();
+					type = SurveyFeatureFactory.createWaypointSchema();
 				}else if (typeName.equals(MISSIONTRACK_TYPE)){
-					type = createTrackSchema();
+					type = SurveyFeatureFactory.createTrackSchema();
 				}
 			}catch(SchemaException ex){
 				throw new IOException(Messages.MissionDataSource_SchemaNotSupported + ex.getLocalizedMessage(), ex);
@@ -99,15 +98,5 @@ public class MissionDataSource extends AbstractDataStore{
 		return type;
 	}
 
-	private SimpleFeatureType createPointSchema() throws SchemaException{
-		String spec = "fid:String,id:Integer,date:Date,sampling_unit_id:String,observation:String,comment:String,geom:Point:srid=4326"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType("smart." + MISSIONWAYPOINT_TYPE, spec); //$NON-NLS-1$
-		return type;
-	}
 	
-	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		String spec = "fid:String,id:String,date:Date,sampling_unit_id:String,mission_id:String,distance:Double,geom:LineString:srid=4326"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType("smart." + MISSIONTRACK_TYPE, spec); //$NON-NLS-1$
-		return type;
-	}
 }
