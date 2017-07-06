@@ -62,8 +62,8 @@ public class OpenSourcePatrolAction implements IQaAction {
 	}
 
 	@Override
-	public void doAction(List<QaError> items) {
-		if (items.isEmpty()) return;
+	public boolean doAction(List<QaError> items) {
+		if (items.isEmpty()) return false;
 		QaError item = items.get(0);
 		if (item.getDataProviderId().equals(PatrolWaypointDataProvider.ID)){
 			PatrolWaypoint pw = null;
@@ -85,7 +85,7 @@ public class OpenSourcePatrolAction implements IQaAction {
 			if (pw == null){
 				//not found
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Patrol waypoint {0} not found", item.getErrorId()));
-				return;
+				return false;
 			}else{
 				(new OpenPatrolHandler()).openPatrol(new PatrolEditorInput(pw.getPatrolLegDay().getPatrolLeg().getPatrol()), pw.getWaypoint().getUuid(), context.get(MWindow.class));	
 			}
@@ -107,11 +107,12 @@ public class OpenSourcePatrolAction implements IQaAction {
 			if (track == null){
 				//not found
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Patrol track {0} not found", item.getErrorId()));
-				return;
+				return false;
 			}else{
 				(new OpenPatrolHandler()).openPatrol(new PatrolEditorInput(track.getPatrolLegDay().getPatrolLeg().getPatrol()), track.getPatrolLegDay().getUuid(), context.get(MWindow.class));	
 			}
 		}
+		return false;
 	}
 
 	@Override

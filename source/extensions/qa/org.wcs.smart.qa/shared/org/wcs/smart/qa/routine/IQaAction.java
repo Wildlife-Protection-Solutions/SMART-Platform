@@ -45,8 +45,9 @@ public interface IQaAction {
 	 * these cases you should skip this item and continue.
 	 * 
 	 * @param items
+	 * @return true if any of the items have been modified
 	 */
-	public void doAction(List<QaError> items);
+	public boolean doAction(List<QaError> items);
 	
 	/**
 	 * @return if the action can be applied to multiple items at once.  For example
@@ -54,7 +55,7 @@ public interface IQaAction {
 	 * do not. 
 	 */
 	public boolean supportsMultiple();
-	
+		
 	/**
 	 * 
 	 * @return id of the qa action

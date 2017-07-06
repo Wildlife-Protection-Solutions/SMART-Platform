@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.qa.model;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -61,7 +61,9 @@ public class QaError extends UuidItem{
 		NEW,
 		IGNORED,
 		DELETED,
+		ERROR,
 		FIXED;
+		
 		
 		public String getGuiName(Locale l){
 			//TODO:
@@ -83,7 +85,7 @@ public class QaError extends UuidItem{
 	@Transient
 	private IQaDataProvider dataProvider;
 	private Geometry geometry;
-	private List<QaError> links;
+	private Set<QaError> links;
 	
 	public QaError() {
 	}
@@ -355,9 +357,9 @@ public class QaError extends UuidItem{
 	 * @return
 	 */
 	@Transient
-	public List<QaError> getLinks() {
+	public Set<QaError> getLinks() {
 		if (links == null){
-			links = new ArrayList<>();
+			links = new HashSet<>();
 		}
 		return links;
 	}

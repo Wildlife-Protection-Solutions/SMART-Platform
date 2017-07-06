@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.qa.ui.view;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -33,23 +31,16 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -62,8 +53,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -78,19 +67,8 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.locationtech.udig.catalog.CatalogPlugin;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.ILayer;
-import org.locationtech.udig.project.internal.Layer;
-import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
-import org.locationtech.udig.project.ui.ApplicationGIS;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
@@ -103,22 +81,9 @@ import org.wcs.smart.qa.ValidationEngine;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
-import org.wcs.smart.qa.model.map.FeatureFactory;
-import org.wcs.smart.qa.model.map.QaErrorService;
 import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.ValidationTask;
-import org.wcs.smart.udig.AddContentFilterLayersCommand;
-import org.wcs.smart.udig.ContentFilterLayerImpl;
-import org.wcs.smart.ui.map.LoadDefaultLayersJob;
-import org.wcs.smart.ui.map.MapToolComposite;
-import org.wcs.smart.ui.map.SmartMapEditorPart;
-import org.wcs.smart.ui.map.tool.ClearSelectionTool;
-import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.JobUtil;
-import org.wcs.smart.util.UuidUtils;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Editor part of displaying the results of manual validation routine.
@@ -126,36 +91,25 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author Emily
  *
  */
-public class ValidationResultsEditor extends SmartMapEditorPart {
+public class ValidationResultsEditor extends TableMapQaErrorComposite {
 	
 	public static final String ID = "org.wcs.smart.qa.data.validatation.manual"; //$NON-NLS-1$
 
-	private TableViewer tblResults;
-	private Label lblResultCnt;
-	
-	private LoadDefaultLayersJob loadDefaultLayers;
-	private FormToolkit toolkit = null;
-	
 	private DateFilterDropDownComposite dateFilter;
 	private CheckboxTableViewer tblRoutines;
 	
 	private Composite stackPanel;
 	private ProgressAreaComposite progressComposite;
-	private IEclipseContext parentContext;
-	private Button btnIncludeFixed ;
-
+	
 	private Font boldFont, normalFont;
 	
 	private StackPanelItem progressStackItem;
 	private StackPanelItem optionsStackItem;
 	private StackPanelItem resultsStackItem;
 	
-	private Collection<QaError> results = null;
-	
-	private List<Layer> errorLayers;
-	private QaErrorService service = null;
-	
 	private ValidationEngine lastValidationEngine;
+
+	private FormToolkit toolkit = null;
 	
 	public static IEditorInput MANUAL_VALIDATION_INPUT =  new IEditorInput() {
 		
@@ -190,78 +144,19 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		}
 	};
 	
-	private enum ResultTableColumn{
-		STATUS("Status"),
-		DATA_TYPE("Data Type"),
-		ROUTINE("Routine"),
-		OBJECT_ID("Source ID"),
-		DESC("Description"),
-		FIX("Fix");
+	public ValidationResultsEditor(){
+		super();
 		
-		public String title;
-		
-		ResultTableColumn(String title){
-			this.title = title;
-		}
-		
-		public int getWidth(){
-			if (this == STATUS ) return 50;
-			return 150;
-		}
-		
-		public String getLabel(Object element){
-			if (!(element instanceof QaError)) return element.toString();
-			QaError error = (QaError)element;
-			if (this == DATA_TYPE){
-				return error.getDataProvider().getName(Locale.getDefault());
-			}else if (this == ROUTINE){
-				return error.getQaRoutine().getName() + " (" + error.getQaRoutine().getRoutineType().getName(Locale.getDefault()) + ")";
-			}else if (this == OBJECT_ID){
-				return error.getErrorId();
-			}else if (this == DESC){
-				return error.getErrorDescription();
-			}else if (this == STATUS){
-				return error.getStatus().getGuiName(Locale.getDefault());
-			}else if (this == FIX){
-				return error.getFixMessage();
-			}
-			return element.toString();
-		}
-	};
-	    
-	public Collection<QaError> getResults(){
-		return this.results;
+		tableColumns = new ResultTableColumn[]{
+				ResultTableColumn.STATUS,
+				ResultTableColumn.DATA_TYPE,
+				ResultTableColumn.ROUTINE,
+				ResultTableColumn.OBJECT_ID,
+				ResultTableColumn.DESC,
+				ResultTableColumn.FIX
+		};
 	}
-
-	public IEclipseContext getContext(){
-		return this.parentContext;
-	}
-	
-	public void clearResults(){
-		//clear table
-		results = null;
-		tblResults.setInput(null);
-		tblResults.getTable().setEnabled(false);
-		lblResultCnt.setText("");
 		
-		//clear map layers
-		if (errorLayers != null){
-			DeleteLayersCommand cmd = new DeleteLayersCommand(errorLayers.toArray(new ILayer[errorLayers.size()]));
-			getMap().sendCommandSync(cmd);
-			for (Layer l : errorLayers){
-				l.getGeoResource().dispose(new NullProgressMonitor());
-			}
-			
-		}
-	}
-	
-
-//	private void subscribeToEvent(String eventTopic, EventHandler handler){
-//		parentContext.get(IEventBroker.class).subscribe(eventTopic, handler);
-//		
-//	//	handlers.add(handler);
-//	}
-	
 	private void executeValidation(final ValidationEngine engine){
 		clearResults();
 		showProgress();
@@ -279,6 +174,21 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 				}
 				Collection<QaError> ferrors = errors;
 				Display.getDefault().syncExec(()->{
+					List<Exception> exceptions = engine.getExceptions();
+					if (!exceptions.isEmpty()){
+						StringBuilder sb = new StringBuilder();
+						for (Exception ex : exceptions){
+							QaPlugIn.log(ex.getMessage(), ex);
+							sb.append(ex.getMessage());
+							sb.append("\n");
+						}
+						String message = "The following errors occured while validating data:\n";
+						message += sb.toString();
+						if (message.length() > 700){
+							message =message.substring(0, 700) + "...";
+						}
+						MessageDialog.openError(getSite().getShell(), "Error", message);
+					}
 					setResults(ferrors);
 				});
 				return Status.OK_STATUS;
@@ -294,55 +204,16 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 	}
 	
 	
-	private void disposeService(){
-		if (service != null){
-			service.dispose(new NullProgressMonitor());
-			CatalogPlugin.getDefault().getLocalCatalog().remove(service);
-			service = null;
-		}
-	}
+	
 	public void setResults(Collection<QaError> results){
-		this.results = results;
-		
 		for (QaError r : results){
 			if (r.getUuid() == null){
 				r.setUuid(UUID.randomUUID());
 			}
 		}
-		
-		tblResults.setInput(results);
-		tblResults.getTable().setEnabled(true);
-		lblResultCnt.setText(MessageFormat.format("{0} items found", results.size()));
-		lblResultCnt.getParent().layout(true, true);
+		super.setResults(results);
 		resultsStackItem.show();
-		
-		try{
-			disposeService();		
-			service = new QaErrorService(results);
-			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-			toAdd.addAll(service.resources(new NullProgressMonitor()));
-			AddContentFilterLayersCommand cmd = new AddContentFilterLayersCommand(toAdd);
-			getMap().sendCommandSync(cmd);
-			errorLayers = cmd.getLayers();
-			for (Layer l : errorLayers){
-				l.setName("Error Results");
-				if (l instanceof ContentFilterLayerImpl){
-					((ContentFilterLayerImpl)l).setContentFilter(FeatureFactory.newStatusFilter());
-				}
-			}
-		}catch (Exception ex){
-			ex.printStackTrace();
-			//TODO:
-		}
 	}	
-	
-	private void addLayers(){
-		if (loadDefaultLayers != null){
-			loadDefaultLayers.cancel();			
-		}
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap());
-		loadDefaultLayers.schedule();
-	}
 	
 	/**
 	 * @see org.eclipse.ui.part.EditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
@@ -353,20 +224,28 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		super.init(site, input);
 	}
 
+	protected void createHeaderToolbar(Composite parent){
+		ToolBar tb = new ToolBar(parent,  SWT.NONE);
+		ToolItem btnRefresh = new ToolItem(tb, SWT.PUSH);
+	//	Button btnRefresh = toolkit.createButton(topComp, "", SWT.PUSH);
+		btnRefresh.setToolTipText("Re-run qa routines against the same data.");
+		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		btnRefresh.addListener(SWT.Selection, e->{
+			if (lastValidationEngine != null){
+				executeValidation(lastValidationEngine);
+			}
+		});
+	}
 	
-
 	/** Creates the map
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
-//		subscribeToEvent("SMART_QA/MANUAL/EXECUTE", executeValidate);
-		
-		toolkit = new FormToolkit(parent.getDisplay());
+		toolkit =  new FormToolkit(parent.getDisplay());
 		
 		Form form = toolkit.createForm(parent);
-		form.setText("Data Validation Results");
+		form.setText("Manual Data Validation ");
 		
 		form.getBody().setLayout(new GridLayout());
 		
@@ -428,215 +307,21 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 		optionsStackItem = new StackPanelItem(lOptions, optionsPanel);
 		progressStackItem = new StackPanelItem(lResults, progressPanel);
 
-		SashForm sash = new SashForm(resultsPanel,  SWT.VERTICAL);
-		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		Composite tableArea = toolkit.createComposite(sash, SWT.NONE);
-		tableArea.setLayout(new GridLayout());
-		((GridLayout)tableArea.getLayout()).marginWidth = 0;
-		((GridLayout)tableArea.getLayout()).marginHeight = 0;
-		
-		Composite topComp = toolkit.createComposite(tableArea);
-		topComp.setLayout(new GridLayout(3, false));
-		((GridLayout)topComp.getLayout()).marginWidth = 0;
-		((GridLayout)topComp.getLayout()).marginHeight = 0;
-		topComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		lblResultCnt = toolkit.createLabel(topComp, "");
-		lblResultCnt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		btnIncludeFixed = toolkit.createButton(topComp, "Include Resolved Items", SWT.CHECK);
-		btnIncludeFixed.setSelection(false);
-		btnIncludeFixed.addListener(SWT.Selection, e->updateResultsTableFilter());
-		btnIncludeFixed.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		
-		ToolBar tb = new ToolBar(topComp,  SWT.NONE);
-		ToolItem btnRefresh = new ToolItem(tb, SWT.PUSH);
-//		Button btnRefresh = toolkit.createButton(topComp, "", SWT.PUSH);
-		btnRefresh.setToolTipText("Re-run qa routines against the same data.");
-		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
-		btnRefresh.addListener(SWT.Selection, e->{
-			if (lastValidationEngine != null){
-				executeValidation(lastValidationEngine);
-			}
-		});
-		
-		tblResults = new TableViewer(tableArea, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
-		tblResults.setContentProvider(ArrayContentProvider.getInstance());
-		toolkit.adapt(tblResults.getTable());
-		tblResults.getTable().setLinesVisible(true);
-		tblResults.getTable().setHeaderVisible(true);
-		tblResults.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tblResults.getTable().setEnabled(false);
-		for (ResultTableColumn c : ResultTableColumn.values()){
-			TableViewerColumn column = new TableViewerColumn(tblResults, SWT.NONE);
-			column.getColumn().setText(c.title);
-			column.getColumn().setWidth(c.getWidth());
-			column.setLabelProvider(new ColumnLabelProvider(){
-				public String getText(Object element){
-					return c.getLabel(element);
-				}
-			});
-		}
-		tblResults.getTable().addListener(SWT.Selection, e->{
-			if (errorLayers == null) return;
-			FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-			
-			List<Filter> selectedFeatures = new ArrayList<>();
-			for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
-				Object x = (Object) iterator.next();				
-				if (x instanceof QaError){
-					selectedFeatures.add(ff.equals(ff.property("fid"), ff.literal(UuidUtils.uuidToString(((QaError) x).getUuid()))));
-				}
-				
-			}
-			Filter selection = ff.or(selectedFeatures);
-			for (Layer l : errorLayers){
-				l.setFilter(Filter.EXCLUDE);
-				l.setFilter(selection);
-				l.refresh(null);
-			}
-		
-		});
-		
-		
-		createTableMenu();
-				
-		String[] tools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 1);
-		tools[tools.length - 1] = ClearSelectionTool.ID;
-		mapTools = tools;
-		
-		Composite mapArea = toolkit.createComposite(sash);
-		mapArea.setLayout(new GridLayout());	
-		super.createPartControl(mapArea);
-		getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, new QaMapInfoToolProvider(this));
+		super.createPartControl(resultsPanel);
 		
 		optionsStackItem.show();
-		updateResultsTableFilter();
-		
-		sash.setWeights(new int[]{3,5});
-        addLayers();
 	}
 
-	private void updateResultsTableFilter(){
-		if (btnIncludeFixed.getSelection()){
-			tblResults.setFilters(new ViewerFilter[]{});
-			
-			if (errorLayers != null){
-				for (Layer l : errorLayers){
-					if (l instanceof ContentFilterLayerImpl){
-						((ContentFilterLayerImpl)l).setContentFilter(Filter.INCLUDE);
-					}
-				}
-				getMap().getRenderManager().refresh(null);
-			}
-		}else{
-			tblResults.setFilters(new ViewerFilter[]{new ViewerFilter() {
-				@Override
-				public boolean select(Viewer viewer, Object parentElement, Object element) {
-					if (element instanceof QaError){
-						if (((QaError) element).getStatus() == QaError.Status.NEW) return true;
-						return false;
-					}
-					return true;
-				}
-			}});
-			
-			if (errorLayers != null){
-				for (Layer l : errorLayers){
-					if (l instanceof ContentFilterLayerImpl){
-						((ContentFilterLayerImpl)l).setContentFilter(FeatureFactory.newStatusFilter());
-					}
-				}
-				getMap().getRenderManager().refresh(null);
-			}
-		}
-	}
-	
-	/**
-	 * Refreshes the results table and the map
-	 */
-	public void refreshResults(){
-		ApplicationGIS.getToolManager().setCurrentEditor(this);
-		tblResults.refresh();
-		clearSelection();
-		updateResultsTableFilter();
-	}
-	
-	
-	private void createTableMenu(){
-		Menu mnu = new Menu(tblResults.getTable());
-		
-		MenuItem zoomTo = new MenuItem(mnu, SWT.PUSH);
-		zoomTo.setText("Zoom To");
-		zoomTo.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ZOOM_IMAGE));
-		zoomTo.addListener(SWT.Selection, e->zoomSelected());
-		
-		MenuItem clearSelection = new MenuItem(mnu, SWT.PUSH);
-		clearSelection.setText("Clear Selection");
-		clearSelection.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CLEAR_SELECTION_ICON));
-		clearSelection.addListener(SWT.Selection, e->clearSelection());
-		
-		tblResults.getTable().setMenu(mnu);
-		new QaActionMenu(mnu, parentContext, tblResults){
-			@Override
-			public void refresh() {
-				refreshResults();
-			}
-		};
-		
-	}
 
 	
-	public void setSelection(QaError error){
-		clearSelection();
-		tblResults.setSelection(new StructuredSelection(error));
-		tblResults.getTable().showSelection();
-	}
-	
-	private void clearSelection(){
-		for (Layer l : getMap().getLayersInternal()){
-			l.setFilter(Filter.EXCLUDE);
-			l.refresh(null);
-		}
-		tblResults.setSelection(null);
-	}
-	
-	private void zoomSelected(){
-		Envelope env = null;
-		for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
-			Object x = (Object) iterator.next();				
-			if (x instanceof QaError && ((QaError) x).getGeometryObject() != null){
-				if (env == null){
-					env = ((QaError)x).getGeometryObject().getEnvelopeInternal();
-				}else{
-					env.expandToInclude(((QaError)x).getGeometryObject().getEnvelopeInternal());
-				}
-			}
-		}
-		if (env != null){
-			env.expandBy(0.001);
-			
-			ReferencedEnvelope re = new ReferencedEnvelope(env, SmartDB.DATABASE_CRS);
-			SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(re);
-			getMap().sendCommandASync(bbox);
-		}
-	}
-	
-    @Override
+	@Override
     public void dispose() {
-    	JobUtil.stopJobs(loadDefaultLayers);
-    	loadDefaultLayers = null;
-
-        if (toolkit != null){
-        	toolkit.dispose();
-        	toolkit = null;
-        }
-        disposeService();
-        
-        super.dispose();
-      
-    }
+		if (toolkit != null){
+			toolkit.dispose();
+			toolkit = null;
+		}
+		super.dispose();
+	}
 
 	@Override
 	public EditorPart getParentEditor() {
@@ -786,10 +471,7 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 			return;
 		}
 		
-		lastValidationEngine = new ValidationEngine();
-		
-		
-		//TODO: validate this cast
+		lastValidationEngine = new ValidationEngine(Locale.getDefault());
 		for (Object x  : tblRoutines.getCheckedElements()){
 			if (x instanceof DataValidator){
 				ValidationTask task = new ValidationTask(((DataValidator) x).getRoutine(), ((DataValidator) x).getDataProvider(), startDate, endDate, SmartDB.getCurrentConservationArea());
@@ -797,7 +479,6 @@ public class ValidationResultsEditor extends SmartMapEditorPart {
 			}
 		}
 		executeValidation(lastValidationEngine);
-//		eventBroker.send("SMART_QA/MANUAL/EXECUTE", engine);
 	}
 	
 	/*

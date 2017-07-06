@@ -52,15 +52,16 @@ import org.wcs.smart.qa.routine.IQaAction;
 public class DeleteErTrackAction implements IQaAction {
 
 	@Override
-	public void doAction(List<QaError> items) {
+	public boolean doAction(List<QaError> items) {
 		List<QaError> toProcess = new ArrayList<>();
 		for (QaError e : items){
 			if (e.getDataProviderId().equals(ErTrackDataProvider.ID)){
 				toProcess.add(e);
 			}
 		}
+		if (toProcess.isEmpty()) return false;
 		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected tracks?  This action cannot be undone.", toProcess.size()))){
-			return;
+			return false;
 		}
 		
 		Set<Mission> modified = new HashSet<>();
@@ -100,8 +101,9 @@ public class DeleteErTrackAction implements IQaAction {
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
+			s.getTransaction().rollback();
 			QaPlugIn.displayLog("An error occurred while removing the selected patrol tracks.  Refresh QA list and try again, or edit try deleting individual patrol tracks." + "\n\n", ex);
-			return;
+			return false;
 		}finally{
 			s.close();
 		}
@@ -114,6 +116,7 @@ public class DeleteErTrackAction implements IQaAction {
 		for (Mission m : modified){
 			SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.MISSION_MODIFIED, m);
 		}			
+		return true;
 	}
 
 	@Override

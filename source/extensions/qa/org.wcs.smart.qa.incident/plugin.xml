@@ -16,5 +16,11 @@
          </qa_action>
       </data_provider>
    </extension>
+   <extension
+         point="org.wcs.smart.hibernate.interceptor">
+      <integrator
+            class="org.wcs.smart.qa.incident.hibernate.IncidentQaIntegrator">
+      </integrator>
+   </extension>
 
 </plugin>

@@ -50,8 +50,8 @@ import com.vividsolutions.jts.geom.LineString;
 public class EditTrackAction  implements IQaAction {
 
 	@Override
-	public void doAction(List<QaError> items) {
-		if (items.isEmpty()) return;
+	public boolean doAction(List<QaError> items) {
+		if (items.isEmpty()) return false;
 		QaError item = items.get(0);
 		
 		Track track = null;
@@ -72,8 +72,10 @@ public class EditTrackAction  implements IQaAction {
 		}
 		
 		if (track == null){
+			item.setStatus(Status.ERROR);
+			item.setFixMessage("Could not edit track - Track Not Found");
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Not found", "Track not found");
-			return ;
+			return true;
 		}
 		
 		LineString ls = null;
@@ -82,7 +84,7 @@ public class EditTrackAction  implements IQaAction {
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Not found", "Unable to parse track linestring.  Track should be regenerated or re-imported in the patrol editor.");
-			return ;
+			return false;
 		}
 
 		PatrolTrackPointDialog dialog = new PatrolTrackPointDialog(Display.getDefault().getActiveShell(), track, true);
@@ -92,7 +94,9 @@ public class EditTrackAction  implements IQaAction {
 			item.setFixMessage("Track manually modified.");
 			item.setGeometryObject(dialog.getEditTrackLineString());			
 			PatrolEventManager.getInstance().patrolSaved(p, true);
+			return true;
 		}
+		return false;
 	}
 
 	@Override

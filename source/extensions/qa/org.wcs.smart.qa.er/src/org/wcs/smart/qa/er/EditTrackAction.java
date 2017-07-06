@@ -20,8 +20,8 @@ import org.wcs.smart.qa.routine.IQaAction;
 public class EditTrackAction  implements IQaAction {
 
 	@Override
-	public void doAction(List<QaError> items) {
-		if (items.isEmpty()) return;
+	public boolean doAction(List<QaError> items) {
+		if (items.isEmpty()) return false;
 		QaError item = items.get(0);
 		
 		MissionTrack track = null;
@@ -42,8 +42,10 @@ public class EditTrackAction  implements IQaAction {
 		}
 		
 		if (track == null){
+			item.setStatus(Status.ERROR);
+			item.setFixMessage("Track not found");
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Not found", "Track not found");
-			return ;
+			return true;
 		}
 		
 		try{
@@ -51,7 +53,7 @@ public class EditTrackAction  implements IQaAction {
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Not found", "Unable to parse track linestring.  Track should be regenerated or re-imported in the patrol editor.");
-			return ;
+			return false;
 		}
 
 		boolean[] changes = new boolean[]{false};
@@ -70,7 +72,9 @@ public class EditTrackAction  implements IQaAction {
 			item.setFixMessage("Track manually modified.");
 			//TODO: do something here
 			//item.setGeometryObject(dialog.getEditTrackLineString());
+			return true;
 		}
+		return false;
 	}
 
 	@Override

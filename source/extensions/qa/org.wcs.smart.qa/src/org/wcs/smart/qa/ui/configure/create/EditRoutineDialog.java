@@ -136,6 +136,7 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		}finally{
 			s.close();
 		}
+		InternalExtensionManager.INSTANCE.clearAutoRoutines();
 		super.okPressed();
 	}
 	
@@ -177,7 +178,7 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		lblAuto.setToolTipText(RoutinesListDialog.RoutineColumn.AUTO.tooltip);
 
 		btnAuto = new Button(top, SWT.CHECK);
-		btnAuto.addListener(SWT.Modify, e->validate());
+		btnAuto.addListener(SWT.Selection, e->validate());
 		
 		Label lblDesc = new Label(top, SWT.NONE);
 		lblDesc.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));

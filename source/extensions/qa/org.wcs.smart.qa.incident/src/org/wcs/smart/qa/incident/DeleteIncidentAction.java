@@ -54,7 +54,7 @@ import org.wcs.smart.util.UuidUtils;
 public class DeleteIncidentAction implements IQaAction {
 
 	@Override
-	public void doAction(List<QaError> items) {
+	public boolean doAction(List<QaError> items) {
 		List<QaError> toProcess = new ArrayList<>();
 		for (QaError e : items){
 			if (e.getDataProviderId().equals(IncidentDataProvider.ID)){
@@ -62,7 +62,7 @@ public class DeleteIncidentAction implements IQaAction {
 			}
 		}
 		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected independent incidents?  This action cannot be undone.", toProcess.size()))){
-			return;
+			return false;
 		}
 		
 		List<QaError> deleted = new ArrayList<>();
@@ -95,8 +95,9 @@ public class DeleteIncidentAction implements IQaAction {
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
+			s.getTransaction().rollback();
 			QaPlugIn.displayLog("An error occurred while removing the selected independent incidents.  Refresh QA list and try again, or edit try deleting individual indepdent incidents." + "\n\n", ex);
-			return;
+			return false;
 		}finally{
 			s.close();
 		}
@@ -120,7 +121,7 @@ public class DeleteIncidentAction implements IQaAction {
 			WaypointEventManager.getInstance().waypointDeleted(w);
 			IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_DELETED, w);
 		});
-		
+		return true;
 
 	}
 

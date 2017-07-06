@@ -27,6 +27,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.model.QaRoutine;
 
@@ -96,6 +97,7 @@ public class NewRoutineWizard extends Wizard implements IPageChangingListener{
 		}finally{
 			s.close();
 		}
+		InternalExtensionManager.INSTANCE.clearAutoRoutines();
 		return true;
 	}
 }

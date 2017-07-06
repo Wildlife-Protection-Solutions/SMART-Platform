@@ -59,8 +59,8 @@ public class OpenSourceMissionAction implements IQaAction {
 	}
 
 	@Override
-	public void doAction(List<QaError> items) {
-		if (items.isEmpty()) return;
+	public boolean doAction(List<QaError> items) {
+		if (items.isEmpty()) return false;
 		QaError item = items.get(0);
 		if (item.getDataProviderId().equals(ErWaypointDataProvider.ID)){
 			SurveyWaypoint pw = null;
@@ -82,7 +82,7 @@ public class OpenSourceMissionAction implements IQaAction {
 			if (pw == null){
 				//not found
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Patrol waypoint {0} not found", item.getErrorId()));
-				return;
+				return false;
 			}else{
 				EditSurveyElementHandler.editMission(context.get(Shell.class), pw.getMissionDay().getMission().getUuid(), pw.getMissionDay().getMission().getId(), pw.getWaypoint().getUuid());
 					
@@ -105,11 +105,12 @@ public class OpenSourceMissionAction implements IQaAction {
 			if (track == null){
 				//not found
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Patrol track {0} not found", item.getErrorId()));
-				return;
+				return false;
 			}else{
 				EditSurveyElementHandler.editMission(context.get(Shell.class),track.getMissionDay().getMission().getUuid(), track.getMissionDay().getMission().getId(), track.getMissionDay().getDate());	
 			}
 		}
+		return false;
 	}
 
 	@Override

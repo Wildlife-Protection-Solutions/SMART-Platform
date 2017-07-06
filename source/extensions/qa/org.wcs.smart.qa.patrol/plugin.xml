@@ -34,5 +34,11 @@
          </parameter_collector>
       </qa_routine>
    </extension>
+   <extension
+         point="org.wcs.smart.hibernate.interceptor">
+      <integrator
+            class="org.wcs.smart.qa.patrol.hibernate.PatrolQaIntegrator">
+      </integrator>
+   </extension>
 
 </plugin>

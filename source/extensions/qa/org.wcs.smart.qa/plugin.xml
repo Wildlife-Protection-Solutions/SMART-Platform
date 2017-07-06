@@ -33,6 +33,10 @@
                   commandId="org.wcs.smart.qa.validation.manual"
                   style="push">
             </command>
+            <command
+                  commandId="org.wcs.smart.qa.validation.auto"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
    </extension>
@@ -46,6 +50,10 @@
             id="org.wcs.smart.qa.validation.manual"
             name="Manual Data Validation">
       </command>
+      <command
+            id="org.wcs.smart.qa.validation.auto"
+            name="Automated Data Validation Errors">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -56,6 +64,10 @@
       <handler
             class="org.wcs.smart.qa.ui.handler.NewManualValidationHandler$NewManualValidationHandlerWrapper"
             commandId="org.wcs.smart.qa.validation.manual">
+      </handler>
+      <handler
+            class="org.wcs.smart.qa.ui.handler.NewAutoValidationHandler$NewAutoValidationHandlerWrapper"
+            commandId="org.wcs.smart.qa.validation.auto">
       </handler>
    </extension>
    <extension
@@ -75,15 +87,12 @@
             id="org.wcs.smart.qa.data.validatation.manual"
             name="Manual Data Validation">
       </editor>
-   </extension>
-   <extension
-         point="org.eclipse.ui.views">
-      <view
-            class="org.wcs.smart.qa.ui.view.ManualValidationView$ManualValidationViewWrapper"
-            id="org.wcs.smart.qa.validatation.manual.parameters"
-            name="Manual Validation"
-            restorable="true">
-      </view>
+      <editor
+            class="org.wcs.smart.qa.ui.view.AutomatedResultsEditor"
+            default="false"
+            id="org.wcs.smart.qa.data.validatation.automated"
+            name="Automated Data Validation">
+      </editor>
    </extension>
 
 </plugin>

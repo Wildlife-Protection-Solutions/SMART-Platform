@@ -49,8 +49,8 @@ import com.vividsolutions.jts.geom.Point;
 public class EditIncidentAction implements IQaAction {
 
 	@Override
-	public void doAction(List<QaError> items) {
-		if (items.isEmpty()) return;
+	public boolean doAction(List<QaError> items) {
+		if (items.isEmpty()) return false;
 		QaError item = items.get(0);
 		EditWaypointDetailsDialog dialog = new IncidentEditWaypointDialog(Display.getDefault().getActiveShell(), item.getSourceId());
 		if (dialog.open() == Window.OK){
@@ -58,8 +58,10 @@ public class EditIncidentAction implements IQaAction {
 			Point pnt = (Point)item.getGeometryObject();
 			Point to = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(dialog.getUpdatedPoint().getX(), dialog.getUpdatedPoint().getY()));
 			item.setFixMessage(MessageFormat.format("Manually moved from ({0}, {1}) to ({2}, {3})", pnt.getX(), pnt.getY(), to.getX(), to.getY()));
-			item.setGeometryObject(to);			
+			item.setGeometryObject(to);
+			return true;
 		}
+		return false;
 	}
 
 	@Override

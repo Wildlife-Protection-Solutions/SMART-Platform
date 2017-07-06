@@ -22,6 +22,7 @@
 package org.wcs.smart.qa.ui.view;
 
 import java.awt.Point;
+import java.util.List;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -47,10 +48,9 @@ import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 public class QaMapInfoToolProvider implements IInfoToolProvider {
 
+	private TableMapQaErrorComposite editor;
 	
-	private ValidationResultsEditor editor;
-	
-	public QaMapInfoToolProvider(ValidationResultsEditor editor){
+	public QaMapInfoToolProvider(TableMapQaErrorComposite editor){
 		this.editor = editor;
 	}
 	
@@ -157,7 +157,8 @@ public class QaMapInfoToolProvider implements IInfoToolProvider {
 			}
 		}){
 			@Override
-			public void refresh() {
+			public void refresh(List<QaError> errors) {
+				if (errors != null) editor.saveErrorItems(errors);
 				editor.refreshResults();
 			}
 			

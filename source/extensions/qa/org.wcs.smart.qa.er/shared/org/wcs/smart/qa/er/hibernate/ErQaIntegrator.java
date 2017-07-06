@@ -19,48 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.routine;
+package org.wcs.smart.qa.er.hibernate;
 
-import java.util.List;
-import java.util.Locale;
-
-import org.wcs.smart.qa.model.QaError;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.event.service.spi.EventListenerRegistry;
+import org.hibernate.event.spi.EventType;
+import org.hibernate.integrator.spi.Integrator;
+import org.hibernate.metamodel.source.MetadataImplementor;
+import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 
 /**
- * Updates status to ignore.  This is applicable to
- * all data providers.
+ * Hibernate Integrator to register for patrol object events.
  * 
  * @author Emily
  *
  */
-public class IgnoreAction implements IQaAction {
+public class ErQaIntegrator implements Integrator {
 
-	public final static IgnoreAction INSTANCE = new IgnoreAction();
-	
-	private IgnoreAction(){	
-	}
-	
 	@Override
-	public boolean doAction(List<QaError> items) {
-		for (QaError i : items){
-			i.setStatus(QaError.Status.IGNORED);
-		}
-		return true;
+	public void integrate(Configuration configuration,
+			SessionFactoryImplementor sessionFactory,
+			SessionFactoryServiceRegistry serviceRegistry) {
+
+        final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService( EventListenerRegistry.class );
+		 eventListenerRegistry.appendListeners( EventType.POST_COMMIT_INSERT, new NewErObjectEventListener() );
 	}
 
 	@Override
-	public boolean supportsMultiple() {
-		return true;
+	public void integrate(MetadataImplementor metadata,
+			SessionFactoryImplementor sessionFactory,
+			SessionFactoryServiceRegistry serviceRegistry) {
+		//do nothing; this is for hibernate 5.0
 	}
 
 	@Override
-	public String getId() {
-		return "org.wcs.smart.qa.action.ignore"; //$NON-NLS-1$
-	}
-
-	@Override
-	public String getName(Locale l) {
-		return "Ignore";
+	public void disintegrate(SessionFactoryImplementor sessionFactory,
+			SessionFactoryServiceRegistry serviceRegistry) {
 	}
 
 }

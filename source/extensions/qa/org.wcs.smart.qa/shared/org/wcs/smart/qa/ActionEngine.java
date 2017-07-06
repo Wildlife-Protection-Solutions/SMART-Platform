@@ -40,26 +40,31 @@ public enum ActionEngine {
 	/*
 	 * Find the associated action for each qa error item and perform 
 	 * it.
+	 * 
+	 * return true if changes have been made to at least one item, false otherwise
 	 */
-	public void performActions(List<QaError> actionItems, String actionId, IEclipseContext context){
+	public boolean performActions(List<QaError> actionItems, String actionId, IEclipseContext context){
 		
 		Set<IQaDataProvider> providers = new HashSet<IQaDataProvider>();
 		actionItems.forEach(i -> providers.add(i.getDataProvider()));
-		
+		boolean changes = false;
 		boolean found = false;
+		
+		//universal actions
 		for (IQaAction action : RoutineExtensionManager.INSTANCE.getUniversalActions()){
 			if (action.getId().equals(actionId)){
-				action.doAction(actionItems);
+				changes = changes || action.doAction(actionItems);
 				found = true;
 				break;
 			}
 		}
 		
+		//extension point actions
 		if (!found){
 			for (IQaDataProvider p : providers){
 				for (IQaAction n : InternalExtensionManager.INSTANCE.getQaActions(p, context)){
 					if (n.getId().equals(actionId)){
-						n.doAction(actionItems);
+						changes = changes || n.doAction(actionItems);
 						break;
 					}
 				}
@@ -73,5 +78,6 @@ public enum ActionEngine {
 				link.setGeometryObject(item.getGeometryObject());
 			}
 		}
+		return changes;
 	}
 }

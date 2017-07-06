@@ -130,8 +130,11 @@ public abstract class QaActionMenu implements MenuListener {
 						items.add((QaError) x);
 					}
 				}
-				ActionEngine.INSTANCE.performActions(items, action.getId(), context);
-				refresh();
+				if (ActionEngine.INSTANCE.performActions(items, action.getId(), context)){
+					refresh(items);
+				}else{
+					refresh(null);
+				}
 			});		
 		}				
 	}
@@ -142,7 +145,9 @@ public abstract class QaActionMenu implements MenuListener {
 	}
 	
 	/**
-	 * called when actions are complete; refreshes the ui
+	 * called when actions are complete;
+	 * @param modified a list of items modified, can be null if nothing modified
 	 */
-	public abstract void refresh();
+	public abstract void refresh(List<QaError> modified);
+
 }

@@ -48,7 +48,7 @@ import org.wcs.smart.qa.routine.LocationRoutineType;
 public class PatrolWaypointDataProvider extends IQaDataProvider {
 
 	public static final String ID = "org.wcs.smart.qa.dataprovider.patrol.waypoint"; //$NON-NLS-1$
-	
+		
 	@Override
 	public String getName(Locale l) {
 		return "Patrol Waypoint";

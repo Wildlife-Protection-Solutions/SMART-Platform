@@ -31,16 +31,59 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.routine.IQaAction;
 import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.IQaRoutineType;
 import org.wcs.smart.qa.ui.configure.IParameterCollector;
 
+/**
+ * Utility functions for managing QA Routines, actions, and parameters.  
+ * 
+ * @author Emily
+ *
+ */
 public enum InternalExtensionManager {
 	INSTANCE;
 	
 	private HashMap<String, List<IQaAction>> providerActions = null;
 
+	private List<QaRoutine> autoRoutines = null;
+	
+	private Boolean isAutoCleaned = Boolean.FALSE;
+	
+	/**
+	 * 
+	 * @return list of routines defined for automatic configuration
+	 */
+	@SuppressWarnings("unchecked")
+	public synchronized List<QaRoutine> getAutoRoutines(){
+		if (autoRoutines != null) return autoRoutines;
+		List<QaRoutine> routines = new ArrayList<>();
+		Session session = HibernateManager.openSession();
+		try{
+			routines.addAll(session.createCriteria(QaRoutine.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("autoCheck", true)) //$NON-NLS-1$
+				.list());
+			
+		}catch (Exception ex){
+			QaPlugIn.log(ex.getMessage(), ex);
+		}finally{
+			session.close();
+		}
+		this.autoRoutines = routines;
+		return this.autoRoutines;
+	}
+	
+	public void clearAutoRoutines(){
+		this.autoRoutines = null;
+	}
+	
 	/**
 	 * Finds the parameter collector for the qa routine type provided
 	 * by typeId
@@ -85,7 +128,7 @@ public enum InternalExtensionManager {
 								IConfigurationElement[] kids = e.getChildren("qa_action"); //$NON-NLS-1$
 								List<IQaAction> actions = new ArrayList<>();
 								for (IConfigurationElement kid : kids){
-									IQaAction action = (IQaAction)kid.createExecutableExtension("class");
+									IQaAction action = (IQaAction)kid.createExecutableExtension("class"); //$NON-NLS-1$
 									actions.add(action);
 									ContextInjectionFactory.inject(action, context);
 								}
@@ -99,6 +142,22 @@ public enum InternalExtensionManager {
 			}
 		}
 		return providerActions.get(provider.getId());
-
+	}
+	
+	/**
+	 * Deletes all resolved items from the qa error tables. This is designed to be run
+	 * only once per application run.
+	 * 
+	 */
+	public void cleanAutoResults(){
+		synchronized (isAutoCleaned) {
+			if (isAutoCleaned) return;
+			isAutoCleaned = true;
+		}
+		try {
+			QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea());
+		} catch (Exception e) {
+			QaPlugIn.log(e.getMessage(), e);
+		}
 	}
 }

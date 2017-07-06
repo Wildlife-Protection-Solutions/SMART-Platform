@@ -66,10 +66,24 @@ public enum RoutineExtensionManager {
 	}
 	
 	/**
+	 * Find the data provider routine type with the given id. 
+	 * Will return null if none found
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public IQaDataProvider findDataProvider(String id){
+		for(IQaDataProvider type : getDataProviders()){
+			if (id.equals(type.getId())) return type;
+		}
+		return null;
+	}
+	
+	/**
 	 * Finds all defined QA Routine Types in the system
 	 * @return
 	 */
-	public Collection<IQaRoutineType> getDefinedRoutineTypes(){
+	public synchronized Collection<IQaRoutineType> getDefinedRoutineTypes(){
 		if (types != null) return types;
 		List<IQaRoutineType> temp = new ArrayList<>();
 		IExtensionRegistry registry = RegistryFactory.getRegistry();
@@ -94,7 +108,7 @@ public enum RoutineExtensionManager {
 	 * Finds all defined QA Routine Types in the system
 	 * @return
 	 */
-	public Collection<IQaDataProvider> getDataProviders(){
+	public synchronized Collection<IQaDataProvider> getDataProviders(){
 		if (dataproviders != null) return dataproviders;
 		List<IQaDataProvider> temp = new ArrayList<>();
 		IExtensionRegistry registry = RegistryFactory.getRegistry();

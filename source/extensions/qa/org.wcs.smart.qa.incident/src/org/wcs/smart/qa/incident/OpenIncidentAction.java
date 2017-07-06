@@ -56,8 +56,8 @@ public class OpenIncidentAction implements IQaAction {
 	}
 
 	@Override
-	public void doAction(List<QaError> items) {
-		if (items.isEmpty()) return;
+	public boolean doAction(List<QaError> items) {
+		if (items.isEmpty()) return false;
 		QaError item = items.get(0);
 		if (item.getDataProviderId().equals(IncidentDataProvider.ID)){
 			Waypoint pw = null;
@@ -70,11 +70,11 @@ public class OpenIncidentAction implements IQaAction {
 			if (pw == null){
 				//not found
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Independent Incident {0} not found", item.getErrorId()));
-				return;
 			}else{
 				(new OpenIncidentHandler()).openIncident(pw.getUuid(), context.get(MWindow.class));	
 			}
 		}
+		return false;
 	}
 
 	@Override

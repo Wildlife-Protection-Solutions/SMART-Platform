@@ -96,9 +96,9 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Maximum Speed ");
 		sb.append(speedParameter.getStringValue());
-		sb.append(" km/h; Types(");
+		sb.append(" km/h; Types: ");
 		sb.append(typeParameter.getStringValue());
-		sb.append(") ");
+		sb.append("");
 
 		return sb.toString();
 	}

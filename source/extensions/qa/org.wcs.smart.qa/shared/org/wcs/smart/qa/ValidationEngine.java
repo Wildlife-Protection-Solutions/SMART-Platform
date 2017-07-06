@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.qa;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -41,12 +43,15 @@ import org.wcs.smart.qa.routine.ValidationTask;
 public class ValidationEngine {
 
 	private List<ValidationTask> tasks;
+	private List<Exception> exceptions;
+	private Locale l;
 	
 	/**
 	 * Creates a new engine with no tasks
 	 */
-	public ValidationEngine(){
+	public ValidationEngine(Locale l){
 		tasks = new ArrayList<>();
+		this.l = l;
 	}
 	
 	/**
@@ -57,11 +62,28 @@ public class ValidationEngine {
 		this.tasks.add(task);
 	}
 	
+	/**
+	 * 
+	 * @return collection of exceptions that occurred while validating data
+	 * 
+	 */
+	public List<Exception> getExceptions(){
+		return this.exceptions;
+	}
+	
+	/**
+	 * Runs all the validation tasks and returns all associated validation errors 
+	 * 
+	 * @param session
+	 * @param monitor
+	 * @return
+	 */
 	public Collection<QaError> validate( Session session, IProgressMonitor monitor ){
 		SubMonitor  m = SubMonitor.convert(monitor, "Validating Data", tasks.size());
-		
+		exceptions = new ArrayList<>();
 		Collection<QaError> errors = new ArrayList<QaError>();
 		for (ValidationTask t : tasks){
+			m.setTaskName(MessageFormat.format("Validating {0} ({1})", t.getDataProvider().getName(l), t.getRoutine().getName()));
 			try{
 				QaRoutine r = (QaRoutine) session.get(QaRoutine.class, t.getRoutine().getUuid());
 				t.setQaRoutine(r);
@@ -78,8 +100,7 @@ public class ValidationEngine {
 					errors.add(newError);
 				}
 			}catch (Exception ex){
-				//TODO: DO SOMETHING WITH THIS ERROR
-				ex.printStackTrace();
+				exceptions.add(ex);
 			}
 		}
 		monitor.done();

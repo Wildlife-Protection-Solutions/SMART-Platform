@@ -19,48 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.routine;
+package org.wcs.smart.qa;
 
-import java.util.List;
-import java.util.Locale;
-
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.qa.model.QaError;
 
 /**
- * Updates status to ignore.  This is applicable to
- * all data providers.
- * 
+ * Tools for cleaning results from the QaError table
  * @author Emily
  *
  */
-public class IgnoreAction implements IQaAction {
+public enum QaErrorCleaner {
+	
+	INSTANCE;
 
-	public final static IgnoreAction INSTANCE = new IgnoreAction();
-	
-	private IgnoreAction(){	
-	}
-	
-	@Override
-	public boolean doAction(List<QaError> items) {
-		for (QaError i : items){
-			i.setStatus(QaError.Status.IGNORED);
+	/**
+	 * Deletes all QaErrors from the database that are not 
+	 * of ERROR state
+	 */
+	public void cleanItems(ConservationArea ca) throws Exception{
+		Session s = HibernateManager.openSession();
+		try{
+			s.getTransaction().begin();
+			Query q = s.createQuery("DELETE FROM QaError WHERE conservationArea = :ca and status != :status"); //$NON-NLS-1$
+			q.setParameter("ca", ca); //$NON-NLS-1$
+			q.setParameter("status", QaError.Status.NEW); //$NON-NLS-1$
+			q.executeUpdate();
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			s.getTransaction().rollback();
+			throw ex;
+		}finally{
+			s.close();
 		}
-		return true;
 	}
-
-	@Override
-	public boolean supportsMultiple() {
-		return true;
-	}
-
-	@Override
-	public String getId() {
-		return "org.wcs.smart.qa.action.ignore"; //$NON-NLS-1$
-	}
-
-	@Override
-	public String getName(Locale l) {
-		return "Ignore";
-	}
-
 }
