@@ -1,6 +1,5 @@
 package org.wcs.smart.i2.birt.entity;
 
-import java.util.HashSet;
 import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
@@ -44,10 +43,6 @@ public class EntityLocationAttributeDatasetResultSetMetadata implements IResultS
 	
 	public EntityLocationAttributeDatasetResultSetMetadata(Locale l){
 		this.l = l;
-		HashSet<String> fixedLabels = new HashSet<>();
-		for (Column c : Column.values()){
-			fixedLabels.add(c.getColumnName(l));
-		}
 	}
 	
 	/**

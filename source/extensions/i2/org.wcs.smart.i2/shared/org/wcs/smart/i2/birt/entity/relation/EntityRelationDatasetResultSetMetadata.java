@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.birt.entity.relation;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -104,10 +105,29 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 			return null;
 		}
 	}
-	private Locale l;
+	
+	private String[] columnNames;
+	
 	public EntityRelationDatasetResultSetMetadata(List<IntelAttribute> attributes, Locale l){
 		this.validAttributes = attributes;
-		this.l = l;
+	
+		HashSet<String> duplicates = new HashSet<String>();
+		columnNames = new String[Column.values().length + validAttributes.size()];
+		for (int i = 0; i < Column.values().length; i ++){
+			columnNames[i] = Column.values()[i].getColumnName(l);
+			duplicates.add(columnNames[i]);
+		}
+		//configure attribute column names removing duplicates
+		for (int i = 0; i < validAttributes.size(); i ++){
+			String rawpart = validAttributes.get(i).getName();
+			String name = rawpart;
+			int k = 1;
+			while(duplicates.contains(name)){
+				name = rawpart + k;
+				k++;
+			}
+			columnNames[i + Column.values().length] = name;
+		}	
 	}
 	
 	/**
@@ -130,15 +150,10 @@ public class EntityRelationDatasetResultSetMetadata implements IResultSetMetaDat
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnLabel(int)
 	 */
+	//index is 1 based
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		if (index <= Column.values().length){
-			return Column.values()[index-1].getColumnName(l);
-		}
-		index = index - 1 - Column.values().length;
-		if (index >= 0){
-			return validAttributes.get(index).getName();
-		}
+		if (index <= columnNames.length) return columnNames[index-1];
 		return null;
 	}
 
