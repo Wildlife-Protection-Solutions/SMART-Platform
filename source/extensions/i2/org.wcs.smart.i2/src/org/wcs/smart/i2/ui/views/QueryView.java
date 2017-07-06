@@ -40,7 +40,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
@@ -48,6 +50,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -102,6 +105,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
+import org.wcs.smart.i2.ui.handler.NewQueryHandler;
 import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
 import org.wcs.smart.i2.ui.views.query.FilterTreeContentProvider;
 import org.wcs.smart.i2.ui.views.query.FilterTreeItem;
@@ -394,6 +398,10 @@ public class QueryView {
 		}
 		context.get(IEventBroker.class).post(IntelEvents.QUERY_DELETED, removed);
 	}
+	
+	private void createNewQuery(){
+		ContextInjectionFactory.invoke(new NewQueryHandler(), Execute.class, context);
+	}
 	private void openSelection(){
 		for (Iterator<?> iterator = ((IStructuredSelection)queryList.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
@@ -421,6 +429,16 @@ public class QueryView {
 
 		
 		if (IntelSecurityManager.INSTANCE.canEditQuery()){
+			MenuItem miNew = new MenuItem(m, SWT.PUSH);
+			miNew.setText(Messages.QueryView_NewQueryOption);
+			miNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			miNew.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					createNewQuery();
+				}
+			});
+			
 			new MenuItem(m, SWT.SEPARATOR);
 			
 			MenuItem miDelete = new MenuItem(m, SWT.PUSH);

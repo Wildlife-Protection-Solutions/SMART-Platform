@@ -322,7 +322,7 @@ public class ObservationFilterProcessor {
 			query.executeUpdate();
 			
 			sql = new StringBuilder();
-			sql.append("CREATE INDEX observation_uuid_tmp_idx on " + t2 + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("CREATE INDEX " + SqlGenerator.createIndexName("observation_uuid_tmp") + " on " + t2 + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			logString(sql.toString());
 			s.createSQLQuery(sql.toString()).executeUpdate();
 			
@@ -467,7 +467,7 @@ public class ObservationFilterProcessor {
 		
 		
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX observation_uuid_tmp_idx on " + t2 + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("observation_uuid_tmp") + " on " + t2 + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 		

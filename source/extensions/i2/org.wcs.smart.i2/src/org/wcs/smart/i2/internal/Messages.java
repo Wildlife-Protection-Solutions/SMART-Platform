@@ -862,6 +862,7 @@ public class Messages extends NLS {
 	public static String QueryView_DeleteMessage;
 	public static String QueryView_DeleteTitle;
 	public static String QueryView_FiltersSection;
+	public static String QueryView_NewQueryOption;
 	public static String QueryView_OpenMenuItem;
 	public static String QueryView_QueryNotFound;
 	public static String QueryView_refreshRequired;
