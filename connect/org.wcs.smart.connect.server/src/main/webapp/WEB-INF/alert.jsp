@@ -99,67 +99,16 @@
 <%@include file="menu.jsp" %>
 
 <div id= "main">
-  <div class="pageheader"><fmt:message key="alert.pageheader" /></div>
   <div>
     <div id="message" class="msgsection"></div>
   </div>
   <article id="tabs" class="tabs">
 	<section id="tab1" class="">
-		<h2 id="tab1text" class=""><a onclick="settab(1)"><fmt:message key="alert.shortmaptitle" /></a></h2>
 		<div id="map"></div>
-		<div id="map-info-box" class="link_small">
-			<fmt:message key="alert.lastupdated"/><a href='javascript:refreshAlerts()'><fmt:message key="alert.udpatenow"/></a>
-		</div>
-	</section>
-	
-	<section id="tab2" class="">
-		<h2 id="tab2text" class=""><a onclick="settab(2)"><fmt:message key="alert.createnewalert" /></a></h2>
-		<p>
-		<form id="newalertform" style="padding-left:10px">
-     		<div id="error" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
-     		<label class="top-spacer block"><fmt:message key="alert.calabel" /></label>
-     		<select name="alert_ca" class="block  formtext alert-select">
-	     		<c:forEach var="ca" items="${cas}" varStatus="count">
-	     			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
-				</c:forEach> 
-     		</select>
-     		
-     		<label class="top-spacer block"><fmt:message key="alert.typelabel" /></label>
-     		<select name="alert_type" class="block formtext alert-select">
-	     		<c:forEach var="type" items="${alertTypes}" varStatus="count">
-	     			<option value="${type.getUuid()}"> ${type.getLabel()} </option> 
-				</c:forEach> 
-     		</select>
-
-			<label class="top-spacer block"><fmt:message key="alert.eventimportancelabel" /></label>
-			<select name="level" class="block formtext alert-select">
-				<option value=1><fmt:message key="alert.eventimportance1" /></option>
-				<option value=2><fmt:message key="alert.eventimportance2" /></option>
-				<option value=3><fmt:message key="alert.eventimportance3" /></option>
-				<option value=4><fmt:message key="alert.eventimportance4" /></option>
-				<option value=5><fmt:message key="alert.eventimportance5" /></option>
-			</select>
-			
-			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label>
-			<input id="long" type="text" name="long" class="formtext" style="width: 20em">
-			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label>
-			<input id="lat" type="text" name="lat" class="formtext" style="width: 20em">
-			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>
-			<textarea name="alert_description" rows="5" cols="72"></textarea>
-   			<input class="button block top-spacer" type="submit" value="   <fmt:message key="alert.submit" />    "/>
-    	</form>
-		</p>
-	</section>
-	
-	<section id="tab3" class="">
+		<div id="spacer"></div>
 		
-		<h2 id="tab3text" class=" "><a onclick="settab(3)"><fmt:message key="alert.viewmanagealerts" />:(0)</a></h2>
-		<div class="overflow"><table id="alerttable">
-		<tr class="table-row smart-table-header"><th><a onclick="sort('typeUuid')" href="#"><fmt:message key="alert.type" /></a></th><th><a onclick="sort('ca.label')" href="#"><fmt:message key="query.conservationarea" /></a></th><th><a onclick="sort('date')" href="#"><fmt:message key="alert.date" /></a></th><th><a onclick="sort('description')" href="#"><fmt:message key="alert.description" /></a></th><th><a onclick="sort('level')" href="#"><fmt:message key="alert.eventimportance" /></a></th><th><a onclick="sort('status')" href="#"><fmt:message key="alert.status" /></a></th><th><a onclick="sort('x')" href="#"><fmt:message key="alert.location" /></a></th><th><fmt:message key="actions" /></th></tr>
-		</table>
-		</div> 
 	</section>
-
+	
 	
 	<div id="filter-controls">
 		<p style="text-align:center;font-weight:bold;"><a id="filter-link" onClick="hideShowFilters()"  class="filterIcon"></a></p>
@@ -231,13 +180,66 @@
 
 	</div>
   </article>
-	
+ 	<div id="buttons">
+ 		<a href='javascript:refreshAlerts()'><div class="button mapbutton" style="float:left"><fmt:message key="alert.refresh" /></div></a>
+ 		<a href='javascript:buttonCreateAlert()'><div class="button mapbutton" style="float:left"><fmt:message key="alert.createalert" /></div></a>
+ 		<a href='javascript:buttonManageAlerts()'><div class="button mapbutton" style="float:left"><fmt:message key="alert.managealerts" /></div></a>
+ 		
+ 	</div>
+ 	<div id="map-info-box" class="link_small">
+		<fmt:message key="alert.lastupdated"/>
+	</div>
+	<div id="tab3text" class="link_small" style="float:right">0</div>
+	<div class="link_small" style="float:right"><fmt:message key="alert.alertsshown" /></div>
+  
 </div>
 
 <%@include file="footer.jsp" %>
 
+<div id="createAlertDialog" style="display: none;" class="dialog">
+	<section id="tab2" class="">
+		<p>
+		<form id="newalertform" style="padding-left:10px">
+     		<div id="error" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
+     		<label class="top-spacer block"><fmt:message key="alert.calabel" /></label>
+     		<select name="alert_ca" class="block  formtext alert-select">
+	     		<c:forEach var="ca" items="${cas}" varStatus="count">
+	     			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
+				</c:forEach> 
+     		</select>
+     		
+     		<label class="top-spacer block"><fmt:message key="alert.typelabel" /></label>
+     		<select name="alert_type" class="block formtext alert-select">
+	     		<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	     			<option value="${type.getUuid()}"> ${type.getLabel()} </option> 
+				</c:forEach> 
+     		</select>
 
-<div id="updateAlertDialog" style="display: none;" class="dialog">
+			<label class="top-spacer block"><fmt:message key="alert.eventimportancelabel" /></label>
+			<select name="level" class="block formtext alert-select">
+				<option value=1><fmt:message key="alert.eventimportance1" /></option>
+				<option value=2><fmt:message key="alert.eventimportance2" /></option>
+				<option value=3><fmt:message key="alert.eventimportance3" /></option>
+				<option value=4><fmt:message key="alert.eventimportance4" /></option>
+				<option value=5><fmt:message key="alert.eventimportance5" /></option>
+			</select>
+			
+			<label class="top-spacer block"><fmt:message key="alert.longitudelabel" /></label>
+			<input id="long" type="text" name="long" class="formtext" style="width: 20em">
+			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label>
+			<input id="lat" type="text" name="lat" class="formtext" style="width: 20em">
+			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>
+			<textarea name="alert_description" rows="5" cols="72"></textarea>
+   			<input class="button block top-spacer" type="submit" style="float:left" value="   <fmt:message key="alert.submit" />    "/>
+   			<input class="button block top-spacer" type="button" onClick="javascript:buttonCancelCreateAlert()" style="float:right" value="<fmt:message key="alert.cancel" />"/>
+    	</form>
+		</p>
+	</section>
+</div>
+
+	
+
+<div id="updateAlertDialog" style="display: none;z-index:201" class="dialog">
   <div class="dialog-title"><fmt:message key="alert.updatealert" /></div>
   <div id="dialogerror" class="errorsection"></div>
 	<form id="updatealertform" name="updatealertform">
@@ -286,11 +288,26 @@
 			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>
 			<textarea name="update_alert_description" rows="5" cols="45"></textarea>
    			<div class="block top-spacer" style="text-align:right">
-   			 <input class="button top-spacer" type="submit" value="   Update    "/>
-   			 <input class="button" type="button" id="cancel" value="Cancel" />
+   			 <input class="button top-spacer" type="submit" value="   <fmt:message key="alert.updatealert" />    "/>
+   			 <input class="button" type="button" id="cancel" value="<fmt:message key="alert.cancel" />" />
    			 </div>
     	</form>
   </div>
+
+
+	
+<div id="manageAlertsDialog" style="display: none;width:80%" class="dialog">
+	<section id="tab3" class="">
+		<div id="alertTableMessage" class="msgsection"></div>
+		<div class="overflow">
+		<table id="alerttable" style="width:100%">
+		<tr class="table-row smart-table-header"><th><a onclick="sort('typeUuid')" href="#"><fmt:message key="alert.type" /></a></th><th><a onclick="sort('ca.label')" href="#"><fmt:message key="query.conservationarea" /></a></th><th><a onclick="sort('date')" href="#"><fmt:message key="alert.date" /></a></th><th><a onclick="sort('description')" href="#"><fmt:message key="alert.description" /></a></th><th><a onclick="sort('level')" href="#"><fmt:message key="alert.eventimportance" /></a></th><th><a onclick="sort('status')" href="#"><fmt:message key="alert.status" /></a></th><th><a onclick="sort('x')" href="#"><fmt:message key="alert.location" /></a></th><th><fmt:message key="actions" /></th></tr>
+		</table>
+		</div> 
+	</section>
+</div>
+
+
 
 </body>
 </html>

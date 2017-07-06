@@ -153,10 +153,7 @@ window.onload = function(){
 	
 //Map setup complete.
 //--------------------------------------------------	
-	
-    
-    //initialize the tab styles
-    settab(tab);
+
     
     //set the lat/long in the "new alert form", if we can get them from the device automatically
     if (navigator.geolocation) {
@@ -168,6 +165,8 @@ window.onload = function(){
 	document.querySelector("#updatealertform").onsubmit = submitUpdatedAlert;
 	document.querySelector("#cancel").onclick = function(){
 		closeDialog('updateAlertDialog');
+		var overlaydiv = document.querySelector(".overlay-widgetlevel2");
+		overlaydiv.parentNode.removeChild(overlaydiv);
 	};
 
 	refreshAlerts();
@@ -231,10 +230,12 @@ function createNewAlert() {
 	oReq.open("POST", ALERT_URL  + encodeURIComponent(usergenid), true);
 	oReq.setRequestHeader("Content-type", "application/json");
 	oReq.send(JSON.stringify(jsonData));
+	
+	buttonCancelCreateAlert()//closes the pop-up dialog and returns to the normal map view
 	return false;
 }
 
-//callback for creating user 
+//callback for creating alert 
 function alertCreated() {
 	refreshAlerts();
 	
@@ -336,6 +337,10 @@ function deleteAlert(){
 	date = new Date(Date.parse(date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
 	var type = this.parentElement.parentElement.getAttribute('data-alerttype');
 
+	var overlaydiv = document.createElement('div');
+	overlaydiv.setAttribute("class", "overlay-widgetlevel2");
+	document.body.appendChild(overlaydiv);
+
 	displayConfirmDialog("Delete Alert",  i18n("alert.areyousuredeletealert") + type + " on " + date + "?"  , function(){
 		hideInfo();
 		
@@ -343,6 +348,8 @@ function deleteAlert(){
 		oReq.onload = alertDeleted;
 		oReq.open("DELETE", ALERT_URL  + encodeURIComponent(uuid), true);
 		oReq.send();
+		var overlaydiv = document.querySelector(".overlay-widgetlevel2");
+		overlaydiv.parentNode.removeChild(overlaydiv);
 		return false;	
 	});
 	return false;
@@ -388,30 +395,32 @@ function refreshAlerts(){
 
 /* callback that displays all alert info */
 function createAlertTable(){
-	
+	var element = document.getElementById("alertTableMessage");
 	if (this.status != 200 && this.status != 201 ) {
-		var msg = "Error: ";
+		var msg = i18n("alert.error");
+		document.getElementById("map-info-box").innerHTML = i18n("alert.errortrying") ;
 		if (this.status == 401){
 			msg += i18n("alert.unathorized");
-			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
 		}else if (this.status == 404){
 			msg += i18n("alert.invalidurl");
-			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
 		}else if (this.status == 406){
 			msg += i18n("alert.toomanyalerts");
-			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
 		}else if (this.status == 500){
 			msg += i18n("alert.servererror");
-			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
 		}
-		
 		
 		try {
 			msg += JSON.parse(this.responseText).error
 		} catch (err) {
 		}
-		displayError(msg);
+		
+		
+		element.style.display = "block";
+		element.innerHTML = msg;
+		element.className = "msgsection";
 		return;
+	}else{
+		element.style.display = "none";//hide any previous errors
 	}
 	//clear current table
 	var objects = document.querySelectorAll("tr.alertrow");
@@ -433,10 +442,10 @@ function createAlertTable(){
 	 	    oCell.colSpan = 10;
 	 	    oCell.innerHTML = i18n("alert.noalertsfound");
 	 	    var str = document.getElementById("tab3text").innerHTML;
-			document.getElementById("tab3text").innerHTML = str.substring(0, str.indexOf(':(') +1 ) + "(0)</a>";
+			document.getElementById("tab3text").innerHTML = 0;
 		}else{
 			var str = document.getElementById("tab3text").innerHTML;
-			document.getElementById("tab3text").innerHTML = str.substring(0, str.indexOf(':(') +1) + "(" + alerts.length/2 + ")</a>";
+			document.getElementById("tab3text").innerHTML = alerts.length/2 ;
 		 	for (var i = 0; i < alerts.length; i ++){
 		 		if(alerts[i].geometry.type == "LineString"){
 		 			continue; //This is a track feature, ignore it for drawing the table of alerts.
@@ -446,7 +455,7 @@ function createAlertTable(){
 
 		 		var row = tableCreateRowTDs(parent,
 		 				[alerts[i].properties.type, alerts[i].properties.caname, date , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
-		 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+		 				"alertrow " + (i % 4 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "alertRow" + i;
 		 		row.dataset.uuid = alerts[i].properties.uuid;
 		 		row.dataset.alertdate = alerts[i].properties.date;
@@ -476,14 +485,29 @@ function createAlertTable(){
 			
 			cell = document.createElement("td");
 			cell.className="table-cell smart-table-cell";
-			cell.colSpan = "5";
+			cell.colSpan = "8";
 			var a = document.createElement("a");
-			var linkText = document.createTextNode(i18n("alert.deleteall"));
-			a.appendChild(linkText);
-			a.onclick=deleteFilteredAlerts;
-			a.href="";
+			var deleteAllDiv = document.createElement("div");
+			deleteAllDiv.classList.add("button");
+			deleteAllDiv.style.float = "left";
+			deleteAllDiv.innerHTML = i18n("alert.deleteall");
+			a.appendChild(deleteAllDiv);
+			a.href="javascript:deleteFilteredAlerts()";
 			cell.appendChild(a);
 			lastrow.appendChild(cell);
+			
+			
+			a = document.createElement("a");
+			var closeDiv = document.createElement("div");
+			closeDiv.classList.add("button");
+			closeDiv.style.float = "right";
+			closeDiv.innerHTML = i18n("alert.close");
+			a.appendChild(closeDiv);
+			a.href="javascript:buttonCloseManageAlerts()";
+			cell.appendChild(a);
+			lastrow.appendChild(cell);
+			
+			
 			parent.appendChild(lastrow);
 		}
 	}catch(err) {
@@ -512,7 +536,34 @@ function updateAlert(){
 	return false;	
 }
 
-//callback for update alert clicked, fill in update alert form with current details 
+//Create alert button was clicked. Show dialog
+function buttonCreateAlert(){
+	document.querySelector(".leaflet-control-container").style.display = "none";
+	document.querySelector("#dialogerror").style.display = "none";
+	displayDialog('createAlertDialog', 'main');
+	
+}
+
+function buttonCancelCreateAlert(){
+	document.querySelector(".leaflet-control-container").style.display = "block";
+	closeDialog('createAlertDialog');
+	document.getElementById("message").style.display = "none";
+}
+
+function buttonCloseManageAlerts(){
+	document.querySelector(".leaflet-control-container").style.display = "block";
+	closeDialog('manageAlertsDialog');
+	document.getElementById("message").style.display = "none";
+}
+
+function buttonManageAlerts(){
+	document.querySelector(".leaflet-control-container").style.display = "none";
+	document.querySelector("#dialogerror").style.display = "none";
+	displayDialog('manageAlertsDialog', 'main');
+	
+}
+
+//update alert clicked, fill in update alert form with current details 
 function showCurrentAlert() {
 	if (this.status == 200 ) {
 		var r = JSON.parse(this.response);
@@ -522,6 +573,10 @@ function showCurrentAlert() {
 	
 	document.querySelector("#dialogerror").style.display = "none";
 	displayDialog('updateAlertDialog', 'alerttable');
+	
+	var overlaydiv = document.createElement('div');
+	overlaydiv.setAttribute("class", "overlay-widgetlevel2");
+	document.body.appendChild(overlaydiv);
 	
 	document.getElementById("updatealertform").user_id.value = r.userGeneratedId;
 	
@@ -576,12 +631,13 @@ function submitUpdatedAlert(){
 function AlertUpdated(){
 	if (this.status == 200 ) {
 		var r = JSON.parse(this.response);
-		displayInfo("Alert with UUID " + r.uuid + " Updated.");
+		displayInfo(i18n("alert.alertwithuuid") + r.uuid + i18n("alert.updated"));
 		refreshAlerts();
 	} else {
 		displayError(parseError(i18n("alert.errorupdating") + this.statusText + "; " + this.responseText));
 	}
-	
+	var overlaydiv = document.querySelector(".overlay-widgetlevel2");
+	overlaydiv.parentNode.removeChild(overlaydiv);
 	closeDialog('updateAlertDialog');
 
 }
@@ -698,7 +754,7 @@ function updateRealtimeLayer(updatedUrl){
                 d = new Date(Date.parse(feature.properties.date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
                 
                 if(feature.properties.type == undefined){
-                	return "Track Selected - Please click an alert for alert details.";
+                	return i18n("alert.trackselected");
             	}
 
                 var text = i18n("alert.event");
@@ -734,7 +790,7 @@ function updateRealtimeLayer(updatedUrl){
         var month = now.getMonth() + 1;
         if(minutes <10) minutes = "0" + minutes;
         if(seconds<10) seconds = "0" + seconds;
-        document.getElementById("map-info-box").innerHTML = i18n("alert.lastupdated") + now.getDate() + "/" + month + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds + "  <a href='javascript:refreshAlerts()'>update now</a>";
+        document.getElementById("map-info-box").innerHTML = i18n("alert.lastupdated") + now.getDate() + "/" + month + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds;
     });
     
     realtime.addTo(map);
@@ -958,7 +1014,7 @@ function sort(str){
 }
 //Delete all alerts that meet the current filter criteria
 function deleteFilteredAlerts(){
-	displayConfirmDialog("Delete All Alerts", i18n("alert.areyousuredeleteallalerts"), function(){
+	displayConfirmDialog(i18n("alert.deleteallheading"), i18n("alert.areyousuredeleteallalerts"), function(){
 
 		var alerts = document.querySelectorAll(".alertrow");
 		for (var i = 0; i < alerts.length-1; i++){ //-1 because the delete all link is in the list as well. 

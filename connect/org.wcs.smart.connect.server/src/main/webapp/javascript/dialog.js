@@ -8,7 +8,7 @@
 function displayConfirmDialog(title, message, onOkay){
 	var dialogDiv = document.createElement('div');
 	
-	dialogDiv.setAttribute("class", "dialog");
+	dialogDiv.setAttribute("class", "level2dialog");
 	dialogDiv.style.display="none";
 	dialogDiv.id = "smartconfirmdialog";
 	
@@ -50,6 +50,8 @@ function displayConfirmDialog(title, message, onOkay){
 	cancelButton.onclick = function(){
 		closeDialog(dialogDiv.id);
 		document.body.removeChild(dialogDiv);
+		var overlaydiv = document.querySelector(".overlay-widgetlevel2");
+		overlaydiv.parentNode.removeChild(overlaydiv);
 	}
 	document.body.appendChild(dialogDiv);
 	
