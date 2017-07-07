@@ -28,7 +28,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.qa.QaPlugIn;
-import org.wcs.smart.qa.ui.view.ValidationResultsEditor;
+import org.wcs.smart.qa.ui.view.ManualResultsEditor;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 public class NewManualValidationHandler {
@@ -37,7 +37,7 @@ public class NewManualValidationHandler {
 	public void createNewRecord(IEclipseContext context){
 		(new ShowPerspectiveHandler()).execute("org.wcs.smart.observation.FieldDataPerspective", context.get(MWindow.class));
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(ValidationResultsEditor.MANUAL_VALIDATION_INPUT, ValidationResultsEditor.ID);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(ManualResultsEditor.MANUAL_VALIDATION_INPUT, ManualResultsEditor.ID);
 		} catch (PartInitException e) {
 			QaPlugIn.displayLog("Error loading manual data validation UI.", e);
 		}

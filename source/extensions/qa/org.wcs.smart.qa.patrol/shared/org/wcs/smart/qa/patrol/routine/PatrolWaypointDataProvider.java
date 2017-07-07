@@ -29,10 +29,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.qa.routine.IQaDataProvider;
@@ -105,4 +107,8 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 		return ((WaypointLocationData)obj).getWaypoint().getUuid();
 	}
 
+	@Override
+	public Image getImage() {
+		return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+	}
 }

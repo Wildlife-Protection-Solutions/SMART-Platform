@@ -152,6 +152,9 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 	
 	private void validate(){
 		isValid = true;
+		cdWkt.hide();
+		cdFile.hide();
+		cdArea.hide();
 		if (btnOpFile.getSelection()){
 			if (txtSummary.getData(GEOMETRY_KEY) == null){
 				isValid = false;
@@ -310,6 +313,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		
 		txtWkt = new Text(pnl, SWT.BORDER | SWT.MULTI);
 		txtWkt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)txtWkt.getLayoutData()).heightHint = 50;
 		
 		cdWkt = new ControlDecoration(txtWkt, SWT.LEFT | SWT.TOP);
 		cdWkt.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());

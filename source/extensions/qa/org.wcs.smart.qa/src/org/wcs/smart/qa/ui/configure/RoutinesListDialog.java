@@ -22,6 +22,7 @@
 package org.wcs.smart.qa.ui.configure;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,18 +42,33 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -63,7 +79,9 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.model.QaRoutine;
+import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.IQaRoutineType;
 import org.wcs.smart.qa.ui.configure.create.EditRoutineDialog;
 import org.wcs.smart.qa.ui.configure.create.NewRoutineWizard;
@@ -79,19 +97,43 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class RoutinesListDialog extends TitleAreaDialog {
 
 	private TableViewer tblRoutines;
+	private Font boldFont;
+	private Composite descriptionArea;
+	
+	private RoutineColumn sortColumn;
+	private int sortDirection = 1;
+	private Object lastSelection = null;
+	
+	private Listener resizeListener = null;
+	
+	private ViewerComparator sorter = new ViewerComparator(){
+		@Override
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			 if (sortColumn == null) return 0;
+			 
+			 String s1 = getValue(sortColumn, e1);
+			 String s2 = getValue(sortColumn, e2);
+			 if (s1==null) s1 = "";
+			 if (s2==null) s2 = "";
+			 return Collator.getInstance().compare(s1,s2) * sortDirection;
+		}
+	};
 	
 	public enum RoutineColumn{
-		TYPE("Routine", "The quality assurance routine"),
-		NAME("Name", "User defined name for uniquely identifying the routine"),
-		AUTO("Auto Execute", "If routine should be auto executed when new data is added to the system"),
-		DESC("Description", "Optional user defined description for the routine"),
-		PARAMETERS("Parameters", "QA Routine parameters");
+		TYPE("Routine Type", "The quality assurance routine", 150),
+		NAME("Name", "User defined name for uniquely identifying the routine", 260),
+		AUTO("Auto Execute", "If routine should be auto executed when new data is added to the system", 100),
+		DESC("Description", "Optional user defined description for the routine",10),
+		PARAMETERS("Parameters", "QA Routine parameters",10);
+		
+		
 		public String guiName;
 		public String tooltip;
-		
-		RoutineColumn(String guiName, String tooltip){
+		public int width;
+		RoutineColumn(String guiName, String tooltip, int width){
 			this.guiName = guiName;
 			this.tooltip = tooltip;
+			this.width = width;
 		}
 	}
 	
@@ -103,20 +145,138 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
 
+	@Override
+	public Point getInitialSize(){
+		return new Point(800, 400);
+	}
+	
+	
+	protected void createDescriptionPanel(){
+		for (Control c : descriptionArea.getChildren()){
+			c.dispose();
+		}
+		if (resizeListener != null){
+			descriptionArea.removeListener(SWT.Resize,resizeListener);
+			resizeListener = null;
+		}
+		
+		if (tblRoutines.getSelection().isEmpty()) return;
+		QaRoutine r = (QaRoutine) ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+		if (r == null) return;
+		
+		descriptionArea.setLayout(new GridLayout());
+
+		Label l = new Label(descriptionArea, SWT.WRAP);
+		l.setFont(boldFont);
+		l.setText(r.getName());
+		l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = 200;
+		
+		ScrolledComposite scroll = new ScrolledComposite(descriptionArea, SWT.V_SCROLL );
+		scroll.setExpandVertical(true);
+		scroll.setExpandHorizontal(true);
+		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		//((GridData)scroll.getLayoutData()).widthHint = 150;
+
+		Composite textArea =new Composite(scroll, SWT.NONE);
+		scroll.setContent(textArea);
+		textArea.setLayout(new GridLayout());
+		((GridLayout)textArea.getLayout()).marginWidth = 0;
+		((GridLayout)textArea.getLayout()).marginHeight= 0;
+		textArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		textArea.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		
+		l = new Label(textArea, SWT.WRAP);
+		l.setText(r.getRoutineType().getName(Locale.getDefault()));
+		l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));		
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = 150;
+
+		if (r.getDescription() != null && !r.getDescription().isEmpty()){
+			l = new Label(textArea, SWT.WRAP);
+			l.setText("\nDescription:\n" + r.getDescription());
+			l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).widthHint = 200;
+		}
+		String params = r.getRoutineType().getParameterSummary(r);
+		if (params != null && !params.isEmpty()){
+			l = new Label(textArea, SWT.WRAP);
+			l.setText("\nParameters:\n" + params);
+			l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).widthHint = 200;
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		for (IQaDataProvider provider : RoutineExtensionManager.INSTANCE.getDataProviders()){
+			if (provider.supportsRoutine(r.getRoutineType())){
+				sb.append(provider.getName(Locale.getDefault()));
+				sb.append("\n");
+			}
+		}
+		if (sb.length() > 0){
+			sb.deleteCharAt(sb.length() - 1);
+			
+			l = new Label(textArea, SWT.WRAP);
+			l.setText("\nSupported Data Types:\n" + sb.toString());
+			l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).widthHint = 200;
+		}
+		
+		resizeListener = new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				if (scroll.isDisposed()){
+					descriptionArea.removeListener(SWT.Resize, this);
+					System.out.println("removed");
+					return;
+				}
+				scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));	
+			}
+		};
+		descriptionArea.addListener(SWT.Resize,resizeListener);
+		
+		getShell().layout(true, true);
+		scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));
+	}
 	 
+	
+	
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		parent = (Composite)super.createDialogArea(parent);
 		
+		FontData fd = parent.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		boldFont = new Font(parent.getDisplay(), fd);
+		parent.addDisposeListener(e->boldFont.dispose());
+		
 		Composite outer = new Composite(parent, SWT.NONE);
 		outer.setLayout(new GridLayout(2, false));
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		outer.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+
+		descriptionArea = new Composite(outer, SWT.BORDER);
+		descriptionArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)descriptionArea.getLayoutData()).widthHint = 200;
+		descriptionArea.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
-		tblRoutines = new TableViewer(outer, SWT.BORDER | SWT.FULL_SELECTION);
+		Composite tableComp = new Composite(outer, SWT.NONE);
+		tableComp.setLayout(new GridLayout(2, false));
+		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tableComp.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		((GridLayout)tableComp.getLayout()).marginWidth = 0;
+		((GridLayout)tableComp.getLayout()).marginHeight= 0;
+		
+		tblRoutines = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		tblRoutines.setContentProvider(ArrayContentProvider.getInstance());
 		tblRoutines.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		tblRoutines.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		for (RoutineColumn c : RoutineColumn.values()){
+			if (c == RoutineColumn.PARAMETERS || c == RoutineColumn.DESC) continue;
 			TableViewerColumn typeColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
 			typeColumn.getColumn().setText(c.guiName);
 			typeColumn.getColumn().setToolTipText(c.tooltip);
@@ -125,10 +285,36 @@ public class RoutinesListDialog extends TitleAreaDialog {
 				public String getText(Object element) {
 					return getValue(c, element);
 				}
+				
+				@Override
+				public Image getImage(Object element) {
+					if (c == RoutineColumn.TYPE){
+						return QaPlugIn.getDefault().getImageRegistry().get(QaPlugIn.ICON_QA);
+					}
+					return null;
+				}
 			});
-			typeColumn.getColumn().setWidth(150);
+			typeColumn.getColumn().setWidth(c.width);
+			
+			typeColumn.getColumn().addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (c == sortColumn){
+						sortDirection = sortDirection * -1;
+					}else{
+						sortColumn = c;
+					}
+					tblRoutines.getTable().setSortColumn(typeColumn.getColumn());
+					tblRoutines.getTable().setSortDirection(sortDirection == 1 ? SWT.UP : SWT.DOWN);
+					tblRoutines.refresh();
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) { }
+			});
 		}
-		tblRoutines.getTable().setLinesVisible(true);
+//		tblRoutines.getTable().setLinesVisible(true);
+		tblRoutines.setComparator(sorter);
 		tblRoutines.getTable().setHeaderVisible(true);
 		tblRoutines.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -136,12 +322,20 @@ public class RoutinesListDialog extends TitleAreaDialog {
 				edit();
 			}
 		});
+		tblRoutines.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				createDescriptionPanel();
+			}
+		});
 		
-		Composite buttonPnl = new Composite(outer, SWT.NONE);
+		Composite buttonPnl = new Composite(tableComp, SWT.NONE);
 		buttonPnl.setLayout(new GridLayout());
 		((GridLayout)buttonPnl.getLayout()).marginWidth = 0;
 		((GridLayout)buttonPnl.getLayout()).marginHeight = 0;
-		buttonPnl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
+		buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		buttonPnl.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+
 		
 		Button btnNew = new Button(buttonPnl, SWT.PUSH);
 		btnNew.setText(DialogConstants.ADD_BUTTON_TEXT);
@@ -198,7 +392,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		getShell().setText("QA Routines");
 		setTitle("Quality Assurance Routines");
 		setMessage("Currently configures quality assurance routines");
-		return parent;
+		return outer;
 	}
 	
 	private void add(){
@@ -286,24 +480,22 @@ public class RoutinesListDialog extends TitleAreaDialog {
 				}else{
 					return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 				}
-			case DESC:
-				if (r.getDescription() == null) return ""; //$NON-NLS-1$
-				return r.getDescription();
 			case NAME:
 				return r.getName();
 			case TYPE:
 				IQaRoutineType type = r.getRoutineType();
 				if (type == null) return "Not Defined";
 				return type.getName(Locale.getDefault());
-			case PARAMETERS:
-				type = r.getRoutineType();
-				if (type == null) return "Not Defined";
-				return type.getParameterSummary(r);
 		}
 		return "";
 	}
+
 	
 	private void refresh(){
+		lastSelection = null;
+		if (!tblRoutines.getSelection().isEmpty())
+			lastSelection = ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+	
 		tblRoutines.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		refreshJob.setSystem(true);
 		refreshJob.schedule();
@@ -329,6 +521,12 @@ public class RoutinesListDialog extends TitleAreaDialog {
 			}
 			Display.getDefault().asyncExec(()->{
 				tblRoutines.setInput(routines);
+				if (lastSelection == null && !routines.isEmpty()){
+					tblRoutines.setSelection(new StructuredSelection(routines.get(0)));
+				}else{
+					tblRoutines.setSelection(new StructuredSelection(lastSelection));
+				}
+				
 			});
 			return Status.OK_STATUS;
 		}

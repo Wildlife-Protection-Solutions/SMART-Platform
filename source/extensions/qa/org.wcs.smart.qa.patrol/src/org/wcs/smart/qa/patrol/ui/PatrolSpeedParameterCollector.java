@@ -96,7 +96,7 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 		cdTt.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		cdTt.hide();
 		
-		tblTransportTypes = CheckboxTableViewer.newCheckList(panel, SWT.BORDER);
+		tblTransportTypes = CheckboxTableViewer.newCheckList(panel, SWT.BORDER | SWT.FULL_SELECTION);
 		tblTransportTypes.setContentProvider(ArrayContentProvider.getInstance());
 		tblTransportTypes.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){

@@ -29,9 +29,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -121,4 +123,8 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 		return ((TrackLocationData)obj).getTrack().getUuid();
 	}
 
+	@Override
+	public Image getImage() {
+		return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+	}
 }

@@ -38,21 +38,29 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -91,7 +99,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class ValidationResultsEditor extends TableMapQaErrorComposite {
+public class ManualResultsEditor extends TableMapQaErrorComposite {
 	
 	public static final String ID = "org.wcs.smart.qa.data.validatation.manual"; //$NON-NLS-1$
 
@@ -100,6 +108,7 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 	
 	private Composite stackPanel;
 	private ProgressAreaComposite progressComposite;
+	private Label infoLabel;
 	
 	private Font boldFont, normalFont;
 	
@@ -110,6 +119,9 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 	private ValidationEngine lastValidationEngine;
 
 	private FormToolkit toolkit = null;
+
+	private Composite detailsComposite;
+	private Listener detailsSizeListener;
 	
 	public static IEditorInput MANUAL_VALIDATION_INPUT =  new IEditorInput() {
 		
@@ -144,7 +156,7 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 		}
 	};
 	
-	public ValidationResultsEditor(){
+	public ManualResultsEditor(){
 		super();
 		
 		tableColumns = new ResultTableColumn[]{
@@ -198,12 +210,17 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 		j.schedule();
 	}
 	
-	
+	/**
+	 * Displays the progress tab
+	 */
 	public void showProgress(){
+		if (infoLabel != null){
+			infoLabel.dispose();
+			infoLabel = null;
+		}
+		progressComposite.setVisible(true);
 		progressStackItem.show();
 	}
-	
-	
 	
 	public void setResults(Collection<QaError> results){
 		for (QaError r : results){
@@ -245,10 +262,9 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 		toolkit =  new FormToolkit(parent.getDisplay());
 		
 		Form form = toolkit.createForm(parent);
-		form.setText("Manual Data Validation ");
-		
+		form.setText("Manual Data Validation ");		
 		form.getBody().setLayout(new GridLayout());
-		
+	
 		Composite header = toolkit.createComposite(form.getBody());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		header.setLayout(new GridLayout(3, false));
@@ -297,11 +313,16 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 		
 		Composite progressPanel = toolkit.createComposite(stackPanel);
 		progressPanel.setLayout(new GridLayout());
+		infoLabel = toolkit.createLabel(progressPanel, "Select validation routines and date range on Options tab, then run validation.  After complete results will be displayed here.");
+		
 		progressComposite = new ProgressAreaComposite(progressPanel);
 		progressComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		progressComposite.setVisible(false);
 		
 		Composite resultsPanel = toolkit.createComposite(stackPanel);
 		resultsPanel.setLayout(new GridLayout());
+		((GridLayout)resultsPanel.getLayout()).marginWidth = 0;
+		((GridLayout)resultsPanel.getLayout()).marginHeight = 0;
 		
 		resultsStackItem = new StackPanelItem(lResults, resultsPanel);
 		optionsStackItem = new StackPanelItem(lOptions, optionsPanel);
@@ -327,7 +348,77 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 	public EditorPart getParentEditor() {
 		return this;
 	}
-
+	
+	private void updateRoutineDetails(){
+		for (Control c : detailsComposite.getChildren()){
+			c.dispose();
+		}
+		if (detailsSizeListener != null){
+			detailsComposite.removeListener(SWT.Resize, detailsSizeListener);
+			detailsSizeListener = null;
+		}
+		
+		if (tblRoutines.getSelection().isEmpty()) return;
+		DataValidator r = (DataValidator) ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+		if (r == null) return;
+		
+		detailsComposite.setLayout(new GridLayout());
+//		((GridLayout)detailsComposite.getLayout()).marginWidth = 0;
+//		((GridLayout)detailsComposite.getLayout()).marginHeight= 0;
+		
+		int widthHint = 250;
+		Label l = toolkit.createLabel(detailsComposite, r.getRoutine().getName() + " \n" + r.getDataProvider().getName(Locale.getDefault()), SWT.WRAP);
+		l.setFont(boldFont);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = widthHint;
+		
+		ScrolledComposite scroll = new ScrolledComposite(detailsComposite, SWT.V_SCROLL );
+		scroll.setExpandVertical(true);
+		scroll.setExpandHorizontal(true);
+		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)scroll.getLayoutData()).widthHint = widthHint;
+		
+		toolkit.adapt(scroll);
+		
+		Composite textArea = toolkit.createComposite(scroll, SWT.NONE);
+		scroll.setContent(textArea);
+		textArea.setLayout(new GridLayout());
+		((GridLayout)textArea.getLayout()).marginWidth = 0;
+		((GridLayout)textArea.getLayout()).marginHeight= 0;
+		textArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		l = toolkit.createLabel(textArea, r.getRoutine().getRoutineType().getName(Locale.getDefault()), SWT.WRAP);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = widthHint;
+		
+		if (r.getRoutine().getDescription() != null && !r.getRoutine().getDescription().isEmpty()){
+			l = toolkit.createLabel(textArea, "\nDescription:\n" + r.getRoutine().getDescription(), SWT.WRAP);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).widthHint = widthHint;
+		}
+		String params = r.getRoutine().getRoutineType().getParameterSummary(r.getRoutine());
+		if (params != null && !params.isEmpty()){
+			l = toolkit.createLabel(textArea, "\nParameters:\n" + params, SWT.WRAP);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).widthHint = widthHint;
+		}
+		
+		l = toolkit.createLabel(textArea, "\nData Types:\n" + r.getDataProvider().getName(Locale.getDefault()), SWT.WRAP);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).widthHint = widthHint;
+		
+		detailsSizeListener = new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				if (scroll.isDisposed()) return;
+				scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));	
+			}
+		};
+		detailsComposite.getParent().layout(true, true);
+		scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));
+		
+	}
+	
 	
 	private void createParameterArea(Composite parent){
 		Composite panel = toolkit.createComposite(parent, SWT.NONE);
@@ -352,14 +443,20 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 				DateFilter.CURRENT_MONTH,
 				DateFilter.CUSTOM};
 		
-		dateFilter = new DateFilterDropDownComposite(dFilter, dFilters, DateFilter.LAST_30_DAYS);
+		dateFilter = new DateFilterDropDownComposite(dFilter, dFilters, DateFilter.LAST_30_DAYS,true);
 		toolkit.adapt(dateFilter);
 		
-		Table tbl = toolkit.createTable(panel, SWT.CHECK| SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		Composite tableArea = toolkit.createComposite(panel, SWT.NONE);
+		tableArea.setLayout(new GridLayout(2, false));
+		((GridLayout)tableArea.getLayout()).marginWidth = 0;
+		((GridLayout)tableArea.getLayout()).marginHeight = 0;
+		tableArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Table tbl = toolkit.createTable(tableArea, SWT.CHECK| SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		tblRoutines = new CheckboxTableViewer(tbl);//, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		toolkit.adapt(tblRoutines.getTable());
 		tblRoutines.setContentProvider(ArrayContentProvider.getInstance()); 
-		tblRoutines.getTable().setLinesVisible(true);
+		//tblRoutines.getTable().setLinesVisible(true);
 		tblRoutines.getTable().setHeaderVisible(true);
 		tblRoutines.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -392,8 +489,15 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 				}
 				return super.getText(element);
 			}
+			
+			public Image getImage(Object element){
+				if (element instanceof DataValidator){
+					return ((DataValidator) element).getDataProvider().getImage();
+				}
+				return super.getImage(element);
+			}
 		});
-		dataColumn.getColumn().setWidth(150);
+		dataColumn.getColumn().setWidth(200);
 		dataColumn.getColumn().setText("Data To Validate");
 		
 		TableViewerColumn routineColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
@@ -406,36 +510,66 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 				return super.getText(element);
 			}
 		});
-		routineColumn.getColumn().setWidth(150);
+		routineColumn.getColumn().setWidth(700);
 		routineColumn.getColumn().setText("Routine To Perform");
 		
-		TableViewerColumn paramColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
-		paramColumn.setLabelProvider(new ColumnLabelProvider(){
-			public String getText(Object element){
-				if (element instanceof DataValidator){
-					QaRoutine routine = ((DataValidator)element).getRoutine();
-					return routine.getRoutineType().getParameterSummary(routine);
-				}
-				return super.getText(element);
+		detailsComposite = toolkit.createComposite(tableArea, SWT.BORDER);
+		detailsComposite.setLayout(new GridLayout());
+		detailsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		tblRoutines.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateRoutineDetails();
 			}
 		});
-		paramColumn.getColumn().setWidth(150);
-		paramColumn.getColumn().setText("Routine Parameters");
 		
-		TableViewerColumn descColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
-		descColumn.setLabelProvider(new ColumnLabelProvider(){
-			public String getText(Object element){
-				if (element instanceof DataValidator){
-					QaRoutine v = ((DataValidator)element).getRoutine();
-					return v.getDescription();
-				}
-				return super.getText(element);
+		//fix the size of the description column
+		tableArea.addListener(SWT.Resize, e->{
+			Point size = tableArea.getSize();
+	            
+			int right = 0;
+	        int left = 0;
+	        if (size.x < 500){
+	        	right = left = size.x/2;
+	        }else{
+	        	right = 250;
+	            left = size.x - right;
+	        }
+	        ((GridData)tblRoutines.getControl().getLayoutData()).widthHint = left;
+	        ((GridData)detailsComposite.getLayoutData()).widthHint = right;
+		});
+
+		
+		Composite bottomPanel = new Composite(panel, SWT.NONE);
+		bottomPanel.setLayout(new GridLayout(4, false));
+		bottomPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)bottomPanel.getLayout()).marginWidth = 0;
+		((GridLayout)bottomPanel.getLayout()).marginHeight = 0;
+		
+		Hyperlink hlink = toolkit.createHyperlink(bottomPanel, "Select All", SWT.NONE);
+		hlink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				tblRoutines.setAllChecked(true);
 			}
 		});
-		descColumn.getColumn().setWidth(150);
-		descColumn.getColumn().setText("Routine Description");
 		
-		Hyperlink hlink = toolkit.createHyperlink(panel, "refresh list", SWT.NONE);
+		Label l = toolkit.createLabel(bottomPanel, "", SWT.SEPARATOR | SWT.VERTICAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)l.getLayoutData()).heightHint = 10;
+		
+		hlink = toolkit.createHyperlink(bottomPanel, "De-Select All", SWT.NONE);
+		hlink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				tblRoutines.setAllChecked(false);
+			}
+		});
+		
+		
+		hlink = toolkit.createHyperlink(bottomPanel, "refresh list", SWT.NONE);
+		hlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		hlink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -520,7 +654,9 @@ public class ValidationResultsEditor extends TableMapQaErrorComposite {
 			}
 			Display.getDefault().asyncExec(()->{
 				tblRoutines.setInput(routines);
-				tblRoutines.setAllChecked(true);
+				if (routines.size() > 0){
+					tblRoutines.setSelection(new StructuredSelection(routines.get(0)));
+				}
 			});
 			return Status.OK_STATUS;
 		}

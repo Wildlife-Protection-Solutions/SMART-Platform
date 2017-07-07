@@ -29,6 +29,7 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -36,6 +37,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -72,6 +75,17 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		this.routine = r;
 	}
 
+	@Override
+	public Point getInitialSize(){
+		Point p = super.getInitialSize();
+		if (p.x < 500) p.x = 500;
+		if (p.y < 400) p.y = 400;
+		return p;
+	}
+	
+	/*
+	 * Initialize the ui controls with the routine data
+	 */
 	private void initControls(){
 		Session s = HibernateManager.openSession();
 		try{
@@ -140,6 +154,7 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		super.okPressed();
 	}
 	
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
 		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
@@ -147,12 +162,60 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		
-		Composite top = new Composite(composite, SWT.NONE);
+		TabFolder tabs = new TabFolder(composite, SWT.NONE);
+		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TabItem generalTab = new TabItem(tabs, SWT.NONE);
+		generalTab.setText("General");
+		
+		Composite generalTabComp = createGeneralTab(tabs);
+		generalTab.setControl(generalTabComp);
+		
+		
+		TabItem parametersTab = new TabItem(tabs, SWT.NONE);
+		parametersTab.setText("Parameters");
+		
+		Composite parametersTabComp = new Composite(tabs, SWT.NONE);
+		parametersTabComp.setLayout(new GridLayout(2, false));
+		parametersTabComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
+		parametersTab.setControl(parametersTabComp);
+		((GridLayout)parametersTabComp.getLayout()).marginWidth = 0;
+		((GridLayout)parametersTabComp.getLayout()).marginHeight = 0;
+		
+		sc = new ScrolledComposite(parametersTabComp, SWT.V_SCROLL );
+		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sc.setExpandHorizontal(true);
+		sc.setExpandVertical(true);
+		
+		parameterComp = new Composite(sc, SWT.NONE);
+		parameterComp.setLayout(new GridLayout());
+		parameterComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	
+		sc.setContent(parameterComp);
+		
+		
+		getShell().setText("Edit QA Routine");
+		setTitle(routine.getName());
+		setMessage("Modify the QA Routine details");
+		
+		initControls();
+		
+		return composite;
+	}
+	
+	/*
+	 * creates the general tab
+	 */
+	private Composite createGeneralTab(Composite parent){
+		Composite top = new Composite(parent, SWT.NONE);
 		top.setLayout(new GridLayout(2, false));
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
+		((GridLayout)top.getLayout()).marginWidth = 10;
+		((GridLayout)top.getLayout()).marginHeight = 10;
 		
 		Label lblType = new Label(top, SWT.NONE);
 		lblType.setText(RoutinesListDialog.RoutineColumn.TYPE.guiName + ":");
@@ -190,32 +253,12 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		txtDescription.setTextLimit(QaRoutine.MAX_DESC_LENGTH);
 		((GridData)txtDescription.getLayoutData()).heightHint = 60;
 		txtDescription.addListener(SWT.Modify, e->validate());
-		
-		Label l = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		sc = new ScrolledComposite(composite, SWT.V_SCROLL );
-		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		sc.setExpandHorizontal(true);
-		sc.setExpandVertical(true);
-		
-		parameterComp = new Composite(sc, SWT.NONE);
-		parameterComp.setLayout(new GridLayout());
-		parameterComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	
-		sc.setContent(parameterComp);
-		
-		
-		getShell().setText("Edit QA Routine");
-		setTitle(routine.getName());
-		setMessage("Modify the QA Routine details");
-		
-		initControls();
-		
-		return composite;
+		return top;
 	}
 	
-	
+	/*
+	 * validates all ui controls
+	 */
 	private void validate(){
 		boolean ok = true; 
 		if (txtName.getText().trim().length() == 0){

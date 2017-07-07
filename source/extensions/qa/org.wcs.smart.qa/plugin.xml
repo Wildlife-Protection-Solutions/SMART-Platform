@@ -26,15 +26,19 @@
          <menu
                label="QA">
             <command
-                  commandId="org.wcs.smart.qa.routines.list"
-                  style="push">
-            </command>
-            <command
                   commandId="org.wcs.smart.qa.validation.manual"
                   style="push">
             </command>
             <command
                   commandId="org.wcs.smart.qa.validation.auto"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.qa.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.qa.routines.list"
                   style="push">
             </command>
          </menu>
@@ -44,7 +48,7 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.qa.routines.list"
-            name="Manage QA Routines">
+            name="Configure QA Routines...">
       </command>
       <command
             id="org.wcs.smart.qa.validation.manual"
@@ -82,17 +86,34 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.wcs.smart.qa.ui.view.ValidationResultsEditor"
+            class="org.wcs.smart.qa.ui.view.ManualResultsEditor"
             default="false"
+            icon="images/icons/qa.png"
             id="org.wcs.smart.qa.data.validatation.manual"
             name="Manual Data Validation">
       </editor>
       <editor
             class="org.wcs.smart.qa.ui.view.AutomatedResultsEditor"
             default="false"
+            icon="images/icons/qa.png"
             id="org.wcs.smart.qa.data.validatation.automated"
             name="Automated Data Validation">
       </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.qa.routines.list"
+            icon="images/icons/qa_configure.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.qa.validation.auto"
+            icon="images/icons/qa.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.qa.validation.manual"
+            icon="images/icons/qa.png">
+      </image>
    </extension>
 
 </plugin>

@@ -29,10 +29,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
@@ -106,4 +108,8 @@ public class ErWaypointDataProvider extends IQaDataProvider {
 		return ((WaypointLocationData)obj).getWaypoint().getUuid();
 	}
 
+	@Override
+	public Image getImage() {
+		return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON) ;
+	}
 }

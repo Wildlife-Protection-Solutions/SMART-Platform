@@ -95,8 +95,6 @@ public class TypeNamePage extends WizardPage{
 			}
 		});
 		cmbType.getControl().addListener(SWT.Selection, e->{
-			if (txtName.getText().length() == 0 && getSelectedType() != null) 
-				txtName.setText(getSelectedType().getName(Locale.getDefault()));
 			validate();
 		});
 		Collection<IQaRoutineType> input = RoutineExtensionManager.INSTANCE.getDefinedRoutineTypes();

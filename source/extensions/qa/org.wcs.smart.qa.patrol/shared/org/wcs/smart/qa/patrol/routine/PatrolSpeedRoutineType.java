@@ -85,7 +85,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 
 	@Override
 	public String getDescription(Locale l) {
-		return "Validates patrol track and waypoint speed against a user provided maximum value.  If any part of the track exceeds this speed the track is flagged.";
+		return "Validates patrol track and waypoint speed against a user provided maximum value. ";
 	}
 	
 	@Override
