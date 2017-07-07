@@ -35,9 +35,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -141,6 +143,9 @@ public class DateFilterDropDownComposite extends Composite {
 		toolkit.adapt(this, false, true);
 	}
 	
+	public void setBackgroundColor(Color color){
+		cmbFilter.getControl().setBackground(color);
+	}
 	
 	private void createComponent(){
 		main = new Composite(this, SWT.NONE);
@@ -154,8 +159,14 @@ public class DateFilterDropDownComposite extends Composite {
 		layout.marginHeight = 0;
 		main.setLayout(layout);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		cmbFilter = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+
+		//use ccombo to have white background
+		CCombo combo = new CCombo(main, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+		combo.setBackground(combo.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		cmbFilter = new ComboViewer(combo);
+	
+//		cmbFilter = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+
 		cmbFilter.setContentProvider(ArrayContentProvider.getInstance());
 		cmbFilter.setLabelProvider(new LabelProvider(){
 			@Override
