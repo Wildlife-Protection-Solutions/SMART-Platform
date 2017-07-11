@@ -24,7 +24,6 @@ package org.wcs.smart.qa;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.qa.model.QaError;
 
 /**
@@ -39,21 +38,13 @@ public enum QaErrorCleaner {
 	/**
 	 * Deletes all QaErrors from the database that are not 
 	 * of ERROR state
+	 * @param ca the conservation area to delete form
+	 * @param session the active session
 	 */
-	public void cleanItems(ConservationArea ca) throws Exception{
-		Session s = HibernateManager.openSession();
-		try{
-			s.getTransaction().begin();
-			Query q = s.createQuery("DELETE FROM QaError WHERE conservationArea = :ca and status != :status"); //$NON-NLS-1$
-			q.setParameter("ca", ca); //$NON-NLS-1$
-			q.setParameter("status", QaError.Status.NEW); //$NON-NLS-1$
-			q.executeUpdate();
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			throw ex;
-		}finally{
-			s.close();
-		}
+	public void cleanItems(ConservationArea ca, Session session) throws Exception{
+		Query q = session.createQuery("DELETE FROM QaError WHERE conservationArea = :ca and status != :status"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.setParameter("status", QaError.Status.NEW); //$NON-NLS-1$
+		q.executeUpdate();
 	}
 }

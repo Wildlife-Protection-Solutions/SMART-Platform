@@ -32,12 +32,13 @@ import java.util.UUID;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.qa.routine.IQaDataProvider;
-import org.wcs.smart.qa.routine.IQaRoutineType;
+import org.wcs.smart.qa.incident.ILabelProvider.Key;
+import org.wcs.smart.qa.model.IQaDataProvider;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.routine.LocationRoutineType;
 
 /**
@@ -52,7 +53,7 @@ public class IncidentDataProvider extends IQaDataProvider {
 	
 	@Override
 	public String getName(Locale l) {
-		return "Independent Incident";
+		return ILabelProvider.getLabel(Key.IncidentDataProvider_Name, l);
 	}
 
 	public String getId(){
@@ -78,17 +79,18 @@ public class IncidentDataProvider extends IQaDataProvider {
 	}
 
 	@Override
-	public String getFeatureId(Session session, Object obj){
+	public String getFeatureId(Session session, Object obj, Locale l){
 		Waypoint waypoint = (Waypoint) session.get(Waypoint.class, ((IncidentLocationData)obj).getWaypoint().getUuid());
 		if (waypoint == null){
-			return "Indepdence Incident not found - data error";
+			return ILabelProvider.getLabel(Key.IncidentDataProvder_IncidentNotFound, l);
 		}
 		StringBuilder sb = new StringBuilder();
-		sb.append("Waypoint ID ");
+		sb.append(ILabelProvider.getLabel(Key.IncidentDataProvder_WpIdLbl, l));
+		sb.append(" "); //$NON-NLS-1$
 		sb.append(waypoint.getId());
-		sb.append(" (");
+		sb.append(" ("); //$NON-NLS-1$
 		sb.append(DateFormat.getDateTimeInstance().format(waypoint.getDateTime()));
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
@@ -105,6 +107,6 @@ public class IncidentDataProvider extends IQaDataProvider {
 
 	@Override
 	public Image getImage() {
-		return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON) ;
+		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getImage(getClass());
 	}
 }

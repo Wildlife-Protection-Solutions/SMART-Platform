@@ -41,10 +41,11 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.qa.patrol.internal.Messages;
 import org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider;
 import org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider;
-import org.wcs.smart.qa.routine.IQaAction;
 
 /**
  * Opens the source patrol editor.  Works for
@@ -84,7 +85,7 @@ public class OpenSourcePatrolAction implements IQaAction {
 			}
 			if (pw == null){
 				//not found
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Patrol waypoint {0} not found", item.getErrorId()));
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_WpNotFound, item.getErrorId()));
 				return false;
 			}else{
 				(new OpenPatrolHandler()).openPatrol(new PatrolEditorInput(pw.getPatrolLegDay().getPatrolLeg().getPatrol()), pw.getWaypoint().getUuid(), context.get(MWindow.class));	
@@ -106,7 +107,7 @@ public class OpenSourcePatrolAction implements IQaAction {
 			}
 			if (track == null){
 				//not found
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Patrol track {0} not found", item.getErrorId()));
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_TrackNotFound, item.getErrorId()));
 				return false;
 			}else{
 				(new OpenPatrolHandler()).openPatrol(new PatrolEditorInput(track.getPatrolLegDay().getPatrolLeg().getPatrol()), track.getPatrolLegDay().getUuid(), context.get(MWindow.class));	
@@ -122,12 +123,12 @@ public class OpenSourcePatrolAction implements IQaAction {
 
 	@Override
 	public String getId() {
-		return "org.wcs.smart.qa.patrol.goto"; //$NON-NLS-1$
+		return GOTO_ACTION_ID;
 	}
 
 	@Override
 	public String getName(Locale l) {
-		return "Goto Source";
+		return Messages.OpenSourcePatrolAction_ActionName;
 	}
 
 	@Override

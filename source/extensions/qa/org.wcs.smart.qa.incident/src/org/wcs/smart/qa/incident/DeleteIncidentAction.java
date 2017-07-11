@@ -40,8 +40,9 @@ import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.incident.internal.Messages;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.routine.IQaAction;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -61,7 +62,7 @@ public class DeleteIncidentAction implements IQaAction {
 				toProcess.add(e);
 			}
 		}
-		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected independent incidents?  This action cannot be undone.", toProcess.size()))){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.DeleteIncidentAction_DeleteDialogTitle, MessageFormat.format(Messages.DeleteIncidentAction_DeleteDialogConfirmMsg, toProcess.size()))){
 			return false;
 		}
 		
@@ -86,7 +87,7 @@ public class DeleteIncidentAction implements IQaAction {
 				
 				if (pw == null){
 					item.setStatus(QaError.Status.DELETED);
-					item.setFixMessage("***Could not delete - Waypoint Not Found*** " + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));
+					item.setFixMessage(Messages.DeleteIncidentAction_DeleteErrorWpNotFound + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));  //$NON-NLS-1$//$NON-NLS-2$
 				}else{
 					s.delete(pw);
 					deleted.add(item);
@@ -96,14 +97,14 @@ public class DeleteIncidentAction implements IQaAction {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QaPlugIn.displayLog("An error occurred while removing the selected independent incidents.  Refresh QA list and try again, or edit try deleting individual indepdent incidents." + "\n\n", ex);
+			QaPlugIn.displayLog(Messages.DeleteIncidentAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
 			return false;
 		}finally{
 			s.close();
 		}
 
 		for (QaError item : deleted){
-			item.setFixMessage("Incident Deleted");
+			item.setFixMessage(Messages.DeleteIncidentAction_DeleteMsg);
 			item.setStatus(QaError.Status.DELETED);
 		}
 		
@@ -114,7 +115,7 @@ public class DeleteIncidentAction implements IQaAction {
 				try{
 					FileUtils.forceDelete(f);
 				}catch(Exception ex){
-					QaPlugIn.log("Could not delete incident filestore path: " + ex.getMessage(), ex);
+					QaPlugIn.log(Messages.DeleteIncidentAction_FilestoreDeleteError + ex.getMessage(), ex);
 				}
 			}
 			
@@ -137,7 +138,7 @@ public class DeleteIncidentAction implements IQaAction {
 
 	@Override
 	public String getName(Locale l) {
-		return "Delete";
+		return Messages.DeleteIncidentAction_ActionName;
 	}
 	
 	@Override

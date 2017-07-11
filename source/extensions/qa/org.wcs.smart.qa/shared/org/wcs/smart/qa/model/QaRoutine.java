@@ -36,7 +36,6 @@ import javax.persistence.Transient;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.qa.RoutineExtensionManager;
-import org.wcs.smart.qa.routine.IQaRoutineType;
 
 /**
  * A QA routine created by the user. 

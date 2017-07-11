@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.qa.ui.view;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -38,8 +41,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.wcs.smart.qa.ActionEngine;
 import org.wcs.smart.qa.InternalExtensionManager;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.routine.IQaAction;
 import org.wcs.smart.qa.routine.IgnoreAction;
 
 /**
@@ -113,7 +116,13 @@ public abstract class QaActionMenu implements MenuListener {
 		}
 		actions.put(IgnoreAction.INSTANCE.getId(), IgnoreAction.INSTANCE);
 		
-		for (IQaAction action : actions.values()){
+		List<IQaAction> sortedActions = new ArrayList<>();
+		sortedActions.addAll(actions.values());
+		sortedActions.sort((a,b)->{
+			return Collator.getInstance().compare(a.getName(Locale.getDefault()), b.getName(Locale.getDefault()));
+		});
+		
+		for (IQaAction action : sortedActions){
 			if (newItems.size() == 0){
 				newItems.add(new MenuItem(parent, SWT.SEPARATOR));
 			}

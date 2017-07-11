@@ -22,9 +22,10 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
+            locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.observation.options">
          <menu
-               label="QA">
+               icon="images/icons/qa.png"
+               label="Quality Assurance">
             <command
                   commandId="org.wcs.smart.qa.validation.manual"
                   style="push">
@@ -88,14 +89,14 @@
       <editor
             class="org.wcs.smart.qa.ui.view.ManualResultsEditor"
             default="false"
-            icon="images/icons/qa.png"
+            icon="images/icons/manual_qa.png"
             id="org.wcs.smart.qa.data.validatation.manual"
             name="Manual Data Validation">
       </editor>
       <editor
             class="org.wcs.smart.qa.ui.view.AutomatedResultsEditor"
             default="false"
-            icon="images/icons/qa.png"
+            icon="images/icons/auto_qa.png"
             id="org.wcs.smart.qa.data.validatation.automated"
             name="Automated Data Validation">
       </editor>
@@ -108,12 +109,18 @@
       </image>
       <image
             commandId="org.wcs.smart.qa.validation.auto"
-            icon="images/icons/qa.png">
+            icon="images/icons/auto_qa.png">
       </image>
       <image
             commandId="org.wcs.smart.qa.validation.manual"
-            icon="images/icons/qa.png">
+            icon="images/icons/manual_qa.png">
       </image>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.qa.plugin.ChangeLogInstaller">
+      </ChangeLogTracker>
    </extension>
 
 </plugin>

@@ -41,8 +41,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.RoutineExtensionManager;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaRoutine;
-import org.wcs.smart.qa.routine.IQaRoutineType;
 import org.wcs.smart.qa.ui.configure.RoutinesListDialog;
 
 /**

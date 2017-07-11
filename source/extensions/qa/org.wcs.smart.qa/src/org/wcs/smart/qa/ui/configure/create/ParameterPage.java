@@ -31,8 +31,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.qa.InternalExtensionManager;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaRoutine;
-import org.wcs.smart.qa.routine.IQaRoutineType;
 import org.wcs.smart.qa.ui.configure.IParameterCollector;
 
 /**

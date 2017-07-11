@@ -35,10 +35,10 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.qa.model.IQaAction;
+import org.wcs.smart.qa.model.IQaDataProvider;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaRoutine;
-import org.wcs.smart.qa.routine.IQaAction;
-import org.wcs.smart.qa.routine.IQaDataProvider;
-import org.wcs.smart.qa.routine.IQaRoutineType;
 import org.wcs.smart.qa.ui.configure.IParameterCollector;
 
 /**
@@ -154,10 +154,16 @@ public enum InternalExtensionManager {
 			if (isAutoCleaned) return;
 			isAutoCleaned = true;
 		}
+		Session session = HibernateManager.openSession();
 		try {
-			QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea());
+			session.beginTransaction();
+			QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea(), session);
+			session.getTransaction().commit();
 		} catch (Exception e) {
 			QaPlugIn.log(e.getMessage(), e);
+			session.getTransaction().rollback();
+		}finally{
+			session.close();
 		}
 	}
 }

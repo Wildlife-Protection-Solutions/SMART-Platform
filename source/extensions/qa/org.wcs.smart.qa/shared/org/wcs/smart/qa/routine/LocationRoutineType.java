@@ -21,24 +21,31 @@
  */
 package org.wcs.smart.qa.routine;
 
+import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.geotools.geometry.jts.JTS;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.routine.ILocationRoutineData.Type;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.algorithm.MCPointInRing;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -49,6 +56,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
+import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 /**
  * A QA routine that validates position of geometry objects.
@@ -62,9 +70,22 @@ import com.vividsolutions.jts.io.WKBReader;
  */
 public class LocationRoutineType implements IQaRoutineType {
 
+	/**
+	 * Routine ID
+	 */
 	public static final String ID = "org.wcs.smart.qa.waypointlocation";  //$NON-NLS-1$
 	
+	/**
+	 * Area parameter id
+	 */
 	public static final String LOCATION_PARAM_ID = LocationRoutineType.ID + ".parameter.area";  //$NON-NLS-1$
+	
+	/**
+	 * Seperator character for string values 
+	 */
+	public static final String SEPERATOR_CHAR = ":"; //$NON-NLS-1$
+	
+	private static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#.###"); //$NON-NLS-1$
 	
 	public static enum GeometryType{
 		FILE("file"), //$NON-NLS-1$
@@ -96,7 +117,7 @@ public class LocationRoutineType implements IQaRoutineType {
 	}
 	
 	@Override
-	public String getParameterSummary(QaRoutine routine){
+	public String getParameterSummary(QaRoutine routine, Locale l, Session session){
 		QaRoutineParameter p = routine.findParameter(LOCATION_PARAM_ID);
 		if (p == null) return "";
 		
@@ -109,18 +130,25 @@ public class LocationRoutineType implements IQaRoutineType {
 				sb.append(value);
 				sb.append(": "); //$NON-NLS-1$
 				Envelope env = g.getEnvelopeInternal();
-				sb.append("(" + env.getMinX() + "," + env.getMinY() + ")  (" + env.getMaxX() + "," + env.getMaxY() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				sb.append("Area: Shapefile boundary (" + env.getMinX() + "," + env.getMinY() + ")  (" + env.getMaxX() + "," + env.getMaxY() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				return sb.toString();
 			} catch (ParseException e) {
-				QaPlugIn.log(e.getMessage(), e);
+				Logger.getLogger(LocationRoutineType.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			}
 			return "Error";
 			
 		}else if (value.startsWith(GeometryType.AREA.key)){
+			String[] parts = value.split(LocationRoutineType.SEPERATOR_CHAR);
+			String areaKey = parts[1];
+			for (AreaType t : Area.AreaType.values()){
+				if (areaKey.equals(t.name())){
+					return "Area: " + SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(t, l);
+				}
+			}
 			return value;
 		}else if (value.startsWith(GeometryType.WKT.key)){
 			String geom = new String(p.getByteValue());
-			return value + ": " + geom; //$NON-NLS-1$
+			return "Area (wkt): " + geom; //$NON-NLS-1$
 		}
 		return p.getStringValue();
 		
@@ -147,7 +175,7 @@ public class LocationRoutineType implements IQaRoutineType {
 			g = reader.read(p.getByteValue());
 			
 		}else if (p.getStringValue().startsWith(GeometryType.AREA.key)){
-			Area.AreaType type = Area.AreaType.valueOf(p.getStringValue().split(":")[1]);
+			Area.AreaType type = Area.AreaType.valueOf(p.getStringValue().split(SEPERATOR_CHAR)[1]);
 			if (type == null) throw new Exception("No valid geometry found for waypoint position routine: " + routine.getName());
 			List<Area> areas = session.createCriteria(Area.class)
 					.add(Restrictions.eq("conservationArea", task.getConservationArea()))
@@ -179,20 +207,17 @@ public class LocationRoutineType implements IQaRoutineType {
 				for(ProcessedPolygon pp : toCheck){
 					if (wp.getType() == Type.POINT){
 						if (!pp.isInside(wp.getPoint())){
-							//TODO: this computes distances in degrees/min/sec
 							double distance = Double.MAX_VALUE;
 							for (ProcessedPolygon ppp : toCheck){
 								double d = ppp.distance(wp.getPoint());
-								if (d < distance){
-									distance = d;
-								}
+								if (d < distance) distance = d;
 							}
 							
 							QaError error = new QaError();
 							error.setDataProviderId(task.getDataProvider().getId());
-							error.setConservationArea(SmartDB.getCurrentConservationArea());
-							error.setErrorDescription(MessageFormat.format("Point is {0} units outside of area.",distance));
-							error.setErrorId( task.getDataProvider().getFeatureId(session, x));
+							error.setConservationArea(task.getConservationArea());
+							error.setErrorDescription("The waypoint is outside the validation area.");
+							error.setErrorId( task.getDataProvider().getFeatureId(session, x, task.getLocale()));
 							error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
 							error.setQaRoutine(routine);
 							error.setStatus(QaError.Status.NEW);
@@ -200,17 +225,38 @@ public class LocationRoutineType implements IQaRoutineType {
 							errors.add(error);
 							error.setGeometryObject(GeometryFactoryProvider.getFactory().createPoint(wp.getPoint()));
 							
+							try{
+								Coordinate[] minPnts = DistanceOp.nearestPoints(pp.polygon, GeometryFactoryProvider.getFactory().createPoint(wp.getPoint()));
+								double distancekm = JTS.orthodromicDistance(minPnts[0], minPnts[1], GeometryUtils.SMART_CRS) / 1000.0;									
+								error.setErrorDescription(MessageFormat.format("The waypoint is {0} km away from the validation area.",DISTANCE_FORMATTER.format(distancekm)));
+							}catch (Exception ex){
+								ex.printStackTrace();
+								error.setErrorDescription("The waypoint is outside the validation area.");
+							}
+							
 							break;
 						}
 					}else if (wp.getType() == Type.LINESTRING){
 						
 						if (!pp.polygon.contains(wp.getGeometry())){
+							
 							double distance = pp.polygon.distance(wp.getGeometry());
 							QaError error = new QaError();
 							error.setDataProviderId(task.getDataProvider().getId());
-							error.setConservationArea(SmartDB.getCurrentConservationArea());
-							error.setErrorDescription(MessageFormat.format("Linestring is {0} units outside of area.",distance));
-							error.setErrorId( task.getDataProvider().getFeatureId(session, x));
+							error.setConservationArea(task.getConservationArea());
+							if (distance == 0){
+								error.setErrorDescription(MessageFormat.format("A portion of the track is outside the validation area.",distance));
+							}else{
+								try{
+									Coordinate[] minPnts = DistanceOp.nearestPoints(pp.polygon, wp.getGeometry());
+									double distancekm = JTS.orthodromicDistance(minPnts[0], minPnts[1], GeometryUtils.SMART_CRS) / 1000.0;									
+									error.setErrorDescription(MessageFormat.format("The track is a minimum of {0} km away from the validation area.",DISTANCE_FORMATTER.format(distancekm)));
+								}catch (Exception ex){
+									ex.printStackTrace();
+									error.setErrorDescription("Track is outside the validation area.");
+								}
+							}
+							error.setErrorId( task.getDataProvider().getFeatureId(session, x, task.getLocale()));
 							error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
 							error.setQaRoutine(routine);
 							error.setStatus(QaError.Status.NEW);

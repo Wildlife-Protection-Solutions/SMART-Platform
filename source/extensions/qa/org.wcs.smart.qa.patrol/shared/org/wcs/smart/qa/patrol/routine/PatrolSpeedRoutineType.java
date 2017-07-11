@@ -22,6 +22,7 @@
 package org.wcs.smart.qa.patrol.routine;
 
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,10 +41,12 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
-import org.wcs.smart.qa.routine.IQaRoutineType;
+import org.wcs.smart.qa.patrol.ILabelProvider;
+import org.wcs.smart.qa.patrol.ILabelProvider.Key;
 import org.wcs.smart.qa.routine.ValidationTask;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -80,33 +83,47 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 
 	@Override
 	public String getName(Locale l) {
-		return "Patrol Maximum Speed Routine";
+		return ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_Name, l);
 	}
 
 	@Override
 	public String getDescription(Locale l) {
-		return "Validates patrol track and waypoint speed against a user provided maximum value. ";
+		return ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_Desc, l);
 	}
 	
 	@Override
-	public String getParameterSummary(QaRoutine routine){
+	public String getParameterSummary(QaRoutine routine, Locale l, Session session){
 		QaRoutineParameter speedParameter = routine.findParameter(MAX_SPEED_PARAM_ID);
 		QaRoutineParameter typeParameter = routine.findParameter(PATROL_TYPES_PARAM_ID);
 		
+		String[] patrolTypes = typeParameter.getStringValue().split(PARAM_SEP);
+		
 		StringBuilder sb = new StringBuilder();
-		sb.append("Maximum Speed ");
+		sb.append(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_Param_MaxSpeedName, l));
 		sb.append(speedParameter.getStringValue());
-		sb.append(" km/h; Types: ");
-		sb.append(typeParameter.getStringValue());
-		sb.append("");
-
+		sb.append(" "); //$NON-NLS-1$
+		sb.append(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_Param_SpeedUnits, l));
+		sb.append("\n"); //$NON-NLS-1$
+		sb.append(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_Param_TypeName, l));
+		for (int i = 0; i < patrolTypes.length; i ++){
+			if (i != 0) sb.append(", "); //$NON-NLS-1$
+			PatrolTransportType ttype = (PatrolTransportType)session.createCriteria(PatrolTransportType.class)
+					.add(Restrictions.eq("conservationArea", routine.getConservationArea())) //$NON-NLS-1$
+					.add(Restrictions.eq("keyId", patrolTypes[i])) //$NON-NLS-1$
+					.uniqueResult();
+			if (ttype == null){
+				sb.append(patrolTypes[i]);
+			}else{
+				sb.append(ttype.getName());
+			}	
+		}
 		return sb.toString();
 	}
 	
 	@Override
 	public Collection<QaError> validateData(ValidationTask task, Session session, IProgressMonitor monitor) throws Exception{
 		monitor.beginTask(task.getRoutine().getName(), 103);
-		monitor.subTask("Loading Data");
+		monitor.subTask(ILabelProvider.getLabel(Key.LoadingString, task.getLocale()));
 		
 		Collection<?> data = task.getDataProvider().getData(session, task.getConservationArea(), task.getStartDate(), task.getEndDate());
 		monitor.worked(1);
@@ -118,7 +135,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		try{
 			maxSpeed = Double.parseDouble(speedParameter.getStringValue());
 		}catch (Exception ex){
-			throw new Exception("Invalid maximum speed parameter for qa routine: " + speedParameter.getStringValue(), ex);
+			throw new Exception(MessageFormat.format(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_InvalidMaxSpeed, task.getLocale()), speedParameter.getStringValue()), ex);
 		}
 		
 		QaRoutineParameter typeParameter = routine.findParameter(PATROL_TYPES_PARAM_ID);
@@ -126,8 +143,8 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		String[] keys = typeParameter.getStringValue().split(PARAM_SEP);
 		for (String key : keys){
 			PatrolTransportType type = (PatrolTransportType)session.createCriteria(PatrolTransportType.class)
-					.add(Restrictions.eq("conservationArea", task.getConservationArea()))
-					.add(Restrictions.eq("keyId", key))
+					.add(Restrictions.eq("conservationArea", task.getConservationArea())) //$NON-NLS-1$
+					.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
 					.uniqueResult();
 			if (type != null){
 				types.add(type);
@@ -158,7 +175,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 	
 	private QaError validateWaypoint(WaypointLocationData wp, ValidationTask task, double maxSpeed, Set<PatrolTransportType> types, Session session){
 		PatrolWaypoint pw = (PatrolWaypoint) session.createCriteria(PatrolWaypoint.class)
-				.add(Restrictions.eq("id.waypoint", wp.getWaypoint()))
+				.add(Restrictions.eq("id.waypoint", wp.getWaypoint())) //$NON-NLS-1$
 				.uniqueResult();
 		if (pw == null) return null;
 		if (!types.contains(pw.getPatrolLegDay().getPatrolLeg().getType())) return null;
@@ -176,7 +193,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		
 		double speed = computeSpeed(new Coordinate(previous.getX(), previous.getY(), previous.getDateTime().getTime()),  new Coordinate(pw.getWaypoint().getX(), pw.getWaypoint().getY(), pw.getWaypoint().getDateTime().getTime()), maxSpeed);
 		if  (speed > maxSpeed){
-			String message = "Waypoint speed ( " + DISTANCE_FORMATTER.format(speed) + " km/h ) exceeds " + maxSpeed;
+			String message = MessageFormat.format(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_WpSpeedExceeded, task.getLocale()), DISTANCE_FORMATTER.format(speed), maxSpeed);
 			return createError(task, session, wp, GeometryFactoryProvider.getFactory().createPoint(new Coordinate(pw.getWaypoint().getX(), pw.getWaypoint().getY())), message);
 		}
 		return null;
@@ -197,7 +214,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 				Coordinate current = c[i];
 				double speed = computeSpeed(previous,  current, maxSpeed);
 				if  (speed > maxSpeed){
-					String message = "Track speed ( " + DISTANCE_FORMATTER.format(speed) + " km/h ) exceeds " + maxSpeed + " at point (" + current.x + ", " + current.y + ")";
+					String message = MessageFormat.format(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_TrackSpeedExceeded, task.getLocale()), DISTANCE_FORMATTER.format(speed), maxSpeed, current.x, current.y);
 					return createError(task, session, x, ls, message);
 				}
 			}
@@ -231,7 +248,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		error.setConservationArea(task.getConservationArea());
 		error.setDataProviderId(task.getDataProvider().getId());
 		error.setErrorDescription(message);
-		error.setErrorId(task.getDataProvider().getFeatureId(session, data));
+		error.setErrorId(task.getDataProvider().getFeatureId(session, data, task.getLocale()));
 		error.setGeometryObject(geometry);
 		error.setQaRoutine(task.getRoutine());
 		error.setSourceId(task.getDataProvider().getFeatureSource(session, data));

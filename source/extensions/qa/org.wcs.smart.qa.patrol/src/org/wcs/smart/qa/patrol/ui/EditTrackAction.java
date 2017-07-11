@@ -35,9 +35,10 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolTrackPointDialog;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaError.Status;
-import org.wcs.smart.qa.routine.IQaAction;
+import org.wcs.smart.qa.patrol.internal.Messages;
 
 import com.vividsolutions.jts.geom.LineString;
 
@@ -65,7 +66,7 @@ public class EditTrackAction  implements IQaAction {
 				p.equals(null);
 				track.getPatrolLegDay().equals(null);
 				track.getPatrolLegDay().getTracks().size();
-				int x = track.getGeom().length;
+				track.getGeom().equals(null);
 			}
 		}finally{
 			s.close();
@@ -73,8 +74,8 @@ public class EditTrackAction  implements IQaAction {
 		
 		if (track == null){
 			item.setStatus(Status.ERROR);
-			item.setFixMessage("Could not edit track - Track Not Found");
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Not found", "Track not found");
+			item.setFixMessage(Messages.EditTrackAction_TrackNotFoundMsg);
+			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_NotFoundDialogMsg);
 			return true;
 		}
 		
@@ -83,7 +84,7 @@ public class EditTrackAction  implements IQaAction {
 			ls = track.getLineString();
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Not found", "Unable to parse track linestring.  Track should be regenerated or re-imported in the patrol editor.");
+			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_ParseError);
 			return false;
 		}
 
@@ -91,7 +92,7 @@ public class EditTrackAction  implements IQaAction {
 		dialog.open();
 		if (!ls.equalsExact(dialog.getEditTrackLineString())){
 			item.setStatus(Status.FIXED);
-			item.setFixMessage("Track manually modified.");
+			item.setFixMessage(Messages.EditTrackAction_ModifiedMsg);
 			item.setGeometryObject(dialog.getEditTrackLineString());			
 			PatrolEventManager.getInstance().patrolSaved(p, true);
 			return true;
@@ -111,7 +112,7 @@ public class EditTrackAction  implements IQaAction {
 
 	@Override
 	public String getName(Locale l) {
-		return "Edit Track...";
+		return Messages.EditTrackAction_ActionName;
 	}
 
 	@Override

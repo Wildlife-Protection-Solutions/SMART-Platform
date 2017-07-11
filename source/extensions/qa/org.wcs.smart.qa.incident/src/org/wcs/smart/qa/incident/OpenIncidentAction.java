@@ -37,8 +37,9 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.ui.OpenIncidentHandler;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.qa.incident.internal.Messages;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.routine.IQaAction;
 
 /**
  * Opens the source patrol editor.  Works for
@@ -69,7 +70,7 @@ public class OpenIncidentAction implements IQaAction {
 			}
 			if (pw == null){
 				//not found
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Independent Incident {0} not found", item.getErrorId()));
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenIncidentAction_NotFoundTitle, MessageFormat.format(Messages.OpenIncidentAction_NotFoundMsg, item.getErrorId()));
 			}else{
 				(new OpenIncidentHandler()).openIncident(pw.getUuid(), context.get(MWindow.class));	
 			}
@@ -84,12 +85,12 @@ public class OpenIncidentAction implements IQaAction {
 
 	@Override
 	public String getId() {
-		return "org.wcs.smart.qa.incident.goto"; //$NON-NLS-1$
+		return GOTO_ACTION_ID;
 	}
 
 	@Override
 	public String getName(Locale l) {
-		return "Goto Source";
+		return Messages.OpenIncidentAction_ActionName;
 	}
 
 	@Override

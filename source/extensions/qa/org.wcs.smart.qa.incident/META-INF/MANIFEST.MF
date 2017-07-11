@@ -8,3 +8,5 @@ Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.wcs.smart.qa;bundle-version="1.0.0",
  org.wcs.smart.independentincident;bundle-version="6.0.0",
  org.locationtech.udig.style.sld
+Bundle-Activator: org.wcs.smart.qa.incident.Activator
+Bundle-ActivationPolicy: lazy

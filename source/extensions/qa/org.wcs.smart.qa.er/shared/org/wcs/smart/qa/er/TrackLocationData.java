@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.qa.er;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.routine.ILocationRoutineData;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -48,7 +50,7 @@ public class TrackLocationData implements ILocationRoutineData {
 		try {
 			return track.getLineString();
 		} catch (Exception e) {
-			QaPlugIn.log(e.getMessage(), e);
+			Logger.getLogger(TrackLocationData.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			return null;
 		}
 	}

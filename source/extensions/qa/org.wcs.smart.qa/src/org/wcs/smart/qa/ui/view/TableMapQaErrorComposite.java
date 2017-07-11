@@ -6,6 +6,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -29,6 +30,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,7 +44,11 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -56,7 +63,9 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.map.FeatureFactory;
 import org.wcs.smart.qa.model.map.QaErrorService;
@@ -91,6 +100,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		
 		public int getWidth(){
 			if (this == STATUS ) return 50;
+			if (this == OBJECT_ID) return 350;
 			return 150;
 		}
 		
@@ -100,7 +110,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			if (this == DATA_TYPE){
 				return error.getDataProvider().getName(Locale.getDefault());
 			}else if (this == ROUTINE){
-				return error.getQaRoutine().getName() + " (" + error.getQaRoutine().getRoutineType().getName(Locale.getDefault()) + ")";
+				return error.getQaRoutine().getName();
 			}else if (this == OBJECT_ID){
 				return error.getErrorId();
 			}else if (this == DESC){
@@ -143,6 +153,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 	protected Label lblResultCnt;
 	protected ToolItem btnIncludeFixed ;
 
+	private Font boldFont;
 	private FormToolkit toolkit = null;
 	
 	private ResultTableColumn sortColumn;
@@ -157,9 +168,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		  return 0;
 	  }
 	};
-	
 
-	
 	private Composite detailsComposite;
 	private Listener detailsSizeListener;
 	
@@ -190,21 +199,33 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		if (r == null) return;
 		
 		detailsComposite.setLayout(new GridLayout());
-//		((GridLayout)detailsComposite.getLayout()).marginWidth = 0;
-//		((GridLayout)detailsComposite.getLayout()).marginHeight= 0;
 		
-		int widthHint = 250;
-		Label l = toolkit.createLabel(detailsComposite, r.getErrorId(), SWT.WRAP);
-//		l.setFont(boldFont);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)l.getLayoutData()).widthHint = widthHint;
-		
-		ScrolledComposite scroll = new ScrolledComposite(detailsComposite, SWT.V_SCROLL );
+		IQaAction gotoSource = null;
+		for (IQaAction action : InternalExtensionManager.INSTANCE.getQaActions(r.getDataProvider(), getContext())){
+			if (action.getId().equals(IQaAction.GOTO_ACTION_ID)){
+				gotoSource = action;
+				break;
+			}
+		}
+		if (gotoSource != null){
+			Hyperlink link = toolkit.createHyperlink(detailsComposite, r.getErrorId(), SWT.WRAP);
+			link.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			link.setFont(boldFont);
+			final IQaAction fgotoSource = gotoSource;
+			link.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					fgotoSource.doAction(Collections.singletonList(r));						
+				}
+			});
+		} else {
+			Label l = toolkit.createLabel(detailsComposite, r.getErrorId(), SWT.WRAP);
+			l.setFont(boldFont);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		}
+		ScrolledComposite scroll = new ScrolledComposite(detailsComposite, SWT.V_SCROLL);
 		scroll.setExpandVertical(true);
-		scroll.setExpandHorizontal(true);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)scroll.getLayoutData()).widthHint = widthHint;
-		
 		toolkit.adapt(scroll);
 		
 		Composite textArea = toolkit.createComposite(scroll, SWT.NONE);
@@ -215,39 +236,38 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		textArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		List<String> labels = new ArrayList<>();
-//		labels.add(r.getErrorId());
-		
 		labels.add("Status: " + r.getStatus().getGuiName(Locale.getDefault()));
-		
 		if (r.getFixMessage() != null && !r.getFixMessage().isEmpty()){
 			labels.add("\nFix:\n" + r.getFixMessage());
 		}
-		
 		if (r.getErrorDescription() != null && !r.getErrorDescription().isEmpty()){
 			labels.add("\nDescription:\n" + r.getErrorDescription());
 		}
-		
 		labels.add("\nRoutine:\n" + r.getQaRoutine().getName());
 		labels.add("\nRoutine Type:\n" + r.getQaRoutine().getRoutineType().getName(Locale.getDefault()));
 		labels.add("\nData Provider:\n" + r.getDataProvider().getName(Locale.getDefault()));
 		labels.add("\nDate:\n" + DateFormat.getDateInstance().format(r.getValidateDate()));
 		
 		for (String label : labels){
-			l = toolkit.createLabel(textArea, label, SWT.WRAP);
+			Label l = toolkit.createLabel(textArea, label, SWT.WRAP);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			((GridData)l.getLayoutData()).widthHint = widthHint;
 		}
 				
 		detailsSizeListener = new Listener(){
 			@Override
 			public void handleEvent(Event event) {
 				if (scroll.isDisposed()) return;
-				scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));	
+				int width = detailsComposite.getSize().x - scroll.getVerticalBar().getSize().x - 20;
+				textArea.setSize(textArea.computeSize(width, SWT.DEFAULT));
+				scroll.setMinSize(textArea.computeSize(width, SWT.DEFAULT));
 			}
 		};
+		detailsComposite.addListener(SWT.Resize, detailsSizeListener);
 		detailsComposite.getParent().layout(true, true);
-		scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));
 		
+		int width = detailsComposite.getSize().x - scroll.getVerticalBar().getSize().x - 20;
+		textArea.setSize(textArea.computeSize(width, SWT.DEFAULT));
+		scroll.setMinSize(textArea.computeSize(width, SWT.DEFAULT));		
 	}
 	
 	@Override
@@ -257,6 +277,11 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		
 		SashForm sash = new SashForm(parent,  SWT.VERTICAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		FontData fd = sash.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		boldFont = new Font(sash.getDisplay(), fd);
+		sash.addListener(SWT.Dispose, e->boldFont.dispose());
 		
 		Composite main =toolkit.createComposite(sash);
 		main.setLayout(new GridLayout());
@@ -285,8 +310,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		
 		createHeaderToolbar(topComp);
 		
-		Composite tableArea = toolkit.createComposite(main);
-		tableArea.setLayout(new GridLayout(2, false));
+		SashForm tableArea = new SashForm(main, SWT.HORIZONTAL);
 		tableArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		tblResults = new TableViewer(tableArea, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
@@ -308,10 +332,8 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			});
 			
 			column.getColumn().addSelectionListener(new SelectionListener() {
-				
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					// TODO Auto-generated method stub
 					if (sortColumn == c)
 						sortDirection = sortDirection * -1;
 					else
@@ -354,28 +376,13 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		detailsComposite = toolkit.createComposite(tableArea, SWT.BORDER);
 		detailsComposite.setLayout(new GridLayout());
 		detailsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tableArea.setWeights(new int[]{70,30});
 		
 		tblResults.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateErrorDetails();
 			}
-		});
-		
-		//fix the size of the description column
-		tableArea.addListener(SWT.Resize, e->{
-			Point size = tableArea.getSize();
-	            
-			int right = 0;
-	        int left = 0;
-	        if (size.x < 500){
-	        	right = left = size.x/2;
-	        }else{
-	        	right = 200;
-	            left = size.x - right;
-	        }
-	        ((GridData)tblResults.getControl().getLayoutData()).widthHint = left;
-	        ((GridData)detailsComposite.getLayoutData()).widthHint = right;
 		});
 		
 		String[] tools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 1);

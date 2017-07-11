@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.er;
+package org.wcs.smart.qa.er.ui;
 
 import java.io.IOException;
 import java.util.ArrayList;

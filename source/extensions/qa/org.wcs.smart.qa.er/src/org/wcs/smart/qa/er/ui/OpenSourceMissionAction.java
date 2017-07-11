@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.er;
+package org.wcs.smart.qa.er.ui;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -40,8 +40,10 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.qa.er.ErTrackDataProvider;
+import org.wcs.smart.qa.er.ErWaypointDataProvider;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.routine.IQaAction;
 
 /**
  * Opens the source patrol editor.  Works for
@@ -120,7 +122,7 @@ public class OpenSourceMissionAction implements IQaAction {
 
 	@Override
 	public String getId() {
-		return "org.wcs.smart.qa.patrol.goto"; //$NON-NLS-1$
+		return GOTO_ACTION_ID;
 	}
 
 	@Override

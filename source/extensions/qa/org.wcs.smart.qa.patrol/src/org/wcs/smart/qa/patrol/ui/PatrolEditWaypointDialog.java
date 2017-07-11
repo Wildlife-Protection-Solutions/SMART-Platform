@@ -57,6 +57,7 @@ import org.wcs.smart.patrol.geotools.PatrolFeatureFactory;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.patrol.internal.Messages;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -115,7 +116,7 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 	@Override
 	protected void addToolbarContributions(ToolBar toolBar){
 		btnInterpolate = new ToolItem(toolBar, SWT.PUSH);
-		btnInterpolate.setToolTipText("interpolate a new position based on previous and next waypoints");
+		btnInterpolate.setToolTipText(Messages.PatrolEditWaypointDialog_interpolateToolTooltip);
 		btnInterpolate.setImage(QaPlugIn.getDefault().getImageRegistry().get(QaPlugIn.ICON_INTERPOLATE));
 		btnInterpolate.addListener(SWT.Selection, e->interpolate());
 	}
@@ -153,7 +154,7 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 					.uniqueResult();
 			editWaypoint = pw;
 			if (pw == null){
-				setErrorMessage("Waypoint not found.  Close dialog an re-run validation routines.");
+				setErrorMessage(Messages.PatrolEditWaypointDialog_WpNotFound);
 				return;
 			}
 			waypoints = pw.getPatrolLegDay().getWaypoints();

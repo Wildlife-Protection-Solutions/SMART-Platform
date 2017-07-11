@@ -6,25 +6,25 @@
       <data_provider
             class="org.wcs.smart.qa.er.ErTrackDataProvider">
          <qa_action
-               class="org.wcs.smart.qa.er.DeleteErTrackAction">
+               class="org.wcs.smart.qa.er.ui.DeleteErTrackAction">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.er.EditTrackAction">
+               class="org.wcs.smart.qa.er.ui.EditTrackAction">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.er.OpenSourceMissionAction">
+               class="org.wcs.smart.qa.er.ui.OpenSourceMissionAction">
          </qa_action>
       </data_provider>
       <data_provider
             class="org.wcs.smart.qa.er.ErWaypointDataProvider">
          <qa_action
-               class="org.wcs.smart.qa.er.DeleteErWaypointAction">
+               class="org.wcs.smart.qa.er.ui.DeleteErWaypointAction">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.er.EditWaypointAction">
+               class="org.wcs.smart.qa.er.ui.EditWaypointAction">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.er.OpenSourceMissionAction">
+               class="org.wcs.smart.qa.er.ui.OpenSourceMissionAction">
          </qa_action>
       </data_provider>
    </extension>

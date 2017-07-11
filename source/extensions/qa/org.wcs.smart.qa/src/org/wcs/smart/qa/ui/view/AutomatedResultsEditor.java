@@ -151,10 +151,16 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		btnClean.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnClean.addListener(SWT.Selection, e->{
 			if (MessageDialog.openQuestion(getSite().getShell(), "Confirm", "All items that do not have a status of NEW will be deleted permanently from the database.  Are you sure you want to continue?")){
+				Session session = HibernateManager.openSession();
 				try{
-					QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea());
+					session.beginTransaction();
+					QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea(), session);
+					session.getTransaction().commit();
 				}catch (Exception ex){
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
 					QaPlugIn.displayLog(ex.getMessage(), ex);
+				}finally{
+					session.close();
 				}
 				
 				clearResults();

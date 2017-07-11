@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.er;
+package org.wcs.smart.qa.er.ui;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -30,9 +30,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaError.Status;
-import org.wcs.smart.qa.routine.IQaAction;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
 
 import com.vividsolutions.jts.geom.Coordinate;

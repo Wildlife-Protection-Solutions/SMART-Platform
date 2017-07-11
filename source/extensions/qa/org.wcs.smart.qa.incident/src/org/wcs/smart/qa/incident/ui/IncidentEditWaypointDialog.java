@@ -51,6 +51,7 @@ import org.wcs.smart.incident.IncidentFeatureFactory;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.incident.internal.Messages;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -106,7 +107,7 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 			Waypoint pw = (Waypoint) s.get(Waypoint.class, waypointUuid);
 			editWaypoint = pw;
 			if (pw == null){
-				setErrorMessage("Waypoint not found.  Close dialog an re-run validation routines.");
+				setErrorMessage(Messages.IncidentEditWaypointDialog_WpNotFound);
 				return;
 			}
 

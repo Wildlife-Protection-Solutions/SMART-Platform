@@ -40,7 +40,6 @@ import javax.persistence.Transient;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.qa.RoutineExtensionManager;
-import org.wcs.smart.qa.routine.IQaDataProvider;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;

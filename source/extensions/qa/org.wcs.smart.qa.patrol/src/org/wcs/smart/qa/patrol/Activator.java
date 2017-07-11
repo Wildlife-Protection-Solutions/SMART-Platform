@@ -2,6 +2,7 @@ package org.wcs.smart.qa.patrol;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -27,6 +28,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		SmartContext.INSTANCE.setClass(ILabelProvider.class, new PatrolLabelProvider());
 	}
 
 	/*

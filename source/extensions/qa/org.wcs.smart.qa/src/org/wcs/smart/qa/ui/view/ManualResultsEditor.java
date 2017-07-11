@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.qa.ui.view;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -43,11 +44,15 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
@@ -61,6 +66,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -86,10 +93,10 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.ValidationEngine;
+import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
-import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.ValidationTask;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -122,6 +129,9 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 
 	private Composite detailsComposite;
 	private Listener detailsSizeListener;
+	
+	private TableViewerColumn sortColumn = null;
+	private int sortDirection = -1;
 	
 	public static IEditorInput MANUAL_VALIDATION_INPUT =  new IEditorInput() {
 		
@@ -374,7 +384,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		
 		ScrolledComposite scroll = new ScrolledComposite(detailsComposite, SWT.V_SCROLL );
 		scroll.setExpandVertical(true);
-		scroll.setExpandHorizontal(true);
+//		scroll.setExpandHorizontal(true);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)scroll.getLayoutData()).widthHint = widthHint;
 		
@@ -396,7 +406,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).widthHint = widthHint;
 		}
-		String params = r.getRoutine().getRoutineType().getParameterSummary(r.getRoutine());
+		String params = r.getParameterDescription();
 		if (params != null && !params.isEmpty()){
 			l = toolkit.createLabel(textArea, "\nParameters:\n" + params, SWT.WRAP);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -411,15 +421,18 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			@Override
 			public void handleEvent(Event event) {
 				if (scroll.isDisposed()) return;
-				scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));	
+				int width = detailsComposite.getSize().x - scroll.getVerticalBar().getSize().x - 15;
+				textArea.setSize(textArea.computeSize(width, SWT.DEFAULT));
+				scroll.setMinSize(textArea.computeSize(width, SWT.DEFAULT));	
 			}
 		};
 		detailsComposite.getParent().layout(true, true);
-		scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));
-		
+			
+		int width = detailsComposite.getSize().x - scroll.getVerticalBar().getSize().x - 15;
+		textArea.setSize(textArea.computeSize(width, SWT.DEFAULT));
+		scroll.setMinSize(textArea.computeSize(width, SWT.DEFAULT));
 	}
-	
-	
+		
 	private void createParameterArea(Composite parent){
 		Composite panel = toolkit.createComposite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout());
@@ -482,7 +495,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		checkColumn.setLabelProvider(new ColumnLabelProvider(){});
 		
 		TableViewerColumn dataColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
-		dataColumn.setLabelProvider(new ColumnLabelProvider(){
+		ColumnLabelProvider dataLabelProvider = new ColumnLabelProvider(){
 			public String getText(Object element){
 				if (element instanceof DataValidator){
 					return ((DataValidator) element).getDataProvider().getName(Locale.getDefault());
@@ -496,12 +509,25 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 				}
 				return super.getImage(element);
 			}
-		});
+		};
+		dataColumn.setLabelProvider(dataLabelProvider);
 		dataColumn.getColumn().setWidth(200);
 		dataColumn.getColumn().setText("Data To Validate");
+		dataColumn.getColumn().addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (sortColumn == dataColumn){
+					sortDirection = -1 * sortDirection;
+				}else{
+					sortColumn = dataColumn;
+				}
+				tblRoutines.getTable().setSortColumn(sortColumn.getColumn());
+				tblRoutines.getTable().setSortDirection(sortDirection > 0 ? SWT.UP : SWT.DOWN);
+				tblRoutines.refresh();
+			}});
 		
 		TableViewerColumn routineColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
-		routineColumn.setLabelProvider(new ColumnLabelProvider(){
+		ColumnLabelProvider routineLabelProvider = new ColumnLabelProvider(){
 			public String getText(Object element){
 				if (element instanceof DataValidator){
 					QaRoutine v = ((DataValidator)element).getRoutine();
@@ -509,9 +535,39 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 				}
 				return super.getText(element);
 			}
-		});
+		};
+		routineColumn.setLabelProvider(routineLabelProvider);
 		routineColumn.getColumn().setWidth(700);
 		routineColumn.getColumn().setText("Routine To Perform");
+		routineColumn.getColumn().addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (sortColumn == routineColumn){
+					sortDirection = -1 * sortDirection;
+				}else{
+					sortColumn = routineColumn;
+				}
+				tblRoutines.getTable().setSortColumn(sortColumn.getColumn());
+				tblRoutines.getTable().setSortDirection(sortDirection > 0 ? SWT.UP : SWT.DOWN);
+				tblRoutines.refresh();
+			}});
+		
+		tblRoutines.setComparator(new ViewerComparator(){
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				if (sortColumn == null) return 0;
+				if (!(e1 instanceof DataValidator && e2 instanceof DataValidator)) return 0;
+				
+				DataValidator v1 = (DataValidator) e1;
+				DataValidator v2 = (DataValidator) e2;
+				
+				if (sortColumn == routineColumn){
+					return sortDirection * Collator.getInstance().compare(routineLabelProvider.getText(v1), routineLabelProvider.getText(v2));
+				}else if (sortColumn == dataColumn){
+					return sortDirection * Collator.getInstance().compare(dataLabelProvider.getText(v1), dataLabelProvider.getText(v2));
+				}
+				return 0;
+			}
+		});
 		
 		detailsComposite = toolkit.createComposite(tableArea, SWT.BORDER);
 		detailsComposite.setLayout(new GridLayout());
@@ -540,6 +596,14 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 	        ((GridData)detailsComposite.getLayoutData()).widthHint = right;
 		});
 
+		Menu mnuRoutines = new Menu(tblRoutines.getControl());
+		MenuItem selectAll = new MenuItem(mnuRoutines, SWT.PUSH);
+		selectAll.setText("Select All");
+		selectAll.addListener(SWT.Selection,  e-> tblRoutines.setAllChecked(true));
+		MenuItem deselectAll = new MenuItem(mnuRoutines, SWT.PUSH);
+		deselectAll.setText("De-Select All");
+		deselectAll.addListener(SWT.Selection,  e-> tblRoutines.setAllChecked(false));
+		tblRoutines.getControl().setMenu(mnuRoutines);
 		
 		Composite bottomPanel = new Composite(panel, SWT.NONE);
 		bottomPanel.setLayout(new GridLayout(4, false));
@@ -608,7 +672,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		lastValidationEngine = new ValidationEngine(Locale.getDefault());
 		for (Object x  : tblRoutines.getCheckedElements()){
 			if (x instanceof DataValidator){
-				ValidationTask task = new ValidationTask(((DataValidator) x).getRoutine(), ((DataValidator) x).getDataProvider(), startDate, endDate, SmartDB.getCurrentConservationArea());
+				ValidationTask task = new ValidationTask(((DataValidator) x).getRoutine(), ((DataValidator) x).getDataProvider(), startDate, endDate, SmartDB.getCurrentConservationArea(), Locale.getDefault());
 				lastValidationEngine.addValidationTask(task);
 			}
 		}
@@ -641,7 +705,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 				for (IQaDataProvider p : providers){
 					for (QaRoutine r : dbroutines){
 						if (p.supportsRoutine(r.getRoutineType())){
-							routines.add(new DataValidator(r, p));
+							routines.add(new DataValidator(r, p, r.getRoutineType().getParameterSummary(r, Locale.getDefault(), s)));
 						}
 						for (QaRoutineParameter pp : r.getParameters()){
 							pp.getParameterId();
@@ -667,13 +731,16 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		
 		private QaRoutine routine;
 		private IQaDataProvider data;
+		private String parameterDescription;
 		
-		public DataValidator(QaRoutine routine, IQaDataProvider data){
+		public DataValidator(QaRoutine routine, IQaDataProvider data, String parameterDescription){
 			this.routine = routine;
 			this.data = data;
+			this.parameterDescription = parameterDescription;
 		}		
 		public QaRoutine getRoutine(){ return routine; }
 		public IQaDataProvider getDataProvider(){ return data; }
+		public String getParameterDescription(){ return parameterDescription; }
 	}
 	
 	private class StackPanelItem{

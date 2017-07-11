@@ -39,9 +39,10 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.qa.patrol.internal.Messages;
 import org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider;
-import org.wcs.smart.qa.routine.IQaAction;
 
 /**
  * Delete patrol waypoint action.  Applicable for
@@ -60,7 +61,7 @@ public class DeletePatrolTrackAction implements IQaAction {
 				toProcess.add(e);
 			}
 		}
-		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected tracks?  This action cannot be undone.", toProcess.size()))){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.DeletePatrolTrackAction_DeleteDialogTitle, MessageFormat.format(Messages.DeletePatrolTrackAction_DeleteConfirmMessage, toProcess.size()))){
 			return false;
 		}
 		
@@ -86,7 +87,7 @@ public class DeletePatrolTrackAction implements IQaAction {
 				
 				if (t == null){
 					item.setStatus(QaError.Status.DELETED);
-					item.setFixMessage("***Could not delete - Track Not Found*** ");
+					item.setFixMessage(Messages.DeletePatrolTrackAction_TrackNotFoundError);
 				}else{
 					deleted.add(item);
 					trackDeleted.add(t);
@@ -101,14 +102,14 @@ public class DeletePatrolTrackAction implements IQaAction {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QaPlugIn.displayLog("An error occurred while removing the selected patrol tracks.  Refresh QA list and try again, or edit try deleting individual patrol tracks." + "\n\n", ex);
+			QaPlugIn.displayLog(Messages.DeletePatrolTrackAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
 			return false;
 		}finally{
 			s.close();
 		}
 
 		for (QaError item : deleted){
-			item.setFixMessage("Track Deleted");
+			item.setFixMessage(Messages.DeletePatrolTrackAction_DeletedMsg);
 			item.setStatus(QaError.Status.DELETED);
 		}
 		//fire patrol events
@@ -130,7 +131,7 @@ public class DeletePatrolTrackAction implements IQaAction {
 
 	@Override
 	public String getName(Locale l) {
-		return "Delete";
+		return Messages.DeletePatrolTrackAction_ActionName;
 	}
 	
 	@Override

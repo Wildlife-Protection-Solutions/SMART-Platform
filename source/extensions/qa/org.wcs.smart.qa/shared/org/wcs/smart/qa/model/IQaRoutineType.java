@@ -19,61 +19,59 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.routine;
+package org.wcs.smart.qa.model;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.qa.model.QaError;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.Session;
+import org.wcs.smart.qa.routine.ValidationTask;
 
 /**
- * An action that can be applied to a QA result item.
+ * An interface for implementing a QA Routine type.  These
+ * define routines that users can implement with custom
+ * parameters for validating data.
  * 
  * @author Emily
  *
  */
-public interface IQaAction {
+public interface IQaRoutineType {
 
-	public static final String DELETE_ACTION_ID = "org.wcs.smart.qa.action.delete"; //$NON-NLS-1$
-	
-	/**
-	 * Perform the action on the set of items.  If supportsMultiple is true
-	 * this list should only have a single item in it.
-	 * 
-	 * List or errors may contain items that you cannot perform and action on.  In
-	 * these cases you should skip this item and continue.
-	 * 
-	 * @param items
-	 * @return true if any of the items have been modified
-	 */
-	public boolean doAction(List<QaError> items);
-	
-	/**
-	 * @return if the action can be applied to multiple items at once.  For example
-	 * delete actions could be applied to multiple actions, but goto source
-	 * do not. 
-	 */
-	public boolean supportsMultiple();
-		
 	/**
 	 * 
-	 * @return id of the qa action
+	 * @return the identifier of the QA routine
 	 */
 	public String getId();
 	
 	/**
+	 * The property QA routine name for the given locale
 	 * 
-	 * @param l
-	 * @return the name of the qa action
+	 * @return
 	 */
 	public String getName(Locale l);
 	
+	
 	/**
+	 * A description of what the QA routine validates
 	 * 
-	 * @return the image for the action; can return null if no image applicable
+	 * @return
 	 */
-	public default Image getImage() {
-		return null;
-	}
+	public String getDescription(Locale l);
+
+	
+	/**
+	 * Validates data returns a set of errors.
+	 * 
+	 * @return
+	 */
+	public Collection<QaError> validateData(ValidationTask task, Session session, IProgressMonitor monitor) throws Exception;
+		
+	/**
+	 * Returns a user friendly string summary of the parameter values 
+	 * from the QA routine
+	 * @param routine
+	 * @return
+	 */
+	public String getParameterSummary(QaRoutine routine, Locale l, Session session);
 }

@@ -1,4 +1,4 @@
-package org.wcs.smart.qa.er;
+package org.wcs.smart.qa.er.ui;
 
 import java.util.List;
 import java.util.Locale;
@@ -13,9 +13,9 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.ui.mision.editor.MissionTrackEditDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaError.Status;
-import org.wcs.smart.qa.routine.IQaAction;
 
 public class EditTrackAction  implements IQaAction {
 

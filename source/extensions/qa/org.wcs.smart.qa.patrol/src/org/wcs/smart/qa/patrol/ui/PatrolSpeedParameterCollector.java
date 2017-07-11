@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.qa.patrol.ui;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -52,6 +54,8 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
+import org.wcs.smart.qa.patrol.ILabelProvider;
+import org.wcs.smart.qa.patrol.internal.Messages;
 import org.wcs.smart.qa.patrol.routine.PatrolSpeedRoutineType;
 import org.wcs.smart.qa.ui.configure.IParameterCollector;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -82,14 +86,14 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(panel, SWT.NONE);
-		l.setText("Maximum Speed (km/h):");
+		l.setText(MessageFormat.format("{0} ({1}):", ILabelProvider.getLabel(ILabelProvider.Key.PatrolSpeedRoutineType_Param_MaxSpeedName, Locale.getDefault() ), ILabelProvider.getLabel(ILabelProvider.Key.PatrolSpeedRoutineType_Param_SpeedUnits, Locale.getDefault()))); //$NON-NLS-1$
 		
 		txtMaxSpeed = new Text(panel, SWT.BORDER);
 		txtMaxSpeed.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtMaxSpeed.addListener(SWT.Modify, e->validate());
 		
 		l = new Label(panel, SWT.NONE);
-		l.setText("Patrol Transport Types:");
+		l.setText(MessageFormat.format("{0}:", ILabelProvider.getLabel(ILabelProvider.Key.PatrolSpeedRoutineType_Param_TypeName, Locale.getDefault()))); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
 		
 		cdTt = new ControlDecoration(l, SWT.RIGHT | SWT.TOP);
@@ -134,14 +138,14 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 			Double.parseDouble(txtMaxSpeed.getText());
 		}catch (Exception ex){
 			isValid = false;
-			cdMax.setDescriptionText("Invalid maximum speed value");
+			cdMax.setDescriptionText(Messages.PatrolSpeedParameterCollector_InvalidMaxSpeedValue);
 			cdMax.show();	
 		}
 		
 		cdTt.hide();
 		if (tblTransportTypes.getCheckedElements().length == 0){
 			isValid = false;
-			cdTt.setDescriptionText("At least one transport type must be selected");
+			cdTt.setDescriptionText(Messages.PatrolSpeedParameterCollector_TransportTypeRequired);
 			cdTt.show();
 		}else{
 			boolean found = false;
@@ -153,7 +157,7 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 			}
 			if (!found){
 				isValid = false;
-				cdTt.setDescriptionText("At least one transport type must be selected");
+				cdTt.setDescriptionText(Messages.PatrolSpeedParameterCollector_TransportTypeRequired);
 				cdTt.show();
 			}
 		}
@@ -164,19 +168,20 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 	private void loadTransportTypes(){
 		Job j = new Job("init transport types"){ //$NON-NLS-1$
 
+			@SuppressWarnings("unchecked")
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final List<PatrolTransportType> transportTypes = new ArrayList<>();
 				Session s = HibernateManager.openSession();
 				try{
 					transportTypes.addAll(s.createCriteria(PatrolTransportType.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.list());
 					for (PatrolTransportType t : transportTypes){
 						t.getName().length();
 					}
 				}catch (Exception ex){
-					QaPlugIn.displayLog("Unable to read conservation area boundary layers from the database: " + ex.getMessage(), ex);
+					QaPlugIn.displayLog(Messages.PatrolSpeedParameterCollector_DbError + ex.getMessage(), ex);
 				}finally{
 					s.close();
 				}
@@ -206,7 +211,7 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 		List<PatrolTransportType> types = new ArrayList<>();
 		Object items = tblTransportTypes.getInput();
 		if (items instanceof List){
-			for (Object item : (List)items){
+			for (Object item : (List<?>)items){
 				if (item instanceof PatrolTransportType){
 					if (keys.contains(((PatrolTransportType) item).getKeyId())){
 						types.add((PatrolTransportType)item);
@@ -258,7 +263,7 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 		for (Object x : tblTransportTypes.getCheckedElements()){
 			if (x instanceof PatrolTransportType){
 				sb.append(((PatrolTransportType) x).getKeyId());
-				sb.append(",");
+				sb.append(","); //$NON-NLS-1$
 			}
 		}
 		if (sb.length() > 0){

@@ -80,9 +80,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.RoutineExtensionManager;
+import org.wcs.smart.qa.model.IQaDataProvider;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaRoutine;
-import org.wcs.smart.qa.routine.IQaDataProvider;
-import org.wcs.smart.qa.routine.IQaRoutineType;
 import org.wcs.smart.qa.ui.configure.create.EditRoutineDialog;
 import org.wcs.smart.qa.ui.configure.create.NewRoutineWizard;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -161,7 +161,8 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		}
 		
 		if (tblRoutines.getSelection().isEmpty()) return;
-		QaRoutine r = (QaRoutine) ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+		WrappedQaRoutine routine = (WrappedQaRoutine) ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+		QaRoutine r = routine.routine;
 		if (r == null) return;
 		
 		descriptionArea.setLayout(new GridLayout());
@@ -175,9 +176,10 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		
 		ScrolledComposite scroll = new ScrolledComposite(descriptionArea, SWT.V_SCROLL );
 		scroll.setExpandVertical(true);
-		scroll.setExpandHorizontal(true);
+//		scroll.setExpandHorizontal(true);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		//((GridData)scroll.getLayoutData()).widthHint = 150;
+		scroll.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 
 		Composite textArea =new Composite(scroll, SWT.NONE);
 		scroll.setContent(textArea);
@@ -200,7 +202,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).widthHint = 200;
 		}
-		String params = r.getRoutineType().getParameterSummary(r);
+		String params = routine.parameterDescription;
 		if (params != null && !params.isEmpty()){
 			l = new Label(textArea, SWT.WRAP);
 			l.setText("\nParameters:\n" + params);
@@ -231,16 +233,20 @@ public class RoutinesListDialog extends TitleAreaDialog {
 			public void handleEvent(Event event) {
 				if (scroll.isDisposed()){
 					descriptionArea.removeListener(SWT.Resize, this);
-					System.out.println("removed");
 					return;
 				}
-				scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));	
+				int width = descriptionArea.getSize().x - scroll.getVerticalBar().getSize().x - 15;
+				textArea.setSize(textArea.computeSize(width, SWT.DEFAULT));
+				scroll.setMinSize(textArea.computeSize(width, SWT.DEFAULT));
+					
 			}
 		};
 		descriptionArea.addListener(SWT.Resize,resizeListener);
 		
 		getShell().layout(true, true);
-		scroll.setMinSize(textArea.computeSize(scroll.getClientArea().width, SWT.DEFAULT));
+		int width = descriptionArea.getSize().x - scroll.getVerticalBar().getSize().x - 15;
+		textArea.setSize(textArea.computeSize(width, SWT.DEFAULT));
+		scroll.setMinSize(textArea.computeSize(width, SWT.DEFAULT));
 	}
 	 
 	
@@ -376,7 +382,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		tblRoutines.addSelectionChangedListener(e->{
 			boolean enabled = false;
 			if (!tblRoutines.getSelection().isEmpty()){
-				if ( ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement() instanceof QaRoutine){
+				if ( ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement() instanceof WrappedQaRoutine){
 					enabled = true;
 				}
 			}
@@ -405,8 +411,8 @@ public class RoutinesListDialog extends TitleAreaDialog {
 	private void edit(){
 		if (tblRoutines.getSelection().isEmpty()) return;
 		Object x = ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
-		if (!(x instanceof QaRoutine)) return;
-		QaRoutine r = (QaRoutine)x;
+		if (!(x instanceof WrappedQaRoutine)) return;
+		QaRoutine r = ((WrappedQaRoutine)x).routine;
 		EditRoutineDialog dialog = new EditRoutineDialog(getShell(),r);
 		if (dialog.open() == Window.OK){
 			refresh();
@@ -417,8 +423,8 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		final List<QaRoutine> toDelete = new ArrayList<QaRoutine>();
 		for (Iterator<?> iterator = ((IStructuredSelection)tblRoutines.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
-			if (x instanceof QaRoutine){
-				toDelete.add((QaRoutine)x);
+			if (x instanceof WrappedQaRoutine){
+				toDelete.add(((WrappedQaRoutine)x).routine);
 			}
 		}
 		if (toDelete.isEmpty()) return;
@@ -471,8 +477,8 @@ public class RoutinesListDialog extends TitleAreaDialog {
 	
 	private String getValue(RoutineColumn field, Object element){
 		if (element == null) return "";
-		if (!(element instanceof QaRoutine)) return element.toString();
-		QaRoutine r = (QaRoutine)element;
+		if (!(element instanceof WrappedQaRoutine)) return element.toString();
+		QaRoutine r = ((WrappedQaRoutine)element).routine;
 		switch(field){
 			case AUTO:
 				if (r.getAutoCheck()){
@@ -506,15 +512,17 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			List<QaRoutine> routines = new ArrayList<>();
-		
+			List<WrappedQaRoutine> routines = new ArrayList<>();
+			
 			Session s = HibernateManager.openSession();
 			try{
-				routines.addAll(s.createCriteria(QaRoutine.class)
+				List<QaRoutine> thisroutines = s.createCriteria(QaRoutine.class)
 					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list());
-				for (QaRoutine r : routines){
+					.list();
+				for (QaRoutine r : thisroutines){
 					r.getParameters().size();
+					String parameterSummary = r.getRoutineType().getParameterSummary(r, Locale.getDefault(), s);
+					routines.add(new WrappedQaRoutine(r, parameterSummary));
 				}
 			}finally{
 				s.close();
@@ -532,4 +540,14 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		}
 		
 	};
+	
+	private class WrappedQaRoutine {
+		QaRoutine routine;
+		String parameterDescription;
+		
+		public WrappedQaRoutine(QaRoutine routine, String parameterDescription){
+			this.routine = routine;
+			this.parameterDescription = parameterDescription;
+		}
+	}
 }

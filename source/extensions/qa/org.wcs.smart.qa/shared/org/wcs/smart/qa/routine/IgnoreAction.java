@@ -24,6 +24,7 @@ package org.wcs.smart.qa.routine;
 import java.util.List;
 import java.util.Locale;
 
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 
 /**

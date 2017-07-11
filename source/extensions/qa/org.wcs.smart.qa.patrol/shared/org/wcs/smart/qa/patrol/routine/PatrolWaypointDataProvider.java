@@ -32,13 +32,15 @@ import java.util.UUID;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
-import org.wcs.smart.qa.routine.IQaDataProvider;
-import org.wcs.smart.qa.routine.IQaRoutineType;
+import org.wcs.smart.qa.model.IQaDataProvider;
+import org.wcs.smart.qa.model.IQaRoutineType;
+import org.wcs.smart.qa.patrol.ILabelProvider;
+import org.wcs.smart.qa.patrol.ILabelProvider.Key;
 import org.wcs.smart.qa.routine.LocationRoutineType;
 
 /**
@@ -53,7 +55,7 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 		
 	@Override
 	public String getName(Locale l) {
-		return "Patrol Waypoint";
+		return ILabelProvider.getLabel(Key.PatrolWaypointDataProvider_Name, l);
 	}
 
 	public String getId(){
@@ -78,20 +80,21 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 	}
 
 	@Override
-	public String getFeatureId(Session session, Object obj){
+	public String getFeatureId(Session session, Object obj, Locale l){
 		PatrolWaypoint pw = (PatrolWaypoint) session.createCriteria(PatrolWaypoint.class)
 				.add(Restrictions.eq("id.waypoint", ((WaypointLocationData)obj).getWaypoint())) //$NON-NLS-1$
 				.uniqueResult();
 		if (pw == null){
-			return "Patrol Waypoint not found - data error";
+			return ILabelProvider.getLabel(Key.PatrolWaypointDataProvider_WpNotFound, l);
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(pw.getPatrolLegDay().getPatrolLeg().getPatrol().getId());
-		sb.append(" - Waypoint ID ");
+		sb.append(" - "); //$NON-NLS-1$
+		sb.append(ILabelProvider.getLabel(Key.PatrolWaypointDataProvider_WpIdLabel, l));
 		sb.append(pw.getWaypoint().getId());
-		sb.append(" (");
+		sb.append(" ("); //$NON-NLS-1$
 		sb.append(DateFormat.getDateTimeInstance().format(pw.getWaypoint().getDateTime()));
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
@@ -109,6 +112,6 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 
 	@Override
 	public Image getImage() {
-		return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
+		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getImage(getClass());
 	}
 }

@@ -38,9 +38,9 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.ValidationEngine;
+import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
-import org.wcs.smart.qa.routine.IQaDataProvider;
 import org.wcs.smart.qa.routine.ValidationTask;
 
 /**
@@ -65,7 +65,7 @@ public class AutoValidateJob extends Job{
 	 */
 	public void addTask(IQaDataProvider provider){
 		for (QaRoutine r : InternalExtensionManager.INSTANCE.getAutoRoutines()){
-			tasks.add(new ValidationTask(r,provider, null, null, SmartDB.getCurrentConservationArea()));
+			tasks.add(new ValidationTask(r,provider, null, null, SmartDB.getCurrentConservationArea(), Locale.getDefault()));
 		}
 		if (getState() == Job.WAITING || 
 				getState() == Job.NONE){

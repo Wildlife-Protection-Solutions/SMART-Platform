@@ -25,14 +25,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
-import org.wcs.smart.qa.routine.IQaAction;
-import org.wcs.smart.qa.routine.IQaDataProvider;
-import org.wcs.smart.qa.routine.IQaRoutineType;
+import org.wcs.smart.qa.model.IQaAction;
+import org.wcs.smart.qa.model.IQaDataProvider;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.routine.IgnoreAction;
 
 /**
@@ -94,9 +96,8 @@ public enum RoutineExtensionManager {
 				try{
 					IQaRoutineType type = (IQaRoutineType)e.createExecutableExtension("class"); //$NON-NLS-1$
 					temp.add(type);
-					
 				}catch (Exception ex){
-					QaPlugIn.log(ex.getMessage(), ex);
+					Logger.getLogger(RoutineExtensionManager.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 				}
 			}
 		}
@@ -119,9 +120,8 @@ public enum RoutineExtensionManager {
 				try{
 					IQaDataProvider type = (IQaDataProvider)e.createExecutableExtension("class"); //$NON-NLS-1$
 					temp.add(type);
-					
 				}catch (Exception ex){
-					QaPlugIn.log(ex.getMessage(), ex);
+					Logger.getLogger(RoutineExtensionManager.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 				}
 			}
 		}

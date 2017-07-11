@@ -19,59 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.routine;
+package org.wcs.smart.qa.incident;
 
-import java.util.Collection;
 import java.util.Locale;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.model.QaRoutine;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.qa.incident.internal.Messages;
+import org.wcs.smart.qa.model.IQaDataProvider;
 
 /**
- * An interface for implementing a QA Routine type.  These
- * define routines that users can implement with custom
- * parameters for validating data.
+ * Image provider for incident data providers
  * 
  * @author Emily
  *
  */
-public interface IQaRoutineType {
+public class IncidentLabelProvider extends ILabelProvider {
 
-	/**
-	 * 
-	 * @return the identifier of the QA routine
-	 */
-	public String getId();
-	
-	/**
-	 * The property QA routine name for the given locale
-	 * 
-	 * @return
-	 */
-	public String getName(Locale l);
-	
-	
-	/**
-	 * A description of what the QA routine validates
-	 * 
-	 * @return
-	 */
-	public String getDescription(Locale l);
+	@Override
+	public Image getImage(Class<? extends IQaDataProvider> clazz) {
+		if (clazz.equals(IncidentDataProvider.class))
+			return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON) ;
+		return null;
+	}
 
-	
-	/**
-	 * Validates data returns a set of errors.
-	 * 
-	 * @return
-	 */
-	public Collection<QaError> validateData(ValidationTask task, Session session, IProgressMonitor monitor) throws Exception;
-		
-	/**
-	 * Returns a summary of the parameter values from the qa routine for display to the user
-	 * @param routine
-	 * @return
-	 */
-	public String getParameterSummary(QaRoutine routine);
+	@Override
+	public String getString(Key key, Locale l) {
+		switch(key){
+		case IncidentDataProvider_Name:
+			return Messages.IncidentLabelProvider_DataProviderName;
+		case IncidentDataProvder_IncidentNotFound:
+			return Messages.IncidentLabelProvider_NotFoundError;
+		case IncidentDataProvder_WpIdLbl:
+			return Messages.IncidentLabelProvider_WaypointLbl;
+		}
+		return ""; //$NON-NLS-1$
+	}
+
 }

@@ -38,8 +38,8 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.udig.IFilteringResource;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Georesource fo QaError layers.  Supports layer filtering.
@@ -139,7 +139,7 @@ public class QaErrorGeoResource extends IGeoResource implements IFilteringResour
 			this.description = "Resources for QA results";
 			this.name = "QA Error GeoResource";
 			this.title = this.name;
-			this.bounds = new ReferencedEnvelope(SmartDB.DATABASE_CRS);
+			this.bounds = new ReferencedEnvelope(GeometryUtils.SMART_CRS);
 		}
 	}
 	

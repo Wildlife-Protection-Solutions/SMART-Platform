@@ -28,18 +28,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.qa.QaPlugIn;
-import org.wcs.smart.qa.routine.IQaDataProvider;
-import org.wcs.smart.qa.routine.IQaRoutineType;
+import org.wcs.smart.qa.er.ILabelProvider.Key;
+import org.wcs.smart.qa.model.IQaDataProvider;
+import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.routine.LocationRoutineType;
 
 /**
@@ -54,7 +56,7 @@ public class ErTrackDataProvider extends IQaDataProvider {
 	
 	@Override
 	public String getName(Locale l) {
-		return "Mission Track";
+		return ILabelProvider.getLabel(Key.ErTrackDataProvider_Name, l);
 	}
 
 	public String getId(){
@@ -67,10 +69,10 @@ public class ErTrackDataProvider extends IQaDataProvider {
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
 		List<TrackLocationData> tracks = new ArrayList<>();
 		
-		Query q = session.createQuery("FROM Mission WHERE survey.surveyDesign.conservationArea = :ca AND startDate between :start and :end");
-		q.setParameter("ca", ca);
-		q.setParameter("start", startDate);
-		q.setParameter("end", endDate);
+		Query q = session.createQuery("FROM Mission WHERE survey.surveyDesign.conservationArea = :ca AND startDate between :start and :end"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.setParameter("start", startDate); //$NON-NLS-1$
+		q.setParameter("end", endDate); //$NON-NLS-1$
 		List<Mission> missions = q.list();
 		
 		for (Mission m: missions){
@@ -82,7 +84,7 @@ public class ErTrackDataProvider extends IQaDataProvider {
 								tracks.add(new TrackLocationData(t));
 							}
 						}catch (Exception ex){
-							QaPlugIn.log(ex.getMessage(), ex);
+							Logger.getLogger(ErTrackDataProvider.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 						}
 					}
 				}
@@ -93,19 +95,19 @@ public class ErTrackDataProvider extends IQaDataProvider {
 	}
 
 	@Override
-	public String getFeatureId(Session session, Object obj){
+	public String getFeatureId(Session session, Object obj, Locale l){
 		MissionTrack track = (MissionTrack) session.get(MissionTrack.class, ((TrackLocationData)obj).getTrack().getUuid());
 
 		if (track == null){
-			return "Mission Track not found - data error";
+			return ILabelProvider.getLabel(Key.ErTrackDataProvider_TrackNotFound, l);
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(track.getId());
-		sb.append(" - ");
+		sb.append(" - "); //$NON-NLS-1$
 		sb.append(track.getMissionDay().getMission().getId());
-		sb.append(" (");
+		sb.append(" ("); //$NON-NLS-1$
 		sb.append(DateFormat.getDateInstance().format(track.getMissionDay().getDate()));
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
@@ -122,7 +124,7 @@ public class ErTrackDataProvider extends IQaDataProvider {
 
 	@Override
 	public Image getImage() {
-		return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON) ;
+		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getImage(getClass());
 	}
 
 }

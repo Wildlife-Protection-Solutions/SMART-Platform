@@ -30,9 +30,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaError.Status;
-import org.wcs.smart.qa.routine.IQaAction;
+import org.wcs.smart.qa.patrol.internal.Messages;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -56,7 +57,7 @@ public class EditWaypointAction implements IQaAction {
 			item.setStatus(Status.FIXED);
 			Point pnt = (Point)item.getGeometryObject();
 			Point to = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(dialog.getUpdatedPoint().getX(), dialog.getUpdatedPoint().getY()));
-			item.setFixMessage(MessageFormat.format("Manually moved from ({0}, {1}) to ({2}, {3})", pnt.getX(), pnt.getY(), to.getX(), to.getY()));
+			item.setFixMessage(MessageFormat.format(Messages.EditWaypointAction_ActionFixMessage, pnt.getX(), pnt.getY(), to.getX(), to.getY()));
 			item.setGeometryObject(to);
 			return true;
 		}
@@ -75,7 +76,7 @@ public class EditWaypointAction implements IQaAction {
 
 	@Override
 	public String getName(Locale l) {
-		return "Edit Waypoint...";
+		return Messages.EditWaypointAction_ActionName;
 	}
 
 	@Override

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.routine;
+package org.wcs.smart.qa.model;
 
 import java.util.Collection;
 import java.util.Date;
@@ -88,7 +88,7 @@ public abstract class IQaDataProvider {
 	 * @param obj
 	 * @return
 	 */
-	public abstract String getFeatureId(Session session, Object obj);
+	public abstract String getFeatureId(Session session, Object obj, Locale l);
 	
 	
 	/**

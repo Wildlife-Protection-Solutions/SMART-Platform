@@ -30,8 +30,8 @@ import java.util.UUID;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.qa.routine.IQaDataProvider;
-import org.wcs.smart.qa.routine.IQaRoutineType;
+import org.wcs.smart.qa.model.IQaDataProvider;
+import org.wcs.smart.qa.model.IQaRoutineType;
 
 /**
  * Wrapper around any data provider that overrides the getData method
@@ -78,8 +78,8 @@ public class SingleItemDataProvider extends IQaDataProvider{
 	}
 
 	@Override
-	public String getFeatureId(Session session, Object obj) {
-		return parentProvider.getFeatureId(session, obj);
+	public String getFeatureId(Session session, Object obj, Locale l) {
+		return parentProvider.getFeatureId(session, obj, l);
 	}
 
 	@Override

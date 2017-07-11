@@ -42,9 +42,10 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.qa.patrol.internal.Messages;
 import org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider;
-import org.wcs.smart.qa.routine.IQaAction;
 
 /**
  * Delete patrol waypoint action.  Applicable for
@@ -63,7 +64,7 @@ public class DeletePatrolWaypointAction implements IQaAction {
 				toProcess.add(e);
 			}
 		}
-		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected waypoints?  This action cannot be undone.", toProcess.size()))){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.DeletePatrolWaypointAction_DeleteDialogTitle, MessageFormat.format(Messages.DeletePatrolWaypointAction_ConfirmDeleteMsg, toProcess.size()))){
 			return false;
 		}
 		
@@ -91,7 +92,7 @@ public class DeletePatrolWaypointAction implements IQaAction {
 				
 				if (pw == null){
 					item.setStatus(QaError.Status.DELETED);
-					item.setFixMessage("***Could not delete - Waypoint Not Found*** " + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));
+					item.setFixMessage(Messages.DeletePatrolWaypointAction_DeleteErrorNotFound + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));  //$NON-NLS-1$//$NON-NLS-2$ 
 				}else{
 					s.delete(pw);
 					s.delete(pw.getWaypoint());
@@ -106,14 +107,14 @@ public class DeletePatrolWaypointAction implements IQaAction {
 
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QaPlugIn.displayLog("An error occurred while removing the selected patrol waypoints.  Refresh QA list and try again, or edit try deleting individual patrol waypoints." + "\n\n", ex);
+			QaPlugIn.displayLog(Messages.DeletePatrolWaypointAction_DeleteError + "\n\n", ex);  //$NON-NLS-1$
 			return false;
 		}finally{
 			s.close();
 		}
 
 		for (QaError item : deleted){
-			item.setFixMessage("Waypoint Deleted");
+			item.setFixMessage(Messages.DeletePatrolWaypointAction_DeletedMsg);
 			item.setStatus(QaError.Status.DELETED);
 		}
 		//fire patrol events
@@ -137,7 +138,7 @@ public class DeletePatrolWaypointAction implements IQaAction {
 
 	@Override
 	public String getName(Locale l) {
-		return "Delete";
+		return Messages.DeletePatrolWaypointAction_ActionName;
 	}
 	
 	@Override

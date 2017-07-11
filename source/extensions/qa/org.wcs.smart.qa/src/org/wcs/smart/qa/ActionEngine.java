@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.wcs.smart.qa.model.IQaAction;
+import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.routine.IQaAction;
-import org.wcs.smart.qa.routine.IQaDataProvider;
 
 /**
  * Engine for performing qa actions

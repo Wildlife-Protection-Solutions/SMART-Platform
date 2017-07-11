@@ -30,8 +30,8 @@ import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Feature Source for providing features for QaError objects
@@ -59,7 +59,7 @@ public class QaErrorFeatureSource  extends ContentFeatureSource {
 		for(QaError error : dataStore.getErrors()){
 			if (QaErrorMemoryDatastore.isValid(error, getSchema())){
 				if (env == null){
-					env = new ReferencedEnvelope(error.getGeometryObject().getEnvelopeInternal(), SmartDB.DATABASE_CRS);
+					env = new ReferencedEnvelope(error.getGeometryObject().getEnvelopeInternal(), GeometryUtils.SMART_CRS);
 				}else{
 					env.expandToInclude(error.getGeometryObject().getEnvelopeInternal());
 				}

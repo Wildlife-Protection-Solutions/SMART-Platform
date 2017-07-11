@@ -506,7 +506,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 			Area.AreaType t = (Area.AreaType)((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
 			StringBuilder sb = new StringBuilder();
 			sb.append(LocationRoutineType.GeometryType.AREA.key);
-			sb.append(":"); //$NON-NLS-1$
+			sb.append(LocationRoutineType.SEPERATOR_CHAR);
 			sb.append(t.name());
 			areaParam.setStringValue(sb.toString());
 			areaParam.setByteValue(null);

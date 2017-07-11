@@ -22,8 +22,10 @@
 package org.wcs.smart.qa.routine;
 
 import java.util.Date;
+import java.util.Locale;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.QaRoutine;
 
 /**
@@ -40,6 +42,7 @@ public class ValidationTask{
 	private Date startDate;
 	private Date endDate;
 	private ConservationArea ca;
+	private Locale l;
 	
 	/**
 	 * Creates a new validation task
@@ -49,14 +52,19 @@ public class ValidationTask{
 	 * @param endDate the end date 
 	 * @param ca the conservation area 
 	 */
-	public ValidationTask(QaRoutine routine, IQaDataProvider provider, Date startDate, Date endDate, ConservationArea ca){
+	public ValidationTask(QaRoutine routine, IQaDataProvider provider, Date startDate, Date endDate, ConservationArea ca, Locale l){
 		this.routine = routine;
 		this.provider = provider;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.ca = ca;
+		this.l = l;
 	}
 
+	public Locale getLocale(){
+		return l;
+	}
+	
 	public void setQaRoutine(QaRoutine routine){
 		this.routine = routine;
 	}

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.er;
+package org.wcs.smart.qa.er.ui;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -32,18 +32,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.events.WaypointEventManager;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.er.ErTrackDataProvider;
+import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.routine.IQaAction;
 
 /**
  * Delete patrol waypoint action.  Applicable for
@@ -52,32 +50,32 @@ import org.wcs.smart.qa.routine.IQaAction;
  * @author Emily
  *
  */
-public class DeleteErWaypointAction implements IQaAction {
+public class DeleteErTrackAction implements IQaAction {
 
 	@Override
 	public boolean doAction(List<QaError> items) {
 		List<QaError> toProcess = new ArrayList<>();
 		for (QaError e : items){
-			if (e.getDataProviderId().equals(ErWaypointDataProvider.ID)){
+			if (e.getDataProviderId().equals(ErTrackDataProvider.ID)){
 				toProcess.add(e);
 			}
 		}
 		if (toProcess.isEmpty()) return false;
-		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected waypoints?  This action cannot be undone.", toProcess.size()))){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected tracks?  This action cannot be undone.", toProcess.size()))){
 			return false;
 		}
 		
 		Set<Mission> modified = new HashSet<>();
 		List<QaError> deleted = new ArrayList<>();
-		List<Waypoint> wpDeleted = new ArrayList<>();
+		List<MissionTrack> trackDeleted = new ArrayList<>();
 		Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try{
 			s.beginTransaction();
 			
 			for (QaError item : toProcess){
 				boolean found = false;
-				for (Waypoint wp : wpDeleted){
-					if (wp.getUuid().equals(item.getSourceId())){
+				for (MissionTrack track : trackDeleted){
+					if (track.getUuid().equals(item.getSourceId())){
 						//previously deleted
 						deleted.add(item);
 						found = true;
@@ -85,44 +83,40 @@ public class DeleteErWaypointAction implements IQaAction {
 				}
 				if (found) continue;
 				
-				SurveyWaypoint pw = (SurveyWaypoint) s.createCriteria(SurveyWaypoint.class)
-						.add(Restrictions.eq("id.waypoint.uuid", item.getSourceId())) //$NON-NLS-1$
-						.uniqueResult();
+				MissionTrack t = (MissionTrack)s.get(MissionTrack.class, item.getSourceId());
 				
-				if (pw == null){
+				if (t == null){
 					item.setStatus(QaError.Status.DELETED);
-					item.setFixMessage("***Could not delete - Waypoint Not Found*** " + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));
+					item.setFixMessage("***Could not delete - Track Not Found*** ");
 				}else{
-					s.delete(pw);
-					s.delete(pw.getWaypoint());
-					modified.add(pw.getMissionDay().getMission());
-					pw.getMissionDay().getMission().equals(null); //lazy load hibernate
 					deleted.add(item);
-					wpDeleted.add(pw.getWaypoint());
+					trackDeleted.add(t);
+					modified.add(t.getMissionDay().getMission());
+					//lazy load for events
+					t.getMissionDay().getMission().equals(null);
+					
+					t.getMissionDay().getTracks().remove(t);
+					t.setMissionDay(null);
+					s.delete(t);
 				}
 			}
 			s.getTransaction().commit();
-			
-
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QaPlugIn.displayLog("An error occurred while removing the selected patrol waypoints.  Refresh QA list and try again, or edit try deleting individual patrol waypoints." + "\n\n", ex);
+			QaPlugIn.displayLog("An error occurred while removing the selected patrol tracks.  Refresh QA list and try again, or edit try deleting individual patrol tracks." + "\n\n", ex);
 			return false;
 		}finally{
 			s.close();
 		}
 
 		for (QaError item : deleted){
-			item.setFixMessage("Waypoint Deleted");
+			item.setFixMessage("Track Deleted");
 			item.setStatus(QaError.Status.DELETED);
 		}
 		//fire patrol events
 		for (Mission m : modified){
 			SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.MISSION_MODIFIED, m);
-		}
-		//fire waypoint events
-		wpDeleted.forEach(w->WaypointEventManager.getInstance().waypointDeleted(w));
-		
+		}			
 		return true;
 	}
 
