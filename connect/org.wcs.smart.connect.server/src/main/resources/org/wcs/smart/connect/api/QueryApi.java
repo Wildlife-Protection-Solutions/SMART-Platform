@@ -68,6 +68,7 @@ import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.connect.query.engine.CsvExporter;
 import org.wcs.smart.connect.query.engine.GeoJsonExporter;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
+import org.wcs.smart.connect.query.engine.HtmlExporter;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
@@ -317,7 +318,6 @@ public class QueryApi extends HttpServlet{
 				}
 				return writeBinary(outputFile);
 			}else if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
-				//TODO: sort reuslts??
 				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
 				
 				if (result instanceof AbstractDbFeatureResultSet && query instanceof SimpleQuery){
@@ -329,6 +329,31 @@ public class QueryApi extends HttpServlet{
 						.status(Status.OK)
 						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
 						.entity(exporter.getGeoJsonOutput() )
+						.build();
+			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
+				HtmlExporter exporter = new HtmlExporter(request.getLocale());
+				
+				if (result instanceof AbstractDbFeatureResultSet
+						&& query instanceof SimpleQuery){
+
+						if(sortColumnName != null){
+							((AbstractDbFeatureResultSet)result).setSorting(sortColumnName, sortDirectionInt);
+							((AbstractDbFeatureResultSet)result).updateSortColumn(s);
+						}
+						
+						exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
+					}else if (result instanceof IMemoryTableResultSet
+						&& query instanceof GriddedQuery){
+						exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, s);
+					}else if (result instanceof SummaryQueryResult){
+						exporter.exportResults(query, (SummaryQueryResult)result, s);
+					}else{
+						return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+					}
+				return Response
+						.status(Status.OK)
+						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
+						.entity(exporter.getHtml() )
 						.build();
 			}else{
 				return createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$

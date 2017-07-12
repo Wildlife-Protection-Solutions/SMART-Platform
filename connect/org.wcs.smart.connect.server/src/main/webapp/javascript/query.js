@@ -354,11 +354,14 @@ function showQueryOptions(){
 	//update tiff option
 	var isTif = tifValues.indexOf(querytype) >= 0;
 	var item = document.querySelector("#queryformat option[value=tif]");
+	var itemHtml = document.querySelector("#queryformat option[value=html]");//turn off HTML option for grid queries which are the same ones tif is available for.
 	if (item != null){
 		if (isTif){
 			item.style.display = "block";
+			itemHtml.style.display = "none";
 		}else{
 			item.style.display = "none";
+			itemHtml.style.display = "block";
 		}
 	}
 	
