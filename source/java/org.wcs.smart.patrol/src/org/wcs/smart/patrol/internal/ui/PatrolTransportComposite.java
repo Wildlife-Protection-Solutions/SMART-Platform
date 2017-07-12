@@ -140,28 +140,29 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 			patrolLeg.setType(pm);
 			patrolLeg.getPatrol().recalculateType();
 			
-			if (pm.getPatrolType().requiresPilot()){
-				//prompt for pilot
-				boolean hasPilot = false;
-				for (PatrolLegMember member : patrolLeg.getMembers()){
-					if (member.getIsPilot()){
-						hasPilot = true;
-						break;
-					}
-				}
-				if (!hasPilot){
-					//as for pilot
-					EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(patrolTypeViewer.getControl().getShell(), Messages.PatrolTransportComposite_PilotLabel, 
-							MessageFormat.format(Messages.PatrolTransportComposite_PilotRequired, pm.getName()), EmployeeSelectorDialog.Type.PILOT,patrolLeg);
-					if (dialog.open() != Window.OK) return false;  //not pilot selected
-				}
-				
-			}else{
-				//remove all pilots
-				if (patrolLeg.getMembers() != null){
+			//for edits only
+			if (patrolLeg.getUuid() != null ){
+				if (pm.getPatrolType().requiresPilot()){
+					//prompt for pilot
+					boolean hasPilot = false;
 					for (PatrolLegMember member : patrolLeg.getMembers()){
-						member.setIsPilot(false);
+						if (member.getIsPilot()){
+							hasPilot = true;
+							break;
+						}
 					}
+					if (!hasPilot){
+						//as for pilot
+						EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(patrolTypeViewer.getControl().getShell(), Messages.PatrolTransportComposite_PilotLabel, 
+								MessageFormat.format(Messages.PatrolTransportComposite_PilotRequired, pm.getName()), EmployeeSelectorDialog.Type.PILOT,patrolLeg);
+						if (dialog.open() != Window.OK) return false;  //not pilot selected
+					}
+				}
+			}
+			if (!pm.getPatrolType().requiresPilot() && patrolLeg.getMembers() != null){
+				//remove all pilots
+				for (PatrolLegMember member : patrolLeg.getMembers()){
+					member.setIsPilot(false);
 				}
 			}
 			return true;
