@@ -84,7 +84,7 @@ public class UuidItem {
 			if (s.getUuid() == null && this.getUuid() == null){
 				return this == s;
 			}else if (s.getUuid() != null && this.getUuid() != null){
-				return s.getUuid().equals(this.uuid);
+				return s.getUuid().equals(this.getUuid());
 			}
 		}
 		return false;
