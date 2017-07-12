@@ -82,8 +82,6 @@ public class PatrolLabelProvider extends ILabelProvider {
 			return Messages.PatrolLabelProvider_WaypointDataProviderName;
 		case PatrolWaypointDataProvider_WpIdLabel:
 			return Messages.PatrolLabelProvider_WaypointIdLbl;
-		default:
-			break;
 		}
 		return ""; //$NON-NLS-1$
 	}

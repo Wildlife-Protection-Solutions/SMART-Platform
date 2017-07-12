@@ -39,6 +39,8 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.qa.ILabelProvider;
+import org.wcs.smart.qa.ILabelProvider.Key;
 import org.wcs.smart.qa.RoutineExtensionManager;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -63,9 +65,19 @@ public class QaError extends UuidItem{
 		ERROR,
 		FIXED;
 		
-		
 		public String getGuiName(Locale l){
-			//TODO:
+			switch(this){
+			case DELETED:
+				return ILabelProvider.getLabel(Key.QaError_Status_Deleted, l);
+			case ERROR:
+				return ILabelProvider.getLabel(Key.QaError_Status_Error, l);
+			case FIXED:
+				return ILabelProvider.getLabel(Key.QaError_Status_Fixed, l);
+			case IGNORED:
+				return ILabelProvider.getLabel(Key.QaError_Status_Ignored, l);
+			case NEW:
+				return ILabelProvider.getLabel(Key.QaError_Status_New, l);
+			}
 			return this.name();
 		}
 	}

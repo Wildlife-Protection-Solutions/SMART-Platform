@@ -4,6 +4,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.qa.internal.messages"; //$NON-NLS-1$
+	public static String AutomatedResultsEditor_CleanMsg;
+	public static String AutomatedResultsEditor_CleanTitle;
 	public static String AutomatedResultsEditor_ConfirmDelete;
 	public static String AutomatedResultsEditor_DeleteMessage;
 	public static String AutomatedResultsEditor_FormTitle;
@@ -80,6 +82,11 @@ public class Messages extends NLS {
 	public static String QaLabelProvider_LocationWpOutsideArea2;
 	public static String QaLabelProvider_QaServiceDescription;
 	public static String QaLabelProvider_QaServiceName;
+	public static String QaLabelProvider_StatusDeleted;
+	public static String QaLabelProvider_StatusError;
+	public static String QaLabelProvider_StatusFixed;
+	public static String QaLabelProvider_StatusIgnored;
+	public static String QaLabelProvider_StatusNew;
 	public static String QaLabelProvider_ValidationSubTask;
 	public static String QaLabelProvider_ValidationTaskName;
 	public static String QaLabelProvider_ValidGeometryNotFound;

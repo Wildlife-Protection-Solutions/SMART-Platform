@@ -55,7 +55,11 @@ public abstract class ILabelProvider {
 		LocationRoutineType_WpOutsideArea2,
 		LocationRoutineType_TrackOutsideArea,
 		LocationRoutineType_TrackOutsideArea2,
-	
+		QaError_Status_New,
+		QaError_Status_Ignored,
+		QaError_Status_Deleted,
+		QaError_Status_Error,
+		QaError_Status_Fixed,
 	}
 
 	public abstract String getString(Key key, Locale l);

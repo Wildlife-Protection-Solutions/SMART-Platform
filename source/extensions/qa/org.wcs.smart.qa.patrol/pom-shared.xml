@@ -25,6 +25,11 @@
     			<artifactId>org.wcs.smart.patrol</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+				<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.observation</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.qa</artifactId>

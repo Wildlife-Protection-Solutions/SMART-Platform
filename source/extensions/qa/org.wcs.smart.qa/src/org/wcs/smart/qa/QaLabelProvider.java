@@ -49,6 +49,16 @@ public class QaLabelProvider extends ILabelProvider {
 			return Messages.QaLabelProvider_ValidationSubTask;
 		case ValidationEngine_TaskName:
 			return Messages.QaLabelProvider_ValidationTaskName;
+		case QaError_Status_New:
+			return Messages.QaLabelProvider_StatusNew;
+		case QaError_Status_Ignored:
+			return Messages.QaLabelProvider_StatusIgnored;
+		case QaError_Status_Deleted:
+			return Messages.QaLabelProvider_StatusDeleted;
+		case QaError_Status_Error:
+			return Messages.QaLabelProvider_StatusError;
+		case QaError_Status_Fixed:
+			return Messages.QaLabelProvider_StatusFixed;
 		default:
 			break;
 		

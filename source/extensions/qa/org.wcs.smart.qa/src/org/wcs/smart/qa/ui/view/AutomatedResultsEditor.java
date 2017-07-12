@@ -40,7 +40,9 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPersistableElement;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -68,6 +70,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 	public static final String ID = "org.wcs.smart.qa.data.validatation.automated"; //$NON-NLS-1$
 
 	private FormToolkit toolkit;
+	private boolean isModified = false;
 	
 	public static IEditorInput AUTO_VALIDATION_INPUT =  new IEditorInput() {
 		
@@ -102,6 +105,43 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		}
 	};
 		
+	
+	private IPartListener2 partListener = new IPartListener2() {
+		
+		@Override
+		public void partVisible(IWorkbenchPartReference partRef) { }
+		
+		@Override
+		public void partOpened(IWorkbenchPartReference partRef) { }
+		
+		@Override
+		public void partInputChanged(IWorkbenchPartReference partRef) { }
+		
+		@Override
+		public void partHidden(IWorkbenchPartReference partRef) { }
+		
+		@Override
+		public void partDeactivated(IWorkbenchPartReference partRef) { }
+		
+		@Override
+		public void partBroughtToTop(IWorkbenchPartReference partRef) { }
+		
+		@Override
+		public void partActivated(IWorkbenchPartReference partRef) { }
+		
+		@Override
+		public void partClosed(IWorkbenchPartReference partRef) {
+			if (isModified){
+				if (MessageDialog.openQuestion(getSite().getShell(), Messages.AutomatedResultsEditor_CleanTitle, MessageFormat.format(Messages.AutomatedResultsEditor_CleanMsg, QaError.Status.NEW.getGuiName(Locale.getDefault())))){
+					InternalExtensionManager.INSTANCE.cleanAutoResults();
+				}
+				
+			}
+		}
+		
+
+	};
+	
 	public AutomatedResultsEditor(){
 		tableColumns = new ResultTableColumn[]{
 				ResultTableColumn.STATUS,
@@ -121,6 +161,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		super.init(site, input);
+		getSite().getPage().addPartListener(partListener);
 	}
 
 	@Override
@@ -128,7 +169,6 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			
 			for (QaError i : items){
 				for (QaError link : i.getLinks()){
 					s.saveOrUpdate(link);
@@ -136,11 +176,12 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 				s.saveOrUpdate(i);
 			}
 			s.getTransaction().commit();
+			isModified = true;
 		}catch (Exception ex){
 			QaPlugIn.displayLog(MessageFormat.format(Messages.AutomatedResultsEditor_SaveError, ex.getMessage()), ex);
 		}finally{
 			s.close();
-		}
+		}		
 	} 
 	
 	@Override
@@ -197,6 +238,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 	@Override
     public void dispose() {
 		super.dispose();
+		getSite().getPage().removePartListener(partListener);
 		if (toolkit != null){
 			toolkit.dispose();
 			toolkit = null;
@@ -208,17 +250,12 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		return this;
 	}
 
-	
-	
-	
 	/*
 	 * Loads all possible record sources from db and populates 
 	 * provided combo
 	 * @param cmbSource
 	 */
 	private void loadData(){
-		InternalExtensionManager.INSTANCE.cleanAutoResults();
-		
 		tblResults.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		j.setSystem(true);
 		j.cancel();
