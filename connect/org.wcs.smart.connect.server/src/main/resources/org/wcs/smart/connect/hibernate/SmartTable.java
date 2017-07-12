@@ -170,6 +170,9 @@ import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.model.SpatialPlanTargetPoint;
+import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.qa.model.QaRoutine;
+import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -354,7 +357,11 @@ public enum SmartTable {
 	I2_RECORD_SOURCE(IntelRecordSource.class, null),
 	I2_RECORD_ATTRIBUTE(IntelRecordSourceAttribute.class, ".id.source.conservationArea"),
 	I2_RECORD_ATTRIBUTE_VALUE(IntelRecordAttributeValue.class, ".id.record.conservationArea"),
-	I2_RECORD_ATTRIBUTE_LIST_VALUE(IntelRecordAttributeValueList.class, ".id.value.record.conservationArea");
+	I2_RECORD_ATTRIBUTE_LIST_VALUE(IntelRecordAttributeValueList.class, ".id.value.record.conservationArea"),
+	
+	QA_ERROR(QaError.class, null),
+	QA_ROUTINE(QaRoutine.class, null),
+	QA_ROUTINE_PARAMETER(QaRoutineParameter.class, ".qaRoutine.conservationArea");
 	
 	public Class<?> hibernateClass;
 	public String caProperty;
