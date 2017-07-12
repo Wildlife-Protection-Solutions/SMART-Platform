@@ -693,6 +693,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 	
 	Job j = new Job(Messages.ManualResultsEditor_LoadRoutinesJobName){
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<DataValidator> routines = new ArrayList<>();

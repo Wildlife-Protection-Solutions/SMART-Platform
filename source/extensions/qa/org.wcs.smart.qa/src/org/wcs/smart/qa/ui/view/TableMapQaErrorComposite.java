@@ -16,7 +16,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -28,6 +30,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
@@ -73,6 +76,7 @@ import org.wcs.smart.udig.ContentFilterLayerImpl;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.ui.map.tool.BBoxInfoTool;
 import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.util.JobUtil;
@@ -349,7 +353,10 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			});
 		}
 	
-		tblResults.getTable().addListener(SWT.Selection, e->{
+//		tblResults.getTable().addListener(SWT.Selection, e->{
+		tblResults.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
 			if (errorLayers == null) return;
 			FilterFactory ff = CommonFactoryFinder.getFilterFactory();
 			
@@ -367,7 +374,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 				l.setFilter(selection);
 				l.refresh(null);
 			}
-		
+			}
 		});
 		
 		createTableMenu();
@@ -385,6 +392,11 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		});
 		
 		String[] tools = Arrays.copyOf(MapToolComposite.DEFAULT_MAP_TOOLS, MapToolComposite.DEFAULT_MAP_TOOLS.length + 1);
+		for (int i = 0; i < tools.length; i ++){
+			if (BBoxInfoTool.ID.equals(tools[i])){
+				tools[i] = QaFixTool.ID;
+			}
+		}
 		tools[tools.length - 1] = ClearSelectionTool.ID;
 		mapTools = tools;
 		
@@ -397,6 +409,62 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		
 		sash.setWeights(new int[]{3,5});
         addLayers();
+        
+        
+        Menu mapMenu = new Menu(mapViewer.getControl());
+        new QaActionMenu(mapMenu, parentContext, tblResults){
+			@Override
+			public void refresh(List<QaError> errors) {
+				if (errors != null) saveErrorItems(errors);
+				refreshResults();
+			}
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				if (!(ApplicationGIS.getToolManager().getActiveTool() instanceof QaFixTool)){
+					for(MenuItem i : mapMenu.getItems()){
+						i.dispose();
+					}
+					return;
+				}
+				Object x = getMap().getBlackboard().get(QaFixTool.HOVER_ID);
+				ISelectionProvider lastProvider = selectionProvider;
+				if (x != null && x instanceof QaError){
+					final StructuredSelection singleSelection = new StructuredSelection(x);
+					selectionProvider = new ISelectionProvider() {
+						
+						@Override
+						public void setSelection(ISelection selection) {}
+						
+						@Override
+						public void removeSelectionChangedListener(ISelectionChangedListener listener) {}
+						
+						@Override
+						public ISelection getSelection() {
+							return  singleSelection;
+						}
+						
+						@Override
+						public void addSelectionChangedListener(ISelectionChangedListener listener) { }
+					};
+				}
+				super.menuShown(e);
+				if( ((IStructuredSelection)selectionProvider.getSelection()).size() == 1){
+					//show in table options
+					MenuItem miTest = new MenuItem(mapMenu, SWT.NONE,0);
+					miTest.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
+					miTest.setText(Messages.QaMapInfoToolProvider_ShowInTableLabel);
+					QaError element = (QaError)((IStructuredSelection)selectionProvider.getSelection()).getFirstElement();
+					miTest.addListener(SWT.Selection, evt->{
+						setSelection(element);
+					});
+					newItems.add(miTest);
+				}
+				selectionProvider = lastProvider;
+			}
+		};
+		
+		mapViewer.getControl().setMenu(mapMenu);
 	}
 	
 	public Collection<QaError> getResults(){
@@ -490,8 +558,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			}
 			errorLayers.addAll(newLayers);
 		}catch (Exception ex){
-			ex.printStackTrace();
-			//TODO:
+			QaPlugIn.log(ex.getMessage(), ex);
 		}
 	}	
 	
@@ -524,12 +591,25 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 				refreshResults();
 			}
 		};
-		
 	}
 	
+	/**
+	 * Sets the table/map selection and displays the item in the table
+	 * @param error
+	 */
 	public void setSelection(QaError error){
 		clearSelection();
 		tblResults.setSelection(new StructuredSelection(error));
+		tblResults.getTable().showSelection();
+	}
+	
+	/**
+	 * Sets the table/map selection and displays the items in the table 
+	 * @param errors
+	 */
+	public void setSelection(List<QaError> errors){
+		clearSelection();
+		tblResults.setSelection(new StructuredSelection(errors));
 		tblResults.getTable().showSelection();
 	}
 	

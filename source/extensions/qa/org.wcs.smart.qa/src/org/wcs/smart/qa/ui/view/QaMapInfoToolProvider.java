@@ -22,29 +22,23 @@
 package org.wcs.smart.qa.ui.view;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
+import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.render.IViewportModel;
-import org.wcs.smart.SmartPlugIn;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.qa.internal.Messages;
+import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 public class QaMapInfoToolProvider implements IInfoToolProvider {
@@ -55,6 +49,35 @@ public class QaMapInfoToolProvider implements IInfoToolProvider {
 		this.editor = editor;
 	}
 	
+	public void selectFeatures(Point start, Point end){
+		Map map = editor.getMap();
+		
+		Coordinate c1 = map.getViewportModel().pixelToWorld(start.x, start.y);
+		Coordinate c2 = map.getViewportModel().pixelToWorld(end.x, end.y);
+
+		CoordinateReferenceSystem crs = map.getViewportModel().getCRS();
+		
+		try{
+			c1 = ReprojectUtils.reproject(c1.x, c1.y, crs, SmartDB.DATABASE_CRS);
+			c2 = ReprojectUtils.reproject(c2.x, c2.y, crs, SmartDB.DATABASE_CRS);
+		}catch (Exception ex){
+			QaPlugIn.log(ex.getMessage(), ex);
+			return;
+		}
+		
+		Envelope env = new Envelope(c1, c2);
+		Polygon pEnv = GeometryFactoryProvider.getFactory().createPolygon(new Coordinate[]{c1, new Coordinate(c1.x, c2.y), c2, new Coordinate(c2.x, c1.y), c1});
+		List<QaError> toSelect = new ArrayList<>();
+		for (QaError result : editor.getResults()){
+			if (result.getGeometryObject() != null){
+				if (env.intersects(result.getGeometryObject().getEnvelopeInternal()) && result.getGeometryObject().intersects(pEnv)){
+					toSelect.add(result);
+				}
+			}
+		}
+		editor.setSelection(toSelect);
+	}
+				
 	
 	@Override
 	public InfoPoint findFeature(int x, int y, IViewportModel vm) {
@@ -65,8 +88,7 @@ public class QaMapInfoToolProvider implements IInfoToolProvider {
 		try {
 			db = ReprojectUtils.reproject(world.x, world.y, vm.getCRS(), SmartDB.DATABASE_CRS);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			QaPlugIn.log(e.getMessage(), e);
 			return null;
 		}
 		QaError nearest = null;
@@ -95,8 +117,7 @@ public class QaMapInfoToolProvider implements IInfoToolProvider {
 		try {
 			px = ReprojectUtils.reproject(c[0].x, c[0].y, SmartDB.DATABASE_CRS, vm.getCRS());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			QaPlugIn.log(e.getMessage(), e);
 			return null;
 		}
 		Point pnt = vm.worldToPixel(px);
@@ -105,66 +126,9 @@ public class QaMapInfoToolProvider implements IInfoToolProvider {
 		StringBuilder sb = new StringBuilder();
 		sb.append(nearest.getErrorId());
 		
-		createMenu(editor.getMapViewer().getControl(), nearest);
+		editor.getMap().getBlackboard().put(QaFixTool.HOVER_ID, nearest);
 		return new InfoPoint(pnt, nearest, sb.toString());
 	}
 	
 	
-	private void createMenu(Control control, QaError error){
-		
-		Menu existingMenu = control.getMenu();
-		if(existingMenu != null && !existingMenu.isDisposed()){
-			existingMenu.dispose();
-		}
-
-		Menu menuTable = new Menu(control);
-		control.setMenu(menuTable);
-
-		control.addListener(SWT.MouseMove, new Listener(){
-			@Override
-			public void handleEvent(Event event) {
-				control.removeListener(SWT.MouseMove, this);
-				menuTable.dispose();
-				control.setMenu(null);
-			}
-			
-		});
-
-		MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
-		miTest.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
-		miTest.setText(Messages.QaMapInfoToolProvider_ShowInTableLabel);
-		miTest.addListener(SWT.Selection, e->{
-			editor.setSelection(error);
-		});
-		
-		new QaActionMenu(menuTable, editor.getContext(), new ISelectionProvider() {
-			
-			@Override
-			public void setSelection(ISelection selection) {
-			}
-			
-			@Override
-			public void removeSelectionChangedListener(
-					ISelectionChangedListener listener) {
-			}
-			
-			@Override
-			public ISelection getSelection() {
-				return new StructuredSelection(error);
-			}
-			
-			@Override
-			public void addSelectionChangedListener(ISelectionChangedListener listener) {
-			}
-		}){
-			@Override
-			public void refresh(List<QaError> errors) {
-				if (errors != null) editor.saveErrorItems(errors);
-				editor.refreshResults();
-			}
-			
-		};
-		
-	}
-
 }

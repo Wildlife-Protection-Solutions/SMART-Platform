@@ -24,6 +24,8 @@ package org.wcs.smart.qa.model.map;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
@@ -40,6 +42,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.qa.ILabelProvider;
 import org.wcs.smart.qa.ILabelProvider.Key;
+import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.udig.IFilteringResource;
 import org.wcs.smart.util.GeometryUtils;
 
@@ -86,8 +89,7 @@ public class QaErrorGeoResource extends IGeoResource implements IFilteringResour
 		try {
 			return new URL(null, service.getIdentifier().toExternalForm() + "#" + typeName, CorePlugin.RELAXED_HANDLER);  //$NON-NLS-1$
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.getLogger(QaErrorGeoResource.class.getName()).log(Level.WARNING, e.getMessage(), e);
 		}
 		return null;
 	}

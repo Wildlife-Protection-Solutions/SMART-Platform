@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.referencing.GeodeticCalculator;
@@ -218,11 +220,10 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 					return createError(task, session, x, ls, message);
 				}
 			}
-					
-					
 		}catch (Exception ex){
-			//TODO: do something with this error
-			ex.printStackTrace();
+			Logger.getLogger(PatrolSpeedRoutineType.class.getName()).log(Level.WARNING,ex.getMessage(), ex);
+			String message = MessageFormat.format(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_TrackError, task.getLocale()), ex.getMessage());
+			return createError(task, session, x, null, message);
 		}
 		return null;
 		

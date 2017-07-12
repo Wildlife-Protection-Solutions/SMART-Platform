@@ -122,5 +122,18 @@
             clazz="org.wcs.smart.qa.plugin.ChangeLogInstaller">
       </ChangeLogTracker>
    </extension>
+   <extension
+         point="org.locationtech.udig.project.ui.tool">
+      <modalTool
+            categoryId="org.wcs.smart.location.maptools"
+            class="org.wcs.smart.qa.ui.view.QaFixTool"
+            icon="images/icons/qatool.png"
+            id="org.wcs.smart.qa.map.QaFixTool"
+            name="QA Fix Tool"
+            onToolbar="true"
+            toolCursorId="org.wcs.smart.cross"
+            tooltip="select qa items on map ">
+      </modalTool>
+   </extension>
 
 </plugin>

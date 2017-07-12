@@ -54,11 +54,10 @@ import org.wcs.smart.qa.routine.IgnoreAction;
  */
 public abstract class QaActionMenu implements MenuListener {
 
-	private List<MenuItem> newItems = new ArrayList<>();
-
-	private ISelectionProvider selectionProvider;
-	private IEclipseContext context;
-	private Menu parent;
+	protected List<MenuItem> newItems = new ArrayList<>();
+	protected ISelectionProvider selectionProvider;
+	protected IEclipseContext context;
+	protected Menu parent;
 	
 	public QaActionMenu(Menu parent, IEclipseContext context, ISelectionProvider selectionProvider ){
 		this.selectionProvider = selectionProvider;
@@ -75,12 +74,9 @@ public abstract class QaActionMenu implements MenuListener {
 		newItems.clear();
 		
 		if (selectionProvider.getSelection().isEmpty()) return;
-		
 		boolean isSingle = ((IStructuredSelection)selectionProvider.getSelection()).size() == 1;
 		
-		
 		Map<String, IQaAction> actions = new HashMap<>();
-		
 		boolean isFirst = true;
 		for (Iterator<?> iterator = ((IStructuredSelection)selectionProvider.getSelection()).iterator(); iterator.hasNext();) {
 			Object item = (Object) iterator.next();
@@ -131,9 +127,10 @@ public abstract class QaActionMenu implements MenuListener {
 			mi.setImage(action.getImage());
 			newItems.add(mi);
 		
+			final IStructuredSelection thisSelection =  (IStructuredSelection)selectionProvider.getSelection();
 			mi.addListener(SWT.Selection, event->{
 				List<QaError> items = new ArrayList<QaError>();
-				for (Iterator<?> iterator3 = ((IStructuredSelection)selectionProvider.getSelection()).iterator(); iterator3.hasNext();) {
+				for (Iterator<?> iterator3 = thisSelection.iterator(); iterator3.hasNext();) {
 					Object x = iterator3.next();
 					if (x instanceof QaError){
 						items.add((QaError) x);

@@ -51,6 +51,7 @@ public class Messages extends NLS {
 	public static String OpenSourcePatrolAction_WpNotFound;
 	public static String PatrolEditWaypointDialog_interpolateToolTooltip;
 	public static String PatrolEditWaypointDialog_WpNotFound;
+	public static String PatrolLabelProvider_ErrorValidatingPatrolTrack;
 	public static String PatrolLabelProvider_InvalidMaxSpeed;
 	public static String PatrolLabelProvider_LegLabel;
 	public static String PatrolLabelProvider_LoadingDataMsg;

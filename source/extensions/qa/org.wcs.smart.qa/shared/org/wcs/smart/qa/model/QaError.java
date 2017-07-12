@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -341,8 +343,7 @@ public class QaError extends UuidItem{
 			try {
 				this.geometry = reader.read(getGeometry());
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Logger.getLogger(QaError.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			}
 		}
 		return geometry;

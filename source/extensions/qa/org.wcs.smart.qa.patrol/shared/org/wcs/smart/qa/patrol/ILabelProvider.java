@@ -45,6 +45,7 @@ public abstract class ILabelProvider {
 		PatrolSpeedRoutineType_InvalidMaxSpeed,
 		PatrolSpeedRoutineType_WpSpeedExceeded,
 		PatrolSpeedRoutineType_TrackSpeedExceeded,
+		PatrolSpeedRoutineType_TrackError,
 		PatrolTrackDataProvider_TrackNotFound,
 		PatrolTrackDataProvider_Name,
 		PatrolTrackDataProvider_LegLabel,

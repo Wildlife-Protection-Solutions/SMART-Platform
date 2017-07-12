@@ -98,7 +98,7 @@ public class EditTrackAction  implements IQaAction {
 		if (changes[0]){
 			item.setStatus(Status.FIXED);
 			item.setFixMessage(Messages.EditTrackAction_FixMessage);
-			//TODO: do something here
+			//you can edit multiple tracks so we cannot do this 
 			//item.setGeometryObject(dialog.getEditTrackLineString());
 			return true;
 		}
