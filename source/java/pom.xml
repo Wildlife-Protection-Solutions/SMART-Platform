@@ -209,6 +209,9 @@
         			<module>org.wcs.smart.patrol.query</module>
         			<module>org.wcs.smart.patrol.query.report</module>
         			<module>org.wcs.smart.reporttable</module>
+        			
+        			<module>../extensions/qa/org.wcs.smart.qa</module>
+				<module>../extensions/qa/org.wcs.smart.qa.patrol</module>
 			</modules>
 		</profile>
 		<profile>
@@ -223,12 +226,12 @@
 				<module>org.wcs.smart.intelligence.core.feature</module>
 				<module>org.wcs.smart.intelligence.feature</module>
 				
-				
 				<module>org.wcs.smart.plan</module>
 				<module>org.wcs.smart.plan.core.feature</module>
 				<module>org.wcs.smart.plan.feature</module>
 				
 				<module>org.wcs.smart.independentincident</module>
+				<module>../extensions/qa/org.wcs.smart.qa.incident</module>
 				<module>org.wcs.smart.independentincident.feature</module>
 				
 				<module>../extensions/entity/org.wcs.smart.entity</module>
@@ -251,6 +254,7 @@
 				<module>../extensions/er/org.wcs.smart.er.core.feature</module>
 				<module>../extensions/er/org.wcs.smart.er.query</module>
 				<module>../extensions/er/org.wcs.smart.er.query.report</module>
+				<module>../extensions/qa/org.wcs.smart.qa.er</module>
 				
 				<module>../extensions/i2/org.wcs.smart.i2</module>
 				<module>../extensions/i2/org.wcs.smart.i2.feature</module>
