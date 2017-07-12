@@ -26,7 +26,7 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 				public void execute(Connection c) throws SQLException {
 					try {
 						c.setAutoCommit(false);
-						upgrade(c, monitor);
+						upgrade(c, s, monitor);
 						c.setAutoCommit(true);
 					} catch (final Exception e) {
 						thrownException = new Exception(Messages.Upgrader500To600_ErrorMessage, e);
@@ -43,7 +43,7 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 		monitor.done();
 	}
 
-	private void upgrade(Connection c, IProgressMonitor monitor)
+	private void upgrade(Connection c, Session session, IProgressMonitor monitor)
 			throws Exception {
 
 		String[] sql = new String[] {
@@ -59,6 +59,9 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 			SmartPlugIn.logInfo(s);
 			c.createStatement().execute(s);
 		}
+		
+		//create qa plugin tables
+		QaPlugInInstaller.createTables(session, c);
 
 		/* VERSION UDATE */
 		String ssql = "update smart.db_version set version = '" + UpgradeEngine.UpgradeFromVersion.V600.toVersion + "' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$ //$NON-NLS-2$
