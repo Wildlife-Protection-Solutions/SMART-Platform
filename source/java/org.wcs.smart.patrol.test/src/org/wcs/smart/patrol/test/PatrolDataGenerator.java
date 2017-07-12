@@ -236,7 +236,16 @@ public class PatrolDataGenerator {
 					cx += ((random.nextInt(1000)) / 100000.0) * (random.nextInt(10) <= 5 ? -1 : 1);
 					cy += ((random.nextInt(1000)) / 100000.0) * (random.nextInt(10) <= 5 ? -1 : 1);
 					
-					trackPnts[x] = new Coordinate(cx,cy);
+					Calendar c1 = Calendar.getInstance();
+					c1.setTimeInMillis(wp.getDateTime().getTime());
+					Calendar c2 = Calendar.getInstance();
+					c2.setTimeZone(Track.ZTIMEZONE);
+					c2.setTimeInMillis(0);
+					c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH),
+							c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY),
+							c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
+
+					trackPnts[x] = new Coordinate(cx,cy, c2.getTime().getTime());
 					
 					wp.setX(cx);
 					wp.setY(cy);
