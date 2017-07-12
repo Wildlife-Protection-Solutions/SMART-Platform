@@ -47,6 +47,10 @@ import org.wcs.smart.connect.i18n.labels.PlanLabelProvider;
 import org.wcs.smart.connect.i18n.labels.QueryDateLabelProvider;
 import org.wcs.smart.connect.i18n.labels.SmartLabelProvider;
 import org.wcs.smart.connect.i18n.labels.SurveyQueryLabelProvider;
+import org.wcs.smart.connect.qa.QaErLabelProvider;
+import org.wcs.smart.connect.qa.QaIncidentLabelProvider;
+import org.wcs.smart.connect.qa.QaLabelProvider;
+import org.wcs.smart.connect.qa.QaPatrolLabelProvider;
 import org.wcs.smart.connect.query.PatrolContributionFinder;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.connect.query.columns.EntityQueryColumnProvider;
@@ -120,6 +124,11 @@ public class SmartContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(IPatrolContributionFinder.class, new PatrolContributionFinder());
 		SmartContext.INSTANCE.setClass(IWaypointSourceEngine.class, WaypointSourceEngine.INSTANCE);
 		SmartContext.INSTANCE.setClass(ISmartMapLabelProvider.class, new SmartServiceLabelProvider());
+		
+		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.er.ILabelProvider.class, new QaErLabelProvider());
+		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.ILabelProvider.class, new QaLabelProvider());
+		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.patrol.ILabelProvider.class, new QaPatrolLabelProvider());
+		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.incident.ILabelProvider.class, new QaIncidentLabelProvider());
 		
 		/* filestore configurations */
 		SmartContext.INSTANCE.setTempFilestoreLocation((File)arg0.getServletContext().getAttribute(ServletContext.TEMPDIR));

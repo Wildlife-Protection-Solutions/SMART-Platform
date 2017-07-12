@@ -344,6 +344,21 @@
     			<artifactId>org.wcs.smart.qa</artifactId>
     			<version>${smart.version}</version>
 		</dependency>		
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.qa.patrol</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.qa.incident</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>		
+				<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.qa.er</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
 		<!-- JTS -->
 		<dependency>
     			<groupId>com.vividsolutions</groupId>
