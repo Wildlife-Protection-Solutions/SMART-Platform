@@ -30,6 +30,7 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.qa.ILabelProvider.Key;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.routine.ValidationTask;
@@ -79,11 +80,11 @@ public class ValidationEngine {
 	 * @return
 	 */
 	public Collection<QaError> validate( Session session, IProgressMonitor monitor ){
-		SubMonitor  m = SubMonitor.convert(monitor, "Validating Data", tasks.size());
+		SubMonitor  m = SubMonitor.convert(monitor, ILabelProvider.getLabel(Key.ValidationEngine_TaskName, l), tasks.size());
 		exceptions = new ArrayList<>();
 		Collection<QaError> errors = new ArrayList<QaError>();
 		for (ValidationTask t : tasks){
-			m.setTaskName(MessageFormat.format("Validating {0} ({1})", t.getDataProvider().getName(l), t.getRoutine().getName()));
+			m.setTaskName(MessageFormat.format(ILabelProvider.getLabel(Key.ValidationEngine_SubTaskName, t.getLocale()), t.getDataProvider().getName(l), t.getRoutine().getName()));
 			try{
 				QaRoutine r = (QaRoutine) session.get(QaRoutine.class, t.getRoutine().getUuid());
 				t.setQaRoutine(r);

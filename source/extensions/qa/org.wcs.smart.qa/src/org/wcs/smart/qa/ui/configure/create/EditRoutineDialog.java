@@ -45,6 +45,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.ui.configure.IParameterCollector;
@@ -110,7 +111,7 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		collector = InternalExtensionManager.INSTANCE.newParameterCollector(routine.getRoutineTypeId());
 		if (collector == null){
 			Label l = new Label(parameterComp, SWT.NONE);
-			l.setText("No Parameters required for this QA Routine");
+			l.setText(Messages.EditRoutineDialog_NoParametersRequired);
 		}else{
 			collector.createUi(parameterComp);
 			collector.initUi(routine);
@@ -145,7 +146,7 @@ public class EditRoutineDialog extends TitleAreaDialog{
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QaPlugIn.displayLog("Error saving changes to QA Routine: " + ex.getMessage(), ex);
+			QaPlugIn.displayLog(Messages.EditRoutineDialog_SaveError + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -170,14 +171,14 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		TabItem generalTab = new TabItem(tabs, SWT.NONE);
-		generalTab.setText("General");
+		generalTab.setText(Messages.EditRoutineDialog_GeneralTab);
 		
 		Composite generalTabComp = createGeneralTab(tabs);
 		generalTab.setControl(generalTabComp);
 		
 		
 		TabItem parametersTab = new TabItem(tabs, SWT.NONE);
-		parametersTab.setText("Parameters");
+		parametersTab.setText(Messages.EditRoutineDialog_ParametersTab);
 		
 		Composite parametersTabComp = new Composite(tabs, SWT.NONE);
 		parametersTabComp.setLayout(new GridLayout(2, false));
@@ -198,9 +199,9 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		sc.setContent(parameterComp);
 		
 		
-		getShell().setText("Edit QA Routine");
+		getShell().setText(Messages.EditRoutineDialog_ShellTitle);
 		setTitle(routine.getName());
-		setMessage("Modify the QA Routine details");
+		setMessage(Messages.EditRoutineDialog_DialogTitle);
 		
 		initControls();
 		
@@ -218,7 +219,7 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		((GridLayout)top.getLayout()).marginHeight = 10;
 		
 		Label lblType = new Label(top, SWT.NONE);
-		lblType.setText(RoutinesListDialog.RoutineColumn.TYPE.guiName + ":");
+		lblType.setText(RoutinesListDialog.RoutineColumn.TYPE.guiName + ":"); //$NON-NLS-1$
 		
 		lblType2 = new Label(top, SWT.NONE);
 		lblType2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -263,7 +264,7 @@ public class EditRoutineDialog extends TitleAreaDialog{
 		boolean ok = true; 
 		if (txtName.getText().trim().length() == 0){
 			ok = false;
-			cdName.setDescriptionText("Name required");
+			cdName.setDescriptionText(Messages.EditRoutineDialog_NameRequired);
 			cdName.show();
 		}else{
 			cdName.hide();

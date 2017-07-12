@@ -40,6 +40,8 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.qa.ILabelProvider;
+import org.wcs.smart.qa.ILabelProvider.Key;
 import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
@@ -108,18 +110,18 @@ public class LocationRoutineType implements IQaRoutineType {
 
 	@Override
 	public String getName(Locale l) {
-		return "Location Routine";
+		return ILabelProvider.getLabel(Key.LocationRoutineType_Name, l);
 	}
 
 	@Override
 	public String getDescription(Locale l) {
-		return "Validates waypoints & track positions against a user provided areas flagging all waypoints outside of the boundaries.";
+		return ILabelProvider.getLabel(Key.LocationRoutineType_Description, l);
 	}
 	
 	@Override
 	public String getParameterSummary(QaRoutine routine, Locale l, Session session){
 		QaRoutineParameter p = routine.findParameter(LOCATION_PARAM_ID);
-		if (p == null) return "";
+		if (p == null) return ""; //$NON-NLS-1$
 		
 		String value = p.getStringValue();
 		if (value.startsWith(GeometryType.FILE.key)){
@@ -130,34 +132,35 @@ public class LocationRoutineType implements IQaRoutineType {
 				sb.append(value);
 				sb.append(": "); //$NON-NLS-1$
 				Envelope env = g.getEnvelopeInternal();
-				sb.append("Area: Shapefile boundary (" + env.getMinX() + "," + env.getMinY() + ")  (" + env.getMaxX() + "," + env.getMaxY() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				sb.append(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_FileParamDescription, l), env.getMinX(),env.getMinY(), env.getMaxX(), env.getMaxY())); 
 				return sb.toString();
 			} catch (ParseException e) {
 				Logger.getLogger(LocationRoutineType.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			}
-			return "Error";
+			return ILabelProvider.getLabel(Key.LocationRoutineType_Error, l);
 			
 		}else if (value.startsWith(GeometryType.AREA.key)){
 			String[] parts = value.split(LocationRoutineType.SEPERATOR_CHAR);
 			String areaKey = parts[1];
 			for (AreaType t : Area.AreaType.values()){
 				if (areaKey.equals(t.name())){
-					return "Area: " + SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(t, l);
+					return MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_AreaParamDescription, l), SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(t, l));
 				}
 			}
 			return value;
 		}else if (value.startsWith(GeometryType.WKT.key)){
 			String geom = new String(p.getByteValue());
-			return "Area (wkt): " + geom; //$NON-NLS-1$
+			return MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_WktParamDescription, l), geom);
 		}
 		return p.getStringValue();
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<QaError> validateData(ValidationTask task, Session session, IProgressMonitor monitor) throws Exception{
 		monitor.beginTask(task.getRoutine().getName(), 103);
-		monitor.subTask("Loading Data");
+		monitor.subTask(ILabelProvider.getLabel(Key.LocationRoutineType_LoadingDataMsg, task.getLocale()));
 		
 		Collection<?> data = task.getDataProvider().getData(session, task.getConservationArea(), task.getStartDate(), task.getEndDate());
 		monitor.worked(1);
@@ -167,7 +170,7 @@ public class LocationRoutineType implements IQaRoutineType {
 		QaRoutineParameter p = routine.findParameter(LOCATION_PARAM_ID);
 		
 		
-		if (p == null) throw new Exception("No valid geometry found for waypoint position routine: " + routine.getName());
+		if (p == null) throw new Exception(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_NoGeomFound, task.getLocale()), routine.getName()));
 		
 		if (p.getStringValue().startsWith(GeometryType.WKT.key) || 
 				p.getStringValue().startsWith(GeometryType.FILE.key)){
@@ -176,24 +179,24 @@ public class LocationRoutineType implements IQaRoutineType {
 			
 		}else if (p.getStringValue().startsWith(GeometryType.AREA.key)){
 			Area.AreaType type = Area.AreaType.valueOf(p.getStringValue().split(SEPERATOR_CHAR)[1]);
-			if (type == null) throw new Exception("No valid geometry found for waypoint position routine: " + routine.getName());
+			if (type == null) throw new Exception(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_NoGeomFound, task.getLocale()), routine.getName()));
 			List<Area> areas = session.createCriteria(Area.class)
-					.add(Restrictions.eq("conservationArea", task.getConservationArea()))
-					.add(Restrictions.eq("type", type))
+					.add(Restrictions.eq("conservationArea", task.getConservationArea())) //$NON-NLS-1$
+					.add(Restrictions.eq("type", type)) //$NON-NLS-1$
 					.list();
 			List<Geometry> geoms = new ArrayList<>();
 			for (Area a : areas ){
 				geoms.add(a.getGeometry());
 			}
-			if (geoms.isEmpty()) throw new Exception("No valid geometry found for waypoint position routine: " + routine.getName()); 
+			if (geoms.isEmpty()) throw new Exception(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_NoGeomFound, task.getLocale()), routine.getName())); 
 			g = new GeometryCollection(geoms.toArray(new Geometry[geoms.size()]), GeometryFactoryProvider.getFactory());
 		}else{
-			throw new Exception("No valid geometry found for waypoint position routine: " + routine.getName());
+			throw new Exception(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_NoGeomFound, task.getLocale()), routine.getName()));
 		}
 		
 		monitor.worked(2);
 		
-		monitor.subTask("Validating Data");
+		monitor.subTask(ILabelProvider.getLabel(Key.LocationRoutineType_ValidatingDataTaskName, task.getLocale()));
 		
 		int lastsize = 0;
 		int cnt = 0;
@@ -216,7 +219,7 @@ public class LocationRoutineType implements IQaRoutineType {
 							QaError error = new QaError();
 							error.setDataProviderId(task.getDataProvider().getId());
 							error.setConservationArea(task.getConservationArea());
-							error.setErrorDescription("The waypoint is outside the validation area.");
+							error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea, task.getLocale()));
 							error.setErrorId( task.getDataProvider().getFeatureId(session, x, task.getLocale()));
 							error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
 							error.setQaRoutine(routine);
@@ -228,10 +231,10 @@ public class LocationRoutineType implements IQaRoutineType {
 							try{
 								Coordinate[] minPnts = DistanceOp.nearestPoints(pp.polygon, GeometryFactoryProvider.getFactory().createPoint(wp.getPoint()));
 								double distancekm = JTS.orthodromicDistance(minPnts[0], minPnts[1], GeometryUtils.SMART_CRS) / 1000.0;									
-								error.setErrorDescription(MessageFormat.format("The waypoint is {0} km away from the validation area.",DISTANCE_FORMATTER.format(distancekm)));
+								error.setErrorDescription(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea2, task.getLocale()),DISTANCE_FORMATTER.format(distancekm)));
 							}catch (Exception ex){
 								ex.printStackTrace();
-								error.setErrorDescription("The waypoint is outside the validation area.");
+								error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea, task.getLocale()));
 							}
 							
 							break;
@@ -245,15 +248,15 @@ public class LocationRoutineType implements IQaRoutineType {
 							error.setDataProviderId(task.getDataProvider().getId());
 							error.setConservationArea(task.getConservationArea());
 							if (distance == 0){
-								error.setErrorDescription(MessageFormat.format("A portion of the track is outside the validation area.",distance));
+								error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_TrackOutsideArea, task.getLocale()));
 							}else{
 								try{
 									Coordinate[] minPnts = DistanceOp.nearestPoints(pp.polygon, wp.getGeometry());
 									double distancekm = JTS.orthodromicDistance(minPnts[0], minPnts[1], GeometryUtils.SMART_CRS) / 1000.0;									
-									error.setErrorDescription(MessageFormat.format("The track is a minimum of {0} km away from the validation area.",DISTANCE_FORMATTER.format(distancekm)));
+									error.setErrorDescription(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_TrackOutsideArea2, task.getLocale()), DISTANCE_FORMATTER.format(distancekm)));
 								}catch (Exception ex){
 									ex.printStackTrace();
-									error.setErrorDescription("Track is outside the validation area.");
+									error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_TrackOutsideArea, task.getLocale()));
 								}
 							}
 							error.setErrorId( task.getDataProvider().getFeatureId(session, x, task.getLocale()));

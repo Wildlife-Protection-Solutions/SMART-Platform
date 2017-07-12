@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.RoutineExtensionManager;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.ui.configure.RoutinesListDialog;
@@ -135,8 +136,8 @@ public class TypeNamePage extends WizardPage{
 		
 		setControl(all);
 		
-		setTitle("Quality Assurance Routine Details");
-		setMessage("Configure a new quality assurance routine.");
+		setTitle(Messages.TypeNamePage_PageTitle);
+		setMessage(Messages.TypeNamePage_PageMessage);
 		
 		validate(false);
 	}
@@ -145,14 +146,14 @@ public class TypeNamePage extends WizardPage{
 		canFlip = true;
 		if (getSelectedType() == null){
 			canFlip = false;
-			cdType.setDescriptionText("Quality assurance routine required.");
+			cdType.setDescriptionText(Messages.TypeNamePage_RoutineRequired);
 			cdType.show();
 		}else{
 			cdType.hide();
 		}
 		if (txtName.getText().trim().length() == 0){
 			canFlip = false;
-			cdName.setDescriptionText("Name required");
+			cdName.setDescriptionText(Messages.TypeNamePage_NameRequired);
 			cdName.show();
 		}else{
 			cdName.hide();

@@ -38,6 +38,7 @@ import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.util.ReprojectUtils;
@@ -131,7 +132,7 @@ public class QaMapInfoToolProvider implements IInfoToolProvider {
 
 		MenuItem miTest = new MenuItem(menuTable, SWT.NONE);
 		miTest.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
-		miTest.setText("Show In Table");
+		miTest.setText(Messages.QaMapInfoToolProvider_ShowInTableLabel);
 		miTest.addListener(SWT.Selection, e->{
 			editor.setSelection(error);
 		});

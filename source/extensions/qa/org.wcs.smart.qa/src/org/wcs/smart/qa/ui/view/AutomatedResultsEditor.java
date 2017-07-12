@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.qa.ui.view;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -52,6 +53,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaErrorCleaner;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -135,8 +137,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
-			//TODO:
-			ex.printStackTrace();
+			QaPlugIn.displayLog(MessageFormat.format(Messages.AutomatedResultsEditor_SaveError, ex.getMessage()), ex);
 		}finally{
 			s.close();
 		}
@@ -147,10 +148,10 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		ToolBar tb = new ToolBar(parent,  SWT.NONE);
 		
 		ToolItem btnClean = new ToolItem(tb, SWT.PUSH);
-		btnClean.setToolTipText("Remove all non resolved items from the database");
+		btnClean.setToolTipText(Messages.AutomatedResultsEditor_RemoveTooltip);
 		btnClean.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnClean.addListener(SWT.Selection, e->{
-			if (MessageDialog.openQuestion(getSite().getShell(), "Confirm", "All items that do not have a status of NEW will be deleted permanently from the database.  Are you sure you want to continue?")){
+			if (MessageDialog.openQuestion(getSite().getShell(), Messages.AutomatedResultsEditor_ConfirmDelete, MessageFormat.format(Messages.AutomatedResultsEditor_DeleteMessage,QaError.Status.NEW.getGuiName(Locale.getDefault())))){
 				Session session = HibernateManager.openSession();
 				try{
 					session.beginTransaction();
@@ -170,7 +171,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		});
 		
 		ToolItem btnRefresh = new ToolItem(tb, SWT.PUSH);
-		btnRefresh.setToolTipText("Reload results from database");
+		btnRefresh.setToolTipText(Messages.AutomatedResultsEditor_RelaodTooltip);
 		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		btnRefresh.addListener(SWT.Selection, e->{
 			clearResults();
@@ -186,7 +187,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		toolkit =  new FormToolkit(parent.getDisplay());
 		
 		Form form = toolkit.createForm(parent);
-		form.setText("Automated Data Validation Results");
+		form.setText(Messages.AutomatedResultsEditor_FormTitle);
 		form.getBody().setLayout(new GridLayout());
 		
 		super.createPartControl(form.getBody());
@@ -224,7 +225,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		j.schedule();
 	}
 	
-	Job j = new Job("load qa results data"){
+	Job j = new Job(Messages.AutomatedResultsEditor_LoadResultsJobName){
 
 		@SuppressWarnings("unchecked")
 		@Override

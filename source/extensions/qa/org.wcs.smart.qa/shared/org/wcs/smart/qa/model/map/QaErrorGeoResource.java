@@ -38,6 +38,8 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.qa.ILabelProvider;
+import org.wcs.smart.qa.ILabelProvider.Key;
 import org.wcs.smart.udig.IFilteringResource;
 import org.wcs.smart.util.GeometryUtils;
 
@@ -50,11 +52,12 @@ import org.wcs.smart.util.GeometryUtils;
 public class QaErrorGeoResource extends IGeoResource implements IFilteringResource {
 
 	private String typeName;
-	private IGeoResourceInfo info = new QaErrorGeoResourceInfo();
+	private IGeoResourceInfo info;;
 	
 	public QaErrorGeoResource(IService service, String typeName){
 		this.service = service;
 		this.typeName = typeName;
+		this.info = new QaErrorGeoResourceInfo();
 	}
 	
 	@Override
@@ -81,7 +84,7 @@ public class QaErrorGeoResource extends IGeoResource implements IFilteringResour
 	@Override
 	public URL getIdentifier() {
 		try {
-			return new URL(null, service.getIdentifier().toExternalForm() + "#" + typeName, CorePlugin.RELAXED_HANDLER); 
+			return new URL(null, service.getIdentifier().toExternalForm() + "#" + typeName, CorePlugin.RELAXED_HANDLER);  //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -136,8 +139,8 @@ public class QaErrorGeoResource extends IGeoResource implements IFilteringResour
 	
 	private class QaErrorGeoResourceInfo extends IGeoResourceInfo {
 		public QaErrorGeoResourceInfo() {
-			this.description = "Resources for QA results";
-			this.name = "QA Error GeoResource";
+			this.description = ILabelProvider.getLabel(Key.QaErrorGeoResourceInfo_Description, ((QaErrorService)service).getLocale());
+			this.name = ILabelProvider.getLabel(Key.QaErrorGeoResourceInfo_Name, ((QaErrorService)service).getLocale());
 			this.title = this.name;
 			this.bounds = new ReferencedEnvelope(GeometryUtils.SMART_CRS);
 		}

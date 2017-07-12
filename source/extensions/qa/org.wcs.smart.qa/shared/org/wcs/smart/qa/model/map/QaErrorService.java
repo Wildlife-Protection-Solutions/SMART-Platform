@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,6 +38,8 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.core.internal.CorePlugin;
+import org.wcs.smart.qa.ILabelProvider;
+import org.wcs.smart.qa.ILabelProvider.Key;
 import org.wcs.smart.qa.model.QaError;
 
 /**
@@ -52,8 +55,9 @@ public class QaErrorService extends IService {
 	private URL url;
 	private volatile List<QaErrorGeoResource> members;
 	private QaErrorMemoryDatastore ds = null;
+	private Locale l;
 	
-	public QaErrorService(Collection<QaError> errors) {
+	public QaErrorService(Collection<QaError> errors, Locale l) {
 		ds = new QaErrorMemoryDatastore(errors);
 		try {
 			this.url = new URL(null, "smart://smartdb/qa/" + System.nanoTime(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
@@ -91,6 +95,9 @@ public class QaErrorService extends IService {
 		return this.url;
 	}
 
+	public Locale getLocale(){
+		return l;
+	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -121,7 +128,9 @@ public class QaErrorService extends IService {
 	@Override
 	protected IServiceInfo createInfo(IProgressMonitor monitor)
 			throws IOException {
-		return new IServiceInfo("Temporary QA Service", "Temporary service for displaying QA result layers",null, null,null, null, new String[]{},null);
+		return new IServiceInfo(ILabelProvider.getLabel(Key.QaErrorService_Name, getLocale()),
+				ILabelProvider.getLabel(Key.QaErrorService_Description, getLocale()),
+				null, null,null, null, new String[]{},null);
 	}
 
 	/**

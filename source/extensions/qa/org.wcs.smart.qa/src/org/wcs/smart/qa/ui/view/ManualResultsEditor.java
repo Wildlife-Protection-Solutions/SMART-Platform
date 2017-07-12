@@ -93,6 +93,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.ValidationEngine;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
@@ -182,7 +183,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 	private void executeValidation(final ValidationEngine engine){
 		clearResults();
 		showProgress();
-		Job j = new Job("validation job"){
+		Job j = new Job(Messages.ManualResultsEditor_JobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -202,14 +203,14 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 						for (Exception ex : exceptions){
 							QaPlugIn.log(ex.getMessage(), ex);
 							sb.append(ex.getMessage());
-							sb.append("\n");
+							sb.append("\n"); //$NON-NLS-1$
 						}
-						String message = "The following errors occured while validating data:\n";
+						String message = Messages.ManualResultsEditor_ValidationErrorMsg + "\n"; //$NON-NLS-1$
 						message += sb.toString();
 						if (message.length() > 700){
-							message =message.substring(0, 700) + "...";
+							message =message.substring(0, 700) + "..."; //$NON-NLS-1$
 						}
-						MessageDialog.openError(getSite().getShell(), "Error", message);
+						MessageDialog.openError(getSite().getShell(), Messages.ManualResultsEditor_ErrorDialogTitle, message);
 					}
 					setResults(ferrors);
 				});
@@ -255,7 +256,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		ToolBar tb = new ToolBar(parent,  SWT.NONE);
 		ToolItem btnRefresh = new ToolItem(tb, SWT.PUSH);
 	//	Button btnRefresh = toolkit.createButton(topComp, "", SWT.PUSH);
-		btnRefresh.setToolTipText("Re-run qa routines against the same data.");
+		btnRefresh.setToolTipText(Messages.ManualResultsEditor_RefreshTooltip);
 		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		btnRefresh.addListener(SWT.Selection, e->{
 			if (lastValidationEngine != null){
@@ -272,7 +273,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		toolkit =  new FormToolkit(parent.getDisplay());
 		
 		Form form = toolkit.createForm(parent);
-		form.setText("Manual Data Validation ");		
+		form.setText(Messages.ManualResultsEditor_FormName);		
 		form.getBody().setLayout(new GridLayout());
 	
 		Composite header = toolkit.createComposite(form.getBody());
@@ -282,9 +283,9 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		//((GridLayout)header.getLayout()).marginHeight = 8;
 		header.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG));
 		
-		Hyperlink lOptions = toolkit.createHyperlink(header, "Options", SWT.NONE);
-		Hyperlink lResults = toolkit.createHyperlink(header, "Results", SWT.NONE);
-		Label spacer = toolkit.createLabel(header, "");
+		Hyperlink lOptions = toolkit.createHyperlink(header, Messages.ManualResultsEditor_OptionsHeaderLbl, SWT.NONE);
+		Hyperlink lResults = toolkit.createHyperlink(header, Messages.ManualResultsEditor_ResultsHeaderLbl, SWT.NONE);
+		Label spacer = toolkit.createLabel(header, ""); //$NON-NLS-1$
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		normalFont = lOptions.getFont();
@@ -323,7 +324,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		
 		Composite progressPanel = toolkit.createComposite(stackPanel);
 		progressPanel.setLayout(new GridLayout());
-		infoLabel = toolkit.createLabel(progressPanel, "Select validation routines and date range on Options tab, then run validation.  After complete results will be displayed here.");
+		infoLabel = toolkit.createLabel(progressPanel, Messages.ManualResultsEditor_InitialMessage);
 		
 		progressComposite = new ProgressAreaComposite(progressPanel);
 		progressComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -377,7 +378,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 //		((GridLayout)detailsComposite.getLayout()).marginHeight= 0;
 		
 		int widthHint = 250;
-		Label l = toolkit.createLabel(detailsComposite, r.getRoutine().getName() + " \n" + r.getDataProvider().getName(Locale.getDefault()), SWT.WRAP);
+		Label l = toolkit.createLabel(detailsComposite, r.getRoutine().getName() + " \n" + r.getDataProvider().getName(Locale.getDefault()), SWT.WRAP); //$NON-NLS-1$
 		l.setFont(boldFont);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = widthHint;
@@ -402,18 +403,18 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		((GridData)l.getLayoutData()).widthHint = widthHint;
 		
 		if (r.getRoutine().getDescription() != null && !r.getRoutine().getDescription().isEmpty()){
-			l = toolkit.createLabel(textArea, "\nDescription:\n" + r.getRoutine().getDescription(), SWT.WRAP);
+			l = toolkit.createLabel(textArea, "\n" + Messages.ManualResultsEditor_DescriptionLbl + "\n" + r.getRoutine().getDescription(), SWT.WRAP); //$NON-NLS-1$ //$NON-NLS-2$ 
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).widthHint = widthHint;
 		}
 		String params = r.getParameterDescription();
 		if (params != null && !params.isEmpty()){
-			l = toolkit.createLabel(textArea, "\nParameters:\n" + params, SWT.WRAP);
+			l = toolkit.createLabel(textArea, "\n" + Messages.ManualResultsEditor_ParametersLbl + "\n" + params, SWT.WRAP); //$NON-NLS-1$ //$NON-NLS-2$ 
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).widthHint = widthHint;
 		}
 		
-		l = toolkit.createLabel(textArea, "\nData Types:\n" + r.getDataProvider().getName(Locale.getDefault()), SWT.WRAP);
+		l = toolkit.createLabel(textArea, "\n" + Messages.ManualResultsEditor_DataTypesLbl + "\n" + r.getDataProvider().getName(Locale.getDefault()), SWT.WRAP); //$NON-NLS-1$ //$NON-NLS-2$ 
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = widthHint;
 		
@@ -440,7 +441,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		((GridLayout)panel.getLayout()).marginWidth = 0;
 		((GridLayout)panel.getLayout()).marginHeight = 0;
 		
-		Button btnExecute = toolkit.createButton(panel, "Validate Data...", SWT.PUSH);
+		Button btnExecute = toolkit.createButton(panel, Messages.ManualResultsEditor_ValidateButton, SWT.PUSH);
 		btnExecute.addListener(SWT.Selection, e->validate());
 		
 		Composite dFilter = toolkit.createComposite(panel);
@@ -449,7 +450,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		((GridLayout)dFilter.getLayout()).marginWidth = 0;
 		((GridLayout)dFilter.getLayout()).marginHeight = 0;
 		
-		toolkit.createLabel(dFilter, "Dates:");
+		toolkit.createLabel(dFilter, Messages.ManualResultsEditor_DatesLabel);
 		DateFilter[] dFilters = new DateFilter[]{
 				DateFilter.LAST_30_DAYS,
 				DateFilter.LAST_60_DAYS,
@@ -512,7 +513,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		};
 		dataColumn.setLabelProvider(dataLabelProvider);
 		dataColumn.getColumn().setWidth(200);
-		dataColumn.getColumn().setText("Data To Validate");
+		dataColumn.getColumn().setText(Messages.ManualResultsEditor_DataToValidateColumnName);
 		dataColumn.getColumn().addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -531,14 +532,14 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			public String getText(Object element){
 				if (element instanceof DataValidator){
 					QaRoutine v = ((DataValidator)element).getRoutine();
-					return v.getName() + " (" + v.getRoutineType().getName(Locale.getDefault()) + ")";
+					return v.getName() + " (" + v.getRoutineType().getName(Locale.getDefault()) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return super.getText(element);
 			}
 		};
 		routineColumn.setLabelProvider(routineLabelProvider);
 		routineColumn.getColumn().setWidth(700);
-		routineColumn.getColumn().setText("Routine To Perform");
+		routineColumn.getColumn().setText(Messages.ManualResultsEditor_RoutinecolumnName);
 		routineColumn.getColumn().addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -598,10 +599,10 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 
 		Menu mnuRoutines = new Menu(tblRoutines.getControl());
 		MenuItem selectAll = new MenuItem(mnuRoutines, SWT.PUSH);
-		selectAll.setText("Select All");
+		selectAll.setText(Messages.ManualResultsEditor_SelectAllLabel);
 		selectAll.addListener(SWT.Selection,  e-> tblRoutines.setAllChecked(true));
 		MenuItem deselectAll = new MenuItem(mnuRoutines, SWT.PUSH);
-		deselectAll.setText("De-Select All");
+		deselectAll.setText(Messages.ManualResultsEditor_DeSelectAllLabel);
 		deselectAll.addListener(SWT.Selection,  e-> tblRoutines.setAllChecked(false));
 		tblRoutines.getControl().setMenu(mnuRoutines);
 		
@@ -611,7 +612,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		((GridLayout)bottomPanel.getLayout()).marginWidth = 0;
 		((GridLayout)bottomPanel.getLayout()).marginHeight = 0;
 		
-		Hyperlink hlink = toolkit.createHyperlink(bottomPanel, "Select All", SWT.NONE);
+		Hyperlink hlink = toolkit.createHyperlink(bottomPanel, Messages.ManualResultsEditor_SelectAllLabel, SWT.NONE);
 		hlink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -619,11 +620,11 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			}
 		});
 		
-		Label l = toolkit.createLabel(bottomPanel, "", SWT.SEPARATOR | SWT.VERTICAL);
+		Label l = toolkit.createLabel(bottomPanel, "", SWT.SEPARATOR | SWT.VERTICAL); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)l.getLayoutData()).heightHint = 10;
 		
-		hlink = toolkit.createHyperlink(bottomPanel, "De-Select All", SWT.NONE);
+		hlink = toolkit.createHyperlink(bottomPanel, Messages.ManualResultsEditor_DeSelectAllLabel, SWT.NONE);
 		hlink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -632,7 +633,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		});
 		
 		
-		hlink = toolkit.createHyperlink(bottomPanel, "refresh list", SWT.NONE);
+		hlink = toolkit.createHyperlink(bottomPanel, Messages.ManualResultsEditor_refreshLink, SWT.NONE);
 		hlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		hlink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -650,7 +651,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 
 	private void validate(){
 		if (tblRoutines.getCheckedElements().length == 0){
-			MessageDialog.openInformation(getSite().getShell(), "No Routines Selected", "No validation routines selected.  Nothing to validate.");
+			MessageDialog.openInformation(getSite().getShell(), Messages.ManualResultsEditor_NoRoutinesTitle, Messages.ManualResultsEditor_NoRoutinesMsg);
 			return;
 		}
 		
@@ -665,7 +666,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		}
 		
 		if (startDate.after(endDate)){
-			MessageDialog.openInformation(getSite().getShell(), "Invalid Dates", "Start date is after end date.  Cannot validate data.");
+			MessageDialog.openInformation(getSite().getShell(), Messages.ManualResultsEditor_InvalidDatesTitles, Messages.ManualResultsEditor_InvalidDatesMsg);
 			return;
 		}
 		
@@ -690,7 +691,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		j.schedule();
 	}
 	
-	Job j = new Job("load routines"){
+	Job j = new Job(Messages.ManualResultsEditor_LoadRoutinesJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -698,7 +699,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			Session s = HibernateManager.openSession();
 			try{
 				List<QaRoutine> dbroutines = s.createCriteria(QaRoutine.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 						.list();
 				
 				Collection<IQaDataProvider> providers = RoutineExtensionManager.INSTANCE.getDataProviders();

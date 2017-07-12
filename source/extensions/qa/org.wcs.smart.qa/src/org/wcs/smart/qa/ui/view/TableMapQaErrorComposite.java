@@ -32,7 +32,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -46,7 +45,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
@@ -65,6 +63,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.map.FeatureFactory;
@@ -84,13 +83,13 @@ import com.vividsolutions.jts.geom.Envelope;
 public class TableMapQaErrorComposite extends SmartMapEditorPart{
 
 	public enum ResultTableColumn{
-		STATUS("Status"),
-		DATA_TYPE("Data Type"),
-		ROUTINE("Routine"),
-		OBJECT_ID("Source ID"),
-		DESC("Description"),
-		FIX("Fix"),
-		DATE("Date Validated");
+		STATUS(Messages.TableMapQaErrorComposite_StatusColumName),
+		DATA_TYPE(Messages.TableMapQaErrorComposite_DataTypeColumnName),
+		ROUTINE(Messages.TableMapQaErrorComposite_RoutineColumnName),
+		OBJECT_ID(Messages.TableMapQaErrorComposite_SrcColumnName),
+		DESC(Messages.TableMapQaErrorComposite_DescriptionColumName),
+		FIX(Messages.TableMapQaErrorComposite_FixColumnName),
+		DATE(Messages.TableMapQaErrorComposite_DateColumnName);
 		
 		public String title;
 		
@@ -129,8 +128,8 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			if (this != DATE ){
 				String s1 = getLabel(object1);
 				String s2 = getLabel(object2);
-				if (s1 == null) s1 = "";
-				if (s2 == null) s2 = "";
+				if (s1 == null) s1 = ""; //$NON-NLS-1$
+				if (s2 == null) s2 = ""; //$NON-NLS-1$
 				return Collator.getInstance().compare(s1, s2);
 			}else{
 				return object1.getValidateDate().compareTo(object2.getValidateDate());
@@ -236,17 +235,17 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		textArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		List<String> labels = new ArrayList<>();
-		labels.add("Status: " + r.getStatus().getGuiName(Locale.getDefault()));
+		labels.add(Messages.TableMapQaErrorComposite_StatusLabel + r.getStatus().getGuiName(Locale.getDefault()));
 		if (r.getFixMessage() != null && !r.getFixMessage().isEmpty()){
-			labels.add("\nFix:\n" + r.getFixMessage());
+			labels.add("\n" + Messages.TableMapQaErrorComposite_FixLbl + "\n" + r.getFixMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (r.getErrorDescription() != null && !r.getErrorDescription().isEmpty()){
-			labels.add("\nDescription:\n" + r.getErrorDescription());
+			labels.add("\n" + Messages.TableMapQaErrorComposite_DescriptionLbl + "\n" + r.getErrorDescription()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		labels.add("\nRoutine:\n" + r.getQaRoutine().getName());
-		labels.add("\nRoutine Type:\n" + r.getQaRoutine().getRoutineType().getName(Locale.getDefault()));
-		labels.add("\nData Provider:\n" + r.getDataProvider().getName(Locale.getDefault()));
-		labels.add("\nDate:\n" + DateFormat.getDateInstance().format(r.getValidateDate()));
+		labels.add("\n" + Messages.TableMapQaErrorComposite_RoutineLbl + "\n" + r.getQaRoutine().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		labels.add("\n" + Messages.TableMapQaErrorComposite_RoutineTypeLbl + "\n" + r.getQaRoutine().getRoutineType().getName(Locale.getDefault())); //$NON-NLS-1$ //$NON-NLS-2$
+		labels.add("\n" + Messages.TableMapQaErrorComposite_DataProviderLbl + "\n" + r.getDataProvider().getName(Locale.getDefault())); //$NON-NLS-1$ //$NON-NLS-2$
+		labels.add("\n" + Messages.TableMapQaErrorComposite_DateLbl + "\n" + DateFormat.getDateInstance().format(r.getValidateDate())); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (String label : labels){
 			Label l = toolkit.createLabel(textArea, label, SWT.WRAP);
@@ -295,7 +294,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		((GridLayout)topComp.getLayout()).marginHeight = 0;
 		topComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		lblResultCnt = toolkit.createLabel(topComp, "");
+		lblResultCnt = toolkit.createLabel(topComp, ""); //$NON-NLS-1$
 		lblResultCnt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		ToolBar tb = new ToolBar(topComp, SWT.NONE);
@@ -305,7 +304,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		btnIncludeFixed.addListener(SWT.Selection, e->{
 			updateResultsTableFilter();
 		});
-		btnIncludeFixed.setToolTipText("hide/include resolved items in the results table");
+		btnIncludeFixed.setToolTipText(Messages.TableMapQaErrorComposite_filterTooltip);
 		btnIncludeFixed.setImage(QaPlugIn.getDefault().getImageRegistry().get(QaPlugIn.ICON_FILTER));
 		
 		createHeaderToolbar(topComp);
@@ -358,7 +357,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
 				Object x = (Object) iterator.next();				
 				if (x instanceof QaError){
-					selectedFeatures.add(ff.equals(ff.property("fid"), ff.literal(UuidUtils.uuidToString(((QaError) x).getUuid()))));
+					selectedFeatures.add(ff.equals(ff.property("fid"), ff.literal(UuidUtils.uuidToString(((QaError) x).getUuid())))); //$NON-NLS-1$
 				}
 				
 			}
@@ -409,7 +408,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		results = null;
 		tblResults.setInput(null);
 		tblResults.getTable().setEnabled(false);
-		lblResultCnt.setText("");
+		lblResultCnt.setText(""); //$NON-NLS-1$
 		
 		//clear map layers
 		if (errorLayers != null){
@@ -472,19 +471,19 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		
 		tblResults.setInput(results);
 		tblResults.getTable().setEnabled(true);
-		lblResultCnt.setText(MessageFormat.format("{0} items found", results.size()));
+		lblResultCnt.setText(MessageFormat.format(Messages.TableMapQaErrorComposite_CountLabel, results.size()));
 		lblResultCnt.getParent().layout(true, true);
 		
 		try{
 			disposeService();		
-			service = new QaErrorService(results);
+			service = new QaErrorService(results, Locale.getDefault());
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
 			toAdd.addAll(service.resources(new NullProgressMonitor()));
 			AddContentFilterLayersCommand cmd = new AddContentFilterLayersCommand(toAdd);
 			getMap().sendCommandSync(cmd);
 			List<Layer> newLayers = cmd.getLayers();
 			for (Layer l : newLayers){
-				l.setName("Error Results");
+				l.setName(Messages.TableMapQaErrorComposite_ResultsLabel);
 				if (l instanceof ContentFilterLayerImpl){
 					((ContentFilterLayerImpl)l).setContentFilter(FeatureFactory.newStatusFilter());
 				}
@@ -508,12 +507,12 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		Menu mnu = new Menu(tblResults.getTable());
 		
 		MenuItem zoomTo = new MenuItem(mnu, SWT.PUSH);
-		zoomTo.setText("Zoom To");
+		zoomTo.setText(Messages.TableMapQaErrorComposite_ZoomToLabel);
 		zoomTo.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ZOOM_IMAGE));
 		zoomTo.addListener(SWT.Selection, e->zoomSelected());
 		
 		MenuItem clearSelection = new MenuItem(mnu, SWT.PUSH);
-		clearSelection.setText("Clear Selection");
+		clearSelection.setText(Messages.TableMapQaErrorComposite_ClearSelectionLbl);
 		clearSelection.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CLEAR_SELECTION_ICON));
 		clearSelection.addListener(SWT.Selection, e->clearSelection());
 		

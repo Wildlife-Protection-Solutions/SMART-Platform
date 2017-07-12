@@ -28,7 +28,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.qa.model.IQaDataProvider;
 
 /**
- * Image provider to implement & set in SmartContext to add icons to patrol
+ * Image provider to implement & set in SmartContext to add icons & label to patrol
  * data providers.
  * 
  * @author Emily

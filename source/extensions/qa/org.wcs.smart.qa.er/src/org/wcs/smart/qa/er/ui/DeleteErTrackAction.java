@@ -40,6 +40,7 @@ import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.er.ErTrackDataProvider;
+import org.wcs.smart.qa.er.internal.Messages;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 
@@ -61,7 +62,7 @@ public class DeleteErTrackAction implements IQaAction {
 			}
 		}
 		if (toProcess.isEmpty()) return false;
-		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected tracks?  This action cannot be undone.", toProcess.size()))){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.DeleteErTrackAction_DeleteTitle, MessageFormat.format(Messages.DeleteErTrackAction_DeleteMsg, toProcess.size()))){
 			return false;
 		}
 		
@@ -87,7 +88,7 @@ public class DeleteErTrackAction implements IQaAction {
 				
 				if (t == null){
 					item.setStatus(QaError.Status.DELETED);
-					item.setFixMessage("***Could not delete - Track Not Found*** ");
+					item.setFixMessage(Messages.DeleteErTrackAction_DeleteErrorNotFound);
 				}else{
 					deleted.add(item);
 					trackDeleted.add(t);
@@ -103,14 +104,14 @@ public class DeleteErTrackAction implements IQaAction {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QaPlugIn.displayLog("An error occurred while removing the selected patrol tracks.  Refresh QA list and try again, or edit try deleting individual patrol tracks." + "\n\n", ex);
+			QaPlugIn.displayLog(Messages.DeleteErTrackAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
 			return false;
 		}finally{
 			s.close();
 		}
 
 		for (QaError item : deleted){
-			item.setFixMessage("Track Deleted");
+			item.setFixMessage(Messages.DeleteErTrackAction_DeleteMessage);
 			item.setStatus(QaError.Status.DELETED);
 		}
 		//fire patrol events
@@ -132,7 +133,7 @@ public class DeleteErTrackAction implements IQaAction {
 
 	@Override
 	public String getName(Locale l) {
-		return "Delete";
+		return Messages.DeleteErTrackAction_ActionName;
 	}
 	
 	@Override

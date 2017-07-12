@@ -19,51 +19,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.qa.routine;
+package org.wcs.smart.qa;
 
-import java.util.List;
 import java.util.Locale;
 
-import org.wcs.smart.qa.ILabelProvider;
-import org.wcs.smart.qa.ILabelProvider.Key;
-import org.wcs.smart.qa.model.IQaAction;
-import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.SmartContext;
 
 /**
- * Updates status to ignore.  This is applicable to
- * all data providers.
+ * Image provider to implement & set in SmartContext to support labels for core
+ * qa plugin.
  * 
  * @author Emily
  *
  */
-public class IgnoreAction implements IQaAction {
+public abstract class ILabelProvider {
 
-	public final static IgnoreAction INSTANCE = new IgnoreAction();
+	public static enum Key {
+		ValidationEngine_TaskName,
+		ValidationEngine_SubTaskName,
+		QaErrorGeoResourceInfo_Name,
+		QaErrorGeoResourceInfo_Description,
+		QaErrorService_Name,
+		QaErrorService_Description,
+		IgnoreAction_Name,
+		LocationRoutineType_Name,
+		LocationRoutineType_Description,
+		LocationRoutineType_FileParamDescription,
+		LocationRoutineType_AreaParamDescription,
+		LocationRoutineType_WktParamDescription,
+		LocationRoutineType_Error,
+		LocationRoutineType_LoadingDataMsg,
+		LocationRoutineType_NoGeomFound,
+		LocationRoutineType_ValidatingDataTaskName,
+		LocationRoutineType_WpOutsideArea,
+		LocationRoutineType_WpOutsideArea2,
+		LocationRoutineType_TrackOutsideArea,
+		LocationRoutineType_TrackOutsideArea2,
 	
-	private IgnoreAction(){	
+	}
+
+	public abstract String getString(Key key, Locale l);
+	
+	public static final String getLabel(Key key, Locale l){
+		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getString(key, l);
 	}
 	
-	@Override
-	public boolean doAction(List<QaError> items) {
-		for (QaError i : items){
-			i.setStatus(QaError.Status.IGNORED);
-		}
-		return true;
-	}
-
-	@Override
-	public boolean supportsMultiple() {
-		return true;
-	}
-
-	@Override
-	public String getId() {
-		return "org.wcs.smart.qa.action.ignore"; //$NON-NLS-1$
-	}
-
-	@Override
-	public String getName(Locale l) {
-		return ILabelProvider.getLabel(Key.IgnoreAction_Name, l);
-	}
-
 }

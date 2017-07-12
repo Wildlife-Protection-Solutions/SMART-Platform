@@ -23,6 +23,7 @@ package org.wcs.smart.qa.ui.view;
 
 import java.awt.Color;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -69,6 +70,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.SetBasemapTool;
@@ -216,14 +218,14 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 				originalX = waypoint.getX();
 				originalY = waypoint.getY();
 			}else{
-				setErrorMessage("Waypoint not found.  Close dialog and rerun validation routines.");
+				setErrorMessage(Messages.EditWaypointDetailsDialog_WaypointNotFound);
 				return;
 			}
 		}finally{
 			s.close();
 		}
 		updateLabels();
-		setTitle("Waypoint: " + waypoint.getId() + " - " + DateFormat.getDateTimeInstance().format(waypoint.getDateTime()));
+		setTitle(MessageFormat.format(Messages.EditWaypointDetailsDialog_DialogTitle, waypoint.getId(), DateFormat.getDateTimeInstance().format(waypoint.getDateTime())));
 		initBackgroundLayers();
 	}
 	
@@ -251,7 +253,7 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QaPlugIn.displayLog("Error saving changes to QA Routine: " + ex.getMessage(), ex);
+			QaPlugIn.displayLog(Messages.EditWaypointDetailsDialog_SaveError + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -276,7 +278,7 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 		coordinateCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(coordinateCmp, SWT.NONE);
-		lbl.setText("X Coordinate:");
+		lbl.setText(Messages.EditWaypointDetailsDialog_XLabel);
 		
 		ModifyListener validation = new ModifyListener() {
 			@Override
@@ -293,7 +295,7 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 		txtX.addListener(SWT.FocusIn, e-> txtX.selectAll());
 		
 		lbl = new Label(coordinateCmp, SWT.NONE);
-		lbl.setText("Y Coordinate:");
+		lbl.setText(Messages.EditWaypointDetailsDialog_YLabel);
 		
 		txtY = new Text(coordinateCmp, SWT.BORDER);
 		txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -307,7 +309,7 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 		mapViewer = new MapViewer(mapComposite,  SWT.SINGLE | SWT.DOUBLE_BUFFERED);
 		mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		map = (Map) ProjectFactory.eINSTANCE.createMap();
-		map.setName("Edit Waypoint Map");
+		map.setName(Messages.EditWaypointDetailsDialog_MapName);
 		mapViewer.setMap(map);
 		//set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
@@ -347,13 +349,13 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 		
 		//add revert option
 		ToolItem btnReset = new ToolItem(tools.getToolbar(), SWT.PUSH);
-		btnReset.setToolTipText("revert back to original value");
+		btnReset.setToolTipText(Messages.EditWaypointDetailsDialog_RevertTooltip);
 		btnReset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.UNDO_ICON));
 		btnReset.addListener(SWT.Selection, e->revert());
 		
 		
-		getShell().setText("Edit Waypoint");
-		setMessage("Edit waypoint details");
+		getShell().setText(Messages.EditWaypointDetailsDialog_ShellTitle);
+		setMessage(Messages.EditWaypointDetailsDialog_ShellMessage);
 		
 		initControls();
 		
@@ -365,7 +367,7 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 	 * This is a job and updates the position based on the values
 	 * in the text box.  
 	 */
-	Job updatePosition = new Job("update position"){
+	Job updatePosition = new Job(Messages.EditWaypointDetailsDialog_JobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Display.getDefault().syncExec(()->{
@@ -376,7 +378,7 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 					newC = ReprojectUtils.reproject(x, y, getMap().getViewportModelInternal().getCRS(), SmartDB.DATABASE_CRS);
 					updateWaypointLocation(newC);
 				}catch (Exception ex){
-					setErrorMessage("Could not parse new value from x y positions.");
+					setErrorMessage(Messages.EditWaypointDetailsDialog_ParseError);
 				}
 			});			
 			return Status.OK_STATUS;
@@ -444,7 +446,7 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 						try{
 							crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
 						}catch (Exception ex){
-							QaPlugIn.displayLog("Error reprojecting new location. Location not updated", ex);
+							QaPlugIn.displayLog(Messages.EditWaypointDetailsDialog_ReprojectionError, ex);
 							return;
 						}
 					}

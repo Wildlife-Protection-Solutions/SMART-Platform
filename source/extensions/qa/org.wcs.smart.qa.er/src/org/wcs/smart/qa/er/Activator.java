@@ -28,7 +28,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		SmartContext.INSTANCE.setClass(ILabelProvider.class, new ErImageProvider());
+		SmartContext.INSTANCE.setClass(ILabelProvider.class, new ErLabelProvider());
 	}
 
 	/*

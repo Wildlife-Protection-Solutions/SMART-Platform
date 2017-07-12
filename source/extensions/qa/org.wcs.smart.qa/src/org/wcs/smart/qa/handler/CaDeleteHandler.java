@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.qa.internal.Messages;
 
 /**
  * Deletes all qa routines and error data.
@@ -41,9 +42,9 @@ public class CaDeleteHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session,
 			IProgressMonitor monitor) throws Exception {
-		//labels are dealt with by core Conservation Area delete engine 
 		
-		monitor.subTask("Deleting Quality Analysis Data");
+		//labels are dealt with by core Conservation Area delete engine 
+		monitor.subTask(Messages.CaDeleteHandler_TaskName);
 		
 		Query q = session.createQuery("DELETE from QaError where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$

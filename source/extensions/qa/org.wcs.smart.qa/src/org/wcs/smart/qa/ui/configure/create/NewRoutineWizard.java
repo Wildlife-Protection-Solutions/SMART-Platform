@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.QaRoutine;
 
 /**
@@ -53,7 +54,7 @@ public class NewRoutineWizard extends Wizard implements IPageChangingListener{
     	addPage(page1);
     	addPage(page2);
     	
-    	setWindowTitle("Create New Quality Assurance Routine");    	
+    	setWindowTitle(Messages.NewRoutineWizard_WindowTitle);    	
     }
 
     @Override
@@ -92,7 +93,7 @@ public class NewRoutineWizard extends Wizard implements IPageChangingListener{
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			QaPlugIn.displayLog("Unable to save QA Routine: " + ex.getMessage(), ex);
+			QaPlugIn.displayLog(Messages.NewRoutineWizard_SaveError + ex.getMessage(), ex);
 			return false;
 		}finally{
 			s.close();

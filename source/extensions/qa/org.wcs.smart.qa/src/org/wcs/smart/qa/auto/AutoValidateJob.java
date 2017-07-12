@@ -38,6 +38,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.ValidationEngine;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.model.QaRoutine;
@@ -56,7 +57,7 @@ public class AutoValidateJob extends Job{
 	private List<ValidationTask> tasks = Collections.synchronizedList(new ArrayList<>());
 		
 	private AutoValidateJob() {
-		super("Executing QA Routines");
+		super(Messages.AutoValidateJob_JobName);
 	}
 
 	/**
@@ -77,7 +78,7 @@ public class AutoValidateJob extends Job{
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask("Validating QA Data", IProgressMonitor.UNKNOWN);
+		monitor.beginTask(Messages.AutoValidateJob_Status1, IProgressMonitor.UNKNOWN);
 		while(!tasks.isEmpty()){
 			ValidationEngine engine = new ValidationEngine(Locale.getDefault());
 			synchronized (tasks) {
@@ -96,7 +97,7 @@ public class AutoValidateJob extends Job{
 				}
 				session.getTransaction().commit();
 			}catch(Exception ex){
-				QaPlugIn.displayLog("Error executing auto validation routines on new data. These routines may need to modified to prevent these errors in the future. " + ex.getMessage(), ex);
+				QaPlugIn.displayLog(Messages.AutoValidateJob_DataError + ex.getMessage(), ex);
 			}finally{
 				session.close();
 			}

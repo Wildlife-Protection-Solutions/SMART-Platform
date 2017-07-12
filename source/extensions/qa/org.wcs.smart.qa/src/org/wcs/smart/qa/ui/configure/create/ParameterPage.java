@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.qa.InternalExtensionManager;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.ui.configure.IParameterCollector;
@@ -61,8 +62,8 @@ public class ParameterPage extends WizardPage{
 		all.setLayout(new GridLayout());
 		all.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		setTitle("Quality Assurance Routine Parameters");
-		setMessage("Configure parameters for quality assurance routine");
+		setTitle(Messages.ParameterPage_PageTitle);
+		setMessage(Messages.ParameterPage_PageMessage);
 		
 		setControl(all);
 	}
@@ -85,7 +86,7 @@ public class ParameterPage extends WizardPage{
 		collector = InternalExtensionManager.INSTANCE.newParameterCollector(r.getRoutineTypeId());
 		if (collector == null){
 			Label l = new Label(all, SWT.NONE);
-			l.setText("No parameters are required for this QA routine.");
+			l.setText(Messages.ParameterPage_NoParametersRequiredMsg);
 		}else{
 			collector.createUi(all);
 			collector.initUi(r);

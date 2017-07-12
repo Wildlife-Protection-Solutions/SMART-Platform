@@ -80,6 +80,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.RoutineExtensionManager;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.model.QaRoutine;
@@ -113,18 +114,18 @@ public class RoutinesListDialog extends TitleAreaDialog {
 			 
 			 String s1 = getValue(sortColumn, e1);
 			 String s2 = getValue(sortColumn, e2);
-			 if (s1==null) s1 = "";
-			 if (s2==null) s2 = "";
+			 if (s1==null) s1 = ""; //$NON-NLS-1$
+			 if (s2==null) s2 = ""; //$NON-NLS-1$
 			 return Collator.getInstance().compare(s1,s2) * sortDirection;
 		}
 	};
 	
 	public enum RoutineColumn{
-		TYPE("Routine Type", "The quality assurance routine", 150),
-		NAME("Name", "User defined name for uniquely identifying the routine", 260),
-		AUTO("Auto Execute", "If routine should be auto executed when new data is added to the system", 100),
-		DESC("Description", "Optional user defined description for the routine",10),
-		PARAMETERS("Parameters", "QA Routine parameters",10);
+		TYPE(Messages.RoutinesListDialog_RoutineTypeColumnName, Messages.RoutinesListDialog_RoutineTypeTooltip, 150),
+		NAME(Messages.RoutinesListDialog_RoutineNameColumnName, Messages.RoutinesListDialog_RoutineTooltipColumnName, 260),
+		AUTO(Messages.RoutinesListDialog_RoutineAutoExecuteColumnName, Messages.RoutinesListDialog_RoutineAutoExecuteTooltip, 100),
+		DESC(Messages.RoutinesListDialog_RoutineDescriptionColumnName, Messages.RoutinesListDialog_RoutineDescriptionTooltip,10),
+		PARAMETERS(Messages.RoutinesListDialog_RoutineParametersColumnName, Messages.RoutinesListDialog_RoutineParametersTooltip,10);
 		
 		
 		public String guiName;
@@ -197,7 +198,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 
 		if (r.getDescription() != null && !r.getDescription().isEmpty()){
 			l = new Label(textArea, SWT.WRAP);
-			l.setText("\nDescription:\n" + r.getDescription());
+			l.setText("\n" + Messages.RoutinesListDialog_DescriptionLbl + "\n" + r.getDescription()); //$NON-NLS-1$ //$NON-NLS-2$ 
 			l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).widthHint = 200;
@@ -205,7 +206,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		String params = routine.parameterDescription;
 		if (params != null && !params.isEmpty()){
 			l = new Label(textArea, SWT.WRAP);
-			l.setText("\nParameters:\n" + params);
+			l.setText("\n" + Messages.RoutinesListDialog_ParameterLbl + "\n" + params); //$NON-NLS-1$ //$NON-NLS-2$ 
 			l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).widthHint = 200;
@@ -215,14 +216,14 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		for (IQaDataProvider provider : RoutineExtensionManager.INSTANCE.getDataProviders()){
 			if (provider.supportsRoutine(r.getRoutineType())){
 				sb.append(provider.getName(Locale.getDefault()));
-				sb.append("\n");
+				sb.append("\n"); //$NON-NLS-1$
 			}
 		}
 		if (sb.length() > 0){
 			sb.deleteCharAt(sb.length() - 1);
 			
 			l = new Label(textArea, SWT.WRAP);
-			l.setText("\nSupported Data Types:\n" + sb.toString());
+			l.setText("\n" + Messages.RoutinesListDialog_DataTypesLbl + "\n" + sb.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 			l.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).widthHint = 200;
@@ -395,9 +396,9 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		
 		refresh();
 		
-		getShell().setText("QA Routines");
-		setTitle("Quality Assurance Routines");
-		setMessage("Currently configures quality assurance routines");
+		getShell().setText(Messages.RoutinesListDialog_ShellTitle);
+		setTitle(Messages.RoutinesListDialog_DialogTitle);
+		setMessage(Messages.RoutinesListDialog_DialogMessage);
 		return outer;
 	}
 	
@@ -428,7 +429,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 			}
 		}
 		if (toDelete.isEmpty()) return;
-		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected QA Routines? This action cannot be undone.", toDelete.size()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.RoutinesListDialog_DeleteTitle, MessageFormat.format(Messages.RoutinesListDialog_DeleteConfirmMsg, toDelete.size()))){
 			return;
 		}
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
@@ -438,7 +439,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				monitor.beginTask("Deleting QA Routines", toDelete.size());
+				monitor.beginTask(Messages.RoutinesListDialog_DeleteTaskName, toDelete.size());
 				Session s = HibernateManager.openSession();
 				s.getTransaction().begin();
 				try{
@@ -464,7 +465,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		}catch (Exception ex){
 			String msg = ex.getMessage();
 			if (msg == null && ex.getCause() != null) msg = ex.getCause().getMessage();
-			QaPlugIn.displayLog("Error deleting Quality Assurance routines. " + msg, ex);
+			QaPlugIn.displayLog(Messages.RoutinesListDialog_DeleteError + msg, ex);
 		}
 		refresh();
 	}
@@ -476,7 +477,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 	
 	
 	private String getValue(RoutineColumn field, Object element){
-		if (element == null) return "";
+		if (element == null) return ""; //$NON-NLS-1$
 		if (!(element instanceof WrappedQaRoutine)) return element.toString();
 		QaRoutine r = ((WrappedQaRoutine)element).routine;
 		switch(field){
@@ -490,10 +491,10 @@ public class RoutinesListDialog extends TitleAreaDialog {
 				return r.getName();
 			case TYPE:
 				IQaRoutineType type = r.getRoutineType();
-				if (type == null) return "Not Defined";
+				if (type == null) return Messages.RoutinesListDialog_Undefined;
 				return type.getName(Locale.getDefault());
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 	

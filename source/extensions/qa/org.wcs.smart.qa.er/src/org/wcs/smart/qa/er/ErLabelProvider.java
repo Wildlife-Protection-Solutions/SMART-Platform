@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.qa.er.internal.Messages;
 import org.wcs.smart.qa.model.IQaDataProvider;
 
 /**
@@ -33,7 +34,7 @@ import org.wcs.smart.qa.model.IQaDataProvider;
  * @author Emily
  *
  */
-public class ErImageProvider extends ILabelProvider {
+public class ErLabelProvider extends ILabelProvider {
 
 	@Override
 	public Image getImage(Class<? extends IQaDataProvider> clazz) {
@@ -50,19 +51,19 @@ public class ErImageProvider extends ILabelProvider {
 	public String getString(Key key, Locale l) {
 		switch(key){
 		case ErTrackDataProvider_Name:
-			return "Mission Track";
+			return Messages.ErLabelProvider_MissionTrackDataProviderName;
 		case ErTrackDataProvider_TrackNotFound:
-			return "Mission Track not found - data error";
+			return Messages.ErLabelProvider_TrackNotFoundError;
 		case ErWaypointDataProvider_Name:
-			return "Mission Waypoint";
+			return Messages.ErLabelProvider_MissionWpDataProviderName;
 		case ErWaypointDataProvider_WpIdLbl:
-			return "Waypoint ID";
+			return Messages.ErLabelProvider_WaypointIdLbl;
 		case ErWaypointDataProvider_WpNotFound:
-			return "Patrol Waypoint not found - data error";
+			return Messages.ErLabelProvider_WaypointNotFoundError;
 		default:
 		
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 
 }

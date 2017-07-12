@@ -70,6 +70,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.qa.routine.LocationRoutineType;
@@ -124,17 +125,17 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		panel.setLayout(new GridLayout());
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnOpFile = new Button(panel, SWT.RADIO);
-		btnOpFile.setText("Upload custom polygon from shapefile");
+		btnOpFile.setText(Messages.WaypointLocationParameterCollector_UploadBtn);
 		
 		compShp = createShpPanel(panel);
 		
 		btnOpArea = new Button(panel, SWT.RADIO);
-		btnOpArea.setText("Use a Conservation Area defined boundary ");
+		btnOpArea.setText(Messages.WaypointLocationParameterCollector_UserCaBoundaryBtn);
 		
 		compArea = createAreaPanel(panel);
 		
 		btnOpText= new Button(panel, SWT.RADIO);
-		btnOpText.setText("Define area using WKT of polygon");
+		btnOpText.setText(Messages.WaypointLocationParameterCollector_UseWktBtn);
 		
 		compTxt = createWktPanel(panel);
 		
@@ -158,7 +159,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		if (btnOpFile.getSelection()){
 			if (txtSummary.getData(GEOMETRY_KEY) == null){
 				isValid = false;
-				cdFile.setDescriptionText("A shapefile must be selected.");
+				cdFile.setDescriptionText(Messages.WaypointLocationParameterCollector_ShapefileRequiredError);
 				cdFile.show();
 			}else{
 				cdFile.hide();
@@ -166,7 +167,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		}else if (btnOpArea.getSelection()){
 			if (cmbViewer.getSelection().isEmpty()){
 				isValid = false;
-				cdArea.setDescriptionText("Area layer must be selected");
+				cdArea.setDescriptionText(Messages.WaypointLocationParameterCollector_AreaLayerRequiredError);
 				cdArea.show();
 			}else{
 				cdArea.hide();
@@ -178,12 +179,12 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 				if (g instanceof Polygon || g instanceof MultiPolygon){
 					cdWkt.hide();
 				}else{
-					cdWkt.setDescriptionText("Not a valid polygon or multipolygon ");
+					cdWkt.setDescriptionText(Messages.WaypointLocationParameterCollector_InvalidPolygonError);
 					cdWkt.show();
 					isValid = false;
 				}
 			}catch (Exception ex){
-				cdWkt.setDescriptionText("Not a valid geometry");
+				cdWkt.setDescriptionText(Messages.WaypointLocationParameterCollector_InvalidGeometryError);
 				cdWkt.show();
 				isValid = false;
 			}
@@ -220,19 +221,19 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		cdFile.hide();
 		
 		Button btnBrowse = new Button(pnl, SWT.PUSH);
-		btnBrowse.setText("Select File");
+		btnBrowse.setText(Messages.WaypointLocationParameterCollector_SelectFileBtn);
 		
 		btnBrowse.addListener(SWT.Selection, e->{
 			FileDialog fd = new FileDialog(parent.getShell());
-			fd.setFilterExtensions(new String[]{"*.shp", "*.*"});
-			fd.setFilterNames(new String[]{"Shapefiles (*.shp)", "All Files (*.*)"});
+			fd.setFilterExtensions(new String[]{"*.shp", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			fd.setFilterNames(new String[]{Messages.WaypointLocationParameterCollector_ShapefileLabel, Messages.WaypointLocationParameterCollector_AllFileLabel});
 			
 			String file = fd.open();
 			if(file != null){
 				try {
 					readShapefile(Paths.get(file).toUri().toURL());
 				} catch (Exception e1) {
-					QaPlugIn.displayLog("Error reading shapefile: " + e1.getMessage(), e1);
+					QaPlugIn.displayLog(Messages.WaypointLocationParameterCollector_ShapeFileErrorMsg + e1.getMessage(), e1);
 				}
 			}
 		});
@@ -245,8 +246,8 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		pnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)pnl.getLayoutData()).horizontalIndent = 15;
 		Label l = new Label(pnl, SWT.NONE);
-		l.setText("Area Boundary Layer:");
-		l.setToolTipText("If no layers appear here you have not configured any geometries for the conservation area boundary layers");
+		l.setText(Messages.WaypointLocationParameterCollector_BoundaryAreaLayerLbl);
+		l.setToolTipText(Messages.WaypointLocationParameterCollector_BoundaryLabelTooltip);
 		cmbViewer = new ComboViewer(pnl, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		cmbViewer.setLabelProvider(new LabelProvider(){
@@ -267,6 +268,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 	
 		Job j = new Job("init areas"){ //$NON-NLS-1$
 
+			@SuppressWarnings("unchecked")
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<Area.AreaType> types = new ArrayList<>();
@@ -276,11 +278,9 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 					String query = "SELECT type FROM Area WHERE conservationArea = :ca GROUP BY type having count(*) > 0"; //$NON-NLS-1$
 					Query q = s.createQuery(query);
 					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-					
 					types.addAll(q.list());
-					
 				}catch (Exception ex){
-					QaPlugIn.displayLog("Unable to read conservation area boundary layers from the database: " + ex.getMessage(), ex);
+					QaPlugIn.displayLog(Messages.WaypointLocationParameterCollector_LoadBoundariesArea + ex.getMessage(), ex);
 				}finally{
 					s.close();
 				}
@@ -307,8 +307,8 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		((GridData)pnl.getLayoutData()).horizontalIndent = 15;
 		
 		Label l = new Label(pnl, SWT.NONE);
-		l.setText("WKT:");
-		l.setToolTipText("Well Known Text");
+		l.setText(Messages.WaypointLocationParameterCollector_WellKnownTextLabel);
+		l.setToolTipText(Messages.WaypointLocationParameterCollector_WellKnownTextTooltip);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		txtWkt = new Text(pnl, SWT.BORDER | SWT.MULTI);
@@ -348,21 +348,21 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Reading shapefile", IProgressMonitor.UNKNOWN);
+					monitor.beginTask(Messages.WaypointLocationParameterCollector_ReadShpTaskName, IProgressMonitor.UNKNOWN);
 
 					SimpleFeatureCollection collection = null;
 					try{
 						FileDataStore store = FileDataStoreFinder.getDataStore(url);
 						collection = store.getFeatureSource().getFeatures();
 					}catch (final Exception ex){
-						QaPlugIn.displayLog("Error reading shapefile", ex);
+						QaPlugIn.displayLog(Messages.WaypointLocationParameterCollector_ShapeErrorMsg, ex);
 						return;
 					}
 					
 					if (collection.getSchema().getCoordinateReferenceSystem() == null){
 						//check projection
 						shell.getDisplay().syncExec(()->{
-								MessageDialog.openError(ppd.getShell(), "Shapefile Error", "No projection defined with shapefile.  Ensure a .prj file exists.");
+								MessageDialog.openError(ppd.getShell(), Messages.WaypointLocationParameterCollector_ShpErrorDialogTitle, Messages.WaypointLocationParameterCollector_NoProjectionDefined);
 						});
 						return;
 					}
@@ -386,7 +386,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 									geom = geom.buffer(0);
 									if (!geom.isValid() || !geom.isSimple()){
 										//still not valid and not simple so error out
-										throw new Exception("Invalid geometry found in shapefile.");
+										throw new Exception(Messages.WaypointLocationParameterCollector_InvalidShapefileGeometry);
 									}
 								}
 								if (geom instanceof Polygon || geom instanceof MultiPolygon){
@@ -401,7 +401,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 							}
 							shell.getDisplay().syncExec(()->{
 								txtSummary.setData(GEOMETRY_KEY, geometries);
-								txtSummary.setText(MessageFormat.format("Bounds: ({0} {1}, {2}, {3})", r.getMinX(), r.getMinY(), r.getMaxX(), r.getMaxY()));
+								txtSummary.setText(MessageFormat.format(Messages.WaypointLocationParameterCollector_BoundsLabel, r.getMinX(), r.getMinY(), r.getMaxX(), r.getMaxY()));
 							});
 						}
 						
@@ -413,7 +413,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		} catch (Exception e) {
 			String msg = e.getMessage();
 			if (msg == null && e.getCause() != null) msg = e.getCause().getMessage();
-			QaPlugIn.displayLog("Error reading shapefile: " +msg, e);
+			QaPlugIn.displayLog(Messages.WaypointLocationParameterCollector_ShapeErrorMsg +msg, e);
 		}
 		validate();
 	}
@@ -429,7 +429,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 			btnOpFile.setSelection(false);
 			btnOpText.setSelection(false);
 			
-			String areaType = areaParam.getStringValue().split(":")[1];
+			String areaType = areaParam.getStringValue().split(":")[1]; //$NON-NLS-1$
 			Area.AreaType type = Area.AreaType.valueOf(areaType);
 			if (type != null){
 				cmbViewer.setSelection(new StructuredSelection(type));
@@ -465,7 +465,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 						}
 				
 						txtSummary.setData(GEOMETRY_KEY, geometries);
-						txtSummary.setText(MessageFormat.format("Bounds: ({0} {1}, {2}, {3})", r.getMinX(), r.getMinY(), r.getMaxX(), r.getMaxY()));
+						txtSummary.setText(MessageFormat.format(Messages.WaypointLocationParameterCollector_BoundsLabel, r.getMinX(), r.getMinY(), r.getMaxX(), r.getMaxY()));
 					}
 				}
 			}
@@ -481,6 +481,7 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		updatePanels();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void updateParameters(QaRoutine routine) {
 		QaRoutineParameter areaParam = (QaRoutineParameter)routine.findParameter(LocationRoutineType.LOCATION_PARAM_ID);

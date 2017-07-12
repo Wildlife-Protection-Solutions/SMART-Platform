@@ -57,6 +57,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
+import org.wcs.smart.qa.er.internal.Messages;
 import org.wcs.smart.qa.ui.view.EditWaypointDetailsDialog;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -115,7 +116,7 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 	@Override
 	protected void addToolbarContributions(ToolBar toolBar){
 		btnInterpolate = new ToolItem(toolBar, SWT.PUSH);
-		btnInterpolate.setToolTipText("interpolate a new position based on previous and next waypoints");
+		btnInterpolate.setToolTipText(Messages.ErEditWaypointDialog_interpolateTooltip);
 		btnInterpolate.setImage(QaPlugIn.getDefault().getImageRegistry().get(QaPlugIn.ICON_INTERPOLATE));
 		btnInterpolate.addListener(SWT.Selection, e->interpolate());
 	}
@@ -153,7 +154,7 @@ public class ErEditWaypointDialog extends EditWaypointDetailsDialog {
 					.uniqueResult();
 			editWaypoint = pw;
 			if (pw == null){
-				setErrorMessage("Waypoint not found.  Close dialog an re-run validation routines.");
+				setErrorMessage(Messages.ErEditWaypointDialog_NotFoundError);
 				return;
 			}
 			waypoints = pw.getMissionDay().getWaypoints();

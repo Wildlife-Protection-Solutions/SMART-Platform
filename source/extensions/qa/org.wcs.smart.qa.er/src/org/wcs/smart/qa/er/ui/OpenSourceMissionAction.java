@@ -42,6 +42,7 @@ import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.qa.er.ErTrackDataProvider;
 import org.wcs.smart.qa.er.ErWaypointDataProvider;
+import org.wcs.smart.qa.er.internal.Messages;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
 
@@ -83,7 +84,7 @@ public class OpenSourceMissionAction implements IQaAction {
 			}
 			if (pw == null){
 				//not found
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Patrol waypoint {0} not found", item.getErrorId()));
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourceMissionAction_NotFoundTitle, MessageFormat.format(Messages.OpenSourceMissionAction_WpNotfoundMsg, item.getErrorId()));
 				return false;
 			}else{
 				EditSurveyElementHandler.editMission(context.get(Shell.class), pw.getMissionDay().getMission().getUuid(), pw.getMissionDay().getMission().getId(), pw.getWaypoint().getUuid());
@@ -106,7 +107,7 @@ public class OpenSourceMissionAction implements IQaAction {
 			}
 			if (track == null){
 				//not found
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Not Found", MessageFormat.format("Patrol track {0} not found", item.getErrorId()));
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourceMissionAction_NotFoundTitle, MessageFormat.format(Messages.OpenSourceMissionAction_TrackNotFoundMsg, item.getErrorId()));
 				return false;
 			}else{
 				EditSurveyElementHandler.editMission(context.get(Shell.class),track.getMissionDay().getMission().getUuid(), track.getMissionDay().getMission().getId(), track.getMissionDay().getDate());	
@@ -127,7 +128,7 @@ public class OpenSourceMissionAction implements IQaAction {
 
 	@Override
 	public String getName(Locale l) {
-		return "Goto Source";
+		return Messages.OpenSourceMissionAction_ActionName;
 	}
 
 	@Override
