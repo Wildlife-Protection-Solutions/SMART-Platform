@@ -87,8 +87,16 @@ public class PerspectiveEditorTracker implements EventHandler {
 			}
 			MWindow window = ((MPart)x).getContext().get(MWindow.class);
 			if (window == null) return;
-
-			String id = mService.getActivePerspective(window).getElementId();
+			String id = null;
+			if (mService.getActivePerspective(window) == null){
+				MWindow top = mService.getTopLevelWindowFor(window);
+				if (mService.getActivePerspective(top) != null){
+					id = mService.getActivePerspective(top).getElementId();
+				}
+			}else{
+				id = mService.getActivePerspective(window).getElementId();
+			}
+			if (id == null) return;
 			Object y = event.getProperty(UIEvents.EventTags.WIDGET);
 			if (y != null){
 				if (!((MPart)x).getTags().contains(PID_KEY)){
