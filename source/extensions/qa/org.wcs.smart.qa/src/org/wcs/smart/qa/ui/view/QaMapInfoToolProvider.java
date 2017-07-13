@@ -25,13 +25,18 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.geotools.data.simple.SimpleFeatureSource;
+import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.render.IViewportModel;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.qa.model.map.QaErrorMemoryDatastore;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -68,17 +73,38 @@ public class QaMapInfoToolProvider implements IInfoToolProvider {
 		Envelope env = new Envelope(c1, c2);
 		Polygon pEnv = GeometryFactoryProvider.getFactory().createPolygon(new Coordinate[]{c1, new Coordinate(c1.x, c2.y), c2, new Coordinate(c2.x, c1.y), c1});
 		List<QaError> toSelect = new ArrayList<>();
+
+		List<SimpleFeatureType> validTypes = getValidTypes();
 		for (QaError result : editor.getResults()){
 			if (result.getGeometryObject() != null){
 				if (env.intersects(result.getGeometryObject().getEnvelopeInternal()) && result.getGeometryObject().intersects(pEnv)){
-					toSelect.add(result);
+					for (SimpleFeatureType t : validTypes){
+						if (QaErrorMemoryDatastore.isValid(result, t)){
+							toSelect.add(result);
+							break;
+						}
+					}
 				}
 			}
 		}
 		editor.setSelection(toSelect);
 	}
 				
-	
+	private List<SimpleFeatureType> getValidTypes(){
+		//geometry is valid lets see if it's part of a valid layer
+		List<SimpleFeatureType> validTypes = new ArrayList<>();
+		for (Layer l : editor.getQaMapLayers()){
+			if (l.isVisible()){
+				try{
+					SimpleFeatureType type = (SimpleFeatureType) l.getGeoResource().resolve(SimpleFeatureSource.class, new NullProgressMonitor()).getSchema();
+					if (type != null) validTypes.add(type);
+				}catch (Exception ex){
+					QaPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		}
+		return validTypes;
+	}
 	@Override
 	public InfoPoint findFeature(int x, int y, IViewportModel vm) {
 		if (editor.getResults() == null) return null;
@@ -109,6 +135,16 @@ public class QaMapInfoToolProvider implements IInfoToolProvider {
 		}
 		
 		if (nearest == null) return null;
+		
+		boolean found = false;
+		for (SimpleFeatureType t : getValidTypes()){
+			if (QaErrorMemoryDatastore.isValid(nearest, t)){
+				found = true;
+				break;
+			}
+		}
+		if (!found) return null;
+		
 		Geometry g = nearest.getGeometryObject();
 		Coordinate[] c = DistanceOp.nearestPoints(g, toTest);
 		if (c.length == 0) return null;

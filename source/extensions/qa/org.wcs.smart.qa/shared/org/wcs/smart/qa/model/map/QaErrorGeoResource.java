@@ -42,7 +42,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.qa.ILabelProvider;
 import org.wcs.smart.qa.ILabelProvider.Key;
-import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.udig.IFilteringResource;
 import org.wcs.smart.util.GeometryUtils;
 
@@ -144,7 +143,7 @@ public class QaErrorGeoResource extends IGeoResource implements IFilteringResour
 			this.description = ILabelProvider.getLabel(Key.QaErrorGeoResourceInfo_Description, ((QaErrorService)service).getLocale());
 			this.name = ILabelProvider.getLabel(Key.QaErrorGeoResourceInfo_Name, ((QaErrorService)service).getLocale());
 			this.title = this.name;
-			this.bounds = new ReferencedEnvelope(GeometryUtils.SMART_CRS);
+			this.bounds = ((QaErrorService)service).getDataStore().getBounds();
 		}
 	}
 	

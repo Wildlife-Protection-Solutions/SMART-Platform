@@ -154,8 +154,9 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 
 	protected TableViewer tblResults;
 	protected Label lblResultCnt;
+	protected Label lblSelectedCnt;
 	protected ToolItem btnIncludeFixed ;
-
+	
 	private Font boldFont;
 	private FormToolkit toolkit = null;
 	
@@ -187,6 +188,9 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 	 */
 	public void saveErrorItems(List<QaError> items){} 
 
+	public List<Layer> getQaMapLayers(){
+		return this.errorLayers;
+	}
 	
 	private void updateErrorDetails(){
 		for (Control c : detailsComposite.getChildren()){
@@ -293,13 +297,16 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		((GridLayout)main.getLayout()).marginHeight = 0;
 		
 		Composite topComp = toolkit.createComposite(main);
-		topComp.setLayout(new GridLayout(3, false));
+		topComp.setLayout(new GridLayout(4, false));
 		((GridLayout)topComp.getLayout()).marginWidth = 0;
 		((GridLayout)topComp.getLayout()).marginHeight = 0;
 		topComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		lblResultCnt = toolkit.createLabel(topComp, ""); //$NON-NLS-1$
-		lblResultCnt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		lblResultCnt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		lblSelectedCnt = toolkit.createLabel(topComp, ""); //$NON-NLS-1$
+		lblSelectedCnt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		ToolBar tb = new ToolBar(topComp, SWT.NONE);
 		
@@ -357,23 +364,27 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		tblResults.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-			if (errorLayers == null) return;
-			FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-			
-			List<Filter> selectedFeatures = new ArrayList<>();
-			for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
-				Object x = (Object) iterator.next();				
-				if (x instanceof QaError){
-					selectedFeatures.add(ff.equals(ff.property("fid"), ff.literal(UuidUtils.uuidToString(((QaError) x).getUuid())))); //$NON-NLS-1$
-				}
+				int cnt = ((IStructuredSelection)tblResults.getSelection()).size();
+				lblSelectedCnt.setText(MessageFormat.format(Messages.TableMapQaErrorComposite_selectedLabel, cnt));
+				lblSelectedCnt.getParent().layout(true, true);
 				
-			}
-			Filter selection = ff.or(selectedFeatures);
-			for (Layer l : errorLayers){
-				l.setFilter(Filter.EXCLUDE);
-				l.setFilter(selection);
-				l.refresh(null);
-			}
+				if (errorLayers == null) return;
+				FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+				
+				List<Filter> selectedFeatures = new ArrayList<>();
+				for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
+					Object x = (Object) iterator.next();				
+					if (x instanceof QaError){
+						selectedFeatures.add(ff.equals(ff.property("fid"), ff.literal(UuidUtils.uuidToString(((QaError) x).getUuid())))); //$NON-NLS-1$
+					}
+					
+				}
+				Filter selection = ff.or(selectedFeatures);
+				for (Layer l : errorLayers){
+					l.setFilter(Filter.EXCLUDE);
+					l.setFilter(selection);
+					l.refresh(null);
+				}
 			}
 		});
 		
@@ -682,6 +693,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 	 */
 	public void refreshResults(){
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
+		if (tools != null) tools.selectLastTool();
 		tblResults.refresh();
 		clearSelection();
 		updateResultsTableFilter();

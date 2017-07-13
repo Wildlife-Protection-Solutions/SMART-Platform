@@ -29,10 +29,13 @@ import java.util.List;
 import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
 import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.util.GeometryUtils;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
@@ -47,6 +50,7 @@ public class QaErrorMemoryDatastore extends ContentDataStore{
 	private List<SimpleFeatureType> schemas;
 	private Collection<QaError> errors;
 	
+	private ReferencedEnvelope bounds;
 	/**
 	 * Determines if the error is valid for the given feature type.  This is determined
 	 * based on the geometry type of the error object
@@ -65,7 +69,34 @@ public class QaErrorMemoryDatastore extends ContentDataStore{
 	
 	public QaErrorMemoryDatastore(Collection<QaError> errors){
 		this.errors = errors;
+		this.bounds = null;
 	}
+	
+	/**
+	 * compute bounds for layers
+	 * @return
+	 */
+	public synchronized ReferencedEnvelope getBounds(){
+		if (bounds != null) return bounds;
+		Envelope env = null;
+		for (QaError e : errors){
+			if (e.getGeometryObject() != null){
+				if (env == null){
+					env = e.getGeometryObject().getEnvelopeInternal();
+				}else{
+					env.expandToInclude(e.getGeometryObject().getEnvelopeInternal());
+				}
+			}
+		}
+		if (env == null){
+			bounds = new ReferencedEnvelope(GeometryUtils.SMART_CRS);
+		}else{
+			bounds = new ReferencedEnvelope(env, GeometryUtils.SMART_CRS);
+		}
+		return bounds;
+			
+	}
+	
 	
 	public Collection<QaError> getErrors(){
 		return this.errors;

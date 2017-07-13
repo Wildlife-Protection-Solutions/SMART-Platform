@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
@@ -41,6 +42,8 @@ import org.locationtech.udig.core.internal.CorePlugin;
 import org.wcs.smart.qa.ILabelProvider;
 import org.wcs.smart.qa.ILabelProvider.Key;
 import org.wcs.smart.qa.model.QaError;
+
+import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * UDig map service for displaying the results
@@ -63,12 +66,13 @@ public class QaErrorService extends IService {
 			this.url = new URL(null, "smart://smartdb/qa/" + System.nanoTime(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			Logger.getLogger(QaErrorService.class.getName()).log(Level.WARNING, e.getMessage(), e);
-		}
+		}	
 	}
 
 	public QaErrorMemoryDatastore getDataStore(){
 		return this.ds;
 	}
+	
 	/**
 	 * @see org.locationtech.udig.catalog.IResolve#getStatus()
 	 */
