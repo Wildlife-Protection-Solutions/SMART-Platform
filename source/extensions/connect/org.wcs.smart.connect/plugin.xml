@@ -92,6 +92,10 @@
             id="org.wcs.smart.connect.server.web"
             name="%OpenBrowser">
       </command>
+      <command
+            id="org.wcs.smart.connect.server.downloadreplaceca"
+            name="Replace CA with CA from Connect ">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -122,6 +126,10 @@
       <image
             commandId="org.wcs.smart.connect.server.web"
             icon="images/icons/obj16/world.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.server.downloadreplaceca"
+            icon="images/icons/obj16/server_ca_download.png">
       </image>
    </extension>
    <extension
@@ -215,6 +223,18 @@
                               value="manager">
                         </test>
                      </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.connect.server.downloadreplaceca"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <test
+                           property="org.wcs.smart.caSingle">
+                     </test>
                   </and>
                </visibleWhen>
             </command>
@@ -344,6 +364,16 @@
       <handler
             class="org.wcs.smart.connect.ui.ShowConnectWebHandler$ShowConnectWebHandlerWrapper"
             commandId="org.wcs.smart.connect.server.web">
+      </handler>
+      <handler
+            class="org.wcs.smart.connect.ui.server.DownloadReplaceCaHandler$DownloadReplaceCaHandlerWrapper"
+            commandId="org.wcs.smart.connect.server.downloadreplaceca">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.connect.replication.isEnabled"
+                  value="true">
+            </test>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
