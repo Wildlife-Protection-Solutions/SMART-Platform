@@ -25,7 +25,7 @@
             locationURI="menu:org.wcs.smart.fielddata?before=org.wcs.smart.observation.options">
          <menu
                icon="images/icons/qa.png"
-               label="Quality Assurance">
+               label="%QaMenuLabel">
             <command
                   commandId="org.wcs.smart.qa.validation.manual"
                   style="push">
@@ -49,15 +49,15 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.qa.routines.list"
-            name="Configure QA Routines...">
+            name="%ConfigureMenuLabel">
       </command>
       <command
             id="org.wcs.smart.qa.validation.manual"
-            name="Manual Data Validation">
+            name="%manual.command.name">
       </command>
       <command
             id="org.wcs.smart.qa.validation.auto"
-            name="Automated Data Validation Errors">
+            name="%auto.command.name">
       </command>
    </extension>
    <extension
@@ -91,14 +91,14 @@
             default="false"
             icon="images/icons/manual_qa.png"
             id="org.wcs.smart.qa.data.validatation.manual"
-            name="Manual Data Validation">
+            name="%manual.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.qa.ui.view.AutomatedResultsEditor"
             default="false"
             icon="images/icons/auto_qa.png"
             id="org.wcs.smart.qa.data.validatation.automated"
-            name="Automated Data Validation">
+            name="%auto.editor.name">
       </editor>
    </extension>
    <extension
@@ -129,10 +129,10 @@
             class="org.wcs.smart.qa.ui.view.QaFixTool"
             icon="images/icons/qatool.png"
             id="org.wcs.smart.qa.map.QaFixTool"
-            name="QA Fix Tool"
+            name="%qafix.tool.name"
             onToolbar="true"
             toolCursorId="org.wcs.smart.cross"
-            tooltip="select qa items on map ">
+            tooltip="%qafix.tool.tooltip">
       </modalTool>
    </extension>
 
