@@ -30,6 +30,7 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.ui.PlatformUI;
@@ -50,8 +51,13 @@ public class ShowPerspectiveHandler {
 		if (perspectiveId == null) return;
 		
 		EModelService mService = window.getContext().get(EModelService.class);
-		String activeId = mService.getActivePerspective(window).getElementId();		
-		if (!activeId.equals(perspectiveId)){
+		MPerspective perspective = mService.getActivePerspective(window);
+		String activeId = null;
+		if (perspective != null){
+			activeId = perspective.getElementId();
+		}
+		
+		if (!perspectiveId.equals(activeId)){
 			try {
 				PlatformUI.getWorkbench().showPerspective(perspectiveId, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			} catch (WorkbenchException e) {
