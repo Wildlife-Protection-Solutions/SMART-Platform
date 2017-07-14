@@ -119,7 +119,14 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
 				StringBuilder sb = new StringBuilder();
-				try(ResultSet rs = c.getMetaData().getColumns(null, null, engine.getQueryDataTable(), null)){
+				String schema = null;
+				String tablename = engine.getQueryDataTable();
+				int position = tablename.indexOf('.');
+				if (position >= 0){
+					schema = tablename.substring(0, position);
+					tablename = tablename.substring(position+1);
+				}
+				try(ResultSet rs = c.getMetaData().getColumns(null, schema, tablename, null)){
 					while(rs.next()){
 						sb.append("foo." + rs.getString(4)); //$NON-NLS-1$
 						sb.append(","); //$NON-NLS-1$

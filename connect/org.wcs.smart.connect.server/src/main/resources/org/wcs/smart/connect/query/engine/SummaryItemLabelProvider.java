@@ -25,7 +25,6 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -500,9 +499,11 @@ public class SummaryItemLabelProvider {
 		String[] filterHkeys = item.getFilterKeys();
 		List<ListItem> items = new ArrayList<ListItem>();
 		
-		List<ConservationArea> cas = s.createCriteria(ConservationArea.class).list();
+		List<ConservationArea> cas = s.createCriteria(ConservationArea.class)
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+				.list();
 		for (ConservationArea ca : cas){
-			items.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
+			if (!ca.getIsCcaa()) items.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
 		}
 		sortItems(items);
 		
@@ -840,6 +841,7 @@ public class SummaryItemLabelProvider {
 					c.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$
 				}
 			}
+			c.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 			Collection<?> data = c.list();
 			List<UUID> caUuids = caFilter.getConservationAreaFilterIds();
 			for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
@@ -875,17 +877,29 @@ public class SummaryItemLabelProvider {
 					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 					.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
 			
+			//unique values based on keys
+			HashSet<String> existingKeys = new HashSet<String>();
 			for (Iterator<?> it = c.list().iterator(); it.hasNext();){
 				NamedKeyItem nkitem = (NamedKeyItem)it.next();
-				data.add(new ListItem(null, nkitem.getName(),nkitem.getKeyId()));					
+				if (!existingKeys.contains(nkitem.getKeyId())){
+					data.add(new ListItem(null, nkitem.getName(),nkitem.getKeyId()));
+					existingKeys.add(nkitem.getKeyId());
+				}
 			}
 			
-			if (data != null){	
-				for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
-					ListItem it = (ListItem) iterator.next();
-					if (keys != null && Arrays.asList(keys).contains(it.getKey())){
-						results.add(it);
+			if (data != null){
+				if (keys != null){
+					HashSet<String> allKeys = new HashSet<>();
+					for (String a : keys) allKeys.add(a);
+					
+					for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
+						ListItem it = (ListItem) iterator.next();
+						if (allKeys.contains(it.getKey())){
+							results.add(it);
+						}
 					}
+				}else{
+					results.addAll(data);
 				}
 			}
 		}else if (type == PatrolQueryOptionType.STRING){

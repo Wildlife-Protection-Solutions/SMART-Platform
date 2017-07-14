@@ -41,6 +41,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.common.engine.NamedPreparedStatement;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -103,7 +104,8 @@ public class PsqlEntityFilterProcessor implements IFilterProcessor {
 	 */
 	@Override
 	public void processFilter(Connection c, IFilter queryFilter, 
-			DateFilter dateFilter, ConservationAreaFilter caFilter, 
+			DateFilter dateFilter, Query query,
+			ConservationAreaFilter caFilter, 
 			boolean populateObservation,
 			boolean includeEmptyObservations) throws SQLException{
 
@@ -116,7 +118,7 @@ public class PsqlEntityFilterProcessor implements IFilterProcessor {
 			createObservationTable(c, qFilter, dateFilter, caFilter);
 		}
 		createTemporaryTable(c);
-		populateTemporaryTable(qFilter, dateFilter, caFilter, includeEmptyObservations, c, populateObservation);
+		populateTemporaryTable(qFilter, dateFilter, query, caFilter, includeEmptyObservations, c, populateObservation);
 
 	}
 	
@@ -177,6 +179,7 @@ public class PsqlEntityFilterProcessor implements IFilterProcessor {
 	 */
 	private void populateTemporaryTable(IFilter queryFilter,
 			DateFilter dateFilter, 
+			Query query,
 			ConservationAreaFilter caFilter,
 			boolean onlyObservations,
 			Connection c,
@@ -262,7 +265,7 @@ public class PsqlEntityFilterProcessor implements IFilterProcessor {
 				}
 		}
 		
-		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine);
+		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, query.getConservationArea());
 		queryFilter.accept(areaVisitor);
 
 		entityVisitor = new EntityAttributeFilterVisitor(sql, engine, caFilter, c);

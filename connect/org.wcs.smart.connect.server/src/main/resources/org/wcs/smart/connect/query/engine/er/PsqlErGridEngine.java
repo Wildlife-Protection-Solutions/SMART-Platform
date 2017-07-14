@@ -308,7 +308,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			
 			IFilterProcessor filterer = getFilterProcessor(filter.getFilterType(), dataTable, sdFilter);
 			try{
-				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, 
+				filterer.processFilter(c, filter.getFilter(), dateFilter, query, caFilter, 
 					needsObservation, false);
 			}finally{
 				filterer.dropTemporaryTables(c);
@@ -655,7 +655,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 	@Override
 	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".start_date, "); //$NON-NLS-1$

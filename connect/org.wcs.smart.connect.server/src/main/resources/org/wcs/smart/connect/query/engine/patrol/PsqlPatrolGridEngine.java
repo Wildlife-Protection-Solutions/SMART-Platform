@@ -293,7 +293,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			
 			IFilterProcessor filterer = getFilterProcessor(filter.getFilterType(), dataTable);
 			try{
-				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, needsObservation, false);
+				filterer.processFilter(c, filter.getFilter(), dateFilter, query, caFilter, needsObservation, false);
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}
@@ -558,7 +558,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		}
 		IFilterProcessor filterer = getFilterProcessor(filter.getFilterType(), dataTable);
 		try{
-			filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, needsObservation, false);
+			filterer.processFilter(c, filter.getFilter(), dateFilter, query, caFilter, needsObservation, false);
 		}finally{
 			filterer.dropTemporaryTables(c);
 		}
@@ -762,7 +762,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 	@Override
 	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".id, "); //$NON-NLS-1$

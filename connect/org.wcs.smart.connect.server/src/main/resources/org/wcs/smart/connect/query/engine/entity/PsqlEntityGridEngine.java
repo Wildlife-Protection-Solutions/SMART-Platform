@@ -190,7 +190,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 			try{
 				parseConservationAreaFilterInternal(query);
 				filterer = getFilterProcessor(filter.getFilterType(), dataTable);
-				filterer.processFilter(c, filter.getFilter(), dFilter, caFilter, 
+				filterer.processFilter(c, filter.getFilter(), dFilter, query, caFilter, 
 					needsObservation, false);
 			}catch (Exception ex){
 				throw new SQLException(ex);
@@ -452,7 +452,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 	@Override
 	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		
 		if (includeObservations){
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$

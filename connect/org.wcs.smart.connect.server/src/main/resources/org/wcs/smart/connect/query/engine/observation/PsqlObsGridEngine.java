@@ -189,7 +189,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 			
 			try{
 				parseConservationAreaFilterInternal(query);
-				filterer.processFilter(c, filter.getFilter(), dFilter, caFilter, needsObservation, false);
+				filterer.processFilter(c, filter.getFilter(), dFilter, query,  caFilter, needsObservation, false);
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}
@@ -448,7 +448,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	@Override
 	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		
 		if (includeObservations){
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$

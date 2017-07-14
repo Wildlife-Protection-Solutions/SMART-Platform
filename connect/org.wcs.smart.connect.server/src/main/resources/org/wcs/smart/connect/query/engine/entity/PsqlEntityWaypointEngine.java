@@ -106,7 +106,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 					filterer = PsqlEntityWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
 					
 					parseConservationAreaFilterInternal(query);
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, query, 
 							caFilter, false, true);
 					
 					populateTemporaryTableExtra(c, session);

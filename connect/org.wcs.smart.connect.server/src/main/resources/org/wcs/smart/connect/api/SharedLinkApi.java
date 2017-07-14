@@ -118,8 +118,8 @@ public class SharedLinkApi extends HttpServlet{
 	
 	/**
 	 * List all Shared Links
-	 * URL: ../server/api/sharedlink/
-	 * Call Type: GET
+	 * <p>URL: ../server/api/sharedlink/
+	 * <p>Call Type: GET
 	 * 
 	 * @return Returns a JSON array of SharedLink objects
 	 */
@@ -179,7 +179,7 @@ public class SharedLinkApi extends HttpServlet{
 	 * 		<expires in 1 year>
 	 * @param expiresAfter - 0  means the link will never expire, otherwise it is # of minutes until the link expires
 	 * @param url - the url of the report or query you want to link to.
-	 * @return Returns a JSON ShareLink object for the created user, the link_uuid attribute is what you need to put into URLs. 
+	 * @return Returns a JSON SharedLink object for the created user, the link_uuid attribute is what you need to put into URLs. 
 	 */
 	@POST
     @Path("/")
@@ -349,7 +349,7 @@ public class SharedLinkApi extends HttpServlet{
 	
 	/**
 	 * Delete a shared link
-	 * <p>URL: ../server/api/sharedlink//{alertUuid}
+	 * <p>URL: ../server/api/sharedlink/{alertUuid}
 	 * <p>Call Type: DELETE
 	 * 
 	 * @param	Uuid	provided in the URL, the UUID of the shared link to delete.

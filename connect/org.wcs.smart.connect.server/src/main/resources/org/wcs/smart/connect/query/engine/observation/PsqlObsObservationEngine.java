@@ -110,7 +110,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 					DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));
 					
 					parseConservationAreaFilterInternal(query);
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, caFilter, true, true);
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, query, caFilter, true, true);
 					populateTemporaryTableExtra(c, caFilter, session);
 					
 					//item cnt
@@ -205,7 +205,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 	@Override
 	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".source, "); //$NON-NLS-1$

@@ -114,7 +114,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 				try {			
 					parseConservationAreaFilterInternal(lquery);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							caFilter, 
+							query, caFilter, 
 							false, true);
 					
 					populateTemporaryTableExtra(c, caFilter.getConservationAreaFilterIds().size() > 1, session);

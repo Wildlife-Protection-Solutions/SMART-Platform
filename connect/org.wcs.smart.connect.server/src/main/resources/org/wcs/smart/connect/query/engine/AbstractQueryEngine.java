@@ -598,22 +598,73 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sb.append(tableName);
 		sb.append(" SET "); //$NON-NLS-1$
 		sb.append( value );
-		sb.append(" = (SELECT "); //$NON-NLS-1$
+		sb.append(" = a.lbl FROM (SELECT "); //$NON-NLS-1$
 		sb.append(tablePrefix(Label.class));
-		sb.append(".value FROM "); //$NON-NLS-1$
+		sb.append(".value as lbl, ");
+		sb.append(tablePrefix(Label.class));
+		sb.append(".element_uuid as uuid ");
+		sb.append("FROM "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(Label.class));
-		sb.append(","); //$NON-NLS-1$
+		sb.append(" JOIN "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(Language.class));
-		sb.append(" WHERE "); //$NON-NLS-1$
-		sb.append(tablePrefix(Label.class) + ".language_uuid = "); //$NON-NLS-1$
+		sb.append(" ON "); //$NON-NLS-1$
+		sb.append(tablePrefix(Label.class));
+		sb.append(".language_uuid  = "); //$NON-NLS-1$
 		sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
-		sb.append(" AND "); //$NON-NLS-1$
-		sb.append(tableName + "." + uuid); //$NON-NLS-1$
-		sb.append(" = "); //$NON-NLS-1$
-		sb.append(tablePrefix(Label.class) + ".element_uuid"); //$NON-NLS-1$
-		sb.append(" ORDER BY CASE WHEN upper(code) = '" + locale.toString().toUpperCase() + "' THEN 1 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append(" CASE WHEN upper(code) = '" + locale.getLanguage().toUpperCase() + "' THEN 2 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append(" CASE WHEN isdefault THEN 3 ELSE 4 END END END LIMIT 1)"); //$NON-NLS-1$
+		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
+		sb.append(" WHERE upper(code) = '" + locale.toString().toUpperCase() + "'");
+		
+		if (locale.toString().toUpperCase().endsWith(locale.getLanguage().toUpperCase())){
+			sb.append(" UNION ");
+			
+			sb.append(" SELECT "); //$NON-NLS-1$
+			sb.append(tablePrefix(Label.class));
+			sb.append(".value as lbl, ");
+			sb.append(tablePrefix(Label.class));
+			sb.append(".element_uuid as uuid ");
+			sb.append("FROM "); //$NON-NLS-1$
+			sb.append(tableNamePrefix(Label.class));
+			sb.append(" JOIN "); //$NON-NLS-1$
+			sb.append(tableNamePrefix(Language.class));
+			sb.append(" ON "); //$NON-NLS-1$
+			sb.append(tablePrefix(Label.class));
+			sb.append(".language_uuid  = "); //$NON-NLS-1$
+			sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
+			sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
+			sb.append(" WHERE upper(code) = '" + locale.getLanguage().toUpperCase() + "'");
+			
+			sb.append("AND " + tablePrefix(Label.class) + ".element_uuid not in (");
+			sb.append(" SELECT " + tablePrefix(Label.class) + ".element_uuid as uuid FROM " + tableNamePrefix(Label.class) + " JOIN " + tableNamePrefix(Language.class) + " on " + tablePrefix(Label.class) + ".language_uuid = " + tablePrefix(Language.class) + ".uuid");
+			sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
+			sb.append(" WHERE  upper(code) = '" +  locale.toString().toUpperCase()+ "')");
+		}
+		
+		sb.append(" UNION ");
+		
+		sb.append(" SELECT "); //$NON-NLS-1$
+		sb.append(tablePrefix(Label.class));
+		sb.append(".value as lbl, ");
+		sb.append(tablePrefix(Label.class));
+		sb.append(".element_uuid as uuid ");
+		sb.append("FROM "); //$NON-NLS-1$
+		sb.append(tableNamePrefix(Label.class));
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append(tableNamePrefix(Language.class));
+		sb.append(" ON "); //$NON-NLS-1$
+		sb.append(tablePrefix(Label.class));
+		sb.append(".language_uuid  = "); //$NON-NLS-1$
+		sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
+		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
+		sb.append(" WHERE " + tablePrefix(Language.class) + ".isdefault ");
+		
+		sb.append("AND " + tablePrefix(Label.class) + ".element_uuid not in (");
+		sb.append(" SELECT " + tablePrefix(Label.class) + ".element_uuid as uuid FROM " + tableNamePrefix(Label.class) + " JOIN " + tableNamePrefix(Language.class) + " on " + tablePrefix(Label.class) + ".language_uuid = " + tablePrefix(Language.class) + ".uuid");
+		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
+		sb.append(" WHERE  upper(code) IN( '" +  locale.toString().toUpperCase()+ "',  '" +  locale.getLanguage().toUpperCase() + "'))");
+		
+		sb.append(") a ");
+		sb.append(" WHERE a.uuid = " + tableName + "." + uuid); //$NON-NLS-1$
+
 
 		logger.finest(sb.toString());
 		c.createStatement().execute(sb.toString());

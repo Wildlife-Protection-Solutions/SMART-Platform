@@ -48,6 +48,7 @@ import org.wcs.smart.er.query.engine.visitors.MissionPropertyFilterCollectorVisi
 import org.wcs.smart.er.query.engine.visitors.SamplingUnitAttributeFilterCollectorVisitor;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.query.common.engine.NamedPreparedStatement;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -117,7 +118,8 @@ public class ErFilterProcessorMission implements IFilterProcessor {
 	 */
 	@Override
 	public void processFilter(Connection c, IFilter queryFilter, 
-			DateFilter dateFilter, ConservationAreaFilter caFilter, 
+			DateFilter dateFilter, Query query,
+			ConservationAreaFilter caFilter, 
 			boolean populateObservation,
 			boolean includeEmptyObservations) throws SQLException{
 		
@@ -140,7 +142,7 @@ public class ErFilterProcessorMission implements IFilterProcessor {
 		}
 		createTemporaryTable(c);
 
-		populateTemporaryTable(qFilter, dateFilter, caFilter, 
+		populateTemporaryTable(qFilter, dateFilter, query, caFilter, 
 				includeEmptyObservations, c, populateObservation);
 	}
 	
@@ -201,6 +203,7 @@ public class ErFilterProcessorMission implements IFilterProcessor {
 	 */
 	private void populateTemporaryTable(IFilter queryFilter,
 			DateFilter dateFilter, 
+			Query query,
 			ConservationAreaFilter caFilter,
 			boolean onlyObservations,
 			Connection c,
@@ -303,7 +306,7 @@ public class ErFilterProcessorMission implements IFilterProcessor {
 		}
 		
 		// area filters
-		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables);
+		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
 		queryFilter.accept(areaVisitor);
 		
 		sql.append(engine.appendFromClause(usedTables));
