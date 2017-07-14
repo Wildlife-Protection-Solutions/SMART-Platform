@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.i2.feature_5.0.1.201707050844.jar" id="org.wcs.smart.i2.feature" version="5.0.1.201707050844">
+   <feature url="features/org.wcs.smart.i2.feature.nl.es_5.0.0.jar" id="org.wcs.smart.i2.feature.nl.es" version="5.0.0">
       <category name="intelligence"/>
    </feature>
-   <feature url="features/org.wcs.smart.i2.feature.nl.es_5.0.0.jar" id="org.wcs.smart.i2.feature.nl.es" version="5.0.0">
+   <feature url="features/org.wcs.smart.i2.feature_5.0.1.201707060957.jar" id="org.wcs.smart.i2.feature" version="5.0.1.201707060957">
       <category name="intelligence"/>
    </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
