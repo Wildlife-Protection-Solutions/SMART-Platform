@@ -48,6 +48,7 @@ import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -69,6 +70,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 	
 	private DerbySurveyQueryEngine engine;
 	private SurveyDesignFilter designFilter;
+	private Query query;
 	
 	private MissionPropertyFilterCollectorVisitor mpcollector = new MissionPropertyFilterCollectorVisitor();
 	private SamplingUnitAttributeFilterCollectorVisitor sucollector = new SamplingUnitAttributeFilterCollectorVisitor();
@@ -80,10 +82,11 @@ public class FilterProcessorMission implements IFilterProcessor {
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public FilterProcessorMission(String tableName, DerbySurveyQueryEngine engine, SurveyDesignFilter designFilter ){
+	public FilterProcessorMission(String tableName, DerbySurveyQueryEngine engine, SurveyDesignFilter designFilter, Query query ){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.designFilter = designFilter;
+		this.query = query;
 	}
 	
 	/**
@@ -324,7 +327,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 		}
 		
 		// area filters
-		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables);
+		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
 		queryFilter.accept(areaVisitor);
 		
 		sql.append(engine.appendFromClause(usedTables));

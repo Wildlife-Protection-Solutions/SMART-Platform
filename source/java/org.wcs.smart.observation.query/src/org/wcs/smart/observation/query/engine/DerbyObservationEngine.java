@@ -110,7 +110,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				c.setAutoCommit(true);
 				try {
-					filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, query);
 					
 					//create a date filter that caches the dates so the same
 					//dates are used for all parts of the query;
@@ -467,7 +467,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	@Override
 	protected String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".source, "); //$NON-NLS-1$

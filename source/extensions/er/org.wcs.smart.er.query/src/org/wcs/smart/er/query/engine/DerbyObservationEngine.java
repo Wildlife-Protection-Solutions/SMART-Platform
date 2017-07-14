@@ -129,7 +129,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				c.setAutoCommit(true);
 				try {
-					filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+					filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter, query);
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, 

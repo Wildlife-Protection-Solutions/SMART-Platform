@@ -50,6 +50,8 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -61,6 +63,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -90,6 +94,7 @@ import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -363,6 +368,25 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		});
 		modelTreeViewer.expandToLevel(2);
 
+		Menu mnuTreeMenu = new Menu(modelTreeViewer.getTree());
+		modelTreeViewer.getTree().setMenu(mnuTreeMenu);
+		
+		MenuItem mnuNewAlert = new MenuItem(mnuTreeMenu, SWT.PUSH);
+		mnuNewAlert.setText(Messages.ConfigurableModelEditorConnectTab_Button_NewAlert);
+		mnuNewAlert.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		mnuNewAlert.addListener(SWT.Selection, e->handleNewAlert());
+		
+		mnuTreeMenu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				mnuNewAlert.setEnabled(canCreateAlertFromSelection());
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) { }
+		});
+		
 		btnNew = new Button(innerLeft, SWT.PUSH);
 		btnNew.setText(Messages.ConfigurableModelEditorConnectTab_Button_NewAlert);
 		btnNew.setLayoutData(new GridData(SWT.END, SWT.BOTTOM, false, false));
@@ -387,8 +411,42 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 				updateEditDeleteButtonState();
 			}
 		});
-		alertsList = new ArrayList<ConnectAlert>(dbAlertsList); //this is a copy of db data that can be changes, changes will be persisted on 'Save'
+		
+		//this is a copy of db data that can be changes, changes will be persisted on 'Save'
+		//automatically remove alerts that can no longer be associated
+		//with a cm item (usually because the item was deleted from the dm)
+		alertsList = new ArrayList<>();
+		for (ConnectAlert c : dbAlertsList){
+			if (c.getAlertItem() != null){
+				alertsList.add(c);
+			}else{
+				dialog.getSession().delete(c);
+			}
+		}
 		alertTable.setInput(alertsList);
+
+		
+		Menu mnuAlertTable = new Menu(alertTable.getControl());
+		alertTable.getControl().setMenu(mnuAlertTable);
+		
+		MenuItem mnuEditAlert = new MenuItem(mnuAlertTable, SWT.PUSH);
+		mnuEditAlert.setText(Messages.ConfigurableModelEditorConnectTab_Button_Edit);
+		mnuEditAlert.addListener(SWT.Selection, e->handleEditAlert());
+		
+		MenuItem mnuDeleteAlert = new MenuItem(mnuAlertTable, SWT.PUSH);
+		mnuDeleteAlert.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		mnuDeleteAlert.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		mnuDeleteAlert.addListener(SWT.Selection, e->handleDeleteAlert());
+		
+		mnuAlertTable.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				mnuDeleteAlert.setEnabled(!alertTable.getSelection().isEmpty());
+				mnuEditAlert.setEnabled(!alertTable.getSelection().isEmpty());
+			}
+			@Override
+			public void menuHidden(MenuEvent e) { }
+		});
 		
 		Composite buttonPanel = new Composite(rightPanel, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(3, false));
@@ -578,15 +636,18 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 		}
 	}
 	
-	
-	private void updateNewButtonState() {
+	private boolean canCreateAlertFromSelection(){
 		boolean canCreate = false;
 		IStructuredSelection sel = (IStructuredSelection) modelTreeViewer.getSelection();
 		if (sel != null && !sel.isEmpty()) {
 			Object obj = sel.getFirstElement();
 			canCreate = obj instanceof CmNode || obj instanceof CmAttributeListItem || obj instanceof ConnectCmTreeElement;
 		}
-		btnNew.setEnabled(canCreate);
+		return canCreate;
+	}
+	
+	private void updateNewButtonState() {
+		btnNew.setEnabled(canCreateAlertFromSelection());
 	}
 
 	private void updateEditDeleteButtonState() {

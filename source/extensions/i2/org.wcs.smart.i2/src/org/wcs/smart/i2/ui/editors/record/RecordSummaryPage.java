@@ -159,6 +159,7 @@ public class RecordSummaryPage extends EditorPart{
 	public void clearLists(){
 		attachmentPanel.getAttachmentsToDelete().clear();
 		attachmentPanel.getNewEntityAttachments().clear();
+		attachmentPanel.getRemovedEntityAttachments().clear();
 		entityPanel.getEntityLinksAdded().clear();
 		entityPanel.getEntityLinksToDelete().clear();
 	}
@@ -169,6 +170,9 @@ public class RecordSummaryPage extends EditorPart{
 //	}
 	public List<IntelEntityAttachment> getNewAttachments(){
 		return attachmentPanel.getNewEntityAttachments();
+	}
+	public List<IntelEntityAttachment> getRemovedEntityAttachments(){
+		return attachmentPanel.getRemovedEntityAttachments();
 	}
 	
 	public List<IntelRecordAttachment> getDeleteAttachments(){

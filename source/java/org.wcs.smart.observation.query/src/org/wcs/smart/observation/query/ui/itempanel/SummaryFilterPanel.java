@@ -122,10 +122,10 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		
 		groupbynodes.add(new GeneralTreeNode(Messages.SummaryFilterPanel_GeneralItemGroupBy, generalItems));
 		groupbynodes.add(new DateTreeNode());
-		if (!SmartDB.isMultipleAnalysis()){
-			areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_AreaGroupBy);
-			groupbynodes.add(areaTreeNode);
-		}
+		
+		areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_AreaGroupBy);
+		groupbynodes.add(areaTreeNode);
+		
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
 		
 		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();

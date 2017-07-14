@@ -28,6 +28,7 @@ import java.util.List;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -41,8 +42,14 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -450,6 +457,69 @@ public class EditListDialog extends TitleAreaDialog{
 		ll.setColumnData(new TableColumn(listViewer.getTable(),SWT.NONE), new ColumnWeightData(100));
 		tableComp.setLayout(ll);
 		
+		/* drag and drop support */
+		int operations = DND.DROP_MOVE;
+		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
+		listViewer.addDragSupport(operations, transferTypes, new DragSourceListener() {
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				LocalSelectionTransfer.getTransfer().setSelection(listViewer.getSelection());
+				event.doit = true;
+				
+			}
+			
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				if (LocalSelectionTransfer.getTransfer()
+						.isSupportedType(event.dataType)) {
+					event.data = listViewer.getSelection();
+				}
+			}
+			
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				LocalSelectionTransfer.getTransfer().setSelection(null);
+				listViewer.refresh();
+			}
+		});
+		
+		ViewerDropAdapter dropAdapter = new ViewerDropAdapter(listViewer) {
+			
+			@Override
+			public boolean validateDrop(Object target, int operation,
+					TransferData transferType) {
+				if (target instanceof CmAttributeListItem){
+					return true;
+				}
+				return false;
+			}
+			
+			@Override
+			public boolean performDrop(Object data) {
+				StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
+				if (selection == null){
+					return false;
+				}
+				CmAttributeListItem obj = (CmAttributeListItem) selection.getFirstElement();
+				
+				CmAttributeListItem target = (CmAttributeListItem)getCurrentTarget();
+				if (target.equals(obj)){
+					return false;
+				}
+				int index = attribute.getCurrentList().indexOf(obj);
+				int toIndex = attribute.getCurrentList().indexOf(target);
+				
+				if (index == -1 || toIndex == -1) return false;
+				attribute.getCurrentList().remove(obj);
+				attribute.getCurrentList().add(toIndex, obj);
+				for (int i = 0; i < attribute.getCurrentList().size(); i++){
+					((CmAttributeListItem)attribute.getCurrentList().get(i)).setListOrder(i);
+				}
+			
+				return true;
+			}
+		};
+		listViewer.addDropSupport(operations, transferTypes,dropAdapter);
 		return listViewer;
 	}
 

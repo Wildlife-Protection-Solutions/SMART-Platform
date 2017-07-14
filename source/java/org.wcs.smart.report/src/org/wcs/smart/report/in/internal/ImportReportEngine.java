@@ -388,6 +388,15 @@ public class ImportReportEngine {
 			}
 		}
 		
+		//make sure default language has a name
+		if (r.findNameNull(r.getConservationArea().getDefaultLanguage()) == null){
+			if (r.getNames().isEmpty()){
+				r.setName(Messages.ImportReportEngine_NoNameReportName);
+			}else{
+				r.setName(r.getNames().iterator().next().getValue());
+			}
+			r.updateName(r.getConservationArea().getDefaultLanguage(), r.getName());
+		}
 		if (version == null || !version.equals(ReportDefintionExporter.VERSION_2)){
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
@@ -549,23 +558,25 @@ public class ImportReportEngine {
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
 		ReportDesignHandle rdh = session.openDesign(reportFile.getAbsolutePath());
-		
-		List<?> datasets = rdh.getDataSets().getContents();
-		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
-			DataSetHandle dataset = (DataSetHandle) iterator.next();
-			if (dataset instanceof OdaDataSetHandle){
-				OdaDataSetHandle handle = (OdaDataSetHandle)dataset;
-				if (handle.getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
-					//smart dataset
-					if (!processQuery(handle.getQueryText().split(":")[1],  //$NON-NLS-1$
-							queryDir, handle, sharedReport, reportEmployee, importCa)){
-						return false;
+		try{
+			List<?> datasets = rdh.getDataSets().getContents();
+			for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
+				DataSetHandle dataset = (DataSetHandle) iterator.next();
+				if (dataset instanceof OdaDataSetHandle){
+					OdaDataSetHandle handle = (OdaDataSetHandle)dataset;
+					if (handle.getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
+						//smart dataset
+						if (!processQuery(handle.getQueryText().split(":")[1],  //$NON-NLS-1$
+								queryDir, handle, sharedReport, reportEmployee, importCa)){
+							return false;
+						}
 					}
 				}
 			}
+			rdh.save();
+		}finally{
+			rdh.close();
 		}
-		rdh.save();
-		rdh.close();
 		return true;
 	}
 	

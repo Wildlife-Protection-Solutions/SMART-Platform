@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.udig;
 
 import java.awt.Color;
@@ -9,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -24,18 +44,24 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+/**
+ * Tool to compute the list between points.
+ * 
+ * @author Emily
+ *
+ */
 public class SmartDistanceTool extends SimpleTool implements KeyListener {
+	
 	public static final String ID = "org.wcs.smart.map.tool.distance"; //$NON-NLS-1$
 
 	private String units;
-
+	private List<Point> points = new ArrayList<Point>();
+	private DistanceFeedbackCommand command;
+	private Point now;
+	
 	public SmartDistanceTool() {
 		super(MOUSE | MOTION);
 	}
-
-	List<Point> points = new ArrayList<Point>();
-	DistanceFeedbackCommand command;
-	private Point now;
 
 	@Override
 	protected void onMouseMoved(MapMouseEvent e) {
@@ -67,9 +93,6 @@ public class SmartDistanceTool extends SimpleTool implements KeyListener {
 		points.clear();
 	}
 
-	/**
-	     *
-	     */
 	private void disposeCommand() {
 		if (command != null) {
 			points.clear();
@@ -88,19 +111,8 @@ public class SmartDistanceTool extends SimpleTool implements KeyListener {
 	@Override
 	public void setActive(boolean active) {
 		super.setActive(active);
-		final IStatusLineManager statusBar = getContext().getActionBars()
-				.getStatusLineManager();
-
+		
 		disposeCommand();
-
-		if (statusBar == null)
-			return; // shouldn't happen if the tool is being used.
-		getContext().updateUI(new Runnable() {
-			public void run() {
-				statusBar.setErrorMessage(null);
-				statusBar.setMessage(null);
-			}
-		});
 
 		if (active) {
 			Control control = getContext().getViewportPane().getControl();
@@ -120,11 +132,14 @@ public class SmartDistanceTool extends SimpleTool implements KeyListener {
 	}
 
 	private double distance() throws TransformException {
+		
 		if (points.isEmpty())
 			return 0;
+		
 		Iterator<Point> iter = points.iterator();
 		Point start = iter.next();
 		double distance = 0;
+		
 		while (iter.hasNext()) {
 			Point current = iter.next();
 			Coordinate begin = getContext().pixelToWorld(start.x, start.y);

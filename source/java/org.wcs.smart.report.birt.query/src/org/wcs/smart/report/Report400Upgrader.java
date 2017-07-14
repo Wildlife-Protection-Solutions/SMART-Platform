@@ -94,7 +94,7 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 			
 			final List<String> warnings = new ArrayList<String>();
 			
-			//NOTE: we are not allowed to use hibernate objects attached to session (see )
+			//NOTE: we are not allowed to use hibernate objects attached to session (see 1924 )
 			//This is why we fetch everything manually and fill object with fields that will be used later
 			final List<ConservationArea> cas = new ArrayList<>();
 			session.doWork(new Work() {

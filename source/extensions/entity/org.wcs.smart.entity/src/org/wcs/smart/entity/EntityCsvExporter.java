@@ -89,7 +89,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 	
 	public void setProjection(Projection prj) throws FactoryException{
 		this.currentPrj = prj;
-		if (prj.getParsedCoordinateReferenceSystem() == null){
+		if (prj != null && prj.getParsedCoordinateReferenceSystem() == null){
 			prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
 		}
 	}

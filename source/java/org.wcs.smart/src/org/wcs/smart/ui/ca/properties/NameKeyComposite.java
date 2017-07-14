@@ -128,6 +128,13 @@ public class NameKeyComposite {
 				item.setName(type.getValue());
 			}
 		}
+		//update name field
+		String name = item.findNameNull(SmartDB.getCurrentLanguage());
+		if (name == null){
+			item.setName(item.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+		}else{
+			item.setName(name);
+		}
 		
 		item.setKeyId(txtKey.getText());
 		if (item instanceof HkeyObject){

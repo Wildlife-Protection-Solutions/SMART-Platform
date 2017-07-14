@@ -46,6 +46,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryFilter;
@@ -67,7 +68,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 
 	private String tableName;
 	private String waypointTable;
-	
+	private Query query;
 	private DerbyEntityQueryEngine engine;
 
 	/**
@@ -76,10 +77,11 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public WaypointFilterProcessor(String tableName, DerbyEntityQueryEngine engine){
+	public WaypointFilterProcessor(String tableName, DerbyEntityQueryEngine engine, Query query){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.waypointTable = engine.createTempTableName();
+		this.query = query;
 	}
 	
 	/**
@@ -259,7 +261,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$
 		}
 			
-		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine);
+		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, query.getConservationArea());
 		queryFilter.accept(av);
 
 		sql.append(engine.appendFromClause(usedTables));

@@ -22,8 +22,8 @@
 package org.wcs.smart.i2;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -79,7 +79,13 @@ public enum RecordManager {
 		}
 	}
 
-	public void deleteRecords(List<? extends Object> records, IEclipseContext context, IProgressMonitor monitor){
+	/**
+	 * Deletes a collection of intelligence records.
+	 * @param records list of IntelRecord or RecordEditorInput
+	 * @param context
+	 * @param monitor
+	 */
+	public void deleteRecords(Collection<? extends Object> records, IEclipseContext context, IProgressMonitor monitor){
 		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			MessageDialog.openError(context.get(Shell.class), Messages.RecordManager_ErrorTitle, Messages.RecordManager_InsufficientPrivileges);
 			return;
@@ -127,45 +133,5 @@ public enum RecordManager {
 		broker.send(IntelEvents.RECORD_DELETE, deleted);
 		if (!entities.isEmpty()) broker.send(IntelEvents.ENTITY_MODIFIED, entities);
 	}
-	public void deleteRecord(IntelRecord record, IEclipseContext context){
-		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
-			MessageDialog.openError(context.get(Shell.class), Messages.RecordManager_ErrorTitle, Messages.RecordManager_InsufficientPrivileges);
-			return;
-		}
-		Session s = HibernateManager.openSession(new AttachmentInterceptor());
-		List<IntelEntity> entities = new ArrayList<IntelEntity>();
-		try{
-			s.beginTransaction();
-			record = (IntelRecord) s.get(IntelRecord.class, record.getUuid());
-			for (IntelEntityRecord r : record.getEntities()){
-				entities.add(r.getEntity());
-			}
-			deleteRecord(record, s);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.RecordManager_DeleteError + ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
-		}
-		IEventBroker broker = context.get(IEventBroker.class);
-		broker.send(IntelEvents.RECORD_DELETE, record);
-		if (!entities.isEmpty()) broker.send(IntelEvents.ENTITY_MODIFIED, entities);
-	}
-	
-	public void deleteRecord(UUID recordUuid, IEclipseContext context){
-		IntelRecord record = null;
-		Session s = HibernateManager.openSession();
-		try{
-			record = (IntelRecord) s.get(IntelRecord.class, recordUuid);
-		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(Messages.RecordManager_DeleteError + ex.getMessage(), ex);
-			return;
-		}
-		if (record != null){
-			deleteRecord(record, context);
-		}
-		
-	}
+
 }

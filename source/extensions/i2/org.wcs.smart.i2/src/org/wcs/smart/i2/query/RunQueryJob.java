@@ -52,6 +52,7 @@ public abstract class RunQueryJob extends Job {
 	
 	private ProgressPanel progressPanel;
 	
+	
 	public RunQueryJob(IntelRecordObservationQuery query) {
 		super(Messages.RunQueryJob_jobname + query.getName());
 		this.query = query;
@@ -59,6 +60,9 @@ public abstract class RunQueryJob extends Job {
 		
 	}
 
+	public IntelRecordObservationQuery getQuery(){
+		return this.query;
+	}
 	protected abstract void onError(Exception ex);
 	
 	protected abstract void onComplete(IPagedQueryResultSet results);

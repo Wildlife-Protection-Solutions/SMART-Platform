@@ -8,7 +8,7 @@ Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.wcs.smart,
  org.eclipse.ui.forms,
  org.wcs.smart.dataentry
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.observation,
  org.wcs.smart.observation.common.importwp,

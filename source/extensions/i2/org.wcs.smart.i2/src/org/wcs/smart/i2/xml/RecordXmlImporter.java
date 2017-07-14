@@ -49,10 +49,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -564,33 +564,33 @@ public class RecordXmlImporter {
 		for (ObservationAttributeType recordAttribute : attributes){
 			UUID attributeUuid = UuidUtils.stringToUuid(recordAttribute.getAttribute().getUuid());
 			
-			CategoryAttribute srcAttribute = null;
-			List<CategoryAttribute> allAttributes = new ArrayList<CategoryAttribute>();
-			newObservation.getCategory().getAllCategoryAttribute(allAttributes, null);
-			for (CategoryAttribute a : allAttributes){
-				if (a.getAttribute().getUuid().equals(attributeUuid)){
+			Attribute srcAttribute = null;
+			List<Attribute> allAttributes = new ArrayList<Attribute>();
+			newObservation.getCategory().getAllAttribute(allAttributes, null);
+			for (Attribute a : allAttributes){
+				if (a.getUuid().equals(attributeUuid)){
 					srcAttribute = a;
 					break;
 				}
 			}
 			if (srcAttribute == null){
-				for (CategoryAttribute a : allAttributes){
-					if (a.getAttribute().getKeyId().equals(recordAttribute.getAttribute().getName())){
+				for (Attribute a : allAttributes){
+					if (a.getKeyId().equals(recordAttribute.getAttribute().getName())){
 						srcAttribute = a;
 						break;
 					}
 				}	
 			}
-			if (srcAttribute == null || !srcAttribute.getAttribute().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+			if (srcAttribute == null || !srcAttribute.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 				warnings.add(MessageFormat.format(Messages.RecordXmlImporter_CategoryAttributeNotFound, newObservation.getCategory().getName(), recordAttribute.getAttribute().getName()));
 				continue;
 			}
 
 			IntelObservationAttribute newValue = new IntelObservationAttribute();
-			newValue.setAttribute(srcAttribute.getAttribute());
+			newValue.setAttribute(srcAttribute);
 			newValue.setObservation(newObservation);
 			
-			switch(srcAttribute.getAttribute().getType()){
+			switch(srcAttribute.getType()){
 				case BOOLEAN:
 				case NUMERIC:
 					if (recordAttribute.getNumberValue() == null) continue;
@@ -605,7 +605,7 @@ public class RecordXmlImporter {
 					if (recordAttribute.getListValue() == null) continue;
 					
 					//search uuid
-					for (AttributeListItem listItem : srcAttribute.getAttribute().getAttributeList()){
+					for (AttributeListItem listItem : srcAttribute.getAttributeList()){
 						if (listItem.getUuid().equals(recordAttribute.getListValue().getUuid())){
 							newValue.setAttributeListItem(listItem);
 							break;
@@ -613,7 +613,7 @@ public class RecordXmlImporter {
 					}
 					if (newValue.getAttributeListItem() == null){
 						//search key
-						for (AttributeListItem listItem : srcAttribute.getAttribute().getAttributeList()){
+						for (AttributeListItem listItem : srcAttribute.getAttributeList()){
 							if (listItem.getKeyId().equals(recordAttribute.getListValue().getName())){
 								newValue.setAttributeListItem(listItem);
 								break;
@@ -621,7 +621,7 @@ public class RecordXmlImporter {
 						}
 					}
 					if (newValue.getAttributeListItem() == null){
-						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_AttributeListNotFound, srcAttribute.getAttribute().getName(), recordAttribute.getListValue().getName()));
+						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_AttributeListNotFound, srcAttribute.getName(), recordAttribute.getListValue().getName()));
 						continue;
 					}
 					
@@ -630,17 +630,17 @@ public class RecordXmlImporter {
 					if (recordAttribute.getTreeValue() == null) continue;
 					
 					AttributeTreeNode treeNode = (AttributeTreeNode)session.createCriteria(AttributeTreeNode.class)
-						.add(Restrictions.eq("attribute", srcAttribute.getAttribute())) //$NON-NLS-1$
+						.add(Restrictions.eq("attribute", srcAttribute)) //$NON-NLS-1$
 						.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(recordAttribute.getTreeValue().getUuid()))) //$NON-NLS-1$
 						.uniqueResult();
 					if (treeNode == null){
 						treeNode = (AttributeTreeNode)session.createCriteria(AttributeTreeNode.class)
-								.add(Restrictions.eq("attribute", srcAttribute.getAttribute())) //$NON-NLS-1$
+								.add(Restrictions.eq("attribute", srcAttribute)) //$NON-NLS-1$
 								.add(Restrictions.eq("hkey", recordAttribute.getTreeValue().getName())) //$NON-NLS-1$
 								.uniqueResult();
 					}
 					if (treeNode == null){
-						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_TreeNodeNotFound, srcAttribute.getAttribute().getName(), recordAttribute.getTreeValue().getName()));
+						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_TreeNodeNotFound, srcAttribute.getName(), recordAttribute.getTreeValue().getName()));
 						continue;
 					}
 					newValue.setAttributeTreeNode(treeNode);					

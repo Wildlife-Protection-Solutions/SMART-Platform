@@ -209,7 +209,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.menu.ca">
+            locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.menu.help">
          <menu
                id="org.wcs.smart.i2.menu.main"
                label="%IntelligenceMenuItem">

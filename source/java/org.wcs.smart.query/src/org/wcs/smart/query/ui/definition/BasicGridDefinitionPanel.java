@@ -400,6 +400,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 		lblUnits = new Label(parent, SWT.NONE);
 		lblUnits.setText(Messages.GriddedValuePanel_UnknownUnitsLabel);
 		lblUnits.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		lblUnits.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		
 	}
@@ -446,10 +447,10 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 						try{
 							//assume units of all axis are the same
 							Unit<?> units = ReprojectUtils.stringToCrs(((Projection)o).getDefinition()).getCoordinateSystem().getAxis(0).getUnit();
-							
 							lblUnits.setText(units.toString());
 						}catch (Exception ex){	
 						}
+						lblUnits.getParent().layout(true);
 					}
 					
 					if (isInitializing) return;

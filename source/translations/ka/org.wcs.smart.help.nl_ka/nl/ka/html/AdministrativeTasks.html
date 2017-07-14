@@ -1,0 +1,689 @@
+﻿<html dir="ltr">
+<head>
+  
+  <title>Tareas Administrativas</title>
+  
+  <link href="smart_help.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body dir="ltr">
+<h1>Tareas del administrador ES</h1>
+
+<p></p>
+
+<h2><a id="createca">La creación de un Área de Conservación</a></h2>
+
+<p>Después de la instalación inicial del software SMART, tendrá que establecer una
+nueva área de conservación que involucra una serie de elementos de configuración. </p>
+<ul>
+</ul>
+<ul>
+  <li>La creación de un Área de Conservación</li>
+  <li>Propiedades del área de conservación</li>
+  <li>Definición de un usuario administrativo</li>
+  <li>Definición de un modelo de datos</li>
+  <li>Instituciones y Cargos</li>
+  <li>Funcionarios</li>
+  <li>Estaciones</li>
+  <li>Tipos de Patrullaje</li>
+  <li>Equipos</li>
+  <li>Mandatos</li>
+  <li>Otras opciones de patrullaje</li>
+  <li>Definir los límites del área</li>
+</ul>
+
+<p>Crear una nueva área de conservación se hace a través del enlace &quot;avanzado ...&quot; en la
+pantalla de arranque inicial.</p>
+
+<p></p>
+
+<p><strong>Pantalla de arranque inicial</strong></p>
+
+<p><img alt="Opciones avanzadas" src="images/AdvancedOption.png" width="497" height="318" /></p>
+<ul>
+  <li><em>Haga clic en Avanzado ...</em></li>
+</ul>
+
+<p></p>
+
+<p><strong>Opciones avanzadas de SMART</strong></p>
+
+<p><img alt="crear AC" src="images/createNewCA.png" width="443" height="318" /></p>
+<ul>
+  <li><em>Seleccione Crear Nueva Área de Conservación</em></li>
+</ul>
+
+<p></p>
+
+<h4><a id="caproperties">Propiedades del Área de Conservación</a></h4>
+
+<p>Las Propiedades del Área de Conservación son los nombres y descriptores asignados a un
+Área de Conservación específica. Estas propiedades pueden ayudar a los usuarios del software SMART
+a manejar múltiples áreas de conservación. </p>
+
+<p><img alt="Propiedades de AC" src="images/ConservationAreaProperties.png" width="511" height="312" /></p>
+
+<p></p>
+<ul>
+  <li><strong>Identificador:</strong> Nombre corto o identificador del Área de Conservación
+  </li>
+  <li><strong>Nombre:</strong> Nombre completo del Área de Conservación</li>
+  <li><strong>Descripción: Descripción</strong> del Área de Conservación</li>
+  <li><strong>Designación:</strong> Designación o Estatus de la Área de Conservación
+    </li>
+</ul>
+
+<p></p>
+
+<h4><a id="caadminuser">Definición de un usuario administrativo</a></h4>
+
+<p>La creación de una cuenta para el administrador principal de una nueva área de conservación
+es requerida, y los campos tendrán que ser llenados antes
+que el software avance. Después de completar el formulario,
+la cuenta del administrador principal se creará y se puede utilizar para hacer cualquier
+cambio dentro de la área de conservación que acaba de definir. </p>
+
+<p></p>
+
+<p><strong>Usuario administrativo</strong></p>
+
+<p><img alt="usuario administrativo" src="images/AdministrativeUser.png" width="430" height="464" /></p>
+
+<p></p>
+
+<p><strong>ID:</strong> el identificador existente del funcionario del Área de Conservación
+ Si no existe ningún identificador, el sistema generará uno si se deja
+sin editar.</p>
+
+<p><strong>Nombre (s):</strong> El nombre del funcionario</p>
+
+<p><strong>Apellido (s):</strong> El apellido del funcionario.</p>
+
+<p><strong>Inicio en el Área de Conservación:</strong> La fecha inicial del empleo del
+funcionario</p>
+
+<p><strong>Fecha de nacimiento:</strong> La fecha de nacimiento del funcionario</p>
+
+<p><strong>Sexo:</strong> El sexo del funcionario</p>
+
+<p></p>
+
+<p><strong>Nombre de Usuario SMART:</strong> El nombre de usuario
+utilizado para acceder al software SMART </p>
+
+<p><strong>Contraseña SMART:</strong> La contraseña para el nombre de usuario</p>
+
+<p><strong>Vuelva a escribir la contraseña:</strong> La confirmación de la contraseña de la cuenta
+</p>
+
+<p></p>
+
+<h4><a id="DataModel" name="DataModel">Definición de un modelo de datos</a></h4>
+
+<p>En la inicialización de una nueva área de conservación, el administrador principal
+tendrá que definir el modelo de datos que se utilizará para la nueva área de conservación.</p>
+
+<p></p>
+
+<p><img alt="inicializar el modelo de datos" src="images/initializeDataModel.png" width="678" height="373" /></p>
+
+<p></p>
+
+<p>Este proceso puede llevarse a cabo mediante:</p>
+<ul>
+  <li><strong>Utilizando el modelo de datos de la UICN por defecto</strong> - esta opción
+    aplicará el modelo de datos predeterminada de SMART a la nueva área de conservación. Es
+    recomendada para los usuarios novatos.</li>
+  <li><strong>Utilizando un modelo de datos en blanco</strong> - Esta opción resulta en un modelo de datos en blanco y
+    no se recomienda a menos que el usuario está dispuesto a crear manualmente
+    un modelo de datos sencillo para un propósito único. Si se selecciona esta opción,
+    y no hay un modelo de datos creado manualmente, el administrador será
+    capaz de volver a esta pantalla en el futuro para elegir a otra
+  opción.</li>
+  <li><strong>Copiar de una área de conservación existente</strong> (si uno ha
+    sido inicializado previamente por esa instancia de SMART) - esta es la manera de
+    utilizar una copia de un modelo de datos existente de otra área de conservación dentro
+    la base de datos local de SMART. Si se utiliza esta opción, a continuación, una copia exacta de un
+    modelo de datos existente se creará para la nueva área de conservación. En
+    ese momento, los dos modelos de datos se gestionan por separado - cualquier cambio
+    hecho en cualquiera de los modelos de datos sólo se producirá dentro del Área de Conservación asociada.
+     Para utilizar esta opción, tendrá que especificar el
+    Área de Conservación existente, dentro de su base de datos de SMART, que utiliza el modelo de datos
+    que desea copiar a la nueva área de conservación.</li>
+  <li><strong>La importación de un modelo de datos personalizado</strong> (si
+    un archivo de modelo de datos XML se ha creado y previamente exportado) - esta opción permite que el
+    administrador pueda importar un modelo de datos de SMART con formato XML. El escenario más probable
+    en el cual se utiliza esta opción es cuando otro administrador de SMART ha
+    proporcionado un modelo de datos XML de exportación de una instalación independiente de SMART.
+    Tal vez se ha otorgado en una memoria USB o en un archivo adjunto de un correo electrónico. Para
+    utilizar esta opción, tendrá que navegar a la ubicación del archivo.</li>
+</ul>
+
+<p>Después que un modelo de datos se ha establecido, es posible personalizar el
+modelo de datos para satisfacer las necesidades de un área de conservación en particular.</p>
+
+<h4><a id="AgenciesRanks" name="AgenciesRanks">Creación de instituciones y cargos
+</a><a id="AgenciesRanks" name="AgenciesRanks"></a></h4>
+
+<p>Los funcionarios que trabajan en una Área de Conservación, y los usuarios de SMART, pueden pertenecer a
+una institución en particular, y puede tener un cargo dentro de ese organismo. Los cargos son
+asociados a las instituciones y tienen que ser creados como una entrada dentro de una institución específica.
+</p>
+
+<p>Como parte de la configuración inicial de un Área de Conservación, la lista de las Instituciones
+y sus cargos asociados se acceden a través del menú &quot;Área de Conservación
+- Institución y Lista de Cargos ... &quot;</p>
+
+<p></p>
+
+<p><img alt="funcionarios y cargos" src="images/employeesRanks.png" width="437" height="397" /></p>
+
+<p></p>
+
+<p><strong>Añadir Institución:</strong> Añade nuevas instituciones</p>
+
+<p><strong>Eliminar Institución:</strong> Elimina las instituciones seleccionadas</p>
+
+<p><strong>Añadir Cargo:</strong> Crea nuevos cargos como parte de la institución seleccionada
+</p>
+
+<p><strong>Eliminar Cargo:</strong> Elimina cargos seleccionados</p>
+
+<p></p>
+
+<h4><a id="Employees" name="Employees">Creación de Funcionarios</a></h4>
+
+<p>Después de la inicialización de una nueva área de conservación, la lista de funcionarios contiene
+la única cuenta de administrador que fue creada durante la inicialización del
+Área de Conservación. Funcionarios adicionales de una área de conservación pueden ser
+ingresados de forma individual, o a través de un proceso de carga masiva.</p>
+
+<p><img alt="lista de funcionarios" src="images/employeelist.png" width="800" height="363" /></p>
+
+<p><strong>Introduzca los términos de búsqueda:</strong> filtro de texto para devolver entradas especificas</p>
+
+<p><strong>Importar:</strong> Abre la interfaz para importar un archivo CSV que permite
+la carga masiva de funcionarios.</p>
+
+<p><img alt="importación de funcionarios" src="images/ImportEmployeesCSV.png" width="872" height="272" /></p>
+
+<p><em>Muestra CSV</em> ( <a href="linked_files/empoyees.csv">funcionarios.csv</a> )</p>
+
+<p></p>
+
+<p><strong>Editar:</strong> Abre la interfaz para actualizar la información sobre
+el funcionario seleccionado</p>
+
+<p><img alt="actualizar funcionario" src="images/updateEmployee.png" width="456" height="534" /></p>
+
+<p></p>
+
+<p><strong>ID:</strong> el identificador actual del funcionario del Área de Conservación.
+ Si no existe ningún identificador, el sistema generará uno si este campo
+se deja sin editar.</p>
+
+<p><strong>Nombre (s):</strong> El nombre del funcionario</p>
+
+<p><strong>Apellido (s):</strong> El apellido del funcionario</p>
+
+<p><strong>Inicio en el Área de Conservación:</strong> La fecha inicial de empleo del
+funcionario</p>
+
+<p><strong>Inactivo:</strong> Si lo activa, indica que el funcionario ya no se
+emplea para el Área de Conservación</p>
+
+<p><strong>Trabajo Final:</strong> Si la casilla Inactivo está marcada, 
+la fecha final del trabajo será editable y permite la grabación de una
+fecha final de empleo</p>
+
+<p><strong>Fecha de nacimiento:</strong> La fecha de nacimiento del funcionario</p>
+
+<p><strong>Sexo:</strong> El sexo del funcionario</p>
+
+<p></p>
+
+<p><strong>Institución:</strong> Institución del funcionario</p>
+
+<p><strong>Cargo:</strong> Cargo del funcionario</p>
+
+<p></p>
+
+<p><strong>Nombre de Usuario SMART:</strong> El nombre de usuario
+usado para iniciar sesión en el software SMART </p>
+
+<p><strong>Contraseña SMART:</strong> La contraseña para el nombre de usuario</p>
+
+<p><strong>Vuelva a escribir la contraseña:</strong> La confirmación de la contraseña 
+para la cuenta</p>
+
+<p><strong>Nivel de usuario SMART:</strong> el nivel de usuario SMART se actualiza con
+este menú desplegable.</p>
+
+<p></p>
+
+<p><strong>Crear nuevo:</strong> Abre la interfaz para actualizar la información
+sobre el funcionario seleccionado</p>
+
+<p><img alt="crear editar funcionarios" src="images/createEditEmployees.png" width="455" height="484" /></p>
+
+<p></p>
+
+<p><strong>ID:</strong> el identificador actual del funcionario del Área de Conservación.
+ Si no existe algún identificador, el sistema generará uno si este campo
+se deja sin editar.</p>
+
+<p><strong>Nombre (s):</strong> El nombre del funcionario</p>
+
+<p><strong>Apellido (s):</strong> El apellido del funcionario</p>
+
+<p><strong>Inicio en el Área de Conservación:</strong> La fecha incial de empleo para
+el funcionario</p>
+
+<p><strong>Fecha de nacimiento:</strong> La fecha de nacimiento del funcionario</p>
+
+<p><strong>Sexo:</strong> El sexo del funcionario</p>
+
+<p></p>
+
+<p><strong>Institución:</strong> Institución del funcionario</p>
+
+<p><strong>Carg¿go:</strong> Cargo del funcionario</p>
+
+<p></p>
+
+<p><strong>Nombre de Usuario SMART:</strong> El nombre de usuario
+utilizado para acceder al software SMART </p>
+
+<p><strong>Contraseña SMART:</strong> La contraseña para el nombre de usuario</p>
+
+<p><strong>Vuelva a escribir la contraseña:</strong> La confirmación de la contraseña para
+la cuenta</p>
+
+<p></p>
+
+<h4><a id="userlevels">Configuración de cuentas y permisos</a></h4>
+
+<p><strong>Permisos y restricciones a Niveles de Usuario</strong></p>
+
+<p>Las cuentas SMART tienen varios tipos de permisos de acceso que permite a los administradores 
+asignar un nivel de usuario apropiado para los funcionarios. El diseño de SMART es dinámico y
+las cuentas de usuario pueden ser actualizadas para adaptarse a los cambios en los derechos y cargos laborales de los funcionarios.
+</p>
+
+<p></p>
+
+<p><strong>Ingreso de Datos</strong></p>
+
+<p>El nivel de usuario &quot;ingreso de datos&quot; tiene el mayor nivel de restricciones. La barra de menús
+y los iconos disponibles se han personalizado para incluir sólo las características requeridas
+para ingresar datos de patrullaje.</p>
+
+<p>El nivel de usuario &quot;ingreso de datos&quot; puede crear, exportar e importar datos de patrullaje, y
+puede crear copias de seguridad del sistema después que la información de patrullaje haya sido completada.</p>
+
+<p></p>
+
+<p><img alt="Iconos de ingreso de datos" src="images/icons_dataEntry.png" width="328" height="161" /></p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Analista</strong></p>
+
+<p>El nivel de usuario &quot;analista&quot; está diseñado para que funcionarios puedan crear, exportar, importar,
+y ejecutar búsquedas e informes. El nivel de usuario &quot;analista&quot; no puede crear, modificar o
+eliminar búsquedas o informes que se han guardado en la carpeta &quot;Búsquedas de Área de Conservación&quot;
+o &quot;Informes de Área de Conservación.&quot;  El nivel de usuario &quot;analista&quot; puede ejecutar, crear,
+alterar o eliminar informes guardados en la carpetas &quot;Mis Búsquedas&quot; o &quot;Mis informes.&quot; Un
+analista no puede introducir datos de patrullaje o importar/exportar patrullajes.</p>
+
+<p></p>
+
+<p><img alt="iconos de analista" src="images/icons_analyst.png" width="336" height="161" /></p>
+
+<p></p>
+
+<p><strong>Gerente</strong></p>
+
+<p>La cuenta de gerente puede realizar cambios completos a los modulos de patrullaje, búsqueda, informe o
+planificación. Una cuenta de gerente no puede realizar cambios en el modelo de datos, ni
+actualizar el Área de Conservación ni parámetros de patrullaje.</p>
+
+<p></p>
+
+<p><strong>Administrador</strong></p>
+
+<p>La cuenta de administrador tiene acceso completo a todas las funciones y opciones
+de SMART.</p>
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="Stations">Lista de Estaciones</a></h4>
+
+<p>Después de inicializar una nueva área de conservación, una lista de las estaciones es
+requerida. </p>
+
+<p><strong>Nombre:</strong> El nombre de la estación</p>
+
+<p><strong>Descripción:</strong> Una descripción detallada de la estación</p>
+
+<p></p>
+
+<p><em><em>Nota:</em> El idioma se configura antes de ingresar el nombre y
+</em><em>la descripción de la estación.</em></p>
+
+<p><img alt="estaciones
+" src="images/stations.png" width="509" height="359" /></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="Projections">Manejando Proyecciones</a></h4>
+
+<p>SMART es compatible con múltiples proyecciones del sistema de coordenadas y el Administrador
+puede seleccionar y ajustar las proyecciones predeterminadas. Este proceso no es un requisito
+durante la inicialización una área de conservación.</p>
+
+<p><strong>Añadir:</strong> Añade proyecciones al área de conservación</p>
+
+<p><strong>Eliminar:</strong> Elimina las proyecciones del Área de Conservación</p>
+
+<p><strong>Editar:</strong> Permite ediciones personalizadas a la proyección seleccionada
+</p>
+
+<p><strong>Configuración predeterminada:</strong> Establece la proyección seleccionada como predeterminada para
+el Área de Conservación</p>
+
+<p></p>
+
+<p></p>
+
+<p><img alt="proyección" src="images/projections.png" width="510" height="327" /></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="AreaBoundaries">Definir los bordes de la área</a></h4>
+
+<p>Como parte del proceso de inicialización de la nueva área de conservación requerirá
+que se carguen los archivos de límites. No todas las Áreas de Conservación tendrán archivos de límites
+para los cinco tipos, y no son requeridos los cinco completos. </p>
+
+<p>ESRI Shapefiles es el formato predeterminado para la carga en SMART.</p>
+
+<p></p>
+
+<p><strong>Carga:</strong> Abre una ventana donde el Administrador seleccionará
+el Shapefile ESRI.</p>
+
+<p><strong>Borrar:</strong> borra o elimina el Shapefile elegido del
+Área de Conservación. </p>
+
+<p><strong>Cambiar etiquetas:</strong> Permite al administrador seleccionar un
+campo diferente que se utilizará para la visualización y el etiquetado.</p>
+
+<p><em>Nota: Un archivo de proyección (. Prj) es requerido por SMART y si no está presente
+</em><em>durante la carga del archivo de forma, la aplicación rechazará el
+</em><em>Shapefile.</em></p>
+
+<p></p>
+
+<p><img alt="límites" src="images/boundaries.png" width="510" height="336" /></p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="Basemaps">Administrando mapas de base</a></h4>
+
+<p>Mapas de base son esencialmente parámetros de visualización cartográfica guardadas y se
+crean en la ventana de Perspectiva de Mapa. El administrador puede establecer un mapa de base predeterminado
+para el Área de Conservación o eliminar mapas de base desde esta ventana. Este
+proceso no es un requisito durante la inicialización del Área de Conservación.
+</p>
+
+<p></p>
+
+<p><strong>Establecer como predeterminado:</strong> Establece el mapa de base seleccionado como predeterminado
+para toda el Área de Conservación</p>
+
+<p><strong>Eliminar:</strong> Elimina el mapa de base seleccionado.</p>
+
+<p></p>
+
+<p><img alt="mapa de base" src="images/basemaps.png" width="508" height="270" /></p>
+
+<p></p>
+
+<h4><a id="UserNames">Cambio de nombres de usuario y contraseñas</a></h4>
+
+<p></p>
+
+<p>Para cambiar su nombre de usuario y/o contraseña, en el menú principal, seleccione
+&quot;Cambiar contraseña..&quot;</p>
+
+<p></p>
+
+<p><strong>Para cambiar su nombre de usuario,</strong> haga clic en el botón etiquetado
+&quot;Cambiar ...&quot;, escriba un nuevo nombre de usuario y, a continuación, haga clic en el botón &quot;OK&quot;. Una vez que se hace
+clic en el botón &quot;OK&quot;, el nombre de usuario se ha actualizado.</p>
+
+<p></p>
+
+<p><strong>Para cambiar su contraseña,</strong> escriba su contraseña actual dentro de
+&quot;Contraseña actual:&quot; y escriba una contraseña nueva al lado de &quot;Nueva contraseña:&quot;. Usted
+debe confirmar la nueva contraseña escribiéndola de nuevo al lado de &quot;Re-Ingresar Nueva
+Contraseña.&quot; Luego haga clic en el botón &quot;Guardar&quot; para implementar la nueva
+contraseña. Si usted decide que no desea guardar la nueva contraseña, puede
+hacer clic en el botón &quot;Cerrar&quot;.</p>
+
+<p></p>
+
+<h4><a id="ExportImportPatrol">Exportación e importación de Patrullajes</a></h4>
+
+<p>La capacidad de SMART para exportar e importar patrullajes permite distribuir
+el ingreso de datos y vuelve a cargar a un sistema maestro, además de funcionar como una
+copia de seguridad en caso de pérdida de datos. Archivos exportados de patrullajes SMART estarán
+en formato XML.</p>
+
+<p></p>
+
+<p>Para exportar uno o varios patrullajes, desde el menú principal de la Patrulla seleccione &quot;Exportar
+Patrullajes ... &quot;. Elija una carpeta de destino mediante el botón &quot;Buscar&quot;. Está será
+la ubicación del archivo (s) que se exporta.</p>
+
+<p>Seleccione la casilla de verificación &quot;Incluir archivos adjuntos&quot; si desea incluir archivos
+adjuntos, como archivos de imagen.</p>
+
+<p>Elija los patrullajes que desea exportar de la lista. Puede
+seleccionar individualmente los patrullajes, o seleccione todos a la vez.</p>
+
+<p>Cuando haya seleccionado una carpeta de destino, indicado si desea incluir
+archivos adjuntos, y seleccionado los patrullajes que desea exportar,
+puede hacer clic en el botón en la parte inferior con la etiqueta &quot;Exportar&quot; para crear el/los archivo(s) de
+datos de patrullajes.  Tenga en cuenta que se creará un archivo para cada patrullaje que
+exporte.</p>
+
+<p>El programa le indicará el número de patrullajes que fueron éxitosamente
+exportados. Haga clic en &quot;Aceptar.&quot; Así, se ha creado un archivo o archivos que
+contiene datos de patrullaje. El/Los archivo(s) se puede compartir con los demás y se pueden cargar en
+otras instalaciones de SMART.</p>
+
+<p></p>
+
+<p>Para importar un archivo de patrullaje SMART, en el menú principal del Patrullaje seleccione &quot;Importar
+Patrullajes ... &quot;. Elija si desea importar un solo patrullaje
+o múltiples patrullajes.</p>
+
+<p>Si se trata de un patrullaje unico, use el botón &quot;Buscar ...&quot; para navegar hasta la
+carpeta que contiene el patrullaje, y seleccione el patrullaje que se desea importar.
+Haga clic en el botón &quot;Abrir&quot;. A continuación, haga clic en el botón &quot;Importar&quot;.</p>
+
+<p>Para importar varios patrullajes, utilice el botón &quot;Agregar archivos ...&quot; para sucesivamente
+añadir archivos de patrullaje a la lista de importación. De ahí, haga clic en el botón &quot;Importar&quot;
+cuando haya agregado todas los patrullajes que desee a la lista.</p>
+
+<p></p>
+
+<h4><a id="ExportDataModel">Exportar el modelo de datos</a></h4>
+
+<p>Para ayudar en la distribución de un modelo de datos bien diseñado o para proteger
+contra la pérdida de datos, SMART puede exportar el modelo de datos en un formato XML estructurado.
+Este archivo XML se puede utilizar para la construcción de una nueva área de conservación o para reconstruir un
+Área de Conservación corrupta.</p>
+
+<p>Para exportar un modelo de datos de SMART en formato XML, del menú principal
+&quot;Área de Conservación&quot; seleccione &quot;Modelo de Datos ...&quot;. En la parte inferior de la ventana, haga clic en la opción &quot;Exportar
+a XML ... &quot;.  Navega a la ubicación de la carpeta donde desea guardar el
+Modelo de datos XML. A continuación, escriba un nombre de archivo para el nombre del archivo que se está
+guardando. Haga clic en el botón &quot;Guardar&quot; para crear el archivo de modelo de datos XML. Espere que
+el software indique que el modelo de datos se ha exportado con éxito,
+y haga clic en el botón &quot;OK&quot;.</p>
+
+<h4><a id="exportca">Exportación de un Área de Conservación</a></h4>
+
+<p>La exportación de un Área de Conservación exportará todos los componentes de un
+Área de Conservación en particular.  Esta función no sólo permite el archivado
+de un área de conservación, sino también la distribución y el intercambio de esta misma.</p>
+
+<p>Para exportar un área de conservación, en el menú principal, seleccione &quot;Exportar
+Área de Conservación ... &quot;. </p>
+
+<p>Utilice la opción &quot;Buscar ...&quot; para navegar hasta un lugar en la cual desea almacenar
+el archivo. Se recomienda no cambiar el nombre del archivo. Cuando se ha
+encontrado la ubicación en la que desea guardar el archivo, haga clic en &quot;Guardar.&quot;
+ A continuación, haga clic en el botón &quot;Exportar&quot; para crear el archivo conteniendo el
+Área de Conservación exportada. El software le indicará cuando se ha exportado la
+Área de Conservación éxitosamente. Haga clic en &quot;OK&quot; cuando reciba este mensaje.</p>
+
+<p></p>
+
+<h4><a id="ImportCa">La importación de un Área de Conservación</a></h4>
+
+<p>Desde la pantalla de inicial de SMART, puede importar un área de conservación
+desde un archivo guardado. Para ello, haga clic en el botón &quot;Avanzados&quot; y, a continuación,
+seleccione &quot;Importar un Área de Conservación&quot; y haga clic en el botón &quot;Continuar&quot;.</p>
+
+<p>Se le puede pedir una copia de seguridad de la base de datos actual antes de importar el
+área de conservación, en caso de que ya existe un área de conservación con el mismo
+nombre dentro de la base de datos. En general, es una buena idea para hacer clic en el botón &quot;Sí&quot;
+para crear un archivo de copia de seguridad, en cuyo caso debe especificar una ubicación y
+un nombre de archivo y hacer clic en el botón &quot;Copia de seguridad&quot;. Pero usted también puede elegir la opción &quot;No&quot;.</p>
+
+<p>Ahora va a utilizar el botón &quot;Examinar&quot; para localizar el archivo del área de conservación guardado
+que desea importar. Una vez que haya encontrado el archivo, haga clic en la opción &quot;Abrir&quot;
+y luego haga clic en el botón &quot;Importar&quot;. El software le permitirá saber
+si ha completado la importación de la zona de conservación; haga clic en &quot;OK&quot;
+para continuar.</p>
+
+<p>Ahora que se ha importado correctamente el área de conservación, deberá
+iniciar sesión para entrar a el área de conservación desde la pantalla inicial, con una cuenta de usuario y contraseña apropiada.
+ Si el área de conservación que ha importado pertenece a
+usted, entonces usted sabrá el nombre de usuario/contraseña. Si se le ha enviado la área de conservación,
+entonces usted tendrá que pedir a esa persona el nombre de usuario/contraseña.
+</p>
+
+<p></p>
+
+<h4><a id="DeleteCa">Eliminación de un Área de Conservación</a></h4>
+
+<p>Puede ser necesario en algunas ocasiones eliminar un área de conservación. Tres
+razones de ejemplo son: (1) si los datos estan corruptos (o dañados) o
+están en condiciones irreparables, (2) si usted ha estado utilizando un Área de Conservación
+para propósitos de formación o prueba y quiere borrarlo, o (3) si el Área de Conservación
+nunca fue utilizado activamente dentro de SMART.</p>
+
+<p>Esperemos que, si un área de conservación se ha dañado o de otro modo
+vuelto inutilizable debido a un problema de datos, podrá restaurar esta área desde una copia de seguridad
+después de eliminar la versión mala.</p>
+
+<p>Por favor, asegúrese de que entiende las consecuencias de la eliminación de
+una área de conservación. Si tiene alguna duda, se recomienda que no continue con el proceso de eliminación.
+</p>
+
+<p>Para eliminar un área de conservación, seleccione &quot;Eliminar Área de Conservación&quot; desde el menú principal.
+ Lea la advertencia y haga clic en el botón &quot;OK&quot;, si
+desea continuar. A continuación, escriba su nombre de usuario y contraseña con el fin de
+confirmar la acción. Haga clic en el botón &quot;Eliminar&quot; para eliminar el área de conservación actual.
+</p>
+
+<p>Una vez que la eliminación se ha completado, el software SMART abrirá
+la pantalla de arranque inicial. Si no existen otras áreas de conservación, el software
+presentará algunas opciones para continuar.</p>
+
+<p>Tenga en cuenta que sólo se puede borrar el área de conservación al cual está ingresado. 
+</p>
+
+<p></p>
+
+<h4><a id="Backup">Sistema de copias de seguridad</a></h4>
+
+<p>El sistema de Copia de Seguridad creará un archivo de copia de seguridad de toda la base de datos,
+y por lo tanto proporciona una copia de seguridad de cada Área de Conservación administrado por la
+base de datos. Si desea una copia de seguridad de una sola área de la conservación, es mejor utilizar
+la función &quot;Exportar Área de Conservación ...&quot; dentro del menú principal del archivo.</p>
+
+<p>Para crear una copia de seguridad de toda la base de datos de SMART, en el menú principal del archivo
+seleccione &quot;Copia de Seguridad&quot;. </p>
+
+<p>Utilice la opción &quot;Buscar ...&quot; para navegar hasta un lugar en el que desea almacenar
+el archivo de copia de seguridad. Se recomienda no cambiar el nombre del archivo. Cuando haya
+encontrado la ubicación donde desea almacenar el archivo, haga clic en el
+botón &quot;Guardar.&quot; Luego haga clic en el botón &quot;Copia de seguridad&quot; para crear el archivo de copia de seguridad completa de
+la base de datos SMART. El software le dirá cuando haya
+creado el archivo de copia de seguridad éxitosamente. Haga clic en &quot;OK&quot; cuando reciba este mensaje.</p>
+
+<p></p>
+
+<h4><a id="AutoBackup">Copia de Seguridad Automática</a></h4>
+
+<p>Crear copias de seguridad periódicas es fundamental para garantizar que los datos puedan
+ser recuperados en caso de un fallo de sistema. SMART tiene la capacidad para
+realizar automáticamente copias de seguridad en una carpeta especificada de manera regular. Esta copia de seguridad
+incluirá toda la base de datos de SMART.</p>
+
+<p></p>
+
+<p>Para configurar una copia de seguridad automática, desde el menú principal seleccione Preferencias de Sistema, 
+de ahí haga clic en el enlace a la derecha de &quot;Copias de seguridad automáticas&quot;.</p>
+
+<p></p>
+
+<p>Hay tres parámetros que se pueden establecer en la página &quot;Configuración de Copias de Seguridad Automáticas.&quot;
+</p>
+
+<p>En primer lugar, se puede establecer la frecuencia en la cual se creará la copia de seguridad automática. Un valor de &quot;1&quot; significa
+que un archivo de copia de seguridad se creará cada día. Un valor de &quot;7&quot; significa que un
+archivo de copia de seguridad se creará una vez cada 7 días. Un valor de &quot;0&quot; significa que un
+archivo de copia de seguridad se creará cada vez que se cierre la aplicación. Un valor
+de &quot;-1&quot; indica al sistema no realizará copias de seguridad automáticas.</p>
+
+<p>En segundo lugar, se indica al sistema cuánto tiempo debe almacenar los archivos de copia de seguridad automática.
+Estos archivos son grandes, por lo que al crear copias de seguridad con frecuencia, se consume
+espacio de disco duro de montos grandes.  Un valor aquí de &quot;10&quot; significa que SMART eliminará
+copias de seguridad que tengan más de 10 días. Para crear un archivo que duré más tiempo, debe
+copiar periódicamente una copia de seguridad SMART a una úbicación separada.</p>
+
+<p>En tercer lugar, debe especificar la ubicación donde desea almacenar los archivos de copia de seguridad automáticas
+(hasta que el sistema los elimine en función de su edad). Utilice el botón
+&quot;Buscar ...&quot; para navegar hasta un lugar en la cual desea almacenar la copia de seguridad.
+ Automáticamente, se crearán los nombres de archivo, pero puede elegir una carpeta
+para su almacenamiento.</p>
+
+<p>Una vez que haya establecido estos tres parámetros, haga clic en el botón &quot;Guardar&quot; para
+implementar estos ajustes a la configuración de las &quot;Copias de Seguridad Automáticas.&quot; Tenga en cuenta que una copia de seguridad no será
+creada en este momento preciso; se realizarán copias de seguridad automáticas, si
+programadas, cuando se cierre el software.</p>
+
+<p></p>
+
+<p></p>
+</body>
+</html>

@@ -186,7 +186,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 			
 			try{
 				ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
-				filterer = super.getFilterProcessor(filter.getFilterType(), dataTable);
+				filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, query);
 				filterer.processFilter(c, filter.getFilter(), dFilter, caFilter, 
 					needsObservation, false, monitor);
 			}catch (Exception ex){
@@ -459,7 +459,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 	@Override
 	protected String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		
 		if (includeObservations){
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$

@@ -155,6 +155,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	partListener = new IPartListener2() {
     		@Override
 			public void partActivated(IWorkbenchPartReference partRef) {
+    			updateLayersView(partRef);
 			}
 
 			@Override
@@ -185,6 +186,10 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
 			@Override
 			public void partVisible(IWorkbenchPartReference partRef) {
+				updateLayersView(partRef);
+			}
+			
+			private void updateLayersView(IWorkbenchPartReference partRef){
 				if (partRef.getPart(false) instanceof MapPart){
 					MapPart mp = (MapPart)partRef.getPart(false); 
 					LayersView view = (LayersView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(LayersView.ID);
@@ -192,11 +197,10 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 						if (mp == null){
 							view.setCurrentMap(null);
 						}else{
-							view.setCurrentMap(mp.getMap());
+							if (mp.getMap() != view.getCurrentMap()) view.setCurrentMap(mp.getMap());
 						}
 					}
 				}
-				
 			}
 
 			@Override

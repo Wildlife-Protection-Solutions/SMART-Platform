@@ -24,19 +24,20 @@ package org.wcs.smart.ui;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Named;
 
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
+import org.eclipse.swt.browser.TitleEvent;
+import org.eclipse.swt.browser.TitleListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -50,6 +51,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Very basic web browser.
@@ -78,12 +80,6 @@ public class BrowserView {
 	public BrowserView() {
 	}
 
-	@Inject
-	public void setSelection (@Named(DEFAULT_URL) @Optional String home) {
-		if (home == null) return;
-		goHome();
-	}
-	
 	@PreDestroy
 	public void dispose(){
 	}
@@ -171,7 +167,6 @@ public class BrowserView {
 		});
 		
 		browser.addProgressListener(new ProgressListener() {
-			
 			@Override
 			public void completed(ProgressEvent event) {
 				btnRefresh.setEnabled(true);
@@ -185,6 +180,17 @@ public class BrowserView {
 				btnRefresh.setEnabled(false);
 			}
 		});
+		
+		browser.addTitleListener(new TitleListener() {
+			@Override
+			public void changed(TitleEvent event) {
+				String title = event.title;
+				if (title.length() > 30) title = title.substring(0, 30) + "..."; //$NON-NLS-1$
+				part.setLabel(title);
+				part.setTooltip(browser.getUrl());
+			}
+		});
+		
 		browser.addLocationListener(new LocationListener() {
 			@Override
 			public void changing(LocationEvent event) {
@@ -199,11 +205,23 @@ public class BrowserView {
 			}
 		});
 		
+		browser.addOpenWindowListener(event -> {
+			//when asked to open in a new window; open in a new part instead
+			EPartService ePartService = part.getContext().get(EPartService.class);
+			MPart newPart = ePartService.createPart(BrowserView.ID);
+			this.part.getParent().getChildren().add(part);
+			System.out.println(newPart.getElementId());
+		    ePartService.showPart(newPart, PartState.ACTIVATE);	    
+			BrowserView newView = (BrowserView) E3Utils.getSourceObject(newPart);
+			newPart.getContext().set(DEFAULT_URL, part.getContext().get(DEFAULT_URL));
+			event.browser = newView.browser;  			
+		});
+		
 		btnBack.setEnabled(browser.isBackEnabled());
 		btnForward.setEnabled(browser.isForwardEnabled());
 	}
 
-	private void goHome(){
+	public void goHome(){
 		String home = (String) part.getContext().get(DEFAULT_URL);
 		if (home != null){
 			browser.setUrl(home);

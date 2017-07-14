@@ -80,6 +80,7 @@ import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
@@ -186,7 +187,8 @@ public class PatrolListView implements IPatrolFilteringView {
 //		if (activePart.getElementId().equals(PatrolEditor.ID)){ //this doesn't work as it returns compatibility id; not editor id
 		Object lpart = E3Utils.getSourceObject(activePart);
 		if (lpart instanceof PatrolEditor){
-			PatrolEditorInput pi = new PatrolEditorInput(	((PatrolEditor)lpart).getPatrol().getUuid(), null, null, null, null);	
+			Patrol p = ((PatrolEditor)lpart).getPatrol();
+			PatrolEditorInput pi = new PatrolEditorInput(p);	
 			patrolListViewer.setSelection(new StructuredSelection(pi));
 			pService.bringToTop(localPart);
 		}

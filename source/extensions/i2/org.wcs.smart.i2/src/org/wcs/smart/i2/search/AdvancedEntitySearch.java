@@ -68,7 +68,10 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		if (!bits[0].equals(Type.ADVANCED.key)) return null;
 		
 		int maxCnt = Integer.parseInt(bits[1]);
-		String ss = bits[2];
+		String ss = ""; //$NON-NLS-1$
+		if (bits.length >= 3){
+			ss = bits[2];
+		}
 		AdvancedEntitySearch search = new AdvancedEntitySearch();
 		search.searchString = ss;
 		search.maxResultCnt = maxCnt;

@@ -1,0 +1,181 @@
+﻿<toc label="Ayuda SMART ">
+   <topic href="html/Requirements.html" label="Requerimientos del Sistema">
+      <topic href="html/Requirements.html#hardware" label="Hardware / OS Requerimientos">
+      </topic>
+<topic href="html/Requirements.html#diskspace" label="Espacio Libre en Disco">
+      
+      </topic>
+      <topic href="html/Requirements.html#transfers" label="USB / Transferencia de Medios Externos"> 
+      </topic>
+      <topic href="html/Requirements.html#screen" label="Resolución de Pantalla">
+      </topic>
+      <topic href="html/Requirements.html#internet" label="Conexión a Internet"> 
+      </topic>
+      <topic href="html/Requirements.html#installation" label="Instalación de la Aplicación">
+      </topic>
+   </topic>
+   <topic href="html/AdministrativeTasks.html" label="Adiministrador de Tareas">
+      <topic href="html/AdministrativeTasks.html#createca" label="Crear un Área de Conservación">
+         <topic href="html/AdministrativeTasks.html#caproperties" label="Propiedades del Área de Conservación"> 
+         </topic>
+         <topic href="html/AdministrativeTasks.html#caadminuser" label="Definir un Usuario Administrativo"> 
+         </topic>
+         <topic href="html/AdministrativeTasks.html#DataModel" label="Definir un Modelo de Datos"> 
+         </topic>
+         <topic href="html/AdministrativeTasks.html#AgenciesRanks" label="Crear Instituciones y Cargos">
+         </topic>
+         <topic href="html/AdministrativeTasks.html#Employees" label="Crear Empleados">
+         </topic>
+         <topic href="html/AdministrativeTasks.html#userlevels" label="Configurar Cuentas y Permisos">
+         </topic>
+         <topic href="html/AdministrativeTasks.html#Stations" label="Lista de Estaciones">
+         </topic>
+         <topic href="html/AdministrativeTasks.html#Projections" label="Adiministrador de Proyecciones">
+         </topic>
+         <topic href="html/AdministrativeTasks.html#AreaBoundaries" label="Definir los bordes del Área"> 
+         </topic>
+         <topic href="html/AdministrativeTasks.html#Basemaps" label="Administrador de Mapas Base">
+         </topic>
+      </topic>
+       <topic href="html/AdministrativeTasks.html#UserNames" label="Cambiar Nombres de Usuario y Contraseña">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#ExportImportPatrol" label="Exportar e Importar Patrullajes">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#ExportDataModel" label="Exportar el Modelo de Datos"> 
+      </topic>
+      <topic href="html/AdministrativeTasks.html#exportca" label="Exportar un Área de Conservación">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#ImportCa" label="Importar un Área de Conservación"> 
+      </topic>
+      <topic href="html/AdministrativeTasks.html#DeleteCa" label="Eliminar un Área de Conservación">
+      </topic>
+      <topic href="html/AdministrativeTasks.html#Backup" label="Sistema de Copia de Seguridad">
+      </topic>
+       <topic href="html/AdministrativeTasks.html#AutoBackup" label="Copia de Seguridad Automática">
+      </topic>
+   </topic>
+   <topic href="html/ComponentsOfSMART.html" label="Componentes de Smart">
+      <topic href="html/ComponentsOfSMART.html#Overview" label="Vista General">
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#MapView" label="Perspectiva de Mapa">
+         <topic href="html/ComponentsOfSMART.html#MapNav" label="Mapa de Navegación">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#AddLayer" label="Añadir Capas">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#StyleLayer" label="Diseño de Capas">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#DeleteLayer" label="Eliminar Capas">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ExportMap" label="Exportar Mapa">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#Basemaps" label="Mapas Base">
+         </topic>
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#Patrol" label="Perspectiva de Patrullaje">
+         <topic href="html/ComponentsOfSMART.html#PatrolOp" label="Opciones de Patrullaje">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#PatrolMandates" label="Mandatos de Patrullaje">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#PatrolTypes" label="Tipos de Patrullaje">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#PatrolTeams" label="Equipos de Patrullaje">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#CreatePatrol" label="Crear Patrullajes">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ImportWaypoints" label="Importar Puntos del Recorrido"> 
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ImportTracks" label="Importar Trayectos">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#Observations" label="Ingresar Observaciones">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ViewPatrols" label="Vista de Patrullajes"> 
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ExportImportPatrol" label="Exportar / Importar Patrullajes">
+         </topic>
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#Query" label="Perspectiva de Consulta">
+         <topic href="html/ComponentsOfSMART.html#QueryType" label="Tipos de Consultas">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#PatrolObservationQuery" label="Consultas de Patrullaje y Observación">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#SummaryQuery" label="Resumen de Consulta">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#GriddedQueries" label="Consulta Espacial"> 
+         </topic>
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#Reports" label="Perspectiva de Informe">
+         <topic href="html/ComponentsOfSMART.html#reporttools" label="Componentes y Herramientas del Informe">
+         </topic>
+      </topic>
+     
+     
+      <topic href="html/ComponentsOfSMART.html#DataModel" label="El Modelo de Datos SMART">
+         <topic href="html/ComponentsOfSMART.html#dmcategories" label="Categorias">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#dmattributes" label="Atritbutos">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#dmcreateattributes" label="Crear Atributos">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#dmdisabledelete" label="Deshabilitar o Eliminar Categorías y Atributos">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#dmmoving" label="Mover Categorías y Atributos">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#dmimportingattributes" label="Importar Atributos">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#dmkeys" label="Claves del Modelo de Datos">
+         </topic>
+      </topic>
+      <topic href="html/ComponentsOfSMART.html#CrossCa" label="Análisis Cruzado de Áreas de  Conservación"> 
+         <topic href="html/ComponentsOfSMART.html#ccalogin" label="Requerimientos de Inicio de Sesión">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ccaqueries" label="Consultas">
+         </topic>
+         <topic href="html/ComponentsOfSMART.html#ccareports" label="Informe">
+         </topic>
+      </topic>
+   </topic>
+   <topic href="html/Internationalization.html" label="Internationalización">
+      <topic href="html/Internationalization.html#Overview" label="Vista General">
+      </topic>
+      <topic href="html/Internationalization.html#LanguageSupport" label="Añadir Soporte de Idioma"> 
+      </topic>
+      <topic href="html/Internationalization.html#LanguagePacks" label="Paquetes de Idioma"> 
+      </topic>
+   </topic>
+   <topic href="html/SMART_TipsTricks.html" label="Consejos,Trucos, y Preguntas Frecuentes">
+      <topic href="html/SMART_TipsTricks.html#Tips" label="Consejos y Trucos">
+         <topic href="html/SMART_TipsTricks.html#ShiftSelect" label="Seleccione una casilla ">
+         </topic>
+      </topic>
+      <topic href="html/SMART_TipsTricks.html#FAQ" label="Preguntas Frecuentes">
+         <topic href="html/SMART_TipsTricks.html#Q1" label="Errores de Cuadricula">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q2" label="Temas de Estilo en los Informes">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q3" label="Desempeño de Inicio">
+         </topic>
+        <topic href="html/SMART_TipsTricks.html#Q4"  label="Error no se puede analizar la consulta"> 
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q5" label="Importar Puntos de  Patrullajes Múltiples">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q6" label="Configuración SMART">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q7" label="Informes en Formato Paisaje">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q8" label="Resultados de la Consulta en Formato Resumen"> 
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q9" label="Reusar Páginas del Informe Maestro"> 
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q10" label="Id del Elemento del Informe "> 
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q11" label="Informes de Cubos de Datos">
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q12" label="Crear Múltiples Objetivos del Plan de Diferentes Tipos"> 
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q13" label="¿Qué significa CET?">>
+         </topic>
+         <topic href="html/SMART_TipsTricks.html#Q14" label="GPSBabel en Mac">
+         </topic>
+      </topic>
+   </topic>
+</toc>

@@ -29,6 +29,7 @@ public class Messages extends NLS {
 	public static String AdvancedEntitySearchPanel_SaveDialogTitle;
 	public static String AdvancedEntitySearchPanel_SaveSearchlink;
 	public static String AttachmentListComposite_AddAttachmentItem;
+	public static String AttachmentListComposite_AttachmentsLinked;
 	public static String AttachmentListComposite_LinkEntityItem;
 	public static String AttachmentListComposite_LocationsParsedMsg;
 	public static String AttachmentListComposite_openMenuItem;
@@ -36,7 +37,9 @@ public class Messages extends NLS {
 	public static String AttachmentListComposite_ProcessingError;
 	public static String AttachmentListComposite_ProcessingFilesTask;
 	public static String AttachmentListComposite_PropertiesItem;
+	public static String AttachmentListComposite_Refresh;
 	public static String AttachmentListComposite_SearchItem;
+	public static String AttachmentListComposite_UnlinkMenuOption;
 	public static String AttachmentPropertiesDialog_CreatedByLabel;
 	public static String AttachmentPropertiesDialog_CreatedOnLabel;
 	public static String AttachmentPropertiesDialog_Message;
@@ -100,9 +103,6 @@ public class Messages extends NLS {
 	public static String AttributeValueLabelProvider_ErrorLabel;
 	public static String BasicEntitySearch_taskName;
 	public static String BasicRecordSearchPanel_AddToWsMenuItem;
-	public static String BasicRecordSearchPanel_DeleteDialogMsg;
-	public static String BasicRecordSearchPanel_DeleteDialogTitle;
-	public static String BasicRecordSearchPanel_DeleteError;
 	public static String BasicRecordSearchPanel_ExportLink;
 	public static String BasicRecordSearchPanel_ExportTooltip;
 	public static String BasicRecordSearchPanel_NarrativeLabel;
@@ -143,6 +143,9 @@ public class Messages extends NLS {
 	public static String DeleteIntelAttributeListItemAdvisor_EntityError;
 	public static String DeleteIntelAttributeListItemAdvisor_InvalidObject;
 	public static String DeleteIntelAttributeListItemAdvisor_RelationshipError;
+	public static String DeleteRecordHandler_DeleteConfirmMulti;
+	public static String DeleteRecordHandler_DeleteConfirmSingle;
+	public static String DeleteRecordHandler_InvalidPassword;
 	public static String DrawPointTool_InvalidPointMsg;
 	public static String DrawPolygonTool_InvalidPolygonMsg;
 	public static String DropItem_DeleteItemTooltip;
@@ -309,6 +312,7 @@ public class Messages extends NLS {
 	public static String EntityRelationshipExportDialog_Title;
 	public static String EntityRelationshipExporter_EntityColumnName;
 	public static String EntityRelationshipExporter_ProgressMsg;
+	public static String EntityRelationshipExporter_RelationshipType;
 	public static String EntityRelationshipExporter_RelationshipUuidColumnName;
 	public static String EntityRelationshipExporter_SrcEntityId;
 	public static String EntityRelationshipExporter_SrcEntityUuid;
@@ -656,6 +660,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_TimeColumnLabel;
 	public static String IntelligenceLabelProviderImpl_TitleColumnLabel;
 	public static String IntelligenceMapEditor_MapName;
+	public static String IntelligenceMapEditor_refreshmapjob;
 	public static String IntelligenceTemplatesView_refreshJobName;
 	public static String IntelligenceTemplatesView_RecordTemplateName;
 	public static String IntelligenceTemplatesView_ResetMenuItem;
@@ -835,6 +840,8 @@ public class Messages extends NLS {
 	public static String QueryFormatPage_FormatOp;
 	public static String QueryFormatPage_Message;
 	public static String QueryFormatPage_Title;
+	public static String QueryGeoResourceInfo_pointQueryLayerName;
+	public static String QueryGeoResourceInfo_polygonQueryLayerName;
 	public static String QueryLazyResultsContentProvider_LoadingResultLbl;
 	public static String QueryLazyResultsTable_CntLabel1;
 	public static String QueryLazyResultsTable_CntLabel2;
@@ -854,6 +861,7 @@ public class Messages extends NLS {
 	public static String QueryView_DeleteMessage;
 	public static String QueryView_DeleteTitle;
 	public static String QueryView_FiltersSection;
+	public static String QueryView_NewQueryOption;
 	public static String QueryView_OpenMenuItem;
 	public static String QueryView_QueryNotFound;
 	public static String QueryView_refreshRequired;
@@ -862,8 +870,6 @@ public class Messages extends NLS {
 	public static String QueryView_RenameMenuItem;
 	public static String QueryView_SaveQuerySection;
 	public static String RecordButtonToolbar_addtooltip;
-	public static String RecordButtonToolbar_DeleteDialogMsg;
-	public static String RecordButtonToolbar_DeleteDialogTitle;
 	public static String RecordButtonToolbar_deleteTooltip;
 	public static String RecordButtonToolbar_edittooltip;
 	public static String RecordButtonToolbar_PDFErrorDialog;
@@ -874,11 +880,9 @@ public class Messages extends NLS {
 	public static String RecordButtonToolbar_refreshtooltip;
 	public static String RecordButtonToolbar_savetooltip;
 	public static String RecordCsvExporter_ConfigTitle;
-	public static String RecordCsvExporter_CreatedByColumn;
 	public static String RecordCsvExporter_DateCreatedColumn;
 	public static String RecordCsvExporter_DateModifiedColumn;
 	public static String RecordCsvExporter_ErrorMsg;
-	public static String RecordCsvExporter_ModifiedByColumn;
 	public static String RecordCsvExporter_ProgressMsg;
 	public static String RecordCsvExporter_Sourcecolumn;
 	public static String RecordCsvExporter_StatusColumn;
@@ -1030,9 +1034,7 @@ public class Messages extends NLS {
 	public static String RecordsView_CreateDirTitle;
 	public static String RecordsView_DdMessage;
 	public static String RecordsView_DeleteErrorMessage;
-	public static String RecordsView_DeleteMessage;
 	public static String RecordsView_DeleteTitle;
-	public static String RecordsView_exportlink;
 	public static String RecordsView_ErrorMessage;
 	public static String RecordsView_ErrorMessage2;
 	public static String RecordsView_ErrorTitle;
@@ -1041,7 +1043,6 @@ public class Messages extends NLS {
 	public static String RecordsView_ExportMenuOption;
 	public static String RecordsView_ExportToCsv;
 	public static String RecordsView_ExportToXml;
-	public static String RecordsView_exporttooltip;
 	public static String RecordsView_inprogressSection;
 	public static String RecordsView_LoadingIntelRecordsJobName;
 	public static String RecordsView_OpenMenu;
@@ -1187,6 +1188,8 @@ public class Messages extends NLS {
 	public static String WorkingSetListDialog_createcopyLabel;
 	public static String WorkingSetListDialog_DefaultCopyWsName;
 	public static String WorkingSetListDialog_DeleteError;
+	public static String WorkingSetListDialog_DeleteWs;
+	public static String WorkingSetListDialog_DeleteWsMsg;
 	public static String WorkingSetListDialog_deletetooltip;
 	public static String WorkingSetListDialog_loadingJobName;
 	public static String WorkingSetListDialog_Message;

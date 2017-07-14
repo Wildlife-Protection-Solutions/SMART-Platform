@@ -163,10 +163,13 @@ public class SurveyDesignFromXmlConverter {
 		}
 		
 		
-		if(xml.getState().equals(State.ACTIVE.name())){ 
+		if(xml.getState().equalsIgnoreCase(State.ACTIVE.name())){ 
 			surveyDesign.setState(State.ACTIVE);
-		}else if(xml.getState().equals(State.INACTIVE.name()) ){ 
+		}else if(xml.getState().equalsIgnoreCase(State.INACTIVE.name()) ){ 
 			surveyDesign.setState(State.INACTIVE);
+		}else{
+			//default to active
+			surveyDesign.setState(State.ACTIVE);
 		}
 
 		//sampling units attributes

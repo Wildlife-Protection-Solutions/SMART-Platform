@@ -143,7 +143,10 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 	@Override
 	public void dispose(){
 		super.dispose();
-		mapComposite.dispose();
+		if (mapComposite != null ){
+			mapComposite.dispose();
+			mapComposite = null;
+		}
 	}
 	/**
 	 * 

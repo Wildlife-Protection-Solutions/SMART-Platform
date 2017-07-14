@@ -60,7 +60,6 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 	@Override
 	protected SimpleFeatureType buildFeatureType() throws IOException {
 		try {
-
 			return DataUtilities.createType(entry.getTypeName(), getFeatureSchemaString(geomType));
 		} catch (SchemaException e) {
 			throw new IOException(e);

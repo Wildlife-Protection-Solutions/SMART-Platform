@@ -231,7 +231,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 				di.setInitialValue(Operator.OR.getKey());
 				toAdd.add(di);
 			}else if (p.startsWith(AdvancedEntitySearch.ENTITYTYPE_KEY)){
-				String entityTypeKey = p.split("=")[1]; //$NON-NLS-1$
+				String entityTypeKey = p.split("=")[1].trim(); //$NON-NLS-1$
 				toAdd.add(createEntityTypeDropItem(entityTypeKey));				
 			}else if (p.startsWith(AdvancedEntitySearch.ATTRIBUTE_KEY + ":")){ //$NON-NLS-1$
 				String[] bits = p.split(" ")[0].split(":"); //$NON-NLS-1$ //$NON-NLS-2$

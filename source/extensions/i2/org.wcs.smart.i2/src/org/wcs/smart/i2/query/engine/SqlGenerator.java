@@ -38,6 +38,7 @@ import org.wcs.smart.i2.query.Operator;
 public class SqlGenerator {
 
 	private static AtomicLong tableCnter = new AtomicLong();
+	private static AtomicLong indexCnter = new AtomicLong();
 	
 	/**
 	 * Creates a temporary query table with unique name.   
@@ -47,6 +48,16 @@ public class SqlGenerator {
 	public static synchronized String createTempTableName(){
 		return "query_temp_i2_" + tableCnter.incrementAndGet();//$NON-NLS-1$ 
 	}
+	
+	/**
+	 * Creates a unique index name using the prefix 
+	 * @param prefix
+	 * @return
+	 */
+	public static synchronized String createIndexName(String prefix){
+		return prefix + "_" + indexCnter.incrementAndGet() + "_idx";//$NON-NLS-1$ //$NON-NLS-2$ 
+	}
+	
 	
 	public static String generateDateClause(Date[] filter, String fieldName){
 		if (filter[0] == null && filter[1] != null){

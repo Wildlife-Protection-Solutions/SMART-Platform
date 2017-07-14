@@ -53,7 +53,10 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		if (!bits[0].equals(Type.BASIC.key)) return null; //not a basic search
 		
 		int maxResultsCnt = Integer.parseInt(bits[1]);
-		String searchString = bits[2];
+		String searchString = ""; //$NON-NLS-1$
+		if (bits.length >= 3){
+			searchString = bits[2];
+		}
 		String[] types = null;
 		if (bits.length >= 3){
 			types = bits[3].split(":"); //$NON-NLS-1$

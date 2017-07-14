@@ -53,6 +53,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -119,7 +120,10 @@ public class WaypointInfoView {
 				selectedWaypointUuid = null;
 				return Status.OK_STATUS;
 			}
-			
+			if (selectedWaypointUuid == null){
+				Display.getDefault().syncExec(()->clearContents());
+				return Status.OK_STATUS;
+			}
 			final List<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
 			
 			final HashMap<Category, List<DisplayData>> data = new HashMap<Category, List<DisplayData>>();

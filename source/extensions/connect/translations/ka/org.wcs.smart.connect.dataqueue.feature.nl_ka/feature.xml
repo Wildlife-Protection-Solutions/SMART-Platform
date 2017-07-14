@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.wcs.smart.connect.dataqueue.feature.nl_ka"
+      label="SMART Connect Data Queue Module Georgian Language Pack"
+      version="5.0.0"
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.smart.feature">
+
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
+   </copyright>
+
+   <plugin
+         id="org.wcs.smart.connect.dataqueue.nl_ka"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.connect.dataqueue.patrol.nl_ka"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+</feature>

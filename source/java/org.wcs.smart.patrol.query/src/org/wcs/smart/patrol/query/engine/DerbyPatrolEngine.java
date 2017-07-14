@@ -107,7 +107,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 				monitor.beginTask(Messages.DerbyPatrolEngine_Progress_RunningQuery, 4);
 				IFilterProcessor filterer = null;
 				try{
-					filterer = DerbyPatrolEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					filterer = DerbyPatrolEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, query);
 				}catch (Exception ex){
 					throw new SQLException (ex);
 				}
@@ -306,7 +306,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 	@Override
 	protected String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".id, "); //$NON-NLS-1$

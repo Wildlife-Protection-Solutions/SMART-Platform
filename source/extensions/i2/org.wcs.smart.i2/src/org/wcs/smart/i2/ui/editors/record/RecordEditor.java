@@ -87,12 +87,12 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
 
-import com.drew.lang.annotations.NotNull;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
@@ -314,6 +314,13 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			s.clear();
 			s.saveOrUpdate(record);
 			s.flush();
+			
+			for (IntelEntityAttachment entityAttachment : summaryPage.getRemovedEntityAttachments()){
+				s.delete(entityAttachment);
+				entityAttachment.getEntity().getEntityAttachments().remove(entityAttachment);
+				modifiedEntities.add(entityAttachment.getEntity());
+			}
+			
 			
 			for (IntelEntityAttachment entityAttachments : summaryPage.getNewAttachments()){
 				s.save(entityAttachments);
@@ -595,7 +602,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 * @param p
 	 * @param dateTime
 	 */
-	public void addNewLocation(@NotNull Geometry p, Date dateTime){
+	public void addNewLocation(Geometry p, Date dateTime){
+		if (p == null) return;
 		IntelLocation newLocation = new IntelLocation();
 		newLocation.setComment(null);
 		newLocation.setDateTime(dateTime == null ? record.getDateCreated() : dateTime);
@@ -603,7 +611,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		addNewLocations(Collections.singletonList(newLocation));
 	}
 	
-	public void addNewLocations(@NotNull List<IntelLocation> newLocations){
+	public void addNewLocations(List<IntelLocation> newLocations){
+		if (newLocations == null) return;
 		if (record.getLocations() == null) record.setLocations(new ArrayList<IntelLocation>());
 		
 		for (IntelLocation newLocation : newLocations){
@@ -729,6 +738,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 	}
 	
+	public void showMessage(String message){
+		TransparentInfoDialog infodialog = new TransparentInfoDialog(getSite().getShell(), message);
+		infodialog.open();	
+	}
 	
 	private Image lastIcon = null;
 	private void updateImageIcon(){

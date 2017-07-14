@@ -33,6 +33,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -40,6 +41,11 @@ import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.util.SmartUtils;
+
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifIFD0Directory;
 
 
 /**
@@ -157,8 +163,9 @@ public class Thumbnail {
 				// skip images > 200MB
 				return;
 			}
-			
+		
 			Image rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
+			
 			//scale image
 			Rectangle bounds = rawImage.getBounds();
 			int x = 0, y = 0, width = 0, height = 0;
@@ -171,14 +178,27 @@ public class Thumbnail {
 				width = bounds.width * thumbnailSize / bounds.height;
 				x = (thumbnailSize - width) / 2;
 			}
+			//resize image
 			Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
 			GC gc = new GC(image2);
-			gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
+			gc.drawImage(rawImage, 0,0, bounds.width, bounds.height, x, y, width, height);
 			rawImage.dispose();
 
-			image = image2;
+			//transform based on exif orientation data
+			Transform imageTransform = SmartUtils.getExifImageTransform(file,  thumbnailSize, thumbnailSize);
+			if (imageTransform != null){
+		        Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
+				GC gc3 = new GC(image3);
+				gc3.setTransform(imageTransform);
+				gc3.drawImage(image2, 0,0);
+				image2.dispose();
+		        image = image3;
+			}else{
+				image = image2;
+			}
 		} catch (SWTException ex) {
 			//eatme
+			ex.printStackTrace();
 		}
 	}
 	

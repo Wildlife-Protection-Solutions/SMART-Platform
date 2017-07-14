@@ -97,7 +97,8 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 	 */
 	@Override
 	public boolean updateModel(Patrol p, Session session) {
-		return legComposite.updatePatrol(p, session);
+		boolean ok = legComposite.updatePatrol(p, session);
+		return ok;
 	}	
 	
 	/**

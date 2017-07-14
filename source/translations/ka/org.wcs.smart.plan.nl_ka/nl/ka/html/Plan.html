@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>Los componentes de SMART</title>
+  <meta name="generator" content="Amaya, see http://www.w3.org/Amaya/" />
+  <link href="smart_help.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+
+<h1><a id="Plans">Planes SMART</a></h1>
+
+<p>Planes SMART permiten que una serie de objetivos se asigne a un patrullaje o a una serie
+de patrullajes y permite tener en cuenta guardabosques disponibles y activos. Planes SMART pueden
+ser configurados en una relación padre-hijo donde un plan padre puede tener un
+número de planes hijos (planes secundarios) que son asociados con el padre. Planes
+son asignados a patrullajes, y cuando un patrullaje regresa del campo y los datos
+han sido ingresados al software, SMART validará automáticamente si
+los objetivos se han cumplido o no. </p>
+
+<p></p>
+
+<h4><strong><a id="DevelopingPlans">Desarrollando Planes</a></strong></h4>
+
+<p>Un plan permite que los objetivos y las metas específicas que se asignan a un
+Área de Conservación, una estación, un equipo o una serie de patrullajes. Se crea un plan
+usando un asistente, parecido al asistente utilizado para crear patrullajes.
+Después que un plan se haya creado, se puede asociar con un patrullaje o una serie de
+patrullajes, luego se utiliza la información de los trayectos para calcular el éxito o el
+ fracaso de los objetivos definidos.</p>
+
+<p></p>
+
+<p><strong>Pasos para crear un plan</strong></p>
+
+<p><strong>1. </strong><strong>Plantilla</strong> <strong>-</strong> Crear un plan de cero
+o utilizar un plan existente como plantilla</p>
+
+<p><strong>2. </strong><strong>Tipo de plan -</strong> Elige el tipo de plan (patrullaje, equipo,
+estación o Área de Conservación) y los guardaparques disponibles para el plan</p>
+
+<p><strong>3. </strong><strong>Plan Principal -</strong> Selecciona si el plan es un sub-plan
+de otro plan o si se queda solo</p>
+
+<p><strong>4. </strong><strong>Información del Plan -</strong> ID de plan, nombre y descripción</p>
+
+<p><strong>5. </strong><strong>Estación / Equipo -</strong> Selección el equipo y la estación
+involucrados en el plan</p>
+
+<p><strong>6. </strong><strong>Fechas de plan -</strong> selección de la fecha inicial y final del
+plan</p>
+
+<p><strong>7. </strong><strong>Objetivos del Plan -</strong> Añadir metas y objetivos al plan</p>
+
+<p></p>
+
+<p><strong>Tipos de objetivos y metas</strong></p>
+<dl>
+  <dt><strong>Numérico</strong> - objetivos incluyen la distancia y la cantidad de horas patrulladas
+  </dt>
+</dl>
+
+<p><img alt="Plan numérico" src="images/numericPlan.png" width="351" height="345" /></p>
+
+<p><strong>Tipos de objetivos numéricos:</strong></p>
+<ul>
+  <li>Distancia recorrida</li>
+  <li>Horas patrulladas</li>
+  <li>Días de patrullaje</li>
+  <li>Horas-Persona de Patrullaje</li>
+</ul>
+
+<p></p>
+<dl>
+  <dt><strong>Administrativa</strong> - se puede definir y describir como
+  requerida por los administradores y planificadores de los patrullajes del área de conservación.
+  SMART no evalúa automáticamente el éxito/fracaso de los patrullajes Administrativos.
+   Cuando se ha logrado un objetivo de patrullaje administrativo, el cuadro para chequear
+  &quot;Objetivo logrado&quot; se selecciona manualmente.</dt>
+</dl>
+
+<p><img alt="Plan Administrativo" src="images/AdministrativePlan.png" width="352" height="349" /></p>
+
+<p></p>
+<dl>
+  <dt><strong>Espacial</strong>- Ubicaciones dentro del  área de conservación que
+  deben ser visitados por los patrullajes, especificados por la introducción manual de coordenadas o
+  a través de una interfaz de mapeo . El parametro de &quot;distancia para completar (metros)&quot;
+  define cuán cerca las coordenadas exactas del 
+  patrullaje tiene que ser antes que la ubicación de meta se considera
+  visitada con éxito.</dt>
+</dl>
+
+<p><img alt="Meta espacial" src="images/SpatialTarget.png" width="708" height="548" /></p>
+<ul>
+</ul>
+
+<p></p>
+
+<p><strong>Pantalla de resumen del Plan</strong></p>
+
+<p><img alt="Resumen del plan general" src="images/PlanOverviewSummary.png" width="716" height="694" /></p>
+
+<p></p>
+
+<p><strong>editar</strong> - edita el objetivo del plan seleccionado</p>
+
+<p><strong>manejar</strong> - abre un diálogo para añadir nuevos objetivos</p>
+
+<p>Refrescar- refresca la validación de patrullajes asociados
+con estos objetivos</p>
+
+<p></p>
+
+<h4><strong><a id="LinkPatrolPlan">Vinculación de patrullajes a Planes</a></strong></h4>
+
+<p>Después que se ha creado un plan, se puede asignar a un patrullaje o a
+varios patrullajes. </p>
+
+<p>Vincular un patrullaje a un plan requiere que el usuario abra ese patrullaje específico
+en la perspectiva de patrullaje y haga clic en la pestaña &quot;Otros&quot; (parte inferior de la ventana).</p>
+
+<p>A continuación, al hacer clic en el enlace Editar situado junto a la ventana del Plan se abrirá un diálogo
+para vincular el patrullaje activo con un plan.</p>
+
+<p><img alt="Vincular un patrullaje a un plan" src="images/linkingPlanPatrols.png" width="769" height="593" /></p>
+
+<p></p>
+
+<h4><strong><a id="validatePlan">Validando Planes</a></strong></h4>
+
+<p>Después que un patrullaje se ha relacionado con un plan, SMART puede validar los objetivos numericos y espaciales.
+ Estos objetivos se validan con la información de los trayectos, por lo que
+si no hay información de trayectos ingresada, la validación de planes no será
+éxitoso. </p>
+
+<p><img alt="Validación del Plan" src="images/PlanValidation.png" /></p>
+
+<p>Después que los patrullajes y los planes han sido vinculados, el usuario tendrá que hacer clic en
+el botón de actualización para ejecutar la validación. Cuando el objetivo ha sido exitosamente
+validado, el círculo rojo se vuelve verde. Esto se aplica a los objetivos numéricos y espaciales.
+</p>
+
+<p></p>
+
+<p>La validación de los objetivos administrativos es un proceso manual que requiere que el
+usuario seleccione y edite las metas Administrativas y haga clic en la casilla de verificación &quot;Objetivo se
+ha logrado &quot;.</p>
+
+<p><img alt="La validación del plan administrativo" src="images/adminTargetValidation.png" width="589" height="261" /></p>
+
+<p></p>
+
+</body>
+</html>

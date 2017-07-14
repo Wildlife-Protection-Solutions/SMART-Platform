@@ -163,6 +163,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 			ss = (SmartService) CatalogPlugin.getDefault().getLocalCatalog().find(serviceurl, monitor).get(0);
 		}else{
 			ss = new SmartService(params, new DesktopSessionProvider());
+			CatalogPlugin.getDefault().getLocalCatalog().add(ss);
 		}
 		
 		if (updated){

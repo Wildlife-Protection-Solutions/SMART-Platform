@@ -36,7 +36,7 @@ public interface IPatrolEditorContribution {
 	/**
 	 * Extension id
 	 */
-	public static final String EXTENSION_ID = "org.wcs.smart.patrol.editorContribution"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.patrol.contribution"; //$NON-NLS-1$
 	
 	/**
 	 * Creates the control content.  Each content is

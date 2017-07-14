@@ -116,7 +116,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				c.setAutoCommit(true);
 				try {
-					filterer = DerbyMissionEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+					filterer = DerbyMissionEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter, query);
 					
 					SurveyHasObservationFilterVisitor vv = new SurveyHasObservationFilterVisitor();
 					boolean needsObservations = false;

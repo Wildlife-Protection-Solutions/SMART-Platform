@@ -46,6 +46,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -55,6 +57,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
@@ -147,28 +151,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				CreateNewOpDialog opDialog = new CreateNewOpDialog(getShell());
-				if (opDialog.open() == Window.OK){
-					ConfigurableModel initModel  = null;
-				
-					try{
-						initModel = opDialog.getDefaultConfigurableModel();
-					}catch (Exception ex){
-						SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_CreateCmModelErrorMessage + ex.getLocalizedMessage(), ex);
-						return;
-					}
-					if (initModel == null){
-						//cancelled or invalid model
-						return;
-					}
-					
-					Dialog dialog = new ConfigurableModelEditDialog(initModel, opDialog.getCmTemplate(), opDialog.getOriginal2CloneItemMap());
-					dialog.open();
-					
-					//refresh list
-					modelListViewer.setInput(getModelsList().toArray());
-					updateTreeViewer(true);
-				}
+				createNewCm();
 			}
 		});
 		
@@ -179,18 +162,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ConfigurableModel cm = (ConfigurableModel) ((IStructuredSelection) modelListViewer.getSelection()).getFirstElement();
-				if (cm == null){
-					return;
-				}
-				Dialog dialog = new ConfigurableModelEditDialog(cm);
-				dialog.open();
-				
-				modelListViewer.setInput(getModelsList().toArray());
-				updateTreeViewer(true);
+				editCm();
 			}
-			
-			
 		});		
 		
 		btnDelete = new Button(buttonComposite, SWT.PUSH);
@@ -200,66 +173,56 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (!(modelTreeViewer.getInput() instanceof ConfigurableModel)){
-					return;
-				}
-				final ConfigurableModel cm = (ConfigurableModel) modelTreeViewer.getInput();
-				if (cm == null){
-					return;
-				}
-				if (!MessageDialog.openConfirm(getShell(), Messages.ConfigurableModelPropertyDialog_DeleteDialogTitle, MessageFormat.format(Messages.ConfigurableModelPropertyDialog_ConfirmDelete, new Object[]{cm.getName()}))){
-					return;
-				}
-
-
-				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-				try{
-				pmd.run(true, false, new IRunnableWithProgress() {
-					
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException,
-							InterruptedException {
-						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_ProgressDelete, 2);
-						Session session = HibernateManager.openSession();
-						session.setFlushMode(FlushMode.COMMIT);
-						session.beginTransaction();
-						try {
-							ConfigurableModel currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
-							monitor.worked(1);
-							if (DeleteManager.canDelete(currentCm, session)){
-								currentCm.getAttributeSettings().clear();
-								currentCm.getNodes().clear();
-								currentCm.getDefaultLists().clear();
-								currentCm.getDefaultTrees().clear();
-								
-								session.delete(currentCm);
-								session.getTransaction().commit();
-								//deleting filestore
-								DataentryHibernateManager.deleteFilestore(currentCm);
-							}
-						}catch (Exception ex){
-							session.getTransaction().rollback();
-							SmartPlugIn.log("Error deleting configurable model", ex); //$NON-NLS-1$
-							throw new InvocationTargetException(new Exception(Messages.ConfigurableModelPropertyDialog_ErrorDelete + "\n\n" + ex.getMessage())); //$NON-NLS-1$
-						} finally {
-							session.close();
-							monitor.done();
-						}
-					}
-				});
-				}catch (InvocationTargetException ex){
-					MessageDialog.openError(getShell(), Messages.ConfigurableModelPropertyDialog_ErrorDialogTitle, ex.getCause().getMessage());
-				}catch (Exception ex){
-					MessageDialog.openError(getShell(), Messages.ConfigurableModelPropertyDialog_ErrorDialogTitle, ex.getMessage());
-				}
-				
-				modelListViewer.setInput(getModelsList().toArray());
-				modelTreeViewer.setInput(null);
-				updateTreeViewer(false);
+				deleteCm();
 			}
 		});		
 
 
+		Menu menu = new Menu(modelListViewer.getControl());
+		modelListViewer.getControl().setMenu(menu);
+		
+		MenuItem edit = new MenuItem(menu, SWT.PUSH);
+		edit.setText(Messages.ConfigurableModelPropertyDialog_Button_Edit);
+//		add.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		edit.addListener(SWT.Selection, e->editCm());
+		
+		new MenuItem(menu, SWT.SEPARATOR);
+		
+		MenuItem add = new MenuItem(menu, SWT.PUSH);
+		add.setText(Messages.ConfigurableModelPropertyDialog_Button_Create);
+		add.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		add.addListener(SWT.Selection, e->createNewCm());
+		
+		MenuItem miImport = new MenuItem(menu, SWT.PUSH);
+		miImport.setText(Messages.ConfigurableModelPropertyDialog_Button_Import_File);
+		miImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miImport.addListener(SWT.Selection, e->importXml());
+		
+		new MenuItem(menu, SWT.SEPARATOR);
+		
+		MenuItem delete = new MenuItem(menu, SWT.PUSH);
+		delete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		delete.addListener(SWT.Selection, e->deleteCm());
+		
+		new MenuItem(menu, SWT.SEPARATOR);
+		
+		MenuItem export = new MenuItem(menu, SWT.PUSH);
+		export.setText(Messages.ConfigurableModelPropertyDialog_Button_Export_File);
+		export.addListener(SWT.Selection, e->exportXml());
+		
+		menu.addMenuListener(new MenuListener(){
+			@Override
+			public void menuHidden(MenuEvent e) { }
+
+			@Override
+			public void menuShown(MenuEvent e) {
+				edit.setEnabled(!modelListViewer.getSelection().isEmpty());
+				delete.setEnabled(!modelListViewer.getSelection().isEmpty());
+				export.setEnabled(!modelListViewer.getSelection().isEmpty());
+			}
+		});
+		
 		Composite exportImportCmp = new Composite(container, SWT.NONE);
 		exportImportCmp.setLayout(new GridLayout(2, false));
 		exportImportCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
@@ -289,6 +252,101 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		return container;
 	}
 	
+	private void editCm(){
+		ConfigurableModel cm = (ConfigurableModel) ((IStructuredSelection) modelListViewer.getSelection()).getFirstElement();
+		if (cm == null){
+			return;
+		}
+		Dialog dialog = new ConfigurableModelEditDialog(cm);
+		dialog.open();
+		
+		modelListViewer.setInput(getModelsList().toArray());
+		updateTreeViewer(true);
+	}
+	
+	private void deleteCm(){
+		if (!(modelTreeViewer.getInput() instanceof ConfigurableModel)){
+			return;
+		}
+		final ConfigurableModel cm = (ConfigurableModel) modelTreeViewer.getInput();
+		if (cm == null){
+			return;
+		}
+		if (!MessageDialog.openConfirm(getShell(), Messages.ConfigurableModelPropertyDialog_DeleteDialogTitle, MessageFormat.format(Messages.ConfigurableModelPropertyDialog_ConfirmDelete, new Object[]{cm.getName()}))){
+			return;
+		}
+
+
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+		pmd.run(true, false, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				monitor.beginTask(Messages.ConfigurableModelPropertyDialog_ProgressDelete, 2);
+				Session session = HibernateManager.openSession();
+				session.setFlushMode(FlushMode.COMMIT);
+				session.beginTransaction();
+				try {
+					ConfigurableModel currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
+					monitor.worked(1);
+					if (DeleteManager.canDelete(currentCm, session)){
+						currentCm.getAttributeSettings().clear();
+						currentCm.getNodes().clear();
+						currentCm.getDefaultLists().clear();
+						currentCm.getDefaultTrees().clear();
+						
+						session.delete(currentCm);
+						session.getTransaction().commit();
+						//deleting filestore
+						DataentryHibernateManager.deleteFilestore(currentCm);
+					}
+				}catch (Exception ex){
+					session.getTransaction().rollback();
+					SmartPlugIn.log("Error deleting configurable model", ex); //$NON-NLS-1$
+					throw new InvocationTargetException(new Exception(Messages.ConfigurableModelPropertyDialog_ErrorDelete + "\n\n" + ex.getMessage())); //$NON-NLS-1$
+				} finally {
+					session.close();
+					monitor.done();
+				}
+			}
+		});
+		}catch (InvocationTargetException ex){
+			MessageDialog.openError(getShell(), Messages.ConfigurableModelPropertyDialog_ErrorDialogTitle, ex.getCause().getMessage());
+		}catch (Exception ex){
+			MessageDialog.openError(getShell(), Messages.ConfigurableModelPropertyDialog_ErrorDialogTitle, ex.getMessage());
+		}
+		
+		modelListViewer.setInput(getModelsList().toArray());
+		modelTreeViewer.setInput(null);
+		updateTreeViewer(false);
+	}
+	
+	private void createNewCm(){
+		CreateNewOpDialog opDialog = new CreateNewOpDialog(getShell());
+		if (opDialog.open() == Window.OK){
+			ConfigurableModel initModel  = null;
+		
+			try{
+				initModel = opDialog.getDefaultConfigurableModel();
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_CreateCmModelErrorMessage + ex.getLocalizedMessage(), ex);
+				return;
+			}
+			if (initModel == null){
+				//cancelled or invalid model
+				return;
+			}
+			
+			Dialog dialog = new ConfigurableModelEditDialog(initModel, opDialog.getCmTemplate(), opDialog.getOriginal2CloneItemMap());
+			dialog.open();
+			
+			//refresh list
+			modelListViewer.setInput(getModelsList().toArray());
+			updateTreeViewer(true);
+		}
+	}
 
 	@Override
 	protected boolean performSave() {

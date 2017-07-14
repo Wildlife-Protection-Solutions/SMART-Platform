@@ -315,7 +315,7 @@ public class WaypointFilterProcessor {
 			query.executeUpdate();
 			
 			sql = new StringBuilder();
-			sql.append("CREATE INDEX location_uuid_tmp_idx on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			logString(sql.toString());
 			s.createSQLQuery(sql.toString()).executeUpdate();
 			
@@ -460,7 +460,7 @@ public class WaypointFilterProcessor {
 		
 		
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX location_uuid_tmp_idx on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 		
@@ -501,7 +501,7 @@ public class WaypointFilterProcessor {
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX location_uuid_tmp_idx on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 		
@@ -544,7 +544,7 @@ public class WaypointFilterProcessor {
 		query.executeUpdate();
 				
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX location_uuid_tmp_idx on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 				
@@ -677,7 +677,7 @@ public class WaypointFilterProcessor {
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX location_uuid_tmp_idx on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 		
@@ -743,7 +743,7 @@ public class WaypointFilterProcessor {
 		query.executeUpdate();
 		
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX location_uuid_tmp_idx on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("location_uuid") + " on " + t2 + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());
 		s.createSQLQuery(sql.toString()).executeUpdate();
 		

@@ -277,7 +277,7 @@ public enum IntelReportManager {
 			
 			Path p = getEntityTemplate(entityType);
 			if (!Files.exists(p.getParent())){
-				Files.createDirectory(p.getParent());
+				Files.createDirectories(p.getParent());
 			}
 			if (!Files.exists(p)){
 				Session s = HibernateManager.openSession();
@@ -301,7 +301,7 @@ public enum IntelReportManager {
 			IntelEntityTypeEditorInput input = new IntelEntityTypeEditorInput(p.toFile(), entityType);
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog("Error opening entity printing template." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+			Intelligence2PlugIn.displayLog("Error opening entity printing template. Try refreshing datasets, if error persists you can reset the template by right-clicking and selecting reset for the intelligence type in the Intelligence Templates View." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 	}

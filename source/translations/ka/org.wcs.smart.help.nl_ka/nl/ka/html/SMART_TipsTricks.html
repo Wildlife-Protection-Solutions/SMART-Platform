@@ -1,0 +1,324 @@
+﻿<html dir="ltr">
+<head>
+  
+  <title>Consejos, trucos y preguntas frecuentes</title>
+  
+  <link href="smart_help.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body dir="ltr">
+<h2>Consejos, trucos y preguntas frecuentes</h2>
+
+<p></p>
+
+<h4><a id="Tips">Consejos y trucos</a></h4>
+
+<p><strong><a id="ShiftSelect">Seleccionando con tecla de mayúsculas y barra espaciadora</a></strong></p>
+
+<p>En muchas partes de la aplicación de SMART, cuando muchos objetos (atributos,
+puntos de patrullaje, etc ..) están activados o desactivados, el usuario puede alternar entre ellos
+individualmente, a través de la función &quot;Seleccione todos/De-seleccione todos,&quot; o a través de otra
+opción.</p>
+
+<p>Usando la tecla de mayúsculas y seleccionando un bloque de registros, se puede oprimir 
+la barra espaciadora, para activar o desactivar los registros seleccionados.</p>
+
+<p></p>
+
+<p><img alt="Tecla de mayúsculas seleccionar BarraEspaciadora" src="images/shiftSelectSpaceBar.png" width="370" height="547" /> <img alt="Tecla de mayúsculas Seleccionar BarraEspaciadora 2" src="images/shiftSelectSpaceBar2.png" width="398" height="535" /></p>
+
+<p></p>
+
+<h4><a id="FAQ">Preguntas frecuentes</a></h4>
+<a id="Q1"></a> 
+
+<p><strong>P.</strong> <strong><strong>¿Cuando</strong> se añade una cuadrícula a la perspectiva de mapeo, muchas veces </strong><strong>no lo dibuja correctamente, lo que resulta en una X roja en la capa de retícula en la lista Capas.
+</strong><strong>¿Cómo puedo hacer para que se muestre la capa cuadriculada?</strong></p>
+
+<p></p>
+
+<p><strong>R.</strong> <strong>Las cuadriculas sólo son compatible cuando la unidad de CRS</strong><strong> es &quot;metro&quot; en todos los ejes.</strong></p>
+
+<p>Para especificar la proyección de la cuadrícula:</p>
+
+<p>1. Abra la capa de estilo cuadriculada (haz clic derecho sobre la capa y elige &#39;Cambiar
+Estilos&quot; o seleccione la capa y utilize el botón de revisión de estilo).</p>
+
+<p>2. Elige página &quot;Proyección&quot; en la lista a la izquierda.</p>
+
+<p>3. Seleccione una proyección con &quot;metro&quot; en todos los ejes.</p>
+
+<p>4. Aplique</p>
+
+<p></p>
+<hr />
+<a id="Q2"></a> 
+
+<p><strong>P. ¿Por qué no funciona la función de editor de estilo de tema en los 
+</strong><strong>informes?</strong></p>
+
+<p></p>
+
+<p><strong>R. Este es un problema fundamental con la forma en la que el estilizador de tema
+</strong><strong>funciona.  </strong><strong>Este construye temas basados ​​en los datos dentro de la capa. </strong><strong>Sin embargo, al establecer
+</strong><strong>el informe todavía no hay datos en la capa, por lo tanto, el error. </strong><strong>Los datos de consulta
+</strong><strong>no se generan hasta que se ejecute el informe y las fechas son
+</strong><strong>proveídas. </strong></p>
+
+<p>Si quiere estilos temáticos en el informe, la forma de trabajar alrededor de este problema, es la siguiente:</p>
+
+<p>1. Ejecuta la consulta dentro de la perspectiva de consulta y establece el estilo de tematización usando
+el editor de estilo asociado a la capa de consulta.</p>
+
+<p>2. Cuando el estilo de tematización se configura a la forma que desee, abra el dialogo
+de estilo para la capa y seleccione la página &#39;XML&#39; en la lista a la izquierda.</p>
+
+<p>3. Copie el fragmento de código XML mostrado.</p>
+
+<p>4. Regrese a editar su informe.</p>
+
+<p>5. Cambie el estilo de la capa de mapa en el informe al cual desea aplicar
+la tematización, y pegue el código XML copiado en la página &quot;XML&quot; de este diálogo
+de estilo.</p>
+
+<p>6. Guarde.</p>
+
+<p>7. Vuelva a ejecutar el informe y los datos se ajustarán a su estilo temático. </p>
+
+<p></p>
+<hr />
+
+<p></p>
+<a id="Q3"></a> 
+
+<p><strong>P. ¿Por qué SMART toma mucho tiempo en cargar las áreas de conservación?
+</strong><strong>No parece que esté haciendo algo.</strong></p>
+
+<p></p>
+
+<p><strong>R. Cuando la aplicación SMART se apaga anormalemente (apagando el
+</strong><strong>equipo, un fallo de computadora, etc) la base de datos de SMART realiza una validación
+</strong><strong>la próxima vez que se ejecute. </strong><strong>Esta validación puede tardar un tiempo y se realiza cuando
+</strong><strong>se inicia el sistema. </strong><strong>Para evitar esto, asegúrese de apagar el
+</strong><strong>programa de la manera correcta cuando haya terminado con él.</strong></p>
+
+<p></p>
+<hr />
+
+<p><a id="Q4"></a> </p>
+
+<p><strong>P. ¿Por qué mi consulta falla al cargar con un &quot;no se pudo analizar
+</strong><strong>búsqueda: &lt;Nombre de búsqueda&gt;&quot; error?</strong></p>
+
+<p></p>
+
+<p><strong>R. Este es un resultado de los filtros de área o modelo de datos que han cambiado
+</strong><strong>sin que se actualice la consulta. </strong><strong>Se tendrá que volver a crear la
+</strong><strong>consulta.</strong></p>
+
+<p>Hay dos situaciones conocidas donde esto ocurre:</p>
+
+<p>1. Si se eliminan o cambian las claves en el modelo de datos. En este caso, las
+consultas no son validadas (y las observaciones de patrullaje sí lo están) por lo que este error ocurre.
+</p>
+
+<p>2. Si la clave de filtro de área cambia. De igual manera, las búsquedas no están validadas
+cuando las áreas se modifican o actualizan.</p>
+
+<p></p>
+<hr />
+
+<p><a id="Q5"></a> </p>
+
+<p><strong>P. ¿Por qué la importación de puntos de GPS a una patrulla de varios tramos
+</strong><strong>a veces coloca los puntos en el tramo equivocado?</strong></p>
+
+<p></p>
+
+<p><strong>R. Si dos tramos tienen el mismo rango de tiempo, SMART no sabe a cual
+</strong><strong>tramo asignar los puntos y escogerá uno de los tramos. </strong><strong>Verificar la
+</strong><strong>asignación correcta de los puntos es muy recomendable cuando se importa a un
+</strong><strong>patrullaje de varios tramos. </strong><strong>Si la asignación de los puntos es incorrecta, el usuario puede
+</strong><strong>moverlos a otro tramo.</strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q6">P. Al utilizar SMART, veo funciones en el diálogo de Exportación
+</a></strong><strong><a id="Q6">de Mapa o cuando hago clic sobre las capas del mapa veo esas funciones, pero no parecen hacer
+</a></strong><strong><a id="Q6">nada. </a></strong><strong><a id="Q6">¿Por qué es están aquí?</a></strong></p>
+
+<p><strong>R. Si ve opciones adicionales en el diálogo de Exportación de Mapa u otras
+</strong><strong>opciones en el menú del botón derecho de tu capa, puede que este experimentando problemas con
+</strong><strong>las opciones de configuración de SMART. </strong><strong>Pruebe ejecutar &quot;smart.exe-clean&quot; para reparar y
+</strong><strong>eliminar las funciones no utilizadas. </strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q7"></a> P. ¿Si tengo demasiadas columnas en mi búsqueda (y quiero
+</strong><strong>tener estas columnas), puedo diseñar mi informe en formato de paisaje?</strong></p>
+
+<p><strong>R. Sí. </strong><strong>Ver la imagen abajo.</strong></p>
+
+<p><img alt="Configurando Columnas" src="images/FAQ1.png" width="858" /></p>
+
+<p></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q8"></a> P. ¿La versión actual muestra 15 dígitos después del decimal para
+</strong><strong>distancia cubierta y número de horas ...</strong><strong>Yo preferiría tener sólo dos dígitos
+</strong><strong>después del decimal. </strong><strong>¿Es posible hacer esto en el sistema SMART o se necesita
+</strong><strong>cambios en la programación?</strong></p>
+
+<p><strong>R. No se puede hacer esto en la tabla de resumen. </strong><strong>Sin embargo, si usted utiliza su
+</strong><strong>resumen en un informe, la interfaz de informes le permite definir cómo formatear
+</strong><strong>el número para visualización.</strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q9"></a> P. ¿Es posible copiar la página principal y utilizar el
+</strong><strong>mismo formato para un nuevo informe?</strong></p>
+
+<p><strong>R.</strong> <strong>Utilice la opción &quot;Exportar a biblioteca&quot; asociada</strong><strong> con la página principal:</strong></p>
+<ol>
+  <li>Haga clic derecho sobre la página principal</li>
+  <li>Seleccione &#39;Exportar a Biblioteca ...&#39;</li>
+  <li>Escoge &quot;smart.rptlibrary&quot; para exportar (esta biblioteca está automáticamente
+    incluida en todos los informes).</li>
+</ol>
+
+<p><strong>Luego, en su segundo informe:</strong></p>
+<ol>
+  <li>Abra la perspectiva &quot;Explorador de recursos&quot; (arriba a la izquierda)</li>
+  <li>Vaya a su nueva página principal</li>
+  <li>Haga clic derecho y seleccione &quot;Añade a Informe&quot;</li>
+</ol>
+
+<p>Esto agregará la página principal a su segundo informe (ver imagen adjunta).
+Como regla general, los elementos que desea compartir a través de informes deben ir a la
+biblioteca.</p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q10"></a> P. ¿Qué es Identificación del elemento en la sección de informes?
+</strong><strong></strong></p>
+
+<p><strong><strong>R.</strong> Un identificador utilizado por BIRT en el diseño del informe.
+</strong><strong>No debería ser necesario modificarlo.</strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q11"></a> P. ¿Puede explicar qué son los cubos de datos?</strong></p>
+
+<p><strong>R.</strong> <strong>SMART utiliza BIRT para diseñar y ejecutar</strong><strong> informes; cubos de datos son una característica de BIRT - echar un vistazo a la documentación de BIRT
+</strong><strong>dentro de la sección &quot;2013-05-29&quot;</strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q12"></a> P. En la versión actual se puede seleccionar un solo
+</strong><strong>tipo de meta (Numérico / espacial / Administrativo) para cada 
+</strong><strong>equipo de patrullaje / estación / zona de conservación. </strong><strong>¿Cómo puedo configurar objetivos tanto numéricos y espaciales
+</strong><strong>para un solo plan de patrullaje?</strong></p>
+
+<p><strong>A. Un plan puede tener múltiples metas. </strong><strong>Así que para crear objetivos tantos númericos
+</strong><strong>como espaciales, necesita crear dos metas en dos operaciones separadas.
+</strong><strong>En primer lugar, crea tu objetivo numérico y oprime &quot;Guardar&quot;. </strong><strong>A continuación, utilice el botón &quot;Añadir Meta&quot; (Añade Meta)
+</strong><strong>para añadir otro objetivo, esta vez eligiendo un destino espacial.</strong></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q13"></a> P. ¿Qué significa &quot;CET&quot; en el campo de fuente de inteligencia?
+</strong><strong></strong></p>
+
+<p><strong>R. <span style="font-size:12pt">C</span> ommunity <span style="font-size:12pt">E</span> xtension <span style="font-size:12pt">T</span> eam (Equipo de Extensión a la Comunidad)- o sea un equipo separado del Departamento Forestal/ONG
+</strong><strong>que trabaja con las comunidades locales que pueden ser una fuente vital de
+</strong><strong>inteligencia.</strong></p>
+
+<p></p>
+
+<p></p>
+<hr />
+
+<p></p>
+
+<p><strong><a id="Q14"></a> P. ¿Cómo puedo instalar GPS Babel en
+</strong><strong>una Mac?</strong></p>
+
+<p><strong>R. GPS Babel no viene incluido en el paquete de instalación de SMART para Mac.
+</strong><strong> </strong><strong>Para activar GPS Babel en la Mac y permitir que los usuarios importen datos directamente
+</strong><strong>desde las aplicaciones de GPS, es necesario seguir las instrucciones a continuación.</strong></p>
+
+<p>1. Descargar e instalar GPS Babel directamente desde el sitio Babel GPS. ( <a href="http://www.gpsbabel.org/download.html">http://www.gpsbabel.org/download.html</a> )</p>
+
+<p>2. Determinar la ruta completa al ejecutable Babel GPS. Este NO es la aplicación de GPS
+Babel que se ve en la sección Aplicaciones del Finder. Usted
+debe entrar al paquete y buscar el archivo ejecutable gpsbabel. </p>
+
+<p>Generalmente, este archivo se encuentra en:
+<em>/ Aplicaciones / GPSBabelFE.app / Contents / MacOS / gpsbabel.</em></p>
+
+<p>a) En el Finder, haga clic en &quot;Aplicaciones&quot;.</p>
+
+<p>b) Encuentre la aplicación GPS Babel.</p>
+
+<p>c) Haga clic a la misma vez que oprimir &quot;Ctrl-&quot; y elige &quot;Mostrar contenido del paquete&quot;</p>
+
+<p>d) Examine las carpetas y busque el archivo de aplicación gpsbabel. Usted debe
+encontrar esto en Contents / MacOS /.</p>
+
+<p>e) Crtl-&gt; Click sobre gpsbabel y escoge &#39;Get Info&#39;.</p>
+
+<p>f) En la sección &quot;General&quot;, verá un enlace &#39;Donde:&#39;. Esta es la carpeta
+que tendrá que adjuntar con gpsbabel y utilizar en el paso 6.</p>
+
+<p></p>
+
+<p><img alt="GPS Babel en Mac" src="images/babel_mac1.png" width="379" height="763" /></p>
+
+<p></p>
+
+<p>3. Ejecuta SMART y cree o importe un área de conservación (o restaure una copia de seguridad)
+e inicie sesión en el sistema.</p>
+
+<p>4. Abra el árticulo de menú &quot;Archivo -&gt; Preferencias del Sistema&quot;.</p>
+
+<p>5.  Elija la página &quot;GPS Babel Configuración&quot;.</p>
+
+<p>6. Apunte el Programa Babel GPS en el lugar que se encontró en el paso 2. </p>
+
+<p></p>
+
+<p><img alt="babel_mac2" src="images/babel_mac2.png" width="776" height="528" /></p>
+
+<p></p>
+
+<p>Si configurado apropiadamente, en este punto usted debería ser capaz de importar puntos y
+trayectos directamente desde las unidades de GPS.</p>
+
+<p></p>
+</body>
+</html>

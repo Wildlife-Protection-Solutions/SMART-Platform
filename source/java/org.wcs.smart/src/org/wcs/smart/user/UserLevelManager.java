@@ -88,6 +88,7 @@ public enum UserLevelManager {
 	public boolean supportsUser(Employee e, SmartUserLevel... l){
 		for (String s : e.getSmartUserLevels()){
 			SmartUserLevel level = getUserLevel(s);
+			if (level == null) continue; /* plugin with userlevel no longer installed */
 			for (SmartUserLevel c : l){
 				if (level.equals(c)) return true;
 			}

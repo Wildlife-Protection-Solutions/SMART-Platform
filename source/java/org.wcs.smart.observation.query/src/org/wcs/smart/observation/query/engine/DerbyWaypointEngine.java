@@ -94,7 +94,7 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
 				IFilterProcessor filterer;
 				try{
-					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, query);
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				}

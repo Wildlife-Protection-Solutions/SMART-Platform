@@ -43,6 +43,7 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.BrowserView;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Handler for opening web broser to connect
@@ -58,6 +59,7 @@ public class ShowConnectWebHandler {
 			EPartService ePartService, EModelService mService, MApplication app) {
 		
 		MPart part = ePartService.findPart(BrowserView.ID);
+		
 		if (part == null){
 			part = ePartService.showPart(BrowserView.ID, PartState.VISIBLE);
 			
@@ -68,22 +70,26 @@ public class ShowConnectWebHandler {
 				mService.move(part, (MElementContainer<MUIElement>)((MArea)((MPlaceholder)element).getRef()).getChildren().get(0), 0);
 				ePartService.showPart(part, PartState.ACTIVATE);
 			}
+			Session s = HibernateManager.openSession();
+			try{
+				ConnectServer cs = (ConnectServer) s.createCriteria(ConnectServer.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+					.uniqueResult();
+				if (cs != null){
+					part.getContext().set(BrowserView.DEFAULT_URL, cs.getServerUrl() + "/connect"); //$NON-NLS-1$
+				}
+							
+			}finally{
+				s.close();
+			}
+		
+			((BrowserView)E3Utils.getSourceObject(part)).goHome();
 		}else{
 			ePartService.activate(part);
 		}
 		
-		Session s = HibernateManager.openSession();
-		try{
-			ConnectServer cs = (ConnectServer) s.createCriteria(ConnectServer.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.uniqueResult();
-			if (cs != null){
-				part.getContext().set(BrowserView.DEFAULT_URL, cs.getServerUrl() + "/connect"); //$NON-NLS-1$
-			}
-						
-		}finally{
-			s.close();
-		}
+		
+		
 		
 		
 	}

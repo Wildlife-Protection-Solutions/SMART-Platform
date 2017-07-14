@@ -10,7 +10,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.ID;
@@ -90,7 +93,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		IntelWorkingSet workingset = null;
-		
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
 			Session s = HibernateManager.openSession();
 			try{
@@ -102,7 +105,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 				s.close();
 			}
 		}
-		
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		if (workingset != null){
 			Date[] dates = null;
 			String dateFilter = workingset.getEntityDateFilter();
@@ -132,6 +135,8 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 			}else{
 				queries= workingset.getQueries();
 			}
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			
 			for (IntelWorkingSetQuery query: queries){
 				QueryService existing = null;
 				for (ILayer l : map.getMapLayers()){
@@ -147,6 +152,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 							ex.printStackTrace();
 						}
 					}
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				}
 				if (existing == null) continue;
 				
@@ -250,12 +256,34 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 				//only run one at a time so that we don't consume all db connections running queries
 				job.setRule(WS_QUERY_MUTEX);
 				job.setDateFilter(dates);
-				job.schedule();
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				scheduleJob(job, dates);
 			}
 		}
 		return Status.OK_STATUS;
 	}
 	
+	/*
+	 * reuse jobs where we can
+	 */
+	private List<RunQueryJob> jobsToRun = new ArrayList<>();
+	public void scheduleJob(RunQueryJob job, Date[] dates){
+		for (RunQueryJob j : jobsToRun){
+			if (j.getQuery().equals(j.getQuery()) && j.getState() == Job.WAITING){
+				j.setDateFilter(dates);
+				return;
+			}
+		}
+		jobsToRun.add(job);
+		
+		job.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				jobsToRun.remove(event.getJob());
+			}
+		});
+		job.schedule();
+	}
 	private final static ISchedulingRule WS_QUERY_MUTEX = new ISchedulingRule() {
 		
 		@Override

@@ -301,8 +301,13 @@ public class SmartConnect {
 			ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		
 			ConnectClient simple = target.proxy(ConnectClient.class);
-			simple.getUser(username, Boolean.TRUE.toString());
-			return null;
+			String user = simple.getUser(username, Boolean.TRUE.toString());
+			if (user == null) return null;	//this should return null if able to connect ok; otherwise it might return something
+			String error = MessageFormat.format(Messages.SmartConnect_connectError, server.getServerUrl());
+			if (!server.getServerUrl().endsWith("/server")){ //$NON-NLS-1$
+				error += "\n\n" + Messages.SmartConnect_ServerErrorMsg; //$NON-NLS-1$
+			}
+			return error;
 		}catch(Throwable t){
 			return processException(t);
 		}	

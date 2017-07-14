@@ -128,7 +128,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				c.setAutoCommit(true);
 				try {			
-					filterer = DerbyEntityObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					filterer = DerbyEntityObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, query);
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, 
@@ -523,7 +523,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 	@Override
 	protected String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".source, "); //$NON-NLS-1$

@@ -145,10 +145,10 @@ public class PlanListView implements IPlanFilterItem {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				//Load the plan into the main view window.
-				PlanEditorInput input = (PlanEditorInput) planViewer.getSelectedPlan();
-				if (input != null){
+				Object input = planViewer.getSelectedPlan();
+				if (input != null && input instanceof PlanEditorInput){
 					IEclipseContext localCtx = EclipseContextFactory.create();
-					localCtx.set(OpenPlanHandler.PLANUUID_PARAM, input.getUuid());
+					localCtx.set(OpenPlanHandler.PLANUUID_PARAM, ((PlanEditorInput)input).getUuid());
 					localCtx.setParent(part.getContext());
 					ContextInjectionFactory.invoke(new OpenPlanHandler(), Execute.class, localCtx);
 				}

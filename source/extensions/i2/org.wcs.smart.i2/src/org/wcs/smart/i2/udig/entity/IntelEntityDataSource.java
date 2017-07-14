@@ -36,6 +36,7 @@ import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.i2.udig.LocationLayerType;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -76,6 +77,6 @@ public class IntelEntityDataSource extends ContentDataStore{
 	public static Filter createDateFilter(Date startDate, Date endDate){
 		if (startDate == null || endDate == null) return Filter.INCLUDE;
 		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-		return ff.between(ff.property("date"), ff.literal(startDate), ff.literal(endDate)); //$NON-NLS-1$
+		return ff.between(ff.property("date"), ff.literal(startDate), ff.literal(SharedUtils.getDatePart(endDate, true))); //$NON-NLS-1$
 	}
 }

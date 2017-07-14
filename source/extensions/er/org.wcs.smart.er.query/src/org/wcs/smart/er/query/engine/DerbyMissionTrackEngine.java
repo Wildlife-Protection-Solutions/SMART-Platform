@@ -105,7 +105,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
-				IFilterProcessor filterer = new FilterProcessorMission(queryDataTable, DerbyMissionTrackEngine.this, filter);
+				IFilterProcessor filterer = new FilterProcessorMission(queryDataTable, DerbyMissionTrackEngine.this, filter, query);
 				
 				
 				//create a date filter that caches the dates so the same
@@ -368,7 +368,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	@Override
 	protected String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT  "); //$NON-NLS-1$
+		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".start_date, "); //$NON-NLS-1$
