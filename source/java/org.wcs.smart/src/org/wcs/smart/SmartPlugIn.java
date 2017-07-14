@@ -203,6 +203,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String EDIT_ICON = "org.wsc.smart.EDIT_ICON"; //$NON-NLS-1$
 	/**
+	 * Undo Icon
+	 */
+	public static final String UNDO_ICON = "org.wsc.smart.UNDO_ICON"; //$NON-NLS-1$
+	/**
 	 * Clear selection icon
 	 */
 	public static final String CLEAR_SELECTION_ICON = "org.wsc.smart.map.selection.clear"; //$NON-NLS-1$
@@ -412,6 +416,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     
 	     reg.put(CLEAR_SELECTION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/clear_selection.png")); //$NON-NLS-1$
 	     reg.put(REFRESH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/arrow_refresh.png")); //$NON-NLS-1$
+	     reg.put(UNDO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/undo.png")); //$NON-NLS-1$
 	}
 	
 	/**
