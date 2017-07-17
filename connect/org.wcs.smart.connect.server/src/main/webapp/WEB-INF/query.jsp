@@ -20,6 +20,7 @@
 		var RELATIVEQUERYLINKURL = "/connect/query/api/";
 		var SHAREDLINKSERVLETURL = "${pageContext.request.contextPath}/noa/sharedlink/";
 		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/withdataonly/";
+		var SHAREDLINKURL = "${pageContext.request.contextPath}/api/sharedlink/";
 		
 		var datefilters = {
 				<c:forEach var="df" items="${datefilters}">
