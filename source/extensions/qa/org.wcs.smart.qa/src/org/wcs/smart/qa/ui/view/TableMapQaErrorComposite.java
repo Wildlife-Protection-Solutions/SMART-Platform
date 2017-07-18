@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -60,6 +61,7 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.MapPart;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
@@ -692,8 +694,13 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 	 * Refreshes the results table and the map
 	 */
 	public void refreshResults(){
+		//reset tool
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		if (tools != null) tools.selectLastTool();
+		//set to correct page
+		if (PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart() instanceof MapPart){
+			ApplicationGIS.getToolManager().setCurrentEditor((MapPart)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart());	
+		}
 		tblResults.refresh();
 		clearSelection();
 		updateResultsTableFilter();

@@ -182,6 +182,7 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 	 */
 	protected void updateLabels(){
 		if (waypoint == null) return;
+		if (txtX.isDisposed()) return;
 		Coordinate display = new Coordinate(waypoint.getX(), waypoint.getY());
 		try {
 			display = ReprojectUtils.reproject(display.x, display.y, SmartDB.DATABASE_CRS, getMap().getViewportModel().getCRS());
