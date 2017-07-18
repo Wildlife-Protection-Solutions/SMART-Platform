@@ -17,6 +17,7 @@
 		var REPORTLINKURL = "${pageContext.request.contextPath}/connect/report/api/";
 		var RELATIVEREPORTLINKURL = "/connect/report/api/";
 		var SHAREDLINKSERVLETURL = "${pageContext.request.contextPath}/noa/sharedlink/";
+		var SHAREDLINKURL = "${pageContext.request.contextPath}/connect/report/api/sharedlink/";
 		var CAURL = "${pageContext.request.contextPath}/api/conservationarea/withdataonly";
 	</script>
 		
