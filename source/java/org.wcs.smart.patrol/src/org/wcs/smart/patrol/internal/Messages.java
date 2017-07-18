@@ -454,6 +454,8 @@ public class Messages extends NLS {
 	public static String PatrolLegTable_LegStartDate_ColumnName;
 	public static String PatrolLegTable_LegTranportType_ColumnName;
 	public static String PatrolLegTable_Mandate_ColumnName;
+	public static String PatrolListView_CollapseAllOp;
+	public static String PatrolListView_ExpandAllOp;
 	public static String PatrolListView_LoadingLabel;
 	public static String PatrolListView_Progress_LoadingPatrols;
 	public static String PatrolListView_UpdatePatrolJobName;
@@ -584,6 +586,18 @@ public class Messages extends NLS {
 	public static String PatrolTransportCsvImporter_LanguageSelection;
 	public static String PatrolTransportType_Key;
 	public static String PatrolTransportType_Name;
+	public static String PatrolTreeContentProvider_FolderOption;
+	public static String PatrolTreeContentProvider_JobName;
+	public static String PatrolTreeContentProvider_MandateOption;
+	public static String PatrolTreeContentProvider_MonthOption;
+	public static String PatrolTreeContentProvider_NoneOption;
+	public static String PatrolTreeContentProvider_NoStationLabel;
+	public static String PatrolTreeContentProvider_NoTeamLabel;
+	public static String PatrolTreeContentProvider_StationOption;
+	public static String PatrolTreeContentProvider_TeamOption;
+	public static String PatrolTreeContentProvider_TransportOption;
+	public static String PatrolTreeContentProvider_TypeOption;
+	public static String PatrolTreeContentProvider_YearOption;
 	public static String PatrolType_AirName;
 	public static String PatrolType_GroundName;
 	public static String PatrolType_MixedName;

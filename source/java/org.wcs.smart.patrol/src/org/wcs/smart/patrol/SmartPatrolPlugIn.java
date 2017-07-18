@@ -106,10 +106,20 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	public static final String PATROL_MANDATE_ICON = "org.wsc.smart.patrol.PATROL_MANDATE"; //$NON-NLS-1$
 
 	/**
-	 * Image descriptor key for patrol filetr icon
+	 * Image descriptor key for patrol filter icon
 	 */
 	public static final String PATROL_FILTER_ICON = "org.wsc.smart.patrol.PATROL_FILTER"; //$NON-NLS-1$
 	
+
+	/**
+	 * Image descriptor key for month icon
+	 */
+	public static final String MONTH_ICON = "org.wsc.smart.patrol.YEAR"; //$NON-NLS-1$
+
+	/**
+	 * Image descriptor key for year icon
+	 */
+	public static final String YEAR_ICON = "org.wsc.smart.patrol.MONTH"; //$NON-NLS-1$
 	/**
 	 * The constructor
 	 */
@@ -130,7 +140,10 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		reg.put(PATROL_PILOT_ICON,imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_pilot.png")); //$NON-NLS-1$
 		reg.put(PATROL_MANDATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/patrol_mandate.png")); //$NON-NLS-1$			
 
-		reg.put(PATROL_FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/patrol_filter.png")); //$NON-NLS-1$			
+		reg.put(PATROL_FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/patrol_filter.png")); //$NON-NLS-1$
+		
+		reg.put(MONTH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/calendar_month.png")); //$NON-NLS-1$
+		reg.put(YEAR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/calendar_year.png")); //$NON-NLS-1$
     }
 	
 	/*
