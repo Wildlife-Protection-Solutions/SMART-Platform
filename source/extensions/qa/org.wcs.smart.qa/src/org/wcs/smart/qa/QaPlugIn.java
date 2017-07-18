@@ -56,6 +56,7 @@ public class QaPlugIn extends AbstractUIPlugin {
 	public static final String ICON_INTERPOLATE = "org.wcs.smart.qa.icon.interpolate"; //$NON-NLS-1$
 	public static final String ICON_QA = "org.wcs.smart.qa.icon.qa"; //$NON-NLS-1$
 	public static final String ICON_FILTER = "org.wcs.smart.qa.icon.filter"; //$NON-NLS-1$
+	public static final String ICON_SORT = "org.wcs.smart.qa.icon.sort"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor
@@ -89,6 +90,7 @@ public class QaPlugIn extends AbstractUIPlugin {
 	     reg.put(ICON_INTERPOLATE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/interpolate.png")); //$NON-NLS-1$
 	     reg.put(ICON_QA, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/qa.png")); //$NON-NLS-1$
 	     reg.put(ICON_FILTER, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/filter.png")); //$NON-NLS-1$
+	     reg.put(ICON_SORT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/table_sort.png")); //$NON-NLS-1$
 
 	}
 	/**
