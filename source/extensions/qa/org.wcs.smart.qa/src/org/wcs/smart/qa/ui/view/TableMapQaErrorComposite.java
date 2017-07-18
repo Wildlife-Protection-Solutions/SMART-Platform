@@ -375,7 +375,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		btnOrderSelection.addListener(SWT.Selection, e->{
 			orderBySelection();
 		});
-		btnOrderSelection.setToolTipText("sort on table selection");
+		btnOrderSelection.setToolTipText(Messages.TableMapQaErrorComposite_sortOnSelection);
 		btnOrderSelection.setImage(QaPlugIn.getDefault().getImageRegistry().get(QaPlugIn.ICON_SORT));
 		
 		createHeaderToolbar(topComp);
