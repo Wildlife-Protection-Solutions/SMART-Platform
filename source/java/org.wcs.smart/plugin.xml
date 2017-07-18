@@ -37,7 +37,7 @@
             name="SMART">
          <property
                name="windowImages"
-               value="images/icons/smart16.gif,images/icons/smart32.gif,images/icons/smart48.gif,images/icons/smart64.gif,images/icons/smart128.gif">
+               value="./images/icons/smart16.gif,./images/icons/smart32.gif,./images/icons/smart48.gif,./images/icons/smart64.gif,./images/icons/smart128.gif">
          </property>
          <property
                name="preferenceCustomization"
@@ -53,7 +53,7 @@
          </property>
          <property
                name="aboutImage"
-               value="images/nl/en/about.png">
+               value="./images/nl/en/about.png">
          </property>
          <property
                name="rendererFactoryUri"
