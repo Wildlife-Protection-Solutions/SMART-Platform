@@ -21,52 +21,38 @@
  */
 package org.wcs.smart.dataentry;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
-import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
- * Util class for configurable model custom trees manipulations
- * 
  * @author elitvin
- * @since 4.0.0
+ * @since 6.0.0
+ *
  */
-public class CmCustomTreesUtil {
-
-	public static CmAttributeConfig buildCustomTreeConfig(CmAttribute cmAttr) {
-		CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(cmAttr.getNode().getModel(), cmAttr.getAttribute(), false);
+public class CmAttributeConfigUtil {
+	
+	@Transient
+	public static final void assignCustomName(CmAttributeConfig cfg, CmAttribute cmAttr) {
 		String name = Messages.CmAttributeConfig_Custom_Prefix + " " + cmAttr.findName(SmartDB.getCurrentLanguage()); //$NON-NLS-1$
 		cfg.setName(name);
 		cfg.updateName(SmartDB.getCurrentLanguage(), name);
-		cfg.setTree(buildCustomTree(cfg, cmAttr.getAttribute()));
+	}
+
+	@Transient
+	public static final CmAttributeConfig createConfig(ConfigurableModel model, Attribute attribute, boolean isDefault) {
+		CmAttributeConfig cfg = new CmAttributeConfig();
+		cfg.setModel(model);
+		cfg.setAttribute(attribute);
+		cfg.setDisplayMode(DisplayMode.DEFAULT_DISPLAY_MODE);
+		cfg.setDefault(isDefault);
 		return cfg;
-	}
-	
-	public static List<CmAttributeTreeNode> buildCustomTree(CmAttributeConfig cfg, Attribute dmAttr) {
-		return buildCustomTree(cfg, dmAttr, null, null);
-	}
-	
-	private static List<CmAttributeTreeNode> buildCustomTree(CmAttributeConfig cfg, Attribute dmAttr, CmAttributeTreeNode cmParent, AttributeTreeNode dmParent) {
-		List<AttributeTreeNode> source = dmParent != null ? dmParent.getActiveChildren() : dmAttr.getActiveTreeNodes();
-		List<CmAttributeTreeNode> result = new ArrayList<>(source.size());
-		for (AttributeTreeNode dmNode : source) {
-			CmAttributeTreeNode cmNode = new CmAttributeTreeNode();
-			cmNode.setDmTreeNode(dmNode);
-			cmNode.setIsActive(dmNode.getIsActive());
-			cmNode.setParent(cmParent);
-			cmNode.setNodeOrder(dmNode.getNodeOrder());
-			cmNode.setConfig(cfg);
-			cmNode.setChildren(buildCustomTree(cfg, dmAttr, cmNode, dmNode));
-			result.add(cmNode);
-		}
-		return result;
 	}
 	
 }

@@ -33,7 +33,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
@@ -42,7 +41,6 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
@@ -51,8 +49,6 @@ import org.wcs.smart.dataentry.model.xml.generated.AttributeCmListItemTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeCmTreeNodeTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
-import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsType;
-import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageListType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageType;
@@ -136,7 +132,8 @@ public class CmSmartToXmlConverter {
 
 		AttributeCmTreeNodeTypeList defTree = new AttributeCmTreeNodeTypeList();
 		xml.setDefaultTrees(defTree);
-		processCmTreeNodes(cm.getDefaultTrees(), defTree.getTreeNode(), llookup, monitor);
+		//TODO: QQQ reimplement
+//		processCmTreeNodes(cm.getDefaultTrees(), defTree.getTreeNode(), llookup, monitor);
 	}
 
 	private static void processCmTreeNodes(List<CmAttributeTreeNode> cmList,
@@ -153,10 +150,11 @@ public class CmSmartToXmlConverter {
 				xmlNode.setKeyRef(cmNode.getDmTreeNode().getKeyId());
 				xmlNode.setHkeyRef(cmNode.getDmTreeNode().getHkey());
 			}
-			Attribute dmAttribute = cmNode.getDmAttribute();
-			if (dmAttribute != null) {
-				xmlNode.setAttributeKey(dmAttribute.getKeyId());
-			}
+			//TODO: QQQ fix code below!!!
+//			Attribute dmAttribute = cmNode.getDmAttribute();
+//			if (dmAttribute != null) {
+//				xmlNode.setAttributeKey(dmAttribute.getKeyId());
+//			}
 			if (cmNode.getDisplayMode() != null) {
 				xmlNode.setDisplayMode(cmNode.getDisplayMode().name());
 			}
@@ -173,7 +171,8 @@ public class CmSmartToXmlConverter {
 
 		AttributeCmListItemTypeList defList = new AttributeCmListItemTypeList();
 		xml.setDefaultLists(defList);
-		processCmListItems(cm.getDefaultLists(), defList.getListItem(), llookup, monitor);
+		//TODO: QQQ reimplement
+//		processCmListItems(cm.getDefaultLists(), defList.getListItem(), llookup, monitor);
 	}
 	
 	private static void processCmListItems(List<CmAttributeListItem> cmList,
@@ -189,10 +188,11 @@ public class CmSmartToXmlConverter {
 			}else{
 				xmlNode.setKeyRef(cmNode.getListItem().getKeyId());
 			}
-			Attribute dmAttribute = cmNode.getDmAttribute();
-			if (dmAttribute != null) {
-				xmlNode.setAttributeKey(dmAttribute.getKeyId());
-			}
+			//TODO: QQQ fix code below!!!
+//			Attribute dmAttribute = cmNode.getDmAttribute();
+//			if (dmAttribute != null) {
+//				xmlNode.setAttributeKey(dmAttribute.getKeyId());
+//			}
 			xmlNode.setImageFile(getImageFileRef(cmNode));
 			xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
 			xmlList.add(xmlNode);
@@ -268,8 +268,9 @@ public class CmSmartToXmlConverter {
 					}
 					at.getOption().add(aot);
 				}
-				processCmListItems(ca.getList(), at.getListItem(), llookup, monitor);
-				processCmTreeNodes(ca.getTree(), at.getTreeNode(), llookup, monitor);
+				//TODO: QQQ reimplement
+//				processCmListItems(ca.getList(), at.getListItem(), llookup, monitor);
+//				processCmTreeNodes(ca.getTree(), at.getTreeNode(), llookup, monitor);
 				at.setId(ca.getUuid().toString()); //this will allow to reference this item in extradata
 				nt.getAttribute().add(at);
 			}
@@ -287,18 +288,19 @@ public class CmSmartToXmlConverter {
 	private static void processCmDmAttributeSettings(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
 			HashMap<String, Language> llookup, IProgressMonitor monitor) {
-		if (!cm.getAttributeSettings().isEmpty()) {
-			CmDmAttributeSettingsTypeList xmlList = new CmDmAttributeSettingsTypeList();
-			for (CmDmAttributeSettings s : cm.getAttributeSettings().values()) {
-				CmDmAttributeSettingsType sXml = new CmDmAttributeSettingsType();
-				sXml.setAttributeKey(s.getDmAttribute().getKeyId());
-				if (s.getDisplayMode() != null) {
-					sXml.setDisplayMode(s.getDisplayMode().name());
-				}
-				xmlList.getSetting().add(sXml);
-			}
-			xml.setSetting(xmlList);
-		}
+		//TODO: QQQ fix this!!!!
+//		if (!cm.getAttributeSettings().isEmpty()) {
+//			CmDmAttributeSettingsTypeList xmlList = new CmDmAttributeSettingsTypeList();
+//			for (CmDmAttributeSettings s : cm.getAttributeSettings().values()) {
+//				CmDmAttributeSettingsType sXml = new CmDmAttributeSettingsType();
+//				sXml.setAttributeKey(s.getDmAttribute().getKeyId());
+//				if (s.getDisplayMode() != null) {
+//					sXml.setDisplayMode(s.getDisplayMode().name());
+//				}
+//				xmlList.getSetting().add(sXml);
+//			}
+//			xml.setSetting(xmlList);
+//		}
 	}
 
 	

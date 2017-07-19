@@ -22,7 +22,6 @@
 package org.wcs.smart.dataentry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,9 +33,11 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Util class for configurable model default lists manipulations
@@ -74,61 +75,69 @@ public class CmDefaultListsUtil {
 		return result;
 	}
 
-	public static List<CmAttributeListItem> buildDefaultList(ConfigurableModel model, Attribute a) {
-		return buildDefaultList(model, a, null);
+	public static CmAttributeConfig buildDefaultListConfig(ConfigurableModel model, Attribute a) {
+		CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(model, a, true);
+		cfg.setName(a.getName());
+		cfg.updateName(SmartDB.getCurrentLanguage(), a.getName());
+		List<CmAttributeListItem> listItems = buildDefaultList(cfg, a);
+		cfg.setList(listItems);
+		return cfg;
 	}
 	
-	private static List<CmAttributeListItem> buildDefaultList(ConfigurableModel model, Attribute a, Map<AttributeListItem, CmAttributeListItem> preMapping) {
+	public static List<CmAttributeListItem> buildDefaultList(CmAttributeConfig cfg, Attribute a) {
+		return buildDefaultList(cfg, a, null);
+	}
+	
+	private static List<CmAttributeListItem> buildDefaultList(CmAttributeConfig cfg, Attribute a, Map<AttributeListItem, CmAttributeListItem> preMapping) {
 		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
 		List<AttributeListItem> source = a.getActiveListItems();
 		for (AttributeListItem dmNode : source) {
 			CmAttributeListItem cmNode = preMapping == null ? null : preMapping.get(dmNode);
 			if (cmNode == null) {
 				cmNode = new CmAttributeListItem();
-				cmNode.setConfigurableModel(model);
+				cmNode.setConfig(cfg);
 				cmNode.setListItem(dmNode);
 				cmNode.setIsActive(dmNode.getIsActive());
 			}
 			cmNode.setListOrder(dmNode.getListOrder());
-			cmNode.setDmAttribute(a);
 			result.add(cmNode);
 		}
 		return result;
 	}
 
-	public static List<CmAttributeListItem> buildCustomList(ConfigurableModel model, CmAttribute cmAttribute) {
+	public static List<CmAttributeListItem> buildCustomList(CmAttributeConfig cfg, CmAttribute cmAttribute) {
 		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
 		List<AttributeListItem> source = cmAttribute.getAttribute().getActiveListItems();
 		for (AttributeListItem dmNode : source) {
 			CmAttributeListItem cmNode = new CmAttributeListItem();
-			cmNode.setConfigurableModel(model);
+			cmNode.setConfig(cfg);
 			cmNode.setListItem(dmNode);
 			cmNode.setIsActive(dmNode.getIsActive());
 			cmNode.setListOrder(dmNode.getListOrder());
-			cmNode.setAttribute(cmAttribute);
 			result.add(cmNode);
 		}
 		return result;
 	}
 	
-	/**
-	 * Upgrades list mapping used in 3.1.0 and previous versions to 3.2.1
-	 * @param oldNodes
-	 * @return
-	 */
-	public static List<CmAttributeListItem> upgradeDefaultLists(ConfigurableModel m, List<CmAttributeListItem> oldNodes) {
-		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
-		Map<AttributeListItem, CmAttributeListItem> preMapping = new HashMap<AttributeListItem, CmAttributeListItem>();
-		for (CmAttributeListItem cmNode : oldNodes) {
-			preMapping.put(cmNode.getListItem(), cmNode);
-		}
-		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
-		
-		for (Attribute a : existingLists) {
-			List<CmAttributeListItem> defList = buildDefaultList(m, a, preMapping);
-			result.addAll(defList);
-		}
-		
-		return result;
-	}
+	//TODO: QQQ used during xml conversion
+//	/**
+//	 * Upgrades list mapping used in 3.1.0 and previous versions to 3.2.1
+//	 * @param oldNodes
+//	 * @return
+//	 */
+//	public static List<CmAttributeListItem> upgradeDefaultLists(ConfigurableModel m, List<CmAttributeListItem> oldNodes) {
+//		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
+//		Map<AttributeListItem, CmAttributeListItem> preMapping = new HashMap<AttributeListItem, CmAttributeListItem>();
+//		for (CmAttributeListItem cmNode : oldNodes) {
+//			preMapping.put(cmNode.getListItem(), cmNode);
+//		}
+//		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
+//		
+//		for (Attribute a : existingLists) {
+//			List<CmAttributeListItem> defList = buildDefaultList(m, a, preMapping);
+//			result.addAll(defList);
+//		}
+//		
+//		return result;
+//	}
 }

@@ -88,12 +88,14 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 			return (CmAttributeTreeNode) element;
 		}
 		
+		//Evgeniy: it looks like the code below never works as it closes hibernate session that must remain open while configurable model is editor is opened
 		if (element instanceof AttributeTreeNode){
 			Session session = HibernateManager.openSession();
 			try{
+				AttributeTreeNode dmAttr = (AttributeTreeNode) element;
 				List<?> items = session.createCriteria(CmAttributeTreeNode.class)
-						.add(Restrictions.eq("dmTreeNode", ((AttributeTreeNode) element)))  //$NON-NLS-1$
-						.add(Restrictions.eq("configurableModel", model)).list();  //$NON-NLS-1$
+						.add(Restrictions.eq("dmTreeNode", dmAttr))  //$NON-NLS-1$
+						.add(Restrictions.eq("config", model.getDefaultConfigs().get(dmAttr))).list();  //$NON-NLS-1$
 				if (items.size() > 0){
 					CmAttributeTreeNode node = (CmAttributeTreeNode) items.get(0);
 					return node;

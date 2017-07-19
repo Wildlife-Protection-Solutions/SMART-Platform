@@ -40,8 +40,9 @@ public class CmElementsVisitor {
 
 	public void visit(ConfigurableModel model, IElementVisitHandler handler) {
 		visitNodes(handler, model.getNodes());
-		visitList(handler, model.getDefaultLists());
-		visitTree(handler, model.getDefaultTrees());
+		//TODO: QQQ fix this!!!
+//		visitList(handler, model.getDefaultLists());
+//		visitTree(handler, model.getDefaultTrees());
 	}
 
 	private void visitNodes(IElementVisitHandler handler, List<CmNode> nodes) {
@@ -49,8 +50,9 @@ public class CmElementsVisitor {
 			handler.handle(cmNode);
 			for (CmAttribute attr : cmNode.getCmAttributes()) {
 				handler.handle(attr);
-				visitList(handler, attr.getList());
-				visitTree(handler, attr.getTree());
+				//TODO: QQQ fix this!!!
+//				visitList(handler, attr.getList());
+//				visitTree(handler, attr.getTree());
 			}
 			visitNodes(handler, cmNode.getChildren());
 		}

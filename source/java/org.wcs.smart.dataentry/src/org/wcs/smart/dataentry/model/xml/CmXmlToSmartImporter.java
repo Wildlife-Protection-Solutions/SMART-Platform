@@ -45,14 +45,13 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
-import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
@@ -61,7 +60,6 @@ import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeItemType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
-import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsType;
 import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageType;
 import org.wcs.smart.dataentry.model.xml.generated.ListItemType;
@@ -183,27 +181,28 @@ public class CmXmlToSmartImporter {
 			
 			if (monitor.isCanceled()) return null;
 			
+			//TODO: QQQ implement + backward compatible
 			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingTreeNodes);
-			if (xmlCm.getDefaultTrees() != null) {
-				//tree mapping was introduced in 3.2.0, previous version were using different mapping
-				cm.setDefaultTrees(processCmTreeNodes(cm, null, null, xmlCm.getDefaultTrees().getTreeNode(), monitor));
-			} else if (xmlCm.getTreeNodes() != null) {
-				//if we are here than we are importing data from version less than 3.2
-				//need to perform additional data conversion
-				List<CmAttributeTreeNode> treeNodes = processTreeNodes(xmlCm.getTreeNodes().getNode(), cm);
-				cm.setDefaultTrees(CmDefaultTreesUtil.upgradeDefaultTrees(cm, treeNodes));
-			}
-			
-			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingListItems);
-			if (xmlCm.getDefaultLists() != null) {
-				//list mapping was introduced in 3.2.1, previous version were using different mapping
-				cm.setDefaultLists(processCmListItems(cm, null, xmlCm.getDefaultLists().getListItem(), monitor));
-			} else if (xmlCm.getListItems() != null) {
-				//if we are here than we are importing data from version less than 3.2
-				//need to perform additional data conversion
-				List<CmAttributeListItem> listItems = processListItems(xmlCm.getListItems().getItem(), cm);
-				cm.setDefaultLists(CmDefaultListsUtil.upgradeDefaultLists(cm, listItems));
-			}
+//			if (xmlCm.getDefaultTrees() != null) {
+//				//tree mapping was introduced in 3.2.0, previous version were using different mapping
+//				cm.setDefaultTrees(processCmTreeNodes(cm, null, null, xmlCm.getDefaultTrees().getTreeNode(), monitor));
+//			} else if (xmlCm.getTreeNodes() != null) {
+//				//if we are here than we are importing data from version less than 3.2
+//				//need to perform additional data conversion
+//				List<CmAttributeTreeNode> treeNodes = processTreeNodes(xmlCm.getTreeNodes().getNode(), cm);
+//				cm.setDefaultTrees(CmDefaultTreesUtil.upgradeDefaultTrees(cm, treeNodes));
+//			}
+//			
+//			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingListItems);
+//			if (xmlCm.getDefaultLists() != null) {
+//				//list mapping was introduced in 3.2.1, previous version were using different mapping
+//				cm.setDefaultLists(processCmListItems(cm, null, xmlCm.getDefaultLists().getListItem(), monitor));
+//			} else if (xmlCm.getListItems() != null) {
+//				//if we are here than we are importing data from version less than 3.2
+//				//need to perform additional data conversion
+//				List<CmAttributeListItem> listItems = processListItems(xmlCm.getListItems().getItem(), cm);
+//				cm.setDefaultLists(CmDefaultListsUtil.upgradeDefaultLists(cm, listItems));
+//			}
 
 			if (monitor.isCanceled()) return null;
 			monitor.subTask(Messages.CmXmlToSmartImporter_ImportAttributesSettings);
@@ -272,13 +271,13 @@ public class CmXmlToSmartImporter {
 		}
 	}
 
-	private List<CmAttributeTreeNode> processCmTreeNodes(ConfigurableModel cm, CmAttribute cmAttribute, CmAttributeTreeNode parent, List<TreeNodeType> xmlNodes, IProgressMonitor monitor) {
+	private List<CmAttributeTreeNode> processCmTreeNodes(CmAttributeConfig cfg, CmAttribute cmAttribute, CmAttributeTreeNode parent, List<TreeNodeType> xmlNodes, IProgressMonitor monitor) {
 		if (monitor.isCanceled()) return null;
 		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
 		for (TreeNodeType xmlNode : xmlNodes) {
 			CmAttributeTreeNode node = new CmAttributeTreeNode();
-			node.setConfigurableModel(cm);
 			updateNames(node, xmlNode.getName());
+			node.setConfig(cfg);
 			node.setIsActive(xmlNode.isIsActive());
 			if (cmAttribute == null) {
 				//this is default mapping and it MUST be provided with datamodel attribute key
@@ -287,11 +286,13 @@ public class CmXmlToSmartImporter {
 					//attribute doesn't exist; skip this tree node
 					continue;
 				}
-				node.setDmAttribute(dmAttribute);
+				//TODO: QQQ line below
+//				node.setDmAttribute(dmAttribute);
 				node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), dmAttribute));
 			} else {
 				//this is custom mapping and datamodel attribute key MUST be null
-				node.setAttribute(cmAttribute);
+				//TODO: QQQ line below
+//				node.setAttribute(cmAttribute);
 				node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), cmAttribute.getAttribute()));
 			}
 			node.setParent(parent);
@@ -299,19 +300,19 @@ public class CmXmlToSmartImporter {
 			node.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
 			node.setImageFile(findFile(xmlNode.getImageFile()));
 			addToDataMap(xmlNode.getId(), node);
-			node.setChildren(processCmTreeNodes(cm, cmAttribute, node, xmlNode.getChildren(), monitor));
+			node.setChildren(processCmTreeNodes(cfg, cmAttribute, node, xmlNode.getChildren(), monitor));
 			if (monitor.isCanceled()) return null;
 			result.add(node);
 		}
 		return result;
 	}
 
-	private List<CmAttributeListItem> processCmListItems(ConfigurableModel cm, CmAttribute cmAttribute, List<ListItemType> xmlNodes, IProgressMonitor monitor) {
+	private List<CmAttributeListItem> processCmListItems(CmAttributeConfig cfg, CmAttribute cmAttribute, List<ListItemType> xmlNodes, IProgressMonitor monitor) {
 		if (monitor.isCanceled()) return null;
 		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
 		for (ListItemType xmlNode : xmlNodes) {
 			CmAttributeListItem item = new CmAttributeListItem();
-			item.setConfigurableModel(cm);
+			item.setConfig(cfg);
 			updateNames(item, xmlNode.getName());
 			item.setIsActive(xmlNode.isIsActive());
 			if (cmAttribute == null) {
@@ -321,11 +322,13 @@ public class CmXmlToSmartImporter {
 					//attribute not found; do not add to list
 					continue;
 				}
-				item.setDmAttribute(dmAttribute);
+				//TODO: QQQ line below
+//				item.setDmAttribute(dmAttribute);
 				item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), dmAttribute));
 			} else {
 				//this is custom mapping and datamodel attribute key MUST be null
-				item.setAttribute(cmAttribute);
+				//TODO: QQQ line below
+//				item.setAttribute(cmAttribute);
 				item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), cmAttribute.getAttribute()));
 			}
 			item.setListOrder(result.size());
@@ -341,7 +344,8 @@ public class CmXmlToSmartImporter {
 		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
 		for (AttributeItemType xmlItem : xmlItems) {
 			CmAttributeListItem item = new CmAttributeListItem();
-			item.setConfigurableModel(cm);
+			//TODO: QQQ line below
+//			item.setConfigurableModel(cm);
 			updateNames(item, xmlItem.getName());
 			item.setIsActive(xmlItem.isIsActive());
 			item.setListItem(fetchAttributeListItem(xmlItem.getRefKey(), fetchAttribute(xmlItem.getAttributeKey())));
@@ -354,7 +358,6 @@ public class CmXmlToSmartImporter {
 		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
 		for (AttributeItemType xmlItem : xmlItems) {
 			CmAttributeTreeNode item = new CmAttributeTreeNode();
-			item.setConfigurableModel(cm);
 			updateNames(item, xmlItem.getName());
 			item.setIsActive(xmlItem.isIsActive());
 			//NOTE: hkey support was added in version 3.3.0, this code is conversion from version less than 3.2 (before configurable trees), this is why we pass hkey=null
@@ -410,8 +413,9 @@ public class CmXmlToSmartImporter {
 			cmAttr.setAttribute(dmAttribute);
 			cmAttr.setOrder(i);
 			cmAttr.setCmAttributeOptions(processAttributeOptions(xmlAttr.getOption(), cmAttr));
-			cmAttr.setTree(processCmTreeNodes(parent.getModel(), cmAttr, null, xmlAttr.getTreeNode(), monitor));
-			cmAttr.setList(processCmListItems(parent.getModel(), cmAttr, xmlAttr.getListItem(), monitor));
+			//TODO: QQQ reimplement and set config
+//			cmAttr.setTree(processCmTreeNodes(parent.getModel(), cmAttr, null, xmlAttr.getTreeNode(), monitor));
+//			cmAttr.setList(processCmListItems(parent.getModel(), cmAttr, xmlAttr.getListItem(), monitor));
 			addToDataMap(xmlAttr.getId(), cmAttr);
 
 			result.add(cmAttr);
@@ -461,18 +465,19 @@ public class CmXmlToSmartImporter {
 
 	private void processAttributeSettings(ConfigurableModel cm, CmDmAttributeSettingsTypeList setting) {
 		if (setting != null) {
-			for (CmDmAttributeSettingsType sXml : setting.getSetting()) {
-				CmDmAttributeSettings s = new CmDmAttributeSettings();
-				s.setModel(cm);
-				Attribute dmAttribute = fetchAttribute(sXml.getAttributeKey());
-				if (dmAttribute == null){
-					//no data model attribute skip these settings
-					continue;
-				}
-				s.setDmAttribute(dmAttribute);
-				s.setDisplayMode(getDisplayMode(sXml.getDisplayMode()));
-				cm.getAttributeSettings().put(s.getDmAttribute(), s);
-			}
+			//TODO: QQQ we need backward compatibility!!!!
+//			for (CmDmAttributeSettingsType sXml : setting.getSetting()) {
+//				CmDmAttributeSettings s = new CmDmAttributeSettings();
+//				s.setModel(cm);
+//				Attribute dmAttribute = fetchAttribute(sXml.getAttributeKey());
+//				if (dmAttribute == null){
+//					//no data model attribute skip these settings
+//					continue;
+//				}
+//				s.setDmAttribute(dmAttribute);
+//				s.setDisplayMode(getDisplayMode(sXml.getDisplayMode()));
+//				cm.getAttributeSettings().put(s.getDmAttribute(), s);
+//			}
 		}
 	}
 	

@@ -19,6 +19,10 @@ public class Messages extends NLS {
 	public static String AbstractRenameDialog_DataModelColumnName;
 	public static String AbstractRenameDialog_LanguageColumnName;
 	public static String BooleanAttributeInfoComposite_defaultValueTooltip;
+	public static String CmAttributeConfig_Custom_Prefix;
+	public static String CmAttributeConfig_Default;
+	public static String CmAttributeConfInfoComposite_Configuration_Label;
+	public static String CmAttributeConfInfoComposite_Configuration_Tooltip;
 	public static String CmAttributeInfoComposite_Attribute;
 	public static String CmAttributeInfoComposite_enabledTooltip;
 	public static String CmAttributeInfoComposite_EnableOnce_Tooltip;
@@ -157,6 +161,7 @@ public class Messages extends NLS {
 	public static String DisplayModeLabelProvider_Text;
 	public static String DisplayModeLabelProvider_TextImage;
 	public static String DropdownScreenOptionComposite_EmptyValue;
+	public static String EditListDialog_ConfigurationName;
 	public static String EditListDialog_DisplayMode;
 	public static String EditListDialog_Image;
 	public static String EditTreeDialog_AddGroup;
@@ -164,13 +169,13 @@ public class Messages extends NLS {
 	public static String EditTreeDialog_AddNodeTooltip;
 	public static String EditTreeDialog_AutoAddSubnodes;
 	public static String EditTreeDialog_ConfigurableModelValues;
+	public static String EditTreeDialog_ConfigurationName;
 	public static String EditTreeDialog_DataModelValues;
 	public static String EditTreeDialog_DeleteTooltip;
 	public static String EditTreeDialog_DisplayMode;
 	public static String EditTreeDialog_EnableTooltip;
 	public static String EditTreeDialog_Image;
-	public static String EditTreeDialog_MessageCustom;
-	public static String EditTreeDialog_MessageDefault;
+	public static String EditTreeDialog_Message;
 	public static String EditTreeDialog_NewGroup;
 	public static String EditTreeDialog_NewGroupTooltip;
 	public static String EditTreeDialog_NoPropertiesToDisplay;
@@ -182,8 +187,7 @@ public class Messages extends NLS {
 	public static String ImageSelectionControl_JpegFiles;
 	public static String ListAttributeInfoComposite_Button_Edit;
 	public static String ListAttributeInfoComposite_Button_Revert;
-	public static String ListAttributeInfoComposite_ConfirmRevert_Custom_Message;
-	public static String ListAttributeInfoComposite_ConfirmRevert_Default_Message;
+	public static String ListAttributeInfoComposite_ConfirmRevert_Message;
 	public static String ListAttributeInfoComposite_ConfirmRevert_Title;
 	public static String ListAttributeInfoComposite_defaultTooltip;
 	public static String ListAttributeInfoComposite_MultiselectHint;
@@ -192,7 +196,6 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_UseCustomConfigurationTooltip;
 	public static String ListAttributeInfoComposite_UseDefaultWarning_Message;
 	public static String ListAttributeInfoComposite_UseDefaultWarning_Title;
-	public static String ListAttributeInfoComposite_Values;
 	public static String ListAttributeInfoComposite_WarnDialogMessage;
 	public static String ListAttributeInfoComposite_WarnDialogTitle;
 	public static String MetaConfigDialog_SaveError;
@@ -211,8 +214,7 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_Button_Revert;
 	public static String TreeAttributeInfoComposite_Cleanup_Error;
 	public static String TreeAttributeInfoComposite_Cleanup_Task;
-	public static String TreeAttributeInfoComposite_ConfirmRevert_Custom_Message;
-	public static String TreeAttributeInfoComposite_ConfirmRevert_Default_Message;
+	public static String TreeAttributeInfoComposite_ConfirmRevert_Message;
 	public static String TreeAttributeInfoComposite_ConfirmRevert_Title;
 	public static String TreeAttributeInfoComposite_customTreeOp;
 	public static String TreeAttributeInfoComposite_deafultValueTooltip;
@@ -224,7 +226,6 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_UseCustomConfiguration;
 	public static String TreeAttributeInfoComposite_UseDefaultWarning_Message;
 	public static String TreeAttributeInfoComposite_UseDefaultWarning_Title;
-	public static String TreeAttributeInfoComposite_valueLabel;
 	public static String TreeAttributeInfoComposite_WarnMessage1;
 	public static String TreeAttributeInfoComposite_WarnTitle;
 	public static String XmlCmExtraDataContributionFactory_ErrorParseExtraData;

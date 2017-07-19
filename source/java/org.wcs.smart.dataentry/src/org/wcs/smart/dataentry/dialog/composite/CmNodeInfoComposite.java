@@ -291,7 +291,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		for (Attribute a : CmDefaultTreesUtil.getPresentedTreeAttributes(node)) {
 			if (!existingTrees.contains(a)) {
 				//attribute is not present in CM anymore -> remove default mapping
-				getModel().removeDefaultTrees(a);
+				getModel().getDefaultConfigs().remove(a);
 			}
 		}
 		//remove default list mapping if present
@@ -299,7 +299,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		for (Attribute a : CmDefaultListsUtil.getPresentedListAttributes(node)) {
 			if (!existingLists.contains(a)) {
 				//attribute is not present in CM anymore -> remove default mapping
-				getModel().removeDefaultLists(a);
+				getModel().getDefaultConfigs().remove(a);
 			}
 		}
 

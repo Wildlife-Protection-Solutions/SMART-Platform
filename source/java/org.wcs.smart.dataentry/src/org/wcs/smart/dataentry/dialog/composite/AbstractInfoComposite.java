@@ -63,8 +63,7 @@ import org.wcs.smart.dataentry.dialog.DatamodelCategorySelectorDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
-import org.wcs.smart.dataentry.model.CmAttributeListItem;
-import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
@@ -179,7 +178,7 @@ public abstract class AbstractInfoComposite extends Composite {
 					return m.getDisplayMode();
 				} else if (obj instanceof CmAttribute) {
 					CmAttribute a = (CmAttribute) obj;
-					return a.getDisplayMode();
+					return a.getConfigDisplayMode();
 				}
 				return null; //we should never be here
 			}
@@ -285,7 +284,6 @@ public abstract class AbstractInfoComposite extends Composite {
 	}
 	
 	private void addCategory(Category category){
-		
 		final CmNode node = new CmNode();
 		node.setModel(getModel());
 		node.setCategory(category);
@@ -304,14 +302,15 @@ public abstract class AbstractInfoComposite extends Composite {
 				cma.updateName(label.getLanguage(), label.getValue());
 			}
 			cma.setOrder(node.getCmAttributes().size());
-			cma.setCmAttributeOptions(CmAttributeOptionFactory
-					.buildDefaultOptions(cma, a.getType()));
+			cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 			node.getCmAttributes().add(cma);
 			if (AttributeType.TREE.equals(a.getType())) {
 				ensureDefaultTreeExists(a);
+				cma.setConfig(getModel().getDefaultConfigs().get(a));
 			}
 			if (AttributeType.LIST.equals(a.getType())) {
 				ensureDefaultListExists(a);
+				cma.setConfig(getModel().getDefaultConfigs().get(a));
 			}
 		}
 		//we need to call this part in the main ui thread
@@ -327,8 +326,8 @@ public abstract class AbstractInfoComposite extends Composite {
 		ConfigurableModel m = getModel();
 		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(m);
 		if (!existingTrees.contains(a)) {
-			List<CmAttributeTreeNode> defTree = CmDefaultTreesUtil.buildDefaultTree(m, a);
-			m.getDefaultTrees().addAll(defTree);
+			CmAttributeConfig cfg = CmDefaultTreesUtil.buildDefaultTreeConfig(m, a);
+			m.getDefaultConfigs().put(a, cfg);
 		}
 	}
 
@@ -336,8 +335,8 @@ public abstract class AbstractInfoComposite extends Composite {
 		ConfigurableModel m = getModel();
 		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
 		if (!existingLists.contains(a)) {
-			List<CmAttributeListItem> defList = CmDefaultListsUtil.buildDefaultList(m, a);
-			m.getDefaultLists().addAll(defList);
+			CmAttributeConfig cfg = CmDefaultListsUtil.buildDefaultListConfig(m, a);
+			m.getDefaultConfigs().put(a, cfg);
 		}
 	}
 

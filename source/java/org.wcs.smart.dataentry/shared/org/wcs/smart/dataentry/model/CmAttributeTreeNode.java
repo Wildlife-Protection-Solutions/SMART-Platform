@@ -42,7 +42,6 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.util.UuidUtils;
 
@@ -59,15 +58,14 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 	
 	private AttributeTreeNode dmTreeNode;
 
-	private CmAttribute attribute = null;
-	private Attribute dmAttribute = null;
+	private CmAttributeConfig config;
 	private int nodeOrder;
 	private List<CmAttributeTreeNode> children = new ArrayList<CmAttributeTreeNode>();
 	private CmAttributeTreeNode parent = null;
 	private DisplayMode displayMode;
 	private File imageFile;
-	
-	
+	private boolean isActive;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="dm_tree_node_uuid", referencedColumnName="uuid")
 	public AttributeTreeNode getDmTreeNode() {
@@ -102,21 +100,12 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="cm_attribute_uuid", referencedColumnName="uuid")
-	public CmAttribute getAttribute() {
-		return attribute;
+	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
+	public CmAttributeConfig getConfig() {
+		return config;
 	}
-	public void setAttribute(CmAttribute attribute) {
-		this.attribute = attribute;
-	}
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="dm_attribute_uuid", referencedColumnName="uuid")
-	public Attribute getDmAttribute() {
-		return dmAttribute;
-	}
-	public void setDmAttribute(Attribute dmAttribute) {
-		this.dmAttribute = dmAttribute;
+	public void setConfig(CmAttributeConfig config) {
+		this.config = config;
 	}
 	
 	@Column(name="node_order")
@@ -127,18 +116,6 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 		this.nodeOrder = nodeOrder;
 	}
 
-	private ConfigurableModel configurableModel;
-	private boolean isActive;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
-	public ConfigurableModel getConfigurableModel() {
-		return configurableModel;
-	}
-	public void setConfigurableModel(ConfigurableModel configurableModel) {
-		this.configurableModel = configurableModel;
-	}
-	
 	@Column(name="is_active")
 	public boolean getIsActive() {
 		return isActive;
@@ -172,6 +149,6 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 	@Transient
 	@Override
 	public String getImagePersistenceLocation() {
-		return getConfigurableModel().getFileDataStoreLocation() + File.separator + "tn_img1_" + UuidUtils.getDirectoryPath(getUuid()) + ".jpg"; //$NON-NLS-1$ //$NON-NLS-2$
+		return getConfig().getModel().getFileDataStoreLocation() + File.separator + "tn_img1_" + UuidUtils.getDirectoryPath(getUuid()) + ".jpg"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

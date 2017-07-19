@@ -19,36 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.dataentry;
+package org.wcs.smart.dataentry.dialog.composite;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
-import org.wcs.smart.dataentry.model.CmAttributeListItem;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
- * Util class for configurable model custom lists manipulations
+ * Label provider for {@link CmAttributeConfig}
  * 
  * @author elitvin
- * @since 4.0.0
+ * @since 6.0.0
+ *
  */
-public class CmCustomListsUtil {
+public class CmAttributeConfigLabelProvider extends NamedItemLabelProvider {
 
-	public static List<CmAttributeListItem> buildCustomList(CmAttributeConfig cfg, Attribute dmAttr) {
-		List<AttributeListItem> source = dmAttr.getActiveListItems();
-		List<CmAttributeListItem> result = new ArrayList<>(source.size());
-		for (AttributeListItem dmNode : source) {
-			CmAttributeListItem cmNode = new CmAttributeListItem();
-			cmNode.setConfig(cfg);
-			cmNode.setListItem(dmNode);
-			cmNode.setIsActive(dmNode.getIsActive());
-			cmNode.setListOrder(dmNode.getListOrder());
-			result.add(cmNode);
+	@Override
+	public String getText(Object element) {
+		String text = super.getText(element);
+		if (element instanceof CmAttributeConfig) {
+			CmAttributeConfig cfg = (CmAttributeConfig) element;
+			if (cfg.isDefault()) {
+				text += Messages.CmAttributeConfig_Default;
+			}
 		}
-		return result;
+		return text;
 	}
 	
 }

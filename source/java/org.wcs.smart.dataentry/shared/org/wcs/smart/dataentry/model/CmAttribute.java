@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.dataentry.model;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +37,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.OrderBy;
-import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
 
 /**
@@ -58,12 +55,8 @@ public class CmAttribute extends NamedItem {
 	private Map<String, CmAttributeOption> cmAttributeOptions;
 	private int order;
 	
-	/* for tree type attributes */
-	private List<CmAttributeTreeNode> rootTreeNodes = null;
-	
-	/* for list type attributes */
-	private List<CmAttributeListItem> listItems = null;
-	
+	private CmAttributeConfig config = null;
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="node_uuid", referencedColumnName="uuid")
 	public CmNode getNode() {
@@ -101,24 +94,13 @@ public class CmAttribute extends NamedItem {
 		this.order = order;
 	}
 
-	/**
-	 * Only valid for tree attributes.  Only returns nodes
-	 * if a customized tree configuration is used for this attribute.
-	 * 
-	 * @return  set of root tree nodes
-	 */
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
-	@Where(clause = "parent_uuid is null")
-	@OrderBy(clause = "node_order")
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-	public List<CmAttributeTreeNode> getTree(){
-		if (rootTreeNodes == null) {
-			rootTreeNodes = new ArrayList<CmAttributeTreeNode>();
-		}
-		return this.rootTreeNodes;
+	@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
+	public CmAttributeConfig getConfig() {
+		return config;
 	}
-	public void setTree(List<CmAttributeTreeNode> tree){
-		this.rootTreeNodes = tree;
+	public void setConfig(CmAttributeConfig config) {
+		this.config = config;
 	}
 
 	/**
@@ -128,38 +110,9 @@ public class CmAttribute extends NamedItem {
 	 */
 	@Transient
 	public List<CmAttributeTreeNode> getCurrentTree() {
-		return isUseCustomConfig() ? getTree() : getDefaultTree();
+		return AttributeType.TREE.equals(attribute.getType()) ? getConfig().getTree() : Collections.emptyList();
 	}
 	
-	/**
-	 * Gets the default model (defined for the entire cm) for the 
-	 * tree attribute
-	 * @return
-	 */
-	@Transient
-	public List<CmAttributeTreeNode> getDefaultTree() {
-		return node.getModel().getDefaultTrees(attribute);
-	}
-	
-	/**
-	 * Only valid for list attributes.  Only returns items
-	 * if a customized list configuration is used for this attribute.
-	 * 
-	 * @return  set of root tree nodes
-	 */
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
-	@OrderBy(clause = "list_order")
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-	public List<CmAttributeListItem> getList() {
-		if (listItems == null) {
-			listItems = new ArrayList<CmAttributeListItem>();
-		}
-		return this.listItems;
-	}
-	public void setList(List<CmAttributeListItem> list){
-		this.listItems = list;
-	}
-
 	/**
 	 * 
 	 * @return the items for the custom list or the default list depending on
@@ -167,19 +120,9 @@ public class CmAttribute extends NamedItem {
 	 */
 	@Transient
 	public List<CmAttributeListItem> getCurrentList() {
-		return isUseCustomConfig() ? getList() : getDefaultList();
+		return AttributeType.LIST.equals(attribute.getType()) ? getConfig().getList() : Collections.emptyList();
 	}
 	
-	/**
-	 * Gets the default model (defined for the entire cm) for the 
-	 * list attribute
-	 * @return
-	 */
-	@Transient
-	public List<CmAttributeListItem> getDefaultList() {
-		return node.getModel().getDefaultLists(attribute);
-	}
-
 	@Transient
 	public boolean isVisible() {
 		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE);
@@ -205,12 +148,6 @@ public class CmAttribute extends NamedItem {
 	}
 
 	@Transient
-	public boolean isUseCustomConfig() {
-		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_CUSTOM_CONFIG);
-		return option != null && Boolean.TRUE.equals(option.getBooleanValue());
-	}
-	
-	@Transient
 	public EnterOnceType getEnterOnce() {
 		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_ENTER_ONCES);
 		return option != null && option.getStringValue() != null ? EnterOnceType.valueOf(option.getStringValue()) : EnterOnceType.NONE;
@@ -218,52 +155,12 @@ public class CmAttribute extends NamedItem {
 	
 	/**
 	 * Only valid for list and tree attributes.
-	 * Option is responsible for display mode of custom list attributes configurations (or tree nodes at root level configuration)
-	 * when custom configuration is used for the attribute.
+	 * Option is responsible for display mode of list attributes configurations (or tree nodes at root level configuration).
+	 * @return the {@link DisplayMode} configured in {@link CmAttributeConfig}.
 	 */
 	@Transient
-	public DisplayMode getDisplayMode() {
-		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
-		return option != null && option.getStringValue() != null ? DisplayMode.valueOf(option.getStringValue()) : DisplayMode.DEFAULT_DISPLAY_MODE;
+	public DisplayMode getConfigDisplayMode() {
+		return getConfig().getDisplayMode();
 	}
 
-	/**
-	 * @return the default {@link DisplayMode} (defined for the entire cm) for this attribute
-	 */
-	@Transient
-	public DisplayMode getDefaultDisplayMode() {
-		return node.getModel().getAttributeDisplayMode(attribute);
-	}
-
-	/**
-	 * 
-	 * @return the {@link DisplayMode} for the custom list or the default {@link DisplayMode} depending on
-	 * if a custom flag is configured for this attribute or not
-	 */
-	@Transient
-	public DisplayMode getCurrentDisplayMode() {
-		return isUseCustomConfig() ? getDisplayMode() : getDefaultDisplayMode();
-	}
-	@Transient
-	public void setCurrentDisplayMode(DisplayMode mode) {
-		if (isUseCustomConfig()) {
-			CmAttributeOption op = getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
-			if (op == null) {
-				op = new CmAttributeOption();
-				op.setCmAttribute(this);
-				op.setOptionId(CmAttributeOption.ID_DISPLAY_MODE);
-				op.setStringValue(DisplayMode.DEFAULT_DISPLAY_MODE.toString());
-				getCmAttributeOptions().put(op.getOptionId(), op);
-			}
-			if (mode != null) {
-				op.setStringValue(mode.toString());
-			} else {
-				getCmAttributeOptions().remove(op.getOptionId());
-				op.setStringValue(null);
-			}
-		} else {
-			node.getModel().setAttributeDisplayMode(attribute, mode);
-		}
-	}
-	
 }

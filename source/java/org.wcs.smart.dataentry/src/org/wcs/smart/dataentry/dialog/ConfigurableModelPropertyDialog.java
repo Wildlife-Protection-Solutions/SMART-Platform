@@ -292,10 +292,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 					ConfigurableModel currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
 					monitor.worked(1);
 					if (DeleteManager.canDelete(currentCm, session)){
-						currentCm.getAttributeSettings().clear();
 						currentCm.getNodes().clear();
-						currentCm.getDefaultLists().clear();
-						currentCm.getDefaultTrees().clear();
 						
 						session.delete(currentCm);
 						session.getTransaction().commit();

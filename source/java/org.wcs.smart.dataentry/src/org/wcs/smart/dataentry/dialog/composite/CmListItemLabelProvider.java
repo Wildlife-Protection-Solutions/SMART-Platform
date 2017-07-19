@@ -76,12 +76,14 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 			return (CmAttributeListItem) element;
 		}
 		
+		//Evgeniy: it looks like the code below never works as it closes hibernate session that must remain open while configurable model is editor is opened
 		if (element instanceof AttributeListItem){
 			Session session = HibernateManager.openSession();
 			try{
+				AttributeListItem dmAttr = (AttributeListItem) element;
 				List<?> items = session.createCriteria(CmAttributeListItem.class)
-						.add(Restrictions.eq("listItem", ((AttributeListItem) element)))  //$NON-NLS-1$
-						.add(Restrictions.eq("configurableModel", model)).list();  //$NON-NLS-1$
+						.add(Restrictions.eq("listItem", dmAttr))  //$NON-NLS-1$
+						.add(Restrictions.eq("config", model.getDefaultConfigs().get(dmAttr))).list();  //$NON-NLS-1$
 				if (items.size() > 0){
 					CmAttributeListItem node = (CmAttributeListItem) items.get(0);
 					return node;

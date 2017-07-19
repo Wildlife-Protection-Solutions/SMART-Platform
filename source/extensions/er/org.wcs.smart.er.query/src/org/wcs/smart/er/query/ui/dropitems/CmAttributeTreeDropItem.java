@@ -106,19 +106,10 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 					toLoad.addAll(n.getChildren());
 				}
 				if (currentSelection != null){
-					if (attribute.isUseCustomConfig()){
-						defaultNode = (CmAttributeTreeNode) s.createCriteria(CmAttributeTreeNode.class)
+					defaultNode = (CmAttributeTreeNode) s.createCriteria(CmAttributeTreeNode.class)
 							.add(Restrictions.eq("dmTreeNode", currentSelection))  //$NON-NLS-1$
-							.add(Restrictions.eq("configurableModel", attribute.getNode().getModel())) //$NON-NLS-1$
-							.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
+							.add(Restrictions.eq("config", attribute.getConfig())) //$NON-NLS-1$
 							.uniqueResult();
-					}else{
-						defaultNode = (CmAttributeTreeNode) s.createCriteria(CmAttributeTreeNode.class)
-								.add(Restrictions.eq("dmTreeNode", currentSelection))  //$NON-NLS-1$
-								.add(Restrictions.eq("configurableModel", attribute.getNode().getModel())) //$NON-NLS-1$
-								.add(Restrictions.eq("dmAttribute", currentSelection.getAttribute())) //$NON-NLS-1$
-								.uniqueResult();
-					}
 				}
 				
 			}catch(Exception ex){

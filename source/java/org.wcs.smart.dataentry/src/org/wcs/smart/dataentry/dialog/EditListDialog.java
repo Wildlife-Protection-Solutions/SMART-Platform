@@ -72,11 +72,10 @@ import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
 import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
+import org.wcs.smart.dataentry.dialog.composite.TranslateNameComposite;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
-import org.wcs.smart.dataentry.model.CmAttributeOption;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -92,10 +91,9 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class EditListDialog extends TitleAreaDialog{
 
 	protected CmAttribute attribute;
-	protected ConfigurableModel editModel;
 	
 	private Viewer itemViewer;
-	private TableViewer nameTable ;
+	private TableViewer nameTable;
 	
 	private NamedItem dmNode;
 	private CmAttributeListItem cmNode;
@@ -105,10 +103,9 @@ public class EditListDialog extends TitleAreaDialog{
 	
 	private Session session;
 	
-	public EditListDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, Session session) {
+	public EditListDialog(Shell parentShell, CmAttribute attribute, Session session) {
 		super(parentShell);
 		this.attribute = attribute;
-		this.editModel = editModel;
 		this.session = session;
 	}
 
@@ -118,6 +115,8 @@ public class EditListDialog extends TitleAreaDialog{
 		setTitle(attribute.getName());
 		setMessage(Messages.RenameListDialog_DialogMessage);
 		getShell().setText(Messages.ConfigurableModelEditDialog_Title);
+
+		createTopControls(main);
 		
 		Composite container = new Composite(main, SWT.NONE);
 		GridLayout cgd = new GridLayout(1, false);
@@ -138,15 +137,11 @@ public class EditListDialog extends TitleAreaDialog{
 		label.setText(Messages.EditListDialog_DisplayMode);
 		final DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(upperConlrolsCmp);
 		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		modeViewer.setSelection(new StructuredSelection(attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
+		modeViewer.setSelection(new StructuredSelection(attribute.getConfigDisplayMode() != null ? attribute.getConfigDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
 		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				attribute.setCurrentDisplayMode(modeViewer.getSelectedDisplayMode());
-				//we need to save either configurable model global setting (for default configuration)
-				//or attribute option (for custom configuration), this is way we try to save both below
-				attribute.getCmAttributeOptions().get(CmAttributeOption.ID_DISPLAY_MODE);
-				editModel.getAttributeSettings().get(attribute.getAttribute());
+				attribute.getConfig().setDisplayMode(modeViewer.getSelectedDisplayMode());
 			}
 		});
 		
@@ -209,6 +204,18 @@ public class EditListDialog extends TitleAreaDialog{
 		
 		
 		return main;
+	}
+
+	private void createTopControls(Composite parent) {
+		Composite cmpTop = new Composite(parent, SWT.NONE);
+		GridLayout gd = new GridLayout(2, false);
+		cmpTop.setLayout(gd);
+		cmpTop.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(cmpTop, SWT.NONE);
+		label.setText(Messages.EditListDialog_ConfigurationName);
+		TranslateNameComposite tnc = new TranslateNameComposite(cmpTop, attribute.getConfig());
+		tnc.setCurrentLanguage(SmartDB.getCurrentLanguage());
 	}
 	
 	/**
@@ -432,7 +439,7 @@ public class EditListDialog extends TitleAreaDialog{
 		
 		final TableViewer listViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
-		listViewer.setLabelProvider(new CmListItemLabelProvider(editModel));
+		listViewer.setLabelProvider(new CmListItemLabelProvider(attribute.getNode().getModel()));
 		listViewer.setInput(attribute.getCurrentList());
 		
 		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -534,7 +541,7 @@ public class EditListDialog extends TitleAreaDialog{
 				AttributeListItem tmp = (AttributeListItem) x;
 				List<?> items = s.createCriteria(CmAttributeListItem.class)
 					.add(Restrictions.eq("listItem", tmp))  //$NON-NLS-1$
-					.add(Restrictions.eq("configurableModel", editModel)).list(); //$NON-NLS-1$
+					.add(Restrictions.eq("config", attribute.getConfig())).list(); //$NON-NLS-1$
 				if (items.size() > 0) {
 					return (CmAttributeListItem) items.get(0);
 				}

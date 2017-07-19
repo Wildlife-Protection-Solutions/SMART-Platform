@@ -44,10 +44,10 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -93,27 +93,44 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		engine.copyLabels(cm, clone);
 		engine.getSession().saveOrUpdate(clone);
 		
+		cloneCmAttributeConfigs(cm, clone);
 		//clone nodes
 		for(CmNode kid : cm.getNodes()){
 			processNode(null, kid, clone);
 		}
-		cloneCmAttributeListItems(cm, clone);
-		cloneCmAttributeTreeItems(cm, clone);
 
-		cloneCmDmAttributeSetting(cm, clone);
-		
 		engine.getSession().saveOrUpdate(clone);
 		engine.getSession().flush();
 		
 		engine.addConservationItemMapping(cm, clone);
 	}
 	
-	private void cloneCmAttributeListItems(ConfigurableModel sourceCm, ConfigurableModel clonedCm) throws Exception{
+	private void cloneCmAttributeConfigs(ConfigurableModel sourceCm, ConfigurableModel clonedCm) throws Exception {
 		@SuppressWarnings("unchecked")
-		List<CmAttributeListItem> itemsToClone = engine.getSession().createCriteria(CmAttributeListItem.class).add(Restrictions.eq("configurableModel", sourceCm)).list(); //$NON-NLS-1$
+		List<CmAttributeConfig> configsToClone = engine.getSession().createCriteria(CmAttributeConfig.class).add(Restrictions.eq("model", sourceCm)).list(); //$NON-NLS-1$
+		for (CmAttributeConfig cfg : configsToClone) {
+			CmAttributeConfig clone = new CmAttributeConfig();
+			engine.copyLabels(cfg, clone);
+			clone.setModel(clonedCm);
+			clone.setDefault(cfg.isDefault());
+			clone.setDisplayMode(cfg.getDisplayMode());
+			clone.setAttribute(findNewAttribute(cfg.getAttribute()));
+
+			engine.getSession().saveOrUpdate(clone);
+			engine.addConservationItemMapping(cfg, clone);
+			engine.getSession().flush();
+
+			cloneCmAttributeListItems(cfg, clone);
+			cloneCmAttributeTreeItems(cfg, clone);
+		}
+	}
+
+	private void cloneCmAttributeListItems(CmAttributeConfig sourceCfg, CmAttributeConfig clonedCfg) throws Exception {
+		@SuppressWarnings("unchecked")
+		List<CmAttributeListItem> itemsToClone = engine.getSession().createCriteria(CmAttributeListItem.class).add(Restrictions.eq("config", sourceCfg)).list(); //$NON-NLS-1$
 		for (CmAttributeListItem listItem : itemsToClone){
 			CmAttributeListItem clone = new CmAttributeListItem();
-			clone.setConfigurableModel(clonedCm);
+			clone.setConfig(clonedCfg);
 			engine.copyLabels(listItem, clone);
 			clone.setIsActive(listItem.getIsActive());
 			clone.setListOrder(listItem.getListOrder());
@@ -122,12 +139,6 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			}else{
 				clone.setListItem(null);
 			}
-			if (listItem.getDmAttribute() != null){
-				clone.setDmAttribute(findNewAttribute(listItem.getDmAttribute()));
-			}else{
-				clone.setDmAttribute(null);
-			}
-			clone.setAttribute((CmAttribute)engine.getNewConservationItem(listItem.getAttribute()));
 			File imgFile = listItem.getImageFile();
 			if (imgFile != null && imgFile.exists()) {
 				clone.setImageFile(listItem.getImageFile());
@@ -138,16 +149,15 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		engine.getSession().flush();
 	}
 	
-	private void cloneCmAttributeTreeItems(ConfigurableModel sourceCm, ConfigurableModel clonedCm) throws Exception{
+	private void cloneCmAttributeTreeItems(CmAttributeConfig sourceCfg, CmAttributeConfig clonedCfg) throws Exception {
 		@SuppressWarnings("unchecked")
-		List<CmAttributeTreeNode> itemsToClone = engine.getSession().createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("configurableModel", sourceCm)).list(); //$NON-NLS-1$
+		List<CmAttributeTreeNode> itemsToClone = engine.getSession().createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("config", sourceCfg)).list(); //$NON-NLS-1$
 		
 		HashMap<CmAttributeTreeNode, CmAttributeTreeNode> templateToClone = new HashMap<CmAttributeTreeNode, CmAttributeTreeNode>();
 		HashMap<CmAttributeTreeNode, CmAttributeTreeNode> cloneTotemplate = new HashMap<CmAttributeTreeNode, CmAttributeTreeNode>();
 		
 		for (CmAttributeTreeNode treeItem : itemsToClone){
 			CmAttributeTreeNode clone = new CmAttributeTreeNode();
-			clone.setConfigurableModel(clonedCm);
 			engine.copyLabels(treeItem, clone);
 			clone.setIsActive(treeItem.getIsActive());
 			clone.setNodeOrder(treeItem.getNodeOrder());
@@ -156,12 +166,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			}else{
 				clone.setDmTreeNode(null);
 			}
-			if (treeItem.getDmAttribute() != null){
-				clone.setDmAttribute(findNewAttribute(treeItem.getDmAttribute()));
-			}else{
-				clone.setDmAttribute(null);
-			}
-			clone.setAttribute((CmAttribute)engine.getNewConservationItem(treeItem.getAttribute()));
+			clone.setConfig(clonedCfg);
 			clone.setDisplayMode(treeItem.getDisplayMode());
 			File imgFile = treeItem.getImageFile();
 			if (imgFile != null && imgFile.exists()) {
@@ -245,6 +250,9 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		CmAttribute clone = new CmAttribute();
 		
 		clone.setAttribute(findNewAttribute(attributeToClone.getAttribute()));
+		if (attributeToClone.getConfig() != null) {
+			clone.setConfig((CmAttributeConfig)engine.getNewConservationItem(attributeToClone.getConfig()));
+		}
 		
 		//clone options
 		for (CmAttributeOption op : attributeToClone.getCmAttributeOptions().values()){
@@ -270,19 +278,6 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		}
 
 		return cloned;
-	}
-	
-	private void cloneCmDmAttributeSetting(ConfigurableModel srcCm, ConfigurableModel clonedCm) throws Exception {
-		for (CmDmAttributeSettings s : srcCm.getAttributeSettings().values()) {
-			CmDmAttributeSettings clone = new CmDmAttributeSettings();
-			clone.setModel(clonedCm);
-			clone.setDmAttribute(findNewAttribute(s.getDmAttribute()));
-			clone.setDisplayMode(s.getDisplayMode());
-			clonedCm.getAttributeSettings().put(clone.getDmAttribute(), clone);
-			
-			engine.getSession().saveOrUpdate(clone);
-		}
-		engine.getSession().flush();
 	}
 	
 	private Category findNewCategory(Category oldCategory) throws Exception{

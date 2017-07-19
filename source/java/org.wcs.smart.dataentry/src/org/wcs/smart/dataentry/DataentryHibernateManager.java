@@ -23,6 +23,7 @@ package org.wcs.smart.dataentry;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +34,8 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -123,45 +126,18 @@ public class DataentryHibernateManager extends HibernateManager {
 		}
 	}
 	
-	/**
-	 * Saves a given ConfigurableModel to the database.
-	 * 
-	 * @param model the ConfigurableModel to save
-	 * @return <code>true</code> if saved successfully, <code>false</code> if error
-	 */
-	public static boolean saveConfigurableModel(ConfigurableModel model) {
-		Session session = openSession();
-		try {
-			return saveConfigurableModel(model, session);
-		} finally {
-			session.close();
+	public static List<CmAttributeConfig> getCmAttributeConfigs(Session session, CmAttribute cmAttribute) {
+		ConfigurableModel cm = cmAttribute.getNode().getModel();
+		if (cm.getUuid() == null) {
+			return new ArrayList<>();
 		}
+		@SuppressWarnings("unchecked")
+		List<CmAttributeConfig> result = session.createCriteria(CmAttributeConfig.class)
+				.add(Restrictions.eq("attribute", cmAttribute.getAttribute()))
+				.add(Restrictions.eq("model", cm)).list();
+		return result;
 	}
-
-	/**
-	 * Saves a given ConfigurableModel to the database.
-	 * 
-	 * @param model the ConfigurableModel to save
-	 * @param session session
-	 * @return <code>true</code> if saved successfully, <code>false</code> if error
-	 */
-	public static boolean saveConfigurableModel(ConfigurableModel model, Session session) {
-		session.beginTransaction();
-		try {
-			//save a name
-			if (model.getName() != null) {
-				model.updateName(SmartDB.getCurrentLanguage(), model.getName());
-			}
-			session.saveOrUpdate(model);
-			session.getTransaction().commit();
-			return true;
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			SmartPlugIn.displayLog(Messages.DataentryHibernateManager_ConfigurableModel_Save_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-			return false;
-		}
-	}
-
+	
 	/**
 	 * Delete a filestore for given {@link ConfigurableModel}.
 	 * 
