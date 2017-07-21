@@ -135,9 +135,5 @@ public class DeleteErTrackAction implements IQaAction {
 	public String getName(Locale l) {
 		return Messages.DeleteErTrackAction_ActionName;
 	}
-	
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON);
-	}
+
 }

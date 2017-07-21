@@ -39,9 +39,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.wcs.smart.qa.ActionEngine;
 import org.wcs.smart.qa.InternalExtensionManager;
-import org.wcs.smart.qa.model.IQaAction;
+import org.wcs.smart.qa.QaActionInfo;
 import org.wcs.smart.qa.model.QaError;
-import org.wcs.smart.qa.routine.IgnoreAction;
 
 /**
  * Generates menu items based on selection provided
@@ -74,7 +73,7 @@ public abstract class QaActionMenu implements MenuListener {
 		if (selectionProvider.getSelection().isEmpty()) return;
 		boolean isSingle = ((IStructuredSelection)selectionProvider.getSelection()).size() == 1;
 		
-		Map<String, IQaAction> actions = new HashMap<>();
+		Map<String, QaActionInfo> actions = new HashMap<>();
 		boolean isFirst = true;
 		for (Iterator<?> iterator = ((IStructuredSelection)selectionProvider.getSelection()).iterator(); iterator.hasNext();) {
 			Object item = (Object) iterator.next();
@@ -83,9 +82,9 @@ public abstract class QaActionMenu implements MenuListener {
 			QaError errorItem = (QaError)item;
 			
 			if (isFirst){
-				for (IQaAction action : InternalExtensionManager.INSTANCE.getQaActions(errorItem.getDataProvider(), context)){
-					if(isSingle || action.supportsMultiple()){
-						actions.put(action.getId(), action);
+				for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaActions(errorItem.getDataProvider(), context)){
+					if(isSingle || action.getAction().supportsMultiple()){
+						actions.put(action.getAction().getId(), action);
 					}
 				}
 				isFirst = false;
@@ -94,9 +93,9 @@ public abstract class QaActionMenu implements MenuListener {
 				for (Iterator<String> iterator2 = actions.keySet().iterator(); iterator2.hasNext();) {
 					String ea = (String) iterator2.next();
 					boolean found = false;
-					for (IQaAction action : InternalExtensionManager.INSTANCE.getQaActions(errorItem.getDataProvider(), context)){
-						if(action.supportsMultiple()){
-							if (action.getId().equals(ea)) found = true;
+					for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaActions(errorItem.getDataProvider(), context)){
+						if(action.getAction().supportsMultiple()){
+							if (action.getAction().getId().equals(ea)) found = true;
 						}
 					}
 					if (!found){
@@ -108,21 +107,26 @@ public abstract class QaActionMenu implements MenuListener {
 				}
 			}
 		}
-		actions.put(IgnoreAction.INSTANCE.getId(), IgnoreAction.INSTANCE);
+		actions.put(QaActionInfo.IGNORE_INSTANCE.getAction().getId(), QaActionInfo.IGNORE_INSTANCE);
 		
-		List<IQaAction> sortedActions = new ArrayList<>();
+		List<QaActionInfo> sortedActions = new ArrayList<>();
 		sortedActions.addAll(actions.values());
 		sortedActions.sort((a,b)->{
-			return Collator.getInstance().compare(a.getName(Locale.getDefault()), b.getName(Locale.getDefault()));
+			return Collator.getInstance().compare(a.getAction().getName(Locale.getDefault()), b.getAction().getName(Locale.getDefault()));
 		});
 		
-		for (IQaAction action : sortedActions){
+		for (QaActionInfo action : sortedActions){
 			if (newItems.size() == 0){
 				newItems.add(new MenuItem(parent, SWT.SEPARATOR));
 			}
 			MenuItem mi = new MenuItem(parent, SWT.PUSH);
-			mi.setText(action.getName(Locale.getDefault()));
-			mi.setImage(action.getImage());
+			mi.setText(action.getAction().getName(Locale.getDefault()));
+			if (action.getImage() != null) {
+				mi.setImage(action.getImage().createImage());
+				mi.addListener(SWT.Dispose, ev->{
+					if (mi.getImage() != null && !mi.getImage().isDisposed()) mi.getImage().dispose();
+				});
+			}
 			newItems.add(mi);
 		
 			final IStructuredSelection thisSelection =  (IStructuredSelection)selectionProvider.getSelection();
@@ -134,7 +138,7 @@ public abstract class QaActionMenu implements MenuListener {
 						items.add((QaError) x);
 					}
 				}
-				if (ActionEngine.INSTANCE.performActions(items, action.getId(), context)){
+				if (ActionEngine.INSTANCE.performActions(items, action.getAction().getId(), context)){
 					refresh(items);
 				}else{
 					refresh(null);

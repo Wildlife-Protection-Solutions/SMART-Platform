@@ -7,13 +7,16 @@
             class="org.wcs.smart.qa.incident.IncidentDataProvider"
             image="platform:/plugin/org.wcs.smart.independentincident/images/icons/obj16/incident.png">
          <qa_action
-               class="org.wcs.smart.qa.incident.DeleteIncidentAction">
+               class="org.wcs.smart.qa.incident.DeleteIncidentAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/etool16/delete.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.incident.EditIncidentAction">
+               class="org.wcs.smart.qa.incident.EditIncidentAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/edit.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.incident.OpenIncidentAction">
+               class="org.wcs.smart.qa.incident.OpenIncidentAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/arrow_right.png">
          </qa_action>
       </data_provider>
    </extension>

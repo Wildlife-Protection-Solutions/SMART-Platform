@@ -7,26 +7,32 @@
             class="org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider"
             image="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol.png">
          <qa_action
-               class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction">
+               class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/arrow_right.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.patrol.ui.EditWaypointAction">
+               class="org.wcs.smart.qa.patrol.ui.EditWaypointAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/edit.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.patrol.ui.DeletePatrolWaypointAction">
+               class="org.wcs.smart.qa.patrol.ui.DeletePatrolWaypointAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/etool16/delete.png">
          </qa_action>
       </data_provider>
       <data_provider
             class="org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider"
             image="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol.png">
          <qa_action
-               class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction">
+               class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/arrow_right.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.patrol.ui.DeletePatrolTrackAction">
+               class="org.wcs.smart.qa.patrol.ui.DeletePatrolTrackAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/etool16/delete.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.patrol.ui.EditTrackAction">
+               class="org.wcs.smart.qa.patrol.ui.EditTrackAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/edit.png">
          </qa_action>
       </data_provider>
       <qa_routine

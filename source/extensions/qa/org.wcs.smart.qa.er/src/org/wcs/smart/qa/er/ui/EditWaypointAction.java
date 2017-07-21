@@ -26,9 +26,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.qa.er.internal.Messages;
 import org.wcs.smart.qa.model.IQaAction;
@@ -77,11 +75,6 @@ public class EditWaypointAction implements IQaAction {
 	@Override
 	public String getName(Locale l) {
 		return Messages.EditWaypointAction_ActionName;
-	}
-
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON);
 	}
 
 }

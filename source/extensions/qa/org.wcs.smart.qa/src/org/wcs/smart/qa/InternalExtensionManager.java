@@ -51,15 +51,16 @@ import org.wcs.smart.qa.ui.configure.IParameterCollector;
  *
  */
 public enum InternalExtensionManager {
+	
 	INSTANCE;
 	
-	private HashMap<String, List<IQaAction>> providerActions = null;
+	private HashMap<String, List<QaActionInfo>> providerActions = null;
 
 	private List<QaRoutine> autoRoutines = null;
 	
 	private Boolean isAutoCleaned = Boolean.FALSE;
 	
-	private HashMap<Class<? extends IQaDataProvider>, Image> images = null;
+	private HashMap<Class<? extends IQaDataProvider>, Image> providerImages = null;
 	
 	/**
 	 * Get the image associated with the given data provider
@@ -67,17 +68,17 @@ public enum InternalExtensionManager {
 	 * @return
 	 */
 	public Image getImage(IQaDataProvider dataProvider) {
-		if (images == null) readImages();
+		if (providerImages == null) readProviderImages();
 		
 		if (dataProvider.getClass() == SingleItemDataProvider.class) {
 			return getImage(((SingleItemDataProvider)dataProvider).getParent());
 		}
-		return images.get(dataProvider.getClass());
+		return providerImages.get(dataProvider.getClass());
 	}
 	
 	public void dispose() {
-		if (images != null) {
-			images.values().forEach(e->{if (!e.isDisposed()) e.dispose();});
+		if (providerImages != null) {
+			providerImages.values().forEach(e->{if (!e.isDisposed()) e.dispose();});
 		}
 	}
 	
@@ -114,8 +115,8 @@ public enum InternalExtensionManager {
 	 * reads the data provider images
 	 */
 	@SuppressWarnings("unchecked")
-	private synchronized void readImages(){
-		if (images != null) return;
+	private synchronized void readProviderImages(){
+		if (providerImages != null) return;
 		
 		HashMap<Class<? extends IQaDataProvider>, Image> imgs = new HashMap<>();
 		IExtensionRegistry registry = RegistryFactory.getRegistry();
@@ -137,7 +138,7 @@ public enum InternalExtensionManager {
 				}
 			}
 		}
-		this.images = imgs;
+		this.providerImages = imgs;
 	}
 	
 	/**
@@ -167,7 +168,7 @@ public enum InternalExtensionManager {
 	}
 
 	
-	public List<IQaAction> getQaActions(IQaDataProvider provider, IEclipseContext context){
+	public List<QaActionInfo> getQaActions(IQaDataProvider provider, IEclipseContext context){
 		if (providerActions == null){
 			synchronized (INSTANCE) {
 				if (providerActions == null){
@@ -182,10 +183,16 @@ public enum InternalExtensionManager {
 							try{
 								String id = ((IQaDataProvider)e.createExecutableExtension("class")).getId(); //$NON-NLS-1$
 								IConfigurationElement[] kids = e.getChildren("qa_action"); //$NON-NLS-1$
-								List<IQaAction> actions = new ArrayList<>();
+								List<QaActionInfo> actions = new ArrayList<>();
 								for (IConfigurationElement kid : kids){
 									IQaAction action = (IQaAction)kid.createExecutableExtension("class"); //$NON-NLS-1$
-									actions.add(action);
+									
+									String image = kid.getAttribute("image"); //$NON-NLS-1$
+									ImageDescriptor descriptor = null;
+									if (image != null) {
+										descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(e.getNamespaceIdentifier(), image);
+									}
+									actions.add(new QaActionInfo(action, descriptor));
 									ContextInjectionFactory.inject(action, context);
 								}
 								providerActions.put(id, actions);

@@ -29,11 +29,9 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
@@ -139,10 +137,5 @@ public class DeletePatrolWaypointAction implements IQaAction {
 	@Override
 	public String getName(Locale l) {
 		return Messages.DeletePatrolWaypointAction_ActionName;
-	}
-	
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON);
 	}
 }

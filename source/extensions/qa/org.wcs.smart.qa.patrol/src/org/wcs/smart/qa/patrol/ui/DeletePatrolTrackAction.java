@@ -133,9 +133,4 @@ public class DeletePatrolTrackAction implements IQaAction {
 	public String getName(Locale l) {
 		return Messages.DeletePatrolTrackAction_ActionName;
 	}
-	
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON);
-	}
 }

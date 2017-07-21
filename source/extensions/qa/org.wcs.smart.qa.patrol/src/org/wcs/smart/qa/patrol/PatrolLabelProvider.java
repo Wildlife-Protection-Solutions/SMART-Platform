@@ -23,12 +23,7 @@ package org.wcs.smart.qa.patrol;
 
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.patrol.internal.Messages;
-import org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider;
-import org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider;
 
 /**
  * Image provider for patrol data providers
@@ -37,18 +32,7 @@ import org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider;
  *
  */
 public class PatrolLabelProvider extends ILabelProvider {
-
-	@Override
-	public Image getImage(Class<? extends IQaDataProvider> clazz) {
-		if (clazz.equals(PatrolTrackDataProvider.class))
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
-		
-		if (clazz.equals(PatrolWaypointDataProvider.class))
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_ICON);
-
-		return null;
-	}
-
+	
 	@Override
 	public String getString(Key key, Locale l){
 		switch(key){

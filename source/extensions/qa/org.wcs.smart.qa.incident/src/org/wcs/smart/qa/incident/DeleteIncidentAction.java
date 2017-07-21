@@ -29,10 +29,8 @@ import java.util.Locale;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IndepedentIncidentSource;
@@ -139,10 +137,5 @@ public class DeleteIncidentAction implements IQaAction {
 	@Override
 	public String getName(Locale l) {
 		return Messages.DeleteIncidentAction_ActionName;
-	}
-	
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON);
 	}
 }

@@ -62,9 +62,9 @@ public enum ActionEngine {
 		//extension point actions
 		if (!found){
 			for (IQaDataProvider p : providers){
-				for (IQaAction n : InternalExtensionManager.INSTANCE.getQaActions(p, context)){
-					if (n.getId().equals(actionId)){
-						changes = changes || n.doAction(actionItems);
+				for (QaActionInfo n : InternalExtensionManager.INSTANCE.getQaActions(p, context)){
+					if (n.getAction().getId().equals(actionId)){
+						changes = changes || n.getAction().doAction(actionItems);
 						break;
 					}
 				}

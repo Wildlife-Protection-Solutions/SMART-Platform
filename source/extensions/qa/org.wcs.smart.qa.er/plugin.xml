@@ -7,26 +7,32 @@
             class="org.wcs.smart.qa.er.ErTrackDataProvider"
             image="platform:/plugin/org.wcs.smart.er/images/icons/obj16/mission.png">
          <qa_action
-               class="org.wcs.smart.qa.er.ui.DeleteErTrackAction">
+               class="org.wcs.smart.qa.er.ui.DeleteErTrackAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/arrow_right.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.er.ui.EditTrackAction">
+               class="org.wcs.smart.qa.er.ui.EditTrackAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/edit.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.er.ui.OpenSourceMissionAction">
+               class="org.wcs.smart.qa.er.ui.OpenSourceMissionAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/arrow_right.png">
          </qa_action>
       </data_provider>
       <data_provider
             class="org.wcs.smart.qa.er.ErWaypointDataProvider"
             image="platform:/plugin/org.wcs.smart.er/images/icons/obj16/mission.png">
          <qa_action
-               class="org.wcs.smart.qa.er.ui.DeleteErWaypointAction">
+               class="org.wcs.smart.qa.er.ui.DeleteErWaypointAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/etool16/delete.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.er.ui.EditWaypointAction">
+               class="org.wcs.smart.qa.er.ui.EditWaypointAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/edit.png">
          </qa_action>
          <qa_action
-               class="org.wcs.smart.qa.er.ui.OpenSourceMissionAction">
+               class="org.wcs.smart.qa.er.ui.OpenSourceMissionAction"
+               image="platform:/plugin/org.wcs.smart/images/icons/obj16/arrow_right.png">
          </qa_action>
       </data_provider>
    </extension>

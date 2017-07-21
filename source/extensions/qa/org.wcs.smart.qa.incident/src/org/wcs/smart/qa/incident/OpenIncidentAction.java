@@ -30,10 +30,8 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.ui.OpenIncidentHandler;
 import org.wcs.smart.observation.model.Waypoint;
@@ -91,10 +89,5 @@ public class OpenIncidentAction implements IQaAction {
 	@Override
 	public String getName(Locale l) {
 		return Messages.OpenIncidentAction_ActionName;
-	}
-
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON);
 	}
 }
