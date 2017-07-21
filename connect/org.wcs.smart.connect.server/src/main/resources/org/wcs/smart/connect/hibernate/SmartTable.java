@@ -60,10 +60,10 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.CmDmAttributeSettings;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.ScreenOption;
@@ -211,7 +211,7 @@ public enum SmartTable {
 	CMATTRIBUTELISTITEM(CmAttributeListItem.class,".configurableModel.conservationArea"),
 	CMATTRIBUTEOPTION(CmAttributeOption.class,".cmAttribute.node.model.conservationArea"),
 	CMATTRIBUTETREENODE(CmAttributeTreeNode.class,".configurableModel.conservationArea"),
-	CMDMATTRIBUTESESSIONS(CmDmAttributeSettings.class,".id.model.conservationArea" ),
+	CMATTRIBUTECONFIG(CmAttributeConfig.class,".model.conservationArea" ),
 	CMNODE(CmNode.class,".model.conservationArea"),
 	CMCONNECTALERT(org.wcs.smart.connect.cybertracker.model.ConnectAlert.class, ".model.conservationArea"),
 	CTCONNECTPROPERTY(ConnectCtProperties.class, ".model.conservationArea"),

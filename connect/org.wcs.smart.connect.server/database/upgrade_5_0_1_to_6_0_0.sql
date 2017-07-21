@@ -61,3 +61,37 @@ ALTER TABLE smart.qa_routine ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conserva
 ALTER TABLE smart.qa_error ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE smart.qa_routine_parameter ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa_routine (uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE smart.qa_error ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa_routine (uuid) ON DELETE CASCADE DEFERRABLE;
+
+
+
+--NEEDS TO BE FIXED SEE TICKET 2209
+delete from smart.CONFIGURABLE_MODEL;
+
+CREATE TABLE smart.cm_attribute_config(uuid UUID not null, cm_uuid UUID not null, dm_attribute_uuid UUID not null, display_mode varchar(10), is_default boolean, primary key (uuid));
+ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (CM_UUID) REFERENCES SMART.CONFIGURABLE_MODEL(UUID) ON DELETE CASCADE DEFERRABLE;
+ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES SMART.DM_ATTRIBUTE(UUID) ON DELETE CASCADE DEFERRABLE;
+
+
+alter table smart.cm_attribute add column config_uuid UUID;
+ALTER TABLE smart.cm_attribute ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE ;
+
+alter table smart.cm_attribute_list add column config_uuid UUID;
+ALTER TABLE SMART.CM_ATTRIBUTE_LIST ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE ; 
+
+alter table smart.cm_attribute_tree_node add column config_uuid UUID;
+ALTER TABLE SMART.CM_ATTRIBUTE_TREE_NODE ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE ;
+
+drop table SMART.CM_DM_ATTRIBUTE_SETTINGS;
+
+alter table smart.cm_attribute_list drop column CM_ATTRIBUTE_UUID;
+alter table smart.cm_attribute_list drop column DM_ATTRIBUTE_UUID;
+alter table smart.cm_attribute_list drop column CM_UUID;
+alter table smart.cm_attribute_list alter column config_uuid SET NOT NULL;
+
+alter table smart.cm_attribute_tree_node drop column CM_ATTRIBUTE_UUID;
+alter table smart.cm_attribute_tree_node drop column DM_ATTRIBUTE_UUID;
+alter table smart.cm_attribute_tree_node drop column CM_UUID;
+alter table smart.cm_attribute_tree_node alter column config_uuid SET NOT NULL;
+
+delete from smart.CM_ATTRIBUTE_OPTION where OPTION_ID = 'DISPLAY_MODE' OR OPTION_ID = 'CUSTOM_CONFIG';
+---- END OF SECTION
