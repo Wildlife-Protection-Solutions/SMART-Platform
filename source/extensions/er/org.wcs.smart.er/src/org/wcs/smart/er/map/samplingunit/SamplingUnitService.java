@@ -33,7 +33,7 @@ import java.util.concurrent.locks.Lock;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.geotools.data.DataStore;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
@@ -189,15 +189,14 @@ public class SamplingUnitService extends IService {
 	public void dispose( IProgressMonitor monitor ) {
         if (members == null)
             return;
+        SubMonitor progress = SubMonitor.convert(monitor);
         if (monitor == null){
         	monitor = new NullProgressMonitor();
         }
         int steps = (int) ((double) 99 / (double) members.size());
         for( SamplingUnitGeoResource resolve : members ) {
             try {
-                SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor, steps);
-                resolve.dispose(subProgressMonitor);
-                subProgressMonitor.done();
+                resolve.dispose(progress.newChild(steps));
             } catch (Throwable e) {
             	EcologicalRecordsPlugIn.log("Could not dispose query Service", e); //$NON-NLS-1$
             }

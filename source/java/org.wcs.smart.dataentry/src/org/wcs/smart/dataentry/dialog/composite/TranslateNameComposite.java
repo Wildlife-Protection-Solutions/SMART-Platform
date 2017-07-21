@@ -88,6 +88,9 @@ public class TranslateNameComposite extends Composite {
 
 		text = new Text(this, SWT.BORDER);
 		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		if (item != null) {
+			updateText(item);
+		}
 		
 		final ControlDecoration cd = createControlDecoration(text);
 		cd.hide();
@@ -101,7 +104,7 @@ public class TranslateNameComposite extends Composite {
 						MessageDialog.openError(getShell(), Messages.AbstractInfoComposite_ErrorDialogTitle, MessageFormat.format(Messages.AbstractInfoComposite_InvalidNameMessage, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
 						text.setText(item.getName());
 					}else{
-						changed = !item.getName().equals(text.getText());
+						changed = !text.getText().equals(item.getName());
 						item.setName(text.getText());
 						item.updateName(currentLanguage, item.getName());
 						
@@ -184,7 +187,7 @@ public class TranslateNameComposite extends Composite {
 	protected Language getCurrentLanguage() {
 		return currentLanguage;
 	}
-	protected void setCurrentLanguage(Language currentLanguage) {
+	public void setCurrentLanguage(Language currentLanguage) {
 		this.currentLanguage = currentLanguage;
 	}
 

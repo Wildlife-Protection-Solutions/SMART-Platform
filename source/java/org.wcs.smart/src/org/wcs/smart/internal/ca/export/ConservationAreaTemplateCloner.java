@@ -24,7 +24,7 @@ package org.wcs.smart.internal.ca.export;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Agency;
@@ -58,37 +58,36 @@ public class ConservationAreaTemplateCloner implements
 	
 	/**
 	 * @see org.wcs.smart.ca.IConservationAreaTemplateCloner#cloneTemplateData(org.wcs.smart.ca.ConservationAreaClonerEngine, org.eclipse.core.runtime.IProgressMonitor)
+	 * 
 	 */
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaTemplateCloner_Progress_CopyCaInfo, 5);
 		//need to clone: agencies, ranks, stations, projections,
 		//data model (categories, attributes, attribute list items, 
 		//attribute tree items, attribute aggregations
 		//and all associated labels
-		monitor.beginTask(Messages.ConservationAreaTemplateCloner_Progress_CopyCaInfo, 5);
-		try{
-		    //DO NOT CLONE: employees, saved maps, area geometries
-			monitor.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyAgencyRank);
-			cloneAgenciesRank(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyStation);
-			cloneStations(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyProjection);
-			cloneProjections(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyDataModel);
-			cloneDataModel(engine, new SubProgressMonitor(monitor, 1));
-			monitor.worked(1);
+		
+		//DO NOT CLONE: employees, saved maps, area geometries
+		progress.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyAgencyRank);
+		cloneAgenciesRank(engine);
+		progress.worked(1);
 			
-			monitor.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyStyles);
-			cloneMapStyles(engine);
-			monitor.worked(1);
+		progress.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyStation);
+		cloneStations(engine);
+		progress.worked(1);
 			
-		}finally{
-			monitor.done();
-		}
+		progress.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyProjection);
+		cloneProjections(engine);
+		progress.worked(1);
+			
+		progress.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyDataModel);
+		cloneDataModel(engine, progress.split(1));
+			
+		progress.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyStyles);
+		cloneMapStyles(engine);
+		progress.worked(1);
+		
 	}
 	
 	/*
@@ -117,7 +116,7 @@ public class ConservationAreaTemplateCloner implements
 	 */
 	private void cloneDataModel(ConservationAreaClonerEngine engine, IProgressMonitor monitor){
 		DataModel templateDm = HibernateManager.loadDataModel(engine.getTemplateCa(), engine.getSession());
-		DataModel clonedDm = templateDm.clone(engine.getNewCa(), null, new SubProgressMonitor(monitor, 1));
+		DataModel clonedDm = templateDm.clone(engine.getNewCa(), null, monitor);
 		Session session = engine.getSession();
 		for (Attribute att : clonedDm.getAttributes()) {
 			session.save(att);

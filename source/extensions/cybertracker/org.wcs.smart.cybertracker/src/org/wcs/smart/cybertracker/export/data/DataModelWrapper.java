@@ -38,6 +38,13 @@ public class DataModelWrapper {
 	
 	private ConfigurableModel model;
 
+	/**
+	 * 
+	 * @param session
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
+	 * to call done() on the given monitor
+	 * @return
+	 */
 	public ConfigurableModel buildConfigurableModel(Session session, IProgressMonitor monitor) {
 		if (model == null) {
 			model = ConfigurableModelFactory.createModelFromDataModel(Messages.DataModelWrapper_Name, session, monitor);

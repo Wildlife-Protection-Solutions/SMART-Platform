@@ -43,6 +43,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -207,10 +208,16 @@ public class RecordXmlImporter {
 		}		
 	}
 	
-	
+	/**
+	 * 
+	 * @param zipFile zip file to import
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 */
 	public void importRecord(Path zipFile, IProgressMonitor monitor) {
-		monitor.beginTask(MessageFormat.format(Messages.RecordXmlImporter_TaskName, zipFile.toString()), 1);
+		SubMonitor progress = SubMonitor.convert(monitor, 1);
 		
+		progress.subTask(MessageFormat.format(Messages.RecordXmlImporter_TaskName, zipFile.toString()));
 		List<String> warnings = allWarnings.get(zipFile);
 		if (warnings == null){
 			warnings = new ArrayList<String>();
@@ -361,10 +368,8 @@ public class RecordXmlImporter {
 			warnings.clear();
 			warnings.add(MessageFormat.format(Messages.RecordXmlImporter_ProcessingError1, zipFile.toString(), ex.getMessage()));
 			Intelligence2PlugIn.log(MessageFormat.format(Messages.RecordXmlImporter_ProcessingError2, zipFile.toString(), ex.getMessage()), ex);
-		
-		}finally{
-			monitor.done();
 		}
+		progress.worked(1);
 	}
 	
 	private List<IntelRecordAttributeValue> parseRecordSourceAttributes(List<RecordAttributeType> attributes, IntelRecord record, Session session, List<String> warnings){

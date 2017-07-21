@@ -24,6 +24,7 @@ package org.wcs.smart.observation;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -43,14 +44,11 @@ public class ObservationCloner implements IConservationAreaTemplateCloner {
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.ObservationCloner_TaskName, 1);
-		try{
-			monitor.subTask(Messages.ObservationCloner_ProgressName);
-			cloneOptions(engine);
-			monitor.worked(1);
-		}finally{
-			monitor.done();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ObservationCloner_TaskName, 1);
+		
+		progress.subTask(Messages.ObservationCloner_ProgressName);
+		cloneOptions(engine);
+		progress.worked(1);
 	}
 	
 	

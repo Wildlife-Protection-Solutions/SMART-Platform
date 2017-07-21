@@ -31,8 +31,9 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -72,7 +73,7 @@ public class DerbyBackupEngine {
 	 * Backs up all SMART data to the given output file.
 	 * 
 	 * @param outputFile output file
-	 * @param monitor progress monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
 	 * @return <code>true</code> if backup successful, <code>false</code> if cancelled or failed
 	 * @throws IOException
 	 */
@@ -86,12 +87,13 @@ public class DerbyBackupEngine {
 	 * and only backup the database.
 	 * 
 	 * @param outputFile output file
-	 * @param monitor progress monitor
-	 * @param excludeFilestore <code>false</code> to exclude the entire filestore from the database; true otherwies
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
+	 * @param excludeFilestore <code>false</code> to exclude the entire filestore from the database; true otherwise
 	 * @return <code>true</code> if backup successful, <code>false</code> if cancelled or failed
 	 * @throws IOException
 	 */
 	public static boolean  backupSystem(File outputFile, boolean excludeFilestore, IProgressMonitor monitor) throws IOException{
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyBackupEngine_ProgressMessage, 10);
 		if (outputFile.exists()){
 			if (!outputFile.delete()){
 				throw new IllegalStateException(Messages.DerbyBackupEngine_DeleteOutputFileError + " '" + outputFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -123,15 +125,17 @@ public class DerbyBackupEngine {
 					dirsToBackup = new File[]{filestore, database};
 				}
 			
-				monitor.beginTask(Messages.DerbyBackupEngine_ProgressMessage, 2);
-			
-				if (ZipUtil.createZip(dirsToBackup, outputFile, monitor)) {
+				if (ZipUtil.createZip(dirsToBackup, outputFile, progress.split(9))) {
 					List<IBackupContributor> extensions = getBackupExtensions();
+					SubMonitor sub = progress.split(1);
+					sub.setWorkRemaining(extensions.size());
 					for (IBackupContributor ext : extensions) {
-						ext.process(outputFile, new SubProgressMonitor(monitor, 2));
+						ext.process(outputFile, sub.split(1));
 					}
 					return true;
 				}
+				return false;
+			}catch (OperationCanceledException ex) {
 				return false;
 			}finally{
 				//now un-freeze			

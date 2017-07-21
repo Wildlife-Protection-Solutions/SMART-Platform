@@ -32,7 +32,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.util.UuidUtils;
 
@@ -46,25 +45,14 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.cm_attribute_list")
 public class CmAttributeListItem extends NamedItem implements IImageAssociatedObject {
 
-	private ConfigurableModel configurableModel;
 	private boolean isActive;
 	
 	private AttributeListItem listItem;
 	
-	private CmAttribute attribute;
-	private Attribute dmAttribute;
+	private CmAttributeConfig config;
 	private int listOrder;
 	private File imageFile;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
-	public ConfigurableModel getConfigurableModel() {
-		return configurableModel;
-	}
-	public void setConfigurableModel(ConfigurableModel configurableModel) {
-		this.configurableModel = configurableModel;
-	}
-	
 	@Column(name="is_active")
 	public boolean getIsActive() {
 		return isActive;
@@ -83,21 +71,12 @@ public class CmAttributeListItem extends NamedItem implements IImageAssociatedOb
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="cm_attribute_uuid", referencedColumnName="uuid")
-	public CmAttribute getAttribute() {
-		return attribute;
+	@JoinColumn(name="config_uuid", referencedColumnName="uuid")
+	public CmAttributeConfig getConfig() {
+		return config;
 	}
-	public void setAttribute(CmAttribute attribute) {
-		this.attribute = attribute;
-	}
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="dm_attribute_uuid", referencedColumnName="uuid")
-	public Attribute getDmAttribute() {
-		return dmAttribute;
-	}
-	public void setDmAttribute(Attribute dmAttribute) {
-		this.dmAttribute = dmAttribute;
+	public void setConfig(CmAttributeConfig config) {
+		this.config = config;
 	}
 	
 	@Column(name="list_order")
@@ -121,6 +100,6 @@ public class CmAttributeListItem extends NamedItem implements IImageAssociatedOb
 	@Transient
 	@Override
 	public String getImagePersistenceLocation() {
-		return getConfigurableModel().getFileDataStoreLocation() + File.separator + "li_img1_" + UuidUtils.getDirectoryPath(getUuid()) + ".jpg"; //$NON-NLS-1$ //$NON-NLS-2$
+		return getConfig().getModel().getFileDataStoreLocation() + File.separator + "li_img1_" + UuidUtils.getDirectoryPath(getUuid()) + ".jpg"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

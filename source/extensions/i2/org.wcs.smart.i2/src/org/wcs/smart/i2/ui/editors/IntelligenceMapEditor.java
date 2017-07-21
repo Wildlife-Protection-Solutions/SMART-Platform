@@ -262,7 +262,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	public static IEditorInput MAPINPUT = new IEditorInput() {
 		
 		@Override
-		public Object getAdapter(Class adapter) {
+		public <T> T getAdapter(Class<T> adapter) {
 			return null;
 		}
 		

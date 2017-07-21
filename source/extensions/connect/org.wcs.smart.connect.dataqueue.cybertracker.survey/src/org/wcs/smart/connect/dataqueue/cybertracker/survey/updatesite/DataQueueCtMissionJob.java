@@ -51,11 +51,9 @@ public class DataQueueCtMissionJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		
 		return dropTables();
 	}
 
-	
 	private IStatus dropTables(){
 		Session session = HibernateManager.openSession();
 		try {

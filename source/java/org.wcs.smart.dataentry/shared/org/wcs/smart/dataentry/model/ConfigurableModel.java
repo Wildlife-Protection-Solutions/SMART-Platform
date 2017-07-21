@@ -40,15 +40,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.dataentry.CmDefaultListsUtil;
-import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -64,14 +60,8 @@ public class ConfigurableModel extends NamedItem {
 	private DisplayMode displayMode; //display mode for the root nodes
     private List<CmNode> nodes; //the root nodes for the data model
 
-	private List<CmAttributeTreeNode> defaultRootTreeNodes = null;
-	private Map<Attribute, List<CmAttributeTreeNode>> attr2TreeMap = null;
-
-	private List<CmAttributeListItem> defaultListItems = null;
-	private Map<Attribute, List<CmAttributeListItem>> attr2ListMap = null;
+	private Map<Attribute, CmAttributeConfig> defaultConfigs;
 	
-	private Map<Attribute, CmDmAttributeSettings> attributeSettings;
-
 	private boolean instantGps = false;
 	private boolean photoFirst = false;
 
@@ -120,142 +110,6 @@ public class ConfigurableModel extends NamedItem {
 	}
 	public void setPhotoFirst(Boolean photoFirst) {
 		this.photoFirst = Boolean.TRUE.equals(photoFirst); //null <==> false
-	}
-
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
-	@Where(clause = "parent_uuid is null and dm_attribute_uuid is not null")
-	@OrderBy(clause = "node_order")
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-	public List<CmAttributeTreeNode> getDefaultTrees() {
-		if (defaultRootTreeNodes == null) {
-			defaultRootTreeNodes = new ArrayList<CmAttributeTreeNode>();
-		}
-		return this.defaultRootTreeNodes;
-	}
-	public void setDefaultTrees(List<CmAttributeTreeNode> tree){
-		this.defaultRootTreeNodes = tree;
-	}
-
-	@Transient
-	public List<CmAttributeTreeNode> getDefaultTrees(final Attribute attribute) {
-		if (attr2TreeMap == null) {
-			attr2TreeMap = new HashMap<Attribute, List<CmAttributeTreeNode>>();
-		}
-		List<CmAttributeTreeNode> result = attr2TreeMap.get(attribute);
-		if (result == null) {
-			result = new FilteredSubList<CmAttributeTreeNode>(getDefaultTrees()) {
-				@Override
-				protected boolean matches(CmAttributeTreeNode t) {
-					return attribute.equals(t.getDmAttribute());
-				}
-			};
-			attr2TreeMap.put(attribute, result);
-		}
-		return result;
-	}
-	
-	@Transient
-	public void addDefaultTreeModes(final Attribute attribute) {
-		if (attr2TreeMap == null) {
-			attr2TreeMap = new HashMap<Attribute, List<CmAttributeTreeNode>>();
-		}
-		List<CmAttributeTreeNode> result = attr2TreeMap.get(attribute);
-		if (result == null) {
-			result = new FilteredSubList<CmAttributeTreeNode>(getDefaultTrees()) {
-				@Override
-				protected boolean matches(CmAttributeTreeNode t) {
-					return attribute.equals(t.getDmAttribute());
-				}
-			};
-			if (result.isEmpty()) {
-				//if we are here that this attribute was not added before (no data for it in default trees)
-				result = CmDefaultTreesUtil.buildDefaultTree(this, attribute);
-				getDefaultTrees().addAll(result);
-			} else {
-				attr2TreeMap.put(attribute, result);
-			}
-		}
-	}	
-
-	/**
-	 * @param attribute
-	 * @return The list of nodes that were removed.
-	 */
-	@Transient
-	public List<CmAttributeTreeNode> removeDefaultTrees(final Attribute attribute) {
-		List<CmAttributeTreeNode> tree = getDefaultTrees(attribute);
-		List<CmAttributeTreeNode> removedItems = new ArrayList<>(tree);
-		tree.clear(); //NOTE: as this is FilteredSubList is will remove given items from original defaultRootTreeNodes list
-		attr2TreeMap.remove(attribute);
-		return removedItems;
-	}
-
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
-	@Where(clause = "dm_attribute_uuid is not null")
-	@OrderBy(clause = "list_order")
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-	public List<CmAttributeListItem> getDefaultLists() {
-		if (defaultListItems == null) {
-			defaultListItems = new ArrayList<CmAttributeListItem>();
-		}
-		return this.defaultListItems;
-	}
-	public void setDefaultLists(List<CmAttributeListItem> list){
-		this.defaultListItems = list;
-	}
-
-	@Transient
-	public List<CmAttributeListItem> getDefaultLists(final Attribute attribute) {
-		if (attr2ListMap == null) {
-			attr2ListMap = new HashMap<Attribute, List<CmAttributeListItem>>();
-		}
-		List<CmAttributeListItem> result = attr2ListMap.get(attribute);
-		if (result == null) {
-			result = new FilteredSubList<CmAttributeListItem>(getDefaultLists()) {
-				@Override
-				protected boolean matches(CmAttributeListItem t) {
-					return attribute.equals(t.getDmAttribute());
-				}
-			};
-			attr2ListMap.put(attribute, result);
-		}
-		return result;
-	}
-
-	@Transient
-	public void addDefaultListItems(final Attribute attribute) {
-		if (attr2ListMap == null) {
-			attr2ListMap = new HashMap<Attribute, List<CmAttributeListItem>>();
-		}
-		List<CmAttributeListItem> result = attr2ListMap.get(attribute);
-		if (result == null) {
-			result = new FilteredSubList<CmAttributeListItem>(getDefaultLists()) {
-				@Override
-				protected boolean matches(CmAttributeListItem t) {
-					return attribute.equals(t.getDmAttribute());
-				}
-			};
-			if (result.isEmpty()) {
-				//if we are here that this attribute was not added before (no data for it in default lists)
-				result = CmDefaultListsUtil.buildDefaultList(this, attribute);
-				getDefaultLists().addAll(result);
-			} else {
-				attr2ListMap.put(attribute, result);
-			}
-		}
-	}
-	
-	/**
-	 * @param attribute
-	 * @return The list of items that were removed.
-	 */
-	@Transient
-	public List<CmAttributeListItem> removeDefaultLists(final Attribute attribute) {
-		List<CmAttributeListItem> list = getDefaultLists(attribute);
-		List<CmAttributeListItem> removedItems = new ArrayList<>(list);
-		list.clear(); //NOTE: as this is FilteredSubList it will remove given items from original defaultRootListItems list
-		attr2ListMap.remove(attribute);
-		return removedItems;
 	}
 	
 	/**
@@ -316,40 +170,18 @@ public class ConfigurableModel extends NamedItem {
 		}
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.model", cascade={CascadeType.ALL}, orphanRemoval = true)
-	@MapKey(name="id.dmAttribute")
-	public Map<Attribute, CmDmAttributeSettings> getAttributeSettings() {
-		if (attributeSettings == null)
-			attributeSettings = new HashMap<>();
-		return attributeSettings;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="model", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@MapKey(name="attribute")
+	@Where(clause = "is_default")
+	public Map<Attribute, CmAttributeConfig> getDefaultConfigs() {
+		if (defaultConfigs == null)
+			defaultConfigs = new HashMap<>();
+		return defaultConfigs;
 	}
-	public void setAttributeSettings(Map<Attribute, CmDmAttributeSettings> attributeSettings) {
-		this.attributeSettings = attributeSettings;
+	public void setDefaultConfigs(Map<Attribute, CmAttributeConfig> defaultConfigs) {
+		this.defaultConfigs = defaultConfigs;
 	}
 	
-	/**
-	 * 
-	 * @param attribute
-	 * @return {@link DisplayMode} that is set for this attribute in default configuration
-	 */
-	@Transient
-	public DisplayMode getAttributeDisplayMode(Attribute attribute) {
-		CmDmAttributeSettings settings = getAttributeSettings().get(attribute);
-		return (settings != null && settings.getDisplayMode() != null) ? settings.getDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE;
-	}
-
-	@Transient
-	public void setAttributeDisplayMode(Attribute attribute, DisplayMode mode) {
-		CmDmAttributeSettings settings = getAttributeSettings().get(attribute);
-		if (settings == null) {
-			settings = CmDmAttributeSettings.createDefaultSettings(this, attribute);
-			getAttributeSettings().put(attribute, settings);
-		}
-		if (mode != null) {
-			settings.setDisplayMode(mode);
-		}
-	}
-
 	/**
 	 * @return the filestore location for the given configurable model
 	 */

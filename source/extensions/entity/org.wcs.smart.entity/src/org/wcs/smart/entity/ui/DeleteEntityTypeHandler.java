@@ -62,6 +62,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DeleteEntityTypeHandler {
 
 	@Execute

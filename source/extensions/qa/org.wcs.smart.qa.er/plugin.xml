@@ -4,7 +4,8 @@
    <extension
          point="org.wcs.smart.qa">
       <data_provider
-            class="org.wcs.smart.qa.er.ErTrackDataProvider">
+            class="org.wcs.smart.qa.er.ErTrackDataProvider"
+            image="platform:/plugin/org.wcs.smart.er/images/icons/obj16/mission.png">
          <qa_action
                class="org.wcs.smart.qa.er.ui.DeleteErTrackAction">
          </qa_action>
@@ -16,7 +17,8 @@
          </qa_action>
       </data_provider>
       <data_provider
-            class="org.wcs.smart.qa.er.ErWaypointDataProvider">
+            class="org.wcs.smart.qa.er.ErWaypointDataProvider"
+            image="platform:/plugin/org.wcs.smart.er/images/icons/obj16/mission.png">
          <qa_action
                class="org.wcs.smart.qa.er.ui.DeleteErWaypointAction">
          </qa_action>

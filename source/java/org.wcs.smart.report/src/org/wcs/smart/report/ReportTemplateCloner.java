@@ -38,6 +38,7 @@ import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
@@ -71,23 +72,19 @@ public class ReportTemplateCloner implements
 	 */
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.ReportTemplateCloner_Progress_CopyReport, 3);
-		try{
-			monitor.subTask(Messages.ReportTemplateCloner_Progress_copyLibrary);
-			cloneLibrary(engine);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ReportTemplateCloner_Progress_CopyReport, 3);
+		
+		progress.subTask(Messages.ReportTemplateCloner_Progress_copyLibrary);
+		cloneLibrary(engine);
+		progress.worked(1);
 			
-			monitor.worked(1);
-			monitor.subTask(Messages.ReportTemplateCloner_Progress_CopyFolder);
-			cloneFolders(engine);
+		progress.subTask(Messages.ReportTemplateCloner_Progress_CopyFolder);
+		cloneFolders(engine);
+		progress.worked(1);
 			
-			monitor.worked(1);
-			monitor.subTask(Messages.ReportTemplateCloner_Progress_CopyReportData);
-			cloneReports(engine);
-			
-			monitor.worked(1);
-		}finally{
-			monitor.done();
-		}
+		progress.subTask(Messages.ReportTemplateCloner_Progress_CopyReportData);
+		cloneReports(engine);
+		progress.worked(1);
 	}
 
 	/*

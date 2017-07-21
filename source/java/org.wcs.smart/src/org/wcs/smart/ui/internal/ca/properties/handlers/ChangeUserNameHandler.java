@@ -37,6 +37,7 @@ import org.wcs.smart.ui.internal.ca.properties.ChangeUserPasswordDialog;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ChangeUserNameHandler{
 
 	@Execute

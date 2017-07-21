@@ -25,6 +25,7 @@ package org.wcs.smart.intelligence.query.export;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
@@ -48,17 +49,15 @@ public class IntelligenceQueryTemplateCloner implements
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.IntelligenceQueryTemplateCloner_CloneIntelQuery, 2);
-		try{
-			monitor.subTask(Messages.IntelligenceQueryTemplateCloner_CloneRecords);
-			cloneRecordQueries(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.IntelligenceQueryTemplateCloner_CloneSummaries);
-			cloneSummaryQuery(engine);
-			monitor.worked(1);
-		}finally{
-			monitor.done();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelligenceQueryTemplateCloner_CloneIntelQuery, 1);
+
+		progress.subTask(Messages.IntelligenceQueryTemplateCloner_CloneRecords);
+		cloneRecordQueries(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.IntelligenceQueryTemplateCloner_CloneSummaries);
+		cloneSummaryQuery(engine);
+		progress.worked(1);
 	}
 
 	

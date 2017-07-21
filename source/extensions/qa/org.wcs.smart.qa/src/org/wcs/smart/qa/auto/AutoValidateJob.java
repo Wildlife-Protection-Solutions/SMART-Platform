@@ -30,7 +30,7 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -78,7 +78,8 @@ public class AutoValidateJob extends Job{
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask(Messages.AutoValidateJob_Status1, IProgressMonitor.UNKNOWN);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.AutoValidateJob_Status1, IProgressMonitor.UNKNOWN);
+		
 		while(!tasks.isEmpty()){
 			ValidationEngine engine = new ValidationEngine(Locale.getDefault());
 			synchronized (tasks) {
@@ -90,7 +91,7 @@ public class AutoValidateJob extends Job{
 			
 			Session session = HibernateManager.openSession();
 			try{
-				Collection<QaError> errors = engine.validate(session, new SubProgressMonitor(monitor, -1));
+				Collection<QaError> errors = engine.validate(session, progress.setWorkRemaining(100).split(1));
 				session.beginTransaction();
 				for (QaError error : errors){
 					session.save(error);

@@ -438,6 +438,7 @@ public class Messages extends NLS {
 	public static String ExportQueryWizard_OverwriteDialogTitle;
 	public static String ExportQueryWizard_Title;
 	public static String FileLocationParser_OptionDialogMsg;
+	public static String FileLocationParser_SubTaskName;
 	public static String FileSearchView_CancelledLabel;
 	public static String FileSearchView_CancelLink;
 	public static String FileSearchView_FilesLabel;
@@ -1052,6 +1053,7 @@ public class Messages extends NLS {
 	public static String RecordXmlExporter_OverwriteDialog;
 	public static String RecordXmlExporter_OverwriteMessage;
 	public static String RecordXmlExporter_RecordNotFound;
+	public static String RecordXmlExporter_SubTaskName;
 	public static String RecordXmlExporter_TaskName;
 	public static String RecordXmlImporter_AttributeListNotFound;
 	public static String RecordXmlImporter_CategoryAttributeNotFound;

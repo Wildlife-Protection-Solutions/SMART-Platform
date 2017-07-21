@@ -40,7 +40,6 @@ import org.wcs.smart.i2.udig.LocationLayerType;
  * @author Emily
  *
  */
-@SuppressWarnings("unchecked")
 public class IntelRecordFeatureSource extends ContentFeatureSource {
 
 	public static final String FID_FIELD = "fid"; //$NON-NLS-1$

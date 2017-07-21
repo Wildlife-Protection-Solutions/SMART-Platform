@@ -31,7 +31,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
@@ -205,7 +205,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 					IService service = QueryServiceFactory.generateQueryService(pq, parentEditor);
 
 					try{
-						List<IGeoResource> layers = (List<IGeoResource>) service.resources(monitor);
+						List<? extends IGeoResource> layers = service.resources(monitor);
 						if (layers.size() > 0){
 							patrolLayer = layers.get(0);
 							AddLayersCommand command = new AddLayersCommand(Collections.singletonList(patrolLayer)){
@@ -263,11 +263,12 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
     private Job refreshPatrolsJob = new Job(Messages.MapPlanEditorPage_RefreshMapJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			SubMonitor progress = SubMonitor.convert(monitor, Messages.MapPlanEditorPage_UpadingPatrolLayer, 2);
 			synchronized (lockObj) {
 				if (patrolLayer != null){
 					try{
-						monitor.beginTask(Messages.MapPlanEditorPage_UpadingPatrolLayer, 2);
-						PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, new SubProgressMonitor(monitor, 1));
+						
+						PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, progress.newChild(1));
 						
 						if (pq != null){
 							pq.setCachedResults(null); //clear cached results
@@ -275,7 +276,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 						
 							Session session = HibernateManager.openSession();
 							try{
-								pq.setCachedResults(QueryExecutor.INSTANCE.executeQuery(pq, session, new SubProgressMonitor(monitor, 1)));
+								pq.setCachedResults(QueryExecutor.INSTANCE.executeQuery(pq, session, progress.newChild(1)));
 							}finally{
 								session.close();
 							}

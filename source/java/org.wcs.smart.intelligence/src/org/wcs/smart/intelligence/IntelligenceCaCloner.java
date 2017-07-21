@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -48,12 +49,12 @@ public class IntelligenceCaCloner implements IConservationAreaTemplateCloner {
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.IntelligenceCaCloner_ProgressMessage, 2);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelligenceCaCloner_ProgressMessage, 1);
 		cloneSources(engine);
-		monitor.worked(1);
+		progress.worked(1);
+		
 		clonePrintTemplate(engine);
-		monitor.worked(1);		
-		monitor.done();
+		progress.worked(1);		
 	}
 
 	

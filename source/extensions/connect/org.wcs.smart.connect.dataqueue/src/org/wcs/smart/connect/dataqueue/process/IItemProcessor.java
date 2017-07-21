@@ -47,7 +47,8 @@ public interface IItemProcessor {
 	 * if an error occurred while processing.
 	 * 
 	 * @param item 
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
 	 * @return ProcessingStatus; if processing status is requeue then the item is requeued on the server
 	 * to be processed again later
 	 * @throws Exception

@@ -53,6 +53,7 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class EditSurveyElementHandler {
 
 	@Execute

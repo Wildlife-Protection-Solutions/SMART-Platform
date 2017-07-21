@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -83,8 +83,8 @@ public class CompoundQueryExporter implements IQueryExporter {
 
 	@Override
 	public void export(Query query, IQueryResult results, File file,
-			HashMap<String, Object> parameters, IProgressMonitor monitor)
-			throws Exception {
+			HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CompoundQueryExporter_TaskName, 5);
 		if (results== null) {
 			throw new Exception(Messages.SimpleQueryExporter_Error_QueryNotRun);
 		}
@@ -93,7 +93,8 @@ public class CompoundQueryExporter implements IQueryExporter {
 		}
 		CompoundMapQuery mapQuery = (CompoundMapQuery)query;
 		CompoundMapQueryResults cqresults = (CompoundMapQueryResults) mapQuery.getCachedResults();
-		monitor.beginTask(Messages.CompoundQueryExporter_TaskName, mapQuery.getLayers().size());
+		
+		
 		HashMap<Query, IQueryExporter> exports = new HashMap<Query, IQueryExporter>();
 		StringBuilder messages = new StringBuilder();
 		Session s = HibernateManager.openSession();
@@ -131,13 +132,15 @@ public class CompoundQueryExporter implements IQueryExporter {
 				}
 			});
 		}
+		progress.worked(1);
+		progress.setWorkRemaining(exports.entrySet().size());
 		
 		for(Entry<Query, IQueryExporter> exporter: exports.entrySet()){
 			String queryName = URLUtils.cleanFilename(exporter.getKey().getName() + "_" + exporter.getKey().getId()) + "." + exporter.getValue().getDefaultExtension(); //$NON-NLS-1$ //$NON-NLS-2$
 			File f = new File(file, queryName); 
 			
 			exporter.getValue().export(exporter.getKey(), cqresults.getResults(exporter.getKey().getUuid()), f, 
-					parameters, new SubProgressMonitor(monitor, 1));
+					parameters, progress.split(1));
 		}
 	}
 	

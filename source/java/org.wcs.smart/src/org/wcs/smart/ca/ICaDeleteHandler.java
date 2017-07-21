@@ -42,7 +42,7 @@ public interface ICaDeleteHandler {
 	 * 
 	 * @param ca the conservation being deleted
 	 * @param session the delete session
-	 * @param monitor the progress monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception if error occurs and the ca information could not be removed
 	 */
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception;

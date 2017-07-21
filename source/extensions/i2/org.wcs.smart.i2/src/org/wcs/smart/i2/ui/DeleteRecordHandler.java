@@ -86,7 +86,7 @@ public class DeleteRecordHandler {
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
 		try {
-			pmd.run(true, true, (monitor)-> RecordManager.INSTANCE.deleteRecords(toDelete, context,monitor));
+			pmd.run(true, true, (monitor)-> RecordManager.INSTANCE.deleteRecords(toDelete, context, monitor));
 		} catch (Exception ex) {
 			Intelligence2PlugIn.displayLog(Messages.RecordsView_DeleteErrorMessage + ex.getMessage(), ex);
 		}

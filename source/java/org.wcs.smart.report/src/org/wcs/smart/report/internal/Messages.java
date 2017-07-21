@@ -132,6 +132,7 @@ public class Messages extends NLS {
 	public static String ImportReportWizard_TaskProgress;
 	public static String ImportReportWizard_TaskProgress2;
 	public static String ImportReportWizard_Title;
+	public static String LazyReportContentProvider_loadingkidsprogress;
 	public static String NewFolderHandler_DefaultNewFolderName;
 	public static String NewFolderHandler_Error_CouldNotAddFolder;
 	public static String NewFolderHandler_JobName;

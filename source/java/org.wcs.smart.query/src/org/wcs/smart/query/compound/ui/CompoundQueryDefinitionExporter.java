@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -90,7 +91,7 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 	public void export(org.wcs.smart.query.model.Query query, IQueryResult result, File file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
-		
+		SubMonitor progress = SubMonitor.convert(monitor, "", 3); //$NON-NLS-1$
 		Path tempDir = Files.createTempDirectory("smart" + UuidUtils.uuidToString(query.getUuid())); //$NON-NLS-1$
 		try{
 			Query wpquery = new Query();
@@ -174,11 +175,11 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 				Path output = subDir.resolve(UuidUtils.uuidToString(q.getUuid()) + ".xml"); //$NON-NLS-1$
 				//to definition exporter found for query type
 				if (lexporter != null){
-					lexporter.export(q, null, output.toFile(), parameters, monitor);
+					lexporter.export(q, null, output.toFile(), parameters, progress.split(2));
 				}
 			}
 			
-			ZipUtil.createZip(new File[]{queryFile.toFile(), subDir.toFile()}, file, monitor);
+			ZipUtil.createZip(new File[]{queryFile.toFile(), subDir.toFile()}, file, progress.split(1));
 		}finally{
 			FileUtils.forceDelete(tempDir.toFile());
 		}

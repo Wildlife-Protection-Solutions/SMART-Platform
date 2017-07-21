@@ -37,7 +37,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
@@ -103,19 +103,18 @@ public class ChangeLogPackager {
 	/**
 	 * Packages metadata and change log.
 	 * 
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception
 	 */
 	public void createPackage(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(Messages.ChangeLogPackager_TaskName, 3);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ChangeLogPackager_TaskName, 3);
 		try{
 			packageMetadata();
-			monitor.worked(1);
+			progress.worked(1);
 			packageChangLog();
-			monitor.worked(1);
-			zipPackage(new SubProgressMonitor(monitor, 1));
+			progress.worked(1);
+			zipPackage(progress.split(1));
 		}finally{
-			monitor.done();
 			try{
 				cleanUp();
 			}catch (IOException ex){

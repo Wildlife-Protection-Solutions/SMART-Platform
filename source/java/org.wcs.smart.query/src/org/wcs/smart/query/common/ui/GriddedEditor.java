@@ -178,9 +178,10 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 				try {
 					IQueryResult results = QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor);
 					if (monitor.isCanceled() || mymonitor.isCanceled()){
+						resultPage.updateAndShowTable(null);
 						return Status.CANCEL_STATUS;
 					}
-					resultPage.updateAndShowTable(((GridQueryResult)results).getData(), mymonitor);
+					resultPage.updateAndShowTable(((GridQueryResult)results).getData());
 				} catch (Exception ex) {
 					String message = "Could not execute query." + "\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 					if (ex.getCause() != null && ex.getCause().getCause()== Grid.GRID_TO_BIG_EXCEPTION){
@@ -191,7 +192,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 						message += ex.getLocalizedMessage();
 					}
 					QueryPlugIn.displayLog(message, ex);
-					resultPage.updateAndShowTable(new ArrayList<QueryGridResultItem>(), mymonitor);
+					resultPage.updateAndShowTable(new ArrayList<QueryGridResultItem>());
 				}
 				mapPage.refresh(isFirstRun);
 				return Status.OK_STATUS;

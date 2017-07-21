@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -286,9 +286,9 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException,
 						InterruptedException {
-					
+					SubMonitor progress = null;
 					if (isIUCN) {
-						monitor.setTaskName(Messages.InitCaDataModelDialog_Progress_LoadingDefaultDm);
+						progress = SubMonitor.convert(monitor,Messages.InitCaDataModelDialog_Progress_LoadingDefaultDm, 1);
 						InputStream is = SmartProperties.getIucnDataModelFile();
 						try {
 							try {
@@ -302,15 +302,14 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							throw new InvocationTargetException(ex);
 						}
 					}else if (isCa) {
-						//clone from another data model
-						monitor.beginTask(Messages.InitCaDataModelDialog_Progress_ClosingDm, 3);
+						progress = SubMonitor.convert(monitor,Messages.InitCaDataModelDialog_Progress_ClosingDm, 3);
 						
 						DataModel dmToClone = null;
 						getSession().beginTransaction();
 						try{
-							monitor.subTask(MessageFormat.format(Messages.InitCaDataModelDialog_Progress_loadDataModel, caToCloneFrom.getName()));
+							progress.subTask(MessageFormat.format(Messages.InitCaDataModelDialog_Progress_loadDataModel, caToCloneFrom.getName()));
 							dmToClone = HibernateManager.loadDataModel(caToCloneFrom, getSession());
-							monitor.worked(1);
+							progress.worked(1);
 						}finally{
 							getSession().getTransaction().commit();
 						}
@@ -322,7 +321,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						}
 						
 						boolean hasLang = false;
-						monitor.subTask(Messages.InitCaDataModelDialog_Progress_CloneLanguages);
+						progress.subTask(Messages.InitCaDataModelDialog_Progress_CloneLanguages);
 						for (Language lang: caToCloneFrom.getLanguages()){
 							if (lang.getCode().equals(ca.getDefaultLanguage().getCode())){
 								hasLang = true;
@@ -353,8 +352,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 							}
 						}
 						
-						dm = dmToClone.clone(ca, code, new SubProgressMonitor(monitor, 1));
-						monitor.worked(1);
+						dm = dmToClone.clone(ca, code, progress.split(1));
+						
 					}else if (isBlank){
 						dm = new DataModel(ca, new ArrayList<Category>(), new ArrayList<Attribute>());
 					}
@@ -364,8 +363,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						throw new InvocationTargetException(new IllegalStateException(error), error);
 					}
 					monitor.subTask(Messages.InitCaDataModelDialog_Progress_SavingDm);
-					dm.save(getSession(), monitor);
-					monitor.worked(1);
+					dm.save(getSession(), progress.split(1));
+					
 					return ;
 				}
 			});

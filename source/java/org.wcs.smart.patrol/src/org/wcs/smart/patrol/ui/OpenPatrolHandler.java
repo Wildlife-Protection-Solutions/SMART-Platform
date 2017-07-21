@@ -59,6 +59,7 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class OpenPatrolHandler {
 
 	public static final String PATROL_PARAM = "patrolinput"; //$NON-NLS-1$

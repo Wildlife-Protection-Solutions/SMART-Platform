@@ -33,6 +33,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -71,11 +72,10 @@ public class MissionImporter {
 	 * Imports mission data from the given file.
 	 * 
 	 * @param file  a xml or zip file
-	 * @param monitor progress monitor 
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception
 	 */
 	public static Mission importMission(File file, boolean keepIDs, IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(IMPORTING_MISSION_TASKNAME, 4);
 		return importXmlToMission(file, keepIDs, monitor);
 	}
 	
@@ -88,7 +88,9 @@ public class MissionImporter {
 	 * @throws Exception
 	 */
 	private static Mission importXmlToMission(File zipFile, boolean keepIDs, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_MISSION_TASKNAME, 4);
 		
+		progress.split(1);
 		MissionType ptype = null;
 		String[] files;
 		File directory;
@@ -106,10 +108,9 @@ public class MissionImporter {
 			directory = zipFile;
 		}
 		
-		monitor.worked(1);
-		
+		progress.split(1);
 		if (files != null){
-			monitor.subTask(Messages.MissionImporter_2);
+			progress.subTask(Messages.MissionImporter_2);
 			for (int i = 0; i < files.length; i ++){
 				File f;
 				if(directory.isFile()){
@@ -133,7 +134,6 @@ public class MissionImporter {
 			}
 		}
 		if (ptype == null){
-			
 			try{
 				if(directory.isDirectory()){
 					FileUtils.deleteDirectory(directory);
@@ -143,11 +143,10 @@ public class MissionImporter {
 			}
 			throw new Exception (Messages.MissionImporter_3);
 		}
-		monitor.worked(1);
 		
-		Mission m = convertAndSave(ptype, keepIDs, directory, monitor);
+		Mission m = convertAndSave(ptype, keepIDs, directory, progress.split(2));
 		
-		monitor.subTask(Messages.MissionImporter_4);
+		progress.subTask(Messages.MissionImporter_4);
 		try{
 			if(directory.isDirectory()){
 				FileUtils.deleteDirectory(directory);
@@ -176,10 +175,12 @@ public class MissionImporter {
 	 * @throws Exception
 	 */
 	private static Mission  convertAndSave(MissionType xmlMission, final boolean keepIDs, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
+		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_MISSION_TASKNAME, 3);
 		XMLtoMissionConverter converter = new XMLtoMissionConverter();
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
-			monitor.subTask(Messages.MissionImporter_5);
+			progress.split(1);
+			progress.subTask(Messages.MissionImporter_5);
 			//check if a mission in the database with the given mission id already exists
 			if (xmlMission.getId() != null){
 				if (SurveyHibernateManager.isDuplicateId(xmlMission.getId(), SmartDB.getCurrentConservationArea(), session)){
@@ -209,15 +210,15 @@ public class MissionImporter {
 					}
 				}
 			}		
-			monitor.subTask(Messages.MissionImporter_9);
+			progress.subTask(Messages.MissionImporter_9);
 			converter.fromXml(xmlMission, keepIDs, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
-		
 		} finally {
 			if (session.isOpen()){
 				session.close();
 			}
 		}
 
+		progress.split(1);
 		session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
 			List<String> errors = new ArrayList<String>();
@@ -248,13 +249,8 @@ public class MissionImporter {
 			}
 		}
 
-		
-		
-		
 		List<String> warnings = new ArrayList<String>();
 		warnings.addAll(converter.getWarnings());
-		monitor.worked(1);
-
 		//display reported conversion warnings if they present
 		if (!warnings.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
@@ -284,7 +280,8 @@ public class MissionImporter {
 			}
 
 		}
-		monitor.subTask(Messages.MissionImporter_12);
+		progress.split(1);
+		progress.subTask(Messages.MissionImporter_12);
 		Mission imported = converter.getImportedMission();
 		
 		//performing actual save in database
@@ -313,7 +310,7 @@ public class MissionImporter {
 		}finally{
 			session.close();
 		}
-		monitor.worked(1);
+		
 		return imported;
 	}
 	

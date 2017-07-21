@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart-feature"
+      id="org.wcs.smart.feature"
       label="SMART Feature"
       version="6.0.0.qualifier"
       provider-name="org.wcs.smart">
@@ -92,19 +92,19 @@ limitations under the License.
          version="0.0.0"/>
 
    <includes
-         id="org.wcs.smart.udig-feature"
-         version="0.0.0"/>
-
-   <includes
          id="javax.media.jai_imageio-feature"
          version="0.0.0"/>
 
    <includes
-         id="org.wcs.smart.birt-feature"
+         id="org.wcs.smart.birt.feature"
          version="0.0.0"/>
 
    <includes
-         id="org.wcs.smart.p2-feature"
+         id="org.wcs.smart.p2.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.wcs.smart.udig.feature"
          version="0.0.0"/>
 
    <plugin

@@ -28,6 +28,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -103,8 +105,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				
-				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyQueryEngine2_Progress_RunningQuery, 2);
 				
 				IFilterProcessor filterer = null;
 				try{
@@ -124,25 +125,19 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 				c.setAutoCommit(true);
 				try {			
 					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							cafilter, 
-							false, true, monitor);
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter,  cafilter, false, true, progress.split(1));
 					
-					if (monitor.isCanceled()) return;
-					populateTemporaryTableExtra(c, session, monitor);
+					populateTemporaryTableExtra(c, session, progress.split(1));
 					
-					if (monitor.isCanceled()) return;
-					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
-					//setting result size
-					
+					progress.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					updateResultCount(session, result);
+				}catch( OperationCanceledException ex) {
+					return ;
 				}catch (Exception ex){
 					throw new SQLException(ex);
-
 				} finally {
 					filterer.dropTemporaryTables(c);
-					if (monitor.isCanceled()) dropTables(c);
-					monitor.done();
+					if (progress.isCanceled()) dropTables(c);
 					c.setAutoCommit(false);
 				}
 			}
@@ -197,6 +192,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 	}
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
+		SubMonitor progress = SubMonitor.convert(monitor, 18);
+		
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"p_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
@@ -214,40 +211,24 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 			c.createStatement().execute(sql);
 		}
 		
-		if (monitor.isCanceled()){
-			return;
-		}
-		
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_StationData);
+		progress.subTask(Messages.DerbyObservationEngine_Progress_StationData);
+		progress.split(3);
 		populateTemporaryTableNameObjExtra("p_station_uuid", "p_station", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(7);
-		if (monitor.isCanceled()){
-			return;
-		}
 		
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_TeamData);
+		progress.subTask(Messages.DerbyObservationEngine_Progress_TeamData);
+		progress.split(3);
 		populateTemporaryTableNameObjExtra("p_team_uuid", "p_team", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(7);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_MandateData);
-		populateTemporaryTableNameObjExtra("pl_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(2);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
-		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(2);
-		if (monitor.isCanceled()){
-			return;
-		}
-
 		
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_LeaderPilotData);
+		progress.subTask(Messages.DerbyObservationEngine_Progress_MandateData);
+		progress.split(3);
+		populateTemporaryTableNameObjExtra("pl_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		
+		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
+		progress.split(3);
+		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		
+		progress.subTask(Messages.DerbyObservationEngine_Progress_LeaderPilotData);
+		progress.split(4);
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT plm_leader FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
@@ -288,15 +269,12 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 			pilotSt.executeBatch();
 			leaderSt.executeBatch();
 		}
-		monitor.worked(12);
-		if (monitor.isCanceled()){
-			return;
-		}
 		
 		//ca information
+		progress.split(2);
 		if (SmartDB.isMultipleAnalysis()){
 			//ca id and names are only used for cross-ca analysis
-			monitor.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
+			progress.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
@@ -316,12 +294,6 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 			c.createStatement().executeUpdate(sql.toString());
 		}
 		
-		//populating categories
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
-		monitor.worked(13);
-		if (monitor.isCanceled()){
-			return;
-		}
 	}
 
 	@Override

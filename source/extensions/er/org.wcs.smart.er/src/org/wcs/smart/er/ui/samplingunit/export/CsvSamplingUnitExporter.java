@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -66,6 +67,8 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			Session session,
 			HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception {
 		
+		SubMonitor progress = SubMonitor.convert(monitor);
+		
 		GeometryType type = (GeometryType) options.get(SU_TYPE_KEY);
 		if (type == null){
 			throw new Exception(Messages.CsvSamplingUnitExporter_SuTypeError);
@@ -85,14 +88,13 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 		sd = (SurveyDesign) session.load(SurveyDesign.class, sd.getUuid());
 		
 		try(CSVWriter writer = new CSVWriter(new FileWriter(f), delimiter)){
-			exportPlotsAndTransects(type, writer, sd, session, monitor);
-		}finally{
-			monitor.done();
+			exportPlotsAndTransects(type, writer, sd, session, progress);
 		}
 	}
 	
 	private void exportPlotsAndTransects(GeometryType type, CSVWriter writer, 
 			SurveyDesign sd, Session session, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CsvSamplingUnitExporter_Progress, 100);
 		
 		WKTWriter wktWriter = new WKTWriter();
 		
@@ -105,8 +107,8 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 				.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
 				.add(Restrictions.eq("type", type)) //$NON-NLS-1$
 				.list();
-		
-		monitor.beginTask(Messages.CsvSamplingUnitExporter_Progress, units.size());
+		progress.setWorkRemaining(units.size());
+
 		int index = 0;
 		for (SamplingUnit unit : units){
 			index = 0;
@@ -152,7 +154,7 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 				data[index++] = value;
 			}
 			writer.writeNext(data);
-			monitor.worked(1);
+			progress.worked(1);
 		}
 	}
 	

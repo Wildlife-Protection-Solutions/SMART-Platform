@@ -91,6 +91,10 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		return this.searchString;
 	}
 	
+	/**
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor) {

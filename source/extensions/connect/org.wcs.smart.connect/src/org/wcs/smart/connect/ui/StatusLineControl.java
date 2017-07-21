@@ -53,6 +53,9 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 
 	@Override
 	protected Control createControl(Composite parent) {
+		//see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=471313
+		parent.getParent().setRedraw(true);
+		
 		contribs = getStatusContributions();
 		
 		Composite main = new Composite(parent, SWT.NONE);

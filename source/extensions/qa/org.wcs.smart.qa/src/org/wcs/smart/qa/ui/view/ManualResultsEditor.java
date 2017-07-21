@@ -90,6 +90,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.ValidationEngine;
@@ -137,7 +138,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 	public static IEditorInput MANUAL_VALIDATION_INPUT =  new IEditorInput() {
 		
 		@Override
-		public Object getAdapter(Class adapter) {
+		public <T> T getAdapter(Class<T> adapter) {
 			return null;
 		}
 		
@@ -497,6 +498,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		
 		TableViewerColumn dataColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
 		ColumnLabelProvider dataLabelProvider = new ColumnLabelProvider(){
+			
 			public String getText(Object element){
 				if (element instanceof DataValidator){
 					return ((DataValidator) element).getDataProvider().getName(Locale.getDefault());
@@ -506,7 +508,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			
 			public Image getImage(Object element){
 				if (element instanceof DataValidator){
-					return ((DataValidator) element).getDataProvider().getImage();
+					return InternalExtensionManager.INSTANCE.getImage(((DataValidator) element).getDataProvider());
 				}
 				return super.getImage(element);
 			}

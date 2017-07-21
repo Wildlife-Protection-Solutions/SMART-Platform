@@ -72,6 +72,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class IntelligenceTemplatesView {
 	
 	public static final String ID = "org.wcs.smart.i2.view.entitytypelist"; //$NON-NLS-1$

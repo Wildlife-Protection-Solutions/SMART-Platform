@@ -69,10 +69,10 @@ import org.wcs.smart.dataentry.dialog.composite.CmTreeLabelProvider;
 import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
+import org.wcs.smart.dataentry.dialog.composite.TranslateNameComposite;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
@@ -88,7 +88,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class EditTreeDialog extends TitleAreaDialog {
 
 	protected CmAttribute attribute;
-	protected ConfigurableModel editModel;
 	
 	private Viewer dmTreeViewer;
 	private TreeViewer itemViewer;
@@ -112,10 +111,9 @@ public class EditTreeDialog extends TitleAreaDialog {
 
 	private Session session;
 
-	public EditTreeDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, Session session) {
+	public EditTreeDialog(Shell parentShell, CmAttribute attribute, Session session) {
 		super(parentShell);
 		this.attribute = attribute;
-		this.editModel = editModel;
 		this.session = session;
 	}
 
@@ -123,8 +121,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 		parent = (Composite) super.createDialogArea(parent);
 		
 		setTitle(attribute.getName());
-		setMessage(getDialogMessage());
+		setMessage(Messages.EditTreeDialog_Message);
 		getShell().setText(Messages.ConfigurableModelEditDialog_Title);
+		
+		createTopControls(parent);
 		
 		SashForm comp = new SashForm(parent, SWT.HORIZONTAL);
 		comp.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
@@ -213,7 +213,6 @@ public class EditTreeDialog extends TitleAreaDialog {
 				updateEnableButtonText();
 			}
 		});
-		//super.setButtonLayoutData(btnEnable);
 		
 		itemViewer = createItemViewer(middle);
 		
@@ -237,6 +236,18 @@ public class EditTreeDialog extends TitleAreaDialog {
 		comp.setWeights(new int[]{28,37,35});
 		itemViewer.refresh();		
 		return parent;
+	}
+
+	private void createTopControls(Composite parent) {
+		Composite cmpTop = new Composite(parent, SWT.NONE);
+		GridLayout gd = new GridLayout(2, false);
+		cmpTop.setLayout(gd);
+		cmpTop.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+
+		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(cmpTop, SWT.NONE);
+		label.setText(Messages.EditTreeDialog_ConfigurationName);
+		TranslateNameComposite tnc = new TranslateNameComposite(cmpTop, attribute.getConfig());
+		tnc.setCurrentLanguage(SmartDB.getCurrentLanguage());
 	}
 	
 	@Override
@@ -275,13 +286,8 @@ public class EditTreeDialog extends TitleAreaDialog {
 		CmAttributeTreeNode parent = getTargetCmNode();
 		List<CmAttributeTreeNode> children = getTargetList(parent);
 		CmAttributeTreeNode cmTreeNode = new CmAttributeTreeNode();
-		cmTreeNode.setConfigurableModel(editModel);
 		cmTreeNode.setParent(parent);
-		if (attribute.isUseCustomConfig()) {
-			cmTreeNode.setAttribute(attribute);
-		} else {
-			cmTreeNode.setDmAttribute(attribute.getAttribute());
-		}
+		cmTreeNode.setConfig(attribute.getConfig());
 		cmTreeNode.setIsActive(true);
 		cmTreeNode.updateName(SmartDB.getCurrentLanguage(), Messages.EditTreeDialog_NewGroup);
 		cmTreeNode.setNodeOrder(children.size());
@@ -302,13 +308,8 @@ public class EditTreeDialog extends TitleAreaDialog {
 
 	private void addCmTreeNode(AttributeTreeNode dmTreeNode, CmAttributeTreeNode parent, boolean addSubNodes) {
 		CmAttributeTreeNode cmTreeNode = new CmAttributeTreeNode();
-		cmTreeNode.setConfigurableModel(editModel);
 		cmTreeNode.setParent(parent);
-		if (attribute.isUseCustomConfig()) {
-			cmTreeNode.setAttribute(attribute);
-		} else {
-			cmTreeNode.setDmAttribute(attribute.getAttribute());
-		}
+		cmTreeNode.setConfig(attribute.getConfig());
 		cmTreeNode.setDmTreeNode(dmTreeNode);
 		cmTreeNode.setIsActive(dmTreeNode.getIsActive());
 		List<CmAttributeTreeNode> target = getTargetList(parent);
@@ -376,7 +377,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		((GridData)tree.getTree().getLayoutData()).heightHint = 300;
 		
 		tree.setContentProvider(new CmAttributeTreeContentProvider(false, true));
-		tree.setLabelProvider(new CmTreeLabelProvider(editModel));
+		tree.setLabelProvider(new CmTreeLabelProvider(attribute.getNode().getModel()));
 		tree.setInput(attribute);
 		tree.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -539,7 +540,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		label.setText(Messages.EditTreeDialog_DisplayMode);
 		modeViewer = new DisplayModeComboViewer(containerCmp);
 		modeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		modeViewer.setSelection(new StructuredSelection(attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
+		modeViewer.setSelection(new StructuredSelection(attribute.getConfigDisplayMode() != null ? attribute.getConfigDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE));
 		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -644,7 +645,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 			return tn.getDisplayMode() != null ? tn.getDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE;
 		}
 		//value for root
-		return attribute.getCurrentDisplayMode() != null ? attribute.getCurrentDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE;
+		return attribute.getConfigDisplayMode() != null ? attribute.getConfigDisplayMode() : DisplayMode.DEFAULT_DISPLAY_MODE;
 	}
 	
 	private void updateEnableButtonText(){
@@ -664,14 +665,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 				CmAttributeTreeNode tn = (CmAttributeTreeNode) obj;
 				tn.setDisplayMode(mode);
 			} else {
-				//we are configuring a root of the tree; its configuration is stored as a part of attribute
-				attribute.setCurrentDisplayMode(mode);
+				//we are configuring a root of the tree; its configuration is stored as a part of attribute config
+				attribute.getConfig().setDisplayMode(mode);
 			}
 		}
-	}
-	
-	protected String getDialogMessage() {
-		return attribute.isUseCustomConfig() ? Messages.EditTreeDialog_MessageCustom : Messages.EditTreeDialog_MessageDefault;
 	}
 	
 	private void processItem(CmAttributeTreeNode cmTreeNode, boolean enable, boolean updateSelection){

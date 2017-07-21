@@ -51,21 +51,22 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DownloadReplaceCaHandler {
 
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell){
 		
-		if (!MessageDialog.openConfirm(activeShell, "Download and Install", "Are you sure you want to replace your Conservation Area data with the data from Connect?  You will lose all local changes.")){
+		if (!MessageDialog.openConfirm(activeShell, Messages.DownloadReplaceCaHandler_DialogTitle, Messages.DownloadReplaceCaHandler_ConfirmMsg)){
 			return;
 		}
 		
 		ConnectDialog dialog = new ConnectDialog(activeShell){
 			@Override
 			protected Control createDialogArea(Composite parent) {
-				setTitle("Download and Install");
-				setMessage("Replace the Conservation Area data with data from Connect");
-				getShell().setText("Download and Install");
+				setTitle(Messages.DownloadReplaceCaHandler_title);
+				setMessage(Messages.DownloadReplaceCaHandler_message);
+				getShell().setText(Messages.DownloadReplaceCaHandler_shelltitle);
 				
 				return super.createDialogArea(parent);
 			}	

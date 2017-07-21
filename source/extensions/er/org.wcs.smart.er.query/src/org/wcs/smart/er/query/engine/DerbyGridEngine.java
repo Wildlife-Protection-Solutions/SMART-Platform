@@ -44,7 +44,8 @@ import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -147,7 +148,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyGridEngine_RunQueryProgress, 100);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyGridEngine_RunQueryProgress, 100);
 
 				SurveyDesignFilter dsFilter = null;
 				if (query.getSurveyDesign() != null){
@@ -177,7 +178,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 					//get numerator results
 					Collection<QueryGridResultItem> numeratorResults = getItems(
 							gridDef, numerator, query.getQueryDefinition().getValueFilter(), 
-							dsFilter, caFilter, c, session, new SubProgressMonitor(monitor, 30), true);
+							dsFilter, caFilter, c, session, progress.split(30), true);
 					
 					//apply denominator results
 					if (denominator != null){
@@ -189,7 +190,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 						}
 						//computer denominator results
 						//only recompute filter if filter is different
-						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), dsFilter, caFilter, c, session, new SubProgressMonitor(monitor, 30), !isSame);
+						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), dsFilter, caFilter, c, session, progress.split(30), !isSame);
 						HashMap<String, Double> items = new HashMap<String, Double>();
 						for (QueryGridResultItem it : denominatorResults){
 							items.put(it.getTileId(), it.getValue());
@@ -206,11 +207,11 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 								i.setValue(i.getValue() / v);
 							}
 						}
-					}else{
-						monitor.worked(30);
 					}
+					progress.setWorkRemaining(40);
+					
 
-					monitor.subTask(Messages.DerbyGridEngine_ProgressTrackLocations);
+					progress.subTask(Messages.DerbyGridEngine_ProgressTrackLocations);
 					//combine with the patrol existance value
 					HashMap<String, QueryGridResultItem> items = new HashMap<String, QueryGridResultItem>();
 					for (QueryGridResultItem it : numeratorResults){
@@ -228,20 +229,21 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 						}
 					}
 					myResults = new GridQueryResult(items.values());
-					monitor.worked(40);
+					progress.setWorkRemaining(0);
+				}catch (OperationCanceledException ex) {
+					return;
 				}catch (Exception ex){
 					ERQueryPlugIn.log(ex.getMessage(), ex);
 					throw new SQLException(ex.getMessage(), ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryGridTable(c);
-					monitor.done();
 					c.setAutoCommit(false);
 				}
 			}
 
 		});
-		myResults.setResultsMetadata(GridMetadata.computeMetadata(myResults.getData()));
+		if (myResults != null) myResults.setResultsMetadata(GridMetadata.computeMetadata(myResults.getData()));
 		return myResults;
 
 	}
@@ -255,11 +257,10 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			QueryFilter filter, SurveyDesignFilter sdFilter, 
 			ConservationAreaFilter caFilter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
-		
-		monitor.beginTask(Messages.DerbyGridEngine_CreateObsTableProgress, 100);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyGridEngine_CreateObsTableProgress, 100);
 		
 		if (needsFilter) {
-			monitor.subTask(Messages.DerbyGridEngine_ProgressFilters);
+			progress.subTask(Messages.DerbyGridEngine_ProgressFilters);
 			try {
 				dropTemporaryGridTable(c);
 			} catch (Exception ex) {
@@ -303,20 +304,17 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, sdFilter, query);
 			try{
 				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, 
-					needsObservation, false, new SubProgressMonitor(monitor, 90));
+					needsObservation, false, progress.split(90));
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}
 
-			if (monitor.isCanceled()) {
-				return null;
-			}
+			progress.checkCanceled();
 		}
-		monitor.subTask(Messages.DerbyGridEngine_CalcValueProgresss);
+		progress.subTask(Messages.DerbyGridEngine_CalcValueProgresss);
 		Collection<QueryGridResultItem> results = getGridResults(c, session, gridDef, value);
-		monitor.worked(10);
+		progress.worked(10);
 		
-		monitor.done();
 		return results;
 	}
 	/**

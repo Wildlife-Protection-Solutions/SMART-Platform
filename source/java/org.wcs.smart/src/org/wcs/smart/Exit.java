@@ -30,6 +30,7 @@ import org.eclipse.ui.PlatformUI;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class Exit {
 
 	@Execute

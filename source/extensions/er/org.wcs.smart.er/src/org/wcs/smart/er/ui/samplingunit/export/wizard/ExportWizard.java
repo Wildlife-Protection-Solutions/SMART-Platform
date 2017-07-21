@@ -29,7 +29,7 @@ import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -119,7 +119,7 @@ public class ExportWizard extends Wizard implements IPageChangingListener{
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask(Messages.ExportWizard_ProgressLabel, 2);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.ExportWizard_ProgressLabel, 2);
 					
 					try{
 						if (exportPlots) {
@@ -127,36 +127,35 @@ public class ExportWizard extends Wizard implements IPageChangingListener{
 							try {
 								File plotFile = new File(dir, surveyDesign.getName() + "_" + "plots" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								options.put(ISamplingUnitExporter.SU_TYPE_KEY, GeometryType.PLOT);
-								exporter.exportFile(plotFile, surveyDesign, session, options, new SubProgressMonitor(monitor, 1));
+								exporter.exportFile(plotFile, surveyDesign, session, options, progress.split(1));
 							}finally{
 								if (session.isOpen()){
 									session.close();
 								}
 							}
 						}else{
-							monitor.worked(1);
+							progress.setWorkRemaining(1);
 						}
+						
 						if (exportTransects) {
 							Session session = HibernateManager.openSession();
 							try{
 								options.put(ISamplingUnitExporter.SU_TYPE_KEY, GeometryType.TRANSECT);
 								File transectFile = new File(dir, surveyDesign.getName() + "_" + "transects" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-								exporter.exportFile(transectFile, surveyDesign, session, options, new SubProgressMonitor(monitor, 1));
+								exporter.exportFile(transectFile, surveyDesign, session, options, progress.split(1));
 							}finally{
 								if (session.isOpen()){
 									session.close();
 								}
 							}
 						}else{
-							monitor.worked(1);
+							progress.setWorkRemaining(0);
 						}
 					
 					} catch (Exception ex) {
 						EcologicalRecordsPlugIn.displayLog(
 								Messages.ExportWizard_ExportError + "\n\n" //$NON-NLS-1$
 										+ ex.getMessage(), ex);
-					} finally {
-						monitor.done();
 					}
 				}
 			});

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -48,21 +49,21 @@ public class PatrolTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.PatrolTemplateCloner_ProgressPatrols, 3);
-		try{
-			//	need to clone: team, mandate,  types, transport types
-			monitor.subTask(Messages.PatrolTemplateCloner_ProgressCopyMandates);
-			cloneMandates(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.PatrolTemplateCloner_ProgressCopyTeams);
-			cloneTeams(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.PatrolTemplateCloner_ProgressCopyTypes);
-			clonePatrolTypes(engine);
-			monitor.worked(1);
-		}finally{
-			monitor.done();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolTemplateCloner_ProgressPatrols, 3);
+		
+		//	need to clone: team, mandate,  types, transport types
+		progress.subTask(Messages.PatrolTemplateCloner_ProgressCopyMandates);
+		cloneMandates(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.PatrolTemplateCloner_ProgressCopyTeams);
+		cloneTeams(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.PatrolTemplateCloner_ProgressCopyTypes);
+		clonePatrolTypes(engine);
+		progress.worked(1);
+		
 	}
 
 	/*

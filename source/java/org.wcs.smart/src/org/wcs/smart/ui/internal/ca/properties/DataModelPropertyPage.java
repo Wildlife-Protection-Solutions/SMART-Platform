@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -474,19 +474,20 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModelPropertyPage_TaskName, 2);
 					try{
-						monitor.beginTask(Messages.DataModelPropertyPage_TaskName, 2);
+						
 						DataModel sourceDm = ((DataModel) viewer.getInput());
 						
-						monitor.subTask(Messages.DataModelPropertyPage_Progress1);
+						progress.subTask(Messages.DataModelPropertyPage_Progress1);
 						DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
 						DataModel targetDm = converter.convert(f, currentCa, false);
-						monitor.worked(1);
+						progress.worked(1);
 						
-						monitor.subTask(Messages.DataModelPropertyPage_Progress2);
+						progress.subTask(Messages.DataModelPropertyPage_Progress2);
 						DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, currentCa);
 						
-						final List<String> warnings = updater.merge(new SubProgressMonitor(monitor, 1));
+						final List<String> warnings = updater.merge(progress.setWorkRemaining(1));
 						
 						//add any new objects that are not saved via relationships
 						for (Attribute a : sourceDm.getAttributes()){
@@ -514,8 +515,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 								viewer.setSelection(viewer.getSelection());
 							}	
 						});
-						
-						monitor.done();
 					}catch (final Exception ex){
 						Display.getDefault().syncExec(new Runnable(){
 							@Override

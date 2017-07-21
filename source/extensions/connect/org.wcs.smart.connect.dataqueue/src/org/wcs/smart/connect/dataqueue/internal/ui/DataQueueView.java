@@ -92,6 +92,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DataQueueView{ 
 	
 	public static final String ID = "org.wcs.smart.connect.dataqueue.queueview"; //$NON-NLS-1$

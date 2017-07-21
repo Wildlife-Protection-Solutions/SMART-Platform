@@ -29,7 +29,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -251,7 +251,7 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask(Messages.MergePatrolsDialog_MergingPatrols, patrolsToMerge.size()+1);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.MergePatrolsDialog_MergingPatrols, patrolsToMerge.size()+1);
 					
 					session.beginTransaction();
 					
@@ -290,7 +290,7 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 							legClone.setPatrol(newPatrol);
 							newPatrol.getLegs().add(legClone);
 						}
-						monitor.worked(1);
+						progress.worked(1);
 					}
 					
 					try {
@@ -307,15 +307,15 @@ public class MergePatrolsDialog extends TitleAreaDialog {
 
 					
 					//delete all the original patrols 
+					progress.setWorkRemaining(patrolsToMerge.size());
 					for (Patrol p: patrolsToMerge){
 						try {
-							PatrolManager.getInstance().deletePatrol(p.getUuid(), new SubProgressMonitor(monitor, 1));
+							PatrolManager.getInstance().deletePatrol(p.getUuid(), progress.split(1));
 						} catch (Exception e) {
 							SmartPatrolPlugIn.displayLog(
 									Messages.DeletePatrolHandler_Error_CouldNotDeletePatrol, e);
 						}
 					}
-					monitor.done();
 				}
 			});
 		} catch (Exception ex) {

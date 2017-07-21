@@ -46,6 +46,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandler {
 
 	@Execute

@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowOptionsHandler {
 
 	@Execute

@@ -75,9 +75,8 @@ public class SurveyDesignEditorInput implements IEditorInput {
 		return this.key;
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
 

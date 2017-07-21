@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ShowServerConfigurationHandler{
 	
 	@Execute

@@ -55,6 +55,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ExportIncidentHandler {
 
 	

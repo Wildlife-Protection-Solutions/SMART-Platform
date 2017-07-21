@@ -4,7 +4,8 @@
    <extension
          point="org.wcs.smart.qa">
       <data_provider
-            class="org.wcs.smart.qa.incident.IncidentDataProvider">
+            class="org.wcs.smart.qa.incident.IncidentDataProvider"
+            image="platform:/plugin/org.wcs.smart.independentincident/images/icons/obj16/incident.png">
          <qa_action
                class="org.wcs.smart.qa.incident.DeleteIncidentAction">
          </qa_action>

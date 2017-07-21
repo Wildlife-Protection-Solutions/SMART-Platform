@@ -38,7 +38,6 @@ import org.wcs.smart.util.GeometryUtils;
  * @author Emily
  *
  */
-@SuppressWarnings("unchecked")
 public class QaErrorFeatureSource  extends ContentFeatureSource {
 	
 	private QaErrorMemoryDatastore dataStore;

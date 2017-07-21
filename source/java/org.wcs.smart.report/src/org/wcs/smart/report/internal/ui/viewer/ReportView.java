@@ -71,6 +71,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ReportView implements IReportListener{
 
 	/**

@@ -38,6 +38,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -82,9 +83,14 @@ public class CyberTrackerImporter {
 			}
 		}
 	}
-	
+	/**
+	 * 
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
+	 * @return
+	 * @throws Exception
+	 */
 	public CyberTrackerImportResult importPdaData(IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.CyberTrackerImporter_Task_Download);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerImporter_Task_Download, 2);
 		CyberTrackerImportResult result = new CyberTrackerImportResult();
 		List<ICyberTrackerData> patrols = new ArrayList<ICyberTrackerData>();
 		String appPath = PdaUtil.getCTAppPath();
@@ -102,16 +108,17 @@ public class CyberTrackerImporter {
 		File cxtDataFolder = PdaUtil.getDowloadFolder(ca);
 		File xmlTempDir = PdaUtil.createTempDirectory();
 		//scan files in this directory and obtain raw xml for them
-		monitor.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
+		progress.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
 		try {
 			for (final File file : cxtDataFolder.listFiles()) {
 				if (file.isFile())
 					extractRawXml(appPath, file, xmlTempDir);
 			}
 			
+			progress.setWorkRemaining(xmlTempDir.listFiles().length+1);
 			//now all raw xml data is in temporary directory, importing it
 			for (final File file : xmlTempDir.listFiles()) {
-				patrols.addAll(importXmlFileData(file, monitor));
+				patrols.addAll(importXmlFileData(file, progress.split(1)));
 			}
 
 			//move processed files to storage
@@ -125,7 +132,7 @@ public class CyberTrackerImporter {
 					}
 				}
 			}
-			
+			progress.setWorkRemaining(0);
 			result.setData(patrols);
 			return result;
 			
@@ -142,28 +149,30 @@ public class CyberTrackerImporter {
 	}
 	
 	protected List<ICyberTrackerData> importCtxFileData(File file, IProgressMonitor monitor) throws Exception {
+		SubMonitor progress = SubMonitor.convert(monitor, "", 1); //$NON-NLS-1$
 		File xmlTempDir = PdaUtil.createTempDirectory();
 		try {
-			monitor.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
+			progress.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
 			String appPath = PdaUtil.getCTAppPath();
 			if (appPath == null) {
 				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.DISPLAY_MIN_VERSION), null);
 				return new ArrayList<ICyberTrackerData>();
 			}
 			File xmlFile = extractRawXml(appPath, file, xmlTempDir);
-			return importXmlFileData(xmlFile, monitor);
+			return importXmlFileData(xmlFile, progress.split(1));
 		} finally {
 			SmartFileUtils.deleteTempDirectory(xmlTempDir);
 		}
 	}
 	
 	protected List<ICyberTrackerData> importXmlFileData(File file, IProgressMonitor monitor) throws Exception {
+		SubMonitor progress = SubMonitor.convert(monitor, "", 2); //$NON-NLS-1$
 		Data data = null;
-		
+
+		progress.split(1);
+		progress.subTask(MessageFormat.format(Messages.CyberTrackerImporter_Read_Xml, file.getName()));
 		try(FileInputStream in = new FileInputStream(file)) {
-			monitor.subTask(MessageFormat.format(Messages.CyberTrackerImporter_Read_Xml, file.getName()));
 			data = readDataModel(in);
-			monitor.worked(1);
 		} catch (Exception e) {
 			CyberTrackerPlugIn.log(e.getMessage(), e);
 			data = null;
@@ -177,6 +186,7 @@ public class CyberTrackerImporter {
 		CyberTrackerRawData rawData = new CyberTrackerRawData(data);
 		data = null; //we don't need data object anymore
 
+		progress.split(1);
 		final String datatype = getDataType(rawData);
 		CyberTrackerDataBuilder dataBuilder = dataBuilderMap.get(datatype);
 		if (dataBuilder == null) {

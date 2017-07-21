@@ -247,6 +247,7 @@ public class Messages extends NLS {
 	public static String BasemapPropertyPage_SetDefaultButton;
 	public static String CaExporter_Error_TempDirDelete;
 	public static String CaExporter_ProgressExportCA;
+	public static String CaExporter_TaskName;
 	public static String CaImporter_Error_CaAlreadyExists;
 	public static String CaImporter_Error_CirculateTableDependencies;
 	public static String CaImporter_Error_CleanUpFailed;
@@ -919,6 +920,8 @@ public class Messages extends NLS {
 	public static String NameKeyComposite_LanguageLabel;
 	public static String NameKeyComposite_Name_Label;
 	public static String PlugInConfigurationExporter_ExportingVersions;
+	public static String ProgressAreaComposite_CancelledMessage;
+	public static String ProgressAreaComposite_StoppingMessage;
 	public static String ProjectionDialog_DialogMessage;
 	public static String ProjectionDialog_DialogTitle;
 	public static String ProjectionDialog_Error_LoadProjectionMessage;

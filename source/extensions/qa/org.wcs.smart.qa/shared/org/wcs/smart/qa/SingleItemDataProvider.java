@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.qa.model.IQaDataProvider;
@@ -87,8 +86,7 @@ public class SingleItemDataProvider extends IQaDataProvider{
 		return parentProvider.getFeatureSource(session, obj);
 	}
 
-	@Override
-	public Image getImage() {
-		return parentProvider.getImage();
+	public IQaDataProvider getParent() {
+		return this.parentProvider;
 	}
 }

@@ -33,6 +33,7 @@ import org.wcs.smart.patrol.meta.PatrolMetaConfigDialog;
  * @author elitvin
  * @since 2.0.0
  */
+@SuppressWarnings("restriction")
 public class PartolScreenOptionsMetaHandler  {
 
 	@Execute

@@ -10,7 +10,8 @@ Require-Bundle: org.wcs.smart,
  org.wcs.smart.observation;visibility:=reexport,
  org.locationtech.udig.style.sld;bundle-version="1.2.0",
  org.wcs.smart.dataentry,
- org.wcs.smart.hibernate.libs
+ org.wcs.smart.hibernate.libs,
+ org.eclipse.e4.core.commands;bundle-version="0.10.2"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.wcs.smart.patrol.SmartPatrolPlugIn
 Eclipse-RegisterBuddy: org.wcs.smart.hibernate.libs

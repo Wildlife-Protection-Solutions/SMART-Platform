@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
@@ -55,22 +56,24 @@ public class ObservationQueryTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.ObservationQueryTemplateCloner_TaskName, 4);
-		try{
-			monitor.subTask(Messages.ObservationQueryTemplateCloner_GridProgress);
-			cloneGriddedQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.ObservationQueryTemplateCloner_SummaryProgress);
-			cloneSummaryQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.ObservationQueryTemplateCloner_ObservationProgress);
-			cloneObservationQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.ObservationQueryTemplateCloner_IncidentProgress);
-			cloneWaypointQuery(engine);
-		}finally{
-			monitor.done();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ObservationQueryTemplateCloner_TaskName, 4);
+		
+		progress.subTask(Messages.ObservationQueryTemplateCloner_GridProgress);
+		cloneGriddedQuery(engine);
+		progress.worked(1);
+			
+		progress.subTask(Messages.ObservationQueryTemplateCloner_SummaryProgress);
+		cloneSummaryQuery(engine);
+		progress.worked(1);
+			
+		progress.subTask(Messages.ObservationQueryTemplateCloner_ObservationProgress);
+		cloneObservationQuery(engine);
+		progress.worked(1);
+			
+		progress.subTask(Messages.ObservationQueryTemplateCloner_IncidentProgress);
+		cloneWaypointQuery(engine);
+		progress.worked(1);
+		
 	}
 	
 	/*

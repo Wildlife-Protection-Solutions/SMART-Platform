@@ -52,7 +52,6 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;

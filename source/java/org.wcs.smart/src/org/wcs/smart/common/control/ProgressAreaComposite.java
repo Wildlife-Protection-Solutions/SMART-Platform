@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.internal.Messages;
 
 
 /**
@@ -62,8 +63,8 @@ public class ProgressAreaComposite extends Composite {
 	public ProgressAreaComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		createComposite();
-		this.cancelledMessage="Task Cancelled";
-		this.cancellingMessage = "Stopping Task";
+		this.cancelledMessage=Messages.ProgressAreaComposite_CancelledMessage;
+		this.cancellingMessage = Messages.ProgressAreaComposite_StoppingMessage;
 	}
 	
 	/**

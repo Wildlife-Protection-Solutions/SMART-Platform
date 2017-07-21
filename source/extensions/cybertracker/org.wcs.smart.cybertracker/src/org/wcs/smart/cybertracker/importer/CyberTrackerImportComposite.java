@@ -33,7 +33,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -310,20 +310,22 @@ public class CyberTrackerImportComposite extends Composite {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 1);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerImportDialog_Task_RawImport, 1);
 					List<ICyberTrackerData> data;
 					int code = 0;
 					try {
 						if (fromPda) {
-							CyberTrackerImportResult result = importer.importPdaData(monitor);
+							CyberTrackerImportResult result = importer.importPdaData(progress.split(1));
 							data = result.getData();
 							code = result.getReturnCode();
 						}else{
-							monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, files.length);
+							progress.subTask(Messages.CyberTrackerImportDialog_Task_RawImport);
+							progress.setWorkRemaining(files.length);
 							data = new ArrayList<ICyberTrackerData>();
 							for (int i = 0; i < files.length; i ++){
 								File currentFile = files[i];
 								if (!currentFile.exists()){
+									progress.worked(1);
 									final File fcurrentFile = currentFile;
 									Display.getDefault().syncExec(new Runnable(){
 										@Override
@@ -332,9 +334,8 @@ public class CyberTrackerImportComposite extends Composite {
 										}});
 														
 								}else{
-									data.addAll(importer.importFileData(files[i], new SubProgressMonitor(monitor,1)));
+									data.addAll(importer.importFileData(files[i], progress.split(1)));
 								}
-								monitor.worked(1);
 							}
 						}
 						addTableData(data);

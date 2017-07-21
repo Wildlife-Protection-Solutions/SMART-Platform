@@ -145,9 +145,8 @@ public class GriddedTableResults  extends EditorPart  {
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(List<QueryGridResultItem> results, 
-			IProgressMonitor monitor){
-		content.setTableData(results, monitor);
+	public void updateAndShowTable(List<QueryGridResultItem> results){
+		content.setTableData(results);
 	}
 	
 	/**

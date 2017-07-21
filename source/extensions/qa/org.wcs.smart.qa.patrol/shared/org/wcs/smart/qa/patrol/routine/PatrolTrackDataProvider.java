@@ -31,10 +31,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -127,8 +125,4 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 		return ((TrackLocationData)obj).getTrack().getUuid();
 	}
 
-	@Override
-	public Image getImage() {
-		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getImage(getClass());
-	}
 }

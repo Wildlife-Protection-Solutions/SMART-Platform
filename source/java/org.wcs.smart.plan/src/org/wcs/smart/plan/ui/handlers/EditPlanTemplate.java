@@ -31,6 +31,7 @@ import org.wcs.smart.plan.report.ReportPlan;
  * @since 2.0.0
  *
  */
+@SuppressWarnings("restriction")
 public class EditPlanTemplate {
 
 	@Execute

@@ -28,14 +28,15 @@ import org.eclipse.core.runtime.IAdapterFactory;
  * @author Emily
  * 
  */
-@SuppressWarnings("rawtypes")
+
 public class SmartMapItemPageGeneratorFactory implements IAdapterFactory {
 
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
-		return new SmartMapItemPageGenerator();
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+		return (T)new SmartMapItemPageGenerator();
 	}
 
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		return new Class[] { IPageGenerator.class };
 	}
 

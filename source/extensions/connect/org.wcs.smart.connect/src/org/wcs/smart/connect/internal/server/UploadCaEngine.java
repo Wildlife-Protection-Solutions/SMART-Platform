@@ -28,7 +28,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -68,11 +68,13 @@ public class UploadCaEngine {
 	 * and starts a job to upload the export to the server  
 	 * 
 	 * @param sc
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception 
 	 */
 	public void upload(SmartConnect connect, IProgressMonitor monitor) throws Exception{
 
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.UploadCaEngine_TaskName, 3);
+		
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
@@ -84,15 +86,14 @@ public class UploadCaEngine {
 			return;
 		}
 		try{
-			monitor.beginTask(Messages.UploadCaEngine_TaskName, 3);
-			monitor.subTask(Messages.UploadCaEngine_ConnectSubtaskName);
+			progress.subTask(Messages.UploadCaEngine_ConnectSubtaskName);
 			
 			ConnectServer server = connect.getServer();
 			
 			ConservationAreaProxy serverInfo = connect.getCaInfo(server.getConservationArea().getUuid());
-			monitor.worked(1);
+			progress.worked(1);
 			
-			monitor.subTask(Messages.UploadCaEngine_ConfigureSubtask);
+			progress.subTask(Messages.UploadCaEngine_ConfigureSubtask);
 			ConnectServerStatus localStatus = null;
 			Session s = HibernateManager.openSession();
 	
@@ -151,7 +152,7 @@ public class UploadCaEngine {
 				
 				s.getTransaction().commit();
 				
-				monitor.worked(1);
+				progress.worked(1);
 				
 			}catch(Exception ex){
 				throw new Exception(Messages.UploadCaEngine_ConfigureError + ex.getMessage(), ex);
@@ -162,8 +163,8 @@ public class UploadCaEngine {
 			//create export package
 			try{
 				if (localStatus.getUploadUrl() == null){
-					monitor.subTask(Messages.UploadCaEngine_ExportCaSubtaskName);
-					packageCa(localStatus.getLocalFile(), new SubProgressMonitor(monitor, 1));
+					progress.subTask(Messages.UploadCaEngine_ExportCaSubtaskName);
+					packageCa(localStatus.getLocalFile(), progress.split(1));
 					
 					localStatus.setStatus(Status.UPLOAD);
 					s = HibernateManager.openSession();
@@ -190,7 +191,7 @@ public class UploadCaEngine {
 						s.close();
 					}
 				}else{
-					monitor.worked(1);
+					progress.setWorkRemaining(0);
 				}
 			}catch(Exception ex){
 				throw new Exception(Messages.UploadCaEngine_ConfigureError + ex.getMessage(), ex);
@@ -213,7 +214,6 @@ public class UploadCaEngine {
 			});
 			job.schedule();
 			
-			monitor.done();
 		}catch (Exception ex){
 			SmartConnect.UPLOAD_LOCK.release();
 			throw ex;
@@ -310,7 +310,7 @@ public class UploadCaEngine {
 	 * 
 	 */
 	private void packageCa(String filename, IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(Messages.UploadCaEngine_packingTaskName, 1);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.UploadCaEngine_packingTaskName, 1);
 		
 		File f = new File(SmartContext.INSTANCE.getFilestoreLocation(), filename);
 		if (!f.getParentFile().exists()){
@@ -321,6 +321,6 @@ public class UploadCaEngine {
 		options.put("informant_delete_no_prompt", Boolean.TRUE.toString()); //$NON-NLS-1$
 		
 		ConnectCaExporter exporter = new ConnectCaExporter();
-		exporter.export(f, options, new SubProgressMonitor(monitor, 1));
+		exporter.export(f, options, progress.split(1));
 	}
 }

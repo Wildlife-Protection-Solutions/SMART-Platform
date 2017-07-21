@@ -39,6 +39,7 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class CyberTrackerImportHandler {
 
 	@Execute
@@ -55,9 +56,9 @@ public class CyberTrackerImportHandler {
 	}
 
 	private class CTImportEditorInput implements IEditorInput {
-		@SuppressWarnings("rawtypes")
+
 		@Override
-		public Object getAdapter(Class adapter) {
+		public <T> T getAdapter(Class<T> adapter) {
 			return null;
 		}
 

@@ -36,6 +36,7 @@ import org.wcs.smart.cybertracker.patrol.export.PatrolCTExportDialog;
  * @author elitvin
  * @since 4.0.0
  */
+@SuppressWarnings("restriction")
 public class PatrolCTExportHandler {
 
 	@Execute

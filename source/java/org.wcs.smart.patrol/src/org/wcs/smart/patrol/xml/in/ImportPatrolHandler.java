@@ -56,6 +56,7 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ImportPatrolHandler {
 
 	private static final String PATROL_NOT_IMPORTED_ERROR_MSG = Messages.ImportPatrolHandler_PatrolNotImported_Error;

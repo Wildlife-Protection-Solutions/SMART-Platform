@@ -32,7 +32,7 @@ import org.eclipse.birt.data.engine.api.IQueryResults;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
@@ -336,10 +336,10 @@ public class MapGeoResource extends IGeoResource {
 	    }
 	    if (adaptee.isAssignableFrom(IServiceInfo.class)) {
 	    	try {
-	    		monitor.beginTask("service info", 100); //$NON-NLS-1$
-	    		IService service = service(new SubProgressMonitor(monitor, 40));
+	    		SubMonitor progress = SubMonitor.convert(monitor, "service info", 100); //$NON-NLS-1$
+	    		IService service = service(progress.newChild(40));
 	    		if (service != null) {
-	    			IServiceInfo info = service.getInfo(new SubProgressMonitor(monitor, 60));
+	    			IServiceInfo info = service.getInfo(progress.newChild(60));
 	    			return adaptee.cast(info);
 	    		}
 	    	} finally {

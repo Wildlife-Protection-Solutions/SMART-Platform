@@ -33,23 +33,23 @@ import org.wcs.smart.report.model.RootReportFolder;
  */
 public class ReportModelAdapterFactory implements IAdapterFactory {
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (adapterType.isAssignableFrom(IDeferredWorkbenchAdapter.class)){
 			if (adaptableObject.getClass() == ReportFolder.class){
-				return ReportFolderModelAdapter.adapter;
+				return (T)ReportFolderModelAdapter.adapter;
 			}else if (adaptableObject.getClass() == RootReportFolder.class){
-				return RootReportFolderModelAdapter.adapter;
+				return (T)RootReportFolderModelAdapter.adapter;
 			}
 		}
 		
 		return null;
 	}
 
-	@SuppressWarnings("rawtypes")
+	
 	@Override
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		return new Class[]{IDeferredWorkbenchAdapter.class};
 	}
 

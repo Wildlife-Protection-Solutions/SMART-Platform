@@ -44,6 +44,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -158,21 +159,29 @@ public class CyberTrackerConfExporter {
 		this.ctProperties = ctProfile;
 	}
 
+	/**
+	 * 
+	 * @param destFolder
+	 * @param cmProvider
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 * @return
+	 * @throws Exception
+	 */
 	public File export(File destFolder, IConfigurableModelProvider cmProvider, IProgressMonitor monitor) throws Exception {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerExportHandler_TaskName, 100);
 		session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
 			if (cmProvider != null) {
-				configurableModel = cmProvider.getConfigurableModel(session, monitor);
+				configurableModel = cmProvider.getConfigurableModel(session, progress.split(30));
 			}
 			if (configurableModel == null) {
 				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_InvalidSource, null);
 				return null;
 			}
-			
-			monitor.beginTask(Messages.CyberTrackerExportHandler_TaskName, 100);
 
-			monitor.subTask(Messages.CyberTrackerConfExporter_Progress_AlertsConfig);
+			progress.subTask(Messages.CyberTrackerConfExporter_Progress_AlertsConfig);
 			alertDataProvider = new ConfigurationDataProvider(configurableModel, session);
 
 			elements = ElementsUtil.buildEmptyElements();
@@ -190,7 +199,7 @@ public class CyberTrackerConfExporter {
 			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_OBSERVATION_COUNTER, observationCounterId.getItemId());
 			
 			processExportSource(elements, cmProvider.getExportSource());
-			return performExport(destFolder, monitor);
+			return performExport(destFolder, progress.split(70));
 		} finally {
 			alertDataProvider = null;
 			screensFactory = null;
@@ -225,7 +234,8 @@ public class CyberTrackerConfExporter {
 	}
 
 	private File performExport(File file, IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerExporter_Progress_Fetch_Configuration, 100);
+		
 		if (ctProperties != null) {
 			ctProperties = (CyberTrackerPropertiesProfile) session.merge(ctProperties);
 		} else {
@@ -238,16 +248,17 @@ public class CyberTrackerConfExporter {
 			});
 			ctProperties = CyberTrackerHibernateManager.getAssociatedCmProfile(session, configurableModel).getProfile();
 		}
+		progress.split(10);
 		screensFactory = new ScreensObjectFactory(ctProperties);
 		ctUtil = new CyberTrackerUtil(screensFactory, currentLanguage, observationCounterId);
-		monitor.worked(10);
 		
-		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
+		
+		progress.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
 		CmNode root = ctUtil.buildRoot(configurableModel);
 		Map<CmNode, CyberTrackerId> keyMap = ctUtil.buildMap(root);
 		CyberTrackerId firstScreenForNewTaskId = keyMap.get(root);
 
-		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
+		progress.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
 		ScreensUtil screensUtil = createScreensUtil(ctUtil);
 
 		List<Node> beforeRootNodes = new ArrayList<Node>();
@@ -271,31 +282,32 @@ public class CyberTrackerConfExporter {
 			ScreensObjectFactory.addControlToNode(metaScreensData.nextTaskNode, snapGpsCtrl);
 		}
 		
+		progress.split(5);
 		List<Node> screenNodes = new ArrayList<Node>();
 		screenNodes.addAll(metaScreensData.screenNodes);
 		rootId = metaScreensData.rootId;
 		tripUniqueElementId = metaScreensData.tripUniqueElementId;
-		monitor.worked(5);
+		
 
 		screenNodes.addAll(beforeRootNodes);
 
+		progress.split(70);
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
-		monitor.worked(70);
 		
+		progress.split(5);
 		Screens screens = screensFactory.createScreens(screenNodes, ctProperties, configurableModel.getName());
-		monitor.worked(5);
 
 		try {
 			//----------------creating Screens.xml----------------
-			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Screens);
-			
+			progress.subTask(Messages.CyberTrackerExporter_Progress_Generate_Screens);
+			progress.split(10);
 			try (BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_SCREENS))){
 				writeDataModel(screens, outS, Screens.class);
 			}
-			monitor.worked(10);
+			
 			
 			//----------------creating Elements.xml----------------
-			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
+			progress.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
 			ElementsUtil.addNodeElements(elements, keyMap, currentLanguage);
 			
 			try (BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_ELEMENTS))){ 
@@ -303,7 +315,7 @@ public class CyberTrackerConfExporter {
 			}
 			
 			//----------------creating Reports.xml----------------
-			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Reports);
+			progress.subTask(Messages.CyberTrackerExporter_Progress_Generate_Reports);
 			List<Items.Item> columnItems = new ArrayList<Items.Item>();
 			columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.DATE, Messages.CyberTrackerExporter_Report_Column_Date));
 			columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.TIME, Messages.CyberTrackerExporter_Report_Column_Time));
@@ -355,7 +367,7 @@ public class CyberTrackerConfExporter {
 			return null;
 		}
 		
-		monitor.subTask(Messages.CyberTrackerExporter_Progress_GenerateCTX);
+		progress.subTask(Messages.CyberTrackerExporter_Progress_GenerateCTX);
 		try {
 			String appPath = PdaUtil.getCTAppPath();
 			String[] createCommands = {appPath, ICyberTrackerConstants.COMMAND_CREATE, file.getAbsolutePath(),file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME}; //$NON-NLS-1$
@@ -534,7 +546,7 @@ public class CyberTrackerConfExporter {
 		List<String> values = ctUtil.listItemIds(childIds);
 		String trElements = ctUtil.translateElements(childIds);
 		String trLinks = ctUtil.translateLinks(childIds, true);
-		Node node = screensFactory.createNodeMultiList(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage), values, trElements, trLinks, cmAttr.getCurrentDisplayMode(), withNumbers);
+		Node node = screensFactory.createNodeMultiList(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage), values, trElements, trLinks, cmAttr.getConfigDisplayMode(), withNumbers);
 		//NOTE: next screen is not set here
 		return node;
 	}
@@ -647,7 +659,7 @@ public class CyberTrackerConfExporter {
 				List<String> values = ctUtil.listItemIds(ids);
 				String trElements = ctUtil.translateElements(ids);
 				String trLinks = ctUtil.translateLinks(ids, false);
-				Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId(), cmAttr.getCurrentDisplayMode());
+				Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId(), cmAttr.getConfigDisplayMode());
 				if (!attribute.getIsRequired()) {
 					Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
@@ -664,7 +676,7 @@ public class CyberTrackerConfExporter {
 					List<String> values = ctUtil.listItemIds(ids);
 					String trElements = ctUtil.translateElements(ids);
 					String trLinks = ctUtil.translateLinks(ids, false);
-					Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId(), cmAttr.getCurrentDisplayMode());
+					Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId(), cmAttr.getConfigDisplayMode());
 					if (!attribute.getIsRequired()) {
 						Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 						control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
@@ -970,7 +982,7 @@ public class CyberTrackerConfExporter {
 		
 		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
-		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeCmAttribute, currentLanguage) + label, childIds, resultElementId, true, treeCmAttribute.getCurrentDisplayMode());
+		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeCmAttribute, currentLanguage) + label, childIds, resultElementId, true, treeCmAttribute.getConfigDisplayMode());
 		if (!treeCmAttribute.getAttribute().getIsRequired()) {
 			Control control7 = ScreensObjectFactory.getRadioMainControl(treeRootNode);
 			control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);

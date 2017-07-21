@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -131,8 +131,7 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					
-					monitor.beginTask(Messages.ImportWizard_ProgressLabel1, 2);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.ImportWizard_ProgressLabel1, 2);
 					
 					finishOk = false;
 
@@ -145,9 +144,9 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 					params.put(ISamplingUnitImporter.EXISTING_IDS_KEY, existingIds);
 					//get units
 					List<SamplingUnit> units = null;
-					monitor.subTask(Messages.ImportWizard_ProgressLabel2);
+					progress.subTask(Messages.ImportWizard_ProgressLabel2);
 					try {
-						units = importer.importFile(file, params, new SubProgressMonitor(monitor, 1));
+						units = importer.importFile(file, params,progress.split(1));
 					}catch (Exception ex){
 						EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
 						return;
@@ -169,7 +168,7 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 					}
 					
 					//save units
-					monitor.subTask(Messages.ImportWizard_ProgressLabel3);
+					progress.subTask(Messages.ImportWizard_ProgressLabel3);
 					if (!session.isOpen()){
 						session = HibernateManager.openSession();
 					}
@@ -188,6 +187,7 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 						//close session to event manager doesn't conflict
 						session.close();	
 					}
+					progress.worked(1);
 					
 					//run event manager
 					SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, surveyDesign);

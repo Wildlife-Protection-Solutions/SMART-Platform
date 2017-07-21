@@ -68,6 +68,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DeleteSurveyElementHandler {
 
 	//EG: instead of selectionService I originally made user of

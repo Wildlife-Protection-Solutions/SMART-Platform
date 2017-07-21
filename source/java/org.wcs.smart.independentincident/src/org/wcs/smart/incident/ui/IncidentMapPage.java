@@ -279,7 +279,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					try{
 						crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
 					}catch (Exception ex){
-						IncidentPlugIn.displayLog("Unable to reproduce incident: " + ex.getMessage(), ex);
+						IncidentPlugIn.displayLog(Messages.IncidentMapPage_reprojectionError + ex.getMessage(), ex);
 						return;
 					}
 				}
@@ -300,7 +300,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					try{
 						if (s.getTransaction().isActive()) s.getTransaction().rollback();
 					}catch (Exception ex2){
-						IncidentPlugIn.displayLog("Unable to save changes to waypoint: " + ex.getMessage(), ex);
+						IncidentPlugIn.displayLog(Messages.IncidentMapPage_SaveError + ex.getMessage(), ex);
 						return;
 					}
 					pw.setX(origx);
@@ -371,7 +371,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					});
 				}catch (Exception ex){
 					if (s.getTransaction().isActive()) s.getTransaction().rollback();
-					IncidentPlugIn.displayLog("Error undoing waypoint move command: " + ex.getMessage(), ex);	
+					IncidentPlugIn.displayLog(Messages.IncidentMapPage_UndonError + ex.getMessage(), ex);	
 				}finally{
 					s.close();
 				}

@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Shell;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ProcessDataQueueHandler {
 	
 	@SuppressWarnings("unchecked")

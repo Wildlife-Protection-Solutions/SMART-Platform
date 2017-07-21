@@ -51,6 +51,7 @@ import org.wcs.smart.er.xml.MissionImporter;
  * @author Jeff
  * @since 4.0.0
  */
+@SuppressWarnings("restriction")
 public class MissionImportHandler {
 	private static final String MISSION_NOT_IMPORTED_ERROR_MSG = Messages.MissionImportHandler_0;
 

@@ -42,6 +42,7 @@ public class Messages extends NLS {
 	public static String DerbySummaryEngine_Progress_CreatingTempTable;
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
 	public static String DerbySummaryEngine_Progress_RunningQuery;
+	public static String DerbySummaryEngine_ProgressValueProgressLabel;
 	public static String FilterValidator_PatrolFilter_EmployeeError;
 	public static String FilterValidator_PatrolFilter_UnqiueIdMatchingError;
 	public static String FilterValidator_PatrolFilter_ValueMatchingError;

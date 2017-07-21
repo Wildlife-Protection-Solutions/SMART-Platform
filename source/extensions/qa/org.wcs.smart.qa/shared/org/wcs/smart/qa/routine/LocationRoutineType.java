@@ -195,79 +195,76 @@ public class LocationRoutineType implements IQaRoutineType {
 		}
 		
 		monitor.worked(2);
-		
 		monitor.subTask(ILabelProvider.getLabel(Key.LocationRoutineType_ValidatingDataTaskName, task.getLocale()));
 		
 		int lastsize = 0;
 		int cnt = 0;
-		List<ProcessedPolygon> toCheck = preprocess(g);
+		
+		List<ProcessedPolygon> toCheck = null;
+		Geometry mergedPolygon = null;
 		List<QaError> errors = new ArrayList<>();
+		
 		for (Object x : data){
-
 			if (x instanceof ILocationRoutineData){
 				ILocationRoutineData wp = (ILocationRoutineData)x;
-				
-				for(ProcessedPolygon pp : toCheck){
-					if (wp.getType() == Type.POINT){
-						if (!pp.isInside(wp.getPoint())){
-							double distance = Double.MAX_VALUE;
-							for (ProcessedPolygon ppp : toCheck){
-								double d = ppp.distance(wp.getPoint());
-								if (d < distance) distance = d;
-							}
-							
-							QaError error = new QaError();
-							error.setDataProviderId(task.getDataProvider().getId());
-							error.setConservationArea(task.getConservationArea());
+
+				if (wp.getType() == Type.POINT){
+					if (toCheck == null) toCheck = preprocess(g);
+					boolean contains = false;
+					for(ProcessedPolygon pp : toCheck){
+						if (pp.isInside(wp.getPoint())){
+							contains = true;
+						}
+					}
+					if (!contains){
+						QaError error = new QaError();
+						error.setDataProviderId(task.getDataProvider().getId());
+						error.setConservationArea(task.getConservationArea());
+						error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea, task.getLocale()));
+						error.setErrorId( task.getDataProvider().getFeatureId(session, x, task.getLocale()));
+						error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
+						error.setQaRoutine(routine);
+						error.setStatus(QaError.Status.NEW);
+						error.setValidateDate(new Date());
+						errors.add(error);
+						error.setGeometryObject(GeometryFactoryProvider.getFactory().createPoint(wp.getPoint()));
+						
+						try{
+							Coordinate[] minPnts = DistanceOp.nearestPoints(g, GeometryFactoryProvider.getFactory().createPoint(wp.getPoint()));
+							double distancekm = JTS.orthodromicDistance(minPnts[0], minPnts[1], GeometryUtils.SMART_CRS) / 1000.0;									
+							error.setErrorDescription(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea2, task.getLocale()),DISTANCE_FORMATTER.format(distancekm)));
+						}catch (Exception ex){
+							ex.printStackTrace();
 							error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea, task.getLocale()));
-							error.setErrorId( task.getDataProvider().getFeatureId(session, x, task.getLocale()));
-							error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
-							error.setQaRoutine(routine);
-							error.setStatus(QaError.Status.NEW);
-							error.setValidateDate(new Date());
-							errors.add(error);
-							error.setGeometryObject(GeometryFactoryProvider.getFactory().createPoint(wp.getPoint()));
-							
+						}
+					}
+						
+				}else if (wp.getType() == Type.LINESTRING){
+					if (mergedPolygon == null)  mergedPolygon = g.union();
+					if (!mergedPolygon.contains(wp.getGeometry())){
+						double distance = g.distance(wp.getGeometry());
+						QaError error = new QaError();
+						error.setDataProviderId(task.getDataProvider().getId());
+						error.setConservationArea(task.getConservationArea());
+						if (distance == 0){
+							error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_TrackOutsideArea, task.getLocale()));
+						}else{
 							try{
-								Coordinate[] minPnts = DistanceOp.nearestPoints(pp.polygon, GeometryFactoryProvider.getFactory().createPoint(wp.getPoint()));
+								Coordinate[] minPnts = DistanceOp.nearestPoints(g, wp.getGeometry());
 								double distancekm = JTS.orthodromicDistance(minPnts[0], minPnts[1], GeometryUtils.SMART_CRS) / 1000.0;									
-								error.setErrorDescription(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea2, task.getLocale()),DISTANCE_FORMATTER.format(distancekm)));
+								error.setErrorDescription(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_TrackOutsideArea2, task.getLocale()), DISTANCE_FORMATTER.format(distancekm)));
 							}catch (Exception ex){
 								ex.printStackTrace();
-								error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_WpOutsideArea, task.getLocale()));
-							}
-							
-							break;
-						}
-					}else if (wp.getType() == Type.LINESTRING){
-						
-						if (!pp.polygon.contains(wp.getGeometry())){
-							
-							double distance = pp.polygon.distance(wp.getGeometry());
-							QaError error = new QaError();
-							error.setDataProviderId(task.getDataProvider().getId());
-							error.setConservationArea(task.getConservationArea());
-							if (distance == 0){
 								error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_TrackOutsideArea, task.getLocale()));
-							}else{
-								try{
-									Coordinate[] minPnts = DistanceOp.nearestPoints(pp.polygon, wp.getGeometry());
-									double distancekm = JTS.orthodromicDistance(minPnts[0], minPnts[1], GeometryUtils.SMART_CRS) / 1000.0;									
-									error.setErrorDescription(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_TrackOutsideArea2, task.getLocale()), DISTANCE_FORMATTER.format(distancekm)));
-								}catch (Exception ex){
-									ex.printStackTrace();
-									error.setErrorDescription(ILabelProvider.getLabel(Key.LocationRoutineType_TrackOutsideArea, task.getLocale()));
-								}
 							}
-							error.setErrorId( task.getDataProvider().getFeatureId(session, x, task.getLocale()));
-							error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
-							error.setQaRoutine(routine);
-							error.setStatus(QaError.Status.NEW);
-							error.setValidateDate(new Date());
-							errors.add(error);
-							error.setGeometryObject(wp.getGeometry());
-							
 						}
+						error.setErrorId( task.getDataProvider().getFeatureId(session, x, task.getLocale()));
+						error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
+						error.setQaRoutine(routine);
+						error.setStatus(QaError.Status.NEW);
+						error.setValidateDate(new Date());
+						errors.add(error);
+						error.setGeometryObject(wp.getGeometry());
 					}
 				}
 			}
@@ -309,10 +306,8 @@ public class LocationRoutineType implements IQaRoutineType {
 	private class ProcessedPolygon{
 		private MCPointInRing outer;
 		private List<MCPointInRing> inner;
-		private Polygon polygon;
 		
 		public ProcessedPolygon(Polygon p){
-			this.polygon = p;
 			outer = new MCPointInRing(GeometryFactoryProvider.getFactory().createLinearRing(p.getExteriorRing().getCoordinates()));
 			inner = new ArrayList<>();
 			for (int i = 0; i < p.getNumInteriorRing(); i ++){
@@ -328,9 +323,6 @@ public class LocationRoutineType implements IQaRoutineType {
 				return true;
 			}
 			return false;
-		}
-		public double distance(Coordinate c){
-			return polygon.distance(GeometryFactoryProvider.getFactory().createPoint(c));
 		}
 	}
 }

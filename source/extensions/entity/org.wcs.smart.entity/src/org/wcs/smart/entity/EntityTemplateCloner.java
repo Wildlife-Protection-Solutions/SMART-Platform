@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -52,23 +52,28 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 
 	@Override
+	/**
+	 * 
+	 * @param engine
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 * @throws Exception
+	 */
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
 		this.engine = engine;
-		monitor.beginTask(Messages.EntityTemplateCloner_ProgressCloningTypes, 10);
-		try{
-			cloneEntityTypes(new SubProgressMonitor(monitor, 10));
-		}finally{
-			monitor.done();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntityTemplateCloner_ProgressCloningTypes, 10);
+		cloneEntityTypes(progress.newChild(10));
 	}
 	
 	@SuppressWarnings("unchecked")
 	private void cloneEntityTypes(IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntityTemplateCloner_ProgressCloningTypes2, 1);
 		List<EntityType> toClone = engine.getSession().createCriteria(EntityType.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
-		monitor.beginTask(Messages.EntityTemplateCloner_ProgressCloningTypes2, toClone.size());
+		progress.setWorkRemaining(toClone.size());
+		
 		for (EntityType et : toClone){
-			monitor.subTask(MessageFormat.format(Messages.EntityTemplateCloner_ProgressCloning3, new Object[]{et.getName()}));
+			progress.subTask(MessageFormat.format(Messages.EntityTemplateCloner_ProgressCloning3, new Object[]{et.getName()}));
 			EntityType clone = new EntityType();
 			
 			clone.setConservationArea(engine.getNewCa());
@@ -107,10 +112,8 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 			}
 			
 			engine.getSession().save(clone);
-			monitor.worked(1);
+			progress.worked(1);
 		}
-		monitor.done();
-		
 	}
 
 	private Attribute findNewAttribute(Attribute oldAttribute) throws Exception{

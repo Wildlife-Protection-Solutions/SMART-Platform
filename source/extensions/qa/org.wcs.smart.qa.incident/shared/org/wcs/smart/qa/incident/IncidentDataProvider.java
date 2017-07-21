@@ -29,10 +29,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.observation.model.Waypoint;
@@ -105,8 +103,4 @@ public class IncidentDataProvider extends IQaDataProvider {
 		return ((IncidentLocationData)obj).getWaypoint().getUuid();
 	}
 
-	@Override
-	public Image getImage() {
-		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getImage(getClass());
-	}
 }

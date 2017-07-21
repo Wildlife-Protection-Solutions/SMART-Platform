@@ -24,6 +24,7 @@ package org.wcs.smart.connect.internal.server.replication;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -85,12 +86,7 @@ public class SyncChangesRunnable implements IRunnableWithProgress{
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException,
 			InterruptedException {
-		
-		if (upload){
-			monitor.beginTask(Messages.SyncChangesRunnable_SyncTaskName, 3);
-		}else{
-			monitor.beginTask(Messages.SyncChangesRunnable_DownloadTaskName, 3);
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, upload ? Messages.SyncChangesRunnable_SyncTaskName :Messages.SyncChangesRunnable_DownloadTaskName, 3);
 		
 		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(ca, connect) {
 			protected void processComplete() {
@@ -109,7 +105,7 @@ public class SyncChangesRunnable implements IRunnableWithProgress{
 					};
 						
 					try{
-						engine.createUpload(monitor);
+						engine.createUpload(progress.split(1));
 					}catch (final NothingToUpdateException ex){
 						ConnectSyncHistoryRecord uptodate = new ConnectSyncHistoryRecord();
 						uptodate.setStatus(Status.NODATA);
@@ -128,13 +124,14 @@ public class SyncChangesRunnable implements IRunnableWithProgress{
 		};
 		try {
 			engine.downloadInstall();
-			monitor.worked(1);
+			progress.worked(1);
 			//wait until job is complete
 			lock();
 		} catch (Exception ex) {
 			thrownException = ex;
 			ConnectPlugIn.log(ex.getMessage(), ex);
 		}
+		progress.setWorkRemaining(0);
 	}
 	
 	/**

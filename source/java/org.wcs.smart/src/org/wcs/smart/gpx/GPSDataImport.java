@@ -37,6 +37,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.gpx.xml.GpxType;
 import org.wcs.smart.gpx.xml.TrkType;
@@ -129,18 +130,19 @@ public class GPSDataImport {
 	 * Reads waypoints from a gpx file.
 	 * 
 	 * @param gpsFile the gps file name
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * 
 	 * @return list of waypoints in the gpx file
 	 */
 	public static List<WptType> getWaypointsGpx(List<String> gpxFiles, IProgressMonitor monitor){
+		SubMonitor progress = SubMonitor.convert(monitor);
 		List<WptType> waypoints = new ArrayList<WptType>();
 		
 		for (String file : gpxFiles){
 			File gpxFile = new File(file);
 			GpxType type = null;
 			try {
-				monitor.subTask(Messages.GPSDataImport_WaypointProgress_ReadingGpx);
+				progress.subTask(Messages.GPSDataImport_WaypointProgress_ReadingGpx);
 				JAXBContext context = JAXBContext.newInstance(GPX_METADATA_CLASSES);
 				Unmarshaller un = context.createUnmarshaller();
 				Object o = un.unmarshal(gpxFile);
@@ -156,7 +158,7 @@ public class GPSDataImport {
 				SmartPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_WaypointError_CouldNotParse, new Object[]{gpxFile.getAbsolutePath()}), null);
 				continue;
 			}
-			monitor.subTask(Messages.GPSDataImport_Progress_ParsingWaypoints);
+			progress.subTask(Messages.GPSDataImport_Progress_ParsingWaypoints);
 			waypoints.addAll(type.getWpt());
 		}
 		

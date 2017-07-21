@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ImportRecordCsvHandler {
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context){
@@ -44,7 +45,7 @@ public class ImportRecordCsvHandler {
 	}
 	
 	// E3
-	public static class ImportRecordCsvHandlerWrapper extends DIHandler<ImportRecordCsvHandler> {
+	public static class ImportRecordCsvHandlerWrapper extends DIHandler<ImportRecordCsvHandler> {		
 		public ImportRecordCsvHandlerWrapper() {
 			super(ImportRecordCsvHandler.class);
 		}

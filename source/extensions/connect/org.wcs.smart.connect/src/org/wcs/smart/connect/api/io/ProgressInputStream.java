@@ -24,7 +24,8 @@ package org.wcs.smart.connect.api.io;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.wcs.smart.connect.internal.Messages;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 
 /**
  * Wrapper around an input stream that checks the canceled state
@@ -37,54 +38,68 @@ import org.wcs.smart.connect.internal.Messages;
  */
 public class ProgressInputStream extends InputStream{
 
-	private static final IOException CANCELLED_EXCEPTION = new IOException(Messages.ProgressInputStream_UserCancelled, new InterruptedException());
-	public InputStream wrapper;
-	public CopyProgressMonitor monitor; 
 	
+	public InputStream wrapper;
+	public SubMonitor monitor; 
+	
+	private long expectedSize;
+	private long currentSize = 0;
+	private int lastValue = 0;
 	/**
 	 * 
 	 * @param in wrapper input stream
 	 * @param monitor progress monitor to monitor
 	 */
-	public ProgressInputStream(InputStream in, CopyProgressMonitor monitor){
+	public ProgressInputStream(InputStream in, long expectedSize, SubMonitor monitor){
 		this.wrapper = in;
 		this.monitor = monitor;
+		this.expectedSize = expectedSize;
+		monitor.setWorkRemaining( 100 );
 	}
 	
+	private void updateMonitor() {
+		monitor.checkCanceled();
+		int thisPercent = (int)((currentSize / (double)expectedSize) * 100);
+		if (thisPercent != lastValue) monitor.worked(thisPercent - lastValue);
+		lastValue = thisPercent;       
+	}
 	@Override
-    public int read() throws IOException {
-		if (monitor.isCanceled()) throw CANCELLED_EXCEPTION;
-    	int value = wrapper.read();
-    	monitor.addToCopiedCount(1);
+    public int read() throws IOException, OperationCanceledException {
+		int value = wrapper.read();
+		currentSize ++;
+		updateMonitor();
     	return value;
     }
 
 	@Override
-    public int read(byte b[]) throws IOException {
-		if (monitor.isCanceled()) throw CANCELLED_EXCEPTION;
+    public int read(byte b[]) throws IOException, OperationCanceledException {
+		monitor.checkCanceled();
     	int value = wrapper.read(b);
     	if (value >= 0){
-    		monitor.addToCopiedCount(value);
+    		currentSize += value;
+    		updateMonitor();
     	}
     	return value;
     }
 	
 	@Override
-    public int read(byte b[], int off, int len) throws IOException {
-		if (monitor.isCanceled()) throw CANCELLED_EXCEPTION;
+    public int read(byte b[], int off, int len) throws IOException, OperationCanceledException {
+		monitor.checkCanceled();
     	int value = wrapper.read(b, off, len);
     	if ( value >= 0){
-    		monitor.addToCopiedCount(value);
+    		currentSize += value;
+    		updateMonitor();
     	}
     	return value;
 	}
 
     @Override
-    public long skip(long n) throws IOException {
-    	if (monitor.isCanceled()) throw CANCELLED_EXCEPTION;
+    public long skip(long n) throws IOException, OperationCanceledException {
+    	monitor.checkCanceled();
     	long value = wrapper.skip(n);
     	if ( value >= 0){
-    		monitor.addToCopiedCount(value);
+    		currentSize += value;
+    		updateMonitor();
     	}
     	return value;
     }

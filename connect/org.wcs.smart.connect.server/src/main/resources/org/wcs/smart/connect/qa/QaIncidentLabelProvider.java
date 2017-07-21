@@ -23,7 +23,6 @@ package org.wcs.smart.connect.qa;
 
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.qa.incident.ILabelProvider;
 import org.wcs.smart.qa.model.IQaDataProvider;
@@ -35,11 +34,6 @@ import org.wcs.smart.qa.model.IQaDataProvider;
  *
  */
 public class QaIncidentLabelProvider extends ILabelProvider {
-	
-	@Override
-	public Image getImage(Class<? extends IQaDataProvider> clazz) {
-		return null;
-	}
 
 	@Override
 	public String getString(Key key, Locale l) {

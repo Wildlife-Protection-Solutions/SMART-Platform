@@ -66,6 +66,7 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class QueryDefView  {
 
 	/**

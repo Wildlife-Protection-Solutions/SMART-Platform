@@ -54,9 +54,11 @@ import org.wcs.smart.report.model.ReportFolder;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class DeleteReportItemHandler {
 
 	
+	@SuppressWarnings("unchecked")
 	@Execute
 	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, Shell activeShell){
 		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty() ){

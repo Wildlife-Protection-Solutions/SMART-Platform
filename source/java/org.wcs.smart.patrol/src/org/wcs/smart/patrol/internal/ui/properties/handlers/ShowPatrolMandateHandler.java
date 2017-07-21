@@ -31,6 +31,7 @@ import org.wcs.smart.patrol.internal.ui.properties.PatrolMandatePropertyPage;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ShowPatrolMandateHandler {
 
 	@Execute

@@ -46,6 +46,7 @@ import org.wcs.smart.intelligence.report.ReportIntelligence;
  * @author elitvin
  * @since 3.0.0
  */
+@SuppressWarnings("restriction")
 public class ImportIntelligenceTemplateHandler {
 
 	@Execute

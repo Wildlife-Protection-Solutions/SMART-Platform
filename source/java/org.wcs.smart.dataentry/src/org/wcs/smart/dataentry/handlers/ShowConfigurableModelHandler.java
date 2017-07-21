@@ -49,6 +49,7 @@ import org.wcs.smart.ui.internal.ca.properties.handlers.ShowDataModelPropertyPag
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowConfigurableModelHandler {
 
 	@Execute

@@ -162,7 +162,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 			if (queryService != null){
 				try {
 					((IQueryService)queryService).refresh(null);
-					List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
+					List<? extends IGeoResource> layers = queryService.resources(monitor);
 					boolean found = false;
 					for (IGeoResource w : layers){
 						for( ILayer layer : getMap().getLayersInternal() ) {

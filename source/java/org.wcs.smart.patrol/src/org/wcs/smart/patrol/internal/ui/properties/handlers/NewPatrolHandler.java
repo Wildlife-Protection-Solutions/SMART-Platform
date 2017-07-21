@@ -47,6 +47,7 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class NewPatrolHandler {
 
 	private WizardDialog dialog = null;

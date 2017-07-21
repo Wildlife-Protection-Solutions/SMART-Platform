@@ -4,7 +4,8 @@
    <extension
          point="org.wcs.smart.qa">
       <data_provider
-            class="org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider">
+            class="org.wcs.smart.qa.patrol.routine.PatrolWaypointDataProvider"
+            image="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol.png">
          <qa_action
                class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction">
          </qa_action>
@@ -16,7 +17,8 @@
          </qa_action>
       </data_provider>
       <data_provider
-            class="org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider">
+            class="org.wcs.smart.qa.patrol.routine.PatrolTrackDataProvider"
+            image="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol.png">
          <qa_action
                class="org.wcs.smart.qa.patrol.ui.OpenSourcePatrolAction">
          </qa_action>

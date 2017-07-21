@@ -121,8 +121,8 @@ public class RoutinesListDialog extends TitleAreaDialog {
 	};
 	
 	public enum RoutineColumn{
-		TYPE(Messages.RoutinesListDialog_RoutineTypeColumnName, Messages.RoutinesListDialog_RoutineTypeTooltip, 150),
 		NAME(Messages.RoutinesListDialog_RoutineNameColumnName, Messages.RoutinesListDialog_RoutineTooltipColumnName, 260),
+		TYPE(Messages.RoutinesListDialog_RoutineTypeColumnName, Messages.RoutinesListDialog_RoutineTypeTooltip, 150),
 		AUTO(Messages.RoutinesListDialog_RoutineAutoExecuteColumnName, Messages.RoutinesListDialog_RoutineAutoExecuteTooltip, 100),
 		DESC(Messages.RoutinesListDialog_RoutineDescriptionColumnName, Messages.RoutinesListDialog_RoutineDescriptionTooltip,10),
 		PARAMETERS(Messages.RoutinesListDialog_RoutineParametersColumnName, Messages.RoutinesListDialog_RoutineParametersTooltip,10);
@@ -282,11 +282,13 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		tblRoutines.setContentProvider(ArrayContentProvider.getInstance());
 		tblRoutines.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		tblRoutines.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		for (RoutineColumn c : RoutineColumn.values()){
 			if (c == RoutineColumn.PARAMETERS || c == RoutineColumn.DESC) continue;
 			TableViewerColumn typeColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
 			typeColumn.getColumn().setText(c.guiName);
 			typeColumn.getColumn().setToolTipText(c.tooltip);
+			typeColumn.getColumn().setMoveable(true);
 			typeColumn.setLabelProvider(new ColumnLabelProvider(){
 				@Override
 				public String getText(Object element) {
@@ -295,7 +297,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 				
 				@Override
 				public Image getImage(Object element) {
-					if (c == RoutineColumn.TYPE){
+					if (c == RoutineColumn.NAME){
 						return QaPlugIn.getDefault().getImageRegistry().get(QaPlugIn.ICON_QA);
 					}
 					return null;

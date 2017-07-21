@@ -25,6 +25,7 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.plan.internal.Messages;
@@ -42,21 +43,19 @@ public class PlanTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.PlanTemplateCloner_Progress, 1);
-		try{
-			//need to clone: the plan template
-			File f = new File(engine.getTemplateCa().getFileDataStoreLocation(),SmartPlanPlugIn.PLAN_DIR);
-			File templateFile = new File(f, ReportPlan.PLAN_TEMPLATE);
+		SubMonitor.convert(monitor, Messages.PlanTemplateCloner_Progress, 1);
 		
-			if (templateFile.exists()){
-				//copy plan template
-				f = new File(engine.getNewCa().getFileDataStoreLocation(),SmartPlanPlugIn.PLAN_DIR);
-				File newFile = new File(f, ReportPlan.PLAN_TEMPLATE);
-				FileUtils.copyFile(templateFile, newFile);
-			}
-		}finally{
-			monitor.done();
+		//need to clone: the plan template
+		File f = new File(engine.getTemplateCa().getFileDataStoreLocation(),SmartPlanPlugIn.PLAN_DIR);
+		File templateFile = new File(f, ReportPlan.PLAN_TEMPLATE);
+		
+		if (templateFile.exists()){
+			//copy plan template
+			f = new File(engine.getNewCa().getFileDataStoreLocation(),SmartPlanPlugIn.PLAN_DIR);
+			File newFile = new File(f, ReportPlan.PLAN_TEMPLATE);
+			FileUtils.copyFile(templateFile, newFile);
 		}
+		
 	}
 
 }

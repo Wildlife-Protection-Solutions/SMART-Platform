@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -27,6 +28,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -92,7 +95,7 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
 				
 				IFilterProcessor filterer = null;
 				//create a date filter that caches the dates so the same
@@ -107,13 +110,11 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 					
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							caFilter, false, true, monitor);
+							caFilter, false, true, progress.split(50));
 					
-					if (monitor.isCanceled()) return;
-					populateTemporaryTableExtra(c, session, monitor);
+					populateTemporaryTableExtra(c, session, progress.split(20));
 					
-					if (monitor.isCanceled()) return;
-					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
+					progress.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					//setting result size
 					
 					try (ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)){ //$NON-NLS-1$
@@ -121,6 +122,8 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 							result.setItemCount(rs.getInt(1));
 						}
 					}
+				}catch( OperationCanceledException ex) {
+					return;
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {
@@ -147,7 +150,8 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 	}
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
-		//NOTE: does 50 worked for monitor in total
+		SubMonitor progress = SubMonitor.convert(monitor, "", 1); //$NON-NLS-1$
+
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -158,12 +162,9 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 			c.createStatement().execute(sql);
 		}
 		
-		if (monitor.isCanceled()){
-			return;
-		}
-		
 		
 		//ca information
+		progress.split(1);
 		if (SmartDB.isMultipleAnalysis()){
 			//ca id and names are only used for cross-ca analysis
 			monitor.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
@@ -187,11 +188,8 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 		}
 		
 		//populating categories
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
-		monitor.worked(13);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
+		progress.setWorkRemaining(0);
 	}
 
 	@Override

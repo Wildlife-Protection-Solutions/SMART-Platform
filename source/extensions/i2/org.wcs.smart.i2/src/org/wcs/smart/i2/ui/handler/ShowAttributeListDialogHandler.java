@@ -48,6 +48,7 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ShowAttributeListDialogHandler extends ShowDialogHandler {
 
 	public ShowAttributeListDialogHandler(){

@@ -96,6 +96,7 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class SurveyDesignListView implements IDoubleClickListener, IUpdatableView{
 
 	public static final String ID = "org.wcs.smart.er.surveyDesignListView"; //$NON-NLS-1$

@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
@@ -83,7 +83,7 @@ public enum ConnectServerManager {
 	 * @throws Exception
 	 */
 	public void deleteConnectServerData(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(Messages.ConnectServerInfoDialog_DeleteServerTaskName, 6);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConnectServerInfoDialog_DeleteServerTaskName, 6);
 		
 		Session s = HibernateManager.openSession();
 		try{
@@ -91,7 +91,7 @@ public enum ConnectServerManager {
 
 			ConservationArea ca = SmartDB.getCurrentConservationArea();
 			//delete items from database
-			(new CaConnectDeleteHandler()).beforeDelete(ca, s, new SubProgressMonitor(monitor, 6));
+			(new CaConnectDeleteHandler()).beforeDelete(ca, s, progress.split(5));
 		
 			//delete items from the datastore
 			Path fs = Paths.get(ca.getFileDataStoreLocation(), ConnectDatastore.CONNECT_FILESTORE_DIR);
@@ -105,14 +105,13 @@ public enum ConnectServerManager {
 			
 			//run any delete handlers
 			runAfterDeleteHandlers(s);
-		
+			progress.worked(1);
 			s.getTransaction().commit();
 		}finally{
 			if (s.getTransaction().isActive()){
 				s.getTransaction().rollback();
 			}
 			s.close();
-			monitor.done();
 		}
 	}
 	

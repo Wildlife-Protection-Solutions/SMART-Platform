@@ -49,6 +49,7 @@ import org.wcs.smart.report.model.RootReportFolder;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class NewFolderHandler {
 
 	@Execute

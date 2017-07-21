@@ -68,6 +68,8 @@ import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -76,7 +78,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.api.ConnectClient;
-import org.wcs.smart.connect.api.io.CopyProgressMonitor;
 import org.wcs.smart.connect.api.io.IOUtils;
 import org.wcs.smart.connect.api.io.ProgressInputStream;
 import org.wcs.smart.connect.api.model.AlertType;
@@ -513,11 +514,11 @@ public class SmartConnect {
 	 * @param url the URL to download from
 	 * @param promptDownloadSizeMb prompt the user to continue if the download
 	 * file size is larger than this size.  Can be null if should never prompt.
-	 * @param monitor subprogress monitor used to cancel download and update progress 
+	 * @param monitor subprogress monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor 
 	 * @return the downloaded file
 	 * @throws Exception
 	 */
-	public Path downloadFileFromUrl(String url, Integer promptDownloadSizeMb, IProgressMonitor monitor) throws PackageToLargeException, InterruptedException, Exception{
+	public Path downloadFileFromUrl(String url, Integer promptDownloadSizeMb, IProgressMonitor monitor) throws PackageToLargeException, OperationCanceledException, Exception{
 		createClient();
 		int tryCount = 0;
 		
@@ -533,7 +534,8 @@ public class SmartConnect {
 		Long size = null;
 		
 		long waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(server);
-		CopyProgressMonitor copyMonitor = null;
+		SubMonitor progress = SubMonitor.convert(monitor);
+		
 		//first request; this one gives us the requested size
 		while(size == null && tryCount < ConnectServerOption.ConnectionOption.MAX_RETRY_DOWNLOAD.getIntegerValue(server)){
 			Response r = null;
@@ -553,7 +555,6 @@ public class SmartConnect {
 						}
 					}
 					
-					copyMonitor = new CopyProgressMonitor(monitor, size);
 					if (promptDownloadSizeMb != null &&
 							size > promptDownloadSizeMb * 1000000 ){
 						//prompt to download before continuing
@@ -564,21 +565,20 @@ public class SmartConnect {
 					//parse target
 					try(InputStream is = r.readEntity(InputStream.class);
 							OutputStream out = Files.newOutputStream(filestore)){
-						IOUtils.copy(is, out, copyMonitor);
+						IOUtils.copy(is, out, size, progress);
 					}
 					
 					if (Files.size(filestore) > size){
 						throw new Exception(Messages.SmartConnect_FileToLargeError);
 					}
 					if (Files.size(filestore) == size){
-						monitor.done();
 						return filestore;
 					}
 				}
 			}catch (PackageToLargeException ex){
 				//we do not want to try again
 				throw ex;
-			}catch (InterruptedException ex){
+			}catch (OperationCanceledException ex){
 				throw ex;	//user cancelled do not try again
 			}catch (Exception ex){
 				ConnectPlugIn.log(ex.getMessage(), ex);
@@ -591,13 +591,12 @@ public class SmartConnect {
 		
 		//try a maximum of 10 times
 		while(tryCount < ConnectServerOption.ConnectionOption.MAX_RETRY_DOWNLOAD.getIntegerValue(server)){
-			downloadRequest(filestore, url, size, copyMonitor);
+			downloadRequest(filestore, url, size, progress);
 			
 			if (Files.size(filestore) > size){
 				throw new Exception(Messages.SmartConnect_FileToLargeError);
 			}
 			if (Files.size(filestore) == size){
-				monitor.done();
 				return filestore;
 			}
 			tryCount++;
@@ -616,12 +615,12 @@ public class SmartConnect {
 	 * @param maxLength total download filesize
 	 * @throws Exception
 	 */
-	private void downloadRequest(Path p, String url, long maxLength, CopyProgressMonitor monitor) throws InterruptedException{
+	private void downloadRequest(Path p, String url, long packageSize, SubMonitor monitor) throws OperationCanceledException{
 		ResteasyWebTarget target = client.target(url);
 		Response r = null;
 		try {
 			Long start = Files.size(p);
-			Long end = maxLength;
+			Long end = packageSize;
 			
 			Builder requestBuilder = target.request();
 			if (start != 0){
@@ -634,10 +633,10 @@ public class SmartConnect {
 				//parse target
 				try(InputStream is = r.readEntity(InputStream.class);
 						OutputStream out = Files.newOutputStream(p, StandardOpenOption.CREATE, StandardOpenOption.APPEND)){
-					IOUtils.copy(is, out, monitor);
+					IOUtils.copy(is, out, packageSize, monitor);
 				}
 			}
-		}catch (InterruptedException ex){
+		}catch (OperationCanceledException ex){
 			throw ex;
 		}catch (Exception ex){
 			ConnectPlugIn.log(ex.getMessage(), ex);
@@ -678,13 +677,14 @@ public class SmartConnect {
 	 * @param url the url to upload file to
 	 * @param f the file to upload
 	 * @param startbyte the start position in the file 
+	 * @Param monitor  the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 */
-	public void uploadFile(String url, Path f, long startByte, CopyProgressMonitor monitor) throws Exception{
+	public void uploadFile(String url, Path f, long startByte, SubMonitor monitor) throws Exception{
         createClient();
         
 		//retry handler set when creating client;
         ConnectClient service =  client.target(url).proxy(ConnectClient.class);
-		try(InputStream fis = new ProgressInputStream(Files.newInputStream(f), monitor)){
+		try(InputStream fis = new ProgressInputStream(Files.newInputStream(f), Files.size(f), monitor)){
 			fis.skip(startByte);
 			service.updateFile(fis);
 		}

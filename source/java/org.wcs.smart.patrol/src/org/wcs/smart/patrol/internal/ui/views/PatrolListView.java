@@ -21,11 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui.views;
 
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.commands.ECommandService;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -54,35 +53,32 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.ui.handlers.RadioState;
 import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.PatrolUtils;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.internal.ui.views.PatrolTreeContentProvider.GroupByType;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -97,6 +93,7 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class PatrolListView implements IPatrolFilteringView {
 
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView"; //$NON-NLS-1$
@@ -106,8 +103,9 @@ public class PatrolListView implements IPatrolFilteringView {
 	private TreeViewer patrolListViewer;
 	private PatrolViewFilter filter = PatrolViewFilter.newInstance();
 	
-	private PatrolTreeContentProvider contentProvider = new PatrolTreeContentProvider();
+	private PatrolTreeContentProvider contentProvider;
 	
+	@Inject private IEclipseContext context;
 	@Inject private IMenuService menuService;
 	@Inject private MPart localPart;
 	@Inject private ESelectionService selService;
@@ -198,9 +196,7 @@ public class PatrolListView implements IPatrolFilteringView {
 	@Inject
 	private void groupByChanged(@EventTopic(GROUP_BY_EVENT) Object data){
 		if (!(data instanceof String)) return;
-		System.out.println("GROUP BY: " +data);
 		contentProvider.setGroupBy((String)data);
-//		patrolListViewer.setInput(patrolListViewer.getInput());
 	}
 	
 	@Optional
@@ -246,50 +242,29 @@ public class PatrolListView implements IPatrolFilteringView {
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		list.setBounds(0, 0, 88, 68);
 		
-		patrolListViewer.setLabelProvider(new LabelProvider(){
-			
-			@Override
-			public Image getImage(Object element){
-				if (element instanceof PatrolEditorInput){
-					PatrolEditorInput p = (PatrolEditorInput)element;
-					return PatrolUtils.getImage(p.getType());			
-				}else if (element instanceof PatrolMandate){
-					return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
-				}else if (element instanceof Team){
-					return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON);
-				}else if (element instanceof Station){
-					return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON);
-				}
-				return super.getImage(element);
-			}
-			@Override
-			public String getText(Object element) {
-				if (element instanceof PatrolEditorInput){
-					return ((PatrolEditorInput)element).getPatrolId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getStartDate()) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getEndDate()) + " ]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}else if (element instanceof NamedItem){
-					return ((NamedItem) element).getName();
-				}else if (element instanceof PatrolType.Type){
-					return ((PatrolType.Type) element).getGuiName(Locale.getDefault());
-				}
-				return super.getText(element);
-			}
-		});
+		String defaultValue = null;
+		Object value = context.get(ECommandService.class).getCommand("org.wcs.smart.patrol.view.groupby").getState(RadioState.STATE_ID).getValue(); //$NON-NLS-1$
+		if (value instanceof String) defaultValue = (String)value;
+		contentProvider = new PatrolTreeContentProvider(defaultValue);
+		
+		patrolListViewer.setLabelProvider(new PatrolTreeLabelProvider());
 		patrolListViewer.setContentProvider(contentProvider);
 		patrolListViewer.setInput(DialogConstants.LOADING_TEXT);
 		patrolListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		patrolListViewer.addDoubleClickListener(new IDoubleClickListener() {
-			
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				IStructuredSelection selection = (IStructuredSelection)event.getSelection();
-				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-					Object item = (Object) iterator.next();
-					boolean isExpanded = patrolListViewer.getExpandedState(item);
-					patrolListViewer.setExpandedState(item, !isExpanded);
-				}
-				
-			}
-		});
+//		patrolListViewer.addDoubleClickListener(new IDoubleClickListener() {
+//			
+//			@Override
+//			public void doubleClick(DoubleClickEvent event) {
+//				IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+//				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+//					Object item = (Object) iterator.next();
+//					boolean isExpanded = patrolListViewer.getExpandedState(item);
+//					//patrolListViewer.setExpandedState(item, !isExpanded);
+//				}
+//				
+//				
+//			}
+//		});
 		updateContent();
 		
 		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, patrolListener);
@@ -322,6 +297,37 @@ public class PatrolListView implements IPatrolFilteringView {
 		MenuManager menuManager = new MenuManager();
 		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(patrolListViewer.getControl());
+		
+		menu.addMenuListener(new MenuListener() {
+			
+			MenuItem mnuCollapseAll = null;
+			MenuItem mnuExpandAll = null;
+			@Override
+			public void menuShown(MenuEvent e) {
+				if (mnuCollapseAll == null){
+					new MenuItem(menu,  SWT.SEPARATOR);
+					
+					mnuCollapseAll = new MenuItem(menu, SWT.PUSH);
+					mnuCollapseAll.setText(Messages.PatrolListView_CollapseAllOp);
+					mnuCollapseAll.addListener(SWT.Selection, x->{
+						patrolListViewer.collapseAll();
+					});
+					
+					mnuExpandAll = new MenuItem(menu, SWT.PUSH);
+					mnuExpandAll.setText(Messages.PatrolListView_ExpandAllOp);
+					mnuExpandAll.addListener(SWT.Selection, x->{
+						patrolListViewer.expandAll();
+					});
+				}
+				mnuCollapseAll.setEnabled(contentProvider.getGroupBy() != GroupByType.NONE);
+				mnuExpandAll.setEnabled(contentProvider.getGroupBy() != GroupByType.NONE);
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) { }
+		});
+		
+		
 		patrolListViewer.getControl().setMenu(menu);		
 	}
 

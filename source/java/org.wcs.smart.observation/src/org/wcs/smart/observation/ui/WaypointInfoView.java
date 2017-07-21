@@ -85,6 +85,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class WaypointInfoView {
 
 	public static final String ID = "org.wcs.smart.observation.waypointInfo"; //$NON-NLS-1$

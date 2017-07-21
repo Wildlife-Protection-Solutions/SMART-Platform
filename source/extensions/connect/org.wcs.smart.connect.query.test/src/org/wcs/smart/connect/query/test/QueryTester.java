@@ -21,7 +21,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.model.PasswordAesManager;

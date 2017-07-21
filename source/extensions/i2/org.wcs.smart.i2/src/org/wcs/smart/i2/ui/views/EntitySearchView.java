@@ -112,6 +112,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class EntitySearchView {
 
 	/**
@@ -181,7 +182,6 @@ public class EntitySearchView {
 					entityList.setEntities(null);
 				}
 			});
-			monitor.done();
 		}
 		
 		@Override
@@ -193,7 +193,6 @@ public class EntitySearchView {
 					entityList.setEntities(entities);
 				}
 			});
-			monitor.done();
 			
 		}
 		

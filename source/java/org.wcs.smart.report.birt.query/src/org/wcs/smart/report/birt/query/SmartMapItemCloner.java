@@ -34,6 +34,7 @@ import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.birt.report.model.core.DesignElement;
 import org.eclipse.birt.report.model.elements.ExtendedItem;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
@@ -63,14 +64,15 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 		//here we just need to update the 
 		//query text in the BIRT smart
 		//report item
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.SmartMapItemCloner_CloningReportItem, 1);
+		
 		List<Report> newReports = engine.getSession().createCriteria(Report.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).list(); //$NON-NLS-1$
-		monitor.beginTask(Messages.SmartMapItemCloner_CloningReportItem, newReports.size());
+		progress.setWorkRemaining(newReports.size());
 		for (Report r : newReports){
 			File reportFile = new File(new File(engine.getNewCa().getFileDataStoreLocation(), Report.REPORT_DIR), r.getFilename());
 			updateReportFile(r, reportFile, engine);
-			monitor.worked(1);
+			progress.worked(1);
 		}
-		monitor.done();
 	}
 	
 	/**

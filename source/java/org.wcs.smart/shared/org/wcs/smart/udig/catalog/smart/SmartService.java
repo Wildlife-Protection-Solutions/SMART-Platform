@@ -29,18 +29,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.geotools.data.smart.SmartDataSource;
 import org.wcs.smart.geotools.data.smart.SmartDataSourceFactory;
 
@@ -149,13 +147,11 @@ public class SmartService extends ISessionService {
 	public void dispose( IProgressMonitor monitor ) {
         if (members == null)
             return;
-
+        SubMonitor progress = SubMonitor.convert(monitor);
         int steps = (int) ((double) 99 / (double) members.size());
         for( SmartGeoResource resolve : members ) {
             try {
-                SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor, steps);
-                resolve.dispose(subProgressMonitor);
-                subProgressMonitor.done();
+                resolve.dispose(progress.split(steps));
             } catch (Throwable e) {
             	Logger.getLogger(SmartService.class.getName()).log(Level.SEVERE, "Error disposing Smart Service.", e); //$NON-NLS-1$
             }

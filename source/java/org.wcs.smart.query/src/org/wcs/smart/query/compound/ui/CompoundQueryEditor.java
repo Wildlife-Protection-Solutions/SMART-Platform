@@ -412,10 +412,11 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 		page1.setFocus();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter.isAssignableFrom(Map.class)) {
-			return getMap();
+			return (T)getMap();
 		}
 		return super.getAdapter(adapter);
 	}

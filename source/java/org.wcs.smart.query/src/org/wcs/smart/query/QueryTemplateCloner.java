@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
@@ -55,14 +56,12 @@ public class QueryTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.QueryTemplateCloner_ProgressQuery, 1);
-		try{
-			//	need to clone: shared query folders
-			monitor.subTask(Messages.QueryTemplateCloner_ProgressCopyFolders);
-			cloneFolders(engine);		
-		}finally{
-			monitor.done();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.QueryTemplateCloner_ProgressQuery, 1);
+		
+		//	need to clone: shared query folders
+		progress.subTask(Messages.QueryTemplateCloner_ProgressCopyFolders);
+		cloneFolders(engine);		
+		progress.worked(1);
 	}
 	
 	

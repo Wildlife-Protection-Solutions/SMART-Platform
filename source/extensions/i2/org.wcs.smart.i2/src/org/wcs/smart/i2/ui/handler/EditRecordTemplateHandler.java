@@ -25,6 +25,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.i2.birt.IntelReportManager;
 
+@SuppressWarnings("restriction")
 public class EditRecordTemplateHandler  {
 	
 	@Execute

@@ -47,6 +47,7 @@ import org.wcs.smart.query.model.QueryFolder;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class AddFolderHandler {
 
 	@Execute

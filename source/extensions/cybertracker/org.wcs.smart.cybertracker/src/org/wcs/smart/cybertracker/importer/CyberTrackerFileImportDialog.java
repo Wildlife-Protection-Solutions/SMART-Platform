@@ -19,7 +19,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -144,7 +144,7 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 
 		storageViewer.setContentProvider(ArrayContentProvider.getInstance());
 		storageViewer.setInput(getStorageFiles());
-		storageViewer.setSorter(sorter);
+		storageViewer.setComparator(sorter);
 		storageViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -308,7 +308,7 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 		return files;
 	}
 
-	private final class StorageViewerSorter extends ViewerSorter {
+	private final class StorageViewerSorter extends ViewerComparator {
 		StorageColumn column;
 		private int direction = SWT.UP;
 		

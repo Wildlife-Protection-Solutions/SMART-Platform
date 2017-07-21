@@ -32,7 +32,7 @@ import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.birt.ColumnBindingFixer;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.ui.internal.Messages;
@@ -59,11 +59,12 @@ public class ReportQueryColumnBindingFixer {
 	 * @throws Exception
 	 */
 	public void fixReport(Report report, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, "", 1); //$NON-NLS-1$
 		this.report = report;
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 		ReportDesignHandle rdh = session.openDesign(ReportPlugIn.getDefault().getReportFile(report).getAbsolutePath());
 		try{
-			fixReport(rdh.getModuleHandle(), new SubProgressMonitor(monitor, 0));
+			fixReport(rdh.getModuleHandle(), progress.split(1));
 			rdh.save();
 		}finally{
 			rdh.close();

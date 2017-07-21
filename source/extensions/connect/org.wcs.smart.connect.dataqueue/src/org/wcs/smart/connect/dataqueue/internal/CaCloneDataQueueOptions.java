@@ -43,27 +43,25 @@ public class CaCloneDataQueueOptions implements IConservationAreaTemplateCloner 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.CaCloneDataQueueOptions_task, 1);
-		try{
-			Session s = engine.getSession();
+		monitor.subTask(Messages.CaCloneDataQueueOptions_task);
+		
+		Session s = engine.getSession();
 			
-			List<DataQueueProcessingOption> options = s.createCriteria(DataQueueProcessingOption.class)
-					.add(Restrictions.eq("id.conservationArea", engine.getTemplateCa().getUuid())) //$NON-NLS-1$
-					.list();
+		List<DataQueueProcessingOption> options = s.createCriteria(DataQueueProcessingOption.class)
+				.add(Restrictions.eq("id.conservationArea", engine.getTemplateCa().getUuid())) //$NON-NLS-1$
+				.list();
 			
-			for (DataQueueProcessingOption op : options){
-				DataQueueProcessingOption cloneop = new DataQueueProcessingOption();
-				cloneop.setConservationArea(engine.getNewCa().getUuid());
-				cloneop.setOptionKey(op.getOptionKey());
-				cloneop.setValue(op.getValue());
+		for (DataQueueProcessingOption op : options){
+			DataQueueProcessingOption cloneop = new DataQueueProcessingOption();
+			cloneop.setConservationArea(engine.getNewCa().getUuid());
+			cloneop.setOptionKey(op.getOptionKey());
+			cloneop.setValue(op.getValue());
 				
-				s.save(cloneop);
-			}
-			
-			s.flush();
-		}finally{
-			monitor.done();
+			s.save(cloneop);
 		}
+			
+		s.flush();
+		
 	}
 
 }

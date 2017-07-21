@@ -31,6 +31,8 @@ import java.util.Queue;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedItem;
@@ -40,9 +42,12 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.dataentry.CmDefaultListsUtil;
+import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -107,11 +112,13 @@ public class ConfigurableModelFactory {
 		if (monitor.isCanceled()) return null;
 		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultLists);
 		monitor.worked(1);
-		clone.setDefaultLists(cloneCmAttributeList(cm.getDefaultLists(), clone, null, o2iMap));
+		//TODO: QQQ fix below
+//		clone.setDefaultLists(cloneCmAttributeList(cm.getDefaultLists(), clone, null, o2iMap));
 		if (monitor.isCanceled()) return null;
 		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultTrees);
 		monitor.worked(1);
-		clone.setDefaultTrees(cloneCmAttributeTree(cm.getDefaultTrees(), null, clone, null, o2iMap));
+		//TODO: QQQ fix below
+		//clone.setDefaultTrees(cloneCmAttributeTree(cm.getDefaultTrees(), null, clone, null, o2iMap));
 
 		if (monitor.isCanceled()) return null;
 		monitor.done();
@@ -139,37 +146,30 @@ public class ConfigurableModelFactory {
 	 * @return
 	 */
 	public static ConfigurableModel createModelFromDataModel(String name, Session session, IProgressMonitor monitor){
-		monitor.beginTask(Messages.ConfigurableModelFactory_TaskName, 1);
-		
-		monitor.subTask(Messages.ConfigurableModelFactory_BlankCmTaskName);
-		ConfigurableModel init = createBlankModel(name);
-		
-		DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
-		
-		int catCnt = 0;
-		Queue<Category> toProcess = new LinkedList<Category>();
-		toProcess.addAll(dm.getActiveCategories());
-		while(!toProcess.isEmpty()) {
-			Category c = toProcess.remove();
-			catCnt ++;
-			toProcess.addAll(c.getActiveChildren());
-		}
-		monitor.beginTask(Messages.ConfigurableModelFactory_TaskName, catCnt);
-		
-		for (Category c : dm.getActiveCategories()){
-			processCategory(c, null, init,monitor);
-			if (monitor.isCanceled()) return null;
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConfigurableModelFactory_TaskName, 1);
+		try {
+			progress.subTask(Messages.ConfigurableModelFactory_BlankCmTaskName);
+			ConfigurableModel init = createBlankModel(name);
+			
+			DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
+			
+			progress.setWorkRemaining(dm.getActiveCategories().size());
+			for (Category c : dm.getActiveCategories()){
+				processCategory(c, null, init,progress.split(1));
+			}
+			progress.checkCanceled();
+			return init;
+		}catch (OperationCanceledException e) {
+			return null;
 		}
 		
-		if (monitor.isCanceled()) return null;
-		return init;
 	}
 	
 	private static void processCategory(Category c, CmNode parent, ConfigurableModel model, IProgressMonitor monitor){
-		monitor.subTask(MessageFormat.format(Messages.ConfigurableModelFactory_ProgressMessage, c.getName()));
-		monitor.worked(1);
+		SubMonitor progress = SubMonitor.convert(monitor, MessageFormat.format(Messages.ConfigurableModelFactory_ProgressMessage, c.getName()), 1);
+		
 		c.getFullCategoryName();
-		if (monitor.isCanceled()) return;
+		progress.checkCanceled();
 		
 		if (c.getActiveChildren().size() > 0){
 			//there are kids so this needs to be converted to a group
@@ -189,8 +189,9 @@ public class ConfigurableModelFactory {
 				parent.getChildren().add(node);
 			}
 			
+			progress.setWorkRemaining(c.getActiveChildren().size());
 			for (Category kid : c.getActiveChildren()){
-				processCategory(kid, node, model, monitor);
+				processCategory(kid, node, model, progress.split(1));
 			}
 		}else{
 			//this are leafs and can be added as such to model
@@ -217,6 +218,7 @@ public class ConfigurableModelFactory {
 				cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 				node.getCmAttributes().add(cma);
 				addAttributeDefaultValues(model, a);
+				cma.setConfig(model.getDefaultConfigs().get(a));
 				
 				loadAttributeInfo(a);
 			}
@@ -233,10 +235,10 @@ public class ConfigurableModelFactory {
 	private static void addAttributeDefaultValues(ConfigurableModel model, Attribute a) {
 		switch(a.getType()) {
 		case LIST:
-			model.addDefaultListItems(a);
+			addDefaultListItems(model, a);
 			break;
 		case TREE:
-			model.addDefaultTreeModes(a);
+			addDefaultTreeNodes(model, a);
 			break;
 		default:
 			//nothing to add
@@ -244,6 +246,23 @@ public class ConfigurableModelFactory {
 		}
 	}
 
+	public static void addDefaultTreeNodes(final ConfigurableModel model, final Attribute attribute) {
+		CmAttributeConfig cfg = model.getDefaultConfigs().get(attribute);
+		if (cfg == null) {
+			//if we are here that this attribute was not added before (no data for it in default trees)
+			cfg = CmDefaultTreesUtil.buildDefaultTreeConfig(model, attribute);
+			model.getDefaultConfigs().put(attribute, cfg);
+		}
+	}	
+
+	public static void addDefaultListItems(final ConfigurableModel model, final Attribute attribute) {
+		CmAttributeConfig cfg = model.getDefaultConfigs().get(attribute);
+		if (cfg == null) {
+			//if we are here that this attribute was not added before (no data for it in default configs)
+			cfg = CmDefaultListsUtil.buildDefaultListConfig(model, attribute);
+			model.getDefaultConfigs().put(attribute, cfg);
+		}
+	}
 
 	//this is adopted copy from ConservationAreaClonerEngine
 	private static void copyLabels(NamedItem copyFrom, NamedItem copyTo){
@@ -339,10 +358,21 @@ public class ConfigurableModelFactory {
 		copyLabels(attributeToClone, clone);
 		clone.setOrder(attributeToClone.getOrder());
 		o2iMap.put(attributeToClone.getUuid(), clone);
-		clone.setList(cloneCmAttributeList(attributeToClone.getList(), cm, clone, o2iMap));
-		clone.setTree(cloneCmAttributeTree(attributeToClone.getTree(), null, cm, clone, o2iMap));
+		clone.setConfig(cloneCmAttributeConfig(attributeToClone.getConfig(), cm, o2iMap));
 		
 		loadAttributeInfo(attributeToClone.getAttribute());
+		return clone;
+	}
+
+	private static CmAttributeConfig cloneCmAttributeConfig(CmAttributeConfig cfgToClone, ConfigurableModel clonedCm, Map<UUID, UuidItem> o2iMap) {
+		CmAttributeConfig clone = new CmAttributeConfig();
+		copyLabels(cfgToClone, clone);
+		clone.setModel(clonedCm);
+		clone.setAttribute(cfgToClone.getAttribute());
+		clone.setDefault(cfgToClone.isDefault());
+		clone.setDisplayMode(cfgToClone.getDisplayMode());
+		clone.setList(cloneCmAttributeList(cfgToClone.getList(), clone, o2iMap));
+		clone.setTree(cloneCmAttributeTree(cfgToClone.getTree(), null, clone, o2iMap));
 		return clone;
 	}
 	
@@ -373,39 +403,35 @@ public class ConfigurableModelFactory {
 		return cloned;
 	}
 	
-	private static List<CmAttributeListItem> cloneCmAttributeList(List<CmAttributeListItem> srcList, ConfigurableModel cm, CmAttribute cmAttribute, Map<UUID, UuidItem> o2iMap) {
+	private static List<CmAttributeListItem> cloneCmAttributeList(List<CmAttributeListItem> srcList, CmAttributeConfig cfg, Map<UUID, UuidItem> o2iMap) {
 		List<CmAttributeListItem> clonedList = new ArrayList<CmAttributeListItem>();
 		for (CmAttributeListItem listItem : srcList) {
 			CmAttributeListItem clone = new CmAttributeListItem();
-			clone.setConfigurableModel(cm);
+			clone.setConfig(cfg);
 			copyLabels(listItem, clone);
 			cloneImages(listItem, clone);
 			clone.setIsActive(listItem.getIsActive());
 			clone.setListOrder(listItem.getListOrder());
 			clone.setListItem(listItem.getListItem());
-			clone.setDmAttribute(listItem.getDmAttribute());
-			clone.setAttribute(cmAttribute);
 			clonedList.add(clone);
 			o2iMap.put(listItem.getUuid(), clone);
 		}
 		return clonedList;
 	}
 
-	private static List<CmAttributeTreeNode> cloneCmAttributeTree(List<CmAttributeTreeNode> srcTree, CmAttributeTreeNode parent, ConfigurableModel cm, CmAttribute cmAttribute, Map<UUID, UuidItem> o2iMap) {
+	private static List<CmAttributeTreeNode> cloneCmAttributeTree(List<CmAttributeTreeNode> srcTree, CmAttributeTreeNode parent, CmAttributeConfig cfg, Map<UUID, UuidItem> o2iMap) {
 		List<CmAttributeTreeNode> clonedTree = new ArrayList<CmAttributeTreeNode>();
 		for (CmAttributeTreeNode treeItem : srcTree) {
 			CmAttributeTreeNode clone = new CmAttributeTreeNode();
-			clone.setConfigurableModel(cm);
 			copyLabels(treeItem, clone);
 			cloneImages(treeItem, clone);
 			clone.setIsActive(treeItem.getIsActive());
 			clone.setNodeOrder(treeItem.getNodeOrder());
 			clone.setDmTreeNode(treeItem.getDmTreeNode());
-			clone.setDmAttribute(treeItem.getDmAttribute());
-			clone.setAttribute(cmAttribute);
+			clone.setConfig(cfg);
 			clone.setParent(parent);
 			clone.setDisplayMode(treeItem.getDisplayMode());
-			clone.setChildren(cloneCmAttributeTree(treeItem.getChildren(), clone, cm, cmAttribute, o2iMap));
+			clone.setChildren(cloneCmAttributeTree(treeItem.getChildren(), clone, cfg, o2iMap));
 			clonedTree.add(clone);
 			o2iMap.put(treeItem.getUuid(), clone);
 		}

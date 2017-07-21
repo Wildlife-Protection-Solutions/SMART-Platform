@@ -46,6 +46,7 @@ import org.wcs.smart.internal.Messages;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class BackupHandler {
 
 	private int backupState = 0;

@@ -31,6 +31,9 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -55,6 +58,28 @@ public enum InternalExtensionManager {
 	private List<QaRoutine> autoRoutines = null;
 	
 	private Boolean isAutoCleaned = Boolean.FALSE;
+	
+	private HashMap<Class<? extends IQaDataProvider>, Image> images = null;
+	
+	/**
+	 * Get the image associated with the given data provider
+	 * @param dataProvider
+	 * @return
+	 */
+	public Image getImage(IQaDataProvider dataProvider) {
+		if (images == null) readImages();
+		
+		if (dataProvider.getClass() == SingleItemDataProvider.class) {
+			return getImage(((SingleItemDataProvider)dataProvider).getParent());
+		}
+		return images.get(dataProvider.getClass());
+	}
+	
+	public void dispose() {
+		if (images != null) {
+			images.values().forEach(e->{if (!e.isDisposed()) e.dispose();});
+		}
+	}
 	
 	/**
 	 * 
@@ -82,6 +107,37 @@ public enum InternalExtensionManager {
 	
 	public void clearAutoRoutines(){
 		this.autoRoutines = null;
+	}
+
+	
+	/**
+	 * reads the data provider images
+	 */
+	@SuppressWarnings("unchecked")
+	private synchronized void readImages(){
+		if (images != null) return;
+		
+		HashMap<Class<? extends IQaDataProvider>, Image> imgs = new HashMap<>();
+		IExtensionRegistry registry = RegistryFactory.getRegistry();
+		IExtensionPoint pnt = registry.getExtensionPoint(RoutineExtensionManager.QA_ROUTINE_TYPE_EXTENSION_ID);
+		IConfigurationElement[] config = pnt.getConfigurationElements();
+		for (IConfigurationElement e : config) {
+			if (e.getName().equals("data_provider")){ //$NON-NLS-1$
+				try{
+					Class<?extends IQaDataProvider> routineType = (Class<? extends IQaDataProvider>) e.createExecutableExtension("class").getClass(); //$NON-NLS-1$
+					String image = e.getAttribute("image"); //$NON-NLS-1$
+					if (image != null) {
+						ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(e.getNamespaceIdentifier(), image);
+						Image img = id.createImage();
+						if (img != null) imgs.put(routineType, img);
+						
+					}
+				}catch (Exception ex){
+					QaPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		}
+		this.images = imgs;
 	}
 	
 	/**

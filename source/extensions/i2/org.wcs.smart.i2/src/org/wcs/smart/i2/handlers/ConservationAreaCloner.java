@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -58,36 +59,35 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.ConservationAreaCloner_TaskName, 6);
-		try{
-			monitor.subTask(Messages.ConservationAreaCloner_AttributeSubTask);
-			cloneAttributes(engine);
-			monitor.worked(1);
+		
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaCloner_TaskName, 6);
+		
+		progress.subTask(Messages.ConservationAreaCloner_AttributeSubTask);
+		cloneAttributes(engine);
+		progress.worked(1);
+		
+		progress.setTaskName(Messages.ConservationAreaCloner_EntityTypeSubTask);
+		cloneEntityTypes(engine);
+		progress.worked(1);
+		
+		progress.setTaskName(Messages.ConservationAreaCloner_GroupsSubTask);
+		cloneRelationshipGroups(engine);
+		progress.worked(1);
+		
+		progress.setTaskName(Messages.ConservationAreaCloner_RelationshiptypesSubTask);
+		cloneRelationshipTypes(engine);
+		progress.worked(1);
+		
+		progress.setTaskName(Messages.ConservationAreaCloner_SourceTypesSubTask);
+		cloneRecordSource(engine);
+		progress.worked(1);
 			
-			monitor.setTaskName(Messages.ConservationAreaCloner_EntityTypeSubTask);
-			cloneEntityTypes(engine);
-			monitor.worked(1);
-			
-			monitor.setTaskName(Messages.ConservationAreaCloner_GroupsSubTask);
-			cloneRelationshipGroups(engine);
-			monitor.worked(1);
-			
-			monitor.setTaskName(Messages.ConservationAreaCloner_RelationshiptypesSubTask);
-			cloneRelationshipTypes(engine);
-			monitor.worked(1);
-			
-			monitor.setTaskName(Messages.ConservationAreaCloner_SourceTypesSubTask);
-			cloneRecordSource(engine);
-			monitor.worked(1);
-			
-			//clone record template
-			Path source = IntelReportManager.INSTANCE.getRecordTemplate(engine.getTemplateCa());
-			Path target = IntelReportManager.INSTANCE.getRecordTemplate(engine.getNewCa());
-			if (Files.exists(source)) FileUtils.copyFile(source.toFile(), target.toFile());
-			monitor.worked(1);
-		}finally{
-			monitor.done();
-		}
+		//clone record template
+		Path source = IntelReportManager.INSTANCE.getRecordTemplate(engine.getTemplateCa());
+		Path target = IntelReportManager.INSTANCE.getRecordTemplate(engine.getNewCa());
+		if (Files.exists(source)) FileUtils.copyFile(source.toFile(), target.toFile());
+		progress.worked(1);
+		
 	}
 
 	

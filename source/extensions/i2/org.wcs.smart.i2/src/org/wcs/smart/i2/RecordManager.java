@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -83,14 +85,15 @@ public enum RecordManager {
 	 * Deletes a collection of intelligence records.
 	 * @param records list of IntelRecord or RecordEditorInput
 	 * @param context
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 *  to call done() on the given monitor. 
 	 */
 	public void deleteRecords(Collection<? extends Object> records, IEclipseContext context, IProgressMonitor monitor){
 		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			MessageDialog.openError(context.get(Shell.class), Messages.RecordManager_ErrorTitle, Messages.RecordManager_InsufficientPrivileges);
 			return;
 		}
-		monitor.beginTask(Messages.RecordManager_Progress1, records.size());
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.RecordManager_Progress1, records.size());
 		Session s = HibernateManager.openSession(new AttachmentInterceptor());
 		List<IntelEntity> entities = new ArrayList<IntelEntity>();
 		List<IntelRecord> deleted = new ArrayList<IntelRecord>();
@@ -106,28 +109,27 @@ public enum RecordManager {
 					//this should never happen but if we don't have a record then ignore
 					continue;
 				}
-				monitor.subTask(record.getTitle());
+				progress.subTask(record.getTitle());
 				for (IntelEntityRecord r : record.getEntities()){
 					entities.add(r.getEntity());
 				}
 				
 				deleteRecord(record, s);
 				deleted.add(record);
-				monitor.worked(1);
-				if (monitor.isCanceled()){
-					s.getTransaction().rollback();
-					return;
-				}
+				progress.worked(1);
+				progress.checkCanceled();
 			}
 			
 			s.getTransaction().commit();
+		}catch (OperationCanceledException e) {
+			s.getTransaction().rollback();
+			return;
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(Messages.RecordManager_DeleteError + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
-			monitor.done();
 		}
 		IEventBroker broker = context.get(IEventBroker.class);
 		broker.send(IntelEvents.RECORD_DELETE, deleted);

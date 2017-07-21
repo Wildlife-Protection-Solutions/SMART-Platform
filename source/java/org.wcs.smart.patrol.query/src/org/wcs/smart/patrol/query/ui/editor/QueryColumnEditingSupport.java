@@ -25,7 +25,6 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn.FixedColumns;
-import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.common.ui.edit.AttributeColumnEditor;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;

@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
@@ -62,8 +63,7 @@ public class ShpSamplingUnitExporter implements ISamplingUnitExporter{
 	@Override
 	public void exportFile(File f, SurveyDesign sd, Session session,
 			HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception {
-
-		monitor.beginTask(Messages.ShpSamplingUnitExporter_Progress1, 1);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ShpSamplingUnitExporter_Progress1, 1);
 		
 		
 		GeometryType type = (GeometryType) options.get(SU_TYPE_KEY);
@@ -97,9 +97,7 @@ public class ShpSamplingUnitExporter implements ISamplingUnitExporter{
 		
 		shapefile.dispose();
 		
-		monitor.worked(1);
-		monitor.done();
-		
+		progress.worked(1);		
 	}
 
 

@@ -78,6 +78,7 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditor;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class RecordNarrativeView {
 
 	public static final String ID = "org.wcs.smart.i2.record.editor.narrative"; //$NON-NLS-1$

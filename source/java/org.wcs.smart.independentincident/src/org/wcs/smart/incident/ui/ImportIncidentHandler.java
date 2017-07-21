@@ -51,6 +51,7 @@ import org.wcs.smart.observation.model.Waypoint;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ImportIncidentHandler {
 
 	private static final String INCIDENT_NO_IMPORTED = Messages.ImportIncidentHandler_ImportError;

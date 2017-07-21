@@ -42,6 +42,7 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class NewRecordHandler {
 	
 	@Execute

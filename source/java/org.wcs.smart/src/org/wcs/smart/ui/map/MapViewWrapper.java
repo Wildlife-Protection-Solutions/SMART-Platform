@@ -26,17 +26,18 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class MapViewWrapper extends DIViewPart<MapView> implements MapPart{
 
 	public MapViewWrapper() {
 		super(MapView.class);
 	}
 
-	@SuppressWarnings({ "rawtypes" })
-	public Object getAdapter(Class adaptee) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Class<T> adaptee) {
 		Object x = getComponent().getAdapter(adaptee);
 		if (x != null){
-			return x;
+			return (T)x;
 		}
 		return super.getAdapter(adaptee);
 	}

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.qa.ui.view;
 
 import java.text.Collator;
@@ -46,6 +67,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -60,6 +82,7 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.MapPart;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
@@ -155,16 +178,30 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 	protected TableViewer tblResults;
 	protected Label lblResultCnt;
 	protected Label lblSelectedCnt;
-	protected ToolItem btnIncludeFixed ;
+	protected ToolItem btnIncludeFixed;
 	
 	private Font boldFont;
 	private FormToolkit toolkit = null;
 	
 	private ResultTableColumn sortColumn;
 	private int sortDirection = 1;
+	private boolean sortOnSelection = false;
+	
 	private ViewerComparator sorter = new ViewerComparator(){
 	  @Override
 	    public int compare(Viewer viewer, Object o1, Object o2) {
+		  if (sortOnSelection){
+			  boolean a1 = false;
+			  boolean a2 = false;
+			  for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
+					Object x = iterator.next();
+					if (x.equals(o1)) a1 = true;
+					if (x.equals(o2)) a2 = true;
+					if (a1 && a2) break;
+			  }
+			  if (a1 && a2) return 0;
+			  return -1* Boolean.compare(a1, a2);
+		  }
 		  if (sortColumn == null) return 0;
 		  if (o1 instanceof QaError && o2 instanceof QaError){
 			  return sortDirection * sortColumn.compare((QaError)o1, (QaError)o2);
@@ -277,6 +314,21 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		scroll.setMinSize(textArea.computeSize(width, SWT.DEFAULT));		
 	}
 	
+	/*
+	 * order table input by selection rather than column;
+	 * this is a one time thing, not maintained as selection
+	 * changes
+	 */
+	private void orderBySelection(){
+		tblResults.getTable().setSortColumn(null);
+		sortOnSelection = true;
+		tblResults.setComparator(sorter);
+		tblResults.refresh();
+		tblResults.getTable().showSelection();
+		sortOnSelection = false;
+	}
+	
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit =  new FormToolkit(parent.getDisplay());
@@ -318,6 +370,14 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		btnIncludeFixed.setToolTipText(Messages.TableMapQaErrorComposite_filterTooltip);
 		btnIncludeFixed.setImage(QaPlugIn.getDefault().getImageRegistry().get(QaPlugIn.ICON_FILTER));
 		
+		ToolItem btnOrderSelection = new ToolItem(tb,  SWT.PUSH);
+		btnOrderSelection.setSelection(false);
+		btnOrderSelection.addListener(SWT.Selection, e->{
+			orderBySelection();
+		});
+		btnOrderSelection.setToolTipText(Messages.TableMapQaErrorComposite_sortOnSelection);
+		btnOrderSelection.setImage(QaPlugIn.getDefault().getImageRegistry().get(QaPlugIn.ICON_SORT));
+		
 		createHeaderToolbar(topComp);
 		
 		SashForm tableArea = new SashForm(main, SWT.HORIZONTAL);
@@ -344,6 +404,8 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			column.getColumn().addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
+					btnOrderSelection.setSelection(false);
+					
 					if (sortColumn == c)
 						sortDirection = sortDirection * -1;
 					else
@@ -352,6 +414,8 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 					tblResults.getTable().setSortColumn(column.getColumn());
 					tblResults.setComparator(sorter);
 					tblResults.refresh();
+					
+					
 				}
 				
 				@Override
@@ -692,8 +756,13 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 	 * Refreshes the results table and the map
 	 */
 	public void refreshResults(){
+		//reset tool
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		if (tools != null) tools.selectLastTool();
+		//set to correct page
+		if (PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart() instanceof MapPart){
+			ApplicationGIS.getToolManager().setCurrentEditor((MapPart)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart());	
+		}
 		tblResults.refresh();
 		clearSelection();
 		updateResultsTableFilter();

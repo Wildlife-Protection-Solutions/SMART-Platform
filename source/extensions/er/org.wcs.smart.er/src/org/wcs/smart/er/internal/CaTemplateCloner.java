@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -53,26 +54,22 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-
-		monitor.beginTask(Messages.CaTemplateCloner_CopySurveyElement, 3);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaTemplateCloner_CopySurveyElement, 3);
 		
 		//clone mission attributes
 		cloneMissionAttributes(engine);
-		monitor.worked(1);
+		progress.worked(1);
 		engine.getSession().flush();
 		
 		//clone sampling unit attributes
 		cloneSamplingUnitAttributes(engine);
-		monitor.worked(1);
+		progress.worked(1);
 		engine.getSession().flush();
 		
 		//clone survey designs
 		cloneDesigns(engine);
-		monitor.worked(1);
+		progress.worked(1);
 		engine.getSession().flush();
-		
-		monitor.done();
-		
 	}
 	
 	/*

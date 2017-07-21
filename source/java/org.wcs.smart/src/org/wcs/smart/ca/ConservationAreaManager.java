@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
@@ -83,18 +84,11 @@ public class ConservationAreaManager {
 	 * area is deleted the application restarts.
 	 * 
 	 * @param ca the conservation area to delete
-	 * @param monitor the progress monitor; cannot be null
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception if conservation area not deleted
 	 */
 	public void deleteConservationArea(ConservationArea ca, IProgressMonitor monitor, boolean restart) throws Exception{
-		
-		int work = 1;
-		for (ArrayList<ICaDeleteHandler> data : deleteListeners.values()){
-			work += data.size();
-		}
-		
-		monitor.beginTask(Messages.ConservationAreaManager_Progress_DeleteCa, work);
-		monitor.worked(0);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaManager_Progress_DeleteCa, 3); 
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -102,14 +96,15 @@ public class ConservationAreaManager {
 			ca = (ConservationArea)session.get(ConservationArea.class, ca.getUuid());
 			final File fileStore = new File(ca.getFileDataStoreLocation());
 			
-			runDeleteHandlers(ca, session, monitor);
-			monitor.subTask(Messages.ConservationAreaManager_Progress_DeleteCa);
+			runDeleteHandlers(ca, session, progress.split(1));
+			
+			progress.subTask(Messages.ConservationAreaManager_Progress_DeleteCa);
 			session.delete(ca);
 			session.getTransaction().commit();
-			monitor.worked(1);
+			progress.worked(1);
 			
 			if (fileStore.exists()){
-				monitor.subTask(Messages.ConservationAreaManager_Progress_RemoveFileStore);
+				progress.subTask(Messages.ConservationAreaManager_Progress_RemoveFileStore);
 				try{
 					FileUtils.forceDelete(fileStore);
 				}catch(final Exception ex){
@@ -120,8 +115,8 @@ public class ConservationAreaManager {
 						}});
 				}
 			}
-			monitor.worked(1);
-			monitor.subTask(Messages.ConservationAreaManager_Progress_Restarting);
+			progress.worked(1);
+			progress.subTask(Messages.ConservationAreaManager_Progress_Restarting);
 		}catch (Exception ex){
 			session.getTransaction().rollback();
 			throw ex;
@@ -143,14 +138,18 @@ public class ConservationAreaManager {
 	 * 
 	 */
 	private void runDeleteHandlers(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, "", 1); //$NON-NLS-1$
 		ArrayList<Integer> items = new ArrayList<Integer> ();
 		items.addAll(deleteListeners.keySet());
 		Collections.sort(items);
+		
+		int totalCnt = deleteListeners.values().stream().mapToInt(List::size).sum();
+		progress.setWorkRemaining(totalCnt);
+		
 		for(int i = items.size() - 1; i >= 0; i --){
 			ArrayList<ICaDeleteHandler> listeners = deleteListeners.get(items.get(i));
 			for (ICaDeleteHandler listener : listeners){
-				listener.beforeDelete(ca, session, monitor);
-				monitor.worked(1);
+				listener.beforeDelete(ca, session, progress.split(1));
 			}
 		}
 	}

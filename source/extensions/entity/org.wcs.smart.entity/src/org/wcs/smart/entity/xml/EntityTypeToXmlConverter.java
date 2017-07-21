@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -36,10 +37,12 @@ public class EntityTypeToXmlConverter {
 	 * 
 	 * 
 	 * @param entityType
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
 	 * @return
 	 */
 	public static org.wcs.smart.entity.xml.model.EntityType toXml(EntityType entityType, IProgressMonitor monitor){
-		monitor.beginTask(MessageFormat.format(Messages.EntityTypeToXmlConverter_Progress1, new Object[]{entityType.getName()}), entityType.getAttributes().size() + 1);
+		SubMonitor progress = SubMonitor.convert(monitor, MessageFormat.format(Messages.EntityTypeToXmlConverter_Progress1, new Object[]{entityType.getName()}), entityType.getAttributes().size() + 1);
 		org.wcs.smart.entity.xml.model.EntityType xml = new org.wcs.smart.entity.xml.model.EntityType();
 
 		xml.setKeyid(entityType.getKeyId());
@@ -47,10 +50,10 @@ public class EntityTypeToXmlConverter {
 		xml.setType(entityType.getType().name());
 		xml.getNames().addAll(processNames(entityType));
 		xml.setDmAttribute(processAttribute(entityType.getDmAttribute()));
-		monitor.worked(1);
+		progress.worked(1);
 		
 		for (EntityAttribute et : entityType.getAttributes()){
-			monitor.subTask(MessageFormat.format(Messages.EntityTypeToXmlConverter_Progress2, new Object[]{et.getName()}));
+			progress.subTask(MessageFormat.format(Messages.EntityTypeToXmlConverter_Progress2, new Object[]{et.getName()}));
 			
 			org.wcs.smart.entity.xml.model.EntityAttribute xmlAtt = new org.wcs.smart.entity.xml.model.EntityAttribute();
 			
@@ -61,9 +64,8 @@ public class EntityTypeToXmlConverter {
 			xmlAtt.getAliases().addAll(processNames(et));
 			
 			xml.getAttributes().add(xmlAtt);
-			monitor.worked(1);
+			progress.worked(1);
 		}
-		monitor.done();
 		
 		return xml;
 	}

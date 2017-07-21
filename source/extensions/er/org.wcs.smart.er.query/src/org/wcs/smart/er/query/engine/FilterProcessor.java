@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -143,7 +144,8 @@ public class FilterProcessor implements IFilterProcessor {
 			boolean includeEmptyObservations,
 			IProgressMonitor monitor) throws SQLException{
 		
-		monitor.beginTask(Messages.FilterProcessor_progress1, 50);
+		SubMonitor progress = SubMonitor.convert(monitor, 5);
+		progress.subTask(Messages.FilterProcessor_progress1);
 		
 		IFilter qFilter = queryFilter;
 		if (qFilter == null){
@@ -151,51 +153,41 @@ public class FilterProcessor implements IFilterProcessor {
 		}
 		
 		//observation filter
-		qFilter.accept(observationFilterVisitor);		
+		qFilter.accept(observationFilterVisitor);
+		SubMonitor sub = progress.split(1);
 		if (observationFilterVisitor.hasAttributeFilter()){
-			createObservationTable(c, qFilter, dateFilter, caFilter, monitor);
-		}
-		monitor.worked(10);
-		if (monitor.isCanceled()){
-			return;
+			createObservationTable(c, qFilter, dateFilter, caFilter, sub);
 		}
 
 		//mission filters
-		monitor.subTask(Messages.FilterProcessor_ProgressMissionFilters);
+		progress.subTask(Messages.FilterProcessor_ProgressMissionFilters);
+		sub = progress.split(1);
 		queryFilter.accept(mpcollector);
 		if (mpcollector.getAttributeInfo().size() > 0){
 			this.missionTable = engine.createTempTableName();
-			createMissionTable(c, qFilter, caFilter, dateFilter, monitor);
+			createMissionTable(c, qFilter, caFilter, dateFilter, sub);
 		}
-		monitor.worked(10);
 		
-		monitor.subTask(Messages.FilterProcessor_ProgressSuFilters);
+		
+		progress.subTask(Messages.FilterProcessor_ProgressSuFilters);
+		sub = progress.split(1);
 		queryFilter.accept(sucollector);
 		if (sucollector.getAttributeInfo().size() > 0){
 			this.suAttributeTable = engine.createTempTableName();
-			createSamplingUnitAttributeTable(c, qFilter, caFilter, dateFilter, monitor);
-		}
-		monitor.worked(10);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.FilterProcessor_ProgressDataTableCreate);
-		createTemporaryTable(c);
-		monitor.worked(10);
-		if (monitor.isCanceled()){
-			return;
+			createSamplingUnitAttributeTable(c, qFilter, caFilter, dateFilter, sub);
 		}
 		
-		monitor.subTask(Messages.FilterProcessor_ProgressDataTablePopulate);
+
+		progress.subTask(Messages.FilterProcessor_ProgressDataTableCreate);
+		progress.split(1);
+		createTemporaryTable(c);
+		
+		
+		progress.subTask(Messages.FilterProcessor_ProgressDataTablePopulate);
+		progress.split(1);
 		populateTemporaryTable(qFilter, dateFilter, caFilter, 
 				includeEmptyObservations, c, populateObservation);
-		monitor.worked(10);
-		if (monitor.isCanceled()){
-			return;
-		}
 		
-		monitor.done();
 	}
 	
 	
@@ -481,8 +473,8 @@ public class FilterProcessor implements IFilterProcessor {
 	private void createObservationTable(Connection c, IFilter filter, 
 			DateFilter dateFilter, ConservationAreaFilter caFilter, IProgressMonitor monitor)
 			throws SQLException {
-		
-		monitor.subTask(Messages.FilterProcessor_progress3);
+		SubMonitor progress = SubMonitor.convert(monitor,1);
+		progress.subTask(Messages.FilterProcessor_progress3);
 		
 		AttributeFilterCollectorVisitor collector = new AttributeFilterCollectorVisitor();
 		filter.accept(collector);
@@ -507,9 +499,10 @@ public class FilterProcessor implements IFilterProcessor {
 		c.createStatement().execute(sql.toString());
 		
 		String attributeTempTable = engine.createTempTableName();
-			
+		progress.setWorkRemaining(keys.size());
 		for (AttributeInfo key : keys){
-			monitor.subTask(Messages.FilterProcessor_progress4  + key.getKey());
+			progress.split(1);
+			progress.subTask(Messages.FilterProcessor_progress4  + key.getKey());
 			
 			//create temporary table for attribute observations
 			sql = new StringBuilder();
@@ -687,6 +680,7 @@ public class FilterProcessor implements IFilterProcessor {
 			DateFilter dateFilter,
 			IProgressMonitor monitor) throws SQLException{
 
+		SubMonitor progress = SubMonitor.convert(monitor,1);
 		Set<AttributeInfo> keys = mpcollector.getAttributeInfo();
 		
 		StringBuilder sql = new StringBuilder();
@@ -704,8 +698,10 @@ public class FilterProcessor implements IFilterProcessor {
 		
 		
 		String lTempTable = engine.createTempTableName();
+		progress.setWorkRemaining(keys.size());
 		for (AttributeInfo key : keys){
-			monitor.subTask(Messages.FilterProcessor_progress5  + key.getKey());
+			progress.split(1);
+			progress.subTask(Messages.FilterProcessor_progress5  + key.getKey());
 			
 			//create temporary table for attribute observations
 			sql = new StringBuilder();
@@ -847,6 +843,7 @@ public class FilterProcessor implements IFilterProcessor {
 			DateFilter dateFilter,
 			IProgressMonitor monitor) throws SQLException{
 
+		SubMonitor progress = SubMonitor.convert(monitor, 1);
 		Set<AttributeInfo> keys = sucollector.getAttributeInfo();
 		
 		StringBuilder sql = new StringBuilder();
@@ -864,8 +861,10 @@ public class FilterProcessor implements IFilterProcessor {
 		
 		
 		String lTempTable = engine.createTempTableName();
+		progress.setWorkRemaining(keys.size());
 		for (AttributeInfo key : keys){
-			monitor.subTask(Messages.FilterProcessor_progress5  + key.getKey());
+			progress.split(1);
+			progress.subTask(Messages.FilterProcessor_progress5  + key.getKey());
 			
 			//create temporary table for attribute observations
 			sql = new StringBuilder();

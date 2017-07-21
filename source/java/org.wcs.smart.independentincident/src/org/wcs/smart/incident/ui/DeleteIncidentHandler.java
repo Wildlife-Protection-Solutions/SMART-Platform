@@ -54,6 +54,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DeleteIncidentHandler{
 
 	@Execute

@@ -184,7 +184,7 @@ public class AutoQueueProcessingJob extends Job {
 			for (LocalDataQueueItem i : localItems){
 				for (DataQueueItem serverItem : serverItems){
 					if (serverItem.getUuid().equals(i.getServerItemUuid())){
-						serverItems.remove(server);
+						serverItems.remove(serverItem);
 						break;
 					}
 				}

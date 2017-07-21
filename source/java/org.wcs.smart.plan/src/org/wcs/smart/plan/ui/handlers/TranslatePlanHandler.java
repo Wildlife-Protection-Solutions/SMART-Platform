@@ -45,6 +45,7 @@ import org.wcs.smart.ui.TranslateNamesHandler;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class TranslatePlanHandler extends TranslateNamesHandler {
 
 	@Override

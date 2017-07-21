@@ -45,6 +45,7 @@ import org.wcs.smart.ca.datamodel.IDataModelItemListener;
 import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -184,20 +185,21 @@ public class DataModelItemListener implements IDataModelItemListener {
 			
 			interceptor.onDelete(a, a.getUuid(),null, null, null);
 			//register delete on children (ensure images are removed)
-			if (a.getList() != null){
-				for (CmAttributeListItem l : a.getList()){
-					interceptor.onDelete(l, l.getUuid(),null, null, null);
-				}
-			}
-			if (a.getTree() != null){
-				List<CmAttributeTreeNode> nodes = new ArrayList<>();
-				nodes.addAll(a.getTree());
-				while(!nodes.isEmpty()){
-					CmAttributeTreeNode n = nodes.remove(0);
-					interceptor.onDelete(n, n.getUuid(),null, null, null);
-					nodes.addAll(n.getChildren());
-				}
-			}
+			//TODO: QQQ fix code below
+//			if (a.getList() != null){
+//				for (CmAttributeListItem l : a.getList()){
+//					interceptor.onDelete(l, l.getUuid(),null, null, null);
+//				}
+//			}
+//			if (a.getTree() != null){
+//				List<CmAttributeTreeNode> nodes = new ArrayList<>();
+//				nodes.addAll(a.getTree());
+//				while(!nodes.isEmpty()){
+//					CmAttributeTreeNode n = nodes.remove(0);
+//					interceptor.onDelete(n, n.getUuid(),null, null, null);
+//					nodes.addAll(n.getChildren());
+//				}
+//			}
 			
 			//update the order of other attribute
 			for (int i = 0; i < a.getNode().getCmAttributes().size(); i ++){
@@ -299,9 +301,6 @@ public class DataModelItemListener implements IDataModelItemListener {
 				
 				ConfigurableModel cm = node.getModel();
 				if (AttributeType.TREE.equals(attribute.getType()) || AttributeType.LIST.equals(attribute.getType())) {
-					CmAttributeOption option = CmAttributeOptionFactory.createCustomCofigOption(newAttribute);
-					option.setBooleanValue(true);
-					newAttribute.getCmAttributeOptions().put(CmAttributeOption.ID_CUSTOM_CONFIG, option);
 					if (!changedModels.contains(cm)) {
 						//create default configurations if needed
 						changedModels.add(cm);
@@ -313,11 +312,15 @@ public class DataModelItemListener implements IDataModelItemListener {
 					}
 					//create custom configurations
 					if (AttributeType.TREE.equals(attribute.getType())) {
-						List<CmAttributeTreeNode> customTree = CmCustomTreesUtil.buildCustomTree(cm, newAttribute, attribute);
-						newAttribute.setTree(customTree);
+						CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(cm, attribute, false);
+						CmAttributeConfigUtil.assignCustomName(cfg, newAttribute);
+						cfg.setTree(CmCustomTreesUtil.buildCustomTree(cfg, attribute));
+						newAttribute.setConfig(cfg);
 					} else if (AttributeType.LIST.equals(attribute.getType())) {
-						List<CmAttributeListItem> customList = CmCustomListsUtil.buildCustomList(cm, newAttribute, attribute);
-						newAttribute.setList(customList);
+						CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(cm, attribute, false);
+						CmAttributeConfigUtil.assignCustomName(cfg, newAttribute);
+						cfg.setList(CmCustomListsUtil.buildCustomList(cfg, attribute));
+						newAttribute.setConfig(cfg);
 					}
 				}
 
@@ -330,8 +333,8 @@ public class DataModelItemListener implements IDataModelItemListener {
 	private void ensureDefaultTreeExists(Session s, ConfigurableModel m, Attribute a) {
 		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(m);
 		if (!existingTrees.contains(a)) {
-			List<CmAttributeTreeNode> defTree = CmDefaultTreesUtil.buildDefaultTree(m, a);
-			m.getDefaultTrees().addAll(defTree);
+			CmAttributeConfig cfg = CmDefaultTreesUtil.buildDefaultTreeConfig(m, a);
+			m.getDefaultConfigs().put(a, cfg);
 			s.saveOrUpdate(m);
 		}
 	}
@@ -339,47 +342,25 @@ public class DataModelItemListener implements IDataModelItemListener {
 	private void ensureDefaultListExists(Session s, ConfigurableModel m, Attribute a) {
 		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
 		if (!existingLists.contains(a)) {
-			List<CmAttributeListItem> defList = CmDefaultListsUtil.buildDefaultList(m, a);
-			m.getDefaultLists().addAll(defList);
+			CmAttributeConfig cfg = CmDefaultListsUtil.buildDefaultListConfig(m, a);
+			m.getDefaultConfigs().put(a, cfg);
 			s.saveOrUpdate(m);
 		}
 	}
 	
 	private void addAttributeListItem(Session currentSession, AttributeListItem dmListItem) {
-		List<CmAttribute> attrList = currentSession.createCriteria(CmAttribute.class).add(Restrictions.eq("attribute", dmListItem.getAttribute())).list(); //$NON-NLS-1$
-		Set<CmAttribute> attributes = new HashSet<>(attrList); //this will remove duplicates
-		Set<ConfigurableModel> processedCMs = new HashSet<>();
-		for (CmAttribute a : attributes) {
-			ConfigurableModel cm = a.getNode().getModel();
-			if (!processedCMs.contains(cm)) {
-				//need to add new CmAttributeListItem to default lists configuration
-				processedCMs.add(cm);
-				CmAttributeListItem li = createCmAttributeListItem(dmListItem, cm);
-				li.setDmAttribute(dmListItem.getAttribute());
-				currentSession.saveOrUpdate(li);
-			}
-			if (a.isUseCustomConfig()) {
-				//need to add new CmAttributeListItem to custom list configuration
-				CmAttributeListItem li = createCmAttributeListItem(dmListItem, cm);
-				li.setAttribute(a);
-				currentSession.saveOrUpdate(li);
-			}
+		List<CmAttributeConfig> cfgList = currentSession.createCriteria(CmAttributeConfig.class).add(Restrictions.eq("attribute", dmListItem.getAttribute())).list(); //$NON-NLS-1$
+		for (CmAttributeConfig c : cfgList) {
+			CmAttributeListItem cmListItem = new CmAttributeListItem();
+			cmListItem.setConfig(c);
+			cmListItem.setListItem(dmListItem);
+			cmListItem.setIsActive(false); //by design
+			cmListItem.setListOrder(dmListItem.getListOrder());
+
+			currentSession.saveOrUpdate(cmListItem);
 		}
 	}
 	
-	/**
-	 * Notice that returned item is not fully filled.
-	 * DM or CM attribute must be additionally assigned to it
-	 */
-	private CmAttributeListItem createCmAttributeListItem(AttributeListItem dmListItem, ConfigurableModel model) {
-		CmAttributeListItem cmListItem = new CmAttributeListItem();
-		cmListItem.setConfigurableModel(model);
-		cmListItem.setListItem(dmListItem);
-		cmListItem.setIsActive(false); //by design
-		cmListItem.setListOrder(dmListItem.getListOrder());
-		return cmListItem;
-	}
-
 	/**
 	 * Here we only care if an attribute was enabled as it must be added.
 	 * Disabled attributes are dealt with when save is called in

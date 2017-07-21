@@ -35,6 +35,7 @@ import org.wcs.smart.ui.ShowPerspectiveHandler;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ImportQueryHandler {
 
 	@Execute

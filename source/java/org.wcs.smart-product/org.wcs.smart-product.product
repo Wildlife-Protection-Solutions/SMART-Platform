@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="SMART" uid="smartapp" id="org.wcs.smart.smartapp" application="org.wcs.smart" version="5.0.0" useFeatures="true" includeLaunchers="true">
+<product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="5.0.0" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="./images/nl/en/about.png"/>
@@ -28,7 +28,6 @@
    <launcher name="SMART">
       <linux icon="./images/icons/smart.xpm"/>
       <macosx icon="./images/icons/smart.icns"/>
-      <solaris/>
       <win useIco="true">
          <ico path="./images/icons/smart.ico"/>
          <bmp/>
@@ -119,11 +118,10 @@ limitations under the License.
    </plugins>
 
    <features>
-      <feature id="org.eclipse.rcp"/>
-      <feature id="org.wcs.smart-feature"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.emf.common"/>
-      <feature id="org.eclipse.equinox.p2.extras.feature"/>
+      <feature id="org.wcs.smart.feature"/>
+      <feature id="org.eclipse.rcp"/>
    </features>
 
    <configurations>

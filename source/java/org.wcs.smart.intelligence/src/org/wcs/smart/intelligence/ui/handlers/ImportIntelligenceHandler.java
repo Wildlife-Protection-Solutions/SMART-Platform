@@ -48,6 +48,7 @@ import org.wcs.smart.intelligence.xml.IntelligenceImporter;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ImportIntelligenceHandler {
 
 	@Execute

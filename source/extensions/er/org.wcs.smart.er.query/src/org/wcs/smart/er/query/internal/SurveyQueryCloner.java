@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
@@ -56,34 +57,33 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.SurveyQueryCloner_CopyQueryProgress, 6);
-		try{
-			monitor.subTask(Messages.SurveyQueryCloner_GriddedTask);
-			cloneGriddedQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_SummaryTask);
-			cloneSummaryQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_ObservationTask);
-			cloneObservationQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_IncidentTask);
-			cloneWaypointQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_MissionTask);
-			cloneMissionQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_MissionTrackTask);
-			cloneMissionTrackQuery(engine);
-			monitor.worked(1);
-		}finally{
-			monitor.done();
-		}
+	
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.SurveyQueryCloner_CopyQueryProgress, 6);
+	
+		progress.subTask(Messages.SurveyQueryCloner_GriddedTask);
+		cloneGriddedQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_SummaryTask);
+		cloneSummaryQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_ObservationTask);
+		cloneObservationQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_IncidentTask);
+		cloneWaypointQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_MissionTask);
+		cloneMissionQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_MissionTrackTask);
+		cloneMissionTrackQuery(engine);
+		progress.worked(1);
+	
 	}
 	
 	/*

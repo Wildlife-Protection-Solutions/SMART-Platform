@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -93,9 +94,8 @@ public enum RecordImportEngine {
 	 */
 	@SuppressWarnings("unchecked")
 	public Integer importRecords(RecordImportConfig config, IEventBroker eventBroker, IProgressMonitor pMonitor) throws Exception{
-		SubMonitor monitor = SubMonitor.convert(pMonitor);
+		SubMonitor monitor = SubMonitor.convert(pMonitor, Messages.RecordImportEngine_TaskName, 5);
 		
-		monitor.beginTask(Messages.RecordImportEngine_TaskName, 5);
 		//ensure the file exists
 		if (!Files.exists(config.getFile())) throw new FileNotFoundException(config.getFile().toString());
 		
@@ -131,7 +131,7 @@ public enum RecordImportEngine {
 			s.close();
 		}
 		monitor.worked(1);
-		if (monitor.isCanceled()) return null;
+		monitor.checkCanceled();
 
 		List<IntelRecord> addedItems = new ArrayList<>();
 		List<String> warnings = new ArrayList<String>();
@@ -149,12 +149,13 @@ public enum RecordImportEngine {
 			numcols = ldata.length;
 		}
 		monitor.worked(1);
+		monitor.checkCanceled();
 		
-		SubMonitor kidMonitor = monitor.newChild(1, 0);
+		SubMonitor kidMonitor = monitor.split(1);
 		kidMonitor.setWorkRemaining(lineCnt);
 		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile()), config.getDelimiter())){
-			kidMonitor.worked(1);
-			if (monitor.isCanceled()) return null;
+			kidMonitor.split(1);
+			
 			int line = 0;
 			if (config.skipFirstLine()){
 				reader.readNext();
@@ -260,10 +261,9 @@ public enum RecordImportEngine {
 				return null;
 			}
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()) return null;
 		
-		kidMonitor = monitor.newChild(1, 0);
+		
+		kidMonitor = monitor.split(1);
 		kidMonitor.setWorkRemaining(addedItems.size());
 		//save change
 		s = HibernateManager.openSession();
@@ -272,10 +272,13 @@ public enum RecordImportEngine {
 			//save new records
 			for (IntelRecord i : addedItems){
 				s.save(i);
+				kidMonitor.split(1);
 			}
 			s.getTransaction().commit();
+		}catch (OperationCanceledException ex) {
+			s.getTransaction().rollback();
+			return null;
 		}catch (Exception ex){
-			
 			s.getTransaction().rollback();
 			Intelligence2PlugIn.displayLog(Messages.RecordImportEngine_SaveError + ex.getMessage(), ex);
 			return null;

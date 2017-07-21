@@ -50,7 +50,6 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -123,6 +122,7 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class QueryView {
 
 	public static final String REFRESHLABEL_KEY = "refreshlabel"; //$NON-NLS-1$
@@ -611,13 +611,13 @@ public class QueryView {
 			return this.uuid;
 		}
 
-		@SuppressWarnings("rawtypes")
+		@SuppressWarnings("unchecked")
 		@Override
-		public Object getAdapter(Class adapter) {
-			if (adapter.equals(IntelRecordObservationQuery.class)){
+		public <T> T getAdapter(Class<T> adapter) {
+			if (adapter == IntelRecordObservationQuery.class){
 				IntelRecordObservationQuery q = new IntelRecordObservationQuery();
 				q.setUuid(getUuid());
-				return q;
+				return (T) q;
 			}
 			return null;
 		}
@@ -634,6 +634,7 @@ public class QueryView {
 		public int hashCode(){
 			return Objects.hash(uuid);
 		}
+
 	}
 	
 	private class QueryViewerFilter extends ViewerFilter{

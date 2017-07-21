@@ -43,7 +43,6 @@ import org.wcs.smart.i2.query.IQueryColumn;
  * @author Emily
  *
  */
-@SuppressWarnings("unchecked")
 public class QueryContentFeatureSource extends ContentFeatureSource {
 
 	private QueryDataSource source;

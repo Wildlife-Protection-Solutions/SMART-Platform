@@ -94,6 +94,9 @@ public class QueryErrorControlContribution extends
     
 	@Override
 	protected Control createControl(Composite parent) {
+		//see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=471313
+		parent.getParent().setRedraw(true);
+		
 		main = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
 		gl.marginHeight = gl.verticalSpacing = gl.marginWidth = 0;

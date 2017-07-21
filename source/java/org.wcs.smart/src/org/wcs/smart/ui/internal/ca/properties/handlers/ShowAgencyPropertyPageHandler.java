@@ -29,6 +29,7 @@ import org.wcs.smart.ui.internal.ca.properties.AgencyRankPropertyPage;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowAgencyPropertyPageHandler extends ShowPropertyPageHandler {
 
 	/**

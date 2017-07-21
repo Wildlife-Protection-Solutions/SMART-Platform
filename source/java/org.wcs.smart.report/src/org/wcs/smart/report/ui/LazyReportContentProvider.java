@@ -37,10 +37,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.internal.progress.ProgressMessages;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.progress.DeferredTreeContentManager;
 import org.eclipse.ui.progress.WorkbenchJob;
+import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
@@ -131,8 +131,7 @@ public class LazyReportContentProvider extends BaseWorkbenchContentProvider{
 				@Override
 				protected void addChildren(final Object parent, final Object[] children,
 						IProgressMonitor monitor) {
-					WorkbenchJob updateJob = new WorkbenchJob(
-							ProgressMessages.DeferredTreeContentManager_AddingChildren) {
+					WorkbenchJob updateJob = new WorkbenchJob(Messages.LazyReportContentProvider_loadingkidsprogress) {
 						/*
 						 * (non-Javadoc)
 						 * 

@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
@@ -97,29 +98,32 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		return this.entityTypes;
 	}
 	
+	/**
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 */
 	@SuppressWarnings("unchecked")
 	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor){
-		
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.BasicEntitySearch_taskName, maxResultCnt);
 		Long now = System.nanoTime();
 		
 		if (searchString != null && searchString.length() > 0){
 			//perform fuzzy search
-			monitor.beginTask(Messages.BasicEntitySearch_taskName, maxResultCnt);
+			
 			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, session);
 			int actualCnt = Math.min(sresults.size(), maxResultCnt);
 			for (int i = 0; i < actualCnt; i ++){
 				IntelEntity it = (IntelEntity) session.get(IntelEntity.class, sresults.get(i).getEntityUuid());
 				lazyLoadEntity(it, session);
 				sresults.get(i).setEntity(it);
-				monitor.worked(1);
+				progress.worked(1);
+				progress.checkCanceled();
 			}
-			monitor.done();;
 			return new IntelSearchResult(sresults.size(), sresults.subList(0, actualCnt), System.nanoTime() - now);
 		}
 
 		if (searchString == null || searchString.isEmpty()){
 			//search all entities
-			monitor.beginTask(Messages.BasicEntitySearch_taskName, maxResultCnt);
 			Criteria c = session.createCriteria(IntelEntity.class)
 					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
 			Criteria c1 = session.createCriteria(IntelEntity.class)
@@ -143,13 +147,12 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 				IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(),"", 1.0); //$NON-NLS-1$
 				result.setEntity(it);
 				results.add(result);
-				monitor.worked(1);
+				progress.worked(1);
+				progress.checkCanceled();
 			}
-			monitor.done();
 			return new IntelSearchResult(maxCnt, results, System.nanoTime() - now);
 		}
 		//should never get here
-		monitor.done();
 		return new IntelSearchResult(0, Collections.emptyList(), 0);
 	}
 	

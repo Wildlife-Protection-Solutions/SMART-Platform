@@ -88,7 +88,7 @@ public class ReportAddon {
 							} catch (Exception e) {
 								Intelligence2PlugIn.log(e.getMessage(), e);
 							}
-							monitor.worked(1);;
+							monitor.worked(1);
 						}
 						monitor.done();
 					}

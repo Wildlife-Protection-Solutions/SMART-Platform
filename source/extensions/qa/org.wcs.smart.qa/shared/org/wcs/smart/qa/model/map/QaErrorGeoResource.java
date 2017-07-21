@@ -32,7 +32,6 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.FeatureStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.styling.Style;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
@@ -43,7 +42,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.qa.ILabelProvider;
 import org.wcs.smart.qa.ILabelProvider.Key;
 import org.wcs.smart.udig.IFilteringResource;
-import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Georesource fo QaError layers.  Supports layer filtering.

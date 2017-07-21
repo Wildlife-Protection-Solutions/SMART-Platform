@@ -80,6 +80,7 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class IndIncidentListView implements IIncidentFilteringView {
 
 	public static final String ID = "org.wcs.smart.observation.ui.incidientView"; //$NON-NLS-1$

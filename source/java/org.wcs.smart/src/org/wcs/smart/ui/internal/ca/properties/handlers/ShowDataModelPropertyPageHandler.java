@@ -49,6 +49,7 @@ import org.wcs.smart.util.I18nUtil;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowDataModelPropertyPageHandler {
 	
 	private DataModelPropertyPage dialog = null;

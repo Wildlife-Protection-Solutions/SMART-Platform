@@ -39,14 +39,15 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class SightingResultItemAdapterFactory implements IAdapterFactory {
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (adapterType == Waypoint.class){
 			if (adaptableObject instanceof SightingResultItem){
 				SightingResultItem it = (SightingResultItem)adaptableObject;
 				Waypoint wp = new Waypoint();
 				wp.setUuid(it.getWaypointUuid());
-				return wp;
+				return (T)wp;
 			}else if (adaptableObject instanceof SimpleFeature){
 				SimpleFeature sf = (SimpleFeature)adaptableObject;
 				if (sf.getFeatureType().getTypeName().equals(EntityQueryDataSource.TYPENAME)){
@@ -57,12 +58,10 @@ public class SightingResultItemAdapterFactory implements IAdapterFactory {
 						wpuuid = UuidUtils.stringToUuid(uuid);
 						Waypoint wp = new Waypoint();
 						wp.setUuid(wpuuid);
-						return wp;	
+						return (T)wp;	
 					} catch (Exception e) {
 						EntityPlugIn.log("Cannot adapt entity sighting feature to waypoint.", e); //$NON-NLS-1$
 					}
-					
-					
 				}
 			}
 		}
@@ -70,7 +69,7 @@ public class SightingResultItemAdapterFactory implements IAdapterFactory {
 	}
 
 	@Override
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		return new Class[]{Waypoint.class};
 	}
 

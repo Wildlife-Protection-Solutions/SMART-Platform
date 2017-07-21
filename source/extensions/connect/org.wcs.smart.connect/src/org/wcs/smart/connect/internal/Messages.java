@@ -232,6 +232,11 @@ public class Messages extends NLS {
 	public static String DownloadInstallCcaaHandler_SyncTitle;
 	public static String DownloadInstallCcaaHandler_Title;
 	public static String DownloadInstallCcaaHandler_Warning;
+	public static String DownloadReplaceCaHandler_ConfirmMsg;
+	public static String DownloadReplaceCaHandler_DialogTitle;
+	public static String DownloadReplaceCaHandler_message;
+	public static String DownloadReplaceCaHandler_shelltitle;
+	public static String DownloadReplaceCaHandler_title;
 	public static String EditConnectServerInfoDialog_autoError;
 	public static String EditConnectServerInfoDialog_AutoLabel;
 	public static String EditConnectServerInfoDialog_CertificationError;

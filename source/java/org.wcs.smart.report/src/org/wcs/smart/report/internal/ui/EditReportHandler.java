@@ -36,6 +36,7 @@ import org.wcs.smart.report.model.Report;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class EditReportHandler {
 
 	@Execute

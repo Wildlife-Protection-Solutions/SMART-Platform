@@ -53,16 +53,20 @@ public class UserNameControlContribution extends
 	 */
 	@Override
 	protected Control createControl(Composite parent) {
+		parent.getParent().setRedraw(true);	///see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=471313
+		
 		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginHeight =  gl.horizontalSpacing = gl.verticalSpacing = 0;
 		gl.marginWidth = 5;
 		comp.setLayout(gl);
+		
 		Label lbl = new Label(comp, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		
 		lbl.setText(SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()));
 		lbl.setToolTipText(Messages.UserNameControlContribution_LoggedInLabel_ToolTip + SmartLabelProvider.getFullLabel(SmartDB.getCurrentEmployee()));
-		return comp;
+		return lbl;
 	}
 
 }

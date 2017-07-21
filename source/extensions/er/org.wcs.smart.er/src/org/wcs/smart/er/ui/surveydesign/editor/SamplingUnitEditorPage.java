@@ -47,7 +47,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -140,7 +140,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 	private SamplingUnitColumnLabelProvider sortColumn = null;
 	private int sortDirection = SWT.DOWN;
 	
-	private ViewerSorter viewerComparator = new ViewerSorter(){
+	private ViewerComparator viewerComparator = new ViewerComparator(){
 		@Override
 		public int compare(Viewer viewer, Object o1, Object o2){
 			if (sortColumn == null) return 0;
@@ -730,7 +730,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 				suTable.getTable().setSortColumn(column.getColumn());
 				suTable.getTable().setSortDirection(sortDirection);
 				sortColumn = labelProvider;
-				suTable.setSorter(viewerComparator);		
+				suTable.setComparator(viewerComparator);		
 				suTable.refresh();
 			}
 			

@@ -1,4 +1,5 @@
 package org.wcs.smart.plan.ui;
+import java.util.ArrayList;
 /*
  * Copyright (C) 2012 Wildlife Conservation Society
  *
@@ -32,6 +33,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
 
 /**
@@ -94,16 +96,19 @@ public class LoadPlanJob extends Job {
 		});
 		Session session = HibernateManager.openSession();
 		try{
-			final List roots = PlanHibernateManager.getRootPlans(session, currentFilter);
+			List<PlanEditorInput> rootPlans = PlanHibernateManager.getRootPlans(session, currentFilter);
+			final List<Object> allItems = new ArrayList<>();
+			allItems.addAll(rootPlans);
 			if (addNone){
-				roots.add(0, NONE_LABEL);
+				allItems.add(0, NONE_LABEL);
 			}
+			
 			monitor.internalWorked(0.5);
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					if (planViewer.getViewer().getTree().isDisposed()) return;
-					planViewer.setRootPlans(roots.toArray());
+					planViewer.setRootPlans(allItems.toArray());
 					planViewer.refresh();
 					planViewer.getViewer().expandAll();
 					if (currentSelection != null){

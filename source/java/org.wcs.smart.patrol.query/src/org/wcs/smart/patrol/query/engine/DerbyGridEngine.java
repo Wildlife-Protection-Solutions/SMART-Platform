@@ -44,6 +44,8 @@ import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -142,8 +144,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				
-				monitor.beginTask(Messages.DerbyGridEngine_Progress_RunningQuery, 4);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyGridEngine_Progress_RunningQuery, 3);
 
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -169,7 +170,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					
 					//get numerator results
-					Collection<QueryGridResultItem> numeratorResults = getItems(gridDef, numerator, def.getValueFilter(), caFilter, c, session, monitor, true);
+					Collection<QueryGridResultItem> numeratorResults = getItems(gridDef, numerator, def.getValueFilter(), caFilter, c, session, progress.split(1), true);
 					
 					//apply denominator results
 					if (denominator != null){
@@ -181,7 +182,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 						}
 						//computer denominator results
 						//only recompute filter if filter is different
-						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, def.getRateFilter(), caFilter, c, session, monitor, !isSame);
+						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, def.getRateFilter(), caFilter, c, session, progress.split(1), !isSame);
 						HashMap<String, Double> items = new HashMap<String, Double>();
 						for (QueryGridResultItem it : denominatorResults){
 							items.put(it.getTileId(), it.getValue());
@@ -199,7 +200,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 							}
 						}
 					}
-
+					progress.setWorkRemaining(1);
+					
 					//combine with the patrol existence value
 					HashMap<String, QueryGridResultItem> items = new HashMap<String, QueryGridResultItem>();
 					for (QueryGridResultItem it : numeratorResults){
@@ -218,7 +220,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 							}
 						}
 					}else if (def.getZeroDataFilterOption() == ZeroFilterOption.CUSTOM){
-						Collection<QueryGridResultItem> patrolLocations = computePatrolExistance(c, gridDef, caFilter, def.getZeroDataFilter(), monitor);
+						Collection<QueryGridResultItem> patrolLocations = computePatrolExistance(c, gridDef, caFilter, def.getZeroDataFilter(), progress.split(1));
 						for (QueryGridResultItem it : patrolLocations){
 							if (items.get(it.getTileId()) == null){ 
 								QueryGridResultItem newitem = new QueryGridResultItem();
@@ -230,19 +232,21 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 						}
 						
 					}
+					progress.checkCanceled();
 					myResults = new GridQueryResult(items.values());
-					
-					monitor.worked(1);
+					progress.setWorkRemaining(0);
+				}catch (OperationCanceledException ex) {
+					return;
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryGridTable(c);
-					monitor.done();
 					c.setAutoCommit(false);
 				}
 			}
 		});
+		if (myResults == null) return null;
 		myResults.setResultsMetadata(GridMetadata.computeMetadata(myResults.getData()));
 		return myResults;
 
@@ -256,7 +260,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	private Collection<QueryGridResultItem> getItems(Grid gridDef, IValueItem value, 
 			QueryFilter filter, ConservationAreaFilter caFilter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
-		monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
+		SubMonitor progress = SubMonitor.convert(monitor, 2);
+		progress.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
 		
 		if (needsFilter) {
 			try {
@@ -281,16 +286,14 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			
 			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, query);
 			try{
-				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, needsObservation, false, monitor);
+				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, needsObservation, false, progress.split(1));
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}
-
-			if (monitor.isCanceled()) {
-				return null;
-			}
 		}
-		monitor.subTask(Messages.DerbyGridEngine_Progress_CalculatingGridValue);
+		progress.checkCanceled();
+		progress.setWorkRemaining(1);
+		progress.subTask(Messages.DerbyGridEngine_Progress_CalculatingGridValue);
 		return getGridResults(c, session, gridDef, value);
 	}
 	/**

@@ -53,6 +53,7 @@ import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class DeleteIntelligenceHandler {
 
 	@Execute

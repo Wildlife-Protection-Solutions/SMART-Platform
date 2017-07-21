@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
@@ -168,16 +170,13 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				c.setAutoCommit(true);
 				try {
-					monitor.beginTask(Messages.DerbySummaryEngine_Progress_RunningQuery, query.getQueryDefinition().getValuePart().getValueItems().size() + 5);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbySummaryEngine_Progress_RunningQuery, query.getQueryDefinition().getValuePart().getValueItems().size() + 43);
 					
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					
-					monitor.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
+					progress.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
+					progress.split(1);
 					getHeaderInfo(query, sumResults, session);
-					monitor.worked(1);
-					if (monitor.isCanceled()){
-						return;
-					}
 					
 					boolean needsObservationValue = false;
 					boolean needsObservationRate = false;
@@ -228,56 +227,50 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					
 					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, query);
 					try{
-						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, monitor);
+						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, progress.split(20));
 					}finally{
 						filterer.dropTemporaryTables(c);
 					}
 					
-					if (monitor.isCanceled()){
-						return;
-					}
-					monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
+					progress.split(1);
+					progress.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
 					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					
 					String vFilter = valueFilter.asString();
 					String rFilter = rateFilter.asString();
 					
+					SubMonitor rateProgress = progress.split(20);
 					if (vFilter.equals(rFilter)){
 						rateTable = valueTable;
 					}else{
 						rateTable = createTempTableName();
-						
-						
 						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, query);
 						try{
-							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, monitor);
+							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, rateProgress);
 						}finally{
 							rfilterer.dropTemporaryTables(c);
 						}
-						if (monitor.isCanceled()){
-							return;
-						}
-						monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
+						progress.checkCanceled();
+						progress.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
 						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
 					}
 					
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupBy, query.getQueryDefinition().getValuePart(),
-							query, monitor);
+							query, progress.split(query.getQueryDefinition().getValuePart().getValueItems().size()));
 					
-					if (monitor.isCanceled() || data == null){
+					progress.checkCanceled();
+					if (data == null){
 						return ;
 					}
 					sumResults.setData(data);
-					
-					
-					monitor.worked(1);
+				}catch(OperationCanceledException ex) {
+					return;
 				}catch(Exception ex){
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
-					monitor.done();
 					c.setAutoCommit(false);
 				}
 			}
@@ -361,17 +354,14 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			ValuePart values, Query query,
 			IProgressMonitor monitor) throws SQLException{
 	
+		SubMonitor progress= SubMonitor.convert(monitor, "Processing Values", values.getValueItems().size()); //$NON-NLS-1$
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
-			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
+			progress.split(1);
+			progress.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
 			HashMap<SummaryResultKey, Double> data =computeValueItem(c, s, groupBy, it, query, valueTable) ; 
 			if (data != null){
 				results.putAll( data );	
-			}
-			
-			monitor.worked(1);
-			if (monitor.isCanceled()){
-				return null;
 			}
 		}
 		return results;

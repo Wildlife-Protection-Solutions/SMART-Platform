@@ -36,7 +36,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
@@ -92,7 +92,7 @@ import org.wcs.smart.util.SmartUtils;
 * @author Jeff
 *
 */
-
+@SuppressWarnings("restriction")
 public class SurveyDesignExportHandler {
 
 	@Execute
@@ -123,14 +123,14 @@ public class SurveyDesignExportHandler {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask(Messages.SurveyDesignExportHandler_Progress1, types.size() * 4);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.SurveyDesignExportHandler_Progress1, types.size() * 4);
 					int exportedCnt = 0;
 					Session s = HibernateManager.openSession();
 					final boolean[] overwriteall = new boolean[]{false};
 					try{
 						for (SurveyDesignEditorInput sdei : types){
 							SurveyDesign sd = (SurveyDesign) s.load(SurveyDesign.class, sdei.getUuid());
-							monitor.subTask(MessageFormat.format(Messages.SurveyDesignExportHandler_Progress2, new Object[]{sd.getName()}));
+							progress.subTask(MessageFormat.format(Messages.SurveyDesignExportHandler_Progress2, new Object[]{sd.getName()}));
 							final File exportFile = new File(exportDir, URLUtils.cleanFilename(sd.getName()) + ".xml"); //$NON-NLS-1$
 							
 							if (!overwriteall[0] && exportFile.exists()){
@@ -160,8 +160,7 @@ public class SurveyDesignExportHandler {
 								}
 							}
 							try(FileOutputStream fout = new FileOutputStream(exportFile)){
-								SurveyDesignXMLManager.writeDataModel(SurveyDesignToXmlConverter.toXml(sd, s, new SubProgressMonitor(monitor, 3)),
-									fout);
+								SurveyDesignXMLManager.writeDataModel(SurveyDesignToXmlConverter.toXml(sd, s, progress.split(3)), fout);
 								exportedCnt++;
 							}catch (Exception ex){
 								EcologicalRecordsPlugIn.displayLog(
@@ -181,7 +180,7 @@ public class SurveyDesignExportHandler {
 							}});
 						
 					
-					monitor.done();
+					
 				}
 			});
 		}catch (Exception ex){

@@ -27,6 +27,7 @@ import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -59,11 +60,12 @@ public class SurveyDesignToXmlConverter {
 	 * of the xml type.
 	 * 
 	 * @param entityType
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @return
 	 * @throws DatatypeConfigurationException 
 	 */
 	public static org.wcs.smart.er.xml.model.surveydesign.SurveyDesign toXml(SurveyDesign surveyDesign, Session s, IProgressMonitor monitor) throws DatatypeConfigurationException{
-		monitor.beginTask(MessageFormat.format(Messages.SurveyDesignToXmlConverter_TaskName, new Object[]{surveyDesign.getName()}), surveyDesign.getProperties().size() + 1);
+		SubMonitor progress = SubMonitor.convert(monitor, MessageFormat.format(Messages.SurveyDesignToXmlConverter_TaskName, new Object[]{surveyDesign.getName()}), surveyDesign.getProperties().size() + 1);
 		org.wcs.smart.er.xml.model.surveydesign.SurveyDesign xml = new org.wcs.smart.er.xml.model.surveydesign.SurveyDesign();
 
 		
@@ -110,7 +112,7 @@ public class SurveyDesignToXmlConverter {
 			xmlsdp.setValue(sdp.getValue());
 			
 			xml.getSurveyDesignProperty().add(xmlsdp);
-			monitor.worked(1);
+			progress.worked(1);
 		}
 		
 		
@@ -237,7 +239,6 @@ public class SurveyDesignToXmlConverter {
 			}
 			xml.getSamplingUnit().add(xmlsu);
 		}
-		monitor.done();
 		
 		return xml;
 	}

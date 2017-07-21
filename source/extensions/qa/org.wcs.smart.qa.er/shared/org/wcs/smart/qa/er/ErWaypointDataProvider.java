@@ -29,11 +29,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
@@ -109,10 +107,5 @@ public class ErWaypointDataProvider extends IQaDataProvider {
 	@Override
 	public UUID getFeatureSource(Session session, Object obj) {
 		return ((WaypointLocationData)obj).getWaypoint().getUuid();
-	}
-
-	@Override
-	public Image getImage() {
-		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getImage(getClass());
 	}
 }

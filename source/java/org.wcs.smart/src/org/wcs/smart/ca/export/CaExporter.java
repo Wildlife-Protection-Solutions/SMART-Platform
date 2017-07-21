@@ -31,12 +31,14 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
@@ -79,17 +81,18 @@ public class CaExporter {
 	/**
 	 * Exports the current conservation area to the given file.
 	 * @param destFile output file
-	 * @param monitor progress monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
 	 * 
 	 * 
 	 */
 	public void export(File destFile,  HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
-		
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaExporter_TaskName, 3); 
 		File tempDir = SmartUtils.createTemporaryDirectory();
 		try{
-			exportToTempDirectory(tempDir, options, monitor);
-			zipTempDirectory(tempDir, destFile, monitor);
-			
+			exportToTempDirectory(tempDir, options, progress.split(2));
+			zipTempDirectory(tempDir, destFile, progress.split(1));
+		}catch(OperationCanceledException ex) {
+			return;
 		}finally{
 			try{
 				FileUtils.deleteDirectory(tempDir);
@@ -99,46 +102,55 @@ public class CaExporter {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param tempDir
+	 * @param options
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
+	 * @throws Exception
+	 */
 	protected void exportToTempDirectory(File tempDir, HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
 
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaExporter_ProgressExportCA, 1);
+		
 		List<ICaDataExporter> exporters = getExportExtensions();
 		Collections.sort(exporters, new Comparator<ICaDataExporter>() {
-
 			@Override
 			public int compare(ICaDataExporter arg0, ICaDataExporter arg1) {
 				return arg0.getRunLevel() - arg1.getRunLevel();
-			}
-			
+			}	
 		});
 		
-		
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		monitor.beginTask(Messages.CaExporter_ProgressExportCA, (exporters.size() + 2) * 10);
+		progress.setWorkRemaining( (exporters.size() + 2) * 10);
 		
 		Session session = HibernateManager.openSession();
 		try{
 			/* write a conservation area info file */
 			writeConservationAreaInfo(tempDir, ca);
-			if (monitor.isCanceled()) return;
-			monitor.worked(10);
+			progress.checkCanceled();
+			progress.worked(10);
 			
 			/* run through the exporters exporting data */
 			ICaDataExportEngine engine = new DerbyCaDataExportEngine(tempDir, ca, session);
 			engine.setExportOptions(options);
-			for (ICaDataExporter exporter: exporters){
-				if (monitor.isCanceled()) return;
-				if (ca.getIsCcaa() && !exporter.supportsCcaa()) continue;
-				exporter.exportData(engine, new SubProgressMonitor(monitor, 10));
-				monitor.worked(10);
+			List<ICaDataExporter> toRun = exporters.stream().filter(e->!(ca.getIsCcaa() && !e.supportsCcaa())).collect(Collectors.toList()); 
+			
+			progress.setWorkRemaining(toRun.size());
+			for (ICaDataExporter exporter: toRun) {
+				exporter.exportData(engine, progress.split(1));
 			}
+			
+			progress.setWorkRemaining( 0 );
+		}catch (OperationCanceledException ex) {
+			return;
 		}finally{
 			session.close();
 		}
 	}
 	
 	protected void zipTempDirectory(File tempDir, File destFile, IProgressMonitor monitor) throws Exception{
-		if (monitor.isCanceled()) return;
-		ZipUtil.createZip(tempDir.listFiles(), destFile, new SubProgressMonitor(monitor,10));		
+		ZipUtil.createZip(tempDir.listFiles(), destFile, monitor);		
 	}
 	
 	/**

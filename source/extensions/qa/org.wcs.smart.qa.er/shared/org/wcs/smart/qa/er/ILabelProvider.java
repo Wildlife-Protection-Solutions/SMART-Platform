@@ -23,9 +23,7 @@ package org.wcs.smart.qa.er;
 
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.qa.model.IQaDataProvider;
 
 /**
  * Image provider to implement & set in SmartContext to add icons & label to patrol
@@ -45,8 +43,7 @@ public abstract class ILabelProvider {
 		
 		
 	}
-	public abstract Image getImage(Class<? extends IQaDataProvider> clazz);
-	
+
 	public abstract String getString(Key key, Locale l);
 	
 	public static final String getLabel(Key key, Locale l){

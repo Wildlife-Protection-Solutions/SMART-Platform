@@ -31,6 +31,7 @@ import org.wcs.smart.cybertracker.properties.ImageProcessingOpDialog;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class CyberTrackerImgProcessingOpHandler {
 
 	@Execute

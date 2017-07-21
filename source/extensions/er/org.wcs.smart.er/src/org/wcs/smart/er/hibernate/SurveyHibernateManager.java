@@ -204,6 +204,7 @@ public class SurveyHibernateManager {
 	 * @param filter filter or null if not filter should be applied
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<SurveyProxy> getSurveys(Session s, SurveyFilter filter){
 		if (filter == null){
 			//get all

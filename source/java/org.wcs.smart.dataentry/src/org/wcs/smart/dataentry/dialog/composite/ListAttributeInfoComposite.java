@@ -37,12 +37,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.dataentry.CmAttributeConfigUtil;
 import org.wcs.smart.dataentry.CmCustomListsUtil;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
@@ -50,6 +52,7 @@ import org.wcs.smart.dataentry.dialog.EditListDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -61,14 +64,14 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  * @author elitvin
  * @since 2.0.0
  */
-public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
+public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 
 	private final static String NO_OPTION = ""; //$NON-NLS-1$
 	private Label lblMulti;
 	private Button btnMulti;
 	
 	private ComboViewer defaultViewer;
-	private Button btnIsCustomConfig;
+	private Button btnDeleteConfig;
 	
 	private TableViewer listViewer;
 	private Language currentLanguage;
@@ -84,7 +87,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	 * @param session
 	 */
 	public ListAttributeInfoComposite(Composite parent, ConfigurableModelEditDialog dialog) {
-		super(parent, dialog.getModel());
+		super(parent, dialog);
 		this.dialog = dialog;
 	}
 
@@ -94,12 +97,9 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		createMultiselectControl(container);
 		createDefaultControl(container);
 		
-		Label label = new Label(container, SWT.NONE);
-		label.setText(Messages.ListAttributeInfoComposite_Values);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 2, 1));
-		createIsCustomConfigControl(container);
+		createConfigSelectionControl(container);
 		createListControl(container);
-		createRevertToDmButton(container);
+		createListButtons(container);
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
@@ -110,7 +110,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (getSourceObject() != lastSelection){
 					updateListControl();
 				}
-				btnIsCustomConfig.setSelection(getSourceObject().isUseCustomConfig());
+				btnDeleteConfig.setEnabled(!getSourceObject().getConfig().isDefault());
 				lastSelection = getSourceObject();
 				ListAttributeInfoComposite.this.layout(true, true);
 			}
@@ -229,66 +229,77 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		}
 	}	
 
-	private void createIsCustomConfigControl(Composite parent) {
-		btnIsCustomConfig = new Button(parent, SWT.CHECK);
-		btnIsCustomConfig.setText(Messages.ListAttributeInfoComposite_UseCustomConfiguration);
-		btnIsCustomConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		btnIsCustomConfig.setToolTipText(Messages.ListAttributeInfoComposite_UseCustomConfigurationTooltip);
-		
-		btnIsCustomConfig.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (!btnIsCustomConfig.getSelection() && !MessageDialog.openQuestion(getShell(), Messages.ListAttributeInfoComposite_UseDefaultWarning_Title, Messages.ListAttributeInfoComposite_UseDefaultWarning_Message)) {
-					btnIsCustomConfig.setSelection(true);
-					return;
-				}
-				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_CUSTOM_CONFIG);
-				if (option == null) {
-					option = CmAttributeOptionFactory.createCustomCofigOption(getSourceObject());
-					getSourceObject().getCmAttributeOptions().put(option.getOptionId(), option);
-				}
-				option.setBooleanValue(btnIsCustomConfig.getSelection());
-				
-				//we need to remove any configuration created 
-				clearCustomListConfiguration(getSourceObject());
-				if (btnIsCustomConfig.getSelection()){
-					//we need to create custom configuration
-					getSourceObject().getList().addAll(CmDefaultListsUtil.buildCustomList(getModel(), getSourceObject()));
-				}
-				
-				listViewer.setInput(getSourceObject().getCurrentList());
-				listViewer.refresh();
-				fireModelChanged();
-			}
-		});
+	@Override
+	protected void handleConfigViewerSelectionChanged() {
+		btnDeleteConfig.setEnabled(!getSourceObject().getConfig().isDefault());
+		listViewer.setInput(getSourceObject().getCurrentList());
+		listViewer.refresh();
 	}
 
-	private void clearCustomListConfiguration(CmAttribute a) {
-		for (CmAttributeListItem toDelete : a.getList()){
-			toDelete.setAttribute(null);
-		}
-		getSourceObject().getList().clear();
-	}
-	
 	private void createListControl(Composite parent) {
 		listViewer = new TableViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		listViewer.setLabelProvider(new CmListItemLabelProvider(getModel()));
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+	}
 
-		new Label(parent, SWT.NONE);
+	private void createListButtons(Composite container) {
+		Composite btnCompisite = new Composite(container, SWT.NONE);
+		GridLayout gd = new GridLayout(3, false);
+		gd.marginBottom = 0;
+		gd.marginHeight = 0;
+		gd.marginLeft = 0;
+		gd.marginRight = 0;
+		gd.marginTop = 0;
+		gd.marginWidth = 0;
+		btnCompisite.setLayout(gd);
+		btnCompisite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		Button btnEdit = new Button(parent, SWT.PUSH);
+		createAddListButton(btnCompisite);
+		createEditListButton(btnCompisite);
+		createDeleteListButton(btnCompisite);
+		createRevertToDmButton(btnCompisite);
+	}
+	
+	private void createAddListButton(Composite container) {
+		Button btnAdd = new Button(container, SWT.PUSH);
+		btnAdd.setText("Create New...");
+		btnAdd.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+
+		btnAdd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(getModel(), getSourceObject().getAttribute(), false);
+				CmAttributeConfigUtil.assignCustomName(cfg, getSourceObject());
+				cfg.setList(CmCustomListsUtil.buildCustomList(cfg, getSourceObject().getAttribute()));
+				getSourceObject().setConfig(cfg);
+				
+				EditListDialog dlg = new EditListDialog(getShell(), getSourceObject(), dialog.getSession());
+				dlg.open();
+				
+				applyNewConig(cfg);
+				listViewer.setInput(getSourceObject().getCurrentList());
+				listViewer.refresh();
+				
+				fireModelChanged();
+			}
+		});
+	}
+
+	private void createEditListButton(Composite container) {
+		Button btnEdit = new Button(container, SWT.PUSH);
 		btnEdit.setText(Messages.ListAttributeInfoComposite_Button_Edit);
 		btnEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (getSourceObject().isUseCustomConfig() || MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
-					EditListDialog dlg = new EditListDialog(getShell(), getSourceObject(), getModel(), dialog.getSession());
+				//TODO: QQQ correct message as/if needed
+				if (MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
+					EditListDialog dlg = new EditListDialog(getShell(), getSourceObject(), dialog.getSession());
 					dlg.open();
-							
+
+					refreshConfigViewer();
 					updateListControl();
 					listViewer.refresh();
 					fireModelChanged();
@@ -297,23 +308,33 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		});
 	}
 
-	private void createRevertToDmButton(Composite container) {
-		Button btnRename = new Button(container, SWT.PUSH);
-		btnRename.setText(Messages.ListAttributeInfoComposite_Button_Revert);
-		btnRename.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
+	private void createDeleteListButton(Composite container) {
+		btnDeleteConfig = new Button(container, SWT.PUSH);
+		btnDeleteConfig.setText("Delete");
+		btnDeleteConfig.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
-		btnRename.addSelectionListener(new SelectionAdapter() {
+		btnDeleteConfig.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String msg = getSourceObject().isUseCustomConfig() ? Messages.ListAttributeInfoComposite_ConfirmRevert_Custom_Message : Messages.ListAttributeInfoComposite_ConfirmRevert_Default_Message;
-				if (MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_ConfirmRevert_Title, msg)) {
-					CmAttribute cmAttr = getSourceObject();
-					List<CmAttributeListItem> newList = getSourceObject().isUseCustomConfig() ? 
-							CmCustomListsUtil.buildCustomList(getModel(), cmAttr, cmAttr.getAttribute()) : CmDefaultListsUtil.buildDefaultList(getModel(), cmAttr.getAttribute());
-								
-					List<CmAttributeListItem> currentList = cmAttr.getCurrentList();
-					currentList.clear();
-					currentList.addAll(newList);
+				//TODO: QQQ impl
+			}
+		});
+	}
+	
+	private void createRevertToDmButton(Composite container) {
+		Button btnRevert = new Button(container, SWT.PUSH);
+		btnRevert.setText(Messages.ListAttributeInfoComposite_Button_Revert);
+		btnRevert.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 3, 1));
+
+		btnRevert.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				CmAttribute cmAttr = getSourceObject();
+				if (MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_ConfirmRevert_Title, Messages.ListAttributeInfoComposite_ConfirmRevert_Message)) {
+					CmAttributeConfig cfg = cmAttr.getConfig();
+					List<CmAttributeListItem> newList = cfg.isDefault() ? CmDefaultListsUtil.buildDefaultList(cfg, cmAttr.getAttribute()) : CmCustomListsUtil.buildCustomList(cfg, cmAttr.getAttribute());
+					cfg.getList().clear();
+					cfg.getList().addAll(newList);
 					
 					updateListControl();
 					listViewer.refresh();

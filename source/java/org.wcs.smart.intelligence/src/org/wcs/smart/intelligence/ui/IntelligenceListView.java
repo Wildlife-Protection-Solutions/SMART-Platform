@@ -87,6 +87,7 @@ import org.wcs.smart.util.E3Utils;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class IntelligenceListView implements IIntelligenceFilteringView {
 
 	public static final String ID = "org.wcs.smart.intelligence.IntelligenceListView"; //$NON-NLS-1$

@@ -46,31 +46,28 @@ public class CloneConnect implements IConservationAreaTemplateCloner {
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.CloneConnect_CloneTaskName, 1);
-		try{
-			Session s = engine.getSession();
-			//clone server
-			ConnectServer server = ConnectHibernateManager.getConnectServer(s, engine.getTemplateCa());
-			if (server != null){
-				ConnectServer clone = new ConnectServer();
-				clone.setConservationArea(engine.getNewCa());
-				clone.setServerUrl(server.getServerUrl());
-				if (server.getCertificateFileName() != null){
-					clone.setCertificateFile(server.getLocalCertificateFile());
-				}
-				//clone options
-				Map<String, ConnectServerOption> options = server.getOptions();
-				clone.setOptions(new HashMap<String, ConnectServerOption>());
-				for (Entry<String, ConnectServerOption> op : options.entrySet()){
-					clone.setOption(op.getKey(), op.getValue().getValue());
-				}
-				s.save(clone);
-				
+		monitor.subTask(Messages.CloneConnect_CloneTaskName);
+	
+		Session s = engine.getSession();
+		//clone server
+		ConnectServer server = ConnectHibernateManager.getConnectServer(s, engine.getTemplateCa());
+		if (server != null){
+			ConnectServer clone = new ConnectServer();
+			clone.setConservationArea(engine.getNewCa());
+			clone.setServerUrl(server.getServerUrl());
+			if (server.getCertificateFileName() != null){
+				clone.setCertificateFile(server.getLocalCertificateFile());
 			}
-			s.flush();
-		}finally{
-			monitor.done();
+			//clone options
+			Map<String, ConnectServerOption> options = server.getOptions();
+			clone.setOptions(new HashMap<String, ConnectServerOption>());
+			for (Entry<String, ConnectServerOption> op : options.entrySet()){
+				clone.setOption(op.getKey(), op.getValue().getValue());
+			}
+			s.save(clone);
+			
 		}
+		s.flush();
 	}
 
 }

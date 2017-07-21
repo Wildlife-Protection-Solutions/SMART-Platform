@@ -33,6 +33,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -80,10 +81,8 @@ public class IncidentImporter {
 		
 		if (SmartUtils.isZip(file)){
 			//process as zip file
-			monitor.beginTask(IMPORTING_INCIDENT_TASKNAME, 4);
 			return importIncidentFromZip(file, monitor);
 		}else{
-			monitor.beginTask(IMPORTING_INCIDENT_TASKNAME, 3);
 			return importIncidentFromFile(file, monitor);
 		}
 	}
@@ -97,20 +96,21 @@ public class IncidentImporter {
 	 * @throws Exception
 	 */
 	private static Waypoint importIncidentFromZip(File zipFile, IProgressMonitor monitor) throws Exception{
-		
+		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
 		WaypointType waypointtype = null;
 		//unzip 
-		monitor.subTask(Messages.IncidentImporter_ProcessingzipFile);
+		progress.subTask(Messages.IncidentImporter_ProcessingzipFile);
+		progress.split(1);
 		File directory = unzip(zipFile);
 		if (directory == null || !directory.isDirectory()){
 			throw new Exception (MessageFormat.format(Messages.IncidentImporter_ErrorUnzipping, new Object[]{ zipFile.getAbsoluteFile()}));
 		}
-		monitor.worked(1);
+		
 		
 		//file xml file
 		String[] files = directory.list();
 		if (files != null){
-			monitor.subTask(Messages.IncidentImporter_ReadingXmlProgress);
+			progress.subTask(Messages.IncidentImporter_ReadingXmlProgress);
 			
 			for (int i = 0; i < files.length; i ++){
 				File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
@@ -129,8 +129,8 @@ public class IncidentImporter {
 				}
 			}
 		}
-		if (waypointtype == null){
-			
+		
+		if (waypointtype == null){	
 			try{
 				FileUtils.deleteDirectory(directory);
 			}catch (Exception ex){
@@ -138,11 +138,10 @@ public class IncidentImporter {
 			}
 			throw new Exception (Messages.IncidentImporter_XmlNotFound);
 		}
-		monitor.worked(1);
 		
-		Waypoint p = convertAndSave(waypointtype, directory, monitor);
+		Waypoint p = convertAndSave(waypointtype, directory, progress.split(1));
 		
-		monitor.subTask(Messages.IncidentImporter_RemoveTempFiles);
+		progress.subTask(Messages.IncidentImporter_RemoveTempFiles);
 		try{
 			FileUtils.deleteDirectory(directory);
 		}catch (Exception ex){
@@ -159,16 +158,18 @@ public class IncidentImporter {
 	 * @throws Exception
 	 */
 	private static Waypoint importIncidentFromFile(File xmlFile, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
 		WaypointType waypointtype = null;
+		progress.split(1);
 		try(FileInputStream in = new FileInputStream(xmlFile)){
-			monitor.subTask(Messages.IncidentImporter_ReadingXmlProgress);
+			progress.subTask(Messages.IncidentImporter_ReadingXmlProgress);
 			waypointtype = IncidentXmlManager.readIncident(in);
-			monitor.worked(1);
+			
 		}
 		if (waypointtype == null){
 			throw new Exception(Messages.IncidentImporter_XmlIncidentNotFound);
 		}
-		return convertAndSave(waypointtype, null, monitor);
+		return convertAndSave(waypointtype, null, progress.split(1));
 	}
 
 	/**
@@ -187,10 +188,12 @@ public class IncidentImporter {
 	 * @throws Exception
 	 */
 	private static Waypoint convertAndSave(WaypointType xmlIncident, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
+		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
 		XmlToIncident converter = new XmlToIncident();
 		Session session = HibernateManager.openSession(new AttachmentInterceptor());
 		try {
-			monitor.subTask(Messages.IncidentImporter_ValidatingProgress);
+			progress.split(1);
+			progress.subTask(Messages.IncidentImporter_ValidatingProgress);
 			//check if a incident in the database with the given patorl id already exists
 			if (xmlIncident.getId() != null){
 				Criteria c = session.createCriteria(Waypoint.class)
@@ -225,7 +228,7 @@ public class IncidentImporter {
 					}
 				}
 			}		
-			monitor.subTask(Messages.IncidentImporter_ConvertingProgress);
+			progress.subTask(Messages.IncidentImporter_ConvertingProgress);
 			converter.fromXml(xmlIncident, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 		} finally {
 			if (session.isOpen()){
@@ -267,7 +270,8 @@ public class IncidentImporter {
 		}
 		
 		//performing actual save in database
-		monitor.subTask(Messages.IncidentImporter_SavingProgress);
+		progress.split(1);
+		progress.subTask(Messages.IncidentImporter_SavingProgress);
 		Waypoint imported = converter.getImportedIncident();
 		if (imported == null)
 			return null;
@@ -283,7 +287,7 @@ public class IncidentImporter {
 		}finally{
 			session.close();
 		}
-		monitor.worked(1);
+		
 		return imported;
 	}
 	

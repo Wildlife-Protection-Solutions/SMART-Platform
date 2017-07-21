@@ -33,8 +33,8 @@ import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -75,10 +75,7 @@ public class IntelObservationQueryEngine {
 		
 		Session session = (Session) parameters.get(Session.class.getName());
 		IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
-		if (monitor == null){
-			monitor = new NullProgressMonitor();
-		}
-		monitor.beginTask(Messages.IntelObservationQueryEngine_Progress1, 6);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelObservationQueryEngine_Progress1, 6);
 		//one or both element of array may be null
 		Date[] dfilter = (Date[]) parameters.get(Date.class.getName());
 		if (dfilter == null) return null;
@@ -92,14 +89,15 @@ public class IntelObservationQueryEngine {
 		if (ca == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 		}
-		monitor.subTask(Messages.IntelObservationQueryEngine_Progress2);
+		progress.subTask(Messages.IntelObservationQueryEngine_Progress2);
 		ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
-		monitor.worked(1);
-		final IProgressMonitor fmonitor = monitor;
+		progress.worked(1);
+		final SubMonitor fmonitor = progress;
 		final Locale flocale = locale;
 		return session.doReturningWork(new ReturningWork<IPagedQueryResultSet>() {
 			@Override
 			public IPagedQueryResultSet execute(Connection connection) throws SQLException {
+				
 				connection.setAutoCommit(true);
 				try{
 					if (parsedQuery.getFilterType() == IQueryFilter.FilterType.OBSERVATION){
@@ -107,11 +105,11 @@ public class IntelObservationQueryEngine {
 						
 						//session.beginTransaction();
 						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session); 
-						String dataTable = parser.processFilter(new SubProgressMonitor(fmonitor, 2));
-						if (fmonitor.isCanceled()) return null;
+						String dataTable = parser.processFilter(fmonitor.split(2));
+						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
 						
-						if (fmonitor.isCanceled()) return null;
+						fmonitor.checkCanceled();
 						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress3);
 						configureTableContents(dataTable, parser.getFilterToColumnNames(), true, session);
 						
@@ -120,12 +118,12 @@ public class IntelObservationQueryEngine {
 						session.createSQLQuery(sql).executeUpdate();
 						fmonitor.worked(1);
 						
-						if (fmonitor.isCanceled()) return null;
+						fmonitor.checkCanceled();
 						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress4);
 						computeQueryColumns(session, flocale, query);
 						fmonitor.worked(1);
 						
-						if (fmonitor.isCanceled()) return null;
+						fmonitor.checkCanceled();
 						computeCount(session);
 						computeBounds(session);
 						
@@ -138,11 +136,11 @@ public class IntelObservationQueryEngine {
 						
 						//session.beginTransaction();
 						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session); 
-						String dataTable = parser.processFilter(new SubProgressMonitor(fmonitor, 2));
-						if (fmonitor.isCanceled()) return null;
+						String dataTable = parser.processFilter(fmonitor.split(2));
+						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
 						
-						if (fmonitor.isCanceled()) return null;
+						fmonitor.checkCanceled();
 						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress5);
 						configureTableContents(dataTable, parser.getFilterToColumnNames(), false, session);
 						
@@ -151,12 +149,12 @@ public class IntelObservationQueryEngine {
 						session.createSQLQuery(sql).executeUpdate();
 						fmonitor.worked(1);
 						
-						if (fmonitor.isCanceled()) return null;
+						fmonitor.checkCanceled();
 						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress6);
 						computeQueryColumns(session, flocale, query);
 						fmonitor.worked(1);
 						
-						if (fmonitor.isCanceled()) return null;
+						fmonitor.checkCanceled();
 						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress7);
 						computeCount(session);
 						computeBounds(session);
@@ -167,6 +165,8 @@ public class IntelObservationQueryEngine {
 						return queryResults;
 						//process waypoint filter
 					}
+				}catch (OperationCanceledException ex) {
+					return null;
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				}finally{

@@ -31,8 +31,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
@@ -176,15 +175,12 @@ public class PatrolService extends IService {
 	public void dispose( IProgressMonitor monitor ) {
         if (members == null)
             return;
-        if (monitor == null){
-        	monitor = new NullProgressMonitor();
-        }
+        SubMonitor progress = SubMonitor.convert(monitor);
+        
         int steps = (int) ((double) 99 / (double) members.size());
         for( PatrolGeoResource resolve : members ) {
             try {
-                SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor, steps);
-                resolve.dispose(subProgressMonitor);
-                subProgressMonitor.done();
+                resolve.dispose(progress.split(steps));
             } catch (Throwable e) {
             	SmartPatrolPlugIn.log("Could not dispose Patrol Service", e); //$NON-NLS-1$
             }

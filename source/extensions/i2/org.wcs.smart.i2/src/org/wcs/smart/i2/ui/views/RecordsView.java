@@ -41,7 +41,7 @@ import javax.inject.Inject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
@@ -116,6 +116,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class RecordsView {
 
 	public static final String ID = "org.wcs.smart.i2.ui.view.records"; //$NON-NLS-1$
@@ -540,24 +541,23 @@ public class RecordsView {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				
-				monitor.beginTask(Messages.RecordsView_XmlTaskName, toExport.size());
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.RecordsView_XmlTaskName, toExport.size());
 				
 				RecordXmlExporter exporter = new RecordXmlExporter(folder);
 				int cnt = 0;
 				for (UUID record : toExport){
 					try{
-						if (exporter.exportRecord(record, new SubProgressMonitor(monitor, 1))) cnt ++;
+						if (exporter.exportRecord(record, progress.newChild(1))) cnt ++;
 					}catch (Exception ex){
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openError(context.get(Shell.class), Messages.RecordsView_ErrorTitle, Messages.RecordsView_ErrorMessage + ex.getMessage());
 						});
 						Intelligence2PlugIn.log(ex.getMessage(), ex);
 					}
-					if (monitor.isCanceled()) break;
+					if (progress.isCanceled()) break;
 				}
 				
-				if (monitor.isCanceled()){
+				if (progress.isCanceled()){
 					Display.getDefault().syncExec(()->{
 						MessageDialog.openInformation(context.get(Shell.class), Messages.RecordsView_CancelledTitle, Messages.RecordsView_CanclledUser);
 					});
@@ -568,7 +568,6 @@ public class RecordsView {
 						MessageDialog.openInformation(context.get(Shell.class), Messages.RecordsView_ExportCompleteTitle, MessageFormat.format(Messages.RecordsView_ExportCompleteMessage, totalCnt, toExport.size(), folder.toString()));
 					});
 				}
-				monitor.done();
 				
 			}
 			});

@@ -25,12 +25,12 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".configurableModel.conservationArea"
+            ca_property=".config.model.conservationArea"
             class="org.wcs.smart.dataentry.model.CmAttributeTreeNode"
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".configurableModel.conservationArea"
+            ca_property=".config.model.conservationArea"
             class="org.wcs.smart.dataentry.model.CmAttributeListItem"
             supportsCcaa="false">
       </class>
@@ -44,9 +44,9 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".id.model.conservationArea"
-            class="org.wcs.smart.dataentry.model.CmDmAttributeSettings"
-            supportsCcaa="false">
+            ca_property=".model.conservationArea"
+            class="org.wcs.smart.dataentry.model.CmAttributeConfig"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

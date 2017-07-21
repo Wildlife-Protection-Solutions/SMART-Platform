@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
@@ -48,6 +48,7 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DeletePatrolHandler {
 	
 	@Execute
@@ -110,10 +111,10 @@ public class DeletePatrolHandler {
 						throws InvocationTargetException,
 						InterruptedException {
 					int deleted = 0;
-					monitor.beginTask(Messages.DeletePatrolHandler_ProgressTaskName, toDelete.size());
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.DeletePatrolHandler_ProgressTaskName, toDelete.size());
 					for (PatrolEditorInput delete : toDelete){
 						try {
-							if (PatrolManager.getInstance().deletePatrol(delete.getUuid(), new SubProgressMonitor(monitor, 1))){
+							if (PatrolManager.getInstance().deletePatrol(delete.getUuid(), progress.split(1))){
 								deleted++;
 							}
 						}catch (Exception ex){
@@ -136,7 +137,6 @@ public class DeletePatrolHandler {
 									Messages.DeletePatrolHandler_DeletePatrol_DialogTitle,
 									dMessage);
 						}});
-					monitor.done();
 				}
 			});
 		} catch (Exception ex) {

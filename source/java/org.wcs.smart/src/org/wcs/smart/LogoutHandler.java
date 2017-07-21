@@ -33,6 +33,7 @@ import org.eclipse.ui.PlatformUI;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class LogoutHandler {
 
 	/**

@@ -75,7 +75,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 	public static IEditorInput AUTO_VALIDATION_INPUT =  new IEditorInput() {
 		
 		@Override
-		public Object getAdapter(Class adapter) {
+		public <T> T getAdapter(Class<T> adapter) {
 			return null;
 		}
 		
@@ -103,6 +103,8 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		public boolean exists() {
 			return false;
 		}
+
+
 	};
 		
 	

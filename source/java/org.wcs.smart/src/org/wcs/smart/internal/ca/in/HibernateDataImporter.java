@@ -35,6 +35,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
@@ -71,6 +72,8 @@ public class HibernateDataImporter implements ICaDataImporter{
 	 * @throws Exception
 	 */
 	private void processDatabaseFiles(File dir, Session session, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaImporter_Progress_processingTables, 20);
+		
 		HashMap<String, List<TableInfo>> tables = scanTables(dir);
 		//for each table check to ensure the table exists in the database
 		//if it does not exist we cannot import it
@@ -85,8 +88,9 @@ public class HibernateDataImporter implements ICaDataImporter{
 				tables.remove(tableName);
 			}
 		}
+		progress.worked(1);
 		
-		monitor.beginTask(Messages.CaImporter_Progress_processingTables, tables.size());
+		progress.setWorkRemaining(tables.size());
 		
 		HashMap<String, List<String>> keys = getTableConstraints(session);
 		Set<String> processed = new HashSet<String>();
@@ -100,7 +104,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 			if (last.equals(tableName)){
 				throw new Exception(Messages.CaImporter_Error_CirculateTableDependencies);
 			}
-			monitor.subTask(tableName);
+			progress.subTask(tableName);
 			List<String> requires = keys.get(tableName);
 			boolean exportTable = false;
 			if (requires == null || requires.size() == 0){
@@ -126,7 +130,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 					importData(session,tableName, info.getColumns(), info.getDataFile() );
 					processed.add(tableName);
 				}
-				monitor.worked(1);
+				progress.worked(1);
 				last = ""; //$NON-NLS-1$
 			}else{
 				tablesToProcess.add(tableName);

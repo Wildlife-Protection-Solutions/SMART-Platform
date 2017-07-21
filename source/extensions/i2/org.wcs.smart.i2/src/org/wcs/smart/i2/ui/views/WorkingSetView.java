@@ -125,6 +125,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class WorkingSetView {
 	
 	public static final String ID = "org.wcs.smart.i2.ui.view.workingset"; //$NON-NLS-1$

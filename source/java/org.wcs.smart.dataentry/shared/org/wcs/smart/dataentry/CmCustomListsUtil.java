@@ -26,9 +26,8 @@ import java.util.List;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 
 /**
  * Util class for configurable model custom lists manipulations
@@ -38,16 +37,15 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class CmCustomListsUtil {
 
-	public static List<CmAttributeListItem> buildCustomList(ConfigurableModel model, CmAttribute cmAttr, Attribute dmAttr) {
+	public static List<CmAttributeListItem> buildCustomList(CmAttributeConfig cfg, Attribute dmAttr) {
 		List<AttributeListItem> source = dmAttr.getActiveListItems();
 		List<CmAttributeListItem> result = new ArrayList<>(source.size());
 		for (AttributeListItem dmNode : source) {
 			CmAttributeListItem cmNode = new CmAttributeListItem();
-			cmNode.setConfigurableModel(model);
+			cmNode.setConfig(cfg);
 			cmNode.setListItem(dmNode);
 			cmNode.setIsActive(dmNode.getIsActive());
 			cmNode.setListOrder(dmNode.getListOrder());
-			cmNode.setAttribute(cmAttr);
 			result.add(cmNode);
 		}
 		return result;

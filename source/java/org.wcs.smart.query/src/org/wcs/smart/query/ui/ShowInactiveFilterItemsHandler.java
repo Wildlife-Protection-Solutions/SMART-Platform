@@ -33,6 +33,7 @@ import org.wcs.smart.query.QueryFilterConfigManager;
  * @author elitvin
  * @since 4.1.0
  */
+@SuppressWarnings("restriction")
 public class ShowInactiveFilterItemsHandler {
 
 	@Execute

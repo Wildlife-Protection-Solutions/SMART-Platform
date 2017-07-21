@@ -32,6 +32,7 @@ import org.wcs.smart.er.ui.samplingunit.SamplingUnitAttributeDialog;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ShowSamplingUnitAttributesHandler {
 
 	@Execute

@@ -31,7 +31,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
@@ -161,12 +161,12 @@ public class DerbyRestoreEngine {
 	 */
 	public static void restoreSystem(File backupFile, IProgressMonitor monitor)
 			throws Exception {
-		monitor.beginTask(Messages.DerbyRestoreEngine_Progress_RestoringFile, 7);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyRestoreEngine_Progress_RestoringFile, 7);
 		if (!backupFile.exists()) {
 			throw new Exception(Messages.DerbyRestoreEngine_Error_NoBackupFile + " '" + backupFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_ExtractingBackup);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_ExtractingBackup);
 		/* extract contents of backup file to temporary directory */
 		File temp = SmartUtils.createTemporaryDirectory();
 		
@@ -186,7 +186,7 @@ public class DerbyRestoreEngine {
 			throw new Exception(Messages.DerbyRestoreEngine_BackupExtractionError
 					+ ex.getLocalizedMessage(), ex);
 		}
-		monitor.worked(1);
+		progress.worked(1);
 
 		File dbFile = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 		File dataFile = new File(SmartProperties.getInstance().getProperty( SmartProperties.PROP_FILESTORE));
@@ -232,9 +232,9 @@ public class DerbyRestoreEngine {
 		}
 		
 		/* shut down the database */
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_ShutDown);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_ShutDown);
 		HibernateManager.endSessionFactory(true, false);
-		monitor.worked(1);
+		progress.worked(1);
 
 		/* connect to the extractedDb and verify version */
 		SmartHibernateManager.setDatabaseParameter(extractedDb.getAbsolutePath());
@@ -269,9 +269,9 @@ public class DerbyRestoreEngine {
 		try{
 			SmartContext.INSTANCE.setFilestoreLocation(extractedFilestore.getAbsolutePath());
 			UpgradeEngine upgrader = new UpgradeEngine();
-			upgrader.upgradeSystem(new SubProgressMonitor(monitor, 1), versions);
+			upgrader.upgradeSystem(progress.split(1), versions);
 			validateConfiguration(versions);
-			upgrader.postProcess(new SubProgressMonitor(monitor, 1));
+			upgrader.postProcess(progress.split(1));
 		}catch (Exception ex){
 			HibernateManager.endSessionFactory(true, true);
 			String cleanUpErr = cleanUp(new File[] { temp });
@@ -293,7 +293,7 @@ public class DerbyRestoreEngine {
 
 		
 		/* create a copy of the current files incase something goes wrong */
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_MovingFiles);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_MovingFiles);
 		File dbFileBack = null;
 		File dataFileBack = null;
 		try {
@@ -323,7 +323,7 @@ public class DerbyRestoreEngine {
 					Messages.DerbyRestoreEngine_Error_CouldNotCreateTempBackup
 							+ ex.getLocalizedMessage(), ex);
 		}
-		monitor.worked(1);
+		progress.worked(1);
 
 		/* delete existing data */
 		try {
@@ -346,12 +346,9 @@ public class DerbyRestoreEngine {
 		}
 
 		/* restore the unzipped backup files */
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_RestoringFiles);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_RestoringFiles);
 		try {
-			
 			FileUtils.copyDirectory(extractedDb, dbFile);
-
-			
 			if (extractedFilestore.isFile()){
 				//directory was empty
 				dataFile.mkdir();
@@ -376,10 +373,10 @@ public class DerbyRestoreEngine {
 					Messages.DerbyRestoreEngine_Error_RestoreFailedRevertSuccessful
 							+ ex.getLocalizedMessage(), ex);
 		}
-		monitor.worked(1);
+		progress.worked(1);
 
 		/* clean up */
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_CleanUp);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_CleanUp);
 		final String cleanUpErr = cleanUp(new File[] { temp, dbFileBack, dataFileBack });
 		if (cleanUpErr.length() > 0) {
 			Display.getDefault().syncExec(new Runnable(){
@@ -398,7 +395,7 @@ public class DerbyRestoreEngine {
 			
 		}
 
-		monitor.worked(1);
+		progress.worked(1);
 
 	}
 	

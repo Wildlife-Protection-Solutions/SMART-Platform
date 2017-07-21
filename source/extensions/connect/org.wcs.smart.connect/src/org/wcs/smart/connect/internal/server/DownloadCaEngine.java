@@ -27,7 +27,8 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -77,80 +78,82 @@ public class DownloadCaEngine {
 	/**
 	 * Downloads the Conservation Area export package and imports it.
 	 * 
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @return true if download and install completed. false if user cancelled
 	 * @throws Exception
 	 */
 	public boolean downloadImport(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(Messages.DownloadCaEngine_TaskName, 5);
-		
-		/* request ca */
-		monitor.subTask(Messages.DownloadCaEngine_InitSubtaskName);
-		String statusUrl = connect.startConservationAreaDownload(info.getUuid());
-		monitor.worked(1);
-		if (monitor.isCanceled()) return false;
-		
-		/* wait for ca export to be created */
-		monitor.subTask(Messages.DownloadCaEngine_WaitSubTaskName);
-		Long start = System.nanoTime();
-		WorkItemStatus status = null ;
-		int waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
-		while(status == null || status.getStatus() == WorkItemStatus.Status.PROCESSING){
-			Long current = System.nanoTime();
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DownloadCaEngine_TaskName, 5);
+		try {
+			/* request ca */
+			progress.subTask(Messages.DownloadCaEngine_InitSubtaskName);
+			String statusUrl = connect.startConservationAreaDownload(info.getUuid());
+			progress.worked(1);
 			
-			if ( (current - start) > ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) * 1000000l) throw new Exception(Messages.DownloadCaEngine_Timeout);
-			Thread.sleep(waitTime);
-			try{
-				status = connect.getWorkItemStatus(statusUrl);
-			}catch (Exception ex){
-				ConnectPlugIn.log("Error requesting ca download status.", ex); //$NON-NLS-1$
-			}
-			if (monitor.isCanceled()) return false;
-		}
-		monitor.worked(1);
-		
-		if (status.getStatus() == WorkItemStatus.Status.ERROR){
-			throw new Exception(Messages.DownloadCaEngine_CaDownloadError + SmartConnect.parseErrorMessage(status.getMessage()));
-		}
-
-		/* download file */
-		monitor.subTask(Messages.DownloadCaEngine_DownloadSubtaskName);
-		String message = status.getMessage();
-		JsonNode nd = (new ObjectMapper()).readTree(message);
-		String downloadUrl = nd.get("file_url").asText(); //$NON-NLS-1$
-		if (monitor.isCanceled()) return false;
-		
-		Path p = connect.downloadFileFromUrl(downloadUrl, null, new SubProgressMonitor(monitor, 1));
-		
-		ConservationArea desktopCa = null;
-		Session s = HibernateManager.openSession();
-		try{
-			if (SmartDB.getCurrentConservationArea() != null){
-				desktopCa = (ConservationArea)s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
-			}
-		}finally{
-			s.close();
-		}
-		if (desktopCa != null){
-			/* delete existing ca */
-			if (!deleteCa(SmartDB.getCurrentConservationArea(), new SubProgressMonitor(monitor,1))){
-				return false;
-			}
-			if (!validateCaDeleted()){
-				return false;
-			}		
-		}
+			
+			/* wait for ca export to be created */
+			progress.subTask(Messages.DownloadCaEngine_WaitSubTaskName);
+			Long start = System.nanoTime();
+			WorkItemStatus status = null ;
+			int waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
+			while(status == null || status.getStatus() == WorkItemStatus.Status.PROCESSING){
+				Long current = System.nanoTime();
 				
-		/* import file */
-		monitor.subTask(Messages.DownloadCaEngine_InstallSubtaskName);
-		try{
-			if (monitor.isCanceled()) return false;
-			CaImporter.importCa(p.toFile(), new SubProgressMonitor(monitor, 1));
-		}finally{
-			Files.delete(p);
-		}
+				if ( (current - start) > ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME.getIntegerValue(connect.getServer()) * 1000000l) throw new Exception(Messages.DownloadCaEngine_Timeout);
+				Thread.sleep(waitTime);
+				try{
+					status = connect.getWorkItemStatus(statusUrl);
+				}catch (Exception ex){
+					ConnectPlugIn.log("Error requesting ca download status.", ex); //$NON-NLS-1$
+				}
+				progress.checkCanceled();	
+			}		
+			progress.worked(1);
+			
+			if (status.getStatus() == WorkItemStatus.Status.ERROR){
+				throw new Exception(Messages.DownloadCaEngine_CaDownloadError + SmartConnect.parseErrorMessage(status.getMessage()));
+			}
+	
+			/* download file */
+			progress.subTask(Messages.DownloadCaEngine_DownloadSubtaskName);
+			String message = status.getMessage();
+			JsonNode nd = (new ObjectMapper()).readTree(message);
+			String downloadUrl = nd.get("file_url").asText(); //$NON-NLS-1$
+			
+			
+			Path p = connect.downloadFileFromUrl(downloadUrl, null, progress.split(1));
+			
+			ConservationArea desktopCa = null;
+			Session s = HibernateManager.openSession();
+			try{
+				if (SmartDB.getCurrentConservationArea() != null){
+					desktopCa = (ConservationArea)s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+				}
+			}finally{
+				s.close();
+			}
+			if (desktopCa != null){
+				/* delete existing ca */
+				if (!deleteCa(SmartDB.getCurrentConservationArea(), progress.split(1))){
+					return false;
+				}
+				if (!validateCaDeleted()){
+					return false;
+				}		
+			}
+					
+			/* import file */
+			progress.subTask(Messages.DownloadCaEngine_InstallSubtaskName);
+			try{
+				progress.checkCanceled();	
+				CaImporter.importCa(p.toFile(), progress.split(1));
+			}finally{
+				Files.delete(p);
+			}
 		
-		monitor.done();
+		} catch (OperationCanceledException ex) {
+			return false;
+		}
 		return true;
 	}
 	
@@ -259,10 +262,10 @@ public class DownloadCaEngine {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.DownloadCaEngine_DeleteTaskName, 1);
 					DisplayAccess.accessDisplayDuringStartup();
-					monitor.setTaskName(Messages.DownloadCaEngine_DeleteTaskName);
 					try{
-						ConservationAreaManager.getInstance().deleteConservationArea(ca, new SubProgressMonitor(monitor,1), false);
+						ConservationAreaManager.getInstance().deleteConservationArea(ca, progress.split(1), false);
 					}catch (final Exception ex){
 						cont[0] = false;
 						SmartPlugIn.displayLog(Messages.DownloadCaEngine_CaDataError, ex);
@@ -279,19 +282,17 @@ public class DownloadCaEngine {
 	}
 	
 	private boolean deleteCa(final ConservationArea ca, final IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DownloadCaEngine_DeleteTaskName, 1);
 		//we don't revert back here; that will be done after download complete
 		HibernateManager.endSessionFactory(true, false);
 		HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
-		
-		monitor.beginTask(Messages.DownloadCaEngine_DeleteTaskName, 1);
 					
 		try{
-			ConservationAreaManager.getInstance().deleteConservationArea(ca, new SubProgressMonitor(monitor,1), false);
+			ConservationAreaManager.getInstance().deleteConservationArea(ca, progress.split(1), false);
 		}catch (final Exception ex){
 			SmartPlugIn.log(Messages.DownloadCaEngine_CaDataError, ex);
 			throw new Exception("Unable to delete Conservation Area before installing new Conservation Area.", ex); //$NON-NLS-1$
 		}
-		monitor.done();
 		return true;
 	}
 }

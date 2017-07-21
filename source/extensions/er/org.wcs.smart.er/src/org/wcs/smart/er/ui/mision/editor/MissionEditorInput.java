@@ -51,9 +51,8 @@ public class MissionEditorInput implements IEditorInput {
 		return uuid;
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
 

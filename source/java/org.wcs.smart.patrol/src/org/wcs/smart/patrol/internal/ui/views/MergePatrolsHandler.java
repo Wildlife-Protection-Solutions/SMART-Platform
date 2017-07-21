@@ -44,6 +44,7 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
  * @author Jeff
  *
  */
+@SuppressWarnings("restriction")
 public class MergePatrolsHandler {
 	
 	@Execute

@@ -35,7 +35,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
@@ -89,6 +89,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ExportEntityTypeHandler {
 
 	@Execute
@@ -117,15 +118,16 @@ public class ExportEntityTypeHandler {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask(Messages.ExportEntityTypeHandler_ProgressLabel, types.size() * 4);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.ExportEntityTypeHandler_ProgressLabel, types.size() * 4);
 					int exportedCnt = 0;
 					Session s = HibernateManager.openSession();
 					final boolean[] overwriteall = new boolean[]{false};
 					try{
 						for (EntityType et : types){
 							et = (EntityType) s.load(EntityType.class, et.getUuid());
-							monitor.subTask(MessageFormat.format(Messages.ExportEntityTypeHandler_ExportProgress, new Object[]{et.getName()}));
-							monitor.worked(1);
+							progress.subTask(MessageFormat.format(Messages.ExportEntityTypeHandler_ExportProgress, new Object[]{et.getName()}));
+							progress.worked(1);
+							
 							final File exportFile = new File(exportDir, URLUtils.cleanFilename(et.getName()) + ".xml"); //$NON-NLS-1$
 							
 							if (!overwriteall[0] && exportFile.exists()){
@@ -155,8 +157,7 @@ public class ExportEntityTypeHandler {
 								}
 							}
 							try(FileOutputStream fout = new FileOutputStream(exportFile)){
-								EntityTypeXmlManager.writeDataModel(EntityTypeToXmlConverter.toXml(et, new SubProgressMonitor(monitor, 3)),
-									fout);
+								EntityTypeXmlManager.writeDataModel(EntityTypeToXmlConverter.toXml(et, progress.split(3)), fout);
 								exportedCnt++;
 							}catch (Exception ex){
 								EntityPlugIn.displayLog(Messages.ExportEntityTypeHandler_ExportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -173,9 +174,6 @@ public class ExportEntityTypeHandler {
 							MessageDialog.openInformation(pmd.getShell(), Messages.ExportEntityTypeHandler_DialogTitle, 
 									MessageFormat.format(Messages.ExportEntityTypeHandler_ExportComplete, new Object[]{lExportCnt, types.size()}));		
 							}});
-						
-					
-					monitor.done();
 				}
 			});
 		}catch (Exception ex){

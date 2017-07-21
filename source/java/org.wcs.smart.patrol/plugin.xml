@@ -210,9 +210,15 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
+               icon="images/icons/etool16/groupby.png"
                id="org.wcs.smart.patrol.groupby.menu"
-               label="GB"
-               style="pulldown">
+               label="%command.groupby"
+               style="pulldown"
+               tooltip="%command.groupBy.tooltip">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="NONE">
+            </parameter>
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.ShowPatrolFilter"
@@ -227,7 +233,7 @@
             locationURI="popup:org.wcs.smart.patrol.ui.PatrolListView">
          <command
                commandId="org.wcs.smart.patrol.open"
-               label="Open"
+               label="%command.open"
                style="push">
          </command>
          <separator
@@ -250,6 +256,111 @@
                style="push"
                tooltip="%popup.merge.command.tooltip">
          </command>
+         <separator
+               name="org.wcs.smart.patrol.separator2"
+               visible="true">
+         </separator>
+         <menu
+               icon="images/icons/etool16/groupby.png"
+               label="%menu.label.groupby">
+            <command
+                  commandId="org.wcs.smart.patrol.view.groupby"
+                  id="org.wcs.smart.patrol.view.groupby.folder"
+                  label="%command.groupby.folder"
+                  style="radio">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="FOLDER">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.view.groupby"
+                  icon="images/icons/etool16/patrol_types.png"
+                  id="org.wcs.smart.patrol.view.groupby.type"
+                  label="%command.groupby.type"
+                  style="radio">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="PATROLTYPE">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.view.groupby"
+                  icon="images/icons/etool16/patrol_types.png"
+                  id="org.wcs.smart.patrol.view.groupby.transport"
+                  label="%command.groupby.transport"
+                  style="radio">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="TRANSPORTTYPE">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.view.groupby"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/obj16/station.png"
+                  id="org.wcs.smart.patrol.view.groupby.station"
+                  label="%command.groupby.station"
+                  style="radio">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="STATION">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.view.groupby"
+                  icon="images/icons/obj16/patrol_team.png"
+                  id="org.wcs.smart.patrol.view.groupby.team"
+                  label="%command.groupby.team"
+                  style="radio">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="TEAM">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.view.groupby"
+                  icon="images/icons/obj16/patrol_mandate.png"
+                  id="org.wcs.smart.patrol.view.groupby.mandate"
+                  label="%command.groupby.mandate"
+                  style="radio">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="MANDATE">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.view.groupby"
+                  icon="images/icons/obj16/calendar_month.png"
+                  id="org.wcs.smart.patrol.view.groupby.month"
+                  label="%command.groupby.month"
+                  style="radio">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="MONTH">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.view.groupby"
+                  icon="images/icons/obj16/calendar_year.png"
+                  id="org.wcs.smart.patrol.view.groupby.year"
+                  label="%command.groupby.year"
+                  style="radio">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="YEAR">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.patrol.view.groupby"
+                  id="org.wcs.smart.patrol.view.groupby.none"
+                  label="%command.groupby.none"
+                  style="radio">
+               <parameter
+                     name="org.eclipse.ui.commands.radioStateParameter"
+                     value="NONE">
+               </parameter>
+            </command>
+         </menu>
          
       </menuContribution>
       <menuContribution
@@ -301,15 +412,12 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.patrol.ui.PatrolListView?before=org.wcs.smart.patrol.view.DeletePatrol">
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="menu:org.wcs.smart.patrol.groupby.menu">
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               label="Folder"
-               style="push">
+               id="org.wcs.smart.patrol.view.groupby.folder"
+               label="%command.groupby.folder"
+               style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="FOLDER">
@@ -318,8 +426,9 @@
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
                icon="images/icons/etool16/patrol_types.png"
-               label="Patrol Type"
-               style="push">
+               id="org.wcs.smart.patrol.view.groupby.type"
+               label="%command.groupby.type"
+               style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="PATROLTYPE">
@@ -328,8 +437,9 @@
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
                icon="images/icons/etool16/patrol_types.png"
-               label="Transport Type"
-               style="push">
+               id="org.wcs.smart.patrol.view.groupby.transport"
+               label="%command.groupby.transport"
+               style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="TRANSPORTTYPE">
@@ -337,8 +447,10 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               label="Station"
-               style="push">
+               icon="platform:/plugin/org.wcs.smart/images/icons/obj16/station.png"
+               id="org.wcs.smart.patrol.view.groupby.station"
+               label="%command.groupby.station"
+               style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="STATION">
@@ -347,8 +459,9 @@
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
                icon="images/icons/obj16/patrol_team.png"
-               label="Team"
-               style="push">
+               id="org.wcs.smart.patrol.view.groupby.team"
+               label="%command.groupby.team"
+               style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="TEAM">
@@ -357,8 +470,9 @@
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
                icon="images/icons/obj16/patrol_mandate.png"
-               label="Mandate"
-               style="push">
+               id="org.wcs.smart.patrol.view.groupby.mandate"
+               label="%command.groupby.mandate"
+               style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="MANDATE">
@@ -366,8 +480,10 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               label="Month"
-               style="push">
+               icon="images/icons/obj16/calendar_month.png"
+               id="org.wcs.smart.patrol.view.groupby.month"
+               label="%command.groupby.month"
+               style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="MONTH">
@@ -375,8 +491,10 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               label="Year"
-               style="push">
+               icon="images/icons/obj16/calendar_year.png"
+               id="org.wcs.smart.patrol.view.groupby.year"
+               label="%command.groupby.year"
+               style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="YEAR">
@@ -384,8 +502,110 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               label="None"
-               style="push">
+               id="org.wcs.smart.patrol.view.groupby.none"
+               label="%command.groupby.none"
+               style="radio">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="NONE">
+            </parameter>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.patrol.groupby.menu2">
+         <command
+               commandId="org.wcs.smart.patrol.view.groupby"
+               id="org.wcs.smart.patrol.view.groupby.folder"
+               label="%command.groupby.folder"
+               style="radio">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="FOLDER">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.patrol.view.groupby"
+               icon="images/icons/etool16/patrol_types.png"
+               id="org.wcs.smart.patrol.view.groupby.type"
+               label="%command.groupby.type"
+               style="radio">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="PATROLTYPE">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.patrol.view.groupby"
+               icon="images/icons/etool16/patrol_types.png"
+               id="org.wcs.smart.patrol.view.groupby.transport"
+               label="%command.groupby.transport"
+               style="radio">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="TRANSPORTTYPE">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.patrol.view.groupby"
+               icon="platform:/plugin/org.wcs.smart/images/icons/obj16/station.png"
+               id="org.wcs.smart.patrol.view.groupby.station"
+               label="%command.groupby.station"
+               style="radio">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="STATION">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.patrol.view.groupby"
+               icon="images/icons/obj16/patrol_team.png"
+               id="org.wcs.smart.patrol.view.groupby.team"
+               label="%command.groupby.team"
+               style="radio">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="TEAM">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.patrol.view.groupby"
+               icon="images/icons/obj16/patrol_mandate.png"
+               id="org.wcs.smart.patrol.view.groupby.mandate"
+               label="%command.groupby.mandate"
+               style="radio">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="MANDATE">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.patrol.view.groupby"
+               icon="images/icons/obj16/calendar_month.png"
+               id="org.wcs.smart.patrol.view.groupby.month"
+               label="%command.groupby.month"
+               style="radio">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="MONTH">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.patrol.view.groupby"
+               icon="images/icons/obj16/calendar_year.png"
+               id="org.wcs.smart.patrol.view.groupby.year"
+               label="%command.groupby.year"
+               style="radio">
+            <parameter
+                  name="org.eclipse.ui.commands.radioStateParameter"
+                  value="YEAR">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.patrol.view.groupby"
+               id="org.wcs.smart.patrol.view.groupby.none"
+               label="%command.groupby.none"
+               style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="NONE">
@@ -440,21 +660,22 @@
             name="%mergepatrol.command.name">
       </command>
       <command
-            id="org.wcs.smart.patrol..open"
-            name="Open Patrol">
+            id="org.wcs.smart.patrol.open"
+            name="%command.openpatrol">
       </command>
       <command
+            defaultHandler="org.wcs.smart.patrol.internal.ui.views.PatrolGroupByHandler$PatrolGroupByHandlerWrapper"
             id="org.wcs.smart.patrol.view.groupby"
-            name="Group By">
+            name="%command.groupby.name">
+         <commandParameter
+               id="org.eclipse.ui.commands.radioStateParameter"
+               name="Radio Name"
+               optional="false">
+         </commandParameter>
          <state
                class="org.eclipse.ui.handlers.RadioState:NONE"
                id="org.eclipse.ui.commands.radioState">
          </state>
-         <commandParameter
-               id="org.eclipse.ui.commands.radioStateParameter"
-               name="Group By Option"
-               optional="true">
-         </commandParameter>
       </command>
    </extension>
    <extension

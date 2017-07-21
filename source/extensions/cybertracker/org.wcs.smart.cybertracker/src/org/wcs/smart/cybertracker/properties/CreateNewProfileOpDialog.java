@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -181,12 +182,12 @@ public class CreateNewProfileOpDialog extends TitleAreaDialog {
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.beginTask(Messages.CyberTrackerPropertiesDialog_LoadProfile_Task, 1);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerPropertiesDialog_LoadProfile_Task, 1);
 					Session s = HibernateManager.openSession();
 					s.beginTransaction();
 					try {
 						CyberTrackerPropertiesProfile fullProfile = (CyberTrackerPropertiesProfile) s.get(CyberTrackerPropertiesProfile.class, profileTemplate.getUuid());
-						initProfile = CyberTrackerProfileFactory.createProfileClone(fullProfile, name, monitor);
+						initProfile = CyberTrackerProfileFactory.createProfileClone(fullProfile, name, progress.split(1));
 					} catch (Exception ex) {
 						SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_LoadProfile_Error, ex);
 					} finally {

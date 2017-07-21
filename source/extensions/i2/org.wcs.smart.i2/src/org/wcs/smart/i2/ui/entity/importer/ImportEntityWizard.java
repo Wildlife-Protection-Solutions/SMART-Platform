@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -81,15 +82,17 @@ public class ImportEntityWizard extends Wizard implements IPageChangingListener 
 						Integer numEntities = EntityImportEngine.INSTANCE.importEntities(config, eventBroker, monitor);
 						if (numEntities == null){
 							r[0] = false;
-							if (monitor.isCanceled()){
-								Display.getDefault().syncExec(()->{
-									MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportEntityWizard_InfoDialogTitle, Messages.ImportEntityWizard_CancelledMsg);
-								});
-							}
+							throw new OperationCanceledException();
 						}else{
 							r[0] = true;
 							Display.getDefault().syncExec(()->{
 								MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportEntityWizard_ImportDialogTitle, MessageFormat.format(Messages.ImportEntityWizard_SuccessMsg, numEntities));
+							});
+						}
+					}catch (OperationCanceledException ex) {
+						if (monitor.isCanceled()){
+							Display.getDefault().syncExec(()->{
+								MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportEntityWizard_InfoDialogTitle, Messages.ImportEntityWizard_CancelledMsg);
 							});
 						}
 					}catch (Exception ex){

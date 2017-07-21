@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -110,36 +111,29 @@ public class FilterProcessor implements IFilterProcessor {
 			boolean includeEmptyObservations,
 			IProgressMonitor monitor) throws SQLException{
 		
-		monitor.subTask(Messages.DerbySummaryEngine_Progress_CreatingObservationTable);
+		SubMonitor progress = SubMonitor.convert(monitor, 3);
+		progress.subTask(Messages.DerbySummaryEngine_Progress_CreatingObservationTable);
 		
 		IFilter qFilter = queryFilter;
 		if (qFilter == null){
 			qFilter = EmptyFilter.INSTANCE;
 		}
 		qFilter.accept(observationFilterVisitor);		
+		SubMonitor sub = progress.split(1);
 		if (observationFilterVisitor.hasAttributeFilter()){
-			createObservationTable(c, qFilter, dateFilter, caFilter, monitor);
+			createObservationTable(c, qFilter, dateFilter, caFilter, sub);
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.DerbySummaryEngine_Progress_CreatingTempTable);
-		createTemporaryTable(c);
 		
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.subTask(Messages.DerbySummaryEngine_Progress_CreatingTempTable);
+		createTemporaryTable(c);
+		progress.checkCanceled();
+		progress.worked(1);
 		
 		populateTemporaryTable(qFilter, dateFilter, caFilter, 
 				includeEmptyObservations, c, populateObservation);
+		progress.checkCanceled();
+		progress.worked(1);
 		
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
 	}
 	
 	
@@ -346,7 +340,8 @@ public class FilterProcessor implements IFilterProcessor {
 			DateFilter dateFilter, ConservationAreaFilter caFilter, IProgressMonitor monitor)
 			throws SQLException {
 		
-		monitor.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttributes);
+		SubMonitor progress = SubMonitor.convert(monitor, 1);
+		progress.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttributes);
 		
 		AttributeFilterCollectorVisitor collector = new AttributeFilterCollectorVisitor(c, engine);
 		filter.accept(collector);
@@ -372,9 +367,11 @@ public class FilterProcessor implements IFilterProcessor {
 		
 		String attributeTempTable = engine.createTempTableName();
 			
+		progress.setWorkRemaining(keys.size());
 		for (AttributeInfo key : keys){
 			engine.clearParameters();
-			monitor.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttribute + key.getKey());
+			progress.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttribute + key.getKey());
+			progress.split(1);
 			
 			//create temporary table for attribute observations
 			sql = new StringBuilder();

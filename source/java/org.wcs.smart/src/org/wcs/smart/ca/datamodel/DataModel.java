@@ -31,6 +31,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Criteria;
@@ -441,29 +442,28 @@ public class DataModel {
 	 * </p>
 	 * 
 	 * @param session database connection
-	 * 
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
 	 * @throws HibernateException if changes cannot be saved
 	 */
-	public void save(Session session, IProgressMonitor m){
+	public void save(Session session, IProgressMonitor monitor){
 		session.beginTransaction();
-		m.beginTask(Messages.DataModel_Progress_SaveDm, attributes.size() + categories.size());
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModel_Progress_SaveDm, attributes.size() + categories.size());
 		try {
 			for (Attribute att : attributes) {
-				m.subTask(Messages.DataModel_Progress_SaveAttribute + att.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+				progress.subTask(Messages.DataModel_Progress_SaveAttribute + att.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				session.save(att);
 				session.flush();
 				session.clear();
-				m.internalWorked(1);
+				progress.worked(1);
 			}
 
 			for (Category c : categories) {
-				m.subTask(Messages.DataModel_Progress_SaveCategory + c.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+				progress.subTask(Messages.DataModel_Progress_SaveCategory + c.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				session.save(c);
 				session.flush();
 				session.clear();
-				m.internalWorked(1);
+				progress.worked(1);
 			}
-			m.done();
 			session.getTransaction().commit();
 		} catch (HibernateException ex) {
 			session.getTransaction().rollback();
@@ -482,9 +482,11 @@ public class DataModel {
 	 * @param defaultLang may be null otherwise the language from the
 	 * original data model labels to use for the labels of the
 	 * default language of the new conservation area
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
 	 * @return the cloned data model
 	 */
 	public DataModel clone(ConservationArea newCa, String defaultLang, IProgressMonitor monitor){
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModel_ProgressLabel, 2);
 		DataModel clone = new DataModel();
 		
 		clone.setConservationArea(newCa);
@@ -498,27 +500,25 @@ public class DataModel {
 			}
 		}
 		
-		//attributes
-		monitor.beginTask(Messages.DataModel_ProgressLabel, 2);
-		monitor.subTask(Messages.DataModel_CloneAttributes1);
+		//attributes		
+		progress.subTask(Messages.DataModel_CloneAttributes1);
 		if (this.getAttributes() != null){
 			clone.attributes = new ArrayList<Attribute>();
 			for (Attribute att: this.getAttributes()){
-				monitor.subTask(Messages.DataModel_CloneAttributes2 + att.findName(ll));
+				progress.subTask(Messages.DataModel_CloneAttributes2 + att.findName(ll));
 				clone.attributes.add(att.clone(newCa,defaultLang));
 			}
 		}
 		
 		//categories
 		clone.categories = new ArrayList<Category>();
-		monitor.worked(1);
-		monitor.subTask(Messages.DataModel_CloneCategories);
+		progress.worked(1);
+		progress.subTask(Messages.DataModel_CloneCategories);
 		for (Category cat: this.getCategories()){
-			monitor.subTask(Messages.DataModel_CloneSubCategories + cat.findName(ll));
+			progress.subTask(Messages.DataModel_CloneSubCategories + cat.findName(ll));
 			clone.categories.add(cat.clone(newCa, null, clone.attributes, defaultLang));
 		}
-		monitor.worked(1);
-		monitor.done();
+		progress.worked(1);
 		return clone;
 	}
 	

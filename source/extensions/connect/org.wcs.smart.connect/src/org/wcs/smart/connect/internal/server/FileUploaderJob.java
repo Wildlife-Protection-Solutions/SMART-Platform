@@ -29,11 +29,10 @@ import java.text.MessageFormat;
 import javax.ws.rs.InternalServerErrorException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.io.CopyProgressMonitor;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.api.model.WorkItemStatus.Status;
 import org.wcs.smart.connect.internal.Messages;
@@ -66,27 +65,32 @@ public abstract class FileUploaderJob extends Job {
 	}
 	
 	
+	/**
+	 * 
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
+	 * @throws Exception
+	 */
 	protected void uploadFile(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(Messages.FileUploaderJob_TaskName, 4);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.FileUploaderJob_TaskName, 4);
 		// get current status
 		WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 		try{
-			if (checkServerStatus(serverStatus, monitor)){
+			if (checkServerStatus(serverStatus, progress.split(1))){
 				return ;
 			}
 			int cnt = 0;			
 			long waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
 			
-			monitor.subTask(Messages.FileUploaderJob_subTaskName);
-			CopyProgressMonitor copyMonitor = new CopyProgressMonitor(new SubProgressMonitor(monitor,3), Files.size(file));
+			progress.subTask(Messages.FileUploaderJob_subTaskName);
 			
+			progress.setWorkRemaining(4);
 			while(cnt < ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer())){
 				//upload file
 				try{
 					cnt++;
 					connect.uploadFile(url, file, 
 							serverStatus.getCurrentSize(),
-							copyMonitor);
+							progress.split(3));
 				}catch (Exception ex){
 					if (ex instanceof InternalServerErrorException){
 						try{
@@ -100,20 +104,19 @@ public abstract class FileUploaderJob extends Job {
 				}
 				
 				serverStatus = connect.getWorkItemStatus(url);
-				if (checkServerStatus(serverStatus, monitor)){
+				if (checkServerStatus(serverStatus, progress.split(2))){
 					return ;
 				}
 				Thread.sleep(waitTime);
-				if (monitor.isCanceled()) throw new Exception(Messages.FileUploaderJob_Cancelled);
+				progress.checkCanceled();
 			}
+			
 			//if we are here we have tried max_retry times and the file has still not been uploaded
 			throw new Exception(MessageFormat.format(Messages.FileUploaderJob_ToManyTried, ConnectServerOption.ConnectionOption.MAX_RETRY_UPLOAD.getIntegerValue(connect.getServer())));
 		}catch(Exception ex){
 			serverStatus.setMessage(ex.getMessage());
 			onError(serverStatus.getMessage());
 			throw ex;
-		}finally{
-			monitor.done();
 		}
 	}
 	
@@ -132,9 +135,16 @@ public abstract class FileUploaderJob extends Job {
 	/*
 	 * checks the upload status on the server
 	 */
+	/**
+	 * 
+	 * @param serverStatus
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
+	 * @return
+	 * @throws Exception
+	 */
 	protected boolean checkServerStatus(WorkItemStatus serverStatus,
 			IProgressMonitor monitor) throws Exception{
-		monitor.subTask(Messages.FileUploaderJob_StatusCheckSubTaskName);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.FileUploaderJob_StatusCheckSubTaskName, 1);
 	
 		if (serverStatus.getStatus() == Status.COMPLETE){
 			onUploadComplete(serverStatus);
@@ -147,7 +157,7 @@ public abstract class FileUploaderJob extends Job {
 			onUploadComplete(serverStatus);
 			
 			//upload was successful but we need to wait for processing
-			if (!waitProcessing(monitor)){
+			if (!waitProcessing(progress)){
 				//we waited 5 minutes and we do not know how to proceed
 				throw new Exception(
 						MessageFormat.format(

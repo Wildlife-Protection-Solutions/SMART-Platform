@@ -30,6 +30,7 @@ import org.wcs.smart.i2.ui.dialogs.RelationshipGroupListDialog;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ShowRelationshipGroupListDialogHandler extends ShowDialogHandler {
 
 	public ShowRelationshipGroupListDialogHandler(){

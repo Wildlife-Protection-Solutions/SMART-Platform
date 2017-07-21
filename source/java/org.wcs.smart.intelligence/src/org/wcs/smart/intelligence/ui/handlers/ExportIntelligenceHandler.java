@@ -56,6 +56,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ExportIntelligenceHandler {
 
 	@Execute

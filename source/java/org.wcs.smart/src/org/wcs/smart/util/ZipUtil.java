@@ -35,6 +35,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -56,7 +58,7 @@ public class ZipUtil {
 	 * 
 	 * @param directories directories to include in zip
 	 * @param outputZipFile output zip file name
-	 * @param monitor progress monitor
+	 * @param monitor progress monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @return <code>true</code> if successful <code>false</code> if error
 	 * @throws IOException
 	 */
@@ -65,23 +67,15 @@ public class ZipUtil {
 			File outputZipFile, 
 			IProgressMonitor monitor) throws IOException{
 
-        
+        SubMonitor progress = SubMonitor.convert(monitor, Messages.ZipUtil_Progress_CreatingZip, 100);
+        progress.subTask(Messages.ZipUtil_Progress_CreatingZip);
         try (FileOutputStream fOut = new FileOutputStream(outputZipFile);
         	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
         	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
             
-            int count = 0;
+            progress.setWorkRemaining(directories.length);
             for (int i = 0; i < directories.length; i ++){
-            	if (directories[i].isDirectory()){
-            		count += SmartUtils.countFiles(directories[i]);
-            	}else{
-            		count++;
-            	}
-            }
-            
-            monitor.beginTask(Messages.ZipUtil_Progress_CreatingZip, count);
-            for (int i = 0; i < directories.length; i ++){
-            	addFileToZip(tOut,directories[i].getAbsoluteFile(), "", monitor); //$NON-NLS-1$
+            	addFileToZip(tOut,directories[i].getAbsoluteFile(), "", progress.split(1)); //$NON-NLS-1$
             }
             
         }
@@ -102,41 +96,41 @@ public class ZipUtil {
     private static boolean addFileToZip(ZipArchiveOutputStream zOut, 
     		File path, 
     		String base, IProgressMonitor monitor) throws IOException {
-    	
-    	monitor.subTask(Messages.ZipUtil_Progress_ProcessingFile + path.getAbsolutePath());
-    	String entryName = base + path.getName();
-        if(monitor.isCanceled()){
-        	return false;
-        }
-        monitor.worked(1);
-       
-        if (path.isFile()) {
-            ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
-            zOut.putArchiveEntry(zipEntry);
-            try(FileInputStream in = new FileInputStream(path)){
-            	IOUtils.copy(in, zOut);
-            }
-            zOut.closeArchiveEntry();
-        }else if (path.isDirectory() && path.list().length == 0){
-        	//empty directory
-    		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName + DIR_PATH_SEPERATOR);  
-            zOut.putArchiveEntry(zipEntry);
-            zOut.closeArchiveEntry();
-        } else {
-            File[] children = path.listFiles();
-            if (children != null) {
-                for (File child : children) {
-                    if (!addFileToZip(zOut, child, entryName + DIR_PATH_SEPERATOR, monitor)){
-                    	return false;
-                    }
-                    if (monitor.isCanceled()){
-                    	return false;
-                    }
-                }
-            }else{
-            	throw new IllegalStateException(MessageFormat.format(Messages.ZipUtil_BackupError, new Object[]{path.toString()}));
-            }
-        }
+    	SubMonitor progress = SubMonitor.convert(monitor, 1);
+    	progress.subTask( Messages.ZipUtil_Progress_ProcessingFile + path.getAbsolutePath() );
+    	try {
+	    	String entryName = base + path.getName();
+	        progress.checkCanceled();
+	       
+	        
+	        if (path.isFile()) {
+	            ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
+	            zOut.putArchiveEntry(zipEntry);
+	            try(FileInputStream in = new FileInputStream(path)){
+	            	IOUtils.copy(in, zOut);
+	            }
+	            zOut.closeArchiveEntry();
+	        }else if (path.isDirectory() && path.list().length == 0){
+	        	//empty directory
+	    		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName + DIR_PATH_SEPERATOR);  
+	            zOut.putArchiveEntry(zipEntry);
+	            zOut.closeArchiveEntry();
+	        } else {
+	            File[] children = path.listFiles();
+	            if (children != null) {
+	            	progress.setWorkRemaining(children.length);
+	                for (File child : children) {
+	                    if (!addFileToZip(zOut, child, entryName + DIR_PATH_SEPERATOR, progress.split(1))){
+	                    	return false;
+	                    }
+	                }
+	            }else{
+	            	throw new IllegalStateException(MessageFormat.format(Messages.ZipUtil_BackupError, new Object[]{path.toString()}));
+	            }
+	        }
+    	}catch (OperationCanceledException ex) {
+    		return false;
+    	}
         return true;
     }
     

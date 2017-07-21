@@ -52,6 +52,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class DeleteItemHandler {
 
 	@Execute
