@@ -23,6 +23,8 @@ public class Messages extends NLS {
 	public static String CmAttributeConfig_Default;
 	public static String CmAttributeConfInfoComposite_Configuration_Label;
 	public static String CmAttributeConfInfoComposite_Configuration_Tooltip;
+	public static String CmAttributeConfInfoComposite_DeleteConfirmation_Message;
+	public static String CmAttributeConfInfoComposite_DeleteConfirmation_Title;
 	public static String CmAttributeInfoComposite_Attribute;
 	public static String CmAttributeInfoComposite_enabledTooltip;
 	public static String CmAttributeInfoComposite_EnableOnce_Tooltip;
@@ -186,6 +188,8 @@ public class Messages extends NLS {
 	public static String ImageSelectionControl_JpegFiles;
 	public static String ListAttributeInfoComposite_Button_Edit;
 	public static String ListAttributeInfoComposite_Button_Revert;
+	public static String ListAttributeInfoComposite_Config_Create;
+	public static String ListAttributeInfoComposite_Config_Delete;
 	public static String ListAttributeInfoComposite_ConfirmRevert_Message;
 	public static String ListAttributeInfoComposite_ConfirmRevert_Title;
 	public static String ListAttributeInfoComposite_defaultTooltip;
@@ -213,6 +217,8 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_Button_Revert;
 	public static String TreeAttributeInfoComposite_Cleanup_Error;
 	public static String TreeAttributeInfoComposite_Cleanup_Task;
+	public static String TreeAttributeInfoComposite_Config_Create;
+	public static String TreeAttributeInfoComposite_Config_Delete;
 	public static String TreeAttributeInfoComposite_ConfirmRevert_Message;
 	public static String TreeAttributeInfoComposite_ConfirmRevert_Title;
 	public static String TreeAttributeInfoComposite_customTreeOp;

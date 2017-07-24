@@ -263,7 +263,7 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 	
 	private void createAddListButton(Composite container) {
 		Button btnAdd = new Button(container, SWT.PUSH);
-		btnAdd.setText("Create New...");
+		btnAdd.setText(Messages.ListAttributeInfoComposite_Config_Create);
 		btnAdd.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -310,13 +310,15 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 
 	private void createDeleteListButton(Composite container) {
 		btnDeleteConfig = new Button(container, SWT.PUSH);
-		btnDeleteConfig.setText("Delete");
+		btnDeleteConfig.setText(Messages.ListAttributeInfoComposite_Config_Delete);
 		btnDeleteConfig.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
 		btnDeleteConfig.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: QQQ impl
+				removeConfig(getSourceObject().getConfig());
+				listViewer.setInput(getSourceObject().getCurrentList());
+				listViewer.refresh();
 			}
 		});
 	}

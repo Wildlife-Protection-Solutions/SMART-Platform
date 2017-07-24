@@ -25,9 +25,12 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -91,16 +94,16 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		return cfgList;
 	}
 
-	private List<CmAttributeConfig> getUnsavedConfigs(Attribute attribute) {
-		List<CmAttributeConfig> result = new ArrayList<>();
+	private Set<CmAttributeConfig> getUnsavedConfigs(Attribute attribute) {
+		Set<CmAttributeConfig> result = new HashSet<>();
 		for (CmNode cmNode : getModel().getNodes()) {
 			result.addAll(getUnsavedConfigs(cmNode, attribute));
 		}
 		return result;
 	}
 	
-	private List<CmAttributeConfig> getUnsavedConfigs(CmNode cmNode, Attribute attribute) {
-		List<CmAttributeConfig> result = new ArrayList<>();
+	private Set<CmAttributeConfig> getUnsavedConfigs(CmNode cmNode, Attribute attribute) {
+		Set<CmAttributeConfig> result = new HashSet<>();
 		for (CmAttribute cmAttr : cmNode.getCmAttributes()) {
 			if (attribute.equals(cmAttr.getAttribute())) {
 				CmAttributeConfig cfg = cmAttr.getConfig();
@@ -171,6 +174,35 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		configViewer.refresh(true);
 	}
 
+	protected void removeConfig(CmAttributeConfig config) {
+		if (config == null || config.isDefault()) {
+			return;
+		}
+		if (!MessageDialog.openConfirm(getShell(), Messages.CmAttributeConfInfoComposite_DeleteConfirmation_Title, Messages.CmAttributeConfInfoComposite_DeleteConfirmation_Message)){
+			return;
+		}
+		for (CmNode cmNode : getModel().getNodes()) {
+			resetToDefaultConfig(cmNode, config);
+		}
+		
+		List<CmAttributeConfig> cfgList = getConfigs(getSourceObject());
+		cfgList.remove(config);
+		configViewer.setInput(cfgList);
+		configViewer.setSelection(new StructuredSelection(getModel().getDefaultConfigs().get(config.getAttribute())));
+		dialog.getSession().delete(config);
+		fireModelChanged();
+	}
+
+	private void resetToDefaultConfig(CmNode cmNode, CmAttributeConfig config) {
+		for (CmAttribute cmAttr : cmNode.getCmAttributes()) {
+			if (config.equals(cmAttr.getConfig())) {
+				cmAttr.setConfig(getModel().getDefaultConfigs().get(config.getAttribute()));
+			}
+		}
+		for (CmNode childNode : cmNode.getChildren()) {
+			resetToDefaultConfig(childNode, config);
+		}
+	}	
 	
 	protected abstract void handleConfigViewerSelectionChanged();
 

@@ -222,7 +222,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 
 	private void createAddTreeButton(Composite container) {
 		Button btnAdd = new Button(container, SWT.PUSH);
-		btnAdd.setText("Create New...");
+		btnAdd.setText(Messages.TreeAttributeInfoComposite_Config_Create);
 		btnAdd.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 1, 1));
 
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -276,13 +276,16 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 
 	private void createDeleteTreeButton(Composite container) {
 		btnDeleteConfig = new Button(container, SWT.PUSH);
-		btnDeleteConfig.setText("Delete");
+		btnDeleteConfig.setText(Messages.TreeAttributeInfoComposite_Config_Delete);
 		btnDeleteConfig.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 
 		btnDeleteConfig.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: QQQ impl
+				removeConfig(getSourceObject().getConfig());
+				attributeTreeViewer.setInput(getSourceObject());
+				attributeTreeViewer.expandToLevel(2);
+				attributeTreeViewer.refresh();
 			}
 		});
 	}
