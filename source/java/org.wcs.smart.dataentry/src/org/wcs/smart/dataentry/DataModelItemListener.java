@@ -184,22 +184,6 @@ public class DataModelItemListener implements IDataModelItemListener {
 			a.getNode().getCmAttributes().remove(a);
 			
 			interceptor.onDelete(a, a.getUuid(),null, null, null);
-			//register delete on children (ensure images are removed)
-			//TODO: QQQ fix code below
-//			if (a.getList() != null){
-//				for (CmAttributeListItem l : a.getList()){
-//					interceptor.onDelete(l, l.getUuid(),null, null, null);
-//				}
-//			}
-//			if (a.getTree() != null){
-//				List<CmAttributeTreeNode> nodes = new ArrayList<>();
-//				nodes.addAll(a.getTree());
-//				while(!nodes.isEmpty()){
-//					CmAttributeTreeNode n = nodes.remove(0);
-//					interceptor.onDelete(n, n.getUuid(),null, null, null);
-//					nodes.addAll(n.getChildren());
-//				}
-//			}
 			
 			//update the order of other attribute
 			for (int i = 0; i < a.getNode().getCmAttributes().size(); i ++){
