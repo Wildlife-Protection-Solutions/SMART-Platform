@@ -106,16 +106,14 @@ public class ConfigurableModelFactory {
 			processNode(null, kid, clone, o2iMap, monitor);
 		}
 		if (monitor.isCanceled()) return null;
-		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultLists);
+		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultConfigs);
 		monitor.worked(1);
-		//TODO: QQQ fix below
-//		clone.setDefaultLists(cloneCmAttributeList(cm.getDefaultLists(), clone, null, o2iMap));
-		if (monitor.isCanceled()) return null;
-		monitor.subTask(Messages.ConfigurableModelFactory_ProcessDefaultTrees);
-		monitor.worked(1);
-		//TODO: QQQ fix below
-		//clone.setDefaultTrees(cloneCmAttributeTree(cm.getDefaultTrees(), null, clone, null, o2iMap));
+		for (CmAttributeConfig cfgToClone : cm.getDefaultConfigs().values()) {
+			CmAttributeConfig clonedConfig = cloneCmAttributeConfig(cfgToClone, clone, o2iMap);
+			clone.getDefaultConfigs().put(clonedConfig.getAttribute(), clonedConfig);
+		}
 
+		monitor.worked(1);
 		if (monitor.isCanceled()) return null;
 		monitor.done();
 		return cloneResult;
@@ -350,6 +348,9 @@ public class ConfigurableModelFactory {
 	}
 
 	private static CmAttributeConfig cloneCmAttributeConfig(CmAttributeConfig cfgToClone, ConfigurableModel clonedCm, Map<UUID, UuidItem> o2iMap) {
+		if (o2iMap.containsKey(cfgToClone.getUuid())) {
+			return (CmAttributeConfig) o2iMap.get(cfgToClone.getUuid());
+		}
 		CmAttributeConfig clone = new CmAttributeConfig();
 		copyLabels(cfgToClone, clone);
 		clone.setModel(clonedCm);
@@ -358,6 +359,7 @@ public class ConfigurableModelFactory {
 		clone.setDisplayMode(cfgToClone.getDisplayMode());
 		clone.setList(cloneCmAttributeList(cfgToClone.getList(), clone, o2iMap));
 		clone.setTree(cloneCmAttributeTree(cfgToClone.getTree(), null, clone, o2iMap));
+		o2iMap.put(cfgToClone.getUuid(), clone);
 		return clone;
 	}
 	

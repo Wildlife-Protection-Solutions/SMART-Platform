@@ -104,8 +104,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorDefaultTab_TabName;
 	public static String ConfigurableModelFactory_BlankCmTaskName;
 	public static String ConfigurableModelFactory_ProcessCmNode;
-	public static String ConfigurableModelFactory_ProcessDefaultLists;
-	public static String ConfigurableModelFactory_ProcessDefaultTrees;
+	public static String ConfigurableModelFactory_ProcessDefaultConfigs;
 	public static String ConfigurableModelFactory_ProgressMessage;
 	public static String ConfigurableModelFactory_TaskName;
 	public static String ConfigurableModelPropertyDialog_AllFiles;

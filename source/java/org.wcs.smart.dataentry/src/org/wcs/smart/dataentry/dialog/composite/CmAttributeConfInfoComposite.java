@@ -45,6 +45,7 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
@@ -79,6 +80,7 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		List<CmAttributeConfig> cfgList = configsMap.get(cmAttr.getAttribute());
 		if (cfgList == null) {
 			cfgList = new ArrayList<>(DataentryHibernateManager.getCmAttributeConfigs(dialog.getSession(), cmAttr));
+			cfgList.addAll(getUnsavedConfigs(cmAttr.getAttribute()));
 			CmAttributeConfig defaultCfg = dialog.getModel().getDefaultConfigs().get(cmAttr.getAttribute());
 			if (defaultCfg != null && !cfgList.contains(defaultCfg)) {
 				cfgList.add(defaultCfg);
@@ -87,6 +89,30 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 			configsMap.put(cmAttr.getAttribute(), cfgList);
 		}
 		return cfgList;
+	}
+
+	private List<CmAttributeConfig> getUnsavedConfigs(Attribute attribute) {
+		List<CmAttributeConfig> result = new ArrayList<>();
+		for (CmNode cmNode : getModel().getNodes()) {
+			result.addAll(getUnsavedConfigs(cmNode, attribute));
+		}
+		return result;
+	}
+	
+	private List<CmAttributeConfig> getUnsavedConfigs(CmNode cmNode, Attribute attribute) {
+		List<CmAttributeConfig> result = new ArrayList<>();
+		for (CmAttribute cmAttr : cmNode.getCmAttributes()) {
+			if (attribute.equals(cmAttr.getAttribute())) {
+				CmAttributeConfig cfg = cmAttr.getConfig();
+				if (cfg != null && cfg.getUuid() == null) {
+					result.add(cfg);
+				}
+			}
+		}
+		for (CmNode childNode : cmNode.getChildren()) {
+			result.addAll(getUnsavedConfigs(childNode, attribute));
+		}
+		return result;
 	}
 	
 	protected void createConfigSelectionControl(Composite container) {
