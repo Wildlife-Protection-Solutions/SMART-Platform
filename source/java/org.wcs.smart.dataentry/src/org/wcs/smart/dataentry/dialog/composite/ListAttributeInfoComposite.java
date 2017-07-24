@@ -294,8 +294,7 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: QQQ correct message as/if needed
-				if (MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
+				if (MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnConfigDialogMessage)){
 					EditListDialog dlg = new EditListDialog(getShell(), getSourceObject(), dialog.getSession());
 					dlg.open();
 

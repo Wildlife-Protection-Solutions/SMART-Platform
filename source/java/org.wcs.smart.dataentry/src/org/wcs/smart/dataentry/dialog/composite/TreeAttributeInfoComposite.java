@@ -261,8 +261,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO: QQQ correct message as/if needed
-				if (MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnMessage1)) {
+				if (MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnConfigMessage)) {
 					EditTreeDialog dlg = new EditTreeDialog(getShell(), getSourceObject(), dialog.getSession());
 					dlg.open();
 					

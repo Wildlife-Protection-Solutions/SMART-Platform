@@ -199,7 +199,7 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_UseCustomConfigurationTooltip;
 	public static String ListAttributeInfoComposite_UseDefaultWarning_Message;
 	public static String ListAttributeInfoComposite_UseDefaultWarning_Title;
-	public static String ListAttributeInfoComposite_WarnDialogMessage;
+	public static String ListAttributeInfoComposite_WarnConfigDialogMessage;
 	public static String ListAttributeInfoComposite_WarnDialogTitle;
 	public static String MetaConfigDialog_SaveError;
 	public static String NumericAttributeInfoComposite_defaultTooltip;
@@ -231,7 +231,7 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_UseCustomConfiguration;
 	public static String TreeAttributeInfoComposite_UseDefaultWarning_Message;
 	public static String TreeAttributeInfoComposite_UseDefaultWarning_Title;
-	public static String TreeAttributeInfoComposite_WarnMessage1;
+	public static String TreeAttributeInfoComposite_WarnConfigMessage;
 	public static String TreeAttributeInfoComposite_WarnTitle;
 	public static String XmlCmExtraDataContributionFactory_ErrorParseExtraData;
 	public static String YesNoScreenOptionComposite_No;
