@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.connect.cybertracker.util;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -37,12 +40,16 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  * @since 4.0.0
  */
 public class CmElementsVisitor {
+	
+	private Set<CmAttributeConfig> visited = new HashSet<>(); //makes sense only for configs as attributes may share them
 
 	public void visit(ConfigurableModel model, IElementVisitHandler handler) {
+		visited.clear();
 		visitNodes(handler, model.getNodes());
-		//TODO: QQQ fix this!!!
-//		visitList(handler, model.getDefaultLists());
-//		visitTree(handler, model.getDefaultTrees());
+		
+		for (CmAttributeConfig config : model.getDefaultConfigs().values()) {
+			visitConfigItems(handler, config);
+		}
 	}
 
 	private void visitNodes(IElementVisitHandler handler, List<CmNode> nodes) {
@@ -50,12 +57,19 @@ public class CmElementsVisitor {
 			handler.handle(cmNode);
 			for (CmAttribute attr : cmNode.getCmAttributes()) {
 				handler.handle(attr);
-				//TODO: QQQ fix this!!!
-//				visitList(handler, attr.getList());
-//				visitTree(handler, attr.getTree());
+				visitConfigItems(handler, attr.getConfig());
 			}
 			visitNodes(handler, cmNode.getChildren());
 		}
+	}
+
+	private void visitConfigItems(IElementVisitHandler handler, CmAttributeConfig config) {
+		if (config == null || visited.contains(config)) {
+			return;
+		}
+		visited.add(config);
+		visitList(handler, config.getList());
+		visitTree(handler, config.getTree());
 	}
 	
 	private void visitList(IElementVisitHandler handler, List<CmAttributeListItem> lists) {
