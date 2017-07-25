@@ -33,8 +33,8 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -126,14 +126,13 @@ public class DataentryHibernateManager extends HibernateManager {
 		}
 	}
 	
-	public static List<CmAttributeConfig> getCmAttributeConfigs(Session session, CmAttribute cmAttribute) {
-		ConfigurableModel cm = cmAttribute.getNode().getModel();
+	public static List<CmAttributeConfig> getCmAttributeConfigs(Session session, ConfigurableModel cm, Attribute attribute) {
 		if (cm.getUuid() == null) {
 			return new ArrayList<>();
 		}
 		@SuppressWarnings("unchecked")
 		List<CmAttributeConfig> result = session.createCriteria(CmAttributeConfig.class)
-				.add(Restrictions.eq("attribute", cmAttribute.getAttribute()))
+				.add(Restrictions.eq("attribute", attribute))
 				.add(Restrictions.eq("model", cm)).list();
 		return result;
 	}

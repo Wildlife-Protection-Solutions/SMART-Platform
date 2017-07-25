@@ -33,7 +33,6 @@ import org.hibernate.EmptyInterceptor;
 import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
@@ -119,15 +118,6 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 		handleDelete(node);
 		for (CmNode n : node.getChildren()) {
 			deleteCmNode(n);
-		}
-		//TODO: QQQ need to intercept cofig deletion to properly track tree nodes/list items removal
-		for (CmAttribute a : node.getCmAttributes()) {
-//			for (CmAttributeListItem li : a.getList()) {
-//				handleDelete(li);
-//			}
-//			for (CmAttributeTreeNode tn : a.getTree()) {
-//				deleteCmTreeNode(tn);
-//			}
 		}
 	}
 	

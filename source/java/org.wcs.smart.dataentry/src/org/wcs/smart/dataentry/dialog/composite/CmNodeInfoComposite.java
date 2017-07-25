@@ -23,6 +23,7 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -39,11 +40,13 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.CmDefaultTreesUtil;
+import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab.ControlButton;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -290,20 +293,29 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(getModel());
 		for (Attribute a : CmDefaultTreesUtil.getPresentedTreeAttributes(node)) {
 			if (!existingTrees.contains(a)) {
-				//attribute is not present in CM anymore -> remove default mapping
+				//attribute is not present in CM anymore -> remove all related configurations
 				getModel().getDefaultConfigs().remove(a);
+				removeRelatedConfigs(a);
 			}
 		}
 		//remove default list mapping if present
 		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(getModel());
 		for (Attribute a : CmDefaultListsUtil.getPresentedListAttributes(node)) {
 			if (!existingLists.contains(a)) {
-				//attribute is not present in CM anymore -> remove default mapping
+				//attribute is not present in CM anymore -> remove all related configurations
 				getModel().getDefaultConfigs().remove(a);
+				removeRelatedConfigs(a);
 			}
 		}
 
 		fireModelChanged();
+	}
+
+	private void removeRelatedConfigs(Attribute a) {
+		List<CmAttributeConfig> configs = DataentryHibernateManager.getCmAttributeConfigs(this.session, getModel(), a);
+		for (CmAttributeConfig cfg : configs) {
+			this.session.delete(cfg);
+		}
 	}
 	
 	private boolean isPhotoAllowedEnabled(CmNode node) {

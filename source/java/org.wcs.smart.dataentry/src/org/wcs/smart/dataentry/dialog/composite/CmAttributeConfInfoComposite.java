@@ -49,6 +49,7 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
@@ -82,7 +83,8 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 	private List<CmAttributeConfig> getConfigs(CmAttribute cmAttr) {
 		List<CmAttributeConfig> cfgList = configsMap.get(cmAttr.getAttribute());
 		if (cfgList == null) {
-			cfgList = new ArrayList<>(DataentryHibernateManager.getCmAttributeConfigs(dialog.getSession(), cmAttr));
+			ConfigurableModel cm = cmAttr.getNode().getModel();
+			cfgList = new ArrayList<>(DataentryHibernateManager.getCmAttributeConfigs(dialog.getSession(), cm, cmAttr.getAttribute()));
 			cfgList.addAll(getUnsavedConfigs(cmAttr.getAttribute()));
 			CmAttributeConfig defaultCfg = dialog.getModel().getDefaultConfigs().get(cmAttr.getAttribute());
 			if (defaultCfg != null && !cfgList.contains(defaultCfg)) {
@@ -189,7 +191,9 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		cfgList.remove(config);
 		configViewer.setInput(cfgList);
 		configViewer.setSelection(new StructuredSelection(getModel().getDefaultConfigs().get(config.getAttribute())));
-		dialog.getSession().delete(config);
+		if (config.getUuid() != null) {
+			dialog.getSession().delete(config);
+		}
 		fireModelChanged();
 	}
 
