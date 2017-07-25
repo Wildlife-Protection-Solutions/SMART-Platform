@@ -236,9 +236,6 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 				dlg.open();
 				
 				applyNewConig(cfg);
-				attributeTreeViewer.setInput(getSourceObject());
-				attributeTreeViewer.expandToLevel(2);
-				attributeTreeViewer.refresh();
 				
 				fireModelChanged();
 			}

@@ -278,8 +278,6 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 				dlg.open();
 				
 				applyNewConig(cfg);
-				listViewer.setInput(getSourceObject().getCurrentList());
-				listViewer.refresh();
 				
 				fireModelChanged();
 			}

@@ -170,6 +170,7 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		cfgList.sort(new CmAttributeConfigComparator());
 		configViewer.setInput(cfgList);
 		configViewer.setSelection(new StructuredSelection(cfg));
+		handleConfigViewerSelectionChanged();
 	}
 	
 	protected void refreshConfigViewer() {
