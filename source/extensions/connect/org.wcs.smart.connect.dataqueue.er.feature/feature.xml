@@ -5,7 +5,7 @@
       version="6.0.0.qualifier"
       provider-name="org.wcs.smart.connect.dataqueue.er"
       plugin="org.wcs.smart"
-      license-feature="org.wcs.smart-feature">
+      license-feature="org.wcs.smart.feature">
 
    <description>
       Allows for the processing of ecological records data (missions etc) in the Connect data queue.

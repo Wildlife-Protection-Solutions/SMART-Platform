@@ -103,13 +103,9 @@ limitations under the License.
          id="org.eclipse.ecf.core.ssl.feature"
          version="0.0.0"/>
 
-
-
    <includes
          id="org.eclipse.ecf.filetransfer.ssl.feature"
          version="0.0.0"/>
-
-
 
    <plugin
          id="org.wcs.smart.p2"
@@ -127,6 +123,13 @@ limitations under the License.
 
    <plugin
          id="org.eclipse.equinox.security.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.p2.reconciler.dropins"
          download-size="0"
          install-size="0"
          version="0.0.0"

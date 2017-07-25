@@ -4,7 +4,7 @@
       label="SMART Connect for CyberTracker Module"
       version="6.0.0.qualifier"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart-feature">
+      license-feature="org.wcs.smart.feature">
 
    <description>
       Adds support for CyberTracker SMART Connect features.  This include suppport fo configuring alerts in Configurable Models and exporting the alert configuration to CyberTracker applications.
