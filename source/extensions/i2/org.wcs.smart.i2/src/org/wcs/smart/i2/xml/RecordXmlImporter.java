@@ -610,8 +610,9 @@ public class RecordXmlImporter {
 					if (recordAttribute.getListValue() == null) continue;
 					
 					//search uuid
+					UUID listUuid = UuidUtils.stringToUuid(recordAttribute.getListValue().getUuid());
 					for (AttributeListItem listItem : srcAttribute.getAttributeList()){
-						if (listItem.getUuid().equals(recordAttribute.getListValue().getUuid())){
+						if (listItem.getUuid().equals(listUuid)){
 							newValue.setAttributeListItem(listItem);
 							break;
 						}

@@ -29,10 +29,8 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
