@@ -279,9 +279,6 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				removeConfig(getSourceObject().getConfig());
-				attributeTreeViewer.setInput(getSourceObject());
-				attributeTreeViewer.expandToLevel(2);
-				attributeTreeViewer.refresh();
 			}
 		});
 	}

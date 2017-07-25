@@ -314,8 +314,6 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				removeConfig(getSourceObject().getConfig());
-				listViewer.setInput(getSourceObject().getCurrentList());
-				listViewer.refresh();
 			}
 		});
 	}

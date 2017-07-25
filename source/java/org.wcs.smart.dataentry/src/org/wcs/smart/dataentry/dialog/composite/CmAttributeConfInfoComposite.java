@@ -195,6 +195,7 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		if (config.getUuid() != null) {
 			dialog.getSession().delete(config);
 		}
+		handleConfigViewerSelectionChanged();
 		fireModelChanged();
 	}
 
