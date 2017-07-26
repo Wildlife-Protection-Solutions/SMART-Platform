@@ -76,7 +76,7 @@ public class CmDefaultTreesUtil {
 	}
 	
 	public static CmAttributeConfig buildDefaultTreeConfig(ConfigurableModel model, Attribute a) {
-		CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(model, a, true);
+		CmAttributeConfig cfg = CmAttributeConfig.createConfig(model, a, true);
 		cfg.setName(a.getName());
 		cfg.updateName(SmartDB.getCurrentLanguage(), a.getName());
 		List<CmAttributeTreeNode> tree = buildDefaultTree(cfg, a, null, null, null);
@@ -88,28 +88,6 @@ public class CmDefaultTreesUtil {
 		return buildDefaultTree(cfg, a, null, null, null);
 	}
 	
-	/**
-	 * Upgrades tree mapping used in 3.1.0 and previous versions to 3.2.0
-	 * @param oldNodes
-	 * @return
-	 */
-	//TODO: QQQ used during xml conversion
-//	public static List<CmAttributeTreeNode> upgradeDefaultTrees(ConfigurableModel m, List<CmAttributeTreeNode> oldNodes) {
-//		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
-//		Map<AttributeTreeNode, CmAttributeTreeNode> preMapping = new HashMap<AttributeTreeNode, CmAttributeTreeNode>();
-//		for (CmAttributeTreeNode cmNode : oldNodes) {
-//			preMapping.put(cmNode.getDmTreeNode(), cmNode);
-//		}
-//		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(m);
-//		
-//		for (Attribute a : existingTrees) {
-//			List<CmAttributeTreeNode> defTree = buildDefaultTree(m, a, null, null, preMapping);
-//			result.addAll(defTree);
-//		}
-//		
-//		return result;
-//	}
-
 	private static List<CmAttributeTreeNode> buildDefaultTree(CmAttributeConfig cfg, Attribute a, CmAttributeTreeNode cmParent, AttributeTreeNode dmParent, Map<AttributeTreeNode, CmAttributeTreeNode> preMapping) {
 		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
 		List<AttributeTreeNode> source = dmParent != null ? dmParent.getActiveChildren() : a.getActiveTreeNodes();

@@ -228,7 +228,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(getModel(), getSourceObject().getAttribute(), false);
+				CmAttributeConfig cfg = CmAttributeConfig.createConfig(getModel(), getSourceObject().getAttribute(), false);
 				CmAttributeConfigUtil.assignCustomName(cfg, getSourceObject());
 				getSourceObject().setConfig(cfg);
 

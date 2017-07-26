@@ -34,6 +34,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -141,4 +142,14 @@ public class CmAttributeConfig extends NamedItem {
 		this.listItems = list;
 	}
 
+	@Transient
+	public static final CmAttributeConfig createConfig(ConfigurableModel model, Attribute attribute, boolean isDefault) {
+		CmAttributeConfig cfg = new CmAttributeConfig();
+		cfg.setModel(model);
+		cfg.setAttribute(attribute);
+		cfg.setDisplayMode(DisplayMode.DEFAULT_DISPLAY_MODE);
+		cfg.setDefault(isDefault);
+		return cfg;
+	}
+	
 }

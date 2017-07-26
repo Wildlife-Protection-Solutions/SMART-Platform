@@ -76,7 +76,7 @@ public class CmDefaultListsUtil {
 	}
 
 	public static CmAttributeConfig buildDefaultListConfig(ConfigurableModel model, Attribute a) {
-		CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(model, a, true);
+		CmAttributeConfig cfg = CmAttributeConfig.createConfig(model, a, true);
 		cfg.setName(a.getName());
 		cfg.updateName(SmartDB.getCurrentLanguage(), a.getName());
 		List<CmAttributeListItem> listItems = buildDefaultList(cfg, a);
@@ -118,26 +118,5 @@ public class CmDefaultListsUtil {
 		}
 		return result;
 	}
-	
-	//TODO: QQQ used during xml conversion
-//	/**
-//	 * Upgrades list mapping used in 3.1.0 and previous versions to 3.2.1
-//	 * @param oldNodes
-//	 * @return
-//	 */
-//	public static List<CmAttributeListItem> upgradeDefaultLists(ConfigurableModel m, List<CmAttributeListItem> oldNodes) {
-//		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
-//		Map<AttributeListItem, CmAttributeListItem> preMapping = new HashMap<AttributeListItem, CmAttributeListItem>();
-//		for (CmAttributeListItem cmNode : oldNodes) {
-//			preMapping.put(cmNode.getListItem(), cmNode);
-//		}
-//		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
-//		
-//		for (Attribute a : existingLists) {
-//			List<CmAttributeListItem> defList = buildDefaultList(m, a, preMapping);
-//			result.addAll(defList);
-//		}
-//		
-//		return result;
-//	}
+
 }

@@ -296,12 +296,12 @@ public class DataModelItemListener implements IDataModelItemListener {
 					}
 					//create custom configurations
 					if (AttributeType.TREE.equals(attribute.getType())) {
-						CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(cm, attribute, false);
+						CmAttributeConfig cfg = CmAttributeConfig.createConfig(cm, attribute, false);
 						CmAttributeConfigUtil.assignCustomName(cfg, newAttribute);
 						cfg.setTree(CmCustomTreesUtil.buildCustomTree(cfg, attribute));
 						newAttribute.setConfig(cfg);
 					} else if (AttributeType.LIST.equals(attribute.getType())) {
-						CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(cm, attribute, false);
+						CmAttributeConfig cfg = CmAttributeConfig.createConfig(cm, attribute, false);
 						CmAttributeConfigUtil.assignCustomName(cfg, newAttribute);
 						cfg.setList(CmCustomListsUtil.buildCustomList(cfg, attribute));
 						newAttribute.setConfig(cfg);

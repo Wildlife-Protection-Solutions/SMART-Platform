@@ -26,11 +26,8 @@ import java.util.List;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Util class for configurable model custom trees manipulations
@@ -40,15 +37,6 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class CmCustomTreesUtil {
 
-	public static CmAttributeConfig buildCustomTreeConfig(CmAttribute cmAttr) {
-		CmAttributeConfig cfg = CmAttributeConfigUtil.createConfig(cmAttr.getNode().getModel(), cmAttr.getAttribute(), false);
-		String name = Messages.CmAttributeConfig_Custom_Prefix + " " + cmAttr.findName(SmartDB.getCurrentLanguage()); //$NON-NLS-1$
-		cfg.setName(name);
-		cfg.updateName(SmartDB.getCurrentLanguage(), name);
-		cfg.setTree(buildCustomTree(cfg, cmAttr.getAttribute()));
-		return cfg;
-	}
-	
 	public static List<CmAttributeTreeNode> buildCustomTree(CmAttributeConfig cfg, Attribute dmAttr) {
 		return buildCustomTree(cfg, dmAttr, null, null);
 	}

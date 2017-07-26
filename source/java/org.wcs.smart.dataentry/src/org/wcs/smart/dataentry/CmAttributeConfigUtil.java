@@ -21,12 +21,9 @@
  */
 package org.wcs.smart.dataentry;
 
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -42,13 +39,4 @@ public class CmAttributeConfigUtil {
 		cfg.updateName(SmartDB.getCurrentLanguage(), name);
 	}
 
-	public static final CmAttributeConfig createConfig(ConfigurableModel model, Attribute attribute, boolean isDefault) {
-		CmAttributeConfig cfg = new CmAttributeConfig();
-		cfg.setModel(model);
-		cfg.setAttribute(attribute);
-		cfg.setDisplayMode(DisplayMode.DEFAULT_DISPLAY_MODE);
-		cfg.setDefault(isDefault);
-		return cfg;
-	}
-	
 }
