@@ -32,6 +32,7 @@ elementFormDefault="qualified">
     		<element name="setting" type="smrt:CmDmAttributeSettingsTypeList"
     			maxOccurs="1" minOccurs="0">
     		</element>
+    		<element name="attributeConfig" type="smrt:CmAttributeConfigType" maxOccurs="unbounded" minOccurs="0"/>
     		<element name="extraData" type="smrt:CmExtraDataType" maxOccurs="unbounded" minOccurs="0"/>
     	</sequence>
     	<attribute name="displayMode" type="string"></attribute>
@@ -98,6 +99,7 @@ elementFormDefault="qualified">
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
     	<attribute name="id" type="string"></attribute>
+    	<attribute name="configId" type="string"></attribute>
     </complexType>
 
     <complexType name="AttributeOptionType">
@@ -185,6 +187,24 @@ elementFormDefault="qualified">
     	<attribute name="displayMode" type="string"></attribute>
     </complexType>
 
+    <complexType name="CmAttributeConfigType">
+    	<sequence>
+    		<element name="name" type="smrt:NameType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="treeNode" type="smrt:TreeNodeType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="listItem" type="smrt:ListItemType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="attributeKey" type="string"></attribute>
+    	<attribute name="displayMode" type="string"></attribute>
+    	<attribute name="isDefault" type="boolean"/>
+	</complexType>
+	
     <complexType name="CmExtraDataType">
     	<sequence>
             <element name="stringKey" type="smrt:CmExtraDataStringKeyType" maxOccurs="unbounded" minOccurs="0"/>

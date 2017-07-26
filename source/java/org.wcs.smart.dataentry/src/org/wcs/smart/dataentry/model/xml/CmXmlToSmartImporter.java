@@ -25,9 +25,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -45,6 +48,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.dataentry.CmDefaultListsUtil;
+import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.AssociatedImageInterceptor;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -57,10 +61,10 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.dataentry.model.xml.external.IConvertedCmExtraData;
 import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
-import org.wcs.smart.dataentry.model.xml.generated.AttributeItemType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
-import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsTypeList;
+import org.wcs.smart.dataentry.model.xml.generated.CmAttributeConfigType;
+import org.wcs.smart.dataentry.model.xml.generated.CmDmAttributeSettingsType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageType;
 import org.wcs.smart.dataentry.model.xml.generated.ListItemType;
 import org.wcs.smart.dataentry.model.xml.generated.NameType;
@@ -90,8 +94,11 @@ public class CmXmlToSmartImporter {
 	private Map<String, Attribute> attrLookup;
 	private Map<String, AttributeListItem> listItemLookup;
 	private Map<String, AttributeTreeNode> treeNodeLookup;
+	private Map<String, CmAttributeConfig> configLookup;
 	private Map<String, File> fileLookup;
-	
+
+	private Map<String, Integer> compatibilityConfigIndexes;
+
 	private List<String> warnings;
 	private Map<String, UuidItem> dataMap;
 
@@ -157,6 +164,8 @@ public class CmXmlToSmartImporter {
 		warnings = new ArrayList<String>();
 		dataMap = new HashMap<>();
 		
+		compatibilityConfigIndexes = new HashMap<>();
+		
 		session = HibernateManager.openSession(new AssociatedImageInterceptor());
 		session.beginTransaction();
 		try {
@@ -177,37 +186,28 @@ public class CmXmlToSmartImporter {
 			cm.setInstantGps(xmlCm.isInstantGps());
 			cm.setPhotoFirst(xmlCm.isPhotoFirst());
 			
+			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingConfigs);
+			configLookup = loadAttributeConfigs(xmlCm.getAttributeConfig(), cm, monitor);
+			cm.setDefaultConfigs(configLookup.values().stream().filter(cfg -> cfg.isDefault()).collect(Collectors.toMap(CmAttributeConfig::getAttribute, Function.identity())));
+			
+			if (xmlCm.getDefaultTrees() != null || xmlCm.getDefaultLists() != null) {
+				//backward compatibility logic to import configurable models of SMART versions after 3.2 and before 6.0.0
+				Map<Attribute, CmAttributeConfig> defaultConfigs = createBackwardCompatibilityDefaultConfigs(cm, xmlCm, monitor);
+				cm.setDefaultConfigs(defaultConfigs);
+			}
+
 			cm.setNodes(processCmNodes(xmlCm.getNodes().getNode(), cm, null, monitor));
 			
 			if (monitor.isCanceled()) return null;
+			if (xmlCm.getTreeNodes() != null || xmlCm.getListItems() != null) {
+				warnings.add(Messages.CmXmlToSmartImporter_Warn_VessionToOld);
+			}
 			
-			//TODO: QQQ implement + backward compatible
-			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingTreeNodes);
-//			if (xmlCm.getDefaultTrees() != null) {
-//				//tree mapping was introduced in 3.2.0, previous version were using different mapping
-//				cm.setDefaultTrees(processCmTreeNodes(cm, null, null, xmlCm.getDefaultTrees().getTreeNode(), monitor));
-//			} else if (xmlCm.getTreeNodes() != null) {
-//				//if we are here than we are importing data from version less than 3.2
-//				//need to perform additional data conversion
-//				List<CmAttributeTreeNode> treeNodes = processTreeNodes(xmlCm.getTreeNodes().getNode(), cm);
-//				cm.setDefaultTrees(CmDefaultTreesUtil.upgradeDefaultTrees(cm, treeNodes));
-//			}
-//			
-//			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingListItems);
-//			if (xmlCm.getDefaultLists() != null) {
-//				//list mapping was introduced in 3.2.1, previous version were using different mapping
-//				cm.setDefaultLists(processCmListItems(cm, null, xmlCm.getDefaultLists().getListItem(), monitor));
-//			} else if (xmlCm.getListItems() != null) {
-//				//if we are here than we are importing data from version less than 3.2
-//				//need to perform additional data conversion
-//				List<CmAttributeListItem> listItems = processListItems(xmlCm.getListItems().getItem(), cm);
-//				cm.setDefaultLists(CmDefaultListsUtil.upgradeDefaultLists(cm, listItems));
-//			}
+			//validation logic
+			monitor.subTask(Messages.CmXmlToSmartImporter_Validating);
+			validateConfigurableModel(cm);
 
 			if (monitor.isCanceled()) return null;
-			monitor.subTask(Messages.CmXmlToSmartImporter_ImportAttributesSettings);
-			processAttributeSettings(cm, xmlCm.getSetting());
-
 			//converting extra data
 			List<IConvertedCmExtraData> convertedExtraData = new ArrayList<IConvertedCmExtraData>();
 			for (IXmlCmExtraDataContribution edc : XmlCmExtraDataContributionFactory.getContributions()) {
@@ -257,6 +257,7 @@ public class CmXmlToSmartImporter {
 			
 		} finally {
 			langLookup = null;
+			configLookup = null;
 			useAsDefault = null;
 			catLookup = null;
 			attrLookup = null;
@@ -271,66 +272,91 @@ public class CmXmlToSmartImporter {
 		}
 	}
 
-	private List<CmAttributeTreeNode> processCmTreeNodes(CmAttributeConfig cfg, CmAttribute cmAttribute, CmAttributeTreeNode parent, List<TreeNodeType> xmlNodes, IProgressMonitor monitor) {
+	
+	private void validateConfigurableModel(ConfigurableModel cm) {
+		for (CmNode cmNode : cm.getNodes()) {
+			validateCmNode(cmNode);
+		}
+	}
+
+	private void validateCmNode(CmNode cmNode) {
+		for (CmAttribute cmAttr : cmNode.getCmAttributes()) {
+			Attribute dmAttr = cmAttr.getAttribute();
+			switch (dmAttr.getType()) {
+			case LIST:
+			case TREE: {
+				ConfigurableModel cm = cmNode.getModel();
+				if (cm.getDefaultConfigs().get(dmAttr) == null) {
+					warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Warn_DefaultConfigMissing, dmAttr.getName()));
+					CmAttributeConfig config = dmAttr.getType().equals(org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) ? CmDefaultListsUtil.buildDefaultListConfig(cm, dmAttr) : CmDefaultTreesUtil.buildDefaultTreeConfig(cm, dmAttr);
+					cm.getDefaultConfigs().put(dmAttr, config);
+				}
+				if (cmAttr.getConfig() == null) {
+					warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Warn_NoConfigAssigned, dmAttr.getName()));
+					cmAttr.setConfig(cm.getDefaultConfigs().get(dmAttr));
+				}
+				break;
+			}
+			default:
+				break;
+			}
+		}
+		for (CmNode node : cmNode.getChildren()) {
+			validateCmNode(node);
+		}
+	}
+	
+	private Map<String, CmAttributeConfig> loadAttributeConfigs(List<CmAttributeConfigType> xmlConfigList, ConfigurableModel cm, IProgressMonitor monitor) {
+		Map<String, CmAttributeConfig> configMap = new HashMap<>();
+		for (CmAttributeConfigType xmlConfig : xmlConfigList) {
+			CmAttributeConfig config = new CmAttributeConfig();
+			updateNames(config, xmlConfig.getName());
+			config.setModel(cm);
+			config.setDefault(xmlConfig.isIsDefault());
+			config.setDisplayMode(getDisplayMode(xmlConfig.getDisplayMode()));
+			Attribute dmAttribute = fetchAttribute(xmlConfig.getAttributeKey());
+			config.setAttribute(dmAttribute);
+			config.setList(processCmListItems(config, dmAttribute, xmlConfig.getListItem(), monitor));
+			config.setTree(processCmTreeNodes(config, dmAttribute, null, xmlConfig.getTreeNode(), monitor));
+			
+			addToDataMap(xmlConfig.getId(), config);
+			configMap.put(xmlConfig.getId(), config);
+		}
+		return configMap;
+	}
+
+	private List<CmAttributeTreeNode> processCmTreeNodes(CmAttributeConfig cfg, Attribute dmAttribute, CmAttributeTreeNode parent, List<TreeNodeType> xmlNodes, IProgressMonitor monitor) {
 		if (monitor.isCanceled()) return null;
+		if (xmlNodes == null) return null;
 		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
 		for (TreeNodeType xmlNode : xmlNodes) {
 			CmAttributeTreeNode node = new CmAttributeTreeNode();
 			updateNames(node, xmlNode.getName());
 			node.setConfig(cfg);
 			node.setIsActive(xmlNode.isIsActive());
-			if (cmAttribute == null) {
-				//this is default mapping and it MUST be provided with datamodel attribute key
-				Attribute dmAttribute = fetchAttribute(xmlNode.getAttributeKey());
-				if (dmAttribute == null){
-					//attribute doesn't exist; skip this tree node
-					continue;
-				}
-				//TODO: QQQ line below
-//				node.setDmAttribute(dmAttribute);
-				node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), dmAttribute));
-			} else {
-				//this is custom mapping and datamodel attribute key MUST be null
-				//TODO: QQQ line below
-//				node.setAttribute(cmAttribute);
-				node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), cmAttribute.getAttribute()));
-			}
+			node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), dmAttribute));
 			node.setParent(parent);
 			node.setNodeOrder(result.size());
 			node.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
 			node.setImageFile(findFile(xmlNode.getImageFile()));
 			addToDataMap(xmlNode.getId(), node);
-			node.setChildren(processCmTreeNodes(cfg, cmAttribute, node, xmlNode.getChildren(), monitor));
+			node.setChildren(processCmTreeNodes(cfg, dmAttribute, node, xmlNode.getChildren(), monitor));
 			if (monitor.isCanceled()) return null;
 			result.add(node);
 		}
 		return result;
 	}
 
-	private List<CmAttributeListItem> processCmListItems(CmAttributeConfig cfg, CmAttribute cmAttribute, List<ListItemType> xmlNodes, IProgressMonitor monitor) {
+	private List<CmAttributeListItem> processCmListItems(CmAttributeConfig cfg, Attribute dmAttribute, List<ListItemType> xmlNodes, IProgressMonitor monitor) {
 		if (monitor.isCanceled()) return null;
+		if (xmlNodes == null) return null;
 		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
 		for (ListItemType xmlNode : xmlNodes) {
 			CmAttributeListItem item = new CmAttributeListItem();
 			item.setConfig(cfg);
 			updateNames(item, xmlNode.getName());
 			item.setIsActive(xmlNode.isIsActive());
-			if (cmAttribute == null) {
-				//this is default mapping and it MUST be provided with datamodel attribute key
-				Attribute dmAttribute = fetchAttribute(xmlNode.getAttributeKey());
-				if (dmAttribute == null){
-					//attribute not found; do not add to list
-					continue;
-				}
-				//TODO: QQQ line below
-//				item.setDmAttribute(dmAttribute);
-				item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), dmAttribute));
-			} else {
-				//this is custom mapping and datamodel attribute key MUST be null
-				//TODO: QQQ line below
-//				item.setAttribute(cmAttribute);
-				item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), cmAttribute.getAttribute()));
-			}
+			item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), dmAttribute));
 			item.setListOrder(result.size());
 			item.setImageFile(findFile(xmlNode.getImageFile()));
 			addToDataMap(xmlNode.getId(), item);
@@ -340,33 +366,6 @@ public class CmXmlToSmartImporter {
 		return result;
 	}
 	
-	private List<CmAttributeListItem> processListItems(List<AttributeItemType> xmlItems, ConfigurableModel cm) {
-		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
-		for (AttributeItemType xmlItem : xmlItems) {
-			CmAttributeListItem item = new CmAttributeListItem();
-			//TODO: QQQ line below
-//			item.setConfigurableModel(cm);
-			updateNames(item, xmlItem.getName());
-			item.setIsActive(xmlItem.isIsActive());
-			item.setListItem(fetchAttributeListItem(xmlItem.getRefKey(), fetchAttribute(xmlItem.getAttributeKey())));
-			result.add(item);
-		}
-		return result;
-	}
-
-	private List<CmAttributeTreeNode> processTreeNodes(List<AttributeItemType> xmlItems, ConfigurableModel cm) {
-		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
-		for (AttributeItemType xmlItem : xmlItems) {
-			CmAttributeTreeNode item = new CmAttributeTreeNode();
-			updateNames(item, xmlItem.getName());
-			item.setIsActive(xmlItem.isIsActive());
-			//NOTE: hkey support was added in version 3.3.0, this code is conversion from version less than 3.2 (before configurable trees), this is why we pass hkey=null
-			item.setDmTreeNode(fetchAttributeTreeNode(xmlItem.getRefKey(), null, fetchAttribute(xmlItem.getAttributeKey())));
-			result.add(item);
-		}
-		return result;
-	}
-
 	private List<CmNode> processCmNodes(List<NodeType> xmlNodes, ConfigurableModel cm, CmNode parent, IProgressMonitor monitor) {
 
 		List<CmNode> result = new ArrayList<CmNode>();
@@ -413,9 +412,30 @@ public class CmXmlToSmartImporter {
 			cmAttr.setAttribute(dmAttribute);
 			cmAttr.setOrder(i);
 			cmAttr.setCmAttributeOptions(processAttributeOptions(xmlAttr.getOption(), cmAttr));
-			//TODO: QQQ reimplement and set config
-//			cmAttr.setTree(processCmTreeNodes(parent.getModel(), cmAttr, null, xmlAttr.getTreeNode(), monitor));
-//			cmAttr.setList(processCmListItems(parent.getModel(), cmAttr, xmlAttr.getListItem(), monitor));
+			if (xmlAttr.getConfigId() != null) {
+				cmAttr.setConfig(configLookup.get(xmlAttr.getConfigId()));
+			} else {
+				switch (dmAttribute.getType()) {
+				case LIST:
+				case TREE: {
+					//looks like we are importing model exported in SMART version lower than 6.0.0
+					CmAttributeOption optionCC = cmAttr.getCmAttributeOptions().get("CUSTOM_CONFIG"); //$NON-NLS-1$
+					if (optionCC != null && optionCC.getBooleanValue()) {
+						CmAttributeOption optionDM = cmAttr.getCmAttributeOptions().get("DISPLAY_MODE"); //$NON-NLS-1$
+						String displayMode = optionDM != null ? optionDM.getStringValue() : null;
+						cmAttr.setConfig(createCompatibilityConfig(parent.getModel(), dmAttribute, false, displayMode, xmlAttr.getListItem(), xmlAttr.getTreeNode(), monitor));
+					} else {
+						cmAttr.setConfig(parent.getModel().getDefaultConfigs().get(dmAttribute));
+					}
+					cmAttr.getCmAttributeOptions().remove("DISPLAY_MODE"); //$NON-NLS-1$
+					cmAttr.getCmAttributeOptions().remove("CUSTOM_CONFIG"); //$NON-NLS-1$
+					
+					break;
+				}
+				default:
+					break;
+				}
+			}
 			addToDataMap(xmlAttr.getId(), cmAttr);
 
 			result.add(cmAttr);
@@ -463,22 +483,57 @@ public class CmXmlToSmartImporter {
 		return result;
 	}
 
-	private void processAttributeSettings(ConfigurableModel cm, CmDmAttributeSettingsTypeList setting) {
-		if (setting != null) {
-			//TODO: QQQ we need backward compatibility!!!!
-//			for (CmDmAttributeSettingsType sXml : setting.getSetting()) {
-//				CmDmAttributeSettings s = new CmDmAttributeSettings();
-//				s.setModel(cm);
-//				Attribute dmAttribute = fetchAttribute(sXml.getAttributeKey());
-//				if (dmAttribute == null){
-//					//no data model attribute skip these settings
-//					continue;
-//				}
-//				s.setDmAttribute(dmAttribute);
-//				s.setDisplayMode(getDisplayMode(sXml.getDisplayMode()));
-//				cm.getAttributeSettings().put(s.getDmAttribute(), s);
-//			}
+	private Map<Attribute, CmAttributeConfig> createBackwardCompatibilityDefaultConfigs(ConfigurableModel cm,
+			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlCm, IProgressMonitor monitor) {
+		Map<Attribute, CmAttributeConfig> result = new HashMap<>();
+		Map<String, String> attr2DisplayMode = xmlCm.getSetting() != null ? xmlCm.getSetting().getSetting().stream().collect(Collectors.toMap(CmDmAttributeSettingsType::getAttributeKey, CmDmAttributeSettingsType::getDisplayMode)) : Collections.emptyMap();
+
+		monitor.subTask(Messages.CmXmlToSmartImporter_ImportingTreeNodes);
+		if (xmlCm.getDefaultTrees() != null) {
+			//tree mapping was introduced in 3.2.0, previous version were using different mapping
+			Map<String, List<TreeNodeType>> attrMap = xmlCm.getDefaultTrees().getTreeNode().stream().collect(Collectors.groupingBy(TreeNodeType::getAttributeKey));
+			for (String attrKey : attrMap.keySet()) {
+				CmAttributeConfig config = createCompatibilityConfig(cm, fetchAttribute(attrKey), true, attr2DisplayMode.get(attrKey), null, attrMap.get(attrKey), monitor);
+				result.put(config.getAttribute(), config);
+			}
 		}
+
+		monitor.subTask(Messages.CmXmlToSmartImporter_ImportingListItems);
+		if (xmlCm.getDefaultLists() != null) {
+			//list mapping was introduced in 3.2.1, previous version were using different mapping
+			Map<String, List<ListItemType>> attrMap = xmlCm.getDefaultLists().getListItem().stream().collect(Collectors.groupingBy(ListItemType::getAttributeKey));
+			for (String attrKey : attrMap.keySet()) {
+				CmAttributeConfig config = createCompatibilityConfig(cm, fetchAttribute(attrKey), true, attr2DisplayMode.get(attrKey), attrMap.get(attrKey), null, monitor);
+				result.put(config.getAttribute(), config);
+			}
+		}
+		return result;
+	}
+
+	private CmAttributeConfig createCompatibilityConfig(ConfigurableModel model, Attribute dmAttribute, boolean isDefault, String displayMode, List<ListItemType> listItem, List<TreeNodeType> treeNode, IProgressMonitor monitor) {
+		CmAttributeConfig config = new CmAttributeConfig();
+		
+		String name = isDefault ? dmAttribute.getName() : Messages.CmAttributeConfig_Custom_Prefix + " " + dmAttribute.getName(); //$NON-NLS-1$
+		if (!isDefault) {
+			String attrKey = dmAttribute.getKeyId();
+			Integer index = compatibilityConfigIndexes.get(attrKey);
+			if (index == null) {
+				index = 1;
+				compatibilityConfigIndexes.put(attrKey, index);
+			} else {
+				index++;
+			}
+			name += " " + String.valueOf(index); //$NON-NLS-1$
+		}
+		config.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
+		config.setModel(model);
+		config.setDefault(isDefault);
+		config.setDisplayMode(getDisplayMode(displayMode));
+		config.setAttribute(dmAttribute);
+		config.setList(processCmListItems(config, dmAttribute, listItem, monitor));
+		config.setTree(processCmTreeNodes(config, dmAttribute, null, treeNode, monitor));
+		
+		return config;
 	}
 	
 	private Category fetchCategory(String key, String hkey) {

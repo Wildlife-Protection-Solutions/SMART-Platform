@@ -13,29 +13,28 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for TreeNodeType complex type.
+ * <p>Java class for CmAttributeConfigType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="TreeNodeType">
+ * &lt;complexType name="CmAttributeConfigType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NameType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="children" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}TreeNodeType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="name" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NameType" maxOccurs="unbounded"/>
+ *         &lt;element name="treeNode" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}TreeNodeType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="listItem" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}ListItemType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="keyRef" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="hkeyRef" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="isActive" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="displayMode" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="imageFile" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="displayMode" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="isDefault" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -44,28 +43,25 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "TreeNodeType", propOrder = {
+@XmlType(name = "CmAttributeConfigType", propOrder = {
     "name",
-    "children"
+    "treeNode",
+    "listItem"
 })
-public class TreeNodeType {
+public class CmAttributeConfigType {
 
+    @XmlElement(required = true)
     protected List<NameType> name;
-    protected List<TreeNodeType> children;
-    @XmlAttribute(name = "attributeKey")
-    protected String attributeKey;
-    @XmlAttribute(name = "keyRef")
-    protected String keyRef;
-    @XmlAttribute(name = "hkeyRef")
-    protected String hkeyRef;
-    @XmlAttribute(name = "isActive")
-    protected Boolean isActive;
-    @XmlAttribute(name = "displayMode")
-    protected String displayMode;
-    @XmlAttribute(name = "imageFile")
-    protected String imageFile;
+    protected List<TreeNodeType> treeNode;
+    protected List<ListItemType> listItem;
     @XmlAttribute(name = "id")
     protected String id;
+    @XmlAttribute(name = "attributeKey")
+    protected String attributeKey;
+    @XmlAttribute(name = "displayMode")
+    protected String displayMode;
+    @XmlAttribute(name = "isDefault")
+    protected Boolean isDefault;
 
     /**
      * Gets the value of the name property.
@@ -97,18 +93,18 @@ public class TreeNodeType {
     }
 
     /**
-     * Gets the value of the children property.
+     * Gets the value of the treeNode property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the children property.
+     * This is why there is not a <CODE>set</CODE> method for the treeNode property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getChildren().add(newItem);
+     *    getTreeNode().add(newItem);
      * </pre>
      * 
      * 
@@ -118,11 +114,64 @@ public class TreeNodeType {
      * 
      * 
      */
-    public List<TreeNodeType> getChildren() {
-        if (children == null) {
-            children = new ArrayList<TreeNodeType>();
+    public List<TreeNodeType> getTreeNode() {
+        if (treeNode == null) {
+            treeNode = new ArrayList<TreeNodeType>();
         }
-        return this.children;
+        return this.treeNode;
+    }
+
+    /**
+     * Gets the value of the listItem property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the listItem property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getListItem().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link ListItemType }
+     * 
+     * 
+     */
+    public List<ListItemType> getListItem() {
+        if (listItem == null) {
+            listItem = new ArrayList<ListItemType>();
+        }
+        return this.listItem;
+    }
+
+    /**
+     * Gets the value of the id property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the value of the id property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setId(String value) {
+        this.id = value;
     }
 
     /**
@@ -150,78 +199,6 @@ public class TreeNodeType {
     }
 
     /**
-     * Gets the value of the keyRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getKeyRef() {
-        return keyRef;
-    }
-
-    /**
-     * Sets the value of the keyRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setKeyRef(String value) {
-        this.keyRef = value;
-    }
-
-    /**
-     * Gets the value of the hkeyRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getHkeyRef() {
-        return hkeyRef;
-    }
-
-    /**
-     * Sets the value of the hkeyRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setHkeyRef(String value) {
-        this.hkeyRef = value;
-    }
-
-    /**
-     * Gets the value of the isActive property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
-     */
-    public Boolean isIsActive() {
-        return isActive;
-    }
-
-    /**
-     * Sets the value of the isActive property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
-     */
-    public void setIsActive(Boolean value) {
-        this.isActive = value;
-    }
-
-    /**
      * Gets the value of the displayMode property.
      * 
      * @return
@@ -246,51 +223,27 @@ public class TreeNodeType {
     }
 
     /**
-     * Gets the value of the imageFile property.
+     * Gets the value of the isDefault property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link Boolean }
      *     
      */
-    public String getImageFile() {
-        return imageFile;
+    public Boolean isIsDefault() {
+        return isDefault;
     }
 
     /**
-     * Sets the value of the imageFile property.
+     * Sets the value of the isDefault property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link Boolean }
      *     
      */
-    public void setImageFile(String value) {
-        this.imageFile = value;
-    }
-
-    /**
-     * Gets the value of the id property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Sets the value of the id property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setId(String value) {
-        this.id = value;
+    public void setIsDefault(Boolean value) {
+        this.isDefault = value;
     }
 
 }

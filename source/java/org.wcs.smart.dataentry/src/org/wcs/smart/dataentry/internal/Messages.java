@@ -56,13 +56,11 @@ public class Messages extends NLS {
 	public static String CmRootNodeInfoComposite_InstantGpsTooltip;
 	public static String CmRootNodeInfoComposite_PhotoFirst;
 	public static String CmRootNodeInfoComposite_PhotoFirstTooltip;
-	public static String CmSmartToXmlConverter_ProcessAttributeSettings;
+	public static String CmSmartToXmlConverter_ProcessAttributeConfigs;
 	public static String CmSmartToXmlConverter_ProcessCmNodes;
 	public static String CmSmartToXmlConverter_ProcessExtraData;
 	public static String CmSmartToXmlConverter_ProcessingNode;
 	public static String CmSmartToXmlConverter_ProcessLanguages;
-	public static String CmSmartToXmlConverter_ProcessListItems;
-	public static String CmSmartToXmlConverter_ProcessTreeNodes;
 	public static String CmTemplateCloner_AttributeNotFoundError;
 	public static String CmTemplateCloner_CategoryNotFoundErrpr;
 	public static String CmTemplateCloner_CopyConfigModelName;
@@ -71,7 +69,7 @@ public class Messages extends NLS {
 	public static String CmTreeLabelProvider_Root;
 	public static String CmXmlToSmartImporter_DefaultLanguage_Error;
 	public static String CmXmlToSmartImporter_ExtractingZip;
-	public static String CmXmlToSmartImporter_ImportAttributesSettings;
+	public static String CmXmlToSmartImporter_ImportingConfigs;
 	public static String CmXmlToSmartImporter_ImportingFromXml;
 	public static String CmXmlToSmartImporter_ImportingListItems;
 	public static String CmXmlToSmartImporter_ImportingNode;
@@ -91,6 +89,10 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_ReadFile_Error;
 	public static String CmXmlToSmartImporter_Reading;
 	public static String CmXmlToSmartImporter_Saving;
+	public static String CmXmlToSmartImporter_Validating;
+	public static String CmXmlToSmartImporter_Warn_DefaultConfigMissing;
+	public static String CmXmlToSmartImporter_Warn_NoConfigAssigned;
+	public static String CmXmlToSmartImporter_Warn_VessionToOld;
 	public static String ConfigurableModelEditDialog_CloseMessage;
 	public static String ConfigurableModelEditDialog_CloseTitle;
 	public static String ConfigurableModelEditDialog_ErrorMsg;

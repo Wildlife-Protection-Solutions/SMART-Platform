@@ -38,6 +38,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -45,10 +46,9 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
-import org.wcs.smart.dataentry.model.xml.generated.AttributeCmListItemTypeList;
-import org.wcs.smart.dataentry.model.xml.generated.AttributeCmTreeNodeTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
+import org.wcs.smart.dataentry.model.xml.generated.CmAttributeConfigType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageListType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageType;
@@ -94,18 +94,8 @@ public class CmSmartToXmlConverter {
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
-			processDefaultListItems(cm, xml, llookup, monitor);
-			monitor.worked(1);
-			if (monitor.isCanceled()) return null;
-
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessTreeNodes);
-			processDefaultTreeNodes(cm, xml, llookup, monitor);
-			monitor.worked(1);
-			if (monitor.isCanceled()) return null;
-
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessAttributeSettings);
-			processCmDmAttributeSettings(cm, xml, llookup, monitor);
+			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessAttributeConfigs);
+			processCmAttributeConfigs(cm, xml, llookup, session, monitor);
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			
@@ -126,14 +116,28 @@ public class CmSmartToXmlConverter {
 		return xml;
 	}
 
-	private static void processDefaultTreeNodes(ConfigurableModel cm,
+	private static void processCmAttributeConfigs(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup, IProgressMonitor monitor) {
+			HashMap<String, Language> llookup, Session session, IProgressMonitor monitor) {
 
-		AttributeCmTreeNodeTypeList defTree = new AttributeCmTreeNodeTypeList();
-		xml.setDefaultTrees(defTree);
-		//TODO: QQQ reimplement
-//		processCmTreeNodes(cm.getDefaultTrees(), defTree.getTreeNode(), llookup, monitor);
+		Criteria query = session.createCriteria(CmAttributeConfig.class).add(Restrictions.eq("model", cm)); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<CmAttributeConfig> configs = (List<CmAttributeConfig>) query.list();
+		for (CmAttributeConfig config : configs) {
+			CmAttributeConfigType xmlConfig = new CmAttributeConfigType();
+			setNames(xmlConfig.getName(), config.getNames(), llookup);
+			xmlConfig.setId(config.getUuid().toString());
+			xmlConfig.setIsDefault(config.isDefault());
+			if (config.getDisplayMode() != null) {
+				xmlConfig.setDisplayMode(config.getDisplayMode().name());
+			}
+			xmlConfig.setAttributeKey(config.getAttribute().getKeyId());
+			processCmListItems(config.getList(), xmlConfig.getListItem(), llookup, monitor);
+			processCmTreeNodes(config.getTree(), xmlConfig.getTreeNode(), llookup, monitor);
+			
+			xml.getAttributeConfig().add(xmlConfig);
+		}
+		
 	}
 
 	private static void processCmTreeNodes(List<CmAttributeTreeNode> cmList,
@@ -150,11 +154,6 @@ public class CmSmartToXmlConverter {
 				xmlNode.setKeyRef(cmNode.getDmTreeNode().getKeyId());
 				xmlNode.setHkeyRef(cmNode.getDmTreeNode().getHkey());
 			}
-			//TODO: QQQ fix code below!!!
-//			Attribute dmAttribute = cmNode.getDmAttribute();
-//			if (dmAttribute != null) {
-//				xmlNode.setAttributeKey(dmAttribute.getKeyId());
-//			}
 			if (cmNode.getDisplayMode() != null) {
 				xmlNode.setDisplayMode(cmNode.getDisplayMode().name());
 			}
@@ -165,16 +164,6 @@ public class CmSmartToXmlConverter {
 		}
 	}
 
-	private static void processDefaultListItems(ConfigurableModel cm,
-			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup, IProgressMonitor monitor) {
-
-		AttributeCmListItemTypeList defList = new AttributeCmListItemTypeList();
-		xml.setDefaultLists(defList);
-		//TODO: QQQ reimplement
-//		processCmListItems(cm.getDefaultLists(), defList.getListItem(), llookup, monitor);
-	}
-	
 	private static void processCmListItems(List<CmAttributeListItem> cmList,
 			List<ListItemType> xmlList,	HashMap<String, Language> llookup, IProgressMonitor monitor) {
 
@@ -188,11 +177,6 @@ public class CmSmartToXmlConverter {
 			}else{
 				xmlNode.setKeyRef(cmNode.getListItem().getKeyId());
 			}
-			//TODO: QQQ fix code below!!!
-//			Attribute dmAttribute = cmNode.getDmAttribute();
-//			if (dmAttribute != null) {
-//				xmlNode.setAttributeKey(dmAttribute.getKeyId());
-//			}
 			xmlNode.setImageFile(getImageFileRef(cmNode));
 			xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
 			xmlList.add(xmlNode);
@@ -268,10 +252,8 @@ public class CmSmartToXmlConverter {
 					}
 					at.getOption().add(aot);
 				}
-				//TODO: QQQ reimplement
-//				processCmListItems(ca.getList(), at.getListItem(), llookup, monitor);
-//				processCmTreeNodes(ca.getTree(), at.getTreeNode(), llookup, monitor);
 				at.setId(ca.getUuid().toString()); //this will allow to reference this item in extradata
+				at.setConfigId(ca.getConfig() != null ? ca.getConfig().getUuid().toString() : null);
 				nt.getAttribute().add(at);
 			}
 		}
@@ -285,25 +267,6 @@ public class CmSmartToXmlConverter {
 		xmlNodes.add(nt);
 	}
 
-	private static void processCmDmAttributeSettings(ConfigurableModel cm,
-			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup, IProgressMonitor monitor) {
-		//TODO: QQQ fix this!!!!
-//		if (!cm.getAttributeSettings().isEmpty()) {
-//			CmDmAttributeSettingsTypeList xmlList = new CmDmAttributeSettingsTypeList();
-//			for (CmDmAttributeSettings s : cm.getAttributeSettings().values()) {
-//				CmDmAttributeSettingsType sXml = new CmDmAttributeSettingsType();
-//				sXml.setAttributeKey(s.getDmAttribute().getKeyId());
-//				if (s.getDisplayMode() != null) {
-//					sXml.setDisplayMode(s.getDisplayMode().name());
-//				}
-//				xmlList.getSetting().add(sXml);
-//			}
-//			xml.setSetting(xmlList);
-//		}
-	}
-
-	
 	private static HashMap<String, Language> processLanguages(ConfigurableModel cm, org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml) {
 		HashMap<String, Language> lookup = new HashMap<String, Language>();
 		LanguageListType llt = new LanguageListType();
