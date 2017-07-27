@@ -32,12 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -45,9 +45,11 @@ import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
@@ -82,13 +84,17 @@ public class SurveyHibernateManager {
 	 * @return <code>true</code> if id already exists; <code>false</code> otherwise
 	 */
 	public static boolean isDuplicateId(String newId, ConservationArea ca, Session session){
-		Criteria c = session.createCriteria(Mission.class)
-				.createAlias("survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
-				.createAlias("s.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("sd.conservationArea", ca)) //$NON-NLS-1$ 
-				.add(Restrictions.eq("id", newId)) //$NON-NLS-1$ 
-				.setProjection(Projections.rowCount()); 
-		Long cnt = (Long)c.uniqueResult();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Long> c = cb.createQuery(Long.class);
+		Root<Mission> from = c.from(Mission.class);
+		c.select(cb.count(from));
+		c.from(Survey.class);
+		Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
+		c.where(cb.and(
+				cb.equal(fromdesign.get("conservationArea"),ca), //$NON-NLS-1$
+				cb.equal(from.get("id"), newId) //$NON-NLS-1$
+				));
+		Long cnt = (Long)session.createQuery(c).uniqueResult();
 		if (cnt > 0){
 			return true;
 		}
@@ -145,14 +151,12 @@ public class SurveyHibernateManager {
 
 		sb.append(SmartDB.getCurrentConservationArea().getId());
 
-//		Query q = s
-//				.createQuery("SELECT id FROM Mission m, Survey s, SurveyDesign sd WHERE m.id like :id and sd.conservationArea = :ca ORDER BY id desc"); //$NON-NLS-1$
-//		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-//		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-
-		List<?> results = s.createCriteria(Mission.class).createAlias("survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
-			.add(Restrictions.like("id", sb.toString() + "%")).addOrder(Order.desc("id")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			.list();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Mission> c = cb.createQuery(Mission.class);
+		Root<Mission> from = c.from(Mission.class);
+		c.where(cb.like(from.get("id"), sb.toString() + "%")); //$NON-NLS-1$ //$NON-NLS-2$
+		c.orderBy(cb.desc(from.get("id"))); //$NON-NLS-1$
+		List<Mission> results = s.createQuery(c).getResultList();
 		
 		long idNumber = 0;
 		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
@@ -178,11 +182,9 @@ public class SurveyHibernateManager {
 	}
 
 	public static Map<MissionScreenOptionMeta, ScreenOption> getMissionScreenOptions(ConservationArea ca, Session session) {
-		@SuppressWarnings("unchecked")
-		List<ScreenOption> results = session.createCriteria(ScreenOption.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("resource", MissionScreenOptionMeta.MISSION_RESOURCE_ID)) //$NON-NLS-1$
-				.list();
+		List<ScreenOption> results = QueryFactory.buildQuery(session, ScreenOption.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"resource", MissionScreenOptionMeta.MISSION_RESOURCE_ID}).getResultList(); //$NON-NLS-1$
 		Map<MissionScreenOptionMeta, ScreenOption> options = new HashMap<MissionScreenOptionMeta, ScreenOption>();
 		for (ScreenOption screenOption : results) {
 			try {
@@ -204,13 +206,16 @@ public class SurveyHibernateManager {
 	 * @param filter filter or null if not filter should be applied
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<SurveyProxy> getSurveys(Session s, SurveyFilter filter){
 		if (filter == null){
 			//get all
-			List<Survey> ds = s.createCriteria(Survey.class, "s") //$NON-NLS-1$
-					.createAlias("surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-					.add(Restrictions.eq("sd.conservationArea",SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
+			c.from(Survey.class);
+			Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
+			c.where(cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+			List<Survey> ds = s.createQuery(c).getResultList();
+			
 			List<SurveyProxy> all = new ArrayList<SurveyProxy>();
 			
 			for (Survey d : ds){
@@ -220,10 +225,11 @@ public class SurveyHibernateManager {
 			return all;
 				
 		}else{
-			Query q = filter.buildQuery(s);
-			List<Object[]> data = q.list();
+			Query<?> q = filter.buildQuery(s);
+			List<?> data = q.list();
 			List<SurveyProxy> all = new ArrayList<SurveyProxy>();
-			for (Object[] x : data){
+			for (Object d : data){
+				Object[] x = (Object[])d;
 				SurveyProxy ii = new SurveyProxy((String)x[1], (UUID)x[0], (Date)x[2], (String)x[3]);
 				all.add(ii);
 			}

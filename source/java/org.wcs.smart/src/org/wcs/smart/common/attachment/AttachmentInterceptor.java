@@ -29,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hibernate.Transaction;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SessionInterceptor;
@@ -61,7 +62,7 @@ public class AttachmentInterceptor extends SessionInterceptor {
 	
 	@Override
 	public void afterTransactionCompletion(Transaction tx){
-		if (tx.wasCommitted()){
+		if (tx.getStatus() == TransactionStatus.COMMITTED){
 			for (File f : toDelete){
 				try{
 					f.delete();

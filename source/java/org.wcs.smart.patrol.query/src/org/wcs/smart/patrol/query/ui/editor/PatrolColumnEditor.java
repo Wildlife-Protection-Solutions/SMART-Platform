@@ -119,16 +119,13 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					List<Employee> members = new ArrayList<Employee>();
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						PatrolLeg pl = (PatrolLeg)s.get(PatrolLeg.class, item.getPatrolLegUuid());
 						
 						for(PatrolLegMember m : pl.getMembers()){
 							SmartLabelProvider.getShortLabel(m.getMember());
 							members.add(m.getMember());
 						}
-					}finally{
-						s.close();
 					}
 					Display.getDefault().syncExec(()->{
 						if (!employeeCellEditor.getControl().isDisposed()){
@@ -159,11 +156,8 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final List<Station> items = new ArrayList<>();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					items.addAll(HibernateManager.getActiveStations(SmartDB.getCurrentConservationArea(), s));
-				}finally{
-					s.close();
 				}
 				Display.getDefault().syncExec(()->{
 					if (!stationCellEditor.getControl().isDisposed()){
@@ -188,11 +182,8 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final List<Team> items = new ArrayList<>();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					items.addAll(PatrolHibernateManager.getActiveTeams(SmartDB.getCurrentConservationArea(), s));
-				}finally{
-					s.close();
 				}
 				Display.getDefault().syncExec(()->{
 					if (!teamCellEditor.getControl().isDisposed()){
@@ -217,11 +208,8 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final List<PatrolMandate> items = new ArrayList<>();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					items.addAll(PatrolHibernateManager.getActiveMandates(SmartDB.getCurrentConservationArea(), s));
-				}finally{
-					s.close();
 				}
 				Display.getDefault().syncExec(()->{
 					if (!mandateCellEditor.getControl().isDisposed()){
@@ -246,11 +234,8 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final List<PatrolTransportType> items = new ArrayList<>();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					items.addAll(PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), s));
-				}finally{
-					s.close();
 				}
 				Display.getDefault().syncExec(()->{
 					if (!transportCellEditor.getControl().isDisposed()){

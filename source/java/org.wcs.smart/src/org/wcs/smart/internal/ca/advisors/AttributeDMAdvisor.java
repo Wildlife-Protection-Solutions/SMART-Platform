@@ -24,9 +24,11 @@ package org.wcs.smart.internal.ca.advisors;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.hibernate.Criteria;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -57,10 +59,13 @@ public class AttributeDMAdvisor implements IDeleteAdvisor {
 		if (attribute.getUuid() == null){
 			return null;
 		}
-		Criteria query = session.createCriteria(CategoryAttribute.class);
-		query.add(Restrictions.eq("id.attribute", attribute)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<CategoryAttribute> items = query.list();
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<CategoryAttribute> query = cb.createQuery(CategoryAttribute.class);
+		Root<CategoryAttribute> root = query.from(CategoryAttribute.class);
+		query.where(cb.equal(root.get("id.attribute"), attribute)); //$NON-NLS-1$
+		
+		List<CategoryAttribute> items = session.createQuery(query).getResultList();
 		if (items.size() == 0){
 			return null;
 		}else{

@@ -125,9 +125,8 @@ public class SurveyDesignExportHandler {
 						InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.SurveyDesignExportHandler_Progress1, types.size() * 4);
 					int exportedCnt = 0;
-					Session s = HibernateManager.openSession();
 					final boolean[] overwriteall = new boolean[]{false};
-					try{
+					try(Session s = HibernateManager.openSession()) {
 						for (SurveyDesignEditorInput sdei : types){
 							SurveyDesign sd = (SurveyDesign) s.load(SurveyDesign.class, sdei.getUuid());
 							progress.subTask(MessageFormat.format(Messages.SurveyDesignExportHandler_Progress2, new Object[]{sd.getName()}));
@@ -168,8 +167,6 @@ public class SurveyDesignExportHandler {
 							}
 							monitor.worked(1);
 						}
-					}finally{
-						s.close();
 					}
 					final int lExportCnt = exportedCnt;
 					pmd.getShell().getDisplay().syncExec(new Runnable(){
@@ -338,20 +335,20 @@ public class SurveyDesignExportHandler {
 				protected IStatus run(IProgressMonitor monitor) {
 					
 					final List<SurveyDesignEditorInput> items = new ArrayList<SurveyDesignEditorInput>();
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					try{
-						for (SurveyDesignProxy proxy : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null)){
-							items.add(new SurveyDesignEditorInput(proxy));
-						} 
-						Collections.sort(items, new Comparator<SurveyDesignEditorInput>(){
-							@Override
-							public int compare(SurveyDesignEditorInput sd1, SurveyDesignEditorInput sd2) {
-								return Collator.getInstance().compare(sd1.getName(), sd2.getName());
-							}});
-					}finally{
-						s.getTransaction().rollback();
-						s.close();
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try{
+							for (SurveyDesignProxy proxy : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null)){
+								items.add(new SurveyDesignEditorInput(proxy));
+							} 
+							Collections.sort(items, new Comparator<SurveyDesignEditorInput>(){
+								@Override
+								public int compare(SurveyDesignEditorInput sd1, SurveyDesignEditorInput sd2) {
+									return Collator.getInstance().compare(sd1.getName(), sd2.getName());
+								}});
+						}finally{
+							s.getTransaction().rollback();
+						}
 					}
 					getShell().getDisplay().syncExec(new Runnable(){
 

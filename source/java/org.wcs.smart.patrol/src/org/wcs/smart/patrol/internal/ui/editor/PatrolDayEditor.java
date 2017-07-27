@@ -115,125 +115,123 @@ public class PatrolDayEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
-		
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			Projection viewProjection = HibernateManager.getCurrentViewProjection(session);
-			session.update(editor.getPatrol());
-			frmSummary = toolkit.createScrolledForm(parent);
+			try {
+				Projection viewProjection = HibernateManager.getCurrentViewProjection(session);
+				session.update(editor.getPatrol());
+				frmSummary = toolkit.createScrolledForm(parent);
+				
+				frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+				
+				String canEdit = editor.canEdit();
+				if (canEdit != null){
+					Composite warning = toolkit.createComposite(frmSummary.getBody());
+					warning.setLayout(new GridLayout(2, false));
+					Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
+					Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+					lblImage.setImage(x);
+					Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
+					lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol, new Object[]{canEdit})) ;
+				}
+				
+				SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
+				StringBuilder text = new StringBuilder(Messages.PatrolDayEditor_PatrolDayTitle);
+				text.append(" "); //$NON-NLS-1$
+				text.append(dayFormat.format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
+				text.append(", "); //$NON-NLS-1$
+				text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
+				frmSummary.setText(text.toString());
+				frmSummary.getBody().setLayout(new GridLayout(1, false));
 			
-			frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-			
-			String canEdit = editor.canEdit();
-			if (canEdit != null){
-				Composite warning = toolkit.createComposite(frmSummary.getBody());
-				warning.setLayout(new GridLayout(2, false));
-				Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
-				Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
-				lblImage.setImage(x);
-				Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
-				lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol, new Object[]{canEdit})) ;
-			}
-			
-			SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
-			StringBuilder text = new StringBuilder(Messages.PatrolDayEditor_PatrolDayTitle);
-			text.append(" "); //$NON-NLS-1$
-			text.append(dayFormat.format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
-			text.append(", "); //$NON-NLS-1$
-			text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
-			frmSummary.setText(text.toString());
-			frmSummary.getBody().setLayout(new GridLayout(1, false));
 		
+				//find all patrol legs for this day
+				List<PatrolLeg> legs = editor.getPatrol().getLegs();		
+				ArrayList<PatrolLegDay> plds = new ArrayList<PatrolLegDay>();
 	
-			//find all patrol legs for this day
-			List<PatrolLeg> legs = editor.getPatrol().getLegs();		
-			ArrayList<PatrolLegDay> plds = new ArrayList<PatrolLegDay>();
-
-			for (PatrolLeg leg: legs){
-				for (PatrolLegDay day : leg.getPatrolLegDays()){
-					if (SharedUtils.getDatePart(day.getDate(), false).equals(  SharedUtils.getDatePart( ((PatrolDayEditorInput)getEditorInput()).getPatrolDay(), false))){
-						plds.add(day);
-					}
-					
-					//load waypoints and attach to session; for performance reasons
-					//waypoints are not cascaded (otherwise saves are cascaded too)
-					if (day.getWaypoints() != null){
-						for (PatrolWaypoint wp : day.getWaypoints()) {
-							session.update(wp.getWaypoint());
-							if (wp.getWaypoint().getObservations() != null){
-								wp.getWaypoint().getObservations().size();
-							}
+				for (PatrolLeg leg: legs){
+					for (PatrolLegDay day : leg.getPatrolLegDays()){
+						if (SharedUtils.getDatePart(day.getDate(), false).equals(  SharedUtils.getDatePart( ((PatrolDayEditorInput)getEditorInput()).getPatrolDay(), false))){
+							plds.add(day);
 						}
-					}
-				}
-			}
-			
-			if (plds.size() == 0){
-				Label lbl = toolkit.createLabel(frmSummary.getBody(), "", SWT.WRAP); //$NON-NLS-1$
-				GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-				gd.widthHint =lbl.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-				lbl.setLayoutData(gd);
-				lbl.setText(Messages.PatrolDayEditor_Error_LoadingPatrolData);
-				
-			}else if (plds.size() == 1){
-				children = new PatrolLegDayInputComposite[1];
-				PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
-				comp.createComposite(frmSummary.getBody(), toolkit);
-				comp.setData((PatrolLegDay)plds.get(0));
-				children[0] = comp;
-				
-			}else{
-				//sort legs by start date
-				Collections.sort(plds, new Comparator<PatrolLegDay>(){
-
-					@Override
-					public int compare(PatrolLegDay o1, PatrolLegDay o2) {
-						if (o1.getStartTime().before(o2.getStartTime())){
-							return -1;
-						}else if (o1.getStartTime().after(o2.getStartTime())){
-							return 1;
-						}else{
-							return Collator.getInstance().compare(o1.getPatrolLeg().getId(),o2.getPatrolLeg().getId());
-						}
-					}});
-				children = new PatrolLegDayInputComposite[plds.size()];
-				Composite mainComp = toolkit.createComposite(frmSummary.getBody());
-				mainComp.setLayout(new GridLayout(1, false));
-				mainComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-				
-				
-				for (int i = 0; i < plds.size(); i ++){
-					PatrolLegDay pld = (PatrolLegDay)plds.get(i);
-					final Section sec = toolkit.createSection(mainComp, Section.TWISTIE | Section.TITLE_BAR | Section.EXPANDED);
-					sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-					sec.addExpansionListener(new ExpansionAdapter() {
 						
-						@Override
-						public void expansionStateChanged(ExpansionEvent e) {
-							if (sec.isExpanded()){
-								sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
-							}else{
-								sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						//load waypoints and attach to session; for performance reasons
+						//waypoints are not cascaded (otherwise saves are cascaded too)
+						if (day.getWaypoints() != null){
+							for (PatrolWaypoint wp : day.getWaypoints()) {
+								session.update(wp.getWaypoint());
+								if (wp.getWaypoint().getObservations() != null){
+									wp.getWaypoint().getObservations().size();
+								}
 							}
-							sec.getParent().layout();
-							
 						}
-					});
-					
-					sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
-					PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
-					Composite comp2 = comp.createComposite(sec, toolkit);
-					comp.setData(pld);
-					sec.setClient(comp2);
-					children[i] = comp;					
+					}
 				}
 				
+				if (plds.size() == 0){
+					Label lbl = toolkit.createLabel(frmSummary.getBody(), "", SWT.WRAP); //$NON-NLS-1$
+					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+					gd.widthHint =lbl.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+					lbl.setLayoutData(gd);
+					lbl.setText(Messages.PatrolDayEditor_Error_LoadingPatrolData);
+					
+				}else if (plds.size() == 1){
+					children = new PatrolLegDayInputComposite[1];
+					PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
+					comp.createComposite(frmSummary.getBody(), toolkit);
+					comp.setData((PatrolLegDay)plds.get(0));
+					children[0] = comp;
+					
+				}else{
+					//sort legs by start date
+					Collections.sort(plds, new Comparator<PatrolLegDay>(){
+	
+						@Override
+						public int compare(PatrolLegDay o1, PatrolLegDay o2) {
+							if (o1.getStartTime().before(o2.getStartTime())){
+								return -1;
+							}else if (o1.getStartTime().after(o2.getStartTime())){
+								return 1;
+							}else{
+								return Collator.getInstance().compare(o1.getPatrolLeg().getId(),o2.getPatrolLeg().getId());
+							}
+						}});
+					children = new PatrolLegDayInputComposite[plds.size()];
+					Composite mainComp = toolkit.createComposite(frmSummary.getBody());
+					mainComp.setLayout(new GridLayout(1, false));
+					mainComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+					
+					
+					for (int i = 0; i < plds.size(); i ++){
+						PatrolLegDay pld = (PatrolLegDay)plds.get(i);
+						final Section sec = toolkit.createSection(mainComp, Section.TWISTIE | Section.TITLE_BAR | Section.EXPANDED);
+						sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+						sec.addExpansionListener(new ExpansionAdapter() {
+							
+							@Override
+							public void expansionStateChanged(ExpansionEvent e) {
+								if (sec.isExpanded()){
+									sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));			
+								}else{
+									sec.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+								}
+								sec.getParent().layout();
+								
+							}
+						});
+						
+						sec.setText(Messages.PatrolDayEditor_LegSectionNamePrefix + pld.getPatrolLeg().getId());
+						PatrolLegDayInputComposite comp = new PatrolLegDayInputComposite(this, viewProjection);
+						Composite comp2 = comp.createComposite(sec, toolkit);
+						comp.setData(pld);
+						sec.setClient(comp2);
+						children[i] = comp;					
+					}
+					
+				}
+			}finally {	
+				session.getTransaction().rollback();
 			}
-			
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
 		}
 		
 		frmSummary.getBody().getParent().layout();		

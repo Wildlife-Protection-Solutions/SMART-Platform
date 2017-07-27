@@ -78,7 +78,7 @@ public class CtDatabaseUpgrader30To40 {
 			"GRANT SELECT ON smart.cm_ct_properties_profile to login"
 		};
 		for (String s : sql){
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		populateProfiles(session);
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_4_0, session);

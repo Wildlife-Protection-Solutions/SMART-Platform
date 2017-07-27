@@ -27,7 +27,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -94,15 +94,14 @@ public class PatrolDeleteHandler implements IPatrolDeleteHandler {
 		
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<Intelligence> getIntelligenceIds(Patrol patrol, Session session) throws Exception{
-		Query q = session.createQuery("from Intelligence i where i.patrol = :p"); //$NON-NLS-1$
+		Query<Intelligence> q = session.createQuery("from Intelligence i where i.patrol = :p", Intelligence.class); //$NON-NLS-1$
 		q.setParameter("p", patrol); //$NON-NLS-1$
 		return q.list();
 	}
 
 	private void deleteIntelligences(Patrol patrol, Session session) throws Exception{
-		Query q = session.createQuery("delete from Intelligence where patrol = :p"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Intelligence where patrol = :p"); //$NON-NLS-1$
 		q.setParameter("p", patrol); //$NON-NLS-1$
 		q.executeUpdate();
 	}

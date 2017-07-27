@@ -183,16 +183,16 @@ public class CreateNewProfileOpDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerPropertiesDialog_LoadProfile_Task, 1);
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					try {
-						CyberTrackerPropertiesProfile fullProfile = (CyberTrackerPropertiesProfile) s.get(CyberTrackerPropertiesProfile.class, profileTemplate.getUuid());
-						initProfile = CyberTrackerProfileFactory.createProfileClone(fullProfile, name, progress.split(1));
-					} catch (Exception ex) {
-						SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_LoadProfile_Error, ex);
-					} finally {
-						s.getTransaction().rollback();
-						s.close();
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try {
+							CyberTrackerPropertiesProfile fullProfile = (CyberTrackerPropertiesProfile) s.get(CyberTrackerPropertiesProfile.class, profileTemplate.getUuid());
+							initProfile = CyberTrackerProfileFactory.createProfileClone(fullProfile, name, progress.split(1));
+						} catch (Exception ex) {
+							SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_LoadProfile_Error, ex);
+						} finally {
+							s.getTransaction().rollback();
+						}
 					}
 				}
 			});

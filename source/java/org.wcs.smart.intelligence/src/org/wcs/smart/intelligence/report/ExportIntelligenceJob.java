@@ -66,47 +66,48 @@ public class ExportIntelligenceJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		HashMap<String, Object> reportParameters = new HashMap<String, Object>();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
 		Intelligence intelligence = null;
-		try{
-			intelligence = (Intelligence) session.load(Intelligence.class, uuid);
-			String tmp = URLUtils.cleanFilename(intelligence.getName());
-			tmp = String.format("%-3s",tmp).replace(' ', '_'); //$NON-NLS-1$
-			outputFile = File.createTempFile(tmp + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
-			outputFile.deleteOnExit();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
 			
-			reportParameters.put(ReportIntelligence.UUID, UuidUtils.uuidToString(intelligence.getUuid()));
-			reportParameters.put(ReportIntelligence.NAME, intelligence.getName());
-			reportParameters.put(ReportIntelligence.DESCRIPTION, (intelligence.getDescription()==null?"" : intelligence.getDescription())); //$NON-NLS-1$
-			reportParameters.put(ReportIntelligence.SOURCE, (intelligence.getSource() != null ? intelligence.getSource().getName() : "")); //$NON-NLS-1$
-			reportParameters.put(ReportIntelligence.PATROL_ID,  (intelligence.getPatrol() != null ? intelligence.getPatrol().getId() : Messages.IntelligenceEditor_NoValue));
-			reportParameters.put(ReportIntelligence.RECEIVED_DATE, new java.sql.Date(intelligence.getReceivedDate().getTime()));
-			reportParameters.put(ReportIntelligence.FROM_DATE, new java.sql.Date(intelligence.getFromDate().getTime()));
-			reportParameters.put(ReportIntelligence.TO_DATE, new java.sql.Date(intelligence.getToDate() != null ? intelligence.getToDate().getTime() : intelligence.getFromDate().getTime()));
-			reportParameters.put(ReportIntelligence.LOCATION, intelligence.getPoints());
-			reportParameters.put(ReportIntelligence.CREATOR, intelligence.getCreator() == null ? "" : SmartLabelProvider.getFullLabel(intelligence.getCreator())); //$NON-NLS-1$
-			
-			try(FileOutputStream fout = new FileOutputStream(outputFile)){
-				IRenderOption options = new RenderOption();
-				options.setOutputStream(fout);
-				options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
-				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
-				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+			try{
+				intelligence = (Intelligence) session.load(Intelligence.class, uuid);
+				String tmp = URLUtils.cleanFilename(intelligence.getName());
+				tmp = String.format("%-3s",tmp).replace(' ', '_'); //$NON-NLS-1$
+				outputFile = File.createTempFile(tmp + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
+				outputFile.deleteOnExit();
 				
-				SmartReportRunner.INSTANCE.runFile(ReportIntelligence.getIntelligenceTemplate(), 
-						SmartDB.getCurrentConservationArea(), 
-						SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
-						ReportEngineManager.getBirtReportEngine(),
-						options, session, reportParameters);
+				reportParameters.put(ReportIntelligence.UUID, UuidUtils.uuidToString(intelligence.getUuid()));
+				reportParameters.put(ReportIntelligence.NAME, intelligence.getName());
+				reportParameters.put(ReportIntelligence.DESCRIPTION, (intelligence.getDescription()==null?"" : intelligence.getDescription())); //$NON-NLS-1$
+				reportParameters.put(ReportIntelligence.SOURCE, (intelligence.getSource() != null ? intelligence.getSource().getName() : "")); //$NON-NLS-1$
+				reportParameters.put(ReportIntelligence.PATROL_ID,  (intelligence.getPatrol() != null ? intelligence.getPatrol().getId() : Messages.IntelligenceEditor_NoValue));
+				reportParameters.put(ReportIntelligence.RECEIVED_DATE, new java.sql.Date(intelligence.getReceivedDate().getTime()));
+				reportParameters.put(ReportIntelligence.FROM_DATE, new java.sql.Date(intelligence.getFromDate().getTime()));
+				reportParameters.put(ReportIntelligence.TO_DATE, new java.sql.Date(intelligence.getToDate() != null ? intelligence.getToDate().getTime() : intelligence.getFromDate().getTime()));
+				reportParameters.put(ReportIntelligence.LOCATION, intelligence.getPoints());
+				reportParameters.put(ReportIntelligence.CREATOR, intelligence.getCreator() == null ? "" : SmartLabelProvider.getFullLabel(intelligence.getCreator())); //$NON-NLS-1$
 				
+				try(FileOutputStream fout = new FileOutputStream(outputFile)){
+					IRenderOption options = new RenderOption();
+					options.setOutputStream(fout);
+					options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
+					options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
+					options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+					
+					SmartReportRunner.INSTANCE.runFile(ReportIntelligence.getIntelligenceTemplate(), 
+							SmartDB.getCurrentConservationArea(), 
+							SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
+							ReportEngineManager.getBirtReportEngine(),
+							options, session, reportParameters);
+					
+				}
+			} catch (Exception ex) {
+				IntelligencePlugIn.displayLog(Messages.ExportIntelligenceJob_ExportError + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				return Status.CANCEL_STATUS;
+			} finally {
+				session.getTransaction().rollback();
 			}
-		} catch (Exception ex) {
-			IntelligencePlugIn.displayLog(Messages.ExportIntelligenceJob_ExportError + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-			return Status.CANCEL_STATUS;
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
 		}
 
 		

@@ -104,44 +104,43 @@ public class ProjectionDialog extends TitleAreaDialog {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					final Object[] ps = HibernateManager.getCaProjectionList(s).toArray();
-					getShell().getDisplay().asyncExec(new Runnable(){
-
-						@Override
-						public void run() {
-							lst.setInput(ps);
-							try{
-								Projection selection = null;
-								for (Object x : ps){
-									if (x instanceof Projection && ReprojectUtils.stringToCrs(((Projection) x).getDefinition()).equals(defaultCrs)){
-										selection = (Projection) x;
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
+						final Object[] ps = HibernateManager.getCaProjectionList(s).toArray();
+						getShell().getDisplay().asyncExec(new Runnable(){
+	
+							@Override
+							public void run() {
+								lst.setInput(ps);
+								try{
+									Projection selection = null;
+									for (Object x : ps){
+										if (x instanceof Projection && ReprojectUtils.stringToCrs(((Projection) x).getDefinition()).equals(defaultCrs)){
+											selection = (Projection) x;
+										}
 									}
+									if (selection == null && ps.length > 0){
+										selection = (Projection) ps[0];
+									}	
+									if (selection != null){
+										lst.setSelection(new StructuredSelection(selection));
+									}
+								}catch (Exception ex){
+									//eatme
 								}
-								if (selection == null && ps.length > 0){
-									selection = (Projection) ps[0];
-								}	
-								if (selection != null){
-									lst.setSelection(new StructuredSelection(selection));
-								}
-							}catch (Exception ex){
-								//eatme
-							}
-						}});
-						
-				}catch (final Exception ex){
-					getShell().getDisplay().syncExec(new Runnable(){
-
-						@Override
-						public void run() {
-							SmartPlugIn.displayLog(Messages.ProjectionDialog_Error_LoadProjectionMessage + ex.getLocalizedMessage(), ex);							
-						}});
-					
-				}finally{
-					s.getTransaction().rollback();
-					s.close();
+							}});
+							
+					}catch (final Exception ex){
+						getShell().getDisplay().syncExec(new Runnable(){
+	
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(Messages.ProjectionDialog_Error_LoadProjectionMessage + ex.getLocalizedMessage(), ex);							
+							}});
+					} finally {
+						s.getTransaction().rollback();
+					}
 				}
 				return Status.OK_STATUS;
 			}

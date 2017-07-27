@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Employee;
@@ -36,6 +35,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
@@ -383,11 +383,10 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	 * Loads the area for the given type/key.
 	 */
 	private Area loadArea(AreaFilter af, Session session){
-		@SuppressWarnings("unchecked")
-		List<Area> areas = session.createCriteria(Area.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-			.add(Restrictions.eq("type", af.getType())) //$NON-NLS-1$
-			.add(Restrictions.eq("keyId", af.getKey())).list();  //$NON-NLS-1$
+		List<Area> areas = QueryFactory.buildQuery(session, Area.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"type", af.getType()}, //$NON-NLS-1$
+				new Object[] {"keyId", af.getKey()}).getResultList(); //$NON-NLS-1$
 		if (areas.size() == 0){
 			throw new IllegalStateException(
 					MessageFormat.format(

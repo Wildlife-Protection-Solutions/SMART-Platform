@@ -276,15 +276,12 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>(); 
-			Session s = HibernateManager.openSession();
-			try{
+			
+			try(Session s = HibernateManager.openSession()){
 				for (SurveyDesignProxy proxy : SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null)){
 					all.add(new SurveyDesignEditorInput(proxy));
 				}
-			}finally{
-				s.close();
 			}
-			
 			getShell().getDisplay().asyncExec(new Runnable(){
 				@Override
 				public void run() {

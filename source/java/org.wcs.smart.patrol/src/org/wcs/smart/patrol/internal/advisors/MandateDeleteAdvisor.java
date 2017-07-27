@@ -24,11 +24,10 @@ package org.wcs.smart.patrol.internal.advisors;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.Team;
 
@@ -48,7 +47,7 @@ public class MandateDeleteAdvisor implements IDeleteAdvisor {
 			return Messages.MandateDeleteAdvisor_InvalidObjectType;
 		}
 		
-		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("mandate", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		Long cnt = QueryFactory.buildCountQuery(session, PatrolLeg.class,new Object[] {"mandate", object}); //$NON-NLS-1$
 		if (cnt > 0){
 			return MessageFormat.format(
 					Messages.MandateDeleteAdvisor_DeleteError_Patrol,
@@ -56,7 +55,7 @@ public class MandateDeleteAdvisor implements IDeleteAdvisor {
 					);
 		}
 		
-		cnt = (Long) session.createCriteria(Team.class).add(Restrictions.eq("mandate", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		cnt = QueryFactory.buildCountQuery(session, Team.class,new Object[] {"mandate", object}); //$NON-NLS-1$
 		if (cnt > 0){
 			return 
 				MessageFormat.format(

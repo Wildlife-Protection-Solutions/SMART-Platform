@@ -177,8 +177,8 @@ public class MissionImporter {
 	private static Mission  convertAndSave(MissionType xmlMission, final boolean keepIDs, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_MISSION_TASKNAME, 3);
 		XMLtoMissionConverter converter = new XMLtoMissionConverter();
-		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try {
+		
+		try (Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
 			progress.split(1);
 			progress.subTask(Messages.MissionImporter_5);
 			//check if a mission in the database with the given mission id already exists
@@ -212,15 +212,11 @@ public class MissionImporter {
 			}		
 			progress.subTask(Messages.MissionImporter_9);
 			converter.fromXml(xmlMission, keepIDs, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
-		} finally {
-			if (session.isOpen()){
-				session.close();
-			}
 		}
 
 		progress.split(1);
-		session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try {
+		
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())) {
 			List<String> errors = new ArrayList<String>();
 			errors.addAll(converter.getValidationErrors());
 			//display errors in xml file
@@ -242,10 +238,6 @@ public class MissionImporter {
 					}
 				});
 				return null;
-			}
-		}finally {
-			if (session.isOpen()){
-				session.close();
 			}
 		}
 
@@ -285,30 +277,29 @@ public class MissionImporter {
 		Mission imported = converter.getImportedMission();
 		
 		//performing actual save in database
-		session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		session.beginTransaction();
-		try {
-
-			if (imported == null)
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			session.beginTransaction();
+			try {
+	
+				if (imported == null)
+					return null;
+				Survey survey = getSurveyById(imported, session);
+				if (survey == null){
+					//no existing survey, save the new one from the xml file.
+					session.saveOrUpdate(imported.getSurvey());
+				}else{
+					//there is an existing survey with this id, associate the mission with it instead of creating a new one.
+					imported.setSurvey(survey);
+					survey.getMissions().add(imported);
+				}
+			
+				SurveyHibernateManager.saveMission(imported, session, true);
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				EcologicalRecordsPlugIn.displayLog(Messages.MissionImporter_13 + " " + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 				return null;
-			Survey survey = getSurveyById(imported, session);
-			if (survey == null){
-				//no existing survey, save the new one from the xml file.
-				session.saveOrUpdate(imported.getSurvey());
-			}else{
-				//there is an existing survey with this id, associate the mission with it instead of creating a new one.
-				imported.setSurvey(survey);
-				survey.getMissions().add(imported);
 			}
-		
-			SurveyHibernateManager.saveMission(imported, session, true);
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			EcologicalRecordsPlugIn.displayLog(Messages.MissionImporter_13 + " " + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-			return null;
-		}finally{
-			session.close();
 		}
 		
 		return imported;

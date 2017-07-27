@@ -28,16 +28,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.graphics.Image;
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -100,20 +101,21 @@ public class DataModel {
 			//otherwise i might close an existing connection when it should be.
 			Job loadAttributesJob = new Job(Messages.DataModel_LoadAttribute_JobName) {
 				
-				@SuppressWarnings("unchecked")
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
-						aggregations = s.createCriteria(Aggregation.class)
-								.addOrder(Order.asc("name")) //$NON-NLS-1$
-								.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list(); 
+						
+						CriteriaQuery<Aggregation> c = s.getCriteriaBuilder().createQuery(Aggregation.class);
+						Root<Aggregation> from = c.from(Aggregation.class);
+						c.select(from).distinct(true);
+						c.orderBy(s.getCriteriaBuilder().asc(from.get("name"))); //$NON-NLS-1$
+						
+						aggregations = s.createQuery(c).getResultList();
+
 						s.getTransaction().rollback();
 					}catch (Exception ex){
 						SmartPlugIn.displayLog(Messages.DataModel_Error_LoadAggregations, ex);
-					}finally{
-						s.close();
 					}
 					return Status.OK_STATUS;
 				}

@@ -22,7 +22,7 @@
 package org.wcs.smart.intelligence;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -54,19 +54,19 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 	}
 
 	private void deleteIntelligences(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Intelligence where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Intelligence where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deleteIntelligenceSource(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from IntelligenceSource where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from IntelligenceSource where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deleteInformantData(ConservationArea ca, Session session) throws Exception {
-		Query q = session.createQuery("delete from Informant where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Informant where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}

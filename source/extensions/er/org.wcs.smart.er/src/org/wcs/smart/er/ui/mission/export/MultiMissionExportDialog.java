@@ -42,7 +42,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -151,48 +151,48 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 			protected IStatus run(IProgressMonitor monitor) {
 				List<SurveyTreeItem> dataList = new ArrayList<SurveyTreeItem>();
 				
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					Query q = currentFilter.buildQuery(s); 
-					List<?> results = q.list();
-					
-					
-					SurveyTreeItem prevSurvey = null;
-					
-					for(Object x : results){
-						Object[] row = (Object[])x;
-						String surveyName = (String) row[4];
-
-						if(prevSurvey != null && surveyName.equals(prevSurvey.getName()) ){
-							MissionTreeItem mti = new MissionTreeItem();
-							mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
-							mti.setUuid((UUID) row[0]);
-							mti.setParent(prevSurvey);
-							prevSurvey.getChildren().add(mti);
-						}else{
-							SurveyTreeItem surveyTreeItem = new SurveyTreeItem();
-							surveyTreeItem.setName(surveyName);
-							surveyTreeItem.setUuid((UUID) row[5]);
-							surveyTreeItem.setSurveyDesignName((String)row[6]);
-							
-							MissionTreeItem mti = new MissionTreeItem();
-							mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
-							mti.setUuid((UUID) row[0]);
-							mti.setParent(surveyTreeItem);
-							surveyTreeItem.getChildren().add(mti);
-							
-							prevSurvey = surveyTreeItem;
-							dataList.add(surveyTreeItem);
-
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
+						Query<?> q = currentFilter.buildQuery(s); 
+						List<?> results = q.list();
+						
+						
+						SurveyTreeItem prevSurvey = null;
+						
+						for(Object x : results){
+							Object[] row = (Object[])x;
+							String surveyName = (String) row[4];
+	
+							if(prevSurvey != null && surveyName.equals(prevSurvey.getName()) ){
+								MissionTreeItem mti = new MissionTreeItem();
+								mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
+								mti.setUuid((UUID) row[0]);
+								mti.setParent(prevSurvey);
+								prevSurvey.getChildren().add(mti);
+							}else{
+								SurveyTreeItem surveyTreeItem = new SurveyTreeItem();
+								surveyTreeItem.setName(surveyName);
+								surveyTreeItem.setUuid((UUID) row[5]);
+								surveyTreeItem.setSurveyDesignName((String)row[6]);
+								
+								MissionTreeItem mti = new MissionTreeItem();
+								mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
+								mti.setUuid((UUID) row[0]);
+								mti.setParent(surveyTreeItem);
+								surveyTreeItem.getChildren().add(mti);
+								
+								prevSurvey = surveyTreeItem;
+								dataList.add(surveyTreeItem);
+	
+							}
+						}
+						
+					}finally{
+						if (s.getTransaction().isActive()){
+							s.getTransaction().commit();
 						}
 					}
-					
-				}finally{
-					if (s.getTransaction().isActive()){
-						s.getTransaction().commit();
-					}
-					s.close();
 				}
 				
 				final Object[] data = new Object[dataList.size()];

@@ -89,11 +89,8 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	public CaPropertyPage(Shell parent) {
 		super(parent, Messages.CaPropertyPage_Dialog_Title);
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			this.ca = (ConservationArea) s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
-		}finally{
-			s.close();
 		}
 	}
 
@@ -276,33 +273,32 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		}
 		
-		Session session = HibernateManager.openSession();
-		Transaction tx = session.beginTransaction();
-		try{
-			caComposite.updateConservationArea(ca);
-			Language def= ca.getDefaultLanguage();
-			ca.getLanguages().clear();
-			ca.getLanguages().add(def);
-			ca.getLanguages().addAll(languages);
-			session.saveOrUpdate(ca);
-			tx.commit();
-			
-			// update the cached settings
-			SmartDB.getCurrentConservationArea().setLanguages(ca.getLanguages());
-			SmartDB.getCurrentConservationArea().setId(ca.getId());
-			SmartDB.getCurrentConservationArea().setName(ca.getName());
-			
-			setChangesMade(false);
-
-			// update the workbench window
-			SmartWorkbenchWindowAdvisor.updateWorkbenchWindowTitle();
-
-			return true;
-		}catch (RuntimeException ex){
-			tx.rollback();
-			SmartPlugIn.displayLog(Messages.CaPropertyPage_Error_SavingChanages + ex.getLocalizedMessage(), ex);
-		}finally{
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			Transaction tx = session.beginTransaction();
+			try{
+				caComposite.updateConservationArea(ca);
+				Language def= ca.getDefaultLanguage();
+				ca.getLanguages().clear();
+				ca.getLanguages().add(def);
+				ca.getLanguages().addAll(languages);
+				session.saveOrUpdate(ca);
+				tx.commit();
+				
+				// update the cached settings
+				SmartDB.getCurrentConservationArea().setLanguages(ca.getLanguages());
+				SmartDB.getCurrentConservationArea().setId(ca.getId());
+				SmartDB.getCurrentConservationArea().setName(ca.getName());
+				
+				setChangesMade(false);
+	
+				// update the workbench window
+				SmartWorkbenchWindowAdvisor.updateWorkbenchWindowTitle();
+	
+				return true;
+			}catch (RuntimeException ex){
+				tx.rollback();
+				SmartPlugIn.displayLog(Messages.CaPropertyPage_Error_SavingChanages + ex.getLocalizedMessage(), ex);
+			}
 		}
 		return false;
 	}

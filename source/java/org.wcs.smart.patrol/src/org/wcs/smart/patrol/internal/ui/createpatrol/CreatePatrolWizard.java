@@ -228,25 +228,24 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		if (lastPage instanceof NewPatrolWizardPage) {
 			((NewPatrolWizardPage) lastPage).updateModel(this.patrol, getSession());
 		}
-
-		Session session = getSession();//PatrolHibernateManager.openSession();
-		session.beginTransaction();
+		
 		boolean ret = true;
-		try{
-			patrol.createLegDays(session);
-			PatrolHibernateManager.savePatrol(patrol, session, false);
-			for (IWizardPage p : getPages()){
-				if (p instanceof NewPatrolWizardPage){
-					((NewPatrolWizardPage) p).save(patrol, session);
+		try(Session session = getSession()){
+			session.beginTransaction();
+			try{
+				patrol.createLegDays(session);
+				PatrolHibernateManager.savePatrol(patrol, session, false);
+				for (IWizardPage p : getPages()){
+					if (p instanceof NewPatrolWizardPage){
+						((NewPatrolWizardPage) p).save(patrol, session);
+					}
 				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				ret = false;
+				SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
+				session.getTransaction().rollback();
 			}
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			ret = false;
-			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
-			session.getTransaction().rollback();			
-		}finally{
-			session.close();
 		}
 
 		if (!ret)

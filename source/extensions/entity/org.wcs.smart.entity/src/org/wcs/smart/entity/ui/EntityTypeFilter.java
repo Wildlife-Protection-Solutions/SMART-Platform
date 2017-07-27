@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.entity.ui;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
@@ -134,7 +134,7 @@ public class EntityTypeFilter  {
 	 * @param s
 	 * @return
 	 */
-	public Query buildQuery(Session s){ 
+	public Query<?> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		str.append("SELECT e.uuid, e.keyId, e.name "); //$NON-NLS-1$
 		str.append("FROM EntityType e "); //$NON-NLS-1$
@@ -160,7 +160,7 @@ public class EntityTypeFilter  {
 		
 		str.append(" ORDER BY e.name asc"); //$NON-NLS-1$
 		
-		Query query = s.createQuery(str.toString());
+		Query<?> query = s.createQuery(str.toString());
 		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (searchField != null){
 			query.setParameter("language", SmartDB.getCurrentLanguage().getUuid()); //$NON-NLS-1$

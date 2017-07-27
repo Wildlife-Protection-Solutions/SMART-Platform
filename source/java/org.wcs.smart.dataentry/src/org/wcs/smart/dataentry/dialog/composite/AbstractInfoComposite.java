@@ -240,8 +240,8 @@ public abstract class AbstractInfoComposite extends Composite {
 							InterruptedException {
 						monitor.beginTask(Messages.AbstractInfoComposite_AddCategory, dialog.getCategories().size());
 					
-						Session s = HibernateManager.openSession();
-						try{
+						
+						try(Session s = HibernateManager.openSession()){
 							for (Category c : dialog.getCategories()){
 								Category c2 = c;
 								monitor.subTask(c.getName());
@@ -263,8 +263,6 @@ public abstract class AbstractInfoComposite extends Composite {
 								addCategory(c);
 								monitor.worked(1);
 							}
-						}finally{
-							s.close();
 						}
 						monitor.done();
 						
@@ -352,8 +350,7 @@ public abstract class AbstractInfoComposite extends Composite {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.AbstractInfoComposite_DmLoadingTaskName, 3);
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
 						progress.worked(1);
 						
@@ -374,7 +371,6 @@ public abstract class AbstractInfoComposite extends Composite {
 						progress.worked(1);
 					}finally{
 						monitor.done();
-						s.close();
 					}
 				}
 				

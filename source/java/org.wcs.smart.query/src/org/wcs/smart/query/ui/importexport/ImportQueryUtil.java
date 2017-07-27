@@ -24,12 +24,16 @@ package org.wcs.smart.query.ui.importexport;
 import java.io.File;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -57,37 +61,37 @@ public class ImportQueryUtil {
 	 * @param ca the conservation area to search
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static Employee findEmployee(ConservationArea ca) {
 		if (ca.equals(SmartDB.getCurrentConservationArea())){
 			return SmartDB.getCurrentEmployee();
 		}
 		
-		//otherwise look for an employee with the same username 
-		Session s = HibernateManager.openSession();
-		try{
-			Employee e = (Employee)s.createCriteria(Employee.class)
-					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-					.add(Restrictions.eq("smartUserId", SmartDB.getCurrentEmployee().getSmartUserId())) //$NON-NLS-1$
-					.uniqueResult();
+		//otherwise look for an employee with the same username
+		try(Session s = HibernateManager.openSession()){
+			
+			Employee e = QueryFactory.buildQuery(s, Employee.class, 
+					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+					new Object[] {"smartUserId", SmartDB.getCurrentEmployee().getSmartUserId()}).uniqueResult(); //$NON-NLS-1$
 			if (e != null){
 				return e;
 			}
 			
 			//look for any active admin users
-			List<Employee> others = s.createCriteria(Employee.class)
-					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-					.add(Restrictions.isNull("endEmploymentDate")) //$NON-NLS-1$
-					.add(Restrictions.isNotNull("smartUserLevelKeys")) //$NON-NLS-1$
-					.list();
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
+			Root<Employee> from = c.from(Employee.class);
+			c.where(cb.and(
+					cb.equal(from.get("conservationArea"), ca), //$NON-NLS-1$
+					cb.isNull(from.get("endEmploymentDate")), //$NON-NLS-1$
+					cb.isNotNull(from.get("smartUserLevelKeys")) //$NON-NLS-1$
+					));
+			List<Employee> others = s.createQuery(c).getResultList();
 			for (Employee o : others){
 				if (UserLevelManager.INSTANCE.supportsUser(o, UserLevelManager.ADMIN)) return o;
 			}
 			
 			//this should never happen
 			throw new IllegalStateException("Not admin employee found for imported conservation area."); //$NON-NLS-1$
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -135,23 +139,22 @@ public class ImportQueryUtil {
 			}
 		}
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			for (Query query : queries){
-				//generate id
-				query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
-				session.save(query);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				for (Query query : queries){
+					//generate id
+					query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
+					session.save(query);
+				}
+				session.flush();
+				importer.beforeCommit();
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				throw ex;
 			}
-			session.flush();
-			importer.beforeCommit();
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			throw ex;
-		}finally{
-			session.close();
-		}				
+		}			
 		
 		return queries;
 	}

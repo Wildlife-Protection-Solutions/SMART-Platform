@@ -113,23 +113,22 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		protected IStatus run(IProgressMonitor monitor) {
 			
 			final ArrayList<ListItem> items = new ArrayList<ListItem>();
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				SamplingUnitAttribute attribute = (SamplingUnitAttribute) s.load(SamplingUnitAttribute.class, ma.getUuid());
-				for (SamplingUnitAttributeListItem i : attribute.getAttributeList()){
-					items.add(new ListItem(i.getUuid(), i.getName(), i.getKeyId()));
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					SamplingUnitAttribute attribute = (SamplingUnitAttribute) s.load(SamplingUnitAttribute.class, ma.getUuid());
+					for (SamplingUnitAttributeListItem i : attribute.getAttributeList()){
+						items.add(new ListItem(i.getUuid(), i.getName(), i.getKeyId()));
+					}
+					//add the any item
+					items.add(0, BasicDropItemFactory.ANY_OPTION);				
+					if (currentSelection != null && !items.contains(currentSelection)){
+						//item is not longer active; but still in query
+						items.add(currentSelection);
+					}
+				}finally{
+					s.getTransaction().rollback();
 				}
-				//add the any item
-				items.add(0, BasicDropItemFactory.ANY_OPTION);				
-				if (currentSelection != null && !items.contains(currentSelection)){
-					//item is not longer active; but still in query
-					items.add(currentSelection);
-				}
-
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
 			}
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
@@ -463,8 +462,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		this.sd = design;
 		if (sd != null){
 			isAttributeSd = false;
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				SurveyDesign temp = (SurveyDesign) s.load(SurveyDesign.class, design.getUuid());
 				for (SurveyDesignSamplingUnitAttribute att : temp.getSamplingUnitAttributes()){
 					if (att.getSamplingUnitAttribute().equals(ma)){
@@ -472,8 +470,6 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 						break;
 					}
 				}
-			}finally{
-				s.close();
 			}
 		}else{
 			isAttributeSd = true;

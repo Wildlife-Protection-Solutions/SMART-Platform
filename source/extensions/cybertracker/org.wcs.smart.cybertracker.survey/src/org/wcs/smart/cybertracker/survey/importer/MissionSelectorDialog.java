@@ -25,6 +25,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -43,12 +47,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Dialog for selecting the target {@link Mission} when importing mission from CyberTracker.
@@ -186,20 +190,19 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 	}
 
     private List<Mission> loadMissions() {
-    	Session s = HibernateManager.openSession();
-    	try {
-			@SuppressWarnings("unchecked")
-			List<Survey> surveys = s.createCriteria(Survey.class)
-					.add(Restrictions.eq("surveyDesign", surveyDesign)) //$NON-NLS-1$
-					.list();
+    	try (Session s = HibernateManager.openSession()){
+    		
+			List<Survey> surveys = QueryFactory.buildQuery(s, Survey.class, "surveyDesign", surveyDesign).getResultList(); //$NON-NLS-1$
 			if (surveys == null || surveys.isEmpty()) {
 				return Collections.emptyList();
 			}
-			@SuppressWarnings("unchecked")
-			List<Mission> missions = s.createCriteria(Mission.class)
-					.add(Restrictions.in("survey", surveys)) //$NON-NLS-1$
-					.list();
 
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<Mission> c = cb.createQuery(Mission.class);
+			Root<Mission> from= c.from(Mission.class);
+			c.where(from.get("survey").in(surveys)); //$NON-NLS-1$
+			
+			List<Mission> missions = s.createQuery(c).getResultList();
 			Collections.sort(missions, new Comparator<Mission>() {
 				@Override
 				public int compare(Mission m1, Mission m2) {
@@ -208,8 +211,6 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 			});
 
 			return missions;
-    	} finally {
-    		s.close();
     	}
     }
 

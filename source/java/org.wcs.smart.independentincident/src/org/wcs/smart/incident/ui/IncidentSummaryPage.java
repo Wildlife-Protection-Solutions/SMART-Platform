@@ -183,9 +183,8 @@ public class IncidentSummaryPage extends EditorPart {
 	 */
 	public void initData(Waypoint incident){
 		
-		Session session = HibernateManager.openSession();
-		session.saveOrUpdate(editor.getIncident());
-		try{
+		try(Session session = HibernateManager.openSession()){
+			session.saveOrUpdate(editor.getIncident());
 			if (incident.getComment() == null){
 				txtComments.setText(""); //$NON-NLS-1$
 			}else{
@@ -252,8 +251,6 @@ public class IncidentSummaryPage extends EditorPart {
 			this.attachments.setInput(allAtts);
 			this.dataViewer.setInput(incident.getObservations());
 			this.dataViewer.expandAll();
-		}finally{
-			session.close();
 		}
 		
 	}
@@ -558,16 +555,13 @@ public class IncidentSummaryPage extends EditorPart {
 		Job j = new Job(Messages.IncidentSummaryPage_EmployeeLoadJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
 					if (!observationOptions.getTrackObserver()){
 						employees = null;
 					}else{
 						employees = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
 					}
-				}finally{
-					s.close();
 				}
 				if (employees != null){
 					Collections.sort(employees, new Comparator<Employee>() {

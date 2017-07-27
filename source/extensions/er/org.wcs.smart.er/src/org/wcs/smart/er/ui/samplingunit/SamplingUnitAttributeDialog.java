@@ -47,13 +47,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -244,11 +244,8 @@ public class SamplingUnitAttributeDialog extends TitleAreaDialog implements Sele
 		btnEdit.setEnabled(!isSelected);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void initData(){
-		attributes = session.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list(); 
+		attributes = QueryFactory.buildQuery(session, SamplingUnitAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 		lstAttributes.setInput(attributes);
 		sortAttributes();
 	}

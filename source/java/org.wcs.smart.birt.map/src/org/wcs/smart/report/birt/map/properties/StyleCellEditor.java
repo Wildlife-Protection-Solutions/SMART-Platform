@@ -108,15 +108,11 @@ public class StyleCellEditor extends DialogCellEditor {
 							//use user defined style for map
 							sb = BirtMapUtils.parseStyleString(info.getMapStyle());
 						}else{
-							
-							Session session = HibernateManager.openSession();
-							try{
+							try(Session session = HibernateManager.openSession()){
 								String queryText = ((OdaDataSetHandle)mapLayer.getHandle().getDataSet()).getQueryText();
 								sb = BirtStyleManager.INSTANCE.getStyle(
 										((OdaDataSetHandle)mapLayer.getHandle().getDataSet()).getExtensionID(),
 										queryText, session);
-							}finally{
-								session.close();
 							}
 						}
 						

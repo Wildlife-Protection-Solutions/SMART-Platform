@@ -29,12 +29,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.er.ILabelProvider.Key;
 import org.wcs.smart.qa.model.IQaDataProvider;
@@ -60,12 +60,11 @@ public class ErWaypointDataProvider extends IQaDataProvider {
 		return ID;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
 		List<WaypointLocationData> waypoints = new ArrayList<>();
 		
-		Query query = session.createQuery("FROM Waypoint WHERE conservationArea = :ca AND sourceId = :source AND dateTime between :start and :end"); //$NON-NLS-1$
+		Query<Waypoint> query = session.createQuery("FROM Waypoint WHERE conservationArea = :ca AND sourceId = :source AND dateTime between :start and :end", Waypoint.class); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		query.setParameter("source", SurveyWaypointSource.KEY); //$NON-NLS-1$
 		query.setParameter("start", startDate); //$NON-NLS-1$
@@ -80,9 +79,7 @@ public class ErWaypointDataProvider extends IQaDataProvider {
 
 	@Override
 	public String getFeatureId(Session session, Object obj, Locale l){
-		SurveyWaypoint pw = (SurveyWaypoint) session.createCriteria(SurveyWaypoint.class)
-				.add(Restrictions.eq("id.waypoint", ((WaypointLocationData)obj).getWaypoint())) //$NON-NLS-1$
-				.uniqueResult();
+		SurveyWaypoint pw = QueryFactory.buildQuery(session, SurveyWaypoint.class, "id.waypoint", ((WaypointLocationData)obj).getWaypoint()).uniqueResult(); //$NON-NLS-1$
 		if (pw == null){
 			return ILabelProvider.getLabel(Key.ErWaypointDataProvider_WpNotFound, l);
 		}

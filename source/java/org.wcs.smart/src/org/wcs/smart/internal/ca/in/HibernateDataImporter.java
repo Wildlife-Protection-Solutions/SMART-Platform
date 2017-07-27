@@ -36,8 +36,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataImportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
@@ -213,7 +213,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 		query.append("0"); //replace //$NON-NLS-1$
 		query.append(")");  //$NON-NLS-1$
 		
-		SQLQuery sqlQuery = session.createSQLQuery(query.toString());		
+		NativeQuery<?> sqlQuery = session.createNativeQuery(query.toString());		
 		sqlQuery.executeUpdate();
 	}
 	
@@ -244,8 +244,9 @@ public class HibernateDataImporter implements ICaDataImporter{
 		sql.append("AND h.schemaid = c.schemaid"); //$NON-NLS-1$
 		
 		HashMap<String, List<String>> results = new HashMap<String, List<String>>();
+		
 		@SuppressWarnings("unchecked")
-		List<Object[]> data = session.createSQLQuery(sql.toString()).list();
+		List<Object[]> data = session.createNativeQuery(sql.toString()).list();
 		for (Object[] d : data){
 			String source = (String) d[0];
 			String req = (String)d[1];

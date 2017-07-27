@@ -66,7 +66,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
@@ -306,8 +305,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	}
 
 	private void resetAgencyList() {
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			List<Agency> lst = HibernateManager.getAgencies(currentCa,s );
 			Collections.sort(lst, new Comparator<Agency>(){
 
@@ -326,8 +324,6 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				}
 			});
 			agencies = lst;
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -564,32 +560,30 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected boolean performSave(){
-		Session s = HibernateManager.openSession();
-		Transaction tx = s.beginTransaction();
-		try{
-			for (Iterator<Agency> iterator = toDelete.iterator(); iterator.hasNext();) {
-				Agency agt = (Agency) iterator.next();
-				if(agt.getUuid() != null){
-					s.delete(agt);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				for (Iterator<Agency> iterator = toDelete.iterator(); iterator.hasNext();) {
+					Agency agt = (Agency) iterator.next();
+					if(agt.getUuid() != null){
+						s.delete(agt);
+					}
+				}				
+				for(Iterator<?> iterator = agencies.iterator(); iterator.hasNext();){
+					Agency agt = (Agency) iterator.next();
+					s.saveOrUpdate(agt);
 				}
-			}				
-			for(Iterator<?> iterator = agencies.iterator(); iterator.hasNext();){
-				Agency agt = (Agency) iterator.next();
-				s.saveOrUpdate(agt);
-			}
 			
-			tx.commit();
-			toDelete.clear();
-			setChangesMade(false);
-			return true;
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_Save + ex.getLocalizedMessage(), ex);
-			tx.rollback();
-			s.close();			
-		}finally{
-			s.close();
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_Save + ex.getLocalizedMessage(), ex);
+				s.getTransaction().rollback();
+				return false;
+			}
 		}
-		return false;
+		toDelete.clear();
+		setChangesMade(false);
+		return true;
 	}
 	
 	/**
@@ -626,8 +620,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	}
  
 	private void deleteAgency() {
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			for (Iterator<?> iterator = ((IStructuredSelection)tblAgencies.getSelection()).iterator(); iterator.hasNext();) {
 				Agency type = (Agency) iterator.next();
 				
@@ -645,8 +638,6 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_DeleteAgency + type.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				}
 			}
-		}finally{
-			session.close();
 		}
 		tblAgencies.refresh();
 		setChangesMade(true);
@@ -680,10 +671,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			return;
 		}
 		Rank r =(Rank) ((IStructuredSelection)tblRank.getSelection()).getFirstElement();
-		
-		Session s = HibernateManager.openSession();
-		try{
-			
+		try(Session s = HibernateManager.openSession()){
 			if (current != null){
 				if (r.getUuid() != null){
 					if (DeleteManager.canDelete(r, s)){
@@ -698,11 +686,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_DeleteRank + r.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
-		}finally{
-			s.close();
 		}
-		
-		
 		tblRank.refresh();
 		setChangesMade(true);
 	}

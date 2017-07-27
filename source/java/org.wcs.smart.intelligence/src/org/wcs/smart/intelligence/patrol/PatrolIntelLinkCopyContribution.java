@@ -22,11 +22,10 @@
 
 package org.wcs.smart.intelligence.patrol;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.intelligence.model.PatrolIntelligence;
 import org.wcs.smart.patrol.IPatrolEditContribution;
 import org.wcs.smart.patrol.model.Patrol;
@@ -40,9 +39,7 @@ public class PatrolIntelLinkCopyContribution implements IPatrolEditContribution 
 
 	@Override
 	public void splitPatrol(Session s, Patrol originalPatrol, Patrol newPatrol) {
-		Criteria c = s.createCriteria(PatrolIntelligence.class).add(Restrictions.eq("id.patrol", originalPatrol)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		ArrayList<PatrolIntelligence> list = (ArrayList<PatrolIntelligence>)c.list();
+		List<PatrolIntelligence> list = QueryFactory.buildQuery(s, PatrolIntelligence.class, "id.patrol", originalPatrol).getResultList(); //$NON-NLS-1$
 		for(PatrolIntelligence pi : list){
 			PatrolIntelligence newPp = new PatrolIntelligence();
 			newPp.setPatrol(newPatrol);

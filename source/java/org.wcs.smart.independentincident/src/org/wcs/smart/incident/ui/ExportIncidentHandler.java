@@ -92,18 +92,18 @@ public class ExportIncidentHandler {
 						try {
 							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_IncidentProgress,new Object[]{ UuidUtils.uuidToString(puuid)}));
 							Waypoint wp = null;
-							Session s = HibernateManager.openSession();
-							s.beginTransaction();
-							
-							try {
-								wp = (Waypoint) s.load(Waypoint.class, puuid);
-								id = wp.getId();
-							} catch (Exception ex) {
-								IncidentPlugIn.displayLog(MessageFormat.format(Messages.ExportIncidentHandler_IncidentNotFound, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
-								continue;
-							} finally {
-								s.getTransaction().commit();
-								s.close();
+							try(Session s = HibernateManager.openSession()){
+								s.beginTransaction();
+								
+								try {
+									wp = (Waypoint) s.load(Waypoint.class, puuid);
+									id = wp.getId();
+								} catch (Exception ex) {
+									IncidentPlugIn.displayLog(MessageFormat.format(Messages.ExportIncidentHandler_IncidentNotFound, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
+									continue;
+								} finally {
+									s.getTransaction().commit();
+								}
 							}
 
 							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_ExportingIncidentProgress,new Object[]{ String.valueOf(id) }));

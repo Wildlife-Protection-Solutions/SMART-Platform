@@ -218,11 +218,9 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		}
 
 		boolean saved = false;
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			saved = PlanHibernateManager.savePlan(p,s);
-		}finally{
-			s.close();
 		}
 		
 		 // fire events

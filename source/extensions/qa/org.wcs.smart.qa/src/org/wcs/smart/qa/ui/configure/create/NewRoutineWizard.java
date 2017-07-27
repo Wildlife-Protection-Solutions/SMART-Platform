@@ -86,17 +86,16 @@ public class NewRoutineWizard extends Wizard implements IPageChangingListener{
 		
 		page2.updateRoutine(routine);
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			s.save(routine);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			QaPlugIn.displayLog(Messages.NewRoutineWizard_SaveError + ex.getMessage(), ex);
-			return false;
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				s.save(routine);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				QaPlugIn.displayLog(Messages.NewRoutineWizard_SaveError + ex.getMessage(), ex);
+				return false;
+			}
 		}
 		InternalExtensionManager.INSTANCE.clearAutoRoutines();
 		return true;

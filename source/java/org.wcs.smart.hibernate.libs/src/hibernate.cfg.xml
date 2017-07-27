@@ -8,7 +8,8 @@
 		<property name="connection.url">jdbc:derby:./data/database/smartdb;create=false</property>
 
 		<!--  (should not use built in connection pool; we use c3p0 here) -->
-		<!-- <property name="connection.pool_size">1</property> -->
+		<!--  <property name="connection.pool_size">5</property>-->
+		<property name="connection.release_mode">on_close</property> 
 		<property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
 		<property name="c3p0.min_size">1</property>
 		<property name="c3p0.max_size">5</property>

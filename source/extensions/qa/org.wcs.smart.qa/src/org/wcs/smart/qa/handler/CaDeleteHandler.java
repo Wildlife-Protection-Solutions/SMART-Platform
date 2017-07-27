@@ -22,7 +22,7 @@
 package org.wcs.smart.qa.handler;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
@@ -46,7 +46,7 @@ public class CaDeleteHandler implements ICaDeleteHandler{
 		//labels are dealt with by core Conservation Area delete engine 
 		monitor.subTask(Messages.CaDeleteHandler_TaskName);
 		
-		Query q = session.createQuery("DELETE from QaError where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("DELETE from QaError where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		

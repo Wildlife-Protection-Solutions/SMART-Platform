@@ -34,11 +34,11 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.JTS;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.qa.ILabelProvider;
 import org.wcs.smart.qa.ILabelProvider.Key;
@@ -152,11 +152,9 @@ public class LocationRoutineType implements IQaRoutineType {
 			String geom = new String(p.getByteValue());
 			return MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_WktParamDescription, l), geom);
 		}
-		return p.getStringValue();
-		
+		return p.getStringValue();	
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<QaError> validateData(ValidationTask task, Session session, IProgressMonitor monitor) throws Exception{
 		monitor.beginTask(task.getRoutine().getName(), 103);
@@ -180,10 +178,8 @@ public class LocationRoutineType implements IQaRoutineType {
 		}else if (p.getStringValue().startsWith(GeometryType.AREA.key)){
 			Area.AreaType type = Area.AreaType.valueOf(p.getStringValue().split(SEPERATOR_CHAR)[1]);
 			if (type == null) throw new Exception(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_NoGeomFound, task.getLocale()), routine.getName()));
-			List<Area> areas = session.createCriteria(Area.class)
-					.add(Restrictions.eq("conservationArea", task.getConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("type", type)) //$NON-NLS-1$
-					.list();
+			
+			List<Area> areas = HibernateManager.loadAreas(type, session);
 			List<Geometry> geoms = new ArrayList<>();
 			for (Area a : areas ){
 				geoms.add(a.getGeometry());

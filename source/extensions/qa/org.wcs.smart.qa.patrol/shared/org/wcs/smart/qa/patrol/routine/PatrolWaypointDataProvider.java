@@ -29,9 +29,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
@@ -60,16 +64,20 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 		return ID;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
 		List<WaypointLocationData> waypoints = new ArrayList<>();
 		
-		List<Waypoint> pws = session.createCriteria(Waypoint.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("sourceId", PatrolWaypointSource.PATROL_WP_SOURCE_ID)) //$NON-NLS-1$
-				.add(Restrictions.between("dateTime", startDate, endDate)) //$NON-NLS-1$
-				.list();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Waypoint> c = cb.createQuery(Waypoint.class);
+		Root<Waypoint> from = c.from(Waypoint.class);
+		c.where(cb.and(
+				cb.equal(from.get("conservationArea"), ca), //$NON-NLS-1$
+				cb.equal(from.get("sourceId"), PatrolWaypointSource.PATROL_WP_SOURCE_ID), //$NON-NLS-1$
+				cb.between(from.get("dateTime"), cb.literal(startDate), cb.literal(endDate)) //$NON-NLS-1$
+				));
+		List<Waypoint> pws = session.createQuery(c).getResultList();
+		
 		for (Waypoint wp : pws){
 			waypoints.add(new WaypointLocationData(wp));
 		}
@@ -79,9 +87,8 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 
 	@Override
 	public String getFeatureId(Session session, Object obj, Locale l){
-		PatrolWaypoint pw = (PatrolWaypoint) session.createCriteria(PatrolWaypoint.class)
-				.add(Restrictions.eq("id.waypoint", ((WaypointLocationData)obj).getWaypoint())) //$NON-NLS-1$
-				.uniqueResult();
+		PatrolWaypoint pw = QueryFactory.buildQuery(session, PatrolWaypoint.class, "id.waypoint", ((WaypointLocationData)obj).getWaypoint()).uniqueResult(); //$NON-NLS-1$
+		
 		if (pw == null){
 			return ILabelProvider.getLabel(Key.PatrolWaypointDataProvider_WpNotFound, l);
 		}

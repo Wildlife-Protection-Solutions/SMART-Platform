@@ -45,7 +45,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -208,30 +208,30 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 				params.put(SmartReportParameters.PARAM_START_DATE_KEY,
 						new java.sql.Date(-2208998272375l)); // JAN 01 1900
 
-				Session session = HibernateManager.openSession();
-				try {
-					session.beginTransaction();
-
-					String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
-					Query q = session.createQuery(hql);
-					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-					List<?> data = q.list();
-					Date startdate = null;
-					if (data != null && data.size() >= 1 && data.get(0) != null) {
-						startdate = (java.sql.Timestamp) data.get(0);
-						params.put(SmartReportParameters.PARAM_START_DATE_KEY,
-								new java.sql.Date(startdate.getTime()));
+				try(Session session = HibernateManager.openSession()){
+					try {
+						session.beginTransaction();
+	
+						String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
+						Query<?> q = session.createQuery(hql);
+						q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+						List<?> data = q.list();
+						Date startdate = null;
+						if (data != null && data.size() >= 1 && data.get(0) != null) {
+							startdate = (java.sql.Timestamp) data.get(0);
+							params.put(SmartReportParameters.PARAM_START_DATE_KEY,
+									new java.sql.Date(startdate.getTime()));
+						}
+	
+					} catch (Exception ex) {
+						ReportPlugIn
+								.log(Messages.SmartDateParameterComponent_EarliestDateError,
+										ex);
+					} finally {
+						if (session.getTransaction().isActive()) {
+							session.getTransaction().commit();
+						}
 					}
-
-				} catch (Exception ex) {
-					ReportPlugIn
-							.log(Messages.SmartDateParameterComponent_EarliestDateError,
-									ex);
-				} finally {
-					if (session.getTransaction().isActive()) {
-						session.getTransaction().commit();
-					}
-					session.close();
 				}
 				// today + one day
 				// add one day just to make sure we get everything

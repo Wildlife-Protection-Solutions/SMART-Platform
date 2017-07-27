@@ -47,11 +47,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Dialog for selecting the target {@link Survey} when importing mission from CyberTracker.
@@ -209,13 +209,9 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 	}
 
     private List<Survey> loadSurveys() {
-    	Session s = HibernateManager.openSession();
-    	try {
-			@SuppressWarnings("unchecked")
-			List<Survey> surveys = s.createCriteria(Survey.class)
-					.add(Restrictions.eq("surveyDesign", surveyDesign)) //$NON-NLS-1$
-					.list();
-
+    	
+    	try(Session s = HibernateManager.openSession()) {
+			List<Survey> surveys = QueryFactory.buildQuery(s, Survey.class, "surveyDesign", surveyDesign).getResultList(); //$NON-NLS-1$
 			Collections.sort(surveys, new Comparator<Survey>() {
 				@Override
 				public int compare(Survey s1, Survey s2) {
@@ -224,8 +220,6 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 			});
 
 			return surveys;
-    	} finally {
-    		s.close();
     	}
     }
 	

@@ -89,8 +89,8 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 	}
 
 	private void initData() {
-		Session session = HibernateManager.openSession();
-		try{
+		
+		try(Session session = HibernateManager.openSession()){
 			ConservationArea ca = SmartDB.getCurrentConservationArea();
 			options = PatrolHibernateManager.getScreenOptions(ca, session);
 			//creating missing options
@@ -116,8 +116,6 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 					return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
 				}
 			});
-		}finally{
-			session.close();
 		}
 	}
 

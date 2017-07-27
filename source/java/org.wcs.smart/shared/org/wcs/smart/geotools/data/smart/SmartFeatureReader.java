@@ -25,12 +25,15 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.Area;
@@ -100,10 +103,17 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 				createTransaction = true;
 			}
 			
-			itemCursor = session.createCriteria(Area.class)
-					.add(Restrictions.eq("conservationArea.uuid", ca)) //$NON-NLS-1$
-					.add(Restrictions.eq("type", atype)).setReadOnly(true) //$NON-NLS-1$
-					.setCacheable(false).scroll(ScrollMode.FORWARD_ONLY); 
+			CriteriaQuery<Area> c = session.getCriteriaBuilder().createQuery(Area.class);
+			Root<Area> root = c.from(Area.class);
+			c.where(session.getCriteriaBuilder().and(
+					session.getCriteriaBuilder().equal(root.get("conservationArea").get("uuid"), ca), //$NON-NLS-1$ //$NON-NLS-2$
+					session.getCriteriaBuilder().equal(root.get("type"), atype) //$NON-NLS-1$
+					));
+			
+			Query<Area> query = session.createQuery(c);
+			query.setCacheable(false);
+			query.setReadOnly(true);
+			itemCursor = query.scroll(ScrollMode.FORWARD_ONLY); 
 			
 		}
 		return itemCursor.next();

@@ -161,19 +161,18 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		ModuleHandle initialModel = editor.getModel();
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			if (editor.getModel() instanceof ReportDesignHandle){
-				ReportManager.updateReportQueries(s, (ReportDesignHandle)editor.getModel(), getEditorInputLocal().getReport());
+		try(Session s = HibernateManager.openSession()){
+			try{
+				s.beginTransaction();
+				if (editor.getModel() instanceof ReportDesignHandle){
+					ReportManager.updateReportQueries(s, (ReportDesignHandle)editor.getModel(), getEditorInputLocal().getReport());
+				}
+				editor.doSaveParent(monitor);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_Error_SavingReport + ex.getLocalizedMessage(), ex);
 			}
-			editor.doSaveParent(monitor);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_Error_SavingReport + ex.getLocalizedMessage(), ex);
-		}finally{
-			s.close();
 		}
 		try {
 			//on the xml page saving changes the model so we need to reconfigure
@@ -238,22 +237,20 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 						copy.setOwner(SmartDB.getCurrentEmployee());
 					}
 					
-					Session s = HibernateManager.openSession();
-					try {
+					try(Session s = HibernateManager.openSession()) {
 						s.beginTransaction();
-						copy.setId(ReportManager.generateReportId(SmartDB.getCurrentConservationArea(), s));
-						copy.setFilename(ReportManager.generateFilename(copy));
-						s.save(copy);
+						try{
+							copy.setId(ReportManager.generateReportId(SmartDB.getCurrentConservationArea(), s));
 						
-						ReportManager.updateReportQueries(s, (ReportDesignHandle)editor.getModel(), copy);
-						s.getTransaction().commit();
-					} catch (Exception ex) {
-						s.getTransaction().rollback();
-						ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_SaveAsError + ex.getLocalizedMessage(), ex);
-						return;
-					} finally {
-						if (s != null) {
-							s.close();
+							copy.setFilename(ReportManager.generateFilename(copy));
+							s.save(copy);
+							
+							ReportManager.updateReportQueries(s, (ReportDesignHandle)editor.getModel(), copy);
+							s.getTransaction().commit();
+						} catch (Exception ex) {
+							s.getTransaction().rollback();
+							ReportPlugIn.displayLog(Messages.RCPMultiPageReportEditor_SaveAsError + ex.getLocalizedMessage(), ex);
+							return;
 						}
 					}
 

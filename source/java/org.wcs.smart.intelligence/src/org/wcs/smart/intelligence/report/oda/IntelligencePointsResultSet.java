@@ -33,8 +33,8 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.criterion.Restrictions;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -77,9 +77,9 @@ public class IntelligencePointsResultSet implements IResultSet {
 		
 		for (int i = 0; i < uuids.length; i ++){
 			try{
-				Intelligence p = (Intelligence)connection.getSession().createCriteria(Intelligence.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(uuids[i]))).list().get(0); //$NON-NLS-1$
+				Intelligence p = QueryFactory.buildQuery(connection.getSession(), Intelligence.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"uuid", UuidUtils.stringToUuid(uuids[i])}).uniqueResult(); //$NON-NLS-1$
 				if (p != null) {
 					points.addAll(p.getPoints());
 					m_maxRows += p.getPoints().size();

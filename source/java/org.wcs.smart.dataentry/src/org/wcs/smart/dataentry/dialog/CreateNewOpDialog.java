@@ -191,13 +191,11 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 
 	private List<ConfigurableModel> getCmList() {
 		List<ConfigurableModel> modelList = new ArrayList<ConfigurableModel>();
-		Session s = HibernateManager.openSession();
-		try {
+		
+		try(Session s = HibernateManager.openSession()) {
 			modelList = DataentryHibernateManager.getConfigurableModels(s);
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
-		}finally{
-			s.close();
 		}
 		return modelList;
 	}
@@ -218,14 +216,11 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						ConfigurableModel m = (ConfigurableModel) s.get(ConfigurableModel.class, cmTemplate.getUuid());
 						ConfigurableModelCloneResult cloneResult = ConfigurableModelFactory.createConfigurableModelClone(m, name, monitor);
 						initModel = cloneResult.getModelClone();
 						original2CloneItemMap = cloneResult.getOriginal2CloneItemMap();
-					}finally{
-						s.close();
 					}
 					
 				}
@@ -240,13 +235,9 @@ public class CreateNewOpDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						initModel = ConfigurableModelFactory.createModelFromDataModel(name, s, monitor);
-					}finally{
-						s.close();
-					}
-					
+					}					
 				}
 			});
 			return initModel;

@@ -21,12 +21,11 @@
  */
 package org.wcs.smart.qa.er.hibernate;
 
-import org.hibernate.cfg.Configuration;
+import org.hibernate.boot.Metadata;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.integrator.spi.Integrator;
-import org.hibernate.metamodel.source.MetadataImplementor;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 
 /**
@@ -38,7 +37,7 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 public class ErQaIntegrator implements Integrator {
 
 	@Override
-	public void integrate(Configuration configuration,
+	public void integrate(Metadata metadata,
 			SessionFactoryImplementor sessionFactory,
 			SessionFactoryServiceRegistry serviceRegistry) {
 
@@ -46,16 +45,9 @@ public class ErQaIntegrator implements Integrator {
 		 eventListenerRegistry.appendListeners( EventType.POST_COMMIT_INSERT, new NewErObjectEventListener() );
 	}
 
-	@Override
-	public void integrate(MetadataImplementor metadata,
-			SessionFactoryImplementor sessionFactory,
-			SessionFactoryServiceRegistry serviceRegistry) {
-		//do nothing; this is for hibernate 5.0
-	}
 
 	@Override
 	public void disintegrate(SessionFactoryImplementor sessionFactory,
 			SessionFactoryServiceRegistry serviceRegistry) {
 	}
-
 }

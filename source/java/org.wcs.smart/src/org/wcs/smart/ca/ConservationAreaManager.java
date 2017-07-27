@@ -90,19 +90,27 @@ public class ConservationAreaManager {
 	public void deleteConservationArea(ConservationArea ca, IProgressMonitor monitor, boolean restart) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaManager_Progress_DeleteCa, 3); 
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			ca = (ConservationArea)session.get(ConservationArea.class, ca.getUuid());
-			final File fileStore = new File(ca.getFileDataStoreLocation());
-			
-			runDeleteHandlers(ca, session, progress.split(1));
-			
-			progress.subTask(Messages.ConservationAreaManager_Progress_DeleteCa);
-			session.delete(ca);
-			session.getTransaction().commit();
+		
+		
+		try(Session session = HibernateManager.openSession()){
+			File fStore = null;
+			session.beginTransaction();
+			try {
+				ca = (ConservationArea)session.get(ConservationArea.class, ca.getUuid());
+				fStore = new File(ca.getFileDataStoreLocation());
+				
+				runDeleteHandlers(ca, session, progress.split(1));
+				
+				progress.subTask(Messages.ConservationAreaManager_Progress_DeleteCa);
+				session.delete(ca);
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				throw ex;
+			}
 			progress.worked(1);
-			
+				
+			final File fileStore = fStore;
 			if (fileStore.exists()){
 				progress.subTask(Messages.ConservationAreaManager_Progress_RemoveFileStore);
 				try{
@@ -117,11 +125,7 @@ public class ConservationAreaManager {
 			}
 			progress.worked(1);
 			progress.subTask(Messages.ConservationAreaManager_Progress_Restarting);
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			throw ex;
-		}finally{
-			session.close();
+			
 		}
 		if (restart){
 			//logout

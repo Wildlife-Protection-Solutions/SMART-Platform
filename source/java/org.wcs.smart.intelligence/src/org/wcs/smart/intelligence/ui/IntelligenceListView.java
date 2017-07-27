@@ -63,7 +63,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.menus.IMenuService;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
@@ -282,15 +282,15 @@ public class IntelligenceListView implements IIntelligenceFilteringView {
 		}
 		
 		private List<?> loadIntelligences() {
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try {
-				Query query = IntelligenceListView.this.getFilter().buildQuery(session);
-				List<?> list = query.list();
-				return list;
-			} finally {
-				session.getTransaction().rollback();
-				session.close();
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try {
+					Query<?> query = IntelligenceListView.this.getFilter().buildQuery(session);
+					List<?> list = query.list();
+					return list;
+				} finally {
+					session.getTransaction().rollback();
+				}
 			}
 		}
    	

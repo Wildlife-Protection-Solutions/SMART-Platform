@@ -100,23 +100,23 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 		protected IStatus run(IProgressMonitor monitor) {
 			
 			final ArrayList<ListItem> items = new ArrayList<ListItem>();
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				MissionAttribute attribute = (MissionAttribute) s.load(MissionAttribute.class, ma.getUuid());
-				for (MissionAttributeListItem i : attribute.getAttributeList()){
-					items.add(new ListItem(i.getUuid(), i.getName(), i.getKeyId()));
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					MissionAttribute attribute = (MissionAttribute) s.load(MissionAttribute.class, ma.getUuid());
+					for (MissionAttributeListItem i : attribute.getAttributeList()){
+						items.add(new ListItem(i.getUuid(), i.getName(), i.getKeyId()));
+					}
+					//add the any item
+					items.add(0, BasicDropItemFactory.ANY_OPTION);				
+					if (currentSelection != null && !items.contains(currentSelection)){
+						//item is not longer active; but still in query
+						items.add(currentSelection);
+					}
+	
+				}finally{
+					s.getTransaction().rollback();
 				}
-				//add the any item
-				items.add(0, BasicDropItemFactory.ANY_OPTION);				
-				if (currentSelection != null && !items.contains(currentSelection)){
-					//item is not longer active; but still in query
-					items.add(currentSelection);
-				}
-
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
 			}
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override

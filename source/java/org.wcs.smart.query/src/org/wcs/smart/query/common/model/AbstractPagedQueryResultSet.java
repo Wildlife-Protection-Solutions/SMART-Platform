@@ -53,15 +53,12 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 	public List<IResultItem> getData(final int offset, final int pageSize) {
 		List<IResultItem> result = null;
 		
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			try(ResultSet rs = getResultSet(session)){
 				result = getResults(session, rs, offset, pageSize);
 			}
 		}catch (SQLException ex){
 			QueryPlugIn.displayLog(Messages.AbstractPagedQueryResultSet_ErrorLoadingQueryResults, ex);
-		}finally{
-			session.close();
 		}
 		return result;
 	}

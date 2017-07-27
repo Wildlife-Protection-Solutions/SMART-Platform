@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -72,57 +70,57 @@ public class CmSmartToXmlConverter {
 	public static org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel convert(ConfigurableModel cm, IProgressMonitor monitor) {
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = new org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel();
 
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid(), session);
-			if (monitor.isCanceled()) return null;
-			
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessLanguages);
-			HashMap<String, Language> llookup = processLanguages(cm, xml);
-			setNames(xml.getName(), cm.getNames(), llookup);
-			if (cm.getDisplayMode() != null) {
-				xml.setDisplayMode(cm.getDisplayMode().name());
-			}
-			xml.setInstantGps(cm.isInstantGps());
-			xml.setPhotoFirst(cm.isPhotoFirst());
-			monitor.worked(1);
-			if (monitor.isCanceled()) return null;
-			
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
-			processCmNodes(cm, xml, llookup, session, monitor);
-			monitor.worked(1);
-			if (monitor.isCanceled()) return null;
-			
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
-			processDefaultListItems(cm, xml, llookup, monitor);
-			monitor.worked(1);
-			if (monitor.isCanceled()) return null;
-
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessTreeNodes);
-			processDefaultTreeNodes(cm, xml, llookup, monitor);
-			monitor.worked(1);
-			if (monitor.isCanceled()) return null;
-
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessAttributeSettings);
-			processCmDmAttributeSettings(cm, xml, llookup, monitor);
-			monitor.worked(1);
-			if (monitor.isCanceled()) return null;
-			
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessExtraData);
-			for (IXmlCmExtraDataContribution dc : XmlCmExtraDataContributionFactory.getContributions()) {
-				List<CmExtraDataType> extraData = dc.exportData(cm, session);
-				if (extraData != null) {
-					xml.getExtraData().addAll(extraData);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid(), session);
+				if (monitor.isCanceled()) return null;
+				
+				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessLanguages);
+				HashMap<String, Language> llookup = processLanguages(cm, xml);
+				setNames(xml.getName(), cm.getNames(), llookup);
+				if (cm.getDisplayMode() != null) {
+					xml.setDisplayMode(cm.getDisplayMode().name());
 				}
+				xml.setInstantGps(cm.isInstantGps());
+				xml.setPhotoFirst(cm.isPhotoFirst());
+				monitor.worked(1);
+				if (monitor.isCanceled()) return null;
+				
+				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
+				processCmNodes(cm, xml, llookup, session, monitor);
+				monitor.worked(1);
+				if (monitor.isCanceled()) return null;
+				
+				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
+				processDefaultListItems(cm, xml, llookup, monitor);
+				monitor.worked(1);
+				if (monitor.isCanceled()) return null;
+	
+				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessTreeNodes);
+				processDefaultTreeNodes(cm, xml, llookup, monitor);
+				monitor.worked(1);
+				if (monitor.isCanceled()) return null;
+	
+				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessAttributeSettings);
+				processCmDmAttributeSettings(cm, xml, llookup, monitor);
+				monitor.worked(1);
+				if (monitor.isCanceled()) return null;
+				
+				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessExtraData);
+				for (IXmlCmExtraDataContribution dc : XmlCmExtraDataContributionFactory.getContributions()) {
+					List<CmExtraDataType> extraData = dc.exportData(cm, session);
+					if (extraData != null) {
+						xml.getExtraData().addAll(extraData);
+					}
+				}
+				monitor.worked(1);
+				if (monitor.isCanceled()) return null;
+			}finally {
+				session.getTransaction().rollback();
 			}
-			monitor.worked(1);
-			if (monitor.isCanceled()) return null;
-			
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
 		}
+		
 		return xml;
 	}
 
@@ -244,8 +242,7 @@ public class CmSmartToXmlConverter {
 						switch (ca.getAttribute().getType()) {
 						case LIST:
 						{
-							Criteria query = session.createCriteria(AttributeListItem.class).add(Restrictions.eq("uuid", option.getUuidValue())); //$NON-NLS-1$
-							AttributeListItem item = (AttributeListItem) query.uniqueResult();
+							AttributeListItem item = session.get(AttributeListItem.class, option.getUuidValue());
 							if (item != null) {
 								aot.setKeyRef(item.getKeyId());
 								aot.setHkeyRef(null); //not relevant for list items attributes
@@ -254,8 +251,7 @@ public class CmSmartToXmlConverter {
 						}
 						case TREE:
 						{
-							Criteria query = session.createCriteria(AttributeTreeNode.class).add(Restrictions.eq("uuid", option.getUuidValue())); //$NON-NLS-1$
-							AttributeTreeNode item = (AttributeTreeNode) query.uniqueResult();
+							AttributeTreeNode item = session.get(AttributeTreeNode.class, option.getUuidValue());
 							if (item != null) {
 								aot.setKeyRef(item.getKeyId());
 								aot.setHkeyRef(item.getHkey());

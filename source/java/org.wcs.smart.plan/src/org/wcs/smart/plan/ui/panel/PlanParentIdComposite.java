@@ -157,18 +157,18 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 				return false;
 			}
 			Plan parent = null;
-			Session session = HibernateManager.openSession();
-			try{
-				session.beginTransaction();
-				parent = (Plan) session.load(Plan.class, tmp.getUuid());
-				if (parent == null){
-					MessageDialog.openInformation(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_PlanNotFound_Message);
-					return false;
+			try(Session session = HibernateManager.openSession()){
+				try{
+					session.beginTransaction();
+					parent = (Plan) session.load(Plan.class, tmp.getUuid());
+					if (parent == null){
+						MessageDialog.openInformation(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_PlanNotFound_Message);
+						return false;
+					}
+					parent.getName(); //to actually load data
+				}finally{
+					session.getTransaction().rollback();
 				}
-				parent.getName(); //to actually load data
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
 			}
 			updatePlan(plan, parent);
 		}else{
@@ -216,20 +216,18 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 					return;
 				}
 				//ensure the new parent is not a child of the current plan
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					s.update(currentPlan);
-					//new parent cannot be a child of the current plan
-					if (findPlan(currentPlan.getChildren(), in.getUuid())){
-						setErrorMessage(Messages.PlanParentIdComposite_ChildParentError);
-						return;
-					}
-				}finally{
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
 					try{
+						s.update(currentPlan);
+						//new parent cannot be a child of the current plan
+						if (findPlan(currentPlan.getChildren(), in.getUuid())){
+							setErrorMessage(Messages.PlanParentIdComposite_ChildParentError);
+							return;
+						}
+					}finally{
 						s.getTransaction().rollback();
-					}catch (Exception ex){}
-					s.close();
+					}
 				}
 			}
 		}

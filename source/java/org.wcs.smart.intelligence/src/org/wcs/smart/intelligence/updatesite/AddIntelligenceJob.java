@@ -70,25 +70,24 @@ public class AddIntelligenceJob extends Job {
 				
 		
 		//required if run during restore to ensure Display.syncexec calls don't block
-		Session session = HibernateManager.openSession();
-		try{
-			session.beginTransaction();		
-			installPlugin(session);
-			session.getTransaction().commit();
-		}catch(Exception ex){
-			if (session.getTransaction().isActive()) session.getTransaction().rollback();
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					MessageDialog.openError(Display.getDefault().getActiveShell(),
-							Messages.AddIntelligenceJob_Title,
-							Messages.AddIntelligenceJob_Error);
-				}
-				
-			});
-			return new Status(Status.ERROR,IntelligencePlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
-		}finally{
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			try{
+				session.beginTransaction();		
+				installPlugin(session);
+				session.getTransaction().commit();
+			}catch(Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openError(Display.getDefault().getActiveShell(),
+								Messages.AddIntelligenceJob_Title,
+								Messages.AddIntelligenceJob_Error);
+					}
+					
+				});
+				return new Status(Status.ERROR,IntelligencePlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
+			}
 		}
 		monitor.done();
 		return Status.OK_STATUS;

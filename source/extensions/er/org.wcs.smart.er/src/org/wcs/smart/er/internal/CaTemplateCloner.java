@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -38,6 +37,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Clone sampling unit attributes, mission attributes, and 
@@ -75,13 +75,9 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 	/*
 	 * Clone mission attributes
 	 */
-	@SuppressWarnings("unchecked")
 	private void cloneMissionAttributes(ConservationAreaClonerEngine engine){
-		List<MissionAttribute> attributes = engine.getSession()
-				.createCriteria(MissionAttribute.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-				.list();
-			
+		List<MissionAttribute> attributes = QueryFactory.buildQuery(engine.getSession(), MissionAttribute.class, "conservationArea", engine.getTemplateCa()).getResultList(); //$NON-NLS-1$
+				
 		for (MissionAttribute attribute : attributes) {
 			MissionAttribute clone = new MissionAttribute();
 			clone.setConservationArea(engine.getNewCa());
@@ -108,13 +104,9 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 	/*
 	 * Clone sampling unit attributes
 	 */
-	@SuppressWarnings("unchecked")
 	private void cloneSamplingUnitAttributes(ConservationAreaClonerEngine engine){
-		List<SamplingUnitAttribute> attributes = engine.getSession()
-				.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-				.list();
-			
+		List<SamplingUnitAttribute> attributes = QueryFactory.buildQuery(engine.getSession(), SamplingUnitAttribute.class, "conservationArea", engine.getTemplateCa()).getResultList(); //$NON-NLS-1$
+		
 		for (SamplingUnitAttribute attribute : attributes) {
 			SamplingUnitAttribute clone = new SamplingUnitAttribute();
 			clone.setConservationArea(engine.getNewCa());
@@ -140,13 +132,9 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 	/*
 	 * Clone survey designs
 	 */
-	@SuppressWarnings("unchecked")
 	private void cloneDesigns(ConservationAreaClonerEngine engine){
-		List<SurveyDesign> designs = engine.getSession()
-				.createCriteria(SurveyDesign.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-				.list();
-			
+		List<SurveyDesign> designs = QueryFactory.buildQuery(engine.getSession(), SurveyDesign.class, "conservationArea", engine.getTemplateCa()).getResultList(); //$NON-NLS-1$
+
 		for (SurveyDesign design : designs) {
 			SurveyDesign clone = new SurveyDesign();
 			clone.setConservationArea(engine.getNewCa());

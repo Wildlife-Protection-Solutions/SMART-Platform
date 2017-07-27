@@ -60,11 +60,9 @@ public class OpenIncidentAction implements IQaAction {
 		QaError item = items.get(0);
 		if (item.getDataProviderId().equals(IncidentDataProvider.ID)){
 			Waypoint pw = null;
-			Session s = HibernateManager.openSession();
-			try{
+			
+			try(Session s = HibernateManager.openSession()){
 				pw = (Waypoint) s.get(Waypoint.class, item.getSourceId());
-			}finally{
-				s.close();
 			}
 			if (pw == null){
 				//not found

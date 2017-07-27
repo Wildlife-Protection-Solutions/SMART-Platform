@@ -616,34 +616,34 @@ public class PatrolSummaryEditor extends EditorPart {
 	 */
 	protected void updateTimeWithWpData() {
 		List<PatrolLegDay> updatedLegDays = new ArrayList<>();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			Patrol patrol = editor.getPatrol();
-			session.update(patrol);
-			for (PatrolLeg leg : patrol.getLegs()) {
-				for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-					List<PatrolWaypoint> wps = pld.getWaypoints();
-					if (wps.isEmpty()) continue;
-					List<Date> dates = wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList());
-					Date minDate = Collections.min(dates);
-					Date mmaxDate = Collections.max(dates);
-					pld.setStartTime(new Time(minDate.getTime()));
-					pld.setEndTime(new Time(mmaxDate.getTime()));
-					session.saveOrUpdate(pld);
-					updatedLegDays.add(pld);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				Patrol patrol = editor.getPatrol();
+				session.update(patrol);
+				for (PatrolLeg leg : patrol.getLegs()) {
+					for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+						List<PatrolWaypoint> wps = pld.getWaypoints();
+						if (wps.isEmpty()) continue;
+						List<Date> dates = wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList());
+						Date minDate = Collections.min(dates);
+						Date mmaxDate = Collections.max(dates);
+						pld.setStartTime(new Time(minDate.getTime()));
+						pld.setEndTime(new Time(mmaxDate.getTime()));
+						session.saveOrUpdate(pld);
+						updatedLegDays.add(pld);
+					}
 				}
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				if (session.getTransaction().isActive()){
+					session.getTransaction().rollback();
+				}
+				SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
+				return;
 			}
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
-			SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
-			return;
-		} finally {
-			session.close();
 		}
+		
 		//fire events
 		for (PatrolLegDay pld : updatedLegDays) {
 			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, pld);
@@ -654,82 +654,82 @@ public class PatrolSummaryEditor extends EditorPart {
 	 * Updates the widgets with the value from the patrol.
 	 */
 	private void initValues(){
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			Patrol patrol = editor.getPatrol();
-			session.update(patrol);
-			frmPatrolSummary.setText(editor.getPatrol().getId());
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				Patrol patrol = editor.getPatrol();
+				session.update(patrol);
+				frmPatrolSummary.setText(editor.getPatrol().getId());
+				
+				txtPatrolId.setText(patrol.getId(), false, false);
+				txtPatrolType.setText(patrol.getPatrolType().getGuiName(Locale.getDefault()), false, false);
+				if (patrol.getStation() == null) {
+					txtStation.setText(Messages.PatrolSummaryEditor_NoStationLabel);
+				} else {
+					txtStation.setText(patrol.getStation().getName());
+				}
 			
-			txtPatrolId.setText(patrol.getId(), false, false);
-			txtPatrolType.setText(patrol.getPatrolType().getGuiName(Locale.getDefault()), false, false);
-			if (patrol.getStation() == null) {
-				txtStation.setText(Messages.PatrolSummaryEditor_NoStationLabel);
-			} else {
-				txtStation.setText(patrol.getStation().getName());
-			}
-		
-			if (patrol.getComment() != null){
-				txtComment.setText(patrol.getComment());
-			}else{
-				txtComment.setText(""); //$NON-NLS-1$
-			}
-			btnArmed.setSelection(patrol.isArmed());
-
-			if (patrol.getTeam() != null) {
-				txtTeam.setText(patrol.getTeam().getName());
-			} else {
-				txtTeam.setText(Messages.PatrolSummaryEditor_NoTeamLabel);
-			}
-
-			if (patrol.getObjective() != null) {
-				txtObjective.setText(patrol.getObjective());
-			} else {
-				txtObjective.setText(""); //$NON-NLS-1$
-			}
-
-			Set<Employee> allEmployee = new HashSet<Employee>();
-			Set<Employee> leaders = new HashSet<Employee>();
-			Set<Employee> pilots = new HashSet<Employee>();
-			for (int i = 0; i < patrol.getLegs().size(); i++) {
-				session.update(patrol.getLegs().get(i));
-				List<PatrolLegMember> members = patrol.getLegs().get(i)
-						.getMembers();
-				for (PatrolLegMember mem : members) {
-					allEmployee.add(mem.getMember());
-					if (mem.getIsLeader()) {
-						leaders.add(mem.getMember());
-					}
-					if (mem.getIsPilot()) {
-						pilots.add(mem.getMember());
+				if (patrol.getComment() != null){
+					txtComment.setText(patrol.getComment());
+				}else{
+					txtComment.setText(""); //$NON-NLS-1$
+				}
+				btnArmed.setSelection(patrol.isArmed());
+	
+				if (patrol.getTeam() != null) {
+					txtTeam.setText(patrol.getTeam().getName());
+				} else {
+					txtTeam.setText(Messages.PatrolSummaryEditor_NoTeamLabel);
+				}
+	
+				if (patrol.getObjective() != null) {
+					txtObjective.setText(patrol.getObjective());
+				} else {
+					txtObjective.setText(""); //$NON-NLS-1$
+				}
+	
+				Set<Employee> allEmployee = new HashSet<Employee>();
+				Set<Employee> leaders = new HashSet<Employee>();
+				Set<Employee> pilots = new HashSet<Employee>();
+				for (int i = 0; i < patrol.getLegs().size(); i++) {
+					session.update(patrol.getLegs().get(i));
+					List<PatrolLegMember> members = patrol.getLegs().get(i)
+							.getMembers();
+					for (PatrolLegMember mem : members) {
+						allEmployee.add(mem.getMember());
+						if (mem.getIsLeader()) {
+							leaders.add(mem.getMember());
+						}
+						if (mem.getIsPilot()) {
+							pilots.add(mem.getMember());
+						}
 					}
 				}
+				
+				
+				((EmployeeLabelProvider) employeeList.getLabelProvider())
+						.setLeaders(leaders);
+				((EmployeeLabelProvider) employeeList.getLabelProvider())
+						.setPilots(pilots);
+				
+				Employee[] employeeArray = allEmployee.toArray(new Employee[allEmployee.size()]);
+				Arrays.sort(employeeArray, new Comparator<Employee>(){
+					@Override
+					public int compare(Employee o1, Employee o2) {
+						return Collator.getInstance().compare(
+								org.wcs.smart.ui.SmartLabelProvider.getFullLabel(o1), 
+								org.wcs.smart.ui.SmartLabelProvider.getFullLabel(o2));
+					}});
+				employeeList.setInput(employeeArray);
+	
+				updateDateTable();
+				if (!isMulti){
+					txtTransport.setText(patrol.getFirstLeg().getType().getName());
+					txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
+				}
+			}finally{
+				session.getTransaction().rollback();
 			}
-			
-			
-			((EmployeeLabelProvider) employeeList.getLabelProvider())
-					.setLeaders(leaders);
-			((EmployeeLabelProvider) employeeList.getLabelProvider())
-					.setPilots(pilots);
-			
-			Employee[] employeeArray = allEmployee.toArray(new Employee[allEmployee.size()]);
-			Arrays.sort(employeeArray, new Comparator<Employee>(){
-				@Override
-				public int compare(Employee o1, Employee o2) {
-					return Collator.getInstance().compare(
-							org.wcs.smart.ui.SmartLabelProvider.getFullLabel(o1), 
-							org.wcs.smart.ui.SmartLabelProvider.getFullLabel(o2));
-				}});
-			employeeList.setInput(employeeArray);
-
-			updateDateTable();
-			if (!isMulti){
-				txtTransport.setText(patrol.getFirstLeg().getType().getName());
-				txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
-			}
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
 		}
 	}
 	

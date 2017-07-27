@@ -131,6 +131,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 					
 					progress.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					updateResultCount(session, result);
+					
+					progress.subTask(Messages.DerbyObservationEngine_LoadingResultTask);
 				}catch( OperationCanceledException ex) {
 					return ;
 				}catch (Exception ex){
@@ -148,7 +150,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 	
 	public void updateResultCount(Session s, DerbyPagedWaypointResult results){
 		//setting result size
-		Integer count = (Integer) s.createSQLQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
+		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
 		results.setItemCount(count);
 		
 	}

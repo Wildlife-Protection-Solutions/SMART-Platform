@@ -29,7 +29,7 @@ import java.util.UUID;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.BinaryType;
 import org.hibernate.usertype.UserType;
 import org.wcs.smart.util.UuidUtils;
@@ -55,9 +55,8 @@ public class LabelUserType implements UserType {
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names,
-			SessionImplementor implementor, Object object) throws HibernateException,
-			SQLException {
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor implementor, Object object)
+			throws HibernateException, SQLException {
 		assert names.length == 1;
 		Object value = rs.getObject(names[0]);
 		UUID uuid = null;
@@ -72,9 +71,8 @@ public class LabelUserType implements UserType {
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement arg0, Object arg1, int arg2,
-			SessionImplementor arg3) throws HibernateException, SQLException {
-		// does nothing
+	public void nullSafeSet(PreparedStatement arg0, Object arg1, int arg2, SharedSessionContractImplementor arg3)
+			throws HibernateException, SQLException {
 	}
 	
 	public Object deepCopy(Object value) throws HibernateException {
@@ -108,6 +106,8 @@ public class LabelUserType implements UserType {
 			throws HibernateException {
 		return cached;
 	}
+
+
 
 
 }

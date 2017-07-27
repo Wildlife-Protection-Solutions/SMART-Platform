@@ -245,34 +245,35 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 			final List<SurveyListTreeNode> ins = new ArrayList<SurveyListTreeNode>();
 			final List<SurveyDesignEditorInput> designs = new ArrayList<SurveyDesignEditorInput>();
 			
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				//surveys
-				List<SurveyProxy> items = SurveyHibernateManager.getSurveys(s, filter);
-				
-				for (SurveyProxy sp : items){
-					SurveyEditorInput sv = new SurveyEditorInput(sp);
-					ins.add(new SurveyListTreeNode(sv.getName(), sv.getUuid(), Type.SURVEY)); 
-				}
-				
-				//designs
-				List<SurveyDesignProxy> objects =SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, designFilter);
-				for (SurveyDesignProxy p : objects){
-					designs.add(new SurveyDesignEditorInput(p));
-				}
-				Collections.sort(designs, new Comparator<SurveyDesignEditorInput>() {
-					@Override
-					public int compare(SurveyDesignEditorInput o1,
-							SurveyDesignEditorInput o2) {
-						return Collator.getInstance().compare(o1.getName(), o2.getName());
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					//surveys
+					List<SurveyProxy> items = SurveyHibernateManager.getSurveys(s, filter);
+					
+					for (SurveyProxy sp : items){
+						SurveyEditorInput sv = new SurveyEditorInput(sp);
+						ins.add(new SurveyListTreeNode(sv.getName(), sv.getUuid(), Type.SURVEY)); 
 					}
-				});
-				s.getTransaction().rollback();
-			}catch (Exception ex){
-				EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignListView_LoadError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-			}finally{
-				s.close();
+					
+					//designs
+					List<SurveyDesignProxy> objects =SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, designFilter);
+					for (SurveyDesignProxy p : objects){
+						designs.add(new SurveyDesignEditorInput(p));
+					}
+					Collections.sort(designs, new Comparator<SurveyDesignEditorInput>() {
+						@Override
+						public int compare(SurveyDesignEditorInput o1,
+								SurveyDesignEditorInput o2) {
+							return Collator.getInstance().compare(o1.getName(), o2.getName());
+						}
+					});
+					
+				}catch (Exception ex){
+					EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignListView_LoadError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+				}finally{
+					s.getTransaction().rollback();
+				}
 			}
 			
 			getShell().getDisplay().asyncExec(new Runnable(){

@@ -23,8 +23,8 @@ package org.wcs.smart.hibernate;
 
 import java.sql.DriverManager;
 
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 
 /**
  * Database specific extensions for the derby database.
@@ -71,7 +71,7 @@ public class DerbyHibernateExtensions {
 	 */
 	public static boolean tableExists(Session session, String tableName) {
 		String sql = "select count(*) from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID AND sch.SCHEMANAME = 'SMART' WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME = '"+tableName.toUpperCase()+"'"; //$NON-NLS-1$ //$NON-NLS-2$
-		SQLQuery q = session.createSQLQuery(sql);
+		NativeQuery<?> q = session.createNativeQuery(sql);
 		Integer result = (Integer) q.uniqueResult();
 		return result != null && result > 0;
 	}

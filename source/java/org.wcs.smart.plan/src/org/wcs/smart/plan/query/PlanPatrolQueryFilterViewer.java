@@ -27,7 +27,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.swt.graphics.Image;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
@@ -102,13 +102,12 @@ public class PlanPatrolQueryFilterViewer implements IExtensionFilterViewer {
 	 */
 	private static List<UUID> listChildPlanIds(UUID planUuid, Session session) {
 		List<UUID> ids = new ArrayList<UUID>();
-		Query query = session.createQuery("SELECT p.uuid FROM Plan p where p.parent.uuid = :uuid"); //$NON-NLS-1$
+		Query<?> query = session.createQuery("SELECT p.uuid FROM Plan p where p.parent.uuid = :uuid"); //$NON-NLS-1$
 		query.setParameter("uuid", planUuid); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<UUID> list = query.list();
-		ids.addAll(list);
-		for (UUID uuid : list) {
-			ids.addAll(listChildPlanIds(uuid, session));
+		List<?> list = query.list();
+		for(Object x : list) {
+			ids.add((UUID)x);
+			ids.addAll(listChildPlanIds((UUID)x, session));
 		}
 		return ids;
 	}

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.wcs.smart.SmartContext;
@@ -82,21 +82,16 @@ public class PatrolWaypointSource implements IWaypointSource {
 			return null;
 		}
 		String patrolDir ;
-		StatelessSession temp = session.getSessionFactory().openStatelessSession();
-		try{
-			Query q = temp.createQuery("SELECT p.uuid from Patrol p join p.legs pl join pl.patrolLegDays pld join pld.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
+		try(StatelessSession temp = session.getSessionFactory().openStatelessSession()){
+			Query<?> q = temp.createQuery("SELECT p.uuid from Patrol p join p.legs pl join pl.patrolLegDays pld join pld.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
 			q.setParameter("wp", wp); //$NON-NLS-1$
-	
 			List<?> pws = q.list();
-		
 			if (pws.size() > 0){
 				UUID uuid = (UUID) pws.get(0);
 				patrolDir = UuidUtils.getDirectoryPath(uuid);
 			}else{
 				throw new Exception("Could not determine attachment location for patrol waypoint: " + wp.getUuid().toString()); //$NON-NLS-1$
 			}
-		}finally{
-			temp.close();
 		}
 			
 		StringBuilder sb = new StringBuilder();

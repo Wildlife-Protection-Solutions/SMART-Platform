@@ -30,9 +30,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -364,10 +366,15 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 						}
 						for (String key : groupBy.getItems()){
 							//look for key in database
-							Long cnt = (Long) session.createCriteria(op.getSourceClass())
-									.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-									.add(Restrictions.in("conservationArea", toSearch)) //$NON-NLS-1$
-									.setProjection(Projections.rowCount()).list().get(0); 
+							CriteriaBuilder cb = session.getCriteriaBuilder();
+							CriteriaQuery<Long> c = cb.createQuery(Long.class);
+							Root<?> from = c.from(op.getSourceClass());
+							c.select(cb.count(from));
+							c.where(cb.and(
+									from.get("conservationArea").in(toSearch), //$NON-NLS-1$
+									cb.equal(from.get("keyId"), key) //$NON-NLS-1$
+									));
+							Long cnt = session.createQuery(c).uniqueResult();
 								if (cnt == 0){
 									throw new Exception(MessageFormat.format(Messages.PatrolGroupBy_KeyNotFoundError, new Object[]{op.getGuiName(Locale.getDefault()), key}));
 								}

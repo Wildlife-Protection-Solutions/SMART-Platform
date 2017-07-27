@@ -21,19 +21,17 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider.CmTreeRootNode;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
@@ -90,18 +88,12 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 		
 		//Evgeniy: it looks like the code below never works as it closes hibernate session that must remain open while configurable model is editor is opened
 		if (element instanceof AttributeTreeNode){
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){
 				AttributeTreeNode dmAttr = (AttributeTreeNode) element;
-				List<?> items = session.createCriteria(CmAttributeTreeNode.class)
-						.add(Restrictions.eq("dmTreeNode", dmAttr))  //$NON-NLS-1$
-						.add(Restrictions.eq("config", model.getDefaultConfigs().get(dmAttr))).list();  //$NON-NLS-1$
-				if (items.size() > 0){
-					CmAttributeTreeNode node = (CmAttributeTreeNode) items.get(0);
-					return node;
-				}
-			}finally{
-				session.close();
+				
+				return QueryFactory.buildQuery(session,  CmAttributeTreeNode.class,
+						new Object[] {"dmTreNode", dmAttr}, //$NON-NLS-1$
+						new Object[] {"config", model.getDefaultConfigs().get(dmAttr) }).uniqueResult(); //$NON-NLS-1$
 			}
 		}
 		return null;

@@ -230,25 +230,24 @@ public class MissionMapPage extends SmartMapEditorPart {
 				double origy = pw.getWaypoint().getY();
 				
 				boolean modified = false;
-				Session s = HibernateManager.openSession();
-				try{
-					s.beginTransaction();
-					pw.getWaypoint().setX(crspx.x);
-					pw.getWaypoint().setY(crspx.y);
-					s.update(pw.getWaypoint());
-					s.getTransaction().commit();
-					modified = true;
-				}catch (Exception ex){
+				try(Session s = HibernateManager.openSession()){
 					try{
-						if (s.getTransaction().isActive()) s.getTransaction().rollback();
-					}catch (Exception ex2){
-						EcologicalRecordsPlugIn.displayLog(Messages.MissionMapPage_MoveDbError + ex.getMessage(), ex);
-						return;
+						s.beginTransaction();
+						pw.getWaypoint().setX(crspx.x);
+						pw.getWaypoint().setY(crspx.y);
+						s.update(pw.getWaypoint());
+						s.getTransaction().commit();
+						modified = true;
+					}catch (Exception ex){
+						try{
+							if (s.getTransaction().isActive()) s.getTransaction().rollback();
+						}catch (Exception ex2){
+							EcologicalRecordsPlugIn.displayLog(Messages.MissionMapPage_MoveDbError + ex.getMessage(), ex);
+							return;
+						}
+						pw.getWaypoint().setX(origx);
+						pw.getWaypoint().setY(origy);
 					}
-					pw.getWaypoint().setX(origx);
-					pw.getWaypoint().setY(origy);
-				}finally{
-					s.close();
 				}
 				if (modified){
 					addUndo(pw, origx, origy);
@@ -307,30 +306,29 @@ public class MissionMapPage extends SmartMapEditorPart {
 			public synchronized void undo() {
 				if (undoCommands.isEmpty()) return;
 				
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					Object c = undoCommands.remove(0);
 					s.beginTransaction();
-					Object[] data = (Object[])c;
-					
-					SurveyWaypoint pw = (SurveyWaypoint) data[0];
-					double x = (double) data[1];
-					double y = (double) data[2];
-					
-					pw.getWaypoint().setX(x);
-					pw.getWaypoint().setY(y);
-					s.update(pw.getWaypoint());
-					s.getTransaction().commit();
-					
-					Display.getDefault().syncExec(()->{
-						SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
-						WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
-					});
-				}catch (Exception ex){
-					if (s.getTransaction().isActive()) s.getTransaction().rollback();
-					EcologicalRecordsPlugIn.displayLog(Messages.MissionMapPage_UndoError + ex.getMessage(), ex);	
-				}finally{
-					s.close();
+					try {
+						Object[] data = (Object[])c;
+						
+						SurveyWaypoint pw = (SurveyWaypoint) data[0];
+						double x = (double) data[1];
+						double y = (double) data[2];
+						
+						pw.getWaypoint().setX(x);
+						pw.getWaypoint().setY(y);
+						s.update(pw.getWaypoint());
+						s.getTransaction().commit();
+						
+						Display.getDefault().syncExec(()->{
+							SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
+							WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
+						});
+					}catch (Exception ex){
+						if (s.getTransaction().isActive()) s.getTransaction().rollback();
+						EcologicalRecordsPlugIn.displayLog(Messages.MissionMapPage_UndoError + ex.getMessage(), ex);
+					}
 				}
 				updateToolbar();
 			}

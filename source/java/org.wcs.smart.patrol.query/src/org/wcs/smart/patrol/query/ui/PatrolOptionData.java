@@ -30,8 +30,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -82,10 +85,10 @@ public class PatrolOptionData implements IPatrolOptionData{
 		List<ListItem> results = new ArrayList<ListItem>();
 		PatrolQueryOptionType type = option.getType();
 		if (type == PatrolQueryOptionType.UUID){
-			UUID[] uuidkeys = new UUID[keys.length];
+			List<UUID> uuidkeys = new ArrayList<UUID>(keys.length);
 			try {
 				for (int i = 0; i < keys.length; i++) {
-					uuidkeys[i] = UuidUtils.stringToUuid(keys[i]);
+					uuidkeys.add(UuidUtils.stringToUuid(keys[i]));
 				}
 			} catch (Exception ex) {
 				QueryPlugIn.log(
@@ -93,7 +96,12 @@ public class PatrolOptionData implements IPatrolOptionData{
 								+ ex.getLocalizedMessage(), ex);
 				return results;
 			}
-			Collection<?> data = session.createCriteria(option.getSourceClass()).add(Restrictions.in("uuid", uuidkeys)).list(); //$NON-NLS-1$
+			
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<?> c = cb.createQuery(option.getSourceClass());
+			Root<?> root = c.from(option.getSourceClass());
+			c.where(root.get("uuid").in(uuidkeys)); //$NON-NLS-1$
+			Collection<?> data = session.createQuery(c).getResultList();
 			
 			for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 				Object object = (Object) iterator.next();
@@ -132,9 +140,18 @@ public class PatrolOptionData implements IPatrolOptionData{
 			}
 		}else if (type == PatrolQueryOptionType.STRING){
 			if (option == PatrolQueryOption.ID){
-				List<?> data = session.createCriteria(option.getSourceClass())
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.add(Restrictions.in(option.getColumnName(), keys)).list(); 
+				List<String> keyCollection = new ArrayList<String>(keys.length);
+				for (String k : keys) keyCollection.add(k);
+				
+				CriteriaBuilder cb = session.getCriteriaBuilder();
+				CriteriaQuery<?> c = cb.createQuery(option.getSourceClass());
+				Root<?> root = c.from(option.getSourceClass());
+				c.where(cb.and(
+						cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+						root.get(option.getColumnName()).in(keyCollection) 
+						));
+				List<?> data = session.createQuery(c).getResultList();
+				
 				for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 					Object object = (Object) iterator.next();
 					if (object instanceof Patrol){

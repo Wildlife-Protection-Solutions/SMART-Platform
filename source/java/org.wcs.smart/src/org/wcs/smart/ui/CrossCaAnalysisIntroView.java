@@ -51,6 +51,7 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class CrossCaAnalysisIntroView {
 
 	public static final String ID = "org.wcs.smart.crossCaView"; //$NON-NLS-1$

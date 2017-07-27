@@ -79,15 +79,17 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
-					s.beginTransaction();
-					for (Aggregation a : AttributeValueDropItem.this.attribute.getAggregations()){
-						aggLabels.put(a, Aggregation.getGuiName(a, s, Locale.getDefault()));
+				try(Session s = HibernateManager.openSession()){
+					try{
+						s.beginTransaction();
+						for (Aggregation a : AttributeValueDropItem.this.attribute.getAggregations()){
+							aggLabels.put(a, Aggregation.getGuiName(a, s, Locale.getDefault()));
+						}
+						s.getTransaction().commit();
+					}catch (Exception ex) {
+						s.getTransaction().rollback();
+						throw ex;
 					}
-					s.getTransaction().commit();
-				}finally{
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}

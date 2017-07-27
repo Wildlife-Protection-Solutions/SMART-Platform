@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.wcs.smart.SmartContext;
@@ -71,9 +71,9 @@ public class SurveyWaypointSource implements IWaypointSource{
 		//with; do in a different thread so we can have our own database
 		//connection
 		String missionDir = null;
-		StatelessSession temp = session.getSessionFactory().openStatelessSession();
-		try{
-			Query q = temp.createQuery("SELECT m.uuid from Mission m join m.missionDays md join md.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
+		
+		try(StatelessSession temp = session.getSessionFactory().openStatelessSession()){
+			Query<?> q = temp.createQuery("SELECT m.uuid from Mission m join m.missionDays md join md.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
 			q.setParameter("wp", wp); //$NON-NLS-1$
 	
 			List<?> pws = q.list();
@@ -84,8 +84,6 @@ public class SurveyWaypointSource implements IWaypointSource{
 			}else{
 				throw new Exception("Could not determine attached location for survey waypoint attachment. " + wp.getUuid().toString()); //$NON-NLS-1$
 			}
-		}finally{
-			temp.close();
 		}
 
 		StringBuilder sb = new StringBuilder();

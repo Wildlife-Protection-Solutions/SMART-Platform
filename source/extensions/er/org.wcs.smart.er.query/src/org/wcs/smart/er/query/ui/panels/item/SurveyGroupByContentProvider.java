@@ -33,7 +33,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -45,6 +44,7 @@ import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.WrappedTreeNode;
@@ -68,25 +68,20 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 	
 	private IItemTreeNode rootNode;
 	
-	@SuppressWarnings("unchecked")
 	private Job loadMissionPropertiesJob = new Job(Messages.SurveyItemContentProvider_loadMissionJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				if (design != null){
 					s.update(design);
 					for (MissionProperty p : design.getMissionProperties()){
 						p.getAttribute().getName();
 					}
 				}else{
-					listMissionAttributes = s.createCriteria(MissionAttribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.add(Restrictions.eq("type", Attribute.AttributeType.LIST)) //$NON-NLS-1$
-							.list();
+					listMissionAttributes = QueryFactory.buildQuery(s,MissionAttribute.class,
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"type", Attribute.AttributeType.LIST}).getResultList(); //$NON-NLS-1$
 				}
-			}finally{
-				s.close();
 			}
 			
 			Display.getDefault().asyncExec(new Runnable(){
@@ -99,12 +94,10 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 		}
 	};
 	
-	@SuppressWarnings("unchecked")
 	private Job loadSamplingUnitPropertiesJob = new Job(Messages.SurveyGroupByContentProvider_suJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				if (design != null){
 					listSamplingUnitAttributes = new ArrayList<SamplingUnitAttribute>();
 					s.update(design);
@@ -115,13 +108,10 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 						}
 					}
 				}else{
-					listSamplingUnitAttributes = s.createCriteria(SamplingUnitAttribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.add(Restrictions.eq("type", Attribute.AttributeType.LIST)) //$NON-NLS-1$
-							.list();
+					listSamplingUnitAttributes = QueryFactory.buildQuery(s, SamplingUnitAttribute.class,
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"type", Attribute.AttributeType.LIST}).getResultList(); //$NON-NLS-1$
 				}
-			}finally{
-				s.close();
 			}
 			
 			Display.getDefault().asyncExec(new Runnable(){

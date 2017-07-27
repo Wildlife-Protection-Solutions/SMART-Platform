@@ -132,73 +132,73 @@ public class WaypointInfoView {
 			Waypoint currentWp = null;
 			
 			//load waypoint information
-			final Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				currentWp = (Waypoint) s.get(Waypoint.class, selectedWaypointUuid);	//reload waypoint to get latest info
-				if (currentWp != null) {
-					if (currentWp.getObservations() != null) {
-						for (WaypointObservation wo : currentWp.getObservations()) {
-							DisplayData dd = new DisplayData();
-							
-							List<DisplayData> cData = data.get(wo.getCategory());
-							if (cData == null){
-								cData = new ArrayList<DisplayData>();
-								data.put(wo.getCategory(), cData);
-							}
-							cData.add(dd);
-							
-							dd.categoryLabel = wo.getCategory().getFullCategoryName();
-							
-							//sort observation attribute based on data model order
-							Category c = (Category) s.load(Category.class, wo.getCategory().getUuid());
-							final List<Attribute> attributes = new ArrayList<Attribute>();
-							c.getAllAttribute(attributes, null);
-							List<WaypointObservationAttribute> tmp = new ArrayList<WaypointObservationAttribute>();
-							tmp.addAll(wo.getAttributes());
-							Collections.sort(tmp, new Comparator<WaypointObservationAttribute>() {
-								@Override
-								public int compare(
-										WaypointObservationAttribute o1,
-										WaypointObservationAttribute o2) {
-									int index1 = attributes.indexOf(o1.getAttribute());
-									int index2 = attributes.indexOf(o2.getAttribute());
-									if (index1 == index2){
-										return 0;
-									}
-									if (index1 > index2) return 1;
-									return -1;
+			try(final Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					currentWp = (Waypoint) s.get(Waypoint.class, selectedWaypointUuid);	//reload waypoint to get latest info
+					if (currentWp != null) {
+						if (currentWp.getObservations() != null) {
+							for (WaypointObservation wo : currentWp.getObservations()) {
+								DisplayData dd = new DisplayData();
+								
+								List<DisplayData> cData = data.get(wo.getCategory());
+								if (cData == null){
+									cData = new ArrayList<DisplayData>();
+									data.put(wo.getCategory(), cData);
 								}
-							});
-							for (WaypointObservationAttribute woa : tmp) {
-								dd.attributeLabels.add(woa.getAttribute().getName());
-								dd.attributeValues.add(woa.getAttributeValueAsString(Locale.getDefault()));
+								cData.add(dd);
+								
+								dd.categoryLabel = wo.getCategory().getFullCategoryName();
+								
+								//sort observation attribute based on data model order
+								Category c = (Category) s.load(Category.class, wo.getCategory().getUuid());
+								final List<Attribute> attributes = new ArrayList<Attribute>();
+								c.getAllAttribute(attributes, null);
+								List<WaypointObservationAttribute> tmp = new ArrayList<WaypointObservationAttribute>();
+								tmp.addAll(wo.getAttributes());
+								Collections.sort(tmp, new Comparator<WaypointObservationAttribute>() {
+									@Override
+									public int compare(
+											WaypointObservationAttribute o1,
+											WaypointObservationAttribute o2) {
+										int index1 = attributes.indexOf(o1.getAttribute());
+										int index2 = attributes.indexOf(o2.getAttribute());
+										if (index1 == index2){
+											return 0;
+										}
+										if (index1 > index2) return 1;
+										return -1;
+									}
+								});
+								for (WaypointObservationAttribute woa : tmp) {
+									dd.attributeLabels.add(woa.getAttribute().getName());
+									dd.attributeValues.add(woa.getAttributeValueAsString(Locale.getDefault()));
+								}
+								for (ObservationAttachment att: wo.getAttachments()){
+									try{
+										att.computeFileLocation(s);
+										dd.attchmentFileNames.add(att);
+									}catch (Exception ex){
+										ObservationPlugIn.log(ex.getMessage(), ex);
+									}
+								}
 							}
-							for (ObservationAttachment att: wo.getAttachments()){
+						}
+						
+						//load attachment information
+						if (currentWp.getAttachments() != null){
+							for(WaypointAttachment att: currentWp.getAttachments()){
 								try{
 									att.computeFileLocation(s);
-									dd.attchmentFileNames.add(att);
 								}catch (Exception ex){
 									ObservationPlugIn.log(ex.getMessage(), ex);
 								}
 							}
 						}
 					}
-					
-					//load attachment information
-					if (currentWp.getAttachments() != null){
-						for(WaypointAttachment att: currentWp.getAttachments()){
-							try{
-								att.computeFileLocation(s);
-							}catch (Exception ex){
-								ObservationPlugIn.log(ex.getMessage(), ex);
-							}
-						}
-					}
+				}finally{
+					s.getTransaction().rollback();
 				}
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
 			}
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;

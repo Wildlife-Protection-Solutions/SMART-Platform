@@ -39,12 +39,12 @@ import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.manger.ReportManager;
@@ -106,14 +106,10 @@ public class ReportTemplateCloner implements
 	 * clones shared folders
 	 */
 	private void cloneFolders(ConservationAreaClonerEngine engine){
-		@SuppressWarnings("unchecked")
-		List<ReportFolder> queryFolder = 
-				 engine.getSession()
-					.createCriteria(ReportFolder.class)
-					.add(Restrictions.isNull("parentFolder")) //$NON-NLS-1$
-					.add(Restrictions.isNull("employee")) //$NON-NLS-1$
-					.add(Restrictions.eq("conservationArea", //$NON-NLS-1$
-							engine.getTemplateCa())).list();
+		List<ReportFolder> queryFolder = QueryFactory.buildQuery(engine.getSession(), ReportFolder.class, 
+				new Object[] {"parentFolder", null}, //$NON-NLS-1$
+				new Object[] {"employee", null}, //$NON-NLS-1$
+				new Object[] {"conservationArea", engine.getTemplateCa()}).getResultList(); //$NON-NLS-1$
 				
 		for (ReportFolder q : queryFolder){
 			processReportFolder(q, null, engine);
@@ -148,8 +144,9 @@ public class ReportTemplateCloner implements
 	 */
 	private void cloneReports(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<Report> reports = engine.getSession().createCriteria(Report.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("shared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<Report> reports = QueryFactory.buildQuery(engine.getSession(), Report.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"shared", true}).getResultList(); //$NON-NLS-1$
 		
 		for (Report r : reports){
 			Report clone = new Report();
@@ -181,8 +178,7 @@ public class ReportTemplateCloner implements
 				engine.getSession().save(clone);
 				engine.addConservationItemMapping(r, clone);
 				
-				@SuppressWarnings("unchecked")
-				List<ReportQuery> queries = engine.getSession().createCriteria(ReportQuery.class).add(Restrictions.eq("id.report", r)).list(); //$NON-NLS-1$
+				List<ReportQuery> queries = QueryFactory.buildQuery(engine.getSession(), ReportQuery.class, "id.report", r).getResultList(); //$NON-NLS-1$
 				for (ReportQuery rq : queries){
 					UuidItem item = engine.getNewConservationItem(rq.getQueryUuid());
 					if (item != null){

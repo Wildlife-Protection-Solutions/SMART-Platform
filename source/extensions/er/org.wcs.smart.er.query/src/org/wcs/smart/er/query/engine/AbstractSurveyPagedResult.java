@@ -32,7 +32,6 @@ import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -51,6 +50,7 @@ import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
 import org.wcs.smart.er.query.model.column.SurveyAttributeQueryColumn;
 import org.wcs.smart.er.query.model.column.SurveyCategoryQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -141,8 +141,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
 				s.doWork(new Work(){
 	
@@ -159,8 +158,6 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 						}
 					}	
 				});
-			}finally{
-				s.close();
 			}
 		}
 		return bounds;	
@@ -188,14 +185,15 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 					Attribute attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
 					type = attribute.getType();
 				}else if (sortColumn instanceof MissionPropertyQueryColumn){
-					MissionAttribute prop = (MissionAttribute) session.createCriteria(MissionAttribute.class)
-							.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list().get(0); //$NON-NLS-1$
+					MissionAttribute prop = QueryFactory.buildQuery(session, MissionAttribute.class,
+								new Object[] {"keyId", key}, //$NON-NLS-1$
+								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
+
 					type = prop.getType();
 				}else if (sortColumn instanceof SamplingUnitAttributeQueryColumn){
-					SamplingUnitAttribute suA = (SamplingUnitAttribute)session.createCriteria(SamplingUnitAttribute.class)
-							.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list().get(0); //$NON-NLS-1$
+					SamplingUnitAttribute suA = QueryFactory.buildQuery(session, SamplingUnitAttribute.class,
+							new Object[] {"keyId", key}, //$NON-NLS-1$
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
 					type = suA.getType();
 				}
 			}finally{
@@ -676,8 +674,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 	}
 
 	public List<byte[]> getMissionUuids() {
-		final Session session = HibernateManager.openSession();
-		try{
+		try(final Session session = HibernateManager.openSession()){
 			final List<byte[]> uuids = new ArrayList<byte[]>();
 			session.doWork(new Work(){
 				@Override
@@ -691,8 +688,6 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 				}});
 			
 			return uuids;
-		}finally{
-			session.close();
 		}
 	}
 	

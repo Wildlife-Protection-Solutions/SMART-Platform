@@ -89,8 +89,8 @@ public class AutoValidateJob extends Job{
 				tasks.clear();
 			}
 			
-			Session session = HibernateManager.openSession();
-			try{
+			
+			try(Session session = HibernateManager.openSession()){
 				Collection<QaError> errors = engine.validate(session, progress.setWorkRemaining(100).split(1));
 				session.beginTransaction();
 				for (QaError error : errors){
@@ -99,8 +99,6 @@ public class AutoValidateJob extends Job{
 				session.getTransaction().commit();
 			}catch(Exception ex){
 				QaPlugIn.displayLog(Messages.AutoValidateJob_DataError + ex.getMessage(), ex);
-			}finally{
-				session.close();
 			}
 			if (monitor.isCanceled()) break;
 		}

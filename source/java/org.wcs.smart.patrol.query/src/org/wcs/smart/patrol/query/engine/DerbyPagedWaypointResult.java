@@ -33,17 +33,17 @@ import java.util.UUID;
 
 import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.swt.SWT;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
@@ -114,8 +114,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
 				s.doWork(new Work(){
 					@Override
@@ -130,8 +129,6 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 						}
 					}
 				});
-			}finally{
-				s.close();
 			}
 		}
 		return bounds;
@@ -240,90 +237,88 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		Waypoint wp = null;
 		Patrol p = null;
 		boolean change = false;
-		Session s = HibernateManager.openSession();
-		try {
-			s.getTransaction().begin();
-			wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
-			if (wp != null) {
-				PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).uniqueResult(); //$NON-NLS-1$
-				
-				if (pw != null) {
-					p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-					p.equals(p); //necessary for using outside session
-					
-					switch (column.getColumn()) {
-					case WAYPOINT_COMMENT:
-						if (value instanceof String) {
-							if (((String) value).length() == 0) value = null;
-							if (NULL_COMPARATOR.compare(value, wp.getComment()) != 0) {
-								change = true;
-								updateWaypointComment(wp,(String) value, s);
+		try(Session s = HibernateManager.openSession()){
+			try {
+				s.getTransaction().begin();
+				wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
+				if (wp != null) {
+					PatrolWaypoint pw = PatrolHibernateManager.getPatrolWaypoint(s, wp);
+					if (pw != null) {
+						p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
+						p.equals(p); //necessary for using outside session
+						
+						switch (column.getColumn()) {
+						case WAYPOINT_COMMENT:
+							if (value instanceof String) {
+								if (((String) value).length() == 0) value = null;
+								if (NULL_COMPARATOR.compare(value, wp.getComment()) != 0) {
+									change = true;
+									updateWaypointComment(wp,(String) value, s);
+								}
 							}
-						}
-						break;
-					case WAYPOINT_TIME:
-						if (value instanceof Date) {
-							Date newDate = (Date) value;
-							if (!SharedUtils.isSameTime(newDate,
-									wp.getDateTime())) {
-								change = true;
-								updateWaypointTime(wp, newDate, s);
+							break;
+						case WAYPOINT_TIME:
+							if (value instanceof Date) {
+								Date newDate = (Date) value;
+								if (!SharedUtils.isSameTime(newDate,
+										wp.getDateTime())) {
+									change = true;
+									updateWaypointTime(wp, newDate, s);
+								}
 							}
-						}
-						break;
-					case WAYPOINT_DIRECTION:
-						if (value instanceof Double) {
-							float newValue = ((Double) value).floatValue();
-							if (NULL_COMPARATOR.compare(newValue, wp.getDirection()) != 0) {
-								change = true;
-								updateWaypointDirection(wp, newValue, s);
+							break;
+						case WAYPOINT_DIRECTION:
+							if (value instanceof Double) {
+								float newValue = ((Double) value).floatValue();
+								if (NULL_COMPARATOR.compare(newValue, wp.getDirection()) != 0) {
+									change = true;
+									updateWaypointDirection(wp, newValue, s);
+								}
 							}
-						}
-						break;
-					case WAYPOINT_DISTANCE:
-						if (value instanceof Double) {
-							float newValue = ((Double) value).floatValue();
-							if (NULL_COMPARATOR.compare(newValue, wp.getDistance()) != 0) {
-								change = true;
-								updateWaypointDistance(wp, newValue, s);
+							break;
+						case WAYPOINT_DISTANCE:
+							if (value instanceof Double) {
+								float newValue = ((Double) value).floatValue();
+								if (NULL_COMPARATOR.compare(newValue, wp.getDistance()) != 0) {
+									change = true;
+									updateWaypointDistance(wp, newValue, s);
+								}
 							}
-						}
-						break;
-					case WAYPOINT_ID:
-						if (value instanceof Integer) {
-							if (!value.equals(wp.getId())) {
-								change = true;
-								updateWaypointId(wp, (Integer) value, s);
+							break;
+						case WAYPOINT_ID:
+							if (value instanceof Integer) {
+								if (!value.equals(wp.getId())) {
+									change = true;
+									updateWaypointId(wp, (Integer) value, s);
+								}
 							}
-						}
-						break;
-					case WAYPOINT_X:
-						if (value instanceof Double) {
-							if (!value.equals(wp.getX())) {
-								change = true;
-								updateWaypointPosition(wp, (Double) value, wp.getY(), s);
+							break;
+						case WAYPOINT_X:
+							if (value instanceof Double) {
+								if (!value.equals(wp.getX())) {
+									change = true;
+									updateWaypointPosition(wp, (Double) value, wp.getY(), s);
+								}
 							}
-						}
-						break;
-					case WAYPOINT_Y:
-						if (value instanceof Double) {
-							if (!value.equals(wp.getX())) {
-								change = true;
-								updateWaypointPosition(wp, wp.getX(), (Double) value, s);
+							break;
+						case WAYPOINT_Y:
+							if (value instanceof Double) {
+								if (!value.equals(wp.getX())) {
+									change = true;
+									updateWaypointPosition(wp, wp.getX(), (Double) value, s);
+								}
 							}
+							break;
+						default:
+							break;
 						}
-						break;
-					default:
-						break;
 					}
 				}
+				s.getTransaction().commit();
+			} catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			s.getTransaction().commit();
-		} catch (Exception ex) {
-			s.getTransaction().rollback();
-			throw ex;
-		} finally {
-			s.close();
 		}
 
 		if (change) {
@@ -341,7 +336,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		wp.setX(newX);
 		wp.setY(newY);
 		
-		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_x = :x, wp_y = :y WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_x = :x, wp_y = :y WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("x", newX); //$NON-NLS-1$
 		q.setParameter("y", newY); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
@@ -351,7 +346,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	private void updateWaypointDistance(Waypoint wp, float newDistance, Session session){
 		wp.setDistance(newDistance);
 		
-		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_distance = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_distance = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("id", newDistance); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
@@ -360,7 +355,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	private void updateWaypointDirection(Waypoint wp, float newDirection, Session session){
 		wp.setDirection(newDirection);
 		
-		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_direction = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_direction = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("id", newDirection); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();	
@@ -369,7 +364,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	private void updateWaypointId(Waypoint wp, int newId, Session session){
 		wp.setId(newId);
 		
-		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_id = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_id = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("id", newId); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
@@ -379,7 +374,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		Date dttime = SmartUtils.combineDateTime(wp.getDateTime(), newTime);
 		wp.setDateTime(dttime);
 		
-		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_time = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_time = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("id", newTime); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
@@ -388,7 +383,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	private void updateWaypointComment(Waypoint wp, String newComment, Session session){
 		wp.setComment(newComment);
 		
-		SQLQuery q = session.createSQLQuery("update " + queryTempTable + " SET wp_comment = :cmt WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_comment = :cmt WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("cmt", newComment,  StringType.INSTANCE); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		
@@ -397,45 +392,43 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	
 	@Override
 	public boolean deleteWaypoint(UUID waypointUuid) throws Exception{
-		Session s = HibernateManager.openSession(new AttachmentInterceptor());
 		Waypoint wp = null;
 		Patrol p = null;
-		try{
-			s.getTransaction().begin();
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			
-			Waypoint wo = (Waypoint) s.get(Waypoint.class, waypointUuid);
-			if (wo == null) return false;
-			wp = wo;
-			
-			//find patrol updated for events
-			PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
-					.add(Restrictions.eq("id.waypoint", wp)) //$NON-NLS-1$
-					.uniqueResult();
-			if (pw == null) throw new Exception("No patrol link found for waypoint.  Waypoint will not be deleted."); //$NON-NLS-1$
-			s.delete(pw);
-			s.delete(wp);
-			
-			p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-			p.equals(p);	//required to prevent patrol equals from failing in event manager
-			
-			s.flush();
-			
-			//update category names in query results table
-			StringBuilder sql = new StringBuilder();
-			sql.append(" DELETE FROM " + queryTempTable + " WHERE wp_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-			SQLQuery queryUpdate = s.createSQLQuery(sql.toString());
-			queryUpdate.setParameter("uuid", waypointUuid); //$NON-NLS-1$
-			queryUpdate.executeUpdate();
+			try{
+				s.getTransaction().begin();
 				
-			((DerbyWaypointEngine) engine).updateResultCount(s, this);
-			
-			s.getTransaction().commit();
-			
-		}catch(Exception ex){
-			s.getTransaction().rollback();
-			throw ex;
-		}finally{
-			s.close();
+				Waypoint wo = (Waypoint) s.get(Waypoint.class, waypointUuid);
+				if (wo == null) return false;
+				wp = wo;
+				
+				//find patrol updated for events
+				PatrolWaypoint pw = PatrolHibernateManager.getPatrolWaypoint(s, wp);
+				if (pw == null) throw new Exception("No patrol link found for waypoint.  Waypoint will not be deleted."); //$NON-NLS-1$
+				s.delete(pw);
+				s.delete(wp);
+				
+				p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
+				p.equals(p);	//required to prevent patrol equals from failing in event manager
+				
+				s.flush();
+				
+				//update category names in query results table
+				StringBuilder sql = new StringBuilder();
+				sql.append(" DELETE FROM " + queryTempTable + " WHERE wp_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				NativeQuery<?> queryUpdate = s.createNativeQuery(sql.toString());
+				queryUpdate.setParameter("uuid", waypointUuid); //$NON-NLS-1$
+				queryUpdate.executeUpdate();
+					
+				((DerbyWaypointEngine) engine).updateResultCount(s, this);
+				
+				s.getTransaction().commit();
+				
+			}catch(Exception ex){
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 		
 		WaypointEventManager.getInstance().waypointModified(wp);
@@ -451,26 +444,24 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		Waypoint wp = null;
 		Patrol p = null;
 		boolean change = false;
-		Session s = HibernateManager.openSession();
-		try {
-			s.getTransaction().begin();
-			wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
-			if (wp != null) {
-				PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).uniqueResult(); //$NON-NLS-1$
-				
-				if (pw != null) {
-					p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-					p.equals(p); //necessary for using outside session
-					updateWaypointPosition(wp, x, y, s);
-					change = true;
+		try(Session s = HibernateManager.openSession()){
+			try {
+				s.getTransaction().begin();
+				wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
+				if (wp != null) {
+					PatrolWaypoint pw = PatrolHibernateManager.getPatrolWaypoint(s, wp);
+					if (pw != null) {
+						p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
+						p.equals(p); //necessary for using outside session
+						updateWaypointPosition(wp, x, y, s);
+						change = true;
+					}
 				}
+				s.getTransaction().commit();
+			} catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			s.getTransaction().commit();
-		} catch (Exception ex) {
-			s.getTransaction().rollback();
-			throw ex;
-		} finally {
-			s.close();
 		}
 
 		if (change) {
@@ -504,8 +495,8 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		
 		List<IResultItem> items = new ArrayList<IResultItem>();
 		
-		Session session = HibernateManager.openSession();
-		try{
+		
+		try(Session session = HibernateManager.openSession()){
 			session.doWork(new Work(){
 				@Override
 				public void execute(Connection connection) throws SQLException {
@@ -520,8 +511,6 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		}catch (Exception ex){
 			PatrolQueryPlugIn.log(ex.getMessage(), ex);
 			return Collections.emptyList();
-		}finally{
-			session.close();
 		}
 		
 		return items;

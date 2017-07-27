@@ -41,8 +41,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
@@ -117,8 +115,8 @@ public class CaImporter {
 		/* need to login as admin user to restore */
 		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
-		Session session = HibernateManager.openSession();
-		try{
+		
+		try(Session session = HibernateManager.openSession()){
 			progress.worked(10);
 			
 			progress.subTask(Messages.CaImporter_Progress_ValidatingCaImport);
@@ -163,13 +161,6 @@ public class CaImporter {
 				SmartPlugIn.log(Messages.CaImporter_Error_CleanUpFailed + dir.toString(), ex);
 			}
 			
-			try{
-				if (session.isOpen()){
-					session.close();
-				}
-			}catch (Exception ex){
-				SmartPlugIn.log(Messages.CaImporter_Error_CouldNotCloseSession, ex);
-			}
 			/* disconnect from admin user */
 			HibernateManager.endSessionFactory(true, true);
 		}
@@ -248,8 +239,8 @@ public class CaImporter {
 			session.beginTransaction();
 			try{
 				uuid = UuidUtils.stringToUuid(cauuid);
-				long cnt = (Long)session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", uuid)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
-				if (cnt != 0){				
+				ConservationArea existingCa = session.get(ConservationArea.class, uuid);
+				if (existingCa != null) {				
 					throw new Exception(MessageFormat.format(Messages.CaImporter_Error_CaAlreadyExists, new Object[]{name, id}));
 				}
 			}finally{	

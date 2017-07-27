@@ -138,30 +138,30 @@ public class PlanDatesComposite extends PlanComposite {
 	@Override
 	public void initFromModel(Plan plan){
 		Plan thisParentPlan = null;
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			if(plan.getParent() != null){
-				thisParentPlan = (Plan) session.load(Plan.class, plan.getParent().getUuid());
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				if(plan.getParent() != null){
+					thisParentPlan = (Plan) session.load(Plan.class, plan.getParent().getUuid());
+				}
+	
+				SmartUtils.initDateDateTimeWidget(dtStartDate, plan.getStartDate() != null ? plan.getStartDate() : new Date());
+				SmartUtils.initDateDateTimeWidget(dtEndDate, plan.getEndDate() != null ? plan.getEndDate() : new Date());
+				
+				if(thisParentPlan != null){
+					parentStartDate = thisParentPlan.getStartDate();
+				}else{
+					parentStartDate = null;
+				}
+				
+				if(thisParentPlan != null){
+					parentEndDate = thisParentPlan.getEndDate();
+				}else{
+					parentEndDate = null;
+				}
+			} finally {
+				session.getTransaction().rollback();
 			}
-
-			SmartUtils.initDateDateTimeWidget(dtStartDate, plan.getStartDate() != null ? plan.getStartDate() : new Date());
-			SmartUtils.initDateDateTimeWidget(dtEndDate, plan.getEndDate() != null ? plan.getEndDate() : new Date());
-			
-			if(thisParentPlan != null){
-				parentStartDate = thisParentPlan.getStartDate();
-			}else{
-				parentStartDate = null;
-			}
-			
-			if(thisParentPlan != null){
-				parentEndDate = thisParentPlan.getEndDate();
-			}else{
-				parentEndDate = null;
-			}
-			session.getTransaction().rollback();
-		} finally {
-			session.close();
 
 		}
 

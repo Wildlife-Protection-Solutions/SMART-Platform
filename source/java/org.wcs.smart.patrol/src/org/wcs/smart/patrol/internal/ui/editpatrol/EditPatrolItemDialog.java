@@ -101,14 +101,9 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	protected Composite createContent(Composite parent) {
 		Composite comp = item.createComponent(parent, SWT.NONE);
 		item.addChangeListener(listener);
-		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			item.setValues(patrol, s);
-		}finally{
-			s.close();
-		}
-		
+		}		
 		setTitle(item.getTitle());
 		setChangesMade(false);
 		return comp;
@@ -131,9 +126,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	}
 
 	private boolean savePatrolInternal() {
-		Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		
-		try{
+		try(Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
 			s.beginTransaction();
 			try{
 				s.saveOrUpdate(patrol);
@@ -150,10 +143,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 			}
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.EditPatrolItemDialog_Error_CouldNoSaveChanges + ex.getLocalizedMessage(), ex);
-		}finally{
-			s.close();
-		}
-		
+		}		
 		return false;
 		
 	}

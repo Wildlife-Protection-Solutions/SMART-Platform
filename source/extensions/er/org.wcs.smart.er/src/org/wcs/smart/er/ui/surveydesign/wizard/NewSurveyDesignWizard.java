@@ -30,7 +30,6 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -48,6 +47,7 @@ import org.wcs.smart.er.ui.surveydesign.NameIdComposite;
 import org.wcs.smart.er.ui.surveydesign.PropertiesComposite;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -167,15 +167,13 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
      * added before the wizard opens. New pages should be added by calling
      * <code>addPage</code>.
      */
-    @SuppressWarnings("unchecked")
 	public void addPages() {
     	
     	setWindowTitle(Messages.NewSurveyDesignWizard_WindowTitle);
     	
-    	List<ConfigurableModel> models = session.createCriteria(ConfigurableModel.class)
-    			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+    	List<ConfigurableModel> models = QueryFactory.buildQuery(session, ConfigurableModel.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
     	
-    	List<SurveyDesign> allOthers = session.createCriteria(SurveyDesign.class).list();
+    	List<SurveyDesign> allOthers =  QueryFactory.buildQuery(session, SurveyDesign.class, (Object[])null).getResultList();
     	
     	List<SurveyDesign> caOthers = new ArrayList<SurveyDesign>();
     	for (SurveyDesign d : allOthers){

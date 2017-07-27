@@ -22,7 +22,7 @@
 package org.wcs.smart.report;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -55,14 +55,14 @@ public class ReportCaDeleteHandler implements ICaDeleteHandler {
 	}
 
 	private void deleteReports(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Report where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Report where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deleteReportFolders(ConservationArea ca, Session session) throws Exception{
 		//first update parent folders to null; otherwise derby throws and error
-		Query q = session.createQuery("update ReportFolder set parentFolder = null WHERE conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("update ReportFolder set parentFolder = null WHERE conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		

@@ -149,8 +149,7 @@ public class FixedEntityDataSource extends AbstractDataStore{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					EntityType entityType = EntityHibernateManager.getInstance().getEntityType(entityTypeKey, s);
 					
 					sb.append("fid:String"); //$NON-NLS-1$
@@ -187,8 +186,6 @@ public class FixedEntityDataSource extends AbstractDataStore{
 					
 				}catch (Exception ex){
 					EntityPlugIn.log("Error creating feature type for entity type key: " + entityTypeKey, ex); //$NON-NLS-1$
-				}finally{
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}

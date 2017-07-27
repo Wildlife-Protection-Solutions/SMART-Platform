@@ -89,20 +89,20 @@ public class MissionFilterDialog extends SmartFilterDialog {
 		setTitle(Messages.MissionFilterDialog_Title);
 		getShell().setText(Messages.MissionFilterDialog_Title);
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			Composite composite = new Composite((Composite) filter, SWT.NONE);
-			composite.setLayout(new GridLayout(1, false));
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-			Composite dateFilterExpComp = createGroupComposite(Messages.MissionFilterDialog_Dates, composite);
-			dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
-			
-			updateControlsValues();
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				Composite composite = new Composite((Composite) filter, SWT.NONE);
+				composite.setLayout(new GridLayout(1, false));
+				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	
+				Composite dateFilterExpComp = createGroupComposite(Messages.MissionFilterDialog_Dates, composite);
+				dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
+				
+				updateControlsValues();
+			} finally {
+				session.getTransaction().rollback();
+			}
 		}
 		
 		return filter;

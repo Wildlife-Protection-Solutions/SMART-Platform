@@ -26,8 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import org.hibernate.Query;
+import javax.persistence.EntityManagerFactory;
+
 import org.hibernate.Session;
+import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -58,7 +63,12 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	public abstract boolean canModifyCaQueries();
 	
 	
-
+	public ClassMetadata getClassMetadata(Class<?> queryClass, Session session) {
+		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory)session.getSessionFactory()).getMetamodel();		
+		AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(queryClass));
+		return info.getClassMetadata();
+	}
+	
 	/**
 	 * Generates a query id from the database 
 	 * @param session
@@ -70,11 +80,11 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 		
 		int id = 0;
 		for (IQueryType type : types){
-			if (session.getSessionFactory().getClassMetadata(type.getHibernateClass()) == null){
+			if (getClassMetadata(type.getHibernateClass(), session) == null){
 				//query is not mapped to hibernate class so skip it
 				continue;
 			}
-			Query a = session.createQuery("select max(id) from " + type.getHibernateClass().getSimpleName() + " where conservationArea = :ca"); //$NON-NLS-1$ //$NON-NLS-2$
+			Query<?> a = session.createQuery("select max(id) from " + type.getHibernateClass().getSimpleName() + " where conservationArea = :ca"); //$NON-NLS-1$ //$NON-NLS-2$
 			a.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 			List<?> dataa = a.list();
 			if( dataa != null && dataa.size() >= 1 && dataa.get(0) != null){
@@ -145,51 +155,50 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 		boolean newQuery = query.getId() == null;
 		
 		//fire before save listeners in a separate transaction
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			//fire before save events; this may load the query
-			if (!QueryEventManager.getInstance().fireBeforeSave(query, s)){
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				//fire before save events; this may load the query
+				if (!QueryEventManager.getInstance().fireBeforeSave(query, s)){
+					return false;
+				}
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.QueryHibernateManager_CouldNotSaveQueryError + ex.getLocalizedMessage(), ex);
+				return false;
+			}finally{
+				s.getTransaction().rollback();
+			}
+		}
+		
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				if (newQuery){
+					query.setId(generateQueryId(s));
+					//page1.setQuery();
+				}
+				if (proxy != null){
+					QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()).getDropItemFactory().generateDropItems(proxy, s);
+				}
+				s.saveOrUpdate(query);
+				query.updateName(SmartDB.getCurrentLanguage(), query.getName());
+				if (SmartDB.getCurrentConservationArea().getDefaultLanguage() != null){
+					if (query.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage()) == null){
+						//if label for default language is null then update the default as well
+						query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), query.getName());
+					}
+				}
+				s.getTransaction().commit();
+	
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.QueryHibernateManager_CouldNotSaveQueryError + ex.getLocalizedMessage(), ex);
+				s.getTransaction().rollback();
+				if (newQuery){
+					query.setUuid(null);
+					query.setId(null);
+				}
 				return false;
 			}
-		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.QueryHibernateManager_CouldNotSaveQueryError + ex.getLocalizedMessage(), ex);
-			return false;
-		}finally{
-			s.getTransaction().rollback();
-		}
-		s.close();
-		
-		s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			if (newQuery){
-				query.setId(generateQueryId(s));
-				//page1.setQuery();
-			}
-			if (proxy != null){
-				QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()).getDropItemFactory().generateDropItems(proxy, s);
-			}
-			s.saveOrUpdate(query);
-			query.updateName(SmartDB.getCurrentLanguage(), query.getName());
-			if (SmartDB.getCurrentConservationArea().getDefaultLanguage() != null){
-				if (query.findNameNull(SmartDB.getCurrentConservationArea().getDefaultLanguage()) == null){
-					//if label for default language is null then update the default as well
-					query.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), query.getName());
-				}
-			}
-			s.getTransaction().commit();
-
-		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.QueryHibernateManager_CouldNotSaveQueryError + ex.getLocalizedMessage(), ex);
-			s.getTransaction().rollback();
-			if (newQuery){
-				query.setUuid(null);
-				query.setId(null);
-			}
-			return false;
-		}finally{
-			s.close();
 		}
 
 		if (newQuery) {
@@ -233,11 +242,11 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 		List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
 		String hsql = "SELECT q FROM " + queryType.getHibernateClass().getSimpleName() + " q, Label l WHERE l.id.element = q.uuid and q.conservationArea = :ca " +  //$NON-NLS-1$//$NON-NLS-2$
 				"and l.value = :name and (q.isShared = 'true' or (q.isShared = 'false' and q.owner = :employee))"; //$NON-NLS-1$ 
-		Query query = session.createQuery(hsql); 
+		Query<?> query = session.createQuery(hsql); 
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		query.setParameter("employee", search); //$NON-NLS-1$
 		query.setParameter("name", queryName); //$NON-NLS-1$
-		List<org.wcs.smart.query.model.Query> list = query.list();
+		List<org.wcs.smart.query.model.Query> list = (List<org.wcs.smart.query.model.Query>) query.list();
 		for (org.wcs.smart.query.model.Query q : list){
 			if (!queries.contains(q)){
 				queries.add(q);

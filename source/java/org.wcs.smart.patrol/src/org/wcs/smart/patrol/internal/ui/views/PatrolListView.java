@@ -67,7 +67,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.handlers.RadioState;
 import org.eclipse.ui.menus.IMenuService;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
@@ -124,30 +124,30 @@ public class PatrolListView implements IPatrolFilteringView {
 				}
 			});
 			
-			Session s = PatrolHibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				Query query = filter.buildQuery(s);
-				List<?> results = query.list();
-				final PatrolEditorInput[] input = new PatrolEditorInput[results.size()];
-				int i = 0;
-				for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-					Object[] data = (Object[]) iterator.next();					
-					input[i++] = new PatrolEditorInput((UUID)data[0], (String)data[1], (PatrolType.Type)data[2], (Date)data[3], (Date)data[4]);
-				}
-				
-				monitor.internalWorked(0.5);
-				if (patrolListViewer.getControl().isDisposed()) return Status.CANCEL_STATUS;
-				patrolListViewer.getControl().getDisplay().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						patrolListViewer.setInput(input);
-						patrolListViewer.refresh();
+			try(Session s = PatrolHibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					Query<?> query = filter.buildQuery(s);
+					List<?> results = query.list();
+					final PatrolEditorInput[] input = new PatrolEditorInput[results.size()];
+					int i = 0;
+					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+						Object[] data = (Object[]) iterator.next();					
+						input[i++] = new PatrolEditorInput((UUID)data[0], (String)data[1], (PatrolType.Type)data[2], (Date)data[3], (Date)data[4]);
 					}
-				});
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
+					
+					monitor.internalWorked(0.5);
+					if (patrolListViewer.getControl().isDisposed()) return Status.CANCEL_STATUS;
+					patrolListViewer.getControl().getDisplay().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							patrolListViewer.setInput(input);
+							patrolListViewer.refresh();
+						}
+					});
+				}finally{
+					s.getTransaction().rollback();
+				}
 			}
 			return Status.OK_STATUS;
 		}

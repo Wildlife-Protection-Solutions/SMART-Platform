@@ -24,7 +24,7 @@ package org.wcs.smart.entity.internal;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -46,7 +46,7 @@ public class DmAttributeEditAdvisor implements IDmEditAdvisor {
 	@Override
 	public String canEdit(Attribute attribute, Session session) {
 		//find all entity types associated with attribute
-		Query q = session.createQuery("FROM EntityType where dmAttribute = :att"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("FROM EntityType where dmAttribute = :att"); //$NON-NLS-1$
 		q.setParameter("att", attribute); //$NON-NLS-1$
 		List<?> items = q.list();
 		if (items.size()  > 0){

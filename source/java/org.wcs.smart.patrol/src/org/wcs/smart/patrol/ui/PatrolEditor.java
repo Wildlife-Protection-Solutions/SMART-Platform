@@ -30,6 +30,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,7 +47,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
@@ -120,13 +123,14 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						protected IStatus run(IProgressMonitor monitor) {
 							patrol = null;
 							getPatrol();
-							Session s = HibernateManager.openSession();
-							s.beginTransaction();
-							try{
-								s.update(patrol);
-								updateSummaryPage();
-							}finally{
-								s.close();
+							try(Session s = HibernateManager.openSession()){
+								s.beginTransaction();
+								try{
+									s.update(patrol);
+									updateSummaryPage();
+								}finally {
+									s.getTransaction().rollback();
+								}
 							}
 							getSite().getShell().getDisplay().syncExec(new Runnable(){
 								@Override
@@ -225,38 +229,39 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		if (this.patrol == null){
 			
 			UUID puuid = ((PatrolEditorInput) getEditorInput()).getUuid();
-			Session session = HibernateManager.openSession();
-			try{
-				//load patrol items so don't have lazy loading issues later.
+			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
-				this.patrol = (Patrol) session.load(Patrol.class, puuid);
-				this.patrol.getLegs().size();
-				this.patrol.getPatrolDatastorePath();
-				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
-				this.projections = tmp.toArray(new Projection[tmp.size()]);
-				
+			
 				try{
-					for (PatrolLeg pl : patrol.getLegs()){
-						for (PatrolLegDay pld : pl.getPatrolLegDays()){
-							for (PatrolWaypoint pw : pld.getWaypoints()){
-								ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
+					//load patrol items so don't have lazy loading issues later.
+					
+					this.patrol = (Patrol) session.load(Patrol.class, puuid);
+					this.patrol.getLegs().size();
+					this.patrol.getPatrolDatastorePath();
+					List<Projection> tmp = HibernateManager.getCaProjectionList(session);
+					this.projections = tmp.toArray(new Projection[tmp.size()]);
+					
+					try{
+						for (PatrolLeg pl : patrol.getLegs()){
+							for (PatrolLegDay pld : pl.getPatrolLegDays()){
+								for (PatrolWaypoint pw : pld.getWaypoints()){
+									ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
+								}
 							}
 						}
+					} catch (Exception e) {
+						SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_AttachmentError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 					}
-				} catch (Exception e) {
-					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_AttachmentError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+					session.getTransaction().commit();
+					if (ops == null){
+						ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+					}
+				}catch (Exception ex){
+					if (session.getTransaction().isActive()){
+						session.getTransaction().rollback();
+					}
+					throw ex;
 				}
-				session.getTransaction().commit();
-				if (ops == null){
-					ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-				}
-			}catch (Exception ex){
-				if (session.getTransaction().isActive()){
-					session.getTransaction().rollback();
-				}
-				throw ex;
-			}finally{
-				session.close();	
 			}
 			
 		}
@@ -280,13 +285,13 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		PatrolWaypoint wp = null;
 		PatrolLegDay pld = null;
 		long time = -1;
-		Session s = HibernateManager.openSession();
-		
-		try{
+		try(Session s = HibernateManager.openSession()){
 			//search waypoints
-			wp = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
-					.add(Restrictions.eq("id.waypoint.uuid", uuid)) //$NON-NLS-1$
-					.uniqueResult();
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<PatrolWaypoint> c = cb.createQuery(PatrolWaypoint.class);
+			Root<PatrolWaypoint> from = c.from(PatrolWaypoint.class);
+			c.where(cb.equal(from.get("id").get("waypoint").get("uuid"), uuid)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			wp = s.createQuery(c).uniqueResult();
 			if (wp != null){
 				time = wp.getPatrolLegDay().getDate().getTime();
 			}else{
@@ -295,10 +300,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				if (pld != null){
 					time = pld.getDate().getTime();
 				}
-			}
-			
-		}finally{
-			s.close();
+			}	
 		}
 		
 		final PatrolWaypoint wp2 = wp;
@@ -444,79 +446,76 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		Job moveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-				try{
+				try(Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
 					saveSession.beginTransaction();
-					
-					/* delete waypoints */
-					for (PatrolWaypoint wp : toDelete) {
-						saveSession.delete(wp);
-						saveSession.delete(wp.getWaypoint());					
-					}
-					Patrol p = null;
-					File rootFolder = null;
-					if (toSave.size() > 0){
-						PatrolWaypointSource pws = (PatrolWaypointSource) WaypointSourceEngine.INSTANCE.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-						p = toSave.iterator().next().getPatrolLegDay().getPatrolLeg().getPatrol();
-						rootFolder = new File(p.getConservationArea().getFileDataStoreLocation(), pws.getDatastoreFileLocation(p));
-					}
-					/* save waypoints */
-					for (PatrolWaypoint wp : toSave) {
-						if (!wp.getPatrolLegDay().getPatrolLeg().getPatrol().equals(p)) throw new Exception("Cannot save waypoints that are not associated with the same patrol in a single statement."); //$NON-NLS-1$
-						
-						wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-						wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
-						
-						//configure attachment locations; this is necessary because the waypoint is saved before the patrol waypoint
-						//and in these case the waypoint won't be able to find the patrol waypoint which is necessary to compute
-						//the filestore location
-						if (wp.getWaypoint().getAttachments() != null){
-							for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-								wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
-							}
+					try{
+						/* delete waypoints */
+						for (PatrolWaypoint wp : toDelete) {
+							saveSession.delete(wp);
+							saveSession.delete(wp.getWaypoint());					
 						}
-						if (wp.getWaypoint().getObservations() != null){
-							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-								if (wo.getAttachments() != null){
-									for (ObservationAttachment wa : wo.getAttachments()){
-										wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
+						Patrol p = null;
+						File rootFolder = null;
+						if (toSave.size() > 0){
+							PatrolWaypointSource pws = (PatrolWaypointSource) WaypointSourceEngine.INSTANCE.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+							p = toSave.iterator().next().getPatrolLegDay().getPatrolLeg().getPatrol();
+							rootFolder = new File(p.getConservationArea().getFileDataStoreLocation(), pws.getDatastoreFileLocation(p));
+						}
+						/* save waypoints */
+						for (PatrolWaypoint wp : toSave) {
+							if (!wp.getPatrolLegDay().getPatrolLeg().getPatrol().equals(p)) throw new Exception("Cannot save waypoints that are not associated with the same patrol in a single statement."); //$NON-NLS-1$
+							
+							wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+							wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
+							
+							//configure attachment locations; this is necessary because the waypoint is saved before the patrol waypoint
+							//and in these case the waypoint won't be able to find the patrol waypoint which is necessary to compute
+							//the filestore location
+							if (wp.getWaypoint().getAttachments() != null){
+								for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+									wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
+								}
+							}
+							if (wp.getWaypoint().getObservations() != null){
+								for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+									if (wo.getAttachments() != null){
+										for (ObservationAttachment wa : wo.getAttachments()){
+											wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
+										}
 									}
+								}
+							}
+							
+							saveSession.saveOrUpdate(wp.getWaypoint());
+							saveSession.saveOrUpdate(wp);
+							
+							
+							// remove observations with no data
+							if (wp.getWaypoint().getObservations() != null) {
+								for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
+									List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+									for (WaypointObservationAttribute att : wo.getAttributes()) {
+										if (!att.hasValue()) {
+											toDelete.add(att);
+										}
+									}
+									wo.getAttributes().removeAll(toDelete);
 								}
 							}
 						}
 						
-						saveSession.saveOrUpdate(wp.getWaypoint());
-						saveSession.saveOrUpdate(wp);
-						
-						
-						// remove observations with no data
-						if (wp.getWaypoint().getObservations() != null) {
-							for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
-								List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-								for (WaypointObservationAttribute att : wo.getAttributes()) {
-									if (!att.hasValue()) {
-										toDelete.add(att);
-									}
-								}
-								wo.getAttributes().removeAll(toDelete);
-							}
+						saveSession.getTransaction().commit();
+					}catch (Exception ex){
+						if (saveSession.getTransaction().isActive()){
+							saveSession.getTransaction().rollback();
 						}
+						SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
 					}
-					
-					saveSession.getTransaction().commit();
-				}catch (Exception ex){
-					if (saveSession.getTransaction().isActive()){
-						saveSession.getTransaction().rollback();
-					}
-					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
-				}finally{
-					saveSession.close();
 				}
 				
 				//load the attachment locations after close to ensure
 				//items can be viewed in ui without error
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					for (PatrolWaypoint wp : toSave) {
 						if (wp.getWaypoint().getAttachments() != null){
 							for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
@@ -535,8 +534,6 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					}
 				}catch (Exception ex){
 					ex.printStackTrace();
-				}finally{
-					s.close();
 				}
 				
 				/* fire events */
@@ -582,23 +579,24 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		Job saveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session saveSession = HibernateManager
-						.openSession(new WaypointAttachmentInterceptor());
-				try{
+				try(Session saveSession = HibernateManager
+						.openSession(new WaypointAttachmentInterceptor())){
+				
 					saveSession.beginTransaction();
-					for (PatrolWaypoint wp : waypoints) {
-						saveSession.delete(wp);
-						saveSession.delete(wp.getWaypoint());					
+					try{
+						for (PatrolWaypoint wp : waypoints) {
+							saveSession.delete(wp);
+							saveSession.delete(wp.getWaypoint());					
+						}
+						saveSession.getTransaction().commit();
+					}catch (Exception ex){
+						if (saveSession.getTransaction().isActive()){
+							saveSession.getTransaction().rollback();
+						}
+						SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
 					}
-					saveSession.getTransaction().commit();
-				}catch (Exception ex){
-					if (saveSession.getTransaction().isActive()){
-						saveSession.getTransaction().rollback();
-					}
-					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
-				}finally{
-					saveSession.close();
 				}
+				
 				for (PatrolWaypoint wp : waypoints){
 					try{
 						PatrolEventManager.getInstance().waypointDeleted(wp);

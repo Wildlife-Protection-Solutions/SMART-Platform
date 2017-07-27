@@ -139,8 +139,7 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				final String sql = "SELECT geometry FROM smart.mission_track where mission_day_uuid in (SELECT mission_day_uuid FROM " + queryTempTable + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 				s.doWork(new Work(){
 	
@@ -166,8 +165,6 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 						bounds = results;
 					}	
 				});
-			}finally{
-				s.close();
 			}
 		}
 		return bounds;	

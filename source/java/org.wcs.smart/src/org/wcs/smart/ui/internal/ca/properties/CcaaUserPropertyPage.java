@@ -26,6 +26,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -54,7 +58,6 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -266,28 +269,27 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 		return container;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void refreshUserList() {
 		tblEmployee.setInput(Messages.CcaaUserPropertyPage_Loading);
-		Session s = HibernateManager.openSession();;
-		
-		try{
-			List<Employee> users = s.createCriteria(Employee.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.ne("uuid", Employee.SHARED_UUID)) //$NON-NLS-1$
-				.list();
+				
+		try(Session s = HibernateManager.openSession()){
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
+			Root<Employee> from = c.from(Employee.class);
+			c.where(cb.and(
+					cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+					cb.notEqual(from.get("uuid"), Employee.SHARED_UUID) //$NON-NLS-1$
+					));
+			List<Employee> users = s.createQuery(c).getResultList();
 			tblEmployee.setInput(users);
 			
 			List<Employee> currentUsers = new ArrayList<Employee>();
-			
 			for (Employee e : SmartDB.getConservationAreaConfiguration().getEmployees()){
 				Employee emp = (Employee) s.get(Employee.class, e.getUuid());
 				emp.getConservationArea().getNameLabel();
 				currentUsers.add(emp);
 			}
 			tblCurrentUsers.setInput(currentUsers);
-		}finally{
-			s.close();
 		}
 		
 		tblEmployee.refresh();
@@ -332,51 +334,50 @@ public class CcaaUserPropertyPage extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(Messages.CcaaUserPropertyPage_ProgressMsg, toDelete.size());
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					try{
-						for (Employee del : toDelete){
-							del = (Employee) s.get(Employee.class, del.getUuid());
-							monitor.subTask(del.getSmartUserId());
-							String deleteError = null;
-							try{
-								//first run before delete 
-								ConservationAreaManager.getInstance()
-									.fireEmployeeBeforeDelete(del, s);
-								
-								//validate delete
-								if (!DeleteManager.canDelete(del, s)){
-									deleteError = MessageFormat.format(
-											Messages.CcaaUserPropertyPage_Error1, del.getSmartUserId());
-								}else{
-									//delete
-									if (del.equals(SmartDB.getCurrentEmployee())){
-										restart[0] = true;
-									}
-									s.delete(del);
-								}
-							}catch (Exception ex){
-								deleteError =  MessageFormat.format(
-										Messages.CcaaUserPropertyPage_Error2, del.getSmartUserId(), ex.getMessage());
-								SmartPlugIn.log(ex.getMessage(), ex);
-							}
-							
-							if (deleteError != null){
-								displayError(deleteError);
-							}
-							monitor.worked(1);
-						}
-						s.getTransaction().commit();
-					}catch ( final Exception ex){
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
 						try{
-							s.getTransaction().rollback();
-						}catch (Exception ex2){
-							SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
+							for (Employee del : toDelete){
+								del = (Employee) s.get(Employee.class, del.getUuid());
+								monitor.subTask(del.getSmartUserId());
+								String deleteError = null;
+								try{
+									//first run before delete 
+									ConservationAreaManager.getInstance()
+										.fireEmployeeBeforeDelete(del, s);
+									
+									//validate delete
+									if (!DeleteManager.canDelete(del, s)){
+										deleteError = MessageFormat.format(
+												Messages.CcaaUserPropertyPage_Error1, del.getSmartUserId());
+									}else{
+										//delete
+										if (del.equals(SmartDB.getCurrentEmployee())){
+											restart[0] = true;
+										}
+										s.delete(del);
+									}
+								}catch (Exception ex){
+									deleteError =  MessageFormat.format(
+											Messages.CcaaUserPropertyPage_Error2, del.getSmartUserId(), ex.getMessage());
+									SmartPlugIn.log(ex.getMessage(), ex);
+								}
+								
+								if (deleteError != null){
+									displayError(deleteError);
+								}
+								monitor.worked(1);
+							}
+							s.getTransaction().commit();
+						}catch ( final Exception ex){
+							try{
+								s.getTransaction().rollback();
+							}catch (Exception ex2){
+								SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
+							}
+							displayError(Messages.CcaaUserPropertyPage_Error3 + "\n\n" + ex.getMessage()); //$NON-NLS-1$
+							SmartPlugIn.log(ex.getMessage(), ex);
 						}
-						displayError(Messages.CcaaUserPropertyPage_Error3 + "\n\n" + ex.getMessage()); //$NON-NLS-1$
-						SmartPlugIn.log(ex.getMessage(), ex);						
-					}finally{
-						s.close();
 					}
 				}
 			});

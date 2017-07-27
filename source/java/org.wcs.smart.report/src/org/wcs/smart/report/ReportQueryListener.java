@@ -27,7 +27,7 @@ import java.util.List;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.internal.Messages;
@@ -54,8 +54,7 @@ public class ReportQueryListener extends QueryListenerAdapter {
 	@Override
 	public boolean beforeDelete(Query query, Session session) {
 		if (query.getUuid() == null) return true;
-		@SuppressWarnings("unchecked")
-		List<ReportQuery> queries = session.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list(); //$NON-NLS-1$
+		List<ReportQuery> queries = QueryFactory.buildQuery(session, ReportQuery.class, "id.queryUuid", query.getUuid()).getResultList(); //$NON-NLS-1$
 		if (queries.size() == 0) {
 			return true;
 		}else{

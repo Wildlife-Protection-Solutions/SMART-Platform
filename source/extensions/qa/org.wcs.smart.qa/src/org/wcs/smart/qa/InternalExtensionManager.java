@@ -35,8 +35,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.IQaDataProvider;
@@ -86,21 +86,17 @@ public enum InternalExtensionManager {
 	 * 
 	 * @return list of routines defined for automatic configuration
 	 */
-	@SuppressWarnings("unchecked")
 	public synchronized List<QaRoutine> getAutoRoutines(){
 		if (autoRoutines != null) return autoRoutines;
 		List<QaRoutine> routines = new ArrayList<>();
-		Session session = HibernateManager.openSession();
-		try{
-			routines.addAll(session.createCriteria(QaRoutine.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("autoCheck", true)) //$NON-NLS-1$
-				.list());
+		
+		try(Session session = HibernateManager.openSession()){
+			routines.addAll(QueryFactory.buildQuery(session, QaRoutine.class, 
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"autoCheck", true}).getResultList()); //$NON-NLS-1$
 			
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
-		}finally{
-			session.close();
 		}
 		this.autoRoutines = routines;
 		return this.autoRoutines;
@@ -217,16 +213,15 @@ public enum InternalExtensionManager {
 			if (isAutoCleaned) return;
 			isAutoCleaned = true;
 		}
-		Session session = HibernateManager.openSession();
-		try {
-			session.beginTransaction();
-			QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea(), session);
-			session.getTransaction().commit();
-		} catch (Exception e) {
-			QaPlugIn.log(e.getMessage(), e);
-			session.getTransaction().rollback();
-		}finally{
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			try {
+				session.beginTransaction();
+				QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea(), session);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				QaPlugIn.log(e.getMessage(), e);
+				session.getTransaction().rollback();
+			}
 		}
 	}
 }

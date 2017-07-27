@@ -24,6 +24,10 @@ package org.wcs.smart.cybertracker.properties;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -44,7 +48,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
@@ -52,6 +55,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.ImageResize
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.ImageSizeOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -217,68 +221,67 @@ public class ImageProcessingOpDialog extends TitleAreaDialog implements Listener
 			return;
 		}
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			CyberTrackerPropertiesOption resizeOp = (CyberTrackerPropertiesOption)s.createCriteria(CyberTrackerPropertiesOption.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("optionId", OptionID.RESIZE_IMAGE)) //$NON-NLS-1$
-				.uniqueResult();
-			CyberTrackerPropertiesOption sizeOp = (CyberTrackerPropertiesOption)s.createCriteria(CyberTrackerPropertiesOption.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("optionId", OptionID.IMAGE_SIZE)) //$NON-NLS-1$
-					.uniqueResult();
-			
-			CyberTrackerPropertiesOption maxSize = (CyberTrackerPropertiesOption)s.createCriteria(CyberTrackerPropertiesOption.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("optionId", OptionID.MAX_IMAGE_SIZE)) //$NON-NLS-1$
-					.uniqueResult();
-			
-			if (resizeOp == null){
-				resizeOp = new CyberTrackerPropertiesOption();
-				resizeOp.setOptionId(OptionID.RESIZE_IMAGE);
-				resizeOp.setConservationArea(SmartDB.getCurrentConservationArea());
-			}
-			if (!btnDoResize.getSelection()){
-				resizeOp.setStringValue(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name());
-				if (sizeOp != null){
-					s.delete(sizeOp);
-				}
-			}else{
-				if (maxSize == null){
-					maxSize = new CyberTrackerPropertiesOption();
-					maxSize.setOptionId(OptionID.MAX_IMAGE_SIZE);
-					maxSize.setConservationArea(SmartDB.getCurrentConservationArea());
-				}
-				maxSize.setDoubleValue(Double.parseDouble(txtMaxSize.getText()));
-				s.saveOrUpdate(maxSize);
+			try{
 				
-				if (btnPrompt.getSelection()){
-					resizeOp.setStringValue(ImageResizeOption.MANUAL.name());
-					if (sizeOp != null) s.delete(sizeOp);
-				}else{
-					resizeOp.setStringValue(ImageResizeOption.AUTO.name());
-					if (sizeOp == null){
-						sizeOp = new CyberTrackerPropertiesOption();
-						sizeOp.setOptionId(OptionID.IMAGE_SIZE);
-						sizeOp.setConservationArea(SmartDB.getCurrentConservationArea());
-					}
-					ImageSizeOption selectedSizeOp = resizeComp.getResizeOption();
-					if(selectedSizeOp.equals(ImageSizeOption.CUSTOM)){
-						sizeOp.setStringValue(selectedSizeOp.name() + CyberTrackerPropertiesOption.PROP_SEP + resizeComp.getWidth() + CyberTrackerPropertiesOption.PROP_SEP + resizeComp.getHeight());
-					}else{
-						sizeOp.setStringValue(selectedSizeOp.name());
-					}
-					s.saveOrUpdate(sizeOp);
+				CyberTrackerPropertiesOption resizeOp = QueryFactory.buildQuery(s, CyberTrackerPropertiesOption.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"optionId", OptionID.RESIZE_IMAGE}).uniqueResult(); //$NON-NLS-1$
+						
+				CyberTrackerPropertiesOption sizeOp = QueryFactory.buildQuery(s, CyberTrackerPropertiesOption.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"optionId", OptionID.IMAGE_SIZE}).uniqueResult(); //$NON-NLS-1$
+				
+				CyberTrackerPropertiesOption maxSize = QueryFactory.buildQuery(s, CyberTrackerPropertiesOption.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"optionId", OptionID.MAX_IMAGE_SIZE}).uniqueResult(); //$NON-NLS-1$
+
+				
+				if (resizeOp == null){
+					resizeOp = new CyberTrackerPropertiesOption();
+					resizeOp.setOptionId(OptionID.RESIZE_IMAGE);
+					resizeOp.setConservationArea(SmartDB.getCurrentConservationArea());
 				}
+				if (!btnDoResize.getSelection()){
+					resizeOp.setStringValue(CyberTrackerPropertiesOption.ImageResizeOption.NONE.name());
+					if (sizeOp != null){
+						s.delete(sizeOp);
+					}
+				}else{
+					if (maxSize == null){
+						maxSize = new CyberTrackerPropertiesOption();
+						maxSize.setOptionId(OptionID.MAX_IMAGE_SIZE);
+						maxSize.setConservationArea(SmartDB.getCurrentConservationArea());
+					}
+					maxSize.setDoubleValue(Double.parseDouble(txtMaxSize.getText()));
+					s.saveOrUpdate(maxSize);
+					
+					if (btnPrompt.getSelection()){
+						resizeOp.setStringValue(ImageResizeOption.MANUAL.name());
+						if (sizeOp != null) s.delete(sizeOp);
+					}else{
+						resizeOp.setStringValue(ImageResizeOption.AUTO.name());
+						if (sizeOp == null){
+							sizeOp = new CyberTrackerPropertiesOption();
+							sizeOp.setOptionId(OptionID.IMAGE_SIZE);
+							sizeOp.setConservationArea(SmartDB.getCurrentConservationArea());
+						}
+						ImageSizeOption selectedSizeOp = resizeComp.getResizeOption();
+						if(selectedSizeOp.equals(ImageSizeOption.CUSTOM)){
+							sizeOp.setStringValue(selectedSizeOp.name() + CyberTrackerPropertiesOption.PROP_SEP + resizeComp.getWidth() + CyberTrackerPropertiesOption.PROP_SEP + resizeComp.getHeight());
+						}else{
+							sizeOp.setStringValue(selectedSizeOp.name());
+						}
+						s.saveOrUpdate(sizeOp);
+					}
+				}
+				s.saveOrUpdate(resizeOp);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				CyberTrackerPlugIn.displayError(Messages.ImageProcessingOpDialog_ErrorTitle, Messages.ImageProcessingOpDialog_SaveError + ex.getMessage(), ex);
 			}
-			s.saveOrUpdate(resizeOp);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			CyberTrackerPlugIn.displayError(Messages.ImageProcessingOpDialog_ErrorTitle, Messages.ImageProcessingOpDialog_SaveError + ex.getMessage(), ex);
-		}finally{
-			s.close();
 		}
 		modified(false);
 	}
@@ -290,20 +293,19 @@ public class ImageProcessingOpDialog extends TitleAreaDialog implements Listener
 		btnDoResize.setEnabled(false);
 		
 		Job j = new Job("loading settings"){ //$NON-NLS-1$
-
-			@SuppressWarnings("unchecked")
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final List<CyberTrackerPropertiesOption> options = new ArrayList<>();
-				Session s = HibernateManager.openSession();
-				try{
-					options.addAll(s.createCriteria(CyberTrackerPropertiesOption.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.in("optionId", new OptionID[]{OptionID.RESIZE_IMAGE, OptionID.IMAGE_SIZE, OptionID.MAX_IMAGE_SIZE})) //$NON-NLS-1$
-					.list());
+				
+				try(Session s = HibernateManager.openSession()){
 					
-				}finally{
-					s.close();
+					CriteriaBuilder cb = s.getCriteriaBuilder();
+					CriteriaQuery<CyberTrackerPropertiesOption> c = cb.createQuery(CyberTrackerPropertiesOption.class);
+					Root<CyberTrackerPropertiesOption> from = c.from(CyberTrackerPropertiesOption.class);
+					c.where(cb.and(
+							cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+							from.get("optionId").in(new Object[]{OptionID.RESIZE_IMAGE, OptionID.IMAGE_SIZE, OptionID.MAX_IMAGE_SIZE}))); //$NON-NLS-1$
+					options.addAll(s.createQuery(c).getResultList());
 				}
 
 				Display.getDefault().syncExec(()->{

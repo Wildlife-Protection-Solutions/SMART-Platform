@@ -55,25 +55,24 @@ public class AddERQueryJob extends Job {
 		//required if run during restore to ensure Display.syncexec calls don't block
 		DisplayAccess.accessDisplayDuringStartup();
 				
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			installPlugin(session);
-			session.getTransaction().commit();
-		}catch(Exception ex){
-			if (session.getTransaction().isActive()) session.getTransaction().rollback();
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					MessageDialog.openError(Display.getDefault().getActiveShell(),
-							Messages.AddERQueryJob_Errortitle,
-							Messages.AddERQueryJob_ErrorMsg);
-				}
-				
-			});
-			return new Status(Status.ERROR,ERQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
-		}finally{
-			session.close();
+			try{
+				installPlugin(session);
+				session.getTransaction().commit();
+			}catch(Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openError(Display.getDefault().getActiveShell(),
+								Messages.AddERQueryJob_Errortitle,
+								Messages.AddERQueryJob_ErrorMsg);
+					}
+					
+				});
+				return new Status(Status.ERROR,ERQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
+			}
 		}
 		monitor.done();
 		return Status.OK_STATUS;

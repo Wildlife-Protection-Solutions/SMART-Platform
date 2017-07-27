@@ -30,6 +30,7 @@ import org.locationtech.udig.project.ui.internal.wizard.MapImport;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class AddLayerHandler {
 
 	@Execute

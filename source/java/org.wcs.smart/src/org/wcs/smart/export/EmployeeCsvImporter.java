@@ -35,13 +35,13 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
@@ -291,17 +291,13 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Agency> loadAgencies(Session session){
-		List<Agency> agencies = null;
 		session.beginTransaction();
 		try{
-			agencies = session.createCriteria(Agency.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list(); 
+			return QueryFactory.buildQuery(session, Agency.class, 
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
 		}finally{
 			session.getTransaction().commit();
 		}
-		return agencies;
 	}
 }

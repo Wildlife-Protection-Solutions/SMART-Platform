@@ -30,7 +30,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
@@ -49,22 +48,15 @@ public class IndIncidentSourceUiProvider implements
 	@Override
 	public void findAndShow(UUID waypointUuid) {
 		Waypoint pw = null;
-		Session s = HibernateManager.openSession();
-		try{
-			pw = (Waypoint)s.createCriteria(Waypoint.class)
-					.add(Restrictions.eq("uuid", waypointUuid)) //$NON-NLS-1$
-					.uniqueResult();
+		try(Session s = HibernateManager.openSession()){
+			pw = s.get(Waypoint.class, waypointUuid);
 			if (pw == null){
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
 						ERROR_STR, 
 						Messages.IndIncidentSourceUiProvider_WaypointNotFound);
 				return;
 			}
-			
-		}finally{
-			s.close();
 		}
-		
 			
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		ctx.set(OpenIncidentHandler.UUID_PARAM, waypointUuid);

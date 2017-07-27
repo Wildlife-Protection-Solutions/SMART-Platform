@@ -43,25 +43,25 @@ public class EntityDatabaseUpgrader implements IDatabaseUpgrader {
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.EntityDatabaseUpgrader_UpgradeTask, 1);
-		Session session = HibernateManager.openSession();
-		try{
-			session.beginTransaction();
-			Map<String, String> versions = UpgradeEngine.getVersions(session);
-			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			String currentPluginVersion = versions.get(EntityPlugIn.PLUGIN_ID);
-			
-			if (currentPluginVersion == null) {
-				(new AddEntityJob()).installPlugin(session);
+		try(Session session = HibernateManager.openSession()){
+			try{
+		
+				session.beginTransaction();
+				Map<String, String> versions = UpgradeEngine.getVersions(session);
+				if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+				String currentPluginVersion = versions.get(EntityPlugIn.PLUGIN_ID);
 				
-			}else{
-				upgrade(currentPluginVersion, session);
-			}
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			throw ex;
-		} finally { 
-			session.close();
+				if (currentPluginVersion == null) {
+					(new AddEntityJob()).installPlugin(session);
+					
+				}else{
+					upgrade(currentPluginVersion, session);
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				throw ex;
+			} 
 		}
 		monitor.done();
 	}
@@ -106,7 +106,7 @@ public class EntityDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE SMART.ENTITY_TYPE ADD CONSTRAINT ENTITY_TYPE_DM_ATTRIBUTE_FK FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES SMART.DM_ATTRIBUTE(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 		};
 		for (String s : sql){
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, EntityPlugIn.DB_VERSION_2, session);
 	}

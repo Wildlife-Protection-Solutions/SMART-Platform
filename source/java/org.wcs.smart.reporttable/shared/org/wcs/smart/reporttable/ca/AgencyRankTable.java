@@ -24,7 +24,7 @@ package org.wcs.smart.reporttable.ca;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Rank;
@@ -137,13 +137,11 @@ public class AgencyRankTable  extends SmartBirtTable {
 	/**
 	 * @see org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable#getValues(org.wcs.smart.ca.ConservationArea)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues (SmartConnection connection) {
+	public List<? extends Object> getValues (SmartConnection connection) {
 		String sql = "FROM Rank r WHERE r.agency.conservationArea in (:ca)"; //$NON-NLS-1$
-		Query q  = connection.getSession().createQuery(sql);
+		Query<Rank> q  = connection.getSession().createQuery(sql, Rank.class);
 		q.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
-		
 		return q.list();
 	}
 

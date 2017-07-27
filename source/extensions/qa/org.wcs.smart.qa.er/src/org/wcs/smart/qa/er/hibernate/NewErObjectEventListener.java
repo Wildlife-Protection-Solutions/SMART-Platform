@@ -23,6 +23,7 @@ package org.wcs.smart.qa.er.hibernate;
 
 import org.hibernate.event.spi.PostInsertEvent;
 import org.hibernate.event.spi.PostInsertEventListener;
+import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.qa.RoutineExtensionManager;
@@ -61,5 +62,10 @@ public class NewErObjectEventListener implements PostInsertEventListener{
 			SingleItemDataProvider provider = new SingleItemDataProvider(RoutineExtensionManager.INSTANCE.findDataProvider(ErWaypointDataProvider.ID), data);
 			AutoValidateJob.INSTANCE.addTask(provider);
 		}
+	}
+
+	@Override
+	public boolean requiresPostCommitHanding(EntityPersister persister) {
+		return true;
 	}
 }

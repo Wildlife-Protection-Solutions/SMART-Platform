@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -36,6 +35,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Clones entity types when a conservation area is cloned.  Will not
@@ -66,10 +66,9 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 		cloneEntityTypes(progress.newChild(10));
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void cloneEntityTypes(IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntityTemplateCloner_ProgressCloningTypes2, 1);
-		List<EntityType> toClone = engine.getSession().createCriteria(EntityType.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
+		List<EntityType> toClone = QueryFactory.buildQuery(engine.getSession(), EntityType.class, "conservationArea", engine.getTemplateCa()).getResultList(); //$NON-NLS-1$
 		progress.setWorkRemaining(toClone.size());
 		
 		for (EntityType et : toClone){
@@ -117,7 +116,9 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 
 	private Attribute findNewAttribute(Attribute oldAttribute) throws Exception{
-		List<?> attributes = engine.getSession().createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).add(Restrictions.eq("keyId", oldAttribute.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<Attribute> attributes = QueryFactory.buildQuery(engine.getSession(), Attribute.class,
+				new Object[] {"conservationArea", engine.getNewCa()}, //$NON-NLS-1$
+				new Object[] {"keyId", oldAttribute.getKeyId()}).getResultList(); //$NON-NLS-1$
 		if (attributes.size() == 1){
 			return (Attribute) attributes.get(0);
 		}

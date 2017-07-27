@@ -24,10 +24,9 @@ package org.wcs.smart.report.internal.advisor;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
@@ -56,12 +55,12 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		if (e.getUuid() == null){
 			return null;
 		}
-		Long cnt = (Long) session.createCriteria(Report.class).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		Long cnt = QueryFactory.buildCountQuery(session, Report.class, new Object[] {"owner",e}); //$NON-NLS-1$
 		if (cnt > 0){
 			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsReports, new Object[]{SmartLabelProvider.getFullLabel(e), cnt});
 		}
-	
-		cnt = (Long) session.createCriteria(ReportFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		
+		cnt = QueryFactory.buildCountQuery(session, ReportFolder.class, new Object[] {"employee",e}); //$NON-NLS-1$
 		if (cnt > 0){
 			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsFolders, new Object[]{SmartLabelProvider.getFullLabel(e), cnt});
 		}

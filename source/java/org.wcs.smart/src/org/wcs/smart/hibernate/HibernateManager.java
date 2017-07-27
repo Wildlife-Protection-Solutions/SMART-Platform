@@ -28,29 +28,30 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.geotools.referencing.CRS;
-import org.hibernate.Criteria;
 import org.hibernate.Interceptor;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.Joinable;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
 import org.mindrot.jbcrypt.BCrypt;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ProjectionUtils;
@@ -65,7 +66,6 @@ import org.wcs.smart.ca.ICaCreateHandler;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Projection;
-import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -129,29 +129,32 @@ public class HibernateManager extends SmartHibernateManager{
 	 * <code>null</code> if not found
 	 */
 	public static Language findLanguage(Session x, Locale l, ConservationArea ca){
-		Transaction tx = x.beginTransaction();
+		x.beginTransaction();
 		try {
 			//match language and country code
 			String fullCode = I18nUtil.localeToString(l);
-			List<?> results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", fullCode)).list(); //$NON-NLS-1$ //$NON-NLS-2$
-			if (results.size() > 0){
-				return (Language)results.get(0);
+			
+			ConservationArea thisca = x.get(ConservationArea.class, ca.getUuid());
+			if (thisca == null) return null;
+			
+			//match language and country code
+			for (Language lang : thisca.getLanguages()) {
+				if (lang.getCode().equals(fullCode)) return lang;
 			}
+			
 			//match language only
-			results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", l.getLanguage())).list(); //$NON-NLS-1$ //$NON-NLS-2$
-			if (results.size() > 0){
-				return (Language)results.get(0);
+			for (Language lang : thisca.getLanguages()) {
+				if (lang.getCode().equals(l.getLanguage())) return lang;
 			}
 			
 			//find default
-			results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("default", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
-			if (results.size() > 0){
-				return (Language) results.get(0);
+			for (Language lang : thisca.getLanguages()) {
+				if (lang.isDefault()) return lang;
 			}
 			
 			return null;
 		}finally{
-			tx.rollback();
+			x.getTransaction().rollback();
 		}
 	}
 	
@@ -162,15 +165,9 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return
 	 */
 	public static List<Area> loadAreas(AreaType areaType, Session session){
-		@SuppressWarnings("unchecked")
-		List<Area> items = session
-			.createCriteria(Area.class)
-			.add(Restrictions.eq(
-					"conservationArea", //$NON-NLS-1$
-				SmartDB.getCurrentConservationArea()))
-				.add(Restrictions.eq("type", areaType)).list(); //$NON-NLS-1$
-	
-		return items;
+		return QueryFactory.buildQuery(session, Area.class, 
+				new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()},  //$NON-NLS-1$
+				new Object[]{"type", areaType}).getResultList(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -183,20 +180,13 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param session
 	 * @return matching area or <code>null</code> if not found
 	 */
-	@SuppressWarnings("unchecked")
 	public static Area findArea(AreaType type, String key, Session session){
-		List<Area> matching = session
-				.createCriteria(Area.class)
-				.add(Restrictions.eq("conservationArea", //$NON-NLS-1$
-						SmartDB.getCurrentConservationArea()))
-				.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-				.add(Restrictions.eq("type", type)).list(); //$NON-NLS-1$
-		if (matching.size() == 0){
-			return null;
-		}else{
-			return matching.get(0);
-		}
+		return QueryFactory.buildQuery(session, Area.class, 
+				new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()},  //$NON-NLS-1$
+				new Object[]{"keyId", key},  //$NON-NLS-1$
+				new Object[]{"type", type}).uniqueResult(); //$NON-NLS-1$
 	}
+	
 	/**
 	 * For each hibernate mapping which maps 1-1 to a database
 	 * table this function returns the information about that
@@ -213,24 +203,25 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 		
 		List<TableInfo> data = new ArrayList<TableInfo>();
-		Map<String, ClassMetadata> x = sessionFactory.getAllClassMetadata();
-		for (Iterator<ClassMetadata> i = x.values().iterator(); i.hasNext();) {
-			ClassMetadata m = i.next();
-			if (m instanceof Joinable){
-				Joinable j = ((Joinable)m);
-				if (((AbstractEntityPersister)m).getRootTableName().equals(j.getTableName())){
-					TableInfo info = new TableInfo(m.getMappedClass(), j.getTableName());
+		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory)sessionFactory).getMetamodel();
+		for (EntityType<?> t : mi.getEntities()) {
+			AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(t.getJavaType()));
+
+			if (info.getClassMetadata() instanceof Joinable) {
+				Joinable j = ((Joinable)info.getClassMetadata());
+				if (info.getRootTableName().equals(j.getTableName())){
+					TableInfo tableInfo = new TableInfo(info.getMappedClass(), j.getTableName());
 					//find conservation area property if available
-					for (int k = 0; k < m.getPropertyTypes().length; k ++){
-						if (m.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
-							info.setCaPropertyName(((AbstractEntityPersister)m).getPropertyColumnNames(k)[0]);
+					for (int k = 0; k < info.getPropertyTypes().length; k ++){
+						if (info.getPropertyTypes()[k].getReturnedClass() == ConservationArea.class){
+							tableInfo.setCaPropertyName(((AbstractEntityPersister)info).getPropertyColumnNames(k)[0]);
 						}
 					}
-					data.add(info);
+					data.add(tableInfo);
 				}
-				
 			}
 		}
+		
 		return data;
 	}
 	
@@ -246,7 +237,9 @@ public class HibernateManager extends SmartHibernateManager{
 		if (sessionFactory == null){
 			return null;
 		}
-		ClassMetadata m = sessionFactory.getClassMetadata(hibernateClass);
+		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory)sessionFactory).getMetamodel();
+		AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(hibernateClass));
+		ClassMetadata m = info.getClassMetadata();
 		if (m instanceof Joinable){
 			return ((Joinable)m).getTableName();
 		}
@@ -275,9 +268,8 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param session hibernate session
 	 * @return a list of conservation areas in the database
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<ConservationArea> getConservationAreas(Session session) {		
-		Query query = session.createQuery("from ConservationArea WHERE uuid != :uuid Order by lower(id)");	 //$NON-NLS-1$
+		Query<ConservationArea> query = session.createQuery("from ConservationArea WHERE uuid != :uuid Order by lower(id)", ConservationArea.class);	 //$NON-NLS-1$
 		query.setParameter("uuid", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
 		List<ConservationArea> areas = query.list();
 		return areas;
@@ -291,22 +283,26 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return
 	 */
 	public static List<Employee> getActiveEmployees(ConservationArea ca, Session s){
-		@SuppressWarnings("unchecked")
-		List<Employee> results = s.createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.isNull("endEmploymentDate")).list(); //$NON-NLS-1$ //$NON-NLS-2$
-		return results;
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
+		Root<Employee> root = c.from(Employee.class);
+		c.where(cb.and(
+				cb.equal(root.get("conservationArea"), ca), //$NON-NLS-1$
+				cb.isNull(root.get("endEmploymentDate")) //$NON-NLS-1$
+				));
+		return s.createQuery(c).getResultList();
 	}
 
 	/**
-	 * Gets all active employees for a given conservation area.
+	 * Gets all employees for a given conservation area.
 	 * 
 	 * @param ca
 	 * @param s
 	 * @return
 	 */
 	public static List<Employee> getAllEmployees(ConservationArea ca, Session s){
-		@SuppressWarnings("unchecked")
-		List<Employee> results = s.createCriteria(Employee.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
-		return results;
+		ConservationArea thisCa = s.get(ConservationArea.class, ca.getUuid());
+		return thisCa.getEmployees();
 	}
 	
 	/**
@@ -322,8 +318,8 @@ public class HibernateManager extends SmartHibernateManager{
 		try{
 			String query = "select count(*) from Employee where conservationArea = :ca and UPPER(smartUserId) = :userId"; //$NON-NLS-1$
 			List<?> cnt = session.createQuery(query)
-					.setEntity("ca", ca) //$NON-NLS-1$
-					.setString("userId", userName.toUpperCase()).list(); //$NON-NLS-1$ 
+					.setParameter("ca", ca) //$NON-NLS-1$
+					.setParameter("userId", userName.toUpperCase()).list(); //$NON-NLS-1$ 
 			boolean ok = false;
 			if ( (Long) cnt.get(0) > 0){
 				ok = false;
@@ -352,16 +348,15 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return list of conservation areas 
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<ConservationArea> findConservationAreas(String userName, String password) throws Exception{
-		Session x = HibernateManager.openSession();
-		Transaction tx = x.beginTransaction();
-		try{
-			
-			List<Employee> es = x.createCriteria(Employee.class)
-					.add(Restrictions.eq("smartUserId", userName).ignoreCase()) //$NON-NLS-1$
-					.list();
-			
+		try(Session s = HibernateManager.openSession()){
+		
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
+			Root<Employee> root = c.from(Employee.class);
+			c.where(cb.equal(cb.upper(root.get("smartUserId")), userName.toUpperCase())); //$NON-NLS-1$
+			List<Employee> es = s.createQuery(c).list();
+
 			List<ConservationArea> areas = new ArrayList<ConservationArea>();
 			for (Employee e : es){
 				if (!e.getConservationArea().getIsCcaa() && e.getEndEmploymentDate() == null){
@@ -373,14 +368,8 @@ public class HibernateManager extends SmartHibernateManager{
 				}
 			}
 			areas.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));
-			
 			return areas;
 			
-		}catch (Exception ex){
-			tx.rollback();
-			throw ex;
-		}finally{
-			x.close();
 		}
 	}
 	
@@ -409,19 +398,20 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return the Employee associated with the username and password; null if nobody found
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public static Employee validateUser(String userName, String password, ConservationArea ca) throws Exception{
 		
-		Session x = HibernateManager.openSession();
-		Transaction tx = x.beginTransaction();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			
-			Criteria employee = x.createCriteria(Employee.class);
-			employee.add( Restrictions.eq("smartUserId", userName).ignoreCase()); //$NON-NLS-1$
-			employee.add(Restrictions.isNull("endEmploymentDate")); //$NON-NLS-1$
-			employee.add( Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
+			Root<Employee> root = c.from(Employee.class);
+			c.where(cb.and(
+					cb.equal(cb.upper(root.get("smartUserId")), userName.toUpperCase()), //$NON-NLS-1$
+					cb.isNull(root.get("endEmploymentDate")), //$NON-NLS-1$
+					cb.equal(root.get("conservationArea"), ca) //$NON-NLS-1$
+					));
+			List<Employee> people = s.createQuery(c).list();
 			
-			List<Employee> people = employee.list();
 			if (people.size() == 1){
 				Employee user = people.get(0);
 				
@@ -432,11 +422,15 @@ public class HibernateManager extends SmartHibernateManager{
 					return null;
 				}else{
 					//check passwords for all users with matching userids
-					List<Employee> otherUsers = x.createCriteria(Employee.class)
-						.add( Restrictions.eq("smartUserId", userName).ignoreCase()) //$NON-NLS-1$
-						.add(Restrictions.isNull("endEmploymentDate")) //$NON-NLS-1$
-						.add(Restrictions.ne("conservationArea", ca)) //$NON-NLS-1$
-						.list();
+					cb = s.getCriteriaBuilder();
+					c = cb.createQuery(Employee.class);
+					root = c.from(Employee.class);
+					c.where(cb.and(cb.equal(cb.upper(root.get("smartUserId")), userName.toUpperCase()), //$NON-NLS-1$
+							cb.isNull(root.get("endEmploymentDate")), //$NON-NLS-1$
+							cb.notEqual(root.get("conservationArea"), ca) //$NON-NLS-1$
+							));
+					List<Employee> otherUsers = s.createQuery(c).list();
+					
 					for (Employee o : otherUsers){
 						if (validatePassword(password, o)){
 							return user;
@@ -446,11 +440,6 @@ public class HibernateManager extends SmartHibernateManager{
 				}
 			}
 			return null;
-		}catch (Exception ex){
-			throw ex;
-		}finally{
-			tx.rollback();
-			x.close();
 		}
 	}
 	
@@ -487,15 +476,12 @@ public class HibernateManager extends SmartHibernateManager{
 	 */
 	private static List<Station> getStations(ConservationArea ca, Session s,
 			boolean onlyActive) {
-		Criteria st = null;
-		st = s.createCriteria(Station.class);
-		st.add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		Object[][] fields = new Object[onlyActive?2:1][2];
+		fields[0] = new Object[] {"conservationArea", ca}; //$NON-NLS-1$
 		if (onlyActive) {
-			st.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
+			fields[1] = new Object[] {"isActive", true}; //$NON-NLS-1$
 		}
-		@SuppressWarnings("unchecked")
-		List<Station> people = st.list();
-		return people;
+		return QueryFactory.buildQuery(s, Station.class, fields).getResultList();
 	}
 	
 	
@@ -506,22 +492,12 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return list of agencies
 	 */
 	public static List<Agency> getAgencies(ConservationArea ca, Session s){
-		Criteria st = null;
-		st = s.createCriteria(Agency.class);
-		st.add( Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Agency> people = st.list();		
-		return people;		
-	}
-	
-	public static List<Rank> getRanksByAgency(ConservationArea ca, Session s,Agency agt){
-		Criteria st = null;
-		st = s.createCriteria(Agency.class);
-		st.add( Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		st.add( Restrictions.eq("Agency", agt)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Rank> ranks = st.list();		
-		return ranks;		
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Agency> c = cb.createQuery(Agency.class);
+		Root<Agency> root = c.from(Agency.class);
+		c.where(cb.equal(root.get("conservationArea"), ca)); //$NON-NLS-1$
+		
+		return s.createQuery(c).getResultList();
 	}
 
 	private static NumberFormat ID_FORMATTER = new DecimalFormat("00000"); //$NON-NLS-1$
@@ -539,8 +515,8 @@ public class HibernateManager extends SmartHibernateManager{
 		c.setTime(e.getBirthDate());
 		int year = c.get(Calendar.YEAR);
 		
-		String query = (((SessionFactoryImplementor)sessionFactory).getDialect().getSequenceNextValString("smart.smart_user_id_seq")); //$NON-NLS-1$
-		List<?> results = session.createSQLQuery(query).list();
+		String query = getCurrentDialect().getSequenceNextValString("smart.smart_user_id_seq"); //$NON-NLS-1$
+		List<?> results = session.createNativeQuery(query).list();
 		e.setId(year + ID_FORMATTER.format(results.get(0)));
 	}
 	
@@ -556,43 +532,43 @@ public class HibernateManager extends SmartHibernateManager{
 		HibernateManager.endSessionFactory(true);
 		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
-		Session s = HibernateManager.openSession();
-		Transaction tx = s.beginTransaction();
-		try {
-			//save conservation area
-			s.save(newCa);
-			for(Employee e: newCa.getEmployees()){
-				generateEmployeeId(e, s);
-				s.save(e);
-			}		
-			
-			//create initial default projection
-			CoordinateReferenceSystem crs = CRS.decode("EPSG:4326"); //$NON-NLS-1$
-			Projection prj = new Projection();
-			prj.setConservationArea(newCa);
-			String code = "unknown"; //$NON-NLS-1$
-			try{
-				code = CRS.lookupIdentifier(crs.getName().getAuthority(), crs, true);
-			}catch (Exception ex){
+		try(Session s = HibernateManager.openSession()) {
+			s.beginTransaction();
+			try {
+				//save conservation area
+				s.save(newCa);
+				for(Employee e: newCa.getEmployees()){
+					generateEmployeeId(e, s);
+					s.save(e);
+				}		
 				
+				//create initial default projection
+				CoordinateReferenceSystem crs = CRS.decode("EPSG:4326"); //$NON-NLS-1$
+				Projection prj = new Projection();
+				prj.setConservationArea(newCa);
+				String code = "unknown"; //$NON-NLS-1$
+				try{
+					code = CRS.lookupIdentifier(crs.getName().getAuthority(), crs, true);
+				}catch (Exception ex){
+					
+				}
+				prj.setName(crs.getName().getCode() + " [" + crs.getName().getCodeSpace() + ": " + code + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				prj.setDefinition(crs.toWKT());
+				prj.setIsDefault(true);
+				s.save(prj);
+				
+				//fire extension points
+				List<ICaCreateHandler> extensions = getCreateExtensions();
+				for (ICaCreateHandler handler : extensions) {
+					handler.afterCreate(newCa, s);
+				}
+				
+				s.getTransaction().commit();
+			} catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			prj.setName(crs.getName().getCode() + " [" + crs.getName().getCodeSpace() + ": " + code + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			prj.setDefinition(crs.toWKT());
-			prj.setIsDefault(true);
-			s.save(prj);
-			
-			//fire extension points
-			List<ICaCreateHandler> extensions = getCreateExtensions();
-			for (ICaCreateHandler handler : extensions) {
-				handler.afterCreate(newCa, s);
-			}
-			
-			tx.commit();
-		} catch (Exception ex) {
-			tx.rollback();
-			throw ex;
 		} finally {
-			s.close();
 			HibernateManager.endSessionFactory(true);	
 			SmartHibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
 		}
@@ -650,16 +626,19 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return an error message if the employee should not be updated, false if updates
 	 * can be made.
 	 */
-	@SuppressWarnings("unchecked")
 	public static String validateSmartUserChanges(Session session, Employee e){
-		//we only care if we are modifying ourself.
-		Criteria crit = session.createCriteria(Employee.class);
-		crit.add(Restrictions.isNull("endEmploymentDate")); //$NON-NLS-1$
-		crit.add(Restrictions.ne("uuid", e.getUuid())); //$NON-NLS-1$
-		crit.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
-		crit.add(Restrictions.isNotNull("smartUserLevelKeys")); //$NON-NLS-1$
-			
-		List<Employee> otherEmployees = crit.list();
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
+		Root<Employee> root = c.from(Employee.class);
+		c.where(cb.and(
+				cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+				cb.isNull(root.get("endEmploymentDate")), //$NON-NLS-1$
+				cb.notEqual(root.get("uuid"), e.getUuid()), //$NON-NLS-1$
+				cb.isNotNull(root.get("smartUserLevelKeys")) //$NON-NLS-1$
+				));
+		
+		List<Employee> otherEmployees = session.createQuery(c).getResultList();
 		for (Employee other : otherEmployees){
 			//some other employee in this ca is admin; we don't have anything to worry about
 			if (UserLevelManager.INSTANCE.supportsUser(other, UserLevelManager.ADMIN)) return null;
@@ -689,24 +668,30 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param s database connection
 	 * @return data model loaded or <code>null</code> if error occurred
 	 */
-	@SuppressWarnings("unchecked")
-	public static DataModel loadDataModel(ConservationArea ca, Session s){
+	public static DataModel loadDataModel(ConservationArea ca, Session session){
 		try{
-			List<Category> rootCategories = s.createCriteria(Category.class)
-					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-					.add(Restrictions.isNull("parent")) //$NON-NLS-1$
-					.addOrder(Order.asc("categoryOrder")).list(); //$NON-NLS-1$
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<Category> c = cb.createQuery(Category.class);
+			Root<Category> root = c.from(Category.class);
+			c.where(cb.and(
+					cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+					cb.isNull(root.get("parent")) //$NON-NLS-1$
+					));
+			c.orderBy(cb.asc(root.get("categoryOrder"))); //$NON-NLS-1$
+			List<Category> rootCategories = session.createQuery(c).getResultList();
+						
+			List<Attribute> attribute = QueryFactory.buildQuery(session, Attribute.class, 
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
 			
-			List<Attribute> attribute = s.createCriteria(Attribute.class)
-					.add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
 			DataModel dm = new DataModel(ca, rootCategories, attribute);
 			return dm;
 		}catch (final Exception ex){
 			SmartPlugIn.displayLog(Messages.HibernateManager_Error_LoadingDataModel, ex);
-			if (s.getTransaction().isActive()){
-				s.getTransaction().rollback();
+			
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
 			}
-			s.close();
+			session.close();
 			return null;
 		}
 		
@@ -723,15 +708,15 @@ public class HibernateManager extends SmartHibernateManager{
 	 */
 	public static Employee findEmployeeById(String employeeId, ConservationArea ca, Session session){		
 		String sql = "FROM Employee WHERE id = :id AND conservationArea = :ca"; //$NON-NLS-1$
-		Query query = session.createQuery(sql);
+		Query<Employee> query = session.createQuery(sql, Employee.class);
 		query.setParameter("id", employeeId); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<Employee> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else{
-			return (Employee)results.get(0);
+			return results.get(0);
 		}
 	}
 	
@@ -748,16 +733,16 @@ public class HibernateManager extends SmartHibernateManager{
 	 */
 	public static Employee findEmployeeByName(String givenName, String familyName, ConservationArea ca, Session session){		
 		String sql = "FROM Employee WHERE givenName = :given AND familyName = :family AND conservationArea = :ca"; //$NON-NLS-1$
-		Query query = session.createQuery(sql);
+		Query<Employee> query = session.createQuery(sql, Employee.class);
 		query.setParameter("given", givenName); //$NON-NLS-1$
 		query.setParameter("family", familyName); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<Employee> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else{
-			return (Employee)results.get(0);
+			return results.get(0);
 		}
 	}
 	
@@ -774,17 +759,17 @@ public class HibernateManager extends SmartHibernateManager{
 	 */
 	public static Employee findEmployeeByIdAndName(String employeeId, String givenName, String familyName, ConservationArea ca, Session session){		
 		String sql = "FROM Employee WHERE givenName = :given AND familyName = :family AND id = :id AND conservationArea = :ca"; //$NON-NLS-1$
-		Query query = session.createQuery(sql);
+		Query<Employee> query = session.createQuery(sql, Employee.class);
 		query.setParameter("given", givenName); //$NON-NLS-1$
 		query.setParameter("family", familyName); //$NON-NLS-1$
 		query.setParameter("id", employeeId); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<Employee> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else{
-			return (Employee)results.get(0);
+			return results.get(0);
 		}
 	}
 	
@@ -792,10 +777,9 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param session
 	 * @return all basemaps defined for the current conservation area
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<BasemapDefinition> getBasemaps(Session session){
 		String query = "FROM BasemapDefinition WHERE conservationArea = :ca"; //$NON-NLS-1$
-		Query q = session.createQuery(query);
+		Query<BasemapDefinition> q = session.createQuery(query, BasemapDefinition.class);
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		return q.list();
 	}
@@ -807,29 +791,24 @@ public class HibernateManager extends SmartHibernateManager{
 	 * if no default specified
 	 */
 	public static BasemapDefinition getDefaultBasemapDefinition(Session session){
-		List<?> defaultmap = session.createCriteria(BasemapDefinition.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("isDefault", true)).list(); //$NON-NLS-1$
-		if (defaultmap.size() > 0){
-			return (BasemapDefinition) defaultmap.get(0);
-		}
-		return null;
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<BasemapDefinition> c = cb.createQuery(BasemapDefinition.class);
+		Root<BasemapDefinition> root = c.from(BasemapDefinition.class);
+		c.where(cb.and(
+				cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+				cb.equal(root.get("isDefault"), true) //$NON-NLS-1$
+				));
+		return session.createQuery(c).uniqueResult();
 	}
 	
 	/**
 	 * @param session
 	 * @param uuid the basemap uuid
-	 * @return the default basemap defined for the conservation area or null
-	 * if no default specified
+	 * @return the  basemap with the uuid or null if not found
 	 */
 	public static BasemapDefinition getBasemapDefinition(Session session, UUID uuid){
-		List<?> defaultmap = session.createCriteria(BasemapDefinition.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("uuid", uuid)).list(); //$NON-NLS-1$
-		if (defaultmap.size() > 0){
-			return (BasemapDefinition) defaultmap.get(0);
-		}
-		return null;
+		return session.get(BasemapDefinition.class, uuid);
 	}
 	
 
@@ -849,9 +828,13 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return list of projections available for the given conservation
 	 * area
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<Projection> getCaProjectionList(ConservationArea ca, Session session){
-		return ((List<Projection>)session.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", ca)).list()); //$NON-NLS-1$
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Projection> c = cb.createQuery(Projection.class);
+		Root<Projection> root = c.from(Projection.class);
+		c.where(cb.equal(root.get("conservationArea"), ca)); //$NON-NLS-1$
+		
+		return session.createQuery(c).getResultList();
 	}
 
 	
@@ -862,12 +845,14 @@ public class HibernateManager extends SmartHibernateManager{
 	 * area of null of non selected
 	 */
 	public static Projection getDefaultProjection(Session session){
-		List<?> defaults = session.createCriteria(Projection.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("isDefault", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
-		if (defaults.size() == 0){
-			return null;
-		}else{
-			return (Projection)defaults.get(0);
-		}
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Projection> query = cb.createQuery(Projection.class);
+		Root<Projection> root = query.from(Projection.class);
+		query.where(cb.and(
+				cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+				cb.equal(root.get("isDefault"), true) //$NON-NLS-1$
+				));
+		return session.createQuery(query).uniqueResult();
 	}
 	
 	
@@ -881,7 +866,7 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return
 	 */
 	public static String getPlugInVersion(String pluginId, Session s){
-		SQLQuery query = s.createSQLQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL + " WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		NativeQuery<?> query = s.createNativeQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL + " WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		List<?> versions = query.list();
 		if (versions.size() == 0){
 			return null;
@@ -902,16 +887,16 @@ public class HibernateManager extends SmartHibernateManager{
 	public static void setPlugInVersion(String pluginId, String newVersion, Session s){
 		if (newVersion == null){
 			//delete record
-			SQLQuery query = s.createSQLQuery("DELETE FROM " + SmartDB.PLUGIN_VERSION_TBL + " WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			NativeQuery<?> query = s.createNativeQuery("DELETE FROM " + SmartDB.PLUGIN_VERSION_TBL + " WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			query.executeUpdate();
 		}else{
 			String x = getPlugInVersion(pluginId, s);
 			if (x == null){
 				//insert new
-				SQLQuery query = s.createSQLQuery("INSERT INTO " + SmartDB.PLUGIN_VERSION_TBL + " (plugin_id, version) VALUES ('" + pluginId + "', '" + newVersion + "')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				NativeQuery<?> query = s.createNativeQuery("INSERT INTO " + SmartDB.PLUGIN_VERSION_TBL + " (plugin_id, version) VALUES ('" + pluginId + "', '" + newVersion + "')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				query.executeUpdate();
 			}else{
-				SQLQuery query = s.createSQLQuery("UPDATE " + SmartDB.PLUGIN_VERSION_TBL + " SET version = '" + newVersion + "' WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				NativeQuery<?> query = s.createNativeQuery("UPDATE " + SmartDB.PLUGIN_VERSION_TBL + " SET version = '" + newVersion + "' WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				query.executeUpdate();
 			}
 		}
@@ -923,11 +908,8 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return
 	 */
 	public static Projection getCurrentViewProjection() {
-		Session s = HibernateManager.openSession();
-		try {
+		try(Session s = HibernateManager.openSession()) {
 			return getCurrentViewProjection(s);
-		} finally {
-			s.close();
 		}
 	}
 

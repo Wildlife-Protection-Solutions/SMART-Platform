@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.report.birt.query,
  org.eclipse.help,
  org.wcs.smart.p2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.entity,
  org.wcs.smart.entity.event,

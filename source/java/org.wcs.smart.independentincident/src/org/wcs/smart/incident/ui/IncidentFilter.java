@@ -23,7 +23,7 @@ package org.wcs.smart.incident.ui;
 
 import java.util.Date;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
@@ -129,7 +129,7 @@ public class IncidentFilter {
 	 * @param s
 	 * @return
 	 */
-	public Query buildQuery(Session s){ 
+	public Query<?> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT i.uuid, i.id, i.dateTime "); //$NON-NLS-1$
@@ -173,7 +173,7 @@ public class IncidentFilter {
 		
 		str.append("ORDER BY i.dateTime desc"); //$NON-NLS-1$
 		
-		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		query.setParameter("source", IndepedentIncidentSource.KEY); //$NON-NLS-1$
 		if (stringComparator != null && incidentIdFilter != null){
 			if (stringComparator == StringComparison.EQUALS){

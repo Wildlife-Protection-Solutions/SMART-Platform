@@ -66,44 +66,43 @@ public class DeletePatrolTrackAction implements IQaAction {
 		Set<Patrol> modified = new HashSet<>();
 		List<QaError> deleted = new ArrayList<>();
 		List<Track> trackDeleted = new ArrayList<>();
-		Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try{
-			s.beginTransaction();
-			
-			for (QaError item : toProcess){
-				boolean found = false;
-				for (Track track : trackDeleted){
-					if (track.getUuid().equals(item.getSourceId())){
-						//previously deleted
+		try(Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			try{
+				s.beginTransaction();
+				
+				for (QaError item : toProcess){
+					boolean found = false;
+					for (Track track : trackDeleted){
+						if (track.getUuid().equals(item.getSourceId())){
+							//previously deleted
+							deleted.add(item);
+							found = true;
+						}
+					}
+					if (found) continue;
+					
+					Track t = (Track)s.get(Track.class, item.getSourceId());
+					
+					if (t == null){
+						item.setStatus(QaError.Status.DELETED);
+						item.setFixMessage(Messages.DeletePatrolTrackAction_TrackNotFoundError);
+					}else{
 						deleted.add(item);
-						found = true;
+						trackDeleted.add(t);
+						modified.add(t.getPatrolLegDay().getPatrolLeg().getPatrol());
+						t.getPatrolLegDay().getPatrolLeg().getPatrol().equals(null);
+						
+						t.getPatrolLegDay().setTrack(null);
+						t.setPatrolLegDay(null);
+						s.delete(t);
 					}
 				}
-				if (found) continue;
-				
-				Track t = (Track)s.get(Track.class, item.getSourceId());
-				
-				if (t == null){
-					item.setStatus(QaError.Status.DELETED);
-					item.setFixMessage(Messages.DeletePatrolTrackAction_TrackNotFoundError);
-				}else{
-					deleted.add(item);
-					trackDeleted.add(t);
-					modified.add(t.getPatrolLegDay().getPatrolLeg().getPatrol());
-					t.getPatrolLegDay().getPatrolLeg().getPatrol().equals(null);
-					
-					t.getPatrolLegDay().setTrack(null);
-					t.setPatrolLegDay(null);
-					s.delete(t);
-				}
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				QaPlugIn.displayLog(Messages.DeletePatrolTrackAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
+				return false;
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			QaPlugIn.displayLog(Messages.DeletePatrolTrackAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
-			return false;
-		}finally{
-			s.close();
 		}
 
 		for (QaError item : deleted){

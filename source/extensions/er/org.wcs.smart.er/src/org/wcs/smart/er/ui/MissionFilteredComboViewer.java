@@ -35,7 +35,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
@@ -166,9 +166,8 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
         }
  
         private List<Mission> loadMissionIds() {
-        	Session s = HibernateManager.openSession();
-        	try {
-        		Query query = getFilter().buildQuery(s);
+        	try(Session s = HibernateManager.openSession()){
+        		Query<?> query = getFilter().buildQuery(s);
         		List<?> results = query.list(); // mission uuid, mission id, mission start date, mission end date, survey id, survey uuid, survey design name
         		List<Mission> missions = new ArrayList<Mission>(results.size()+1);
         		boolean defaultPresent = preselectedMission == null; //indicated if default patrol id is in filtered list
@@ -197,8 +196,6 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
         			missions.add(preselectedMission);
         		}
         		return missions;
-        	} finally {
-        		s.close();
         	}
         }
         

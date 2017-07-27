@@ -87,8 +87,7 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		Session session = HibernateManager.openSession();
-		try {
+		try (Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			upgradeReportFiles(session);
 			
@@ -140,8 +139,6 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 					}});
 			}
 			session.getTransaction().commit();
-		} finally {
-			session.close();
 		}
 	}
 

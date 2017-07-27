@@ -61,37 +61,35 @@ public class RemoveQueryEntityJob extends Job {
 
 	
 	private IStatus dropTables(){
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			for (int i = 0; i < SQL.length; i ++){
-				if (SQL[i].equals("")) continue; //$NON-NLS-1$
-				
-				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-					session.createSQLQuery(SQL[i]).executeUpdate();
-				}
-			}
+			try {
 			
-			for (int i = 0; i < TABLES.length; i ++){
-				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+				for (int i = 0; i < SQL.length; i ++){
+					if (SQL[i].equals("")) continue; //$NON-NLS-1$
+					
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery(SQL[i]).executeUpdate();
+					}
 				}
-			}
-			HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-		} catch (final Exception e) {
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					IntelligenceQueryPlugIn.displayLog(Messages.RemoveQueryEntityJob_error1, e);
+				
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
 				}
-			});
-			return new Status(IStatus.ERROR, IntelligenceQueryPlugIn.PLUGIN_ID, 1, Messages.RemoveQueryEntityJob_error2 + e.getLocalizedMessage(), e); 
-		} finally {
-			if (session.getTransaction().isActive()) {
+				HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
 				session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						IntelligenceQueryPlugIn.displayLog(Messages.RemoveQueryEntityJob_error1, e);
+					}
+				});
+				return new Status(IStatus.ERROR, IntelligenceQueryPlugIn.PLUGIN_ID, 1, Messages.RemoveQueryEntityJob_error2 + e.getLocalizedMessage(), e); 
 			}
-			session.close();
 		}
 		return Status.OK_STATUS;
 	}

@@ -38,9 +38,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -54,6 +53,7 @@ import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.samplingunit.EditSamplingUnitAttributeDialog;
 import org.wcs.smart.er.ui.samplingunit.SamplingUnitLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -130,12 +130,11 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 				for (SurveyDesignSamplingUnitAttribute a : toDelete){
 
 					//we need to delete any sampling unit attribute values
-					Query q = session.createQuery("SELECT sua FROM SamplingUnitAttributeValue sua JOIN sua.id.samplingUnit su WHERE sua.id.samplingUnitAttribute = :sua AND su.surveyDesign = :sd"); //$NON-NLS-1$
+					Query<SamplingUnitAttributeValue> q = session.createQuery("SELECT sua FROM SamplingUnitAttributeValue sua JOIN sua.id.samplingUnit su WHERE sua.id.samplingUnitAttribute = :sua AND su.surveyDesign = :sd", SamplingUnitAttributeValue.class); //$NON-NLS-1$
 					q.setParameter("sua", a.getSamplingUnitAttribute()); //$NON-NLS-1$
 					q.setParameter("sd", this.design); //$NON-NLS-1$
-					@SuppressWarnings("unchecked")
+
 					List<SamplingUnitAttributeValue> values = q.list();
-					
 					for (SamplingUnitAttributeValue v : values){
 						session.delete(v);
 					}
@@ -173,12 +172,8 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 	}
 	
 	private void initValues(boolean keepCurrent){
-		@SuppressWarnings("unchecked")
 		List<SamplingUnitAttribute> allAttributes = 
-				session.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list();
-		
+				QueryFactory.buildQuery(session, SamplingUnitAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 		List<SamplingUnitAttribute> selectedAttributes = new ArrayList<SamplingUnitAttribute>();
 		if (!keepCurrent){
 			for (SurveyDesignSamplingUnitAttribute a : design.getSamplingUnitAttributes()){
@@ -220,11 +215,9 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 				sua.setConservationArea(SmartDB.getCurrentConservationArea());
 				sua.setType(AttributeType.TEXT);
 				
-				@SuppressWarnings("unchecked")
-				List<SamplingUnitAttribute> siblings = session
-						.createCriteria(SamplingUnitAttribute.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.list(); 
+				List<SamplingUnitAttribute> siblings = 
+						QueryFactory.buildQuery(session, SamplingUnitAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+		
 				EditSamplingUnitAttributeDialog d = new EditSamplingUnitAttributeDialog(
 						getShell(), sua, siblings, session);
 				

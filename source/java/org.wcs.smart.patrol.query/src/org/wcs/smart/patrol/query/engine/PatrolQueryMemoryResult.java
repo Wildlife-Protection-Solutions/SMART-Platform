@@ -107,122 +107,121 @@ public class PatrolQueryMemoryResult extends MemoryQueryResult<PatrolQueryResult
 		PatrolQueryResultItem item = (PatrolQueryResultItem)it;
 		Patrol p = null;
 		boolean change = false;
-		Session s = HibernateManager.openSession();
-		try {
-			s.getTransaction().begin();
-			p = (Patrol) s.get(Patrol.class, item.getPatrolUuid());
-			if (p == null) return false; //patrol not found
-			
-			PatrolLeg pl = null;
-			for (PatrolLeg leg : p.getLegs()){
-				if (leg.getUuid().equals(item.getPatrolLegUuid())){
-					pl = leg;
-					break;
+		try(Session s = HibernateManager.openSession()){
+			try {
+				s.getTransaction().begin();
+				p = (Patrol) s.get(Patrol.class, item.getPatrolUuid());
+				if (p == null) return false; //patrol not found
+				
+				PatrolLeg pl = null;
+				for (PatrolLeg leg : p.getLegs()){
+					if (leg.getUuid().equals(item.getPatrolLegUuid())){
+						pl = leg;
+						break;
+					}
 				}
-			}
-			if (pl == null) return false; //patrol leg not found
-			switch (fixedcolumn.getColumn()) {
-				case PATROL_ID:
-					if (newValue instanceof String) {
-						if (((String) newValue).length() != 0) { 
-							if (!isEqual(newValue, p.getId())) {
-								change = true;
-								updatePatrolId(p, (String)newValue,s);
+				if (pl == null) return false; //patrol leg not found
+				switch (fixedcolumn.getColumn()) {
+					case PATROL_ID:
+						if (newValue instanceof String) {
+							if (((String) newValue).length() != 0) { 
+								if (!isEqual(newValue, p.getId())) {
+									change = true;
+									updatePatrolId(p, (String)newValue,s);
+								}
 							}
 						}
-					}
-					break;
-				case PATROL_STATION:
-					if (newValue instanceof Station) {
-						Station newStation = (Station) newValue;
-						if (!isEqual(newStation, p.getStation())){
-							change = true;
-							updateStation(p, newStation, s);
+						break;
+					case PATROL_STATION:
+						if (newValue instanceof Station) {
+							Station newStation = (Station) newValue;
+							if (!isEqual(newStation, p.getStation())){
+								change = true;
+								updateStation(p, newStation, s);
+							}
 						}
-					}
-					break;
-				case PATROL_TEAM:
-					if (newValue instanceof Team) {
-						Team newTeam = (Team) newValue;
-						if (!isEqual(newTeam, p.getStation())){
-							change = true;
-							updateTeam(p, newTeam, s);
-						}
-					}	
-					break;
-				case PATROL_OBJETIVE:
-					if (newValue instanceof String) {
-						String newObj = (String) newValue;
-						if (!isEqual(newObj, p.getObjective())){
-							change = true;
-							updateObjective(p, newObj, s);
-						}
-					}	
-					break;
-				case PATROL_MANDATE:
-					if (newValue instanceof PatrolMandate) {
-						PatrolMandate newMandate = (PatrolMandate) newValue;
-						if (!isEqual(newMandate, pl.getMandate())){
-							change = true;
-							updateMandate(pl, newMandate, s);
-						}
-					}	
-					break;	
-				case PATROL_ARMED:
-					if (newValue instanceof Boolean) {
-						Boolean newArmed = (Boolean) newValue;
-						if (!isEqual(newArmed, p.isArmed())){
-							change = true;
-							updateArmed(p, newArmed, s);
-						}
-					}	
-					break;
-				case PATROL_LEG_ID:
-					if (newValue instanceof String) {
-						String newId = (String)newValue;
-						if (!isEqual(newId, pl.getId())){
-							change = true;
-							updateLegId(pl, newId, s);
-						}
-					}	
-					break;
-				case TRANSPORT_TYPE:
-					if (newValue instanceof PatrolTransportType) {
-						PatrolTransportType newId = (PatrolTransportType)newValue;
-						if (!isEqual(newId, pl.getType())){
-							change = true;
-							updateTransport(pl, newId, s);
-						}
-					}	
-					break;	
-				case PATROL_LEG_LEADER:
-					if (newValue instanceof Employee) {
-						Employee newemployee = (Employee)newValue;
-						if (!isEqual(newemployee, pl.getId())){
-							change = true;
-							updateLegLeader(pl, newemployee, s);
-						}
-					}	
-					break;	
-				case PATROL_LEG_PILOT:
-					if (newValue instanceof Employee) {
-						Employee newemployee = (Employee)newValue;
-						if (!isEqual(newemployee, pl.getId())){
-							change = true;
-							updateLegPilot(pl, newemployee, s);
-						}
-					}	
-					break;						
-				default:
-					break;
+						break;
+					case PATROL_TEAM:
+						if (newValue instanceof Team) {
+							Team newTeam = (Team) newValue;
+							if (!isEqual(newTeam, p.getStation())){
+								change = true;
+								updateTeam(p, newTeam, s);
+							}
+						}	
+						break;
+					case PATROL_OBJETIVE:
+						if (newValue instanceof String) {
+							String newObj = (String) newValue;
+							if (!isEqual(newObj, p.getObjective())){
+								change = true;
+								updateObjective(p, newObj, s);
+							}
+						}	
+						break;
+					case PATROL_MANDATE:
+						if (newValue instanceof PatrolMandate) {
+							PatrolMandate newMandate = (PatrolMandate) newValue;
+							if (!isEqual(newMandate, pl.getMandate())){
+								change = true;
+								updateMandate(pl, newMandate, s);
+							}
+						}	
+						break;	
+					case PATROL_ARMED:
+						if (newValue instanceof Boolean) {
+							Boolean newArmed = (Boolean) newValue;
+							if (!isEqual(newArmed, p.isArmed())){
+								change = true;
+								updateArmed(p, newArmed, s);
+							}
+						}	
+						break;
+					case PATROL_LEG_ID:
+						if (newValue instanceof String) {
+							String newId = (String)newValue;
+							if (!isEqual(newId, pl.getId())){
+								change = true;
+								updateLegId(pl, newId, s);
+							}
+						}	
+						break;
+					case TRANSPORT_TYPE:
+						if (newValue instanceof PatrolTransportType) {
+							PatrolTransportType newId = (PatrolTransportType)newValue;
+							if (!isEqual(newId, pl.getType())){
+								change = true;
+								updateTransport(pl, newId, s);
+							}
+						}	
+						break;	
+					case PATROL_LEG_LEADER:
+						if (newValue instanceof Employee) {
+							Employee newemployee = (Employee)newValue;
+							if (!isEqual(newemployee, pl.getId())){
+								change = true;
+								updateLegLeader(pl, newemployee, s);
+							}
+						}	
+						break;	
+					case PATROL_LEG_PILOT:
+						if (newValue instanceof Employee) {
+							Employee newemployee = (Employee)newValue;
+							if (!isEqual(newemployee, pl.getId())){
+								change = true;
+								updateLegPilot(pl, newemployee, s);
+							}
+						}	
+						break;						
+					default:
+						break;
+				}
+				
+				s.getTransaction().commit();
+			} catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			
-			s.getTransaction().commit();
-		} catch (Exception ex) {
-			s.getTransaction().rollback();
-			throw ex;
-		} finally {
-			s.close();
 		}
 
 		if (change) {

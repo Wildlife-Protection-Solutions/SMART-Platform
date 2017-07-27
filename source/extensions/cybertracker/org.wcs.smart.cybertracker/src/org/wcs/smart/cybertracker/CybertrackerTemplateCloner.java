@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -35,6 +34,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.QueryFactory;
 /**
  * Clones the cybertracker properties when creating
  * a new conservation area from a template.
@@ -51,8 +51,9 @@ public class CybertrackerTemplateCloner implements
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CybertrackerTemplateCloner_CloningCtProfiles,2);
-		@SuppressWarnings("unchecked")
-		List<CyberTrackerPropertiesProfile> profiles = engine.getSession().createCriteria(CyberTrackerPropertiesProfile.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
+		
+		List<CyberTrackerPropertiesProfile> profiles = 
+				QueryFactory.buildQuery(engine.getSession(), CyberTrackerPropertiesProfile.class, "conservationArea", engine.getTemplateCa()).getResultList(); //$NON-NLS-1$
 		
 		SubMonitor sub = progress.split(1);
 		sub.setWorkRemaining(profiles.size());
@@ -86,8 +87,8 @@ public class CybertrackerTemplateCloner implements
 		
 		progress.subTask(Messages.CybertrackerTemplateCloner_CloningCtOptions);
 
-		@SuppressWarnings("unchecked")
-		List<CyberTrackerPropertiesOption> list = engine.getSession().createCriteria(CyberTrackerPropertiesOption.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
+		List<CyberTrackerPropertiesOption> list = 
+				QueryFactory.buildQuery(engine.getSession(), CyberTrackerPropertiesOption.class, "conservationArea", engine.getTemplateCa()).getResultList(); //$NON-NLS-1$
 		sub = progress.split(1);
 		sub.setWorkRemaining(list.size());
 		for (CyberTrackerPropertiesOption templateOption : list) {
@@ -106,8 +107,8 @@ public class CybertrackerTemplateCloner implements
 	}
 	
 	private void cloneCmProfileMappings(ConservationAreaClonerEngine engine, CyberTrackerPropertiesProfile sourceProfile, CyberTrackerPropertiesProfile clonedProfile) throws Exception {
-		@SuppressWarnings("unchecked")
-		List<ConfigurableModelCtPropertiesProfile> toClone = engine.getSession().createCriteria(ConfigurableModelCtPropertiesProfile.class).add(Restrictions.eq("profile", sourceProfile)).list(); //$NON-NLS-1$
+		List<ConfigurableModelCtPropertiesProfile> toClone = 
+				QueryFactory.buildQuery(engine.getSession(), ConfigurableModelCtPropertiesProfile.class, "profile", sourceProfile).getResultList(); //$NON-NLS-1$
 		for (ConfigurableModelCtPropertiesProfile cmctp : toClone) {
 			ConfigurableModelCtPropertiesProfile clone = new ConfigurableModelCtPropertiesProfile();
 			clone.setModel((ConfigurableModel)engine.getNewConservationItem(cmctp.getModel()));

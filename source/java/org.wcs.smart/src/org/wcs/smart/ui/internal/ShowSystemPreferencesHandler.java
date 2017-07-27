@@ -36,6 +36,7 @@ import org.wcs.smart.ui.internal.preference.SmartPreferenceDialog;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class ShowSystemPreferencesHandler{
 
 	@Execute

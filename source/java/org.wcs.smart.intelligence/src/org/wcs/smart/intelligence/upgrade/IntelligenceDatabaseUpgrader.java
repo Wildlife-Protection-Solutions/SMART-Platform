@@ -43,26 +43,25 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.IntelligenceDatabaseUpgrader_UpgradeTask, 1);
-		Session session = HibernateManager.openSession();
-		try {
-			session.beginTransaction();
-			Map<String, String> versions = UpgradeEngine.getVersions(session);
-			if (versions == null)
-				throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			String currentPluginVersion = versions
-					.get(IntelligencePlugIn.PLUGIN_ID);
-
-			if (currentPluginVersion == null) {
-				(new AddIntelligenceJob()).installPlugin(session);
-			} else {
-				upgrade(currentPluginVersion, session);
+		try(Session session = HibernateManager.openSession()){
+			try {
+				session.beginTransaction();
+				Map<String, String> versions = UpgradeEngine.getVersions(session);
+				if (versions == null)
+					throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+				String currentPluginVersion = versions
+						.get(IntelligencePlugIn.PLUGIN_ID);
+	
+				if (currentPluginVersion == null) {
+					(new AddIntelligenceJob()).installPlugin(session);
+				} else {
+					upgrade(currentPluginVersion, session);
+				}
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				throw ex;
 			}
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			throw ex;
-		}finally{
-			session.close();
 		}
 		monitor.done();
 	}
@@ -94,7 +93,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql){
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_32, session);
 	}
@@ -134,7 +133,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"GRANT ALL PRIVILEGES ON smart.intelligence_attachment to analyst",
 		};
 		for (String s : sql){
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_40, session);
 	}

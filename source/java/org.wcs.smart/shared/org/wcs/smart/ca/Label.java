@@ -37,13 +37,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.dialect.PostgreSQL82Dialect;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.type.PostgresUUIDType;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.util.I18nUtil;
 
 /**
@@ -173,8 +173,8 @@ public class Label  {
 	private static synchronized String searchAll(Locale lang, UUID element, Session session){
 		if (lang == null) return ""; //$NON-NLS-1$
 
-		SQLQuery query = session.createSQLQuery("SELECT a.code, b.value, a.isdefault from smart.language a, smart.i18n_label b where a.uuid = b.language_uuid and b.element_uuid = :element"); //$NON-NLS-1$
-		if (((SessionFactoryImplementor)session.getSessionFactory()).getDialect() instanceof PostgreSQL82Dialect){
+		NativeQuery<?> query = session.createNativeQuery("SELECT a.code, b.value, a.isdefault from smart.language a, smart.i18n_label b where a.uuid = b.language_uuid and b.element_uuid = :element"); //$NON-NLS-1$
+		if (SmartHibernateManager.getCurrentDialect() instanceof PostgreSQL82Dialect){
 			query.setParameter("element", element, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		}else{
 			query.setParameter("element", element); //$NON-NLS-1$

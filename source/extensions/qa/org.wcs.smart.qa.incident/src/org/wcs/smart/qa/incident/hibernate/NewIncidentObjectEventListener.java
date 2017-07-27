@@ -23,6 +23,7 @@ package org.wcs.smart.qa.incident.hibernate;
 
 import org.hibernate.event.spi.PostInsertEvent;
 import org.hibernate.event.spi.PostInsertEventListener;
+import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.RoutineExtensionManager;
@@ -54,5 +55,10 @@ public class NewIncidentObjectEventListener implements PostInsertEventListener{
 			SingleItemDataProvider provider = new SingleItemDataProvider(RoutineExtensionManager.INSTANCE.findDataProvider(IncidentDataProvider.ID), data);
 			AutoValidateJob.INSTANCE.addTask(provider);
 		}
+	}
+	
+	@Override
+	public boolean requiresPostCommitHanding(EntityPersister persister) {
+		return true;
 	}
 }

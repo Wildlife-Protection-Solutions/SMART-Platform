@@ -147,26 +147,26 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 	public SurveyDesign getSurveyDesign() {
 		if (surveyDesign == null) {
 			UUID puuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, puuid);
-				surveyDesign.getName();
-				if (surveyDesign.getConfigurableModel() != null) {
-					surveyDesign.getConfigurableModel().getNames().size();
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, puuid);
+					surveyDesign.getName();
+					if (surveyDesign.getConfigurableModel() != null) {
+						surveyDesign.getConfigurableModel().getNames().size();
+					}
+					surveyDesign.getMissionProperties().size();
+					surveyDesign.getProperties().size();
+					
+					//ensure all languages are loaded; this is to support the translate link
+					for (Label l : surveyDesign.getNames()){
+						l.getLanguage().getLabel();
+					}
+				}catch (Exception ex){
+					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+				}finally{
+					session.getTransaction().rollback();
 				}
-				surveyDesign.getMissionProperties().size();
-				surveyDesign.getProperties().size();
-				
-				//ensure all languages are loaded; this is to support the translate link
-				for (Label l : surveyDesign.getNames()){
-					l.getLanguage().getLabel();
-				}
-			}catch (Exception ex){
-				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
 			}
 		}
 		return surveyDesign;

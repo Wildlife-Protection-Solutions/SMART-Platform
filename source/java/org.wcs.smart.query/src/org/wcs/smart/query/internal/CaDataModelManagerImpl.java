@@ -31,10 +31,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -44,6 +42,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 /**
@@ -127,13 +126,10 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public List<AttributeListItem> getAttributeListItems(Attribute attribute, Session session, boolean onlyActive) {
-		Criteria criteria = session.createCriteria(AttributeListItem.class).add(Restrictions.eq("attribute", attribute)); //$NON-NLS-1$
-		if (onlyActive) {
-			criteria = criteria.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
-		}
-		@SuppressWarnings("unchecked")
-		List<AttributeListItem> items = criteria.list();
-		return items;
+		Object[][] filters = new Object[onlyActive ? 2 : 1][2];
+		filters[0] = new Object[] {"attribute", attribute}; //$NON-NLS-1$
+		if (onlyActive) filters[1] = new Object[] {"isActive", true}; //$NON-NLS-1$
+		return QueryFactory.buildQuery(session, AttributeListItem.class, filters).getResultList();
 	}
 	
 	/**
@@ -198,11 +194,11 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public Attribute getAttribute(Session session, String attributeKey){
-		Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+		Query<Attribute> q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key", Attribute.class); //$NON-NLS-1$
 		q.setParameter("ca", conservationArea.getUuid()); //$NON-NLS-1$
 		q.setParameter("key", attributeKey); //$NON-NLS-1$
 		q.setCacheable(true);
-		@SuppressWarnings("unchecked")
+		
 		List<Attribute> results = q.list();
 		if (results.size() != 1 ){
 			return null;
@@ -233,14 +229,13 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 * @param active if only active tree nodes should be loaded; if false all nodes will be returned
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public List<AttributeTreeNode> getAttributeTreeNodes(Session session, Attribute attribute, int level, boolean active){
 		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
 		if (active){
 			query += " and isActive = :active"; //$NON-NLS-1$ 
 		}
 		
-		Query q = session.createQuery(query);
+		Query<AttributeTreeNode> q = session.createQuery(query, AttributeTreeNode.class);
 		q.setParameter("uuid", attribute.getUuid()); //$NON-NLS-1$
 		q.setParameter("level", level); //$NON-NLS-1$
 		if (active) q.setParameter("active", active); //$NON-NLS-1$
@@ -257,11 +252,11 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public Category getCategory(Session session, String categoryKey){
-		Query q = session.createQuery("From Category where conservationArea = :ca and hkey = :key"); //$NON-NLS-1$
+		Query<Category> q = session.createQuery("From Category where conservationArea = :ca and hkey = :key", Category.class); //$NON-NLS-1$
 		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("key", categoryKey); //$NON-NLS-1$
 		q.setCacheable(true);
-		@SuppressWarnings("unchecked")
+		
 		List<Category> results = q.list();
 		if (results.size() != 1 ){
 			return null;
@@ -300,11 +295,9 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	@Override
 	public List<Category> getCategories(Session session, int level){
 		String query = "FROM Category WHERE conservationArea = :ca AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
-		Query q = session.createQuery(query);
+		Query<Category> q = session.createQuery(query, Category.class);
 		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("level", level); //$NON-NLS-1$
-		
-		@SuppressWarnings("unchecked")
 		List<Category> cats = q.list();
 		return cats;
 	}
@@ -320,11 +313,10 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public AttributeListItem getAttributeListItem(Session session, String attributeKey, String attributeListItem){
-		Query q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key and a.keyId = :attributeKey"); //$NON-NLS-1$
+		Query<AttributeListItem> q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea = :ca and ali.keyId = :key and a.keyId = :attributeKey", AttributeListItem.class); //$NON-NLS-1$
 		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("key", attributeListItem); //$NON-NLS-1$
 		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
 		List<AttributeListItem> results = q.list();
 		if (results.size() != 1 ){
 			return null;
@@ -343,11 +335,10 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 	 */
 	@Override
 	public AttributeTreeNode getAttributeTreeNode(Session session, String attributeKey, String attributeTreeHKey){
-		Query q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key and a.keyId = :attribute"); //$NON-NLS-1$
+		Query<AttributeTreeNode> q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea = :ca and ali.hkey = :key and a.keyId = :attribute", AttributeTreeNode.class); //$NON-NLS-1$
 		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("key", attributeTreeHKey); //$NON-NLS-1$
 		q.setParameter("attribute", attributeKey); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
 		List<AttributeTreeNode> results = q.list();
 		if (results.size() != 1 ){
 			return null;
@@ -454,26 +445,26 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 			dmDepth = null;
 			dm = null;
 			
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				DataModel tmp = HibernateManager.loadDataModel(conservationArea, session);
-				
-				//load into memory; no-lazy loading here.
-				for (Category cat: tmp.getCategories()){
-					visitCategory(cat);
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					DataModel tmp = HibernateManager.loadDataModel(conservationArea, session);
+					
+					//load into memory; no-lazy loading here.
+					for (Category cat: tmp.getCategories()){
+						visitCategory(cat);
+					}
+					for (Category cat: tmp.getActiveCategories()){
+						cat.getName();
+	//					visitCategory(cat);
+					}
+					for (Attribute att: tmp.getAttributes()){
+						att.getAggregations().size();
+					}
+					dm = tmp;
+				}finally{
+					session.getTransaction().rollback();
 				}
-				for (Category cat: tmp.getActiveCategories()){
-					cat.getName();
-//					visitCategory(cat);
-				}
-				for (Attribute att: tmp.getAttributes()){
-					att.getAggregations().size();
-				}
-				dm = tmp;
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
 			}
 		
 			return Status.OK_STATUS;

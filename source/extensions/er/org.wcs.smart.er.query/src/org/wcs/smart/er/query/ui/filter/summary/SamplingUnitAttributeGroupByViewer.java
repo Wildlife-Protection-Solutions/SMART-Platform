@@ -26,12 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitAttributeGroupBy;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -80,10 +80,10 @@ public class SamplingUnitAttributeGroupByViewer extends AbstractGroupByViewer<Sa
 	
 	private SamplingUnitAttribute getSamplingUnitAttribute(Session session) throws Exception{
 		String attributeKey = groupBy.getAttributeKey();
-		List<?> items = session.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.eq("keyId", attributeKey)) //$NON-NLS-1$
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list();
+		List<SamplingUnitAttribute> items = QueryFactory.buildQuery(session, SamplingUnitAttribute.class,
+				new Object[] {"keyId", attributeKey}, //$NON-NLS-1$
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
+		
 		if (items.size() == 0){
 			throw new Exception(MessageFormat.format(Messages.SamplingUnitAttributeGroupBy_KeyNotFound, new Object[]{attributeKey}));
 		}else if (items.size() > 1){

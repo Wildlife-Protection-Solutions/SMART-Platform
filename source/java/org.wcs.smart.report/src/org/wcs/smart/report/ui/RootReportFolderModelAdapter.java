@@ -24,13 +24,16 @@ package org.wcs.smart.report.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 import org.eclipse.ui.progress.IElementCollector;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.model.Report;
@@ -94,57 +97,71 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 	public void fetchDeferredChildren(Object object,
 			IElementCollector collector, IProgressMonitor monitor) {
 		
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			//get kid folders
-			RootReportFolder root = (RootReportFolder)object;
-			List<Object> kids = new ArrayList<Object>();
-			if (root.isShared()){
-				List<?> kidFolders = s
-						.createCriteria(ReportFolder.class)
-						.add(Restrictions.isNull("parentFolder")) //$NON-NLS-1$
-						.add(Restrictions.isNull("employee")) //$NON-NLS-1$
-						.add(Restrictions.eq("conservationArea", //$NON-NLS-1$
-								root.getConservationArea())).list();
-				kids.addAll(kidFolders);
-				List<?> kidQueries = s
-						.createCriteria(Report.class)
-						.add(Restrictions.isNull("folder")) //$NON-NLS-1$
-						.add(Restrictions.eq("shared", true)) //$NON-NLS-1$
-						.add(Restrictions.eq("conservationArea", //$NON-NLS-1$
-								root.getConservationArea())).list();
-				kids.addAll(kidQueries);
-			}else{
-				List<?> kidFolders = s
-						.createCriteria(ReportFolder.class)
-						.add(Restrictions.isNull("parentFolder")) //$NON-NLS-1$
-						.add(Restrictions.eq("employee",  //$NON-NLS-1$
-								SmartDB.getConservationAreaConfiguration().getCcaaUser()))
-						.add(Restrictions.eq("conservationArea",  //$NON-NLS-1$
-								root.getConservationArea())).list();
-				kids.addAll(kidFolders);
-				List<?> kidQueries = s
-						.createCriteria(Report.class)
-						.add(Restrictions.isNull("folder"))  //$NON-NLS-1$
-						.add(Restrictions.eq("shared", false))  //$NON-NLS-1$
-						.add(Restrictions.eq("owner",SmartDB.getConservationAreaConfiguration().getCcaaUser()))  //$NON-NLS-1$
-						.add(Restrictions.eq("conservationArea",  //$NON-NLS-1$
-								root.getConservationArea())).list();
-				kids.addAll(kidQueries);
-			}
-			
-			//ensure ca is loaded for report items
-			for (Object  x : kids){
-				if (x instanceof Report){
-					((Report) x).getConservationArea().getId();
+		try(Session s = HibernateManager.openSession()){
+			try{
+				s.beginTransaction();
+				//get kid folders
+				RootReportFolder root = (RootReportFolder)object;
+				List<Object> kids = new ArrayList<Object>();
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				
+				if (root.isShared()){
+					
+					CriteriaQuery<ReportFolder> cfolder = cb.createQuery(ReportFolder.class);
+					Root<ReportFolder> folderfrom = cfolder.from(ReportFolder.class);
+					cfolder.where(cb.and(
+							cb.isNull(folderfrom.get("parentFolder")), //$NON-NLS-1$
+							cb.isNull(folderfrom.get("employee")), //$NON-NLS-1$
+							cb.equal(folderfrom.get("conservationArea"), root.getConservationArea()) //$NON-NLS-1$
+							));				
+					List<?> kidFolders = s.createQuery(cfolder).getResultList();
+					kids.addAll(kidFolders);
+					
+					CriteriaQuery<Report> creport = cb.createQuery(Report.class);
+					Root<Report> reportfrom = cfolder.from(Report.class);
+					creport.where(cb.and(
+							cb.isNull(reportfrom.get("folder")), //$NON-NLS-1$
+							cb.equal(reportfrom.get("shared"), true), //$NON-NLS-1$
+							cb.equal(reportfrom.get("conservationArea"), root.getConservationArea()) //$NON-NLS-1$
+							));									
+					List<?> kidQueries = s.createQuery(creport).getResultList();
+					kids.addAll(kidQueries);
+				}else{
+					CriteriaQuery<ReportFolder> cfolder = cb.createQuery(ReportFolder.class);
+					Root<ReportFolder> folderfrom = cfolder.from(ReportFolder.class);
+					cfolder.where(cb.and(
+							cb.isNull(folderfrom.get("parentFolder")), //$NON-NLS-1$
+							cb.equal(folderfrom.get("employee"), SmartDB.getConservationAreaConfiguration().getCcaaUser()), //$NON-NLS-1$
+							cb.equal(folderfrom.get("conservationArea"), root.getConservationArea()) //$NON-NLS-1$
+							));				
+					List<?> kidFolders = s.createQuery(cfolder).getResultList();
+					kids.addAll(kidFolders);
+					
+					CriteriaQuery<Report> creport = cb.createQuery(Report.class);
+					Root<Report> reportfrom = cfolder.from(Report.class);
+					creport.where(cb.and(
+							cb.isNull(reportfrom.get("folder")), //$NON-NLS-1$
+							cb.equal(reportfrom.get("shared"), false), //$NON-NLS-1$
+							cb.equal(reportfrom.get("owner"), SmartDB.getConservationAreaConfiguration().getCcaaUser()), //$NON-NLS-1$
+							cb.equal(reportfrom.get("conservationArea"), root.getConservationArea()) //$NON-NLS-1$
+							));									
+					List<?> kidQueries = s.createQuery(creport).getResultList();
+					kids.addAll(kidQueries);
 				}
+				
+				//ensure ca is loaded for report items
+				for (Object  x : kids){
+					if (x instanceof Report){
+						((Report) x).getConservationArea().getId();
+					}
+				}
+				LazyReportContentProvider.sortItems(kids);
+				collector.add(kids.toArray(), monitor);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			LazyReportContentProvider.sortItems(kids);
-			collector.add(kids.toArray(), monitor);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
 		}
 		
 	}

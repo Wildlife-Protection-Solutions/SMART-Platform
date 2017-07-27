@@ -30,11 +30,11 @@ import java.util.UUID;
 import javax.transaction.Synchronization;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.transaction.spi.LocalStatus;
+import org.hibernate.query.Query;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -89,32 +89,26 @@ public class DataModelItemListener implements IDataModelItemListener {
 					//we need any empty transaction that returns true for wasCommitted
 					//for the itercceptor
 					Transaction tx = new Transaction(){
-
 						@Override
-						public boolean isInitiator() { return false; }
+						public void begin() {}
 						@Override
-						public void begin() { }
+						public void commit() {}
 						@Override
-						public void commit() { }
+						public boolean getRollbackOnly() { return false; }
+						@Override
+						public boolean isActive() {return false;}
 						@Override
 						public void rollback() { }
 						@Override
-						public LocalStatus getLocalStatus() { return null; }
+						public void setRollbackOnly() { }
 						@Override
-						public boolean isActive() { return false; }
-						@Override
-						public boolean isParticipating() { return false; }
-						@Override
-						public boolean wasCommitted() { return true; }
-						@Override
-						public boolean wasRolledBack() { return false; }
-						@Override
-						public void registerSynchronization( Synchronization synchronization) throws HibernateException { }
-						@Override
-						public void setTimeout(int seconds) { }
+						public TransactionStatus getStatus() { return TransactionStatus.COMMITTED; }
 						@Override
 						public int getTimeout() { return 0; }
-						
+						@Override
+						public void registerSynchronization(Synchronization arg0) throws HibernateException {}
+						@Override
+						public void setTimeout(int arg0) {}
 					};
 					interceptor.afterTransactionCompletion(tx);
 				}

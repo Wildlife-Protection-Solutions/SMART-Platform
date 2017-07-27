@@ -5,7 +5,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Agency;
@@ -14,6 +13,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -175,7 +175,7 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	 * @return
 	 */
 	public Object getObject(Session session, UUID uuid){
-		List<?> data = session.createCriteria(sourceClazz).add(Restrictions.eq("uuid", uuid)).list(); //$NON-NLS-1$
+		List<?> data = QueryFactory.buildQuery(session, sourceClazz, new Object[] {"uuid", uuid}).getResultList(); //$NON-NLS-1$
 		if (data.size() == 0){
 			return null; //nothing found
 		}else if (data.size() > 1){

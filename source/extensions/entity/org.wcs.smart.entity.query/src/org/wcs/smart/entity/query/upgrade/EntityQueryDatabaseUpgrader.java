@@ -47,24 +47,24 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.EntityQueryDatabaseUpgrader_UpgradeTask, 1);
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			Map<String, String> versions = UpgradeEngine.getVersions(session);
-			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			String currentPluginVersion = versions.get(EntityQueryPlugIn.PLUGIN_ID);
+			try{
 			
-			if (currentPluginVersion == null) {
-				(new AddEntityQueryJob()).installPlugin(session);
-			}else{
-				upgrade(currentPluginVersion, session);
+				Map<String, String> versions = UpgradeEngine.getVersions(session);
+				if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+				String currentPluginVersion = versions.get(EntityQueryPlugIn.PLUGIN_ID);
+				
+				if (currentPluginVersion == null) {
+					(new AddEntityQueryJob()).installPlugin(session);
+				}else{
+					upgrade(currentPluginVersion, session);
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				throw ex;
 			}
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			throw ex;
-		} finally { 
-			session.close();
 		}
 		monitor.done();
 	}
@@ -96,7 +96,7 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 		
 		for (String s : sql){
 			EntityQueryPlugIn.log(s, null);
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_2, session);
@@ -133,7 +133,7 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 		
 		for (String s : sql){
 			EntityQueryPlugIn.log(s, null);
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		session.doWork(new Work(){
 			@Override
@@ -165,7 +165,7 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 		
 		for (String s : sql){
 			EntityQueryPlugIn.log(s, null);
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		
 		HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_4, session);

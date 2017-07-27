@@ -31,7 +31,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
@@ -40,12 +39,13 @@ import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
-
-import au.com.bytecode.opencsv.CSVWriter;
+import org.wcs.smart.hibernate.QueryFactory;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.io.WKTWriter;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * CSV File importer sampling unit.
@@ -102,11 +102,10 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 		String[] headers = getHeaders(type, sd);
 		writer.writeNext(headers);
 
-		@SuppressWarnings("unchecked")
-		List<SamplingUnit> units = session.createCriteria(SamplingUnit.class)
-				.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
-				.add(Restrictions.eq("type", type)) //$NON-NLS-1$
-				.list();
+		List<SamplingUnit> units = QueryFactory.buildQuery(session, SamplingUnit.class, 
+				new Object[] {"surveyDesign", sd}, //$NON-NLS-1$
+				new Object[] {"type", type}).getResultList(); //$NON-NLS-1$
+		
 		progress.setWorkRemaining(units.size());
 
 		int index = 0;

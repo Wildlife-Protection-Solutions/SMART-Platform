@@ -151,17 +151,12 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Object[] data = null;
-				
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					data = HibernateManager.getBasemaps(s).toArray();
-				}finally{
-					if (s.getTransaction().isActive()){
-						s.getTransaction().commit();		
-					}
-					s.close();
+					s.getTransaction().commit();
 				}
+				
 				Arrays.sort(data, new Comparator<Object>(){
 					@Override
 					public int compare(Object o1, Object o2) {

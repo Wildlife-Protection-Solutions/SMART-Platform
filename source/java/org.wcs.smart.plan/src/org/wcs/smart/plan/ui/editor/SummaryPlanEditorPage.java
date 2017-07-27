@@ -142,15 +142,15 @@ public class SummaryPlanEditorPage extends EditorPart {
 
 			final Set<PatrolEditorInput> childPatrols = new HashSet<PatrolEditorInput>(); 
 			final List<PatrolEditorInput> myPatrols;
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				myPatrols = PlanHibernateManager.getPatrols(parentEditor.getPlan(), s);
-				Plan thisPlan = (Plan) s.get(Plan.class, parentEditor.getPlan().getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
-				parentEditor.getChildPlanPatrols(thisPlan, childPatrols, s);
-				s.getTransaction().rollback();
-			}finally{
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					myPatrols = PlanHibernateManager.getPatrols(parentEditor.getPlan(), s);
+					Plan thisPlan = (Plan) s.get(Plan.class, parentEditor.getPlan().getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
+					parentEditor.getChildPlanPatrols(thisPlan, childPatrols, s);
+				}finally{
+					s.getTransaction().rollback();
+				}
 			}
 
 			
@@ -250,11 +250,8 @@ public class SummaryPlanEditorPage extends EditorPart {
 							getEditorSite().getShell(), SummaryPlanEditorPage.this.parentEditor.getPlan());
 					
 					if (dialog.open() == IDialogConstants.OK_ID) {
-						Session session = HibernateManager.openSession();
-						try{
+						try(Session session = HibernateManager.openSession()){
 							PlanHibernateManager.savePlan(SummaryPlanEditorPage.this.parentEditor.getPlan(),session);
-						}finally{
-							session.close();
 						}
 						PlanEventManager.getInstance()
 								.planChanged(0, SummaryPlanEditorPage.this.parentEditor.getPlan());
@@ -597,11 +594,8 @@ public class SummaryPlanEditorPage extends EditorPart {
 			ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
 			if (dialog.isSavePerformed()) {
 				boolean saved = false;
-				Session session = HibernateManager.openSession();
-				try{
+				try(Session session = HibernateManager.openSession()){
 					saved = PlanHibernateManager.savePlan(parentEditor.getPlan(), session);
-				}finally{
-					session.close();
 				}
 				if (saved) {
 					PlanEventManager.getInstance().planChanged(0, parentEditor.getPlan());

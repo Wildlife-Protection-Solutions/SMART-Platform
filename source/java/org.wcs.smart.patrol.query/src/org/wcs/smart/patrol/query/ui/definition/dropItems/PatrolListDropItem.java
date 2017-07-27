@@ -85,30 +85,30 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				final List<ListItem> items = data.getAllValues(s);
-				Display.getDefault().asyncExec(new Runnable(){
-					@Override
-					public void run() {
-						if (listViewer.getCombo().isDisposed()) return;
-						if (currentSelection != null && !items.contains(currentSelection)){
-							//item is not longer active; but still in query
-							items.add(currentSelection);
-						}
-						listViewer.setInput(items.toArray(new ListItem[items.size()]));
-						if (currentSelection != null){
-							
-							listViewer.setSelection(new StructuredSelection(currentSelection));
-						}
-						getTargetPanel().redraw();
-					}});
-			}catch (Exception ex){
-				QueryPlugIn.displayLog(Messages.PatrolListDropItem_ErrorLoadingItems, ex);
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					final List<ListItem> items = data.getAllValues(s);
+					Display.getDefault().asyncExec(new Runnable(){
+						@Override
+						public void run() {
+							if (listViewer.getCombo().isDisposed()) return;
+							if (currentSelection != null && !items.contains(currentSelection)){
+								//item is not longer active; but still in query
+								items.add(currentSelection);
+							}
+							listViewer.setInput(items.toArray(new ListItem[items.size()]));
+							if (currentSelection != null){
+								
+								listViewer.setSelection(new StructuredSelection(currentSelection));
+							}
+							getTargetPanel().redraw();
+						}});
+				}catch (Exception ex){
+					QueryPlugIn.displayLog(Messages.PatrolListDropItem_ErrorLoadingItems, ex);
+				}finally{
+					s.getTransaction().rollback();
+				}
 			}
 			return Status.OK_STATUS;
 		}};

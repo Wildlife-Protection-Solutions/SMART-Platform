@@ -38,6 +38,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -54,7 +58,6 @@ import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ICatalog;
 import org.locationtech.udig.catalog.ID;
@@ -628,8 +631,7 @@ public class MapSettings {
 	 */
 	public synchronized void save(final Map map) throws Exception{
 		tmpImportedFiles = new ArrayList<File>();
-		try{
-			Session s = HibernateManager.openSession();
+		try(Session s = HibernateManager.openSession()){
 			try{
 				s.beginTransaction();
 				//this point is where files are copied into the filestore
@@ -681,7 +683,6 @@ public class MapSettings {
 				throw ex;
 				
 			}finally{
-				s.close();
 				tmpImportedFiles.clear();
 			}
 		} catch (Exception e) {
@@ -847,14 +848,22 @@ public class MapSettings {
 		
 		ArrayList<File> toDelete = new ArrayList<File>();
 		
+		CriteriaBuilder cb = activeSession.getCriteriaBuilder();
+		
 		for (LayerRegister basemapLayer : userMap.getLayerList()) {
 			URI uri = basemapLayer.getURI();
 			if (uri.getScheme().equals(SMARTBM_FILE_PROTOCOL)){
 				//verify that this layer is not used in any other basemaps
-				List<?> others = activeSession.createCriteria(BasemapDefinition.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.add(Restrictions.ilike("mapDef", "%" + uri.toString() + "%")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						.add(Restrictions.ne("uuid", baseMap.getUuid())).list(); //$NON-NLS-1$
+				
+				CriteriaQuery<BasemapDefinition> query = cb.createQuery(BasemapDefinition.class);
+				Root<BasemapDefinition> root = query.from(BasemapDefinition.class);
+				query.where(cb.and(
+						cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+						cb.like(cb.lower(root.get("mapDef")), "%" + uri.toString().toLowerCase() + "%"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						cb.notEqual(root.get("uuid"), baseMap.getUuid()) //$NON-NLS-1$
+						));
+				
+				List<BasemapDefinition> others = activeSession.createQuery(query).getResultList();
 				if(others.size() > 0){
 					//this is used by another layer leave it
 					continue;

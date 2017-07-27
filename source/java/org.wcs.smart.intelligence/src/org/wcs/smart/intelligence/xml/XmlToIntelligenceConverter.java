@@ -26,13 +26,12 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -157,10 +156,9 @@ public class XmlToIntelligenceConverter {
 	}
 
 	private Label labelForElement(LabelType labelType, NamedItem element) {
-		Criteria criteria = session.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.ilike("code", labelType.getLanguageCode())); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		@SuppressWarnings("unchecked")
-		List<Language> results = criteria.list();
+		List<Language> results = QueryFactory.buildQuery(session, Language.class, 
+				new Object[] {"ca", ca}, //$NON-NLS-1$
+				new Object[] {"code", labelType.getLanguageCode()}).getResultList(); //$NON-NLS-1$
 		if (results.isEmpty()) {
 			warnings.add(MessageFormat.format(Messages.XmlToIntelligenceConverter_NoLangCodeFound_Warning, labelType.getLanguageCode()));
 			return null;

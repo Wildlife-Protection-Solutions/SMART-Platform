@@ -85,17 +85,17 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						monitor.beginTask(Messages.CyberTrackerPropertiesDialog_LoadProfile_Task, 1);
-						Session s = HibernateManager.openSession();
-						s.beginTransaction();
-						try {
-							ctProperties = (CyberTrackerPropertiesProfile) s.get(CyberTrackerPropertiesProfile.class, profile.getUuid());
-							ctProperties.getNames().size();
-							ctProperties.getOptions().size();
-						} catch (Exception ex) {
-							SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_LoadProfile_Error, ex);
-						} finally {
-							s.getTransaction().rollback();
-							s.close();
+						try(Session s = HibernateManager.openSession()){
+							s.beginTransaction();
+							try {
+								ctProperties = (CyberTrackerPropertiesProfile) s.get(CyberTrackerPropertiesProfile.class, profile.getUuid());
+								ctProperties.getNames().size();
+								ctProperties.getOptions().size();
+							} catch (Exception ex) {
+								SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_LoadProfile_Error, ex);
+							} finally {
+								s.getTransaction().rollback();
+							}
 						}
 					}
 				});
@@ -212,17 +212,16 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.CyberTrackerPropertiesDialog_SaveProfile_Task, 1);
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					try {
-						s.saveOrUpdate(ctProperties);
-						s.getTransaction().commit();
-						isOk[0] = true;
-					} catch (Exception ex) {
-						s.getTransaction().rollback();
-						SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_SaveProfile_Error, ex);
-					} finally {
-						s.close();
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try {
+							s.saveOrUpdate(ctProperties);
+							s.getTransaction().commit();
+							isOk[0] = true;
+						} catch (Exception ex) {
+							s.getTransaction().rollback();
+							SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_SaveProfile_Error, ex);
+						}
 					}
 				}
 			});

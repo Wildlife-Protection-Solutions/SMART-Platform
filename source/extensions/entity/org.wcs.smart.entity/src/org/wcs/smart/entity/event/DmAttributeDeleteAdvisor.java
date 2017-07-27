@@ -24,7 +24,7 @@ package org.wcs.smart.entity.event;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -49,23 +49,23 @@ public class DmAttributeDeleteAdvisor implements IDeleteAdvisor {
 		
 		//check if this is the attribute associated with any entity type
 		Attribute toDelete = (Attribute)object;
-		Query q = session.createQuery("FROM EntityType WHERE dmAttribute = :todelete"); //$NON-NLS-1$
+		Query<EntityType> q = session.createQuery("FROM EntityType WHERE dmAttribute = :todelete", EntityType.class); //$NON-NLS-1$
 		q.setParameter("todelete", toDelete); //$NON-NLS-1$
-		List<?> results = q.list();
+		List<EntityType> results = q.list();
 		if (results.size() > 0){
 			//attribute associated with an entity and cannot be deleted
 			return MessageFormat.format(Messages.DmAttributeDeleteAdvisor_CannotDeleteAttributeEtAssociation, 
-					new Object[]{((EntityType)results.get(0)).getName()});	
+					new Object[]{results.get(0).getName()});	
 		}
 		
 		//check if this is an attribute used to describe entities
-		q = session.createQuery("FROM EntityAttribute WHERE dmAttribute = :todelete"); //$NON-NLS-1$
-		q.setParameter("todelete", toDelete); //$NON-NLS-1$
-		results = q.list();
-		if (results.size() > 0){
+		Query<EntityAttribute> q2 = session.createQuery("FROM EntityAttribute WHERE dmAttribute = :todelete", EntityAttribute.class); //$NON-NLS-1$
+		q2.setParameter("todelete", toDelete); //$NON-NLS-1$
+		List<EntityAttribute> results2 = q2.list();
+		if (results2.size() > 0){
 			//attribute associated with an entity and cannot be deleted
 			return MessageFormat.format(Messages.DmAttributeDeleteAdvisor_CannotDeleteAttributeAssociation, 
-					new Object[]{((EntityAttribute)results.get(0)).getEntityType().getName()});	
+					new Object[]{results2.get(0).getEntityType().getName()});	
 		}
 		return null;
 	}

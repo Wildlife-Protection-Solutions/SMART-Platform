@@ -21,11 +21,8 @@
  */
 package org.wcs.smart.observation;
 
-import java.util.List;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.observation.internal.Messages;
@@ -56,16 +53,12 @@ public class ObservationCloner implements IConservationAreaTemplateCloner {
 	 * clones patrol options
 	 */
 	private void cloneOptions(ConservationAreaClonerEngine engine){
-		@SuppressWarnings("unchecked")
-		List<ObservationOptions> ops = engine.getSession().createCriteria(ObservationOptions.class).add(Restrictions.eq("uuid", engine.getTemplateCa().getUuid())).list(); //$NON-NLS-1$
-
 		ObservationOptions newOp = ObservationHibernateManager.createPatrolOption(engine.getNewCa(), engine.getSession());
-		if (ops.size() > 0){
-			ObservationOptions tempOp = ops.get(0);
-			newOp.setEditTime(tempOp.getEditTime());
-			newOp.setTrackDistanceDirection(tempOp.getTrackDistanceDirection());
-			newOp.setTrackObserver(tempOp.getTrackObserver());
-			
+		ObservationOptions ops = engine.getSession().get(ObservationOptions.class, engine.getTemplateCa().getUuid());
+		if (ops != null){
+			newOp.setEditTime(ops.getEditTime());
+			newOp.setTrackDistanceDirection(ops.getTrackDistanceDirection());
+			newOp.setTrackObserver(ops.getTrackObserver());
 		}
 		engine.getSession().save(newOp);
 		engine.getSession().flush();

@@ -56,31 +56,31 @@ public abstract class CyberTrackerDataBuilder {
 	
 	public List<ICyberTrackerData> buildRecords(CyberTrackerRawData rawData) {
 		List<ICyberTrackerData> records = new ArrayList<ICyberTrackerData>();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			for (String id : rawData.getTripsMap().keySet()) {
-				List<S> sData = rawData.getTripsMap().get(id);
-				ICyberTrackerData ctTripData = createDataRecord(session, rawData.getElementsMap(), sData);
-				List<Coordinate> trackPoints = AbstractSmartImporter.listPart(rawData.getTimerTrackList(), ctTripData.getStartDate(), ctTripData.getEndDate());
-				
-				S lastS = !ctTripData.getSData().isEmpty() ? ctTripData.getSData().get(ctTripData.getSData().size()-1) : null;
-				if (lastS != null && !SightsUtil.hasWaypointData(lastS, rawData.getElementsMap())) {
-					//lastS is last point recorded when "End Patrol" was selected
-					//do not record it as a separate waypoint but add to end of the track
-					ctTripData.getSData().remove(ctTripData.getSData().size()-1);
-					//adding last waypoint to the track
-					//TODO: should all waypoints be part of a track?
-					Coordinate coord = toCoordinate(lastS);
-					if (coord != null)
-						trackPoints.add(coord);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				for (String id : rawData.getTripsMap().keySet()) {
+					List<S> sData = rawData.getTripsMap().get(id);
+					ICyberTrackerData ctTripData = createDataRecord(session, rawData.getElementsMap(), sData);
+					List<Coordinate> trackPoints = AbstractSmartImporter.listPart(rawData.getTimerTrackList(), ctTripData.getStartDate(), ctTripData.getEndDate());
+					
+					S lastS = !ctTripData.getSData().isEmpty() ? ctTripData.getSData().get(ctTripData.getSData().size()-1) : null;
+					if (lastS != null && !SightsUtil.hasWaypointData(lastS, rawData.getElementsMap())) {
+						//lastS is last point recorded when "End Patrol" was selected
+						//do not record it as a separate waypoint but add to end of the track
+						ctTripData.getSData().remove(ctTripData.getSData().size()-1);
+						//adding last waypoint to the track
+						//TODO: should all waypoints be part of a track?
+						Coordinate coord = toCoordinate(lastS);
+						if (coord != null)
+							trackPoints.add(coord);
+					}
+					ctTripData.setTimerTrackList(trackPoints);
+					records.add(ctTripData);
 				}
-				ctTripData.setTimerTrackList(trackPoints);
-				records.add(ctTripData);
+			} finally {
+				session.getTransaction().rollback();
 			}
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
 		}
 		//sort patrols based on there CT id before returning
 		Collections.sort(records, new Comparator<ICyberTrackerData>() {

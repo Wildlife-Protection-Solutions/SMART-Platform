@@ -29,7 +29,7 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -67,7 +67,7 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		
 		session = HibernateManager.openSession();
 		
-		Query q = session.createQuery("SELECT max(id) FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("SELECT max(id) FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("source", IndepedentIncidentSource.KEY); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> maxIs = q.list();

@@ -32,12 +32,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.qa.er.ErTrackDataProvider;
 import org.wcs.smart.qa.er.ErWaypointDataProvider;
 import org.wcs.smart.qa.er.internal.Messages;
@@ -65,11 +65,9 @@ public class OpenSourceMissionAction implements IQaAction {
 		QaError item = items.get(0);
 		if (item.getDataProviderId().equals(ErWaypointDataProvider.ID)){
 			SurveyWaypoint pw = null;
-			Session s = HibernateManager.openSession();
-			try{
-				pw = (SurveyWaypoint) s.createCriteria(SurveyWaypoint.class)
-				.add(Restrictions.eq("id.waypoint.uuid", item.getSourceId())) //$NON-NLS-1$
-				.uniqueResult();
+			
+			try(Session s = HibernateManager.openSession()){
+				pw = QueryFactory.buildQuery(s, SurveyWaypoint.class, "id.waypoint.uuid", item.getSourceId()).uniqueResult(); //$NON-NLS-1$
 				if (pw != null){
 					Mission m = pw.getMissionDay().getMission();
 					m.getId();
@@ -77,8 +75,6 @@ public class OpenSourceMissionAction implements IQaAction {
 					m.getStartDate();
 					m.getEndDate();
 				}
-			}finally{
-				s.close();
 			}
 			if (pw == null){
 				//not found
@@ -90,8 +86,7 @@ public class OpenSourceMissionAction implements IQaAction {
 			}
 		}else if (item.getDataProviderId().equals(ErTrackDataProvider.ID)){
 			MissionTrack track = null;
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				track = (MissionTrack) s.get(MissionTrack.class, item.getSourceId());
 				if (track != null){
 					Mission m = track.getMissionDay().getMission();
@@ -100,8 +95,6 @@ public class OpenSourceMissionAction implements IQaAction {
 					m.getStartDate();
 					m.getEndDate();
 				}
-			}finally{
-				s.close();
 			}
 			if (track == null){
 				//not found

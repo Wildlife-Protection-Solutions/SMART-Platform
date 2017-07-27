@@ -114,99 +114,98 @@ public class MissionEditorDialog extends TitleAreaDialog {
 			return false;
 		}
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			session.saveOrUpdate(toUpdate);
-		
-			Date currentStart = toUpdate.getStartDate();
-			Date currentEnd = toUpdate.getEndDate();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				session.saveOrUpdate(toUpdate);
 			
-			composite.updateDesign(toUpdate);
-			
-			if (!currentStart.equals(toUpdate.getStartDate()) ||
-				!currentEnd.equals(toUpdate.getEndDate())){
-				//dates have changed;
-				//we need to:
-				//1. remove any waypoints & attachments that are not associated with a day
-				//2. remove any tracks that are not associated with a day
+				Date currentStart = toUpdate.getStartDate();
+				Date currentEnd = toUpdate.getEndDate();
 				
-				//waypoints
-				List<MissionDay> wpDelete = new ArrayList<MissionDay>();
-				for (MissionDay md : toUpdate.getMissionDays()){
-					if (!isBetweenMissionDates(
-							SharedUtils.getDatePart(md.getDate(), false))){
-						wpDelete.add(md);
-					}
-					
-				}
-				for (MissionDay md : wpDelete){
-					for (SurveyWaypoint sw : md.getWaypoints()){
-						Waypoint delete = sw.getWaypoint();
-						session.delete(sw);
-						session.delete(delete);
-					}
-					
-					for (MissionTrack mt : md.getTracks()){
-						session.delete(mt);
-					}
-					md.getWaypoints().clear();
-					md.getTracks().clear();
-					
-					session.delete(md);
-				}
-				toUpdate.getMissionDays().removeAll(wpDelete);
+				composite.updateDesign(toUpdate);
 				
-				//need to create new mission days as required
-				//create days
-				Calendar calStart = SharedUtils.convertDate(toUpdate.getStartDate());
-				calStart.set(Calendar.HOUR, 0);
-				calStart.set(Calendar.MINUTE, 0);
-				calStart.set(Calendar.SECOND, 0);
-				calStart.set(Calendar.MILLISECOND, 0);
-				
-				Calendar calEnd = SharedUtils.convertDate(toUpdate.getEndDate());
-				while (calStart.before(calEnd) || calStart.equals(calEnd)) {
-					boolean found = false;
-					for(MissionDay md : toUpdate.getMissionDays()){
-						if (SharedUtils.isSameDate(md.getDate(), calStart.getTime())){
-							found = true;
-							break;
+				if (!currentStart.equals(toUpdate.getStartDate()) ||
+					!currentEnd.equals(toUpdate.getEndDate())){
+					//dates have changed;
+					//we need to:
+					//1. remove any waypoints & attachments that are not associated with a day
+					//2. remove any tracks that are not associated with a day
+					
+					//waypoints
+					List<MissionDay> wpDelete = new ArrayList<MissionDay>();
+					for (MissionDay md : toUpdate.getMissionDays()){
+						if (!isBetweenMissionDates(
+								SharedUtils.getDatePart(md.getDate(), false))){
+							wpDelete.add(md);
 						}
+						
 					}
-					if (!found){
-						MissionDay md = new MissionDay();
-						md.setDate(SharedUtils.getDatePart(calStart.getTime(), false));
-						md.setStartTime(createTime(0, 0, 0));
-						md.setEndTime(createTime(23, 59, 59));
-						md.setRestMinutes(0);
-						md.setTracks(new ArrayList<MissionTrack>());
-						md.setWaypoints(new ArrayList<SurveyWaypoint>());
-						md.setMission(toUpdate);
-						toUpdate.getMissionDays().add(md);
+					for (MissionDay md : wpDelete){
+						for (SurveyWaypoint sw : md.getWaypoints()){
+							Waypoint delete = sw.getWaypoint();
+							session.delete(sw);
+							session.delete(delete);
+						}
+						
+						for (MissionTrack mt : md.getTracks()){
+							session.delete(mt);
+						}
+						md.getWaypoints().clear();
+						md.getTracks().clear();
+						
+						session.delete(md);
 					}
-					calStart.add(Calendar.DAY_OF_MONTH, 1);
+					toUpdate.getMissionDays().removeAll(wpDelete);
+					
+					//need to create new mission days as required
+					//create days
+					Calendar calStart = SharedUtils.convertDate(toUpdate.getStartDate());
+					calStart.set(Calendar.HOUR, 0);
+					calStart.set(Calendar.MINUTE, 0);
+					calStart.set(Calendar.SECOND, 0);
+					calStart.set(Calendar.MILLISECOND, 0);
+					
+					Calendar calEnd = SharedUtils.convertDate(toUpdate.getEndDate());
+					while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+						boolean found = false;
+						for(MissionDay md : toUpdate.getMissionDays()){
+							if (SharedUtils.isSameDate(md.getDate(), calStart.getTime())){
+								found = true;
+								break;
+							}
+						}
+						if (!found){
+							MissionDay md = new MissionDay();
+							md.setDate(SharedUtils.getDatePart(calStart.getTime(), false));
+							md.setStartTime(createTime(0, 0, 0));
+							md.setEndTime(createTime(23, 59, 59));
+							md.setRestMinutes(0);
+							md.setTracks(new ArrayList<MissionTrack>());
+							md.setWaypoints(new ArrayList<SurveyWaypoint>());
+							md.setMission(toUpdate);
+							toUpdate.getMissionDays().add(md);
+						}
+						calStart.add(Calendar.DAY_OF_MONTH, 1);
+					}
+					
+					//ensure these are sorted correctly
+					Collections.sort(toUpdate.getMissionDays(), new Comparator<MissionDay>() {
+	
+						@Override
+						public int compare(MissionDay o1, MissionDay o2) {
+							return o1.getDate().compareTo(o2.getDate());
+						}
+					});
 				}
 				
-				//ensure these are sorted correctly
-				Collections.sort(toUpdate.getMissionDays(), new Comparator<MissionDay>() {
-
-					@Override
-					public int compare(MissionDay o1, MissionDay o2) {
-						return o1.getDate().compareTo(o2.getDate());
-					}
-				});
+				
+				session.getTransaction().commit();
+				isChanged = false;
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
+			}catch (Exception ex){
+				EcologicalRecordsPlugIn.displayLog(Messages.MissionEditorDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+				return false;
 			}
-			
-			
-			session.getTransaction().commit();
-			isChanged = false;
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog(Messages.MissionEditorDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-			return false;
-		}finally{
-			session.close();
 		}
 		
 		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, toUpdate);
@@ -242,15 +241,11 @@ public class MissionEditorDialog extends TitleAreaDialog {
 		
 		
 		composite.createControl(c);
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			session.update(toUpdate);
 			session.update(toUpdate.getSurvey().getSurveyDesign());
 			composite.init(toUpdate, session);
-		}finally{
-			session.close();
 		}
-		
 		composite.addChangeListener(new ISurveyListener() {
 			@Override
 			public void compositeModified() {

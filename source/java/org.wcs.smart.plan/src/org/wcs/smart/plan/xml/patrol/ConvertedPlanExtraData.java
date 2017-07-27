@@ -101,8 +101,8 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 			warnings.add(Messages.ConvertedPlanExtraData_NoPlanReference);
 			return null;
 		}
-		Session session = HibernateManager.openSession();
-		try {
+		
+		try(Session session = HibernateManager.openSession()) {
 			List<Plan> plans = PlanHibernateManager.getPlansById(session, SmartDB.getCurrentConservationArea(), id);
 			if (plans.isEmpty()) {
 				warnings.add(MessageFormat.format(Messages.ConvertedPlanExtraData_PlanNotFound, id));
@@ -112,8 +112,6 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 				warnings.add(MessageFormat.format(Messages.ConvertedPlanExtraData_MultiplePlansFound, id));
 			}
 			return plans.get(0);
-		} finally {
-			session.close();
 		}
 	}
 }

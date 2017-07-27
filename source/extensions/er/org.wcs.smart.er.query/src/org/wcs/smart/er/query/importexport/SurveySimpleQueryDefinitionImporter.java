@@ -73,14 +73,14 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 				filter = parser.ExpressionPart();
 			}
 			
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try {
-				SurveyQueryValidator validator = new SurveyQueryValidator(importCa, uuidLookup, session);
-				warnings.addAll(validator.validate(filter));
-			} finally {
-				session.getTransaction().rollback();
-				session.close();
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try {
+					SurveyQueryValidator validator = new SurveyQueryValidator(importCa, uuidLookup, session);
+					warnings.addAll(validator.validate(filter));
+				} finally {
+					session.getTransaction().rollback();
+				}
 			}
 			return filter.asString();
 			
@@ -91,14 +91,14 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 				queryFilter = parser.QueryFilter();
 			}
 			
-			Session session = HibernateManager.openSession();
+			try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			try {
-				SurveyQueryValidator validator = new SurveyQueryValidator(importCa, uuidLookup, session);
-				warnings.addAll(validator.validate(queryFilter.getFilter()));
-			} finally {
-				session.getTransaction().rollback();
-				session.close();
+				try {
+					SurveyQueryValidator validator = new SurveyQueryValidator(importCa, uuidLookup, session);
+					warnings.addAll(validator.validate(queryFilter.getFilter()));
+				} finally {
+					session.getTransaction().rollback();
+				}
 			}
 			return queryFilter.asString();
 

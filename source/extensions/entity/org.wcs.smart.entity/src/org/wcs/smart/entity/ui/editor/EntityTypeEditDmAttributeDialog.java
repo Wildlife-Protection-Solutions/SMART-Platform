@@ -44,13 +44,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolTip;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
@@ -218,10 +218,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 				try{
 					openSession.saveOrUpdate(((EntityAttribute)item).getDmAttribute());
 					
-					@SuppressWarnings("unchecked")
-					List<Attribute> atts = openSession.createCriteria(Attribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-					
+					List<Attribute> atts = QueryFactory.buildQuery(openSession, Attribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 					AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(),
 							((EntityAttribute)item).getDmAttribute(),
 							atts,

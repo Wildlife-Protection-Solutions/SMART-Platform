@@ -66,39 +66,38 @@ public class DeleteIncidentAction implements IQaAction {
 		
 		List<QaError> deleted = new ArrayList<>();
 		List<Waypoint> wpDeleted = new ArrayList<>();
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			
-			for (QaError item : toProcess){
-				boolean found = false;
-				for (Waypoint wp : wpDeleted){
-					if (wp.getUuid().equals(item.getSourceId())){
-						//previously deleted
+		try(Session s = HibernateManager.openSession()){
+			try{
+				s.beginTransaction();
+				
+				for (QaError item : toProcess){
+					boolean found = false;
+					for (Waypoint wp : wpDeleted){
+						if (wp.getUuid().equals(item.getSourceId())){
+							//previously deleted
+							deleted.add(item);
+							found = true;
+						}
+					}
+					if (found) continue;
+					
+					Waypoint pw = (Waypoint) s.get(Waypoint.class, item.getSourceId());
+					
+					if (pw == null){
+						item.setStatus(QaError.Status.DELETED);
+						item.setFixMessage(Messages.DeleteIncidentAction_DeleteErrorWpNotFound + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));  //$NON-NLS-1$//$NON-NLS-2$
+					}else{
+						s.delete(pw);
 						deleted.add(item);
-						found = true;
+						wpDeleted.add(pw);
 					}
 				}
-				if (found) continue;
-				
-				Waypoint pw = (Waypoint) s.get(Waypoint.class, item.getSourceId());
-				
-				if (pw == null){
-					item.setStatus(QaError.Status.DELETED);
-					item.setFixMessage(Messages.DeleteIncidentAction_DeleteErrorWpNotFound + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));  //$NON-NLS-1$//$NON-NLS-2$
-				}else{
-					s.delete(pw);
-					deleted.add(item);
-					wpDeleted.add(pw);
-				}
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				QaPlugIn.displayLog(Messages.DeleteIncidentAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
+				return false;
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			QaPlugIn.displayLog(Messages.DeleteIncidentAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
-			return false;
-		}finally{
-			s.close();
 		}
 
 		for (QaError item : deleted){

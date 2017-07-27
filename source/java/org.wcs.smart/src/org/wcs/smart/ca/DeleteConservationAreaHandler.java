@@ -22,7 +22,7 @@
 package org.wcs.smart.ca;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.internal.Messages;
 
@@ -55,25 +55,25 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 	}
 	
 	private void deleteAgencyRanks(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Agency where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Agency where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deleteStations(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Station where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Station where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deleteEmployees(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Employee where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Employee where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deleteDataModel(ConservationArea ca, Session session) throws Exception{	
-		Query q = session.createQuery("delete from Category where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Category where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 

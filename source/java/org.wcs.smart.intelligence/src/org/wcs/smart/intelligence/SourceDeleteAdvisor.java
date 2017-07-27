@@ -22,12 +22,10 @@
 package org.wcs.smart.intelligence;
 
 import java.text.MessageFormat;
-import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
@@ -51,15 +49,11 @@ public class SourceDeleteAdvisor implements IDeleteAdvisor {
 			return Messages.SourceDeleteAdvisor_InvalidObjectType;
 		}
 		IntelligenceSource source = (IntelligenceSource)object;
-		List<?> data = session.createCriteria(Intelligence.class).add(Restrictions.eq("source", source)).setProjection(Projections.rowCount()).list(); //$NON-NLS-1$
-		if (data.size() == 0){
-			return null;
-		}else if (data.size() > 0){
-			long cnt = (Long) data.get(0);
-			if (cnt > 0){
-				return MessageFormat.format(
-						Messages.SourceDeleteAdvisor_IntelligenceDeleteError, new Object[]{source.getName(), cnt}); 
-			}
+		Long cnt = QueryFactory.buildCountQuery(session, Intelligence.class, new Object[] {"source", source}); //$NON-NLS-1$
+		
+		if (cnt > 0){
+			return MessageFormat.format(
+					Messages.SourceDeleteAdvisor_IntelligenceDeleteError, new Object[]{source.getName(), cnt}); 
 		}
 		return null;
 	}

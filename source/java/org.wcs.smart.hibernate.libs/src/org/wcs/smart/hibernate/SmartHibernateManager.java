@@ -34,13 +34,14 @@ import org.hibernate.BaseSessionEventListener;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.jdbc.spi.JdbcServices;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.hql.spi.QueryTranslator;
 import org.hibernate.hql.spi.QueryTranslatorFactory;
-import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 
 /**
  * Manage hibernate connections and mappings.
@@ -121,10 +122,11 @@ public class SmartHibernateManager {
 				hibernateConfiguration.setProperty("hibernate.connection.username", userName); //$NON-NLS-1$
 				hibernateConfiguration.setProperty("hibernate.connection.password", passWord); //$NON-NLS-1$
 				hibernateConfiguration.setProperty("hibernate.connection.url", "jdbc:derby:" + databaseLocation + ";create=false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-				ServiceRegistry service = new ServiceRegistryBuilder().applySettings(hibernateConfiguration.getProperties()).buildServiceRegistry();
+				
+				ServiceRegistry service = new StandardServiceRegistryBuilder().applySettings(hibernateConfiguration.getProperties()).build();
 				sessionFactory = hibernateConfiguration.buildSessionFactory(service);
-				if (!((SessionFactoryImplementor)sessionFactory).getDialect().supportsSequences()){
+				
+				if (getCurrentDialect() == null || !getCurrentDialect().supportsSequences()){
 					//fail
 					throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
 				}
@@ -133,16 +135,33 @@ public class SmartHibernateManager {
 	}
 	
 	/**
+	 * the current dialog in use 
+	 * @return
+	 */
+	public static Dialect getCurrentDialect() {
+		try {
+		if (sessionFactory != null) {
+			return sessionFactory.getSessionFactoryOptions().getServiceRegistry().getService(JdbcServices.class).getDialect();
+		}
+		}catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	/**
 	 * Convert hql to sql
 	 * @param hqlQueryText
 	 * @return
 	 */
 	public static String toSql(String hqlQueryText) {
 		if (hqlQueryText != null && hqlQueryText.trim().length() > 0) {
-			final QueryTranslatorFactory translatorFactory = ((SessionFactoryImpl) sessionFactory).getSettings().getQueryTranslatorFactory();
+			QueryTranslatorFactory translatorFactory = sessionFactory.getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
+//			Settings settings = ((SessionFactoryImpl) sessionFactory).getSettings();
+//			final QueryTranslatorFactory translatorFactory = ((SessionFactoryImpl) sessionFactory).getSettings().getQueryTranslatorFactory();
 			final SessionFactoryImplementor factory = (SessionFactoryImplementor) sessionFactory;
-			final QueryTranslator translator = translatorFactory
-					.createQueryTranslator(hqlQueryText, hqlQueryText, Collections.EMPTY_MAP, factory);
+			final QueryTranslator translator = translatorFactory.createQueryTranslator(hqlQueryText, hqlQueryText, Collections.EMPTY_MAP, factory, null);
 			translator.compile(Collections.EMPTY_MAP, false);
 			return translator.getSQLString();
 		}
@@ -244,6 +263,7 @@ public class SmartHibernateManager {
 		return sessionFactory != null;
 	}
 	
+	@SuppressWarnings("resource")
 	private static Session openSessionOnly(Interceptor interceptor){
 		if (sessionFactory == null){
 			createSessionFactory();
@@ -293,7 +313,7 @@ public class SmartHibernateManager {
 				cnt++;
 			}
 			if (openSessions.size() > 0 && !force){
-				throw new Exception("Could not end current database session.  There are still active transactions.");
+				throw new Exception("Could not end current database session.  There are still active transactions."); //$NON-NLS-1$
 			}else if (force){
 				closeAllSessions();
 			}

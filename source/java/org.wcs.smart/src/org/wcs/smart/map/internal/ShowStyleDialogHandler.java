@@ -41,6 +41,7 @@ import org.wcs.smart.ui.map.SmartStyleEditorDialog;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ShowStyleDialogHandler {
 
 	@Execute

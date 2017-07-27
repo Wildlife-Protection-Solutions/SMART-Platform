@@ -124,8 +124,9 @@ public class CaExporter {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		progress.setWorkRemaining( (exporters.size() + 2) * 10);
 		
-		Session session = HibernateManager.openSession();
-		try{
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
 			/* write a conservation area info file */
 			writeConservationAreaInfo(tempDir, ca);
 			progress.checkCanceled();
@@ -142,10 +143,9 @@ public class CaExporter {
 			}
 			
 			progress.setWorkRemaining( 0 );
+			session.getTransaction().rollback();
 		}catch (OperationCanceledException ex) {
 			return;
-		}finally{
-			session.close();
 		}
 	}
 	

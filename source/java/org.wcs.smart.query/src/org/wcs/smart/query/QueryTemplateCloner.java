@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -66,11 +69,16 @@ public class QueryTemplateCloner implements
 	
 	
 	private void cloneFolders(ConservationAreaClonerEngine engine){
-		@SuppressWarnings("unchecked")
-		List<QueryFolder> queryFolder = engine.getSession().createCriteria(QueryFolder.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-				.add(Restrictions.isNull("employee")) //$NON-NLS-1$
-				.add(Restrictions.isNull("parentFolder")).list(); //$NON-NLS-1$
+		CriteriaBuilder cb = engine.getSession().getCriteriaBuilder();
+		CriteriaQuery<QueryFolder> c = cb.createQuery(QueryFolder.class);
+		Root<QueryFolder> root = c.from(QueryFolder.class);
+		c.where(cb.and(
+				cb.equal(root.get("conservationArea"), engine.getTemplateCa()), //$NON-NLS-1$
+				cb.isNull(root.get("employee")), //$NON-NLS-1$
+				cb.isNull(root.get("parentFolder")) //$NON-NLS-1$
+				));
+		
+		List<QueryFolder> queryFolder = engine.getSession().createQuery(c).getResultList();
 		for (QueryFolder q : queryFolder){
 			processQueryFolder(q, null, engine);
 		}

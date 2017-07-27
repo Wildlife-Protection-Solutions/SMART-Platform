@@ -27,16 +27,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.hibernate.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Single ca survey hibernate functions.
@@ -44,7 +49,6 @@ import org.wcs.smart.er.model.SurveyDesign;
  * @author Emily
  *
  */
-@SuppressWarnings("unchecked")
 public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 
 	private ConservationArea ca;
@@ -79,7 +83,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 			sb.append(" AND a.state = :state");	 //$NON-NLS-1$
 		}
 		
-		Query q = s.createQuery(sb.toString());
+		Query<SamplingUnit> q = s.createQuery(sb.toString(),SamplingUnit.class);
 		q.setParameter("survey", survey); //$NON-NLS-1$
 		if (state != null){
 			q.setParameter("state", state); //$NON-NLS-1$
@@ -113,7 +117,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		sb.append(" WHERE missionDay.mission.survey.surveyDesign = :survey "); //$NON-NLS-1$
 		sb.append(" AND type = :type  "); //$NON-NLS-1$
 		
-		Query q = s.createQuery(sb.toString());
+		Query<MissionTrack> q = s.createQuery(sb.toString(), MissionTrack.class);
 		q.setParameter("survey", survey); //$NON-NLS-1$
 		q.setParameter("type", MissionTrack.TrackType.TRACK); //$NON-NLS-1$
 		
@@ -133,11 +137,8 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	public List<SurveyDesignProxy> getSurveyDesignEditorInputs(Session s, SurveyDesignFilter filter) {
 		if (filter == null){
 			//get all
-			List<SurveyDesign> ds = s.createCriteria(SurveyDesign.class)
-					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-					.list(); 
+			List<SurveyDesign> ds = QueryFactory.buildQuery(s, SurveyDesign.class, "conservationArea", ca).getResultList(); //$NON-NLS-1$
 			List<SurveyDesignProxy> all = new ArrayList<SurveyDesignProxy>();
-			
 			for (SurveyDesign d : ds){
 				SurveyDesignProxy ii = new SurveyDesignProxy(d.getName(), d.getUuid(), d.getKeyId(), d.getState());
 				all.add(ii);
@@ -145,10 +146,11 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 			return all;
 				
 		}else{
-			Query q = filter.buildQuery(s);
-			List<Object[]> data = q.list();
+			Query<?> q = filter.buildQuery(s);
+			List<?> data = q.list();
 			List<SurveyDesignProxy> all = new ArrayList<SurveyDesignProxy>();
-			for (Object[] x : data){
+			for (Object d : data){
+				Object[] x = (Object[])d;
 				SurveyDesignProxy ii = new SurveyDesignProxy((String)x[1], (UUID)x[0], (String)x[3], (SurveyDesign.State)x[2]);
 				all.add(ii);
 			}
@@ -162,12 +164,17 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	@Override
 	public List<Survey> getActiveSurveys(Session s) {
 		//get all
-		List<Survey> ds = s.createCriteria(Survey.class, "s") //$NON-NLS-1$
-				.createAlias("s.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("sd.conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("sd.state", SurveyDesign.State.ACTIVE)) //$NON-NLS-1$
-				.list();
-		return ds;
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
+		Root<Survey> from = c.from(Survey.class);
+		c.select(from);
+		Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
+		c.where(cb.and(
+				cb.equal(fromdesign.get("conservationArea"), ca), //$NON-NLS-1$
+				cb.equal(fromdesign.get("state"), SurveyDesign.State.ACTIVE) //$NON-NLS-1$
+				));
+		return s.createQuery(c).getResultList();
+		
 	}
 	
 	/**
@@ -175,10 +182,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 */
 	@Override
 	public List<Survey> getActiveSurveys(SurveyDesign sd, Session s){
-		List<Survey> ds = s.createCriteria(Survey.class, "s") //$NON-NLS-1$
-				.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
-				.list();
-		return ds;
+		return QueryFactory.buildQuery(s, Survey.class, "surveyDesign", sd).getResultList(); //$NON-NLS-1$
 	}
 	
 	
@@ -204,65 +208,62 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 * @return
 	 */
 	public SurveyDesign getSurveyDesign(String key, Session session){
-		List<SurveyDesign> designs = session.createCriteria(SurveyDesign.class)
-				.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.list();
-		if (designs.size() > 0){
-			return designs.get(0);
-		}
-		return null;
+		return QueryFactory.buildQuery(session, SurveyDesign.class,
+				new Object[] {"keyId", key}, //$NON-NLS-1$
+				new Object[] {"conservationArea", ca}).uniqueResult(); //$NON-NLS-1$
 	}
 
 	@Override
 	public MissionAttribute getMissionAttributeByKey(String missionAttributeKeyId, Session session) {
-		List<MissionAttribute> list = session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.eq("keyId", missionAttributeKeyId)) //$NON-NLS-1$
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.list();
-		if (list.size() > 0){
-			return list.get(0);
-		}
-		return null;
+		return QueryFactory.buildQuery(session, MissionAttribute.class,
+				new Object[] {"keyId", missionAttributeKeyId}, //$NON-NLS-1$
+				new Object[] {"conservationArea", ca}).uniqueResult(); //$NON-NLS-1$
 	}
 
 	@Override
 	public MissionAttributeListItem getMissionAttributeListItenByKey(String key, Session session) {
-		List<MissionAttributeListItem> list = session.createCriteria(MissionAttributeListItem.class)
-				.createAlias("attribute", "a") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-				.add(Restrictions.eq("a.conservationArea", ca)) //$NON-NLS-1$
-				.list();
-		if (list.size() > 0){
-			return list.get(0);
-		}
-		return null;
+		
+		//get all
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<MissionAttributeListItem> c = cb.createQuery(MissionAttributeListItem.class);
+		Root<MissionAttributeListItem> from = c.from(MissionAttributeListItem.class);
+		Root<Attribute> fromattribute = c.from(Attribute.class);
+		c.select(from);
+		c.where(cb.and(
+				cb.equal(from.get("keyId"), key), //$NON-NLS-1$
+				cb.equal(fromattribute.get("conservationArea"), ca) //$NON-NLS-1$
+				));
+		return session.createQuery(c).uniqueResult();
 	}
 
 	@Override
 	public SamplingUnit getSamplingUnitById(String key, Session session) {
-		List<SamplingUnit> list = session.createCriteria(SamplingUnit.class)
-				.createAlias("surveyDesign","sd") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("id", key)) //$NON-NLS-1$
-				.add(Restrictions.eq("sd.conservationArea", ca)) //$NON-NLS-1$
-				.list();
-		if (list.size() > 0){
-			return list.get(0);
-		}
-		return null;	}
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<SamplingUnit> c = cb.createQuery(SamplingUnit.class);
+		Root<SamplingUnit> from = c.from(SamplingUnit.class);
+		Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
+		c.select(from);
+		c.where(cb.and(
+				cb.equal(from.get("id"), key), //$NON-NLS-1$
+				cb.equal(fromdesign.get("conservationArea"), ca) //$NON-NLS-1$
+				));
+		return session.createQuery(c).uniqueResult();
+	}
 
 	
 	
 	@Override
 	public Survey getSurveyById(Session session, String id) {
-		List<Survey> surveys = session.createCriteria(Survey.class)
-				.createAlias("surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("id", id)) //$NON-NLS-1$
-				.add(Restrictions.eq("sd.conservationArea", ca)) //$NON-NLS-1$
-				.list();
-		if (surveys.size() > 0){
-			return surveys.get(0);
-		}
-		return null;
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
+		Root<Survey> from = c.from(Survey.class);
+		Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
+		c.select(from);
+		c.where(cb.and(
+				cb.equal(from.get("id"), id), //$NON-NLS-1$
+				cb.equal(fromdesign.get("conservationArea"), ca) //$NON-NLS-1$
+				));
+		return session.createQuery(c).uniqueResult();
 	}
 }

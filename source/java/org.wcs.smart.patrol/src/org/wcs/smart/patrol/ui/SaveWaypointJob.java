@@ -69,43 +69,41 @@ public class SaveWaypointJob extends Job {
 		synchronized (this) {
 			pnts.addAll(waypoints);
 		}
-		Session saveSession = HibernateManager
-				.openSession(new WaypointAttachmentInterceptor());
-		try {
+		
+		try (Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
 			saveSession.beginTransaction();
-			for (PatrolWaypoint wp : pnts) {
-				wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-				wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
-				saveSession.saveOrUpdate(wp.getWaypoint());
-				saveSession.saveOrUpdate(wp);
-				
-				// remove observations with no data
-				if (wp.getWaypoint().getObservations() != null) {
-					for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
-						List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-						for (WaypointObservationAttribute att : wo.getAttributes()) {
-							if (!att.hasValue()) {
-								toDelete.add(att);
+			try{
+				for (PatrolWaypoint wp : pnts) {
+					wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+					wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
+					saveSession.saveOrUpdate(wp.getWaypoint());
+					saveSession.saveOrUpdate(wp);
+					
+					// remove observations with no data
+					if (wp.getWaypoint().getObservations() != null) {
+						for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
+							List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+							for (WaypointObservationAttribute att : wo.getAttributes()) {
+								if (!att.hasValue()) {
+									toDelete.add(att);
+								}
 							}
+							wo.getAttributes().removeAll(toDelete);
 						}
-						wo.getAttributes().removeAll(toDelete);
 					}
+					ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);
 				}
-				ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);
-			}
-			saveSession.getTransaction().commit();
+				saveSession.getTransaction().commit();
 			
-			
-		} catch (Exception ex) {
-			if (saveSession.getTransaction().isActive()) {
-				saveSession.getTransaction().rollback();
+			} catch (Exception ex) {
+				if (saveSession.getTransaction().isActive()) {
+					saveSession.getTransaction().rollback();
+				}
+				SmartPatrolPlugIn
+						.displayLog(
+								Messages.PatrolEditor_Error_SavingWaypoints
+										+ ex.getLocalizedMessage(), ex);
 			}
-			SmartPatrolPlugIn
-					.displayLog(
-							Messages.PatrolEditor_Error_SavingWaypoints
-									+ ex.getLocalizedMessage(), ex);
-		} finally {
-			saveSession.close();
 		}
 		for (PatrolWaypoint wp : waypoints){
 			try{

@@ -40,12 +40,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
@@ -78,7 +78,6 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 	 * job to load all patrol ids
 	 */
 	private Job loadIdsJob = new Job(Messages.SurveyIdDropItem_LoadIdsJobName){
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (value.isDisposed() || design == null){
@@ -86,15 +85,11 @@ public class SurveyIdDropItem  extends DropItem implements IFilterDropItem, ISur
 			}
 			final String lcurrentValue = currentValue;
 			final List<String> data = new ArrayList<String>();
-			Session s = HibernateManager.openSession();
-			try{
-				List<Survey> ss = s.createCriteria(Survey.class)
-						.add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
+			try(Session s = HibernateManager.openSession()){
+				List<Survey> ss = QueryFactory.buildQuery(s, Survey.class, "surveyDesign", design).getResultList(); //$NON-NLS-1$
 				for (Survey sy : ss){
 					data.add(sy.getId());
 				}
-			}finally{
-				s.close();
 			}
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override

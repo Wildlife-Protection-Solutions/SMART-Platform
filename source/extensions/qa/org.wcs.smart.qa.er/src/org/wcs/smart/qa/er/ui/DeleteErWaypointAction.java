@@ -31,12 +31,12 @@ import java.util.Set;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.QaPlugIn;
@@ -70,46 +70,42 @@ public class DeleteErWaypointAction implements IQaAction {
 		Set<Mission> modified = new HashSet<>();
 		List<QaError> deleted = new ArrayList<>();
 		List<Waypoint> wpDeleted = new ArrayList<>();
-		Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try{
-			s.beginTransaction();
-			
-			for (QaError item : toProcess){
-				boolean found = false;
-				for (Waypoint wp : wpDeleted){
-					if (wp.getUuid().equals(item.getSourceId())){
-						//previously deleted
+		try(Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			try{
+				s.beginTransaction();
+				
+				for (QaError item : toProcess){
+					boolean found = false;
+					for (Waypoint wp : wpDeleted){
+						if (wp.getUuid().equals(item.getSourceId())){
+							//previously deleted
+							deleted.add(item);
+							found = true;
+						}
+					}
+					if (found) continue;
+						
+					SurveyWaypoint pw = QueryFactory.buildQuery(s, SurveyWaypoint.class, "id.waypoint.uuid", item.getSourceId()).uniqueResult(); //$NON-NLS-1$
+					if (pw == null){
+						item.setStatus(QaError.Status.DELETED);
+						item.setFixMessage(Messages.DeleteErWaypointAction_DeleteErrorNotfound + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));  //$NON-NLS-1$//$NON-NLS-2$
+					}else{
+						s.delete(pw);
+						s.delete(pw.getWaypoint());
+						modified.add(pw.getMissionDay().getMission());
+						pw.getMissionDay().getMission().equals(null); //lazy load hibernate
 						deleted.add(item);
-						found = true;
+						wpDeleted.add(pw.getWaypoint());
 					}
 				}
-				if (found) continue;
+				s.getTransaction().commit();
 				
-				SurveyWaypoint pw = (SurveyWaypoint) s.createCriteria(SurveyWaypoint.class)
-						.add(Restrictions.eq("id.waypoint.uuid", item.getSourceId())) //$NON-NLS-1$
-						.uniqueResult();
-				
-				if (pw == null){
-					item.setStatus(QaError.Status.DELETED);
-					item.setFixMessage(Messages.DeleteErWaypointAction_DeleteErrorNotfound + (item.getFixMessage() == null ? "" : " - " + item.getFixMessage()));  //$NON-NLS-1$//$NON-NLS-2$
-				}else{
-					s.delete(pw);
-					s.delete(pw.getWaypoint());
-					modified.add(pw.getMissionDay().getMission());
-					pw.getMissionDay().getMission().equals(null); //lazy load hibernate
-					deleted.add(item);
-					wpDeleted.add(pw.getWaypoint());
-				}
+	
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				QaPlugIn.displayLog(Messages.DeleteErWaypointAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
+				return false;
 			}
-			s.getTransaction().commit();
-			
-
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			QaPlugIn.displayLog(Messages.DeleteErWaypointAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
-			return false;
-		}finally{
-			s.close();
 		}
 
 		for (QaError item : deleted){

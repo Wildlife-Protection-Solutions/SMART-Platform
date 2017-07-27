@@ -102,8 +102,8 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 		IGeoResource editResource = null;
 		ReferencedEnvelope zoomEnv = null;	
 		
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			Waypoint pw = (Waypoint) s.get(Waypoint.class, waypointUuid);
 			editWaypoint = pw;
 			if (pw == null){
@@ -128,8 +128,6 @@ public class IncidentEditWaypointDialog extends EditWaypointDetailsDialog {
 			}
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
-		}finally{
-			s.close();
 		}
 		
 		IGeoResource eResource = editResource;

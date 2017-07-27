@@ -304,9 +304,8 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 			};
 			
 			EntitySightingQuery query = currentQuery;
-			Session s = HibernateManager.openSession();
-			try{
-				
+			
+			try(Session s = HibernateManager.openSession()){
 				HashMap<String, Object> params = new HashMap<String, Object>();
 				params.put(IProgressMonitor.class.getName(), lblProgressMonitor);
 				params.put(Session.class.getName(), s);
@@ -322,8 +321,6 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 					}});
 			}catch (Exception ex){
 				EntityPlugIn.displayLog(Messages.SightingPage_QueryError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-			}finally{
-				s.close();
 			}
 			lblProgressMonitor.done();
 			return Status.OK_STATUS;

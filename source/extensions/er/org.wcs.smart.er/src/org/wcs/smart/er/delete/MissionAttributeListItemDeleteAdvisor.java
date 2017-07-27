@@ -25,11 +25,11 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Delete advisor for attribute list items.
@@ -48,9 +48,7 @@ public class MissionAttributeListItemDeleteAdvisor implements IDeleteAdvisor {
 		MissionAttributeListItem ma = (MissionAttributeListItem)object;
 		
 		//find missions which use this attribute
-		@SuppressWarnings("unchecked")
-		List<MissionPropertyValue> designs = session.createCriteria(MissionPropertyValue.class)
-				.add(Restrictions.eq("attributeListItem", ma)).list(); //$NON-NLS-1$
+		List<MissionPropertyValue> designs = QueryFactory.buildQuery(session, MissionPropertyValue.class, "attributeListItem", ma).getResultList(); //$NON-NLS-1$
 		if (designs.size() == 0){
 			return null;
 		}

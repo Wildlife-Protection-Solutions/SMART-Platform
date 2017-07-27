@@ -209,16 +209,16 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ManageProfilesDialog_DeleteTask_Name, 1);
 					
-					Session session = HibernateManager.openSession();
-					try {
+					try(Session session = HibernateManager.openSession()){
 						session.beginTransaction();
-						CyberTrackerHibernateManager.deleteProfile(session, p);
-						session.getTransaction().commit();							
-					}catch (Exception ex){
-						session.getTransaction().rollback();
-						SmartPlugIn.displayLog(Messages.ManageProfilesDialog_DeleteTask_Error, ex);
+						try {
+							CyberTrackerHibernateManager.deleteProfile(session, p);
+							session.getTransaction().commit();							
+						}catch (Exception ex){
+							session.getTransaction().rollback();
+							SmartPlugIn.displayLog(Messages.ManageProfilesDialog_DeleteTask_Error, ex);
+						}
 					} finally {
-						session.close();
 						monitor.done();
 					}
 				}
@@ -244,16 +244,16 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ManageProfilesDialog_LoadProfileList_Task, 1);
-					Session session  = HibernateManager.openSession();
-					try {
+					try(Session session = HibernateManager.openSession()){
 						session.beginTransaction();
-						profileList.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
-						Collections.sort(profileList, new CtProfileDefaultNameComparator());
-					} catch (Exception ex) {
-						SmartPlugIn.displayLog(Messages.ManageProfilesDialog_LoadProfileList_Error, ex);
-					} finally {
-						session.getTransaction().rollback();
-						session.close();
+						try {
+							profileList.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
+							Collections.sort(profileList, new CtProfileDefaultNameComparator());
+						} catch (Exception ex) {
+							SmartPlugIn.displayLog(Messages.ManageProfilesDialog_LoadProfileList_Error, ex);
+						} finally {
+							session.getTransaction().rollback();
+						}
 					}
 				}
 			});

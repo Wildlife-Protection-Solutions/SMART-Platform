@@ -59,36 +59,31 @@ public class RemovePlanJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		List<ConservationArea> cas = null;
 		
-		final Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			cas = HibernateManager.getConservationAreas(session);
-			if (DerbyHibernateExtensions.tableExists(session, "plan")){ //$NON-NLS-1$
-				session.createSQLQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.plan)").executeUpdate(); //$NON-NLS-1$
-			}
-			for (String table : TABLES){
-				if (DerbyHibernateExtensions.tableExists(session, table)){
-					session.createSQLQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
-				}
-			}		
-			HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-
-		} catch (Exception e) {
-			try{
-				session.getTransaction().rollback();
-			}catch (Exception ex){
-				SmartPlanPlugIn.log(ex.getMessage(), ex);	
-			}
-			SmartPlanPlugIn.displayLog(Messages.RemovePlanJob_Error, e);
-			return new Status(Status.ERROR,SmartPlanPlugIn.PLUGIN_ID,e.getMessage());
-		} finally {
+		try(final Session session = HibernateManager.openSession()){
+			session.beginTransaction();
 			try {
-				session.close();
-			} catch (Exception ex) {
-				SmartPlanPlugIn.log(ex.getMessage(), ex);
+				cas = HibernateManager.getConservationAreas(session);
+				if (DerbyHibernateExtensions.tableExists(session, "plan")){ //$NON-NLS-1$
+					session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.plan)").executeUpdate(); //$NON-NLS-1$
+				}
+				for (String table : TABLES){
+					if (DerbyHibernateExtensions.tableExists(session, table)){
+						session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+					}
+				}		
+				HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+	
+			} catch (Exception e) {
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex){
+					SmartPlanPlugIn.log(ex.getMessage(), ex);	
+				}
+				SmartPlanPlugIn.displayLog(Messages.RemovePlanJob_Error, e);
+				return new Status(Status.ERROR,SmartPlanPlugIn.PLUGIN_ID,e.getMessage());
 			}
-		}
+		} 
 		if (cas != null){
 			//delete filestores
 			for (ConservationArea ca : cas){

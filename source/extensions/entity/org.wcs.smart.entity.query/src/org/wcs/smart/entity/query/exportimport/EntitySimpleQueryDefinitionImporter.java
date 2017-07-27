@@ -64,14 +64,14 @@ public class EntitySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 		}
 
 		//perform validation
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			EntityQueryValidator validator = new EntityQueryValidator(importCa, session);
-			warnings.addAll(validator.validate(queryFilter.getFilter()));
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				EntityQueryValidator validator = new EntityQueryValidator(importCa, session);
+				warnings.addAll(validator.validate(queryFilter.getFilter()));
+			} finally {
+				session.getTransaction().rollback();
+			}
 		}
 		return queryFilter.asString();
 	}

@@ -25,11 +25,11 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Delete advisor for sampling unit attribute list items.
@@ -48,9 +48,8 @@ public class SamplingUnitAttributeListItemDeleteAdvisor implements IDeleteAdviso
 		SamplingUnitAttributeListItem ma = (SamplingUnitAttributeListItem)object;
 		
 		//find missions which use this attribute
-		@SuppressWarnings("unchecked")
-		List<SamplingUnitAttributeValue> suattributes = session.createCriteria(SamplingUnitAttributeValue.class)
-				.add(Restrictions.eq("attributeListItem", ma)).list(); //$NON-NLS-1$
+		List<SamplingUnitAttributeValue> suattributes = 
+				QueryFactory.buildQuery(session, SamplingUnitAttributeValue.class, "attributeListItem", ma).getResultList(); //$NON-NLS-1$
 		if (suattributes.size() == 0){
 			return null;
 		}

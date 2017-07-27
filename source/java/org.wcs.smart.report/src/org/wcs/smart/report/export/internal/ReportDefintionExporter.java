@@ -121,23 +121,23 @@ public class ReportDefintionExporter implements IReportExporter {
 	 * @throws Exception
 	 */
 	private void writeReportInfo(File f, Report report) throws Exception{
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try {
-			s.saveOrUpdate(report);
-			Properties prop = new Properties();
-			for (Label l : report.getNames()) {
-				prop.setProperty(
-						"name_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				s.saveOrUpdate(report);
+				Properties prop = new Properties();
+				for (Label l : report.getNames()) {
+					prop.setProperty(
+							"name_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+				}
+				prop.setProperty(FILENAME_KEY, report.getFilename());
+				prop.setProperty(VERSION_KEY, VERSION_2);
+				try(FileOutputStream fout = new FileOutputStream(f)){
+					prop.store(fout, null);
+				}
+			} finally {
+				s.getTransaction().rollback();
 			}
-			prop.setProperty(FILENAME_KEY, report.getFilename());
-			prop.setProperty(VERSION_KEY, VERSION_2);
-			try(FileOutputStream fout = new FileOutputStream(f)){
-				prop.store(fout, null);
-			}
-		} finally {
-			s.getTransaction().rollback();
-			s.close();
 		}
 	}
 	
@@ -167,14 +167,14 @@ public class ReportDefintionExporter implements IReportExporter {
 						processedQueries.add(queryUuid);
 						IQueryType qType = QueryTypeManager.INSTANCE.findQueryType((((OdaDataSetHandle) dataset).getQueryText().split(":")[0])); //$NON-NLS-1$
 						UUID uuid = UuidUtils.stringToUuid(queryUuid);
-						Session hsession = HibernateManager.openSession();
 						Query smartQuery = null;
-						try{
+						try(Session hsession = HibernateManager.openSession()){
 							hsession.beginTransaction();
-							smartQuery = QueryHibernateManager.getInstance().findQuery(hsession, uuid, qType);
-						}finally{
-							hsession.getTransaction().commit();
-							hsession.close();
+							try{
+								smartQuery = QueryHibernateManager.getInstance().findQuery(hsession, uuid, qType);
+							}finally{
+								hsession.getTransaction().commit();
+							}
 						}	
 					
 						if (smartQuery == null) throw new Exception(Messages.ReportDefintionExporter_Error_LoadingQueryDef);

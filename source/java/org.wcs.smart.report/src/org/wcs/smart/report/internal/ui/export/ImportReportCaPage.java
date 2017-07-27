@@ -76,14 +76,10 @@ public class ImportReportCaPage extends WizardPage {
 		cmbViewer.setLabelProvider(new ConservationAreaLabelProvider());
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
-		
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			List<ConservationArea> areas = HibernateManager.getConservationAreas(session);
 			areas.remove(SmartDB.getCurrentConservationArea());
 			cmbViewer.setInput(areas);
-		}finally{
-			session.close();
 		}
 		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override

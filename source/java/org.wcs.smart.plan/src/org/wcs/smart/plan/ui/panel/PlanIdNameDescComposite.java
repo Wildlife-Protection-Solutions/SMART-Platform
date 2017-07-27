@@ -177,11 +177,9 @@ public class PlanIdNameDescComposite extends PlanComposite {
 		boolean idIsSimple = SmartUtils.isSimpleString(id.getText(),
 				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Plan.MAX_ID_LENGTH, 2);
 		boolean isDup = false;
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			isDup = PlanHibernateManager.isDuplicatePlanId( s, id.getText(), currentPlan.getUuid()); 
-		}finally{
-			s.close();
 		}
 		if(isDup){
 			idDecoration.show();

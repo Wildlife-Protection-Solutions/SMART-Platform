@@ -43,10 +43,6 @@ import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.util.SmartUtils;
 
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.exif.ExifIFD0Directory;
-
 
 /**
  * Class to represent a thumbnail for a SMART attachment.  Attachments

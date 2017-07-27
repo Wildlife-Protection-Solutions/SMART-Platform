@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
 import org.wcs.smart.query.model.QueryFolder;
@@ -45,15 +45,13 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 public class CompoundQueryTemplateCloner implements
 		IConservationAreaTemplateCloner {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-
-		List<CompoundMapQuery> queries = engine.getSession().createCriteria(CompoundMapQuery.class)
-			.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-			.add(Restrictions.eq("isShared", true)) //$NON-NLS-1$
-			.list();  
+		List<CompoundMapQuery> queries = QueryFactory.buildQuery(engine.getSession(), CompoundMapQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
 		

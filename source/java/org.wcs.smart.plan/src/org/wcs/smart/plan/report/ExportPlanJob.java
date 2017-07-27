@@ -73,76 +73,76 @@ public class ExportPlanJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		
 		HashMap<String, Object> reportParameters = new HashMap<String, Object>();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		Plan plan = null;
-		try{
-			plan = (Plan) session.load(Plan.class, planUuid);
-			this.outputFile = File.createTempFile(URLUtils.cleanFilename(plan.getId()) + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
-			outputFile.deleteOnExit();
-			
-			reportParameters.put(ReportPlan.PLAN_UUID, UuidUtils.uuidToString(plan.getUuid()));
-			reportParameters.put(ReportPlan.PLAN_ID, plan.getId());
-			reportParameters.put(ReportPlan.PLAN_NAME, plan.getName());
-			reportParameters.put(ReportPlan.PLAN_DESCRIPTION, (plan.getDescription()==null?"" : plan.getDescription())); //$NON-NLS-1$
-			reportParameters.put(ReportPlan.PLAN_END_DATE,  new java.sql.Date(plan.getEndDate().getTime()));
-			reportParameters.put(ReportPlan.PLAN_START_DATE, new java.sql.Date(plan.getStartDate().getTime()));
-			reportParameters.put(ReportPlan.PLAN_TYPE, plan.getType().getGuiName(Locale.getDefault()));
-			reportParameters.put(ReportPlan.UNAVAILABLE_EMPLOYEES, plan.getUnavailableEmployees());
-			reportParameters.put(ReportPlan.AVAILABLE_EMPLOYEES, plan.getActiveEmployees());
-			if (plan.getTeam() == null){
-				reportParameters.put(ReportPlan.PLAN_TEAM,NONE);
-			}else{
-				reportParameters.put(ReportPlan.PLAN_TEAM,plan.getTeam().getName());
-			}
-			
-			if (plan.getStation() == null){
-				reportParameters.put(ReportPlan.PLAN_STATION,NONE);
-			}else{
-				reportParameters.put(ReportPlan.PLAN_STATION,plan.getStation().getName());
-			}
-			reportParameters.put(ReportPlan.PLAN_COMMENT, plan.getComment() == null ? "" : plan.getComment()); //$NON-NLS-1$
-			reportParameters.put(ReportPlan.PLAN_CREATOR, plan.getCreator() == null ? "" : SmartLabelProvider.getFullLabel(plan.getCreator())); //$NON-NLS-1$
-						
-			StringBuilder sb = new StringBuilder();
-			List<PatrolEditorInput> ins = PlanHibernateManager.getPatrols(plan, session);
-			for (PatrolEditorInput in : ins){
-				sb.append(in.getPatrolId());
-				sb.append(", "); //$NON-NLS-1$
-			}
-			getChildPlanPatrols(plan, sb, session);
-			if (sb.length() > 0){
-				sb.delete(sb.length()-2, sb.length());
-			}else{
-				sb.append(NONE);
-			}
-			reportParameters.put(ReportPlan.PLAN_PATROLS, sb.toString());
-			
-			if (plan.getParent() == null){
-				reportParameters.put(ReportPlan.PLAN_PARENT, NONE);
-			}else{
-				reportParameters.put(ReportPlan.PLAN_PARENT, plan.getParent().getLabel());
-			}
-		
-			try(FileOutputStream fout = new FileOutputStream(outputFile)){
-				IRenderOption options = new RenderOption();
-				options.setOutputStream(fout);
-				options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
-				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
-				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			Plan plan = null;
+			try{
+				plan = (Plan) session.load(Plan.class, planUuid);
+				this.outputFile = File.createTempFile(URLUtils.cleanFilename(plan.getId()) + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
+				outputFile.deleteOnExit();
 				
-				SmartReportRunner.INSTANCE.runFile(ReportPlan.getPlanTemplate(),
-						SmartDB.getCurrentConservationArea(),
-						SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
-						ReportEngineManager.getBirtReportEngine(), 
-						options, session, reportParameters);
+				reportParameters.put(ReportPlan.PLAN_UUID, UuidUtils.uuidToString(plan.getUuid()));
+				reportParameters.put(ReportPlan.PLAN_ID, plan.getId());
+				reportParameters.put(ReportPlan.PLAN_NAME, plan.getName());
+				reportParameters.put(ReportPlan.PLAN_DESCRIPTION, (plan.getDescription()==null?"" : plan.getDescription())); //$NON-NLS-1$
+				reportParameters.put(ReportPlan.PLAN_END_DATE,  new java.sql.Date(plan.getEndDate().getTime()));
+				reportParameters.put(ReportPlan.PLAN_START_DATE, new java.sql.Date(plan.getStartDate().getTime()));
+				reportParameters.put(ReportPlan.PLAN_TYPE, plan.getType().getGuiName(Locale.getDefault()));
+				reportParameters.put(ReportPlan.UNAVAILABLE_EMPLOYEES, plan.getUnavailableEmployees());
+				reportParameters.put(ReportPlan.AVAILABLE_EMPLOYEES, plan.getActiveEmployees());
+				if (plan.getTeam() == null){
+					reportParameters.put(ReportPlan.PLAN_TEAM,NONE);
+				}else{
+					reportParameters.put(ReportPlan.PLAN_TEAM,plan.getTeam().getName());
+				}
+				
+				if (plan.getStation() == null){
+					reportParameters.put(ReportPlan.PLAN_STATION,NONE);
+				}else{
+					reportParameters.put(ReportPlan.PLAN_STATION,plan.getStation().getName());
+				}
+				reportParameters.put(ReportPlan.PLAN_COMMENT, plan.getComment() == null ? "" : plan.getComment()); //$NON-NLS-1$
+				reportParameters.put(ReportPlan.PLAN_CREATOR, plan.getCreator() == null ? "" : SmartLabelProvider.getFullLabel(plan.getCreator())); //$NON-NLS-1$
+							
+				StringBuilder sb = new StringBuilder();
+				List<PatrolEditorInput> ins = PlanHibernateManager.getPatrols(plan, session);
+				for (PatrolEditorInput in : ins){
+					sb.append(in.getPatrolId());
+					sb.append(", "); //$NON-NLS-1$
+				}
+				getChildPlanPatrols(plan, sb, session);
+				if (sb.length() > 0){
+					sb.delete(sb.length()-2, sb.length());
+				}else{
+					sb.append(NONE);
+				}
+				reportParameters.put(ReportPlan.PLAN_PATROLS, sb.toString());
+				
+				if (plan.getParent() == null){
+					reportParameters.put(ReportPlan.PLAN_PARENT, NONE);
+				}else{
+					reportParameters.put(ReportPlan.PLAN_PARENT, plan.getParent().getLabel());
+				}
+			
+				try(FileOutputStream fout = new FileOutputStream(outputFile)){
+					IRenderOption options = new RenderOption();
+					options.setOutputStream(fout);
+					options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
+					options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
+					options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+					
+					SmartReportRunner.INSTANCE.runFile(ReportPlan.getPlanTemplate(),
+							SmartDB.getCurrentConservationArea(),
+							SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
+							ReportEngineManager.getBirtReportEngine(), 
+							options, session, reportParameters);
+				}
+			}catch (Exception ex){
+				SmartPlanPlugIn.displayLog(Messages.ExportPlanJob_ErrorExportingPlan + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				return Status.CANCEL_STATUS;
+			}finally{
+				session.getTransaction().rollback();
 			}
-		}catch (Exception ex){
-			SmartPlanPlugIn.displayLog(Messages.ExportPlanJob_ErrorExportingPlan + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-			return Status.CANCEL_STATUS;
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
 		}
 		
 		//launch the file

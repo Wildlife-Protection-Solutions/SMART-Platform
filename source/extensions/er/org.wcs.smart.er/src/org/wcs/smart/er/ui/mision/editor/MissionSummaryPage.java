@@ -406,28 +406,28 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 	
 	
 	public void initControls() {
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			Mission mission = missionEditor.getMission();
-			session.update(mission);
-
-			form.setText(Messages.MissionSummaryPage_MissionLabel + mission.getId());
-			txtSurveyId.setText(mission.getSurvey().getId() + " [" + mission.getSurvey().getSurveyDesign().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-			txtComment.setText(mission.getComment() == null ? "" : mission.getComment()); //$NON-NLS-1$
-			txtId.setText(mission.getId());
-			lstMembers.setInput(mission.getMembers());
-			tblProperties.setInput(mission.getMissionPropertyValues());
-			
-			txtStart.setText(DateFormat.getDateInstance().format(mission.getStartDate()));
-			txtEnd.setText(DateFormat.getDateInstance().format(mission.getEndDate()));
-			
-			dataTable.setInput(mission.getMissionDays());
-		}catch (Exception ex){
-			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				Mission mission = missionEditor.getMission();
+				session.update(mission);
+	
+				form.setText(Messages.MissionSummaryPage_MissionLabel + mission.getId());
+				txtSurveyId.setText(mission.getSurvey().getId() + " [" + mission.getSurvey().getSurveyDesign().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+				txtComment.setText(mission.getComment() == null ? "" : mission.getComment()); //$NON-NLS-1$
+				txtId.setText(mission.getId());
+				lstMembers.setInput(mission.getMembers());
+				tblProperties.setInput(mission.getMissionPropertyValues());
+				
+				txtStart.setText(DateFormat.getDateInstance().format(mission.getStartDate()));
+				txtEnd.setText(DateFormat.getDateInstance().format(mission.getEndDate()));
+				
+				dataTable.setInput(mission.getMissionDays());
+			}catch (Exception ex){
+				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+			} finally {
+				session.getTransaction().rollback();
+			}
 		}
 	}
 

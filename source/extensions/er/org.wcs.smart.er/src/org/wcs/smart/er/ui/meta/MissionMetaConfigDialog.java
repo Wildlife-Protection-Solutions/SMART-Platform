@@ -72,8 +72,7 @@ public class MissionMetaConfigDialog extends MetaConfigDialog<MissionScreenOptio
 	}
 
 	private void initData() {
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			ConservationArea ca = SmartDB.getCurrentConservationArea();
 			options = SurveyHibernateManager.getMissionScreenOptions(ca, session);
 			//creating missing options
@@ -95,8 +94,6 @@ public class MissionMetaConfigDialog extends MetaConfigDialog<MissionScreenOptio
 					return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
 				}
 			});
-		}finally{
-			session.close();
 		}
 	}
 	

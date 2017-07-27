@@ -24,6 +24,10 @@ package org.wcs.smart.ui.internal.ca.properties;
 import java.text.MessageFormat;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -45,7 +49,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -139,9 +142,16 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 					return;
 				}
 				
-				Session s = HibernateManager.openSession();
-				try{
-					List<?> otherUsers = s.createCriteria(Employee.class).add(Restrictions.eq("smartUserId", newUserName)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+				try(Session s = HibernateManager.openSession()){
+					CriteriaBuilder cb = s.getCriteriaBuilder();
+					CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
+					Root<Employee> from = c.from(Employee.class);
+					c.where(cb.and(
+							cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+							cb.equal(cb.upper(from.get("smartUserId")), newUserName.toUpperCase()) //$NON-NLS-1$
+							));
+					
+					List<Employee> otherUsers = s.createQuery(c).getResultList();
 					if (otherUsers.size() > 0){
 						MessageDialog.openError(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Error_DialogTitle, MessageFormat.format(Messages.ChangeUserPasswordDialog_Error_UserExists, new Object[]{ newUserName }));
 						return;
@@ -160,8 +170,6 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 					
 						txtUserName.setText(toUpdate.getSmartUserId());
 					}
-				}finally{
-					s.close();
 				}
 				
 			}
@@ -301,22 +309,22 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 			//check to ensure old password is correct
 			if (HibernateManager.validatePassword(txtCurrentPassword.getText(), toUpdate)){
 				String old = toUpdate.getSmartPassword();
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try {
-					s.update(toUpdate);
-					toUpdate.setSmartPassword(HibernateManager.generatePassword(txtPassword1.getText()));
-					s.getTransaction().commit();
-					
-					MessageDialog.openInformation(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Updated_DialogTitle, Messages.ChangeUserPasswordDialog_Updated_DialogMessage);
-					setChangesMade(false);
-					return true;
-				} catch (Exception ex) {
-					if (s.getTransaction().isActive()) s.getTransaction().rollback();
-					toUpdate.setSmartPassword(old);	//reset password
-					SmartPlugIn.displayLog(Messages.ChangeUserPasswordDialog_Error_CouldNotUpdatePass + ex.getLocalizedMessage(), ex);
-				}finally{
-					s.close();
+				
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try {
+						s.update(toUpdate);
+						toUpdate.setSmartPassword(HibernateManager.generatePassword(txtPassword1.getText()));
+						s.getTransaction().commit();
+						
+						MessageDialog.openInformation(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Updated_DialogTitle, Messages.ChangeUserPasswordDialog_Updated_DialogMessage);
+						setChangesMade(false);
+						return true;
+					} catch (Exception ex) {
+						if (s.getTransaction().isActive()) s.getTransaction().rollback();
+						toUpdate.setSmartPassword(old);	//reset password
+						SmartPlugIn.displayLog(Messages.ChangeUserPasswordDialog_Error_CouldNotUpdatePass + ex.getLocalizedMessage(), ex);
+					}
 				}
 			}else{
 				setErrorMessage(Messages.ChangeUserPasswordDialog_Error_NewPassNotSame);

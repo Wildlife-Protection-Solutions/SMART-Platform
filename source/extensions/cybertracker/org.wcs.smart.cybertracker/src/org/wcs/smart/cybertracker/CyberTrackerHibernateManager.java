@@ -26,9 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.Assert;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -45,6 +43,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
@@ -68,9 +67,8 @@ public class CyberTrackerHibernateManager {
 	 * @return  {@link List} of {@link CyberTrackerPropertiesOption}
 	 */
 	public static List<CyberTrackerPropertiesOption> getAllStorageOptions(Session session) {
-		Criteria query = session.createCriteria(CyberTrackerPropertiesOption.class).add(Restrictions.eq("optionId", OptionID.STORAGE_TIME)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<CyberTrackerPropertiesOption> list = query.list();
+		List<CyberTrackerPropertiesOption> list =
+				QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,"optionId", OptionID.STORAGE_TIME).getResultList(); //$NON-NLS-1$
 		return list;
 	}
 
@@ -82,9 +80,8 @@ public class CyberTrackerHibernateManager {
 	 */
 	public static CyberTrackerProperties getProperties(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		Criteria query = session.createCriteria(CyberTrackerPropertiesOption.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<CyberTrackerPropertiesOption> options = query.list();
+		List<CyberTrackerPropertiesOption>  options =
+				QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,"conservationArea", ca).getResultList(); //$NON-NLS-1$
 		CyberTrackerProperties properties = new CyberTrackerProperties();
 		for (Object object : options) {
 			CyberTrackerPropertiesOption o = (CyberTrackerPropertiesOption) object;
@@ -124,10 +121,8 @@ public class CyberTrackerHibernateManager {
 	 */
 	public static List<CyberTrackerPropertiesProfile> getPropertiesProfiles(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		Criteria query = session.createCriteria(CyberTrackerPropertiesProfile.class)
-				.add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<CyberTrackerPropertiesProfile> profiles = query.list();
+		List<CyberTrackerPropertiesProfile>  profiles =
+				QueryFactory.buildQuery(session, CyberTrackerPropertiesProfile.class,"conservationArea", ca).getResultList(); //$NON-NLS-1$
 		if (profiles.isEmpty()) {
 			CyberTrackerPropertiesProfile defaultProfile = createDefaultProfile(session);
 			return Arrays.asList(defaultProfile);
@@ -139,10 +134,9 @@ public class CyberTrackerHibernateManager {
 	 * Delete a profile and related records
 	 * @throws Exception 
 	 */
-	@SuppressWarnings("unchecked")
 	public static void deleteProfile(Session session, CyberTrackerPropertiesProfile profile) {
-		List<ConfigurableModelCtPropertiesProfile> usedProfiles = session.createCriteria(ConfigurableModelCtPropertiesProfile.class)
-				.add(Restrictions.eq("profile", profile)).list(); //$NON-NLS-1$
+		List<ConfigurableModelCtPropertiesProfile>  usedProfiles =
+				QueryFactory.buildQuery(session, ConfigurableModelCtPropertiesProfile.class,"profile", profile).getResultList(); //$NON-NLS-1$
 		for (ConfigurableModelCtPropertiesProfile ct : usedProfiles){
 			session.delete(ct);
 		}
@@ -160,9 +154,8 @@ public class CyberTrackerHibernateManager {
 		if (configurableModel.getUuid() == null) {
 			return createDefaultCmProfile(session, configurableModel);
 		}
-		ConfigurableModelCtPropertiesProfile item = (ConfigurableModelCtPropertiesProfile)session
-				.createCriteria(ConfigurableModelCtPropertiesProfile.class)
-				.add(Restrictions.eq("id.model", configurableModel)).uniqueResult(); //$NON-NLS-1$
+		
+		ConfigurableModelCtPropertiesProfile item = QueryFactory.buildQuery(session, ConfigurableModelCtPropertiesProfile.class,"id.model", configurableModel).uniqueResult(); //$NON-NLS-1$
 		if (item == null){
 			return createDefaultCmProfile(session, configurableModel);
 		}
@@ -178,11 +171,10 @@ public class CyberTrackerHibernateManager {
 	
 	public static CyberTrackerPropertiesProfile getDefaultProfile(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		Criteria query = session.createCriteria(CyberTrackerPropertiesProfile.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("default", true)); //$NON-NLS-1$
 		
-		CyberTrackerPropertiesProfile profile = (CyberTrackerPropertiesProfile) query.uniqueResult();
+		CyberTrackerPropertiesProfile profile = QueryFactory.buildQuery(session, CyberTrackerPropertiesProfile.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"default", true}).uniqueResult(); //$NON-NLS-1$
 		return profile != null ? profile : createDefaultProfile(session);
 	}
 	
@@ -203,15 +195,14 @@ public class CyberTrackerHibernateManager {
 		
 		Thread thread = new Thread() { //new thread is created so it will have it's own hibernate session
 		    public void run() {
-	        	Session s = HibernateManager.openSession();
-	    		try {
-	    			s.beginTransaction();
-	    			s.save(defaultProfile);
-	    			s.getTransaction().commit();
-	    		} catch (Exception e) {
-	    			SmartPlugIn.displayLog(Messages.CyberTrackerHibernateManager_CreateDefaultProfile_Error, e);
-	    		}finally {
-	    			s.close();
+		    	try(Session s = HibernateManager.openSession()){
+		    		try {
+		    			s.beginTransaction();
+		    			s.save(defaultProfile);
+		    			s.getTransaction().commit();
+		    		} catch (Exception e) {
+		    			SmartPlugIn.displayLog(Messages.CyberTrackerHibernateManager_CreateDefaultProfile_Error, e);
+		    		}
 	    		}
 		    }  
 		};
@@ -272,7 +263,6 @@ public class CyberTrackerHibernateManager {
 	 * @param session
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> T fetchByUuid(Class<T> clazz, UUID byteUuid, Session session) {
 		if (byteUuid == null) return null;
 		return (T) session.get(clazz, byteUuid);

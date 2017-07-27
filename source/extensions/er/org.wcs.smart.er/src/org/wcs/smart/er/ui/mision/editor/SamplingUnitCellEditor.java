@@ -126,8 +126,7 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try {
+			try(Session s = HibernateManager.openSession()){
 				//load units
 				List<Object> items = new ArrayList<Object>();
 				items.addAll(SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, s, SamplingUnit.State.ACTIVE));
@@ -145,8 +144,6 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 				
 				items.add(0, null);
 				units = items;
-			} finally {
-				s.close();
 			}
 			return Status.OK_STATUS;
 		}

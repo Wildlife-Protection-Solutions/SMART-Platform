@@ -24,8 +24,11 @@ package org.wcs.smart;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.util.GeometryUtils;
@@ -73,9 +76,15 @@ public enum ProjectionUtils {
 	 * @return
 	 */
 	public Projection getCurrentViewProjection(Session s, ConservationArea ca) {
-		return (Projection)s.createCriteria(Projection.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-			.add(Restrictions.eq("isDefault",true)) //$NON-NLS-1$
-			.uniqueResult();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		
+		CriteriaQuery<Projection> query = cb.createQuery(Projection.class);
+		Root<Projection> root = query.from(Projection.class); 
+		query.where(cb.and(
+				cb.equal(root.get("conservationArea"), ca), //$NON-NLS-1$
+				cb.equal(root.get("isDefault"), true) //$NON-NLS-1$
+				));
+		return s.createQuery(query).uniqueResult();
+
 	}
 }

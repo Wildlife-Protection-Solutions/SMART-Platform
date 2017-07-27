@@ -26,10 +26,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
@@ -66,12 +66,10 @@ public class IntelligenceQueryTemplateCloner implements
 	 */
 	private void cloneSummaryQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<IntelligenceSummaryQuery> queries = (List<IntelligenceSummaryQuery>) engine
-			.getSession()
-			.createCriteria(IntelligenceSummaryQuery.class)
-			.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-			.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
+		List<IntelligenceSummaryQuery> queries =
+			QueryFactory.buildQuery(engine.getSession(), IntelligenceSummaryQuery.class, 
+					new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+					new Object[] {"isShared", true}).getResultList(); //$NON-NLS-1$
 		
 		for(IntelligenceSummaryQuery query : queries){
 			IntelligenceSummaryQuery clone = new IntelligenceSummaryQuery();
@@ -97,11 +95,11 @@ public class IntelligenceQueryTemplateCloner implements
 	 */
 	private void cloneRecordQueries(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<IntelligenceRecordQuery> queries = (List<IntelligenceRecordQuery>) engine.getSession()
-			.createCriteria(IntelligenceRecordQuery.class)
-			.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-			.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
+
+		List<IntelligenceRecordQuery> queries =
+		QueryFactory.buildQuery(engine.getSession(), IntelligenceRecordQuery.class, 
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}).getResultList(); //$NON-NLS-1$
 		
 		for(IntelligenceRecordQuery query : queries){
 			IntelligenceRecordQuery clone = new IntelligenceRecordQuery();

@@ -31,10 +31,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.export.config.ICsvDataExporter;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.util.SharedUtils;
 
@@ -104,11 +104,10 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 		return cols;
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<PatrolTransportType> getTransportTypes(ConservationArea ca, Session session) {
 		session.beginTransaction();
 		try{
-			return session.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+			return QueryFactory.buildQuery(session, PatrolTransportType.class, new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$
 		}finally{
 			session.getTransaction().rollback();
 		}

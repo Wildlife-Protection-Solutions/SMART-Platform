@@ -23,6 +23,10 @@ package org.wcs.smart.dataentry.handlers;
 
 import java.lang.reflect.InvocationTargetException;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -33,8 +37,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelPropertyDialog;
@@ -84,15 +86,17 @@ public class ShowConfigurableModelHandler {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						
 						monitor.beginTask(Messages.ShowConfigurableModelHandler_LoadDataModel, 0);
-						Session session = HibernateManager.openSession();
-						try{
-							Long catCnt = (Long)session.createCriteria(Category.class)
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-								.setProjection(Projections.rowCount())
-								.uniqueResult();
+						
+						try(Session session = HibernateManager.openSession()){
+							CriteriaBuilder cb = session.getCriteriaBuilder();
+							
+							CriteriaQuery<Long> c = cb.createQuery(Long.class);
+							Root<Category> from = c.from(Category.class);
+							c.select(cb.count(from));
+							c.where(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+							Long catCnt = session.createQuery(c).uniqueResult();
+		
 							hasDm = catCnt > 0;
-						}finally{
-							session.close();
 						}
 					}});
 			} catch (Exception ex) {

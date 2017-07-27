@@ -607,8 +607,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	protected boolean performSave() {
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		final Session s = getSession();
-		try {
+		
+		try(final Session s = getSession()) {
 			pmd.run(false, false, new IRunnableWithProgress() {
 				
 				@Override
@@ -633,7 +633,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				}
 			}catch (Exception ex2){}
 			currentTransaction = null;
-			s.close();
 			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_SavingDataModel + ex.getLocalizedMessage(), ex);
 			return false;
 		}

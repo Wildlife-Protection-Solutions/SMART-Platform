@@ -191,13 +191,10 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			Job runQueryJob = new Job(Messages.MapPlanEditorPage_ExecutingPatrolQuery){
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						pq.setCachedResults(QueryExecutor.INSTANCE.executeQuery(pq, s, monitor));
 					}catch (Exception ex){
 						SmartPlanPlugIn.log(ex.getMessage(), ex);
-					}finally{
-						s.close();
 					}
 					
 					//add layer to map; only add after the query is run
@@ -267,18 +264,12 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			synchronized (lockObj) {
 				if (patrolLayer != null){
 					try{
-						
 						PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, progress.newChild(1));
-						
 						if (pq != null){
 							pq.setCachedResults(null); //clear cached results
 							pq.setQueryFilter(generateQueryString()); //update filter
-						
-							Session session = HibernateManager.openSession();
-							try{
+							try(Session session = HibernateManager.openSession()){
 								pq.setCachedResults(QueryExecutor.INSTANCE.executeQuery(pq, session, progress.newChild(1)));
-							}finally{
-								session.close();
 							}
 						}
 						
@@ -402,15 +393,15 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
     private String generateQueryString(){
     	final Set<PatrolEditorInput> childPatrols = new HashSet<PatrolEditorInput>(); 
 		final List<PatrolEditorInput> myPatrols;
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			myPatrols = PlanHibernateManager.getPatrols(parentEditor.getPlan(), s);
-			Plan thisPlan = (Plan) s.get(Plan.class, parentEditor.getPlan().getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
-			parentEditor.getChildPlanPatrols(thisPlan, childPatrols, s);
-			s.getTransaction().rollback();
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				myPatrols = PlanHibernateManager.getPatrols(parentEditor.getPlan(), s);
+				Plan thisPlan = (Plan) s.get(Plan.class, parentEditor.getPlan().getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
+				parentEditor.getChildPlanPatrols(thisPlan, childPatrols, s);
+			}finally{
+				s.getTransaction().rollback();
+			}
 		}
 
 		myPatrols.addAll(childPatrols);

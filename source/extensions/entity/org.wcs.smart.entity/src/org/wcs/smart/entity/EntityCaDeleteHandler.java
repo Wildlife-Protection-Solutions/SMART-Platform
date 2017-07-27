@@ -22,7 +22,7 @@
 package org.wcs.smart.entity;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -61,7 +61,7 @@ public class EntityCaDeleteHandler implements ICaDeleteHandler{
 
 	private void deleteEntityAttributes(ConservationArea ca, Session session) throws Exception{
 		//entity attribute values
-		Query q = session.createQuery(
+		Query<?> q = session.createQuery(
 				"delete EntityAttributeValue e where e.id.entity IN " + //$NON-NLS-1$
 				"(SELECT a from Entity a WHERE a.entityType.conservationArea = :conservationArea)"); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$
@@ -75,14 +75,14 @@ public class EntityCaDeleteHandler implements ICaDeleteHandler{
 	}
 	
 	private void deleteEntities(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete Entity e WHERE e.entityType IN "+ //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete Entity e WHERE e.entityType IN "+ //$NON-NLS-1$
 				"(SELECT a FROM EntityType a WHERE a.conservationArea = :conservationArea )"); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deleteTypes(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete EntityType e where e.conservationArea = :conservationArea "); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete EntityType e where e.conservationArea = :conservationArea "); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}

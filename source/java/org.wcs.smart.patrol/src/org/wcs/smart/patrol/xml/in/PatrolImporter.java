@@ -180,8 +180,8 @@ public class PatrolImporter {
 			File attachmentDirectory, File sourceFile, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolImporter_ReadingProgress, 5);
 		
-		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try {
+		
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())) {
 			progress.split(1);
 			converter.convertFile(sourceFile, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 			
@@ -235,12 +235,7 @@ public class PatrolImporter {
 						config.addWarning(message, sourceFile);
 					}
 				}
-			}		
-			
-		} finally {
-			if (session.isOpen()){
-				session.close();
-			}
+			}	
 		}
 		progress.split(1);
 		progress.subTask(Messages.PatrolImporter_Progress_ConvertingPatrol);
@@ -290,20 +285,20 @@ public class PatrolImporter {
 		Patrol imported = converter.getImportedPatrol();
 		if (imported == null)
 			return null;
-		session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		session.beginTransaction();
-		try {
-			PatrolHibernateManager.savePatrol(imported, session, true);
-			for (IConvertedExtraData extraData : convertedExtraData) {
-				extraData.saveInTransaction(session, imported);
+		
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			session.beginTransaction();
+			try {
+				PatrolHibernateManager.savePatrol(imported, session, true);
+				for (IConvertedExtraData extraData : convertedExtraData) {
+					extraData.saveInTransaction(session, imported);
+				}
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
+				return null;
 			}
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
-			return null;
-		}finally{
-			session.close();
 		}
 		
 		return imported;

@@ -363,69 +363,69 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 	 * deletes a specific entity
 	 */
 	private void deleteEntity(final Entity e){
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		
-		try{
-			s.update(e);
-			//-- check if the entity can be removed
-			String errorMessage = null;
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			
 			try{
-				if (!DeleteManager.canDelete(e, s)){
-					errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityDeleteError, new Object[]{e.getId()});
+				s.update(e);
+				//-- check if the entity can be removed
+				String errorMessage = null;
+				try{
+					if (!DeleteManager.canDelete(e, s)){
+						errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityDeleteError, new Object[]{e.getId()});
+					}
+				}catch (Exception ex){
+					EntityPlugIn.log(ex.getMessage(), ex);
+					errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityDeleteError + "\n\n" + ex.getMessage(), new Object[]{e.getId()}); //$NON-NLS-1$
 				}
-			}catch (Exception ex){
-				EntityPlugIn.log(ex.getMessage(), ex);
-				errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityDeleteError + "\n\n" + ex.getMessage(), new Object[]{e.getId()}); //$NON-NLS-1$
-			}
-			if (errorMessage != null){
-				final String lerror = errorMessage;
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						MessageDialog.openInformation(getSite().getShell(), Messages.EntityTypeEntitiesPage_DeleteEntityDialogTitle,lerror);
-					}});
-				return;
-			}
-			s.flush();
-			AttributeListItem itemToDelete = e.getAttributeListItem();
-			s.update(itemToDelete.getAttribute());
-			s.delete(e);
-			s.flush();
-			//at this point we should try to delete the attribute list item as well
-			errorMessage = null;
-			try{
-				if (!DeleteManager.canDelete(itemToDelete, s)){
-					errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityCannotDelete, new Object[]{e.getId(), itemToDelete.getName()});
+				if (errorMessage != null){
+					final String lerror = errorMessage;
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openInformation(getSite().getShell(), Messages.EntityTypeEntitiesPage_DeleteEntityDialogTitle,lerror);
+						}});
+					return;
 				}
+				s.flush();
+				AttributeListItem itemToDelete = e.getAttributeListItem();
+				s.update(itemToDelete.getAttribute());
+				s.delete(e);
+				s.flush();
+				//at this point we should try to delete the attribute list item as well
+				errorMessage = null;
+				try{
+					if (!DeleteManager.canDelete(itemToDelete, s)){
+						errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityCannotDelete, new Object[]{e.getId(), itemToDelete.getName()});
+					}
+				}catch (Exception ex){
+					EntityPlugIn.log(ex.getMessage(), ex);
+					errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityCannotDelete + "\n\n" + ex.getMessage(), new Object[]{e.getId(), itemToDelete.getName()}); //$NON-NLS-1$
+				}
+	
+				if (errorMessage != null){
+					final String error = errorMessage;
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openInformation(getSite().getShell(), Messages.EntityTypeEntitiesPage_DeleteEntityDialogTitle,error);
+						}});
+					return;
+				}
+							
+				//remove attribute list item
+				itemToDelete.getAttribute().getAttributeList().remove(itemToDelete);
+				itemToDelete.setAttribute(null);
+				s.flush();
+				s.getTransaction().commit();
 			}catch (Exception ex){
-				EntityPlugIn.log(ex.getMessage(), ex);
-				errorMessage = MessageFormat.format(Messages.EntityTypeEntitiesPage_EntityCannotDelete + "\n\n" + ex.getMessage(), new Object[]{e.getId(), itemToDelete.getName()}); //$NON-NLS-1$
-			}
-
-			if (errorMessage != null){
-				final String error = errorMessage;
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						MessageDialog.openInformation(getSite().getShell(), Messages.EntityTypeEntitiesPage_DeleteEntityDialogTitle,error);
-					}});
-				return;
-			}
-						
-			//remove attribute list item
-			itemToDelete.getAttribute().getAttributeList().remove(itemToDelete);
-			itemToDelete.setAttribute(null);
-			s.flush();
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			EntityPlugIn.displayLog(MessageFormat.format(Messages.EntityTypeEntitiesPage_DeleteEntityError + "\n\n" + ex.getMessage(), new Object[]{e.getId()}), ex); //$NON-NLS-1$
-		}finally{
-			if (s.getTransaction().isActive()){
 				s.getTransaction().rollback();
+				EntityPlugIn.displayLog(MessageFormat.format(Messages.EntityTypeEntitiesPage_DeleteEntityError + "\n\n" + ex.getMessage(), new Object[]{e.getId()}), ex); //$NON-NLS-1$
+			}finally{
+				if (s.getTransaction().isActive()){
+					s.getTransaction().rollback();
+				}
 			}
-			s.close();
 		}
 		try{
 			Display.getDefault().syncExec(new Runnable(){

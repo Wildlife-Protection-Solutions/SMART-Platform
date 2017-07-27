@@ -427,53 +427,52 @@ public class ReportListView {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 							
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					try{
-						for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-							Object select = (Object) iterator.next();
-							if (select instanceof Report){
-								Report r = null;
-								boolean isChanged = false;
-								
-								r = (Report) s.load(Report.class, ((Report)select).getUuid());
-								ReportFolder targetFolder = null;
-								boolean isShared = false;
-								if (currentTarget instanceof ReportFolder){
-									targetFolder = (ReportFolder)currentTarget;
-									isShared = (targetFolder.getEmployee() == null);
-								}else{
-									isShared = ((RootReportFolder)currentTarget).isShared();
-								}
-								
-								if (r.getFolder() == null && targetFolder != null ||
-										r.getFolder() != null && targetFolder == null ||
-										r.getFolder() != null && !r.getFolder().equals(targetFolder) ||
-										r.getShared() != isShared){
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try{
+							for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+								Object select = (Object) iterator.next();
+								if (select instanceof Report){
+									Report r = null;
+									boolean isChanged = false;
 									
-									isChanged = true;
-									r.setFolder(targetFolder);
-									r.setShared(isShared);
-								}
+									r = (Report) s.load(Report.class, ((Report)select).getUuid());
+									ReportFolder targetFolder = null;
+									boolean isShared = false;
+									if (currentTarget instanceof ReportFolder){
+										targetFolder = (ReportFolder)currentTarget;
+										isShared = (targetFolder.getEmployee() == null);
+									}else{
+										isShared = ((RootReportFolder)currentTarget).isShared();
+									}
 									
-								if (isChanged){
-									final Report fr = r;
-									Display.getDefault().syncExec(new Runnable(){
-										@Override
-										public void run() {
-											ReportEventManager.getInstance().fireReportUpdated(fr);
-										}
-									});
+									if (r.getFolder() == null && targetFolder != null ||
+											r.getFolder() != null && targetFolder == null ||
+											r.getFolder() != null && !r.getFolder().equals(targetFolder) ||
+											r.getShared() != isShared){
+										
+										isChanged = true;
+										r.setFolder(targetFolder);
+										r.setShared(isShared);
+									}
+										
+									if (isChanged){
+										final Report fr = r;
+										Display.getDefault().syncExec(new Runnable(){
+											@Override
+											public void run() {
+												ReportEventManager.getInstance().fireReportUpdated(fr);
+											}
+										});
+									}
 								}
 							}
+							s.getTransaction().commit();
+						}catch (Exception ex){
+							if (s.getTransaction().isActive()) s.getTransaction().rollback();
+							ReportPlugIn.log(ex.getMessage(), ex);
+							return Status.OK_STATUS;
 						}
-						s.getTransaction().commit();
-					}catch (Exception ex){
-						if (s.getTransaction().isActive()) s.getTransaction().rollback();
-						ReportPlugIn.log(ex.getMessage(), ex);
-						return Status.OK_STATUS;
-					}finally{
-						s.close();
 					}
 					
 					//update ui 

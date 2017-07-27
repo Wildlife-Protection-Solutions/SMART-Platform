@@ -90,21 +90,21 @@ public class CategoryGroupByDropItem extends DropItem implements IGroupByDropIte
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			for(Category child : QueryDataModelManager.getInstance().getCategories(s, level)){
-				String name = child.getName();
-				if (child.getParent() != null){
-					name += "   (" + child.getParent().getFullCategoryName() +")" ;  //$NON-NLS-1$//$NON-NLS-2$
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				for(Category child : QueryDataModelManager.getInstance().getCategories(s, level)){
+					String name = child.getName();
+					if (child.getParent() != null){
+						name += "   (" + child.getParent().getFullCategoryName() +")" ;  //$NON-NLS-1$//$NON-NLS-2$
+					}
+					items.add(new ListItem(null, name, child.getHkey())); 
 				}
-				items.add(new ListItem(null, name, child.getHkey())); 
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.CategoryGroupByDropItem_ErrorLoadingCategoryName, ex);
+			}finally {
+				s.getTransaction().rollback();
 			}
-			s.getTransaction().rollback();
-			s.close();
-		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.CategoryGroupByDropItem_ErrorLoadingCategoryName, ex);
-			s.close();
 		}
 		return items;		
 	}

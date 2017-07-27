@@ -105,9 +105,8 @@ public class IntelligenceDataSourceFactory implements DataStoreFactorySpi{
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
 		
-		Session session = HibernateManager.openSession();
 		Intelligence intel = null;
-		try{
+		try(Session session = HibernateManager.openSession()){
 			String uuid = (String)params.get(INTELL_UUID.key);
 			if (uuid != null){
 				intel = (Intelligence)session.load(Intelligence.class, UuidUtils.stringToUuid(uuid));
@@ -118,8 +117,6 @@ public class IntelligenceDataSourceFactory implements DataStoreFactorySpi{
 			}
 		}catch (Exception ex){
 			throw new IOException(ex);
-		}finally{
-			session.close(); 
 		}
 		return new IntelligenceDataSource(intel);
 	}

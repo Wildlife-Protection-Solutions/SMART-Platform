@@ -23,12 +23,10 @@ package org.wcs.smart.observation.internal.advisor;
 
 import java.text.MessageFormat;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
 
@@ -56,15 +54,14 @@ public class CategoryDMAdvisor implements IDeleteAdvisor {
 		}
 		Category category = (Category)object;
 		if (category.getUuid() == null) return null;
-		Criteria query = session.createCriteria(WaypointObservation.class);
-		query.add(Restrictions.eq("category", category)); //$NON-NLS-1$
-		query.setProjection(Projections.rowCount());
-		long cnt = (Long)query.uniqueResult();
+		
+		long cnt = QueryFactory.buildCountQuery(session, WaypointObservation.class,  new Object[] {"category", category}); //$NON-NLS-1$
 		if (cnt != 0){
 			return MessageFormat.format(
 					Messages.CategoryDMAdvisor_DeleteError,
 					new Object[]{cnt });
 		}
+		
 		if (category.getChildren() != null){
 			for(Category kid : category.getChildren()){
 				String canDeleteKid = canDelete(kid, session);

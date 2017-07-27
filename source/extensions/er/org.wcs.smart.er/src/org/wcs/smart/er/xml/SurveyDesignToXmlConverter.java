@@ -29,7 +29,6 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.internal.Messages;
@@ -42,6 +41,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 
@@ -52,7 +52,6 @@ import org.wcs.smart.util.SmartUtils;
  * @author Jeff
  *
  */
-@SuppressWarnings("unchecked")
 public class SurveyDesignToXmlConverter {
 
 	/**
@@ -211,7 +210,7 @@ public class SurveyDesignToXmlConverter {
 		}
 
 		//All Sampling Units
-		List<SamplingUnit> units = s.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", surveyDesign )).list(); //$NON-NLS-1$
+		List<SamplingUnit> units = QueryFactory.buildQuery(s, SamplingUnit.class, "surveyDesign", surveyDesign).getResultList(); //$NON-NLS-1$
 		for(SamplingUnit su :  units) {
 			org.wcs.smart.er.xml.model.surveydesign.SamplingUnit xmlsu = new org.wcs.smart.er.xml.model.surveydesign.SamplingUnit();
 			xmlsu.setGeom(su.getGeom());

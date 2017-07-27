@@ -99,13 +99,12 @@ public class UpgradeEngine {
 		String lnewDbVersion = null;
 		String lexpectedDbVersion = null;
 		
-		Session s = HibernateManager.openSession();
-		try {
+		
+		try (Session s = HibernateManager.openSession()){
 			lnewDbVersion = getSmartVersion(s);
 			lexpectedDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
-		} finally {
-			s.close();
 		}
+		
 		final String newDbVersion = lnewDbVersion;
 		final String expectedDbVersion = lexpectedDbVersion;
 
@@ -182,11 +181,9 @@ public class UpgradeEngine {
 		progress.subTask(Messages.UpgradeEngine_subprogress3);
 		if (currentVersions != null) {
 			Map<String, String> backupVersions;
-			s = HibernateManager.openSession();
-			try {
+			
+			try(Session s = HibernateManager.openSession()) {
 				backupVersions = getVersions(s);
-			} finally {
-				s.close();
 			}
 			String problems = ""; //$NON-NLS-1$
 			for (String curPlugin : currentVersions.keySet()) {
@@ -220,13 +217,11 @@ public class UpgradeEngine {
 		if (requiresUpgrades){
 			//uninstall all change log tracking
 			progress.subTask(Messages.UpgradeEngine_subprogress5);
-			s = HibernateManager.openSession();
-			try{
+
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
 				s.getTransaction().commit();
-			}finally{
-				s.close();
 			}
 	
 			//run all installers/upgraders
@@ -242,13 +237,10 @@ public class UpgradeEngine {
 			
 			//install change log tracking (if necessary)
 			sub.subTask(Messages.UpgradeEngine_subprogress6);
-			s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
 				s.getTransaction().commit();
-			}finally{
-				s.close();
 			}
 			sub.worked(1);
 		}
@@ -283,7 +275,7 @@ public class UpgradeEngine {
 			return versions.get(SmartPlugIn.PLUGIN_ID);
 		}
 		//NOTE: before 3.0.0 db-version table contained only single column with one value
-		String version = (String) s.createSQLQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL).uniqueResult(); //$NON-NLS-1$
+		String version = (String) s.createNativeQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL).uniqueResult(); //$NON-NLS-1$
 		return version;
 	}
 
@@ -353,7 +345,7 @@ public class UpgradeEngine {
 	public static Map<String, String> getVersions(Session s) {
 		Map<String, String> versions = new HashMap<String, String>();
 		try {
-			List<?> tmpversions = s.createSQLQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+			List<?> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
 			for (Object x : tmpversions){
 				String pluginid = (String) ((Object[])x)[0];
 				String version = (String) ((Object[])x)[1];

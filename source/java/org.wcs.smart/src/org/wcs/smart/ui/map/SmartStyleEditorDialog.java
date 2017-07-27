@@ -80,7 +80,7 @@ import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.geotools.styling.Style;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.locationtech.udig.project.IStyleBlackboard;
 import org.locationtech.udig.project.StyleContent;
 import org.locationtech.udig.project.internal.ProjectFactory;
@@ -518,17 +518,16 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
 				Exception ex = null;
-				try {
-					s.saveOrUpdate(toSave);
-					s.getTransaction().commit();
-				} catch (Exception ex1) {
-					ex = ex1;
-					s.getTransaction().rollback();
-				} finally {
-					s.close();
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try {
+						s.saveOrUpdate(toSave);
+						s.getTransaction().commit();
+					} catch (Exception ex1) {
+						ex = ex1;
+						s.getTransaction().rollback();
+					}
 				}
 				if (ex == null){
 					setSmartLayerStyle(toSave);
@@ -733,30 +732,29 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					for (SmartStyle style : toDelete){
-						s.delete(style);
-					}
-					s.getTransaction().commit();
-					
-					Display.getDefault().syncExec(new Runnable(){
-
-						@Override
-						public void run() {
-							setMessage(MessageFormat.format(Messages.SmartStyleEditorDialog_DeleteCompleteMessage, toDelete.size()), IMessageProvider.INFORMATION);
-						}});
-
-				}catch (Exception ex){
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
 					try{
-						s.getTransaction().rollback();
-					}catch(Exception ex2){
-						SmartPlugIn.log(ex2.getMessage(), ex2);
+						for (SmartStyle style : toDelete){
+							s.delete(style);
+						}
+						s.getTransaction().commit();
+						
+						Display.getDefault().syncExec(new Runnable(){
+	
+							@Override
+							public void run() {
+								setMessage(MessageFormat.format(Messages.SmartStyleEditorDialog_DeleteCompleteMessage, toDelete.size()), IMessageProvider.INFORMATION);
+							}});
+	
+					}catch (Exception ex){
+						try{
+							s.getTransaction().rollback();
+						}catch(Exception ex2){
+							SmartPlugIn.log(ex2.getMessage(), ex2);
+						}
+						SmartPlugIn.displayLog(MessageFormat.format(Messages.SmartSavedStylePage_DeleteError, ex.getMessage()), ex);
 					}
-					SmartPlugIn.displayLog(MessageFormat.format(Messages.SmartSavedStylePage_DeleteError, ex.getMessage()), ex);
-				}finally{
-					s.close();
 				}
 				loadStylesJob.schedule();
 				return Status.OK_STATUS;
@@ -828,24 +826,19 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			this.addNoneOp = addNoneOp;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			List<Object> items = Collections.emptyList();
-			Session session = HibernateManager.openSession();
-			try{
-				items = session.createCriteria(SmartStyle.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list();
-			}finally{
-				session.close();
-			}			
-			Collections.sort(items, new Comparator<Object>() {
+			List<SmartStyle> items = Collections.emptyList();
+			
+			try(Session session = HibernateManager.openSession()){
+				Query<SmartStyle> query = session.createQuery("FROM SmartStyle WHERE conservationArea = :ca", SmartStyle.class); //$NON-NLS-1$
+				query.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+				items = query.getResultList();	
+			}
+			Collections.sort(items, new Comparator<SmartStyle>() {
 				@Override
-				public int compare(Object o1, Object o2) {
-					return Collator.getInstance().compare(
-							((SmartStyle)o1).getName(),
-							((SmartStyle)o2).getName());
+				public int compare(SmartStyle o1, SmartStyle o2) {
+					return Collator.getInstance().compare(o1.getName(), o2.getName());
 				}
 			});
 			final List<Object> optionItems = new ArrayList<Object>(items);

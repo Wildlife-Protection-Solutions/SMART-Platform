@@ -94,8 +94,8 @@ public class LoadPlanJob extends Job {
 				planViewer.refresh();
 			}
 		});
-		Session session = HibernateManager.openSession();
-		try{
+		
+		try(Session session = HibernateManager.openSession()){
 			List<PlanEditorInput> rootPlans = PlanHibernateManager.getRootPlans(session, currentFilter);
 			final List<Object> allItems = new ArrayList<>();
 			allItems.addAll(rootPlans);
@@ -118,8 +118,6 @@ public class LoadPlanJob extends Job {
 					}
 				}
 			});
-		}finally{
-			session.close();
 		}
 		return Status.OK_STATUS;
 	}

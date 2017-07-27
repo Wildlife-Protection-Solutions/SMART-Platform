@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Employee;
@@ -96,6 +95,7 @@ import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider;
 import org.wcs.smart.er.query.ui.panels.item.SurveyValuesTreeNode;
 import org.wcs.smart.er.query.ui.panels.item.TrackObservationFilterItemPanel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -309,8 +309,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			protected IStatus run(IProgressMonitor monitor) {
 				CmAttribute cnode = node;
 				cnode.getOrder();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					Category c = (Category) s.load(Category.class, node.getNode().getCategory().getUuid());
 					Attribute att = (Attribute) s.load(Attribute.class, node.getAttribute().getUuid());
 					if (att.getType() == AttributeType.BOOLEAN ||
@@ -327,8 +326,6 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 //						di[0] = new AttributeTreeDropItem(new CategoryAttribute(c,att));
 						di[0] = new CmAttributeTreeDropItem(node, new CategoryAttribute(c, att));
 					}
-				}finally{
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}
@@ -350,11 +347,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			Job j = new Job("") { //$NON-NLS-1$
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						di[0] = createCategoryDropItem( (Category)s.load(Category.class, node.getCategory().getUuid()));
-					}finally{
-						s.close();
 					}
 					return Status.OK_STATUS;
 				}
@@ -852,9 +846,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			Object value = filter.getValue();
 			Attribute.AttributeType type = filter.getAttributeType();
 			
-			MissionAttribute ma = (MissionAttribute) session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", filter.getAttributeKey())).list().get(0); //$NON-NLS-1$
+			MissionAttribute ma = QueryFactory.buildQuery(session, MissionAttribute.class,
+					new Object[] {"keyId", filter.getAttributeKey()}, //$NON-NLS-1$
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
+
 			DropItem di = SurveyDropItemFactory.INSTANCE.createMissionAttributeDropItem(ma);
 			
 			if (type.equals(AttributeType.NUMERIC) ||
@@ -898,9 +893,11 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		Object value = filter.getValue();
 		
 		try{
-			SamplingUnitAttribute sa = (SamplingUnitAttribute) session.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", samplingUnitAttributeKey)).list().get(0); //$NON-NLS-1$
+			SamplingUnitAttribute sa = QueryFactory.buildQuery(session, SamplingUnitAttribute.class,
+					new Object[] {"keyId", samplingUnitAttributeKey}, //$NON-NLS-1$
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
+
+			
 			DropItem di = SurveyDropItemFactory.INSTANCE.createSamplingUnitAttributeDropItem(sa, filter.getSource());
 			
 			if (type.equals(AttributeType.NUMERIC) ||

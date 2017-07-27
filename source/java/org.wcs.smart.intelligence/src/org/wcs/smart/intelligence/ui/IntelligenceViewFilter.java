@@ -23,7 +23,7 @@ package org.wcs.smart.intelligence.ui;
 
 import java.util.Date;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
@@ -75,7 +75,7 @@ public class IntelligenceViewFilter {
 		resetDefaults();
 	}
 	
-	public Query buildQuery(Session s) { 
+	public Query<?> buildQuery(Session s) { 
 		boolean label = (nameComparison != null && name != null) || sortBy == SortBy.NAME;
 		StringBuilder str = new StringBuilder();
 		
@@ -108,7 +108,7 @@ public class IntelligenceViewFilter {
 			str.append(" ORDER BY " + sortBy.getSqlFilterField()); //$NON-NLS-1$
 		}
 		
-		Query query = s.createQuery(str.toString());
+		Query<?> query = s.createQuery(str.toString());
 		
 		//---- parameters ----
 		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$

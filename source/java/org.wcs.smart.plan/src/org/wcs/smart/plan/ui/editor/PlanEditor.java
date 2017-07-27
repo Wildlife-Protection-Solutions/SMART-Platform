@@ -151,18 +151,18 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<PlanTarget> childTargets = new ArrayList<PlanTarget>();
 			Plan thisPlan = null;
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try {
-				thisPlan = (Plan) session.get(Plan.class, plan.getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
-				getChildTargets(thisPlan, childTargets);
-			
-				for(PlanTarget pt : childTargets){
-					pt.refreshStatus(Locale.getDefault(), session);
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try {
+					thisPlan = (Plan) session.get(Plan.class, plan.getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
+					getChildTargets(thisPlan, childTargets);
+				
+					for(PlanTarget pt : childTargets){
+						pt.refreshStatus(Locale.getDefault(), session);
+					}
+				}finally{
+					session.getTransaction().rollback();
 				}
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
 			}
 			
 			mapPage.updateSubplanTargetLayer(thisPlan);
@@ -186,16 +186,16 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				final List<PlanTarget> targets = (List<PlanTarget>)plan.getTargets();
-				for (PlanTarget pt : targets){
-					pt.refreshStatus(Locale.getDefault(), s);
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					final List<PlanTarget> targets = (List<PlanTarget>)plan.getTargets();
+					for (PlanTarget pt : targets){
+						pt.refreshStatus(Locale.getDefault(), s);
+					}
+				}finally{
+					s.getTransaction().rollback();
 				}
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
 			}
 			Display.getDefault().asyncExec(new Runnable(){
 				public void run(){
@@ -304,34 +304,34 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	public Plan loadPlan(){
 		Plan p = null;
 		UUID puuid = ((PlanEditorInput) getEditorInput()).getUuid();
-		Session session = HibernateManager.openSession();
-		//load parent plan so don't have lazy loading issues later.
-		session.beginTransaction();
-		try{
-			prjProvider = ProjectionUtils.INSTANCE.createProjectionProvider(session, SmartDB.getCurrentConservationArea());
-			
-			p = (Plan) session.load(Plan.class, puuid);
-			if (p.getParent() != null) {
-				p.getParent().getId();
+		try(Session session = HibernateManager.openSession()){
+			//load parent plan so don't have lazy loading issues later.
+			session.beginTransaction();
+			try{
+				prjProvider = ProjectionUtils.INSTANCE.createProjectionProvider(session, SmartDB.getCurrentConservationArea());
+				
+				p = (Plan) session.load(Plan.class, puuid);
+				if (p.getParent() != null) {
+					p.getParent().getId();
+				}
+				if(p.getTargets() != null){
+					p.getTargets().size();
+				}
+				Station st = p.getStation();
+				if(st != null){
+					st.getName();
+				}
+				p.getTeam();
+				Team t = p.getTeam();
+				if(t != null){
+					t.getName();
+				}
+				for (org.wcs.smart.ca.Label name : p.getNames()) {
+					name.getLanguage().getCode();
+				}
+			}finally{
+				session.getTransaction().rollback();
 			}
-			if(p.getTargets() != null){
-				p.getTargets().size();
-			}
-			Station st = p.getStation();
-			if(st != null){
-				st.getName();
-			}
-			p.getTeam();
-			Team t = p.getTeam();
-			if(t != null){
-				t.getName();
-			}
-			for (org.wcs.smart.ca.Label name : p.getNames()) {
-				name.getLanguage().getCode();
-			}
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
 		}
 		return p;
 	}

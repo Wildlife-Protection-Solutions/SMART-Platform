@@ -65,6 +65,7 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ConservationAreaListView {
 
 	public static final String ID = "org.wcs.smart.query.conservationAreaList"; //$NON-NLS-1$

@@ -30,7 +30,6 @@ import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.data.oda.smart.impl.QueryDatasetExtensionManager;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
@@ -112,7 +111,7 @@ public class PlanPatrolQuery extends SmartQuery {
 		//set query dates
 		//this is necessary to run the query that is created for this patrol
 		String hql = "SELECT min(startDate) from Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
-		org.hibernate.Query q = connection.getSession().createQuery(hql);
+		org.hibernate.query.Query<?> q = connection.getSession().createQuery(hql);
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> data = q.list();
 		Date startdate = null;
@@ -148,12 +147,8 @@ public class PlanPatrolQuery extends SmartQuery {
 			return;
 		}
 		
-		Plan p = (Plan)session.createCriteria(Plan.class)
-				.add(Restrictions.eq("uuid",UuidUtils.stringToUuid(parentPlanUuid))).list().get(0); //$NON-NLS-1$
-		
+		Plan p = session.get(Plan.class, UuidUtils.stringToUuid(parentPlanUuid));
 		List<String> patrols = new ArrayList<String>();
-		
-		
 		List<Plan> plans = new ArrayList<Plan>();
 		plans.add(p);
 		while(plans.size() > 0){

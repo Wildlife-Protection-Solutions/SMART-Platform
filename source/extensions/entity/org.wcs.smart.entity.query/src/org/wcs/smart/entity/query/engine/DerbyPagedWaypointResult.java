@@ -87,8 +87,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet{
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
 				s.doWork(new Work(){
 					@Override
@@ -103,8 +102,6 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet{
 						}
 					}
 				});
-			}finally{
-				s.close();
 			}
 		}
 		return bounds;	

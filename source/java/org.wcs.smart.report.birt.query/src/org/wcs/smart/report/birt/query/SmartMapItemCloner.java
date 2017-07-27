@@ -35,12 +35,12 @@ import org.eclipse.birt.report.model.core.DesignElement;
 import org.eclipse.birt.report.model.elements.ExtendedItem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.data.oda.smart.internal.Messages;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.UuidUtils;
 
@@ -55,7 +55,6 @@ import com.ibm.icu.util.ULocale;
  */
 public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
@@ -66,7 +65,8 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 		//report item
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.SmartMapItemCloner_CloningReportItem, 1);
 		
-		List<Report> newReports = engine.getSession().createCriteria(Report.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).list(); //$NON-NLS-1$
+		List<Report> newReports = QueryFactory.buildQuery(engine.getSession(), Report.class, new Object[] {"conservationArea", engine.getNewCa()}).getResultList(); //$NON-NLS-1$
+		
 		progress.setWorkRemaining(newReports.size());
 		for (Report r : newReports){
 			File reportFile = new File(new File(engine.getNewCa().getFileDataStoreLocation(), Report.REPORT_DIR), r.getFilename());

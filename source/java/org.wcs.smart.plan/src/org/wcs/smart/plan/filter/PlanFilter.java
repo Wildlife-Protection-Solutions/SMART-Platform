@@ -23,7 +23,7 @@ package org.wcs.smart.plan.filter;
 
 import java.util.Date;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite;
@@ -162,7 +162,7 @@ public class PlanFilter {
 	 * @param s
 	 * @return
 	 */
-	public Query buildQuery(Session s){ 
+	public Query<?> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 
 		//NOTE: if select order is changed also change sorting in PlanHibernateManager.getRootPlans
@@ -215,7 +215,7 @@ public class PlanFilter {
 			str.append(")"); //$NON-NLS-1$
 		}
 		
-		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (types != null && types.length > 0){
 			query.setParameterList("pt", this.types); //$NON-NLS-1$
 		}

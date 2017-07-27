@@ -29,14 +29,13 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Criteria;
 import org.hibernate.Interceptor;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.informant.PersistentManager;
@@ -66,10 +65,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 */
 	public static List<Intelligence> getIntelligences(Session session) {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Intelligence> list = query.list();
-		return list;
+		return QueryFactory.buildQuery(session, Intelligence.class, "conservationArea", ca).getResultList(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -80,11 +76,8 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 */
 	public static boolean saveIntelligence(Intelligence intelligence) {
 		Interceptor interceptor = new AttachmentInterceptor();
-		Session session = SmartHibernateManager.openSession(interceptor);
-		try {
+		try(Session session = SmartHibernateManager.openSession(interceptor)) {
 			return saveIntelligence(intelligence, session);
-		} finally {
-			session.close();
 		}
 	}
 
@@ -120,9 +113,8 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 */
 	public static Intelligence deleteIntelligence(UUID uuid) {
 		//no need to add interceptor as files will be deleted manually
-		Session session = openSession();
 		Intelligence intelligence = null;
-		try {
+		try(Session session = openSession()){
 			session.beginTransaction();
 			try {
 				intelligence = (Intelligence) session.load(Intelligence.class, uuid);
@@ -134,8 +126,6 @@ public class IntelligenceHibernateManager extends HibernateManager {
 				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_DeleteIntelligence_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 				return null;
 			}
-		} finally {
-			session.close();
 		}
 		return intelligence;
 	}
@@ -147,14 +137,11 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return list of Patrol IDs
 	 */
 	public static List<?> fetchRelatedPatrolIDs(UUID intelligenceUuid) {
-		Session session = openSession();
-		try {
-			Query query = session.createQuery("SELECT pi.id.patrol.id FROM PatrolIntelligence pi WHERE pi.id.intelligence.uuid = :uuid ORDER BY pi.id.patrol.id asc"); //$NON-NLS-1$
+		try (Session session = openSession()){
+			Query<?> query = session.createQuery("SELECT pi.id.patrol.id FROM PatrolIntelligence pi WHERE pi.id.intelligence.uuid = :uuid ORDER BY pi.id.patrol.id asc"); //$NON-NLS-1$
 			query.setParameter("uuid", intelligenceUuid); //$NON-NLS-1$
 			List<?> list = query.list();
 			return list;
-		} finally {
-			session.close();
 		}
 	}
 	
@@ -209,7 +196,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		if (hasExcludes) {
 			queryString += " AND id.intelligence not in (:exclude)"; //$NON-NLS-1$
 		}
-		Query query = session.createQuery(queryString);
+		Query<?> query = session.createQuery(queryString);
 		query.setParameter("patrol", patrol); //$NON-NLS-1$
 		if (hasExcludes) {
 			query.setParameterList("exclude", exclude); //$NON-NLS-1$
@@ -224,15 +211,13 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return the list of intelligences reported by this patrol
 	 */
 	public static List<Intelligence> getReportedIntelligences(Patrol patrol) {
-		Session session = openSession();
-		session.beginTransaction();
-		try {
-			return getReportedIntelligences(patrol, session);
-		} finally {
-			try{
+		try(Session session = openSession()){
+			session.beginTransaction();
+			try {
+				return getReportedIntelligences(patrol, session);
+			} finally {
 				session.getTransaction().rollback();
-			}catch(Exception ex){}
-			session.close();
+			}
 		}
 	}
 
@@ -243,10 +228,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return the list of intelligences reported by this patrol
 	 */
 	public static List<Intelligence> getReportedIntelligences(Patrol patrol, Session session) {
-		Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("patrol", patrol)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Intelligence> list = query.list();
-		return list;
+		return QueryFactory.buildQuery(session, Intelligence.class, "patrol", patrol).getResultList(); //$NON-NLS-1$
 	}
 
 	/**
@@ -256,15 +238,13 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return the list of intelligences that motivated patrol
 	 */
 	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol) {
-		Session session = openSession();
-		session.beginTransaction();
-		try {
-			return getMotivatedIntelligences(patrol, session);
-		} finally {
-			try{
+		try(Session session = openSession()){
+			session.beginTransaction();
+			try {
+				return getMotivatedIntelligences(patrol, session);
+			} finally {
 				session.getTransaction().rollback();
-			}catch (Exception ex){}
-			session.close();
+			}
 		}
 	}
 
@@ -275,9 +255,8 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return the list of intelligences that motivated patrol
 	 */
 	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol, Session session) {
-		Query query = session.createQuery("SELECT pi.id.intelligence FROM PatrolIntelligence pi WHERE pi.id.patrol = :patrol"); //$NON-NLS-1$
+		Query<Intelligence> query = session.createQuery("SELECT pi.id.intelligence FROM PatrolIntelligence pi WHERE pi.id.patrol = :patrol", Intelligence.class); //$NON-NLS-1$
 		query.setParameter("patrol", patrol); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
 		List<Intelligence> list = query.list();
 		return list;
 	}
@@ -292,10 +271,9 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @throws  
 	 */
 	public static ListItem getIntelligence(Session session, String id) throws Exception {
-		Query q = session.createQuery("SELECT uuid, name FROM Intelligence WHERE uuid =:uuid"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("SELECT uuid, name FROM Intelligence WHERE uuid =:uuid"); //$NON-NLS-1$
 		q.setParameter("uuid", UuidUtils.stringToUuid(id)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Object[]> results = q.list();
+		List<?> results = q.list();
 		if (results.size() == 1) {
 			return new ListItem( (UUID)((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
 		} else {
@@ -333,25 +311,23 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @param onlyActive <code>true</code> if only active intelligence source types should be returned, <code>false</code> for all 
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	private static List<IntelligenceSource> getSourceTypes(ConservationArea ca, Session s, boolean onlyActive){
-		Criteria query = s.createCriteria(IntelligenceSource.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		if (onlyActive) {
-			query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
-		}
-		return query.list();
+		Object[] filter = new Object[onlyActive ? 2 : 1];
+		filter[0] = new Object[] {"conservationArea", ca}; //$NON-NLS-1$
+		if (onlyActive) filter[1] = new Object[] {"isActive", true}; //$NON-NLS-1$
+		
+		return QueryFactory.buildQuery(s, IntelligenceSource.class, filter).getResultList();
 	}
 
 	/**
 	 * Loads informants 
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<Informant> getInformants(ConservationArea ca, Session s, boolean onlyActive){
-		Criteria query = s.createCriteria(Informant.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		if (onlyActive) {
-			query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
-		}
-		return query.list();
+		Object[] filter = new Object[onlyActive ? 2 : 1];
+		filter[0] = new Object[] {"conservationArea", ca}; //$NON-NLS-1$
+		if (onlyActive) filter[1] = new Object[] {"isActive", true}; //$NON-NLS-1$
+		
+		return QueryFactory.buildQuery(s, Informant.class, filter).getResultList();
 	}
 	
 	public static IntelligenceSource getPatrolSource(Session s) {
@@ -359,18 +335,14 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	public static IntelligenceSource getSourceByKeyId(Session s, String keyId) {
-		Criteria query = s.createCriteria(IntelligenceSource.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", keyId)); //$NON-NLS-1$
-		return (IntelligenceSource) query.uniqueResult();
+		return QueryFactory.buildQuery(s, IntelligenceSource.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"keyId", keyId}).uniqueResult(); //$NON-NLS-1$
 	}
 
 	public static boolean saveInformant(Informant informant) {
-		Session session = openSession();
-		try {
+		try (Session session = openSession()){
 			return saveInformant(informant, session);
-		} finally {
-			session.close();
 		}
 	}
 	
@@ -395,13 +367,11 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	public static boolean deleteInformant(Informant informant) {
-		Session session = openSession();
-		try {
+		
+		try(Session session = openSession()) {
 			session.beginTransaction();
 			try {
-				Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("informant", informant)); //$NON-NLS-1$
-				@SuppressWarnings("unchecked")
-				List<Intelligence> intelList = (List<Intelligence>) query.list();
+				List<Intelligence> intelList = QueryFactory.buildQuery(session, Intelligence.class, "informant", informant).getResultList(); //$NON-NLS-1$
 				if (!intelList.isEmpty()) {
 					StringBuilder sb = new StringBuilder();
 					for (Intelligence intelligence : intelList) {
@@ -445,16 +415,11 @@ public class IntelligenceHibernateManager extends HibernateManager {
 				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_InformantDeleteError + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 				return false;
 			}
-		} finally {
-			if (session.isOpen()) {
-				session.close();
-			}
 		}
 	}
 
 	public static void clearInformantsEncrptedData() {
-		Session session = openSession();
-		try {
+		try(Session session = openSession()) {
 			try {
 				List<Informant> informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), session, false);
 				for (Informant informant : informantList) {
@@ -466,8 +431,6 @@ public class IntelligenceHibernateManager extends HibernateManager {
 				session.getTransaction().rollback();
 				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_EncryptedDataClearError + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			}
-		} finally {
-			session.close();
 		}
 	}
 	

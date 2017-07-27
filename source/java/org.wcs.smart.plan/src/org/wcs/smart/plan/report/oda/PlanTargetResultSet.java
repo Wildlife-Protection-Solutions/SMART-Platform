@@ -31,15 +31,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
@@ -82,9 +86,9 @@ public class PlanTargetResultSet  implements IResultSet {
 		Set<Plan> addedPlans = new HashSet<Plan>();
 		for (int i = 0; i < planUuids.length; i ++){
 			try{
-				Plan p = (Plan)session.createCriteria(Plan.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(planUuids[i]))).list().get(0); //$NON-NLS-1$
+				Plan p = QueryFactory.buildQuery(session, Plan.class,
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"uuid", UuidUtils.stringToUuid(planUuids[i])}).uniqueResult(); //$NON-NLS-1$
 				if (p != null){
 					if (!onlyChildren){
 						plans.addAll(p.getTargets());
@@ -110,7 +114,6 @@ public class PlanTargetResultSet  implements IResultSet {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public PlanTargetResultSet(Date startDate, Date endDate,
 			PlanTargetResultSetMetadata metadata, SmartConnection connection) {
 
@@ -119,16 +122,21 @@ public class PlanTargetResultSet  implements IResultSet {
 		
 		session = connection.getSession();
 
-		Criteria c = session.createCriteria(Plan.class)
-				.add(Restrictions.in("conservationArea",  connection.getConservationAreas())); //$NON-NLS-1$
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Plan> c = cb.createQuery(Plan.class);
+		Root<Plan> from = c.from(Plan.class);
+		List<Predicate> filters = new ArrayList<Predicate>();
+		filters.add(from.get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$
 		if (startDate != null){
-			c.add(Restrictions.ge("startDate", startDate)); //$NON-NLS-1$
+			filters.add(cb.greaterThanOrEqualTo(from.get("startDate"), startDate)); //$NON-NLS-1$
 		}
 		if (endDate != null){
-			c.add(Restrictions.le("startDate", endDate)); //$NON-NLS-1$
+			filters.add(cb.lessThanOrEqualTo(from.get("startDate"), endDate));	 //$NON-NLS-1$
 		}
+		c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
 		
-		List<Plan> searchplans = c.list();
+		List<Plan> searchplans = session.createQuery(c).getResultList();
+		
 		for (Plan p : searchplans){
 			plans.addAll(p.getTargets());
 		}

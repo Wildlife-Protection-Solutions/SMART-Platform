@@ -102,33 +102,33 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 			CompoundMapQuery cquery = (CompoundMapQuery)query;
 			
 			List<org.wcs.smart.query.model.Query> toExport = new ArrayList<org.wcs.smart.query.model.Query>();
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try {
-				s.saveOrUpdate(query);
-	
-				if (query.getConservationArea().getDefaultLanguage() != null){
-					xmlQuery.setLanguage(query.getConservationArea().getDefaultLanguage().getCode());
-				}else{
-					xmlQuery.setLanguage(SmartDB.getCurrentLanguage().getCode());
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try {
+					s.saveOrUpdate(query);
+		
+					if (query.getConservationArea().getDefaultLanguage() != null){
+						xmlQuery.setLanguage(query.getConservationArea().getDefaultLanguage().getCode());
+					}else{
+						xmlQuery.setLanguage(SmartDB.getCurrentLanguage().getCode());
+					}
+					
+					for (org.wcs.smart.ca.Label l : query.getNames()) {
+						QueryName qn = new QueryName();
+						qn.setName(l.getValue());
+						qn.setLanguage(l.getLanguage().getCode());
+						qn.setIsDefault(l.getLanguage().isDefault());
+		
+						xmlQuery.getName().add(qn);
+					}
+					
+					for (CompoundMapQueryLayer l : cquery.getLayers()){
+						org.wcs.smart.query.model.Query q = QueryHibernateManager.getInstance().findQuery(s, l.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType(l.getQueryType()));
+						toExport.add(q);
+					}
+				} finally {
+					s.getTransaction().rollback();
 				}
-				
-				for (org.wcs.smart.ca.Label l : query.getNames()) {
-					QueryName qn = new QueryName();
-					qn.setName(l.getValue());
-					qn.setLanguage(l.getLanguage().getCode());
-					qn.setIsDefault(l.getLanguage().isDefault());
-	
-					xmlQuery.getName().add(qn);
-				}
-				
-				for (CompoundMapQueryLayer l : cquery.getLayers()){
-					org.wcs.smart.query.model.Query q = QueryHibernateManager.getInstance().findQuery(s, l.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType(l.getQueryType()));
-					toExport.add(q);
-				}
-			} finally {
-				s.getTransaction().rollback();
-				s.close();
 			}
 			
 			for (int order = 0; order < cquery.getLayers().size(); order++ ){

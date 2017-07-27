@@ -62,8 +62,7 @@ public class IntelligenceExporter {
 
 	public static File exportIntelligence(Intelligence intelligence, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.IntelligenceExporter_Exporting, includeAttachments ? 4 : 2);
-		Session session = HibernateManager.openSession();
-		try {
+		try (Session session = HibernateManager.openSession()){
 			session.refresh(intelligence);
 			
 			if (intelligence.getAttachments() != null){
@@ -80,8 +79,6 @@ public class IntelligenceExporter {
 			}else{
 				return exportIntelligenceWithAttachments(intelligence, xml, file, monitor);
 			}
-		} finally {
-			session.close();
 		}
 	}
 

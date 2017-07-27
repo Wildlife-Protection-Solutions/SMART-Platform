@@ -25,7 +25,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -165,14 +165,12 @@ public class EntityTable extends SmartBirtTable {
 	/**
 	 * @see org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable#getValues(org.wcs.smart.ca.ConservationArea)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues (SmartConnection connection) {
-		Query q = connection.getSession().createQuery("FROM Entity e WHERE e.entityType.keyId = :keyid and e.entityType.conservationArea in (:cas)"); //$NON-NLS-1$
+	public List<? extends Object> getValues (SmartConnection connection) {
+		Query<Entity> q = connection.getSession().createQuery("FROM Entity e WHERE e.entityType.keyId = :keyid and e.entityType.conservationArea in (:cas)", Entity.class); //$NON-NLS-1$
 		q.setParameter("keyid", et.getKeyId()); //$NON-NLS-1$
 		q.setParameterList("cas", connection.getConservationAreas()); //$NON-NLS-1$
-		List<Object> x = q.list();
-		return x;
+		return q.list();
 	}
 
 	/**

@@ -79,13 +79,10 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
         	Job j = new Job(Messages.SamplingUnitServiceExtension_jobName){
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						SurveyDesign sds = (SurveyDesign) s.load(SurveyDesign.class, uuid);
 						sds.getName();
 						sd[0] = sds;
-					}finally{
-						s.close();
 					}
 					return Status.OK_STATUS;
 				}};

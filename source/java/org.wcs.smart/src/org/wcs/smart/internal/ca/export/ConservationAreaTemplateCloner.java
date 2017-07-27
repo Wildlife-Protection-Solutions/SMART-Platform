@@ -23,10 +23,13 @@ package org.wcs.smart.internal.ca.export;
 
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -95,10 +98,13 @@ public class ConservationAreaTemplateCloner implements
 	 */
 	private void cloneMapStyles(ConservationAreaClonerEngine engine){
 		Session session = engine.getSession();
-		@SuppressWarnings("unchecked")
-		List<SmartStyle> stylesToClone = session.createCriteria(SmartStyle.class)
-								.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-								.list();
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<SmartStyle> query = cb.createQuery(SmartStyle.class);
+		Root<SmartStyle> root = query.from(SmartStyle.class);
+		query.where(cb.equal(root.get("conservationArea"), engine.getTemplateCa())); //$NON-NLS-1$
+		List<SmartStyle> stylesToClone = session.createQuery(query).getResultList();
+		
 		for (SmartStyle style : stylesToClone){
 			SmartStyle clone = new SmartStyle();
 			clone.setConservationArea(engine.getNewCa());

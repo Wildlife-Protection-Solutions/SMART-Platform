@@ -24,7 +24,6 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.ConfigurableModelComposite;
@@ -37,6 +36,7 @@ import org.wcs.smart.er.ui.surveydesign.PropertiesComposite;
 import org.wcs.smart.er.ui.surveydesign.StatusComposite;
 import org.wcs.smart.er.ui.surveydesign.SurveyDesignComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -62,19 +62,13 @@ public class SurveyDesignCompositeFactory {
 		
 		switch (type) {
 		case NAME:
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				return new NameIdComposite(getSurveyDesigns(s));
-			}finally{
-				s.close();
 			}
 		case DATES:					return new DateComposites();
 		case MODEL:
-			s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				return new ConfigurableModelComposite(getConfigurableModels(s));
-			}finally{
-				s.close();
 			}
 		case STATUS:				return new StatusComposite();
 		case MISSION_PROPERTIES:	return new MissionPropertiesComposite();
@@ -86,17 +80,12 @@ public class SurveyDesignCompositeFactory {
 	}
 
 	private List<SurveyDesign> getSurveyDesigns(Session session) {
-		@SuppressWarnings("unchecked")
-		List<SurveyDesign> others = session.createCriteria(SurveyDesign.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-		return others;
+		return QueryFactory.buildQuery(session, SurveyDesign.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+		
 	}
 
 	private List<ConfigurableModel> getConfigurableModels(Session session) {
-		@SuppressWarnings("unchecked")
-		List<ConfigurableModel> models = session.createCriteria(ConfigurableModel.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-		return models;
+		return QueryFactory.buildQuery(session, ConfigurableModel.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 	}
 	
 	/**

@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -53,6 +52,7 @@ import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
 import org.wcs.smart.er.query.model.column.SurveyAttributeQueryColumn;
 import org.wcs.smart.er.query.model.column.SurveyCategoryQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
@@ -148,16 +148,13 @@ public class SurveyQueryColumnManager {
 		Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					SurveyDesign sd2 = null;
 					if (sd != null){
 						sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 					}
 					cols.addAll(getMissionPropertyColumns(s, sd2));
 					cols.addAll(getSamplingUnitAttributeColumns(s, sd2));
-				}finally{
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}
@@ -217,16 +214,13 @@ public class SurveyQueryColumnManager {
 		Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					SurveyDesign sd2 = null;
 					if (sd != null){
 						sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 					}
 					cols.addAll(getMissionPropertyColumns(s, sd2));
 					cols.addAll(getSamplingUnitAttributeColumns(s, sd2));
-				}finally{
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}
@@ -378,16 +372,13 @@ public class SurveyQueryColumnManager {
 		Job j = new Job(Messages.SurveyQueryColumnManager_missionattributejobname){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					SurveyDesign sd2 = null;
 					if (sd != null){
 						sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 					}
 					cols.addAll(getMissionPropertyColumns(s, sd2));
 					cols.addAll(getSamplingUnitAttributeColumns(s, sd2));
-				}finally{
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}
@@ -431,18 +422,17 @@ public class SurveyQueryColumnManager {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			columns = new ArrayList<MissionPropertyQueryColumn>();
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				SurveyDesign sd2 = null;
-				if (sd != null){
-					sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					SurveyDesign sd2 = null;
+					if (sd != null){
+						sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
+					}
+					columns.addAll(getMissionPropertyColumns(s, sd2));
+				}finally {	
+					s.getTransaction().rollback();
 				}
-				columns.addAll(getMissionPropertyColumns(s, sd2));
-				
-				s.getTransaction().rollback();
-			}finally{
-				s.close();
 			}
 			return Status.OK_STATUS;
 		}
@@ -457,12 +447,10 @@ public class SurveyQueryColumnManager {
 		return Messages.SamplingUnitAttributeQueryColumn_SuLabel + "|" + sua.getName(); //$NON-NLS-1$
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<MissionPropertyQueryColumn> getMissionPropertyColumns(Session session, SurveyDesign sd){
 		List<MissionPropertyQueryColumn> columns = new ArrayList<MissionPropertyQueryColumn>();
 		if (sd == null){
-			List<MissionAttribute> all = session.createCriteria(MissionAttribute.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+			List<MissionAttribute> all = QueryFactory.buildQuery(session, MissionAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 			for (MissionAttribute ma : all){
 				columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
 			}
@@ -481,20 +469,15 @@ public class SurveyQueryColumnManager {
 		return columns;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<SamplingUnitAttributeQueryColumn> getSamplingUnitAttributeColumns(Session session, SurveyDesign sd){
 		List<SamplingUnitAttributeQueryColumn> columns = new ArrayList<SamplingUnitAttributeQueryColumn>();
 		if (sd == null){
-			List<SamplingUnitAttribute> su = session.createCriteria(SamplingUnitAttribute.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list();
+			List<SamplingUnitAttribute> su = QueryFactory.buildQuery(session, SamplingUnitAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 			for (SamplingUnitAttribute sua : su){
 				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua), sua));
 			}
 		}else{
-			List<SurveyDesignSamplingUnitAttribute> atts = session.createCriteria(SurveyDesignSamplingUnitAttribute.class)
-				.add(Restrictions.eq("id.surveyDesign", sd)) //$NON-NLS-1$
-				.list();
+			List<SurveyDesignSamplingUnitAttribute> atts = QueryFactory.buildQuery(session, SurveyDesignSamplingUnitAttribute.class, "id.surveyDesign", sd).getResultList(); //$NON-NLS-1$
 			for (SurveyDesignSamplingUnitAttribute a : atts){
 				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(a.getSamplingUnitAttribute()), a.getSamplingUnitAttribute()));
 			}

@@ -120,9 +120,9 @@ public class ExportEntityTypeHandler {
 						InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.ExportEntityTypeHandler_ProgressLabel, types.size() * 4);
 					int exportedCnt = 0;
-					Session s = HibernateManager.openSession();
+					
 					final boolean[] overwriteall = new boolean[]{false};
-					try{
+					try(Session s = HibernateManager.openSession()){
 						for (EntityType et : types){
 							et = (EntityType) s.load(EntityType.class, et.getUuid());
 							progress.subTask(MessageFormat.format(Messages.ExportEntityTypeHandler_ExportProgress, new Object[]{et.getName()}));
@@ -164,8 +164,6 @@ public class ExportEntityTypeHandler {
 							}
 							
 						}
-					}finally{
-						s.close();
 					}
 					final int lExportCnt = exportedCnt;
 					pmd.getShell().getDisplay().syncExec(new Runnable(){
@@ -327,18 +325,18 @@ public class ExportEntityTypeHandler {
 				protected IStatus run(IProgressMonitor monitor) {
 					
 					final List<EntityType> items = new ArrayList<EntityType>();
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					try{
-						items.addAll(EntityHibernateManager.getInstance().getEntityTypes(s));
-						Collections.sort(items, new Comparator<EntityType>(){
-							@Override
-							public int compare(EntityType et1, EntityType et2) {
-								return Collator.getInstance().compare(et1.getName(), et2.getName());
-							}});
-					}finally{
-						s.getTransaction().rollback();
-						s.close();
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try{
+							items.addAll(EntityHibernateManager.getInstance().getEntityTypes(s));
+							Collections.sort(items, new Comparator<EntityType>(){
+								@Override
+								public int compare(EntityType et1, EntityType et2) {
+									return Collator.getInstance().compare(et1.getName(), et2.getName());
+								}});
+						}finally{
+							s.getTransaction().rollback();
+						}
 					}
 					getShell().getDisplay().syncExec(new Runnable(){
 						@Override

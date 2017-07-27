@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.referencing.GeodeticCalculator;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -109,10 +109,10 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		sb.append(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_Param_TypeName, l));
 		for (int i = 0; i < patrolTypes.length; i ++){
 			if (i != 0) sb.append(", "); //$NON-NLS-1$
-			PatrolTransportType ttype = (PatrolTransportType)session.createCriteria(PatrolTransportType.class)
-					.add(Restrictions.eq("conservationArea", routine.getConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("keyId", patrolTypes[i])) //$NON-NLS-1$
-					.uniqueResult();
+			
+			PatrolTransportType ttype = QueryFactory.buildQuery(session, PatrolTransportType.class,
+					new Object[] {"conservationArea", routine.getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"keyId", patrolTypes[i]}).uniqueResult(); //$NON-NLS-1$
 			if (ttype == null){
 				sb.append(patrolTypes[i]);
 			}else{
@@ -144,10 +144,9 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		Set<PatrolTransportType> types = new HashSet<>();
 		String[] keys = typeParameter.getStringValue().split(PARAM_SEP);
 		for (String key : keys){
-			PatrolTransportType type = (PatrolTransportType)session.createCriteria(PatrolTransportType.class)
-					.add(Restrictions.eq("conservationArea", task.getConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-					.uniqueResult();
+			PatrolTransportType type = QueryFactory.buildQuery(session, PatrolTransportType.class,
+					new Object[] {"conservationArea", task.getConservationArea()}, //$NON-NLS-1$
+					new Object[] {"keyId",key}).uniqueResult(); //$NON-NLS-1$
 			if (type != null){
 				types.add(type);
 			}
@@ -176,9 +175,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 	}
 	
 	private QaError validateWaypoint(WaypointLocationData wp, ValidationTask task, double maxSpeed, Set<PatrolTransportType> types, Session session){
-		PatrolWaypoint pw = (PatrolWaypoint) session.createCriteria(PatrolWaypoint.class)
-				.add(Restrictions.eq("id.waypoint", wp.getWaypoint())) //$NON-NLS-1$
-				.uniqueResult();
+		PatrolWaypoint pw = QueryFactory.buildQuery(session, PatrolWaypoint.class, "id.waypoint", wp.getWaypoint()).uniqueResult(); //$NON-NLS-1$
 		if (pw == null) return null;
 		if (!types.contains(pw.getPatrolLegDay().getPatrolLeg().getType())) return null;
 				

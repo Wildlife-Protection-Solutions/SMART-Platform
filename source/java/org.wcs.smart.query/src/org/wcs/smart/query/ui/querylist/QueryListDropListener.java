@@ -114,29 +114,28 @@ public class QueryListDropListener extends ViewerDropAdapter {
 				
 				Query q = null;
 				for (final QueryEditorInput query : toUpdate){
-					Session s = HibernateManager.openSession();
 					boolean isChanged = false;
-					try{
-						q = (Query) s.load(query.getType().getHibernateClass(), query.getUuid());
-						if (!((targetFolder == null && q.getFolder() == null) ||
-							(targetFolder != null && targetFolder.equals(q.getFolder())))){
-							//folder was changed; update it
-							s.beginTransaction();
-							q.setIsShared(targetFolder.getEmployee() == null);
-							if (targetFolder.isRootFolder()){	
-								q.setFolder(null);
-							}else{
-								q.setFolder(targetFolder);
+					try(Session s = HibernateManager.openSession()){
+						try{
+							q = (Query) s.load(query.getType().getHibernateClass(), query.getUuid());
+							if (!((targetFolder == null && q.getFolder() == null) ||
+								(targetFolder != null && targetFolder.equals(q.getFolder())))){
+								//folder was changed; update it
+								s.beginTransaction();
+								q.setIsShared(targetFolder.getEmployee() == null);
+								if (targetFolder.isRootFolder()){	
+									q.setFolder(null);
+								}else{
+									q.setFolder(targetFolder);
+								}
+								
+								s.getTransaction().commit();
+								isChanged = true;
 							}
-							
-							s.getTransaction().commit();
-							isChanged = true;
+						}catch (Exception ex){
+							if (s.getTransaction().isActive()) s.getTransaction().rollback();
+							QueryPlugIn.log(ex.getMessage(), ex);		
 						}
-					}catch (Exception ex){
-						if (s.getTransaction().isActive()) s.getTransaction().rollback();
-						QueryPlugIn.log(ex.getMessage(), ex);		
-					}finally{
-						s.close();
 					}
 					//fire and events and update the ui (outside of session)
 					if (isChanged){
@@ -145,7 +144,7 @@ public class QueryListDropListener extends ViewerDropAdapter {
 							@Override
 							public void run() {
 								QueryEventManager.getInstance().fireQuerySaved(lq);
-								if (toOpen.containsKey(lq)){
+								if (toOpen.containsKey(new QueryEditorInput(lq))){
 									try {
 										PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(query, toOpen.get(query));
 										} catch (PartInitException e) {

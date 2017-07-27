@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
@@ -42,6 +41,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.missionattribute.AttributeLabelProvider;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -87,11 +87,9 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 	@Override
 	public void init(SurveyDesign design, Session session) {
 		warn.setVisible(design.getUuid() != null);
-		
-		@SuppressWarnings("unchecked")
-		List<MissionAttribute> allAttributes = session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list(); 
+		List<MissionAttribute> allAttributes = 
+				QueryFactory.buildQuery(session, MissionAttribute.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+		 
 		List<MissionAttribute> selectedAttributes = new ArrayList<MissionAttribute>();
 		
 		if (design.getMissionProperties() != null){

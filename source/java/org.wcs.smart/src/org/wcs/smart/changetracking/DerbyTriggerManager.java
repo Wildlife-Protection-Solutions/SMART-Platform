@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.changetracking;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 
 /**
  * Tools for managing DERBY database triggers.
@@ -41,8 +41,8 @@ public enum DerbyTriggerManager {
      * @return true if trigger exists, false otherwise
      */
 	public boolean triggerExists(String name, Session s){
-		Query q = s.createSQLQuery("SELECT count(*) FROM SYS.SYSTRIGGERS trj, SYS.SYSSCHEMAS sc WHERE trj.schemaid = sc.schemaid AND sc.schemaname || '.' || UPPER(triggername) = ?"); //$NON-NLS-1$
-		q.setString(0, name.toUpperCase());
+		NativeQuery<?> q = s.createNativeQuery("SELECT count(*) FROM SYS.SYSTRIGGERS trj, SYS.SYSSCHEMAS sc WHERE trj.schemaid = sc.schemaid AND sc.schemaname || '.' || UPPER(triggername) = :triggerName"); //$NON-NLS-1$
+		q.setParameter("triggerName", name.toUpperCase()); //$NON-NLS-1$
 		Integer cnt = (Integer)q.uniqueResult();
 		if (cnt.longValue() == 0) return false;
 		return true;	
@@ -58,7 +58,7 @@ public enum DerbyTriggerManager {
 	 */
 	public boolean createTriggerIfNotExists(String name, String sql, Session s){
 		if (triggerExists(name, s)) return false;
-		s.createSQLQuery(sql).executeUpdate();
+		s.createNativeQuery(sql).executeUpdate();
 		return true;
 	}
 	
@@ -72,7 +72,7 @@ public enum DerbyTriggerManager {
 	 */
 	public boolean dropIfExists(final String name, Session s){
 		if (!triggerExists(name, s)) return false;
-		s.createSQLQuery("DROP TRIGGER " + name).executeUpdate(); //$NON-NLS-1$
+		s.createNativeQuery("DROP TRIGGER " + name).executeUpdate(); //$NON-NLS-1$
 		return true;
 	}
 }

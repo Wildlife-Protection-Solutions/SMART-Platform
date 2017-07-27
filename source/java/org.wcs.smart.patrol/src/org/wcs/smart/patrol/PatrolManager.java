@@ -121,9 +121,7 @@ public class PatrolManager {
 		SubMonitor progress = SubMonitor.convert(monitor, MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{UuidUtils.uuidToString(patrolUuid)}), 4);
 		
 		Patrol patrol = null;
-		Session session = HibernateManager.openSession();
-		
-		try{
+		try(Session session = HibernateManager.openSession()){
 			patrol = (Patrol)session.load(Patrol.class, patrolUuid);
 			progress.subTask(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{patrol == null ? patrolUuid.toString() : patrol.getId()}));
 			
@@ -169,8 +167,6 @@ public class PatrolManager {
 				if (session.getTransaction().isActive()) session.getTransaction().rollback();
 				throw ex;
 			}
-		}finally{
-			session.close();
 		}
 	
 		if (patrol != null){

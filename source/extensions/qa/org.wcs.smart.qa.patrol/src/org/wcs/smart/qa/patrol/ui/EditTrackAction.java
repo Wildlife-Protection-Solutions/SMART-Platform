@@ -55,8 +55,7 @@ public class EditTrackAction  implements IQaAction {
 		
 		Track track = null;
 		Patrol p = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			track = (Track) s.get(Track.class, item.getSourceId());
 			if (track != null){
 				//load hibernate objects necessary for editing
@@ -66,8 +65,6 @@ public class EditTrackAction  implements IQaAction {
 				track.getPatrolLegDay().getTracks().size();
 				track.getGeom().equals(null);
 			}
-		}finally{
-			s.close();
 		}
 		
 		if (track == null){

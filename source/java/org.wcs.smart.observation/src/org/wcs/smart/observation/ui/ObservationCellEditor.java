@@ -99,30 +99,30 @@ public class ObservationCellEditor extends DialogCellEditor {
 
 		@Override
 		public IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try {
-				final DataModel dm = HibernateManager.loadDataModel(
-						SmartDB.getCurrentConservationArea(), s);
-				for (Category c : dm.getActiveCategories()) {
-					visitCategory(c);
-				}
-
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (treeDropDown != null && !treeDropDown.getTreeViewer().getTree().isDisposed()){
-							treeDropDown.getTreeViewer().setInput(dm);
-							treeDropDown.setText(txtFilter.getText());
-						}
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try {
+					final DataModel dm = HibernateManager.loadDataModel(
+							SmartDB.getCurrentConservationArea(), s);
+					for (Category c : dm.getActiveCategories()) {
+						visitCategory(c);
 					}
-				});
+	
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							if (treeDropDown != null && !treeDropDown.getTreeViewer().getTree().isDisposed()){
+								treeDropDown.getTreeViewer().setInput(dm);
+								treeDropDown.setText(txtFilter.getText());
+							}
+						}
+					});
 
-			} finally {
-				if (s.getTransaction().isActive()){
-					s.getTransaction().rollback();
+				} finally {
+					if (s.getTransaction().isActive()){
+						s.getTransaction().rollback();
+					}
 				}
-				s.close();
 			}
 			return Status.OK_STATUS;
 		}

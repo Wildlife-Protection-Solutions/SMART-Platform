@@ -83,12 +83,12 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
@@ -190,11 +190,8 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor = progressComposite.createProgressMonitor();
 				Collection<QaError> errors = null;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					errors = engine.validate(s, monitor);
-				}finally{
-					s.close();
 				}
 				Collection<QaError> ferrors = errors;
 				Display.getDefault().syncExec(()->{
@@ -695,16 +692,11 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 	
 	Job j = new Job(Messages.ManualResultsEditor_LoadRoutinesJobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<DataValidator> routines = new ArrayList<>();
-			Session s = HibernateManager.openSession();
-			try{
-				List<QaRoutine> dbroutines = s.createCriteria(QaRoutine.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.list();
-				
+			try(Session s = HibernateManager.openSession()){
+				List<QaRoutine> dbroutines = QueryFactory.buildQuery(s, QaRoutine.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 				Collection<IQaDataProvider> providers = RoutineExtensionManager.INSTANCE.getDataProviders();
 				for (IQaDataProvider p : providers){
 					for (QaRoutine r : dbroutines){
@@ -717,8 +709,6 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 						}
 					}
 				}
-			}finally{
-				s.close();
 			}
 			Display.getDefault().asyncExec(()->{
 				tblRoutines.setInput(routines);

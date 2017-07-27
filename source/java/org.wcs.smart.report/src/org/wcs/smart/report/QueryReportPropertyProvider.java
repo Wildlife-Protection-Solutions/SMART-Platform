@@ -24,8 +24,8 @@ package org.wcs.smart.report;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
@@ -51,44 +51,43 @@ public class QueryReportPropertyProvider extends AbstractQueryPropertyProvider {
 	 * 
 	 * @see org.wcs.smart.query.AbstractQueryPropertyProvider#getValue(org.wcs.smart.query.model.Query)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public String getValue(Query query) {
 		if (query.getUuid() == null) return ""; //$NON-NLS-1$
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			List<ReportQuery> reports = s.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list(); //$NON-NLS-1$
-			if (reports.size() == 0){
-				return Messages.QueryReportPropertyProvider_NoReportsLabel;
-			}else{
-				StringBuilder sb = new StringBuilder();
-				for (ReportQuery rq : reports){
-					sb.append("* "); //$NON-NLS-1$
-					sb.append(rq.getReport().getName());
-					sb.append(" ["); //$NON-NLS-1$
-					sb.append(rq.getReport().getId());
-					sb.append("] {"); //$NON-NLS-1$
-					sb.append(Messages.QueryReportPropertyProvider_OwnerLabel); 
-					sb.append(": "); //$NON-NLS-1$
-					sb.append(SmartLabelProvider.getFullLabel(rq.getReport().getOwner()));
-					sb.append( "}");  //$NON-NLS-1$
-					
-					sb.append("\n"); //$NON-NLS-1$
+		try(Session s = HibernateManager.openSession()){
+			try{
+				s.beginTransaction();
+				List<ReportQuery> reports = QueryFactory.buildQuery(s, ReportQuery.class, "id.queryUuid", query.getUuid()).getResultList(); //$NON-NLS-1$
+				if (reports.size() == 0){
+					return Messages.QueryReportPropertyProvider_NoReportsLabel;
+				}else{
+					StringBuilder sb = new StringBuilder();
+					for (ReportQuery rq : reports){
+						sb.append("* "); //$NON-NLS-1$
+						sb.append(rq.getReport().getName());
+						sb.append(" ["); //$NON-NLS-1$
+						sb.append(rq.getReport().getId());
+						sb.append("] {"); //$NON-NLS-1$
+						sb.append(Messages.QueryReportPropertyProvider_OwnerLabel); 
+						sb.append(": "); //$NON-NLS-1$
+						sb.append(SmartLabelProvider.getFullLabel(rq.getReport().getOwner()));
+						sb.append( "}");  //$NON-NLS-1$
+						
+						sb.append("\n"); //$NON-NLS-1$
+					}
+					if (sb.length() > 1){
+						sb.delete(sb.length() - 1, sb.length());
+					}
+					return sb.toString();
 				}
-				if (sb.length() > 1){
-					sb.delete(sb.length() - 1, sb.length());
+			}catch (Exception ex){
+				ReportPlugIn.log("Error loading query properties", ex); //$NON-NLS-1$
+				return Messages.QueryReportPropertyProvider_ErrorLabel;
+			}finally{
+				if (s.getTransaction().isActive()){
+					s.getTransaction().commit();
 				}
-				return sb.toString();
 			}
-		}catch (Exception ex){
-			ReportPlugIn.log("Error loading query properties", ex); //$NON-NLS-1$
-			return Messages.QueryReportPropertyProvider_ErrorLabel;
-		}finally{
-			if (s.getTransaction().isActive()){
-				s.getTransaction().commit();
-			}
-			s.close();
 		}
 	}
 

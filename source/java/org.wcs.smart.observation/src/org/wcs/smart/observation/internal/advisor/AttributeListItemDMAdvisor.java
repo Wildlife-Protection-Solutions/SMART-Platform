@@ -23,12 +23,10 @@ package org.wcs.smart.observation.internal.advisor;
 
 import java.text.MessageFormat;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
@@ -57,13 +55,9 @@ public class AttributeListItemDMAdvisor implements IDeleteAdvisor {
 		}
 		AttributeListItem item = (AttributeListItem)object;
 		if (item.getUuid() == null) return null;
-		Criteria query = session.createCriteria(WaypointObservationAttribute.class);
-		query.add(Restrictions.eq("attributeListItem", item)); //$NON-NLS-1$
-		query.setProjection(Projections.rowCount());
-		long cnt = (Long)query.uniqueResult();
-		if (cnt == 0){
-			return null;
-		}
+		
+		long cnt = QueryFactory.buildCountQuery(session, WaypointObservationAttribute.class,  new Object[] {"attributeListItem", item}); //$NON-NLS-1$
+		
 		return MessageFormat.format(
 				Messages.AttributeListItemDMAdvisor_DeleteError,
 				new Object[]{ cnt });

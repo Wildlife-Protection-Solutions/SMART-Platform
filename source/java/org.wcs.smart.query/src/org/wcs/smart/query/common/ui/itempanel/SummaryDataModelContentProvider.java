@@ -390,34 +390,34 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try{
-					
-					List<AttributeTreeNode> nodes = null;
-					boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
-					
-					if (parent.getObject() instanceof Attribute){
-						Attribute attribute = (Attribute)parent.getObject();
-						attribute = QueryDataModelManager.getInstance().getAttribute(session, attribute);
-//						attribute.getName();
-						nodes = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, session) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
-					}else if (parent.getObject() instanceof CategoryAttribute ){
-						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
-						attribute = QueryDataModelManager.getInstance().getAttribute(session, attribute);
-//						attribute.getName();
-						nodes = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, session) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
-					}else if (parent.getObject() instanceof AttributeTreeNode){
-						AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
-						node.getAttribute().getName();
-						nodes = showInactive ? node.getChildren() : node.getActiveChildren();
+				try(Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try{
+						
+						List<AttributeTreeNode> nodes = null;
+						boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+						
+						if (parent.getObject() instanceof Attribute){
+							Attribute attribute = (Attribute)parent.getObject();
+							attribute = QueryDataModelManager.getInstance().getAttribute(session, attribute);
+	//						attribute.getName();
+							nodes = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, session) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
+						}else if (parent.getObject() instanceof CategoryAttribute ){
+							Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
+							attribute = QueryDataModelManager.getInstance().getAttribute(session, attribute);
+	//						attribute.getName();
+							nodes = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, session) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, session);
+						}else if (parent.getObject() instanceof AttributeTreeNode){
+							AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
+							node.getAttribute().getName();
+							nodes = showInactive ? node.getChildren() : node.getActiveChildren();
+						}
+						kids.addAll(nodes);
+					}catch (Exception ex){
+						QueryPlugIn.log(Messages.SummaryDataModelContentProvider_CouldNotLoadTree + ex.getLocalizedMessage(), ex);
+					}finally {
+						session.getTransaction().rollback();
 					}
-					kids.addAll(nodes);					
-					session.getTransaction().rollback();
-				}catch (Exception ex){
-					QueryPlugIn.log(Messages.SummaryDataModelContentProvider_CouldNotLoadTree + ex.getLocalizedMessage(), ex);
-				}finally{
-					session.close();
 				}
 				return Status.OK_STATUS;
 			}
@@ -454,30 +454,31 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try{
-					boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
-					List<AttributeListItem> nodes = null;
-					if (parent.getObject() instanceof Attribute){
-						Attribute attribute = (Attribute)parent.getObject();
-						nodes = QueryDataModelManager.getInstance().getAttributeListItems(attribute, session, !showInactive);
-						for(AttributeListItem it : nodes){
-							it.getAttribute().getName();
+				try(Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try{
+						boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+						List<AttributeListItem> nodes = null;
+						if (parent.getObject() instanceof Attribute){
+							Attribute attribute = (Attribute)parent.getObject();
+							nodes = QueryDataModelManager.getInstance().getAttributeListItems(attribute, session, !showInactive);
+							for(AttributeListItem it : nodes){
+								it.getAttribute().getName();
+							}
+						}else if (parent.getObject() instanceof CategoryAttribute ){
+							Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
+							nodes = QueryDataModelManager.getInstance().getAttributeListItems(attribute, session, !showInactive);
+							for(AttributeListItem it : nodes){
+								it.getAttribute().getName();
+							}
 						}
-					}else if (parent.getObject() instanceof CategoryAttribute ){
-						Attribute attribute = ((CategoryAttribute)parent.getObject()).getAttribute();
-						nodes = QueryDataModelManager.getInstance().getAttributeListItems(attribute, session, !showInactive);
-						for(AttributeListItem it : nodes){
-							it.getAttribute().getName();
-						}
+						kids.addAll(nodes);					
+						
+					}catch (Exception ex){
+						QueryPlugIn.log(Messages.SummaryDataModelContentProvider_CouldNotLoadItems + ex.getLocalizedMessage(), ex);
+					}finally{
+						session.getTransaction().rollback();
 					}
-					kids.addAll(nodes);					
-					session.getTransaction().rollback();
-				}catch (Exception ex){
-					QueryPlugIn.log(Messages.SummaryDataModelContentProvider_CouldNotLoadItems + ex.getLocalizedMessage(), ex);
-				}finally{
-					session.close();
 				}
 				return Status.OK_STATUS;
 			}

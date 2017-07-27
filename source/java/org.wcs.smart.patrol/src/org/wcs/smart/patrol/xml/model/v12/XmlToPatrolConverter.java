@@ -40,7 +40,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -604,17 +604,17 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	private Attribute findAttribute(String key, Category category){
 		if (key != null) {
 			String sql = "FROM Attribute WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
-			Query query = session.createQuery(sql);
+			Query<Attribute> query = session.createQuery(sql, Attribute.class);
 			query.setParameter("key", key); //$NON-NLS-1$
 			query.setParameter("ca", ca); //$NON-NLS-1$
 			
-			List<?> results = query.list();
+			List<Attribute> results = query.list();
 			if (results.size() == 0){
 				return null;
 			}else if (results.size() > 1){
 				throw new IllegalStateException(Messages.XmlToPatrolConverter_Error_DuplicateAttributes);
 			}else{
-				Attribute att = (Attribute) results.get(0);
+				Attribute att = results.get(0);
 				//ensure attribute exists for category
 				if (findCategoryAttribute(category, att)){
 					return att;
@@ -646,14 +646,14 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	private Category findCategory(String key){
 		String[] bits = key.split("\\."); //$NON-NLS-1$
 		String sql = "FROM Category WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
-		Query query = session.createQuery(sql);
+		Query<Category> query = session.createQuery(sql, Category.class);
 		query.setParameter("key", bits[bits.length - 1]); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<Category> results = query.list();
 		Category found = null;
-		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-			Category options = (Category) iterator.next();
+		for (Iterator<Category> iterator = results.iterator(); iterator.hasNext();) {
+			Category options = iterator.next();
 			if (options.getHkey().equals(key)){
 				found = options;
 				break;
@@ -680,7 +680,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		
 		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
-		Query query = session.createQuery(sql);
+		Query<?> query = session.createQuery(sql);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
 		query.setParameter("value", value); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
@@ -702,7 +702,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				"AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca and " + //$NON-NLS-1$
 				"c.patrolType = :patrolType"; //$NON-NLS-1$
 		
-		Query query = session.createQuery(sql);
+		Query<?> query = session.createQuery(sql);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
 		query.setParameter("value", value); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$

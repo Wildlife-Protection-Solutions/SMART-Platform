@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Transaction;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -58,7 +59,7 @@ public class BasemapInterceptor extends SessionInterceptor {
 	
 	@Override
 	public void afterTransactionCompletion(Transaction tx){
-		if (tx.wasCommitted()){
+		if (tx.getStatus() == TransactionStatus.COMMITTED){
 			for (File f : toDelete){
 				try{
 					f.delete();

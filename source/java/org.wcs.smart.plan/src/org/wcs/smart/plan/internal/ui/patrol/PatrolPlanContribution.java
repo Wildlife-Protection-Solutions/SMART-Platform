@@ -42,7 +42,7 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -106,18 +106,19 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						//reload Plan
-						Session session = HibernateManager.openSession();
-						session.beginTransaction();
-						try {
-							currentPlan = (Plan) session.get(Plan.class, currentPlan.getUuid());
-							Plan parent = currentPlan.getParent();
-							// ensure parents are lazily loaded
-							while (parent != null) {
-								parent = parent.getParent();
+						try(Session session = HibernateManager.openSession()){
+							session.beginTransaction();
+							try {
+								currentPlan = (Plan) session.get(Plan.class, currentPlan.getUuid());
+								Plan parent = currentPlan.getParent();
+								// ensure parents are lazily loaded
+								while (parent != null) {
+									parent = parent.getParent();
+								}
+								
+							} finally {
+								session.getTransaction().rollback();
 							}
-							session.getTransaction().rollback();
-						} finally {
-							session.close();
 						}
 						
 						Display.getDefault().syncExec(new Runnable(){
@@ -183,42 +184,41 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 			protected boolean performSave() {
 				Plan newPlan = null;
 				Plan oldPlan = currentPlan;
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					String hql = "DELETE FROM PatrolPlan where id.patrol = :patrol"; //$NON-NLS-1$
-					Query q = s.createQuery(hql).setParameter("patrol", currentPatrol); //$NON-NLS-1$
-					q.executeUpdate();
-					UUID planuuid = ((PatrolPlanComposite)content).getSelection();
-					if (planuuid != null){
-						PatrolPlan pp = new PatrolPlan();
-						pp.setPatrol(currentPatrol);
-						newPlan = (Plan)s.get(Plan.class, planuuid);
-						Plan parent = newPlan.getParent();
-						while(parent != null){
-							parent = parent.getParent();
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
+						String hql = "DELETE FROM PatrolPlan where id.patrol = :patrol"; //$NON-NLS-1$
+						Query<?> q = s.createQuery(hql).setParameter("patrol", currentPatrol); //$NON-NLS-1$
+						q.executeUpdate();
+						UUID planuuid = ((PatrolPlanComposite)content).getSelection();
+						if (planuuid != null){
+							PatrolPlan pp = new PatrolPlan();
+							pp.setPatrol(currentPatrol);
+							newPlan = (Plan)s.get(Plan.class, planuuid);
+							Plan parent = newPlan.getParent();
+							while(parent != null){
+								parent = parent.getParent();
+							}
+							pp.setPlan(newPlan);
+							s.save(pp);
 						}
-						pp.setPlan(newPlan);
-						s.save(pp);
+						s.getTransaction().commit();
+						currentPlan = newPlan;
+						setChangesMade(false);
+						
+						if (newPlan != null){
+							PlanEventManager.getInstance().planChanged(PlanEventManager.PATROL_PLAN_ATTRIBUTE, newPlan);
+						}
+						if (oldPlan != null){
+							PlanEventManager.getInstance().planChanged(PlanEventManager.PATROL_PLAN_ATTRIBUTE, oldPlan);
+						}
+						
+						return true;
+					}catch (Exception ex){
+						s.getTransaction().rollback();
+						SmartPlanPlugIn.displayLog(Messages.PatrolPlanContribution_Save_Error + ex.getLocalizedMessage(), ex);
+						return false;
 					}
-					s.getTransaction().commit();
-					currentPlan = newPlan;
-					setChangesMade(false);
-					
-					if (newPlan != null){
-						PlanEventManager.getInstance().planChanged(PlanEventManager.PATROL_PLAN_ATTRIBUTE, newPlan);
-					}
-					if (oldPlan != null){
-						PlanEventManager.getInstance().planChanged(PlanEventManager.PATROL_PLAN_ATTRIBUTE, oldPlan);
-					}
-					
-					return true;
-				}catch (Exception ex){
-					s.getTransaction().rollback();
-					SmartPlanPlugIn.displayLog(Messages.PatrolPlanContribution_Save_Error + ex.getLocalizedMessage(), ex);
-					return false;
-				}finally{
-					s.close();
 				}
 			
 			}
@@ -231,20 +231,20 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 	public void setPatrol(Patrol patrol) {
 		this.currentPatrol = patrol;
 		this.currentPlan = null;
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			this.currentPlan = PlanHibernateManager.getPlanForPatrol(patrol, session);
-			if (this.currentPlan != null) {
-				Plan parent = currentPlan.getParent();
-				// ensure parents are lazily loaded
-				while (parent != null) {
-					parent = parent.getParent();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				this.currentPlan = PlanHibernateManager.getPlanForPatrol(patrol, session);
+				if (this.currentPlan != null) {
+					Plan parent = currentPlan.getParent();
+					// ensure parents are lazily loaded
+					while (parent != null) {
+						parent = parent.getParent();
+					}
 				}
+			} finally {
+				session.getTransaction().rollback();
 			}
-			session.getTransaction().rollback();
-		} finally {
-			session.close();
 		}
 		initContent();
 

@@ -33,8 +33,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Interceptor;
-import org.hibernate.Query;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
@@ -51,6 +50,7 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Cloner for copying configurable models
@@ -107,8 +107,9 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 	
 	private void cloneCmAttributeConfigs(ConfigurableModel sourceCm, ConfigurableModel clonedCm) throws Exception {
-		@SuppressWarnings("unchecked")
-		List<CmAttributeConfig> configsToClone = engine.getSession().createCriteria(CmAttributeConfig.class).add(Restrictions.eq("model", sourceCm)).list(); //$NON-NLS-1$
+		List<CmAttributeConfig> configsToClone = 
+				QueryFactory.buildQuery(engine.getSession(), CmAttributeConfig.class, new Object[] {"model", sourceCm}).getResultList(); //$NON-NLS-1$
+		
 		for (CmAttributeConfig cfg : configsToClone) {
 			CmAttributeConfig clone = new CmAttributeConfig();
 			engine.copyLabels(cfg, clone);
@@ -127,8 +128,10 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 
 	private void cloneCmAttributeListItems(CmAttributeConfig sourceCfg, CmAttributeConfig clonedCfg) throws Exception {
-		@SuppressWarnings("unchecked")
-		List<CmAttributeListItem> itemsToClone = engine.getSession().createCriteria(CmAttributeListItem.class).add(Restrictions.eq("config", sourceCfg)).list(); //$NON-NLS-1$
+		
+		List<CmAttributeListItem> itemsToClone = 
+				QueryFactory.buildQuery(engine.getSession(), CmAttributeListItem.class, new Object[] {"config", sourceCfg}).getResultList(); //$NON-NLS-1$
+		
 		for (CmAttributeListItem listItem : itemsToClone){
 			CmAttributeListItem clone = new CmAttributeListItem();
 			clone.setConfig(clonedCfg);
@@ -151,8 +154,10 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 	
 	private void cloneCmAttributeTreeItems(CmAttributeConfig sourceCfg, CmAttributeConfig clonedCfg) throws Exception {
-		@SuppressWarnings("unchecked")
-		List<CmAttributeTreeNode> itemsToClone = engine.getSession().createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("config", sourceCfg)).list(); //$NON-NLS-1$
+		
+		List<CmAttributeTreeNode> itemsToClone = 
+				QueryFactory.buildQuery(engine.getSession(), CmAttributeTreeNode.class, new Object[] {"config", sourceCfg}).getResultList(); //$NON-NLS-1$
+		
 		
 		HashMap<CmAttributeTreeNode, CmAttributeTreeNode> templateToClone = new HashMap<CmAttributeTreeNode, CmAttributeTreeNode>();
 		HashMap<CmAttributeTreeNode, CmAttributeTreeNode> cloneTotemplate = new HashMap<CmAttributeTreeNode, CmAttributeTreeNode>();
@@ -282,7 +287,11 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 	
 	private Category findNewCategory(Category oldCategory) throws Exception{
-		List<?> categories = engine.getSession().createCriteria(Category.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).add(Restrictions.eq("hkey", oldCategory.getHkey())).list();  //$NON-NLS-1$//$NON-NLS-2$
+		List<Category> categories = 
+				QueryFactory.buildQuery(engine.getSession(), Category.class, 
+						new Object[] {"conservationArea", engine.getNewCa()},  //$NON-NLS-1$
+						new Object[] {"hkey", oldCategory.getHkey()}).getResultList(); //$NON-NLS-1$
+
 		if (categories.size() == 1){
 			return (Category) categories.get(0);
 		}
@@ -290,7 +299,11 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 	
 	private Attribute findNewAttribute(Attribute oldAttribute) throws Exception{
-		List<?> attributes = engine.getSession().createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).add(Restrictions.eq("keyId", oldAttribute.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<Attribute> attributes = 
+				QueryFactory.buildQuery(engine.getSession(), Attribute.class, 
+						new Object[] {"conservationArea", engine.getNewCa()},  //$NON-NLS-1$
+						new Object[] {"keyId", oldAttribute.getKeyId()}).getResultList(); //$NON-NLS-1$
+
 		if (attributes.size() == 1){
 			return (Attribute) attributes.get(0);
 		}
@@ -298,13 +311,13 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 	
 	private AttributeListItem findNewAttributeListItem(AttributeListItem oldListItem) throws Exception{
-		Query q = engine.getSession().createQuery("From AttributeListItem a WHERE a.attribute.conservationArea = :ca and a.keyId = :key and a.attribute.keyId = :attributeKey"); //$NON-NLS-1$
+		Query<AttributeListItem> q = engine.getSession().createQuery("From AttributeListItem a WHERE a.attribute.conservationArea = :ca and a.keyId = :key and a.attribute.keyId = :attributeKey", AttributeListItem.class); //$NON-NLS-1$
 		q.setParameter("ca", engine.getNewCa()); //$NON-NLS-1$
 		q.setParameter("key", oldListItem.getKeyId()); //$NON-NLS-1$
 		q.setParameter("attributeKey", oldListItem.getAttribute().getKeyId()); //$NON-NLS-1$
-		List<?> items = q.list();
+		List<AttributeListItem> items = q.list();
 		if (items.size() == 1){
-			return (AttributeListItem) items.get(0);
+			return items.get(0);
 		}
 		//this may be an entity list item that is not cloned
 		return null;
@@ -313,13 +326,13 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 	
 	private AttributeTreeNode findNewAttributeTreeNode(AttributeTreeNode oldTreeNode) throws Exception{
-		Query q = engine.getSession().createQuery("From AttributeTreeNode a WHERE a.attribute.conservationArea = :ca and a.hkey = :key and a.attribute.keyId = :attributeKey"); //$NON-NLS-1$
+		Query<AttributeTreeNode> q = engine.getSession().createQuery("From AttributeTreeNode a WHERE a.attribute.conservationArea = :ca and a.hkey = :key and a.attribute.keyId = :attributeKey", AttributeTreeNode.class); //$NON-NLS-1$
 		q.setParameter("ca", engine.getNewCa()); //$NON-NLS-1$
 		q.setParameter("key", oldTreeNode.getHkey()); //$NON-NLS-1$
 		q.setParameter("attributeKey", oldTreeNode.getAttribute().getKeyId()); //$NON-NLS-1$
-		List<?> items = q.list();
+		List<AttributeTreeNode> items = q.list();
 		if (items.size() == 1){
-			return (AttributeTreeNode) items.get(0);
+			return items.get(0);
 		}
 		throw new Exception(MessageFormat.format(Messages.CmTemplateCloner_TreeNodeNotFoundError,new Object[]{oldTreeNode.getHkey()}));
 	}

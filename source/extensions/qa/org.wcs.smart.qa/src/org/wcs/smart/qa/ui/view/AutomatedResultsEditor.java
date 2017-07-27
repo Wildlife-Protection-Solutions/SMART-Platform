@@ -48,9 +48,9 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaErrorCleaner;
@@ -168,21 +168,20 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 
 	@Override
 	public void saveErrorItems(List<QaError> items){
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			for (QaError i : items){
-				for (QaError link : i.getLinks()){
-					s.saveOrUpdate(link);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				for (QaError i : items){
+					for (QaError link : i.getLinks()){
+						s.saveOrUpdate(link);
+					}
+					s.saveOrUpdate(i);
 				}
-				s.saveOrUpdate(i);
+				s.getTransaction().commit();
+				isModified = true;
+			}catch (Exception ex){
+				QaPlugIn.displayLog(MessageFormat.format(Messages.AutomatedResultsEditor_SaveError, ex.getMessage()), ex);
 			}
-			s.getTransaction().commit();
-			isModified = true;
-		}catch (Exception ex){
-			QaPlugIn.displayLog(MessageFormat.format(Messages.AutomatedResultsEditor_SaveError, ex.getMessage()), ex);
-		}finally{
-			s.close();
 		}		
 	} 
 	
@@ -195,18 +194,16 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		btnClean.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnClean.addListener(SWT.Selection, e->{
 			if (MessageDialog.openQuestion(getSite().getShell(), Messages.AutomatedResultsEditor_ConfirmDelete, MessageFormat.format(Messages.AutomatedResultsEditor_DeleteMessage,QaError.Status.NEW.getGuiName(Locale.getDefault())))){
-				Session session = HibernateManager.openSession();
-				try{
-					session.beginTransaction();
-					QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea(), session);
-					session.getTransaction().commit();
-				}catch (Exception ex){
-					if (session.getTransaction().isActive()) session.getTransaction().rollback();
-					QaPlugIn.displayLog(ex.getMessage(), ex);
-				}finally{
-					session.close();
+				try(Session session = HibernateManager.openSession()){
+					try{
+						session.beginTransaction();
+						QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea(), session);
+						session.getTransaction().commit();
+					}catch (Exception ex){
+						if (session.getTransaction().isActive()) session.getTransaction().rollback();
+						QaPlugIn.displayLog(ex.getMessage(), ex);
+					}
 				}
-				
 				clearResults();
 				loadData();
 			}
@@ -265,16 +262,12 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 	}
 	
 	Job j = new Job(Messages.AutomatedResultsEditor_LoadResultsJobName){
-
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<QaError> errors = new ArrayList<>();
-			Session s = HibernateManager.openSession();
-			try{
-				List<QaError> allErrors = s.createCriteria(QaError.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.list();
+			try(Session s = HibernateManager.openSession()){
+				List<QaError> allErrors = QueryFactory.buildQuery(s, QaError.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+
 				//configure links
 				for (QaError e : allErrors){
 					for (QaError link : errors){
@@ -287,8 +280,6 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 					e.getQaRoutine().getName();
 					e.getDataProvider().getName(Locale.getDefault());
 				}
-			}finally{
-				s.close();
 			}
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;

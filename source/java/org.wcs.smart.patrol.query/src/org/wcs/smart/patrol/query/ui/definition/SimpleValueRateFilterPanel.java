@@ -68,7 +68,7 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 		if (queryString == null || queryString.trim().isEmpty()){
 			return;
 		}
-		Session session = null;
+		
 		try{
 			QueryFilter filterPart = null;
 			try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
@@ -78,31 +78,25 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 		
 			//---- generate drop items for value filter
 			List<DropItem> copies = new ArrayList<DropItem>();
-			session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				if (filterPart != null){
-					DropItem[] filterItems = PatrolDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), session);
-					for (int i = 0; i < filterItems.length; i ++){
-						copies.add(filterItems[i]);
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					if (filterPart != null){
+						DropItem[] filterItems = PatrolDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), session);
+						for (int i = 0; i < filterItems.length; i ++){
+							copies.add(filterItems[i]);
+						}
 					}
+				}finally{
+					session.getTransaction().rollback();
 				}
-			}finally{
-				session.getTransaction().rollback();
 			}
 			rateFilter.addItems(copies);
 			if (filterPart != null){
 				rateFilter.setFilterType(filterPart.getFilterType());
 			}
 		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.GriddedFilterPanel_CopyError, ex);
-			if (session != null && session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
-		}finally{
-			if (session != null){
-				session.close();
-			}
+			QueryPlugIn.displayLog(Messages.GriddedFilterPanel_CopyError, ex);	
 		}
 	}
 

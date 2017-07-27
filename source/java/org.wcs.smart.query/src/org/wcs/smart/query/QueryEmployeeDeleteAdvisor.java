@@ -24,10 +24,9 @@ package org.wcs.smart.query;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryFolder;
@@ -57,13 +56,12 @@ public class QueryEmployeeDeleteAdvisor  implements IDeleteAdvisor {
 			return null;
 		}
 		for(IQueryType queryType : QueryTypeManager.INSTANCE.getAllQueryTypes()){
-			Long cnt = (Long) session.createCriteria(queryType.getHibernateClass()).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+			Long cnt = QueryFactory.buildCountQuery(session, queryType.getHibernateClass(), new Object[] {"owner", e}); //$NON-NLS-1$
 			if (cnt > 0){
 				return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsQueries, new Object[]{ SmartLabelProvider.getFullLabel(e), cnt ,queryType.getGuiName()});
 			}
 		}
-	
-		Long cnt = (Long) session.createCriteria(QueryFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		Long cnt = QueryFactory.buildCountQuery(session, QueryFolder.class, new Object[] {"employee", e}); //$NON-NLS-1$
 		if (cnt > 0){
 			return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsFolders, new Object[]{ SmartLabelProvider.getFullLabel(e), cnt});
 		}

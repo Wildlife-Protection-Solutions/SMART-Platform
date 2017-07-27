@@ -93,20 +93,19 @@ public class SamplingUnitGroupByDropItem extends DropItem
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
 			
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			List<SamplingUnit> objects = SurveyHibernateManager.getInstance().getSamplingUnits(currentDesign, s, null);
-			for (SamplingUnit su : objects){
-				items.add(new ListItem(su.getUuid(), su.getId(), null));
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				List<SamplingUnit> objects = SurveyHibernateManager.getInstance().getSamplingUnits(currentDesign, s, null);
+				for (SamplingUnit su : objects){
+					items.add(new ListItem(su.getUuid(), su.getId(), null));
+				}
+				items.add(new ListItem(null, SamplingUnitDropItem.NONE.getId(), SamplingUnitFilter.NONE_KEY));
+			}catch (Exception ex){
+				ERQueryPlugIn.displayLog(Messages.SamplingUnitGroupByDropItem_LoadingError, ex);
+			}finally {				
+				s.getTransaction().rollback();
 			}
-			items.add(new ListItem(null, SamplingUnitDropItem.NONE.getId(), SamplingUnitFilter.NONE_KEY));
-			
-			s.getTransaction().rollback();
-			s.close();
-		}catch (Exception ex){
-			ERQueryPlugIn.displayLog(Messages.SamplingUnitGroupByDropItem_LoadingError, ex);
-			s.close();
 		}
 		
 		return items;

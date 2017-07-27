@@ -234,8 +234,8 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 
 		@Override
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			Session session = HibernateManager.openSession();
-			try {
+			
+			try (Session session = HibernateManager.openSession()){
 				boolean ok = performAction(new File(file), delimiter, headers, monitor, session);
 				setSuccess(ok);
 			} catch (final Exception ex) {
@@ -246,8 +246,6 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 						SmartPlugIn.displayLog(Messages.AbstractCsvDialog_Fail_Error + SharedUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
 					}						
 				});
-			} finally {
-				session.close();
 			}
 		}
 

@@ -21,11 +21,10 @@
  */
 package org.wcs.smart.plan.internal.patrol;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.IPatrolEditContribution;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.model.PatrolPlan;
@@ -37,11 +36,10 @@ import org.wcs.smart.plan.model.PatrolPlan;
 
 public class PatrolPlanLinkCopyContribution implements IPatrolEditContribution {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void splitPatrol(Session s, Patrol originalPatrol, Patrol newPatrol) {
-		Criteria c = s.createCriteria(PatrolPlan.class).add(Restrictions.eq("id.patrol", originalPatrol)); //$NON-NLS-1$
-		for(PatrolPlan pp : ((ArrayList<PatrolPlan>)c.list())){
+		List<PatrolPlan> pps = QueryFactory.buildQuery(s, PatrolPlan.class, "id.patrol", originalPatrol).getResultList(); //$NON-NLS-1$
+		for(PatrolPlan pp : pps){
 			PatrolPlan newPp = new PatrolPlan();
 			newPp.setPatrol(newPatrol);
 			newPp.setPlan(pp.getPlan());

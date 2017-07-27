@@ -67,14 +67,14 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -192,7 +192,7 @@ public class ImportReportEngine {
 				//remove report->query link so when validating
 				//queries we get correct results
 				String hsql = "delete from ReportQuery where id.report= :report"; //$NON-NLS-1$
-				Query q = session.createQuery(hsql);
+				Query<?> q = session.createQuery(hsql);
 				q.setParameter("report", importReport); //$NON-NLS-1$
 				q.executeUpdate();
 			}
@@ -370,20 +370,22 @@ public class ImportReportEngine {
 				int index = key.indexOf('_');
 				String code = key.substring(index+1);
 				
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					List<?> items = s.createCriteria(Language.class).add(Restrictions.eq("ca", r.getConservationArea())).add(Restrictions.eq("code", code)).list(); //$NON-NLS-1$ //$NON-NLS-2$
-					for (Object item : items){
-						r.updateName((Language)item, prop.getProperty(key));
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
+						List<Language> items = QueryFactory.buildQuery(s, Language.class, 
+								new Object[] {"ca", r.getConservationArea()}, //$NON-NLS-1$
+								new Object[] {"code", code}).getResultList(); //$NON-NLS-1$
+						for (Object item : items){
+							r.updateName((Language)item, prop.getProperty(key));
+						}
+						r.setName(r.findName(SmartDB.getCurrentLanguage()));
+						if (r.getName() == null){
+							r.setName(r.findName(newCa.getDefaultLanguage()));
+						}
+					}finally{
+						s.getTransaction().rollback();
 					}
-					r.setName(r.findName(SmartDB.getCurrentLanguage()));
-					if (r.getName() == null){
-						r.setName(r.findName(newCa.getDefaultLanguage()));
-					}
-				}finally{
-					s.getTransaction().rollback();
-					s.close();
 				}
 			}
 		}
@@ -426,18 +428,18 @@ public class ImportReportEngine {
 	private Report validateReport(final Report report, ConservationArea newCa, Employee newEmployee){
 		
 		String hql = "Select r from Report as  r join r.names as l where l.value = :name and ((r.owner = :owner and r.shared = 'false') or r.shared = 'true') and r.conservationArea = :ca"; //$NON-NLS-1$
-		Query query = session.createQuery(hql);
+		Query<Report> query = session.createQuery(hql, Report.class);
 		
 		query.setParameter("name", report.getName()); //$NON-NLS-1$
 		query.setParameter("owner", newEmployee); //$NON-NLS-1$
 		query.setParameter("ca", newCa); //$NON-NLS-1$
 		
-		List<?> reports = query.list();
+		List<Report> reports = query.list();
 		if (reports.size() == 0){
 			//keep the same report
 			return report;
 		}else if (reports.size() == 1){
-			Report existing = (Report) reports.get(0);
+			Report existing = reports.get(0);
 			
 			if (existing.getOwner().equals(newEmployee) && !existing.getShared()){
 				

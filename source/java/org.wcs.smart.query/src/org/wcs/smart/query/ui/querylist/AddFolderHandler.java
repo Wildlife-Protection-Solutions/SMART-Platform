@@ -91,17 +91,16 @@ public class AddFolderHandler {
 		}
 		
 		//need to save and refresh query list view
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			s.save(newFolder);
-			s.save(lbl);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.AddFolderHandler_CouldNotAddFolderError + ex.getLocalizedMessage(), ex);
-			return null;
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				s.save(newFolder);
+				s.save(lbl);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.AddFolderHandler_CouldNotAddFolderError + ex.getLocalizedMessage(), ex);
+				return null;
+			}
 		}
 		
 		return newFolder;

@@ -24,9 +24,12 @@ package org.wcs.smart.patrol;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.patrol.internal.Messages;
@@ -110,8 +113,13 @@ public class PatrolTemplateCloner implements
 	 * clone patrol types & transport types
 	 */
 	private void clonePatrolTypes(ConservationAreaClonerEngine engine){
-		@SuppressWarnings("unchecked")
-		List<PatrolType> types = engine.getSession().createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
+		
+		CriteriaBuilder cb = engine.getSession().getCriteriaBuilder();
+		CriteriaQuery<PatrolType> c = cb.createQuery(PatrolType.class);
+		Root<PatrolType> root = c.from(PatrolType.class);
+		c.where(cb.equal(root.get("id").get("conservationArea"),  engine.getTemplateCa())); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		List<PatrolType> types = engine.getSession().createQuery(c).getResultList();
 		engine.getSession().flush();
 		
 		for (PatrolType t : types){

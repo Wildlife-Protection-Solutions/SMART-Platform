@@ -175,26 +175,27 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		if (this.incident == null){
 			
 			UUID uuid = ((IncidentEditorInput) getEditorInput()).getUuid();
-			Session session = HibernateManager.openSession();
-			try{
-				//load incident 
-				session.beginTransaction();
-				this.incident = (Waypoint) session.load(Waypoint.class, uuid);
-				this.incident.getId();
-				
+			try(Session session = HibernateManager.openSession()){
 				try{
-					ObservationHibernateManager.computeAttachmentLocations(incident, session);
-				}catch (Exception ex){
-					ObservationPlugIn.displayLog(ex.getMessage(), ex);
+					//load incident 
+					session.beginTransaction();
+					this.incident = (Waypoint) session.load(Waypoint.class, uuid);
+					this.incident.getId();
+					
+					try{
+						ObservationHibernateManager.computeAttachmentLocations(incident, session);
+					}catch (Exception ex){
+						ObservationPlugIn.displayLog(ex.getMessage(), ex);
+					}
+					
+					session.getTransaction().commit();
+					
+					if (ops == null){
+						ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+					}
+				}catch (Exception ex) {
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
 				}
-				
-				session.getTransaction().commit();
-				
-				if (ops == null){
-					ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-				}
-			}finally{			
-				session.close();
 			}
 		}
 		return this.incident;

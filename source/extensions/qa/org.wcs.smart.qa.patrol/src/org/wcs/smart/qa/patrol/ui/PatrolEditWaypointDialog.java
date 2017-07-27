@@ -39,7 +39,6 @@ import org.geotools.data.FeatureStore;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.styling.Style;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
@@ -50,6 +49,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -147,11 +147,9 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 		IGeoResource editResource = null;
 		ReferencedEnvelope zoomEnv = null;	
 		
-		Session s = HibernateManager.openSession();
-		try{
-			PatrolWaypoint pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
-					.add(Restrictions.eq("id.waypoint.uuid", waypointUuid)) //$NON-NLS-1$
-					.uniqueResult();
+		try(Session s = HibernateManager.openSession()){
+			PatrolWaypoint pw = QueryFactory.buildQuery(s, PatrolWaypoint.class, "id.waypoint.uuid", waypointUuid).uniqueResult(); //$NON-NLS-1$
+			
 			editWaypoint = pw;
 			if (pw == null){
 				setErrorMessage(Messages.PatrolEditWaypointDialog_WpNotFound);
@@ -235,8 +233,6 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 			}
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
-		}finally{
-			s.close();
 		}
 		
 		IGeoResource eResource = editResource;

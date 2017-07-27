@@ -28,6 +28,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -36,7 +40,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
@@ -96,11 +100,8 @@ public class SmartStartUp {
 			}
 		}
 		for (IDatabaseStartupRunner runner: runners){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				runner.run(s);
-			}finally{
-				s.close();
 			}
 		}
 
@@ -119,15 +120,20 @@ public class SmartStartUp {
 	 * @return list of conservation areas in the database
 	 */
 	public static List<Object> getConservationAreas(boolean includeCcaa){
-		try{
-			Session session = HibernateManager.openSession();
+		try(Session session = HibernateManager.openSession()){
+			
 			session.beginTransaction();
 			try{
 				List<Object> results = new ArrayList<Object>();
 				results.addAll(HibernateManager.getConservationAreas(session));
 				
 				if (results.size() > 1 && includeCcaa){
-					List<?> tmp = session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", ConservationArea.MULTIPLE_CA)).list(); //$NON-NLS-1$
+					CriteriaBuilder cb = session.getCriteriaBuilder();
+					CriteriaQuery<ConservationArea> query = cb.createQuery(ConservationArea.class);
+					Root<ConservationArea> from = query.from(ConservationArea.class);
+					query.where(cb.equal(from.get("uuid"), ConservationArea.MULTIPLE_CA)); //$NON-NLS-1$
+					
+					List<?> tmp = session.createQuery(query).getResultList();
 					if (tmp.size() > 0){
 						results.add(Messages.SmartStartUp_AnalysisLoginSepeartor);
 						results.add((ConservationArea)tmp.get(0));
@@ -136,7 +142,6 @@ public class SmartStartUp {
 				return results;
 			}finally{
 				session.getTransaction().rollback();
-				session.close();
 			}
 		}catch (Exception ex){
 			throw new IllegalStateException(Messages.SmartStartUp_ConnectError + ex.getLocalizedMessage(), ex);
@@ -160,9 +165,7 @@ public class SmartStartUp {
 			throw new Exception(
 				MessageFormat.format(Messages.SmartStartUp_Error_NoSmartDb, new Object[]{SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB)}));
 		}
-		try{
-			Session session = HibernateManager.openSession();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
 		}catch (Exception ex){
 			if (checkAlreadyRunning(ex)){
 				throw new Exception(Messages.SmartStartUp_MultiConnectError);
@@ -237,62 +240,61 @@ public class SmartStartUp {
 						users.add(e);
 					}
 					
-					Session session = HibernateManager.openSession();
-					session.beginTransaction();
+					
 					Employee ccaaUser = null;
-					try{
-						ccaaUser = (Employee)session.createCriteria(Employee.class)
-								.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-								.add(Restrictions.eq("smartUserId", users.get(0).getSmartUserId()).ignoreCase()) //$NON-NLS-1$
-								.uniqueResult();
-						if (ccaaUser == null){
-							ccaaUser = new Employee();
-							ccaaUser.setGender(Employee.DB_MALE);
-							ccaaUser.setSmartUserId(users.get(0).getSmartUserId());
-							ccaaUser.setGivenName(ccaaUser.getSmartUserId());
-							ccaaUser.setFamilyName(""); //$NON-NLS-1$
-							ccaaUser.setStartEmploymentDate(new Date());
-							ccaaUser.setId(ccaaUser.getSmartUserId());
-							ccaaUser.setConservationArea(ca);
-							ccaaUser.setSmartUserLevel(UserLevelManager.INSTANCE.getUserLevels().values()); //give them all seeing access
-							session.save(ccaaUser);
-							session.flush();
-						}
+					try(Session session = HibernateManager.openSession()){
 						
-						List<?> results = session.createCriteria(Language.class)
-								.add(Restrictions.eq("ca", ca)) //$NON-NLS-1$
-								.add(Restrictions.eq("code", Locale.getDefault().getLanguage())) //$NON-NLS-1$
-								.list(); 
-						if (results.size() == 0){
-							Language lang = new Language();
-							lang.setCa(ca);
-							lang.setDefault(false);
-							lang.setCode(Locale.getDefault().getLanguage());
+						session.beginTransaction();
+						try {
+							Query<Employee> e = session.createQuery("FROM Employee WHERE conservationArea = :ca and upper(smartUserId) = :id", Employee.class); //$NON-NLS-1$
+							e.setParameter("conservationArea", ca); //$NON-NLS-1$
+							e.setParameter("id", users.get(0).getSmartUserId().toUpperCase()); //$NON-NLS-1$
+							ccaaUser = e.uniqueResult();
 							
-							ca.getLanguages().add(lang);
-							session.saveOrUpdate(lang);
+							if (ccaaUser == null){
+								ccaaUser = new Employee();
+								ccaaUser.setGender(Employee.DB_MALE);
+								ccaaUser.setSmartUserId(users.get(0).getSmartUserId());
+								ccaaUser.setGivenName(ccaaUser.getSmartUserId());
+								ccaaUser.setFamilyName(""); //$NON-NLS-1$
+								ccaaUser.setStartEmploymentDate(new Date());
+								ccaaUser.setId(ccaaUser.getSmartUserId());
+								ccaaUser.setConservationArea(ca);
+								ccaaUser.setSmartUserLevel(UserLevelManager.INSTANCE.getUserLevels().values()); //give them all seeing access
+								session.save(ccaaUser);
+								session.flush();
+							}
+							
+							Query<Language> q = session.createQuery("FROM Language WHERE ca = :ca and code = :code", Language.class); //$NON-NLS-1$
+							q.setParameter("ca", ca); //$NON-NLS-1$
+							q.setParameter("code", Locale.getDefault().getLanguage()); //$NON-NLS-1$
+							List<Language> results = q.getResultList(); 
+							if (results.size() == 0){
+								Language lang = new Language();
+								lang.setCa(ca);
+								lang.setDefault(false);
+								lang.setCode(Locale.getDefault().getLanguage());
+								
+								ca.getLanguages().add(lang);
+								session.saveOrUpdate(lang);
+							}
+							session.getTransaction().commit();
+						}catch (Exception ex){
+							session.getTransaction().rollback();
+							SmartPlugIn.log(ex.getMessage(), ex);
+							return false;
 						}
-						session.getTransaction().commit();
-					}catch (Exception ex){
-						session.getTransaction().rollback();
-						SmartPlugIn.log(ex.getMessage(), ex);
-						return false;
-					}finally{
-						session.close();
 					}
 					
 					ConservationAreaConfiguration config = null;
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						config = new ConservationAreaConfiguration(ca, areas, ccaaUser, users, s);
-					}finally{
-						s.close();
 					}
 					//	disconnect from the database & setup correct user level
 					SmartDB.setConservationAreaConfiguration(ccaaUser, password, ca, config);
 					
-					s = HibernateManager.openSession();
-					s.close();
+					try (Session s = HibernateManager.openSession()){
+					}
 				}
 			} catch (Exception ex) {
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);
@@ -307,17 +309,14 @@ public class SmartStartUp {
 				}
 
 				ConservationAreaConfiguration config = null;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					config = new ConservationAreaConfiguration(ca, Collections.singleton(ca),e, Collections.singleton(e), s);
-				}finally{
-					s.close();
 				}
 				//	disconnect from the database & setup correct user level
 				SmartDB.setConservationAreaConfiguration(e, password, ca, config);
 				
-				s = HibernateManager.openSession();
-				s.close();
+				try(Session s = HibernateManager.openSession()){}
+
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError + ": " + ex.getMessage(), ex); //$NON-NLS-1$
 				return false;

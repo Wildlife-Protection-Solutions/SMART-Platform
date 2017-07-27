@@ -96,17 +96,16 @@ public class NewFolderHandler {
 						}
 					}
 					if (newFolder != null){
-						Session s = HibernateManager.openSession();
-						try{
-							s.beginTransaction();
-							s.saveOrUpdate(newFolder);
-							s.getTransaction().commit();
-						}catch (Exception ex){
-							ReportPlugIn.displayLog(Messages.NewFolderHandler_Error_CouldNotAddFolder + ex.getLocalizedMessage(), ex);
-							s.getTransaction().rollback();
-							return Status.OK_STATUS;
-						}finally{
-							s.close();
+						try(Session s = HibernateManager.openSession()){
+							try{
+								s.beginTransaction();
+								s.saveOrUpdate(newFolder);
+								s.getTransaction().commit();
+							}catch (Exception ex){
+								ReportPlugIn.displayLog(Messages.NewFolderHandler_Error_CouldNotAddFolder + ex.getLocalizedMessage(), ex);
+								s.getTransaction().rollback();
+								return Status.OK_STATUS;
+							}
 						}
 						
 						ReportEventManager.getInstance().fireReportFolderAdded(newFolder);

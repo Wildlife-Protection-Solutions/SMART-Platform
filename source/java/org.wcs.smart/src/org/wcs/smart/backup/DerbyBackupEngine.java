@@ -34,8 +34,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -108,11 +108,12 @@ public class DerbyBackupEngine {
 			}
 		}
 		
-		Session session = HibernateManager.openSession();
-		try{
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
 			try{
 				//here we freeze the database to put it into a state for copying
-				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_FREEZE_DATABASE()"); //$NON-NLS-1$
+				NativeQuery<?> q = session.createNativeQuery("CALL SYSCS_UTIL.SYSCS_FREEZE_DATABASE()"); //$NON-NLS-1$
 				q.executeUpdate();
 				File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 				File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
@@ -139,11 +140,10 @@ public class DerbyBackupEngine {
 				return false;
 			}finally{
 				//now un-freeze			
-				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE()"); //$NON-NLS-1$
+				NativeQuery<?> q = session.createNativeQuery("CALL SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE()"); //$NON-NLS-1$
 				q.executeUpdate();
+				session.getTransaction().rollback();
 			}
-		}finally{
-			session.close();
 		}
 	}
 

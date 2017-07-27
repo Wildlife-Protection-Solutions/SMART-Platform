@@ -10,5 +10,5 @@ Require-Bundle: org.wcs.smart.observation.query,
  org.wcs.smart.query,
  org.wcs.smart.report,
  org.wcs.smart.birt.map
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

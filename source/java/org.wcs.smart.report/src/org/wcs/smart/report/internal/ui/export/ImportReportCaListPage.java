@@ -45,12 +45,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
@@ -248,27 +248,27 @@ public class ImportReportCaListPage extends WizardPage {
 			
 			final List<Object> allItems = new ArrayList<Object>();
 			
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				//load all shared folders
-				List<?> folders = s.createCriteria(ReportFolder.class)
-						.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-						.add(Restrictions.isNull("employee")) //$NON-NLS-1$
-						.list();
-				allItems.addAll(folders);
-				
-				//load all shared reports
-				List<?> reports = s.createCriteria(Report.class)
-						.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-						.add(Restrictions.eq("shared", true)) //$NON-NLS-1$
-						.list();
-				allItems.addAll(reports);
-				
-				assignNames(allItems, s);
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					//load all shared reports
+					List<?> folders = QueryFactory.buildQuery(s, ReportFolder.class,
+							new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+							new Object[] {"employee", null}).getResultList();  //$NON-NLS-1$
+					
+					allItems.addAll(folders);
+					
+					//load all shared reports
+					List<?> reports = QueryFactory.buildQuery(s, Report.class,
+							new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+							new Object[] {"shared", true}).getResultList();  //$NON-NLS-1$
+							
+					allItems.addAll(reports);
+					
+					assignNames(allItems, s);
+				}finally{
+					s.getTransaction().rollback();
+				}
 			}
 			getShell().getDisplay().syncExec(new Runnable(){
 

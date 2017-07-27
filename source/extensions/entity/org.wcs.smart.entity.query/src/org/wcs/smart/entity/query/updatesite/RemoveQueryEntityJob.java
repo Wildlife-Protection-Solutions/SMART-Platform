@@ -66,37 +66,38 @@ public class RemoveQueryEntityJob extends Job {
 
 	
 	private IStatus dropTables(){
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			for (int i = 0; i < SQL.length; i ++){
-				if (SQL[i].equals("")) continue; //$NON-NLS-1$
-				
-				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-					session.createSQLQuery(SQL[i]).executeUpdate();
-				}
-			}
+			try {
 			
-			for (int i = 0; i < TABLES.length; i ++){
-				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+				for (int i = 0; i < SQL.length; i ++){
+					if (SQL[i].equals("")) continue; //$NON-NLS-1$
+					
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery(SQL[i]).executeUpdate();
+					}
+				}
+				
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						EntityQueryPlugIn.displayLog(Messages.RemoveQueryEntityJob_Error1, e);
+					}
+				});
+				return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.RemoveQueryEntityJob_Error2 + e.getLocalizedMessage(), e); 
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
 				}
 			}
-			HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-		} catch (final Exception e) {
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					EntityQueryPlugIn.displayLog(Messages.RemoveQueryEntityJob_Error1, e);
-				}
-			});
-			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.RemoveQueryEntityJob_Error2 + e.getLocalizedMessage(), e); 
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().rollback();
-			}
-			session.close();
 		}
 		return Status.OK_STATUS;
 	}

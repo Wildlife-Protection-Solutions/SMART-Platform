@@ -46,6 +46,7 @@ public enum SmartContext {
 		map.put(clazz, object);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T> T getClass(Class<T> clazz){
 		return (T)map.get(clazz);
 	}

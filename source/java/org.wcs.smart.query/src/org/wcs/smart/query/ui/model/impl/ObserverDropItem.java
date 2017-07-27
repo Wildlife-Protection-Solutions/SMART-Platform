@@ -76,9 +76,8 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
 			List<Employee> es = null;
-			try{
+			try(Session s = HibernateManager.openSession()){
 				es = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
 				Collections.sort(es, new Comparator<Employee>(){
 					@Override
@@ -89,8 +88,6 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 					e.getUuid();
 					getLabel(e);
 				}
-			}finally{
-				s.close();
 			}
 			final List<Employee> fes = es; 
 			Display.getDefault().syncExec(new Runnable(){

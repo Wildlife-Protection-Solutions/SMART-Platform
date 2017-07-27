@@ -35,7 +35,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.SQLQuery;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -177,6 +177,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 					progress.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					updateResultCount(session, result);
 					
+					progress.subTask(Messages.DerbyObservationEngine_LoadingResultTask);
 				}catch ( OperationCanceledException ex) {
 					return;
 				} finally {
@@ -192,10 +193,10 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 
 	public void updateResultCount(Session s, DerbyPagedObservationResult results){
 		//setting result size
-		Integer count = (Integer) s.createSQLQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
+		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
 		results.setItemCount(count);
 		
-		Integer wcount = (Integer) s.createSQLQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp").uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+		Integer wcount = (Integer) s.createNativeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp").uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 		results.setWpCount(wcount);
 	}
 	
@@ -484,11 +485,11 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 	public void addListLabel(Session s, AttributeListItem item){
 		if (item == null) return;
 		String sql = "SELECT count(*) FROM " + queryDataTable + "_list WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
-		SQLQuery q = s.createSQLQuery(sql);
+		NativeQuery<?> q = s.createNativeQuery(sql);
 		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 		if ((Integer)q.uniqueResult() == 0){
 			sql = " INSERT INTO " + queryDataTable + "_list (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
-			q = s.createSQLQuery(sql);
+			q = s.createNativeQuery(sql);
 			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 			q.setParameter("label",  item.getName()); //$NON-NLS-1$
 			q.executeUpdate();
@@ -503,11 +504,11 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 	public void addTreeLabel(Session s, AttributeTreeNode item){
 		if (item == null) return;
 		String sql = "SELECT count(*) FROM " + queryDataTable + "_tree WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
-		SQLQuery q = s.createSQLQuery(sql);
+		NativeQuery<?> q = s.createNativeQuery(sql);
 		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 		if ((Integer)q.uniqueResult() == 0){
 			sql = " INSERT INTO " + queryDataTable + "_tree (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
-			q = s.createSQLQuery(sql);
+			q = s.createNativeQuery(sql);
 			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 			q.setParameter("label",  item.getName()); //$NON-NLS-1$
 			q.executeUpdate();

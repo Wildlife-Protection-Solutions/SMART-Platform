@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -89,13 +89,11 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
                 public void run( IProgressMonitor monitor ) throws InvocationTargetException,
                         InterruptedException {
-
+                	SubMonitor progress = SubMonitor.convert(monitor, Messages.ExportMapToImageWizard_Progress_Exporting, 1);
                     IMap map = mapSelectorPage.getMap();
 
-                    monitor.beginTask(Messages.ExportMapToImageWizard_Progress_Exporting, 1);
-                    
-                    try {
-                    	if (!exportMap(map, new SubProgressMonitor(monitor, 3))){
+            		try {
+                    	if (!exportMap(map, progress.split(3))){
                     		errors.add(null);
                     	}
                     } catch (RenderException e) {

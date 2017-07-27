@@ -134,13 +134,10 @@ public class EntityInfoPanelComposite extends Composite{
 			return;
 		}
 		
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			this.entity = (Entity) s.load(Entity.class, entity.getUuid());
-			initEntityFields();
-			
-		}finally{
-			s.close();
+			initEntityFields();	
 		}
 	}
 	

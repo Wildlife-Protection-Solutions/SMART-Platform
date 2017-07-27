@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
@@ -37,6 +36,7 @@ import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
@@ -54,16 +54,16 @@ public class SurveyJsonUtils {
 	 * @param session
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static CyberTrackerSurvey  parseSurveyMetadata(JSONObject jsonDefaults, JSONObject jsonValues, Session session){
 		
 		if (jsonValues == null) jsonValues = new JSONObject();
 		
 		SurveyDesign design = null;
 		String surveyDesign = (String) jsonValues.get(SurveyScreensUtil.RESULT_SURVEY_DESIGN);
-		List<SurveyDesign> cas = session.createCriteria(SurveyDesign.class)
-				.add(Restrictions.eq("keyId", surveyDesign)) //$NON-NLS-1$
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+		List<SurveyDesign> cas = QueryFactory.buildQuery(session, SurveyDesign.class,  
+				new Object[] {"keyId", surveyDesign}, //$NON-NLS-1$
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
+				
 		if (cas.size() == 1){
 			design = cas.get(0);
 		}

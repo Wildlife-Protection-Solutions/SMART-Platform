@@ -88,17 +88,17 @@ public abstract class GriddedQueryDefinitionImporter extends AbstractXmlQueryImp
 				if (part.getValue() != null && part.getValue().length() > 0) {
 					
 					griddedQuery.setQuery(part.getValue());
-					Session session = HibernateManager.openSession();
-					session.beginTransaction();
-					try {
-						GridQueryDefinition def = griddedQuery.getQueryDefinition();
-						
-						validateQuery(caImport, def, langCode, uuidLookup, session);
-						
-						griddedQuery.setQuery(def.asQuery(), def);
-					} finally {
-						session.getTransaction().rollback();
-						session.close();
+					try(Session session = HibernateManager.openSession()){
+						session.beginTransaction();
+						try {
+							GridQueryDefinition def = griddedQuery.getQueryDefinition();
+							
+							validateQuery(caImport, def, langCode, uuidLookup, session);
+							
+							griddedQuery.setQuery(def.asQuery(), def);
+						} finally {
+							session.getTransaction().rollback();
+						}
 					}
 				}
 			}else if (part.getKey().equalsIgnoreCase("crs")){ //$NON-NLS-1$

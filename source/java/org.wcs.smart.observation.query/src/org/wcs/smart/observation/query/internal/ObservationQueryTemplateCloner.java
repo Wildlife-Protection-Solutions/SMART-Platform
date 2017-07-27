@@ -26,10 +26,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
@@ -81,8 +81,10 @@ public class ObservationQueryTemplateCloner implements
 	 */
 	private void cloneGriddedQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<ObservationGriddedQuery> queries = (List<ObservationGriddedQuery>) engine.getSession().createCriteria(ObservationGriddedQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		List<ObservationGriddedQuery> queries = QueryFactory.buildQuery(engine.getSession(), ObservationGriddedQuery.class, 
+					new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+					new Object[] {"isShared", true}).getResultList(); //$NON-NLS-1$
 		
 		for(ObservationGriddedQuery query : queries){
 			ObservationGriddedQuery clone = (ObservationGriddedQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObservationGriddedQuery.KEY) );
@@ -112,8 +114,10 @@ public class ObservationQueryTemplateCloner implements
 	 */
 	private void cloneSummaryQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<ObservationSummaryQuery> queries = (List<ObservationSummaryQuery>) engine.getSession().createCriteria(ObservationSummaryQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		List<ObservationSummaryQuery> queries = QueryFactory.buildQuery(engine.getSession(), ObservationSummaryQuery.class, 
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}).getResultList(); //$NON-NLS-1$
 		
 		for(ObservationSummaryQuery query : queries){
 			ObservationSummaryQuery clone = (ObservationSummaryQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObservationSummaryQuery.KEY) );
@@ -140,8 +144,10 @@ public class ObservationQueryTemplateCloner implements
 	 */
 	private void cloneObservationQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<ObsObservationQuery> queries = (List<ObsObservationQuery>) engine.getSession().createCriteria(ObsObservationQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$//$NON-NLS-2$
+		
+		List<ObsObservationQuery> queries = QueryFactory.buildQuery(engine.getSession(), ObsObservationQuery.class, 
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}).getResultList(); //$NON-NLS-1$
 		
 		for(ObsObservationQuery query : queries){
 			ObsObservationQuery clone = (ObsObservationQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObsObservationQuery.KEY) );
@@ -171,8 +177,10 @@ public class ObservationQueryTemplateCloner implements
 	 */
 	private void cloneWaypointQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<ObservationWaypointQuery> queries = (List<ObservationWaypointQuery>) engine.getSession().createCriteria(ObservationWaypointQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		List<ObservationWaypointQuery> queries = QueryFactory.buildQuery(engine.getSession(), ObservationWaypointQuery.class, 
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}).getResultList(); //$NON-NLS-1$
 		
 		for(ObservationWaypointQuery query : queries){
 			ObservationWaypointQuery clone = (ObservationWaypointQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObservationWaypointQuery.KEY) );

@@ -56,7 +56,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
@@ -66,6 +65,7 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.xml.EntityTypeFromXmlConverter;
 import org.wcs.smart.entity.xml.EntityTypeXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -108,12 +108,13 @@ public class ImportEntityTypeHandler{
 					
 					monitor.subTask(Messages.ImportEntityTypeHandler_ImportProgress3);
 				
-					Session session = HibernateManager.openSession();
-					try{
+					try(Session session = HibernateManager.openSession()){
 						EntityType et = EntityTypeFromXmlConverter.fromXml(xmlEntityType, session);
 						
 						//ensure key doesn't already exist
-						List<?> types = session.createCriteria(EntityType.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("keyId", et.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+						List<EntityType> types = QueryFactory.buildQuery(session, EntityType.class, 
+								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+								new Object[] {"keyId", et.getKeyId()}).getResultList(); //$NON-NLS-1$
 						if (types.size() > 0){
 							returnInfo[0] = MessageFormat.format(Messages.ImportEntityTypeHandler_ErrorDuplicateKey, new Object[]{et.getKeyId()});
 							return;
@@ -171,8 +172,6 @@ public class ImportEntityTypeHandler{
 						returnInfo[0] = Messages.ImportEntityTypeHandler_ImportError + "\n\n" + ex.getMessage(); //$NON-NLS-1$  
 						returnInfo[1] = ex;
 						return;
-					}finally{
-						session.close();
 					}
 					
 					

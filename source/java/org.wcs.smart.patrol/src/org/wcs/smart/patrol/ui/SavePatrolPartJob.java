@@ -58,27 +58,29 @@ public class SavePatrolPartJob extends Job {
 	}
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		Session saveSession = HibernateManager
-				.openSession(new WaypointAttachmentInterceptor());
-		try{
+		try(Session saveSession = HibernateManager
+				.openSession(new WaypointAttachmentInterceptor())){
 			saveSession.beginTransaction();
-			if (patrolPart instanceof Patrol) {
-				if (((Patrol) patrolPart).getId() == null) {
-					String id = PatrolHibernateManager.generatePatrolId(
-						((Patrol) patrolPart), saveSession);
-					((Patrol) patrolPart).setId(id);
-				}
-			}
 		
-			saveSession.saveOrUpdate(patrolPart);
-			saveSession.getTransaction().commit();
-		}catch (Exception ex){
-			if (saveSession.getTransaction().isActive()){
-				saveSession.getTransaction().rollback();
+			try{
+			
+				if (patrolPart instanceof Patrol) {
+					if (((Patrol) patrolPart).getId() == null) {
+						String id = PatrolHibernateManager.generatePatrolId(
+							((Patrol) patrolPart), saveSession);
+						((Patrol) patrolPart).setId(id);
+					}
+				}
+			
+				saveSession.saveOrUpdate(patrolPart);
+				saveSession.getTransaction().commit();
+			}catch (Exception ex){
+				if (saveSession.getTransaction().isActive()){
+					saveSession.getTransaction().rollback();
+				}
+				SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
+				return Status.OK_STATUS;
 			}
-			SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
-		}finally{
-			saveSession.close();
 		}				
 		PatrolEventManager.getInstance().patrolSaved(patrol, false);
 		return Status.OK_STATUS;

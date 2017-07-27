@@ -40,7 +40,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
@@ -171,9 +171,9 @@ public class MissionEmployeeComposite extends MissionComposite {
 		//find all observers
 		observers = new HashSet<Employee>();
 		if (mission.getUuid() != null){
-			Query q = session.createQuery("SELECT distinct wpo.observer from WaypointObservation wpo, SurveyWaypoint sw WHERE wpo.waypoint = sw.id.waypoint and sw.missionDay.mission = :mission"); //$NON-NLS-1$
+			Query<?> q = session.createQuery("SELECT distinct wpo.observer from WaypointObservation wpo, SurveyWaypoint sw WHERE wpo.waypoint = sw.id.waypoint and sw.missionDay.mission = :mission"); //$NON-NLS-1$
 			q.setParameter("mission", mission); //$NON-NLS-1$
-			observers.addAll(q.list());
+			for (Object x : q.list()) observers.add((Employee)x);
 		}else{
 			if (warnComp != null){
 				warnComp.dispose();

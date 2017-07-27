@@ -288,25 +288,24 @@ public class IncidentMapPage extends SmartMapEditorPart {
 				double origy = pw.getY();
 				
 				boolean modified = false;
-				Session s = HibernateManager.openSession();
-				try{
-					s.beginTransaction();
-					pw.setX(crspx.x);
-					pw.setY(crspx.y);
-					s.update(pw);
-					s.getTransaction().commit();
-					modified = true;
-				}catch (Exception ex){
+				try(Session s = HibernateManager.openSession()){
 					try{
-						if (s.getTransaction().isActive()) s.getTransaction().rollback();
-					}catch (Exception ex2){
-						IncidentPlugIn.displayLog(Messages.IncidentMapPage_SaveError + ex.getMessage(), ex);
-						return;
+						s.beginTransaction();
+						pw.setX(crspx.x);
+						pw.setY(crspx.y);
+						s.update(pw);
+						s.getTransaction().commit();
+						modified = true;
+					}catch (Exception ex){
+						try{
+							if (s.getTransaction().isActive()) s.getTransaction().rollback();
+						}catch (Exception ex2){
+							IncidentPlugIn.displayLog(Messages.IncidentMapPage_SaveError + ex.getMessage(), ex);
+							return;
+						}
+						pw.setX(origx);
+						pw.setY(origy);
 					}
-					pw.setX(origx);
-					pw.setY(origy);
-				}finally{
-					s.close();
 				}
 				if (modified){
 					addUndo(pw, origx, origy);
@@ -350,30 +349,29 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			public synchronized void undo() {
 				if (undoCommands.isEmpty()) return;
 				
-				Session s = HibernateManager.openSession();
-				try{
-					Object c = undoCommands.remove(0);
-					s.beginTransaction();
-					Object[] data = (Object[])c;
-					
-					Waypoint pw = (Waypoint) data[0];
-					double x = (double) data[1];
-					double y = (double) data[2];
-					
-					pw.setX(x);
-					pw.setY(y);
-					s.update(pw);
-					s.getTransaction().commit();
-					
-					Display.getDefault().syncExec(()->{
-//						SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
-						WaypointEventManager.getInstance().waypointModified(pw);
-					});
-				}catch (Exception ex){
-					if (s.getTransaction().isActive()) s.getTransaction().rollback();
-					IncidentPlugIn.displayLog(Messages.IncidentMapPage_UndonError + ex.getMessage(), ex);	
-				}finally{
-					s.close();
+				try(Session s = HibernateManager.openSession()){
+					try{
+						Object c = undoCommands.remove(0);
+						s.beginTransaction();
+						Object[] data = (Object[])c;
+						
+						Waypoint pw = (Waypoint) data[0];
+						double x = (double) data[1];
+						double y = (double) data[2];
+						
+						pw.setX(x);
+						pw.setY(y);
+						s.update(pw);
+						s.getTransaction().commit();
+						
+						Display.getDefault().syncExec(()->{
+	//						SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, pw.getMissionDay().getMission());
+							WaypointEventManager.getInstance().waypointModified(pw);
+						});
+					}catch (Exception ex){
+						if (s.getTransaction().isActive()) s.getTransaction().rollback();
+						IncidentPlugIn.displayLog(Messages.IncidentMapPage_UndonError + ex.getMessage(), ex);
+					}
 				}
 				updateToolbar();
 			}

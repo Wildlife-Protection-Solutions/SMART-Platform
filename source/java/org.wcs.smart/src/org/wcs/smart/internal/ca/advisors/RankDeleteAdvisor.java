@@ -23,9 +23,11 @@ package org.wcs.smart.internal.ca.advisors;
 
 import java.text.MessageFormat;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
@@ -44,7 +46,13 @@ public class RankDeleteAdvisor implements IDeleteAdvisor {
 			return Messages.RankDeleteAdvisor_Error_NotRank;
 		}
 		
-		Long cnt = (Long) session.createCriteria(Employee.class).add(Restrictions.eq("rank", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Long> query = cb.createQuery(Long.class);
+		Root<Employee> root = query.from(Employee.class);
+		query.select(cb.count(root));
+		query.where(cb.equal(root.get("rank"), object)); //$NON-NLS-1$
+		
+		Long cnt = session.createQuery(query).uniqueResult();
 		if (cnt == 0){
 			return null;
 		}else{

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -26,6 +25,7 @@ import org.wcs.smart.entity.xml.model.DataModelAttribute;
 import org.wcs.smart.entity.xml.model.LabelType;
 import org.wcs.smart.entity.xml.model.ListNode;
 import org.wcs.smart.entity.xml.model.TreeNodeType;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -202,7 +202,9 @@ public class EntityTypeFromXmlConverter {
 	}
 	
 	private  static Attribute findAttribute(String keyId, Session s){
-		List<?> attributes = s.createCriteria(Attribute.class).add(Restrictions.eq("keyId", keyId)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<Attribute> attributes = QueryFactory.buildQuery(s, Attribute.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"keyId", keyId}).getResultList(); //$NON-NLS-1$
 		if (attributes == null || attributes.size() == 0){
 			//attribute not found we will have to create it
 			return null;
@@ -247,10 +249,11 @@ public class EntityTypeFromXmlConverter {
 			if (label.isIsDefault()){
 				xmlDefaultName = label.getValue();
 			}
-			List<?> values = session.createCriteria(Language.class).
-				add(Restrictions.eq("ca", SmartDB.getCurrentConservationArea())). //$NON-NLS-1$ 
-				add(Restrictions.eq("code",label.getLanguageCode())).list(); //$NON-NLS-1$
-				
+			
+			List<Language> values = QueryFactory.buildQuery(session, Language.class, 
+					new Object[] {"ca", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"code", label.getLanguageCode()}).getResultList(); //$NON-NLS-1$
+			
 			if (values.size() > 0){
 				for (Object l : values){
 					toUpdate.updateName((Language)l, label.getValue());

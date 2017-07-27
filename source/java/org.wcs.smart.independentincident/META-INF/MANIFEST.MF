@@ -10,7 +10,7 @@ Require-Bundle: org.wcs.smart,
  org.eclipse.ui.forms,
  org.locationtech.udig.style.sld,
  org.eclipse.help;bundle-version="3.5.100"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.incident,
  org.wcs.smart.incident.event,

@@ -104,34 +104,30 @@ public class PlanStationTeamComposite extends PlanComposite {
 	@Override
 	public void initFromModel(Plan plan) {
 		//Set team values,
-		Session session = HibernateManager.openSession();
+		
 				
-			List<? extends Object> teams = null;
-			List<? extends Object> stations = null;
-			try{
-				
-				teams =  PatrolHibernateManager.getActiveTeams(plan.getConservationArea(), session);
-				stations = PatrolHibernateManager.getActiveStations(plan.getConservationArea(), session);
-			}catch (Exception ex){
-				SmartPatrolPlugIn.displayLog(Messages.PlanStationTeamComposite_TeamStation_NotFound_Error, ex);
-				
-			}finally{
-				session.close();
-			}
+		List<? extends Object> teams = null;
+		List<? extends Object> stations = null;
+		try(Session session = HibernateManager.openSession()){
+			teams =  PatrolHibernateManager.getActiveTeams(plan.getConservationArea(), session);
+			stations = PatrolHibernateManager.getActiveStations(plan.getConservationArea(), session);
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog(Messages.PlanStationTeamComposite_TeamStation_NotFound_Error, ex);
+		}
 			
-			teamList.setInput(teams, plan.getTeam());
-			stationList.setInput(stations, plan.getStation());		
+		teamList.setInput(teams, plan.getTeam());
+		stationList.setInput(stations, plan.getStation());		
 			
-			try{
-				teamList.setSelectedTeam(plan.getTeam());			
-			}catch (Exception e){
-				//do nothing, probably just no template so we can't set the values to anything
-			}
-			try{
-				stationList.setSelectedStation(plan.getStation() );
-			}catch (Exception e){
-				//eat me
-			}
+		try{
+			teamList.setSelectedTeam(plan.getTeam());			
+		}catch (Exception e){
+			//do nothing, probably just no template so we can't set the values to anything
+		}
+		try{
+			stationList.setSelectedStation(plan.getStation() );
+		}catch (Exception e){
+			//eat me
+		}
 	}
 
 	@Override

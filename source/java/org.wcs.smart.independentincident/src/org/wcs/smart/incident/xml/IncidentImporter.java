@@ -44,12 +44,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.IndepedentIncidentSource;
@@ -190,18 +188,17 @@ public class IncidentImporter {
 	private static Waypoint convertAndSave(WaypointType xmlIncident, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
 		XmlToIncident converter = new XmlToIncident();
-		Session session = HibernateManager.openSession(new AttachmentInterceptor());
-		try {
+		
+		try (Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			progress.split(1);
 			progress.subTask(Messages.IncidentImporter_ValidatingProgress);
 			//check if a incident in the database with the given patorl id already exists
 			if (xmlIncident.getId() != null){
-				Criteria c = session.createCriteria(Waypoint.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.add(Restrictions.eq("id", xmlIncident.getId())) //$NON-NLS-1$
-						.add(Restrictions.eq("sourceId", IndepedentIncidentSource.KEY)) //$NON-NLS-1$
-						.setProjection(Projections.rowCount()); 
-				Long cnt = (Long)c.uniqueResult();
+				
+				Long cnt = QueryFactory.buildCountQuery(session, Waypoint.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"id", xmlIncident.getId() }, //$NON-NLS-1$
+						new Object[] {"sourceId", IndepedentIncidentSource.KEY}); //$NON-NLS-1$
 				if (cnt > 0){
 					final boolean[] cont = new boolean[]{true};
 					final int  pid = xmlIncident.getId();
@@ -230,10 +227,6 @@ public class IncidentImporter {
 			}		
 			progress.subTask(Messages.IncidentImporter_ConvertingProgress);
 			converter.fromXml(xmlIncident, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
-		} finally {
-			if (session.isOpen()){
-				session.close();
-			}
 		}
 
 		List<String> warnings = new ArrayList<String>();
@@ -275,17 +268,17 @@ public class IncidentImporter {
 		Waypoint imported = converter.getImportedIncident();
 		if (imported == null)
 			return null;
-		session = HibernateManager.openSession(new AttachmentInterceptor());
-		session.beginTransaction();
-		try {
-			session.save(imported);
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			IncidentPlugIn.displayLog(Messages.IncidentImporter_saveError + ex.getLocalizedMessage(), ex);
-			return null;
-		}finally{
-			session.close();
+		
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
+			session.beginTransaction();
+			try {
+				session.save(imported);
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				IncidentPlugIn.displayLog(Messages.IncidentImporter_saveError + ex.getLocalizedMessage(), ex);
+				return null;
+			}
 		}
 		
 		return imported;

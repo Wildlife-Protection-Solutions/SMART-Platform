@@ -97,8 +97,7 @@ public class CompoundQueryExporter implements IQueryExporter {
 		
 		HashMap<Query, IQueryExporter> exports = new HashMap<Query, IQueryExporter>();
 		StringBuilder messages = new StringBuilder();
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			
 			for (CompoundMapQueryLayer q : mapQuery.getLayers()){
 				Query queryObj = QueryHibernateManager.getInstance().findQuery(s, q.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType(q.getQueryType()));
@@ -120,8 +119,6 @@ public class CompoundQueryExporter implements IQueryExporter {
 					}
 				}
 			}
-		}finally{
-			s.close();
 		}
 		
 		if (messages.length() > 0){

@@ -105,8 +105,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 			//done in job so it has it's own session
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				try{
+				try(Session session = HibernateManager.openSession()){
 					List<EntityAttributeQueryColumn> cols = new ArrayList<EntityAttributeQueryColumn>();
 					for (String entityType : entityTypes){
 						EntityType et = EntityHibernateManager.getInstance().getEntityType(entityType, session);
@@ -125,8 +124,6 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 					queryColumns.addAll(cols);
 				}catch (Exception ex){
 					EntityQueryPlugIn.log(ex.getMessage(), ex);
-				}finally{
-					session.close();
 				}
 				return Status.OK_STATUS;
 			}};
