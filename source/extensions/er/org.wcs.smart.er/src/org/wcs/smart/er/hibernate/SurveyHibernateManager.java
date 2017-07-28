@@ -88,10 +88,8 @@ public class SurveyHibernateManager {
 		CriteriaQuery<Long> c = cb.createQuery(Long.class);
 		Root<Mission> from = c.from(Mission.class);
 		c.select(cb.count(from));
-		c.from(Survey.class);
-		Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
 		c.where(cb.and(
-				cb.equal(fromdesign.get("conservationArea"),ca), //$NON-NLS-1$
+				cb.equal(from.join("survey").join("surveyDesign").get("conservationArea"),ca), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				cb.equal(from.get("id"), newId) //$NON-NLS-1$
 				));
 		Long cnt = (Long)session.createQuery(c).uniqueResult();
@@ -211,9 +209,8 @@ public class SurveyHibernateManager {
 			//get all
 			CriteriaBuilder cb = s.getCriteriaBuilder();
 			CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
-			c.from(Survey.class);
-			Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
-			c.where(cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+			Root<Survey> from = c.from(Survey.class);
+			c.where(cb.equal(from.get("surveyDesign").get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
 			List<Survey> ds = s.createQuery(c).getResultList();
 			
 			List<SurveyProxy> all = new ArrayList<SurveyProxy>();

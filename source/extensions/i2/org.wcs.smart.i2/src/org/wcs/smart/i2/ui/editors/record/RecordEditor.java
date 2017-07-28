@@ -223,7 +223,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						CriteriaBuilder cb = s.getCriteriaBuilder();
 						CriteriaQuery<IntelEntityLocation> c = cb.createQuery(IntelEntityLocation.class);
 						Root<IntelEntityLocation> from = c.from(IntelEntityLocation.class);
-						c.where(from.get("id.location").in(temp.getLocations())); //$NON-NLS-1$
+						c.where(from.get("id").get("location").in(temp.getLocations())); //$NON-NLS-1$ //$NON-NLS-2$
 						currentEntityLocationLinks = s.createQuery(c).getResultList();
 						for (IntelEntityLocation ll : currentEntityLocationLinks){
 							ll.getEntity().getIdAttributeAsText();

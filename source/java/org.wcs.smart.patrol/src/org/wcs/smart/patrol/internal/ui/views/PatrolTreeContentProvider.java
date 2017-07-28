@@ -251,7 +251,7 @@ public class PatrolTreeContentProvider implements ITreeContentProvider{
 								mpatrols = new ArrayList<>();
 								types.put(m, mpatrols);
 							}
-							mpatrols.add(p);
+							if (!mpatrols.contains(p)) mpatrols.add(p);
 						}
 					}
 				}

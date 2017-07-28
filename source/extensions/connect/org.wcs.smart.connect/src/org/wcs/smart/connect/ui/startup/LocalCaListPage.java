@@ -47,7 +47,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -173,8 +172,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		final List<ConservationArea> ca = new ArrayList<ConservationArea>();
 		
 		try(Session s = HibernateManager.openSession()){
-			List<ConnectServer> servers = QueryFactory.buildQuery(s, ConnectServer.class, (Object[])null)
-					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+			List<ConnectServer> servers = QueryFactory.buildQuery(s, ConnectServer.class)
 					.list();
 			for (Iterator<ConnectServer> iterator = servers.iterator(); iterator.hasNext();) {
 				ConnectServer server = (ConnectServer) iterator.next();

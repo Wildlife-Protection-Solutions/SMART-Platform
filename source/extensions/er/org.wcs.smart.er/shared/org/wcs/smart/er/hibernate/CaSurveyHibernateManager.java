@@ -34,7 +34,6 @@ import javax.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionTrack;
@@ -168,10 +167,9 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
 		Root<Survey> from = c.from(Survey.class);
 		c.select(from);
-		Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
 		c.where(cb.and(
-				cb.equal(fromdesign.get("conservationArea"), ca), //$NON-NLS-1$
-				cb.equal(fromdesign.get("state"), SurveyDesign.State.ACTIVE) //$NON-NLS-1$
+				cb.equal(from.join("surveyDesign").get("conservationArea"), ca), //$NON-NLS-1$ //$NON-NLS-2$
+				cb.equal(from.join("surveyDesign").get("state"), SurveyDesign.State.ACTIVE) //$NON-NLS-1$ //$NON-NLS-2$
 				));
 		return s.createQuery(c).getResultList();
 		
@@ -227,11 +225,10 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<MissionAttributeListItem> c = cb.createQuery(MissionAttributeListItem.class);
 		Root<MissionAttributeListItem> from = c.from(MissionAttributeListItem.class);
-		Root<Attribute> fromattribute = c.from(Attribute.class);
 		c.select(from);
 		c.where(cb.and(
 				cb.equal(from.get("keyId"), key), //$NON-NLS-1$
-				cb.equal(fromattribute.get("conservationArea"), ca) //$NON-NLS-1$
+				cb.equal(from.join("attribute").get("conservationArea"), ca) //$NON-NLS-1$ //$NON-NLS-2$
 				));
 		return session.createQuery(c).uniqueResult();
 	}
@@ -240,12 +237,11 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	public SamplingUnit getSamplingUnitById(String key, Session session) {
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<SamplingUnit> c = cb.createQuery(SamplingUnit.class);
-		Root<SamplingUnit> from = c.from(SamplingUnit.class);
-		Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
+		Root<SamplingUnit> from = c.from(SamplingUnit.class);		
 		c.select(from);
 		c.where(cb.and(
 				cb.equal(from.get("id"), key), //$NON-NLS-1$
-				cb.equal(fromdesign.get("conservationArea"), ca) //$NON-NLS-1$
+				cb.equal(from.join("surveyDesign").get("conservationArea"), ca) //$NON-NLS-1$ //$NON-NLS-2$
 				));
 		return session.createQuery(c).uniqueResult();
 	}
@@ -258,11 +254,10 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
 		Root<Survey> from = c.from(Survey.class);
-		Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
 		c.select(from);
 		c.where(cb.and(
 				cb.equal(from.get("id"), id), //$NON-NLS-1$
-				cb.equal(fromdesign.get("conservationArea"), ca) //$NON-NLS-1$
+				cb.equal(from.join("surveyDesign").get("conservationArea"), ca) //$NON-NLS-1$ //$NON-NLS-2$
 				));
 		return session.createQuery(c).uniqueResult();
 	}

@@ -303,8 +303,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 				temp.getPrimaryAttachment();
 				
 				CriteriaQuery<IntelEntityRelationship> c2 = cb.createQuery(IntelEntityRelationship.class);
-				Root<IntelEntityRelationship> from2 = c.from(IntelEntityRelationship.class);
-				c.where(cb.or(
+				Root<IntelEntityRelationship> from2 = c2.from(IntelEntityRelationship.class);
+				c2.where(cb.or(
 						cb.equal(from2.get("sourceEntity"), temp), //$NON-NLS-1$
 						cb.equal(from2.get("targetEntity"), temp) //$NON-NLS-1$
 						));

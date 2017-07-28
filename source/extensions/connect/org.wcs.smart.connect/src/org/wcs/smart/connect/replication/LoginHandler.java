@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.WorkbenchJob;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.SmartContext;
@@ -235,7 +234,6 @@ public class LoginHandler implements ILoginHandler {
 		try(Session s = HibernateManager.openSession()){
 			
 			List<ConnectServerStatus> toKeep = QueryFactory.buildQuery(s, ConnectServerStatus.class, "status", ConnectServerStatus.Status.UPLOAD) //$NON-NLS-1$
-					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
 					.list(); 
 			
 			for(ConnectServerStatus server : toKeep){
@@ -246,8 +244,7 @@ public class LoginHandler implements ILoginHandler {
 			List<ConnectSyncHistoryRecord> upToKeep = QueryFactory.buildQuery(s, ConnectSyncHistoryRecord.class, 
 					new Object[] {"status", ConnectSyncHistoryRecord.Status.ACTIVE}, //$NON-NLS-1$
 					new Object[] {"type", ConnectSyncHistoryRecord.Type.UPLOAD} //$NON-NLS-1$
-					).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-					.list(); 
+					).list(); 
 			
 			for (ConnectSyncHistoryRecord syn : upToKeep){
 				Path fileToKeep = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), syn.getChangeLogZipFile());

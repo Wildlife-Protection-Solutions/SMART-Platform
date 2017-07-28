@@ -30,11 +30,10 @@ import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.Type;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Named key item with a description
@@ -89,11 +88,7 @@ public class NamedDescriptionKeyItem extends NamedKeyItem {
 	public Set<DescriptionLabel> getDescriptions(Session session) {
 		if (this.descriptions == null) {
 			this.descriptions = new HashSet<DescriptionLabel>();
-			
-			CriteriaQuery<DescriptionLabel> c = session.getCriteriaBuilder().createQuery(DescriptionLabel.class);
-			Root<Projection> root = c.from(Projection.class); 
-			c.where(session.getCriteriaBuilder().equal(root.get("id.element"), descuuid)); //$NON-NLS-1$
-			descriptions.addAll(session.createQuery(c).getResultList());
+			descriptions.addAll(QueryFactory.buildQuery(session, DescriptionLabel.class, "id.element", descuuid).list()); //$NON-NLS-1$
 		}
 		return this.descriptions;
 	}

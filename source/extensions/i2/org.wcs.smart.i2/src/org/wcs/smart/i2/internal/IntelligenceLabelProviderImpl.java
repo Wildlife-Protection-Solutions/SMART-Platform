@@ -177,7 +177,7 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsEntityUUIDColumn;
 		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE_KEY) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsAttributeKeyColumn;
 		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE_NAME) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsAttributeNameColumn;
-		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ENTITY_UUID)  return Messages.IntelligenceLabelProviderImpl_EntityLocationRsAttributeGeomtryColumn;
+		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.GEOMETRY)  return Messages.IntelligenceLabelProviderImpl_EntityLocationRsAttributeGeomtryColumn;
 			
 		if (item == EntityAttachmentDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.IntelligenceLabelProviderImpl_EntityAttachmentRsEntityUuidColumn;
 		if (item == EntityAttachmentDatasetResultSetMetadata.Column.FILE_NAME) return  Messages.IntelligenceLabelProviderImpl_EntityAttachmentRsNameColumn;

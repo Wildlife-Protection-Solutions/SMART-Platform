@@ -129,28 +129,32 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			
 			
 			CriteriaBuilder cb = session.getCriteriaBuilder();
-			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
-			CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
-			Root<IntelEntity> from = c.from(IntelEntity.class);
-			c2.from(IntelEntity.class);
-			List<Predicate> filters = new ArrayList<>();
-			filters.add(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
 			
+			CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
+			Root<IntelEntity> from2 = c2.from(IntelEntity.class);
+			List<Predicate> filters = new ArrayList<>();
+			filters.add(cb.equal(from2.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
 			if (entityTypes != null && !entityTypes.isEmpty()){
-				Root<IntelEntityType> typefrom = c.from(IntelEntityType.class);
-				filters.add(typefrom.get("keyId").in(entityTypes)); //$NON-NLS-1$
+				filters.add(from2.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
 				
 			}
-			c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
-			c2.where(cb.and(filters.toArray(new Predicate[filters.size()])));
-			
-			c2.select(cb.count(from));
+			c2.where(cb.and(filters.toArray(new Predicate[filters.size()])));			
+			c2.select(cb.count(from2));
 			Long maxCnt = session.createQuery(c2).uniqueResult();
 			
+			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
+			Root<IntelEntity> from = c.from(IntelEntity.class);
+			c.select(from);
+			filters = new ArrayList<>();
+			filters.add(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+			if (entityTypes != null && !entityTypes.isEmpty()){
+				filters.add(from.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
 			Query<IntelEntity> q = session.createQuery(c).setMaxResults(maxResultCnt);
-		
 			List<IntelEntity> items = q.getResultList();
 			List<IntelSearchResultItem> results = new ArrayList<IntelSearchResultItem>();
+			
 			for (IntelEntity it : items){
 				lazyLoadEntity(it, session);
 				IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(),"", 1.0); //$NON-NLS-1$

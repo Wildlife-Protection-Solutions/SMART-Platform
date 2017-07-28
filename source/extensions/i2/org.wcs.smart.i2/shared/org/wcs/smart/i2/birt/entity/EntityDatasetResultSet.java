@@ -93,9 +93,9 @@ public class EntityDatasetResultSet implements IResultSet {
 				filters1.add(new Object[] {"uuid", UuidUtils.stringToUuid(entity)}); //$NON-NLS-1$
 			}
 		}
-			
-		m_maxRows = QueryFactory.buildCountQuery(connection.getSession(), IntelEntity.class, filters1.toArray(new Object[] {filters1.size()}));
-		results = QueryFactory.buildQuery(connection.getSession(), IntelEntity.class, filters1.toArray(new Object[] {filters1.size()})).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
+		
+		m_maxRows = QueryFactory.buildCountQuery(connection.getSession(), IntelEntity.class, filters1.toArray(new Object[filters1.size()][2]));
+		results = QueryFactory.buildQuery(connection.getSession(), IntelEntity.class, filters1.toArray(new Object[filters1.size()][2])).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
 		
 		this.connection = connection;
 		this.m_currentRowId = 0;

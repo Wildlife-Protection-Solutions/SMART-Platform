@@ -118,7 +118,7 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 					kids.addAll(kidFolders);
 					
 					CriteriaQuery<Report> creport = cb.createQuery(Report.class);
-					Root<Report> reportfrom = cfolder.from(Report.class);
+					Root<Report> reportfrom = creport.from(Report.class);
 					creport.where(cb.and(
 							cb.isNull(reportfrom.get("folder")), //$NON-NLS-1$
 							cb.equal(reportfrom.get("shared"), true), //$NON-NLS-1$
@@ -138,7 +138,7 @@ public class RootReportFolderModelAdapter implements IDeferredWorkbenchAdapter{
 					kids.addAll(kidFolders);
 					
 					CriteriaQuery<Report> creport = cb.createQuery(Report.class);
-					Root<Report> reportfrom = cfolder.from(Report.class);
+					Root<Report> reportfrom = creport.from(Report.class);
 					creport.where(cb.and(
 							cb.isNull(reportfrom.get("folder")), //$NON-NLS-1$
 							cb.equal(reportfrom.get("shared"), false), //$NON-NLS-1$

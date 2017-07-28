@@ -102,15 +102,13 @@ public class MissionIdGroupByDropItem extends DropItem implements IGroupByDropIt
 				CriteriaQuery<Mission> c = cb.createQuery(Mission.class);
 				Root<Mission> from = c.from(Mission.class);
 				c.select(from);
-				Root<Survey> fromsurvey = c.from(Survey.class);
-				Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
 				Predicate[] filters = new Predicate[currentDesign == null ? 1 : 2];
-				filters[0] = cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+				filters[0] = cb.equal(from.join("survey").join("surveyDesign").get("conservationArea"), SmartDB.getCurrentConservationArea()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				if (currentDesign != null){
-					filters[1] = cb.equal(fromsurvey.get("surveyDesign"), currentDesign); //$NON-NLS-1$
+					filters[1] = cb.equal(from.join("survey").get("surveyDesign"), currentDesign); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				c.where(cb.and(filters));
-				c.orderBy(cb.asc(fromdesign.get("keyId")), cb.desc(from.get("startDate")), cb.desc(fromsurvey.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				c.orderBy(cb.asc(from.join("survey").join("surveyDesign").get("keyId")), cb.desc(from.get("startDate")), cb.desc(from.join("survey").get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				
 				List<Mission> ss = s.createQuery(c).getResultList();
 				for (Mission mission : ss){

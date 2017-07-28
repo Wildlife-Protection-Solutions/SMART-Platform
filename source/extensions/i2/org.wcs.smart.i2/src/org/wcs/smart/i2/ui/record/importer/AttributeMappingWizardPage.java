@@ -162,9 +162,8 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 				
 				CriteriaBuilder cb = s.getCriteriaBuilder();
 				CriteriaQuery<IntelRecordSourceAttribute> c = cb.createQuery(IntelRecordSourceAttribute.class);
-				c.from(IntelRecordSourceAttribute.class);
-				Root<IntelRecordSource> srcfrom = c.from(IntelRecordSource.class);
-				c.where(cb.equal(srcfrom.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+				Root<IntelRecordSourceAttribute> from = c.from(IntelRecordSourceAttribute.class);
+				c.where(cb.equal(from.join("source").get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
 				recordattributes.addAll(s.createQuery(c).list());
 			}
 			

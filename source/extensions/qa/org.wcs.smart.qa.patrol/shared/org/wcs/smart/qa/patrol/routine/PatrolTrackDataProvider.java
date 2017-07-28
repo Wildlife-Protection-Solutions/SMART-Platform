@@ -37,7 +37,6 @@ import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -74,10 +73,10 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 		
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<Patrol> c = cb.createQuery(Patrol.class);
-		Root<Waypoint> from = c.from(Waypoint.class);
+		Root<Patrol> from = c.from(Patrol.class);
 		c.where(cb.and(
 				cb.equal(from.get("conservationArea"), ca), //$NON-NLS-1$
-				cb.between(from.get("dateTime"), cb.literal(startDate), cb.literal(endDate)) //$NON-NLS-1$
+				cb.between(from.get("startDate"), cb.literal(startDate), cb.literal(endDate)) //$NON-NLS-1$
 				));
 		
 		List<Patrol> patrols = session.createQuery(c).getResultList();

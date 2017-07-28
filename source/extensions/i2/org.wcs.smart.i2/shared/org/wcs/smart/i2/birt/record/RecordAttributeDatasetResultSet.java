@@ -44,9 +44,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
-import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -82,13 +80,11 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 		
 		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
 		CriteriaQuery<IntelRecordAttributeValue> c = cb.createQuery(IntelRecordAttributeValue.class);
-		c.from(IntelRecordAttributeValue.class);
-		Root<IntelRecord> fromRecord = c.from(IntelRecord.class);
-		Root<IntelRecordSourceAttribute> fromAttribute = c.from(IntelRecordSourceAttribute.class);
-		c.orderBy(cb.asc(fromAttribute.get("order"))); //$NON-NLS-1$
+		Root<IntelRecordAttributeValue> from = c.from(IntelRecordAttributeValue.class);
+		c.orderBy(cb.asc(from.join("attribute").get("order"))); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		List<Predicate> filters = new ArrayList<>();
-		filters.add(fromRecord.get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$
+		filters.add(from.join("record").get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$ //$NON-NLS-2$
 		
 //		Criteria c = connection.getSession().createCriteria(IntelRecordAttributeValue.class)
 //				.createAlias("record", "r") //$NON-NLS-1$ //$NON-NLS-2$
@@ -99,7 +95,7 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		if (index >= 0){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
-			filters.add(cb.equal(fromRecord.get("uuid"), recordUuid)); //$NON-NLS-1$
+			filters.add(cb.equal(from.join("record").get("uuid"), recordUuid)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		c.where(cb.and(filters.toArray(new Predicate[filters.size()]))); 
 		

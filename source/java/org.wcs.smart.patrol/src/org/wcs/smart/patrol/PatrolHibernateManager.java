@@ -266,8 +266,8 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return list of patrol types
 	 */
 	private static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s, boolean onlyActive, boolean excludeHidden){
-		s.beginTransaction();
 		List<PatrolType> types = null;
+		s.beginTransaction();
 		try{
 			CriteriaBuilder cb = s.getCriteriaBuilder();
 			CriteriaQuery<PatrolType> c = cb.createQuery(PatrolType.class);
@@ -280,10 +280,9 @@ public class PatrolHibernateManager extends HibernateManager{
 			}
 			c.where(cb.and(filters));
 			types = s.createQuery(c).getResultList();
-			s.getTransaction().rollback();
+			s.getTransaction().commit();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_20, ex);
-			s.close();
 			return null;
 		}
 		

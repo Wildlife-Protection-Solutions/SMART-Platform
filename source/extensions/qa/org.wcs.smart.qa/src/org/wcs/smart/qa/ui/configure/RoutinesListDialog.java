@@ -162,7 +162,9 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		}
 		
 		if (tblRoutines.getSelection().isEmpty()) return;
-		WrappedQaRoutine routine = (WrappedQaRoutine) ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+		Object x = ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+		if (!(x instanceof WrappedQaRoutine)) return;
+		WrappedQaRoutine routine = (WrappedQaRoutine) x;
 		QaRoutine r = routine.routine;
 		if (r == null) return;
 		

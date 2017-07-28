@@ -99,6 +99,7 @@ public class IntelObservationQueryEngine {
 			public IPagedQueryResultSet execute(Connection connection) throws SQLException {
 				
 				connection.setAutoCommit(true);
+				session.beginTransaction();
 				try{
 					if (parsedQuery.getFilterType() == IQueryFilter.FilterType.OBSERVATION){
 						queryResults = new IntelObservationQueryResults();
@@ -171,6 +172,7 @@ public class IntelObservationQueryEngine {
 					throw new SQLException(ex);
 				}finally{
 					connection.setAutoCommit(false);
+					session.getTransaction().commit();
 				}
 				return null;
 			}

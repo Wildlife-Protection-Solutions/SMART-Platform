@@ -173,7 +173,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
     	
     	List<ConfigurableModel> models = QueryFactory.buildQuery(session, ConfigurableModel.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
     	
-    	List<SurveyDesign> allOthers =  QueryFactory.buildQuery(session, SurveyDesign.class, (Object[])null).getResultList();
+    	List<SurveyDesign> allOthers =  QueryFactory.buildQuery(session, SurveyDesign.class).getResultList();
     	
     	List<SurveyDesign> caOthers = new ArrayList<SurveyDesign>();
     	for (SurveyDesign d : allOthers){

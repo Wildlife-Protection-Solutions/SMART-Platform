@@ -26,13 +26,12 @@ import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.Survey;
-import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.MissionIdGroupBy;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
@@ -65,7 +64,7 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 		if (items != null && items.length > 0){
 			for (String it : items){
 				try{
-					Mission m = (Mission) session.load(Mission.class, UuidUtils.stringToUuid(it));
+					Mission m = session.load(Mission.class, UuidUtils.stringToUuid(it));
 					if (m != null){
 						allItems.add(new ListItem(m.getUuid(), m.getId()));
 					}
@@ -87,14 +86,12 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 		CriteriaQuery<Mission> c = cb.createQuery(Mission.class);
 		Root<Mission> from = c.from(Mission.class);
 		c.select(from);
-		c.from(Survey.class);
-		Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
-		
+		Join<?,?> fromdesign = from.join("survey").join("surveyDesign"); //$NON-NLS-1$ //$NON-NLS-2$
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		if (filter == null){
 			//get all surveys for the current ca
-			c.where(cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
-			c.orderBy(cb.asc(fromdesign.get("keyId")), cb.desc(from.get("startDate")), cb.desc(fromdesign.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			c.where(cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ 
+			c.orderBy(cb.asc(fromdesign.get("keyId")), cb.desc(from.get("startDate")), cb.desc(fromdesign.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 			List<Mission> missions = session.createQuery(c).getResultList();
 			
 			for (Mission m : missions){
@@ -103,11 +100,11 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 			}			
 		}else{
 			c.where(cb.and(
-					cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
-					cb.equal(fromdesign.get("keyId"), filter.getKey()))); //$NON-NLS-1$
-			c.orderBy(cb.asc(fromdesign.get("keyId")),  //$NON-NLS-1$
+					cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$ 
+					cb.equal(fromdesign.get("keyId"), filter.getKey()))); //$NON-NLS-1$ 
+			c.orderBy(cb.asc(fromdesign.get("keyId")),  //$NON-NLS-1$ 
 					cb.desc(from.get("startDate")),  //$NON-NLS-1$
-					cb.desc(fromdesign.get("startDate")));  //$NON-NLS-1$
+					cb.desc(fromdesign.get("startDate")));  //$NON-NLS-1$ 
 			List<Mission> missions = session.createQuery(c).getResultList();
 			
 			for (Mission m : missions){

@@ -100,15 +100,14 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 				CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
 				Root<Survey> from = c.from(Survey.class);
 				c.select(from);
-				Root<SurveyDesign> fromdesign = c.from(SurveyDesign.class);
 
 				Predicate[] filters = new Predicate[currentDesign == null ? 1 : 2];
-				filters[0] = cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+				filters[0] = cb.equal(from.get("surveyDesign").get("conservationArea"), SmartDB.getCurrentConservationArea()); //$NON-NLS-1$ //$NON-NLS-2$
 				if (currentDesign != null){
 					filters[1] = cb.equal(from.get("surveyDesign"), currentDesign); //$NON-NLS-1$
 				}
 				c.where(cb.and(filters));
-				c.orderBy(cb.asc(fromdesign.get("keyId")), cb.desc(fromdesign.get("startDate")), cb.desc(from.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				c.orderBy(cb.asc(from.get("surveyDesign").get("keyId")), cb.desc(from.get("surveyDesign").get("startDate")), cb.desc(from.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				
 				List<Survey> ss = s.createQuery(c).getResultList();
 				for (Survey survey : ss){
