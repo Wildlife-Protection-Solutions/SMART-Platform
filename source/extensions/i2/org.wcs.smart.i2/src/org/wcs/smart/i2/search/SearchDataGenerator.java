@@ -41,6 +41,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -254,14 +255,11 @@ public class SearchDataGenerator {
 		return value;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private static IntelRecordAttributeValue generateEntityValue(IntelRecordSourceAttribute a, List<String> strings, Session session){
 		IntelRecordAttributeValue value = new IntelRecordAttributeValue();
 		value.setAttribute(a);
 		
-		List<IntelEntity> entities = session.createCriteria(IntelEntity.class)
-				.add(Restrictions.eq("entityType", a.getEntityType()))
-				.list();
+		List<IntelEntity> entities = QueryFactory.buildQuery(session, IntelEntity.class, "entityType", a.getEntityType()).getResultList(); 
 		
 		List<IntelRecordAttributeValueList> items = new ArrayList<IntelRecordAttributeValueList>();
 		if (a.getIsMultiple()){

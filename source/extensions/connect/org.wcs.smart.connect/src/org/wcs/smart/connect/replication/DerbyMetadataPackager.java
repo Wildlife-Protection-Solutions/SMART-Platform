@@ -25,8 +25,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -67,12 +67,12 @@ public enum DerbyMetadataPackager {
 		MetadataPackager.INSTANCE.writeMetadata(file, metadata);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public HashMap<String, String> getLocalPluginVersions(Session session){
 		HashMap<String, String> plugins = new HashMap<String, String>();
-		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL); //$NON-NLS-1$
-		List<Object[]> plugin = q.list();
-		for (Object[] version : plugin){
+		NativeQuery<?> q = session.createNativeQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL); //$NON-NLS-1$
+		List<?> plugin = q.list();
+		for (Object dversion : plugin){
+			Object[] version = (Object[])dversion;
 			plugins.put((String)version[1], (String)version[0]);
 		}
 		return plugins;

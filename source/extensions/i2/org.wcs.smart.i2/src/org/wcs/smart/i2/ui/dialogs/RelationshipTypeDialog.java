@@ -83,7 +83,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -183,46 +183,46 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
 		boolean attributesModified = false;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+
 			s.beginTransaction();
-			s.saveOrUpdate(type);
-			
-			for (IntelRelationshipTypeAttribute a : attributeList){
-				if (!type.getAttributes().contains(a)){
-					type.getAttributes().add(a);
-					attributesModified = true;
+			try {
+				s.saveOrUpdate(type);
+				
+				for (IntelRelationshipTypeAttribute a : attributeList){
+					if (!type.getAttributes().contains(a)){
+						type.getAttributes().add(a);
+						attributesModified = true;
+					}
 				}
-			}
-			List<IntelRelationshipTypeAttribute> toDelete = new ArrayList<IntelRelationshipTypeAttribute>();
-			for (IntelRelationshipTypeAttribute a : type.getAttributes()){
-				if (!attributeList.contains(a)){					
-					//delete any entity attribute value associations
-					Query qDelete = s.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue WHERE id.attribute = :att AND id.relationship IN (FROM IntelEntityRelationship r WHERE r.relationshipType = :relationshipType ) "); //$NON-NLS-1$
-					qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
-					qDelete.setParameter("relationshipType", type); //$NON-NLS-1$
-					qDelete.executeUpdate();
-					toDelete.add(a);
-					attributesModified = true;
+				List<IntelRelationshipTypeAttribute> toDelete = new ArrayList<IntelRelationshipTypeAttribute>();
+				for (IntelRelationshipTypeAttribute a : type.getAttributes()){
+					if (!attributeList.contains(a)){					
+						//delete any entity attribute value associations
+						Query<?> qDelete = s.createQuery("DELETE FROM IntelEntityRelationshipAttributeValue WHERE id.attribute = :att AND id.relationship IN (FROM IntelEntityRelationship r WHERE r.relationshipType = :relationshipType ) "); //$NON-NLS-1$
+						qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
+						qDelete.setParameter("relationshipType", type); //$NON-NLS-1$
+						qDelete.executeUpdate();
+						toDelete.add(a);
+						attributesModified = true;
+					}
 				}
-			}
-			type.getAttributes().removeAll(toDelete);
-			int order = 1;
-			for (IntelRelationshipTypeAttribute a : attributeList){
-				int index = type.getAttributes().indexOf(a);
-				if (index >= 0){
-					type.getAttributes().get(index).setOrder(order++);
+				type.getAttributes().removeAll(toDelete);
+				int order = 1;
+				for (IntelRelationshipTypeAttribute a : attributeList){
+					int index = type.getAttributes().indexOf(a);
+					if (index >= 0){
+						type.getAttributes().get(index).setOrder(order++);
+					}
 				}
+				Collections.sort(type.getAttributes(), (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
+				s.getTransaction().commit();
+				
+			}catch (Exception ex){
+				if (s.getTransaction().isActive())s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.RelationshipTypeDialog_SaveError +ex.getMessage(), ex);
+				return;
 			}
-			Collections.sort(type.getAttributes(), (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
-			s.getTransaction().commit();
-			
-		}catch (Exception ex){
-			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.RelationshipTypeDialog_SaveError +ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		
 		
@@ -702,8 +702,8 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					Session session = HibernateManager.openSession();
-					try{
+					try(Session session = HibernateManager.openSession()){
+
 						for (IntelRelationshipTypeAttribute x : toDelete){
 							try{
 								DeleteManager.canDelete(x, session);
@@ -712,8 +712,6 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 								warnings.add(MessageFormat.format(Messages.RelationshipTypeDialog_AttributeDeleteWarn, ((IntelRelationshipTypeAttribute) x).getAttribute().getName(), ex.getMessage()));
 							}
 						}	
-					}finally{
-						session.close();
 					}
 				}
 				
@@ -755,8 +753,7 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 					InterruptedException {
 				List<IntelEntityType> types = new ArrayList<IntelEntityType>();
 				List<Object> groups = new ArrayList<Object>();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					if (type.getUuid() != null){
 						type = (IntelRelationshipType) s.get(IntelRelationshipType.class, type.getUuid());
 						type.getNames().size();
@@ -773,8 +770,6 @@ public class RelationshipTypeDialog extends TitleAreaDialog {
 					entityTypeSiblings.remove(type);
 					types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
 					groups.addAll(RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea()));
-				}finally{
-					s.close();
 				}
 				
 				

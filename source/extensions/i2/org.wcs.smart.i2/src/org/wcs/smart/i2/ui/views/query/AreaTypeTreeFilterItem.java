@@ -54,8 +54,7 @@ public class AreaTypeTreeFilterItem extends DeferredTreeFilterItem {
 		if (kids == null){
 			synchronized (LOCK) {
 				if (kids == null){
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						ArrayList<FilterTreeItem> temp = new ArrayList<>();
 						List<Area> items = HibernateManager.loadAreas(type, s);
 						if (items != null){
@@ -64,8 +63,6 @@ public class AreaTypeTreeFilterItem extends DeferredTreeFilterItem {
 							}
 						}
 						kids = temp;
-					}finally{
-						s.close();
 					}
 				}
 			}

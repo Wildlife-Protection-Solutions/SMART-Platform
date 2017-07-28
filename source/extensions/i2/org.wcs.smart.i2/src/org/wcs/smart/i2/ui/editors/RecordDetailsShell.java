@@ -222,8 +222,7 @@ public class RecordDetailsShell extends SmartShellDialog{
 			String narr = ""; //$NON-NLS-1$
 			Date dCreated;
 			Date dModified;
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				IntelRecord temp = (IntelRecord)s.get(IntelRecord.class, record.getUuid());
 				name = temp.getTitle();
 				narr = temp.getDescription();
@@ -234,8 +233,6 @@ public class RecordDetailsShell extends SmartShellDialog{
 					sbEntities.append(", "); //$NON-NLS-1$
 				}
 				if (sbEntities.length() > 0) sbEntities.delete(sbEntities.length() - 2, sbEntities.length());
-			}finally{
-				s.close();
 			}
 			final String name1 = name;
 			final String narr1 = narr;

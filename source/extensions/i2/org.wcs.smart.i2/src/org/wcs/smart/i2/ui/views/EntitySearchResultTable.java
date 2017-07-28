@@ -69,7 +69,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.IntelSecurityManager;
@@ -386,20 +385,18 @@ public class EntitySearchResultTable extends Composite {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(Messages.EntitySearchResultTable_DeleteTaskName, itemsToDelete.size());
-					Session s = HibernateManager.openSession(new AttachmentInterceptor());
-					try{
+					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
-						for (IntelEntity entity : itemsToDelete){	
-							EntityManager.INSTANCE.deleteEntity(entity, s);
-							monitor.worked(1);
+						try{
+							for (IntelEntity entity : itemsToDelete){	
+								EntityManager.INSTANCE.deleteEntity(entity, s);
+								monitor.worked(1);
+							}
+							s.getTransaction().commit();
+						}catch (Exception ex){
+							s.getTransaction().rollback();
+							throw new InvocationTargetException(ex);
 						}
-						s.getTransaction().commit();
-					}catch (Exception ex){
-						s.getTransaction().rollback();
-						throw new InvocationTargetException(ex);
-						
-					}finally{
-						s.close();
 					}
 					try{
 						context.get(IEventBroker.class).send(IntelEvents.ENTITY_DELETE, itemsToDelete);

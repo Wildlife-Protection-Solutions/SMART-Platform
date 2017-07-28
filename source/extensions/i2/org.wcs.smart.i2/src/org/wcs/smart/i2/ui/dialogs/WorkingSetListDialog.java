@@ -63,9 +63,9 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
@@ -269,22 +269,21 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		String newName = WorkingSetView.getWorkingsetName(getShell(), MessageFormat.format(Messages.WorkingSetListDialog_DefaultCopyWsName, itemToCopy.getName()));
 		if (newName == null) return;
 		
-		Session s = HibernateManager.openSession();
 		IntelWorkingSet copy = null;
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			IntelWorkingSet ic = (IntelWorkingSet)s.get(IntelWorkingSet.class, itemToCopy.getUuid());
-			copy = WorkingSetManager.INSTANCE.clone(ic);
-			copy.setName(newName);
-			copy.updateName(SmartDB.getCurrentLanguage(), newName);
-			copy.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newName);
-			s.save(copy);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.WorkingSetListDialog_SaveError, ex);
-		}finally{
-			s.close();
+			try {
+				IntelWorkingSet ic = (IntelWorkingSet)s.get(IntelWorkingSet.class, itemToCopy.getUuid());
+				copy = WorkingSetManager.INSTANCE.clone(ic);
+				copy.setName(newName);
+				copy.updateName(SmartDB.getCurrentLanguage(), newName);
+				copy.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newName);
+				s.save(copy);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				if (s.getTransaction().isActive())s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.WorkingSetListDialog_SaveError, ex);
+			}
 		}
 		if (copy != null) eventBroker.send(IntelEvents.WS_NEW, copy);
 		loadWorkingsets.schedule();
@@ -294,30 +293,26 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		IntelWorkingSet toRename = getSelectedItem();
 		if (toRename == null) return;
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			toRename = (IntelWorkingSet) s.get(IntelWorkingSet.class, toRename.getUuid());
 			if (toRename == null){
 				Intelligence2PlugIn.displayLog(Messages.WorkingSetListDialog_WsNotFound, null);
 				return;
 			}
 			toRename.getNames().size();
-		}finally{
-			s.close();
 		}
 		
 		TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), toRename);
 		if (dialog.open() == Window.OK){
-			s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
-				s.saveOrUpdate(toRename);
-				s.getTransaction().commit();
-			}catch (Exception ex){
-				s.getTransaction().rollback();
-				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetListDialog_RenameError, toRename.getName(), ex.getMessage()), ex);
-			}finally{
-				s.close();
+				try {
+					s.saveOrUpdate(toRename);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetListDialog_RenameError, toRename.getName(), ex.getMessage()), ex);
+				}
 			}
 			lastSelection = new StructuredSelection(toRename);
 			eventBroker.send(IntelEvents.WS_MODIFIED, toRename);
@@ -333,17 +328,16 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 		}
 		
 		boolean deleteok = false;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			WorkingSetManager.INSTANCE.deleteWorkingSet(s, toDelete);
-			s.getTransaction().commit();
-			deleteok = true;
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetListDialog_DeleteError, toDelete.getName(), ex.getMessage()), ex);
-		}finally{
-			s.close();
+			try {
+				WorkingSetManager.INSTANCE.deleteWorkingSet(s, toDelete);
+				s.getTransaction().commit();
+				deleteok = true;
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetListDialog_DeleteError, toDelete.getName(), ex.getMessage()), ex);
+			}
 		}
 		if (deleteok) eventBroker.send(IntelEvents.WS_DELETE, toDelete);
 		
@@ -375,18 +369,12 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 
 	Job loadWorkingsets = new Job(Messages.WorkingSetListDialog_loadingJobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Display.getDefault().syncExec(()->	lstViewer.setInput(new String[]{DialogConstants.LOADING_TEXT}));
 			List<IntelWorkingSet> sets = null;
-			Session s = HibernateManager.openSession();
-			try{
-				sets = s.createCriteria(IntelWorkingSet.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list();
-			}finally{
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				sets = QueryFactory.buildQuery(s, IntelWorkingSet.class,  "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 			}
 			
 			Collections.sort(sets, (a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));

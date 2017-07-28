@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.connect.dataqueue.cybertracker.IJsonProcessor;
@@ -44,6 +43,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.SharedUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -79,7 +79,6 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 		return modifiedMissions;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
 		modifiedMissions = new HashSet<Mission>();
@@ -101,9 +100,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 
 			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
 			
-			List<CtMissionLink> links = session.createCriteria(CtMissionLink.class)
-					.add(Restrictions.eq("deviceId", deviceId)) //$NON-NLS-1$
-					.list();
+			List<CtMissionLink> links = QueryFactory.buildQuery(session, CtMissionLink.class, "deviceId", deviceId).list(); //$NON-NLS-1$
 
 			//we want to find the patrol leg with a day that matches this day and time
 			Set<MissionDay> matches = new HashSet<MissionDay>();

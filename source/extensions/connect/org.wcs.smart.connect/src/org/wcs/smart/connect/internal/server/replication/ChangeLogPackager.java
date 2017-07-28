@@ -143,11 +143,8 @@ public class ChangeLogPackager {
 	 * Creates metadata package
 	 */
 	private void packageMetadata() throws Exception{
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			DerbyMetadataPackager.INSTANCE.generateMetadata(s, record.getServer(), metadataFile, record.getStartRevision());
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -215,11 +212,8 @@ public class ChangeLogPackager {
 	}
 	
 	private List<ChangeLogItem> getChangeLogItems(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			return ChangeLogTableManager.INSTANCE.getAll(s, record.getConservationArea(), record.getStartRevision());
-		}finally{
-			s.close();
 		}
 	}
 }

@@ -73,8 +73,7 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 		LocationLayerType geomType = LocationLayerType.valueOf(ftype.getName().getLocalPart());
 		ArrayList<IntelLocation> locations = new ArrayList<IntelLocation>();
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			IntelRecord record = (IntelRecord) s.get(IntelRecord.class, recordUuid);
 			if (record != null && record.getLocations() != null){
 				for (IntelLocation location : record.getLocations()){
@@ -84,9 +83,7 @@ public class IntelRecordFeatureReader implements FeatureReader<SimpleFeatureType
 					}
 				}
 			}
-		}finally{
-			s.close();
-		}		
+		}	
 		fIterator = locations.iterator();
 	}
 	

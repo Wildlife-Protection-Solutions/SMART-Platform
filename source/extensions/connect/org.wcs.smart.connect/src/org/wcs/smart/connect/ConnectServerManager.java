@@ -85,33 +85,33 @@ public enum ConnectServerManager {
 	public void deleteConnectServerData(IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConnectServerInfoDialog_DeleteServerTaskName, 6);
 		
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-
-			ConservationArea ca = SmartDB.getCurrentConservationArea();
-			//delete items from database
-			(new CaConnectDeleteHandler()).beforeDelete(ca, s, progress.split(5));
+		try(Session s = HibernateManager.openSession()){
 		
-			//delete items from the datastore
-			Path fs = Paths.get(ca.getFileDataStoreLocation(), ConnectDatastore.CONNECT_FILESTORE_DIR);
-			if (Files.exists(fs)){
-				try{
-					FileUtils.forceDelete(fs.toFile());
-				}catch (Exception ex){
-					ConnectPlugIn.log(ex.getMessage(), ex);
+			s.beginTransaction();
+			try {
+				ConservationArea ca = SmartDB.getCurrentConservationArea();
+				//delete items from database
+				(new CaConnectDeleteHandler()).beforeDelete(ca, s, progress.split(5));
+			
+				//delete items from the datastore
+				Path fs = Paths.get(ca.getFileDataStoreLocation(), ConnectDatastore.CONNECT_FILESTORE_DIR);
+				if (Files.exists(fs)){
+					try{
+						FileUtils.forceDelete(fs.toFile());
+					}catch (Exception ex){
+						ConnectPlugIn.log(ex.getMessage(), ex);
+					}
+				}
+				
+				//run any delete handlers
+				runAfterDeleteHandlers(s);
+				progress.worked(1);
+				s.getTransaction().commit();
+			}finally{
+				if (s.getTransaction().isActive()){
+					s.getTransaction().rollback();
 				}
 			}
-			
-			//run any delete handlers
-			runAfterDeleteHandlers(s);
-			progress.worked(1);
-			s.getTransaction().commit();
-		}finally{
-			if (s.getTransaction().isActive()){
-				s.getTransaction().rollback();
-			}
-			s.close();
 		}
 	}
 	

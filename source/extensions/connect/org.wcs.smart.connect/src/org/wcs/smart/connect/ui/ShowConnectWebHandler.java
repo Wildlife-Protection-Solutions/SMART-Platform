@@ -38,9 +38,9 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.BrowserView;
 import org.wcs.smart.util.E3Utils;
@@ -71,17 +71,11 @@ public class ShowConnectWebHandler {
 				mService.move(part, (MElementContainer<MUIElement>)((MArea)((MPlaceholder)element).getRef()).getChildren().get(0), 0);
 				ePartService.showPart(part, PartState.ACTIVATE);
 			}
-			Session s = HibernateManager.openSession();
-			try{
-				ConnectServer cs = (ConnectServer) s.createCriteria(ConnectServer.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.uniqueResult();
+			try(Session s = HibernateManager.openSession()){
+				ConnectServer cs = QueryFactory.buildQuery(s, ConnectServer.class, "conservationArea", SmartDB.getCurrentConservationArea()).uniqueResult(); //$NON-NLS-1$
 				if (cs != null){
 					part.getContext().set(BrowserView.DEFAULT_URL, cs.getServerUrl() + "/connect"); //$NON-NLS-1$
-				}
-							
-			}finally{
-				s.close();
+				}				
 			}
 		
 			((BrowserView)E3Utils.getSourceObject(part)).goHome();

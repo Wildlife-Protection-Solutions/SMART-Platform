@@ -56,8 +56,7 @@ public class AddConnectJob extends Job {
 		//required if run during restore to ensure Display.syncexec calls don't block
 		DisplayAccess.accessDisplayDuringStartup();
 						
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			monitor.beginTask(Messages.AddConnectJob_TaskName, 10);
 			String currentVersion = HibernateManager.getPlugInVersion(ConnectPlugIn.PLUGIN_ID, session);
 			if (currentVersion == null){
@@ -84,8 +83,6 @@ public class AddConnectJob extends Job {
 			//run the upgrader to upgrade to the current version
 			ConnectDatabaseUpgrader.upgrade(currentVersion, session);
 					
-		}finally{
-			session.close();
 		}
 		return Status.OK_STATUS;
 	}	

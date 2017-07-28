@@ -12,7 +12,7 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
@@ -59,7 +59,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		}
 		
 		String cnt = "SELECT count(*) " + hql; //$NON-NLS-1$
-		Query q = connection.getSession().createQuery(cnt);
+		Query<?> q = connection.getSession().createQuery(cnt);
 		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
 		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){

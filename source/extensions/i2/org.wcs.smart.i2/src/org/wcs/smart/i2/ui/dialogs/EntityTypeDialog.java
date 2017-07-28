@@ -30,6 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -81,14 +84,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -176,80 +178,79 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		}
 		super.cancelPressed();
 	}
-	@SuppressWarnings("unchecked")
+	
 	@Override
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
 		boolean attributesModified = false;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			s.saveOrUpdate(type);
-			
-			//set order and update groups
-			for (int i = 0; i < groups.size(); i ++){
-				groups.get(i).setOrder(i);
-				s.saveOrUpdate(groups.get(i));
-			}
-			
-			for (IntelEntityTypeAttribute a : attributeList){
-				if (!type.getAttributes().contains(a)){
-					//new items 
-					type.getAttributes().add(a);
-					attributesModified = true;
+			try {
+				s.saveOrUpdate(type);
+				
+				//set order and update groups
+				for (int i = 0; i < groups.size(); i ++){
+					groups.get(i).setOrder(i);
+					s.saveOrUpdate(groups.get(i));
 				}
-			}
-			
-			List<IntelEntityTypeAttribute> toDelete = new ArrayList<IntelEntityTypeAttribute>();
-			for (IntelEntityTypeAttribute a : type.getAttributes()){
-				if (!attributeList.contains(a)){
-					//delete any entity attribute value associations
-					Query qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att AND id.entity IN ( FROM IntelEntity e WHERE e.entityType = :entityType ) "); //$NON-NLS-1$
-					qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
-					qDelete.setParameter("entityType", type); //$NON-NLS-1$
-					qDelete.executeUpdate();
-					toDelete.add(a);
-					attributesModified = true;
-				}
-			}
-			type.getAttributes().removeAll(toDelete);
-			
-			HashMap<IntelEntityTypeAttributeGroup, Integer> orderCnt = new HashMap<>();
-			for (IntelEntityTypeAttribute a : attributeList){
-				Integer x = orderCnt.get(a.getAttributeGroup());
-				if (x == null){
-					x = 0;
-				}
-				x++;
-				orderCnt.put(a.getAttributeGroup(), x);
-				for (IntelEntityTypeAttribute aa : type.getAttributes()){
-					if (aa.equals(a)){
-						aa.setOrder(x);
-						break;
+				
+				for (IntelEntityTypeAttribute a : attributeList){
+					if (!type.getAttributes().contains(a)){
+						//new items 
+						type.getAttributes().add(a);
+						attributesModified = true;
 					}
 				}
-				a.setOrder(x);
-			}
-			Collections.sort(type.getAttributes(), (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
-			Collections.sort(groups, (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
-			
-			//remove groups
-			List<IntelEntityTypeAttributeGroup> currentGroups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
-					.add(Restrictions.eq("entityType", type)) //$NON-NLS-1$
-					.list();
-			for (IntelEntityTypeAttributeGroup g : currentGroups){
-				if (!groups.contains(g)){
-					s.delete(g);
+				
+				List<IntelEntityTypeAttribute> toDelete = new ArrayList<IntelEntityTypeAttribute>();
+				for (IntelEntityTypeAttribute a : type.getAttributes()){
+					if (!attributeList.contains(a)){
+						//delete any entity attribute value associations
+						Query<?> qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att AND id.entity IN ( FROM IntelEntity e WHERE e.entityType = :entityType ) "); //$NON-NLS-1$
+						qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
+						qDelete.setParameter("entityType", type); //$NON-NLS-1$
+						qDelete.executeUpdate();
+						toDelete.add(a);
+						attributesModified = true;
+					}
 				}
+				type.getAttributes().removeAll(toDelete);
+				
+				HashMap<IntelEntityTypeAttributeGroup, Integer> orderCnt = new HashMap<>();
+				for (IntelEntityTypeAttribute a : attributeList){
+					Integer x = orderCnt.get(a.getAttributeGroup());
+					if (x == null){
+						x = 0;
+					}
+					x++;
+					orderCnt.put(a.getAttributeGroup(), x);
+					for (IntelEntityTypeAttribute aa : type.getAttributes()){
+						if (aa.equals(a)){
+							aa.setOrder(x);
+							break;
+						}
+					}
+					a.setOrder(x);
+				}
+				Collections.sort(type.getAttributes(), (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
+				Collections.sort(groups, (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
+				
+				//remove groups
+				List<IntelEntityTypeAttributeGroup> currentGroups = 
+						QueryFactory.buildQuery(s,IntelEntityTypeAttributeGroup.class, "entityType", type) //$NON-NLS-1$
+						.getResultList();
+				for (IntelEntityTypeAttributeGroup g : currentGroups){
+					if (!groups.contains(g)){
+						s.delete(g);
+					}
+				}
+				s.flush();
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				if (s.getTransaction().isActive())s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
+				return;
 			}
-			s.flush();
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		if (isNew){
 			broker.send(IntelEvents.ENTITY_TYPE_NEW, type);
@@ -817,8 +818,8 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					Session session = HibernateManager.openSession();
-					try{
+					try(Session session = HibernateManager.openSession()){
+
 						for (IntelEntityTypeAttribute x : toDelete){
 							try{
 								DeleteManager.canDelete(x, session);
@@ -841,8 +842,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 								warnings.add(MessageFormat.format(Messages.EntityTypeDialog_GroupWarning, g.getName(), ex.getMessage()));
 							}
 						}
-					}finally{
-						session.close();
 					}
 				}
 				
@@ -908,7 +907,6 @@ public class EntityTypeDialog extends TitleAreaDialog {
 		try{
 		pmd.run(true, false, new IRunnableWithProgress() {
 			
-			@SuppressWarnings("unchecked")
 			@Override
 			public void run(IProgressMonitor smonitor) throws InvocationTargetException,
 					InterruptedException {
@@ -916,8 +914,8 @@ public class EntityTypeDialog extends TitleAreaDialog {
 				monitor.beginTask(Messages.EntityTypeDialog_LoadingTaskName, 4);
 				
 				monitor.worked(1);
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
+
 					if (type.getUuid() != null){
 						type = (IntelEntityType) s.get(IntelEntityType.class, type.getUuid());
 						type.getNames().size();
@@ -935,15 +933,16 @@ public class EntityTypeDialog extends TitleAreaDialog {
 					entityTypeSiblings.remove(type);
 					monitor.worked(1);
 					if (type.getUuid() != null){
-						groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
-								.add(Restrictions.eq("entityType", type)) //$NON-NLS-1$
-								.addOrder(Order.asc("order")) //$NON-NLS-1$
-								.list();
+						CriteriaBuilder cb = s.getCriteriaBuilder();
+						CriteriaQuery<IntelEntityTypeAttributeGroup> c = cb.createQuery(IntelEntityTypeAttributeGroup.class);
+						Root<IntelEntityTypeAttributeGroup> from = c.from(IntelEntityTypeAttributeGroup.class);
+						c.where(cb.equal(from.get("entityType"), type)); //$NON-NLS-1$
+						c.orderBy(cb.asc(from.get("order"))); //$NON-NLS-1$
+						groups = s.createQuery(c).getResultList();
+						
 						for (IntelEntityTypeAttributeGroup g : groups) g.getNames().size();
 					}
 					monitor.worked(1);
-				}finally{
-					s.close();
 				}
 				
 				Display.getDefault().syncExec(new Runnable(){

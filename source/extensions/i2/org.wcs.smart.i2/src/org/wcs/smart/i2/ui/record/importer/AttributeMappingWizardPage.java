@@ -29,6 +29,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -50,13 +54,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.record.importer.RecordImportConfig;
 
@@ -142,7 +146,6 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 	
 	Job j = new Job(Messages.AttributeMappingWizardPage1_loadingAttributeJobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (lastFile != null){
@@ -154,15 +157,15 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 			HashSet<IntelRecordSourceAttribute> recordattributes = new HashSet<IntelRecordSourceAttribute>();
 			
 			
-			Session s = HibernateManager.openSession();
-			try{
-				List<IntelRecordSourceAttribute> atts = s.createCriteria(IntelRecordSourceAttribute.class, "rs") //$NON-NLS-1$
-						.createAlias("rs.source", "src") //$NON-NLS-1$ //$NON-NLS-2$
-						.add(Restrictions.eq("src.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.list();
-				recordattributes.addAll(atts);
-			}finally{
-				s.close();
+
+			try(Session s = HibernateManager.openSession()){
+				
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<IntelRecordSourceAttribute> c = cb.createQuery(IntelRecordSourceAttribute.class);
+				c.from(IntelRecordSourceAttribute.class);
+				Root<IntelRecordSource> srcfrom = c.from(IntelRecordSource.class);
+				c.where(cb.equal(srcfrom.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+				recordattributes.addAll(s.createQuery(c).list());
 			}
 			
 			//create the column headers from the csv file

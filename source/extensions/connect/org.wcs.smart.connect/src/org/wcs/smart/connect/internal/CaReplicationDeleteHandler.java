@@ -75,15 +75,15 @@ public class CaReplicationDeleteHandler implements ICaDeleteHandler {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							//run in job to get a new session as cannot reuse the existing one
-							Session s = HibernateManager.openSession();
-							try {
+							
+							try (Session s = HibernateManager.openSession()){
 								s.beginTransaction();
-								DerbyReplicationManager.INSTANCE.enableReplication(session);
-								s.getTransaction().commit();
-							}catch (Exception ex){
-								resetException = ex;
-							}finally{
-								s.close();
+								try {
+									DerbyReplicationManager.INSTANCE.enableReplication(session);
+									s.getTransaction().commit();
+								}catch (Exception ex){
+									resetException = ex;
+								}
 							}
 							return org.eclipse.core.runtime.Status.OK_STATUS;
 						}

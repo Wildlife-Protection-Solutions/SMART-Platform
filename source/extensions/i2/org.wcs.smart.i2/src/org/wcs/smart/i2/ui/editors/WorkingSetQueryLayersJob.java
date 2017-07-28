@@ -95,14 +95,11 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 		IntelWorkingSet workingset = null;
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
 				if (workingset.getQueries() != null){
 					workingset.getQueries().forEach(e->e.getQuery().getName());
 				}
-			}finally{
-				s.close();
 			}
 		}
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
@@ -181,8 +178,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 						
 						//ensure the query is still part of the working set; it might have been deleted by the user
 						boolean add = false;
-						Session s = HibernateManager.openSession();
-						try{
+						try(Session s = HibernateManager.openSession()){
 							IntelWorkingSet temp = (IntelWorkingSet) s.get(IntelWorkingSet.class, ws);
 							if (temp.getQueries() != null){
 								for (IntelWorkingSetQuery tq : temp.getQueries()){
@@ -192,8 +188,6 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 									}
 								}
 							}
-						}finally{
-							s.close();
 						}
 						if (!add) return;
 						

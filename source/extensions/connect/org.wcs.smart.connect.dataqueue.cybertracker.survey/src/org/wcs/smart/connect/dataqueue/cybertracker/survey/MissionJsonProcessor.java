@@ -41,7 +41,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.wcs.smart.SmartContext;
@@ -73,6 +72,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
@@ -516,7 +516,6 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		 }
 	}
 	
-	@SuppressWarnings("unchecked")
 	private CtMissionLink createMissionFromSighting(JSONObject sighting, String deviceId, UUID ctUuid, int observationCounter, Session session) throws Exception{
 		Mission mission = new Mission();
 		
@@ -546,10 +545,11 @@ public class MissionJsonProcessor implements IJsonProcessor {
 			if (key.startsWith(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX)){
 				String missionPropKey = key.substring(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX.length());
 				
-				List<MissionAttribute> mas = session.createCriteria(MissionAttribute.class)
-						.add(Restrictions.eq("keyId", missionPropKey)) //$NON-NLS-1$
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				List<MissionAttribute> mas = QueryFactory.buildQuery(session, MissionAttribute.class,
+						new Object[] {"keyId", missionPropKey}, //$NON-NLS-1$
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
 						.list();
+	
 				if (mas.size() == 0){
 					warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_MissionAttributeNotFound, missionPropKey));
 				}else if (mas.size() > 1){

@@ -24,13 +24,15 @@ package org.wcs.smart.connect.internal.server.replication;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
@@ -53,58 +55,63 @@ public class CleanUpReplicationJob extends Job{
 		super(Messages.CleanUpReplicationJob_jobname);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		Date d = new Date();
 		Date lastHour = new Date(d.getTime() - DerbyReplicationManager.REPLICATION_MAXTIME_DAYS * 24 * 60 * 60 * 1000l);
 		
 		//download change log
-		Session s = HibernateManager.openSession();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			//we always want at least one history record of the given type
-			//identifying when last executed to prevent users from
-			//syncing really old databases
-			List<ConnectSyncHistoryRecord> lastUploads = (List<ConnectSyncHistoryRecord>) s.createCriteria(ConnectSyncHistoryRecord.class)
-					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.UPLOAD)) //$NON-NLS-1$
-					.add(Restrictions.eq("status", ConnectSyncHistoryRecord.Status.DONE)) //$NON-NLS-1$
-					.add(Restrictions.lt("datetime", lastHour)) //$NON-NLS-1$
-					.addOrder(Order.desc("datetime")) //$NON-NLS-1$
-					.setMaxResults(2)
-					.list();
-			
-			if (lastUploads.size() == 2){
-			
-				ConnectSyncHistoryRecord toDelete = lastUploads.get(1);
-			
-				//delete records
-				ChangeLogTableManager.INSTANCE.deleteRecords(s, ca, toDelete.getEndRevision());
-				SyncHistoryManager.INSTANCE.deleteRecords(s, ca, ConnectSyncHistoryRecord.Type.UPLOAD, toDelete.getDatetime());
+			try{
+				//we always want at least one history record of the given type
+				//identifying when last executed to prevent users from
+				//syncing really old databases
+				
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<ConnectSyncHistoryRecord> c = cb.createQuery(ConnectSyncHistoryRecord.class);
+				Root<ConnectSyncHistoryRecord> from = c.from(ConnectSyncHistoryRecord.class);
+				c.where(cb.and(
+						cb.equal(from.get("conservationArea"), ca), //$NON-NLS-1$
+						cb.equal(from.get("type"), ConnectSyncHistoryRecord.Type.UPLOAD), //$NON-NLS-1$
+						cb.equal(from.get("status"), ConnectSyncHistoryRecord.Status.DONE), //$NON-NLS-1$
+						cb.lessThan(from.get("datetime"), lastHour) //$NON-NLS-1$
+						));
+				c.orderBy(cb.desc(from.get("datetime"))); //$NON-NLS-1$
+				
+				List<ConnectSyncHistoryRecord> lastUploads = s.createQuery(c).setMaxResults(2).list();
+				
+				if (lastUploads.size() == 2){
+				
+					ConnectSyncHistoryRecord toDelete = lastUploads.get(1);
+				
+					//delete records
+					ChangeLogTableManager.INSTANCE.deleteRecords(s, ca, toDelete.getEndRevision());
+					SyncHistoryManager.INSTANCE.deleteRecords(s, ca, ConnectSyncHistoryRecord.Type.UPLOAD, toDelete.getDatetime());
+				}
+				CriteriaQuery<ConnectSyncHistoryRecord> c2 = cb.createQuery(ConnectSyncHistoryRecord.class);
+				Root<ConnectSyncHistoryRecord> from2 = c2.from(ConnectSyncHistoryRecord.class);
+				c2.where(cb.and(
+						cb.equal(from2.get("conservationArea"), ca), //$NON-NLS-1$
+						cb.equal(from2.get("type"), ConnectSyncHistoryRecord.Type.DOWNLOAD), //$NON-NLS-1$
+						from2.get("status").in(ConnectSyncHistoryRecord.Status.DONE, ConnectSyncHistoryRecord.Status.NODATA), //$NON-NLS-1$
+						cb.lessThan(from2.get("datetime"), lastHour) //$NON-NLS-1$
+						));
+				c2.orderBy(cb.desc(from2.get("datetime"))); //$NON-NLS-1$
+				List<ConnectSyncHistoryRecord> lastDownloads = s.createQuery(c2).setMaxResults(2).list();
+
+				if (lastDownloads.size() == 2){
+					ConnectSyncHistoryRecord toDelete = lastDownloads.get(1);
+					SyncHistoryManager.INSTANCE.deleteRecords(s, ca, ConnectSyncHistoryRecord.Type.DOWNLOAD, toDelete.getDatetime());
+				}
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				ConnectPlugIn.log("Unable to cleanup change log table", ex); //$NON-NLS-1$
+				
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				
 			}
-			
-			List<ConnectSyncHistoryRecord> lastDownloads = (List<ConnectSyncHistoryRecord>) s.createCriteria(ConnectSyncHistoryRecord.class)
-					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.DOWNLOAD)) //$NON-NLS-1$
-					.add(Restrictions.in("status", new ConnectSyncHistoryRecord.Status[]{ConnectSyncHistoryRecord.Status.DONE, ConnectSyncHistoryRecord.Status.NODATA})) //$NON-NLS-1$
-					.add(Restrictions.lt("datetime", lastHour)) //$NON-NLS-1$
-					.addOrder(Order.desc("datetime")) //$NON-NLS-1$
-					.setMaxResults(2)
-					.list();
-			if (lastDownloads.size() == 2){
-				ConnectSyncHistoryRecord toDelete = lastDownloads.get(1);
-				SyncHistoryManager.INSTANCE.deleteRecords(s, ca, ConnectSyncHistoryRecord.Type.DOWNLOAD, toDelete.getDatetime());
-			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			ConnectPlugIn.log("Unable to cleanup change log table", ex); //$NON-NLS-1$
-			
-			if (s.getTransaction().isActive()) s.getTransaction().rollback();
-			
-		}finally{
-			s.close();
 		}
 		return Status.OK_STATUS;
 	}

@@ -40,8 +40,7 @@ public enum AutoReplicationStartUp {
 	INSTANCE;
 	
 	public void onStartUp(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			ConnectServer cs = ConnectHibernateManager.getConnectServer(s);
 			if (cs == null) return;
 			
@@ -50,8 +49,6 @@ public enum AutoReplicationStartUp {
 				int delay = ConnectServerOption.ConnectionOption.SYNC_MINUTE.getIntegerValue(cs);
 				enableAutoReplication(delay);
 			}
-		}finally{
-			s.close();
 		}
 	}
 	

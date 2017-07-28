@@ -209,13 +209,10 @@ public class SyncMultipleCaWizard extends Wizard {
 			
 			ConnectServer server = null;
 			ConnectUser cu = null;
-			Session s = HibernateManager.openSession();
 			String connectPassword = null;
-			try{
+			try(Session s = HibernateManager.openSession()){
 				cu = ConnectHibernateManager.getConnectUser(e, s);
 				server = ConnectHibernateManager.getConnectServer(s,ca);
-			}finally{
-				s.close();
 			}
 			if (server == null){
 				errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_SkippedServerInvalid, ca.getNameLabel()));

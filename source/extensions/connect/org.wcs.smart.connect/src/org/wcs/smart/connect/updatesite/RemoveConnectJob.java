@@ -64,41 +64,41 @@ public class RemoveConnectJob extends Job {
 
 	
 	private IStatus dropTables(){
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			//disable replication
-			DerbyReplicationManager.INSTANCE.disableReplication(session);
-			
-			//uninstall any triggers
-			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(session);
-
-			//drop all tables
-			for (int i = 0; i < TABLES.length; i ++){
-				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+			try {
+				//disable replication
+				DerbyReplicationManager.INSTANCE.disableReplication(session);
+				
+				//uninstall any triggers
+				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(session);
+	
+				//drop all tables
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				session.createNativeQuery("DROP FUNCTION smart.uuid").executeUpdate(); //$NON-NLS-1$
+				session.createNativeQuery("DROP FUNCTION smart.next_revision_id").executeUpdate(); //$NON-NLS-1$
+				session.createNativeQuery("DROP FUNCTION smart.is_replication_enabled_ca").executeUpdate(); //$NON-NLS-1$
+				
+				//clear version
+				HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.RemoveConnectJob_UninstallError, e);
+					}
+				});
+				return new Status(IStatus.ERROR, ConnectPlugIn.PLUGIN_ID, 1, Messages.RemoveConnectJob_UninstallError2 + e.getLocalizedMessage(), e); 
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
 				}
 			}
-			session.createSQLQuery("DROP FUNCTION smart.uuid").executeUpdate(); //$NON-NLS-1$
-			session.createSQLQuery("DROP FUNCTION smart.next_revision_id").executeUpdate(); //$NON-NLS-1$
-			session.createSQLQuery("DROP FUNCTION smart.is_replication_enabled_ca").executeUpdate(); //$NON-NLS-1$
-			
-			//clear version
-			HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-		} catch (final Exception e) {
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(Messages.RemoveConnectJob_UninstallError, e);
-				}
-			});
-			return new Status(IStatus.ERROR, ConnectPlugIn.PLUGIN_ID, 1, Messages.RemoveConnectJob_UninstallError2 + e.getLocalizedMessage(), e); 
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().rollback();
-			}
-			session.close();
 		}
 		return Status.OK_STATUS;
 	}

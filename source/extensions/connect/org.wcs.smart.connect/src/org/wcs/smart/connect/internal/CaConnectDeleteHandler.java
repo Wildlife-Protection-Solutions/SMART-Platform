@@ -22,7 +22,7 @@
 package org.wcs.smart.connect.internal;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
@@ -51,7 +51,7 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 		monitor.subTask(Messages.CaConnectDeleteHandler_TaskName);
 		
 		//SMART Connect Users
-		Query q = session.createQuery("delete from ConnectUser cu where cu in (SELECT cu2.uuid FROM ConnectUser cu2 where cu2.server.conservationArea = :ca)"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from ConnectUser cu where cu in (SELECT cu2.uuid FROM ConnectUser cu2 where cu2.server.conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 

@@ -23,7 +23,7 @@ package org.wcs.smart.i2;
 
 import java.util.UUID;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.internal.Messages;
@@ -48,24 +48,24 @@ public enum QueryManager {
 	 */
 	public IntelRecordObservationQuery deleteQuery(UUID queryUuid){
 		IntelRecordObservationQuery removed = null;
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			removed = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
-			if (removed == null) throw new Exception(Messages.QueryManager_NotFoundError);
-			
-			Query wsQuery = s.createQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query"); //$NON-NLS-1$
-			wsQuery.setParameter("query", removed); //$NON-NLS-1$
-			wsQuery.executeUpdate();
-			
-			s.delete(removed);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.QueryManager_DeleteError + ex.getMessage(), ex);
-			return null;
-		}finally{
-			s.close();
+			try {
+				removed = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
+				if (removed == null) throw new Exception(Messages.QueryManager_NotFoundError);
+				
+				Query<?> wsQuery = s.createQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query"); //$NON-NLS-1$
+				wsQuery.setParameter("query", removed); //$NON-NLS-1$
+				wsQuery.executeUpdate();
+				
+				s.delete(removed);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.QueryManager_DeleteError + ex.getMessage(), ex);
+				return null;
+			}
 		}
 		
 		return removed;

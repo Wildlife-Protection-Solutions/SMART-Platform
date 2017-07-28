@@ -105,14 +105,17 @@ public class UploadChangeLogJob extends FileUploaderJob {
 			JsonNode nd = (new ObjectMapper()).readTree(message);
 			long serverRevision = nd.get("server_revision").asLong(); //$NON-NLS-1$
 			
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
+			
 				s.beginTransaction();
-				ConnectServerStatus serverstatus = (ConnectServerStatus)s.get(ConnectServerStatus.class, item.getConservationArea().getUuid());
-				serverstatus.setServerRevision(serverRevision);
-				s.getTransaction().commit();
-			}finally{
-				s.close();
+				try {
+					ConnectServerStatus serverstatus = (ConnectServerStatus)s.get(ConnectServerStatus.class, item.getConservationArea().getUuid());
+					serverstatus.setServerRevision(serverRevision);
+					s.getTransaction().commit();
+				}catch (Exception ex) {
+					s.getTransaction().rollback();
+					throw ex;
+				}
 			}
 
 		}catch (Exception ex){
@@ -140,13 +143,16 @@ public class UploadChangeLogJob extends FileUploaderJob {
 	}
 	
 	private void saveHistoryRecord(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+		
 			s.beginTransaction();
-			s.saveOrUpdate(item);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+			try {
+				s.saveOrUpdate(item);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 	}
 

@@ -61,15 +61,12 @@ public abstract class EntitySearchJob extends Job{
 			progress.checkCanceled();
 			
 			IntelSearchResult entities = null; 
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				entities = search.doSearch(s, progress.split(1));
 			}catch (Exception ex){
 				Intelligence2PlugIn.log(ex.getMessage(), ex);
 				onError(ex);
 				return Status.OK_STATUS;
-			}finally{
-				s.close();
 			}
 			afterSearch(entities, progress.split(1));
 			

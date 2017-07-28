@@ -40,13 +40,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 import org.wcs.smart.connect.dataqueue.ui.IProcessingOptionPanel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -89,19 +89,18 @@ public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
 	@Override
 	public void okPressed(){
 		
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			for (IProcessingOptionPanel pnl : optionPanels){
-				pnl.update(session);
+			try{
+				for (IProcessingOptionPanel pnl : optionPanels){
+					pnl.update(session);
+				}
+				session.getTransaction().commit();
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
+			}catch (Exception ex){
+				ConnectDataQueuePlugin.displayLog(Messages.DataQueueProcessingOptionDialog_SaveError + ex.getMessage(), ex);
+				return;
 			}
-			session.getTransaction().commit();
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-		}catch (Exception ex){
-			ConnectDataQueuePlugin.displayLog(Messages.DataQueueProcessingOptionDialog_SaveError + ex.getMessage(), ex);
-			return;
-		}finally{
-			session.close();
 		}
 	}
 	
@@ -136,25 +135,20 @@ public class DataQueueProcessingOptionDialog extends TitleAreaDialog{
 		return main;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void initControls(){
 
 		HashMap<String, DataQueueProcessingOption> optionMap = new HashMap<String, DataQueueProcessingOption>();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			List<DataQueueProcessingOption> options = session.createCriteria(DataQueueProcessingOption.class)
-			.add(Restrictions.eq("id.conservationArea", SmartDB.getCurrentConservationArea().getUuid())) //$NON-NLS-1$
-			.list();
-			
-			for (DataQueueProcessingOption op : options){
-				optionMap.put(op.getOptionKey(), op);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				List<DataQueueProcessingOption> options = QueryFactory.buildQuery(session, DataQueueProcessingOption.class, "id.conservationArea", SmartDB.getCurrentConservationArea().getUuid()).list(); //$NON-NLS-1$
+				for (DataQueueProcessingOption op : options){
+					optionMap.put(op.getOptionKey(), op);
+				}
+			}finally{
+				session.getTransaction().rollback();
 			}
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
 		}
-		
 		for (IProcessingOptionPanel pnl :optionPanels){
 			pnl.initValues(optionMap);
 		}

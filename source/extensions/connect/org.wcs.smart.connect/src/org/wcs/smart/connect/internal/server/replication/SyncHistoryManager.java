@@ -24,16 +24,19 @@ package org.wcs.smart.connect.internal.server.replication;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Tools for managing the sync history table.
@@ -67,7 +70,7 @@ public enum SyncHistoryManager {
 	 * @param endDate
 	 */
 	public void deleteRecords(Session s, ConservationArea ca, Type type, Date endDate){
-		Query query = s.createQuery("DELETE FROM ConnectSyncHistoryRecord WHERE type = :type and conservationArea = :ca and datetime <= :datetime"); //$NON-NLS-1$
+		Query<?> query = s.createQuery("DELETE FROM ConnectSyncHistoryRecord WHERE type = :type and conservationArea = :ca and datetime <= :datetime"); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		query.setParameter("type", type); //$NON-NLS-1$
 		query.setParameter("datetime", endDate); //$NON-NLS-1$
@@ -81,16 +84,18 @@ public enum SyncHistoryManager {
 	public void errorActiveDownloadRecords(ConservationArea ca){
 		List<ConnectSyncHistoryRecord> items = SyncHistoryManager.INSTANCE.getActiveSyncRecords(ca, Type.DOWNLOAD);
 
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			for (ConnectSyncHistoryRecord r : items){
-				r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-				s.saveOrUpdate(r);
+			try {
+				for (ConnectSyncHistoryRecord r : items){
+					r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+					s.saveOrUpdate(r);
+				}
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			s.getTransaction().commit();
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -101,16 +106,19 @@ public enum SyncHistoryManager {
 	public void errorActiveUploadRecords(ConservationArea ca){
 		List<ConnectSyncHistoryRecord> items = SyncHistoryManager.INSTANCE.getActiveSyncRecords(ca, Type.UPLOAD);
 
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+		
 			s.beginTransaction();
-			for (ConnectSyncHistoryRecord r : items){
-				r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-				s.saveOrUpdate(r);
+			try {
+				for (ConnectSyncHistoryRecord r : items){
+					r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+					s.saveOrUpdate(r);
+				}
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			s.getTransaction().commit();
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -134,13 +142,15 @@ public enum SyncHistoryManager {
 		record.setStatus(ConnectSyncHistoryRecord.Status.ACTIVE);
 		record.setStatusUrl(null);
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			s.save(record);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+			try {
+				s.save(record);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 		
 		return record;
@@ -155,12 +165,8 @@ public enum SyncHistoryManager {
 	 */
 	public ConnectSyncHistoryRecord getLastNonErrorSyncRecord(ConservationArea ca,
 			ConnectSyncHistoryRecord.Type type){
-		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			return getLastNonErrorSyncRecord(s, ca, type);
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -171,19 +177,15 @@ public enum SyncHistoryManager {
 	 * @param type
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public List<ConnectSyncHistoryRecord> getActiveSyncRecords(ConservationArea ca,
 			ConnectSyncHistoryRecord.Type type){
 		
-		Session session = HibernateManager.openSession();
-		try{
-			return session.createCriteria(ConnectSyncHistoryRecord.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("type", type)) //$NON-NLS-1$
-				.add(Restrictions.eq("status", Status.ACTIVE)) //$NON-NLS-1$
+		try(Session session = HibernateManager.openSession()){
+			return QueryFactory.buildQuery(session, ConnectSyncHistoryRecord.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"type", type}, //$NON-NLS-1$
+				new Object[] {"status", Status.ACTIVE}) //$NON-NLS-1$
 				.list();
-		}finally{
-			session.close();
 		}
 	}
 	
@@ -196,13 +198,17 @@ public enum SyncHistoryManager {
 	 */
 	public ConnectSyncHistoryRecord getLastNonErrorSyncRecord(Session session, ConservationArea ca,
 			ConnectSyncHistoryRecord.Type type){
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<ConnectSyncHistoryRecord> c = cb.createQuery(ConnectSyncHistoryRecord.class);
+		Root<ConnectSyncHistoryRecord> from = c.from(ConnectSyncHistoryRecord.class);
+		c.where(cb.and(
+				cb.equal(from.get("conservationArea"), ca), //$NON-NLS-1$
+				cb.equal(from.get("type"), type), //$NON-NLS-1$
+				from.get("status").in(Status.ACTIVE, Status.DONE) //$NON-NLS-1$
+				));
+		c.orderBy(cb.desc(from.get("endRevision"))); //$NON-NLS-1$
+		ConnectSyncHistoryRecord record = session.createQuery(c).setMaxResults(1).uniqueResult();
 		
-		ConnectSyncHistoryRecord record = (ConnectSyncHistoryRecord) session.createCriteria(ConnectSyncHistoryRecord.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("type", type)) //$NON-NLS-1$
-				.add(Restrictions.in("status", new Object[]{Status.ACTIVE, Status.DONE})) //$NON-NLS-1$
-				.addOrder(Order.desc("endRevision")) //$NON-NLS-1$
-				.setMaxResults(1).uniqueResult();
 		if (record != null) record.getServer().getConservationArea().getUuid();
 		return record;
 	}

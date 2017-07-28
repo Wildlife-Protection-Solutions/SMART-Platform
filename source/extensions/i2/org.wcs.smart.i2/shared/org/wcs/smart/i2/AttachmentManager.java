@@ -22,8 +22,7 @@
 package org.wcs.smart.i2;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
@@ -52,16 +51,10 @@ public enum AttachmentManager {
 	public boolean canDelete(IntelAttachment attachment, Session session) throws Exception{
 		//attachments are linked to:
 		//entities; records
-		Long recordCnt = (Long)session.createCriteria(IntelRecordAttachment.class)
-			.add(Restrictions.eq("id.attachment", attachment)) //$NON-NLS-1$
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
+		Long recordCnt = QueryFactory.buildCountQuery(session, IntelRecordAttachment.class, new Object[] {"id.attachment", attachment}); //$NON-NLS-1$
 		if (recordCnt != 0) return false;
 		
-		recordCnt = (Long)session.createCriteria(IntelEntityAttachment.class)
-				.add(Restrictions.eq("id.attachment", attachment)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount())
-				.uniqueResult();
+		recordCnt = QueryFactory.buildCountQuery(session, IntelEntityAttachment.class, new Object[] {"id.attachment", attachment}); //$NON-NLS-1$
 		if (recordCnt != 0) return false;
 		
 		return true;

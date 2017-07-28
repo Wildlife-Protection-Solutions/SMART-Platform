@@ -57,27 +57,22 @@ public class RemoveIntelligenceJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		List<ConservationArea> cas = null;
 		
-		final Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			cas = HibernateManager.getConservationAreas(session);
-			uninstall(session);
-			HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-
-		} catch (Exception e) {
-			try{
-				session.getTransaction().rollback();
-			}catch (Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);	
-			}
-			Intelligence2PlugIn.displayLog(Messages.RemoveIntelligenceJob_UninstallError, e);
-			return new Status(Status.ERROR,Intelligence2PlugIn.PLUGIN_ID,e.getMessage());
-		} finally {
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
 			try {
-				session.close();
-			} catch (Exception ex) {
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
+				cas = HibernateManager.getConservationAreas(session);
+				uninstall(session);
+				HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+	
+			} catch (Exception e) {
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex){
+					Intelligence2PlugIn.log(ex.getMessage(), ex);	
+				}
+				Intelligence2PlugIn.displayLog(Messages.RemoveIntelligenceJob_UninstallError, e);
+				return new Status(Status.ERROR,Intelligence2PlugIn.PLUGIN_ID,e.getMessage());
 			}
 		}
 		

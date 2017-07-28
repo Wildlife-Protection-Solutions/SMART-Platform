@@ -84,7 +84,6 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
@@ -94,6 +93,7 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -356,14 +356,11 @@ public class QueryView {
 		if (x == null) return;
 		if (x instanceof QueryProxy){
 			IntelRecordObservationQuery toEdit = null;
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				toEdit = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, ((QueryProxy) x).getUuid());
 				if (toEdit != null){
 					toEdit.getNames();
 				}
-			}finally{
-				s.close();
 			}
 			if (toEdit == null){
 				Intelligence2PlugIn.log(Messages.QueryView_QueryNotFound, null);
@@ -571,19 +568,14 @@ public class QueryView {
 	
 	Job refreshQueriesJob = new Job(Messages.QueryView_RefreshJobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<QueryProxy> proxyItems;
-			Session s = HibernateManager.openSession();
-			try{
-				List<IntelRecordObservationQuery> items = s.createCriteria(IntelRecordObservationQuery.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list();
-				
+			try(Session s = HibernateManager.openSession()){
+				List<IntelRecordObservationQuery> items =
+						QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+			
 				proxyItems = items.stream().map(t->new QueryProxy(t.getName(), t.getUuid())).collect(Collectors.toList());
-			}finally{
-				s.close();
 			}
 
 			proxyItems.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));

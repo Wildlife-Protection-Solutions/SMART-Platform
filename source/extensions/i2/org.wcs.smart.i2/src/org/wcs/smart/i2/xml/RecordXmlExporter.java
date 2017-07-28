@@ -43,9 +43,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -106,7 +106,6 @@ public class RecordXmlExporter {
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public  boolean exportRecord(UUID recordUuid, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor,2);
 		
@@ -116,8 +115,7 @@ public class RecordXmlExporter {
 		Path outputFile = null;
 		List<File> attachmentsToInclude = new ArrayList<File>();
 			
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			IntelRecord record = (IntelRecord) session.get(IntelRecord.class, recordUuid);
 			if (record == null) throw new Exception(Messages.RecordXmlExporter_RecordNotFound);
 			progress.subTask(MessageFormat.format(Messages.RecordXmlExporter_SubTaskName, record.getTitle()));
@@ -218,9 +216,7 @@ public class RecordXmlExporter {
 					xmlLocation.setGeometry( location.getGeom() );
 					xmlLocation.setId(location.getId());
 					
-					List<IntelEntityLocation> entities = session.createCriteria(IntelEntityLocation.class)
-							.add(Restrictions.eq("id.location", location)) //$NON-NLS-1$
-							.list();
+					List<IntelEntityLocation> entities = QueryFactory.buildQuery(session, IntelEntityLocation.class, "id.location", location).getResultList(); //$NON-NLS-1$
 					for (IntelEntityLocation entity : entities){
 						LabelUuid xmlEntity =factory.createLabelUuid();;
 						xmlEntity.setUuid(UuidUtils.uuidToString(entity.getEntity().getUuid()));
@@ -270,8 +266,6 @@ public class RecordXmlExporter {
 					}
 				}
 			}
-		}finally{
-			session.close();
 		}
 		
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$

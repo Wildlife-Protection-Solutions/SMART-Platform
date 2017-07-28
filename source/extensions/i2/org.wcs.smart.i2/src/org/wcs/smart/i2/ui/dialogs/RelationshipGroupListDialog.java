@@ -106,11 +106,8 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			groups = null;
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){
 				groups = RelationshipTypeManager.INSTANCE.getRelationshipGroups(session, SmartDB.getCurrentConservationArea());
-			}finally{
-				session.close();
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){
@@ -317,8 +314,7 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 						InterruptedException {
 
 					monitor.beginTask(Messages.RelationshipGroupListDialog_DeleteTaskName, toDelete.size());
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						for (IntelRelationshipGroup t : toDelete){
 							monitor.subTask(t.getName());
 							s.beginTransaction();
@@ -331,9 +327,7 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 							}
 							monitor.worked(1);
 						}
-					}finally{
-						s.close();
-					}
+					}	
 					monitor.done();
 					
 				}

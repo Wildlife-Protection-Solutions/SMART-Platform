@@ -23,12 +23,14 @@ package org.wcs.smart.i2.handlers;
 
 import java.text.MessageFormat;
 
-import org.hibernate.Criteria;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -55,42 +57,27 @@ public class DeleteEmployeeAdvisor implements IDeleteAdvisor {
 		
 		StringBuilder sb = new StringBuilder();
 		
-		Criteria query = session.createCriteria(IntelAttachment.class);
-		query.add(Restrictions.eq("createdBy", em)); //$NON-NLS-1$
-		query.setProjection(Projections.rowCount());
-		long cnt = (Long)query.uniqueResult();
+		long cnt = QueryFactory.buildCountQuery(session, IntelAttachment.class, new Object[] {"createdBy", em}); //$NON-NLS-1$
 		if (cnt != 0){
 			sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_AttachmentError, SmartLabelProvider.getFullLabel(em), cnt));
 		}
 		
-		query = session.createCriteria(IntelEntity.class);
-		query.add(Restrictions.or(Restrictions.eq("createdBy", em), Restrictions.eq("lastModifiedBy", em))); //$NON-NLS-1$ //$NON-NLS-2$
-		query.setProjection(Projections.rowCount());
-		cnt = (Long)query.uniqueResult();
+		cnt = getReferenceCount(session, IntelEntity.class, em);
 		if (cnt != 0){
 			sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_EntityError, SmartLabelProvider.getFullLabel(em), cnt));
 		}
 		
-		query = session.createCriteria(IntelRecord.class);
-		query.add(Restrictions.or(Restrictions.eq("createdBy", em), Restrictions.eq("lastModifiedBy", em))); //$NON-NLS-1$ //$NON-NLS-2$
-		query.setProjection(Projections.rowCount());
-		cnt = (Long)query.uniqueResult();
+		cnt = getReferenceCount(session, IntelRecord.class, em);
 		if (cnt != 0){
 			sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_RecordError, SmartLabelProvider.getFullLabel(em), cnt));
 		}
 		
-		query = session.createCriteria(IntelWorkingSet.class);
-		query.add(Restrictions.or(Restrictions.eq("createdBy", em), Restrictions.eq("lastModifiedBy", em))); //$NON-NLS-1$ //$NON-NLS-2$
-		query.setProjection(Projections.rowCount());
-		cnt = (Long)query.uniqueResult();
+		cnt = getReferenceCount(session, IntelWorkingSet.class, em);
 		if (cnt != 0){
 			sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_WsError, SmartLabelProvider.getFullLabel(em), cnt));
 		}
 		
-		query = session.createCriteria(IntelRecordObservationQuery.class);
-		query.add(Restrictions.or(Restrictions.eq("createdBy", em), Restrictions.eq("lastModifiedBy", em))); //$NON-NLS-1$ //$NON-NLS-2$
-		query.setProjection(Projections.rowCount());
-		cnt = (Long)query.uniqueResult();
+		cnt = getReferenceCount(session, IntelRecordObservationQuery.class, em);
 		if (cnt != 0){
 			sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_QueryError, SmartLabelProvider.getFullLabel(em), cnt));
 		}
@@ -100,4 +87,16 @@ public class DeleteEmployeeAdvisor implements IDeleteAdvisor {
 		return sb.append(Messages.DeleteEmployeeAdvisor_LinkError).toString();
 	}
 
+	private <T> Long getReferenceCount(Session session, Class<T> clazz, Employee em) {
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Long> c = cb.createQuery(Long.class);
+		Root<T> root = c.from(clazz);
+		c.select(cb.count(root));
+		c.where(cb.or(
+				cb.equal( root.get("createdBy"), em), //$NON-NLS-1$
+				cb.equal( root.get("lastModifiedBy"), em))); //$NON-NLS-1$
+		
+		return session.createQuery(c).uniqueResult();
+	}
 }

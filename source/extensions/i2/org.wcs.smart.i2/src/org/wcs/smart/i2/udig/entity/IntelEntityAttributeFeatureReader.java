@@ -29,7 +29,7 @@ import java.util.UUID;
 
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -52,14 +52,10 @@ public class IntelEntityAttributeFeatureReader implements FeatureReader<SimpleFe
 	private SimpleFeatureType ftype;
 	private Iterator<IntelEntityAttributeValue> fIterator= null;
 	
-	@SuppressWarnings("unchecked")
 	public IntelEntityAttributeFeatureReader(UUID entityUuid, SimpleFeatureType ftype) {
 		this.ftype = ftype;
-		
-		Session s = HibernateManager.openSession();
-		try{
-			
-			Query q = s.createQuery("FROM IntelEntityAttributeValue WHERE id.entity.uuid = :entityUuid and id.attribute.type = :type"); //$NON-NLS-1$
+		try(Session s = HibernateManager.openSession()){			
+			Query<IntelEntityAttributeValue> q = s.createQuery("FROM IntelEntityAttributeValue WHERE id.entity.uuid = :entityUuid and id.attribute.type = :type", IntelEntityAttributeValue.class); //$NON-NLS-1$
 			q.setParameter("entityUuid", entityUuid); //$NON-NLS-1$
 			q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
 			
@@ -72,9 +68,7 @@ public class IntelEntityAttributeFeatureReader implements FeatureReader<SimpleFe
 				
 			}
 			fIterator = value.iterator();
-		}finally{
-			s.close();
-		}		
+		}	
 	}
 
 

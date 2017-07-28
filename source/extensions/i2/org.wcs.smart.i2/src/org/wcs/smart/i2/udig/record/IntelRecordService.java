@@ -72,16 +72,13 @@ public class IntelRecordService extends IService {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			String recordName = Messages.IntelRecordService_DefaultName;
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				IntelRecord r = (IntelRecord) s.get(IntelRecord.class, recordUuid);
 				if (r != null){
 					recordName = r.getTitle();
 				}	
 			}catch (Exception e){
 				Logger.getLogger(IntelRecordService.class.getName()).log(Level.WARNING, e.getMessage(), e);
-			}finally{
-				s.close();
 			}
 			
 			try{

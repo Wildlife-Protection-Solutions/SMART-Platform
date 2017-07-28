@@ -24,11 +24,11 @@ package org.wcs.smart.i2;
 import java.text.Collator;
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
@@ -52,20 +52,16 @@ public enum RelationshipTypeManager {
 	 * @param ca
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public List<IntelRelationshipType> getRelationshipTypes(Session session, ConservationArea ca){
-		List<IntelRelationshipType> types = session.createCriteria(IntelRelationshipType.class)
-			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-			.list();
+		List<IntelRelationshipType> types = 
+				QueryFactory.buildQuery(session, IntelRelationshipType.class, "conservationArea", ca).getResultList(); //$NON-NLS-1$
 		types.sort((IntelRelationshipType a, IntelRelationshipType b) -> Collator.getInstance().compare(a.getName(), b.getName()));
 		return types;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<IntelRelationshipGroup> getRelationshipGroups(Session session, ConservationArea ca){
-		List<IntelRelationshipGroup> types = session.createCriteria(IntelRelationshipGroup.class)
-			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-			.list();
+		List<IntelRelationshipGroup> types = 
+				QueryFactory.buildQuery(session, IntelRelationshipGroup.class, "conservationArea", ca).getResultList(); //$NON-NLS-1$
 		types.sort((IntelRelationshipGroup a, IntelRelationshipGroup b) -> Collator.getInstance().compare(a.getName(), b.getName()));
 		return types;
 	}
@@ -90,7 +86,7 @@ public enum RelationshipTypeManager {
 	 */
 	public void deleteRelationshipType(IntelRelationshipType type, Session session) throws Exception{
 		//delete all relationship attribute values
-		Query q = session.createQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.relationship in (FROM IntelEntityRelationship r WHERE  r.relationshipType = :type)"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from IntelEntityRelationshipAttributeValue ii where ii.id.relationship in (FROM IntelEntityRelationship r WHERE  r.relationshipType = :type)"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -116,7 +112,7 @@ public enum RelationshipTypeManager {
 	 */
 	public void deleteRelationshipGroup(IntelRelationshipGroup group, Session session) throws Exception{
 		//update all references
-		Query q = session.createQuery("update IntelRelationshipType set relationshipGroup = null where relationshipGroup = :group"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("update IntelRelationshipType set relationshipGroup = null where relationshipGroup = :group"); //$NON-NLS-1$
 		q.setParameter("group", group); //$NON-NLS-1$
 		q.executeUpdate();
 		

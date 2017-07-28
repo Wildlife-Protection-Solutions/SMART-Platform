@@ -40,7 +40,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -48,6 +47,7 @@ import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
@@ -184,9 +184,7 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 	}
 	
 	private void initControls(){
-
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), session)){
 				lblEnabled.setText(Messages.ReplicationInfoDialog_EnabledState);
 			}else{
@@ -216,12 +214,10 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 				}	
 			}
 			
-			List<?> input = session.createCriteria(ConnectSyncHistoryRecord.class).add(Restrictions.eq("conservationArea", server.getConservationArea())).list(); //$NON-NLS-1$
+			List<?> input = QueryFactory.buildQuery(session, ConnectSyncHistoryRecord.class, "conservationArea", server.getConservationArea()).list(); //$NON-NLS-1$
 			syncHistory.setInput(input);
 		
 			
-		}finally{
-			session.close();
 		}
 	}
 	

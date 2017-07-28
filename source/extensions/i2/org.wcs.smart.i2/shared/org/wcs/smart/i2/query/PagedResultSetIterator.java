@@ -47,7 +47,7 @@ public class PagedResultSetIterator {
 		this.results = results;
 		this.session = session;
 		if (results != null){
-			resultSet = session.createSQLQuery("SELECT * FROM " + results.getQueryDataTable()).scroll(); //$NON-NLS-1$
+			resultSet = session.createNativeQuery("SELECT * FROM " + results.getQueryDataTable()).scroll(); //$NON-NLS-1$
 		}
 	}
 	

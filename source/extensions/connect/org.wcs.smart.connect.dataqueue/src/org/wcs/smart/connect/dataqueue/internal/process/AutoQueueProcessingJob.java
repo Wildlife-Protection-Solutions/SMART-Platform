@@ -108,12 +108,10 @@ public class AutoQueueProcessingJob extends Job {
 		ConnectServer server = null;
 		ConnectUser user = null;
 		
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			server = ConnectHibernateManager.getConnectServer(s);
 			user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);
-		}finally{
-			s.close();
 		}
 		
 		if (server == null){

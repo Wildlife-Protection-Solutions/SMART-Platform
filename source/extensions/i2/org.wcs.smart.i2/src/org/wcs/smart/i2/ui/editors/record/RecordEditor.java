@@ -34,6 +34,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -59,7 +63,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
@@ -68,6 +71,7 @@ import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -124,7 +128,6 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	private Job loadRecordJob = new Job("load intelligence record"){ //$NON-NLS-1$
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			record = null;
@@ -138,8 +141,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			}
 			if (uuid != null){
 				record = null;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					temp = (IntelRecord) s.get(IntelRecord.class, uuid);
 					if (temp == null){
 						closeEditor();
@@ -218,16 +220,16 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						}
 					}
 					if (!temp.getLocations().isEmpty()){
-						currentEntityLocationLinks = s.createCriteria(IntelEntityLocation.class)
-							.add(Restrictions.in("id.location", temp.getLocations())) //$NON-NLS-1$
-							.list();
+						CriteriaBuilder cb = s.getCriteriaBuilder();
+						CriteriaQuery<IntelEntityLocation> c = cb.createQuery(IntelEntityLocation.class);
+						Root<IntelEntityLocation> from = c.from(IntelEntityLocation.class);
+						c.where(from.get("id.location").in(temp.getLocations())); //$NON-NLS-1$
+						currentEntityLocationLinks = s.createQuery(c).getResultList();
 						for (IntelEntityLocation ll : currentEntityLocationLinks){
 							ll.getEntity().getIdAttributeAsText();
 						}
 					}
 					
-				}finally{
-					s.close();
 				}
 			}
 			record = temp;
@@ -259,7 +261,6 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return this.mapPage;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		if (!summaryPage.saveAttributes(monitor)){
@@ -270,96 +271,93 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		Set<IntelEntity> modifiedEntities = new HashSet<IntelEntity>();
 		boolean isnew = record.getUuid() == null;
 		
-		Session s = HibernateManager.openSession(new AttachmentInterceptor());
-		try{
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
+		
 			s.beginTransaction();
-			
-			if (record.getAttachments() != null){
-				for (IntelRecordAttachment a : record.getAttachments()){
-					s.saveOrUpdate(a.getAttachment());
-				}
-			}
-			
-			
-			for (IntelEntityRecord r : summaryPage.getDeleteEntityLinks()){
-				if (r.getRecord().getUuid() != null){
-					modifiedEntities.add(r.getEntity());
-					s.delete(r);
-				}
-			}
-			
-			for (IntelEntityRecord r : summaryPage.getNewEntityLinks()){
-				modifiedEntities.add(r.getEntity());
-			}
-			for (IntelLocation location : locationsToDelete){
-				if (location.getUuid() == null) continue;
-				//find any entity location links and remove these
-				List<IntelEntityLocation> todelete = s.createCriteria(IntelEntityLocation.class)
-					.add(Restrictions.eq("id.location", location)) //$NON-NLS-1$
-					.list();
-				for (IntelEntityLocation l : todelete){
-					l.setLocation((IntelLocation) s.merge(l.getLocation()));
-					modifiedEntities.add(l.getEntity());
-					s.delete(l);
-				}
-			}
-			
-
-			for (IntelEntityLocation locationlink : deleteEntityLocationLinks){
-				s.delete(locationlink);
-				modifiedEntities.add(locationlink.getEntity());
-			}
-			
-			s.flush();
-			s.clear();
-			s.saveOrUpdate(record);
-			s.flush();
-			
-			for (IntelEntityAttachment entityAttachment : summaryPage.getRemovedEntityAttachments()){
-				s.delete(entityAttachment);
-				entityAttachment.getEntity().getEntityAttachments().remove(entityAttachment);
-				modifiedEntities.add(entityAttachment.getEntity());
-			}
-			
-			
-			for (IntelEntityAttachment entityAttachments : summaryPage.getNewAttachments()){
-				s.save(entityAttachments);
-				entityAttachments.getEntity().getEntityAttachments().add(entityAttachments);
-				modifiedEntities.add(entityAttachments.getEntity());
-			}
-			
-			
-			for (IntelEntityLocation locationlink : newEntityLocationLinks){
-				s.saveOrUpdate(locationlink.getLocation());
-				s.save(locationlink);
-				modifiedEntities.add(locationlink.getEntity());
-			}
-			s.flush();
-			
-
-			
-			for (IntelRecordAttachment ea : summaryPage.getDeleteAttachments()){
-				if (ea.getAttachment().getUuid() != null){
-					if (AttachmentManager.INSTANCE.canDelete(ea.getAttachment(), s)){
-						s.delete(ea);
-						s.delete(ea.getAttachment());
+			try {	
+				if (record.getAttachments() != null){
+					for (IntelRecordAttachment a : record.getAttachments()){
+						s.saveOrUpdate(a.getAttachment());
 					}
 				}
+				
+				
+				for (IntelEntityRecord r : summaryPage.getDeleteEntityLinks()){
+					if (r.getRecord().getUuid() != null){
+						modifiedEntities.add(r.getEntity());
+						s.delete(r);
+					}
+				}
+				
+				for (IntelEntityRecord r : summaryPage.getNewEntityLinks()){
+					modifiedEntities.add(r.getEntity());
+				}
+				for (IntelLocation location : locationsToDelete){
+					if (location.getUuid() == null) continue;
+					//find any entity location links and remove these
+					List<IntelEntityLocation> todelete = QueryFactory.buildQuery(s,IntelEntityLocation.class,"id.location", location).getResultList(); //$NON-NLS-1$
+					for (IntelEntityLocation l : todelete){
+						l.setLocation((IntelLocation) s.merge(l.getLocation()));
+						modifiedEntities.add(l.getEntity());
+						s.delete(l);
+					}
+				}
+				
+	
+				for (IntelEntityLocation locationlink : deleteEntityLocationLinks){
+					s.delete(locationlink);
+					modifiedEntities.add(locationlink.getEntity());
+				}
+				
+				s.flush();
+				s.clear();
+				s.saveOrUpdate(record);
+				s.flush();
+				
+				for (IntelEntityAttachment entityAttachment : summaryPage.getRemovedEntityAttachments()){
+					s.delete(entityAttachment);
+					entityAttachment.getEntity().getEntityAttachments().remove(entityAttachment);
+					modifiedEntities.add(entityAttachment.getEntity());
+				}
+				
+				
+				for (IntelEntityAttachment entityAttachments : summaryPage.getNewAttachments()){
+					s.save(entityAttachments);
+					entityAttachments.getEntity().getEntityAttachments().add(entityAttachments);
+					modifiedEntities.add(entityAttachments.getEntity());
+				}
+				
+				
+				for (IntelEntityLocation locationlink : newEntityLocationLinks){
+					s.saveOrUpdate(locationlink.getLocation());
+					s.save(locationlink);
+					modifiedEntities.add(locationlink.getEntity());
+				}
+				s.flush();
+				
+	
+				
+				for (IntelRecordAttachment ea : summaryPage.getDeleteAttachments()){
+					if (ea.getAttachment().getUuid() != null){
+						if (AttachmentManager.INSTANCE.canDelete(ea.getAttachment(), s)){
+							s.delete(ea);
+							s.delete(ea.getAttachment());
+						}
+					}
+				}
+				
+				s.getTransaction().commit();
+				
+				currentEntityLocationLinks.addAll(newEntityLocationLinks);
+				newEntityLocationLinks.clear();
+				deleteEntityLocationLinks.clear();
+				locationsToDelete.clear();
+				summaryPage.clearLists();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.RecordEditor_SaveError + ex.getMessage(), ex);
+				return;
 			}
-			
-			s.getTransaction().commit();
-			
-			currentEntityLocationLinks.addAll(newEntityLocationLinks);
-			newEntityLocationLinks.clear();
-			deleteEntityLocationLinks.clear();
-			locationsToDelete.clear();
-			summaryPage.clearLists();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.RecordEditor_SaveError + ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		try{
 			updateImageIcon();
@@ -662,8 +660,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				IntelEntity tolink = null;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					tolink = (IntelEntity) s.get(IntelEntity.class, entity.getUuid());
 					if (tolink != null){
 						tolink.getIdAttributeAsText();
@@ -685,8 +682,6 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							}
 						}
 					}
-				}finally{
-					s.close();
 				}
 				if (tolink != null){
 					final IntelEntity link = tolink;

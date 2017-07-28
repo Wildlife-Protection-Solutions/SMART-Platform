@@ -32,6 +32,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
@@ -39,7 +43,6 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -68,28 +71,35 @@ public class EntityRelationDataset  implements IQuery {
 	
 	public EntityRelationDataset(AbstractIntelBirtConnection connection){
 		this.connection = connection;
-		parameters = new HashMap<Integer,Object>();
-		
+		parameters = new HashMap<Integer,Object>();		
 	}
-	@SuppressWarnings("unchecked")
+
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		type = (IntelEntityType) connection.getSession().createCriteria(IntelEntityType.class)
-				.add(Restrictions.in("conservationArea", connection.getConservationAreas())) //$NON-NLS-1$
-			.add(Restrictions.eq("keyId", queryText)) //$NON-NLS-1$
-			.uniqueResult();
+		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
+		CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
+		Root<IntelEntityType> from = c.from(IntelEntityType.class);
+		c.where(cb.and(
+				from.get("conservationArea").in(connection.getConservationAreas()), //$NON-NLS-1$
+				cb.equal(from.get("keyId"), queryText) //$NON-NLS-1$
+				));
+		type = connection.getSession().createQuery(c).uniqueResult();
 		
 		//get all attributes that are associated with an relationship that is associated with
 		//the entity type
-		List<IntelRelationshipType> relationshipTypes = connection.getSession().createCriteria(IntelRelationshipType.class)
-		.add(Restrictions.or(
-				Restrictions.eq("sourceEntityType", type), //$NON-NLS-1$
-				Restrictions.eq("targetEntityType", type), //$NON-NLS-1$
-				Restrictions.isNull("sourceEntityType"), //$NON-NLS-1$
-				Restrictions.isNull("targetEntityType") //$NON-NLS-1$
-				))
-		.add(Restrictions.in("conservationArea", connection.getConservationAreas())) //$NON-NLS-1$
-		.list();
+		
+		CriteriaQuery<IntelRelationshipType> c2 =  cb.createQuery(IntelRelationshipType.class);		
+		Root<IntelRelationshipType> from2 = c2.from(IntelRelationshipType.class);
+		c2.where(cb.and(
+					cb.or(
+							cb.equal(from2.get("sourceEntityType"), type), //$NON-NLS-1$
+							cb.equal(from2.get("targetEntityType"), type), //$NON-NLS-1$
+							cb.isNull(from2.get("sourceEntityType")), //$NON-NLS-1$
+							cb.isNull(from2.get("targetEntityType")) //$NON-NLS-1$
+					),
+					from2.get("conservationArea").in(connection.getConservationAreas()) //$NON-NLS-1$
+				));
+		List<IntelRelationshipType> relationshipTypes = connection.getSession().createQuery(c2).getResultList();
 		
 		Set<IntelAttribute> attSet = new HashSet<IntelAttribute>();
 		relationshipTypes.stream().forEach(

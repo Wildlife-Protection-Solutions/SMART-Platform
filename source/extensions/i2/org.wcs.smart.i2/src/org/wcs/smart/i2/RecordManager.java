@@ -32,7 +32,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -62,7 +62,7 @@ public enum RecordManager {
 		
 		record = (IntelRecord) session.get(IntelRecord.class, record.getUuid());
 
-		Query q = session.createQuery("DELETE FROM IntelEntityLocation where id.location IN (FROM IntelLocation ll WHERE ll.record = :record)"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("DELETE FROM IntelEntityLocation where id.location IN (FROM IntelLocation ll WHERE ll.record = :record)"); //$NON-NLS-1$
 		q.setParameter("record", record); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -94,42 +94,41 @@ public enum RecordManager {
 			return;
 		}
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.RecordManager_Progress1, records.size());
-		Session s = HibernateManager.openSession(new AttachmentInterceptor());
 		List<IntelEntity> entities = new ArrayList<IntelEntity>();
 		List<IntelRecord> deleted = new ArrayList<IntelRecord>();
-		try{
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			s.beginTransaction();
-			for (Object x : records){
-				IntelRecord record = null;
-				if (x instanceof IntelRecord){
-					record = (IntelRecord) s.get(IntelRecord.class, ((IntelRecord) x).getUuid());		
-				}else if (x instanceof RecordEditorInput){
-					record = (IntelRecord) s.get(IntelRecord.class, ((RecordEditorInput) x).getUuid());
-				}else{
-					//this should never happen but if we don't have a record then ignore
-					continue;
-				}
-				progress.subTask(record.getTitle());
-				for (IntelEntityRecord r : record.getEntities()){
-					entities.add(r.getEntity());
+			try{
+				for (Object x : records){
+					IntelRecord record = null;
+					if (x instanceof IntelRecord){
+						record = (IntelRecord) s.get(IntelRecord.class, ((IntelRecord) x).getUuid());		
+					}else if (x instanceof RecordEditorInput){
+						record = (IntelRecord) s.get(IntelRecord.class, ((RecordEditorInput) x).getUuid());
+					}else{
+						//this should never happen but if we don't have a record then ignore
+						continue;
+					}
+					progress.subTask(record.getTitle());
+					for (IntelEntityRecord r : record.getEntities()){
+						entities.add(r.getEntity());
+					}
+					
+					deleteRecord(record, s);
+					deleted.add(record);
+					progress.worked(1);
+					progress.checkCanceled();
 				}
 				
-				deleteRecord(record, s);
-				deleted.add(record);
-				progress.worked(1);
-				progress.checkCanceled();
+				s.getTransaction().commit();
+			}catch (OperationCanceledException e) {
+				s.getTransaction().rollback();
+				return;
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.RecordManager_DeleteError + ex.getMessage(), ex);
+				return;
 			}
-			
-			s.getTransaction().commit();
-		}catch (OperationCanceledException e) {
-			s.getTransaction().rollback();
-			return;
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.RecordManager_DeleteError + ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		IEventBroker broker = context.get(IEventBroker.class);
 		broker.send(IntelEvents.RECORD_DELETE, deleted);

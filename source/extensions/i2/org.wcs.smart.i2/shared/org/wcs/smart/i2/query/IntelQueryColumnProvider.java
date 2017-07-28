@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
+import org.hibernate.query.Query;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
@@ -91,7 +91,6 @@ public class IntelQueryColumnProvider {
 		return instance;	
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, Locale l, Session session) throws Exception{
 		
 		List<IQueryColumn> columns = new ArrayList<>();
@@ -132,7 +131,7 @@ public class IntelQueryColumnProvider {
 
 		//data model columns
 		//categories
-		SQLQuery sq = session.createSQLQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid = :ca"); //$NON-NLS-1$
+		NativeQuery<?> sq = session.createNativeQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid = :ca"); //$NON-NLS-1$
 		sq.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 		Integer maxCategory = (Integer) sq.uniqueResult();
 		
@@ -141,7 +140,7 @@ public class IntelQueryColumnProvider {
 		}
 		
 		//attributes
-		Query q = session.createQuery("SELECT distinct id.attribute FROM CategoryAttribute a WHERE a.id.attribute.conservationArea = :ca and a.isActive = 'true'"); //$NON-NLS-1$
+		Query<Attribute> q = session.createQuery("SELECT distinct id.attribute FROM CategoryAttribute a WHERE a.id.attribute.conservationArea = :ca and a.isActive = 'true'", Attribute.class); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		List<Attribute> attributes = q.list();
 

@@ -275,8 +275,7 @@ public class EntityComparisonEditor extends EditorPart{
 			IntelEntityType type;
 			List<IntelEntity> entities = new ArrayList<>();
 			
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				type = (IntelEntityType) s.get(IntelEntityType.class, input.getType().getUuid());
 				for (IntelEntityTypeAttribute a : type.getAttributes()){
 					a.getAttribute().getName();
@@ -303,10 +302,7 @@ public class EntityComparisonEditor extends EditorPart{
 							Intelligence2PlugIn.log(ex.getMessage(), ex);
 						}
 					}
-				}
-				
-			}finally{
-				s.close();
+				}	
 			}
 			
 			Display.getDefault().syncExec(()->{

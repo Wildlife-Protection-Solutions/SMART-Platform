@@ -30,7 +30,6 @@ import java.util.UUID;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
@@ -40,6 +39,7 @@ import org.wcs.smart.connect.cybertracker.util.CmElementsVisitor;
 import org.wcs.smart.connect.cybertracker.util.CmElementsVisitor.IElementVisitHandler;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * "Connect for CyberTracker" related database functions.
@@ -53,8 +53,7 @@ public class ConnectCtHibernateManager {
 		if (cm.getUuid() == null) {
 			return createDefaultProperties(cm);
 		}
-		@SuppressWarnings("unchecked")
-		List<ConnectCtProperties> items = s.createCriteria(ConnectCtProperties.class).add(Restrictions.eq("model", cm)).list();  //$NON-NLS-1$
+		List<ConnectCtProperties> items = QueryFactory.buildQuery(s, ConnectCtProperties.class, "model", cm).list();  //$NON-NLS-1$
 		switch (items.size()) {
 		case 0:
 			//no properties yet -> create new one
@@ -89,9 +88,8 @@ public class ConnectCtHibernateManager {
 	 */
 	public static List<ConnectAlert> getConnectAlerts(ConfigurableModel cm, Session s, boolean replaceLazyItems) {
 		try {
-			@SuppressWarnings("unchecked")
-			List<ConnectAlert> items = s.createCriteria(ConnectAlert.class)
-					.add(Restrictions.eq("model", cm)).list();  //$NON-NLS-1$
+			List<ConnectAlert> items = QueryFactory.buildQuery(s, ConnectAlert.class, "model", cm).list();  //$NON-NLS-1$
+
 			if (replaceLazyItems) {
 				//replace lazy items with real
 				CmElementsMap map = new CmElementsMap(cm);

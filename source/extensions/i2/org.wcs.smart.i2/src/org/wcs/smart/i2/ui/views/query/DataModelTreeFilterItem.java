@@ -105,8 +105,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 						//not kids; this is an attribute
 						kids = new ArrayList<FilterTreeItem>();
 					}else{
-						Session s = HibernateManager.openSession();
-						try{
+						try(Session s = HibernateManager.openSession()){
 							Category c = (Category)s.get(Category.class, categoryUuid);
 							ArrayList<FilterTreeItem> temp = new ArrayList<>();
 							if (c != null){
@@ -121,8 +120,6 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 								}
 							}
 							kids = temp;
-						}finally{
-							s.close();
 						}
 					}
 				}
@@ -161,8 +158,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						Attribute a = (Attribute) s.get(Attribute.class, attributeUuid);
 						if (a.getAttributeList() != null){
 							for (AttributeListItem i : a.getAttributeList()){
@@ -170,10 +166,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 								keys.add(i.getKeyId());
 							}
 						}
-					}finally{
-						s.close();
-					}
-					
+					}					
 					return Status.OK_STATUS;
 				}
 			};

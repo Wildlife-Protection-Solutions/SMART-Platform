@@ -73,12 +73,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -124,14 +124,12 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 	private IntelRecordSource currentSelection = null;
 	
 	private Job loadSources = new Job(Messages.RecordSourceAttributeDialog_LoadSourceJobName){
-		@SuppressWarnings("unchecked")
+
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
-				List<IntelRecordSource> srcs = s.createCriteria(IntelRecordSource.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list();
+			try(Session s = HibernateManager.openSession()){
+				List<IntelRecordSource> srcs = QueryFactory.buildQuery(s, IntelRecordSource.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+				
 				srcs.forEach(e -> {
 					e.getNames().size();
 					if (e.getAttributes() != null){
@@ -143,8 +141,6 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 					}
 				});
 				sources = srcs;
-			}finally{
-				s.close();
 			}
 			
 			Display.getDefault().syncExec(()->{
@@ -774,70 +770,70 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 	}
 	private boolean doSave(){
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			
-			//delete all attribute values for attributes removed from given source
-			for (IntelRecordSourceAttribute a : attributesToDelete){
-				if (a.getUuid() == null) continue; //not saved skip
+		try(Session session = HibernateManager.openSession()){
+
+			session.beginTransaction();
+			try{
 				
-				//delete any values associated with this attribute 
-				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
-				q.setParameter("attribute", a); //$NON-NLS-1$
-				q.executeUpdate();
-				
-				//delete the attributes
-				session.delete(a);
-			}
-			
-			//delete all attributes values for attributes that changes from multi to single
-			for (IntelRecordSourceAttribute a : attributesMultiToSingle){
-				if (a.getUuid() == null) continue; //not saved skip 
-				
-				//delete any values associated with this attribute 
-				Query q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
-				q.setParameter("attribute", a); //$NON-NLS-1$
-				q.executeUpdate();
-			}
-			
-			//delete all records for removed sources
-			for (IntelRecordSource source : toDelete){
-				if (source.getUuid() == null) continue;
-				
-				//update intelligence records to have no source
-				Query q = session.createQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source"); //$NON-NLS-1$
-				q.setParameter("source", source); //$NON-NLS-1$
-				q.executeUpdate();
-				
-				//remove all attributes associated with source
-				for (IntelRecordSourceAttribute a : source.getAttributes()){
+				//delete all attribute values for attributes removed from given source
+				for (IntelRecordSourceAttribute a : attributesToDelete){
+					if (a.getUuid() == null) continue; //not saved skip
+					
 					//delete any values associated with this attribute 
-					q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
+					Query<?> q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
 					q.setParameter("attribute", a); //$NON-NLS-1$
 					q.executeUpdate();
+					
 					//delete the attributes
 					session.delete(a);
 				}
-				//delete source
-				session.delete(source);
+				
+				//delete all attributes values for attributes that changes from multi to single
+				for (IntelRecordSourceAttribute a : attributesMultiToSingle){
+					if (a.getUuid() == null) continue; //not saved skip 
+					
+					//delete any values associated with this attribute 
+					Query<?> q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
+					q.setParameter("attribute", a); //$NON-NLS-1$
+					q.executeUpdate();
+				}
+				
+				//delete all records for removed sources
+				for (IntelRecordSource source : toDelete){
+					if (source.getUuid() == null) continue;
+					
+					//update intelligence records to have no source
+					Query<?> q = session.createQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source"); //$NON-NLS-1$
+					q.setParameter("source", source); //$NON-NLS-1$
+					q.executeUpdate();
+					
+					//remove all attributes associated with source
+					for (IntelRecordSourceAttribute a : source.getAttributes()){
+						//delete any values associated with this attribute 
+						q = session.createQuery("DELETE FROM IntelRecordAttributeValue a where a.attribute = :attribute "); //$NON-NLS-1$
+						q.setParameter("attribute", a); //$NON-NLS-1$
+						q.executeUpdate();
+						//delete the attributes
+						session.delete(a);
+					}
+					//delete source
+					session.delete(source);
+				}
+				
+				//save updates
+				for (IntelRecordSource source : sources){
+					session.saveOrUpdate(source);
+				}
+				session.getTransaction().commit();
+				
+				//clear all delete lists
+				attributesToDelete.clear();
+				attributesMultiToSingle.clear();
+				toDelete.clear();
+			}catch (Exception ex){
+				Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + ex.getMessage(), ex);
+				return false;
 			}
-			
-			//save updates
-			for (IntelRecordSource source : sources){
-				session.saveOrUpdate(source);
-			}
-			session.getTransaction().commit();
-			
-			//clear all delete lists
-			attributesToDelete.clear();
-			attributesMultiToSingle.clear();
-			toDelete.clear();
-		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + ex.getMessage(), ex);
-			return false;
-		}finally{
-			session.close();
 		}
 		
 		context.get(IEventBroker.class).send(IntelEvents.RECORD_SOURCE_ALL, null);

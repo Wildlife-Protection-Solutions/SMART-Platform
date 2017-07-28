@@ -36,7 +36,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -49,6 +48,7 @@ import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.UserNamePasswordDialog;
 import org.wcs.smart.user.UserLevelManager;
@@ -124,13 +124,10 @@ public class DownloadCaEngine {
 			Path p = connect.downloadFileFromUrl(downloadUrl, null, progress.split(1));
 			
 			ConservationArea desktopCa = null;
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				if (SmartDB.getCurrentConservationArea() != null){
 					desktopCa = (ConservationArea)s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
 				}
-			}finally{
-				s.close();
 			}
 			if (desktopCa != null){
 				/* delete existing ca */
@@ -169,52 +166,52 @@ public class DownloadCaEngine {
 	public boolean preDownload(final Shell activeShell){
 		ConservationArea desktopCa;
 		Employee smartUser= null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+		
 			s.beginTransaction();
-			
-			desktopCa = (ConservationArea)s.get(ConservationArea.class, info.getUuid());
-			if (desktopCa != null){
-				if (!MessageDialog.openQuestion(activeShell, Messages.DownloadCaEngine_ImportCaDialogTitle, 
-						MessageFormat.format(Messages.DownloadCaEngine_ImportCaDialogMessage, desktopCa.getNameLabel()))){
-					//user does not want to override
-					return false;
-				}
-			}
-			
-			int cnt = 0;
-			while (desktopCa != null && cnt < 3){
-				UserNamePasswordDialog dialog = new UserNamePasswordDialog(activeShell,
-						Messages.DownloadCaEngine_DeleteConfirmTitle,
-						Messages.DownloadCaEngine_DeleteConfirmMessage,
-						Messages.DownloadCaEngine_DeleteConfirmButtonLabel);
-				if (dialog.open() == Window.CANCEL){
-					return false;
+			try {
+				desktopCa = (ConservationArea)s.get(ConservationArea.class, info.getUuid());
+				if (desktopCa != null){
+					if (!MessageDialog.openQuestion(activeShell, Messages.DownloadCaEngine_ImportCaDialogTitle, 
+							MessageFormat.format(Messages.DownloadCaEngine_ImportCaDialogMessage, desktopCa.getNameLabel()))){
+						//user does not want to override
+						return false;
+					}
 				}
 				
-				String userName = dialog.getUserName();
-				String password = dialog.getPassword();
-				
-				smartUser = (Employee)s.createCriteria(Employee.class)
-						.add(Restrictions.eq("conservationArea", desktopCa)) //$NON-NLS-1$
-						.add(Restrictions.eq("smartUserId", userName)) //$NON-NLS-1$
-						.uniqueResult();
-				if (smartUser != null &&  HibernateManager.validatePassword(password, smartUser)){
-					break;
-				}else if (smartUser != null && !UserLevelManager.INSTANCE.supportsUser(smartUser, UserLevelManager.ADMIN)){
-					MessageDialog.openError(activeShell, Messages.DownloadCaEngine_ErrorDialogTitle, Messages.DownloadCaEngine_InvalidPermission);
+				int cnt = 0;
+				while (desktopCa != null && cnt < 3){
+					UserNamePasswordDialog dialog = new UserNamePasswordDialog(activeShell,
+							Messages.DownloadCaEngine_DeleteConfirmTitle,
+							Messages.DownloadCaEngine_DeleteConfirmMessage,
+							Messages.DownloadCaEngine_DeleteConfirmButtonLabel);
+					if (dialog.open() == Window.CANCEL){
+						return false;
+					}
+					
+					String userName = dialog.getUserName();
+					String password = dialog.getPassword();
+					
+					smartUser = QueryFactory.buildQuery(s, Employee.class, 
+							new Object[] {"conservationArea", desktopCa}, //$NON-NLS-1$
+							new Object[] {"smartUserId", userName}).uniqueResult(); //$NON-NLS-1$
+					
+					if (smartUser != null &&  HibernateManager.validatePassword(password, smartUser)){
+						break;
+					}else if (smartUser != null && !UserLevelManager.INSTANCE.supportsUser(smartUser, UserLevelManager.ADMIN)){
+						MessageDialog.openError(activeShell, Messages.DownloadCaEngine_ErrorDialogTitle, Messages.DownloadCaEngine_InvalidPermission);
+						return false;
+					}
+					MessageDialog.openError(activeShell, Messages.DownloadCaEngine_ErrorDialogTitle, Messages.DownloadCaEngine_InvalidUser);
+					cnt++;
+				}
+				if (cnt >= 3){
+					//no valid username/password was entered
 					return false;
 				}
-				MessageDialog.openError(activeShell, Messages.DownloadCaEngine_ErrorDialogTitle, Messages.DownloadCaEngine_InvalidUser);
-				cnt++;
+			}finally {
+				s.getTransaction().rollback();
 			}
-			if (cnt >= 3){
-				//no valid username/password was entered
-				return false;
-			}
-			s.getTransaction().rollback();
-		}finally{
-			s.close();
 		}
 		
 		if (desktopCa != null){
@@ -235,18 +232,17 @@ public class DownloadCaEngine {
 
 	
 	private boolean validateCaDeleted(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			
-			ConservationArea desktopCa = (ConservationArea)s.get(ConservationArea.class, info.getUuid());
-			if (desktopCa != null){
-				//at some point something went wrong
-				return false;
+			try {
+				ConservationArea desktopCa = (ConservationArea)s.get(ConservationArea.class, info.getUuid());
+				if (desktopCa != null){
+					//at some point something went wrong
+					return false;
+				}
+			}finally {
+				s.getTransaction().rollback();
 			}
-			s.getTransaction().rollback();
-		}finally{
-			s.close();
 		}
 		return true;
 	}

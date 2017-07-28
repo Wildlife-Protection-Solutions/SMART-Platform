@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -43,29 +43,24 @@ import org.wcs.smart.i2.model.IntelEntityType;
 public class IntelHibernateManager {
 	
 	public static IntelAttribute getAttribute(String keyId, ConservationArea ca, Session session){ 
-		IntelAttribute attribute = (IntelAttribute)session.createCriteria(IntelAttribute.class)
-			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-			.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
-			.uniqueResult();
-		return attribute;
+		return QueryFactory.buildQuery(session, IntelAttribute.class, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"keyId", keyId}).uniqueResult(); //$NON-NLS-1$
 	}
 	
 	
 	public static IntelAttributeListItem getAttributeListItem(IntelAttribute attribute, String keyId, Session session){ 
 		if (attribute == null) return null;
-		IntelAttributeListItem listitem = (IntelAttributeListItem)session.createCriteria(IntelAttributeListItem.class)
-			.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
-			.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
-			.uniqueResult();
-		return listitem;
+		return QueryFactory.buildQuery(session, IntelAttributeListItem.class, 
+				new Object[] {"attribute", attribute}, //$NON-NLS-1$
+				new Object[] {"keyId", keyId}).uniqueResult(); //$NON-NLS-1$
 	}
 	
 	public static IntelEntityType getEntityType(String keyId, ConservationArea ca, Session session){ 
-		IntelEntityType type = (IntelEntityType)session.createCriteria(IntelEntityType.class)
-			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-			.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
-			.uniqueResult();
-		return type;
+		return QueryFactory.buildQuery(session, IntelEntityType.class, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"keyId", keyId}).uniqueResult(); //$NON-NLS-1$
+
 	}
 	
 	public static IntelEntity getEntity(UUID entityUuid, Session session){
@@ -79,11 +74,8 @@ public class IntelHibernateManager {
 	 * @param ca
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<IntelAttribute> getAttributes(Session session, ConservationArea ca){
-		List<IntelAttribute> types = session.createCriteria(IntelAttribute.class)
-			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-			.list();
+		List<IntelAttribute> types = QueryFactory.buildQuery(session, IntelAttribute.class, "conservationArea", ca).getResultList();  //$NON-NLS-1$
 		types.sort((IntelAttribute a, IntelAttribute b) -> Collator.getInstance().compare(a.getName() == null ? "" : a.getName(), b.getName() == null ? "" : b.getName())); //$NON-NLS-1$ //$NON-NLS-2$
 		return types;
 	}

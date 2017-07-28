@@ -56,10 +56,10 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -275,27 +275,19 @@ public class FileWizardPage extends WizardPage{
 	
 	private Job loadEntityTypes = new Job(Messages.FileWizardPage_LoadTypeJobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<IntelEntityType> types = new ArrayList<>();
 			final List<Projection> projections = new ArrayList<>();
-			Session s = HibernateManager.openSession();
-			try{
-				types.addAll(s.createCriteria(IntelEntityType.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list());
+
+			try(Session s = HibernateManager.openSession()){
+				
+				types.addAll(QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list()); //$NON-NLS-1$
 				types.forEach(t -> t.getName());
-				
-				
-				projections.addAll(s.createCriteria(Projection.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.list());
+				projections.addAll(HibernateManager.getCaProjectionList(s));
 				projections.forEach(p->{
 					p.getName();
 				});
-			}finally{
-				s.close();
 			}
 			types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			projections.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));

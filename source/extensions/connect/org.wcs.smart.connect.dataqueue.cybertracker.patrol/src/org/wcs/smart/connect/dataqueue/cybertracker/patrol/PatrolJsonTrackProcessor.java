@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.connect.dataqueue.cybertracker.IJsonProcessor;
@@ -40,6 +39,7 @@ import org.wcs.smart.connect.dataqueue.cybertracker.JsonTrackUtils;
 import org.wcs.smart.connect.dataqueue.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.connect.dataqueue.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.JsonUtils;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
@@ -78,7 +78,6 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 		return modifiedPatrols;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<JSONObject> processJson(List<JSONObject> features, Session session) throws Exception{
 		modifiedPatrols = new HashSet<Patrol>();
@@ -100,9 +99,7 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 
 			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
 			
-			List<CtPatrolLink> links = session.createCriteria(CtPatrolLink.class)
-					.add(Restrictions.eq("deviceId", deviceId)) //$NON-NLS-1$
-					.list();
+			List<CtPatrolLink> links = QueryFactory.buildQuery(session, CtPatrolLink.class,"deviceId", deviceId).list(); //$NON-NLS-1$
 
 			//we want to find the patrol leg with a day that matches this day and time
 			List<PatrolLegDay> matches = new ArrayList<PatrolLegDay>();

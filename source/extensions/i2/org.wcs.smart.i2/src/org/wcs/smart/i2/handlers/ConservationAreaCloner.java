@@ -31,9 +31,9 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -53,7 +53,6 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
  * @author Emily
  *
  */
-@SuppressWarnings("unchecked")
 public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 
 	@Override
@@ -92,10 +91,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 
 	
 	private void cloneAttributes(ConservationAreaClonerEngine engine){
-		List<IntelAttribute> attributes = engine.getSession()
-				.createCriteria(IntelAttribute.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
-		
+		List<IntelAttribute> attributes = QueryFactory.buildQuery(engine.getSession(), IntelAttribute.class, "conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$
 		
 		for (IntelAttribute ia : attributes){
 			IntelAttribute clone = new IntelAttribute();
@@ -121,10 +117,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	}
 	
 	private void cloneEntityTypes(ConservationAreaClonerEngine engine) throws Exception{
-		List<IntelEntityType> entityTypes = engine.getSession()
-				.createCriteria(IntelEntityType.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
-		
+		List<IntelEntityType> entityTypes = QueryFactory.buildQuery(engine.getSession(), IntelEntityType.class, "conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$
 		
 		for (IntelEntityType ia : entityTypes){
 			IntelEntityType clone = new IntelEntityType();
@@ -180,10 +173,8 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	
 
 	private void cloneRelationshipGroups(ConservationAreaClonerEngine engine){
-		List<IntelRelationshipGroup> relationshipGroups = engine.getSession()
-				.createCriteria(IntelRelationshipGroup.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
-		
+		List<IntelRelationshipGroup> relationshipGroups = QueryFactory.buildQuery(engine.getSession(), IntelRelationshipGroup.class, "conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$
+
 		for (IntelRelationshipGroup g : relationshipGroups){
 			IntelRelationshipGroup clone = new IntelRelationshipGroup();
 			engine.copyLabels(g, clone);
@@ -197,10 +188,8 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	}
 	
 	private void cloneRelationshipTypes(ConservationAreaClonerEngine engine){
-		List<IntelRelationshipType> relationshipGroups = engine.getSession()
-				.createCriteria(IntelRelationshipType.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
-		
+		List<IntelRelationshipType> relationshipGroups = QueryFactory.buildQuery(engine.getSession(), IntelRelationshipType.class, "conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$
+
 		for (IntelRelationshipType g : relationshipGroups){
 			IntelRelationshipType clone = new IntelRelationshipType();
 			engine.copyLabels(g, clone);
@@ -242,10 +231,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	}
 	
 	private void cloneRecordSource(ConservationAreaClonerEngine engine){
-		
-		List<IntelRecordSource> sources = engine.getSession()
-				.createCriteria(IntelRecordSource.class)
-				.add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
+		List<IntelRecordSource> sources = QueryFactory.buildQuery(engine.getSession(), IntelRecordSource.class, "conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$
 		
 		for (IntelRecordSource source : sources){
 			IntelRecordSource clone = new IntelRecordSource();

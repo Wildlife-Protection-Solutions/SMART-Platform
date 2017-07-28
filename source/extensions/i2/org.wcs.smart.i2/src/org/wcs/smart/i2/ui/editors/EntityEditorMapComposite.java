@@ -620,8 +620,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			if (entity == null) return Status.OK_STATUS;
 			
 			final List<IntelEntityLocation> alllocations  = new ArrayList<IntelEntityLocation>();
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				alllocations.addAll(EntityManager.INSTANCE.getEntityLocations(s, entity.getUuid(), dateFilter));
 				for (IntelEntityLocation l : alllocations){
 					l.getLocation().getId();
@@ -640,8 +639,6 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 						}
 					}
 				}
-			}finally{
-				s.close();
 			}
 			Collections.sort(alllocations,
 					(x,y)-> -1*x.getLocation().getDateTime().compareTo(y.getLocation().getDateTime()));

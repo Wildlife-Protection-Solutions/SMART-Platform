@@ -25,18 +25,23 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Criteria;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -73,16 +78,18 @@ public class RecordDatasetResultSet implements IResultSet {
 			RecordParameterMetadata pmetadata) {
 		this.connection = connection;
 		this.metadata = metadata;
-		Criteria c = connection.getSession().createCriteria(IntelRecord.class)
-				.add(Restrictions.in("conservationArea",connection.getConservationAreas())); //$NON-NLS-1$
 		
+		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
+		CriteriaQuery<IntelRecord> c = cb.createQuery(IntelRecord.class);
+		Root<IntelRecord> from = c.from(IntelRecord.class);
+		List<Predicate> filters = new ArrayList<>();
+		filters.add(from.get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		if (index >= 0){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
-			c.add(Restrictions.eq("uuid", recordUuid)); //$NON-NLS-1$
+			filters.add(cb.equal(from.get("record.uuid"), recordUuid)); //$NON-NLS-1$
 		}
-		
-		results = c.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
+		results = connection.getSession().createQuery(c).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
 		this.m_currentRowId = 0;
 	}
 	

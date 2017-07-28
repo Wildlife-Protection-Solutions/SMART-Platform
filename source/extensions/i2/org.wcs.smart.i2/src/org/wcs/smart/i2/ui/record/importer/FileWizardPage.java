@@ -54,11 +54,9 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -237,21 +235,15 @@ public class FileWizardPage extends WizardPage{
 	}
 	
 	private Job loadProjections = new Job(Messages.FileWizardPage_LoadTypesJob){
-
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<Projection> projections = new ArrayList<>();
-			Session s = HibernateManager.openSession();
-			try{
-				projections.addAll(s.createCriteria(Projection.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.list());
+
+			try(Session s = HibernateManager.openSession()){
+				projections.addAll(HibernateManager.getCaProjectionList(s));
 				projections.forEach(p->{
 					p.getName();
 				});
-			}finally{
-				s.close();
 			}
 			projections.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 			Display.getDefault().syncExec(() -> {

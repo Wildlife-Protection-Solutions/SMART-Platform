@@ -85,25 +85,24 @@ public class AttributeTreeDropItem extends DropItem {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
 			List<AttributeTreeNode> roots = new ArrayList<>();
-			try{
-				Attribute a = (Attribute)s.get(Attribute.class, attributeUuid);
-				List<AttributeTreeNode> toVisit = new ArrayList<>();
-				toVisit.addAll(a.getTree());
-				while(!toVisit.isEmpty()){
-					AttributeTreeNode v = toVisit.remove(0);
-					if (v.getChildren() != null) toVisit.addAll(v.getChildren());
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					Attribute a = (Attribute)s.get(Attribute.class, attributeUuid);
+					List<AttributeTreeNode> toVisit = new ArrayList<>();
+					toVisit.addAll(a.getTree());
+					while(!toVisit.isEmpty()){
+						AttributeTreeNode v = toVisit.remove(0);
+						if (v.getChildren() != null) toVisit.addAll(v.getChildren());
+					}
+					roots.addAll(a.getActiveTreeNodes());
+				}catch(Exception ex){
+					Intelligence2PlugIn.log(ex.getMessage(), ex);
+					roots.clear();
+				}finally{
+					s.getTransaction().rollback();
 				}
-				roots.addAll(a.getActiveTreeNodes());
-			}catch(Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
-				roots.clear();
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
 			}
 			
 			input = roots;

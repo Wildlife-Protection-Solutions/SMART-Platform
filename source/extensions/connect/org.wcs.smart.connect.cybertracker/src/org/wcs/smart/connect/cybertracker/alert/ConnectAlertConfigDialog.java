@@ -63,14 +63,17 @@ public class ConnectAlertConfigDialog extends ConnectDialog {
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
+				
 					s.beginTransaction();
-					cs = ConnectHibernateManager.getConnectServer(s);
-					user = ConnectHibernateManager.getConnectUser(employee, s);			
-					s.getTransaction().commit();
-				}finally{
-					s.close();
+					try {
+						cs = ConnectHibernateManager.getConnectServer(s);
+						user = ConnectHibernateManager.getConnectUser(employee, s);			
+						s.getTransaction().commit();
+					}catch(Exception ex) {
+						s.getTransaction().rollback();
+						throw ex;
+					}
 				}
 			}
 		};

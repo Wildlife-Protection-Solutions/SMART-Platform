@@ -31,7 +31,7 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
@@ -66,8 +66,6 @@ public class RecordCsvExporter implements ICsvDataExporter {
 		this.uuids = recordsToExport;
 	}
 	
-	
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean exportCsvFile(File file, char delimiter,
 			ConservationArea ca, boolean headers, IProgressMonitor monitor,
@@ -86,7 +84,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 		
 		monitor.subTask(Messages.RecordCsvExporter_SubTask1);
 		String hql = "SELECT distinct atts from IntelRecordSource s join s.attributes atts WHERE s.conservationArea = :ca"; //$NON-NLS-1$
-		Query q = session.createQuery(hql);
+		Query<IntelRecordSourceAttribute> q = session.createQuery(hql, IntelRecordSourceAttribute.class);
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		
 		List<IntelRecordSourceAttribute> attributes = q.list();

@@ -103,8 +103,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						IntelAttribute a = (IntelAttribute) s.get(IntelAttribute.class, attributeUuid);
 						if (a.getAttributeList() != null){
 							for (IntelAttributeListItem i : a.getAttributeList()){
@@ -112,10 +111,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 								keys.add(i.getKeyId());
 							}
 						}
-					}finally{
-						s.close();
 					}
-					
 					return Status.OK_STATUS;
 				}
 			};

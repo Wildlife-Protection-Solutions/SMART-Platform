@@ -57,7 +57,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectServerManager;
@@ -65,6 +64,7 @@ import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -198,44 +198,42 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 	
 	private void initControls(){
 
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			ConnectServer server = ConnectHibernateManager.getConnectServer(session);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				ConnectServer server = ConnectHibernateManager.getConnectServer(session);
+				
+				if (server == null){
+					toUpdate = null;
+					txtServer.setText(Messages.ConnectServerInfoDialog_NotSet);
+					btnSet.setText(Messages.ConnectServerInfoDialog_SetButton);
+					btnEditServer.setEnabled(false);
+					btnAdd.setEnabled(false);
+					tblUsers.setInput(new Object[]{});
+					tblUsers.getTable().setEnabled(false);
 			
-			if (server == null){
-				toUpdate = null;
-				txtServer.setText(Messages.ConnectServerInfoDialog_NotSet);
-				btnSet.setText(Messages.ConnectServerInfoDialog_SetButton);
-				btnEditServer.setEnabled(false);
-				btnAdd.setEnabled(false);
-				tblUsers.setInput(new Object[]{});
-				tblUsers.getTable().setEnabled(false);
-		
-				for (IServerOptionsPanel pnl :optionPanels){
-					pnl.initValues(null);
+					for (IServerOptionsPanel pnl :optionPanels){
+						pnl.initValues(null);
+					}
+				}else{
+					toUpdate = server;
+					txtServer.setText(server.getServerUrl());
+					btnSet.setText(Messages.ConnectServerInfoDialog_ResetButton);
+					btnEditServer.setEnabled(true);
+					
+					
+					btnAdd.setEnabled(true);
+					List<?> users= QueryFactory.buildQuery(session, ConnectUser.class, "server", toUpdate).list(); //$NON-NLS-1$
+					tblUsers.setInput(users);
+					tblUsers.getTable().setEnabled(true);
+					
+					for (IServerOptionsPanel pnl :optionPanels){
+						pnl.initValues(toUpdate);
+					}
 				}
-			}else{
-				toUpdate = server;
-				txtServer.setText(server.getServerUrl());
-				btnSet.setText(Messages.ConnectServerInfoDialog_ResetButton);
-				btnEditServer.setEnabled(true);
-				
-				
-				btnAdd.setEnabled(true);
-				List<?> users= session.createCriteria(ConnectUser.class)
-						.add(Restrictions.eq("server", toUpdate)) //$NON-NLS-1$
-						.list();
-				tblUsers.setInput(users);
-				tblUsers.getTable().setEnabled(true);
-				
-				for (IServerOptionsPanel pnl :optionPanels){
-					pnl.initValues(toUpdate);
-				}
+			}finally{
+				session.getTransaction().rollback();
 			}
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
 		}
 	}
 	
@@ -438,21 +436,18 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			return;
 		}
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			for (ConnectUser c : users){
-				s.delete(c);
-			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			ConnectPlugIn.displayLog(Messages.ConnectServerInfoDialog_AccountDeleteError +ex.getMessage(), ex);
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				for (ConnectUser c : users){
+					s.delete(c);
+				}
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				ConnectPlugIn.displayLog(Messages.ConnectServerInfoDialog_AccountDeleteError +ex.getMessage(), ex);
+			};
 		}
 		initControls();
-				
-				
 	}
 
 }

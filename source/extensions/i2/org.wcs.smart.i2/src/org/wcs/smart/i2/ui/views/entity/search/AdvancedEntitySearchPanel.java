@@ -58,8 +58,8 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -237,12 +237,10 @@ public class AdvancedEntitySearchPanel extends Composite {
 				String[] bits = p.split(" ")[0].split(":"); //$NON-NLS-1$ //$NON-NLS-2$
 				String key = bits[2];
 				IntelAttribute ia = null;
-				Session session = HibernateManager.openSession();
-				try{
-					ia = (IntelAttribute)session.createCriteria(IntelAttribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-							.uniqueResult();
+				try(Session session = HibernateManager.openSession()){
+					ia = QueryFactory.buildQuery(session, IntelAttribute.class,
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"keyId", key}).uniqueResult(); //$NON-NLS-1$
 					
 					if (ia != null && ia.getType() == AttributeType.LIST){
 						String listKey = p.split(" ")[2]; //$NON-NLS-1$
@@ -260,8 +258,6 @@ public class AdvancedEntitySearchPanel extends Composite {
 							continue;
 						}
 					}
-				}finally{
-					session.close();
 				}
 				if (ia == null){
 					toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.AdvancedEntitySearchPanel_attributenotfound, key)));
@@ -419,17 +415,11 @@ public class AdvancedEntitySearchPanel extends Composite {
 				Job entityJob = new Job(Messages.AdvancedEntitySearchPanel_LoadingEntitiesJobName){
 
 					private List<IntelEntityType> entities;
-					@SuppressWarnings("unchecked")
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						Session s = HibernateManager.openSession();
-						try{
-							entities = s.createCriteria(IntelEntityType.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.list();
+						try(Session s = HibernateManager.openSession()){
+							entities = QueryFactory.buildQuery(s,IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
 							entities.forEach(ent->ent.getName());
-						}finally{
-							s.close();
 						}
 						Display.getDefault().syncExec(()->{if (!attributeTable.getControl().isDisposed()) attributeTable.setInput(entities);});
 						return Status.OK_STATUS;
@@ -444,15 +434,10 @@ public class AdvancedEntitySearchPanel extends Composite {
 				}else{
 					attributeTable.setInput(new String[]{DialogConstants.LOADING_TEXT});
 					Job j = new Job(Messages.AdvancedEntitySearchPanel_loadingAttributeJobName){
-
-						@SuppressWarnings("unchecked")
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-							Session s = HibernateManager.openSession();
-							try{
-								List<IntelAttribute> ats = s.createCriteria(IntelAttribute.class)
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-								.list();
+							try(Session s = HibernateManager.openSession()){
+								List<IntelAttribute> ats = QueryFactory.buildQuery(s, IntelAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
 								ats.forEach(a->{
 									a.getName();
 									if (a.getType() == IntelAttribute.AttributeType.LIST){
@@ -461,8 +446,6 @@ public class AdvancedEntitySearchPanel extends Composite {
 								});
 								
 								attributes = ats;
-							}finally{
-								s.close();
 							}
 							attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 							Display.getDefault().syncExec(()->{if (!attributeTable.getControl().isDisposed()) attributeTable.setInput(attributes);});
@@ -512,27 +495,20 @@ public class AdvancedEntitySearchPanel extends Composite {
 		return di;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private DropItem createEntityTypeDropItem(String entityTypeKey){
 		String[][] values = new String[2][];
 		Job j = new Job(Messages.AdvancedEntitySearchPanel_loadingEntityTypeJobName){
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
-					List<IntelEntityType> types = s.createCriteria(IntelEntityType.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list();
-					
+				try(Session s = HibernateManager.openSession()){
+					List<IntelEntityType> types = QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$				
 					values[0] = new String[types.size()];
 					values[1] = new String[types.size()];
 					for (int i = 0;i < types.size(); i ++){
 						values[0][i] = types.get(i).getName();
 						values[1][i] = types.get(i).getKeyId();
 					}
-				}finally{
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}

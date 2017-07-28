@@ -115,14 +115,11 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			types = null;
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){
 				types = EntityTypeManager.INSTANCE.getEntityTypes(session, SmartDB.getCurrentConservationArea());
 				for (IntelEntityType t : types){
 					t.getName();
 				}
-			}finally{
-				session.close();
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){
@@ -359,8 +356,8 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 
 					monitor.beginTask(Messages.EntityTypeListDialog_DeleteTaskName, toDelete.size());
 					List<IntelEntityType> deleted = new ArrayList<IntelEntityType>();
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
+
 						for (IntelEntityType t : toDelete){
 							monitor.subTask(t.getName());
 							s.beginTransaction();
@@ -374,8 +371,6 @@ public class EntityTypeListDialog extends TitleAreaDialog {
 							}
 							monitor.worked(1);
 						}
-					}finally{
-						s.close();
 					}
 					monitor.done();
 					for (IntelEntityType d : deleted){

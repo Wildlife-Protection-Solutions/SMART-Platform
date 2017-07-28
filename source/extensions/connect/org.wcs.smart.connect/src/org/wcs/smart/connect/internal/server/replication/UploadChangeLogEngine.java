@@ -87,8 +87,7 @@ public class UploadChangeLogEngine {
 		
 		try{
 			Long currentRevisionNo = -1l;
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){
 				if (!DerbyReplicationManager.INSTANCE.canReplicate(session, ca)){
 					throw new Exception(Messages.UploadChangeLogEngine_ReplicationNotEnabled);
 				}
@@ -96,8 +95,6 @@ public class UploadChangeLogEngine {
 				if (currentRevisionNo == null){
 					currentRevisionNo = -1l;
 				}
-			}finally{
-				session.close();
 			}
 
 			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.UPLOAD);
@@ -121,13 +118,15 @@ public class UploadChangeLogEngine {
 				}
 				
 				record.setStartRevision(startRevision);
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
-					s.saveOrUpdate(record);
-					s.getTransaction().commit();
-				}finally{
-					s.close();
+					try {
+						s.saveOrUpdate(record);
+						s.getTransaction().commit();
+					}catch (Exception ex) {
+						s.getTransaction().rollback();
+						throw ex;
+					}
 				}
 			}else if (previous != null && previous.getStatus() == Status.ACTIVE){
 				//we know that another one is not currently running because of
@@ -229,13 +228,15 @@ public class UploadChangeLogEngine {
 	}
 	
 	private void saveRecord(ConnectSyncHistoryRecord current){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			s.saveOrUpdate(current);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+			try{
+				s.saveOrUpdate(current);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 	}
 }

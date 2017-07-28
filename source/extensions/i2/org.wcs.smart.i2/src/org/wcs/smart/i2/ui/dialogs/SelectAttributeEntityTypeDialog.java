@@ -91,12 +91,9 @@ public class SelectAttributeEntityTypeDialog extends TitleAreaDialog{
 			List<NamedKeyItem> items = new ArrayList<>();
 			items.addAll(attributes);
 			
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				List<IntelEntityType> types = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
 				items.addAll(types);
-			}finally{
-				s.close();
 			}
 			Display.getDefault().syncExec(new Runnable(){
 				@Override

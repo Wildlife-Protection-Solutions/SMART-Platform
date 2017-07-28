@@ -98,8 +98,7 @@ public class ImportRecordXmlDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.ImportRecordXmlDialog_TaskName, files.size());
-					Session session = HibernateManager.openSession(new AttachmentInterceptor());
-					try{
+					try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 						RecordXmlImporter importer = new RecordXmlImporter(session);
 						for (Path p : files){
 							importer.importRecord(p, progress.split(1));
@@ -107,8 +106,6 @@ public class ImportRecordXmlDialog extends TitleAreaDialog {
 						close[0] = importer.finish(context.get(IEventBroker.class));
 					}catch (OperationCanceledException ex) {
 						return;
-					}finally{
-						session.close();
 					}
 				}
 			});

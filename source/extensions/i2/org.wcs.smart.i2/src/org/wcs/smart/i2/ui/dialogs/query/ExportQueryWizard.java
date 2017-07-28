@@ -36,10 +36,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -65,20 +63,15 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private List<Projection> supportedProjections = null;
 	private Projection defaultProjection = null;
 	
-	@SuppressWarnings("unchecked")
 	public ExportQueryWizard(IntelRecordObservationQuery query, IPagedQueryResultSet results) {
 		this.query = query;
 		this.queryResults = results;
 		
 		setWindowTitle(Messages.ExportQueryWizard_Title);
 		setDialogSettings(Intelligence2PlugIn.getDefault().getDialogSettings());
-		Session s = HibernateManager.openSession();
-		try{
-			supportedProjections = s.createCriteria(Projection.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+		try(Session s = HibernateManager.openSession()){
+			supportedProjections = HibernateManager.getCaProjectionList(s);
 			defaultProjection = HibernateManager.getCurrentViewProjection(s);
-		}finally{
-			s.close();
 		}
 		super.setNeedsProgressMonitor(true);
 	}
@@ -182,14 +175,11 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private boolean exportQuery(IProgressMonitor monitor, Path output,
 			IQueryExporter exporter, HashMap<IQueryExporter.ExportOption, Object> options){
 
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			exporter.exportQuery(s, queryResults, output, options);
 		}catch (Exception ex){
 			displayError(ex);
 			return false;
-		}finally{
-			s.close();
 		}
 		return true;
 	}

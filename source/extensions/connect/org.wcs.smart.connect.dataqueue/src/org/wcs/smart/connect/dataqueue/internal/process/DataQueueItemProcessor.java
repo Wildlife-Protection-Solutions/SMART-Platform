@@ -234,13 +234,15 @@ public class DataQueueItemProcessor extends Job {
 	}
 	
 	private void saveItem(){
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			s.saveOrUpdate(item);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				s.saveOrUpdate(item);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 	}
 

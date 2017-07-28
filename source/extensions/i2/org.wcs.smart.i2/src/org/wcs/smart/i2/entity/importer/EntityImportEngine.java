@@ -96,8 +96,7 @@ public enum EntityImportEngine {
 		monitor.subTask(Messages.EntityImportEngine_AttributeTaskName);
 		//load the attributes 
 		Set<IntelAttribute> attributes = new HashSet<>();
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (IntelAttribute a : config.getMappedAttributes()){
 				IntelAttribute attribute = (IntelAttribute) s.get(IntelAttribute.class, a.getUuid());
 				attribute.getType();
@@ -107,8 +106,6 @@ public enum EntityImportEngine {
 				}
 				attributes.add(attribute);
 			}
-		}finally{
-			s.close();
 		}
 		monitor.worked(1);
 		monitor.checkCanceled();
@@ -284,31 +281,30 @@ public enum EntityImportEngine {
 		kidMonitor = monitor.split(1);
 		kidMonitor.setWorkRemaining(newEntities.size());
 		//save change
-		s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			//save new list items
-			for (IntelAttributeListItem i : addedItems){
-				s.save(i);
-				s.saveOrUpdate(i.getAttribute());
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				//save new list items
+				for (IntelAttributeListItem i : addedItems){
+					s.save(i);
+					s.saveOrUpdate(i.getAttribute());
+				}
+				
+				//save new entities
+				for (IntelEntity e : newEntities){
+					s.save(e);
+					kidMonitor.worked(1);
+					kidMonitor.checkCanceled();
+				}
+				s.getTransaction().commit();
+			}catch (OperationCanceledException ex) {
+				s.getTransaction().rollback();
+				return null;
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.EntityImportEngine_SaveError + ex.getMessage(), ex);
+				return null;
 			}
-			
-			//save new entities
-			for (IntelEntity e : newEntities){
-				s.save(e);
-				kidMonitor.worked(1);
-				kidMonitor.checkCanceled();
-			}
-			s.getTransaction().commit();
-		}catch (OperationCanceledException ex) {
-			s.getTransaction().rollback();
-			return null;
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.EntityImportEngine_SaveError + ex.getMessage(), ex);
-			return null;
-		}finally{
-			s.close();
 		}
 		
 		eventBroker.send(IntelEvents.ENTITY_NEW, newEntities);

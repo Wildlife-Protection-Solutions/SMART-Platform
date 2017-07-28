@@ -32,15 +32,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.transaction.Synchronization;
 import javax.ws.rs.WebApplicationException;
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
@@ -52,6 +52,7 @@ import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem.Status;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -91,7 +92,6 @@ public enum DataQueueManager {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public LocalDataQueueItem addItemToQueue(DataQueueItem item) throws Exception{
 		if (!item.getConservationArea().equals(SmartDB.getCurrentConservationArea().getUuid())){
 			throw new IllegalStateException(Messages.DataQueueManager_CaError);
@@ -99,63 +99,60 @@ public enum DataQueueManager {
 		if (item instanceof LocalDataQueueItem){
 			throw new IllegalStateException(Messages.DataQueueManager_InQueueError);
 		}
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			List<LocalDataQueueItem> localItems = s.createCriteria(LocalDataQueueItem.class)
-					.add(Restrictions.eq("serverItemUuid", item.getUuid())) //$NON-NLS-1$
-					.list();
-			
-			for (LocalDataQueueItem i : localItems){
-				//if we have a queued, downloading, or processing item 
-				//then this is already in the queue and we do not want to add it again
-				//if complete or error we can add again
-				//as we may be duplicating data
-				if (i.getStatus() == Status.QUEUED ||
-						i.getStatus() == Status.REQUEUED ||
-						i.getStatus() == Status.DOWNLOADING ||
-						i.getStatus() == Status.PROCESSING){
-					return null;
-				}
-			}
-			
-			LocalDataQueueItem local = new LocalDataQueueItem();
-			local.setConservationArea(item.getConservationArea());
-			local.setFile(null);
-			local.setName(item.getName());
-			local.setServerItemUuid(item.getUuid());
-			local.setStatus(LocalDataQueueItem.Status.QUEUED);
-			local.setType(item.getType());
-			local.setOrder(getNextQueueOrder(s));
-			
-			s.save(local);
-			
-			s.getTransaction().commit();
-			
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
 			try{
-				fireModified();
+				List<LocalDataQueueItem> localItems = QueryFactory.buildQuery(s, LocalDataQueueItem.class, "serverItemUuid", item.getUuid()).list(); //$NON-NLS-1$			
+				for (LocalDataQueueItem i : localItems){
+					//if we have a queued, downloading, or processing item 
+					//then this is already in the queue and we do not want to add it again
+					//if complete or error we can add again
+					//as we may be duplicating data
+					if (i.getStatus() == Status.QUEUED ||
+							i.getStatus() == Status.REQUEUED ||
+							i.getStatus() == Status.DOWNLOADING ||
+							i.getStatus() == Status.PROCESSING){
+						return null;
+					}
+				}
+				
+				LocalDataQueueItem local = new LocalDataQueueItem();
+				local.setConservationArea(item.getConservationArea());
+				local.setFile(null);
+				local.setName(item.getName());
+				local.setServerItemUuid(item.getUuid());
+				local.setStatus(LocalDataQueueItem.Status.QUEUED);
+				local.setType(item.getType());
+				local.setOrder(getNextQueueOrder(s));
+				
+				s.save(local);
+				
+				s.getTransaction().commit();
+				
+				try{
+					fireModified();
+				}catch (Exception ex){
+					ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+				}
+				return local;
 			}catch (Exception ex){
-				ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			return local;
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			throw ex;
-		}finally{
-			s.close();
 		}
-		
 	}
 
 	private Integer getNextQueueOrder(Session s){
-		Integer nextorder = (Integer) s.createCriteria(LocalDataQueueItem.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid())) //$NON-NLS-1$
-				.add(Restrictions.in("status",  //$NON-NLS-1$
-						new LocalDataQueueItem.Status[]{
-						LocalDataQueueItem.Status.QUEUED,
-						LocalDataQueueItem.Status.REQUEUED}))
-				.setProjection(Projections.max("order")) //$NON-NLS-1$
-				.uniqueResult();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Integer> c = cb.createQuery(Integer.class);
+		Root<LocalDataQueueItem> from = c.from(LocalDataQueueItem.class);	
+		c.where(cb.and(
+				cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea().getUuid()), //$NON-NLS-1$
+				from.get("status").in(LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.REQUEUED) //$NON-NLS-1$
+				));
+		c.select(cb.max(from.get("order"))); //$NON-NLS-1$
+		Integer nextorder = s.createQuery(c).uniqueResult();
+		
 		if (nextorder == null) nextorder = 0;
 		nextorder++;
 		return nextorder;
@@ -166,23 +163,26 @@ public enum DataQueueManager {
 	 * @param validStatus
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public List<LocalDataQueueItem> getLocalItems(LocalDataQueueItem.Status... validStatus) {
 
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			Criteria c = s.createCriteria(LocalDataQueueItem.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid())); //$NON-NLS-1$
-			
-			if (validStatus != null && validStatus.length > 0){
-				c.add(Restrictions.in("status", validStatus)); //$NON-NLS-1$
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<LocalDataQueueItem> c = cb.createQuery(LocalDataQueueItem.class);
+				Root<LocalDataQueueItem> from = c.from(LocalDataQueueItem.class);
+				List<Predicate> filters = new ArrayList<>();
+				filters.add(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea().getUuid())); //$NON-NLS-1$
+				if (validStatus != null && validStatus.length > 0){
+					filters.add(from.get("status").in((Object[])validStatus)); //$NON-NLS-1$
+				}
+				c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
+				
+				List<LocalDataQueueItem> localItems = s.createQuery(c).list();
+				return localItems;
+			}finally{
+				s.getTransaction().rollback();
 			}
-			List<LocalDataQueueItem> localItems = c.list();
-			return localItems;
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
 		}
 	}
 	
@@ -195,64 +195,63 @@ public enum DataQueueManager {
 	 * @return
 	 */
 	public synchronized void reprocessItems(List<LocalDataQueueItem> items){
-		Session s = HibernateManager.openSession();
-		s.getTransaction().begin();
-		try{
-			for (LocalDataQueueItem item : items){
-				LocalDataQueueItem i = (LocalDataQueueItem) s.get(LocalDataQueueItem.class, 
-						item.getUuid());
+		try(Session s = HibernateManager.openSession()){
+			s.getTransaction().begin();
+			try{
+				for (LocalDataQueueItem item : items){
+					LocalDataQueueItem i = (LocalDataQueueItem) s.get(LocalDataQueueItem.class, 
+							item.getUuid());
+							
+					if (i == null || i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING ||
+							i.getStatus() == LocalDataQueueItem.Status.QUEUED ||
+							i.getStatus() == LocalDataQueueItem.Status.REQUEUED ||
+							i.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+						//cannot requeue item
+						continue;
+					}
+				
+					LocalDataQueueItem clone = new LocalDataQueueItem();
+					clone.setConservationArea(i.getConservationArea());
+					clone.setName(i.getName());
+					clone.setServerItemUuid(i.getServerItemUuid());
+					clone.setType(i.getType());
+					clone.setStatus(LocalDataQueueItem.Status.REQUEUED);
+					clone.setDateProcessed(null);
+					clone.setErrorMessage(Messages.DataQueueManager_ReQueuedMessage);
+					clone.setOrder(getNextQueueOrder(s));
+				
+					if (i.getFullFilePath() != null && Files.exists(i.getFullFilePath())){
+						//copy 
+						String fileName = i.getFullFilePath().getFileName().toString();
+						int lastIndex = fileName.lastIndexOf('.');
+						int firstIndex = fileName.indexOf('.');
+						String base = fileName;
+						if (firstIndex > 0){
+							base = fileName.substring(0, firstIndex);
+						}
+						String ext = "file"; //$NON-NLS-1$
+						if (lastIndex > 0){
+							ext = fileName.substring(lastIndex+1);
+						}
+						int counter = 0;
+						Path copy = i.getFullFilePath().getParent().resolve(base + "." + counter+ "." + ext); //$NON-NLS-1$ //$NON-NLS-2$
+						while(Files.exists(copy)){
+							counter++;
+							copy = i.getFullFilePath().getParent().resolve(base + "." + counter+ "." + ext);  //$NON-NLS-1$//$NON-NLS-2$
+						}
 						
-				if (i == null || i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING ||
-						i.getStatus() == LocalDataQueueItem.Status.QUEUED ||
-						i.getStatus() == LocalDataQueueItem.Status.REQUEUED ||
-						i.getStatus() == LocalDataQueueItem.Status.PROCESSING){
-					//cannot requeue item
-					continue;
+						Files.copy(i.getFullFilePath(), copy);
+						clone.setFile(
+								FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation())
+								.relativize(copy).toString());
+						
+					}
+					s.save(clone);
 				}
-			
-				LocalDataQueueItem clone = new LocalDataQueueItem();
-				clone.setConservationArea(i.getConservationArea());
-				clone.setName(i.getName());
-				clone.setServerItemUuid(i.getServerItemUuid());
-				clone.setType(i.getType());
-				clone.setStatus(LocalDataQueueItem.Status.REQUEUED);
-				clone.setDateProcessed(null);
-				clone.setErrorMessage(Messages.DataQueueManager_ReQueuedMessage);
-				clone.setOrder(getNextQueueOrder(s));
-			
-				if (i.getFullFilePath() != null && Files.exists(i.getFullFilePath())){
-					//copy 
-					String fileName = i.getFullFilePath().getFileName().toString();
-					int lastIndex = fileName.lastIndexOf('.');
-					int firstIndex = fileName.indexOf('.');
-					String base = fileName;
-					if (firstIndex > 0){
-						base = fileName.substring(0, firstIndex);
-					}
-					String ext = "file"; //$NON-NLS-1$
-					if (lastIndex > 0){
-						ext = fileName.substring(lastIndex+1);
-					}
-					int counter = 0;
-					Path copy = i.getFullFilePath().getParent().resolve(base + "." + counter+ "." + ext); //$NON-NLS-1$ //$NON-NLS-2$
-					while(Files.exists(copy)){
-						counter++;
-						copy = i.getFullFilePath().getParent().resolve(base + "." + counter+ "." + ext);  //$NON-NLS-1$//$NON-NLS-2$
-					}
-					
-					Files.copy(i.getFullFilePath(), copy);
-					clone.setFile(
-							FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation())
-							.relativize(copy).toString());
-					
-				}
-				s.save(clone);
+				s.getTransaction().commit();
+			}catch(Exception ex){
+				ConnectDataQueuePlugin.displayLog(MessageFormat.format(Messages.DataQueueManager_ProcessingError,ex.getMessage()), ex);
 			}
-			s.getTransaction().commit();
-		}catch(Exception ex){
-			ConnectDataQueuePlugin.displayLog(MessageFormat.format(Messages.DataQueueManager_ProcessingError,ex.getMessage()), ex);
-		}finally{
-			s.close();
 		}
 		fireModified();
 	}
@@ -266,47 +265,49 @@ public enum DataQueueManager {
 	 * @return
 	 */
 	public synchronized LocalDataQueueItem checkOutNextQueueItem(SmartConnect connect){
-		Session s = HibernateManager.openSession();
-		s.getTransaction().begin();
-		try{
-			
-			LocalDataQueueItem item = (LocalDataQueueItem) s.createCriteria(LocalDataQueueItem.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid())) //$NON-NLS-1$
-			.add(Restrictions.in("status", new LocalDataQueueItem.Status[]{LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.REQUEUED})) //$NON-NLS-1$
-			.addOrder(Order.asc("order")) //$NON-NLS-1$
-			.setMaxResults(1)
-			.uniqueResult();
-		
-			if (item == null) return null;
-			
-			item.setDateProcessed(new Date());
-			//check status on server
-			item.setCheckOutStatus(item.getStatus());
-			if (item.getStatus() != LocalDataQueueItem.Status.REQUEUED){
-				try{
-					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.PROCESSING);
-					item.setStatus(Status.PROCESSING);
-				}catch (Exception ex){
-					String message = null;
-					if (ex instanceof WebApplicationException){
-						message = MessageFormat.format(Messages.DataQueueManager_ItemServerError, SmartConnect.parseErrorMessage(((WebApplicationException) ex).getResponse().readEntity(String.class)));
-					}else{
-						message = Messages.DataQueueManager_Error3;
+		try(Session s = HibernateManager.openSession()){
+			s.getTransaction().begin();
+			try{
+				
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<LocalDataQueueItem> c = cb.createQuery(LocalDataQueueItem.class);
+				Root<LocalDataQueueItem> from = c.from(LocalDataQueueItem.class);	
+				c.where(cb.and(
+						cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea().getUuid()), //$NON-NLS-1$
+						from.get("status").in(LocalDataQueueItem.Status.QUEUED, LocalDataQueueItem.Status.REQUEUED) //$NON-NLS-1$
+						));
+				c.orderBy(cb.asc(from.get("order"))); //$NON-NLS-1$
+				LocalDataQueueItem item = s.createQuery(c).setMaxResults(1).uniqueResult();
+				
+				if (item == null) return null;
+				
+				item.setDateProcessed(new Date());
+				//check status on server
+				item.setCheckOutStatus(item.getStatus());
+				if (item.getStatus() != LocalDataQueueItem.Status.REQUEUED){
+					try{
+						ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.PROCESSING);
+						item.setStatus(Status.PROCESSING);
+					}catch (Exception ex){
+						String message = null;
+						if (ex instanceof WebApplicationException){
+							message = MessageFormat.format(Messages.DataQueueManager_ItemServerError, SmartConnect.parseErrorMessage(((WebApplicationException) ex).getResponse().readEntity(String.class)));
+						}else{
+							message = Messages.DataQueueManager_Error3;
+						}
+						item.setStatus(LocalDataQueueItem.Status.ERROR);
+						item.setErrorMessage(message);
 					}
-					item.setStatus(LocalDataQueueItem.Status.ERROR);
-					item.setErrorMessage(message);
+				}else{
+					item.setStatus(Status.PROCESSING);
 				}
-			}else{
-				item.setStatus(Status.PROCESSING);
+				
+				s.getTransaction().commit();
+				return item;
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			
-			s.getTransaction().commit();
-			return item;
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			throw ex;
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -314,22 +315,21 @@ public enum DataQueueManager {
 	 * Deletes all items from the data queue table for the current conservation area
 	 */
 	public synchronized void deleteAllHistory(){
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();		
-			deleteDataQueue(SmartDB.getCurrentConservationArea(), s);
-			s.getTransaction().commit();
-			
-			try{
-				fireModified();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				deleteDataQueue(SmartDB.getCurrentConservationArea(), s);
+				s.getTransaction().commit();
+				
+				try{
+					fireModified();
+				}catch (Exception ex){
+					ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+				}
 			}catch (Exception ex){
-				ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+				s.getTransaction().rollback();
+				ConnectDataQueuePlugin.displayLog(Messages.DataQueueManager_Error4 + ex.getMessage(), ex);
 			}
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			ConnectDataQueuePlugin.displayLog(Messages.DataQueueManager_Error4 + ex.getMessage(), ex);
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -339,36 +339,35 @@ public enum DataQueueManager {
 	 * @param toDelete
 	 */
 	public synchronized void deleteItems(List<LocalDataQueueItem> toDelete){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			final List<Path> filesToDelete = new ArrayList<Path>();
-			
-			for (LocalDataQueueItem i : toDelete){
-				s.delete(i);
-				if (i.getFile() != null){
-					filesToDelete.add(i.getFullFilePath());
+			try {
+				final List<Path> filesToDelete = new ArrayList<Path>();
+				
+				for (LocalDataQueueItem i : toDelete){
+					s.delete(i);
+					if (i.getFile() != null){
+						filesToDelete.add(i.getFullFilePath());
+					}
 				}
-			}
-			s.getTransaction().commit();
-			
-			for (Path p : filesToDelete){
+				s.getTransaction().commit();
+				
+				for (Path p : filesToDelete){
+					try{
+						Files.deleteIfExists(p);
+					}catch(Exception ex){
+						ConnectDataQueuePlugin.displayLog(MessageFormat.format(Messages.DataQueueManager_DeleteError, p.toString()), ex);	
+					}
+				}
 				try{
-					Files.deleteIfExists(p);
-				}catch(Exception ex){
-					ConnectDataQueuePlugin.displayLog(MessageFormat.format(Messages.DataQueueManager_DeleteError, p.toString()), ex);	
+					fireModified();
+				}catch (Exception ex){
+					ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
 				}
-			}
-			try{
-				fireModified();
 			}catch (Exception ex){
-				ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+				s.getTransaction().rollback();
+				ConnectDataQueuePlugin.displayLog(Messages.DataQueueManager_CleanError + ex.getMessage(), ex);
 			}
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			ConnectDataQueuePlugin.displayLog(Messages.DataQueueManager_CleanError + ex.getMessage(), ex);
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -379,56 +378,57 @@ public enum DataQueueManager {
 	 *  
 	 * @param toDelete
 	 */
-	@SuppressWarnings("unchecked")
 	public synchronized void deleteOldItems(int numDays){
 		if (numDays < 0) return;
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			Calendar c = Calendar.getInstance();
-			c.add(Calendar.DATE, -numDays);
-			Date compareDate = c.getTime();
-			
-			List<LocalDataQueueItem> toDelete = s.createCriteria(LocalDataQueueItem.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea().getUuid())) //$NON-NLS-1$
-				.add(Restrictions.in("status", new LocalDataQueueItem.Status[]{ //$NON-NLS-1$
-						LocalDataQueueItem.Status.COMPLETE,
-						LocalDataQueueItem.Status.COMPLETE_WARN,
-						LocalDataQueueItem.Status.ERROR,
-				}))
-				.add(Restrictions.and(Restrictions.isNotNull("dateProcessed"), //$NON-NLS-1$
-						Restrictions.lt("dateProcessed", compareDate))) //$NON-NLS-1$
-				.list();
-			final List<Path> filesToDelete = new ArrayList<Path>();
-			
-			for (LocalDataQueueItem i : toDelete){
-				s.delete(i);
-				if (i.getFile() != null){
-					filesToDelete.add(i.getFullFilePath());
+			try {
+				Calendar c = Calendar.getInstance();
+				c.add(Calendar.DATE, -numDays);
+				Date compareDate = c.getTime();
+				
+				
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<LocalDataQueueItem> cq = cb.createQuery(LocalDataQueueItem.class);
+				Root<LocalDataQueueItem> from = cq.from(LocalDataQueueItem.class);	
+				cq.where(cb.and(
+						cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea().getUuid()), //$NON-NLS-1$
+						from.get("status").in(LocalDataQueueItem.Status.COMPLETE, LocalDataQueueItem.Status.COMPLETE_WARN, LocalDataQueueItem.Status.ERROR), //$NON-NLS-1$
+						cb.isNotNull(from.get("dateProcessed")), //$NON-NLS-1$
+						cb.lessThan(from.get("dateProcessed"), compareDate) //$NON-NLS-1$
+						));
+				
+				List<LocalDataQueueItem> toDelete = s.createQuery(cq).list();
+				
+				final List<Path> filesToDelete = new ArrayList<Path>();
+				
+				for (LocalDataQueueItem i : toDelete){
+					s.delete(i);
+					if (i.getFile() != null){
+						filesToDelete.add(i.getFullFilePath());
+					}
 				}
-			}
-			s.getTransaction().commit();
-			
-			for (Path p : filesToDelete){
-				try{
-					Files.deleteIfExists(p);
-				}catch(Exception ex){
-					ConnectDataQueuePlugin.displayLog(MessageFormat.format(Messages.DataQueueManager_DeleteError, p.toString()), ex);	
+				s.getTransaction().commit();
+				
+				for (Path p : filesToDelete){
+					try{
+						Files.deleteIfExists(p);
+					}catch(Exception ex){
+						ConnectDataQueuePlugin.displayLog(MessageFormat.format(Messages.DataQueueManager_DeleteError, p.toString()), ex);	
+					}
 				}
-			}
-			if (!toDelete.isEmpty()){
-				try{	
-					fireModified();
-				}catch (Exception ex){
-					ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+				if (!toDelete.isEmpty()){
+					try{	
+						fireModified();
+					}catch (Exception ex){
+						ConnectDataQueuePlugin.displayLog(ex.getMessage(), ex);
+					}
 				}
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				ConnectDataQueuePlugin.displayLog(Messages.DataQueueManager_CleanError + ex.getMessage(), ex);
 			}
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			ConnectDataQueuePlugin.displayLog(Messages.DataQueueManager_CleanError + ex.getMessage(), ex);
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -440,7 +440,7 @@ public enum DataQueueManager {
 	 */
 	public void deleteDataQueueOptions(ConservationArea ca, Session session) {
 		// delete all data queue items
-		Query q = session
+		Query<?> q = session
 				.createQuery("DELETE FROM DataQueueProcessingOption WHERE id.conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
@@ -455,7 +455,7 @@ public enum DataQueueManager {
 	 */
 	public void deleteDataQueue(ConservationArea ca, Session session) {
 		// delete all data queue items
-		Query q = session
+		Query<?> q = session
 				.createQuery("DELETE FROM LocalDataQueueItem WHERE conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();

@@ -24,9 +24,8 @@ package org.wcs.smart.i2.handlers;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -49,22 +48,13 @@ public class DeleteIntelAttributeListItemAdvisor implements IDeleteAdvisor {
 		}
 		IntelAttributeListItem attribute = (IntelAttributeListItem) object;
 		
-		Long linkCnt =  
-				(Long)session.createCriteria(IntelEntityAttributeValue.class)
-			.add(Restrictions.eq("attributeListItem", attribute)) //$NON-NLS-1$
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
+		Long linkCnt =  QueryFactory.buildCountQuery(session, IntelEntityAttributeValue.class, new Object[] {"attributeListItem", attribute}); //$NON-NLS-1$
 		
 		if (linkCnt > 0){
 			return MessageFormat.format(Messages.DeleteIntelAttributeListItemAdvisor_EntityError, linkCnt);
 		}
 		
-		linkCnt =  
-				(Long)session.createCriteria(IntelEntityRelationshipAttributeValue.class)
-			.add(Restrictions.eq("attributeListItem", attribute)) //$NON-NLS-1$
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
-		
+		linkCnt =  QueryFactory.buildCountQuery(session, IntelEntityRelationshipAttributeValue.class, new Object[] {"attributeListItem", attribute}); //$NON-NLS-1$
 		if (linkCnt > 0){
 			return MessageFormat.format(Messages.DeleteIntelAttributeListItemAdvisor_RelationshipError, linkCnt);
 		}

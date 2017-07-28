@@ -53,22 +53,21 @@ public class AddIntelligenceJob extends Job {
 		//required if run during restore to ensure Display.syncexec calls don't block
 		DisplayAccess.accessDisplayDuringStartup();
 				
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			installPlugin(session);
-			session.getTransaction().commit();
-		} catch (final Exception ex) {
-			if (session.getTransaction().isActive()) session.getTransaction().rollback();
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					Intelligence2PlugIn.displayLog(Messages.AddIntelligenceJob_InstallError, ex);
-				}
-			});
-			return new Status(IStatus.ERROR, Intelligence2PlugIn.PLUGIN_ID, 1, Messages.AddIntelligenceJob_InstallError, ex); 
-		} finally {
-			session.close();
+			try{
+				installPlugin(session);
+				session.getTransaction().commit();
+			} catch (final Exception ex) {
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						Intelligence2PlugIn.displayLog(Messages.AddIntelligenceJob_InstallError, ex);
+					}
+				});
+				return new Status(IStatus.ERROR, Intelligence2PlugIn.PLUGIN_ID, 1, Messages.AddIntelligenceJob_InstallError, ex);
+			}
 		}
 		monitor.done();
 		return Status.OK_STATUS;

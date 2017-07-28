@@ -204,9 +204,7 @@ public class ReplicationStatusContribution implements
 			String message = null;
 			ServerStatus status = ServerStatus.ERROR;
 			if (!DerbyReplicationManager.INSTANCE.getCachedReplicationState()) return Status.OK_STATUS;
-			Session session = HibernateManager.openSession();
-			
-			try{
+			try(Session session = HibernateManager.openSession()){
 				if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), session)){
 					
 					//set the transaction level so it doesn't interfere with other actions
@@ -247,8 +245,6 @@ public class ReplicationStatusContribution implements
 				}
 			}catch (Exception ex){
 				ConnectPlugIn.log(ex.getMessage(), ex);
-			}finally{
-				session.close();
 			}
 			updateLocalStatus(status, message);
 

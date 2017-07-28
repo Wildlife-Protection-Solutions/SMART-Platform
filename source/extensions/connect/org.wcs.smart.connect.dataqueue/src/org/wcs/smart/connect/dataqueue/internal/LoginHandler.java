@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.SmartContext;
@@ -93,31 +93,30 @@ public class LoginHandler implements ILoginHandler {
 
 		//update item status and clear any non complete downloaded files
 		List<Path> toDelete = new ArrayList<Path>();
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			int order = 0;
-			for (LocalDataQueueItem i : itemsToReset){
-				if (i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
-					//downloading was not complete so clear file
-					if (i.getFullFilePath() != null){
-						toDelete.add(i.getFullFilePath());
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				int order = 0;
+				for (LocalDataQueueItem i : itemsToReset){
+					if (i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING){
+						//downloading was not complete so clear file
+						if (i.getFullFilePath() != null){
+							toDelete.add(i.getFullFilePath());
+						}
+						i.setFile(null);
 					}
-					i.setFile(null);
+					if(i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING ||
+							i.getStatus() == LocalDataQueueItem.Status.PROCESSING){
+						i.setStatus(LocalDataQueueItem.Status.REQUEUED);
+					}
+					i.setOrder(order++);
+					s.saveOrUpdate(i);
 				}
-				if(i.getStatus() == LocalDataQueueItem.Status.DOWNLOADING ||
-						i.getStatus() == LocalDataQueueItem.Status.PROCESSING){
-					i.setStatus(LocalDataQueueItem.Status.REQUEUED);
-				}
-				i.setOrder(order++);
-				s.saveOrUpdate(i);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				ConnectDataQueuePlugin.log(ex.getMessage(), ex);
+				return;
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			ConnectDataQueuePlugin.log(ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		for (Path p : toDelete){
 			try{
@@ -130,12 +129,9 @@ public class LoginHandler implements ILoginHandler {
 		ConnectServer server = null;
 		ConnectUser user = null;
 		SmartConnect smartConnect = null;
-		s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			server = ConnectHibernateManager.getConnectServer(s);
 			user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);
-		}finally{
-			s.close();
 		}
 		
 		if (server == null){
@@ -173,13 +169,10 @@ public class LoginHandler implements ILoginHandler {
 	private void cleanUpDataQueueAndFilestore(){
 		
 		int olderThan = -1;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			ConnectServer cs = ConnectHibernateManager.getConnectServer(s);
 			if (cs == null) return;
 			olderThan = DataQueueServerOptions.CLEANUP_DAYS.getIntegerValue(cs);
-		}finally{
-			s.close();
 		}
 		
 		if (olderThan >= 0){
@@ -202,20 +195,20 @@ public class LoginHandler implements ILoginHandler {
 	 * are not associated with a localdataqueue item for the given conservation
 	 * area.
 	 */
-	@SuppressWarnings("unchecked")
 	private void cleanUpFilestore(){
-		List<String> files = null;
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			Query q = s.createQuery("SELECT file FROM LocalDataQueueItem WHERE conservationArea = :ca and file is not null"); //$NON-NLS-1$
-			q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
-			files = q.list();
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+		List<String> files = new ArrayList<>();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				Query<?> q = s.createQuery("SELECT file FROM LocalDataQueueItem WHERE conservationArea = :ca and file is not null"); //$NON-NLS-1$
+				q.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid()); //$NON-NLS-1$
+				for(Object x : q.list()) files.add((String)x);
+				
+			}finally{
+				s.getTransaction().rollback();
+			}
 		}
-		if (files == null) return;
+		if (files.isEmpty()) return;
 		
 		Path p = FileSystems.getDefault().getPath(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), ConnectDataQueuePlugin.DATA_QUEUE_DIR);
 		if (Files.exists(p)){

@@ -91,16 +91,13 @@ public abstract class RunQueryJob extends Job {
 		if (!parameters.containsKey(ConservationArea.class.getName())) parameters.put(ConservationArea.class.getName(), SmartDB.getCurrentConservationArea());
 		
 		IPagedQueryResultSet results = null;
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			parameters.put(Session.class.getName(), session);
 			results = (new IntelObservationQueryEngine()).executeQuery(query, parameters);	
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(Messages.RunQueryJob_error + ex.getMessage(), ex);
 			onError(ex);
 			return Status.OK_STATUS;
-		}finally{
-			session.close();
 		}
 		if (monitor.isCanceled()){
 			onCancel();

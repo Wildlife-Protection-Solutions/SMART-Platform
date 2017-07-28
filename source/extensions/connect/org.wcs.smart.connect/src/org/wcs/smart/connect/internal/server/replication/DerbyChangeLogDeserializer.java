@@ -34,11 +34,13 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.apache.commons.io.FileUtils;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -71,7 +73,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	 */
 	@Override
 	public void processFile(final Session session) throws Exception{
-		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate(); //$NON-NLS-1$
+		session.createNativeQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate(); //$NON-NLS-1$
 		
 		ConnectSyncHistoryRecord lastUpload = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, ca, Type.UPLOAD);
 		lastUploadRevision = lastUpload == null ? -1 : lastUpload.getEndRevision();
@@ -79,7 +81,6 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		super.processFile(session);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean shouldProcess(ChangeLogItem it, Path changeLogPackage) throws ConflictException{
 		if (ChangeLogTableManager.INSTANCE.constains(session, it)){
 			//we already have this item
@@ -89,11 +90,17 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		try{
 			//conflict checking deleting filestore items
 			if (it.getAction() == Action.FS_DELETE){
-				Criteria c = session.createCriteria(ChangeLogItem.class);
-				c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
-				c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
-				c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
-				List<ChangeLogItem> changes = c.list();
+				
+				CriteriaBuilder cb = session.getCriteriaBuilder();
+				CriteriaQuery<ChangeLogItem> c = cb.createQuery(ChangeLogItem.class);
+				Root<ChangeLogItem> from = c.from(ChangeLogItem.class);
+				c.where(cb.and(
+						cb.equal(from.get("fileName"), it.getFileName()), //$NON-NLS-1$
+						cb.greaterThan(from.get("revision"), lastUploadRevision), //$NON-NLS-1$
+						cb.equal(from.get("source"), Source.LOCAL) //$NON-NLS-1$
+						));
+				List<ChangeLogItem> changes = session.createQuery(c).list();
+				
 				
 				//if there is anything other than a delete throw a conflict exception
 				//if we both deleted the same thing we will not throw a conflict
@@ -109,12 +116,17 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 			if (it.getAction() == Action.FS_UPDATE){
 				//in the logging we do not log updates to directories so this must be a file
 				//any any other file modification/addition/deletion should cause a conflict
-				Criteria c = session.createCriteria(ChangeLogItem.class);
-				c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
-				c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
-				c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
-				c.setProjection(Projections.rowCount());
-				Long cnt = (Long) c.uniqueResult();
+				
+				CriteriaBuilder cb = session.getCriteriaBuilder();
+				CriteriaQuery<Long> c = cb.createQuery(Long.class);
+				Root<ChangeLogItem> from = c.from(ChangeLogItem.class);
+				c.select(cb.count(from));
+				c.where(cb.and(
+						cb.equal(from.get("fileName"), it.getFileName()), //$NON-NLS-1$
+						cb.greaterThan(from.get("revision"), lastUploadRevision), //$NON-NLS-1$
+						cb.equal(from.get("source"), Source.LOCAL) //$NON-NLS-1$
+						));
+				Long cnt = session.createQuery(c).uniqueResult();
 				if (cnt > 0){
 					throw new ConflictExceptionImpl(it);
 				}
@@ -123,10 +135,15 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 			}
 			
 			if (it.getAction() ==  Action.FS_INSERT){
-				Criteria c = session.createCriteria(ChangeLogItem.class);
-				c.add(Restrictions.eq("fileName", it.getFileName())); //$NON-NLS-1$
-				c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
-				c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
+				CriteriaBuilder cb = session.getCriteriaBuilder();
+				CriteriaQuery<ChangeLogItem> c = cb.createQuery(ChangeLogItem.class);
+				Root<ChangeLogItem> from = c.from(ChangeLogItem.class);
+				c.where(cb.and(
+						cb.equal(from.get("fileName"), it.getFileName()), //$NON-NLS-1$
+						cb.greaterThan(from.get("revision"), lastUploadRevision), //$NON-NLS-1$
+						cb.equal(from.get("source"), Source.LOCAL) //$NON-NLS-1$
+						));
+				List<ChangeLogItem> others = session.createQuery(c).list();
 				
 				//if we both create the same directory this should not be a conflict
 				Path fromPath = changeLogPackage.resolve(it.getFileName());
@@ -134,7 +151,6 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 					if (Files.isDirectory(fromPath)){
 						//if its a directory and all other changes are also create changes
 						//we are ok to continue
-						List<ChangeLogItem> others = (List<ChangeLogItem>) c.list();
 						for (ChangeLogItem o : others){
 							if(o.getAction() != Action.FS_INSERT){
 								throw new ConflictExceptionImpl(it);
@@ -144,9 +160,15 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 					}
 				}
 				
-				//check for conflicts
-				c.setProjection(Projections.rowCount());
-				Long cnt = (Long) c.uniqueResult();
+				CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
+				Root<ChangeLogItem> from2 = c2.from(ChangeLogItem.class);
+				c2.select(cb.count(from2));
+				c2.where(cb.and(
+						cb.equal(from2.get("fileName"), it.getFileName()), //$NON-NLS-1$
+						cb.greaterThan(from2.get("revision"), lastUploadRevision), //$NON-NLS-1$
+						cb.equal(from2.get("source"), Source.LOCAL) //$NON-NLS-1$
+						));
+				Long cnt = session.createQuery(c2).uniqueResult();
 				if (cnt > 0){
 					throw new ConflictExceptionImpl(it);
 				}
@@ -160,31 +182,38 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		}
 
 		// Conflict checking data records
-		Criteria c = session.createCriteria(ChangeLogItem.class);
-		c.add(Restrictions.eq("tableName", it.getTableName())); //$NON-NLS-1$
-		c.add(Restrictions.eq("conservationArea", it.getConservationArea())); //$NON-NLS-1$
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Long> c = cb.createQuery(Long.class);
+		Root<ChangeLogItem> from = c.from(ChangeLogItem.class);
+		c.select(cb.count(from));
+		List<Predicate> filters = new ArrayList<>();
+		filters.add(cb.equal(from.get("tableName"), it.getTableName())); //$NON-NLS-1$
+		filters.add(cb.equal(from.get("conservationArea"), it.getConservationArea())); //$NON-NLS-1$
+	
 		if (it.getFieldName1() != null){
-			c.add(Restrictions.eq("fieldName1", it.getFieldName1())); //$NON-NLS-1$
-			c.add(Restrictions.eq("key1", it.getKey1())); //$NON-NLS-1$
+			filters.add(cb.equal(from.get("fieldName1"), it.getFieldName1())); //$NON-NLS-1$
+			filters.add(cb.equal(from.get("key1"), it.getKey1())); //$NON-NLS-1$
 		}
 		if (it.getFieldName2() != null){
-			c.add(Restrictions.eq("fieldName2", it.getFieldName2())); //$NON-NLS-1$
+			filters.add(cb.equal(from.get("fieldName2"), it.getFieldName2())); //$NON-NLS-1$
 			if (it.getKey2() != null){
-				c.add(Restrictions.eq("key2", it.getKey2())); //$NON-NLS-1$
-				c.add(Restrictions.isNull("key2String")); //$NON-NLS-1$
+				filters.add(cb.equal(from.get("key2"), it.getKey2())); //$NON-NLS-1$
+				filters.add(cb.isNull(from.get("key2String"))); //$NON-NLS-1$
+				
 			}else if (it.getKey2String() != null){
-				c.add(Restrictions.eq("key2String", it.getKey2String())); //$NON-NLS-1$
-				c.add(Restrictions.isNull("key2")); //$NON-NLS-1$
+				filters.add(cb.equal(from.get("key2String"), it.getKey2String())); //$NON-NLS-1$
+				filters.add(cb.isNull(from.get("key2"))); //$NON-NLS-1$
+				
 			}else{
 				//this case should not happen
 				throw new IllegalStateException("Invalid change log record.  Second key table provide but value not set"); //$NON-NLS-1$
 			}
 		}
-		c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
-		c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
+		filters.add(cb.greaterThan(from.get("revision"), lastUploadRevision)); //$NON-NLS-1$
+		filters.add(cb.equal(from.get("source"), Source.LOCAL)); //$NON-NLS-1$
+		c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
 
-		c.setProjection(Projections.rowCount());
-		Long cnt = (Long) c.uniqueResult();
+		Long cnt = session.createQuery(c).uniqueResult();
 		if (cnt > 0){
 			throw new ConflictExceptionImpl(it);
 		}

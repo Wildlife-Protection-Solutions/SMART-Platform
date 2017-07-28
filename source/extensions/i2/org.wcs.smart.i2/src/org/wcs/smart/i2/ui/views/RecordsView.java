@@ -37,6 +37,9 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -84,14 +87,13 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -619,18 +621,12 @@ public class RecordsView {
 
 	Job loadRecordsJob = new Job(Messages.RecordsView_LoadingIntelRecordsJobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			// -- load record source images --
-			Session s = HibernateManager.openSession();
 			final List<IntelRecordSource> sources = new ArrayList<>();
-			try{
-				sources.addAll(s.createCriteria(IntelRecordSource.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list());
-			}finally{
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				sources.addAll(QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList()); //$NON-NLS-1$					
 			}
 			
 			Display.getDefault().asyncExec(new Runnable() {
@@ -660,15 +656,21 @@ public class RecordsView {
 			// -- load new and inprogress images --
 			final List<IntelRecord> inProgress = new ArrayList<IntelRecord>();
 			final List<IntelRecord> newRecords = new ArrayList<IntelRecord>();
-			s = HibernateManager.openSession();
-			try{
-				List<IntelRecord> records = s.createCriteria(IntelRecord.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.add(Restrictions.or(
-								Restrictions.eq("status", IntelRecord.Status.PROCESSING), //$NON-NLS-1$
-								Restrictions.eq("status", IntelRecord.Status.NEW))) //$NON-NLS-1$
-						.addOrder(Order.asc("dateCreated")) //$NON-NLS-1$
-						.list();
+			
+			try(Session s = HibernateManager.openSession()){
+				
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<IntelRecord> c = cb.createQuery(IntelRecord.class);
+				Root<IntelRecord> from = c.from(IntelRecord.class);
+				c.where(cb.and(
+						cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+						cb.or(
+								cb.equal(from.get("status"), IntelRecord.Status.PROCESSING), //$NON-NLS-1$
+								cb.equal(from.get("status"), IntelRecord.Status.NEW) //$NON-NLS-1$
+								)
+						));
+				c.orderBy(cb.asc(from.get("dateCreated"))); //$NON-NLS-1$
+				List<IntelRecord> records = s.createQuery(c).getResultList();
 				for (IntelRecord r : records){
 					if (r.getRecordSource() != null){
 						r.getRecordSource().getIcon();
@@ -679,8 +681,6 @@ public class RecordsView {
 						newRecords.add(r);
 					}
 				}
-			}finally{
-				s.close();
 			}
 			
 			Display.getDefault().asyncExec(new Runnable() {
@@ -694,17 +694,16 @@ public class RecordsView {
 			});
 			
 			//--load all records --
-			s = HibernateManager.openSession();
+			
 			final List<RecordEditorInput> allRecords = new ArrayList<RecordEditorInput>();
-			try{
-				Query q = s.createQuery("SELECT title, uuid, dateCreated, recordSource.uuid, status FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc"); //$NON-NLS-1$
+			try(Session s = HibernateManager.openSession()){
+				Query<?> q = s.createQuery("SELECT title, uuid, dateCreated, recordSource.uuid, status FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc"); //$NON-NLS-1$
 				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				List<Object[]> items = q.list();
-				for (Object[] item : items){
+				List<?> items = q.list();
+				for (Object it : items){
+					Object[] item = (Object[])it;
 					allRecords.add(new RecordEditorInput((String)item[0], (UUID)item[1], (Date)item[2], (UUID)item[3], (IntelRecord.Status)item[4]));
 				}
-			}finally{
-				s.close();
 			}
 			allRecords.sort((x,y)->-1 * x.getDateCreated().compareTo(y.getDateCreated()));
 			Display.getDefault().asyncExec(new Runnable() {

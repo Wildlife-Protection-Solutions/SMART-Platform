@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
@@ -51,7 +51,6 @@ public class BasicRecordSearch implements IRecordSearch{
 		this.titleSearch = titleSearch;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public IntelRecordResult doSearch(Session session, IProgressMonitor monitor) {
 		Long startTime = System.nanoTime();
@@ -84,7 +83,7 @@ public class BasicRecordSearch implements IRecordSearch{
 			hql += " lower(title) like :title "; //$NON-NLS-1$
 		}
 		
-		Query query = session.createQuery("SELECT count(*) " + hql); //$NON-NLS-1$
+		Query<?> query = session.createQuery("SELECT count(*) " + hql); //$NON-NLS-1$
 		if (source != null){
 			query.setParameter("source", source); //$NON-NLS-1$
 		}
@@ -108,7 +107,7 @@ public class BasicRecordSearch implements IRecordSearch{
 		if (titleSearch != null){
 			query.setParameter("title", "%" + titleSearch.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-		List<Object[]> items = query.list();
+		List<?> items = query.list();
 		List<IntelRecordSearchResultItem> resultItems = new ArrayList<>();
 		
 		Pattern narrativePattern = null;
@@ -116,7 +115,8 @@ public class BasicRecordSearch implements IRecordSearch{
 			narrativePattern = Pattern.compile(narrativeSearch.toLowerCase());
 		}
 		
-		for (Object[] i : items){
+		for (Object it : items){
+			Object[] i = (Object[])it;
 			UUID uuid = (UUID)i[0];
 			String title = (String) i[1];
 			UUID src = (UUID)i[2];

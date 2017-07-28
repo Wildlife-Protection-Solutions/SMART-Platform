@@ -24,12 +24,15 @@ package org.wcs.smart.i2.ui.editors;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -54,33 +57,47 @@ public abstract class RelationshipSearchJob extends Job{
 		
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		Session s = HibernateManager.openSession();
+		
 		rtypes = new ArrayList<IntelRelationshipType>();
-		try{
-			rtypes.addAll(s.createCriteria(IntelRelationshipType.class)
-			.add(Restrictions.and(
-				Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
-				Restrictions.or (
-					Restrictions.and(Restrictions.eq("sourceEntityType", srcType),  //$NON-NLS-1$
-						Restrictions.eq("targetEntityType", targetType)), //$NON-NLS-1$
-					Restrictions.and(Restrictions.eq("sourceEntityType", targetType),  //$NON-NLS-1$
-						Restrictions.eq("targetEntityType", srcType)), //$NON-NLS-1$
-					Restrictions.and(Restrictions.isNull("sourceEntityType"), //$NON-NLS-1$
-						Restrictions.isNull("targetEntityType")), //$NON-NLS-1$
-					Restrictions.and(Restrictions.isNull("sourceEntityType"), //$NON-NLS-1$
-						Restrictions.or(
-							Restrictions.eq("targetEntityType", srcType), //$NON-NLS-1$
-							Restrictions.eq("targetEntityType", targetType) //$NON-NLS-1$
-						)),
-					Restrictions.and(Restrictions.isNull("targetEntityType"), //$NON-NLS-1$
-						Restrictions.or(
-							Restrictions.eq("sourceEntityType", srcType), //$NON-NLS-1$
-							Restrictions.eq("sourceEntityType", targetType) //$NON-NLS-1$
-						))		
-			))).list());
+		try(Session s = HibernateManager.openSession()){
+			
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<IntelRelationshipType> c = cb.createQuery(IntelRelationshipType.class);
+			Root<IntelRelationshipType> from = c.from(IntelRelationshipType.class);
+			c.where(cb.and(
+					cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+					cb.or(
+							cb.and(
+									cb.equal(from.get("sourceEntityType"), srcType), //$NON-NLS-1$
+									cb.equal(from.get("targetEntityType"), targetType) //$NON-NLS-1$
+									),
+							cb.and(
+									cb.equal(from.get("sourceEntityType"), targetType), //$NON-NLS-1$
+									cb.equal(from.get("targetEntityType"), srcType) //$NON-NLS-1$
+									),
+							cb.and(
+									cb.isNull(from.get("sourceEntityType")), //$NON-NLS-1$
+									cb.isNull(from.get("targetEntityType")) //$NON-NLS-1$
+									),
+							cb.and(
+									cb.isNull(from.get("sourceEntityType")), //$NON-NLS-1$
+									cb.or( 
+											cb.equal(from.get("targetEntityType"), srcType), //$NON-NLS-1$
+											cb.equal(from.get("targetEntityType"), targetType) //$NON-NLS-1$
+											)
+									),
+							cb.and(
+									cb.isNull(from.get("targetEntityType")), //$NON-NLS-1$
+									cb.or( 
+											cb.equal(from.get("sourceEntityType"), srcType), //$NON-NLS-1$
+											cb.equal(from.get("sourceEntityType"), targetType) //$NON-NLS-1$
+											)
+									)
+							)
+					));
+			List<IntelRelationshipType> rtypes = s.createQuery(c).getResultList();
 			for (IntelRelationshipType i : rtypes){
 				i.getSourceEntityType();
 				i.getTargetEntityType();
@@ -89,8 +106,6 @@ public abstract class RelationshipSearchJob extends Job{
 				}
 				i.getAttributes().size();
 			}
-		}finally{
-			s.close();
 		}
 		afterLoad();
 		

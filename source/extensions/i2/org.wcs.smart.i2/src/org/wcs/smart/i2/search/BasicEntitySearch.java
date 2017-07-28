@@ -25,16 +25,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+
 
 /**
  * Basic search implementation 
@@ -102,7 +106,6 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
 	 * to call done() on the given monitor
 	 */
-	@SuppressWarnings("unchecked")
 	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor){
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.BasicEntitySearch_taskName, maxResultCnt);
 		Long now = System.nanoTime();
@@ -123,24 +126,30 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		}
 
 		if (searchString == null || searchString.isEmpty()){
-			//search all entities
-			Criteria c = session.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
-			Criteria c1 = session.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+			
+			
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
+			CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
+			Root<IntelEntity> from = c.from(IntelEntity.class);
+			c2.from(IntelEntity.class);
+			List<Predicate> filters = new ArrayList<>();
+			filters.add(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+			
 			if (entityTypes != null && !entityTypes.isEmpty()){
-				c.createAlias("entityType", "et"); //$NON-NLS-1$ //$NON-NLS-2$
-				c.add(Restrictions.in("et.keyId", entityTypes)); //$NON-NLS-1$
-				c1.createAlias("entityType", "et"); //$NON-NLS-1$ //$NON-NLS-2$
-				c1.add(Restrictions.in("et.keyId", entityTypes)); //$NON-NLS-1$
+				Root<IntelEntityType> typefrom = c.from(IntelEntityType.class);
+				filters.add(typefrom.get("keyId").in(entityTypes)); //$NON-NLS-1$
+				
 			}
+			c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
+			c2.where(cb.and(filters.toArray(new Predicate[filters.size()])));
 			
+			c2.select(cb.count(from));
+			Long maxCnt = session.createQuery(c2).uniqueResult();
 			
-			Long maxCnt = (Long) c.setProjection(Projections.rowCount()).list().get(0);
-			
-			c1.setMaxResults(maxResultCnt);
-			
-			List<IntelEntity> items = c1.list();
+			Query<IntelEntity> q = session.createQuery(c).setMaxResults(maxResultCnt);
+		
+			List<IntelEntity> items = q.getResultList();
 			List<IntelSearchResultItem> results = new ArrayList<IntelSearchResultItem>();
 			for (IntelEntity it : items){
 				lazyLoadEntity(it, session);

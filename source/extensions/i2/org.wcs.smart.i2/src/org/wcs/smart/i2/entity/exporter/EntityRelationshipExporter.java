@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -63,14 +63,13 @@ public class EntityRelationshipExporter {
 		
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean exportEntity(IntelEntity entity, int degrees, Path outputDirectory, IProgressMonitor monitor) throws Exception{
 		if (monitor == null) monitor = new NullProgressMonitor();
 		
 		monitor.beginTask(Messages.EntityRelationshipExporter_ProgressMsg, 4);
 		AttributeValueLabelProvider provider = new AttributeValueLabelProvider();
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+
 			entity = (IntelEntity)s.get(IntelEntity.class,  entity.getUuid());
 			
 			HashSet<IntelEntity> entitiesToExport = new HashSet<>();
@@ -91,7 +90,7 @@ public class EntityRelationshipExporter {
 				//is in tosearch
 				
 				String hql = "From IntelEntityRelationship WHERE sourceEntity IN (:toSearch) or targetEntity IN (:toSearch)"; //$NON-NLS-1$
-				Query q = s.createQuery(hql);
+				Query<IntelEntityRelationship> q = s.createQuery(hql, IntelEntityRelationship.class);
 				q.setParameterList("toSearch", toSearch); //$NON-NLS-1$
 				
 				List<IntelEntityRelationship> relationships = q.list();
@@ -223,11 +222,6 @@ public class EntityRelationshipExporter {
 			
 			
 		}finally{
-			try{
-				s.close();
-			}catch (Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
-			}
 			try{
 				provider.dispose();
 			}catch (Exception ex){

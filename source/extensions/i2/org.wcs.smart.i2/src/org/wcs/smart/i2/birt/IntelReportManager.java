@@ -186,11 +186,8 @@ public enum IntelReportManager {
 				MessageFormat.format(Messages.IntelReportManager_ResetMessage, entityType.getName()))){
 			return;
 		}
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			entityType = (IntelEntityType) s.get(IntelEntityType.class, entityType.getUuid());
-		}finally{
-			s.close();
 		}
 			
 		if (entityType.getBirtTemplate() != null){
@@ -261,17 +258,16 @@ public enum IntelReportManager {
 			if (entityType.getBirtTemplate() == null){
 				//create a new template for entity type
 				String file = entityType.getKeyId() + "." + UuidUtils.uuidToString(entityType.getUuid()) +  IReportEditorContants.DESIGN_FILE_EXTENTION; //$NON-NLS-1$
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
-					entityType = (IntelEntityType) s.get(IntelEntityType.class, entityType.getUuid());
-					entityType.setBirtTemplate(file);
-					s.getTransaction().commit();
-				}catch (Exception ex){
-					s.getTransaction().rollback();
-					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError, entityType.getName(),  ex.getMessage()), ex);
-				}finally{
-					s.close();
+					try{
+						entityType = (IntelEntityType) s.get(IntelEntityType.class, entityType.getUuid());
+						entityType.setBirtTemplate(file);
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						s.getTransaction().rollback();
+						Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError, entityType.getName(),  ex.getMessage()), ex);
+					}
 				}
 			}
 			
@@ -280,19 +276,19 @@ public enum IntelReportManager {
 				Files.createDirectories(p.getParent());
 			}
 			if (!Files.exists(p)){
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
-					entityType = (IntelEntityType) s.get(IntelEntityType.class, entityType.getUuid());
-					if (entityType.getAttributes() != null){
-						entityType.getAttributes().forEach((a) ->a.getAttribute().getName());
+					try{
+					
+						entityType = (IntelEntityType) s.get(IntelEntityType.class, entityType.getUuid());
+						if (entityType.getAttributes() != null){
+							entityType.getAttributes().forEach((a) ->a.getAttribute().getName());
+						}
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						s.getTransaction().rollback();
+						Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError, entityType.getName(),  ex.getMessage()), ex);
 					}
-					s.getTransaction().commit();
-				}catch (Exception ex){
-					s.getTransaction().rollback();
-					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.IntelReportManager_EditError, entityType.getName(),  ex.getMessage()), ex);
-				}finally{
-					s.close();
 				}
 				EntityReportGenerator.INSTANCE.generateReport(entityType, p);
 			}

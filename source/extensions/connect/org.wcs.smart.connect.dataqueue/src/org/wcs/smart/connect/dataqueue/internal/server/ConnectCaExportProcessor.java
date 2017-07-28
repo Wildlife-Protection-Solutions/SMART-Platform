@@ -27,7 +27,6 @@ import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
-import org.hibernate.persister.entity.Joinable;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
@@ -50,10 +49,10 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor{
 	
 	@Override
 	public void processExport(File tempDirectory) {
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (Class<?> c : classesToRemove){
-				String tableName = ((Joinable)s.getSessionFactory().getClassMetadata(c)).getTableName();
+				
+				String tableName = HibernateManager.getTableName(c);
 				
 				String fileName1 = tableName + "." + c.getSimpleName() + ".def"; //$NON-NLS-1$ //$NON-NLS-2$
 				String fileName2 = tableName + "." + c.getSimpleName() + ".dat"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -68,8 +67,6 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor{
 				}
 					
 			}
-		}finally{
-			s.close();
 		}
 		
 		//we also want to remove any items from the dataqueue folder in the data store

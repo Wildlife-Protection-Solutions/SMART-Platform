@@ -35,10 +35,10 @@ import java.util.Map.Entry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.internal.Messages;
@@ -115,7 +115,7 @@ public class IntelObservationQueryEngine {
 						
 						String sql = "DROP TABLE " + dataTable; //$NON-NLS-1$
 						SqlGenerator.logString(sql);
-						session.createSQLQuery(sql).executeUpdate();
+						session.createNativeQuery(sql).executeUpdate();
 						fmonitor.worked(1);
 						
 						fmonitor.checkCanceled();
@@ -146,7 +146,7 @@ public class IntelObservationQueryEngine {
 						
 						String sql = "DROP TABLE " + dataTable; //$NON-NLS-1$
 						SqlGenerator.logString(sql);
-						session.createSQLQuery(sql).executeUpdate();
+						session.createNativeQuery(sql).executeUpdate();
 						fmonitor.worked(1);
 						
 						fmonitor.checkCanceled();
@@ -178,14 +178,14 @@ public class IntelObservationQueryEngine {
 	}
 	
 	private void computeCount(Session session){
-		Integer obs = (Integer) session.createSQLQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult(); //$NON-NLS-1$
-		Integer wp = (Integer) session.createSQLQuery("SELECT count(distinct location_uuid) FROM " + queryResults.getQueryDataTable()).uniqueResult(); //$NON-NLS-1$
+		Integer obs = (Integer) session.createNativeQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult(); //$NON-NLS-1$
+		Integer wp = (Integer) session.createNativeQuery("SELECT count(distinct location_uuid) FROM " + queryResults.getQueryDataTable()).uniqueResult(); //$NON-NLS-1$
 		queryResults.setResultCount(obs, wp);
 	}
 	
 	private void computeBounds(Session session){
-//		very slow: Query q = session.createSQLQuery("SELECT geometry FROM smart.i_location WHERE uuid in (select location_uuid FROM " + queryResults.getQueryDataTable() + ")");
-		Query q = session.createSQLQuery("SELECT loc_geometry FROM " + queryResults.getQueryDataTable() ); //$NON-NLS-1$
+//		very slow: Query q = session.createNativeQuery("SELECT geometry FROM smart.i_location WHERE uuid in (select location_uuid FROM " + queryResults.getQueryDataTable() + ")");
+		Query<?> q = session.createNativeQuery("SELECT loc_geometry FROM " + queryResults.getQueryDataTable() ); //$NON-NLS-1$
 		List<?> geoms = q.list();
 		Envelope env = null;
 		for (Object x : geoms){
@@ -218,7 +218,7 @@ public class IntelObservationQueryEngine {
 		sb.append("SELECT distinct a.keyid FROM "); //$NON-NLS-1$
 		sb.append(" smart.dm_attribute a join smart.i_observation_attribute b ON a.uuid = b.attribute_uuid "); //$NON-NLS-1$
 		sb.append(" join " + queryResults.getQueryDataTable() + " c on c.observation_uuid = b.observation_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-		List<String> populatedAttributes = session.createSQLQuery(sb.toString()).list();
+		List<String> populatedAttributes = session.createNativeQuery(sb.toString()).list();
 		for (Iterator<IQueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
 			IQueryColumn column = (IQueryColumn) iterator.next();
 			if (column instanceof DataModelColumn ){
@@ -288,7 +288,7 @@ public class IntelObservationQueryEngine {
 		sb.append(")"); //$NON-NLS-1$
 		
 		SqlGenerator.logString(sb.toString());
-		session.createSQLQuery(sb.toString()).executeUpdate();
+		session.createNativeQuery(sb.toString()).executeUpdate();
 		
 		
 		sb = new StringBuilder();
@@ -304,13 +304,13 @@ public class IntelObservationQueryEngine {
 			sb.append(" AND o.uuid = a.observation_uuid "); //$NON-NLS-1$
 		}
 		SqlGenerator.logString(sb.toString());
-		session.createSQLQuery(sb.toString()).executeUpdate();
+		session.createNativeQuery(sb.toString()).executeUpdate();
 		
 		
 		//add category details
 		sb = new StringBuilder();
 		sb.append("SELECT distinct category_uuid FROM " + newTable + " WHERE category_uuid is not null "); //$NON-NLS-1$ //$NON-NLS-2$
-		List<byte[]> categories = session.createSQLQuery(sb.toString()).list();
+		List<byte[]> categories = session.createNativeQuery(sb.toString()).list();
 		HashMap<Category, List<String>> categoryItems = new HashMap<>();
 		int maxCategoryLength = 0;
 		for (byte[] c : categories){
@@ -323,7 +323,7 @@ public class IntelObservationQueryEngine {
 		
 		if (maxCategoryLength >= 0){
 			for (int i = 0; i < maxCategoryLength; i ++){
-				session.createSQLQuery("ALTER TABLE " + newTable + " ADD column category_" + i + " varchar(1024) ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				session.createNativeQuery("ALTER TABLE " + newTable + " ADD column category_" + i + " varchar(1024) ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				columnNameToIndex.put("category_" + i, columnIndex++); //$NON-NLS-1$
 			}
 			for (Entry<Category, List<String>> update : categoryItems.entrySet()){
@@ -338,7 +338,7 @@ public class IntelObservationQueryEngine {
 					sb.append("category_" + i + " = :c" + i); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sb.append(" WHERE category_uuid = :uuid"); //$NON-NLS-1$
-				SQLQuery query = session.createSQLQuery(sb.toString());
+				NativeQuery<?> query = session.createNativeQuery(sb.toString());
 				query.setParameter("uuid", update.getKey().getUuid()); //$NON-NLS-1$
 				
 				for (int i = 0; i < update.getValue().size(); i ++){

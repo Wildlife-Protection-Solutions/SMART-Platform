@@ -206,14 +206,16 @@ public class ConnectDialog extends TitleAreaDialog {
 	 * Loads the server info from the database
 	 */
 	protected void loadDatabaseInformation(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			cs = ConnectHibernateManager.getConnectServer(s);
-			user = ConnectHibernateManager.getConnectUser(employee, s);			
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+			try {
+				cs = ConnectHibernateManager.getConnectServer(s);
+				user = ConnectHibernateManager.getConnectUser(employee, s);			
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 	}
 	
@@ -225,25 +227,25 @@ public class ConnectDialog extends TitleAreaDialog {
 	 */
 	protected void saveUserInfo(final String user, String newPassword)
 			throws Exception {
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+		
 			s.beginTransaction();
-			if (ConnectDialog.this.user == null){
-				ConnectUser newuser = new ConnectUser();
-				newuser.setConnectUsername(user);
-				newuser.setServer(cs);
-				newuser.setSmartUser(employee);
-				ConnectDialog.this.user = newuser;
-				s.save(newuser);
+			try{
+				if (ConnectDialog.this.user == null){
+					ConnectUser newuser = new ConnectUser();
+					newuser.setConnectUsername(user);
+					newuser.setServer(cs);
+					newuser.setSmartUser(employee);
+					ConnectDialog.this.user = newuser;
+					s.save(newuser);
+				}
+				ConnectDialog.this.user.setConnectPassword(newPassword);
+				s.saveOrUpdate(ConnectDialog.this.user);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			ConnectDialog.this.user.setConnectPassword(newPassword);
-			s.saveOrUpdate(ConnectDialog.this.user);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			throw ex;
-		}finally{
-			s.close();
 		}
 	}
 	

@@ -42,14 +42,14 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -70,10 +70,10 @@ import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
-import au.com.bytecode.opencsv.CSVReader;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Import record engine.
@@ -92,7 +92,6 @@ public enum RecordImportEngine {
 	 * @return the number of entities imported or null if nothing imported
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public Integer importRecords(RecordImportConfig config, IEventBroker eventBroker, IProgressMonitor pMonitor) throws Exception{
 		SubMonitor monitor = SubMonitor.convert(pMonitor, Messages.RecordImportEngine_TaskName, 5);
 		
@@ -107,11 +106,8 @@ public enum RecordImportEngine {
 		monitor.subTask(Messages.RecordImportEngine_LoadingSubTaskName);
 //		//load the attributes 
 		Set<IntelRecordSource> sources = new HashSet<>();
-		Session s = HibernateManager.openSession();
-		try{
-			sources.addAll(s.createCriteria(IntelRecordSource.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list());
+		try(Session s = HibernateManager.openSession()){
+			sources.addAll( QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
 			sources.forEach(src -> {
 				src.getNames().size();
 				for (IntelRecordSourceAttribute sa : src.getAttributes()){
@@ -127,8 +123,6 @@ public enum RecordImportEngine {
 				
 			});
 			
-		}finally{
-			s.close();
 		}
 		monitor.worked(1);
 		monitor.checkCanceled();
@@ -266,44 +260,43 @@ public enum RecordImportEngine {
 		kidMonitor = monitor.split(1);
 		kidMonitor.setWorkRemaining(addedItems.size());
 		//save change
-		s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			//save new records
-			for (IntelRecord i : addedItems){
-				s.save(i);
-				kidMonitor.split(1);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				//save new records
+				for (IntelRecord i : addedItems){
+					s.save(i);
+					kidMonitor.split(1);
+				}
+				s.getTransaction().commit();
+			}catch (OperationCanceledException ex) {
+				s.getTransaction().rollback();
+				return null;
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.RecordImportEngine_SaveError + ex.getMessage(), ex);
+				return null;
 			}
-			s.getTransaction().commit();
-		}catch (OperationCanceledException ex) {
-			s.getTransaction().rollback();
-			return null;
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.RecordImportEngine_SaveError + ex.getMessage(), ex);
-			return null;
-		}finally{
-			s.close();
 		}
 		
 		eventBroker.send(IntelEvents.RECORD_NEW, addedItems);
 		return addedItems.size();
 	}
-	
-	@SuppressWarnings("unchecked")
+
+
 	private IntelRecordAttributeValue convertValue(String strvalue, IntelRecordSourceAttribute attribute) throws Exception{
 		if (strvalue.isEmpty()) return null;
 		
 		IntelRecordAttributeValue value = new IntelRecordAttributeValue();
 		
 		//search entities for name strvalue
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+
 			IntelEntityType type = (IntelEntityType) s.get(IntelEntityType.class, attribute.getEntityType().getUuid());
 			IntelAttribute ia = type.getIdAttribute();
 			
 			String hql = "SELECT v.id.entity FROM IntelEntityAttributeValue v join v.id.entity e WHERE v.id.attribute = :ia and e.entityType = :type and lower(v.stringValue) like :value "; //$NON-NLS-1$
-			Query query = s.createQuery(hql);
+			Query<IntelEntity> query = s.createQuery(hql, IntelEntity.class);
 			query.setParameter("ia", ia); //$NON-NLS-1$
 			query.setParameter("type", type); //$NON-NLS-1$
 			query.setParameter("value", "%" + strvalue.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -320,8 +313,6 @@ public enum RecordImportEngine {
 			item.getId().setElementUuid(entities.get(0).getUuid());
 			value.setAttributeListItems(Collections.singletonList(item));
 			return value;
-		}finally{
-			s.close();
 		}
 		
 	}

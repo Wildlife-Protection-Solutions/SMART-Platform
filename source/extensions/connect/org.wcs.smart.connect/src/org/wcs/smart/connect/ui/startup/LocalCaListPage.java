@@ -54,6 +54,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Lists conservation area from a smart connect server.
@@ -167,13 +168,12 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		return txtPassword.getText();
 	}
 
-	@SuppressWarnings("unchecked")
+	
 	public void initList(){
 		final List<ConservationArea> ca = new ArrayList<ConservationArea>();
 		
-		Session s = HibernateManager.openSession();
-		try{
-			List<ConnectServer> servers = s.createCriteria(ConnectServer.class)
+		try(Session s = HibernateManager.openSession()){
+			List<ConnectServer> servers = QueryFactory.buildQuery(s, ConnectServer.class, (Object[])null)
 					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
 					.list();
 			for (Iterator<ConnectServer> iterator = servers.iterator(); iterator.hasNext();) {
@@ -184,8 +184,6 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 			ConnectPlugIn.log(ex.getMessage(), ex);
 			setErrorMessage(Messages.LocalCaListPage_CaLoadError + ex.getMessage());
 			return;
-		}finally{
-			s.close();
 		}
 		
 		Collections.sort(ca, new Comparator<ConservationArea>() {
