@@ -437,12 +437,30 @@ function createAlertTable(){
 	 	if(typeof alerts === "undefined" || alerts.length == 0){
 		 	var newRow = parent.insertRow(-1);
 	 		newRow.style.display = "table-row";
-	 		newRow.className = "alertrow errorsection";
-	 	    var oCell = newRow.insertCell(0);
+	 		newRow.className = "alertrow errorsection";	 		
+	 		var oCell = newRow.insertCell(0);
 	 	    oCell.colSpan = 10;
 	 	    oCell.innerHTML = i18n("alert.noalertsfound");
-	 	    var str = document.getElementById("tab3text").innerHTML;
-			document.getElementById("tab3text").innerHTML = 0;
+	 	    
+	 	    
+	 		var newRow2 = parent.insertRow(-1);
+	 		newRow2.style.display = "table-row";
+	 		newRow2.className = "table-row alertrow";
+	 		var cell = document.createElement("td");
+			cell.className="table-cell smart-table-cell";
+			cell.colSpan = "10";
+			
+	 	    a = document.createElement("a");
+			var closeDiv = document.createElement("div");
+			closeDiv.classList.add("button");
+			closeDiv.style.float = "right";
+			closeDiv.innerHTML = i18n("alert.close");
+			a.appendChild(closeDiv);
+			a.href="javascript:buttonCloseManageAlerts()";
+			cell.appendChild(a);
+			newRow2.appendChild(cell);
+
+
 		}else{
 			var str = document.getElementById("tab3text").innerHTML;
 			document.getElementById("tab3text").innerHTML = alerts.length/2 ;
@@ -517,6 +535,24 @@ function createAlertTable(){
  	    var oCell = newRow.insertCell(0);
  	    oCell.colSpan = 10;
  	    oCell.innerHTML = err;
+ 	    
+ 	    var newRow2 = parent.insertRow(-1);
+		newRow2.style.display = "table-row";
+		newRow2.className = "table-row alertrow";
+		var cell = document.createElement("td");
+		cell.className="table-cell smart-table-cell";
+		cell.colSpan = "10";
+		
+	    a = document.createElement("a");
+		var closeDiv = document.createElement("div");
+		closeDiv.classList.add("button");
+		closeDiv.style.float = "right";
+		closeDiv.innerHTML = i18n("alert.close");
+		a.appendChild(closeDiv);
+		a.href="javascript:buttonCloseManageAlerts()";
+		cell.appendChild(a);
+		newRow2.appendChild(cell);
+ 	    
 	}
 
 }
