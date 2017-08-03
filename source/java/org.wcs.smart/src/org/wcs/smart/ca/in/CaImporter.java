@@ -68,7 +68,7 @@ public class CaImporter {
 	/**
 	 * Export code extension point
 	 */
-	private static final String IMPORT_EXTENSION_ID = "org.wcs.smart.ca.import"; //$NON-NLS-1$
+	private static final String IMPORT_EXTENSION_ID = "org.wcs.smart.caImport"; //$NON-NLS-1$
 	
 	
 	/**
@@ -132,9 +132,11 @@ public class CaImporter {
 			
 			CaImportEngine engine = new CaImportEngine(session, dir, cauuid);
 			try{
+				session.getTransaction().begin();
 				for (ICaDataImporter importer : getImportExtensions()){
 					importer.importData(engine, progress.split(10));
 				}
+				session.getTransaction().commit();
 			}catch (Exception ex){
 				try{
 					try{

@@ -30,7 +30,7 @@
       </QueryTypeDataset>
    </extension>
    <extension
-         point="org.wcs.smart.report.birt.maplayer">
+         point="org.wcs.smart.birt.map.maplayer">
       <MapLayer
             maplayer="org.wcs.smart.er.query.report.map.QueryMapLayer">
       </MapLayer>
@@ -42,7 +42,7 @@
       </StyleProvider>
    </extension>
    <extension
-         point="org.wcs.smart.data.oda.smart.table">
+         point="org.wcs.smart.report.birt.query.smartTable">
       <TableCategory
             icon="images/icons/obj16/sampling_unit.png"
             id="org.wcs.smart.er.query.report.table.samplingunit"

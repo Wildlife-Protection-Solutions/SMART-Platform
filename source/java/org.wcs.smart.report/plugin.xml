@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.report.exporter" name="Report Exporter" schema="schema/org.wcs.smart.report.exporter.exsd"/>
+   <extension-point id="exporter" name="Report Exporter" schema="schema/org.wcs.smart.report.exporter.exsd"/>
    <extension
          point="org.eclipse.ui.commands">
       <command
@@ -807,7 +807,7 @@
       </editor>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.report.model.ReportFolder"
             supportsCcaa="true">
@@ -915,7 +915,7 @@
       </exporter>
    </extension>
    <extension
-         point="org.wcs.smart.ca.deleteAdvisor">
+         point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
             advisor="org.wcs.smart.report.internal.advisor.EmployeeDeleteAdvisor"
             class="org.wcs.smart.ca.Employee">
@@ -933,7 +933,7 @@
       </EditorManager>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.report.ReportTemplateCloner"
             id="org.wcs.smart.reportCloner">
@@ -946,7 +946,7 @@
       </templateCloner>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="reports">
       </FilestoreDirectory>

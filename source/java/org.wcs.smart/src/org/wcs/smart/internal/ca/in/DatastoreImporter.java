@@ -51,7 +51,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DatastoreImporter implements ICaDataImporter {
 
-	private static final String FILESTORE_DIR_EXTENSION_ID = "org.wcs.smart.ca.filestoredir"; //$NON-NLS-1$
+	private static final String FILESTORE_DIR_EXTENSION_ID = "org.wcs.smart.caFilestoreDir"; //$NON-NLS-1$
 	
 	@Override
 	public void importData(ICaDataImportEngine engine, IProgressMonitor monitor)

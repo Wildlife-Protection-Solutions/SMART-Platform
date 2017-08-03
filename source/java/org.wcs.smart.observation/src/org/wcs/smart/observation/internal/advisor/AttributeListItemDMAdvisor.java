@@ -57,7 +57,9 @@ public class AttributeListItemDMAdvisor implements IDeleteAdvisor {
 		if (item.getUuid() == null) return null;
 		
 		long cnt = QueryFactory.buildCountQuery(session, WaypointObservationAttribute.class,  new Object[] {"attributeListItem", item}); //$NON-NLS-1$
-		
+		if (cnt == 0){
+	     	return null;
+		 }
 		return MessageFormat.format(
 				Messages.AttributeListItemDMAdvisor_DeleteError,
 				new Object[]{ cnt });

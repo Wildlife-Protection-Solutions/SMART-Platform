@@ -62,7 +62,7 @@ public class ConservationAreaClonerEngine {
 
 	private static final String ALL_KEY = "org.wcs.smart.*"; //$NON-NLS-1$
 
-	public static final String EXTENSION_ID = "org.wcs.smart.ca.templateCloner"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.caTemplateCloner"; //$NON-NLS-1$
 	
 	private ConservationArea templateCa;
 	private ConservationArea newCa;

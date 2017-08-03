@@ -32,7 +32,7 @@ import org.hibernate.Session;
  */
 public interface IReplicationEventHandler {
 
-	public static final String EXTENSION_ID = "org.wcs.smart.changelog.handler"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.changeLogEventHandler"; //$NON-NLS-1$
 	
 	/**
 	 * 

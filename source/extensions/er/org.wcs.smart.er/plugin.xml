@@ -20,13 +20,13 @@
       </action>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.er.upgrade.ERDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.er.model.SurveyDesign"
             supportsCcaa="false">
@@ -118,7 +118,7 @@
       </ObservationSource>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="survey">
       </FilestoreDirectory>
@@ -785,7 +785,7 @@
       </editor>
    </extension>
    <extension
-         point="org.wcs.smart.ca.deleteAdvisor">
+         point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
             advisor="org.wcs.smart.er.delete.MissionAttributeDeleteAdvisor"
             class="org.wcs.smart.er.model.MissionAttribute">
@@ -824,7 +824,7 @@
       </service>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.er.internal.CaTemplateCloner"
             id="org.wcs.smart.er.SurveyCloner">
@@ -837,7 +837,7 @@
       </templateCloner>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="survey">
       </FilestoreDirectory>
@@ -885,7 +885,7 @@
       </toc>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.er.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>

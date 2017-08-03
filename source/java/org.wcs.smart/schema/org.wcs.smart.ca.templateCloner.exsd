@@ -85,7 +85,7 @@
                   The id of the template cloner that is required to run before this cloner can be run.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="identifier" basedOn="org.wcs.smart.ca.templateCloner/templateCloner/@id"/>
+                  <meta.attribute kind="identifier" basedOn="org.wcs.smart.caTemplateCloner/templateCloner/@id"/>
                </appinfo>
             </annotation>
          </attribute>

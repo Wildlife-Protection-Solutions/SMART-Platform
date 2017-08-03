@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.patrol.query.contribution" name="Patrol Query Contributions" schema="schema/org.wcs.smart.patrol.query.contribution.exsd"/>
+   <extension-point id="contribution" name="Patrol Query Contributions" schema="schema/org.wcs.smart.patrol.query.contribution.exsd"/>
    <extension
          point="org.wcs.smart.query.queryDefinitionPanel">
       <QueryDefinitionPanel
@@ -133,7 +133,7 @@
       </queryproperty>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.patrol.query.model.PatrolSummaryQuery"
             supportsCcaa="true">
@@ -156,7 +156,7 @@
       </class>
    </extension>
    <extension
-         point="org.wcs.smart.query.export.format">
+         point="org.wcs.smart.query.exportFormat">
       <Exporter
             class="org.wcs.smart.patrol.query.exportimport.PatrolSimpleQueryDefinitionExporter">
       </Exporter>
@@ -350,7 +350,7 @@
       </QueryImporter>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.patrol.query.PatrolQueryTemplateCloner"
             id="org.wcs.smart.PatrolQueryCloner">

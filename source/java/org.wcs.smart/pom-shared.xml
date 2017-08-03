@@ -80,16 +80,20 @@
 		
 		
 		<dependency>
-        	<groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.2.4</version>
-        </dependency>
-        
-        <!-- this file has a bunch of bugs that prevent maven from working correctly -->
-        <!-- see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=497356 -->
-        <!-- ideally it is update to the oxygen release when they are deployed to maven -->
-        <!-- locally I removed the problem files as described in the ticket and that seems to have solved the issue for now -->
-        <dependency>
+        		<groupId>com.google.code.gson</groupId>
+            		<artifactId>gson</artifactId>
+            		<version>2.2.4</version>
+        	</dependency>
+        	<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.hibernate</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+	        <!-- this file has a bunch of bugs that prevent maven from working correctly -->
+	        <!-- see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=497356 -->
+	        <!-- ideally it is update to the oxygen release when they are deployed to maven -->
+	        <!-- locally I removed the problem files as described in the ticket and that seems to have solved the issue for now -->
+	        <dependency>
 			<groupId>org.eclipse.birt.runtime</groupId>
 			<artifactId>org.eclipse.birt.runtime</artifactId>
 			<version>${birt.version}</version>

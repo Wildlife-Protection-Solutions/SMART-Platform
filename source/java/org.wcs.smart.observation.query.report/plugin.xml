@@ -23,7 +23,7 @@
    </extension>
 
    <extension
-         point="org.wcs.smart.report.birt.maplayer">
+         point="org.wcs.smart.birt.map.maplayer">
       <MapLayer
             maplayer="org.wcs.smart.observation.query.report.map.QueryMapLayer">
       </MapLayer>

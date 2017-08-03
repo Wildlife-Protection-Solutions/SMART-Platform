@@ -43,7 +43,7 @@ import org.hibernate.proxy.HibernateProxyHelper;
  */
 public class DeleteManager {
 
-	public static final String DELETE_ADVIOR_EXTENSION_ID = "org.wcs.smart.ca.deleteAdvisor"; //$NON-NLS-1$
+	public static final String DELETE_ADVIOR_EXTENSION_ID = "org.wcs.smart.caDeleteAdvisor"; //$NON-NLS-1$
 	
 	
 	/**

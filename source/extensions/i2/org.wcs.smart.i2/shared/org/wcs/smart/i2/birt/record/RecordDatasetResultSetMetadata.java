@@ -91,8 +91,10 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 			case STATUS_KEY:
 				return record.getStatus().name();
 			case SOURCE:
+				if (record.getRecordSource() == null) return ""; //$NON-NLS-1$
 				return record.getRecordSource().getName();
 			case SOURCE_ICON:
+				if (record.getRecordSource() == null) return null;
 				return new Blob(record.getRecordSource().getIcon());			
 			default:
 				break;

@@ -44,13 +44,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
@@ -72,8 +72,6 @@ import com.vividsolutions.jts.io.WKBWriter;
  * @since 5.0.0
  */
 public class MergePatrolLegDialog extends TitleAreaDialog{
-	Session session;
-	
 	private PatrolLeg newLeg; 
 	private List<PatrolLeg> legsToMerge;
 	
@@ -81,12 +79,14 @@ public class MergePatrolLegDialog extends TitleAreaDialog{
 	
 	private ComboViewer groupLeader;
 	private ComboViewer groupPilot;
-	private ComboViewer TransportType;
+	private ComboViewer cmbTransportTypes;
+	private ComboViewer cmbMandates;
 	
 	private List<PatrolTransportType> typeOps;
 	
 	private boolean showPilot;
 	private ArrayList<Employee> employeeList;
+	private List<PatrolMandate> mandates;
 
 	
 	/**
@@ -96,11 +96,12 @@ public class MergePatrolLegDialog extends TitleAreaDialog{
 	 * @param patrolLeg legs to merge
 	 * @param typeOps transport type options 
 	 */
-	public MergePatrolLegDialog(Shell parentShell, ArrayList<PatrolLeg> patrolLegs,  List<PatrolTransportType> typeOps, Session session) {
+	public MergePatrolLegDialog(Shell parentShell, ArrayList<PatrolLeg> patrolLegs,  
+			List<PatrolTransportType> typeOps, List<PatrolMandate> mandates) {
 		super(parentShell);
-		this.session = session;
 		this.legsToMerge = patrolLegs;
 		this.typeOps = typeOps;
+		this.mandates = mandates;
 
 		showPilot = false;
 		employeeList = new ArrayList<Employee>();
@@ -160,11 +161,9 @@ public class MergePatrolLegDialog extends TitleAreaDialog{
 		txtLegId.setText(legsToMerge.get(0).getId());
 		txtLegId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	
-		TransportType = createTransportTypeComboViewer(parent);		
+		cmbTransportTypes = createTransportTypeComboViewer(patrolIdComp);		
+		cmbMandates = createMandateComboViewer(patrolIdComp);
 
-		Composite leaderComp = new Composite(patrolIdComp, SWT.NONE);
-		leaderComp.setLayout(new GridLayout(2, false));
-		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		groupLeader = createLeaderPilot(patrolIdComp, Messages.MergePatrolLegDialog_LeaderLabel, employeeList, legsToMerge.get(0).getLeader().getMember());
 		if (showPilot){
@@ -199,13 +198,13 @@ public class MergePatrolLegDialog extends TitleAreaDialog{
 	 * Transport type combo viewer
 	 */
 	private ComboViewer createTransportTypeComboViewer(Composite parent){
-		Composite ttype = new Composite(parent, SWT.NONE);
-		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
-		ttype.setLayout(new GridLayout(2, false));
+//		Composite ttype = new Composite(parent, SWT.NONE);
+//		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+//		ttype.setLayout(new GridLayout(2, false));
 		
-		Label lbl = new Label(ttype, SWT.NONE);
+		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_TransportType_Label);
-		ComboViewer cmbTransportType = new ComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN);
+		ComboViewer cmbTransportType = new ComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbTransportType.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				return ((PatrolTransportType)element).getName();
@@ -218,6 +217,25 @@ public class MergePatrolLegDialog extends TitleAreaDialog{
 		return cmbTransportType;
 	}
 	
+	/*
+	 * Mandate combo viewer
+	 */
+	private ComboViewer createMandateComboViewer(Composite parent){
+		Label lbl = new Label(parent, SWT.NONE);
+		lbl.setText(Messages.MergePatrolLegDialog_MandateLabel);
+		ComboViewer cmb = new ComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN);
+		cmb.setLabelProvider(new LabelProvider(){
+			public String getText(Object element) {
+				return ((PatrolMandate)element).getName();
+			}
+		});
+		cmb.setContentProvider(ArrayContentProvider.getInstance());
+		if (!mandates.contains(legsToMerge.get(0).getMandate())) mandates.add(legsToMerge.get(0).getMandate());
+		cmb.setInput( mandates); 
+		cmb.setSelection(new StructuredSelection(legsToMerge.get(0).getMandate()));
+		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		return cmb;
+	}
 	
 	/**
 	 * Performs a validation then updates the patrol leg with the new values.
@@ -287,10 +305,10 @@ public class MergePatrolLegDialog extends TitleAreaDialog{
 		//set the start and end date to the earliest and latest of all legs we are merging
 		newLeg.setStartDate(startDate);
 		newLeg.setEndDate(endDate);
-	
+		newLeg.setMandate( (PatrolMandate)((StructuredSelection) cmbMandates.getSelection()).getFirstElement());
 		newLeg.setMembers(allMembers);
 		//newLeg.setPatrol(legsToMerge.get(0).getPatrol());
-		StructuredSelection selected = (StructuredSelection) TransportType.getSelection();
+		StructuredSelection selected = (StructuredSelection) cmbTransportTypes.getSelection();
 		newLeg.setType((PatrolTransportType)selected.getFirstElement());
 		
 		

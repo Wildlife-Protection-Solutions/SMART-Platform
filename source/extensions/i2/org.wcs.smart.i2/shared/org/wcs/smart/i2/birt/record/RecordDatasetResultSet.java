@@ -87,8 +87,10 @@ public class RecordDatasetResultSet implements IResultSet {
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		if (index >= 0){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
-			filters.add(cb.equal(from.get("record.uuid"), recordUuid)); //$NON-NLS-1$
+			filters.add(cb.equal(from.get("uuid"), recordUuid)); //$NON-NLS-1$
 		}
+		c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
+		
 		results = connection.getSession().createQuery(c).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
 		this.m_currentRowId = 0;
 	}

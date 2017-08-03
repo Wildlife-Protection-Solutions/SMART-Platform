@@ -42,7 +42,7 @@ public enum ExtensionManager {
 	
 	INSTANCE;
 	
-	public static final String EXTENSION_ID = "org.wcs.smart.report.birt.maplayer"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.birt.map.maplayer"; //$NON-NLS-1$
 	
 	public List<LayerDefinition> getLayerOptions(DataSetHandle[] handles) throws Exception{
 		List<IBirtMapLayerManager> managers = getAllManagers();

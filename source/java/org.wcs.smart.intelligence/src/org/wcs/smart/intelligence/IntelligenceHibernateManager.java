@@ -312,7 +312,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return
 	 */
 	private static List<IntelligenceSource> getSourceTypes(ConservationArea ca, Session s, boolean onlyActive){
-		Object[] filter = new Object[onlyActive ? 2 : 1];
+		Object[][] filter = new Object[onlyActive ? 2 : 1][2];
 		filter[0] = new Object[] {"conservationArea", ca}; //$NON-NLS-1$
 		if (onlyActive) filter[1] = new Object[] {"isActive", true}; //$NON-NLS-1$
 		
@@ -323,7 +323,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * Loads informants 
 	 */
 	public static List<Informant> getInformants(ConservationArea ca, Session s, boolean onlyActive){
-		Object[] filter = new Object[onlyActive ? 2 : 1];
+		Object[][] filter = new Object[onlyActive ? 2 : 1][2];
 		filter[0] = new Object[] {"conservationArea", ca}; //$NON-NLS-1$
 		if (onlyActive) filter[1] = new Object[] {"isActive", true}; //$NON-NLS-1$
 		

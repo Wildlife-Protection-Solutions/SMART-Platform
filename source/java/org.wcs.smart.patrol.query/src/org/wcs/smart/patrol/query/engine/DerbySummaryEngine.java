@@ -494,6 +494,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			//don't do anything here - each value is dealt with separatly in the getCombindValue function
 		}
 			
+		monitor.subTask(MessageFormat.format(Messages.DerbySummaryEngine_ProgressValueProgressLabel,it.asString()));
 		String cacheKey = it.asString() + "_" + groupBy.asString() + "_" + dataTable; //$NON-NLS-1$ //$NON-NLS-2$
 		HashMap<SummaryResultKey, Double> results = cachedValueToResults.get(cacheKey); 
 		if (results != null){

@@ -83,9 +83,7 @@ import org.wcs.smart.util.I18nUtil;
  *
  */
 public class HibernateManager extends SmartHibernateManager{
-	
 
-	
 	public static void initContext(){
 		if (SmartDB.getCurrentLanguage() != null){
 			I18nUtil.setLocale(SmartDB.getCurrentLanguage().getUuid());
@@ -515,7 +513,7 @@ public class HibernateManager extends SmartHibernateManager{
 		c.setTime(e.getBirthDate());
 		int year = c.get(Calendar.YEAR);
 		
-		String query = getCurrentDialect().getSequenceNextValString("smart.smart_user_id_seq"); //$NON-NLS-1$
+		String query = HibernateUtil.getHibernateCurrentDialect(session).getSequenceNextValString("smart.smart_user_id_seq"); //$NON-NLS-1$
 		List<?> results = session.createNativeQuery(query).list();
 		e.setId(year + ID_FORMATTER.format(results.get(0)));
 	}

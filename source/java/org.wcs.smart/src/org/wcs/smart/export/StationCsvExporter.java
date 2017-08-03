@@ -101,12 +101,7 @@ public class StationCsvExporter implements ICsvDataExporter {
 	}
 
 	private List<Station> getStations(ConservationArea ca, Session session) {
-		session.beginTransaction();
-		try{
-			return HibernateManager.getStations(ca, session);
-		}finally{
-			session.getTransaction().rollback();
-		}
+		return HibernateManager.getStations(ca, session);
 	}
 
 }

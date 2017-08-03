@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.data.oda.smart.table" name="smartbirttable" schema="schema/org.wcs.smart.data.oda.smart.table.exsd"/>
-   <extension-point id="org.wcs.smart.report.birt.query.queryDataset" name="QueryType Layer Extension Point" schema="schema/org.wcs.smart.report.birt.query.queryDataset.exsd"/>
+   <extension-point id="smartTable" name="smartbirttable" schema="schema/org.wcs.smart.data.oda.smart.table.exsd"/>
+   <extension-point id="queryDataset" name="QueryType Layer Extension Point" schema="schema/org.wcs.smart.report.birt.query.queryDataset.exsd"/>
 
    <extension
          id="org.wcs.smart.data.oda.smart"
@@ -196,7 +196,7 @@
       </startup>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <coreUpgrader
             fromVersion="3.3.1"
             toVersion="4.0.0"
@@ -261,7 +261,7 @@
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.report.birt.maplayer">
+         point="org.wcs.smart.birt.map.maplayer">
       <RasterCreator
             class="org.wcs.smart.data.oda.smart.impl.GriddedQueryRasterCreator">
       </RasterCreator>

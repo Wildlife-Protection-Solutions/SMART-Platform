@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.query.queryType" name="Query Type" schema="schema/org.wcs.smart.query.queryType.exsd"/>
-   <extension-point id="org.wcs.smart.query.queryItemPanel" name="Query Item Panel" schema="schema/org.wcs.smart.query.queryItemPanel.exsd"/>
-   <extension-point id="org.wcs.smart.query.queryDefinitionPanel" name="Query Definition Panel" schema="schema/org.wcs.smart.query.queryDefinitionPanel.exsd"/>
-   <extension-point id="org.wcs.smart.query.export.format" name="Query Export Format" schema="schema/org.wcs.smart.query.export.format.exsd"/>
-   <extension-point id="org.wcs.smart.query.property" name="Query Property" schema="schema/org.wcs.smart.query.property.exsd"/>
-   <extension-point id="org.wcs.smart.query.import" name="Query Definition Importer" schema="schema/org.wcs.smart.query.import.exsd"/>
+   <extension-point id="queryType" name="Query Type" schema="schema/org.wcs.smart.query.queryType.exsd"/>
+   <extension-point id="queryItemPanel" name="Query Item Panel" schema="schema/org.wcs.smart.query.queryItemPanel.exsd"/>
+   <extension-point id="queryDefinitionPanel" name="Query Definition Panel" schema="schema/org.wcs.smart.query.queryDefinitionPanel.exsd"/>
+   <extension-point id="exportFormat" name="Query Export Format" schema="schema/org.wcs.smart.query.export.format.exsd"/>
+   <extension-point id="property" name="Query Property" schema="schema/org.wcs.smart.query.property.exsd"/>
+   <extension-point id="import" name="Query Definition Importer" schema="schema/org.wcs.smart.query.import.exsd"/>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
@@ -1082,7 +1082,7 @@
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.query.model.QueryFolder"
             supportsCcaa="true">
@@ -1102,19 +1102,19 @@
       </class>
    </extension>
    <extension
-         point="org.wcs.smart.ca.deleteAdvisor">
+         point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
             advisor="org.wcs.smart.query.QueryEmployeeDeleteAdvisor"
             class="org.wcs.smart.ca.Employee">
       </DeleteAdvisor>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.query.QueryTemplateCloner"
             id="org.wcs.smart.QueryCloner">
          <require
-               id="org.wcs.smart.patrolCloner">
+               id="org.wcs.smart.query.PatrolQueryCloner">
          </require>
          <require
                id="org.wcs.smart.conservationAreaCloner">
@@ -1122,7 +1122,7 @@
       </templateCloner>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.query.CompoundQueryTemplateCloner"
             id="org.wcs.smart.CompoundQueryCloner">
@@ -1132,7 +1132,7 @@
       </templateCloner>
    </extension>
    <extension
-         point="org.wcs.smart.query.export.format">
+         point="org.wcs.smart.query.exportFormat">
       <Exporter
             class="org.wcs.smart.query.common.importexport.CsvSummaryExporter">
       </Exporter>
@@ -1173,8 +1173,7 @@
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.query.type.compound"
-            class="org.wcs.smart.query.model.types.CompoundMapQueryType"
-            executor = "">
+            class="org.wcs.smart.query.model.types.CompoundMapQueryType">
          <DefinitionPanel
                id="org.wcs.smart.query.compound.definition"
                itemPanelId="org.wcs.smart.query.compound.querylist">
@@ -1208,7 +1207,7 @@
       </QueryItemPanel>
    </extension>
    <extension
-         point="org.wcs.smart.query.export.format">
+         point="org.wcs.smart.query.exportFormat">
       <Exporter
             class="org.wcs.smart.query.compound.ui.CompoundQueryExporter">
       </Exporter>

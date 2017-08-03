@@ -221,7 +221,7 @@
       </editor>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.observation.query.model.ObservationGriddedQuery"
             supportsCcaa="true">
@@ -240,7 +240,7 @@
       </class>
    </extension>
    <extension
-         point="org.wcs.smart.query.export.format">
+         point="org.wcs.smart.query.exportFormat">
       <Exporter
             class="org.wcs.smart.observation.query.exportimport.ObsGridQueryDefinitionExporter">
       </Exporter>
@@ -274,7 +274,7 @@
       </queryproperty>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.observation.query.internal.ObservationQueryTemplateCloner"
             id="org.wcs.smart.query.ObservationQueryCloner">

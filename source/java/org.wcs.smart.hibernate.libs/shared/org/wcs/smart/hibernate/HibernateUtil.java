@@ -19,35 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui;
+package org.wcs.smart.hibernate;
 
-import org.eclipse.swt.widgets.Shell;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.hibernate.Session;
+import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.jdbc.spi.JdbcServices;
 
 /**
- * Extension point representing options that appear on the
- * advanced start up dialog.
+ * Collection of utilities shared with Desktop and Connect applications.
  * 
  * @author Emily
  *
  */
-public interface IAdvancedStartupOption {
-
-	public static final String EXTENSION_ID = "org.wcs.smart.startUpOption"; //$NON-NLS-1$
-	
-	public enum Status{
-		OK,
-		RESTART
-	}
-	
-	public String getLabel();
+public class HibernateUtil {
 	
 	/**
-	 * 
-	 * @param activeShell
-	 * @throws Exception
+	 * the current dialog in use 
+	 * @return
 	 */
-	public Status performTask(Shell activeShell) throws Exception;
-	
-	public int getOrder();
-
+	public static Dialect getHibernateCurrentDialect(Session session) {
+		try {
+			if (session != null && session.getSessionFactory() != null) {
+				return session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(JdbcServices.class).getDialect();
+			}
+		}catch (Exception ex) {
+			Logger.getLogger(HibernateUtil.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+		}
+		return null;
+	}
 }

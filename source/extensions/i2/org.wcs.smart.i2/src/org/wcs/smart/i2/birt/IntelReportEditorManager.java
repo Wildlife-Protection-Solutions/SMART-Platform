@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.birt;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -36,14 +35,13 @@ import org.eclipse.birt.report.model.api.command.ContentEvent;
 import org.eclipse.birt.report.model.api.command.NameEvent;
 import org.eclipse.birt.report.model.api.command.NameException;
 import org.eclipse.birt.report.model.api.core.Listener;
-import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
 import org.eclipse.birt.report.model.api.elements.structures.OdaDataSetParameter;
 import org.eclipse.birt.report.model.elements.OdaDataSet;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.birt.BirtSmartUtils;
 import org.wcs.smart.birt.ui.IReportEditorManager;
 import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
@@ -149,14 +147,7 @@ public class IntelReportEditorManager implements IReportEditorManager{
 							}
 						}
 
-						try{
-							ArrayList<?> columns = (ArrayList<?>) handle.getProperty("columnHints");  //$NON-NLS-1$
-							for (Object col : columns){
-								((ColumnHint)col).setProperty("alias", ((ColumnHint)col).getProperty(ds.getRoot(), "displayName"));   //$NON-NLS-1$//$NON-NLS-2$
-							}
-						}catch (Exception ex){
-							Intelligence2PlugIn.log(ex.getMessage(), ex);
-						}
+						BirtSmartUtils.updateDatasetConfiguration(handle);
 					}
 				}
 			}

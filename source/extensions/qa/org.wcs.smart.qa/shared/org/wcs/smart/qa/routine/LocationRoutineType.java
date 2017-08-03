@@ -38,7 +38,7 @@ import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.qa.ILabelProvider;
 import org.wcs.smart.qa.ILabelProvider.Key;
@@ -179,7 +179,9 @@ public class LocationRoutineType implements IQaRoutineType {
 			Area.AreaType type = Area.AreaType.valueOf(p.getStringValue().split(SEPERATOR_CHAR)[1]);
 			if (type == null) throw new Exception(MessageFormat.format(ILabelProvider.getLabel(Key.LocationRoutineType_NoGeomFound, task.getLocale()), routine.getName()));
 			
-			List<Area> areas = HibernateManager.loadAreas(type, session);
+			List<Area> areas = QueryFactory.buildQuery(session, Area.class, 
+					new Object[]{"conservationArea", routine.getConservationArea()},  //$NON-NLS-1$
+					new Object[]{"type", type}).getResultList(); //$NON-NLS-1$
 			List<Geometry> geoms = new ArrayList<>();
 			for (Area a : areas ){
 				geoms.add(a.getGeometry());

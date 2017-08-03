@@ -76,6 +76,7 @@ public class ConfigurableModelFactory {
 		cm.setConservationArea(SmartDB.getCurrentConservationArea());
 		cm.setName(name);
 		cm.updateName(SmartDB.getCurrentLanguage(), cm.getName());
+		cm.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), cm.getName());
 		return cm;
 	}
 	

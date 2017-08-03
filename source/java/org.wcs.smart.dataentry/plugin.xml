@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.dataentry.extradata" name="Additional Data associated with Configurable Model" schema="schema/org.wcs.smart.dataentry.extradata.exsd"/>
-   <extension-point id="org.wcs.smart.dataentry.xml" name="Dataentry XML Export/Import Contribution" schema="schema/org.wcs.smart.dataentry.xml.exsd"/>
+   <extension-point id="extradata" name="Additional Data associated with Configurable Model" schema="schema/org.wcs.smart.dataentry.extradata.exsd"/>
+   <extension-point id="xml" name="Dataentry XML Export/Import Contribution" schema="schema/org.wcs.smart.dataentry.xml.exsd"/>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.dataentry.model.ConfigurableModel"
             supportsCcaa="false">
@@ -84,7 +84,7 @@
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.dataentry.CmTemplateCloner"
             id="org.wcs.smart.dataentry.cmTemplateCloner">

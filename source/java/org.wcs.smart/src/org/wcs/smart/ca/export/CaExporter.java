@@ -63,7 +63,7 @@ public class CaExporter {
 	/**
 	 * Export code extension point
 	 */
-	private static final String EXPORT_EXTENSION_ID = "org.wcs.smart.ca.export"; //$NON-NLS-1$
+	private static final String EXPORT_EXTENSION_ID = "org.wcs.smart.caExport"; //$NON-NLS-1$
 	
 	/**
 	 * @return the default backup file name based on the current date

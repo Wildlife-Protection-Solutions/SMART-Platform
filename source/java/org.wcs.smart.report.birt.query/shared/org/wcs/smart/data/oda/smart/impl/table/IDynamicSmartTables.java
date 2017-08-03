@@ -34,7 +34,7 @@ import org.wcs.smart.data.oda.smart.impl.SmartConnection;
  */
 public interface IDynamicSmartTables {
 
-	public static final String EXTENSION_ID = "org.wcs.smart.data.oda.smart.table.dynamic"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.report.birt.query.smartTable"; //$NON-NLS-1$
 	
 	/**
 	 * 

@@ -66,7 +66,7 @@ public class SmartHibernateManager {
 	private static Configuration hibernateConfiguration = null;	
 	protected static SessionFactory sessionFactory = null;
 
-	private static final String MAPPING_ID = "org.wcs.smart.hibernate.mapping"; //$NON-NLS-1$
+	private static final String MAPPING_ID = "org.wcs.smart.hibernate.libs.mapping"; //$NON-NLS-1$
 	
 	private static String userName = "login"; //$NON-NLS-1$
 	private static String passWord = "smrt"; //$NON-NLS-1$
@@ -126,6 +126,7 @@ public class SmartHibernateManager {
 				ServiceRegistry service = new StandardServiceRegistryBuilder().applySettings(hibernateConfiguration.getProperties()).build();
 				sessionFactory = hibernateConfiguration.buildSessionFactory(service);
 				
+				
 				if (getCurrentDialect() == null || !getCurrentDialect().supportsSequences()){
 					//fail
 					throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
@@ -134,21 +135,16 @@ public class SmartHibernateManager {
 		}
 	}
 	
-	/**
-	 * the current dialog in use 
-	 * @return
-	 */
-	public static Dialect getCurrentDialect() {
+	private static Dialect getCurrentDialect() {
 		try {
-		if (sessionFactory != null) {
-			return sessionFactory.getSessionFactoryOptions().getServiceRegistry().getService(JdbcServices.class).getDialect();
-		}
+			if (sessionFactory != null && sessionFactory != null) {
+				return sessionFactory.getSessionFactoryOptions().getServiceRegistry().getService(JdbcServices.class).getDialect();
+			}
 		}catch (Exception ex) {
 			ex.printStackTrace();
 		}
 		return null;
 	}
-	
 	
 	/**
 	 * Convert hql to sql

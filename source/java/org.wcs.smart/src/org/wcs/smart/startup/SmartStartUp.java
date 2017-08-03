@@ -64,7 +64,7 @@ import org.wcs.smart.user.UserLevelManager;
  */
 public class SmartStartUp {
 	
-	public static final String LOGIN_EXT_ID = "org.wcs.smart.ca.login"; //$NON-NLS-1$
+	public static final String LOGIN_EXT_ID = "org.wcs.smart.caLogin"; //$NON-NLS-1$
 	
 	/**
 	 * Initializes the db and checks the version.

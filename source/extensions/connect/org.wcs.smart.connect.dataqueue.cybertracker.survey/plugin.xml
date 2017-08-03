@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             ca_property=".mission.survey.surveyDesign.conservationArea"
             class="org.wcs.smart.connect.dataqueue.cybertracker.survey.model.CtMissionLink"
@@ -16,13 +16,13 @@
       </JsonProcessor>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.connect.dataqueue.cybertracker.survey.updatesite.DataQueueCtMissionDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.connect.dataqueue.cybertracker.survey.updatesite.DataQueueCtMissionChangeTrackerInstaller">
       </ChangeLogTracker>

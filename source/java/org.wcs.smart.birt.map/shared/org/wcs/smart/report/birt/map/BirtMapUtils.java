@@ -49,7 +49,6 @@ import org.wcs.smart.udig.style.StyleManager;
  */
 public class BirtMapUtils {
 	
-	
 	public static StyleBlackboard parseStyleString(String styleString){
 		//for backwards compatibility this can either be a blackboard
 		//json string or a single SLD xmlMemento

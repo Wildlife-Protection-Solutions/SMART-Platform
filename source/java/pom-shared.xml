@@ -12,7 +12,7 @@
 		<smart.version>6.0.0-SNAPSHOT</smart.version>
         	<geotools.version>11.2</geotools.version>
         	<jts.version>1.13</jts.version>
-        	<hibernate.version>4.2.18.Final</hibernate.version>
+        	<hibernate.version>5.2.10.Final</hibernate.version>
         	<birt.version>4.6.0-20160607</birt.version>
         	<udig.version>2.0.0-SNAPSHOT</udig.version>
         	
@@ -20,6 +20,7 @@
     	</properties>
     
 	<modules>
+		<module>./org.wcs.smart.hibernate.libs/pom-shared.xml</module>
 		<module>./org.wcs.smart/pom-shared.xml</module>
 		<module>./org.wcs.smart.birt/pom-shared.xml</module>
 		<module>./org.wcs.smart.dataentry/pom-shared.xml</module>

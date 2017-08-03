@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -94,18 +95,14 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 			}
 			return true;
 		} catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
 			return false;
 		}
 	}
 
 	
 	private List<Employee> getEmployees(ConservationArea ca, Session session) {
-		session.beginTransaction();
-		try{
-			return HibernateManager.getAllEmployees(ca, session);
-		}finally{
-			session.getTransaction().rollback();
-		}
+		return HibernateManager.getAllEmployees(ca, session);
 	}
 	
 }

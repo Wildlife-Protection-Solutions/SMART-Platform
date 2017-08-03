@@ -163,6 +163,7 @@ public class Messages extends NLS {
 	public static String MergePatrolLegDialog_DialogMessage;
 	public static String MergePatrolLegDialog_DialogTitle;
 	public static String MergePatrolLegDialog_LeaderLabel;
+	public static String MergePatrolLegDialog_MandateLabel;
 	public static String MergePatrolLegDialog_Pilot;
 	public static String MergePatrolLegDialog_ShellText;
 	public static String MergePatrolsDialog_CustomPatrolId;
