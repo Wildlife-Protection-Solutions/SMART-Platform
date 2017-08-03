@@ -40,6 +40,7 @@ import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Connect VersionInfo servlet. Provide current version information to users.
@@ -55,7 +56,6 @@ public class VersionInfo extends HttpServlet{
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	@SuppressWarnings("unchecked")
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		List<CaPluginVersion> versions = null;
@@ -71,17 +71,11 @@ public class VersionInfo extends HttpServlet{
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 				return;
 			}
-			versions = (List<CaPluginVersion>)session
-					.createCriteria(CaPluginVersion.class)
-					.list();
-			areas = (List<ConservationAreaInfo>)session
-					.createCriteria(ConservationAreaInfo.class)
-					.list();
-			plugins = (List<ConnectPluginVersion>)session
-					.createCriteria(ConnectPluginVersion.class)
-					.list();
+			versions = QueryFactory.buildQuery(session, CaPluginVersion.class).list();
+			areas = QueryFactory.buildQuery(session, ConservationAreaInfo.class).list();
+			plugins = QueryFactory.buildQuery(session, ConnectPluginVersion.class).list(); 
 			
-			Object[] data = (Object[]) session.createSQLQuery("SELECT version, last_updated FROM connect.connect_version").uniqueResult(); //$NON-NLS-1$
+			Object[] data = (Object[]) session.createNativeQuery("SELECT version, last_updated FROM connect.connect_version").uniqueResult(); //$NON-NLS-1$
 			connectVersion = data[0].toString();
 			connectUpdated = data[1].toString();
 			 

@@ -18,8 +18,8 @@
 		<smart.version>6.0.0-SNAPSHOT</smart.version>
         	<geotools.version>14.1</geotools.version>
         	<jts.version>1.13</jts.version>
-        	<hibernate.version>4.2.18.Final</hibernate.version>
-		<resteasy.version>3.0.13.Final</resteasy.version>
+        	<hibernate.version>5.2.10.Final</hibernate.version>
+		<resteasy.version>3.1.4.Final</resteasy.version>
 		<udig.version>2.0.0-SNAPSHOT</udig.version>
     	</properties>
 	

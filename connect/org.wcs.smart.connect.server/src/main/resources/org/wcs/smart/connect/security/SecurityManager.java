@@ -21,21 +21,24 @@
  */
 package org.wcs.smart.connect.security;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.core.Response;
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserRole;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Security manager for smart connect.
@@ -51,11 +54,7 @@ public enum SecurityManager {
 	 * Determine if the user represented by the username is active
 	 */
 	private boolean isActive(Session s, String username){
-		Long roleCnt = (Long)s.createCriteria(SmartUserRole.class)
-				.add(Restrictions.eq("id.username", username)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount())
-				.uniqueResult();
-				
+		Long roleCnt = QueryFactory.buildCountQuery(s, SmartUserRole.class, new Object[] {"id.username",username}); //$NON-NLS-1$
 		if (roleCnt > 0) return true;
 		return false;
 	}
@@ -74,7 +73,7 @@ public enum SecurityManager {
 		}
 		queryString += "  )"; //$NON-NLS-1$
 
-		Query query = s.createQuery(queryString);
+		Query<?> query = s.createQuery(queryString);
 		query.setParameter("username",  username); //$NON-NLS-1$
 		query.setParameter("adminAction", AdminAccountAction.KEY); //$NON-NLS-1$
 		query.setParameter("action", action); //$NON-NLS-1$
@@ -87,28 +86,30 @@ public enum SecurityManager {
 		}
 		
 		//check actions for permission
-		Criterion r = null;
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Long> c = cb.createQuery(Long.class);
+		Root<SmartUserAction> from = c.from(SmartUserAction.class);
+		c.select(cb.count(from));
+		
+		Predicate r = null;
 		if (resource == null){
-			r = Restrictions.and(
-					Restrictions.eq("action", action), //$NON-NLS-1$
-					Restrictions.isNull("resource")); //$NON-NLS-1$
+			r = cb.and(
+					cb.equal(from.get("action"), action), //$NON-NLS-1$
+					cb.isNull(from.get("resource"))); //$NON-NLS-1$
 
 		}else{
-			r = Restrictions.and(
-					Restrictions.eq("action", action), //$NON-NLS-1$
-					Restrictions.or(
-							Restrictions.isNull("resource"), //$NON-NLS-1$
-							Restrictions.eq("resource", resource))); //$NON-NLS-1$
+			r = cb.and(
+					cb.equal(from.get("action"), action), //$NON-NLS-1$
+					cb.or(
+							cb.isNull(from.get("resource")), //$NON-NLS-1$
+							cb.equal(from.get("resource"), resource))); //$NON-NLS-1$
 			
 		}
-		Criteria c = s.createCriteria(SmartUserAction.class);
-				c.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-				.add(Restrictions.or(
-						Restrictions.eq("action", AdminAccountAction.KEY), //$NON-NLS-1$
-						r))
-				.setProjection(Projections.rowCount());
-
-		Long cnt2 = (Long) c.uniqueResult();
+		c.where(cb.and(
+				cb.equal(from.get("username"), username)), //$NON-NLS-1$
+				cb.or(cb.equal(from.get("action"), AdminAccountAction.KEY), //$NON-NLS-1$
+						r));
+		Long cnt2 = s.createQuery(c).uniqueResult();
 		if (cnt2 > 0){
 			return true;
 		}
@@ -118,12 +119,10 @@ public enum SecurityManager {
 			return false;
 		}
 		//check if CaAdmin role allows access, API and other code checking for access must call canAccess with the CAUUID as the resource for this check to work
-		Criteria c2 = s.createCriteria(SmartUserAction.class);
-				c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-				.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$
-				.add(Restrictions.eq("resource", resource)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount());
-		Long cnt3 = (Long) c2.uniqueResult();
+		Long cnt3 = QueryFactory.buildCountQuery(s, SmartUserAction.class, 
+				new Object[] {"username", username}, //$NON-NLS-1$
+				new Object[] {"action", CaAdminAccountAction.KEY}, //$NON-NLS-1$
+				new Object[] {"resource", resource}); //$NON-NLS-1$
 		if (cnt3 > 0){
 			return true;
 		}
@@ -139,24 +138,25 @@ public enum SecurityManager {
 		//ensure the user is active
 		if (!isActive(s, username)) return false;
 		
-		Criterion r = null;
-		r = Restrictions.eq("action", action); //$NON-NLS-1$
-
-		Criteria c = s.createCriteria(SmartUserAction.class);
-		Criterion r2 = Restrictions.or(
-				Restrictions.eq("action", AdminAccountAction.KEY), //$NON-NLS-1$
-				Restrictions.eq("action", CaAdminAccountAction.KEY)); //$NON-NLS-1$
 		
-		c.add(Restrictions.eq("username", username)); //$NON-NLS-1$
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Long> c = cb.createQuery(Long.class);
+		Root<SmartUserAction> from = c.from(SmartUserAction.class);
+		c.select(cb.count(from));
+		List<Predicate> filters = new ArrayList<>();
 		
+		filters.add(cb.equal(from.get("username"), username)); //$NON-NLS-1$
+		
+		Predicate actionEq = cb.equal(from.get("action"), action); //$NON-NLS-1$
 		if(!action.equals(AdminAccountAction.KEY) && !action.equals(CaAdminAccountAction.KEY) ){ //if we are asking specifically about admin or caAdmin users (probably the menu filter) don't add this, or else it will return true for admin and caAdmin regardless 
-			c.add(Restrictions.or(r2,r));			// in summary:   "username"=username" && ("action" == action || ("action"=admin || "action"=caadmin))
+			// in summary:   "username"=username" && ("action" == action || ("action"=admin || "action"=caadmin))
+			Predicate r2 = cb.or(cb.equal(from.get("action"), AdminAccountAction.KEY), cb.equal(from.get("action"), CaAdminAccountAction.KEY)); //$NON-NLS-1$ //$NON-NLS-2$
+			filters.add(cb.or(actionEq, r2));
 		}else{
-			c.add(r);
+			filters.add(actionEq);
 		}
-		c.setProjection(Projections.rowCount());
-
-		Long cnt = (Long) c.uniqueResult();
+		c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
+		Long cnt = s.createQuery(c).uniqueResult();
 		if (cnt == 0){
 			return false;
 		}else{
@@ -172,9 +172,7 @@ public enum SecurityManager {
 	 * Throws an exception if no admin user found
 	 */
 	public void validateSingleAdminUser(Session s, Locale l){
-		Long adminCnt = (Long) s.createCriteria(SmartUserAction.class)
-				.add(Restrictions.eq("action", AdminAccountAction.KEY)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount()).uniqueResult();
+		Long adminCnt = QueryFactory.buildCountQuery(s, SmartUserAction.class, new Object[] {"action",AdminAccountAction.KEY}); //$NON-NLS-1$
 		if (adminCnt > 0) {
 			return;
 		}
@@ -183,7 +181,7 @@ public enum SecurityManager {
 		//check roles for permission
 		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
 		queryString += "WHERE a.role = role AND a.action = :adminAction "; //$NON-NLS-1$
-		Query q= s.createQuery(queryString);
+		Query<?> q= s.createQuery(queryString);
 		q.setParameter("adminAction", AdminAccountAction.KEY); //$NON-NLS-1$
 		Long adminRoleCnt = (Long) q.uniqueResult();
 		if (adminRoleCnt > 0){
@@ -198,14 +196,10 @@ public enum SecurityManager {
 
 	//is the user is CaAdmin of any CA?
 	public boolean isCaAdmin(Session s, String username, String key) {
-		if (!isActive(s, username)) return false;
-		
-		Criteria c2 = s.createCriteria(SmartUserAction.class);
-		c2.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-		.add(Restrictions.eq("action", CaAdminAccountAction.KEY)) //$NON-NLS-1$
-		.setProjection(Projections.rowCount());
-		
-		Long count = (Long) c2.uniqueResult();
+		if (!isActive(s, username)) return false;		
+		Long count = QueryFactory.buildCountQuery(s, SmartUserAction.class, 
+				new Object[] {"action", CaAdminAccountAction.KEY}, //$NON-NLS-1$
+				new Object[] {"username", username}); //$NON-NLS-1$
 		if (count > 0){
 			return true;
 		}

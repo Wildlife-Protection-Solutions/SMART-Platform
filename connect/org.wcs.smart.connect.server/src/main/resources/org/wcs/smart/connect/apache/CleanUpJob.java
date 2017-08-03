@@ -34,11 +34,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.apache.commons.io.FileUtils;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.api.Uploader;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
@@ -49,6 +52,7 @@ import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Remove items from filestore.
@@ -97,8 +101,7 @@ public class CleanUpJob implements Runnable {
 	}
 	
 	private void cleanUp(){
-		Session s = sessionFactory.openSession();
-		try{
+		try(Session s = sessionFactory.openSession()){
 			//list all files in uploads directory			
 			Path uploadDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(Uploader.DATASTORE_DIR);
 			try(DirectoryStream<Path> stream = Files.newDirectoryStream(uploadDir)){
@@ -144,8 +147,6 @@ public class CleanUpJob implements Runnable {
 			
 			//clean up temporary tables
 			cleanupQueryTempTables(s);
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -163,7 +164,7 @@ public class CleanUpJob implements Runnable {
 		
 		s.beginTransaction();
 		try{
-			Query q = s.createQuery("DELETE FROM WorkItem where startTime < :starttime"); //$NON-NLS-1$
+			Query<?> q = s.createQuery("DELETE FROM WorkItem where startTime < :starttime"); //$NON-NLS-1$
 			
 			Date d = new Date((new Date()).getTime() - days * 24l * 60 * 60 *1000);
 			q.setParameter("starttime", d); //$NON-NLS-1$
@@ -180,12 +181,10 @@ public class CleanUpJob implements Runnable {
 	 * finds the work item related to the given file and deletes
 	 * it if the file can be deleted
 	 */
-	@SuppressWarnings("unchecked")
 	private void checkAndDelete(Session s, Path p){
 		String localFilename = DataStoreManager.INSTANCE.getRootDirectory().toPath().relativize(p).toString();
-		List<WorkItem> items = s.createCriteria(WorkItem.class)
-				.add(Restrictions.eq("localFilename", localFilename)) //$NON-NLS-1$
-				.list();
+		
+		List<WorkItem> items = QueryFactory.buildQuery(s, WorkItem.class, "localFilename", localFilename).list(); //$NON-NLS-1$
 		
 		boolean delete = true;
 		for (WorkItem i : items){
@@ -293,7 +292,6 @@ public class CleanUpJob implements Runnable {
 	/*
 	 * delete items from the data queue table and associated files
 	 */
-	@SuppressWarnings("unchecked")
 	private void cleanUpDataQueue(Session s){
 		Integer days = null;
 		try{
@@ -307,13 +305,14 @@ public class CleanUpJob implements Runnable {
 			Date lastDate = new Date((new Date()).getTime() - days * 24l * 60 *60 *1000);
 			s.beginTransaction();
 			try{
-				List<ServerDataQueueItem> toDelete = s.createCriteria(ServerDataQueueItem.class)
-					.add(Restrictions.le("uploadedDate", lastDate)) //$NON-NLS-1$
-					.add(Restrictions.in("status", new ServerDataQueueItem.Status[]{ //$NON-NLS-1$
-							ServerDataQueueItem.Status.COMPLETE,
-							ServerDataQueueItem.Status.ERROR,
-					}))
-					.list();
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<ServerDataQueueItem> c = cb.createQuery(ServerDataQueueItem.class);
+				Root<ServerDataQueueItem> from = c.from(ServerDataQueueItem.class);
+				c.where(cb.and(
+						cb.lessThanOrEqualTo(from.get("uploadedDate"), lastDate), //$NON-NLS-1$
+						from.get("status").in(ServerDataQueueItem.Status.COMPLETE, ServerDataQueueItem.Status.ERROR) //$NON-NLS-1$
+						));
+				List<ServerDataQueueItem> toDelete = s.createQuery(c).list();
 				
 				for (ServerDataQueueItem delete : toDelete){
 					File fToDelete = DataStoreManager.INSTANCE.getFile(delete.getFile());
@@ -341,8 +340,8 @@ public class CleanUpJob implements Runnable {
 		Set<String> allFiles = new HashSet<String>();
 		s.beginTransaction();
 		try{
-			List<String> files = s.createQuery("SELECT file FROM ServerDataQueueItem").list(); //$NON-NLS-1$
-			allFiles.addAll(files);
+			List<?> files = s.createQuery("SELECT file FROM ServerDataQueueItem").list(); //$NON-NLS-1$
+			for (Object x : files) allFiles.add((String)x);
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
@@ -377,10 +376,10 @@ public class CleanUpJob implements Runnable {
 		s.beginTransaction();
 		try{
 			@SuppressWarnings("unchecked")
-			List<String> tablesToDrop = s.createSQLQuery(query).list();
+			List<String> tablesToDrop = s.createNativeQuery(query).list();
 			for (String table : tablesToDrop){
 				try{
-					s.createSQLQuery("DROP TABLE " + table).executeUpdate(); //$NON-NLS-1$
+					s.createNativeQuery("DROP TABLE " + table).executeUpdate(); //$NON-NLS-1$
 				}catch (Exception ex){
 					logger.log(Level.WARNING, "Unable to drop temporary query table : " + table); //$NON-NLS-1$
 				}

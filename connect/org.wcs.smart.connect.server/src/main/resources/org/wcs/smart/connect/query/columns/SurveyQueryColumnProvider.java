@@ -28,8 +28,11 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
@@ -98,12 +101,14 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<MissionPropertyQueryColumn> getMissionPropertyColumns(Session session, Locale l, ConservationAreaFilter caFilter, SurveyDesign sd){
 		List<MissionPropertyQueryColumn> columns = new ArrayList<MissionPropertyQueryColumn>();
 		if (sd == null){
-			List<MissionAttribute> all = session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())).list(); //$NON-NLS-1$
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<MissionAttribute> c = cb.createQuery(MissionAttribute.class);
+			Root<MissionAttribute> from = c.from(MissionAttribute.class);
+			c.where(from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$ //$NON-NLS-2$
+			List<MissionAttribute> all = session.createQuery(c).list();		
 			for (MissionAttribute ma : all){
 				columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma, l), ma));
 			}
@@ -116,20 +121,22 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return columns;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<SamplingUnitAttributeQueryColumn> getSamplingUnitAttributeColumns(Session session, Locale l, ConservationAreaFilter caFilter, SurveyDesign sd){
+		CriteriaBuilder cb = session.getCriteriaBuilder();
 		List<SamplingUnitAttributeQueryColumn> columns = new ArrayList<SamplingUnitAttributeQueryColumn>();
 		if (sd == null){
-			List<SamplingUnitAttribute> su = session.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.list();
+			CriteriaQuery<SamplingUnitAttribute> c = cb.createQuery(SamplingUnitAttribute.class);
+			Root<SamplingUnitAttribute> from = c.from(SamplingUnitAttribute.class);
+			c.where(from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$ //$NON-NLS-2$
+			List<SamplingUnitAttribute> su = session.createQuery(c).list();
 			for (SamplingUnitAttribute sua : su){
 				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua, l), sua));
 			}
 		}else{
-			List<SurveyDesignSamplingUnitAttribute> atts = session.createCriteria(SurveyDesignSamplingUnitAttribute.class)
-				.add(Restrictions.eq("id.surveyDesign", sd)) //$NON-NLS-1$
-				.list();
+			CriteriaQuery<SurveyDesignSamplingUnitAttribute> c = cb.createQuery(SurveyDesignSamplingUnitAttribute.class);
+			Root<SurveyDesignSamplingUnitAttribute> from = c.from(SurveyDesignSamplingUnitAttribute.class);
+			c.where(cb.equal(from.get("id").get("surveyDesign"), sd)); //$NON-NLS-1$ //$NON-NLS-2$
+			List<SurveyDesignSamplingUnitAttribute> atts = session.createQuery(c).list();
 			for (SurveyDesignSamplingUnitAttribute a : atts){
 				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(a.getSamplingUnitAttribute(), l), a.getSamplingUnitAttribute()));
 			}
@@ -295,12 +302,13 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 	
 	public static SurveyDesign getSurveyDesign(String key, Session s, ConservationAreaFilter caFilter){
 		if (key == null) return null;
-		SurveyDesign sd = (SurveyDesign)s.createCriteria(SurveyDesign.class)
-			.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-			.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-			.uniqueResult();
-		return sd;
-		
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<SurveyDesign> c = cb.createQuery(SurveyDesign.class);
+		Root<SurveyDesign> from = c.from(SurveyDesign.class);
+		c.where(cb.and(
+				cb.equal(from.get("keyId"), key), //$NON-NLS-1$
+				from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()))); //$NON-NLS-1$ //$NON-NLS-2$
+		return s.createQuery(c).uniqueResult();
 	}
 	
 	private String getMissionPropertyColumnName(MissionAttribute ma, Locale l ){

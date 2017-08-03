@@ -26,12 +26,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.uploader.IUploadItemProcessor;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Data queue processor for processing uploaded data queue items.
@@ -54,9 +54,7 @@ public class DataQueueProcessor implements IUploadItemProcessor {
 		try{
 			session.beginTransaction();
 			
-			ServerDataQueueItem dqItem = (ServerDataQueueItem)session.createCriteria(ServerDataQueueItem.class)
-					.add(Restrictions.eq("workItem", item.getUuid())) //$NON-NLS-1$
-					.uniqueResult();
+			ServerDataQueueItem dqItem = QueryFactory.buildQuery(session, ServerDataQueueItem.class, "workItem", item.getUuid()).uniqueResult(); //$NON-NLS-1$
 			dqItem.setStatus(ServerDataQueueItem.Status.QUEUED);			
 			item.setStatus(Status.COMPLETE);
 			

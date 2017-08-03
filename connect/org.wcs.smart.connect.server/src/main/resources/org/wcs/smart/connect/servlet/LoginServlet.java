@@ -35,7 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.apache.BcryptCredentialHandler;
 import org.wcs.smart.connect.api.ConnectUser;
@@ -45,6 +44,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.security.AdminAccountAction;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Servlet implementation class LoginServlet
@@ -71,9 +71,7 @@ public class LoginServlet extends HttpServlet {
 		Long userCnt = 1l;
 		try{
 			s.beginTransaction();
-			userCnt = (Long)s.createCriteria(SmartUser.class)
-					.setProjection(Projections.rowCount())
-					.uniqueResult();
+			userCnt = QueryFactory.buildCountQuery(s, SmartUser.class);
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 		}finally{
@@ -135,10 +133,7 @@ public class LoginServlet extends HttpServlet {
 		try{
 			s.beginTransaction();
 			
-			userCnt = (Long)s.createCriteria(SmartUser.class)
-					.setProjection(Projections.rowCount())
-					.uniqueResult();
-			
+			userCnt = QueryFactory.buildCountQuery(s, SmartUser.class);			
 			if (userCnt == 0){
 				//create new user
 				SmartUser su = new SmartUser();

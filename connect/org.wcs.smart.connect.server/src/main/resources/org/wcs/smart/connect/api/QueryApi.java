@@ -487,6 +487,8 @@ public class QueryApi extends HttpServlet{
 					}
 				}
 			}
+		}catch (Exception ex) {
+			ex.printStackTrace();
 		}finally{
 			s.getTransaction().commit();
 		}

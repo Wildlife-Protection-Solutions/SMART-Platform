@@ -49,7 +49,6 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
@@ -60,6 +59,7 @@ import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.hibernate.QueryFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -231,14 +231,9 @@ public class PostgresqlCaLoader {
 	 * @param info
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	private void validatePluginVersions(ConservationAreaInfo info) throws Exception{
-		List<CaPluginVersion> caPlugins = session.createCriteria(CaPluginVersion.class)
-				.add(Restrictions.eq("id.conservationAreaUuid", info.getUuid())).list(); //$NON-NLS-1$
-		
-		List<ConnectPluginVersion>  connectVersions = (List<ConnectPluginVersion>)session
-				.createCriteria(ConnectPluginVersion.class)
-				.list();
+		List<CaPluginVersion> caPlugins = QueryFactory.buildQuery(session, CaPluginVersion.class, "id.conservationAreaUuid", info.getUuid()).list(); //$NON-NLS-1$
+		List<ConnectPluginVersion>  connectVersions = QueryFactory.buildQuery(session, ConnectPluginVersion.class).list();
 		HashMap<String, String> connect = new HashMap<String, String>();
 		for (ConnectPluginVersion v : connectVersions){
 			connect.put(v.getPluginId(), v.getVersion());
@@ -409,9 +404,10 @@ public class PostgresqlCaLoader {
 		sql.append(" WHERE tc.table_schema = 'smart'"); //$NON-NLS-1$
 		
 		HashMap<String, HashSet<String>> results = new HashMap<String, HashSet<String>>();
-		@SuppressWarnings("unchecked")
-		List<Object[]> data = session.createSQLQuery(sql.toString()).list();
-		for (Object[] d : data){
+		
+		List<?> data = session.createNativeQuery(sql.toString()).list();
+		for (Object dRow : data){
+			Object[] d = (Object[])dRow;
 			String source = ((String) d[0]).toUpperCase();
 			String req = ((String)d[1]).toUpperCase();
 			if (source.equals(req)) continue;

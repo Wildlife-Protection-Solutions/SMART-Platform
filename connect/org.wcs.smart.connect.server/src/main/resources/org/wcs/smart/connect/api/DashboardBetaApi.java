@@ -43,7 +43,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.Dashboard;
@@ -51,6 +50,7 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.UsersDefaultDashboard;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 
 /**
@@ -107,11 +107,13 @@ public class DashboardBetaApi extends HttpServlet {
 		try{
 			user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
 			if(user == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			UsersDefaultDashboard dd = (UsersDefaultDashboard)s.createCriteria(UsersDefaultDashboard.class).add(Restrictions.eq("userUuid",user.getUuid())).uniqueResult();
+			UsersDefaultDashboard dd = 
+					QueryFactory.buildQuery(s, UsersDefaultDashboard.class, "userUuid", user.getUuid()).uniqueResult(); //$NON-NLS-1$
+					
 			if(dd == null){
 				return new Dashboard();
 			}
-			Dashboard dashboard = (Dashboard)s.createCriteria(Dashboard.class).add(Restrictions.eq("uuid",dd.getDashboardUuid())).uniqueResult();
+			Dashboard dashboard = s.get(Dashboard.class, dd.getDashboardUuid());
 			
 
 			//override the user-customizable portions of the dashboard then return to the user.
@@ -136,14 +138,13 @@ public class DashboardBetaApi extends HttpServlet {
 	 * 
 	 * @return Returns a JSON representation of a list of Quicklink objects 
 	 */
-	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
     public List<Dashboard> getAllDashboards(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return s.createCriteria(Dashboard.class).list();
+			return QueryFactory.buildQuery(s,  Dashboard.class).list();
 		}finally{
 			s.getTransaction().rollback();
 		}
@@ -162,7 +163,7 @@ public class DashboardBetaApi extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return (Dashboard) s.createCriteria(Dashboard.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
+			return s.get(Dashboard.class, uuid);
 		}finally{
 			s.getTransaction().rollback();
 		}
@@ -190,7 +191,7 @@ public class DashboardBetaApi extends HttpServlet {
 		try{
 
 			if(dashboard.getUuid() != null){
-				d = (Dashboard) s.createCriteria(Dashboard.class).add(Restrictions.eq("uuid", dashboard.getUuid())).uniqueResult();
+				d = s.get(Dashboard.class, dashboard.getUuid());
 			}
 			
 			if(d == null){
@@ -242,7 +243,7 @@ public class DashboardBetaApi extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			Dashboard toDelete = (Dashboard)s.createCriteria(Dashboard.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
+			Dashboard toDelete = s.get(Dashboard.class, uuid);
 			s.delete(toDelete);
 			s.getTransaction().commit();
 			return toDelete;
@@ -273,8 +274,7 @@ public class DashboardBetaApi extends HttpServlet {
 		try{
 			user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
 			if(user == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			
-			d = (UsersDefaultDashboard) s.createCriteria(UsersDefaultDashboard.class).add(Restrictions.eq("userUuid", user.getUuid())).uniqueResult();
+			d = QueryFactory.buildQuery(s, UsersDefaultDashboard.class, "userUuid", user.getUuid()).uniqueResult(); //$NON-NLS-1$
 			if(d == null){
 				d = new UsersDefaultDashboard();
 				d.setUserUuid(user.getUuid());
@@ -305,7 +305,7 @@ public class DashboardBetaApi extends HttpServlet {
 			s.saveOrUpdate(d);
 			
 			//override the user-customizable portions of the dashboard then return to the user Dashboard object.
-			dashboard = (Dashboard)s.createCriteria(Dashboard.class).add(Restrictions.eq("uuid",d.getDashboardUuid())).uniqueResult();
+			dashboard = (Dashboard)s.get(Dashboard.class, d.getDashboardUuid());
 			
 			dashboard.setCustomDate1From(d.getCustomDate1From());
 			dashboard.setCustomDate1To(d.getCustomDate1To());
@@ -356,8 +356,8 @@ public class DashboardBetaApi extends HttpServlet {
 			user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
 			if(user == null) throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			
-			d = (UsersDefaultDashboard) s.createCriteria(UsersDefaultDashboard.class).add(Restrictions.eq("userUuid", user.getUuid())).uniqueResult();
-			dashboard = (Dashboard)s.createCriteria(Dashboard.class).add(Restrictions.eq("uuid",uuid)).uniqueResult();
+			d = s.get(UsersDefaultDashboard.class, user.getUuid());
+			dashboard = s.get(Dashboard.class, uuid);
 			if(d == null){
 				d = new UsersDefaultDashboard();
 				d.setUserUuid(user.getUuid());

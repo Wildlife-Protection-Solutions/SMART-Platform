@@ -75,6 +75,7 @@ import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
@@ -244,11 +245,10 @@ public enum QueryManager {
 	 * @param includeMyQueries  - by default we don't include shared queries, i.e. "My Queries" as they should not be shown most of the time. 
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public List<QueryProxy> getQueries(Session session, final Locale l, Boolean includeMyQueries){
 		List<QueryProxy> proxies = new ArrayList<QueryProxy>();
 		for (Class<? extends Query> q : queryClasses){
-			List<Query> queries = session.createCriteria(q).list();
+			List<? extends Query> queries = QueryFactory.buildQuery(session, q).list();
 			for (Query qq : queries){
 				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName() == null ? "" : qq.getName(), q.getSimpleName(),  //$NON-NLS-1$
 						qq.getConservationArea().getId(), qq.getId(), qq.getIsShared(), 
@@ -362,7 +362,7 @@ public enum QueryManager {
 	 * @throws SQLException
 	 */
 	public int getCategoryDepth(Session session, ConservationAreaFilter caFilter) throws SQLException{
-		org.hibernate.Query q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc"); //$NON-NLS-1$
+		org.hibernate.query.Query<?> q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc"); //$NON-NLS-1$
 		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 		q.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		q.setMaxResults(1);
@@ -381,7 +381,7 @@ public enum QueryManager {
 	 */
 	public void removeAccessToQueriesFromCa(UUID caUuid, Session s) throws SQLException{
 		for (Class<? extends Query> q : queryClasses){
-			org.hibernate.Query delete = s.createQuery("DELETE FROM SmartUserAction WHERE resource IN (SELECT uuid FROM " + q.getSimpleName() + " WHERE conservationArea.uuid = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
+			org.hibernate.query.Query<?> delete = s.createQuery("DELETE FROM SmartUserAction WHERE resource IN (SELECT uuid FROM " + q.getSimpleName() + " WHERE conservationArea.uuid = :ca)"); //$NON-NLS-1$ //$NON-NLS-2$
 			delete.setParameter("ca", caUuid); //$NON-NLS-1$
 			delete.executeUpdate();
 		}
@@ -424,10 +424,10 @@ public enum QueryManager {
 	 * @param session
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+
 	public Attribute.AttributeType getAttributeType(Session session, String attributeKey, ConservationAreaFilter caFilter){
 		if (caFilter.getConservationAreaFilterIds().size() == 1){
-			org.hibernate.Query q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+			org.hibernate.query.Query<Attribute> q = session.createQuery("From Attribute where conservationArea.uuid = :ca and keyid = :key", Attribute.class); //$NON-NLS-1$
 			q.setParameter("ca", caFilter.getConservationAreaFilterIds().get(0)); //$NON-NLS-1$
 			q.setParameter("key", attributeKey); //$NON-NLS-1$
 			q.setCacheable(true);
@@ -443,7 +443,7 @@ public enum QueryManager {
 			return null;
 			
 		}else{
-			org.hibernate.Query q = session.createQuery("From Attribute where conservationArea.uuid in (:cas) and keyid = :key"); //$NON-NLS-1$
+			org.hibernate.query.Query<Attribute> q = session.createQuery("From Attribute where conservationArea.uuid in (:cas) and keyid = :key", Attribute.class); //$NON-NLS-1$
 			q.setParameterList("cas", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			q.setParameter("key", attributeKey); //$NON-NLS-1$
 			

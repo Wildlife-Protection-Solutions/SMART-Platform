@@ -71,7 +71,6 @@ import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.birt.SmartRunAndRender;
@@ -89,6 +88,7 @@ import org.wcs.smart.connect.report.query.ServerSmartConnection;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.report.execute.ParameterFinder;
 import org.wcs.smart.report.model.Report;
@@ -349,13 +349,12 @@ public class ReportApi extends HttpServlet{
 	 * @param includeMyQueries
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	private List<ReportProxy> getReports(Session session, final Locale l, Boolean includeMyQueries){
 		List<ReportProxy> proxies = new ArrayList<ReportProxy>();
 		
-		List<Report> reports = session.createCriteria(Report.class).list();
+		List<Report> reports = QueryFactory.buildQuery(session, Report.class).list();
 		for (Report r : reports){
-			ReportProxy proxy = new ReportProxy(r.getUuid(), r.getName() == null ? "" : r.getName(),  
+			ReportProxy proxy = new ReportProxy(r.getUuid(), r.getName() == null ? "" : r.getName(),   //$NON-NLS-1$
 					r.getConservationArea().getId(), r.getId(), r.getShared(), 
 					r.getConservationArea().getUuid(),
 					r.getConservationArea().getIsCcaa());
@@ -393,7 +392,7 @@ public class ReportApi extends HttpServlet{
 		ReportProxy proxy = null;
 		try{		
 			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, uuid)){
-				r = (Report) s.createCriteria(Report.class).add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
+				r = s.get(Report.class, uuid);
 				proxy = new ReportProxy(r.getUuid(), r.getName(),  
 						r.getConservationArea().getId(), r.getId(), r.getShared(), 
 						r.getConservationArea().getUuid(),

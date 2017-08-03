@@ -304,8 +304,8 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 		}
 		if (!hasSortColumns) {
 			// add the sort columns
-			session.createSQLQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
-			session.createSQLQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 			hasSortColumns = true;
 		}
 
@@ -353,7 +353,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET " + tableSortField + " = " + sortColumn); //$NON-NLS-1$ //$NON-NLS-2$
-			session.createSQLQuery(sql.toString()).executeUpdate();
+			session.createNativeQuery(sql.toString()).executeUpdate();
 			
 		}else{
 			
@@ -372,7 +372,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createSQLQuery(sql.toString()).executeUpdate();
+				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case TEXT:
 			case DATE:
@@ -388,7 +388,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createSQLQuery(sql.toString()).executeUpdate();
+				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case LIST:
 				sql = new StringBuilder();
@@ -405,7 +405,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createSQLQuery(sql.toString()).executeUpdate();
+				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case TREE:
 				sql = new StringBuilder();
@@ -421,17 +421,16 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createSQLQuery(sql.toString()).executeUpdate();
+				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			}
 		}
 		
 	}
 
-	@SuppressWarnings("unchecked")
 	private Attribute.AttributeType getMissionAttributeType(Session session, String missionAttributeKey, ConservationAreaFilter caFilter){
 		if (caFilter.getConservationAreaFilterIds().size() == 1){
-			org.hibernate.Query q = session.createQuery("From MissionAttribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+			org.hibernate.query.Query<MissionAttribute> q = session.createQuery("From MissionAttribute where conservationArea.uuid = :ca and keyid = :key", MissionAttribute.class); //$NON-NLS-1$
 			q.setParameter("ca", caFilter.getConservationAreaFilterIds().get(0)); //$NON-NLS-1$
 			q.setParameter("key", missionAttributeKey); //$NON-NLS-1$
 			q.setCacheable(true);
@@ -447,7 +446,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 			return null;
 			
 		}else{
-			org.hibernate.Query q = session.createQuery("From MissionAttribute where conservationArea.uuid in (:cas) and keyid = :key"); //$NON-NLS-1$
+			org.hibernate.query.Query<MissionAttribute> q = session.createQuery("From MissionAttribute where conservationArea.uuid in (:cas) and keyid = :key", MissionAttribute.class); //$NON-NLS-1$
 			q.setParameterList("cas", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			q.setParameter("key", missionAttributeKey); //$NON-NLS-1$
 			
@@ -460,10 +459,9 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private Attribute.AttributeType getSamplingUnitAttributeType(Session session, String smaplingUnitAttributeKey, ConservationAreaFilter caFilter){
 		if (caFilter.getConservationAreaFilterIds().size() == 1){
-			org.hibernate.Query q = session.createQuery("From SamplingUnitAttribute where conservationArea.uuid = :ca and keyid = :key"); //$NON-NLS-1$
+			org.hibernate.query.Query<SamplingUnitAttribute> q = session.createQuery("From SamplingUnitAttribute where conservationArea.uuid = :ca and keyid = :key", SamplingUnitAttribute.class); //$NON-NLS-1$
 			q.setParameter("ca", caFilter.getConservationAreaFilterIds().get(0)); //$NON-NLS-1$
 			q.setParameter("key", smaplingUnitAttributeKey); //$NON-NLS-1$
 			q.setCacheable(true);
@@ -479,7 +477,7 @@ public abstract class ErSurveyQueryResultSet extends AbstractDbFeatureResultSet 
 			return null;
 			
 		}else{
-			org.hibernate.Query q = session.createQuery("From SamplingUnitAttribute where conservationArea.uuid in (:cas) and keyid = :key"); //$NON-NLS-1$
+			org.hibernate.query.Query<SamplingUnitAttribute> q = session.createQuery("From SamplingUnitAttribute where conservationArea.uuid in (:cas) and keyid = :key", SamplingUnitAttribute.class); //$NON-NLS-1$
 			q.setParameterList("cas", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			q.setParameter("key", smaplingUnitAttributeKey); //$NON-NLS-1$
 			

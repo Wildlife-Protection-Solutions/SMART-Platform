@@ -47,7 +47,6 @@ import javax.ws.rs.core.Response;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +64,7 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 import com.ibm.icu.util.TimeZone;
 
@@ -191,10 +191,7 @@ public class ConnectAlert extends HttpServlet {
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			toUpdate = (AlertType)s.createCriteria(AlertType.class)
-					.add(Restrictions.eq("uuid", uuid)) //$NON-NLS-1$
-					.uniqueResult();
-			
+			toUpdate = s.get(AlertType.class, uuid);			
 			if (toUpdate == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectAlert.AlertTypeNotFound", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
@@ -814,9 +811,7 @@ public class ConnectAlert extends HttpServlet {
     	Session s1 = HibernateManager.getSession(context);
 		s1.beginTransaction();
 		try{
-			toUpdate = (Alert)s1.createCriteria(Alert.class)
-					.add(Restrictions.eq("userGeneratedId", oldAlertId)) //$NON-NLS-1$
-					.uniqueResult();
+			toUpdate = QueryFactory.buildQuery(s1, Alert.class, "userGeneratedId", oldAlertId).uniqueResult(); //$NON-NLS-1$
 			
 			if (toUpdate == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 

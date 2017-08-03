@@ -39,10 +39,14 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -73,6 +77,7 @@ import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.intelligence.query.IntelligencePatrolGroupBy;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
@@ -166,47 +171,55 @@ public class SummaryItemLabelProvider {
 	}
 	
 	private Attribute getAttribute(String key){
-		//find an attribute with the given key in 
-		//any of the conservation areas
-		return (Attribute) s.createCriteria(Attribute.class)
-				.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.setMaxResults(1)
-				.uniqueResult();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Attribute> c = cb.createQuery(Attribute.class);
+		Root<Attribute> from = c.from(Attribute.class);
+		c.where(cb.and(
+				cb.equal(from.get("keyId"), key), //$NON-NLS-1$
+				from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$ //$NON-NLS-2$
+				));
+		return s.createQuery(c).setMaxResults(1).uniqueResult();
 	}
 	
 	private Category getCategory(String catHkey){
-		//find a category with the given given
-		//in any of the conservation areas
-		return (Category) s.createCriteria(Category.class)
-				.add(Restrictions.eq("hkey", catHkey)) //$NON-NLS-1$
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.setMaxResults(1)
-				.uniqueResult();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Category> c = cb.createQuery(Category.class);
+		Root<Category> from = c.from(Category.class);
+		c.where(cb.and(
+				cb.equal(from.get("hkey"), catHkey), //$NON-NLS-1$
+				from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$ //$NON-NLS-2$
+				));
+		return s.createQuery(c).setMaxResults(1).uniqueResult();
 	}
 	
 	private AttributeListItem getAttributeListIem(String key, String attributeKey){
 		//find the first attribute list item with the given key for one
 		//of the conservation areas; we just pick one
-		return (AttributeListItem) s.createCriteria(AttributeListItem.class, "li") //$NON-NLS-1$
-				.createCriteria("attribute", "a") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("li.keyId", key)) //$NON-NLS-1$
-				.add(Restrictions.eq("a.keyId", attributeKey)) //$NON-NLS-1$
-				.add(Restrictions.in("a.conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.setMaxResults(1)
-				.uniqueResult();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<AttributeListItem> c = cb.createQuery(AttributeListItem.class);
+		Root<AttributeListItem> from = c.from(AttributeListItem.class);
+		Join<Object, Object> attributefrom = from.join("attribute"); //$NON-NLS-1$
+		c.where(cb.and(
+				cb.equal(from.get("keyId"), key), //$NON-NLS-1$
+				cb.equal(attributefrom.get("keyId"), attributeKey), //$NON-NLS-1$
+				attributefrom.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$ //$NON-NLS-2$
+				));
+		return s.createQuery(c).setMaxResults(1).uniqueResult();
 	}
 	
 	private AttributeTreeNode getAttributeTreeItem(String hkey, String attributeKey){
-		//find the first attribute tree node with the given key for one
+		//find the first attribute list item with the given key for one
 		//of the conservation areas; we just pick one
-		return (AttributeTreeNode) s.createCriteria(AttributeTreeNode.class)
-				.add(Restrictions.eq("hkey", hkey)) //$NON-NLS-1$
-				.createCriteria("attribute", "a") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("a.keyId", attributeKey)) //$NON-NLS-1$
-				.add(Restrictions.in("a.conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.setMaxResults(1)
-				.uniqueResult();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<AttributeTreeNode> c = cb.createQuery(AttributeTreeNode.class);
+		Root<AttributeTreeNode> from = c.from(AttributeTreeNode.class);
+		Join<Object, Object> attributefrom = from.join("attribute"); //$NON-NLS-1$
+		c.where(cb.and(
+				cb.equal(from.get("hkey"), hkey), //$NON-NLS-1$
+				cb.equal(attributefrom.get("keyId"), attributeKey), //$NON-NLS-1$
+				attributefrom.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$ //$NON-NLS-2$
+				));
+		return s.createQuery(c).setMaxResults(1).uniqueResult();
 	}
 	
 	private String getName(CategoryValueItem item, boolean full){
@@ -346,19 +359,24 @@ public class SummaryItemLabelProvider {
 		});
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(AreaGroupBy item){
 		String[] filterkeys = item.getAreaFilterKeys();
 		Area.AreaType areaType = item.getAreaType();
 		
+		CriteriaBuilder cb = s.getCriteriaBuilder();
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (filterkeys != null && filterkeys.length > 0){
+			List<String> filterItems = new ArrayList<>();
+			for (String f : filterkeys) filterItems.add(f);
 			
-			List<Area> matching = s
-					.createCriteria(Area.class)
-					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-					.add(Restrictions.in("keyId", filterkeys)) //$NON-NLS-1$
-					.add(Restrictions.eq("type", areaType)).list(); //$NON-NLS-1$
+			CriteriaQuery<Area> c = cb.createQuery(Area.class);
+			Root<Area> from = c.from(Area.class);
+			c.where(cb.and(
+					from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()), //$NON-NLS-1$ //$NON-NLS-2$
+					from.get("keyId").in(filterItems), //$NON-NLS-1$
+					cb.equal(from.get("type"), areaType) //$NON-NLS-1$
+					));
+			List<Area> matching = s.createQuery(c).list();
 			
 			for (int i = 0; i < filterkeys.length; i++){
 				boolean found = false;
@@ -374,11 +392,13 @@ public class SummaryItemLabelProvider {
 				}
 			}
 		}else{
-			List<Area> matching = s
-					.createCriteria(Area.class)
-					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-					.add(Restrictions.eq("type", areaType)).list(); //$NON-NLS-1$
-			
+			CriteriaQuery<Area> c = cb.createQuery(Area.class);
+			Root<Area> from = c.from(Area.class);
+			c.where(cb.and(
+					from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()), //$NON-NLS-1$ //$NON-NLS-2$
+					cb.equal(from.get("type"), areaType) //$NON-NLS-1$
+					));
+			List<Area> matching = s.createQuery(c).list();
 			for (Area a : matching){
 				items.add(new ListItem(null, a.getName(), a.getKeyId()));
 			}
@@ -390,7 +410,7 @@ public class SummaryItemLabelProvider {
 	
 	@SuppressWarnings("unchecked")
 	private List<String> getTreeNodes(String attributeKey, int level){
-		Query q = s.createQuery("SELECT a.hkey FROM AttributeTreeNode a join a.attribute b " + //$NON-NLS-1$
+		Query<?> q = s.createQuery("SELECT a.hkey FROM AttributeTreeNode a join a.attribute b " + //$NON-NLS-1$
 				"WHERE b.keyId = :att AND (length(a.hkey) - length(replace(a.hkey, '.', '')))-1 = :level" + //$NON-NLS-1$
 				" AND b.conservationArea.uuid IN (:cauuids) " + //$NON-NLS-1$
 				" GROUP BY a.hkey HAVING count(*) = :cnt "); //$NON-NLS-1$
@@ -399,10 +419,9 @@ public class SummaryItemLabelProvider {
 		q.setParameter("level", level); //$NON-NLS-1$
 		q.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
-		return q.list();
+		return (List<String>)q.list();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(AttributeGroupBy item){
 		String[]  filterHkeys = item.getFilterKeys();
 		
@@ -416,7 +435,7 @@ public class SummaryItemLabelProvider {
 			}else{
 				//we want list items that are shared with all conservation areas
 				String query = "SELECT ali.keyId FROM AttributeListItem ali join ali.attribute a WHERE a.conservationArea.uuid in (:cauuids) and a.keyId = :attributeKey group by ali.keyId HAVING count(*) = :cnt "; //$NON-NLS-1$
-				org.hibernate.Query attquery = s.createQuery(query);
+				Query<?> attquery = s.createQuery(query);
 				attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 				attquery.setParameter("attributeKey", item.getAttributeKey()); //$NON-NLS-1$
 				attquery.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
@@ -425,10 +444,11 @@ public class SummaryItemLabelProvider {
 				String nameQueryHql = "SELECT a.value FROM Label a, AttributeListItem c where a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
 				String allLocal = l.toString().toUpperCase();
 				String local = l.getLanguage().toUpperCase();
-				org.hibernate.Query nameQuery = s.createQuery(nameQueryHql);
+				Query<?> nameQuery = s.createQuery(nameQueryHql);
 				
-				List<String> listitems = attquery.list();
-				for (String li: listitems){
+				List<?> listitems = attquery.list();
+				for (Object lirow: listitems){
+					String li = (String)lirow;
 					nameQuery.setParameter("attributeKey", li); //$NON-NLS-1$
 					nameQuery.setParameter("code1", allLocal); //$NON-NLS-1$
 					nameQuery.setParameter("code2", local); //$NON-NLS-1$
@@ -450,7 +470,7 @@ public class SummaryItemLabelProvider {
 				String nameQueryHql = "SELECT a.value FROM Label a, AttributeTreeNode c where a.id.element = c.uuid and c.hkey = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
 				String allLocal = l.toString().toUpperCase();
 				String local = l.getLanguage().toUpperCase();
-				org.hibernate.Query nameQuery = s.createQuery(nameQueryHql);
+				org.hibernate.query.Query<?> nameQuery = s.createQuery(nameQueryHql);
 				for (String hkey : nodes){
 					nameQuery.setParameter("attributeKey", hkey); //$NON-NLS-1$
 					nameQuery.setParameter("code1", allLocal); //$NON-NLS-1$
@@ -466,7 +486,6 @@ public class SummaryItemLabelProvider {
 		return items;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(CategoryGroupBy item){
 		//get children categories
 		String[] filterHkeys = item.getFilterKeys();
@@ -483,7 +502,7 @@ public class SummaryItemLabelProvider {
 				}
 			}
 		}else{
-			Query q = s.createQuery("FROM Category WHERE conservationArea.uuid in (:ca) and  (length(hkey) - length(replace(hkey, '.', ''))) - 1 = :level"); //$NON-NLS-1$
+			Query<Category> q = s.createQuery("FROM Category WHERE conservationArea.uuid in (:ca) and  (length(hkey) - length(replace(hkey, '.', ''))) - 1 = :level", Category.class); //$NON-NLS-1$
 			q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			q.setParameter("level", item.getTreeLevel()); //$NON-NLS-1$
 			List<Category> cats = q.list();
@@ -494,14 +513,12 @@ public class SummaryItemLabelProvider {
 		}
 		return items;
 	}
-	@SuppressWarnings("unchecked")
+
 	private List<ListItem> getName(ConservationAreaGroupBy item){
 		String[] filterHkeys = item.getFilterKeys();
 		List<ListItem> items = new ArrayList<ListItem>();
 		
-		List<ConservationArea> cas = s.createCriteria(ConservationArea.class)
-				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-				.list();
+		List<ConservationArea> cas = QueryFactory.buildQuery(s, ConservationArea.class).list();
 		for (ConservationArea ca : cas){
 			if (!ca.getIsCcaa()) items.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
 		}
@@ -549,7 +566,7 @@ public class SummaryItemLabelProvider {
 			if (dateFilter.getDates() == null) {
 				// all daytes
 				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
-				Query q = s.createQuery(hql);
+				Query<?> q = s.createQuery(hql);
 				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 
 				List<?> data = q.list();
@@ -607,7 +624,7 @@ public class SummaryItemLabelProvider {
 			if (dateFilter.getDates() == null) {
 				// all daytes
 				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
-				Query q = s.createQuery(hql);
+				Query<?> q = s.createQuery(hql);
 				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 
 				List<?> data = q.list();
@@ -659,7 +676,7 @@ public class SummaryItemLabelProvider {
 			if (dateFilter.getDates() == null) {
 				// all daytes
 				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
-				Query q = s.createQuery(hql);
+				Query<?> q = s.createQuery(hql);
 				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 
 				List<?> data = q.list();
@@ -701,10 +718,10 @@ public class SummaryItemLabelProvider {
 	private List<ListItem> getName(EntityAttributeGroupBy item){
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 
-		Query q = s.createQuery("SELECT et.name from EntityAttribute ea join ea.entityType et WHERE et.conservationArea.uuid in (:cauuids) and ea.keyId = :eaKey and et.keyId = :etKey"); //$NON-NLS-1$
+		Query<?> q = s.createQuery("SELECT et.name from EntityAttribute ea join ea.entityType et WHERE et.conservationArea.uuid in (:cauuids) and ea.keyId = :eaKey and et.keyId = :etKey"); //$NON-NLS-1$
 		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
-		q.setString("eaKey", item.getEntityAttributeKey()); //$NON-NLS-1$
-		q.setString("etKey", item.getEntityKey()); //$NON-NLS-1$
+		q.setParameter("eaKey", item.getEntityAttributeKey()); //$NON-NLS-1$
+		q.setParameter("etKey", item.getEntityKey()); //$NON-NLS-1$
 		q.setMaxResults(1);
 		String entityTypeName = (String) q.uniqueResult();
 		
@@ -726,10 +743,14 @@ public class SummaryItemLabelProvider {
 	}
 	
 	private List<ListItem> getName(MissionAttributeGroupBy item){
-		MissionAttribute ma = (MissionAttribute) s.createCriteria(MissionAttribute.class)
-				.add(Restrictions.eq("keyId", item.getAttributeKey())) //$NON-NLS-1$
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.uniqueResult();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<MissionAttribute> c = cb.createQuery(MissionAttribute.class);
+		Root<MissionAttribute> from = c.from(MissionAttribute.class);
+		c.where(cb.and(
+				cb.equal(from.get("keyId"), item.getAttributeKey()), //$NON-NLS-1$
+				from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$ //$NON-NLS-2$
+				));
+		MissionAttribute ma = s.createQuery(c).uniqueResult();
 		if (ma == null){
 			logger.warning(MessageFormat.format("Mission attribute not found {0}.", item.getAttributeKey()));; //$NON-NLS-1$
 		}
@@ -752,7 +773,6 @@ public class SummaryItemLabelProvider {
 		return allItems;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(MissionIdGroupBy item){
 		String[] items = item.getRawItems();
 		List<ListItem> allItems = new ArrayList<ListItem>();
@@ -768,19 +788,20 @@ public class SummaryItemLabelProvider {
 			}
 		}else{
 			//load all missions
-			Query missionQuery = null;
+			Query<?> missionQuery = null;
 			if (sdFilter.getKey() != null){
 				String hql = "SELECT m.uuid, m.id From Mission m where m.survey.surveyDesign.keyId = :sd and m.survey.surveyDesign.conservationArea.uuid in (:uuids)"; //$NON-NLS-1$
 				missionQuery = s.createQuery(hql)
-						.setString("sd", sdFilter.getKey()) //$NON-NLS-1$
+						.setParameter("sd", sdFilter.getKey()) //$NON-NLS-1$
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			}else{
 				String hql = "SELECT m.uuid, m.id From Mission m where m.survey.surveyDesign.conservationArea.uuid in (:uuids)"; //$NON-NLS-1$
 				missionQuery = s.createQuery(hql)
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			}
-			List<Object[]> ms = missionQuery.list();
-			for(Object[] m : ms){
+			List<?> ms = missionQuery.list();
+			for(Object mRow : ms){
+				Object[] m = (Object[])mRow;
 				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
 			}
 			sortItems(allItems);
@@ -788,7 +809,6 @@ public class SummaryItemLabelProvider {
 		return allItems;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(ObserverGroupBy item){
 		String[] filterkeys = item.getFilterKeys();
 		List<ListItem> items = new ArrayList<ListItem>();
@@ -798,9 +818,14 @@ public class SummaryItemLabelProvider {
 				items.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullName(e, l)));
 			}		
 		}else{
-			List<Employee> es = s.createCriteria(Employee.class)
-					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-					.list();
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
+			Root<Employee> from = c.from(Employee.class);
+			c.where(cb.and(
+					from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$ //$NON-NLS-2$
+					));
+			List<Employee> es = s.createQuery(c).list();
+			
 			for (Employee e : es){
 				items.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullName(e, l)));
 			}
@@ -815,34 +840,42 @@ public class SummaryItemLabelProvider {
 		String[] keys = item.getItems();
 		boolean sort = keys == null;
 		
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		
+		
+		
 		if (type == PatrolQueryOptionType.UUID){
-			Criteria c = s.createCriteria(item.getOption().getSourceClass());
+			
+			CriteriaQuery<?> c = cb.createQuery(item.getOption().getSourceClass());
+			Root<?> from = c.from(item.getOption().getSourceClass());
+			List<Predicate> filters = new ArrayList<>();
+			
 			if (item.getOption() == PatrolQueryOption.STATION 
 					|| item.getOption() == PatrolQueryOption.TEAM
 					|| item.getOption() == PatrolQueryOption.MANDATE
 					|| item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_TYPE
 					|| item.getOption() == PatrolQueryOption.PATROL_TYPE){
-				c.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
+				filters.add(cb.equal(from.get("isActive"), true)); //$NON-NLS-1$
 			}
 												
 			if (keys != null){
-				UUID[] uuidkeys = new UUID[keys.length];
+				List<UUID> uuidkeys = new ArrayList<>(keys.length);
 				for (int i = 0; i < keys.length; i++) {
-					uuidkeys[i] = UuidUtils.stringToUuid(keys[i]);
+					uuidkeys.add(UuidUtils.stringToUuid(keys[i]));
 				}
-				c = c.add(Restrictions.in("uuid", uuidkeys)); //$NON-NLS-1$
+				filters.add(from.get("uuid").in(uuidkeys)); //$NON-NLS-1$
 			}else{
 				//ca filter
-				if (item.getOption() == PatrolQueryOption.RANK){
-					c.add(Restrictions.in("agency.conservationArea.uuid", caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$
+				if (item.getOption() == PatrolQueryOption.RANK){		
+					filters.add(from.join("agency").get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()));					 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}else if (item.getOption() == PatrolQueryOption.CONSERVATION_AREA){
-					c.add(Restrictions.in("uuid", caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$
+					filters.add(from.get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$
 				}else{
-					c.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$
+					filters.add(from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
-			c.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-			Collection<?> data = c.list();
+//			c.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+			Collection<?> data = s.createQuery(c).list();
 			List<UUID> caUuids = caFilter.getConservationAreaFilterIds();
 			for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 				Object object = (Object) iterator.next();
@@ -872,14 +905,18 @@ public class SummaryItemLabelProvider {
 			if (queryClazz == null){
 				throw new UnsupportedOperationException(Messages.getString("SummaryItemLabelProvider.PatrolQueryOptionNotSupported", l) + item.getOption());	 //$NON-NLS-1$
 			}
-			List<ListItem> data = new ArrayList<ListItem>();
-			Criteria c = s.createCriteria(queryClazz)
-					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-					.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
+			
+			CriteriaQuery<?> c = cb.createQuery(queryClazz);
+			Root<?> from = c.from(queryClazz);
+			c.where(cb.and(
+					from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()), //$NON-NLS-1$ //$NON-NLS-2$
+					cb.equal(from.get("isActive"), true) //$NON-NLS-1$
+					));
 			
 			//unique values based on keys
+			List<ListItem> data = new ArrayList<>();
 			HashSet<String> existingKeys = new HashSet<String>();
-			for (Iterator<?> it = c.list().iterator(); it.hasNext();){
+			for (Iterator<?> it =s.createQuery(c).list().iterator(); it.hasNext();){
 				NamedKeyItem nkitem = (NamedKeyItem)it.next();
 				if (!existingKeys.contains(nkitem.getKeyId())){
 					data.add(new ListItem(null, nkitem.getName(),nkitem.getKeyId()));
@@ -904,12 +941,19 @@ public class SummaryItemLabelProvider {
 			}
 		}else if (type == PatrolQueryOptionType.STRING){
 			if (item.getOption() == PatrolQueryOption.ID){
-				Criteria c = s.createCriteria(item.getOption().getSourceClass())
-						.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$
+				
+				CriteriaQuery<?> c = cb.createQuery(item.getOption().getSourceClass());
+				Root<?> from = c.from(item.getOption().getSourceClass());
+				Predicate[] filters = new Predicate[keys != null ? 2 : 1];
+				filters[0] = from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$ //$NON-NLS-2$
 				if (keys != null){
-					c = c.add(Restrictions.in(item.getOption().getColumnName(), keys));
-				} 
-				 List<?> data = c.list();
+					List<String> keyFilters = new ArrayList<>();
+					for (String k : keys) keyFilters.add(k);
+					filters[1] = from.get(item.getOption().getColumnName()).in(keyFilters);
+				}
+				c.where(cb.and(filters));
+				
+				 List<?> data = s.createQuery(c).list();
 				 for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 					Object object = (Object) iterator.next();
 					if (object instanceof Patrol){
@@ -931,11 +975,18 @@ public class SummaryItemLabelProvider {
 		if (sort) sortItems(results);
 		return results;
 	}
+	
+	
 	private List<ListItem> getName(SamplingUnitAttributeGroupBy item){
-		SamplingUnitAttribute su = (SamplingUnitAttribute) s.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.eq("keyId", item.getAttributeKey())) //$NON-NLS-1$
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.uniqueResult();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<SamplingUnitAttribute> c = cb.createQuery(SamplingUnitAttribute.class);
+		Root<SamplingUnitAttribute> from = c.from(SamplingUnitAttribute.class);
+		c.where(cb.and(
+				cb.equal(from.get("keyId"), item.getAttributeKey()), //$NON-NLS-1$
+				from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$ //$NON-NLS-2$
+				));
+		SamplingUnitAttribute su = s.createQuery(c).uniqueResult();
+		
 		if (su == null){
 			logger.warning(MessageFormat.format("Sampling unit attribute not found {0}.", item.getAttributeKey())); //$NON-NLS-1$
 			return null;
@@ -958,7 +1009,6 @@ public class SummaryItemLabelProvider {
 		}
 		return allItems;
 	}
-	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(SamplingUnitGroupBy item){
 		String[] items = item.getRawItems();
 		List<ListItem> listItems = new ArrayList<ListItem>();
@@ -981,10 +1031,11 @@ public class SummaryItemLabelProvider {
 			if (sdFilter.getKey() == null) return null;
 			
 			//all sampling units for associated design
-			List<Object[]> sus = s.createQuery("SELECT su.uuid, su.id FROM SamplingUnit su WHERE su.surveyDesign.keyId = :keyId") //$NON-NLS-1$
-					.setString("keyId", sdFilter.getKey()) //$NON-NLS-1$
+			List<?> sus = s.createQuery("SELECT su.uuid, su.id FROM SamplingUnit su WHERE su.surveyDesign.keyId = :keyId") //$NON-NLS-1$
+					.setParameter("keyId", sdFilter.getKey()) //$NON-NLS-1$
 					.list();
-			for (Object[] su : sus){
+			for (Object suRow : sus){
+				Object[] su = (Object[])suRow;
 				listItems.add(new ListItem((UUID)su[0], (String)su[1]));
 			}
 			sortItems(listItems);
@@ -994,7 +1045,6 @@ public class SummaryItemLabelProvider {
 		return listItems;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(SurveyIdGroupBy item){
 		String[] items = item.getRawItems();
 		List<ListItem> allItems = new ArrayList<ListItem>();
@@ -1010,19 +1060,20 @@ public class SummaryItemLabelProvider {
 			}
 		}else{
 			//load all surveys
-			Query surveyQuery = null;
+			Query<?> surveyQuery = null;
 			if (sdFilter.getKey() != null){
 				String hql = "SELECT s.uuid, s.id From Survey s where s.surveyDesign.keyId = :sd and s.surveyDesign.conservationArea.uuid in (:uuids)"; //$NON-NLS-1$
 				surveyQuery = s.createQuery(hql)
-						.setString("sd", sdFilter.getKey()) //$NON-NLS-1$
+						.setParameter("sd", sdFilter.getKey()) //$NON-NLS-1$
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			}else{
 				String hql = "SELECT s.uuid, s.id From Survey s where s.surveyDesign.conservationArea.uuid in (:uuids)"; //$NON-NLS-1$
 				surveyQuery = s.createQuery(hql)
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 			}
-			List<Object[]> ms = surveyQuery.list();
-			for(Object[] m : ms){
+			List<?> ms = surveyQuery.list();
+			for(Object mRow : ms){
+				Object[] m = (Object[])mRow;
 				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
 			}
 			sortItems(allItems);

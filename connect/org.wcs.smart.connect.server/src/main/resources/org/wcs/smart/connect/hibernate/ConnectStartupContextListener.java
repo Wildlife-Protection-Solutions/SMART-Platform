@@ -60,10 +60,9 @@ import org.geotools.referencing.factory.DeferredAuthorityFactory;
 import org.geotools.referencing.operation.DefaultMathTransformFactory;
 import org.geotools.util.WeakCollectionCleaner;
 import org.hibernate.SessionFactory;
-import org.hibernate.annotations.common.reflection.MetadataProviderInjector;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 import org.opengis.referencing.AuthorityFactory;
 import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
@@ -291,11 +290,6 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		logger.info("Configuring Hibernate SessionFactory"); //$NON-NLS-1$
 		Configuration config = new Configuration();
 		
-		// Perform some test to verify that the current database is Postgres.
-	    // Replace the metadata provider with our custom metadata provider.
-	    MetadataProviderInjector reflectionManager = (MetadataProviderInjector)config.getReflectionManager();
-	    reflectionManager.setMetadataProvider(new UUIDTypeInsertingMetadataProvider(reflectionManager.getMetadataProvider()));
-		
 		config.configure("org/wcs/smart/connect/hibernate/hibernate.cfg.xml"); //$NON-NLS-1$
 		
 		//Add you annotated model classes here
@@ -325,7 +319,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 			throw new RuntimeException("Could not read hibernate class files.", ex); //$NON-NLS-1$
 		}
 
-		ServiceRegistry service = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();
+		ServiceRegistry service = new StandardServiceRegistryBuilder().applySettings(config.getProperties()).build();
 		SessionFactory sf = config.buildSessionFactory(service);
 		
 		sce.getServletContext().setAttribute(HibernateManager.CONTEXT_KEY, sf);

@@ -32,8 +32,11 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
@@ -130,7 +133,6 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		return suColumnMap.get(missionAttributeKey);
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected void populateAdditionalMissionTable(Connection c, Session session,
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,
@@ -168,9 +170,12 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		List<MissionAttribute> attributes = new ArrayList<MissionAttribute>();
 		if (sdFilter == null || sdFilter.getKey() == null){
 			//get all mission properties
-			attributes = session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.in ("conservationArea.uuid" ,caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.list();
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<MissionAttribute> query = cb.createQuery(MissionAttribute.class);
+			Root<MissionAttribute> from = query.from(MissionAttribute.class);
+			query.where(from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$ //$NON-NLS-2$
+			attributes = session.createQuery(query).list();
+			
 		}else{
 			//get mission properties for survey design only
 			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
@@ -242,7 +247,6 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void populateAdditionalSuTable(Connection c, Session session,
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,
@@ -279,9 +283,11 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		//TODO: add support of CCAA queries
 		List<SamplingUnitAttribute> attributes = new ArrayList<SamplingUnitAttribute>();
 		if (sdFilter == null || sdFilter.getKey() == null){
-			attributes = session.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.in ("conservationArea.uuid" ,caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.list();
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<SamplingUnitAttribute> query = cb.createQuery(SamplingUnitAttribute.class);
+			Root<SamplingUnitAttribute> from = query.from(SamplingUnitAttribute.class);
+			query.where(from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$ //$NON-NLS-2$
+			attributes = session.createQuery(query).list();
 		}else{
 			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
 			for (SurveyDesignSamplingUnitAttribute susd : sd.getSamplingUnitAttributes()){

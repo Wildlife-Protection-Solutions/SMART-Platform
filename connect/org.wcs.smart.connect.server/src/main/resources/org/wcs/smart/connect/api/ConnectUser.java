@@ -46,8 +46,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.mindrot.jbcrypt.BCrypt;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.apache.BcryptCredentialHandler;
@@ -59,6 +57,7 @@ import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 
 /**
@@ -281,10 +280,7 @@ public class ConnectUser extends HttpServlet {
 		s.beginTransaction();
 		try{
 			//ensure username is unique
-			Long userCnt = (Long)s.createCriteria(SmartUser.class)
-				.add(Restrictions.eq("username", suser.getUsername())) //$NON-NLS-1$
-				.setProjection(Projections.rowCount()).uniqueResult();
-			
+			Long userCnt = QueryFactory.buildCountQuery(s, SmartUser.class, new Object[] {"username", suser.getUsername()}); //$NON-NLS-1$
 			if (userCnt > 0){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, 
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotUnique", SmartUtils.getRequestLocale(request)), suser.getUsername())); //$NON-NLS-1$
@@ -352,10 +348,7 @@ public class ConnectUser extends HttpServlet {
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			toUpdate = (SmartUser)s.createCriteria(SmartUser.class)
-					.add(Restrictions.eq("username", olduser)) //$NON-NLS-1$
-					.list().get(0);
-			
+			toUpdate = QueryFactory.buildQuery(s, SmartUser.class, "username", olduser).uniqueResult(); //$NON-NLS-1$
 			if (newUser.getPassword() != null){
 				if (!BCrypt.checkpw(newUser.getOldpassword(), toUpdate.getPassword())){
 					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.InvalidPassword", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
@@ -369,11 +362,7 @@ public class ConnectUser extends HttpServlet {
 			
 			if (newUser.getUsername() != null && !olduser.equals(newUser.getUsername())){
 				//ensure new username is unique
-				Long userCnt = (Long)s.createCriteria(SmartUser.class)
-						.add(Restrictions.eq("username", newUser.getUsername())) //$NON-NLS-1$
-						.setProjection(Projections.rowCount())
-						.list().get(0);
-			
+				Long userCnt = QueryFactory.buildCountQuery(s, SmartUser.class, new Object[] {"username", newUser.getUsername()}); //$NON-NLS-1$
 				if (userCnt > 0){
 					throw new SmartConnectException(
 							Response.Status.BAD_REQUEST,
@@ -435,11 +424,8 @@ public class ConnectUser extends HttpServlet {
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			user = (SmartUser)s.createCriteria(SmartUser.class)
-					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-					.list().get(0);
+			user = QueryFactory.buildQuery(s, SmartUser.class, "username", username).uniqueResult(); //$NON-NLS-1$
 
-			
 			SmartUserRole role = new SmartUserRole();
 			role.setUsername(username);
 			role.setRole(HibernateManager.getSmartRole(s));
@@ -478,13 +464,8 @@ public class ConnectUser extends HttpServlet {
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			user = (SmartUser)s.createCriteria(SmartUser.class)
-					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-					.list().get(0);
-
+			user = QueryFactory.buildQuery(s, SmartUser.class, "username", username).uniqueResult(); //$NON-NLS-1$
 			List<SmartUserRole> roles = HibernateManager.getUserRoles(s, user.getUsername());
-			
-			
 			for(SmartUserRole role: roles){
 				s.delete(role);
 				s.flush();

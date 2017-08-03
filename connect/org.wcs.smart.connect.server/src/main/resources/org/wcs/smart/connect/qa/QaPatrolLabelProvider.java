@@ -24,7 +24,6 @@ package org.wcs.smart.connect.qa;
 import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.patrol.ILabelProvider;
 
 /**

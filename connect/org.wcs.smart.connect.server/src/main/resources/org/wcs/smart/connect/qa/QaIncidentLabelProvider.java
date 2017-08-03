@@ -25,7 +25,6 @@ import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.qa.incident.ILabelProvider;
-import org.wcs.smart.qa.model.IQaDataProvider;
 
 /**
  * Image provider for incident data providers

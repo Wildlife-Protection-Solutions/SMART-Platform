@@ -28,15 +28,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.core.Response;
 
-import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
 import org.hibernate.Session;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
@@ -152,79 +150,84 @@ public class AlertFilter {
 		this.sortAscending = sortAscending;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Alert> getAlerts(Session s, String username){
-		Criteria c = s.createCriteria(Alert.class,"alerts"); //$NON-NLS-1$
-		c.createAlias("alerts.ca", "ca");  //$NON-NLS-1$ //$NON-NLS-2$
-		c.setFetchMode("alerts.ca", FetchMode.JOIN); //$NON-NLS-1$
 		
-		
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<Alert> c = cb.createQuery(Alert.class);
+		Root<Alert> from = c.from(Alert.class);
+
 		List<Alert> emptyList = new ArrayList<Alert>();
 		
+		List<Predicate> andFilters = new ArrayList<Predicate>();
 		//level
 		if(levelFilter != null){
-			Disjunction or = Restrictions.disjunction();
 			if(levelFilter.size() == 0){
 				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
+			List<Predicate> orFilters = new ArrayList<Predicate>();
 			for(int x=0; x < levelFilter.size();x++){
-				or.add(Restrictions.eq("level", levelFilter.get(x))); //$NON-NLS-1$
+				orFilters.add(cb.equal(from.get("level"), levelFilter.get(x))); //$NON-NLS-1$
 			}
-			c.add(or);
+			andFilters.add(cb.or(orFilters.toArray(new Predicate[orFilters.size()])));
 		}
 		
 		//type
 		if(typeUuidFilter != null){
-			Disjunction or = Restrictions.disjunction();
+			List<Predicate> orFilters = new ArrayList<Predicate>();
 			for(int x=0; x < typeUuidFilter.size();x++){
-				or.add(Restrictions.eq("typeUuid", typeUuidFilter.get(x) )); //$NON-NLS-1$
+				orFilters.add(cb.equal(from.get("typeUuid"), typeUuidFilter.get(x) )); //$NON-NLS-1$
 			}
-			or.add(Restrictions.eq("typeUuid", AlertType.NULL_TYPE)); //$NON-NLS-1$
-			c.add(or);
+			orFilters.add(cb.equal(from.get("typeUuid"), AlertType.NULL_TYPE)); //$NON-NLS-1$
+			andFilters.add(cb.or(orFilters.toArray(new Predicate[orFilters.size()])));
 		}
 		
 		//status
 		if(statusFilter != null){
-			Disjunction or = Restrictions.disjunction();
 			if(statusFilter.size() == 0){
 				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
+			List<Predicate> orFilters = new ArrayList<Predicate>();
 			for(int x=0; x < statusFilter.size();x++){
-				or.add(Restrictions.eq("status", statusFilter.get(x) )); //$NON-NLS-1$
+				orFilters.add(cb.equal(from.get("status"), statusFilter.get(x) )); //$NON-NLS-1$
 			}
-			c.add(or);
+			andFilters.add(cb.or(orFilters.toArray(new Predicate[orFilters.size()])));
 		}
 	
 		
 		if(caUuidFilter != null){
-			Disjunction or = Restrictions.disjunction();
 			if(caUuidFilter.size() == 0){
 				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
+			List<Predicate> orFilters = new ArrayList<Predicate>();
 			for(int x=0; x < caUuidFilter.size();x++){
 				if(SecurityManager.INSTANCE.canAccess(s, username , AlertAction.VIEW_ALERTS_KEY, caUuidFilter.get(x)) ){;
-					or.add(Restrictions.eq("ca.uuid", caUuidFilter.get(x) )); //$NON-NLS-1$
+					orFilters.add(cb.equal(from.get("ca").get("uuid"), caUuidFilter.get(x) )); //$NON-NLS-1$ //$NON-NLS-2$
+
 				}
 			}
-			c.add(or);
+			andFilters.add(cb.or(orFilters.toArray(new Predicate[orFilters.size()])));
 		}
 
 		if(startDateFilter != null){
-			c.add(Restrictions.gt("date", startDateFilter)); //$NON-NLS-1$
+			andFilters.add(cb.greaterThan(from.get("date"), startDateFilter)); //$NON-NLS-1$
 		}
 		if(endDateFilter != null){
-			c.add(Restrictions.lt("date", endDateFilter)); //$NON-NLS-1$
+			andFilters.add(cb.lessThan(from.get("date"), endDateFilter)); //$NON-NLS-1$
 		}
 		if(textSearchFilter != null){
-			c.add(Restrictions.or(Restrictions.ilike("userGeneratedId", textSearchFilter, MatchMode.ANYWHERE), Restrictions.ilike("description", textSearchFilter, MatchMode.ANYWHERE)) ); //$NON-NLS-1$ //$NON-NLS-2$
+			andFilters.add( cb.or(
+					cb.like(cb.upper(from.get("userGeneratedId")), "%" + textSearchFilter.toUpperCase() + "%"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					cb.like(cb.upper(from.get("description")), "%" + textSearchFilter.toUpperCase() + "%"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-
+		c.where(cb.and(andFilters.toArray(new Predicate[andFilters.size()])));
 		if(sortAscending){
-			c.addOrder(Order.asc(sortBy));
+			c.orderBy(cb.asc(from.get(sortBy))); 
+//			c.addOrder(Order.asc(sortBy));
 		}else{
-			c.addOrder(Order.desc(sortBy));
+			c.orderBy(cb.desc(from.get(sortBy))); 
+//			c.addOrder(Order.desc(sortBy));
 		}
-		return (List<Alert>)c.list();
+		return s.createQuery(c).list();
 	}
 	
 }

@@ -47,10 +47,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.hibernate.Criteria;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -64,6 +61,7 @@ import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.UuidUtils;
@@ -123,7 +121,6 @@ public class SharedLinkApi extends HttpServlet{
 	 * 
 	 * @return Returns a JSON array of SharedLink objects
 	 */
-	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
     public List<SharedLink> getSharedLinks(){
@@ -134,17 +131,14 @@ public class SharedLinkApi extends HttpServlet{
 			
 			if(SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY)){
 				//only return links from the CA(s) they are CaAdmin users for
-				Criteria c = s.createCriteria(SmartUserAction.class)
-						.add(Restrictions.eq("username", request.getUserPrincipal().getName() )) //$NON-NLS-1$
-						.add(Restrictions.eq("action", CaAdminAccountAction.KEY)); //$NON-NLS-1$
-				
-				List<SmartUserAction> list = (ArrayList<SmartUserAction>)c.list();
-		
+				List<SmartUserAction> list = QueryFactory.buildQuery(s, SmartUserAction.class, 
+						new Object[] {"username", request.getUserPrincipal().getName()}, //$NON-NLS-1$
+						new Object[] {"action", CaAdminAccountAction.KEY}).list(); //$NON-NLS-1$
 				List<SharedLink> links = new ArrayList<SharedLink>();
 				for(SmartUserAction a : list ){//loop over each CA they are admins of
 					UUID caUuid = a.getResource();
 					
-					List<SharedLink> temp = s.createCriteria(SharedLink.class).add(Restrictions.eq("conservationArea", caUuid)).list();  //$NON-NLS-1$
+					List<SharedLink> temp = QueryFactory.buildQuery(s, SharedLink.class, "conservationArea", caUuid).list();  //$NON-NLS-1$
 					for(SharedLink t : temp){//add all shared links from this CA
 						links.add(t);
 						t.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, t.getOwnerUuid())).getUsername() );
@@ -155,7 +149,7 @@ public class SharedLinkApi extends HttpServlet{
 			if(!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)) {
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}else{
-				List<SharedLink> links =  s.createCriteria(SharedLink.class).list();
+				List<SharedLink> links =  QueryFactory.buildQuery(s, SharedLink.class).list();
 				for (SharedLink l : links){
 					l.setOwnerUsername( ((SmartUser)s.get(SmartUser.class, l.getOwnerUuid())).getUsername() );
 				}
@@ -269,8 +263,7 @@ public class SharedLinkApi extends HttpServlet{
 	private void deleteExpiredLinks(Session s) {
 		//clean up any old, expired links. Seems like a vaguely reasonable place to do it: 
 		//the more you create, the more often the clean-up occurs.
-		SQLQuery q = s.createSQLQuery("DELETE FROM connect.shared_links WHERE expires_at < now()"); //$NON-NLS-1$
-		q.executeUpdate();
+		s.createNativeQuery("DELETE FROM connect.shared_links WHERE expires_at < now()").executeUpdate(); //$NON-NLS-1$
 	}
 	
 	

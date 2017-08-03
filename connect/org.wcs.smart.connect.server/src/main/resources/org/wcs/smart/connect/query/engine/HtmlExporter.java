@@ -21,10 +21,6 @@
  */
 package org.wcs.smart.connect.query.engine;
 
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
@@ -45,8 +41,6 @@ import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
-import au.com.bytecode.opencsv.CSVWriter;
-
 /**
  * Query HTML Exporter.  Exports table result sets, memory result sets,
  * and summary result sets.
@@ -54,6 +48,7 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @author Emily/Jeff
  *
  */
+@SuppressWarnings("nls")
 public class HtmlExporter {
 	
 	public static final String FORMAT_KEY = "html"; //$NON-NLS-1$
@@ -90,6 +85,7 @@ public class HtmlExporter {
 	 * @param results
 	 * @param session
 	 */
+	
 	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws Exception{
 		try{
 			htmlText.append("<table>");

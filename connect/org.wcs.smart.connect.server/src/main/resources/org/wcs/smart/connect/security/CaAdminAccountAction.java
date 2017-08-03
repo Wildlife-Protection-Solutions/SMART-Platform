@@ -27,9 +27,9 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Ca Administrator actions.  This action allows a user to do most things associated with a particular CA: view/edit/delete alerts, view/run reports & queries, 
@@ -63,13 +63,12 @@ public class CaAdminAccountAction implements ISmartConnectAction{
 		return new String[]{};
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
 		List<ResourceOption> ops = new ArrayList<ResourceOption>();
 		ResourceOption ro;
 		
-		List<ConservationAreaInfo> info = s.createCriteria(ConservationAreaInfo.class).list();
+		List<ConservationAreaInfo> info = QueryFactory.buildQuery(s, ConservationAreaInfo.class).list();
 		for (ConservationAreaInfo i : info){
 			ro = new ResourceOption(i.getLabel(), i.getUuid());
 			ops.add(ro);
@@ -85,9 +84,7 @@ public class CaAdminAccountAction implements ISmartConnectAction{
 	@Override
 	public String getResourceName(UUID resource, Session s, Locale l) {
 		if (resource == null) return Messages.getString("CaAction.AllCas", l); //$NON-NLS-1$
-		ConservationAreaInfo info = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
-				.add(Restrictions.eq("uuid", resource)) //$NON-NLS-1$
-				.uniqueResult();
+		ConservationAreaInfo info = s.get(ConservationAreaInfo.class, resource);
 		if (info == null) return resource.toString();
 		return info.getLabel();
 	}

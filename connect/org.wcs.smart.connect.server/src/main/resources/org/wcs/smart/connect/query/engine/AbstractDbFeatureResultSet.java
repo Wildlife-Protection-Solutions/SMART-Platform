@@ -221,8 +221,8 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 		}
 		if (!hasSortColumns) {
 			// add the sort columns
-			session.createSQLQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
-			session.createSQLQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 			hasSortColumns = true;
 		}
 
@@ -238,7 +238,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET sortKeyTxt = " + sortColumn); //$NON-NLS-1$
-			session.createSQLQuery(sql.toString()).executeUpdate();
+			session.createNativeQuery(sql.toString()).executeUpdate();
 			
 		}else{
 			
@@ -257,7 +257,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createSQLQuery(sql.toString()).executeUpdate();
+				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case TEXT:
 			case DATE:
@@ -273,7 +273,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createSQLQuery(sql.toString()).executeUpdate();
+				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case LIST:
 				sql = new StringBuilder();
@@ -290,7 +290,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createSQLQuery(sql.toString()).executeUpdate();
+				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case TREE:
 				sql = new StringBuilder();
@@ -306,7 +306,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
-				session.createSQLQuery(sql.toString()).executeUpdate();
+				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			}
 		}

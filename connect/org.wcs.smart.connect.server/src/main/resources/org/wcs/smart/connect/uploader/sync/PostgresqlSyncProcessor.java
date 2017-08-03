@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
@@ -64,7 +64,6 @@ public class PostgresqlSyncProcessor {
 		this.item = item;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void processFile() throws Exception{
 		
 		//create a temporary location to unzip file
@@ -113,10 +112,11 @@ public class PostgresqlSyncProcessor {
 			
 			
 			//check plugin version
-			Query q = session.createSQLQuery("SELECT plugin_id, version FROM connect.connect_plugin_version"); //$NON-NLS-1$
-			List<Object[]> plugins = q.list();
+			NativeQuery<?> q = session.createNativeQuery("SELECT plugin_id, version FROM connect.connect_plugin_version"); //$NON-NLS-1$
+			List<?> plugins = q.list();
 			HashMap<String, String> dbVersions = new HashMap<String, String>();
-			for (Object[] plugin : plugins){
+			for (Object pluginRow : plugins){
+				Object[] plugin = (Object[]) pluginRow;
 				dbVersions.put((String)plugin[0], (String)plugin[1]);
 			}
 			
