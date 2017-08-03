@@ -56,8 +56,7 @@ public class PatrolXmlExtraDataContribution implements IXmlExtraDataContribution
 	
 	@Override
 	public List<ExtraDataType> exportData(Patrol patrol) throws Exception {
-		Session session = HibernateManager.openSession();
-		try {
+		try (Session session = HibernateManager.openSession()){
 			List<ExtraDataType> result = new ArrayList<ExtraDataType>();
 			//motivation intelligence
 			List<Intelligence> motivationList = IntelligenceHibernateManager.getMotivatedIntelligences(patrol, session);
@@ -76,8 +75,6 @@ public class PatrolXmlExtraDataContribution implements IXmlExtraDataContribution
 			}
 
 			return result;
-		} finally {
-			session.close();
 		}
 	}
 

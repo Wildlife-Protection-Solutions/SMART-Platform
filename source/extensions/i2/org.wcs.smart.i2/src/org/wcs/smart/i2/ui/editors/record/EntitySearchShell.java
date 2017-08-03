@@ -171,12 +171,9 @@ public class EntitySearchShell extends SmartShellDialog {
 		
 			
 			List<IntelSearchResultItem> entities = new ArrayList<IntelSearchResultItem>();
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				BasicEntitySearch search = new BasicEntitySearch(searchText[0], 50);
 				entities.addAll(search.doSearch(s, new NullProgressMonitor()).getResults());
-			}finally{
-				s.close();
 			}
 			Display.getDefault().syncExec(() -> {
 				if (tblEntityList.getTable().isDisposed()) return;

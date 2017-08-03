@@ -36,6 +36,7 @@ import org.wcs.smart.cybertracker.survey.export.SurveyCTExportDialog;
  * @author elitvin
  * @since 4.0.0
  */
+@SuppressWarnings("restriction")
 public class SurveyCTExportHandler {
 
 	@Execute

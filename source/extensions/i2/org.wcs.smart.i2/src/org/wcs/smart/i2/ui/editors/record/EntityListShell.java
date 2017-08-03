@@ -46,8 +46,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -222,11 +222,8 @@ public class EntityListShell extends SmartShellDialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntityType> types = new ArrayList<IntelEntityType>();
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
-			}finally{
-				s.close();
 			}
 			Display.getDefault().syncExec(() -> {if (!tblEntityTypeList.getTable().isDisposed()){tblEntityTypeList.setInput(types);}});
 			return Status.OK_STATUS;
@@ -236,16 +233,12 @@ public class EntityListShell extends SmartShellDialog {
 	
 	private Job loadEntitiesJob = new Job("load entities"){ //$NON-NLS-1$
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntity> entities = new ArrayList<IntelEntity>();
 			if (lastSelectedType != null){
-				Session s = HibernateManager.openSession();
-				try{
-					entities.addAll(s.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("entityType", lastSelectedType)) //$NON-NLS-1$
-					.list());
+				try(Session s = HibernateManager.openSession()){					
+					entities.addAll( QueryFactory.buildQuery(s,IntelEntity.class, "entityType", lastSelectedType).getResultList()); //$NON-NLS-1$
 					for (IntelEntity e : entities){
 						e.getIdAttributeAsText();
 						if (e.getPrimaryAttachment() != null){
@@ -256,8 +249,6 @@ public class EntityListShell extends SmartShellDialog {
 							}
 						}
 					}
-				}finally{
-					s.close();
 				}
 			}
 			Display.getDefault().syncExec(() -> {if (!tblEntityList.getTable().isDisposed()){tblEntityList.setInput(entities);}});

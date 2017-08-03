@@ -34,7 +34,7 @@ import org.hibernate.Session;
  */
 public interface ICaCreateHandler {
 	
-	public static final String EXTENSION_ID = "org.wcs.smart.ca.create"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.caCreate"; //$NON-NLS-1$
 
 	/**
 	 * Throw an exception if you cannot delete and the delete

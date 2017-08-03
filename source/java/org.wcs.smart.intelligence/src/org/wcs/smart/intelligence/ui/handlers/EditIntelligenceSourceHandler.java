@@ -32,6 +32,7 @@ import org.wcs.smart.intelligence.ui.source.SourceTypesPropertyDialog;
  * @author elitvin
  * @since 3.0.0
  */
+@SuppressWarnings("restriction")
 public class EditIntelligenceSourceHandler {
 
 	@Execute

@@ -158,8 +158,8 @@ public class AttributeMappingWizardPage extends WizardPage{
 			}
 			HashMap<IntelEntityTypeAttributeGroup, List<IntelAttribute>> attributes = new HashMap<>();
 			String name;
-			Session s = HibernateManager.openSession();
-			try{
+
+			try(Session s = HibernateManager.openSession()){
 				IntelEntityType type = (IntelEntityType) s.get(IntelEntityType.class, ((ImportEntityWizard)getWizard()).getImportConfiguration().getType().getUuid());
 				lastType = type;
 				name = type.getName();
@@ -170,10 +170,7 @@ public class AttributeMappingWizardPage extends WizardPage{
 						attributes.put(a.getAttributeGroup(), as);
 					}
 					as.add(a.getAttribute());
-				}); 
-				
-			}finally{
-				s.close();
+				});	
 			}
 			
 			//create the column headers from the csv file

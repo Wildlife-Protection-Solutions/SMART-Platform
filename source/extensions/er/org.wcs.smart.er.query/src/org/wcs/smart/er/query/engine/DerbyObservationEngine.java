@@ -33,7 +33,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -114,7 +115,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyObservationEngine_progress1, 80);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyObservationEngine_progress1, 80);
 				SurveyDesignFilter filter = null;
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
@@ -133,13 +134,12 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, 
-							true, true, new SubProgressMonitor(monitor, 50));
+							true, true, progress.split(50));
 					
-					if (monitor.isCanceled()) return;
-					populateTemporaryTableExtra(c, session, query, new SubProgressMonitor(monitor, 20));
+					populateTemporaryTableExtra(c, session, query, progress.split(20));
 					
-					if (monitor.isCanceled()) return;
-					monitor.subTask(Messages.DerbyObservationEngine_progress2);
+					progress.checkCanceled();
+					progress.subTask(Messages.DerbyObservationEngine_progress2);
 					//setting result size
 					
 					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)) { //$NON-NLS-1$
@@ -154,10 +154,10 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 							result.setWpCount(rs.getInt(1));
 						}
 					}
-					monitor.worked(5);
+					progress.worked(5);
 					
 					//lookup for columns that have data
-					monitor.subTask(Messages.DerbyObservationEngine_FindDataColumns);
+					progress.subTask(Messages.DerbyObservationEngine_FindDataColumns);
 					HashSet<String> dataColumns = new HashSet<>();
 					
 					//looking for attributes that have at least one value
@@ -183,16 +183,16 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 							dataColumns.add(key);
 						}
 					}
-					
+					progress.checkCanceled();
 					result.setDataColumns(dataColumns);
-					monitor.worked(5);
-					
+					progress.worked(5);
+				}catch(OperationCanceledException ex) {
+					return;
 				}catch(Exception ex){
 					throw new SQLException(ex);
 				} finally {
 					if (filterer != null) filterer.dropTemporaryTables(c);
-					if (monitor.isCanceled()) dropTables(c);
-					monitor.done();
+					if (progress.isCanceled()) dropTables(c);
 					c.setAutoCommit(false);
 				}
 			}
@@ -297,8 +297,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, 
 			SurveyObservationQuery query, IProgressMonitor monitor) throws SQLException {
-
-		monitor.beginTask(Messages.DerbyObservationEngine_ProgressAdditionalData, 9);
+		SubMonitor progress = SubMonitor.convert(monitor,  Messages.DerbyObservationEngine_ProgressAdditionalData, 10);
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -312,23 +311,17 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		}
-		
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
+		progress.subTask(Messages.DerbyObservationEngine_progress3);
 
-		monitor.subTask(Messages.DerbyObservationEngine_progress3);
 		populateTemporaryTableNameObjExtra("surveydesign_uuid", "surveydesign_name", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
 		
 		//ca information
 		if (SmartDB.isMultipleAnalysis()){
 			//ca id and names are only used for cross-ca analysis
-			monitor.subTask(Messages.DerbyObservationEngine_progress4);
+			progress.subTask(Messages.DerbyObservationEngine_progress4);
 			StringBuilder sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
@@ -347,13 +340,10 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
 		//add observers
-		monitor.subTask(Messages.DerbyObservationEngine_populatingObserverProgress);
+		progress.subTask(Messages.DerbyObservationEngine_populatingObserverProgress);
 		StringBuilder sqla = new StringBuilder();
 		sqla.append("SELECT DISTINCT ob_observer_uuid FROM "); //$NON-NLS-1$
 		sqla.append(queryDataTable);
@@ -382,13 +372,10 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			}
 			observerSt.executeBatch();
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
 		//mission leader
-		monitor.subTask(Messages.DerbyObservationEngine_ProgressLeader);
+		progress.subTask(Messages.DerbyObservationEngine_ProgressLeader);
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionMember.class));
@@ -433,20 +420,14 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			}
 			leaderSt.executeBatch();
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()) {
-			return;
-		}
-				
+		progress.split(1);
+		
 		//populating categories
-		monitor.subTask(Messages.DerbyObservationEngine_progress5);
+		progress.subTask(Messages.DerbyObservationEngine_progress5);
 		populateTemporaryTableCategory(c, session);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 
-		monitor.subTask(Messages.DerbyObservationEngine_progress6);
+		progress.subTask(Messages.DerbyObservationEngine_progress6);
 		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
@@ -454,12 +435,9 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			}
 		};
 		populateAdditionalWpoaTable(c, session, listData);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
-		monitor.subTask(Messages.DerbyObservationEngine_progress7);
+		progress.subTask(Messages.DerbyObservationEngine_progress7);
 		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
@@ -467,13 +445,10 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			}
 		};
 		populateAdditionalWpoaTable(c, session, treeData);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
 		//mission_list
-		monitor.subTask(Messages.DerbyObservationEngine_progress6);
+		progress.subTask(Messages.DerbyObservationEngine_progress6);
 		WpoaLinkedData mListData = new WpoaLinkedData("_mlist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
@@ -481,13 +456,10 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			}
 		};
 		populateAdditionalMissionTable(c, session, mListData);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
 		//sampling unit list
-		monitor.subTask(Messages.DerbyObservationEngine_SuAttributeProgress);
+		progress.subTask(Messages.DerbyObservationEngine_SuAttributeProgress);
 		WpoaLinkedData suListData = new WpoaLinkedData("_sulist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
@@ -495,13 +467,8 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			}
 		};
 		populateAdditionalSuTable(c, session, suListData);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
-		
-		monitor.done();
 	}
 
 	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {

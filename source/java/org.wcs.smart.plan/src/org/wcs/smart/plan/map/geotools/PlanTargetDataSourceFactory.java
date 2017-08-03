@@ -127,8 +127,7 @@ public class PlanTargetDataSourceFactory implements DataStoreFactorySpi{
 		Job j = new Job("load plan"){ //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				try{
+				try (Session session = HibernateManager.openSession()){
 					Plan temp = (Plan)session.load(Plan.class, UuidUtils.stringToUuid(planUuid));
 					if (temp == null ){
 						throw new IOException(Messages.PlanTargetDataSourceFactory_PlanNotFound);
@@ -158,8 +157,6 @@ public class PlanTargetDataSourceFactory implements DataStoreFactorySpi{
 					plan[0] = temp;
 				}catch (Exception ex){
 					 SmartPlanPlugIn.log(ex.getMessage(), ex);
-				}finally{
-					session.close();
 				}
 				return Status.OK_STATUS;
 			}};

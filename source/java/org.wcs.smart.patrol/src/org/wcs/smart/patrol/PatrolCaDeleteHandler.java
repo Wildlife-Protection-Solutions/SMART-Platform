@@ -22,7 +22,7 @@
 package org.wcs.smart.patrol;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -60,19 +60,19 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 	}
 
 	private void deletePatrols(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Patrol where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Patrol where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deleteMandates(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from PatrolMandate where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from PatrolMandate where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deletePatrolTypes(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from PatrolType where id.conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from PatrolType where id.conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -83,7 +83,7 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 	}
 	
 	private void deletePatrolTeams(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Team where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Team where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}

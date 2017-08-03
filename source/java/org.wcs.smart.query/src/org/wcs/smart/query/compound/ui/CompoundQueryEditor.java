@@ -87,18 +87,18 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 		protected IStatus run(IProgressMonitor monitor) {
 			QueryEditorInput input = (QueryEditorInput) CompoundQueryEditor.this.getEditorInput();
 
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				Query squery = (CompoundMapQuery) QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
-				query = new QueryProxy(squery);
-				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
-			}catch (Exception ex){
-				QueryPlugIn.displayLog(MessageFormat.format(
-						Messages.QueryResultsEditor_Error_CouldNotParse, new Object[]{ input.getName()})+ ex.getLocalizedMessage(), ex);
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					Query squery = (CompoundMapQuery) QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
+					query = new QueryProxy(squery);
+					query.getQueryType().getDropItemFactory().generateDropItems(query, session);
+				}catch (Exception ex){
+					QueryPlugIn.displayLog(MessageFormat.format(
+							Messages.QueryResultsEditor_Error_CouldNotParse, new Object[]{ input.getName()})+ ex.getLocalizedMessage(), ex);
+				}finally{
+					session.getTransaction().rollback();
+				}
 			}
 			return Status.OK_STATUS;
 		}};
@@ -186,31 +186,27 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try {
-					//this must be done in the display thread; but the session needs to be in it's own thread
-					//to not conflict with other operations
-					getSite().getShell().getDisplay().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								getQueryProxy().getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
-							} catch (Exception ex) {
-								QueryPlugIn.log(ex.getMessage(), ex);
+				try(Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try {
+						//this must be done in the display thread; but the session needs to be in it's own thread
+						//to not conflict with other operations
+						getSite().getShell().getDisplay().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									getQueryProxy().getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
+								} catch (Exception ex) {
+									QueryPlugIn.log(ex.getMessage(), ex);
+								}
 							}
-						}
-					});
-					
-				} catch (Exception ex) {
-					QueryPlugIn.log(ex.getMessage(), ex);
-				} finally {
-					try{
-						session.getTransaction().rollback();
-					}catch(Exception ex){
+						});
+						
+					} catch (Exception ex) {
 						QueryPlugIn.log(ex.getMessage(), ex);
+					} finally {
+						session.getTransaction().rollback();
 					}
-					session.close();
 				}
 				return Status.OK_STATUS;
 			}
@@ -412,10 +408,11 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 		page1.setFocus();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter.isAssignableFrom(Map.class)) {
-			return getMap();
+			return (T)getMap();
 		}
 		return super.getAdapter(adapter);
 	}

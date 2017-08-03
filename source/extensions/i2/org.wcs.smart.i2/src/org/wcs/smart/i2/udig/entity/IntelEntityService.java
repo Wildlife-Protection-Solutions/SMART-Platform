@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
@@ -77,16 +77,14 @@ public class IntelEntityService extends IService {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			String recordName = Messages.IntelEntityService_DefaultName;
-			Session s = HibernateManager.openSession();
-			try{
+			
+			try(Session s = HibernateManager.openSession()){
 				IntelEntity r = (IntelEntity) s.get(IntelEntity.class, entityUuid);
 				if (r != null){
 					recordName = r.getIdAttributeAsText(Locale.getDefault());
 				}
 			}catch (Exception e){	
 				Logger.getLogger(IntelEntityService.class.getName()).log(Level.WARNING, e.getMessage(), e);
-			}finally{
-				s.close();
 			}
 			try{
 				for (IGeoResource lresource : resources(monitor)){
@@ -182,17 +180,12 @@ public class IntelEntityService extends IService {
 
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
-								Session s = HibernateManager.openSession();
-								try{
-									
-									Query q = s.createQuery("SELECT count(*) FROM IntelEntity e join e.entityType t join t.attributes ta join ta.id.attribute a WHERE a.type = :type and e.uuid = :uuid"); //$NON-NLS-1$
+								try(Session s = HibernateManager.openSession()){
+									Query<?> q = s.createQuery("SELECT count(*) FROM IntelEntity e join e.entityType t join t.attributes ta join ta.id.attribute a WHERE a.type = :type and e.uuid = :uuid"); //$NON-NLS-1$
 									q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
 									q.setParameter("uuid", entityUuid); //$NON-NLS-1$
 									Long cnt = (Long) q.uniqueResult();
-									hasPosition = cnt > 0;
-									
-								}finally{
-									s.close();
+									hasPosition = cnt > 0;	
 								}
 								
 								return org.eclipse.core.runtime.Status.OK_STATUS;

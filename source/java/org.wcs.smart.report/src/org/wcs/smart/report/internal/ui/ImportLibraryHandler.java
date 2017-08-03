@@ -55,6 +55,7 @@ import org.wcs.smart.util.ZipUtil;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class ImportLibraryHandler {
 
 	private static final String ERROR_MSG = Messages.ImportLibraryHandler_ErrorImportingLibrary;

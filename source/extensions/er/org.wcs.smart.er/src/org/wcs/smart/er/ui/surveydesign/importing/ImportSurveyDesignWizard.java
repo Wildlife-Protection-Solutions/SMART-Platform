@@ -39,7 +39,6 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -53,6 +52,7 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.xml.SurveyDesignFromXmlConverter;
 import org.wcs.smart.er.xml.SurveyDesignXMLManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -122,9 +122,10 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 	}
 
 	private boolean designExists(Session session, String keyId) {
-		List<?> existingDesigns = session.createCriteria(SurveyDesign.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))  //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", keyId)).list(); //$NON-NLS-1$
+		List<SurveyDesign> existingDesigns = QueryFactory.buildQuery(session, SurveyDesign.class,
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"keyId", keyId}).getResultList(); //$NON-NLS-1$
+						
 		return (existingDesigns.size() > 0);
 	}
 	
@@ -138,20 +139,20 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 					monitor.beginTask(Messages.SurveyDesignImportHandler_0, designs.size());
 					SurveyDesign lastDesign = null;
 					int successCount = 0;
-					Session session = HibernateManager.openSession();
-					SurveyDesignImporter importer = new SurveyDesignImporter();
-					monitor.subTask(Messages.SurveyDesignImportHandler_3);
-					for(SurveyDesign source : designs){
-						source = (SurveyDesign)session.merge(source);
-						SurveyDesign sd = importer.importSurveyDesign(session, source);
-						List<SamplingUnit> newSamplingUnits = SurveyDesignImporter.importSamplingUnits(session, source, sd);
-						if (processSave(session, sd, newSamplingUnits)) {
-							lastDesign = sd;
-							successCount++;
+					try(Session session = HibernateManager.openSession()){
+						SurveyDesignImporter importer = new SurveyDesignImporter();
+						monitor.subTask(Messages.SurveyDesignImportHandler_3);
+						for(SurveyDesign source : designs){
+							source = (SurveyDesign)session.merge(source);
+							SurveyDesign sd = importer.importSurveyDesign(session, source);
+							List<SamplingUnit> newSamplingUnits = SurveyDesignImporter.importSamplingUnits(session, source, sd);
+							if (processSave(session, sd, newSamplingUnits)) {
+								lastDesign = sd;
+								successCount++;
+							}
+							monitor.worked(1);
 						}
-						monitor.worked(1);
 					}
-					session.close();
 					reportResult(successCount, designs.size(), lastDesign);
 				}
 			});
@@ -172,33 +173,33 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 					org.wcs.smart.er.xml.model.surveydesign.SurveyDesign xmlsd = null;
 					SurveyDesign lastDesign = null;
 					int successCount = 0;
-					Session session = HibernateManager.openSession();
-					for(File file : importFiles){
-						try{
-							monitor.subTask(Messages.SurveyDesignImportHandler_1);
-							try(FileInputStream fin = new FileInputStream(file)){
-								xmlsd = SurveyDesignXMLManager.readDataModel(fin);
+					try(Session session = HibernateManager.openSession()){
+						for(File file : importFiles){
+							try{
+								monitor.subTask(Messages.SurveyDesignImportHandler_1);
+								try(FileInputStream fin = new FileInputStream(file)){
+									xmlsd = SurveyDesignXMLManager.readDataModel(fin);
+								}
+							}catch (Exception ex){
+								EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.SurveyDesignImportHandler_2, file.getName()), ex);
+								continue; //continue importing other files
 							}
-						}catch (Exception ex){
-							EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.SurveyDesignImportHandler_2, file.getName()), ex);
-							continue; //continue importing other files
-						}
-
-						try{
-							monitor.subTask(Messages.SurveyDesignImportHandler_3);
-							SurveyDesign sd = SurveyDesignFromXmlConverter.fromXml(xmlsd, session);
-							List<SamplingUnit> units =  SurveyDesignFromXmlConverter.getSamplingUnits(xmlsd, sd, session);
-							if (processSave(session, sd, units)) {
-								lastDesign = sd;
-								successCount++;
+	
+							try{
+								monitor.subTask(Messages.SurveyDesignImportHandler_3);
+								SurveyDesign sd = SurveyDesignFromXmlConverter.fromXml(xmlsd, session);
+								List<SamplingUnit> units =  SurveyDesignFromXmlConverter.getSamplingUnits(xmlsd, sd, session);
+								if (processSave(session, sd, units)) {
+									lastDesign = sd;
+									successCount++;
+								}
+								monitor.worked(1);
+							}catch(ParseException parse){
+								EcologicalRecordsPlugIn.displayLog(parse.getMessage(), parse);
+								continue; //continue importing other files;
 							}
-							monitor.worked(1);
-						}catch(ParseException parse){
-							EcologicalRecordsPlugIn.displayLog(parse.getMessage(), parse);
-							continue; //continue importing other files;
-						}
-					}//end loop of each xml file.
-					session.close();
+						}//end loop of each xml file.
+					}
 					reportResult(successCount, importFiles.size(), lastDesign);
 				}
 			});

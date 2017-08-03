@@ -746,7 +746,7 @@
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.intelligence.model.Intelligence"
             supportsCcaa="false">
@@ -903,7 +903,7 @@
       </dataSet>
    </extension>
    <extension
-         point="org.wcs.smart.report.birt.maplayer">
+         point="org.wcs.smart.birt.map.maplayer">
       <MapLayer
             maplayer="org.wcs.smart.intelligence.report.IntelligencePointsMapLayer">
       </MapLayer>
@@ -941,14 +941,14 @@
       </action>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.intelligence.IntelligenceCaCloner"
             id="org.wcs.smart.intelligence.IntelligenceCaCloner">
       </templateCloner>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="intelligence">
       </FilestoreDirectory>
@@ -961,26 +961,26 @@
       </toc>
    </extension>
    <extension
-         point="org.wcs.smart.ca.deleteAdvisor">
+         point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
             advisor="org.wcs.smart.intelligence.SourceDeleteAdvisor"
             class="org.wcs.smart.intelligence.model.IntelligenceSource">
       </DeleteAdvisor>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.intelligence.upgrade.IntelligenceDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension
-         point="org.wcs.smart.ca.create">
+         point="org.wcs.smart.caCreate">
       <handler
             class="org.wcs.smart.intelligence.CaCreateHandler">
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.ca.export">
+         point="org.wcs.smart.caExport">
       <exporter
             caExporter="org.wcs.smart.intelligence.InformantDataExporter">
       </exporter>
@@ -992,13 +992,13 @@
       </contributor>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.intelligence.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.handler">
+         point="org.wcs.smart.changeLogEventHandler">
       <handler
             class="org.wcs.smart.intelligence.ReplicationEventHandler">
       </handler>

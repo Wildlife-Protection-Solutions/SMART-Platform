@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.report.birt.maplayer" name="Map Layer" schema="schema/org.wcs.smart.report.birt.maplayer.exsd"/>
+   <extension-point id="maplayer" name="Map Layer" schema="schema/org.wcs.smart.report.birt.maplayer.exsd"/>
 <extension
          point="org.eclipse.birt.report.model.reportItemModel">
       <reportItem

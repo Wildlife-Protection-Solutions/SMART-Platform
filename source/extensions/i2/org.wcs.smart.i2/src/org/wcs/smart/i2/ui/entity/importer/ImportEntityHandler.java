@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ImportEntityHandler {
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context){

@@ -46,6 +46,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DownloadChangeLogHandler {
 
 	@Execute

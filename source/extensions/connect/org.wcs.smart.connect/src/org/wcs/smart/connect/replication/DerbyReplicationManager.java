@@ -307,11 +307,8 @@ public enum DerbyReplicationManager {
 								isEnabled[0] = false;
 								return Status.OK_STATUS;
 							}
-							Session s = HibernateManager.openSession();
-							try{
+							try(Session s = HibernateManager.openSession()){
 								isEnabled[0] = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);
-							}finally{
-								s.close();
 							}
 							return Status.OK_STATUS;
 						}

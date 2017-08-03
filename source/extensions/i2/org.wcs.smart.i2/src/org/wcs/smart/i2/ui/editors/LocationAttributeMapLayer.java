@@ -129,7 +129,7 @@ public class LocationAttributeMapLayer {
 		Filter f = ff.equals(ff.property("id"), ff.literal(UuidUtils.uuidToString(attribute.getUuid()))); //$NON-NLS-1$
 
 		try {
-			SimpleFeatureStore store = (SimpleFeatureStore) attributeResource
+			SimpleFeatureStore store = attributeResource
 					.resolve(SimpleFeatureStore.class, null);
 
 			if (number1 == null || number2 == null) {

@@ -30,11 +30,10 @@ import java.util.UUID;
 import javax.transaction.Synchronization;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.engine.transaction.spi.LocalStatus;
+import org.hibernate.query.Query;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -51,6 +50,7 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * DataModel listener for removing data model items from configured models.
@@ -89,9 +89,6 @@ public class DataModelItemListener implements IDataModelItemListener {
 					//we need any empty transaction that returns true for wasCommitted
 					//for the itercceptor
 					Transaction tx = new Transaction(){
-
-						@Override
-						public boolean isInitiator() { return false; }
 						@Override
 						public void begin() { }
 						@Override
@@ -99,22 +96,19 @@ public class DataModelItemListener implements IDataModelItemListener {
 						@Override
 						public void rollback() { }
 						@Override
-						public LocalStatus getLocalStatus() { return null; }
-						@Override
 						public boolean isActive() { return false; }
-						@Override
-						public boolean isParticipating() { return false; }
-						@Override
-						public boolean wasCommitted() { return true; }
-						@Override
-						public boolean wasRolledBack() { return false; }
 						@Override
 						public void registerSynchronization( Synchronization synchronization) throws HibernateException { }
 						@Override
 						public void setTimeout(int seconds) { }
 						@Override
 						public int getTimeout() { return 0; }
-						
+						@Override
+						public boolean getRollbackOnly() { return false; }
+						@Override
+						public void setRollbackOnly() { }
+						@Override
+						public TransactionStatus getStatus() {return null;}
 					};
 					interceptor.afterTransactionCompletion(tx);
 				}
@@ -141,7 +135,7 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * @param c
 	 */
 	private void categoryDelete(Session currentSession, Category c, AssociatedImageInterceptor interceptor ){
-		List<CmNode> nodes = currentSession.createCriteria(CmNode.class).add(Restrictions.eq("category", c)).list(); //$NON-NLS-1$
+		List<CmNode> nodes = QueryFactory.buildQuery(currentSession, CmNode.class, "category", c).list(); //$NON-NLS-1$
 		for (CmNode n : nodes){
 			if (n.getParent() == null){
 				currentSession.delete(n);	
@@ -173,8 +167,8 @@ public class DataModelItemListener implements IDataModelItemListener {
 	}
 	
 	private void deleteAttribute(Session currentSession, Category category, Attribute attribute, AssociatedImageInterceptor interceptor){
-		Query q = currentSession.createQuery(
-				"FROM CmAttribute a WHERE a.attribute = :attribute and a.node.category = :category"); //$NON-NLS-1$
+		Query<CmAttribute> q = currentSession.createQuery(
+				"FROM CmAttribute a WHERE a.attribute = :attribute and a.node.category = :category", CmAttribute.class); //$NON-NLS-1$
 		q.setParameter("attribute", attribute); //$NON-NLS-1$
 		q.setParameter("category", category); //$NON-NLS-1$
 		
@@ -198,8 +192,7 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * @param li
 	 */
 	private void listItemDelete(Session currentSession, AttributeListItem li, AssociatedImageInterceptor interceptor){
-		List<CmAttributeListItem> items = currentSession.createCriteria(CmAttributeListItem.class)
-			.add(Restrictions.eq("listItem", li)).list(); //$NON-NLS-1$
+		List<CmAttributeListItem> items = QueryFactory.buildQuery(currentSession, CmAttributeListItem.class, "listItem", li).list(); //$NON-NLS-1$
 		for (CmAttributeListItem item: items){
 			currentSession.delete(item);
 			interceptor.onDelete(item, item.getUuid(),null, null, null);
@@ -213,8 +206,7 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * @param node
 	 */
 	private void treeNodeDelete(Session currentSession, AttributeTreeNode node, AssociatedImageInterceptor interceptor){
-		List<CmAttributeTreeNode> nodes = currentSession.createCriteria(CmAttributeTreeNode.class)
-			.add(Restrictions.eq("dmTreeNode", node)).list(); //$NON-NLS-1$
+		List<CmAttributeTreeNode> nodes = QueryFactory.buildQuery(currentSession, CmAttributeTreeNode.class, "dmTreeNode", node).list(); //$NON-NLS-1$
 		for (CmAttributeTreeNode tnode : nodes){
 			currentSession.delete(tnode);
 			interceptor.onDelete(tnode, tnode.getUuid(), null, null, null);
@@ -228,7 +220,7 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * @param uuidValue
 	 */
 	private void deleteAttributeOption(Session currentSession, UUID uuidValue){
-		Query q = currentSession.createQuery("From CmAttributeOption WHERE uuidValue = :uuid"); //$NON-NLS-1$
+		Query<CmAttributeOption> q = currentSession.createQuery("From CmAttributeOption WHERE uuidValue = :uuid"); //$NON-NLS-1$
 		q.setParameter("uuid", uuidValue); //$NON-NLS-1$
 		List<CmAttributeOption> ops = q.list();
 		for (CmAttributeOption o : ops){
@@ -263,7 +255,7 @@ public class DataModelItemListener implements IDataModelItemListener {
 	}
 	
 	private void addAttributeToCategory(Session currentSession, Category category, Attribute attribute){
-		List<CmNode> nodes = currentSession.createCriteria(CmNode.class).add(Restrictions.eq("category", category)).list(); //$NON-NLS-1$
+		List<CmNode> nodes = QueryFactory.buildQuery(currentSession, CmNode.class, "category", category).list(); //$NON-NLS-1$
 		Set<ConfigurableModel> changedModels = new HashSet<>();
 		for (CmNode node : nodes){
 			//ensure attribute doesn't already exist
@@ -333,7 +325,7 @@ public class DataModelItemListener implements IDataModelItemListener {
 	}
 	
 	private void addAttributeListItem(Session currentSession, AttributeListItem dmListItem) {
-		List<CmAttributeConfig> cfgList = currentSession.createCriteria(CmAttributeConfig.class).add(Restrictions.eq("attribute", dmListItem.getAttribute())).list(); //$NON-NLS-1$
+		List<CmAttributeConfig> cfgList = QueryFactory.buildQuery(currentSession, CmAttributeConfig.class, "attribute", dmListItem.getAttribute()).list(); //$NON-NLS-1$
 		for (CmAttributeConfig c : cfgList) {
 			CmAttributeListItem cmListItem = new CmAttributeListItem();
 			cmListItem.setConfig(c);

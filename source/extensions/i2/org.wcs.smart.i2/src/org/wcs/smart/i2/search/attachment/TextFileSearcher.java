@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.FileCharSequence;
 import org.wcs.smart.i2.internal.Messages;
@@ -47,7 +48,7 @@ public class TextFileSearcher implements IFileSearcher {
 	@Override
 	public void search(String searchString, ISmartAttachment attachment,
 			IMatchCollector collector, IProgressMonitor monitor) {
-		monitor.beginTask(MessageFormat.format(Messages.TextFileSearcher_TaskName,  attachment.getFilename()), 1);
+		SubMonitor progress = SubMonitor.convert(monitor, MessageFormat.format(Messages.TextFileSearcher_TaskName,  attachment.getFilename()), 1);
 	
 		Matcher fMatcher = Pattern.compile(searchString, Pattern.CASE_INSENSITIVE).matcher(searchString);
 		
@@ -85,7 +86,7 @@ public class TextFileSearcher implements IFileSearcher {
 						}
 					}
 					if (k++ == 20) {
-						if (monitor.isCanceled()){
+						if (progress.isCanceled()){
 							throw new OperationCanceledException(Messages.TextFileSearcher_CanceledMsg);
 						}
 						k= 0;
@@ -96,8 +97,6 @@ public class TextFileSearcher implements IFileSearcher {
 		}catch (Exception ex){
 			SearchResult errorResult = new SearchResult(attachment, Messages.TextFileSearcher_ErrorItemName, ex.getMessage(), 0,0);
 			collector.addMatch(errorResult);
-		}finally{
-			monitor.done();
 		}
 	}
 

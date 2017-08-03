@@ -31,10 +31,9 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Type;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Named key item with a description
@@ -79,7 +78,6 @@ public class NamedDescriptionKeyItem extends NamedKeyItem {
 //	// This fails;
 //	 @OneToMany(fetch = FetchType.LAZY)
 //	 @JoinColumn(name="element_uuid", referencedColumnName="desc_uuid")
-	@SuppressWarnings("unchecked")
 	@Transient
 	/**
 	 * If not previously loaded, this runs a database
@@ -90,8 +88,7 @@ public class NamedDescriptionKeyItem extends NamedKeyItem {
 	public Set<DescriptionLabel> getDescriptions(Session session) {
 		if (this.descriptions == null) {
 			this.descriptions = new HashSet<DescriptionLabel>();
-			Criteria c = session.createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", descuuid)); //$NON-NLS-1$
-			descriptions.addAll(c.list());
+			descriptions.addAll(QueryFactory.buildQuery(session, DescriptionLabel.class, "id.element", descuuid).list()); //$NON-NLS-1$
 		}
 		return this.descriptions;
 	}

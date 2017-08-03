@@ -56,27 +56,26 @@ public class AddCyberTrackerJob extends Job {
 		//AND only admin users should be able to install plugins in the first place.
 		//so we shouldn't need to do this
 		//HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
-		Session session = HibernateManager.openSession();	
-				
-		try{
-			session.beginTransaction();
-			installPlugin(session);
-			session.getTransaction().commit();
-		}catch(final Throwable e){
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
-			//TODO: figure out what to do here, because this will install the new 
-			//version anyways
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					CyberTrackerPlugIn.displayError(Messages.AddCyberTrackerJob_ErrorTitle, Messages.AddCyberTrackerJob_ErrorMsg + e.getLocalizedMessage(), e);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();	
+			try{
+			
+				installPlugin(session);
+				session.getTransaction().commit();
+			}catch(final Throwable e){
+				if (session.getTransaction().isActive()){
+					session.getTransaction().rollback();
 				}
-			});
-			return new Status(Status.ERROR, CyberTrackerPlugIn.PLUGIN_ID, "Error installing cybertracker plugin", e); //$NON-NLS-1$
-		}finally{
-			session.close();
+				//TODO: figure out what to do here, because this will install the new 
+				//version anyways
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						CyberTrackerPlugIn.displayError(Messages.AddCyberTrackerJob_ErrorTitle, Messages.AddCyberTrackerJob_ErrorMsg + e.getLocalizedMessage(), e);
+					}
+				});
+				return new Status(Status.ERROR, CyberTrackerPlugIn.PLUGIN_ID, "Error installing cybertracker plugin", e); //$NON-NLS-1$
+			}
 		}
 		
 		monitor.worked(1);
@@ -113,7 +112,7 @@ public class AddCyberTrackerJob extends Job {
 		if (tables[0]) {
 			//old table present, need to drop it
 			String dropSql = "DROP TABLE smart.cybertracker_properties"; //$NON-NLS-1$
-			session.createSQLQuery(dropSql).executeUpdate();
+			session.createNativeQuery(dropSql).executeUpdate();
 		}
 								
 		if (!tables[1]) {
@@ -130,14 +129,14 @@ public class AddCyberTrackerJob extends Job {
 					"REFERENCES smart.conservation_area(UUID) "+ //$NON-NLS-1$
 					"ON UPDATE RESTRICT "+ //$NON-NLS-1$
 					"ON DELETE CASCADE"; //$NON-NLS-1$
-			session.createSQLQuery(createSql).executeUpdate();
-			session.createSQLQuery(alterSql).executeUpdate();
+			session.createNativeQuery(createSql).executeUpdate();
+			session.createNativeQuery(alterSql).executeUpdate();
 				
 						
-			session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to data_entry").executeUpdate(); //$NON-NLS-1$
-			session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to manager").executeUpdate(); //$NON-NLS-1$
-			session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to analyst").executeUpdate(); //$NON-NLS-1$
-			session.createSQLQuery("GRANT SELECT ON smart.ct_properties_option to login").executeUpdate(); //$NON-NLS-1$
+			session.createNativeQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to data_entry").executeUpdate(); //$NON-NLS-1$
+			session.createNativeQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to manager").executeUpdate(); //$NON-NLS-1$
+			session.createNativeQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to analyst").executeUpdate(); //$NON-NLS-1$
+			session.createNativeQuery("GRANT SELECT ON smart.ct_properties_option to login").executeUpdate(); //$NON-NLS-1$
 		}
 		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_3_0, session);
 	}

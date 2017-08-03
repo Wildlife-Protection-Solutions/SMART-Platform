@@ -25,7 +25,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
-import org.hibernate.SQLQuery;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.connect.i18n.Messages;
@@ -52,7 +52,6 @@ public class PostgresqlMetadataCreator {
 	 * @param revision the revision number to write to the metadata packagee
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public static void generateMetadata(Session session, 
 			UUID caUuid, Path file, long revision, WorkItem item) throws Exception{
 		
@@ -68,10 +67,11 @@ public class PostgresqlMetadataCreator {
 		metadata.setServerRevision(revision);
 		
 		//plugin versions
-		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM connect.ca_plugin_version WHERE ca_uuid = :ca "); //$NON-NLS-1$
+		NativeQuery<?> q = session.createNativeQuery("SELECT version, plugin_id FROM connect.ca_plugin_version WHERE ca_uuid = :ca "); //$NON-NLS-1$
 		q.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		List<Object[]> plugins = q.list();
-		for (Object[] version : plugins){
+		List<?> plugins = q.list();
+		for (Object versionRow : plugins){
+			Object[] version = (Object[])versionRow;
 			metadata.setPluginVersion((String)version[1], (String)version[0]);
 		}
 		

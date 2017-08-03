@@ -54,7 +54,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IResolve;
@@ -281,21 +281,20 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!ret ){
 			return;
 		}
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			// remove existing areas
-			String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
-			Query q = session.createQuery(query);
-			q.setParameter("ca", currentCa); //$NON-NLS-1$
-			q.setParameter("type", areatype); //$NON-NLS-1$
-			q.executeUpdate();
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_DeletingArea, ex);
-		}finally{
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				// remove existing areas
+				String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
+				Query<?> q = session.createQuery(query);
+				q.setParameter("ca", currentCa); //$NON-NLS-1$
+				q.setParameter("type", areatype); //$NON-NLS-1$
+				q.executeUpdate();
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_DeletingArea, ex);
+			}
 		}
 		
 		// reset feature counts
@@ -418,82 +417,81 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 					
 					
 					boolean modifiedWarnings = false;
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					// add new areas
-					try {
-						//remove existing areas
-						String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
-						Query q =s.createQuery(query);
-						q.setParameter("ca", currentCa); //$NON-NLS-1$
-						q.setParameter("type", areatype); //$NON-NLS-1$
-						q.executeUpdate();
-
-						MathTransform transform = CRS.findMathTransform(collection.getSchema().getCoordinateReferenceSystem(), Area.AREA_CRS);
-						//find feature store
-						WKBWriter writer = new WKBWriter();
-						
-						try(SimpleFeatureIterator it = collection.features()) {
-							int cnt = 0;
-							List<String> currentKeys = new ArrayList<String>();
-							while (it.hasNext()) {
-								SimpleFeature sf = it.next();
-								if (monitor.isCanceled()) {
-									s.getTransaction().rollback();
-									break;
-								}
-
-								Area area = new Area();
-								area.setType(areatype);
-								area.setConservationArea(AreaPropertyPage.this.currentCa);
-								
-								String defaultName = areatype + "_" + cnt++; //$NON-NLS-1$
-								HashMap<Language, AttributeDescriptor> data = idDialog[0].getSelectedFields();
-								for(Entry<Language, AttributeDescriptor> entry : data.entrySet()){
-									String id = sf.getAttribute(entry.getValue().getName()).toString();
-									if (id.length() > Area.NAME_MAX_LENGTH){
-										id = id.substring(0, Area.NAME_MAX_LENGTH);
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						// add new areas
+						try {
+							//remove existing areas
+							String query = "delete from Area where conservationArea = :ca and type =:type"; //$NON-NLS-1$
+							Query<?> q =s.createQuery(query);
+							q.setParameter("ca", currentCa); //$NON-NLS-1$
+							q.setParameter("type", areatype); //$NON-NLS-1$
+							q.executeUpdate();
+	
+							MathTransform transform = CRS.findMathTransform(collection.getSchema().getCoordinateReferenceSystem(), Area.AREA_CRS);
+							//find feature store
+							WKBWriter writer = new WKBWriter();
+							
+							try(SimpleFeatureIterator it = collection.features()) {
+								int cnt = 0;
+								List<String> currentKeys = new ArrayList<String>();
+								while (it.hasNext()) {
+									SimpleFeature sf = it.next();
+									if (monitor.isCanceled()) {
+										s.getTransaction().rollback();
+										break;
 									}
-									area.updateName(entry.getKey(), id);
-									if (entry.getKey().isDefault()){
-										defaultName = id;
+	
+									Area area = new Area();
+									area.setType(areatype);
+									area.setConservationArea(AreaPropertyPage.this.currentCa);
+									
+									String defaultName = areatype + "_" + cnt++; //$NON-NLS-1$
+									HashMap<Language, AttributeDescriptor> data = idDialog[0].getSelectedFields();
+									for(Entry<Language, AttributeDescriptor> entry : data.entrySet()){
+										String id = sf.getAttribute(entry.getValue().getName()).toString();
+										if (id.length() > Area.NAME_MAX_LENGTH){
+											id = id.substring(0, Area.NAME_MAX_LENGTH);
+										}
+										area.updateName(entry.getKey(), id);
+										if (entry.getKey().isDefault()){
+											defaultName = id;
+										}
 									}
-								}
-								
-								/// - geometry; ensure they are valid and simple
-								Geometry geom = (Geometry) sf.getDefaultGeometry();
-								geom = JTS.transform(geom, transform);
-								if (!geom.isValid() || !geom.isSimple()){
-									//try buffer 0 to clean up and check again
-									modifiedWarnings = true;
-									geom = geom.buffer(0);
+									
+									/// - geometry; ensure they are valid and simple
+									Geometry geom = (Geometry) sf.getDefaultGeometry();
+									geom = JTS.transform(geom, transform);
 									if (!geom.isValid() || !geom.isSimple()){
-										//still not valid and not simple so error out
-										throw new Exception(MessageFormat.format(Messages.AreaPropertyPage_InvalidGeometry, defaultName));
+										//try buffer 0 to clean up and check again
+										modifiedWarnings = true;
+										geom = geom.buffer(0);
+										if (!geom.isValid() || !geom.isSimple()){
+											//still not valid and not simple so error out
+											throw new Exception(MessageFormat.format(Messages.AreaPropertyPage_InvalidGeometry, defaultName));
+										}
 									}
+									area.setGeom(writer.write(geom));
+									
+									String key = Area.generateKey(defaultName, Messages.Area_EmptyKey, currentKeys);
+									area.setKeyId(key);
+									currentKeys.add(key);
+									
+									//save
+									s.save(area);
 								}
-								area.setGeom(writer.write(geom));
-								
-								String key = Area.generateKey(defaultName, Messages.Area_EmptyKey, currentKeys);
-								area.setKeyId(key);
-								currentKeys.add(key);
-								
-								//save
-								s.save(area);
+	
+								s.getTransaction().commit();
 							}
-
-							s.getTransaction().commit();
+	
+						} catch (Exception e) {
+							try{
+								s.getTransaction().rollback();
+							}catch (Exception ex){
+								SmartPlugIn.log("", ex); //$NON-NLS-1$
+							}
+							throw(new InvocationTargetException(e, e.getMessage()));
 						}
-
-					} catch (Exception e) {
-						try{
-							s.getTransaction().rollback();
-						}catch (Exception ex){
-							SmartPlugIn.log("", ex); //$NON-NLS-1$
-						}
-						throw(new InvocationTargetException(e, e.getMessage()));
-					}finally{
-						s.close();
 					}
 
 					if (monitor.isCanceled()) {

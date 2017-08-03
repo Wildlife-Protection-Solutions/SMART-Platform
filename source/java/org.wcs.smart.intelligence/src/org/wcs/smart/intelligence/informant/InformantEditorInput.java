@@ -32,9 +32,9 @@ import org.eclipse.ui.IPersistableElement;
  * @since 3.2.0
  */
 public class InformantEditorInput implements IEditorInput {
-	@SuppressWarnings("rawtypes")
+	
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
 

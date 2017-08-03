@@ -79,11 +79,8 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 		center.setLayout(new GridLayout(1, false));
 		
 		content.createControl(center);
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			content.init(surveyDesign, s);
-		}finally{
-			s.close();
 		}
 		content.addChangeListener(changeListener);
 		

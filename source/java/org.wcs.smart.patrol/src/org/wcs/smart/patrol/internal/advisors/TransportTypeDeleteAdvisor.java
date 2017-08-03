@@ -24,9 +24,8 @@ package org.wcs.smart.patrol.internal.advisors;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -44,8 +43,7 @@ public class TransportTypeDeleteAdvisor implements IDeleteAdvisor {
 		if (!(object instanceof PatrolTransportType)){
 			return Messages.TransportTypeDeleteAdvisor_InvalidObjectType;
 		}
-		
-		Long cnt = (Long) session.createCriteria(PatrolLeg.class).add(Restrictions.eq("type", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		Long cnt = QueryFactory.buildCountQuery(session, PatrolLeg.class,new Object[] {"type", object}); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}else{

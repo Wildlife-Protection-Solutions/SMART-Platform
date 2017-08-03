@@ -150,8 +150,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		/* get mandates */
 		List<PatrolMandate> ms =  null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			teams = new ArrayList<Team>(PatrolHibernateManager.getTeams(currentCa, s));
 			Collections.sort(teams, new Comparator<Team>(){
 
@@ -179,8 +178,6 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingMandates, ex);
 			return;
-		}finally{
-			s.close();
 		}
 		
 		ms.add(0, null);
@@ -358,8 +355,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!MessageDialog.openConfirm(getShell(), Messages.TeamPropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.TeamPropertyPage_ConfirmDeleteMessage, new Object[]{team.getName()}))){
 			return;
 		}
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			if (team.getUuid() != null){
 				if (DeleteManager.canDelete(team, session)){
 					teams.remove(team);
@@ -372,8 +368,6 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.TeamPropertyPage_Error_DeletingTeam + "\n\n" + ex.getLocalizedMessage(), new Object[]{team.getName()}), ex); //$NON-NLS-1$
-		}finally{
-			session.close();
 		}
 		tableViewer.refresh();
 	}
@@ -383,52 +377,50 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		
-		try {
-			for (Team t : toDelete){
-				s.delete(t);
-			}
-			s.flush();
-			
-			List<Team> siblings = new ArrayList<Team>(teams.size());
-			siblings.addAll(teams);
-			
-			for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
-				Team team = (Team) iterator.next();
-				siblings.remove(team);
-				String error = DataModelManager.INSTANCE.validateKey(team.getKeyId(), siblings);
-				siblings.add(team);
-				if (error != null){
-					throw new Exception(error);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				for (Team t : toDelete){
+					s.delete(t);
 				}
-				s.saveOrUpdate(team);
+				s.flush();
 				
-				for (org.wcs.smart.ca.DescriptionLabel lbl : team.getDescriptions(s)) {
-					if (lbl.getElementuuid() == null) {
-						if (team.getDescUuid() == null) {
-							UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) s, lbl);
-							team.setDescUuid(uuid);
-							s.saveOrUpdate(team);
-						}
-						lbl.setElement(team.getDescUuid());
+				List<Team> siblings = new ArrayList<Team>(teams.size());
+				siblings.addAll(teams);
+				
+				for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
+					Team team = (Team) iterator.next();
+					siblings.remove(team);
+					String error = DataModelManager.INSTANCE.validateKey(team.getKeyId(), siblings);
+					siblings.add(team);
+					if (error != null){
+						throw new Exception(error);
 					}
-					s.saveOrUpdate(lbl);
+					s.saveOrUpdate(team);
+					
+					for (org.wcs.smart.ca.DescriptionLabel lbl : team.getDescriptions(s)) {
+						if (lbl.getElementuuid() == null) {
+							if (team.getDescUuid() == null) {
+								UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) s, lbl);
+								team.setDescUuid(uuid);
+								s.saveOrUpdate(team);
+							}
+							lbl.setElement(team.getDescUuid());
+						}
+						s.saveOrUpdate(lbl);
+					}
+					
 				}
-				
+				s.getTransaction().commit();
+				toDelete.clear();
+				setChangesMade(false);
+				return true;
+			} catch (Exception ex) {
+				s.getTransaction().rollback();
+				SmartPatrolPlugIn.displayLog(
+						Messages.TeamPropertyPage_Error_SavingUpdates  + "\n" + ex.getLocalizedMessage(), //$NON-NLS-1$
+						ex);
 			}
-			s.getTransaction().commit();
-			toDelete.clear();
-			setChangesMade(false);
-			return true;
-		} catch (Exception ex) {
-			s.getTransaction().rollback();
-			SmartPatrolPlugIn.displayLog(
-					Messages.TeamPropertyPage_Error_SavingUpdates  + "\n" + ex.getLocalizedMessage(), //$NON-NLS-1$
-					ex);
-		}finally{
-			s.close();
 		}
 		return false;
 	}
@@ -441,12 +433,10 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		team.updateName(currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamName);
 		team.setName(team.findName(currentCa.getDefaultLanguage()));	
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			team.updateDescription(s, currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamDescription);
 			team.setDescription(team.findDescriptionNull(s, currentCa.getDefaultLanguage()));
-		}finally{
-			s.close();
 		}
 		
 		teams.add(team);
@@ -485,11 +475,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			return x;
 		}else if (type == Column.DESCRIPTION){
 			String x = null;
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				x = mnd.findDescriptionNull(s, languageViewer.getCurrentSelection());
-			}finally{
-				s.close();
 			}
 			
 			if (x == null){
@@ -568,11 +555,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		}else if (type == Column.DESCRIPTION){
 			if (!findValue(type, mnd).equals((String)newValue)){
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					mnd.updateDescription(s, languageViewer.getCurrentSelection(), (String)newValue);
-				}finally{
-					s.close();
 				}
 				setChangesMade(true);
 			}

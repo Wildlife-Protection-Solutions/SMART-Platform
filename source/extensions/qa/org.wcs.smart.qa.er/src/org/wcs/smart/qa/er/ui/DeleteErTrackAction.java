@@ -29,10 +29,8 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
@@ -69,45 +67,44 @@ public class DeleteErTrackAction implements IQaAction {
 		Set<Mission> modified = new HashSet<>();
 		List<QaError> deleted = new ArrayList<>();
 		List<MissionTrack> trackDeleted = new ArrayList<>();
-		Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try{
-			s.beginTransaction();
-			
-			for (QaError item : toProcess){
-				boolean found = false;
-				for (MissionTrack track : trackDeleted){
-					if (track.getUuid().equals(item.getSourceId())){
-						//previously deleted
+		try(Session s = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			try{
+				s.beginTransaction();
+				
+				for (QaError item : toProcess){
+					boolean found = false;
+					for (MissionTrack track : trackDeleted){
+						if (track.getUuid().equals(item.getSourceId())){
+							//previously deleted
+							deleted.add(item);
+							found = true;
+						}
+					}
+					if (found) continue;
+					
+					MissionTrack t = (MissionTrack)s.get(MissionTrack.class, item.getSourceId());
+					
+					if (t == null){
+						item.setStatus(QaError.Status.DELETED);
+						item.setFixMessage(Messages.DeleteErTrackAction_DeleteErrorNotFound);
+					}else{
 						deleted.add(item);
-						found = true;
+						trackDeleted.add(t);
+						modified.add(t.getMissionDay().getMission());
+						//lazy load for events
+						t.getMissionDay().getMission().equals(null);
+						
+						t.getMissionDay().getTracks().remove(t);
+						t.setMissionDay(null);
+						s.delete(t);
 					}
 				}
-				if (found) continue;
-				
-				MissionTrack t = (MissionTrack)s.get(MissionTrack.class, item.getSourceId());
-				
-				if (t == null){
-					item.setStatus(QaError.Status.DELETED);
-					item.setFixMessage(Messages.DeleteErTrackAction_DeleteErrorNotFound);
-				}else{
-					deleted.add(item);
-					trackDeleted.add(t);
-					modified.add(t.getMissionDay().getMission());
-					//lazy load for events
-					t.getMissionDay().getMission().equals(null);
-					
-					t.getMissionDay().getTracks().remove(t);
-					t.setMissionDay(null);
-					s.delete(t);
-				}
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				QaPlugIn.displayLog(Messages.DeleteErTrackAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
+				return false;
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			QaPlugIn.displayLog(Messages.DeleteErTrackAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
-			return false;
-		}finally{
-			s.close();
 		}
 
 		for (QaError item : deleted){
@@ -135,9 +132,5 @@ public class DeleteErTrackAction implements IQaAction {
 	public String getName(Locale l) {
 		return Messages.DeleteErTrackAction_ActionName;
 	}
-	
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON);
-	}
+
 }

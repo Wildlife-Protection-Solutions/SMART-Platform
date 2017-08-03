@@ -52,9 +52,9 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
@@ -398,15 +398,14 @@ public class EntityList extends Composite {
 		} 
 		//check duplicates
 		if (add){
-			try{
-				Session s = HibernateManager.openSession();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
 				try{
-					s.beginTransaction();
-					IntelEntityRelationship existing = (IntelEntityRelationship) s.createCriteria(IntelEntityRelationship.class)
-							.add(Restrictions.eq("sourceEntity", newRelationship.getSourceEntity())) //$NON-NLS-1$
-							.add(Restrictions.eq("targetEntity", newRelationship.getTargetEntity())) //$NON-NLS-1$
-							.add(Restrictions.eq("relationshipType", newRelationship.getRelationshipType())) //$NON-NLS-1$
-							.uniqueResult();
+					IntelEntityRelationship existing =  QueryFactory.buildQuery(s,IntelEntityRelationship.class, 
+							new Object[] {"sourceEntity", newRelationship.getSourceEntity()}, //$NON-NLS-1$
+							new Object[] {"targetEntity", newRelationship.getTargetEntity()}, //$NON-NLS-1$
+							new Object[] {"relationshipType", newRelationship.getRelationshipType()}).uniqueResult(); //$NON-NLS-1$
+					
 					if (existing != null){
 						MessageDialog.openInformation(getShell(), Messages.EntityList_CreateTitle, MessageFormat.format(Messages.EntityList_CreateMsg, rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
 						return;
@@ -422,8 +421,8 @@ public class EntityList extends Composite {
 						}
 					}
 					s.getTransaction().commit();
-				}finally{
-					s.close();
+				}catch (Exception ex){
+					Intelligence2PlugIn.displayLog(Messages.EntityList_CreateError + ex.getMessage(), ex);
 				}
 				
 				ArrayList<IntelEntity> modified = new ArrayList<IntelEntity>();
@@ -431,8 +430,6 @@ public class EntityList extends Composite {
 				modified.add(newRelationship.getTargetEntity());
 				listParent.getEditor().getContext().get(IEventBroker.class).send(IntelEvents.ENTITY_MODIFIED, modified);
 				MessageDialog.openInformation(getShell(), Messages.EntityList_CreatedTitle, MessageFormat.format(Messages.EntityList_CreatedMsg, rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));
-			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(Messages.EntityList_CreateError + ex.getMessage(), ex);
 			}
 		}else{
 			MessageDialog.openInformation(getShell(), Messages.EntityList_CreateErrorTitle, MessageFormat.format(Messages.EntityList_CreateErrorMsg, rType.getName(), newRelationship.getSourceEntity().getIdAttributeAsText(), newRelationship.getTargetEntity().getIdAttributeAsText()));

@@ -37,7 +37,6 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -49,6 +48,7 @@ import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.common.celleditor.TreeViewerCellEditor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -172,17 +172,16 @@ public class CellEditorFactory {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final List<AttributeListItem> items = new ArrayList<>();
-				Session s = HibernateManager.openSession();
-				try{
-					final Attribute dmAttribute = (Attribute)s.createCriteria(Attribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.add(Restrictions.eq("keyId", attributeKey)).uniqueResult(); //$NON-NLS-1$
+				try(Session s = HibernateManager.openSession()){
+					
+					final Attribute dmAttribute = QueryFactory.buildQuery(s, Attribute.class, 
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"keyId", attributeKey}).uniqueResult(); //$NON-NLS-1$
+					
 					if (dmAttribute == null) return Status.OK_STATUS;
 					if (dmAttribute.getType() != AttributeType.LIST) return Status.OK_STATUS;
 					
 					items.addAll(dmAttribute.getActiveListItems());
-				}finally{
-					s.close();
 				}
 				Display.getDefault().syncExec(()->{
 					if (!listCellEditor.getControl().isDisposed()){
@@ -226,11 +225,11 @@ public class CellEditorFactory {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final List<AttributeTreeNode> items = new ArrayList<>();
-				Session s = HibernateManager.openSession();
-				try{
-					final Attribute dmAttribute = (Attribute)s.createCriteria(Attribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.add(Restrictions.eq("keyId", attributeKey)).uniqueResult(); //$NON-NLS-1$
+				try(Session s = HibernateManager.openSession()){
+					final Attribute dmAttribute = QueryFactory.buildQuery(s, Attribute.class, 
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"keyId", attributeKey}).uniqueResult(); //$NON-NLS-1$
+					
 					if (dmAttribute == null) return Status.OK_STATUS;
 					if (dmAttribute.getType() != AttributeType.TREE) return Status.OK_STATUS;
 					
@@ -241,8 +240,6 @@ public class CellEditorFactory {
 						nodes.addAll(toVisit.getActiveChildren());
 					}
 					items.addAll(dmAttribute.getActiveTreeNodes());
-				}finally{
-					s.close();
 				}
 				Display.getDefault().syncExec(()->{
 					if (!treeCellEditor.getControl().isDisposed()){

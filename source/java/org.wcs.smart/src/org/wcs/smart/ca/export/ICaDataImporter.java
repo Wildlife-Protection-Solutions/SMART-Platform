@@ -15,7 +15,7 @@ public interface ICaDataImporter {
 	 * Imports data for the conservation area.
 	 * 
 	 * @param exportEngine export engine
-	 * @param monitor progress monitor
+	 * @param monitor progress monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception
 	 */
 	void importData(ICaDataImportEngine engine, IProgressMonitor monitor) throws Exception;

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.observation.ObservationSource" name="Observation Source" schema="schema/org.wcs.smart.observation.ObservationSource.exsd"/>
+   <extension-point id="ObservationSource" name="Observation Source" schema="schema/org.wcs.smart.observation.ObservationSource.exsd"/>
    <extension
-         point="org.wcs.smart.ca.deleteAdvisor">
+         point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
             advisor="org.wcs.smart.observation.internal.advisor.AttributeDMAdvisor"
             class="org.wcs.smart.ca.datamodel.Attribute">
@@ -40,7 +40,7 @@
       </view>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.observation.model.Waypoint"
             supportsCcaa="false">
@@ -201,7 +201,7 @@
       </perspective>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.observation.ObservationCloner"
             id="org.wcs.smart.observation.cloner">
@@ -246,7 +246,7 @@
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="incidents">
       </FilestoreDirectory>

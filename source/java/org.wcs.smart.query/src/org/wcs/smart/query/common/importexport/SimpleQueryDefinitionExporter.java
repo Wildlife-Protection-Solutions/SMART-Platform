@@ -67,13 +67,13 @@ public abstract class SimpleQueryDefinitionExporter extends DefinitionQueryExpor
 		
 		if (((SimpleQuery)query).getFilter() != null){
 			IFilter queryFilter = sQuery.getFilter().getFilter();
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				processFilter(queryFilter, xmlQuery, s);
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					processFilter(queryFilter, xmlQuery, s);
+				}finally{
+					s.getTransaction().rollback();
+				}
 			}
 		}
 	}

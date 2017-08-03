@@ -55,13 +55,10 @@ public abstract class InstallProvisioningAction extends ProvisioningAction {
 			//remove any existing change log tracking
 			//this is done so any alter table statements are not
 			//prevented from running because of the triggers
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s, getPluginId());
 				s.getTransaction().commit();
-			}finally{
-				s.close();
 			}
 			
 			
@@ -69,15 +66,11 @@ public abstract class InstallProvisioningAction extends ProvisioningAction {
 			IStatus temp = executeInternal(parameters);
 			
 			//add back all change log tracking if necessary.
-			s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s, getPluginId());
 				s.getTransaction().commit();
-			}finally{
-				s.close();
-			}
-			
+			}			
 			return temp;
 		}catch (Exception ex){
 			return new Status(Status.ERROR, SmartPlugIn.PLUGIN_ID, "Could not install plugin.", ex); //$NON-NLS-1$

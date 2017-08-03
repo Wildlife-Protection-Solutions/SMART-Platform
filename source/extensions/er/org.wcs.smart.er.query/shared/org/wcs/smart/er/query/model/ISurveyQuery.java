@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.er.query.model;
 
-
-
 /**
  * Interface for survey queries.
  * 

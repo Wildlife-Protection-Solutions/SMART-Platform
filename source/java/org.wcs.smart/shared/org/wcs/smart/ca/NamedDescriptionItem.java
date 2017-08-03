@@ -30,11 +30,11 @@ import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Type;
-import org.hibernate.criterion.Restrictions;
 
 /**
  * Extensions of a simple list item that also tracks a description 
@@ -88,7 +88,6 @@ public class NamedDescriptionItem extends NamedItem {
 //	// This fails;
 //	 @OneToMany(fetch = FetchType.LAZY)
 //	 @JoinColumn(name="element_uuid", referencedColumnName="desc_uuid")
-	@SuppressWarnings("unchecked")
 	@Transient
 	/**
 	 * If not previously loaded, this runs a database
@@ -98,9 +97,12 @@ public class NamedDescriptionItem extends NamedItem {
 	 */
 	public Set<DescriptionLabel> getDescriptions(Session session) {
 		if (this.descriptions == null) {
-			this.descriptions = new HashSet<DescriptionLabel>();		
-			Criteria c = session .createCriteria(DescriptionLabel.class).add(Restrictions.eq("id.element", descuuid)); //$NON-NLS-1$
-			descriptions.addAll(c.list());
+			this.descriptions = new HashSet<DescriptionLabel>();	
+			
+			CriteriaQuery<DescriptionLabel> c = session.getCriteriaBuilder().createQuery(DescriptionLabel.class);
+			Root<DescriptionLabel> root = c.from(DescriptionLabel.class); 
+			c.where(session.getCriteriaBuilder().equal(root.get("id").get("element"), descuuid)); //$NON-NLS-1$ //$NON-NLS-2$
+			descriptions.addAll(session.createQuery(c).getResultList());
 		}
 		return this.descriptions;
 	}

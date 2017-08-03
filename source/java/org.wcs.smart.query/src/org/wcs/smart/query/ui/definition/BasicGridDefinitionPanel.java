@@ -114,18 +114,14 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
 			final List<Projection> projs = new ArrayList<Projection>();
-			try{
-				projs.addAll(HibernateManager.getCaProjectionList(s));
-			}finally{
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
 				try{
+					projs.addAll(HibernateManager.getCaProjectionList(s));
+				}finally{
 					s.getTransaction().commit();
-				}catch (Exception ex){
-					
 				}
-				s.close();
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){

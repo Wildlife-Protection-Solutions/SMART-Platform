@@ -99,8 +99,7 @@ public enum WorkingSetManager {
 		if (activeWorkingSet == null || inputs.isEmpty()) return;
 		IntelWorkingSet wset = null;
 		boolean modified = false;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (RecordEditorInput input : inputs){
 				try{
 					s.beginTransaction();
@@ -131,8 +130,6 @@ public enum WorkingSetManager {
 					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordError, input.getName(), ex.getMessage()), ex);
 				}
 			}
-		}finally{
-			s.close();
 		}
 		if (wset != null && modified) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -141,8 +138,8 @@ public enum WorkingSetManager {
 		if (activeWorkingSet == null || records.isEmpty()) return;
 		IntelWorkingSet wset = null;
 		boolean modified = false;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+
 			for (IntelRecord record : records){
 				try{
 					s.beginTransaction();
@@ -172,8 +169,6 @@ public enum WorkingSetManager {
 					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordError, record.getTitle(), ex.getMessage()), ex);
 				}
 			}
-		}finally{
-			s.close();
 		}
 		if (wset != null && modified ) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -182,8 +177,7 @@ public enum WorkingSetManager {
 		if (activeWorkingSet == null || entities.isEmpty()) return;
 		IntelWorkingSet wset = null;
 		boolean modified = false;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (IntelEntity entity : entities){
 				try{
 					s.beginTransaction();
@@ -213,8 +207,6 @@ public enum WorkingSetManager {
 					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_EntityError, entity.getIdAttributeAsText(Locale.getDefault()), ex.getMessage()), ex);
 				}
 			}
-		}finally{
-			s.close();
 		}
 		if (wset != null && !modified) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -223,8 +215,7 @@ public enum WorkingSetManager {
 		if (activeWorkingSet == null || queryUuids.isEmpty()) return;
 		IntelWorkingSet wset = null;
 		boolean modified = false;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (UUID queryUuid : queryUuids){
 				String queryName = queryUuid.toString();
 				try{
@@ -260,8 +251,6 @@ public enum WorkingSetManager {
 					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_QueryError, queryName, ex.getMessage()), ex);
 				}
 			}
-		}finally{
-			s.close();
 		}
 		if (wset != null && modified) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -273,8 +262,7 @@ public enum WorkingSetManager {
 	public void removeQueryFromWorkingSet(Collection<IntelRecordObservationQuery> queries, IEclipseContext context){
 		if (activeWorkingSet == null || queries.isEmpty()) return;
 		IntelWorkingSet wset = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (IntelRecordObservationQuery query : queries){
 				try{
 					s.beginTransaction();
@@ -297,8 +285,6 @@ public enum WorkingSetManager {
 					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_QueryRemoveError, query.getName(), ex.getMessage()), ex);
 				}
 			}
-		}finally{
-			s.close();
 		}
 		if (wset != null) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -306,8 +292,7 @@ public enum WorkingSetManager {
 	public void removeEntityFromWorkingSet(Collection<IntelEntity> entities, IEclipseContext context){
 		if (activeWorkingSet == null || entities.isEmpty()) return;
 		IntelWorkingSet wset = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (IntelEntity entity : entities){
 				try{
 					s.beginTransaction();
@@ -330,8 +315,6 @@ public enum WorkingSetManager {
 					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_EntityRemoveError, entity.getIdAttributeAsText(), ex.getMessage()), ex);
 				}
 			}
-		}finally{
-			s.close();
 		}
 		if (wset != null) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
@@ -339,8 +322,7 @@ public enum WorkingSetManager {
 	public void removeRecordFromWorkingSet(Collection<IntelRecord> records, IEclipseContext context){
 		if (activeWorkingSet == null || records.isEmpty()) return;
 		IntelWorkingSet wset = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (IntelRecord record : records){
 				s.beginTransaction();
 			
@@ -364,8 +346,6 @@ public enum WorkingSetManager {
 					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetManager_RecordRemoveError, record.getTitle(), ex.getMessage()), ex);
 				}
 			}
-		}finally{
-			s.close();
 		}
 		if (wset != null) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}

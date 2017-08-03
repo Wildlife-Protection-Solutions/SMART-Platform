@@ -25,7 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.criterion.Restrictions;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -35,6 +35,7 @@ import org.wcs.smart.entity.query.model.EntityQueryFactory;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTemplateCloner;
 import org.wcs.smart.query.QueryTypeManager;
@@ -55,22 +56,19 @@ public class EntityQueryTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.ObservationQueryTemplateCloner_TaskName, 4);
-		try{
-			monitor.subTask(Messages.ObservationQueryTemplateCloner_GridProgress);
-			cloneGriddedQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.ObservationQueryTemplateCloner_SummaryProgress);
-			cloneSummaryQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.ObservationQueryTemplateCloner_ObservationProgress);
-			cloneObservationQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.ObservationQueryTemplateCloner_IncidentProgress);
-			cloneWaypointQuery(engine);
-		}finally{
-			monitor.done();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ObservationQueryTemplateCloner_TaskName, 4);
+		
+		progress.subTask(Messages.ObservationQueryTemplateCloner_GridProgress);
+		cloneGriddedQuery(engine);
+		progress.worked(1);
+		progress.subTask(Messages.ObservationQueryTemplateCloner_SummaryProgress);
+		cloneSummaryQuery(engine);
+		progress.worked(1);
+		progress.subTask(Messages.ObservationQueryTemplateCloner_ObservationProgress);
+		cloneObservationQuery(engine);
+		progress.worked(1);
+		progress.subTask(Messages.ObservationQueryTemplateCloner_IncidentProgress);
+		cloneWaypointQuery(engine);
 	}
 	
 	/*
@@ -78,8 +76,11 @@ public class EntityQueryTemplateCloner implements
 	 */
 	private void cloneGriddedQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<EntityGriddedQuery> queries = (List<EntityGriddedQuery>) engine.getSession().createCriteria(EntityGriddedQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+
+		List<EntityGriddedQuery> queries = QueryFactory.buildQuery(engine.getSession(), EntityGriddedQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		for(EntityGriddedQuery query : queries){
 			EntityGriddedQuery clone = (EntityGriddedQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( EntityGriddedQuery.KEY) );
@@ -108,8 +109,10 @@ public class EntityQueryTemplateCloner implements
 	 */
 	private void cloneSummaryQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<EntitySummaryQuery> queries = (List<EntitySummaryQuery>) engine.getSession().createCriteria(EntitySummaryQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<EntitySummaryQuery> queries = QueryFactory.buildQuery(engine.getSession(), EntitySummaryQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		for(EntitySummaryQuery query : queries){
 			EntitySummaryQuery clone = (EntitySummaryQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( EntitySummaryQuery.KEY) );
@@ -136,9 +139,10 @@ public class EntityQueryTemplateCloner implements
 	 */
 	private void cloneObservationQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<EntityObservationQuery> queries = (List<EntityObservationQuery>) engine.getSession().createCriteria(EntityObservationQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$//$NON-NLS-2$
-		
+		List<EntityObservationQuery> queries = QueryFactory.buildQuery(engine.getSession(), EntityObservationQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		for(EntityObservationQuery query : queries){
 			EntityObservationQuery clone = (EntityObservationQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( EntityObservationQuery.KEY) );
 
@@ -167,9 +171,10 @@ public class EntityQueryTemplateCloner implements
 	 */
 	private void cloneWaypointQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<EntityWaypointQuery> queries = (List<EntityWaypointQuery>) engine.getSession().createCriteria(EntityWaypointQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
-		
+		List<EntityWaypointQuery> queries = QueryFactory.buildQuery(engine.getSession(), EntityWaypointQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		for(EntityWaypointQuery query : queries){
 			EntityWaypointQuery clone = (EntityWaypointQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( EntityWaypointQuery.KEY) );
 			

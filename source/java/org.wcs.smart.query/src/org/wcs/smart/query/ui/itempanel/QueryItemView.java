@@ -62,6 +62,7 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class QueryItemView implements ISourceProviderListener {
 
 	public static final String ID ="org.wcs.smart.query.parts.filter"; //$NON-NLS-1$

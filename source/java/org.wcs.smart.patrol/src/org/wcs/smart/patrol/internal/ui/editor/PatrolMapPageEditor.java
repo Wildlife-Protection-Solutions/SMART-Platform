@@ -262,25 +262,24 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 				double origy = pw.getWaypoint().getY();
 				
 				boolean modified = false;
-				Session s = HibernateManager.openSession();
-				try{
-					s.beginTransaction();
-					pw.getWaypoint().setX(crspx.x);
-					pw.getWaypoint().setY(crspx.y);
-					s.update(pw.getWaypoint());
-					s.getTransaction().commit();
-					modified = true;
-				}catch (Exception ex){
+				try(Session s = HibernateManager.openSession()){
 					try{
-						if (s.getTransaction().isActive()) s.getTransaction().rollback();
-					}catch (Exception ex2){
-						SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_MoveErrorDb + ex.getMessage(), ex);
-						return;
+						s.beginTransaction();
+						pw.getWaypoint().setX(crspx.x);
+						pw.getWaypoint().setY(crspx.y);
+						s.update(pw.getWaypoint());
+						s.getTransaction().commit();
+						modified = true;
+					}catch (Exception ex){
+						try{
+							if (s.getTransaction().isActive()) s.getTransaction().rollback();
+						}catch (Exception ex2){
+							SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_MoveErrorDb + ex.getMessage(), ex);
+							return;
+						}
+						pw.getWaypoint().setX(origx);
+						pw.getWaypoint().setY(origy);
 					}
-					pw.getWaypoint().setX(origx);
-					pw.getWaypoint().setY(origy);
-				}finally{
-					s.close();
 				}
 				if (modified){
 					addUndo(pw, origx, origy);
@@ -343,31 +342,29 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 			@Override
 			public synchronized void undo() {
 				if (undoCommands.isEmpty()) return;
-				
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					Object c = undoCommands.remove(0);
-					s.beginTransaction();
-					Object[] data = (Object[])c;
-					
-					PatrolWaypoint pw = (PatrolWaypoint) data[0];
-					double x = (double) data[1];
-					double y = (double) data[2];
-					
-					pw.getWaypoint().setX(x);
-					pw.getWaypoint().setY(y);
-					s.update(pw.getWaypoint());
-					s.getTransaction().commit();
-					
-					Display.getDefault().syncExec(()->{
-						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, pw.getPatrolLegDay());
-						WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
-					});
-				}catch (Exception ex){
-					if (s.getTransaction().isActive()) s.getTransaction().rollback();
-					SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_UndoError + ex.getMessage(), ex);	
-				}finally{
-					s.close();
+					try {
+						s.beginTransaction();
+						Object[] data = (Object[])c;
+						
+						PatrolWaypoint pw = (PatrolWaypoint) data[0];
+						double x = (double) data[1];
+						double y = (double) data[2];
+						
+						pw.getWaypoint().setX(x);
+						pw.getWaypoint().setY(y);
+						s.update(pw.getWaypoint());
+						s.getTransaction().commit();
+						
+						Display.getDefault().syncExec(()->{
+							PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, pw.getPatrolLegDay());
+							WaypointEventManager.getInstance().waypointModified(pw.getWaypoint());
+						});
+					}catch (Exception ex){
+						if (s.getTransaction().isActive()) s.getTransaction().rollback();
+						SmartPatrolPlugIn.displayLog(Messages.PatrolMapPageEditor_UndoError + ex.getMessage(), ex);	
+					}
 				}
 				updateToolbar();
 			}

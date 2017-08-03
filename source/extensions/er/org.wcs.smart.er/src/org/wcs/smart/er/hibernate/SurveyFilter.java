@@ -23,7 +23,7 @@ package org.wcs.smart.er.hibernate;
 
 import java.util.Date;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
@@ -180,7 +180,7 @@ public class SurveyFilter {
 	 * @param s
 	 * @return
 	 */
-	public Query buildQuery(Session s){ 
+	public Query<?> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT s.uuid, s.id, s.startDate, sd.name, sd.uuid "); //$NON-NLS-1$
@@ -238,7 +238,7 @@ public class SurveyFilter {
 		
 		str.append("ORDER BY s.startDate desc, s.id asc "); //$NON-NLS-1$
 		
-		Query query = s.createQuery(str.toString())
+		Query<?> query = s.createQuery(str.toString())
 				.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 			
 		if (state != null ){

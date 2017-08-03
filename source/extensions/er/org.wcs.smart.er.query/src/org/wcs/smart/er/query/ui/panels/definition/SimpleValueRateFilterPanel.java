@@ -91,26 +91,27 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 		if (queryString == null || queryString.trim().isEmpty()){
 			return;
 		}
-		Session session = null;
-		try{
+		try {
 			QueryFilter filterPart = null;
 			try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 				Parser parser = new Parser(is);
 				filterPart = parser.QueryFilter();
 			}
+			
 			//---- generate drop items for value filter
-			session = HibernateManager.openSession();
-			session.beginTransaction();
 			List<DropItem> copies = new ArrayList<DropItem>();
-			try{
-				if (filterPart != null){
-					DropItem[] filterItems = SurveyDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), (session));
-					for (int i = 0; i < filterItems.length; i ++){
-						copies.add(filterItems[i]);
-					}	
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					if (filterPart != null){
+						DropItem[] filterItems = SurveyDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), (session));
+						for (int i = 0; i < filterItems.length; i ++){
+							copies.add(filterItems[i]);
+						}	
+					}
+				}finally{
+					session.getTransaction().rollback();
 				}
-			}finally{
-				session.getTransaction().rollback();
 			}
 			
 			//update rate filter
@@ -119,14 +120,7 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 				rateFilter.setFilterType(filterPart.getFilterType());
 			}
 		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.SimpleValueRateFilterPanel_CopyError, ex);
-			if (session != null && session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
-		}finally{
-			if (session != null){
-				session.close();
-			}
+			QueryPlugIn.displayLog(Messages.SimpleValueRateFilterPanel_CopyError, ex);			
 		}
 	}
 }

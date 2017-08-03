@@ -64,6 +64,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class AttachmentView {
 
 	public static final String ID = "org.wcs.smart.i2.ui.views.AttachmentView"; //$NON-NLS-1$

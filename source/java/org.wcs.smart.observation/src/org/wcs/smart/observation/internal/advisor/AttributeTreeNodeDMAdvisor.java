@@ -23,12 +23,10 @@ package org.wcs.smart.observation.internal.advisor;
 
 import java.text.MessageFormat;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
@@ -58,10 +56,8 @@ public class AttributeTreeNodeDMAdvisor implements IDeleteAdvisor {
 		}
 		AttributeTreeNode node = (AttributeTreeNode)object;
 		if (node.getUuid() == null) return null;
-		Criteria query = session.createCriteria(WaypointObservationAttribute.class);
-		query.add(Restrictions.eq("attributeTreeNode", node)); //$NON-NLS-1$
-		query.setProjection(Projections.rowCount());
-		long cnt = (Long)query.uniqueResult();
+		
+		long cnt = QueryFactory.buildCountQuery(session, WaypointObservationAttribute.class,  new Object[] {"attributeTreeNode", node}); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}

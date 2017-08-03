@@ -79,7 +79,7 @@ public class SummaryIntelligenceQueryEngine implements IQueryEngine {
 				sb.append(" and i.receivedDate >= :d1 and i.receivedDate <= :d2 "); //$NON-NLS-1$
 			}
 			sb.append("AND i in (select id.intelligence FROM PatrolIntelligence)"); //$NON-NLS-1$
-			org.hibernate.Query q = session.createQuery(sb.toString());
+			org.hibernate.query.Query<?> q = session.createQuery(sb.toString());
 			q.setParameterList("ca", asList(caFilter)); //$NON-NLS-1$
 			if (d != null){
 				q.setParameter("d1",d[0]); //$NON-NLS-1$

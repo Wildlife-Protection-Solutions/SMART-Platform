@@ -46,12 +46,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Page to select designs for given Conservation Area.
@@ -129,23 +129,19 @@ public class ImportSurveyDesignDesignsPage extends WizardPage{
 			protected IStatus run(IProgressMonitor monitor) {
 				
 				final List<SurveyDesign> items = new ArrayList<SurveyDesign>();
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					@SuppressWarnings("unchecked")
-					List<SurveyDesign> ds = s.createCriteria(SurveyDesign.class)
-							.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-							.list(); 
-
-					items.addAll(ds); 
-					Collections.sort(items, new Comparator<SurveyDesign>(){
-						@Override
-						public int compare(SurveyDesign sd1, SurveyDesign sd2) {
-							return Collator.getInstance().compare(sd1.getName(), sd2.getName());
-						}});
-				}finally{
-					s.getTransaction().rollback();
-					s.close();
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
+						List<SurveyDesign> ds = QueryFactory.buildQuery(s, SurveyDesign.class, "conservationArea", ca).getResultList(); //$NON-NLS-1$
+						items.addAll(ds); 
+						Collections.sort(items, new Comparator<SurveyDesign>(){
+							@Override
+							public int compare(SurveyDesign sd1, SurveyDesign sd2) {
+								return Collator.getInstance().compare(sd1.getName(), sd2.getName());
+							}});
+					}finally{
+						s.getTransaction().rollback();
+					}
 				}
 				getShell().getDisplay().asyncExec(new Runnable(){
 					@Override

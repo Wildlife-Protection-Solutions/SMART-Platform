@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -62,8 +62,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	public void upgrade(final IProgressMonitor monitor) throws Exception{
 		throwEx = null;
 		monitor.beginTask(Messages.Upgrader310To320_ProgressMessage,1);
-		final Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.doWork(new Work() {
 				@Override
 				public void execute(Connection c) throws SQLException {
@@ -77,8 +76,6 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 					}
 				}
 			});
-		}finally{
-			s.close();
 		}
 		if (throwEx != null) throw throwEx;
 		
@@ -163,8 +160,8 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	 */
 	public void postProcess(IProgressMonitor monitor) {
 		monitor.beginTask(Messages.Upgrader310To320_ProgressMessage, 1);
-		final Session s = HibernateManager.openSession();
-		try{
+		
+		try(final Session s = HibernateManager.openSession()){
 			/* Species Cleanup - ticket #1118 */
 			s.beginTransaction();
 			cleanUpSpecies(s, monitor);
@@ -175,8 +172,6 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 			monitor.subTask(Messages.Upgrader310To320_ProgressMessage + ": " + Messages.Upgrader310To320_upgradingDBMsg); //$NON-NLS-1$
 			CmUpgrader310To320 cmUpgrader = new CmUpgrader310To320();
 			cmUpgrader.upgrade(s);
-		}finally{
-			s.close();
 		}
 		monitor.done();
 	}
@@ -202,7 +197,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 					.setProjection(Projections.rowCount())
 					.uniqueResult();
 		
-			Query q = session.createQuery(
+			Query<?> q = session.createQuery(
 				"SELECT count(distinct poa.attributeTreeNode) FROM WaypointObservationAttribute poa WHERE poa.attributeTreeNode.attribute = :attribute "); //$NON-NLS-1$
 			q.setParameter("attribute", species); //$NON-NLS-1$
 			Long numSpeciesUsed = (Long)q.uniqueResult();
@@ -281,7 +276,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		if (!canDelete) return false;
 		
 		//remove any configurable model lablel (cm nodes will deleted through cascade) 
-		Query q= session.createQuery("DELETE FROM Label WHERE id.element IN (SELECT uuid FROM CmAttributeTreeNode WHERE dmTreeNode = :node)"); //$NON-NLS-1$
+		Query<?> q= session.createQuery("DELETE FROM Label WHERE id.element IN (SELECT uuid FROM CmAttributeTreeNode WHERE dmTreeNode = :node)"); //$NON-NLS-1$
 		q.setParameter("node", node); //$NON-NLS-1$
 		q.executeUpdate();
 		

@@ -43,8 +43,7 @@ public class Upgrader330To331 implements IDatabaseUpgrader {
 
 	public void upgrade(final IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader330To331_UpgradeMsg);
-		final Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.doWork(new Work() {
 				@Override
 				public void execute(Connection c) throws SQLException {
@@ -62,10 +61,7 @@ public class Upgrader330To331 implements IDatabaseUpgrader {
 						c.setAutoCommit(true);
 					}
 				}
-			});
-			
-		}finally{
-			s.close();
+			});	
 		}
 	}
 

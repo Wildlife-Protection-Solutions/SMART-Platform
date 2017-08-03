@@ -25,11 +25,12 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.criterion.Restrictions;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
@@ -67,25 +68,28 @@ public class PatrolQueryTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.QueryTemplateCloner_ProgressQuery, 5);
-		try{
-			monitor.subTask(Messages.QueryTemplateCloner_ProgressCopyGridded);
-			cloneGriddedQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.QueryTemplateCloner_ProgressCopySummary);
-			cloneSummaryQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.QueryTemplateCloner_ProgressCopyPatrols);
-			clonePatrolQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.QueryTemplateCloner_ProgressCopyObservation);
-			cloneObservationQuery(engine);
-			monitor.worked(1);
-			monitor.subTask(Messages.QueryTemplateCloner_ProgressCopyWaypoint);
-			cloneWaypointQuery(engine);
-		}finally{
-			monitor.done();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.QueryTemplateCloner_ProgressQuery, 5);
+		
+		progress.subTask(Messages.QueryTemplateCloner_ProgressCopyGridded);
+		cloneGriddedQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.QueryTemplateCloner_ProgressCopySummary);
+		cloneSummaryQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.QueryTemplateCloner_ProgressCopyPatrols);
+		clonePatrolQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.QueryTemplateCloner_ProgressCopyObservation);
+		cloneObservationQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.QueryTemplateCloner_ProgressCopyWaypoint);
+		cloneWaypointQuery(engine);
+		progress.worked(1);
+		
 	}
 	
 	/*
@@ -93,10 +97,11 @@ public class PatrolQueryTemplateCloner implements
 	 */
 	private void cloneGriddedQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<PatrolGriddedQuery> queries = (List<PatrolGriddedQuery>) engine.getSession().createCriteria(PatrolGriddedQuery.class)
-			.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-			.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
+		
+		List<PatrolGriddedQuery> queries = QueryFactory.buildQuery(engine.getSession(), PatrolGriddedQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		for(PatrolGriddedQuery query : queries){
 			PatrolGriddedQuery clone = (PatrolGriddedQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolGriddedQuery.KEY) );
@@ -126,8 +131,10 @@ public class PatrolQueryTemplateCloner implements
 	 */
 	private void cloneSummaryQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<PatrolSummaryQuery> queries = (List<PatrolSummaryQuery>) engine.getSession().createCriteria(PatrolSummaryQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<PatrolSummaryQuery> queries = QueryFactory.buildQuery(engine.getSession(), PatrolSummaryQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		for(PatrolSummaryQuery query : queries){
 			PatrolSummaryQuery clone = (PatrolSummaryQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolSummaryQuery.KEY) );
@@ -154,9 +161,11 @@ public class PatrolQueryTemplateCloner implements
 	 */
 	private void clonePatrolQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<PatrolQuery> queries = (List<PatrolQuery>) engine.getSession().createCriteria(PatrolQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
-		
+		List<PatrolQuery> queries = QueryFactory.buildQuery(engine.getSession(), PatrolQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
+
 		for(PatrolQuery query : queries){
 			PatrolQuery clone = (PatrolQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolQuery.KEY) );
 			engine.copyLabels(query, clone);
@@ -184,9 +193,10 @@ public class PatrolQueryTemplateCloner implements
 	 */
 	private void cloneObservationQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<PatrolObservationQuery> queries = (List<PatrolObservationQuery>) engine.getSession().createCriteria(PatrolObservationQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$//$NON-NLS-2$
-		
+		List<PatrolObservationQuery> queries = QueryFactory.buildQuery(engine.getSession(), PatrolObservationQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		for(PatrolObservationQuery query : queries){
 			PatrolObservationQuery clone = (PatrolObservationQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolObservationQuery.KEY) );
 
@@ -215,9 +225,10 @@ public class PatrolQueryTemplateCloner implements
 	 */
 	private void cloneWaypointQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<PatrolWaypointQuery> queries = (List<PatrolWaypointQuery>) engine.getSession().createCriteria(PatrolWaypointQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
-		
+		List<PatrolWaypointQuery> queries = QueryFactory.buildQuery(engine.getSession(), PatrolWaypointQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		for(PatrolWaypointQuery query : queries){
 			PatrolWaypointQuery clone = (PatrolWaypointQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolWaypointQuery.KEY) );
 			

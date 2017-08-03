@@ -22,12 +22,12 @@
 package org.wcs.smart.connect;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -55,9 +55,7 @@ public class ConnectHibernateManager {
 	 * @return
 	 */
 	public static ConnectServer getConnectServer(Session session, ConservationArea ca){
-		ConnectServer server = (ConnectServer) session.createCriteria(ConnectServer.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.uniqueResult();
+		ConnectServer server = QueryFactory.buildQuery(session, ConnectServer.class,"conservationArea", ca).uniqueResult(); //$NON-NLS-1$
 		return server;
 	}
 	/**
@@ -68,10 +66,7 @@ public class ConnectHibernateManager {
 	 * @return
 	 */
 	public static ConnectUser getConnectUser(Employee e, Session session){
-		ConnectUser user = (ConnectUser)session.createCriteria(ConnectUser.class, "u") //$NON-NLS-1$
-				.createAlias("u.server", "s") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("u.uuid", e.getUuid())) //$NON-NLS-1$
-				.uniqueResult();
+		ConnectUser user = QueryFactory.buildQuery(session, ConnectUser.class, "uuid", e.getUuid()).uniqueResult(); //$NON-NLS-1$
 		if (SmartDB.getCurrentConservationArea() != null && !SmartDB.getCurrentConservationArea().equals(e.getConservationArea())){
 			return null;
 		}

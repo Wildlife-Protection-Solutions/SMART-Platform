@@ -25,7 +25,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.criterion.Restrictions;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
@@ -33,6 +33,7 @@ import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
 /**
@@ -46,21 +47,21 @@ public class ConnectCtTemplateCloner implements IConservationAreaTemplateCloner 
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		@SuppressWarnings("unchecked")
-		List<ConfigurableModel> cmList = engine.getSession().createCriteria(ConfigurableModel.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
-		monitor.beginTask(Messages.ConnectCtTemplateCloner_TaskName, cmList.size());
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConnectCtTemplateCloner_TaskName, 1);
+		
+		List<ConfigurableModel> cmList = QueryFactory.buildQuery(engine.getSession(), ConfigurableModel.class, "conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$
+		progress.setWorkRemaining(cmList.size());
 		
 		for (ConfigurableModel cm : cmList) {
-			monitor.subTask(MessageFormat.format(Messages.ConnectCtTemplateCloner_CloneAlerts, cm.getName()));
-			cloneAlertsForCm(engine, cm, monitor);
-			cloneConnectCtProperties(engine, cm, monitor);
-			monitor.worked(1);
+			progress.subTask(MessageFormat.format(Messages.ConnectCtTemplateCloner_CloneAlerts, cm.getName()));
+			cloneAlertsForCm(engine, cm);
+			cloneConnectCtProperties(engine, cm);
+			progress.worked(1);
 		}
 	}
 
-	private void cloneAlertsForCm(ConservationAreaClonerEngine engine, ConfigurableModel cm, IProgressMonitor monitor) throws Exception {
-		@SuppressWarnings("unchecked")
-		List<ConnectAlert> alerts = engine.getSession().createCriteria(ConnectAlert.class).add(Restrictions.eq("model", cm)).list(); //$NON-NLS-1$
+	private void cloneAlertsForCm(ConservationAreaClonerEngine engine, ConfigurableModel cm) throws Exception {
+		List<ConnectAlert> alerts = QueryFactory.buildQuery(engine.getSession(), ConnectAlert.class, "model", cm).list(); //$NON-NLS-1$
 		if (!alerts.isEmpty()) {
 			ConfigurableModel cmClone = (ConfigurableModel) engine.getNewConservationItem(cm);
 			for (ConnectAlert a : alerts) {
@@ -77,9 +78,8 @@ public class ConnectCtTemplateCloner implements IConservationAreaTemplateCloner 
 		}
 	}
 
-	private void cloneConnectCtProperties(ConservationAreaClonerEngine engine, ConfigurableModel cm, IProgressMonitor monitor) {
-		@SuppressWarnings("unchecked")
-		List<ConnectCtProperties> props = engine.getSession().createCriteria(ConnectCtProperties.class).add(Restrictions.eq("model", cm)).list(); //$NON-NLS-1$
+	private void cloneConnectCtProperties(ConservationAreaClonerEngine engine, ConfigurableModel cm) {
+		List<ConnectCtProperties> props = QueryFactory.buildQuery(engine.getSession(), ConnectCtProperties.class, "model", cm).list(); //$NON-NLS-1$
 		if (!props.isEmpty()) {
 			ConfigurableModel cmClone = (ConfigurableModel) engine.getNewConservationItem(cm);
 			for (ConnectCtProperties p : props) {

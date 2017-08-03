@@ -8,7 +8,7 @@
       </JsonProcessor>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             ca_property=".patrolLeg.patrol.conservationArea"
             class="org.wcs.smart.connect.dataqueue.cybertracker.patrol.model.CtPatrolLink"
@@ -34,13 +34,13 @@
       </action>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.connect.dataqueue.cybertracker.patrol.updatesite.DataQueueCtPatrolChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.connect.dataqueue.cybertracker.patrol.updatesite.DataQueueCtPatrolDatabaseUpgrader">
       </dbUpgrader>

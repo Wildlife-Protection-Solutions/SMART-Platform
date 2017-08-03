@@ -26,13 +26,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.user.UserLevelManager;
@@ -96,25 +100,31 @@ public class MultiCaQueryHibernateManagerImpl extends
 		userRootFolder.setEmployee(SmartDB.getConservationAreaConfiguration().getCcaaUser());
 		userRootFolder.setRootFolder(true);
 		
-		
 		folders.add(userRootFolder);
 		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
 		if (includeCaFolder){
-			@SuppressWarnings("unchecked")
-			List<QueryFolder> rootFolders = session.createCriteria(QueryFolder.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.isNull("employee")) //$NON-NLS-1$
-					.add(Restrictions.isNull("parentFolder")).list(); //$NON-NLS-1$
-						caRootFolder.setChildren(rootFolders);
-		}
-			@SuppressWarnings("unchecked")
-		List<QueryFolder> userFolders = session.createCriteria(QueryFolder.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("employee", SmartDB.getConservationAreaConfiguration().getCcaaUser())) //$NON-NLS-1$
-				.add(Restrictions.isNull("parentFolder")).list(); //$NON-NLS-1$
+			CriteriaQuery<QueryFolder> c = cb.createQuery(QueryFolder.class);
+			Root<QueryFolder> from = c.from(QueryFolder.class);
+			c.where(cb.and(
+					cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+					cb.isNull(from.get("employee")), //$NON-NLS-1$
+					cb.isNull(from.get("parentFolder")) //$NON-NLS-1$
+					));
 			
+			List<QueryFolder> rootFolders = session.createQuery(c).getResultList();
+			caRootFolder.setChildren(rootFolders);
+		}
+		
+		CriteriaQuery<QueryFolder> c = cb.createQuery(QueryFolder.class);
+		Root<QueryFolder> from = c.from(QueryFolder.class);
+		c.where(cb.and(
+				cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+				cb.equal(from.get("employee"), SmartDB.getConservationAreaConfiguration().getCcaaUser()), //$NON-NLS-1$
+				cb.isNull(from.get("parentFolder")) //$NON-NLS-1$
+				));
+		List<QueryFolder> userFolders = session.createQuery(c).getResultList();
 		userRootFolder.setChildren(userFolders);
-
 		
 		return folders;
 	}
@@ -132,18 +142,21 @@ public class MultiCaQueryHibernateManagerImpl extends
 	
 		for(IQueryType type: QueryTypeManager.INSTANCE.getSupportedQueryTypes()){
 
-			if (session.getSessionFactory().getClassMetadata(type.getHibernateClass()) == null){
+			if (getClassMetadata(type.getHibernateClass(), session) == null){
 				//query is not mapped to hibernate class so skip it
 				continue;
 			}
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<? extends Query> c = cb.createQuery(type.getHibernateClass());
+			Root<? extends Query> from = c.from(type.getHibernateClass());
+			c.where(cb.and(
+					cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+					cb.or(
+							cb.equal(from.get("isShared"), true), //$NON-NLS-1$
+							cb.equal(from.get("owner"), SmartDB.getConservationAreaConfiguration().getCcaaUser()) //$NON-NLS-1$
+							)));
 			
-			@SuppressWarnings("unchecked")
-			List<org.wcs.smart.query.model.Query> objects = session.createCriteria(type.getHibernateClass())
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.or(Restrictions.eq("isShared", true), //$NON-NLS-1$
-						Restrictions.eq("owner", SmartDB.getConservationAreaConfiguration().getCcaaUser()))) //$NON-NLS-1$
-				.list();
-			
+			List<? extends Query> objects = session.createQuery(c).getResultList();
 			for (org.wcs.smart.query.model.Query q : objects){
 				QueryEditorInput proxy = new QueryEditorInput(q.getUuid(),q.getName(),q.getId(),q.getIsShared(),
 						QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()));

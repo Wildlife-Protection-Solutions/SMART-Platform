@@ -39,6 +39,7 @@ import org.wcs.smart.report.model.ReportFolder;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandler {
 	
 	@Execute

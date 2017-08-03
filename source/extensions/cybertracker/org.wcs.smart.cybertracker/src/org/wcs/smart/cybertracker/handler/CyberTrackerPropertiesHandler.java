@@ -33,6 +33,7 @@ import org.wcs.smart.cybertracker.properties.ManageProfilesDialog;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class CyberTrackerPropertiesHandler {
 
 	@Execute

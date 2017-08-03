@@ -47,7 +47,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -68,7 +68,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.factory.CommonFactoryFinder;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
@@ -99,6 +98,7 @@ import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportAttributeWizard;
 import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportOptionDialog;
 import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportWizard;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.GeometryUtils;
@@ -140,7 +140,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 	private SamplingUnitColumnLabelProvider sortColumn = null;
 	private int sortDirection = SWT.DOWN;
 	
-	private ViewerSorter viewerComparator = new ViewerSorter(){
+	private ViewerComparator viewerComparator = new ViewerComparator(){
 		@Override
 		public int compare(Viewer viewer, Object o1, Object o2){
 			if (sortColumn == null) return 0;
@@ -205,8 +205,6 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
     
     private Job loadValues = new Job(Messages.SamplingUnitEditorPage_loadingValuesJobName){
 
-		
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			SurveyDesign sd = editor.getSurveyDesign();
@@ -214,48 +212,46 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			List<SamplingUnit> units = null;
 			List<SurveyDesignSamplingUnitAttribute> attributes = null;
 		
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				sd = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
-				sd.getName();
-
-				//load attributes
-				attributes = new ArrayList<SurveyDesignSamplingUnitAttribute>();
-				attributes.addAll(sd.getSamplingUnitAttributes());
-				Collections.sort(attributes, new Comparator<SurveyDesignSamplingUnitAttribute>() {
-					@Override
-					public int compare(SurveyDesignSamplingUnitAttribute arg0,
-							SurveyDesignSamplingUnitAttribute arg1) {
-						return Collator.getInstance().compare(arg0.getSamplingUnitAttribute().getName(),
-								arg1.getSamplingUnitAttribute().getName());
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					sd = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
+					sd.getName();
+	
+					//load attributes
+					attributes = new ArrayList<SurveyDesignSamplingUnitAttribute>();
+					attributes.addAll(sd.getSamplingUnitAttributes());
+					Collections.sort(attributes, new Comparator<SurveyDesignSamplingUnitAttribute>() {
+						@Override
+						public int compare(SurveyDesignSamplingUnitAttribute arg0,
+								SurveyDesignSamplingUnitAttribute arg1) {
+							return Collator.getInstance().compare(arg0.getSamplingUnitAttribute().getName(),
+									arg1.getSamplingUnitAttribute().getName());
+						}
+					});
+					//ensure fields are loaded
+					for(SurveyDesignSamplingUnitAttribute a: attributes){
+						a.getSamplingUnitAttribute().getName();
+						a.getSamplingUnitAttribute().getKeyId();
+						a.getSamplingUnitAttribute().getType();
 					}
-				});
-				//ensure fields are loaded
-				for(SurveyDesignSamplingUnitAttribute a: attributes){
-					a.getSamplingUnitAttribute().getName();
-					a.getSamplingUnitAttribute().getKeyId();
-					a.getSamplingUnitAttribute().getType();
-				}
-				
-				//load units
-				units = s.createCriteria(SamplingUnit.class)
-						.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
-						.list(); 
-				for(SamplingUnit u : units){
-					for (SamplingUnitAttributeValue v:  u.getAttributes()){
-						v.getSamplingUnitAttribute().getKeyId();
-						if (v.getAttributeListItem() != null){
-							v.getAttributeListItem().getName();
+					
+					//load units
+					units = QueryFactory.buildQuery(s, SamplingUnit.class,"surveyDesign", sd).getResultList(); //$NON-NLS-1$
+					
+					for(SamplingUnit u : units){
+						for (SamplingUnitAttributeValue v:  u.getAttributes()){
+							v.getSamplingUnitAttribute().getKeyId();
+							if (v.getAttributeListItem() != null){
+								v.getAttributeListItem().getName();
+							}
 						}
 					}
+				}catch (Exception ex){
+					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+				}finally{
+					s.getTransaction().rollback();
 				}
-			}catch (Exception ex){
-				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
-				s = null;
 			}
 			
 			//update ui
@@ -456,23 +452,22 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		if (suTable.getSelection().isEmpty()) return;
 		 SamplingUnitStateDialog d = new SamplingUnitStateDialog(getSite().getShell());
 		 if (d.open() == SamplingUnitStateDialog.OK){
-			 Session s = HibernateManager.openSession();
-			 s.beginTransaction();
-			 try{
-				 IStructuredSelection selection = (IStructuredSelection) suTable.getSelection();
-				 for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-					 Object item = (Object) iterator.next();
-					 if (item instanceof SamplingUnit){
-						 ((SamplingUnit) item).setState(d.getState());
-						 s.saveOrUpdate(item);
+			 try(Session s = HibernateManager.openSession()){
+				 s.beginTransaction();
+				 try{
+					 IStructuredSelection selection = (IStructuredSelection) suTable.getSelection();
+					 for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+						 Object item = (Object) iterator.next();
+						 if (item instanceof SamplingUnit){
+							 ((SamplingUnit) item).setState(d.getState());
+							 s.saveOrUpdate(item);
+						 }
 					 }
+					 s.getTransaction().commit();
+				 }catch (Exception ex) {
+					EcologicalRecordsPlugIn.displayLog(Messages.SamplingUnitEditorPage_SaveErrorMsg + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+					return;
 				 }
-				 s.getTransaction().commit();
-			 }catch (Exception ex) {
-				EcologicalRecordsPlugIn.displayLog(Messages.SamplingUnitEditorPage_SaveErrorMsg + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-				return;
-			 }finally{
-				 s.close();
 			 }					 
 			 SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, editor.getSurveyDesign());
 		 }	
@@ -515,32 +510,31 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 						InterruptedException {
 					monitor.beginTask(Messages.SamplingUnitEditorPage_DeleteProgress1, toDelete.size());
 					
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					try{
-						for (final SamplingUnit delete : toDelete){
-							monitor.subTask(MessageFormat.format(Messages.SamplingUnitEditorPage_DeleteProgress2, new Object[]{delete.getId()}));
-							try{
-								DeleteManager.canDelete(delete, s);
-								s.delete(delete);
-							}catch (final Exception ex){
-								getSite().getShell().getDisplay().syncExec(new Runnable(){
-									@Override
-									public void run() {
-										EcologicalRecordsPlugIn.log(null, ex);
-										MessageDialog.openError(pmd.getShell(), Messages.SamplingUnitEditorPage_DeleteDialogTitle, MessageFormat.format(Messages.SamplingUnitEditorPage_ErrorDeletingSu, new Object[]{delete.getId()}) + "\n\n" + ex.getMessage()); //$NON-NLS-1$
-									}
-									
-								});
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try{
+							for (final SamplingUnit delete : toDelete){
+								monitor.subTask(MessageFormat.format(Messages.SamplingUnitEditorPage_DeleteProgress2, new Object[]{delete.getId()}));
+								try{
+									DeleteManager.canDelete(delete, s);
+									s.delete(delete);
+								}catch (final Exception ex){
+									getSite().getShell().getDisplay().syncExec(new Runnable(){
+										@Override
+										public void run() {
+											EcologicalRecordsPlugIn.log(null, ex);
+											MessageDialog.openError(pmd.getShell(), Messages.SamplingUnitEditorPage_DeleteDialogTitle, MessageFormat.format(Messages.SamplingUnitEditorPage_ErrorDeletingSu, new Object[]{delete.getId()}) + "\n\n" + ex.getMessage()); //$NON-NLS-1$
+										}
+										
+									});
+								}
+								monitor.worked(1);
 							}
-							monitor.worked(1);
+							s.getTransaction().commit();
+						}catch (Exception ex){
+							EcologicalRecordsPlugIn.log(Messages.SamplingUnitEditorPage_ErrorDeletingSu2 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+							return;
 						}
-						s.getTransaction().commit();
-					}catch (Exception ex){
-						EcologicalRecordsPlugIn.log(Messages.SamplingUnitEditorPage_ErrorDeletingSu2 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-						return;
-					}finally{
-						s.close();
 					}
 					
 					//fire events
@@ -730,7 +724,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 				suTable.getTable().setSortColumn(column.getColumn());
 				suTable.getTable().setSortDirection(sortDirection);
 				sortColumn = labelProvider;
-				suTable.setSorter(viewerComparator);		
+				suTable.setComparator(viewerComparator);		
 				suTable.refresh();
 			}
 			

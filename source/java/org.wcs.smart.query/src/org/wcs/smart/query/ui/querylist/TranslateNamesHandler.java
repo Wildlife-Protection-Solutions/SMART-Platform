@@ -46,6 +46,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandler {
 
 	@Execute
@@ -63,15 +64,13 @@ public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandle
 		NamedItem toUpdate = null;
 		if (o instanceof QueryEditorInput){
 			QueryEditorInput input = (QueryEditorInput)o;
-			Session s = HibernateManager.openSession();
-			try{
+			
+			try(Session s = HibernateManager.openSession()){
 				s.getTransaction().begin();
 				toUpdate = QueryHibernateManager.getInstance().findQuery(s, input.getUuid(), input.getType());
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(Messages.TranslateNamesHandler_LoadQueryError + ex.getMessage(), ex);
-			}finally{
-				s.close();
 			}
 		}else if  (o instanceof NamedItem){
 			toUpdate = (NamedItem)o;

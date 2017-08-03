@@ -51,39 +51,36 @@ public class DataQueueCtMissionJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		
 		return dropTables();
 	}
 
-	
 	private IStatus dropTables(){
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-
-			//drop all tables
-			for (int i = 0; i < TABLES.length; i ++){
-				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+			try {
+				//drop all tables
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				
+				//clear version
+				HibernateManager.setPlugInVersion(PlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.DataQueueCtMissionJob_ErrorMsg, e);
+					}
+				});
+				return new Status(IStatus.ERROR, PlugIn.PLUGIN_ID, 1, "Error uninstalling Cybertracker Connect DataQueue Processor " + e.getLocalizedMessage(), e);  //$NON-NLS-1$
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
 				}
 			}
-			
-			//clear version
-			HibernateManager.setPlugInVersion(PlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-		} catch (final Exception e) {
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(Messages.DataQueueCtMissionJob_ErrorMsg, e);
-				}
-			});
-			return new Status(IStatus.ERROR, PlugIn.PLUGIN_ID, 1, "Error uninstalling Cybertracker Connect DataQueue Processor " + e.getLocalizedMessage(), e);  //$NON-NLS-1$
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().rollback();
-			}
-			session.close();
 		}
 		return Status.OK_STATUS;
 	}

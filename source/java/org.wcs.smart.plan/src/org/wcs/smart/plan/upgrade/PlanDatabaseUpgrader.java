@@ -43,25 +43,24 @@ public class PlanDatabaseUpgrader implements IDatabaseUpgrader {
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.PlanDatabaseUpgrader_UpgradeTask, 1);
-		Session session = HibernateManager.openSession();
-		try{
-			session.beginTransaction();
-			Map<String, String> versions = UpgradeEngine.getVersions(session);
-			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			String currentPluginVersion = versions.get(SmartPlanPlugIn.PLUGIN_ID);
-			
-			if (currentPluginVersion == null) {
-				monitor.subTask(Messages.PlanDatabaseUpgrader_UpgradeTask);
-				(new AddPlanJob()).installPlugin(session);
-			}else{
-				upgrade(currentPluginVersion, session);
+		try(Session session = HibernateManager.openSession()) {
+			try{
+				session.beginTransaction();
+				Map<String, String> versions = UpgradeEngine.getVersions(session);
+				if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+				String currentPluginVersion = versions.get(SmartPlanPlugIn.PLUGIN_ID);
+				
+				if (currentPluginVersion == null) {
+					monitor.subTask(Messages.PlanDatabaseUpgrader_UpgradeTask);
+					(new AddPlanJob()).installPlugin(session);
+				}else{
+					upgrade(currentPluginVersion, session);
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				throw ex;
 			}
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			throw ex;
-		} finally { 
-			session.close();
 		}
 		monitor.done();
 	}
@@ -102,7 +101,7 @@ public class PlanDatabaseUpgrader implements IDatabaseUpgrader {
 			"GRANT ALL PRIVILEGES ON smart.patrol_plan to analyst",
 		};
 		for (String s : sql){
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, SmartPlanPlugIn.DB_VERSION_2, session);
 	}

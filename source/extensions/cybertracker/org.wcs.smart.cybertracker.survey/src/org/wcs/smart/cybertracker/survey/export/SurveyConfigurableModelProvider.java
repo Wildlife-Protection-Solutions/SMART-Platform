@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.survey.export;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.export.IConfigurableModelProvider;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
@@ -53,18 +54,19 @@ public class SurveyConfigurableModelProvider implements IConfigurableModelProvid
 
 	@Override
 	public ConfigurableModel getConfigurableModel(Session session, IProgressMonitor monitor) {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.SurveyConfigurableModelProvider_Task_FetchConfigurableModel, 1);
 		SurveyDesign sd = SurveyHibernateManager.getInstance().getSurveyDesign(input.getSurveyDesignKey(), session);
 		if (sd != null) {
 			if (sd.getConfigurableModel() != null) {
-				monitor.subTask(Messages.SurveyConfigurableModelProvider_Task_FetchConfigurableModel);
 				return DataentryHibernateManager.getFullConfigurableModel(sd.getConfigurableModel().getUuid(), session);
 			} else {
 				if (dmWrapper == null) {
 					dmWrapper = new DataModelWrapper();
 				}
-				return dmWrapper.buildConfigurableModel(session, monitor);
+				return dmWrapper.buildConfigurableModel(session, progress.split(1));
 			}
 		}
+		progress.setWorkRemaining(0);
 		return null;
 	}
 

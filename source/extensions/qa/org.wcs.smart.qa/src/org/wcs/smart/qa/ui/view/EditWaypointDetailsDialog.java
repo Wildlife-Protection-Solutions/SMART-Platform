@@ -212,8 +212,7 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 	 * ui controls
 	 */
 	private void initControls(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			waypoint = (Waypoint) s.get(Waypoint.class, waypointUuid);
 			if (waypoint != null){
 				originalX = waypoint.getX();
@@ -222,8 +221,6 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 				setErrorMessage(Messages.EditWaypointDetailsDialog_WaypointNotFound);
 				return;
 			}
-		}finally{
-			s.close();
 		}
 		updateLabels();
 		setTitle(MessageFormat.format(Messages.EditWaypointDetailsDialog_DialogTitle, waypoint.getId(), DateFormat.getDateTimeInstance().format(waypoint.getDateTime())));
@@ -243,21 +240,20 @@ public abstract class EditWaypointDetailsDialog extends TitleAreaDialog implemen
 		validate();
 		if (!getButton(IDialogConstants.OK_ID).isEnabled()) return;	//data error
 
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			Waypoint wp = (Waypoint) s.get(Waypoint.class, waypointUuid);
-			wp.setX(waypoint.getX());
-			wp.setY(waypoint.getY());
-			waypoint.setX(wp.getX());
-			waypoint.setY(wp.getY());
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			QaPlugIn.displayLog(Messages.EditWaypointDetailsDialog_SaveError + ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			try{
+				s.beginTransaction();
+				Waypoint wp = (Waypoint) s.get(Waypoint.class, waypointUuid);
+				wp.setX(waypoint.getX());
+				wp.setY(waypoint.getY());
+				waypoint.setX(wp.getX());
+				waypoint.setY(wp.getY());
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				QaPlugIn.displayLog(Messages.EditWaypointDetailsDialog_SaveError + ex.getMessage(), ex);
+				return;
+			}
 		}
 		WaypointEventManager.getInstance().waypointModified(waypoint);
 		fireEvents(waypoint);

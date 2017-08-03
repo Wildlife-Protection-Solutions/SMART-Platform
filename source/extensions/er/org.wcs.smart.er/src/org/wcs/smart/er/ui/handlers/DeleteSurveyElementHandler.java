@@ -41,7 +41,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -58,6 +57,7 @@ import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
@@ -68,6 +68,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DeleteSurveyElementHandler {
 
 	//EG: instead of selectionService I originally made user of
@@ -114,15 +115,12 @@ public class DeleteSurveyElementHandler {
 						InterruptedException {
 					
 						monitor.beginTask(Messages.DeleteSurveyElementHandler_ProgressTaskName, nodes.size());
-						Session s = HibernateManager.openSession();
-						try{
+						try(Session s = HibernateManager.openSession()){
 							for (SurveyListTreeNode node : nodes){
 								monitor.subTask(MessageFormat.format(Messages.DeleteSurveyElementHandler_ProgressItem, new Object[]{node.getLabel()}));
 								deleteItem(node,s);
 								monitor.worked(1);
 							}
-						}finally{
-							s.close();
 						}
 					}
 				});
@@ -151,15 +149,12 @@ public class DeleteSurveyElementHandler {
 						InterruptedException {
 					
 						monitor.beginTask(Messages.DeleteSurveyElementHandler_ProgressTaskName, nodes.size());
-						Session s = HibernateManager.openSession();
-						try{
+						try(Session s = HibernateManager.openSession()){
 							for (SurveyDesignEditorInput design : designs){
 								monitor.subTask(MessageFormat.format(Messages.DeleteSurveyElementHandler_ProgressItem, new Object[]{design.getName()}));
 								deleteSurveyDesign(design.getUuid(), s);
 								monitor.worked(1);
 							}
-						}finally{
-							s.close();
 						}
 					}
 				});
@@ -190,7 +185,6 @@ public class DeleteSurveyElementHandler {
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public static boolean deleteSurveyDesign(UUID uuid, Session session) {
 		String id = UuidUtils.uuidToString(uuid);
 		session.beginTransaction();
@@ -208,9 +202,7 @@ public class DeleteSurveyElementHandler {
 		
 			if (DeleteManager.canDelete(design, session)){
 				List<File> dirsToDelete = new ArrayList<File>();
-				
-				List<Survey> surveys = session.createCriteria(Survey.class)
-						.add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
+				List<Survey> surveys = QueryFactory.buildQuery(session, Survey.class, "surveyDesign", design).getResultList(); //$NON-NLS-1$
 				for (Survey survey : surveys){
 					//delete all waypoints
 					if (survey.getMissions() != null){
@@ -230,8 +222,7 @@ public class DeleteSurveyElementHandler {
 					session.delete(survey);
 				}
 				//delete sampling unit
-				List<SamplingUnit> units = session.createCriteria(SamplingUnit.class)
-						.add(Restrictions.eq("surveyDesign", design)).list(); //$NON-NLS-1$
+				List<SamplingUnit> units = QueryFactory.buildQuery(session, SamplingUnit.class, "surveyDesign", design).getResultList(); //$NON-NLS-1$
 				for (SamplingUnit unit:  units){
 					session.delete(unit);
 				}

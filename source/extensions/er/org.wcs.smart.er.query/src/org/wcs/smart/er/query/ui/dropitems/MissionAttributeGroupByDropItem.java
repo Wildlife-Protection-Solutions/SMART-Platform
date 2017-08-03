@@ -39,15 +39,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolTip;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -88,36 +87,34 @@ public class MissionAttributeGroupByDropItem extends DropItem implements
 	 * 
 	 * @see org.wcs.smart.query.ui.formulaDnd.IGroupByDropItem#getListItem()
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			Criteria c = session.createCriteria(MissionAttributeListItem.class)
-					.add(Restrictions.eq("attribute", attribute)); //$NON-NLS-1$
-			List<MissionAttributeListItem> listitems = c.list();
-			
-			for (MissionAttributeListItem it : listitems) {
-				items.add(new ListItem(null, it.getName(), it.getKeyId()));
-			}
-			if (filters != null) {
-				for (ListItem filter : filters) {
-					// add disabled items
-					if (!items.contains(filter)) {
-						items.add(filter);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				List<MissionAttributeListItem> listitems = QueryFactory.buildQuery(session, MissionAttributeListItem.class, "attribute", attribute).getResultList(); //$NON-NLS-1$
+				
+				for (MissionAttributeListItem it : listitems) {
+					items.add(new ListItem(null, it.getName(), it.getKeyId()));
+				}
+				if (filters != null) {
+					for (ListItem filter : filters) {
+						// add disabled items
+						if (!items.contains(filter)) {
+							items.add(filter);
+						}
 					}
 				}
+				
+			} catch (Exception ex) {
+				ERQueryPlugIn
+						.displayLog(
+								Messages.MissionAttributeGroupByDropItem_ListItemLoadError,
+								ex);
+			}finally{
+				session.getTransaction().rollback();
 			}
-			session.getTransaction().rollback();
-		} catch (Exception ex) {
-			ERQueryPlugIn
-					.displayLog(
-							Messages.MissionAttributeGroupByDropItem_ListItemLoadError,
-							ex);
-		}finally{
-			session.close();
 		}
 		return items;
 	}

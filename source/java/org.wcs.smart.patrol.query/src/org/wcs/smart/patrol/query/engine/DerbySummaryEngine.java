@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,6 +32,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
@@ -209,21 +212,19 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbySummaryEngine_Progress_RunningQuery, 2);
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				//need to make sure we cleanup all temp tables correctly
 				c.setAutoCommit(true);
-				monitor.beginTask(Messages.DerbySummaryEngine_Progress_RunningQuery, ldef.getValuePart().getValueItems().size() + 5);
+				
 
 				try {
-					monitor.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
+					progress.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
+					progress.split(1);
 					try{
 						getHeaderInfo(query, sumResults, session);
 					}catch (Exception ex){
 						throw new SQLException(ex);
-					}
-					monitor.worked(1);
-					if (monitor.isCanceled()){
-						return;
 					}
 					
 					HasObservationValueVisitor vv = new HasObservationValueVisitor();
@@ -270,21 +271,18 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupByParts, ldef.getValuePart(),
-							cafilter, monitor);
+							cafilter, progress.split(1));
 					
-					if (monitor.isCanceled() || data == null){
-						return ;
-					}
+					
+					progress.checkCanceled();
+					if (data == null) return;
 					sumResults.setData(data);
 					
-					if (monitor.isCanceled()){
-						return;
-					}
-					monitor.worked(1);
+				}catch (OperationCanceledException ex) {
+					return;
 				} finally {
 					// ensure temporary tables get dropped
 					dropTableInternal(c);
-					monitor.done();
 					c.setAutoCommit(false);
 				}
 			}
@@ -380,18 +378,14 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			GroupByPart groupBy, 
 			ValuePart values, ConservationAreaFilter caFilter,
 			IProgressMonitor monitor) throws SQLException{
-	
+		SubMonitor progress = SubMonitor.convert(monitor, values.getValueItems().size());
+		
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
-			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
-			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, caFilter, true, monitor) ; 
+			progress.subTask(MessageFormat.format(Messages.DerbySummaryEngine_ProgressValueProgressLabel,it.asString()));
+			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, caFilter, true, progress.split(1)) ; 
 			if (data != null){
 				results.putAll( data );	
-			}
-			
-			monitor.worked(1);
-			if (monitor.isCanceled()){
-				return null;
 			}
 		}
 		return results;
@@ -500,6 +494,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			//don't do anything here - each value is dealt with separatly in the getCombindValue function
 		}
 			
+		monitor.subTask(MessageFormat.format(Messages.DerbySummaryEngine_ProgressValueProgressLabel,it.asString()));
 		String cacheKey = it.asString() + "_" + groupBy.asString() + "_" + dataTable; //$NON-NLS-1$ //$NON-NLS-2$
 		HashMap<SummaryResultKey, Double> results = cachedValueToResults.get(cacheKey); 
 		if (results != null){

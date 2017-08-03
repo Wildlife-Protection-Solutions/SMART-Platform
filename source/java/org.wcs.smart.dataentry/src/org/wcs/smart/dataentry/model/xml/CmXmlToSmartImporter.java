@@ -32,13 +32,16 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
@@ -71,6 +74,7 @@ import org.wcs.smart.dataentry.model.xml.generated.NameType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.dataentry.model.xml.generated.TreeNodeType;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.OptionSelectionDialog;
 import org.wcs.smart.util.SharedUtils;
@@ -542,21 +546,23 @@ public class CmXmlToSmartImporter {
 		String mapKey = hkey != null ? hkey : key;
 		Category c = catLookup.get(mapKey);
 		if (c == null) {
-			Criteria query = session.createCriteria(Category.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("keyId", key)); //$NON-NLS-1$
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<Category> cq = cb.createQuery(Category.class);
+			Root<Category> from = cq.from(Category.class);
+			Predicate[] filters = new Predicate[hkey != null ? 3 : 2];
+			filters[0] = cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+			filters[1] = cb.equal(from.get("keyId"), key); //$NON-NLS-1$
 			if (hkey != null) {
-				query = query.add(Restrictions.eq("hkey", hkey)); //$NON-NLS-1$
+				filters[2] = cb.equal(from.get("hkey"), hkey); //$NON-NLS-1$
 			}
-			List<?> lst = query.list();
+			List<Category> lst = session.createQuery(cq).list();
 			if (lst.size() > 0) {
-				c = (Category) lst.get(0);
+				c = lst.get(0);
 				catLookup.put(mapKey, c);
 			}
 			if (lst.size() > 1) {
 				StringBuilder sb = new StringBuilder();
-				for (Object object : lst) {
-					Category cat = (Category) object;
+				for (Category cat : lst) {
 					if (sb.length() > 0) {
 						sb.append("; "); //$NON-NLS-1$
 					}
@@ -579,10 +585,9 @@ public class CmXmlToSmartImporter {
 			return null;
 		Attribute a = attrLookup.get(key);
 		if (a == null) {
-			Criteria query = session.createCriteria(Attribute.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("keyId", key)); //$NON-NLS-1$
-			a = (Attribute) query.uniqueResult();
+			a = QueryFactory.buildQuery(session, Attribute.class,
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"keyId", key}).uniqueResult(); //$NON-NLS-1$
 			attrLookup.put(key, a);
 		}
 		if (a == null) {
@@ -596,10 +601,9 @@ public class CmXmlToSmartImporter {
 			return null;
 		AttributeListItem a = listItemLookup.get(key);
 		if (a == null) {
-			Criteria query = session.createCriteria(AttributeListItem.class)
-					.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
-					.add(Restrictions.eq("keyId", key)); //$NON-NLS-1$
-			a = (AttributeListItem) query.uniqueResult();
+			a = QueryFactory.buildQuery(session, AttributeListItem.class,
+					new Object[] {"attribute", attribute}, //$NON-NLS-1$
+					new Object[] {"keyId", key}).uniqueResult(); //$NON-NLS-1$
 			listItemLookup.put(key, a);
 		}
 		if (a == null) {
@@ -615,21 +619,25 @@ public class CmXmlToSmartImporter {
 		String mapKey = hkey != null ? hkey : key;
 		AttributeTreeNode a = treeNodeLookup.get(mapKey);
 		if (a == null) {
-			Criteria query = session.createCriteria(AttributeTreeNode.class)
-					.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
-					.add(Restrictions.eq("keyId", key)); //$NON-NLS-1$
+			
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<AttributeTreeNode> cq = cb.createQuery(AttributeTreeNode.class);
+			Root<AttributeTreeNode> from = cq.from(AttributeTreeNode.class);
+			Predicate[] filters = new Predicate[hkey != null ? 3 : 2];
+			filters[0] = cb.equal(from.get("attribute"), attribute); //$NON-NLS-1$
+			filters[1] = cb.equal(from.get("keyId"), key); //$NON-NLS-1$
 			if (hkey != null) {
-				query = query.add(Restrictions.eq("hkey", hkey)); //$NON-NLS-1$
+				filters[2] = cb.equal(from.get("hkey"), hkey); //$NON-NLS-1$
 			}
-			List<?> lst = query.list();
+			
+			List<AttributeTreeNode> lst = session.createQuery(cq).list();
 			if (lst.size() > 0) {
-				a = (AttributeTreeNode) lst.get(0);
+				a = lst.get(0);
 				treeNodeLookup.put(mapKey, a);
 			}
 			if (lst.size() > 1) {
 				StringBuilder sb = new StringBuilder();
-				for (Object object : lst) {
-					AttributeTreeNode n = (AttributeTreeNode) object;
+				for (AttributeTreeNode n : lst) {
 					if (sb.length() > 0) {
 						sb.append("; "); //$NON-NLS-1$
 					}

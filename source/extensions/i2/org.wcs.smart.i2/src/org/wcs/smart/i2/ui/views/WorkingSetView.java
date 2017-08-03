@@ -125,6 +125,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class WorkingSetView {
 	
 	public static final String ID = "org.wcs.smart.i2.ui.view.workingset"; //$NON-NLS-1$
@@ -248,17 +249,16 @@ public class WorkingSetView {
 				}
 				
 				//save date filter
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
-					IntelWorkingSet ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-					ws.setEntityDateFilter(dateFilter);
-					s.getTransaction().commit();
-				}catch (Exception ex){
-					Intelligence2PlugIn.displayLog(Messages.WorkingSetView_SaveDateError, ex);
-					s.getTransaction().rollback();
-				}finally{
-					s.close();
+					try{
+						IntelWorkingSet ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
+						ws.setEntityDateFilter(dateFilter);
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						Intelligence2PlugIn.displayLog(Messages.WorkingSetView_SaveDateError, ex);
+						s.getTransaction().rollback();
+					}
 				}
 				
 				context.get(IEventBroker.class).send(IntelEvents.ACTIVE_WS_LAYER_DATEFILTER, dFilters);
@@ -325,68 +325,67 @@ public class WorkingSetView {
 					}
 					
 					//update working set
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
-						IntelWorkingSet ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-						
-						for (UUID uuid : newEvent.allVisible){
-							boolean found = false;
-							for (IntelWorkingSetEntity layer : ws.getEntities()){
-								if (uuid.equals(layer.getEntity().getUuid())){
-									layer.setIsVisible(true);
-									found = true;
-									break;
+						try {
+							IntelWorkingSet ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
+							
+							for (UUID uuid : newEvent.allVisible){
+								boolean found = false;
+								for (IntelWorkingSetEntity layer : ws.getEntities()){
+									if (uuid.equals(layer.getEntity().getUuid())){
+										layer.setIsVisible(true);
+										found = true;
+										break;
+									}
 								}
-							}
-							if (found) break;
-							for (IntelWorkingSetRecord layer : ws.getRecords()){
-								if (uuid.equals(layer.getRecord().getUuid())){
-									layer.setIsVisible(true);
-									found = true;
-									break;
+								if (found) break;
+								for (IntelWorkingSetRecord layer : ws.getRecords()){
+									if (uuid.equals(layer.getRecord().getUuid())){
+										layer.setIsVisible(true);
+										found = true;
+										break;
+									}
 								}
-							}
-							if (found) break;
-							for (IntelWorkingSetQuery layer : ws.getQueries()){
-								if (uuid.equals(layer.getQuery().getUuid())){
-									layer.setIsVisible(true);
-									break;
+								if (found) break;
+								for (IntelWorkingSetQuery layer : ws.getQueries()){
+									if (uuid.equals(layer.getQuery().getUuid())){
+										layer.setIsVisible(true);
+										break;
+									}
 								}
-							}
-						};
-
-						for (UUID uuid : newEvent.notVisible){
-							boolean found = false;
-							for (IntelWorkingSetEntity layer : ws.getEntities()){
-								if (uuid.equals(layer.getEntity().getUuid())){
-									layer.setIsVisible(false);
-									found = true;
-									break;
+							};
+	
+							for (UUID uuid : newEvent.notVisible){
+								boolean found = false;
+								for (IntelWorkingSetEntity layer : ws.getEntities()){
+									if (uuid.equals(layer.getEntity().getUuid())){
+										layer.setIsVisible(false);
+										found = true;
+										break;
+									}
 								}
-							}
-							if (found) break;
-							for (IntelWorkingSetRecord layer : ws.getRecords()){
-								if (uuid.equals(layer.getRecord().getUuid())){
-									layer.setIsVisible(false);
-									found = true;
-									break;
+								if (found) break;
+								for (IntelWorkingSetRecord layer : ws.getRecords()){
+									if (uuid.equals(layer.getRecord().getUuid())){
+										layer.setIsVisible(false);
+										found = true;
+										break;
+									}
 								}
-							}
-							if (found) break;
-							for (IntelWorkingSetQuery layer : ws.getQueries()){
-								if (uuid.equals(layer.getQuery().getUuid())){
-									layer.setIsVisible(false);
-									break;
+								if (found) break;
+								for (IntelWorkingSetQuery layer : ws.getQueries()){
+									if (uuid.equals(layer.getQuery().getUuid())){
+										layer.setIsVisible(false);
+										break;
+									}
 								}
-							}
-						};
-						s.getTransaction().commit();
-					}catch(Exception ex){
-						s.getTransaction().rollback();
-						Intelligence2PlugIn.log(Messages.WorkingSetView_SaveVisibilityError + ex.getMessage(), ex);
-					}finally{
-						s.close();
+							};
+							s.getTransaction().commit();
+						}catch(Exception ex){
+							s.getTransaction().rollback();
+							Intelligence2PlugIn.log(Messages.WorkingSetView_SaveVisibilityError + ex.getMessage(), ex);
+						}
 					}
 					context.get(IEventBroker.class).send(IntelEvents.ACTIVE_WS_LAYER_VISIBILITY, newEvent);
 
@@ -571,31 +570,21 @@ public class WorkingSetView {
 		List<IntelRecordObservationQuery> queries = new ArrayList<>();
 		for (IntelWorkingSetItem toDelete: toDeleteItems){
 			if (toDelete.getCategory() == IntelWorkingSetCategory.ENTITY){
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					IntelEntity i = (IntelEntity) s.get(IntelEntity.class, toDelete.getUuid());
 					i.getIdAttributeAsText();
 					entities.add(i);
-				}finally{
-					s.close();
 				}
 			}else if (toDelete.getCategory() == IntelWorkingSetCategory.RECORD){
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					IntelRecord i = (IntelRecord) s.get(IntelRecord.class, toDelete.getUuid());
 					records.add(i);
-				}finally{
-					s.close();
 				}
 			}else if (toDelete.getCategory() == IntelWorkingSetCategory.QUERIES){
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					IntelRecordObservationQuery i = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, toDelete.getUuid());
 					queries.add(i);
-				}finally{
-					s.close();
-				}
-				
+				}	
 			}
 		}
 		WorkingSetManager.INSTANCE.removeRecordFromWorkingSet(records, context);
@@ -613,21 +602,15 @@ public class WorkingSetView {
 				
 				if (toOpen.getCategory() == IntelWorkingSetCategory.ENTITY){
 					IntelEntity i = null;
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						i = (IntelEntity) s.get(IntelEntity.class, toOpen.getUuid());
 						i.getIdAttributeAsText();
-					}finally{
-						s.close();
 					}
 					(new OpenEntityHandler()).openEntity(i, context);
 				}else if (toOpen.getCategory() == IntelWorkingSetCategory.RECORD){
 					IntelRecord i = null;
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						i = (IntelRecord) s.get(IntelRecord.class, toOpen.getUuid());
-					}finally{
-						s.close();
 					}
 					(new OpenRecordHandler()).openRecord(i, false);
 				}else if (toOpen.getCategory() == IntelWorkingSetCategory.QUERIES){
@@ -649,29 +632,28 @@ public class WorkingSetView {
 
 	private void copyWorkingSet(){
 		IntelWorkingSet set = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			set = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-			String newName = WorkingSetView.getWorkingsetName(activeShell, MessageFormat.format(Messages.WorkingSetView_DefaultWsName, set.getName()));
-			if (newName != null){
-				set = WorkingSetManager.INSTANCE.clone(set);
-				set.setName(newName);
-				set.updateName(SmartDB.getCurrentLanguage(), newName);
-				set.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newName);
-				s.save(set);
-				s.getTransaction().commit();
-			}else{
-				set = null;
+			try {
+				set = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
+				String newName = WorkingSetView.getWorkingsetName(activeShell, MessageFormat.format(Messages.WorkingSetView_DefaultWsName, set.getName()));
+				if (newName != null){
+					set = WorkingSetManager.INSTANCE.clone(set);
+					set.setName(newName);
+					set.updateName(SmartDB.getCurrentLanguage(), newName);
+					set.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newName);
+					s.save(set);
+					s.getTransaction().commit();
+				}else{
+					set = null;
+					s.getTransaction().rollback();
+				}
+				
+			}catch (Exception ex){
 				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetView_DeleteError, lblWorkingSet.getText(), ex.getMessage()), ex);
+				return;
 			}
-			
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetView_DeleteError, lblWorkingSet.getText(), ex.getMessage()), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		if (set != null){
 			context.get(IEventBroker.class).send(IntelEvents.WS_NEW, set);
@@ -856,16 +838,15 @@ public class WorkingSetView {
 		workingSet.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), name);
 		workingSet.setName(name);
 		workingSet.setEntityDateFilter(DateFilter.LAST_YEAR.name());
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			s.save(workingSet);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetView_NewWsError, ex.getMessage()), ex);
-		}finally{
-			s.close();
+			try {
+				s.save(workingSet);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				if (s.getTransaction().isActive())s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.WorkingSetView_NewWsError, ex.getMessage()), ex);
+			}
 		}
 		return workingSet;
 	}
@@ -907,8 +888,7 @@ public class WorkingSetView {
 				
 				List<IntelWorkingSetItem> items = new ArrayList<IntelWorkingSetItem>();
 				if (workingSetUuid != null){
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, workingSetUuid);
 						if (ws != null){
 							ws.getName();
@@ -950,8 +930,6 @@ public class WorkingSetView {
 								items.add(i);
 							}
 						}
-					}finally{
-						s.close();
 					}
 				}
 				

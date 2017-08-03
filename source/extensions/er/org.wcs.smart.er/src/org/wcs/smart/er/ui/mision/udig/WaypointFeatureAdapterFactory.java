@@ -38,8 +38,9 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (adapterType == Waypoint.class) {
 			if (adaptableObject instanceof SurveyFeature){
 				SurveyFeature sf = (SurveyFeature)adaptableObject;
@@ -55,17 +56,17 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 					}
 					Waypoint wp = new Waypoint();
 					wp.setUuid(wpuuid);
-					return wp;
+					return (T)wp;
 				}
 			}else if (adaptableObject instanceof SurveyWaypoint){
-				return ((SurveyWaypoint)adaptableObject).getWaypoint();
+				return (T)((SurveyWaypoint)adaptableObject).getWaypoint();
 			}
 		}
 		return null;
 	}
 
 	@Override
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		return new Class[]{Waypoint.class};
 	}
 

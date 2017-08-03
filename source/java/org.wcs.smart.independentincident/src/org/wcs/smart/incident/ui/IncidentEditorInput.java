@@ -94,7 +94,7 @@ public class IncidentEditorInput implements IEditorInput {
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
 

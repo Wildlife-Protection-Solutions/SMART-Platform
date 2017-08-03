@@ -25,9 +25,7 @@ import java.awt.Point;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -100,7 +98,6 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -197,25 +194,23 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		protected IStatus run(IProgressMonitor monitor) {
 			QueryEditorInput input = (QueryEditorInput) PatrolQueryResultsEditor.this.getEditorInput();
 			
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				
-				Query tquery = (PatrolQuery) session.load(PatrolQuery.class, input.getUuid());
-				query = new QueryProxy(tquery);
-				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
-				
-				projection = ProjectionUtils.INSTANCE.createProjectionProvider(session, tquery.getConservationArea()).getProjection();
-			}catch (Exception ex){
-				QueryPlugIn.displayLog(
-						MessageFormat.format(Messages.PatrolQueryResultsEditor_CouldNotParseQueryError, new Object[]{ input.getName() }) + ex.getLocalizedMessage(), ex);
-								
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					
+					Query tquery = (PatrolQuery) session.load(PatrolQuery.class, input.getUuid());
+					query = new QueryProxy(tquery);
+					query.getQueryType().getDropItemFactory().generateDropItems(query, session);
+					
+					projection = ProjectionUtils.INSTANCE.createProjectionProvider(session, tquery.getConservationArea()).getProjection();
+				}catch (Exception ex){
+					QueryPlugIn.displayLog(
+							MessageFormat.format(Messages.PatrolQueryResultsEditor_CouldNotParseQueryError, new Object[]{ input.getName() }) + ex.getLocalizedMessage(), ex);
+									
+				}finally{
+					session.getTransaction().rollback();
+				}
 			}
-			
-			
 			if (page1 != null){
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
@@ -615,25 +610,25 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		Job j = new Job("update drop items") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				final Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try{
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							try{
-								query.getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
-							}catch (Exception ex){
-								QueryPlugIn.log(ex.getMessage(), ex);
-							}
-						}});
-				}finally{
+				try(final Session session = HibernateManager.openSession()){
+					session.beginTransaction();
 					try{
-						session.getTransaction().rollback();
-					}catch(Exception ex){
-						QueryPlugIn.log(ex.getMessage(), ex);
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								try{
+									query.getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
+								}catch (Exception ex){
+									QueryPlugIn.log(ex.getMessage(), ex);
+								}
+							}});
+					}finally{
+						try{
+							session.getTransaction().rollback();
+						}catch(Exception ex){
+							QueryPlugIn.log(ex.getMessage(), ex);
+						}
 					}
-					session.close();
 				}
 				return Status.OK_STATUS;
 			}

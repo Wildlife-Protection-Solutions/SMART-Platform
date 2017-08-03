@@ -33,8 +33,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
@@ -322,10 +322,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		boolean isokay = false;
 		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
 		String smartDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
-		Session s = HibernateManager.openSession();
-		try{
-			SQLQuery q = s.createSQLQuery("SELECT version FROM smart.db_version WHERE plugin_id = ?"); //$NON-NLS-1$
-			q.setParameter(0, SmartPlugIn.PLUGIN_ID);
+		
+		try(Session s = HibernateManager.openSession()){
+			NativeQuery<?> q = s.createNativeQuery("SELECT version FROM smart.db_version WHERE plugin_id = ?"); //$NON-NLS-1$
+			q.setParameter(1, SmartPlugIn.PLUGIN_ID);
 			@SuppressWarnings("rawtypes")
 			List results = q.list();
 			if (results.size() > 0){
@@ -336,10 +336,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 			}
 		}catch (Exception ex){
 			//we cannot determine db version so we don't let the user login
-			throw new Exception(Messages.SmartPlugIn_CouldNotconnect + ex.getMessage(), ex);
-			
-		}finally{
-			s.close();
+			throw new Exception(Messages.SmartPlugIn_CouldNotconnect + ex.getMessage(), ex);	
 		}
 		if (!isokay){
 			throw new Exception(MessageFormat.format(Messages.SmartPlugIn_VersionErrorMessage, new Object[]{dbVersion, smartDbVersion}));

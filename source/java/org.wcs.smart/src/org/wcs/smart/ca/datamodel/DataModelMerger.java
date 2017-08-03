@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -159,14 +159,11 @@ public class DataModelMerger {
 				}
 			}
 			clone.setActiveChildren(clone.getChildren());
-		}
-		
-		
+		}	
 		return clone;
 	}
 
 	
-	@SuppressWarnings("unchecked")
 	private void mergeAttributeAggregations(Attribute a, ConservationArea[] ca, Session session){
 		List<Aggregation> aggs = new ArrayList<Aggregation>(a.getAggregations());
 		if (aggs.size() == 0){
@@ -174,7 +171,7 @@ public class DataModelMerger {
 		}
 		
 		String hql = "FROM Attribute a where a.keyId = :key and a.conservationArea in (:ca)"; //$NON-NLS-1$
-		Query q = session.createQuery(hql);
+		Query<Attribute> q = session.createQuery(hql, Attribute.class);
 		q.setParameter("key", a.getKeyId()); //$NON-NLS-1$
 		q.setParameterList("ca", ca); //$NON-NLS-1$
 		List<Attribute> results = q.list();
@@ -200,7 +197,7 @@ public class DataModelMerger {
 	 */
 	private boolean canKeep(Attribute a, ConservationArea[] ca, Session session){
 		String hql = "FROM Attribute WHERE keyId = :key AND conservationArea in (:ca)";//$NON-NLS-1$
-		Query q = session.createQuery(hql);
+		Query<Attribute> q = session.createQuery(hql, Attribute.class);
 		q.setParameter("key", a.getKeyId());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
 		List<Attribute> atts = q.list();
@@ -227,7 +224,7 @@ public class DataModelMerger {
 	 */
 	private boolean canKeep(Category c, ConservationArea[] ca, Session session){
 		String hql = "SELECT count(*) FROM Category WHERE hkey = :key AND conservationArea in (:ca)";//$NON-NLS-1$
-		Query q = session.createQuery(hql);
+		Query<?> q = session.createQuery(hql);
 		q.setParameter("key", c.getHkey());//$NON-NLS-1$
 		q.setParameterList("ca", ca);//$NON-NLS-1$
 		Long cnt = (Long) q.list().get(0);
@@ -250,7 +247,7 @@ public class DataModelMerger {
 	private boolean canKeep(CategoryAttribute c, ConservationArea[] ca, Session session){
 		String hql = "SELECT distinct a.conservationArea.uuid, a.keyId FROM CategoryAttribute ca join  ca.id.attribute a join ca.id.category c WHERE c.hkey = :ckey AND a.keyId = :akey and a.conservationArea in (:ca)";//$NON-NLS-1$
 		
-		Query q = session.createQuery(hql);
+		Query<?> q = session.createQuery(hql);
 		q.setParameter("ckey", c.getCategory().getHkey());//$NON-NLS-1$
 		q.setParameter("akey", c.getAttribute().getKeyId());//$NON-NLS-1$
 		q.setParameterList("ca", ca); //$NON-NLS-1$

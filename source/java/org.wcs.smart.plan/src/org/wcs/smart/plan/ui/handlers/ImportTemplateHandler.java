@@ -43,6 +43,7 @@ import org.wcs.smart.plan.report.ReportPlan;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ImportTemplateHandler {
 
 	@Execute

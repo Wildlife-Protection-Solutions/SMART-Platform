@@ -141,8 +141,7 @@ public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 
 			// update the data set design with the
 			// query's current runtime metadata
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				HashMap<String, Object> ctx = new HashMap<String, Object>();
 				ctx.put(BirtConstants.SESSION_PARAM, s);
 				
@@ -150,8 +149,6 @@ public class SmartPlanTargetDatasetWizardPage extends DataSetWizardPage {
 				customConn.open(connProps);
 				
 				updateDesign(dataSetDesign, customConn);	
-			}finally{
-				s.close();
 			}
 			
 			return true;

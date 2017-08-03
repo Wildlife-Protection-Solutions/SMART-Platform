@@ -24,9 +24,8 @@ package org.wcs.smart.patrol.internal.advisors;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Team;
@@ -44,8 +43,7 @@ public class TeamDeleteAdvisor  implements IDeleteAdvisor {
 		if (!(object instanceof Team)){
 			return Messages.TeamDeleteAdvisor_Error_InvalidObjectType;
 		}
-		
-		Long cnt = (Long) session.createCriteria(Patrol.class).add(Restrictions.eq("team", object)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		Long cnt = QueryFactory.buildCountQuery(session, Patrol.class,new Object[] {"team", object}); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}else{

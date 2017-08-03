@@ -415,7 +415,7 @@
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             ca_property=".entityType.conservationArea"
             class="org.wcs.smart.entity.model.Entity"
@@ -437,7 +437,7 @@
       </class>
    </extension>
    <extension
-         point="org.wcs.smart.ca.deleteAdvisor">
+         point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
             advisor="org.wcs.smart.entity.event.DeleteEntityTypeAdvisor"
             class="org.wcs.smart.entity.model.EntityType">
@@ -514,7 +514,7 @@
       </factory>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.entity.EntityTemplateCloner"
             id="org.wcs.smart.entity.entityCloner">
@@ -542,7 +542,7 @@
       </action>
    </extension>
    <extension
-         point="org.wcs.smart.query.export.format">
+         point="org.wcs.smart.query.exportFormat">
       <Exporter
             class="org.wcs.smart.entity.query.SightingQueryCsvExporter">
       </Exporter>
@@ -551,7 +551,7 @@
       </Exporter>
    </extension>
    <extension
-         point="org.wcs.smart.report.birt.maplayer">
+         point="org.wcs.smart.birt.map.maplayer">
       <MapLayer
             maplayer="org.wcs.smart.entity.report.FixedEntityMapLayer">
       </MapLayer>
@@ -560,7 +560,7 @@
       </StyleProvider>
    </extension>
    <extension
-         point="org.wcs.smart.ca.datamodel.editAdvisor">
+         point="org.wcs.smart.caDataModelAdvisor">
       <EditAdvisor
             advisor="org.wcs.smart.entity.internal.DmAttributeEditAdvisor">
       </EditAdvisor>
@@ -573,13 +573,13 @@
       </toc>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.entity.upgrade.EntityDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension
-         point="org.wcs.smart.data.oda.smart.table">
+         point="org.wcs.smart.report.birt.query.smartTable">
       <TableCategory
             icon="images/icons/obj16/entitytype.png"
             id="org.wcs.smart.entity.tables"
@@ -592,7 +592,7 @@
       </DynamicTable>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.entity.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>

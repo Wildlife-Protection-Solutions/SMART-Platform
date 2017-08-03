@@ -38,7 +38,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -51,6 +50,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -102,178 +102,177 @@ public class ImportAttributes implements IRunnableWithProgress {
 		
 		error = false;
 		
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()){
+		
 			session.beginTransaction();
-			
-			//read file count for progress
-			int fileCnt = 0;
-			try( CSVReader reader = new CSVReader(new FileReader(file), delimiter)){
-				while(reader.readNext() != null){
-					fileCnt++;
-				}
-			}
-			
-			monitor.beginTask(Messages.ImportAttributes_Progress1, fileCnt);
-			
-			final List<String> warnings = new ArrayList<String>();
-			boolean changes = false;
-			
-			try( CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){
-				String[] headers = reader.readNext();
-				monitor.worked(1);
-				int idIndex = -1;
-				HashMap<SamplingUnitAttribute, Integer> attributeIndex = new HashMap<SamplingUnitAttribute, Integer>();
-			
-				for (int i = 0; i < headers.length; i ++){
-					if (headers[i].equals(idField)){
-						idIndex = i;
-					}
-					for(Entry<SamplingUnitAttribute, String> v : attributeFields.entrySet()){
-						if (v.getValue() != null){
-							if (v.getValue().equals(headers[i])){
-								attributeIndex.put(v.getKey(), i);
-							}
-						}
+			try {
+				//read file count for progress
+				int fileCnt = 0;
+				try( CSVReader reader = new CSVReader(new FileReader(file), delimiter)){
+					while(reader.readNext() != null){
+						fileCnt++;
 					}
 				}
-				if (idIndex < 0){
-					throw new Exception(Messages.ImportAttributes_IdFieldNotFound);
-				}
-			
-				headers = reader.readNext();
-				monitor.worked(1);
-				int lineCnt=2;
-			
-				while(headers != null){
-					monitor.subTask(MessageFormat.format(Messages.ImportAttributes_Progress2, new Object[]{lineCnt}));
-					String suId = headers[idIndex];
 				
-					//find units to update
-					List<SamplingUnit> units = findSamplingUnit(suId, session);
-					if (units.size() == 0){
-						warnings.add(MessageFormat.format(Messages.ImportAttributes_SuNotFound, new Object[]{suId, lineCnt})); 
-						//perhaps warn users
-					}else{
-						//update attributes
-						for(Entry<SamplingUnitAttribute, Integer> index : attributeIndex.entrySet()){
-					
-							String newValue = headers[index.getValue()];
-							Double dValue = null;
-							SamplingUnitAttributeListItem listValue = null;
-							if (index.getKey().getType() == Attribute.AttributeType.NUMERIC){
-								//parse value from string
-								try{
-									dValue = Double.parseDouble(newValue);
-								}catch (Exception ex){
-									//cannot compute value so skip
-									warnings.add(MessageFormat.format(Messages.ImportAttributes_ConversionError, new Object[]{newValue, index.getKey().getName(), lineCnt})); 
-									break;
+				monitor.beginTask(Messages.ImportAttributes_Progress1, fileCnt);
+				
+				final List<String> warnings = new ArrayList<String>();
+				boolean changes = false;
+				
+				try( CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){
+					String[] headers = reader.readNext();
+					monitor.worked(1);
+					int idIndex = -1;
+					HashMap<SamplingUnitAttribute, Integer> attributeIndex = new HashMap<SamplingUnitAttribute, Integer>();
+				
+					for (int i = 0; i < headers.length; i ++){
+						if (headers[i].equals(idField)){
+							idIndex = i;
+						}
+						for(Entry<SamplingUnitAttribute, String> v : attributeFields.entrySet()){
+							if (v.getValue() != null){
+								if (v.getValue().equals(headers[i])){
+									attributeIndex.put(v.getKey(), i);
 								}
-							}else if (index.getKey().getType() == Attribute.AttributeType.LIST){
-								if (!newValue.trim().isEmpty()){
-									
-									listValue = ISamplingUnitImporter.findMatch(index.getKey(), newValue);
-									if (listValue == null){
-										warnings.add(MessageFormat.format(Messages.ImportAttributes_ListAttributeNotFound, new Object[]{newValue, index.getKey().getName(), lineCnt}));
-										break;
-									}
-								}
-							}else if (index.getKey().getType() == Attribute.AttributeType.TEXT){
-								if (!newValue.trim().isEmpty()){
-									String error = ISamplingUnitImporter.validateStringAttributeValue(newValue, index.getKey());
-									if (error != null){
-										warnings.add(MessageFormat.format(Messages.ImportAttributes_TextToLong, new Object[]{error, lineCnt}));
-										break;
-									}
-								}
-							}
-						
-							//find sua
-							for (SamplingUnit unit : units){
-								SamplingUnitAttributeValue toUpdate = null;
-								for (SamplingUnitAttributeValue v : unit.getAttributes()){
-									if (v.getSamplingUnitAttribute().equals(index.getKey())){
-										toUpdate = v;
-									}
-								}
-								//if not found create a new one
-								if (toUpdate == null){
-									toUpdate = new SamplingUnitAttributeValue();
-									toUpdate.setSamplingUnit(unit);
-									toUpdate.setSamplingUnitAttribute(index.getKey());
-									unit.getAttributes().add(toUpdate);
-								}
-							
-								if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.NUMERIC){
-									toUpdate.setNumberValue(dValue);
-								}else if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.TEXT){
-									toUpdate.setStringValue(newValue);
-								}else if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.LIST){
-									if (listValue != null){
-										toUpdate.setAttributeListItem(listValue);
-									}else{
-										//remove me
-										unit.getAttributes().remove(toUpdate);
-										session.delete(toUpdate);
-									}
-								}
-								changes = true;
 							}
 						}
-						
+					}
+					if (idIndex < 0){
+						throw new Exception(Messages.ImportAttributes_IdFieldNotFound);
 					}
 				
 					headers = reader.readNext();
-					lineCnt++;
 					monitor.worked(1);
-				}
-			}
-			if (warnings.size() > 0){
-				final boolean[] canContinue = {false};
+					int lineCnt=2;
 				
-				Display.getDefault().syncExec(new Runnable(){
-
-					@Override
-					public void run() {
-						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(),
-								Messages.ImportAttributes_WarningsLabel, Messages.ImportAttributes_ErrorList, 
-								warnings,
-								new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL},
-								0);	
-						if (wd.open() == 0){
-							canContinue[0] = true;
+					while(headers != null){
+						monitor.subTask(MessageFormat.format(Messages.ImportAttributes_Progress2, new Object[]{lineCnt}));
+						String suId = headers[idIndex];
+					
+						//find units to update
+						List<SamplingUnit> units = findSamplingUnit(suId, session);
+						if (units.size() == 0){
+							warnings.add(MessageFormat.format(Messages.ImportAttributes_SuNotFound, new Object[]{suId, lineCnt})); 
+							//perhaps warn users
+						}else{
+							//update attributes
+							for(Entry<SamplingUnitAttribute, Integer> index : attributeIndex.entrySet()){
+						
+								String newValue = headers[index.getValue()];
+								Double dValue = null;
+								SamplingUnitAttributeListItem listValue = null;
+								if (index.getKey().getType() == Attribute.AttributeType.NUMERIC){
+									//parse value from string
+									try{
+										dValue = Double.parseDouble(newValue);
+									}catch (Exception ex){
+										//cannot compute value so skip
+										warnings.add(MessageFormat.format(Messages.ImportAttributes_ConversionError, new Object[]{newValue, index.getKey().getName(), lineCnt})); 
+										break;
+									}
+								}else if (index.getKey().getType() == Attribute.AttributeType.LIST){
+									if (!newValue.trim().isEmpty()){
+										
+										listValue = ISamplingUnitImporter.findMatch(index.getKey(), newValue);
+										if (listValue == null){
+											warnings.add(MessageFormat.format(Messages.ImportAttributes_ListAttributeNotFound, new Object[]{newValue, index.getKey().getName(), lineCnt}));
+											break;
+										}
+									}
+								}else if (index.getKey().getType() == Attribute.AttributeType.TEXT){
+									if (!newValue.trim().isEmpty()){
+										String error = ISamplingUnitImporter.validateStringAttributeValue(newValue, index.getKey());
+										if (error != null){
+											warnings.add(MessageFormat.format(Messages.ImportAttributes_TextToLong, new Object[]{error, lineCnt}));
+											break;
+										}
+									}
+								}
+							
+								//find sua
+								for (SamplingUnit unit : units){
+									SamplingUnitAttributeValue toUpdate = null;
+									for (SamplingUnitAttributeValue v : unit.getAttributes()){
+										if (v.getSamplingUnitAttribute().equals(index.getKey())){
+											toUpdate = v;
+										}
+									}
+									//if not found create a new one
+									if (toUpdate == null){
+										toUpdate = new SamplingUnitAttributeValue();
+										toUpdate.setSamplingUnit(unit);
+										toUpdate.setSamplingUnitAttribute(index.getKey());
+										unit.getAttributes().add(toUpdate);
+									}
+								
+									if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.NUMERIC){
+										toUpdate.setNumberValue(dValue);
+									}else if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.TEXT){
+										toUpdate.setStringValue(newValue);
+									}else if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.LIST){
+										if (listValue != null){
+											toUpdate.setAttributeListItem(listValue);
+										}else{
+											//remove me
+											unit.getAttributes().remove(toUpdate);
+											session.delete(toUpdate);
+										}
+									}
+									changes = true;
+								}
+							}
+							
 						}
-					}});
-				if (!canContinue[0]){
-					session.getTransaction().rollback();
-					error = true;
-					return;
+					
+						headers = reader.readNext();
+						lineCnt++;
+						monitor.worked(1);
+					}
+				}
+				if (warnings.size() > 0){
+					final boolean[] canContinue = {false};
+					
+					Display.getDefault().syncExec(new Runnable(){
+		
+						@Override
+						public void run() {
+							WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(),
+									Messages.ImportAttributes_WarningsLabel, Messages.ImportAttributes_ErrorList, 
+									warnings,
+									new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL},
+									0);	
+							if (wd.open() == 0){
+								canContinue[0] = true;
+							}
+						}});
+					if (!canContinue[0]){
+						session.getTransaction().rollback();
+						error = true;
+						return;
+					}
+					
+				}
+				session.getTransaction().commit();
+				
+				if (changes){
+					SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, survey);
 				}
 				
+				
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				EcologicalRecordsPlugIn.displayLog(Messages.ImportAttributes_ErrorUpdating + "\n\n" + e.getMessage(), e); //$NON-NLS-1$ 
+				error = true;
 			}
-			session.getTransaction().commit();
-			
-			if (changes){
-				SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, survey);
-			}
-			
-			
-		} catch (Exception e) {
-			session.getTransaction().rollback();
-			EcologicalRecordsPlugIn.displayLog(Messages.ImportAttributes_ErrorUpdating + "\n\n" + e.getMessage(), e); //$NON-NLS-1$ 
-			error = true;
 		}finally{
-			session.close();
 			monitor.done();
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<SamplingUnit> findSamplingUnit(String id, Session session){
-		return session.createCriteria(SamplingUnit.class)
-		.add(Restrictions.eq("surveyDesign", survey)) //$NON-NLS-1$
-		.add(Restrictions.eq("id", id)).list(); //$NON-NLS-1$
+		return QueryFactory.buildQuery(session, SamplingUnit.class, 
+			new Object[] {"surveyDesign", survey}, //$NON-NLS-1$
+			new Object[] {"id", id}).getResultList(); //$NON-NLS-1$
 	}
 	
 

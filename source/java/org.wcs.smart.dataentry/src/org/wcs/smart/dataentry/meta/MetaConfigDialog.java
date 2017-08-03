@@ -170,21 +170,20 @@ public abstract class MetaConfigDialog<T> extends AbstractPropertyJHeaderDialog 
 		if (!validate())
 			return false;
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			for (ScreenOption so : getOptionsMap().values()) {
-				session.saveOrUpdate(so);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				for (ScreenOption so : getOptionsMap().values()) {
+					session.saveOrUpdate(so);
+				}
+				session.getTransaction().commit();
+				setChangesMade(false);
+				return true;
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				SmartPlugIn.displayLog(Messages.MetaConfigDialog_SaveError + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				return false;
 			}
-			session.getTransaction().commit();
-			setChangesMade(false);
-			return true;
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			SmartPlugIn.displayLog(Messages.MetaConfigDialog_SaveError + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-			return false;
-		}finally{
-			session.close();
 		}
 	}
 

@@ -77,25 +77,23 @@ public class AddIntelligenceQueriesJob extends Job {
 		//AND only admin users should be able to install plugins in the first place.
 		//so we shouldn't need to do this
 		//HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
-		Session session = HibernateManager.openSession();	
-		
-		try{
-			session.beginTransaction();
-			installPlugin(session);
-			session.getTransaction().commit();
-		}catch(final Exception ex){
-			if (session.getTransaction().isActive()) session.getTransaction().rollback();
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					MessageDialog.openError(Display.getDefault().getActiveShell(),
-							Messages.AddIntelligenceQueriesJob_JobName,
-							Messages.AddIntelligenceQueriesJob_Error1 + ex.getMessage());
-				}	
-			});
-			return new Status(Status.ERROR,IntelligenceQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);					 //$NON-NLS-1$
-		}finally{
-			session.close();
+		try(Session session = HibernateManager.openSession()){	
+			try{
+				session.beginTransaction();
+				installPlugin(session);
+				session.getTransaction().commit();
+			}catch(final Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openError(Display.getDefault().getActiveShell(),
+								Messages.AddIntelligenceQueriesJob_JobName,
+								Messages.AddIntelligenceQueriesJob_Error1 + ex.getMessage());
+					}	
+				});
+				return new Status(Status.ERROR,IntelligenceQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);					 //$NON-NLS-1$
+			}
 		}
 		monitor.done();
 		return Status.OK_STATUS;
@@ -116,7 +114,7 @@ public class AddIntelligenceQueriesJob extends Job {
 		//check is required table exists
 		for (int i = 0; i < CREATE_TABLE_SQL.length; i ++){
 			IntelligenceQueryPlugIn.log(CREATE_TABLE_SQL[i], null);
-			session.createSQLQuery(CREATE_TABLE_SQL[i]).executeUpdate();
+			session.createNativeQuery(CREATE_TABLE_SQL[i]).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, IntelligenceQueryPlugIn.DB_VERSION_1, session);
 	}

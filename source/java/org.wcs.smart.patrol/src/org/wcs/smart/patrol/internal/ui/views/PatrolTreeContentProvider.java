@@ -167,8 +167,7 @@ public class PatrolTreeContentProvider implements ITreeContentProvider{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				HashMap<Station, List<PatrolEditorInput>> types = new HashMap<>();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					for (PatrolEditorInput p : currentInput){
 						Patrol pp = (Patrol) s.get(Patrol.class, p.getUuid());
 						
@@ -181,8 +180,6 @@ public class PatrolTreeContentProvider implements ITreeContentProvider{
 						}
 						mpatrols.add(p);
 					}
-				}finally{
-					s.close();
 				}
 				HashMap<Object, List<PatrolEditorInput>> sorted = new HashMap<>();
 				List<Object> sortedKeys = new ArrayList<>();
@@ -206,8 +203,7 @@ public class PatrolTreeContentProvider implements ITreeContentProvider{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				HashMap<Team, List<PatrolEditorInput>> types = new HashMap<>();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					for (PatrolEditorInput p : currentInput){
 						Patrol pp = (Patrol) s.get(Patrol.class, p.getUuid());
 						
@@ -222,8 +218,6 @@ public class PatrolTreeContentProvider implements ITreeContentProvider{
 						}
 						mpatrols.add(p);
 					}
-				}finally{
-					s.close();
 				}
 				HashMap<Object, List<PatrolEditorInput>> sorted = new HashMap<>();
 				List<Object> sortedKeys = new ArrayList<>();
@@ -247,8 +241,7 @@ public class PatrolTreeContentProvider implements ITreeContentProvider{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				HashMap<PatrolTransportType, List<PatrolEditorInput>> types = new HashMap<>();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					for (PatrolEditorInput p : currentInput){
 						Patrol pp = (Patrol) s.get(Patrol.class, p.getUuid());
 						for (PatrolLeg leg : pp.getLegs()){
@@ -258,11 +251,9 @@ public class PatrolTreeContentProvider implements ITreeContentProvider{
 								mpatrols = new ArrayList<>();
 								types.put(m, mpatrols);
 							}
-							mpatrols.add(p);
+							if (!mpatrols.contains(p)) mpatrols.add(p);
 						}
 					}
-				}finally{
-					s.close();
 				}
 				HashMap<Object, List<PatrolEditorInput>> sorted = new HashMap<>();
 				List<Object> sortedKeys = new ArrayList<>();
@@ -285,8 +276,7 @@ public class PatrolTreeContentProvider implements ITreeContentProvider{
 			protected IStatus run(IProgressMonitor monitor) {
 				
 				HashMap<PatrolMandate, List<PatrolEditorInput>> types = new HashMap<>();
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					for (PatrolEditorInput p : currentInput){
 						Patrol pp = (Patrol) s.get(Patrol.class, p.getUuid());
 						for (PatrolLeg leg : pp.getLegs()){
@@ -296,11 +286,9 @@ public class PatrolTreeContentProvider implements ITreeContentProvider{
 								mpatrols = new ArrayList<>();
 								types.put(m, mpatrols);
 							}
-							mpatrols.add(p);
+							if (!mpatrols.contains(p)) mpatrols.add(p);
 						}
 					}
-				}finally{
-					s.close();
 				}
 				HashMap<Object, List<PatrolEditorInput>> sorted = new HashMap<>();
 				List<Object> sortedKeys = new ArrayList<>();

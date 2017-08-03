@@ -31,7 +31,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -96,21 +97,16 @@ public class ImportRecordXmlDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask(Messages.ImportRecordXmlDialog_TaskName, files.size());
-					Session session = HibernateManager.openSession(new AttachmentInterceptor());
-					try{
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.ImportRecordXmlDialog_TaskName, files.size());
+					try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 						RecordXmlImporter importer = new RecordXmlImporter(session);
 						for (Path p : files){
-							importer.importRecord(p, new SubProgressMonitor(monitor, 1));
-							if (monitor.isCanceled()){
-								return;
-							}
+							importer.importRecord(p, progress.split(1));
 						}
 						close[0] = importer.finish(context.get(IEventBroker.class));
-					}finally{
-						session.close();
+					}catch (OperationCanceledException ex) {
+						return;
 					}
-					monitor.done();
 				}
 			});
 		}catch (Exception ex){

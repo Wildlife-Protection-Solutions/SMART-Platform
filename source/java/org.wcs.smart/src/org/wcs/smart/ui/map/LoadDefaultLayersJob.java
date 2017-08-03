@@ -169,45 +169,26 @@ public class LoadDefaultLayersJob extends Job{
 	}
 	
 	private Projection getDefaultCrs(){
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			return HibernateManager.getDefaultProjection(s);	
-		}finally{
-			s.getTransaction().commit();
-			s.close();
 		}
-		
 	}
 	
 	private BasemapDefinition getDefaultDefinition(){
 		BasemapDefinition selection = SmartPlugIn.getDefault().getBasemapSelection();
 		if (selection != null) return selection;
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			
+		try(Session s = HibernateManager.openSession()){
 			return HibernateManager.getDefaultBasemapDefinition(s);	
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
 		}
-		
 	}
 	
 	private BasemapDefinition getDefinition(){
 		if (basemapUuid == null){
 			return null;
 		}
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			return HibernateManager.getBasemapDefinition(s, basemapUuid);	
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
-		}
-		
+		}		
 	}
 }

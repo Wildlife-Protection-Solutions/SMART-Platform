@@ -25,7 +25,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.changetracking.IFileStoreWatcher;
@@ -41,10 +41,9 @@ import org.wcs.smart.intelligence.model.Intelligence;
  */
 public class ReplicationEventHandler implements org.wcs.smart.changetracking.IReplicationEventHandler {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void replicationEnabled(IFileStoreWatcher watcher, Session session) {
-		Query query = session.createQuery("from ConservationArea ");	 //$NON-NLS-1$
+		Query<ConservationArea> query = session.createQuery("from ConservationArea ", ConservationArea.class);	 //$NON-NLS-1$
 		List<ConservationArea> cas = query.list();
 		for (ConservationArea ca : cas){
 			Path toIgnore = FileSystems.getDefault().getPath(ca.getFileDataStoreLocation(), Intelligence.INTELLIGENCE_DIR, Informant.DIR_NAME);

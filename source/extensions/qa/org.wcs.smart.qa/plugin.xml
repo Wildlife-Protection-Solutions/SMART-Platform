@@ -3,7 +3,7 @@
 <plugin>
    <extension-point id="org.wcs.smart.qa" name="org.wcs.smart.qa" schema="schema/org.wcs.smart.qa.exsd"/>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.qa.model.QaError"
             supportsCcaa="false">
@@ -117,7 +117,7 @@
       </image>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.qa.plugin.ChangeLogInstaller">
       </ChangeLogTracker>

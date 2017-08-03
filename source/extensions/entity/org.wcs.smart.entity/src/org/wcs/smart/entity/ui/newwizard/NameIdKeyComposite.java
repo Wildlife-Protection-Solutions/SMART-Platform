@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -167,15 +167,15 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 		}
 		
 		//load other entity keys
-		Query q = session.createQuery("SELECT keyId from EntityType WHERE conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("SELECT keyId from EntityType WHERE conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<String> keys = q.list();
+		
+		List<?> keys = q.list();
 		sharedKeys = new ArrayList<NamedKeyItem>();
 		
-		for (String k : keys){
+		for (Object k : keys){
 			NamedKeyItem keyItem = new EntityType();
-			keyItem.setKeyId(k);
+			keyItem.setKeyId((String)k);
 			sharedKeys.add(keyItem);
 		}
 		

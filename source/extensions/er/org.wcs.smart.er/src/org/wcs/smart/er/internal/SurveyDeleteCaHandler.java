@@ -22,7 +22,7 @@
 package org.wcs.smart.er.internal;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -66,7 +66,7 @@ public class SurveyDeleteCaHandler implements ICaDeleteHandler{
 	private void deleteMissions(ConservationArea ca, Session session) throws Exception{
 		
 		//mission property values
-		Query q = session.createQuery(
+		Query<?> q = session.createQuery(
 				"DELETE MissionPropertyValue mp WHERE mp.id.missionAttribute IN " + //$NON-NLS-1$
 				"(SELECT ma FROM MissionAttribute ma WHERE ma.conservationArea = :conservationArea)"); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$
@@ -110,7 +110,7 @@ public class SurveyDeleteCaHandler implements ICaDeleteHandler{
 	
 	private void deleteSurveys(ConservationArea ca, Session session) throws Exception{
 		//entity attribute values
-		Query q = session.createQuery(
+		Query<?> q = session.createQuery(
 				"delete Survey s where s IN " + //$NON-NLS-1$
 				"(SELECT s FROM Survey s WHERE s.surveyDesign.conservationArea = :conservationArea)"); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$
@@ -119,7 +119,7 @@ public class SurveyDeleteCaHandler implements ICaDeleteHandler{
 
 	private void deleteSurveyDesign(ConservationArea ca, Session session) throws Exception{
 		//sampling unit attribue values
-		Query q = session.createQuery(
+		Query<?> q = session.createQuery(
 				"DELETE SamplingUnitAttributeValue s where s.id.samplingUnit IN " + //$NON-NLS-1$
 				"(SELECT su FROM SamplingUnit su join su.surveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$
@@ -160,7 +160,7 @@ public class SurveyDeleteCaHandler implements ICaDeleteHandler{
 	
 	private void deleteMissionAttributes(ConservationArea ca, Session session) throws Exception{
 		
-		Query q = session.createQuery(
+		Query<?> q = session.createQuery(
 				"DELETE MissionAttributeListItem li WHERE li.attribute IN " +//$NON-NLS-1$
 				"(SELECT ma FROM MissionAttribute ma WHERE ma.conservationArea = :conservationArea)"); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$
@@ -173,7 +173,7 @@ public class SurveyDeleteCaHandler implements ICaDeleteHandler{
 	}
 	
 	private void deleteSamplingUnitAttributes(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery(
+		Query<?> q = session.createQuery(
 				"DELETE SamplingUnitAttributeListItem li WHERE li.attribute IN " +//$NON-NLS-1$
 				"(SELECT sa FROM SamplingUnitAttribute sa WHERE sa.conservationArea = :conservationArea)"); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$

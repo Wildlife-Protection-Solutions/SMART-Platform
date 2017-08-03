@@ -83,13 +83,14 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.qa.InternalExtensionManager;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.ValidationEngine;
@@ -137,7 +138,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 	public static IEditorInput MANUAL_VALIDATION_INPUT =  new IEditorInput() {
 		
 		@Override
-		public Object getAdapter(Class adapter) {
+		public <T> T getAdapter(Class<T> adapter) {
 			return null;
 		}
 		
@@ -189,11 +190,8 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor = progressComposite.createProgressMonitor();
 				Collection<QaError> errors = null;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					errors = engine.validate(s, monitor);
-				}finally{
-					s.close();
 				}
 				Collection<QaError> ferrors = errors;
 				Display.getDefault().syncExec(()->{
@@ -497,6 +495,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		
 		TableViewerColumn dataColumn = new TableViewerColumn(tblRoutines, SWT.NONE);
 		ColumnLabelProvider dataLabelProvider = new ColumnLabelProvider(){
+			
 			public String getText(Object element){
 				if (element instanceof DataValidator){
 					return ((DataValidator) element).getDataProvider().getName(Locale.getDefault());
@@ -506,7 +505,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			
 			public Image getImage(Object element){
 				if (element instanceof DataValidator){
-					return ((DataValidator) element).getDataProvider().getImage();
+					return InternalExtensionManager.INSTANCE.getImage(((DataValidator) element).getDataProvider());
 				}
 				return super.getImage(element);
 			}
@@ -693,16 +692,11 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 	
 	Job j = new Job(Messages.ManualResultsEditor_LoadRoutinesJobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<DataValidator> routines = new ArrayList<>();
-			Session s = HibernateManager.openSession();
-			try{
-				List<QaRoutine> dbroutines = s.createCriteria(QaRoutine.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-						.list();
-				
+			try(Session s = HibernateManager.openSession()){
+				List<QaRoutine> dbroutines = QueryFactory.buildQuery(s, QaRoutine.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 				Collection<IQaDataProvider> providers = RoutineExtensionManager.INSTANCE.getDataProviders();
 				for (IQaDataProvider p : providers){
 					for (QaRoutine r : dbroutines){
@@ -715,8 +709,6 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 						}
 					}
 				}
-			}finally{
-				s.close();
 			}
 			Display.getDefault().asyncExec(()->{
 				tblRoutines.setInput(routines);

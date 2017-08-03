@@ -23,7 +23,7 @@ package org.wcs.smart.observation.internal.advisor;
 
 import java.text.MessageFormat;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
@@ -55,7 +55,7 @@ public class CategoryAttributeDMAdvisor implements IDeleteAdvisor{
 				|| categoryAttribute.getAttribute().getUuid() == null ){
 			return null;
 		}
-		Query query = session.createQuery(
+		Query<?> query = session.createQuery(
 				"SELECT count(*) FROM WaypointObservation wo join wo.attributes woa join wo.category as cat " + //$NON-NLS-1$
 				"WHERE cat.hkey like :categoryhkey and woa.id.attribute = :attribute"); //$NON-NLS-1$
 		query.setParameter("categoryhkey", categoryAttribute.getCategory().getHkey() + "%"); //$NON-NLS-1$ //$NON-NLS-2$

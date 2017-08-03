@@ -23,10 +23,7 @@ package org.wcs.smart.qa.incident;
 
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.qa.incident.internal.Messages;
-import org.wcs.smart.qa.model.IQaDataProvider;
 
 /**
  * Image provider for incident data providers
@@ -35,13 +32,6 @@ import org.wcs.smart.qa.model.IQaDataProvider;
  *
  */
 public class IncidentLabelProvider extends ILabelProvider {
-
-	@Override
-	public Image getImage(Class<? extends IQaDataProvider> clazz) {
-		if (clazz.equals(IncidentDataProvider.class))
-			return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON) ;
-		return null;
-	}
 
 	@Override
 	public String getString(Key key, Locale l) {

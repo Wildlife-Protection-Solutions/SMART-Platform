@@ -128,7 +128,6 @@ public class QueryColumnUtils {
 	 * @return
 	 * @throws SQLException
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<QueryColumn> getDataModelColumns(Session session, Locale l, ConservationAreaFilter caFilter) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		
@@ -166,7 +165,7 @@ public class QueryColumnUtils {
 		//attributes
 		//I want all attributes that are shared across all conservationAreas
 		String query = "SELECT keyId, type  FROM Attribute WHERE conservationArea.uuid in (:cauuids) group by keyId, type HAVING count(*) = :cnt order by keyId asc"; //$NON-NLS-1$
-		org.hibernate.Query attquery = session.createQuery(query);
+		org.hibernate.query.Query<?> attquery = session.createQuery(query);
 		attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 		attquery.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
 		
@@ -174,11 +173,12 @@ public class QueryColumnUtils {
 		String nameQueryHql = "SELECT a.value FROM Label a, Attribute c where c.conservationArea.uuid in (:cauuids) AND a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
 		String allLocal = l.toString().toUpperCase();
 		String local = l.getLanguage().toUpperCase();
-		org.hibernate.Query nameQuery = session.createQuery(nameQueryHql);
+		org.hibernate.query.Query<?> nameQuery = session.createQuery(nameQueryHql);
 		
-		List<Object[]> attributes = attquery.list();
+		List<?> attributes = attquery.list();
 		List<QueryColumn> attributeColumns = new ArrayList<QueryColumn>();
-		for (Object[] attribute : attributes){
+		for (Object attributeRow : attributes){
+			Object[] attribute = (Object[])attributeRow;
 			String keyid = (String) attribute[0];
 			AttributeType atype = (AttributeType) attribute[1];
 			

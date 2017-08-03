@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -78,14 +79,12 @@ public enum EntityImportEngine {
 	/**
 	 * 
 	 * @param config
-	 * @param pMonitor
+	 * @param pMonitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @return the number of entities imported or null if nothing imported
 	 * @throws Exception
 	 */
 	public Integer importEntities(EntityImportConfig config, IEventBroker eventBroker, IProgressMonitor pMonitor) throws Exception{
-		SubMonitor monitor = SubMonitor.convert(pMonitor);
-		
-		monitor.beginTask(Messages.EntityImportEngine_ImportTaskName, 5);
+		SubMonitor monitor = SubMonitor.convert(pMonitor, Messages.EntityImportEngine_ImportTaskName, 5);
 		//ensure the file exists
 		if (!Files.exists(config.getFile())) throw new FileNotFoundException(config.getFile().toString());
 		
@@ -97,8 +96,7 @@ public enum EntityImportEngine {
 		monitor.subTask(Messages.EntityImportEngine_AttributeTaskName);
 		//load the attributes 
 		Set<IntelAttribute> attributes = new HashSet<>();
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (IntelAttribute a : config.getMappedAttributes()){
 				IntelAttribute attribute = (IntelAttribute) s.get(IntelAttribute.class, a.getUuid());
 				attribute.getType();
@@ -108,11 +106,9 @@ public enum EntityImportEngine {
 				}
 				attributes.add(attribute);
 			}
-		}finally{
-			s.close();
 		}
 		monitor.worked(1);
-		if (monitor.isCanceled()) return null;
+		monitor.checkCanceled();
 		
 		List<IntelEntity> newEntities = new ArrayList<>();
 		List<IntelAttributeListItem> addedItems = new ArrayList<>();
@@ -126,12 +122,13 @@ public enum EntityImportEngine {
 			lineCnt = reader.readAll().size();
 		}
 		monitor.worked(1);
+		monitor.checkCanceled();
 		
-		SubMonitor kidMonitor = monitor.newChild(1, 0);
+		SubMonitor kidMonitor = monitor.split(1);
 		kidMonitor.setWorkRemaining(lineCnt);
 		try(CSVReader reader = new CSVReader(Files.newBufferedReader(config.getFile()), config.getDelimiter())){
 			kidMonitor.worked(1);
-			if (monitor.isCanceled()) return null;
+			kidMonitor.checkCanceled();
 			int line = 0;
 			if (config.skipFirstLine()){
 				reader.readNext();
@@ -280,33 +277,34 @@ public enum EntityImportEngine {
 			}
 		}
 		monitor.worked(1);
-		if (monitor.isCanceled()) return null;
 		
-		kidMonitor = monitor.newChild(1, 0);
+		kidMonitor = monitor.split(1);
 		kidMonitor.setWorkRemaining(newEntities.size());
 		//save change
-		s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			//save new list items
-			for (IntelAttributeListItem i : addedItems){
-				s.save(i);
-				s.saveOrUpdate(i.getAttribute());
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				//save new list items
+				for (IntelAttributeListItem i : addedItems){
+					s.save(i);
+					s.saveOrUpdate(i.getAttribute());
+				}
+				
+				//save new entities
+				for (IntelEntity e : newEntities){
+					s.save(e);
+					kidMonitor.worked(1);
+					kidMonitor.checkCanceled();
+				}
+				s.getTransaction().commit();
+			}catch (OperationCanceledException ex) {
+				s.getTransaction().rollback();
+				return null;
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.EntityImportEngine_SaveError + ex.getMessage(), ex);
+				return null;
 			}
-			
-			//save new entities
-			for (IntelEntity e : newEntities){
-				s.save(e);
-				kidMonitor.worked(1);
-			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.EntityImportEngine_SaveError + ex.getMessage(), ex);
-			return null;
-		}finally{
-			s.close();
 		}
 		
 		eventBroker.send(IntelEvents.ENTITY_NEW, newEntities);

@@ -115,12 +115,10 @@ public class EntityExportReportJob extends Job {
 		
 		//get the template
 		IntelEntityType type = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+
 			type = (IntelEntityType)s.get(IntelEntityType.class, entity.getEntityType().getUuid());
 			type.getName();
-		}finally{
-			s.close();
 		}
 		Path reportFile = IntelReportManager.INSTANCE.getEntityTemplate(type);
 		if (reportFile == null || !Files.exists(reportFile)){

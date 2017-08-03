@@ -17,7 +17,7 @@ public class ActivateMapToolHandler extends AbstractHandler {
 	public final Object execute(final ExecutionEvent event)
 			throws ExecutionException {
 			// Get the view identifier, if any.
-		final Map parameters = event.getParameters();
+		final Map<?,?> parameters = event.getParameters();
 		String toolid = (String) parameters.get("org.wcs.smart.map.toolid"); //$NON-NLS-1$
 		((ToolManager) ApplicationGIS.getToolManager()).findToolProxy((String)toolid).run();
 		return null;

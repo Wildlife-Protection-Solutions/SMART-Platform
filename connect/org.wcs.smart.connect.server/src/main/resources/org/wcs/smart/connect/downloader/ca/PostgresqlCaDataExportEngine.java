@@ -39,12 +39,11 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.hql.spi.QueryTranslator;
 import org.hibernate.hql.spi.QueryTranslatorFactory;
-import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.jdbc.Work;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
@@ -84,8 +83,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 				" column_default not like 'nextval(%::regclass)')) " + //$NON-NLS-1$
 				" ORDER BY ordinal_position";  //$NON-NLS-1$
 		
-		@SuppressWarnings("unchecked")
-		List<String> data = getSession().createSQLQuery(sql).list();
+		List<?> data = getSession().createNativeQuery(sql).list();
 		if (data.size() == 0){
 			throw new IllegalStateException("Could not determine table columns for table " + tableName); //$NON-NLS-1$
 		}
@@ -154,7 +152,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 			String caPropertyQuery) throws Exception {
 		
 		
-		Query q = getSession().createQuery("from " //$NON-NLS-1$
+		Query<?> q = getSession().createQuery("from " //$NON-NLS-1$
 				+ hibernateClass + " a where a" //$NON-NLS-1$
 				+ caPropertyQuery + " = :ca"); //$NON-NLS-1$
 		
@@ -280,15 +278,10 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	public String toSql(String hqlQueryText) {
 		
 		if (hqlQueryText != null && hqlQueryText.trim().length() > 0) {
-
-			final QueryTranslatorFactory translatorFactory = ((SessionFactoryImpl)  session.getSessionFactory())
-					.getSettings().getQueryTranslatorFactory();
-
+			final QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
 			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
-
 			final QueryTranslator translator = translatorFactory
-					.createQueryTranslator(hqlQueryText, hqlQueryText,
-							Collections.EMPTY_MAP, factory);
+					.createQueryTranslator(hqlQueryText, hqlQueryText, Collections.EMPTY_MAP, factory, null);
 			translator.compile(Collections.EMPTY_MAP, false);
 			return translator.getSQLString();
 		}

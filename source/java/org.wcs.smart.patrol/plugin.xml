@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.patrol.wizardpage" name="New Patrol Wizard Page " schema="schema/org.wcs.smart.patrol.wizardpage.exsd"/>
-   <extension-point id="org.wcs.smart.patrol.contribution" name="Patrol Contribution" schema="schema/org.wcs.smart.patrol.contribution.exsd"/>
-   <extension-point id="org.wcs.smart.patrol.xml" name="XML Export/Import Contribution" schema="schema/org.wcs.smart.patrol.xml.exsd"/>
+   <extension-point id="wizardpage" name="New Patrol Wizard Page " schema="schema/org.wcs.smart.patrol.wizardpage.exsd"/>
+   <extension-point id="contribution" name="Patrol Contribution" schema="schema/org.wcs.smart.patrol.contribution.exsd"/>
+   <extension-point id="xml" name="XML Export/Import Contribution" schema="schema/org.wcs.smart.patrol.xml.exsd"/>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -660,11 +660,10 @@
             name="%mergepatrol.command.name">
       </command>
       <command
-            id="org.wcs.smart.patrol..open"
+            id="org.wcs.smart.patrol.open"
             name="%command.openpatrol">
       </command>
       <command
-            defaultHandler="org.wcs.smart.patrol.internal.ui.views.PatrolGroupByHandler$PatrolGroupByHandlerWrapper"
             id="org.wcs.smart.patrol.view.groupby"
             name="%command.groupby.name">
          <commandParameter
@@ -846,7 +845,7 @@
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.patrol.model.PatrolMandate"
             supportsCcaa="false">
@@ -915,7 +914,7 @@
       </editor>
    </extension>
    <extension
-         point="org.wcs.smart.ca.deleteAdvisor">
+         point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
             advisor="org.wcs.smart.patrol.internal.advisors.MandateDeleteAdvisor"
             class="org.wcs.smart.patrol.model.PatrolMandate">
@@ -1006,7 +1005,7 @@
       </wizardpage>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.patrol.PatrolTemplateCloner"
             id="org.wcs.smart.query.PatrolQueryCloner">
@@ -1041,7 +1040,7 @@
       </perspectiveExtension>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="patrol">
       </FilestoreDirectory>

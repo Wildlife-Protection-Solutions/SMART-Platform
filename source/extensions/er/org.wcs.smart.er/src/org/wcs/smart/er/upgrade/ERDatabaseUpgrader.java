@@ -43,24 +43,23 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.ERDatabaseUpgrader_UpgradeTask, 1);
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			Map<String, String> versions = UpgradeEngine.getVersions(session);
-			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			String currentPluginVersion = versions.get(EcologicalRecordsPlugIn.PLUGIN_ID);
-			
-			if (currentPluginVersion == null) {
-				(new AddERJob()).installPlugin(session);
-			}else{
-				upgrade(currentPluginVersion, session);
+			try{
+				Map<String, String> versions = UpgradeEngine.getVersions(session);
+				if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+				String currentPluginVersion = versions.get(EcologicalRecordsPlugIn.PLUGIN_ID);
+				
+				if (currentPluginVersion == null) {
+					(new AddERJob()).installPlugin(session);
+				}else{
+					upgrade(currentPluginVersion, session);
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				throw ex;
 			}
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			throw ex;
-		} finally { 
-			session.close();
 		}
 		monitor.done();
 	}
@@ -150,7 +149,7 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql){
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_2, session);
 	}

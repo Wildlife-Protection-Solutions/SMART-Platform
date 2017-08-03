@@ -29,7 +29,6 @@ import java.util.Set;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
@@ -46,6 +45,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -188,10 +188,9 @@ public class SurveyDesignImporter {
 		if (source.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 			return source;
 		}
-		@SuppressWarnings("unchecked")
-		List<MissionAttribute> values = s.createCriteria(MissionAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", source.getKeyId())).list(); //$NON-NLS-1$ 
+		List<MissionAttribute> values = QueryFactory.buildQuery(s, MissionAttribute.class,
+				new Object[] {"keyId", source.getKeyId()}, //$NON-NLS-1$
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
 		if (values.size() > 0){
 			MissionAttribute attr = values.get(0);
 			//if this is list we need to match list items as well
@@ -224,10 +223,10 @@ public class SurveyDesignImporter {
 			return source;
 		}
 		
-		@SuppressWarnings("unchecked")
-		List<SamplingUnitAttribute> values = s.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", source.getKeyId())).list(); //$NON-NLS-1$ 
+		List<SamplingUnitAttribute> values = QueryFactory.buildQuery(s, SamplingUnitAttribute.class,
+				new Object[] {"keyId", source.getKeyId()}, //$NON-NLS-1$
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
+
 		
 		if (values.size() > 0){
 			SamplingUnitAttribute attr = values.get(0);
@@ -286,13 +285,12 @@ public class SurveyDesignImporter {
 			if (label.getLanguage().isDefault()){
 				srcDefaultName = label.getValue();
 			}
-			List<?> values = session.createCriteria(Language.class).
-				add(Restrictions.eq("ca", SmartDB.getCurrentConservationArea())). //$NON-NLS-1$ 
-				add(Restrictions.eq("code",label.getLanguage().getCode())).list(); //$NON-NLS-1$
-				
+			List<Language> values = QueryFactory.buildQuery(session, Language.class,
+					new Object[] {"code", label.getLanguage().getCode()}, //$NON-NLS-1$
+					new Object[] {"ca", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
 			if (values.size() > 0){
-				for (Object l : values){
-					toUpdate.updateName((Language)l, label.getValue());
+				for (Language l : values){
+					toUpdate.updateName(l, label.getValue());
 				}
 			}
 		}
@@ -320,8 +318,8 @@ public class SurveyDesignImporter {
 	
 	public static List<SamplingUnit> importSamplingUnits(Session session, SurveyDesign from, SurveyDesign to) {
 		List<SamplingUnit> newSamplingUnits = new ArrayList<SamplingUnit>();
-		@SuppressWarnings("unchecked")
-		List<SamplingUnit> sus = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", from)).list(); //$NON-NLS-1$
+		List<SamplingUnit> sus = QueryFactory.buildQuery(session, SamplingUnit.class, "surveyDesign", from).getResultList(); //$NON-NLS-1$
+				
 		boolean isSameCa = from.getConservationArea().equals(to.getConservationArea());
 		
 		for (SamplingUnit s2: sus){

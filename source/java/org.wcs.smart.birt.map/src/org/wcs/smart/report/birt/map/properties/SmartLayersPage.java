@@ -478,9 +478,8 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			basemapListenerEnabled = false;
 			List<BasemapDefinition> maps = null;
 			try{
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try {
+				try(Session session = HibernateManager.openSession()) {
+					session.beginTransaction();
 					maps = HibernateManager.getBasemaps(session);
 					Collections.sort(maps, new Comparator<BasemapDefinition>(){
 						@Override
@@ -489,11 +488,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 							return Collator.getInstance().compare(o1.getName().toUpperCase(), o2.getName().toUpperCase());
 						}						
 					});
-				} finally {
-					if (session.getTransaction().isActive()) {
-						session.getTransaction().commit();
-					}
-					session.close();
+					session.getTransaction().rollback();
 				}
 				
 				BasemapDefinition defaultdef = new BasemapDefinition();

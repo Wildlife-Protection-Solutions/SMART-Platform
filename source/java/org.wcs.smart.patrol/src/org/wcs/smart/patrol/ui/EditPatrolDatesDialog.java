@@ -107,13 +107,9 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 		Job j = new Job("loading patrol"){ //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				
 				Patrol patrol = null;
-				Session session = HibernateManager.openSession();
-				try{
+				try(Session session = HibernateManager.openSession()){
 					patrol = (Patrol) session.get(Patrol.class, input.getUuid());
-				}finally{
-					session.close();
 				}
 				final Patrol fpatrol = patrol;
 				Display.getDefault().syncExec(()->{
@@ -167,102 +163,100 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 	}
 
 	private void updatePatrol(Date startDate, Date endDate){
-		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		session.beginTransaction();
-		try{
-			Patrol patrol = (Patrol) session.get(Patrol.class, input.getUuid());
-			patrol.setStartDate(startDate);
-			patrol.setEndDate(endDate);
-			
-			List<PatrolLeg> legsToDelete = new ArrayList<PatrolLeg>();
-			for (PatrolLeg pl : patrol.getLegs()){
-				if (pl.getEndDate().before(startDate)){
-					//delete me
-					legsToDelete.add(pl);
-					continue;
-				}
-				if (pl.getStartDate().after(endDate)){
-					legsToDelete.add(pl);
-					continue;
-					//delete me
-				}
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			session.beginTransaction();
+			try{
+				Patrol patrol = (Patrol) session.get(Patrol.class, input.getUuid());
+				patrol.setStartDate(startDate);
+				patrol.setEndDate(endDate);
 				
-				boolean modified = false;
-				if (pl.getStartDate().before(startDate)){
-					pl.setStartDate(startDate);
-					modified = true;
-				}
-				if (pl.getEndDate().after(endDate)){
-					pl.setEndDate(endDate);
-					modified = true;
-				}
-				if (!modified) continue;
-				
-				//if leg has been modified we need to update the days
-				List<PatrolLegDay> toDelete = new ArrayList<PatrolLegDay>();
-				for (PatrolLegDay pld : pl.getPatrolLegDays()){
-					if (!pld.getDate().before(startDate) && !pld.getDate().after(endDate)){
+				List<PatrolLeg> legsToDelete = new ArrayList<PatrolLeg>();
+				for (PatrolLeg pl : patrol.getLegs()){
+					if (pl.getEndDate().before(startDate)){
 						//delete me
-						toDelete.add(pld);
+						legsToDelete.add(pl);
+						continue;
 					}
-				}
-				
-				pl.getPatrolLegDays().removeAll(toDelete);
-				for (PatrolLegDay pld : toDelete){
-					pld.setPatrolLeg(null);
+					if (pl.getStartDate().after(endDate)){
+						legsToDelete.add(pl);
+						continue;
+						//delete me
+					}
 					
-					//delete waypoints 
-					if (pld.getWaypoints() != null) {
-						for (PatrolWaypoint pw : pld.getWaypoints()){
-							session.delete(pw.getWaypoint());
+					boolean modified = false;
+					if (pl.getStartDate().before(startDate)){
+						pl.setStartDate(startDate);
+						modified = true;
+					}
+					if (pl.getEndDate().after(endDate)){
+						pl.setEndDate(endDate);
+						modified = true;
+					}
+					if (!modified) continue;
+					
+					//if leg has been modified we need to update the days
+					List<PatrolLegDay> toDelete = new ArrayList<PatrolLegDay>();
+					for (PatrolLegDay pld : pl.getPatrolLegDays()){
+						if (!pld.getDate().before(startDate) && !pld.getDate().after(endDate)){
+							//delete me
+							toDelete.add(pld);
 						}
 					}
-					session.delete(pld);
-				}
-			}
-			
-			if (patrol.getLegs().size() == legsToDelete.size()){
-				//we don't want to delete all legs
-				PatrolLeg keep = legsToDelete.remove(0);
-				keep.setStartDate(startDate);
-				keep.setEndDate(endDate);
-				keep.createLegDays(session);
-			}
-			
-			for (PatrolLeg pl : legsToDelete){
-				if (pl.getPatrolLegDays() != null){
-					for (PatrolLegDay pld : pl.getPatrolLegDays()){
-						if (pld.getWaypoints() != null){
+					
+					pl.getPatrolLegDays().removeAll(toDelete);
+					for (PatrolLegDay pld : toDelete){
+						pld.setPatrolLeg(null);
+						
+						//delete waypoints 
+						if (pld.getWaypoints() != null) {
 							for (PatrolWaypoint pw : pld.getWaypoints()){
 								session.delete(pw.getWaypoint());
 							}
 						}
+						session.delete(pld);
 					}
 				}
-				pl.getPatrol().getLegs().remove(pl);
-				pl.setPatrol(null);
-				session.delete(pl);
+				
+				if (patrol.getLegs().size() == legsToDelete.size()){
+					//we don't want to delete all legs
+					PatrolLeg keep = legsToDelete.remove(0);
+					keep.setStartDate(startDate);
+					keep.setEndDate(endDate);
+					keep.createLegDays(session);
+				}
+				
+				for (PatrolLeg pl : legsToDelete){
+					if (pl.getPatrolLegDays() != null){
+						for (PatrolLegDay pld : pl.getPatrolLegDays()){
+							if (pld.getWaypoints() != null){
+								for (PatrolWaypoint pw : pld.getWaypoints()){
+									session.delete(pw.getWaypoint());
+								}
+							}
+						}
+					}
+					pl.getPatrol().getLegs().remove(pl);
+					pl.setPatrol(null);
+					session.delete(pl);
+				}
+				
+				if (patrol.getLegs().size() == 1){
+					//if there is only one leg, make sure it expands the entire date range
+					//and a day exists for each leg
+					patrol.getFirstLeg().setStartDate(startDate);
+					patrol.getFirstLeg().setEndDate(endDate);
+					patrol.getFirstLeg().createLegDays(session);
+				}else{
+					//ideally here we make sure there are legs for day etc.
+					//but for now we'll leave this up to the user.
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(Messages.EditPatrolDatesDialog_SaveError + ex.getMessage(), ex);
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex1){}
 			}
-			
-			if (patrol.getLegs().size() == 1){
-				//if there is only one leg, make sure it expands the entire date range
-				//and a day exists for each leg
-				patrol.getFirstLeg().setStartDate(startDate);
-				patrol.getFirstLeg().setEndDate(endDate);
-				patrol.getFirstLeg().createLegDays(session);
-			}else{
-				//ideally here we make sure there are legs for day etc.
-				//but for now we'll leave this up to the user.
-			}
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(Messages.EditPatrolDatesDialog_SaveError + ex.getMessage(), ex);
-			try{
-				session.getTransaction().rollback();
-			}catch (Exception ex1){}
-			
-		}finally{
-			session.close();
 		}
 		
 	}

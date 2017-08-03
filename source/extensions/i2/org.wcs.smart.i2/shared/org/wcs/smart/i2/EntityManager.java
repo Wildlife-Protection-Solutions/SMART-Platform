@@ -30,10 +30,10 @@ import org.geotools.styling.Graphic;
 import org.geotools.styling.Mark;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleBuilder;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -86,7 +86,7 @@ public enum EntityManager {
 		if (currentEntity != null){
 			query += " AND e.uuid != :entity "; //$NON-NLS-1$
 		}
-		Query hql = session.createQuery(query);
+		Query<?> hql = session.createQuery(query);
 		hql.setParameter("attribute", type.getIdAttribute()); //$NON-NLS-1$
 		hql.setParameter("ca", ca); //$NON-NLS-1$
 		hql.setParameter("type", type); //$NON-NLS-1$
@@ -118,7 +118,7 @@ public enum EntityManager {
 	public void deleteEntity(IntelEntity entity, Session session) throws Exception{
 
 		//delete all record attribute links 
-		Query q = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :entityUuid");  //$NON-NLS-1$
+		Query<?> q = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :entityUuid");  //$NON-NLS-1$
 		q.setParameter("entityUuid", entity.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 
@@ -162,20 +162,17 @@ public enum EntityManager {
 	 * @param dFilter
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public List<IntelEntityLocation> getEntityLocations(Session session, UUID entityUuid, Date[] dFilter){
 		List<IntelEntityLocation> alllocations = null;
 		
 		if (dFilter != null && dFilter.length == 2 && dFilter[0] != null && dFilter[1] != null){
-			Query q = session.createQuery("FROM IntelEntityLocation WHERE id.entity.uuid = :uuid and id.location.dateTime between :d1 and :d2"); //$NON-NLS-1$
+			Query<IntelEntityLocation> q = session.createQuery("FROM IntelEntityLocation WHERE id.entity.uuid = :uuid and id.location.dateTime between :d1 and :d2", IntelEntityLocation.class); //$NON-NLS-1$
 			q.setParameter("uuid", entityUuid); //$NON-NLS-1$
 			q.setParameter("d1", dFilter[0]); //$NON-NLS-1$
 			q.setParameter("d2", dFilter[1]); //$NON-NLS-1$
 			alllocations = q.list();
 		}else{
-			alllocations = session.createCriteria(IntelEntityLocation.class)
-				.add(Restrictions.eq("id.entity.uuid", entityUuid)) //$NON-NLS-1$
-				.list();
+			alllocations = QueryFactory.buildQuery(session, IntelEntityLocation.class, new Object[] {"id.entity.uuid", entityUuid}).getResultList(); //$NON-NLS-1$
 		}
 		return alllocations;
 	}

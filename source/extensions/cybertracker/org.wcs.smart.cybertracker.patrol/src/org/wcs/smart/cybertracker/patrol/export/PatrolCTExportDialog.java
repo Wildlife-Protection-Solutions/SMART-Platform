@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -75,13 +76,15 @@ public class PatrolCTExportDialog extends CyberTrackerExportDialog {
     	return new IConfigurableModelProvider() {
     		@Override
     		public ConfigurableModel getConfigurableModel(Session session, IProgressMonitor monitor) {
+    			SubMonitor progress =  SubMonitor.convert(monitor, "", 1); //$NON-NLS-1$
     			if (src instanceof ConfigurableModel) {
-    				monitor.subTask(Messages.PatrolCTExportDialog_Task_FetchConfigurableModel);
+    				progress.subTask(Messages.PatrolCTExportDialog_Task_FetchConfigurableModel);
     				ConfigurableModel model = (ConfigurableModel) src;
     				return DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
     			} else if (src instanceof DataModelWrapper) {
-    				return ((DataModelWrapper) src).buildConfigurableModel(session, monitor);
+    				return ((DataModelWrapper) src).buildConfigurableModel(session, progress.split(1));
     			}
+    			progress.setWorkRemaining(0);
     			return null;
     		}
 

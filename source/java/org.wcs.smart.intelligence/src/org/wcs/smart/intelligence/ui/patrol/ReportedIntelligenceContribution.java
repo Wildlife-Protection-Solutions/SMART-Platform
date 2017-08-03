@@ -232,8 +232,7 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 			PlatformUI.getWorkbench().showPerspective(IntelligencePerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 
 			NewIntelligenceWizard wizard = new NewIntelligenceWizard();
-			Session s = HibernateManager.openSession();
-			try {
+			try (Session s = HibernateManager.openSession()){
 				IntelligenceSource source = IntelligenceHibernateManager.getPatrolSource(s);
 				if (source == null){
 					MessageDialog.openError(main.getShell(), Messages.ReportedIntelligenceContribution_ErrorDialogTitle, 
@@ -244,8 +243,6 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 			} catch (Exception e) {
 				IntelligencePlugIn.displayLog(Messages.ReportedIntelligenceContribution_NoPatrolSource_Error, e);
 				return;
-			} finally {
-				s.close();
 			}
 			wizard.getIntelligence().setPatrol(patrol);
 			WizardDialog dialog = new WizardDialog(main.getShell(), wizard);

@@ -92,22 +92,23 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			boolean showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
-			try{
-				roots = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, s) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
-			}catch(Exception ex){
-				QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
+			boolean showInactive = false;
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				showInactive = QueryFilterConfigManager.getInstance().getCurrentConfig().isShowInactiveItems();
+				try{
+					roots = showInactive ? QueryDataModelManager.getInstance().getAllAttributeTreeNodes(attribute, s) : QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(attribute, s);
+				}catch(Exception ex){
+					QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
+				}finally{
+					s.getTransaction().rollback();
+				}
 			}
 			
 			input = roots;
 			if(treeviewer == null) return Status.OK_STATUS;
 			Display d = treeviewer.getTreeViewer().getTree().getDisplay();
+			final boolean fshowInactive = showInactive;
 			if (d != null && !d.isDisposed()){
 				d.asyncExec(new Runnable(){
 					@Override
@@ -116,7 +117,7 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 								treeviewer.getTreeViewer().getControl().isDisposed()){
 							return;
 						}
-						AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(!showInactive, false);
+						AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(!fshowInactive, false);
 						treeviewer.getTreeViewer().setContentProvider(cProvider);
 						treeviewer.getTreeViewer().setInput(roots);
 						treeviewer.getTreeViewer().refresh();

@@ -167,15 +167,14 @@ public class QueryLazyResultsTable extends Composite{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					toDispose.dispose(s);
-					s.getTransaction().commit();
-				}catch (Exception ex){
-					Intelligence2PlugIn.log(Messages.QueryLazyResultsTable_DisplayError, ex);
-				}finally{
-					s.close();
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
+						toDispose.dispose(s);
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						Intelligence2PlugIn.log(Messages.QueryLazyResultsTable_DisplayError, ex);
+					}
 				}
 				return Status.OK_STATUS;
 			}

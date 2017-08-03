@@ -24,7 +24,7 @@ package org.wcs.smart.connect.dataqueue.cybertracker.survey.updatesite;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.connect.dataqueue.cybertracker.survey.PlugIn;
 import org.wcs.smart.connect.dataqueue.cybertracker.survey.internal.Messages;
@@ -43,32 +43,32 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.DataQueueCtMissionDatabaseUpgrader_UpgradeTask, 2);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DataQueueCtMissionDatabaseUpgrader_UpgradeTask, 2);
 		
 		//we need to ensure the mission table is installed first
-		(new ERDatabaseUpgrader()).upgrade(new SubProgressMonitor(monitor, 1));
+		(new ERDatabaseUpgrader()).upgrade(progress.split(1));
 		
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			Map<String, String> versions = UpgradeEngine.getVersions(session);
-			if (versions == null)
-				throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			String currentPluginVersion = versions.get(PlugIn.PLUGIN_ID);
-
-			if (currentPluginVersion == null) {
-				(new AddDataQueueCtMissionJob()).installPlugin(session);
-			} else {
-				upgrade(currentPluginVersion, session);
+			try{
+				Map<String, String> versions = UpgradeEngine.getVersions(session);
+				
+				if (versions == null)
+					throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+				String currentPluginVersion = versions.get(PlugIn.PLUGIN_ID);
+	
+				if (currentPluginVersion == null) {
+					(new AddDataQueueCtMissionJob()).installPlugin(session);
+				} else {
+					upgrade(currentPluginVersion, session);
+				}
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				throw ex;
 			}
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			throw ex;
-		} finally { 
-			session.close();
 		}
-		monitor.done();
+		progress.worked(1);
 	}
 	
 	/**

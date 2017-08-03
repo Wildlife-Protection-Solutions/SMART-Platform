@@ -162,8 +162,8 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     			.relativize(p)
     			.toString());
 
-    	Session s = HibernateManager.openSession();
-    	try{
+    	
+    	try(Session s = HibernateManager.openSession()){
     		if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(caUuid, s)){			
 	    		ChangeLogItem item = new ChangeLogItem();
 	    	    item.setAction(type);
@@ -177,8 +177,6 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     		}
     	}catch (Exception ex){
     		ConnectPlugIn.displayLog(MessageFormat.format(Messages.FileStoreWatcher_FilestoreLogError, relativeFileName, ex.getMessage()), ex);
-    	}finally{
-    		s.close();
     	}
     }
 

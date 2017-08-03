@@ -40,6 +40,7 @@ import org.wcs.smart.ui.ShowPerspectiveHandler;
  * @author elitvin
  * @since 3.2.0
  */
+@SuppressWarnings("restriction")
 public class ShowInformantDataHandler {
 
 	@Execute

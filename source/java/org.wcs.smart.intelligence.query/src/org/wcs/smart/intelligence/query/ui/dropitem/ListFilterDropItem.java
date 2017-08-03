@@ -26,6 +26,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -45,8 +49,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.model.Informant;
@@ -76,33 +78,38 @@ public class ListFilterDropItem extends DropItem{
 	
 	private Job loadItemsJob = new Job(Messages.ListFilterDropItem_loadingListJobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<ListItem> items = new ArrayList<ListItem>();
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				
 				if (filter == IntelligenceFilterOption.INFORMANTID){ 
 					List<Informant> temp = null;
+					
+					CriteriaQuery<Informant> query = cb.createQuery(Informant.class);
+					Root<Informant> from = query.from(Informant.class);
 					if (SmartDB.isMultipleAnalysis()){
-						temp = s.createCriteria(Informant.class)
-								.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())) //$NON-NLS-1$
-								.addOrder(Order.desc("isActive")) //$NON-NLS-1$
-								.addOrder(Order.asc("id")).list(); //$NON-NLS-1$
+						query.where(from.get("conservationArea").in(SmartDB.getConservationAreaConfiguration().getConservationAreas())); //$NON-NLS-1$
+						query.orderBy(cb.desc(from.get("isActive")), cb.asc(from.get("id"))); //$NON-NLS-1$ //$NON-NLS-2$
+						temp = s.createQuery(query).getResultList();
 					}else{
-						temp = s.createCriteria(Informant.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.addOrder(Order.desc("isActive")) //$NON-NLS-1$
-							.addOrder(Order.asc("id")).list(); //$NON-NLS-1$
+						query.where(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+						query.orderBy(cb.desc(from.get("isActive")), cb.asc(from.get("id"))); //$NON-NLS-1$ //$NON-NLS-2$
+						temp = s.createQuery(query).getResultList();
 					}
 					for (Informant i : temp){
 						items.add(new ListItem(null, i.getId(), i.getId()));
 					}
 				}else if (filter == IntelligenceFilterOption.SOURCE){
+					
+					CriteriaQuery<IntelligenceSource> query = cb.createQuery(IntelligenceSource.class);
+					Root<IntelligenceSource> from = query.from(IntelligenceSource.class);
+					
 					if (SmartDB.isMultipleAnalysis()){
-						List<IntelligenceSource> temp = s.createCriteria(IntelligenceSource.class)
-								.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())) //$NON-NLS-1$
-								.addOrder(Order.asc("name")).list(); //$NON-NLS-1$
+						query.where(from.get("conservationArea").in(SmartDB.getConservationAreaConfiguration().getConservationAreas())); //$NON-NLS-1$
+						query.orderBy(cb.asc(from.get("name"))); //$NON-NLS-1$ 
+						List<IntelligenceSource> temp = s.createQuery(query).getResultList();
 						HashSet<String> keys = new HashSet<String>();
 						for (IntelligenceSource i : temp){
 							if (!keys.contains(i.getKeyId())){
@@ -111,16 +118,14 @@ public class ListFilterDropItem extends DropItem{
 							}
 						}
 					}else{
-						List<IntelligenceSource> temp = s.createCriteria(IntelligenceSource.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.addOrder(Order.asc("name")).list(); //$NON-NLS-1$
+						query.where(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+						query.orderBy(cb.asc(from.get("name"))); //$NON-NLS-1$ 
+						List<IntelligenceSource> temp = s.createQuery(query).getResultList();
 						for (IntelligenceSource i : temp){
 							items.add(new ListItem(null, i.getName(), i.getKeyId()));
 						}
 					}
 				}
-			}finally{
-				s.close();
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){

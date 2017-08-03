@@ -23,8 +23,9 @@ package org.wcs.smart.i2.ui;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -51,26 +52,27 @@ public abstract class EntitySearchJob extends Job{
 	public void setSearch(IIntelEntitySearch search){
 		this.search = search;
 	}
+	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-		monitor.beginTask(Messages.EntitySearchJob_TaskName, 3);
-		beforeSearch(new SubProgressMonitor(monitor, 1));
-		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-		IntelSearchResult entities = null; 
-		Session s = HibernateManager.openSession();
-		try{
-			entities = search.doSearch(s, new SubProgressMonitor(monitor, 1));
-		}catch (Exception ex){
-			Intelligence2PlugIn.log(ex.getMessage(), ex);
-			onError(ex);
-			return Status.OK_STATUS;
-		}finally{
-			s.close();
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntitySearchJob_TaskName, 3);
+		try {
+			beforeSearch(progress.split(1));
+			progress.checkCanceled();
+			
+			IntelSearchResult entities = null; 
+			try(Session s = HibernateManager.openSession()){
+				entities = search.doSearch(s, progress.split(1));
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+				onError(ex);
+				return Status.OK_STATUS;
+			}
+			afterSearch(entities, progress.split(1));
+			
+		}catch (OperationCanceledException ex) {
+			return Status.CANCEL_STATUS;
 		}
-		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-		
-		afterSearch(entities, new SubProgressMonitor(monitor, 1));		
 		return Status.OK_STATUS;
 	}
 

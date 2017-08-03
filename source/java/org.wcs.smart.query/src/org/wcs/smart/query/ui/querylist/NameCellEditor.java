@@ -101,24 +101,23 @@ public class NameCellEditor implements ICellModifier {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try {
-					Query thisquery = (Query) session.load(query.getType().getHibernateClass(), query.getUuid());
-					thisquery.updateName(SmartDB.getCurrentLanguage(), newName);
-					thisquery.setName(newName);
-					query.setQueryName(newName);
-					session.getTransaction().commit();
-					fireQueryNameChangeListener(thisquery);
-				} catch (Exception ex) {
-					if (session.getTransaction().isActive()){
-						session.getTransaction().rollback();
+				try(Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try {
+						Query thisquery = (Query) session.load(query.getType().getHibernateClass(), query.getUuid());
+						thisquery.updateName(SmartDB.getCurrentLanguage(), newName);
+						thisquery.setName(newName);
+						query.setQueryName(newName);
+						session.getTransaction().commit();
+						fireQueryNameChangeListener(thisquery);
+					} catch (Exception ex) {
+						if (session.getTransaction().isActive()){
+							session.getTransaction().rollback();
+						}
+						QueryPlugIn.displayLog(
+								Messages.NameCellEditor_CouldNotSaveQueryName
+										+ ex.getLocalizedMessage(), ex);
 					}
-					QueryPlugIn.displayLog(
-							Messages.NameCellEditor_CouldNotSaveQueryName
-									+ ex.getLocalizedMessage(), ex);
-				} finally {
-					session.close();
 				}
 
 				return Status.OK_STATUS;
@@ -141,23 +140,22 @@ public class NameCellEditor implements ICellModifier {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try {
-					session.saveOrUpdate(folder);
-					folder.updateName(SmartDB.getCurrentLanguage(), newName);
-					folder.setName(newName);
-					session.getTransaction().commit();
-					fireFolderNameChangeListener(folder);
-				} catch (Exception ex) {
-					if (session.getTransaction().isActive()){
-						session.getTransaction().rollback();
+				try(Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try {
+						session.saveOrUpdate(folder);
+						folder.updateName(SmartDB.getCurrentLanguage(), newName);
+						folder.setName(newName);
+						session.getTransaction().commit();
+						fireFolderNameChangeListener(folder);
+					} catch (Exception ex) {
+						if (session.getTransaction().isActive()){
+							session.getTransaction().rollback();
+						}
+						QueryPlugIn.displayLog(
+								Messages.NameCellEditor_CouldNotSaveFolderNameChange
+										+ ex.getLocalizedMessage(), ex);
 					}
-					QueryPlugIn.displayLog(
-							Messages.NameCellEditor_CouldNotSaveFolderNameChange
-									+ ex.getLocalizedMessage(), ex);
-				} finally {
-					session.close();
 				}
 
 				return Status.OK_STATUS;

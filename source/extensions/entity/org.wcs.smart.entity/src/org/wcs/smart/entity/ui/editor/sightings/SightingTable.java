@@ -141,20 +141,12 @@ public class SightingTable {
 	
 	private List<QueryColumn> getQueryColumns(EntityType type){
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
-		
-		
 		ObservationOptions obsOptions = null;
-		Session session = HibernateManager.openSession();
-		try {
-			obsOptions = ObservationHibernateManager
-					.getPatrolOptions(
-							SmartDB.getCurrentConservationArea(),
-							session);
-		} finally {
-			session.close();
-		}
-
 		
+		try(Session session = HibernateManager.openSession()){
+			obsOptions = ObservationHibernateManager
+					.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+		}		
 		//fixed columns for waypoint and fixed entity attributes
 		for (FixedColumns fixed : SightingQueryColumn.FixedColumns.values()){
 			QueryColumn column = new SightingQueryColumn(fixed.getGuiName(),fixed.getKey(),fixed.getType(), fixed.dbColName);

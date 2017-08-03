@@ -44,6 +44,7 @@ import org.wcs.smart.ui.TranslateNamesHandler;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class TranslateIntelligenceHandler extends TranslateNamesHandler {
 
 	@Execute
@@ -57,13 +58,13 @@ public class TranslateIntelligenceHandler extends TranslateNamesHandler {
 		Intelligence intelligence = null;
 		if (obj instanceof IntelligenceEditorInput) {
 			UUID uuid = ((IntelligenceEditorInput) obj).getUuid();
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				intelligence = (Intelligence) session.load(Intelligence.class, uuid);
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					intelligence = (Intelligence) session.load(Intelligence.class, uuid);
+				}finally{
+					session.getTransaction().rollback();
+				}
 			}
 		} else if (obj instanceof Intelligence) {
 			intelligence = (Intelligence) obj;

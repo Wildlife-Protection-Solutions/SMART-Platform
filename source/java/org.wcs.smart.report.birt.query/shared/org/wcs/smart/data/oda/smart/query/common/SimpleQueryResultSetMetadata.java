@@ -148,7 +148,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		if (geometryColumns != null && index > queryColumns.length){
 			return geometryColumns[index - queryColumns.length - 1].getLabel();  
 		}
-		return queryColumns[index-1].getName();
+		return queryColumns[index-1].getName();		
 	}
 
 	/**

@@ -47,8 +47,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.qa.QaPlugIn;
@@ -168,22 +168,17 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 	private void loadTransportTypes(){
 		Job j = new Job("init transport types"){ //$NON-NLS-1$
 
-			@SuppressWarnings("unchecked")
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				final List<PatrolTransportType> transportTypes = new ArrayList<>();
-				Session s = HibernateManager.openSession();
-				try{
-					transportTypes.addAll(s.createCriteria(PatrolTransportType.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list());
+				
+				try(Session s = HibernateManager.openSession()){
+					transportTypes.addAll( QueryFactory.buildQuery(s, PatrolTransportType.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList()); //$NON-NLS-1$
 					for (PatrolTransportType t : transportTypes){
 						t.getName().length();
 					}
 				}catch (Exception ex){
 					QaPlugIn.displayLog(Messages.PatrolSpeedParameterCollector_DbError + ex.getMessage(), ex);
-				}finally{
-					s.close();
 				}
 				Display.getDefault().syncExec(()->{
 					tblTransportTypes.setInput(transportTypes);

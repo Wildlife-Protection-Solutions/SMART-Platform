@@ -124,52 +124,52 @@ public class PlanFilterDialog extends SmartFilterDialog {
 		setMessage(Messages.PlanFilterDialog_Message);
 		getShell().setText(Messages.PlanFilterDialog_Title);
 
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			Composite composite = new Composite((Composite) filter, SWT.NONE);
-			composite.setLayout(new GridLayout(1, false));
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
-					false));
-
-			Composite dateFilterExpComp = createGroupComposite(
-					Messages.PlanFilterDialog_PlanDateFilter_Label, composite);
-			
-			dateFilterCmp = new DateFilterComposite(dateFilterExpComp,
-					SWT.NONE, this){
-			
-				@Override
-				protected DateFilter[] getDefaultDateViewerInput() {
-					return new DateFilter[] {
-							DateFilter.RANGE_30_DAYS,
-							DateFilter.RANGE_60_DAYS,
-							DateFilter.CURRENT_YEAR,
-							DateFilter.CURRENT_MONTH,
-							DateFilter.CUSTOM
-					};
-				}
-				@Override
-				protected ISelection getDefaultDateViewerSelection() {
-					return new StructuredSelection(DateFilter.RANGE_30_DAYS);
-				}
-
-			};
-
-			Composite patrolType = createGroupComposite(Messages.PlanFilterDialog_PlanTypeFilter_Label,
-					composite);
-			createPatrolType(session, patrolType);
-
-			Composite planIdComp = createGroupComposite(Messages.PlanFilterDialog_PlanIdName_Label, composite);
-			
-			planIdFilter = new StringFilterComposite(planIdComp, SWT.NONE, PlanFilter.SEARCH_FIELDS);
-			planIdFilter.setIncludeAllRadioLabel(Messages.PlanFilterDialog_IncludeAll_Label);
-			planIdFilter.setFilterRadioLabel(Messages.PlanFilterDialog_FilterIdName_Label);
-			
-
-			updateControlsValues();
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				Composite composite = new Composite((Composite) filter, SWT.NONE);
+				composite.setLayout(new GridLayout(1, false));
+				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
+						false));
+	
+				Composite dateFilterExpComp = createGroupComposite(
+						Messages.PlanFilterDialog_PlanDateFilter_Label, composite);
+				
+				dateFilterCmp = new DateFilterComposite(dateFilterExpComp,
+						SWT.NONE, this){
+				
+					@Override
+					protected DateFilter[] getDefaultDateViewerInput() {
+						return new DateFilter[] {
+								DateFilter.RANGE_30_DAYS,
+								DateFilter.RANGE_60_DAYS,
+								DateFilter.CURRENT_YEAR,
+								DateFilter.CURRENT_MONTH,
+								DateFilter.CUSTOM
+						};
+					}
+					@Override
+					protected ISelection getDefaultDateViewerSelection() {
+						return new StructuredSelection(DateFilter.RANGE_30_DAYS);
+					}
+	
+				};
+	
+				Composite patrolType = createGroupComposite(Messages.PlanFilterDialog_PlanTypeFilter_Label,
+						composite);
+				createPatrolType(session, patrolType);
+	
+				Composite planIdComp = createGroupComposite(Messages.PlanFilterDialog_PlanIdName_Label, composite);
+				
+				planIdFilter = new StringFilterComposite(planIdComp, SWT.NONE, PlanFilter.SEARCH_FIELDS);
+				planIdFilter.setIncludeAllRadioLabel(Messages.PlanFilterDialog_IncludeAll_Label);
+				planIdFilter.setFilterRadioLabel(Messages.PlanFilterDialog_FilterIdName_Label);
+				
+	
+				updateControlsValues();
+			} finally {
+				session.getTransaction().rollback();
+			}
 		}
 
 		return filter;

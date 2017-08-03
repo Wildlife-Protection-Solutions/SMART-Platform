@@ -72,6 +72,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class IntelligenceTemplatesView {
 	
 	public static final String ID = "org.wcs.smart.i2.view.entitytypelist"; //$NON-NLS-1$
@@ -205,11 +206,8 @@ public class IntelligenceTemplatesView {
 			Display.getDefault().syncExec(() -> lstTypes.setInput(new String[]{DialogConstants.LOADING_TEXT}));
 			List<Object> types = new ArrayList<>();
 		
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
-			}finally{
-				s.close();
 			}
 			types.add(0,IntelRecordTemplate.INSTANCE);	
 			final List<Object> ftypes = types;

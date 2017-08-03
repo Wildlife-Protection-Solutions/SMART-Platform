@@ -35,7 +35,7 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -95,8 +95,8 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 			}
 		}
 		
-		Query query1 = connection.getSession().createQuery(q1);
-		Query query2 = connection.getSession().createQuery(q2);
+		Query<?> query1 = connection.getSession().createQuery(q1);
+		Query<?> query2 = connection.getSession().createQuery(q2);
 		for (Entry<String,Object> e : values.entrySet()){
 			query1.setParameter(e.getKey(), e.getValue());
 			query2.setParameter(e.getKey(), e.getValue());

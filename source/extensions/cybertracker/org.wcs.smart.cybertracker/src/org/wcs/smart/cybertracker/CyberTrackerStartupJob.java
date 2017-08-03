@@ -63,14 +63,11 @@ public class CyberTrackerStartupJob extends Job {
 	
 		List<ConservationArea> caList = null;
 		List<CyberTrackerPropertiesOption> propList = null;
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()){
 			caList = HibernateManager.getConservationAreas(session);
 			propList = CyberTrackerHibernateManager.getAllStorageOptions(session);
 		} catch (Exception e) {
 			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to select CA list and CyberTracker properties.", e)); //$NON-NLS-1$
-		} finally {
-			session.close();
 		}
 		checkFolderAndRegistry(caList);
 		cleanStorage(caList, propList);

@@ -132,8 +132,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			types = null;
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){
 				types = RelationshipTypeManager.INSTANCE.getRelationshipTypes(session, SmartDB.getCurrentConservationArea());
 				for (IntelRelationshipType t : types){
 					t.getName();
@@ -143,8 +142,6 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 						t.getRelationshipGroup().getName();
 					}
 				}
-			}finally{
-				session.close();
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){
@@ -525,8 +522,7 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 
 					monitor.beginTask(Messages.RelationshipTypeListDialog_DeleteTaskName, toDelete.size());
 					List<IntelRelationshipType> deleted = new ArrayList<IntelRelationshipType>();
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						for (IntelRelationshipType t : toDelete){
 							monitor.subTask(t.getName());
 							s.beginTransaction();
@@ -540,8 +536,6 @@ public class RelationshipTypeListDialog extends TitleAreaDialog {
 							}
 							monitor.worked(1);
 						}
-					}finally{
-						s.close();
 					}
 					monitor.done();
 					for (IntelRelationshipType d : deleted){

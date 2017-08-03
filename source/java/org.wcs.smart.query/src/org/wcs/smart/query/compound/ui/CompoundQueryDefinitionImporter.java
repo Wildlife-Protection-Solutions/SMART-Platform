@@ -146,12 +146,9 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 				for (CompoundMapQueryLayer l : compoundQuery.getLayers()){
 					Query localQuery = null;
 				
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						localQuery = QueryHibernateManager.getInstance().findQuery(s, l.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType(l.getQueryType()));
 						if (localQuery != null) localQuery.getConservationArea().equals(ca);	//implemented to fix hibernate session loading problem
-					}finally{
-						s.close();
 					}
 					
 					if (localQuery == null || !localQuery.getConservationArea().equals(ca)){
@@ -170,16 +167,13 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 								
 								
 								localQuery = null;
-								s = HibernateManager.openSession();
-								try{
+								try(Session s = HibernateManager.openSession()){
 									List<Query> localOptions = QueryHibernateManager.getInstance().findQuery(s, importedQueryMain.getName(), QueryTypeManager.INSTANCE.findQueryType(l.getQueryType()), ca, SmartDB.getCurrentEmployee());
 									for (Query localQueryOp : localOptions){
 										if (localQueryOp.isDefinitionEqual(importedQueryMain)){
 											localQuery = localQueryOp;
 										}
 									}
-								}finally{
-									s.close();
 								}
 								
 								if (localQuery != null){

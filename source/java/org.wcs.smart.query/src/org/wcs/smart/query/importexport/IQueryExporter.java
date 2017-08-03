@@ -87,6 +87,7 @@ public interface IQueryExporter {
 	 * @param results the query results to export (can be null)
 	 * @param file the file to write results to
 	 * @param options additional export parameters 
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
 	 * @throws Exception an exception if an error occurs
 	 * while exporting
 	 */

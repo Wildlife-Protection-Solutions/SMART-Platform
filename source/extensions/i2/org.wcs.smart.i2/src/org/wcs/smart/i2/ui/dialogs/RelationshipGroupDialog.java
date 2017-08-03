@@ -92,18 +92,16 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 	}
 	
 	protected void okPressed() {
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			s.saveOrUpdate(group);
-			s.getTransaction().commit();
-			
-		}catch (Exception ex){
-			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.RelationshipGroupDialog_SaveError +ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
+			try {
+				s.saveOrUpdate(group);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				if (s.getTransaction().isActive())s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.RelationshipGroupDialog_SaveError +ex.getMessage(), ex);
+				return;
+			}
 		}
 		
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
@@ -183,8 +181,7 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						if (group.getUuid() != null){
 							group = (IntelRelationshipGroup) s.get(IntelRelationshipGroup.class, group.getUuid());
 							group.getNames().size();
@@ -199,10 +196,7 @@ public class RelationshipGroupDialog extends TitleAreaDialog {
 							group = (IntelRelationshipGroup) s.merge(group);
 							group.getRelationshipTypes().forEach(e -> e.getName());
 						}
-					}finally{
-						s.close();
-					}
-					
+					}					
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {

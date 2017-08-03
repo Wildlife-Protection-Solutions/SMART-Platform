@@ -60,7 +60,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.operation.MathTransform;
@@ -267,22 +267,16 @@ public class WaypointLocationParameterCollector extends IParameterCollector {
 		cdArea.hide();
 	
 		Job j = new Job("init areas"){ //$NON-NLS-1$
-
-			@SuppressWarnings("unchecked")
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<Area.AreaType> types = new ArrayList<>();
-				
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					String query = "SELECT type FROM Area WHERE conservationArea = :ca GROUP BY type having count(*) > 0"; //$NON-NLS-1$
-					Query q = s.createQuery(query);
+					Query<?> q = s.createQuery(query);
 					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-					types.addAll(q.list());
+					for (Object x : q.list()) types.add((Area.AreaType)x);
 				}catch (Exception ex){
 					QaPlugIn.displayLog(Messages.WaypointLocationParameterCollector_LoadBoundariesArea + ex.getMessage(), ex);
-				}finally{
-					s.close();
 				}
 				Display.getDefault().syncExec(()->{
 					ISelection selection = cmbViewer.getSelection();

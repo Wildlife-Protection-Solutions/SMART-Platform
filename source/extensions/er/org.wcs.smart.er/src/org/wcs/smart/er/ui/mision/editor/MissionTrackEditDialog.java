@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -71,29 +71,29 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 		Composite comp = (Composite) super.createDialogArea(parent);
 
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			this.missionDay = (MissionDay) session.load(MissionDay.class, missionDay.getUuid());
-
-			String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title, missionDay.getMission().getId(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(missionDay.getDate()));
-			setTitle(title);
-			getShell().setText(title);
-			setMessage(Messages.MissionTrackEditDialog_Message);
-
-			cmp = new TracksComposite(comp, this);
-			cmp.addChangeListener(new ISurveyListener() {
-				@Override
-				public void compositeModified() {
-					if (getButton(IDialogConstants.OK_ID) == null) return;
-					getButton(IDialogConstants.OK_ID).setEnabled(true);
-					isChanged = true;
-				}
-			});
-			return comp;
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				this.missionDay = (MissionDay) session.load(MissionDay.class, missionDay.getUuid());
+	
+				String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title, missionDay.getMission().getId(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(missionDay.getDate()));
+				setTitle(title);
+				getShell().setText(title);
+				setMessage(Messages.MissionTrackEditDialog_Message);
+	
+				cmp = new TracksComposite(comp, this);
+				cmp.addChangeListener(new ISurveyListener() {
+					@Override
+					public void compositeModified() {
+						if (getButton(IDialogConstants.OK_ID) == null) return;
+						getButton(IDialogConstants.OK_ID).setEnabled(true);
+						isChanged = true;
+					}
+				});
+				return comp;
+			} finally {
+				session.getTransaction().rollback();
+			}
 		}
 	}
 	
@@ -135,28 +135,27 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 	}
 
 	public boolean saveChanges() {
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			for (MissionTrack mt : cmp.getTracksToDelete()){
-				if (mt.getUuid() != null){
-					Query q = session.createQuery("UPDATE SurveyWaypoint SET missionTrack = null WHERE missionTrack = :mt"); //$NON-NLS-1$
-					q.setParameter("mt", mt); //$NON-NLS-1$
-					q.executeUpdate();
-				
-					mt.setMissionDay(null);
-					session.delete(mt);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				for (MissionTrack mt : cmp.getTracksToDelete()){
+					if (mt.getUuid() != null){
+						Query<?> q = session.createQuery("UPDATE SurveyWaypoint SET missionTrack = null WHERE missionTrack = :mt"); //$NON-NLS-1$
+						q.setParameter("mt", mt); //$NON-NLS-1$
+						q.executeUpdate();
+					
+						mt.setMissionDay(null);
+						session.delete(mt);
+					}
 				}
+				
+				session.saveOrUpdate(missionDay);
+				session.getTransaction().commit();
+				cmp.clearTracksToDelete();
+			} catch (Exception ex) {
+				EcologicalRecordsPlugIn.displayLog(Messages.MissionTrackEditDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+				return false;
 			}
-			
-			session.saveOrUpdate(missionDay);
-			session.getTransaction().commit();
-			cmp.clearTracksToDelete();
-		} catch (Exception ex) {
-			EcologicalRecordsPlugIn.displayLog(Messages.MissionTrackEditDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-			return false;
-		} finally {
-			session.close();
 		}
 
 		isChanged = false;

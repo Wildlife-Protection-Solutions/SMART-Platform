@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Shell;
  */
 public interface IAdvancedStartupOption {
 
-	public static final String EXTENSION_ID = "org.wcs.smart.startupoption"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.startUpOption"; //$NON-NLS-1$
 	
 	public enum Status{
 		OK,

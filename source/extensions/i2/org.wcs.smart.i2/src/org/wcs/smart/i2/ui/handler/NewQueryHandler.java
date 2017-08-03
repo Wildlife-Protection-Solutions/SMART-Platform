@@ -35,6 +35,7 @@ import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class NewQueryHandler {
 	
 	@Execute

@@ -36,6 +36,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.birt.core.framework.IConfigurationElement;
 import org.eclipse.birt.report.designer.internal.ui.util.UIHelper;
 import org.eclipse.birt.report.engine.api.EmitterInfo;
@@ -121,8 +125,6 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.themes.ColorUtil;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
@@ -136,6 +138,7 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.EntityManager;
@@ -255,13 +258,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private AttributeValueLabelProvider attributeLabelProvider = new AttributeValueLabelProvider();
 	
 	private Job loadEntity = new Job("load entity"){ //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			entity = null;
 			IntelEntity temp = null;
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				temp = (IntelEntity) s.get(IntelEntity.class, input.getUuid());
 				if (temp == null){
 					//close editor
@@ -291,17 +292,24 @@ public class EntityEditor extends EditorPart implements MapPart{
 						}
 					}
 				}
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<IntelEntityTypeAttributeGroup> c = cb.createQuery(IntelEntityTypeAttributeGroup.class);
+				Root<IntelEntityTypeAttributeGroup> from = c.from(IntelEntityTypeAttributeGroup.class);
+				c.where(cb.equal(from.get("entityType"), temp.getEntityType())); //$NON-NLS-1$
+				c.orderBy(cb.asc(from.get("order"))); //$NON-NLS-1$
+				groups = s.createQuery(c).getResultList();
 				
-				groups = s.createCriteria(IntelEntityTypeAttributeGroup.class)
-						.add(Restrictions.eq("entityType", temp.getEntityType())) //$NON-NLS-1$
-						.addOrder(Order.asc("order")) //$NON-NLS-1$
-						.list();
 				
 				temp.getPrimaryAttachment();
 				
-				relationships = s.createCriteria(IntelEntityRelationship.class)
-					.add(Restrictions.or (Restrictions.eq("sourceEntity", temp), Restrictions.eq("targetEntity", temp))) //$NON-NLS-1$ //$NON-NLS-2$
-					.list();
+				CriteriaQuery<IntelEntityRelationship> c2 = cb.createQuery(IntelEntityRelationship.class);
+				Root<IntelEntityRelationship> from2 = c2.from(IntelEntityRelationship.class);
+				c2.where(cb.or(
+						cb.equal(from2.get("sourceEntity"), temp), //$NON-NLS-1$
+						cb.equal(from2.get("targetEntity"), temp) //$NON-NLS-1$
+						));
+				relationships = s.createQuery(c2).getResultList();		
+				
 				for (IntelEntityRelationship r : relationships){
 					r.getRelationshipType().getName();
 					if (r.getRelationshipType().getRelationshipGroup() != null){
@@ -337,8 +345,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 				}
 				
-			}finally{
-				s.close();
 			}
 			
 			entity = temp;
@@ -355,16 +361,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 	
 	private Job loadRecords = new Job("loading entity records"){ //$NON-NLS-1$
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelRecord> records = new ArrayList<IntelRecord>();
 			Set<IntelRecordSource> sources = new HashSet<IntelRecordSource>();
-			Session s = HibernateManager.openSession();
-			try{
-				List<IntelEntityRecord> entityRecords = s.createCriteria(IntelEntityRecord.class)
-						.add(Restrictions.eq("id.entity", entity)) //$NON-NLS-1$
-						.list();
+			try(Session s = HibernateManager.openSession()){
+				List<IntelEntityRecord> entityRecords =  QueryFactory.buildQuery(s, IntelEntityRecord.class, "id.entity", entity).getResultList(); //$NON-NLS-1$
 				for (IntelEntityRecord r : entityRecords){
 					records.add(r.getRecord());
 					r.getRecord().getDateCreated();
@@ -375,8 +377,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 						sources.add(r.getRecord().getRecordSource());
 					}
 				}
-			}finally{
-				s.close();
 			}
 			
 			
@@ -432,75 +432,74 @@ public class EntityEditor extends EditorPart implements MapPart{
 
 		List<IntelEntity> otherEntityModified = new ArrayList<IntelEntity>();
 		
-		Session s = HibernateManager.openSession(new AttachmentInterceptor());
-		try{
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
+	
 			s.beginTransaction();
-			
-			if (entity.getEntityAttachments() != null){
-				for (IntelEntityAttachment a : entity.getEntityAttachments()){
-					s.saveOrUpdate(a.getAttachment());
-				}
-			}
-			s.saveOrUpdate(entity);
-			
-			for(IntelEntityRelationship r : relationships){
-				s.saveOrUpdate(r);
-			}
-			
-			for(IntelEntityRelationship r : relationshipsToAdd){
-				s.saveOrUpdate(r);
-				if (!r.getSourceEntity().equals(entity)){
-					otherEntityModified.add(r.getSourceEntity());
-				}
-				if (!r.getTargetEntity().equals(entity)){
-					otherEntityModified.add(r.getTargetEntity());
-				}
-			}
-			
-			for(IntelEntityRelationship r : relationshipsToDelete){
-				s.delete(r);
-				if (!r.getSourceEntity().equals(entity)){
-					otherEntityModified.add(r.getSourceEntity());
-				}
-				if (!r.getTargetEntity().equals(entity)){
-					otherEntityModified.add(r.getTargetEntity());
-				}
-			}
-			s.flush();
-			
-			for (IntelEntityAttachment ea : attachmentsToDelete){
-				if (ea.getAttachment().getUuid() != null){
-					if (AttachmentManager.INSTANCE.canDelete(ea.getAttachment(), s)){
-						s.delete(ea);
-						s.delete(ea.getAttachment());
+			try {
+				if (entity.getEntityAttachments() != null){
+					for (IntelEntityAttachment a : entity.getEntityAttachments()){
+						s.saveOrUpdate(a.getAttachment());
 					}
 				}
-			}
-			
-			//validate attributes against type
-			//this is done in case the type has modified and removed an attribute 
-			Set<IntelAttribute> attributes = new HashSet<>();
-			IntelEntityType type = (IntelEntityType) s.get(IntelEntityType.class, entity.getEntityType().getUuid());
-			type.getAttributes().forEach(a -> attributes.add(a.getAttribute()));
-			List<IntelEntityAttributeValue> toRemove = new ArrayList<IntelEntityAttributeValue>();
-			for (IntelEntityAttributeValue item : entity.getAttributes()){
-				if (!attributes.contains(item.getAttribute())){
-					toRemove.add(item);
+				s.saveOrUpdate(entity);
+				
+				for(IntelEntityRelationship r : relationships){
+					s.saveOrUpdate(r);
 				}
+				
+				for(IntelEntityRelationship r : relationshipsToAdd){
+					s.saveOrUpdate(r);
+					if (!r.getSourceEntity().equals(entity)){
+						otherEntityModified.add(r.getSourceEntity());
+					}
+					if (!r.getTargetEntity().equals(entity)){
+						otherEntityModified.add(r.getTargetEntity());
+					}
+				}
+				
+				for(IntelEntityRelationship r : relationshipsToDelete){
+					s.delete(r);
+					if (!r.getSourceEntity().equals(entity)){
+						otherEntityModified.add(r.getSourceEntity());
+					}
+					if (!r.getTargetEntity().equals(entity)){
+						otherEntityModified.add(r.getTargetEntity());
+					}
+				}
+				s.flush();
+				
+				for (IntelEntityAttachment ea : attachmentsToDelete){
+					if (ea.getAttachment().getUuid() != null){
+						if (AttachmentManager.INSTANCE.canDelete(ea.getAttachment(), s)){
+							s.delete(ea);
+							s.delete(ea.getAttachment());
+						}
+					}
+				}
+				
+				//validate attributes against type
+				//this is done in case the type has modified and removed an attribute 
+				Set<IntelAttribute> attributes = new HashSet<>();
+				IntelEntityType type = (IntelEntityType) s.get(IntelEntityType.class, entity.getEntityType().getUuid());
+				type.getAttributes().forEach(a -> attributes.add(a.getAttribute()));
+				List<IntelEntityAttributeValue> toRemove = new ArrayList<IntelEntityAttributeValue>();
+				for (IntelEntityAttributeValue item : entity.getAttributes()){
+					if (!attributes.contains(item.getAttribute())){
+						toRemove.add(item);
+					}
+				}
+				for (IntelEntityAttributeValue item : toRemove){
+					entity.getAttributes().remove(item);
+				}
+				
+				
+				s.getTransaction().commit();
+				clearLists();
+			}catch (Exception ex){
+				if (s.getTransaction().isActive())s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.EntityEditor_SaveError + ex.getMessage(), ex);
+				return;
 			}
-			for (IntelEntityAttributeValue item : toRemove){
-				entity.getAttributes().remove(item);
-			}
-			
-			
-			s.getTransaction().commit();
-			clearLists();
-		}catch (Exception ex){
-			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.EntityEditor_SaveError + ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		
 		lblIdentifier.setText(entity.getIdAttributeAsText());
@@ -1022,17 +1021,15 @@ public class EntityEditor extends EditorPart implements MapPart{
 							public void run(IProgressMonitor monitor) throws InvocationTargetException,
 									InterruptedException {
 								monitor.beginTask(Messages.EntityEditor_DeleteTaskName, IProgressMonitor.UNKNOWN);
-								Session s = HibernateManager.openSession(new AttachmentInterceptor());
-								try{
+								try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 									s.beginTransaction();
-									EntityManager.INSTANCE.deleteEntity(entity, s);
-									s.getTransaction().commit();
-								}catch (Exception ex){
-									s.getTransaction().rollback();
-									throw new InvocationTargetException(ex);
-									
-								}finally{
-									s.close();
+									try {
+										EntityManager.INSTANCE.deleteEntity(entity, s);
+										s.getTransaction().commit();
+									}catch (Exception ex){
+										s.getTransaction().rollback();
+										throw new InvocationTargetException(ex);
+									}
 								}
 							}
 						});
@@ -1964,8 +1961,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Session session = HibernateManager.openSession();
-				try{
+				try(Session session = HibernateManager.openSession()){
 					IntelEntityType etype = (IntelEntityType)session.get(IntelEntityType.class, entity.getEntityType().getUuid());
 					IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
 					tmp.setAttribute(etype.getIdAttribute());
@@ -1976,8 +1972,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}else{
 						editor.setWarningMessage(null);
 					}
-				}finally{
-					session.close();
 				}
 			}
 		});

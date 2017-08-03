@@ -193,9 +193,8 @@ public class EntityListComposite extends Composite{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
 				IntelEntity toadd = null;
-				try{
+				try(Session s = HibernateManager.openSession()){
 					toadd = (IntelEntity) s.get(IntelEntity.class, entity.getUuid());
 					if(toadd != null){
 						toadd.getIdAttributeAsText();
@@ -217,8 +216,6 @@ public class EntityListComposite extends Composite{
 						}
 						
 					}
-				}finally{
-					s.close();
 				}
 				if (toadd == null) return Status.OK_STATUS;
 				

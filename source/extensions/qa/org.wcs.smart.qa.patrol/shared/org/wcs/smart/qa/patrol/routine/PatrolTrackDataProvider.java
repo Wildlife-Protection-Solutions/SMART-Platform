@@ -31,10 +31,11 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.swt.graphics.Image;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -66,15 +67,19 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
 		List<TrackLocationData> tracks = new ArrayList<>();
 		
-		List<Patrol> patrols = session.createCriteria(Patrol.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.between("startDate", startDate, endDate)) //$NON-NLS-1$
-				.list();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Patrol> c = cb.createQuery(Patrol.class);
+		Root<Patrol> from = c.from(Patrol.class);
+		c.where(cb.and(
+				cb.equal(from.get("conservationArea"), ca), //$NON-NLS-1$
+				cb.between(from.get("startDate"), cb.literal(startDate), cb.literal(endDate)) //$NON-NLS-1$
+				));
+		
+		List<Patrol> patrols = session.createQuery(c).getResultList();
 		for (Patrol p : patrols){
 			for (PatrolLeg pl : p.getLegs()){
 				for (PatrolLegDay pld : pl.getPatrolLegDays()){
@@ -127,8 +132,4 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 		return ((TrackLocationData)obj).getTrack().getUuid();
 	}
 
-	@Override
-	public Image getImage() {
-		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getImage(getClass());
-	}
 }

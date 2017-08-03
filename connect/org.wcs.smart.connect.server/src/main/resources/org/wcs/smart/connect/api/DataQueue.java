@@ -58,9 +58,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
@@ -74,6 +72,7 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -201,7 +200,6 @@ public class DataQueue {
 		return items;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void getProxyItems(String caFilter, String status, List<ServerDataQueueItem.Status> statusFilter,
 			List<ServerDataQueueItemProxy> proxyitems) {
 		if (status != null){
@@ -222,7 +220,7 @@ public class DataQueue {
 			
 			List<ConservationAreaInfo> cas = null;
 			if (caFilter == null ){
-				cas = s.createCriteria(ConservationAreaInfo.class).list();
+				cas = QueryFactory.buildQuery(s, ConservationAreaInfo.class).list();
 			}else{
 				cas = new ArrayList<ConservationAreaInfo>();
 				for (String x : caFilter.split(",")){ //$NON-NLS-1$
@@ -242,13 +240,13 @@ public class DataQueue {
 				try{
 					validateRead(ca.getUuid(), s);
 					
-					Criteria c = s.createCriteria(ServerDataQueueItem.class)
-							.add(Restrictions.eq("conservationArea", ca.getUuid())); //$NON-NLS-1$
+					Object[][] filters = new Object[statusFilter != null ? 2 : 1][2];
+					filters[0] = new Object[] {"conservationArea", ca.getUuid()}; //$NON-NLS-1$
 					if (statusFilter != null){
-						c.add(Restrictions.in("status", statusFilter)); //$NON-NLS-1$
+						filters[1] = new Object[] {"status", statusFilter}; //$NON-NLS-1$
 					}
+					List<ServerDataQueueItem> items = QueryFactory.buildQuery(s, ServerDataQueueItem.class, filters).list();
 					
-					List<ServerDataQueueItem> items = c.list();
 					for (ServerDataQueueItem item : items){
 						ServerDataQueueItemProxy proxy = new ServerDataQueueItemProxy(
 								item.getUuid(), item.getName(), ca.getUuid(), ca.getLabel(),

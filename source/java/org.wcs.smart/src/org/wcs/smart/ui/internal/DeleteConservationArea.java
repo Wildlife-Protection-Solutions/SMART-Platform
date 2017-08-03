@@ -51,6 +51,7 @@ import org.wcs.smart.user.UserLevelManager;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DeleteConservationArea {
 
 	@Execute

@@ -112,19 +112,18 @@ public class AreaGroupByItem extends DropItem implements IGroupByDropItem,ICombi
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			List<Area> areas = HibernateManager.loadAreas(type, s);
-			for (Area a : areas){
-				items.add(new ListItem(null, a.getName(), a.getKeyId()));
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				List<Area> areas = HibernateManager.loadAreas(type, s);
+				for (Area a : areas){
+					items.add(new ListItem(null, a.getName(), a.getKeyId()));
+				}
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.AreaGroupByItem_LoadError, ex);
+			}finally {
+				s.getTransaction().rollback();	
 			}
-		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.AreaGroupByItem_LoadError, ex);
-			s.close();
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
 		}
 		return items;		
 	}

@@ -21,12 +21,11 @@
  */
 package org.wcs.smart.qa.patrol.hibernate;
 
-import org.hibernate.cfg.Configuration;
+import org.hibernate.boot.Metadata;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.integrator.spi.Integrator;
-import org.hibernate.metamodel.source.MetadataImplementor;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 
 /**
@@ -38,7 +37,7 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 public class PatrolQaIntegrator implements Integrator {
 
 	@Override
-	public void integrate(Configuration configuration,
+	public void integrate(Metadata Metadata,
 			SessionFactoryImplementor sessionFactory,
 			SessionFactoryServiceRegistry serviceRegistry) {
 
@@ -47,15 +46,9 @@ public class PatrolQaIntegrator implements Integrator {
 	}
 
 	@Override
-	public void integrate(MetadataImplementor metadata,
-			SessionFactoryImplementor sessionFactory,
-			SessionFactoryServiceRegistry serviceRegistry) {
-		//do nothing; this is for hibernate 5.0
-	}
-
-	@Override
 	public void disintegrate(SessionFactoryImplementor sessionFactory,
 			SessionFactoryServiceRegistry serviceRegistry) {
 	}
 
+	
 }

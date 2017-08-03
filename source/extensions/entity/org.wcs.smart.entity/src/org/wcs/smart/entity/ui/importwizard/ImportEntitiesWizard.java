@@ -84,8 +84,7 @@ public class ImportEntitiesWizard extends Wizard implements IPageChangingListene
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(Messages.ImportEntitiesWizard_ProgressMsg, 110);
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						if (!importer.importEntities(s, monitor)){
 							error[0] = true;
 						}
@@ -93,7 +92,6 @@ public class ImportEntitiesWizard extends Wizard implements IPageChangingListene
 						EntityPlugIn.displayLog(Messages.ImportEntitiesWizard_ErrorMesg + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 						error[0] = true;
 					}finally{
-						s.close();
 						monitor.done();
 					}
 					
@@ -168,8 +166,7 @@ public class ImportEntitiesWizard extends Wizard implements IPageChangingListene
 							error = MessageFormat.format(Messages.ImportEntitiesWizard_ReadingError, new Object[]{f.toString()}) + "\n\n" + ex.getMessage(); //$NON-NLS-1$
 						}
 						monitor.worked(5);
-						final Session s = HibernateManager.openSession();
-						try{
+						try(final Session s = HibernateManager.openSession()){
 							Display.getDefault().syncExec(new Runnable(){
 								@Override
 								public void run() {
@@ -182,7 +179,6 @@ public class ImportEntitiesWizard extends Wizard implements IPageChangingListene
 							monitor.worked(3);
 							
 						}finally{
-							s.close();
 							monitor.done();
 						}
 						

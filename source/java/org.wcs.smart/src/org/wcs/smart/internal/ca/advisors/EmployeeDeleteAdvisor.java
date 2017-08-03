@@ -23,8 +23,11 @@ package org.wcs.smart.internal.ca.advisors;
 
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.internal.Messages;
@@ -40,7 +43,6 @@ import org.wcs.smart.user.UserLevelManager;
  */
 public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Employee)){
@@ -52,19 +54,23 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 			return null;
 		}
 		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+		Root<Employee> root = query.from(Employee.class);
+		query.where(cb.and(
+				cb.equal(root.get("conservationArea"), e.getConservationArea()), //$NON-NLS-1$
+				cb.isNull(root.get("endEmploymentDate")), //$NON-NLS-1$
+				cb.notEqual(root.get("uuid"), e.getUuid()), //$NON-NLS-1$
+				cb.isNotNull(root.get("smartUserLevelKeys")) //$NON-NLS-1$
+				)); 
+		
 		//find another active admin user
-		List<Employee> others  = session.createCriteria(Employee.class)
-				.add(Restrictions.eq("conservationArea", e.getConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.isNull("endEmploymentDate")) //$NON-NLS-1$
-				.add(Restrictions.ne("uuid", e.getUuid())) //$NON-NLS-1$
-				.add(Restrictions.isNotNull("smartUserLevelKeys")) //$NON-NLS-1$
-				.list();
+		List<Employee> others  = session.createQuery(query).getResultList();
 		for (Employee other : others){
 			if (UserLevelManager.INSTANCE.supportsUser(other, UserLevelManager.ADMIN)) return null;
 		}
 		
 		return Messages.EmployeeDeleteAdvisor_Error_NoMoreAdmin;
-		
 	}
 
 }

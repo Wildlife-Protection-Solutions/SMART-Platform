@@ -72,11 +72,8 @@ public class EditPatrolMotivationDialog extends AbstractPropertyJHeaderDialog {
 				}
 			}
 		});
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			content.initFromModel(patrol, s, selectedList);
-		}finally{
-			s.close();
 		}
 		setChangesMade(false);
 		
@@ -88,17 +85,16 @@ public class EditPatrolMotivationDialog extends AbstractPropertyJHeaderDialog {
 	@Override
 	protected boolean performSave() {
 		content.updateModel(patrol);
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try {
-			IntelligenceHibernateManager.savePatrolIntelligences(s, patrol, content.getCurrentIntelligences());
-			s.getTransaction().commit();
-		} catch (Exception ex) {
-			s.getTransaction().rollback();
-			SmartPatrolPlugIn.displayLog(Messages.EditPatrolMotivationDialog_Save_Error + ex.getLocalizedMessage(), ex);
-			return false;
-		} finally {
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				IntelligenceHibernateManager.savePatrolIntelligences(s, patrol, content.getCurrentIntelligences());
+				s.getTransaction().commit();
+			} catch (Exception ex) {
+				s.getTransaction().rollback();
+				SmartPatrolPlugIn.displayLog(Messages.EditPatrolMotivationDialog_Save_Error + ex.getLocalizedMessage(), ex);
+				return false;
+			}
 		}
 		setChangesMade(false);
 		savePerformed = true;

@@ -116,9 +116,7 @@ public class RunCompoundQueryLayerJob extends Job{
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			item.getQuery().setDateFilter(item.getDateFilter());
 			ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(monitor, item.getProgressBar());
 			IQueryResult results = QueryExecutor.INSTANCE.executeQuery(item.getQuery(), s, wrapper);
@@ -137,10 +135,7 @@ public class RunCompoundQueryLayerJob extends Job{
 		}catch(Exception ex){
 			item.setStatus(QueryItem.Status.ERROR);
 			item.setErrorMessage(ex.getMessage());
-			QueryPlugIn.log(ex.getMessage(), ex);
-			
-		}finally{
-			s.close();
+			QueryPlugIn.log(ex.getMessage(), ex);	
 		}
 		
 		try{		

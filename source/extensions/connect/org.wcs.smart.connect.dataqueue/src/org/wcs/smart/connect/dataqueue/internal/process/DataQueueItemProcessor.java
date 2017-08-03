@@ -29,7 +29,7 @@ import java.text.MessageFormat;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
@@ -95,11 +95,10 @@ public class DataQueueItemProcessor extends Job {
 		if (ProcessorManager.INSTANCE.isProcessingDisabled()) return Status.CANCEL_STATUS;
 		
 		monitor = progressWrapper.setProgressMonitor(monitor);
+		SubMonitor progress = SubMonitor.convert(monitor,Messages.DataQueueItemProcessor_Task1, 30);
 		
 		boolean reschedule = true;
 		try{
-		
-			monitor.beginTask(Messages.DataQueueItemProcessor_Task1, 30);
 			item = DataQueueManager.INSTANCE.checkOutNextQueueItem(connect);
 			
 			if (item == null){
@@ -109,7 +108,7 @@ public class DataQueueItemProcessor extends Job {
 			}
 			
 			progressWrapper.setDataQueueItem(item);
-			monitor.worked(5);
+			progress.worked(5);
 			if (item.getStatus() != LocalDataQueueItem.Status.PROCESSING){
 				//could not checkout next item for whatever reason
 				//do not process
@@ -117,20 +116,20 @@ public class DataQueueItemProcessor extends Job {
 			}
 			
 			
-			monitor.setTaskName(Messages.DataQueueItemProcessor_Task2 + item.getName());
+			progress.setTaskName(Messages.DataQueueItemProcessor_Task2 + item.getName());
 			boolean requeue = false;
 			IItemProcessor.ProcessingStatus processingStatus = null;
 			try{
-				monitor.subTask(Messages.DataQueueItemProcessor_Task3);
+				progress.subTask(Messages.DataQueueItemProcessor_Task3);
 				if (item.getFullFilePath() == null  || !Files.exists(item.getFullFilePath())){
 					//it may have been already downloaded if we are reprocessing
 					updateLocalStatus(LocalDataQueueItem.Status.DOWNLOADING, null);
-					downloadFile(new SubProgressMonitor(monitor, 10));
+					downloadFile(progress.split(10));
 				}
 				
-				monitor.subTask(Messages.DataQueueItemProcessor_Task4);
+				progress.subTask(Messages.DataQueueItemProcessor_Task4);
 				updateLocalStatus(LocalDataQueueItem.Status.PROCESSING, null);
-				processingStatus = processItem(new SubProgressMonitor(monitor, 10));
+				processingStatus = processItem(progress.split(10));
 				
 				
 				if (processingStatus.getStatus() == LocalDataQueueItem.Status.REQUEUED){
@@ -149,7 +148,7 @@ public class DataQueueItemProcessor extends Job {
 				}
 				return Status.OK_STATUS;
 			}
-			monitor.subTask(Messages.DataQueueItemProcessor_Task5);
+			progress.subTask(Messages.DataQueueItemProcessor_Task5);
 			try{
 				if (requeue){
 					//requeuing action takes place below
@@ -176,7 +175,7 @@ public class DataQueueItemProcessor extends Job {
 			}catch (Exception ex){
 				ConnectDataQueuePlugin.displayLog(Messages.DataQueueItemProcessor_Error3, ex);
 			}
-			monitor.worked(5);
+			progress.worked(5);
 		}finally{
 			if (reschedule){
 				ProcessorManager.INSTANCE.processDataQueue(connect);
@@ -235,13 +234,15 @@ public class DataQueueItemProcessor extends Job {
 	}
 	
 	private void saveItem(){
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			s.saveOrUpdate(item);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				s.saveOrUpdate(item);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 	}
 

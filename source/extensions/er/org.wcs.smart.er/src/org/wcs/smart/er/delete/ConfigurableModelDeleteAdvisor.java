@@ -24,12 +24,11 @@ package org.wcs.smart.er.delete;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Delete advisor for deleting configurable model.
@@ -47,11 +46,7 @@ public class ConfigurableModelDeleteAdvisor implements IDeleteAdvisor {
 		ConfigurableModel cm = (ConfigurableModel)object;
 		
 		//check survey design for references
-		Long cmCnt = (Long) session.createCriteria(SurveyDesign.class)
-				.add(Restrictions.eq("configurableModel", cm)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount())
-				.list().get(0);
-
+		Long cmCnt = QueryFactory.buildCountQuery(session, SurveyDesign.class,  new Object[] {"configurableModel", cm}); //$NON-NLS-1$
 		if (cmCnt > 0){
 			return MessageFormat.format(
 					Messages.ConfigurableModelDeleteAdvisor_SurveyCnt, new Object[]{cmCnt});

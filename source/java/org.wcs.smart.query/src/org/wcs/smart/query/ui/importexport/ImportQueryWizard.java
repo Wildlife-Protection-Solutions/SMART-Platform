@@ -150,10 +150,10 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 					monitor.worked(1);
 					monitor.subTask(MessageFormat.format(Messages.ImportQueryWizard_ImportingProgress, new Object[]{qi.getName()}));
 					
-					Session s = HibernateManager.openSession();
 					Query query = null;
 					IQueryExporter def = null;
-					try{
+					
+					try(Session s = HibernateManager.openSession()){
 						query = (Query) s.load(qi.getType().getHibernateClass(), qi.getUuid());
 		
 						List<IQueryExporter> exporter = QueryExportEngine.getQueryExports(query);
@@ -163,8 +163,6 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 								break;
 							}
 						}
-					}finally{
-						s.close();
 					}
 					if (def == null){
 						MessageDialog.openError(getShell(), Messages.ImportQueryWizard_ErrorDialogTitle1, MessageFormat.format(Messages.ImportQueryWizard_ImportError, new Object[]{qi.getName() + " [" + qi.getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
@@ -298,23 +296,22 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 			}
 		}
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			//generate id
-			for (Query query : queries){
-				query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
-				session.saveOrUpdate(query);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				//generate id
+				for (Query query : queries){
+					query.setId(QueryHibernateManager.getInstance().generateQueryId(session));
+					session.saveOrUpdate(query);
+				}
+				session.flush();
+				importer.beforeCommit();
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				throw ex;
 			}
-			session.flush();
-			importer.beforeCommit();
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			throw ex;
-		}finally{
-			session.close();
-		}				
+		}			
 		
 		return queries;
 	}

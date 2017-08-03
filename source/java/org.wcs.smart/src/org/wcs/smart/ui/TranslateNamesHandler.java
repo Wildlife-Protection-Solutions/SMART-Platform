@@ -41,6 +41,7 @@ import org.wcs.smart.internal.Messages;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class TranslateNamesHandler {
 	
 	@Execute
@@ -57,8 +58,8 @@ public class TranslateNamesHandler {
 	}
 	
 	protected void translateItem(NamedItem toUpdate, Shell activeShell){
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			s.saveOrUpdate(toUpdate);
 			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(activeShell, toUpdate);
@@ -69,8 +70,6 @@ public class TranslateNamesHandler {
 			}
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.TranslateNamesHandler_Error_TranslatingName, ex);
-		}finally{
-			s.close();
 		}
 	}
 	

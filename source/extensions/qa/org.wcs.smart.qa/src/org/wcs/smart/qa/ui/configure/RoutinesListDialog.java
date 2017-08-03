@@ -72,11 +72,11 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.RoutineExtensionManager;
@@ -162,7 +162,9 @@ public class RoutinesListDialog extends TitleAreaDialog {
 		}
 		
 		if (tblRoutines.getSelection().isEmpty()) return;
-		WrappedQaRoutine routine = (WrappedQaRoutine) ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+		Object x = ((IStructuredSelection)tblRoutines.getSelection()).getFirstElement();
+		if (!(x instanceof WrappedQaRoutine)) return;
+		WrappedQaRoutine routine = (WrappedQaRoutine) x;
 		QaRoutine r = routine.routine;
 		if (r == null) return;
 		
@@ -442,24 +444,23 @@ public class RoutinesListDialog extends TitleAreaDialog {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
 				monitor.beginTask(Messages.RoutinesListDialog_DeleteTaskName, toDelete.size());
-				Session s = HibernateManager.openSession();
-				s.getTransaction().begin();
-				try{
-					for (QaRoutine r : toDelete){
-						Query q = s.createQuery("DELETE FROM QaError where qaRoutine = :r"); //$NON-NLS-1$
-						q.setParameter("r", r); //$NON-NLS-1$
-						q.executeUpdate();
+				try(Session s = HibernateManager.openSession()){
+					s.getTransaction().begin();
+					try{
+						for (QaRoutine r : toDelete){
+							Query<?> q = s.createQuery("DELETE FROM QaError where qaRoutine = :r"); //$NON-NLS-1$
+							q.setParameter("r", r); //$NON-NLS-1$
+							q.executeUpdate();
+							
+							s.delete(r);
+							monitor.worked(1);
+						}
 						
-						s.delete(r);
-						monitor.worked(1);
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						s.getTransaction().rollback();
+						throw new InvocationTargetException(ex);
 					}
-					
-					s.getTransaction().commit();
-				}catch (Exception ex){
-					s.getTransaction().rollback();
-					throw new InvocationTargetException(ex);
-				}finally{
-					s.close();
 				}
 				monitor.done();
 			}
@@ -512,23 +513,18 @@ public class RoutinesListDialog extends TitleAreaDialog {
 	
 	private Job refreshJob = new Job("refresh"){ //$NON-NLS-1$
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<WrappedQaRoutine> routines = new ArrayList<>();
 			
-			Session s = HibernateManager.openSession();
-			try{
-				List<QaRoutine> thisroutines = s.createCriteria(QaRoutine.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list();
+			
+			try(Session s = HibernateManager.openSession()){
+				List<QaRoutine> thisroutines = QueryFactory.buildQuery(s, QaRoutine.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 				for (QaRoutine r : thisroutines){
 					r.getParameters().size();
 					String parameterSummary = r.getRoutineType().getParameterSummary(r, Locale.getDefault(), s);
 					routines.add(new WrappedQaRoutine(r, parameterSummary));
 				}
-			}finally{
-				s.close();
 			}
 			Display.getDefault().asyncExec(()->{
 				tblRoutines.setInput(routines);

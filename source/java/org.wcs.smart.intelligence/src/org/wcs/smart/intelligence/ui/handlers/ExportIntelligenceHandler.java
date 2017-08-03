@@ -56,6 +56,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ExportIntelligenceHandler {
 
 	@Execute
@@ -90,18 +91,18 @@ public class ExportIntelligenceHandler {
 						try {
 							monitor.subTask(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_SubTask,  UuidUtils.uuidToString(uuid)));
 							Intelligence intel = null;
-							Session s = HibernateManager.openSession();
-							s.beginTransaction();
-							try {
-								intel = (Intelligence) s.load(Intelligence.class, uuid);
-								intel.getReceivedDate();
-								name = intel.getName();
-							} catch (Exception ex) {
-								IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_Error, UuidUtils.uuidToString(uuid)), ex);
-								continue;
-							} finally {
-								s.getTransaction().commit();
-								s.close();
+							try(Session s = HibernateManager.openSession()){
+								s.beginTransaction();
+								try {
+									intel = (Intelligence) s.load(Intelligence.class, uuid);
+									intel.getReceivedDate();
+									name = intel.getName();
+								} catch (Exception ex) {
+									IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_Error, UuidUtils.uuidToString(uuid)), ex);
+									continue;
+								} finally {
+									s.getTransaction().commit();
+								}
 							}
 
 							monitor.subTask(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_SubTask, name));

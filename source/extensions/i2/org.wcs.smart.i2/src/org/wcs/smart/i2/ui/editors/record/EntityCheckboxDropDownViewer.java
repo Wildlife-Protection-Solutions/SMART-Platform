@@ -58,8 +58,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
@@ -129,16 +129,13 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 						setValue(null);
 					});
 					
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						for (IntelRecordAttributeValueList item : items){
 							IntelEntity e = (IntelEntity) s.get(IntelEntity.class, item.getId().getElementUuid());
 							if (e != null){
 								eitems.add(new EntityItem(e.getUuid(), e.getIdAttributeAsText()));
 							}
 						}
-					}finally{
-						s.close();
 					}
 				}finally{
 					isLoading = false;
@@ -345,18 +342,13 @@ public class EntityCheckboxDropDownViewer extends CheckBoxDropDown{
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<EntityItem> entities = new ArrayList<>();
-				Session s = HibernateManager.openSession();
-				try{
-					ScrollableResults r = s.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("entityType", type)) //$NON-NLS-1$
-					.scroll();
+				try(Session s = HibernateManager.openSession()){
+					ScrollableResults r = QueryFactory.buildQuery(s, IntelEntity.class, "entityType", type).scroll(); //$NON-NLS-1$
 					while(r.next()){
 						IntelEntity e = (IntelEntity)r.get()[0];
 						EntityItem i = new EntityItem(e.getUuid(), e.getIdAttributeAsText());
 						entities.add(i);
 					}
-				}finally{
-					s.close();
 				}
 				Display.getDefault().syncExec(()->{
 					

@@ -23,7 +23,6 @@ package org.wcs.smart.i2.birt;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +53,6 @@ import org.eclipse.birt.report.model.api.TableHandle;
 import org.eclipse.birt.report.model.api.TextDataHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
-import org.eclipse.birt.report.model.api.elements.structures.ColumnHint;
 import org.eclipse.birt.report.model.api.elements.structures.ComputedColumn;
 import org.eclipse.birt.report.model.api.elements.structures.HideRule;
 import org.eclipse.birt.report.model.api.elements.structures.OdaDataSetParameter;
@@ -74,11 +72,12 @@ import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.birt.BirtSmartUtils;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
+import org.wcs.smart.i2.birt.entity.EntityDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
 import org.wcs.smart.i2.birt.record.RecordAttributeDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.RecordDataset;
@@ -192,14 +191,7 @@ public enum RecordReportGenerator {
 				}
 			}
 			
-			try{
-				ArrayList<?> hcolumns = (ArrayList<?>) dataset.getProperty("columnHints");  //$NON-NLS-1$
-				for (Object col : hcolumns){
-					((ColumnHint)col).setProperty("alias", ((ColumnHint)col).getProperty(dataset.getModule(), "displayName"));   //$NON-NLS-1$//$NON-NLS-2$
-				}
-			}catch (Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
-			}
+			BirtSmartUtils.updateDatasetConfiguration(dataset);
 			
 			datasetHandles.put(d,  dataset);
 		}
@@ -332,6 +324,12 @@ public enum RecordReportGenerator {
 		mi.setProperty(IImageItemModel.SOURCE_PROP, "expr"); //$NON-NLS-1$
 		mi.setProperty(IImageItemModel.VALUE_EXPR_PROP, "row[\"" + RecordDatasetResultSetMetadata.Column.SOURCE_ICON.getColumnName(Locale.getDefault()) + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
 		srcGrid.getCell(1,1).getContent().add(mi);
+		
+		/* hide if no image */
+		HideRule srcvisibility = StructureFactory.createHideRule();
+		srcvisibility.setFormat(DesignChoiceConstants.FORMAT_TYPE_ALL);
+		srcvisibility.setExpression("row[\""+ RecordDatasetResultSetMetadata.Column.SOURCE_ICON.getColumnName(Locale.getDefault()) +"\"] == null"); //$NON-NLS-1$ //$NON-NLS-2$
+		mi.getPropertyHandle(IReportItemModel.VISIBILITY_PROP).addItem(srcvisibility);
 		
 		di = factory.newDataItem(null);
 		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.SOURCE.getColumnName(Locale.getDefault()));

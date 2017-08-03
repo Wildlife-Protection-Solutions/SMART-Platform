@@ -29,10 +29,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.eclipse.swt.graphics.Image;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.observation.model.Waypoint;
@@ -60,12 +58,11 @@ public class IncidentDataProvider extends IQaDataProvider {
 		return ID;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
 		List<IncidentLocationData> waypoints = new ArrayList<>();
 		
-		Query query = session.createQuery("FROM Waypoint WHERE conservationArea = :ca and sourceId = :source and dateTime between :start AND :end"); //$NON-NLS-1$
+		Query<Waypoint> query = session.createQuery("FROM Waypoint WHERE conservationArea = :ca and sourceId = :source and dateTime between :start AND :end", Waypoint.class); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		query.setParameter("source",  IndepedentIncidentSource.KEY); //$NON-NLS-1$
 		query.setParameter("start",  startDate); //$NON-NLS-1$
@@ -105,8 +102,4 @@ public class IncidentDataProvider extends IQaDataProvider {
 		return ((IncidentLocationData)obj).getWaypoint().getUuid();
 	}
 
-	@Override
-	public Image getImage() {
-		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getImage(getClass());
-	}
 }

@@ -38,6 +38,7 @@ import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class NewEntityDialogHandler extends ShowDialogHandler {
 
 	public NewEntityDialogHandler(){

@@ -32,6 +32,7 @@ import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.ui.view.ManualResultsEditor;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
 
+@SuppressWarnings("restriction")
 public class NewManualValidationHandler {
 
 	@Execute

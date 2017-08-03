@@ -34,9 +34,8 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ShowPatrolFilterHandler {
-
-	
 	@Execute
 	public void execute(Shell activeShell,EPartService partService) throws ExecutionException {
 		PatrolListView view = (PatrolListView) E3Utils.getSourceObject(partService.findPart(PatrolListView.ID));

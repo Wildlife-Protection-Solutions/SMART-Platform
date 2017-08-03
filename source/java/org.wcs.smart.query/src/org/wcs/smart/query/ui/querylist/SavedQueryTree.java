@@ -65,16 +65,16 @@ public class SavedQueryTree {
 	private Job loadQueriesJob = new Job(Messages.SavedQueryTree_LoadingJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				folders = QueryHibernateManager.getInstance().getQueryFolders(s, true);
-				queries = QueryHibernateManager.getInstance().getQueryProxies(s);
-			}catch (Exception ex){
-				QueryPlugIn.displayLog(Messages.SavedQueryTree_ErrorLoadingQueries + ex.getLocalizedMessage(), ex);
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					folders = QueryHibernateManager.getInstance().getQueryFolders(s, true);
+					queries = QueryHibernateManager.getInstance().getQueryProxies(s);
+				}catch (Exception ex){
+					QueryPlugIn.displayLog(Messages.SavedQueryTree_ErrorLoadingQueries + ex.getLocalizedMessage(), ex);
+				}finally{
+					s.getTransaction().rollback();
+				}
 			}
 			return Status.OK_STATUS;
 		}

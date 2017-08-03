@@ -99,27 +99,27 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 		setTitle(Messages.IncidentFilterDialog_DialogTitle);
 		getShell().setText(Messages.IncidentFilterDialog_ShellTitle);
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			Composite composite = new Composite((Composite) filter, SWT.NONE);
-			composite.setLayout(new GridLayout(1, false));
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-			Composite dateFilterExpComp = createGroupComposite(Messages.IncidentFilterDialog_DatesLabel, composite);
-			dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
-
-			Composite incidentIdComp = createGroupComposite(Messages.IncidentFilterDialog_IdLabel, composite);
-			incidentIdFilterCmp = new StringFilterComposite(incidentIdComp, SWT.NONE,
-					new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.IncidentFilterDialog_IdOptionLabel, "id")}, //$NON-NLS-1$
-					new StringFilterComposite.StringComparison[]{StringFilterComposite.StringComparison.EQUALS}); 
-			incidentIdFilterCmp.setIncludeAllRadioLabel(Messages.IncidentFilterDialog_IncludeAllOption);
-			incidentIdFilterCmp.setFilterRadioLabel(Messages.IncidentFilterDialog_FilterOptions);
-			
-			updateControlsValues();
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				Composite composite = new Composite((Composite) filter, SWT.NONE);
+				composite.setLayout(new GridLayout(1, false));
+				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	
+				Composite dateFilterExpComp = createGroupComposite(Messages.IncidentFilterDialog_DatesLabel, composite);
+				dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
+	
+				Composite incidentIdComp = createGroupComposite(Messages.IncidentFilterDialog_IdLabel, composite);
+				incidentIdFilterCmp = new StringFilterComposite(incidentIdComp, SWT.NONE,
+						new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.IncidentFilterDialog_IdOptionLabel, "id")}, //$NON-NLS-1$
+						new StringFilterComposite.StringComparison[]{StringFilterComposite.StringComparison.EQUALS}); 
+				incidentIdFilterCmp.setIncludeAllRadioLabel(Messages.IncidentFilterDialog_IncludeAllOption);
+				incidentIdFilterCmp.setFilterRadioLabel(Messages.IncidentFilterDialog_FilterOptions);
+				
+				updateControlsValues();
+			} finally {
+				session.getTransaction().rollback();
+			}
 		}
 		
 		return filter;

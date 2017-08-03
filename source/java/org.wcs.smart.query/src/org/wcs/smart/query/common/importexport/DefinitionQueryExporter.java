@@ -102,28 +102,28 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 		xmlQuery.setQueryType(query.getTypeKey());
 		
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try {
-			s.saveOrUpdate(query);
-
-			if (query.getConservationArea().getDefaultLanguage() != null){
-				xmlQuery.setLanguage(query.getConservationArea().getDefaultLanguage().getCode());
-			}else{
-				xmlQuery.setLanguage(SmartDB.getCurrentLanguage().getCode());
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				s.saveOrUpdate(query);
+	
+				if (query.getConservationArea().getDefaultLanguage() != null){
+					xmlQuery.setLanguage(query.getConservationArea().getDefaultLanguage().getCode());
+				}else{
+					xmlQuery.setLanguage(SmartDB.getCurrentLanguage().getCode());
+				}
+				
+				for (org.wcs.smart.ca.Label l : query.getNames()) {
+					QueryName qn = new QueryName();
+					qn.setName(l.getValue());
+					qn.setLanguage(l.getLanguage().getCode());
+					qn.setIsDefault(l.getLanguage().isDefault());
+	
+					xmlQuery.getName().add(qn);
+				}
+			} finally {
+				s.getTransaction().rollback();
 			}
-			
-			for (org.wcs.smart.ca.Label l : query.getNames()) {
-				QueryName qn = new QueryName();
-				qn.setName(l.getValue());
-				qn.setLanguage(l.getLanguage().getCode());
-				qn.setIsDefault(l.getLanguage().isDefault());
-
-				xmlQuery.getName().add(qn);
-			}
-		} finally {
-			s.getTransaction().rollback();
-			s.close();
 		}
 		
 		writeQuerySpecifics(query, xmlQuery);

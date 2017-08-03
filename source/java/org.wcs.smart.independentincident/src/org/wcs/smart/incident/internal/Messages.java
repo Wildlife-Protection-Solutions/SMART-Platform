@@ -93,6 +93,9 @@ public class Messages extends NLS {
 	public static String IncidentMapPage_Error1;
 	public static String IncidentMapPage_Error2;
 	public static String IncidentMapPage_MapLayerName;
+	public static String IncidentMapPage_reprojectionError;
+	public static String IncidentMapPage_SaveError;
+	public static String IncidentMapPage_UndonError;
 	public static String IncidentPlugIn_ErrorDialogTitle;
 	public static String IncidentSummaryPage_AttachmentsColumnContent;
 	public static String IncidentSummaryPage_AttachmentsColumnName;

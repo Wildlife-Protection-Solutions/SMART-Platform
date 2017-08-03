@@ -30,6 +30,7 @@ import org.wcs.smart.i2.ui.dialogs.EntityTypeListDialog;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ShowEntityTypeListDialogHandler extends ShowDialogHandler {
 
 	public ShowEntityTypeListDialogHandler(){

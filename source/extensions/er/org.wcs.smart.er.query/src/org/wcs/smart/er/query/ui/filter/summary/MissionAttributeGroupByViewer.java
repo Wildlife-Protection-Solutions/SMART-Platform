@@ -26,12 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.query.filter.summary.MissionAttributeGroupBy;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -80,10 +80,10 @@ public class MissionAttributeGroupByViewer extends AbstractGroupByViewer<Mission
 	}
 	
 	private MissionAttribute getMissionAttribute(Session session) throws Exception{
-		List<?> items = session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.eq("keyId", groupBy.getAttributeKey())) //$NON-NLS-1$
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list();
+		List<MissionAttribute> items = QueryFactory.buildQuery(session, MissionAttribute.class,
+				new Object[] {"keyId", groupBy.getAttributeKey()}, //$NON-NLS-1$
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
+
 		if (items.size() == 0){
 			throw new Exception(MessageFormat.format(Messages.MissionAttributeGroupBy_AttributeNotFound, new Object[]{groupBy.getAttributeKey()}));
 		}else if (items.size() > 1){

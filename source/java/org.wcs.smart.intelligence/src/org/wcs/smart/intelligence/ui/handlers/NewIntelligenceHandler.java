@@ -37,6 +37,7 @@ import org.wcs.smart.ui.ShowPerspectiveHandler;
  * @author elitvin
  *
  */
+@SuppressWarnings("restriction")
 public class NewIntelligenceHandler {
 
 	@Execute

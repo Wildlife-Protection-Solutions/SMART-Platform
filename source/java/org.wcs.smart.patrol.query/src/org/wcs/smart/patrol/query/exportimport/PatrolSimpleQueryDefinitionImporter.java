@@ -64,16 +64,15 @@ public class PatrolSimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 			Parser parser = new Parser(is);
 			queryFilter = parser.QueryFilter();
 		}
-		
 
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session, QueryDataModelManager.getManager(importCa), importCa);
-			warnings.addAll(validator.validate(queryFilter.getFilter()));
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session, QueryDataModelManager.getManager(importCa), importCa);
+				warnings.addAll(validator.validate(queryFilter.getFilter()));
+			} finally {
+				session.getTransaction().rollback();
+			}
 		}
 		return queryFilter.asString();
 	}

@@ -23,6 +23,10 @@ package org.wcs.smart.patrol.ui;
 
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -30,7 +34,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
 import org.wcs.smart.patrol.internal.Messages;
@@ -51,11 +54,15 @@ public class PatrolWaypointSourceUiProvider implements
 	@Override
 	public void findAndShow(UUID waypointUuid) {
 		PatrolWaypoint pw = null;
-		Session s = HibernateManager.openSession();
-		try{
-			pw = (PatrolWaypoint)s.createCriteria(PatrolWaypoint.class)
-					.add(Restrictions.eq("id.waypoint.uuid", waypointUuid)) //$NON-NLS-1$
-					.uniqueResult();
+		
+		try(Session s = HibernateManager.openSession()){
+			
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<PatrolWaypoint> c = cb.createQuery(PatrolWaypoint.class);
+			Root<PatrolWaypoint> from = c.from(PatrolWaypoint.class);
+			c.where(cb.equal(from.get("id").get("waypoint").get("uuid"), waypointUuid)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			pw = s.createQuery(c).uniqueResult();
+			
 			if (pw == null){
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
 						ERROR_STR, 
@@ -65,8 +72,6 @@ public class PatrolWaypointSourceUiProvider implements
 			Patrol p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
 			p.getPatrolType();
 			pw.getWaypoint().getUuid();
-		}finally{
-			s.close();
 		}
 		
 		

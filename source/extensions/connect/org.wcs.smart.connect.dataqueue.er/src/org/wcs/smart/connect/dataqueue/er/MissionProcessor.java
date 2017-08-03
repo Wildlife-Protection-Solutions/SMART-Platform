@@ -65,14 +65,11 @@ public class MissionProcessor implements IItemProcessor {
 		Path file = lItem.getFullFilePath();
 
 		DataQueueProcessingOption keepIdoption = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			DataQueueProcessingOptionPk pk = new DataQueueProcessingOptionPk();
 			pk.setConservationArea(item.getConservationArea());
 			pk.setOptionKey(ErDataQueueProcessorOption.ER_GENERATE_IDS.name());
 			keepIdoption = (DataQueueProcessingOption)s.get(DataQueueProcessingOption.class, pk);
-		}finally{
-			s.close();
 		}
 		
 		//fire events

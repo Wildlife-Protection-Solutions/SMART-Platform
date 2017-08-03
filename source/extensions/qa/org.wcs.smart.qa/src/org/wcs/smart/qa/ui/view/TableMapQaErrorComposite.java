@@ -88,6 +88,7 @@ import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.InternalExtensionManager;
+import org.wcs.smart.qa.QaActionInfo;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.internal.Messages;
 import org.wcs.smart.qa.model.IQaAction;
@@ -245,9 +246,9 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		detailsComposite.setLayout(new GridLayout());
 		
 		IQaAction gotoSource = null;
-		for (IQaAction action : InternalExtensionManager.INSTANCE.getQaActions(r.getDataProvider(), getContext())){
-			if (action.getId().equals(IQaAction.GOTO_ACTION_ID)){
-				gotoSource = action;
+		for (QaActionInfo action : InternalExtensionManager.INSTANCE.getQaActions(r.getDataProvider(), getContext())){
+			if (action.getAction().getId().equals(IQaAction.GOTO_ACTION_ID)){
+				gotoSource = action.getAction();
 				break;
 			}
 		}

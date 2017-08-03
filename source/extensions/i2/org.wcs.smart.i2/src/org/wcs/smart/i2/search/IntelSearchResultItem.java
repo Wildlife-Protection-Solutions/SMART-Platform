@@ -126,10 +126,10 @@ public class IntelSearchResultItem implements IAdaptable {
 		this.entity = entity;
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter) {
-		if (adapter == IntelEntity.class && entity != null) return entity;
+	public <T> T getAdapter(Class<T> adapter) {
+		if (adapter == IntelEntity.class && entity != null) return (T)entity;
 		return null;
 	}
 }

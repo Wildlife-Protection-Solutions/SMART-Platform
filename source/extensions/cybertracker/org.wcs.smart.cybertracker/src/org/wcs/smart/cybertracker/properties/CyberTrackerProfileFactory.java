@@ -24,6 +24,8 @@ package org.wcs.smart.cybertracker.properties;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
@@ -51,30 +53,34 @@ public class CyberTrackerProfileFactory {
 	
 	/**
 	 * Creates a CyberTracker properties profile using another configurable model as a template.
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
 	 */
 	public static CyberTrackerPropertiesProfile createProfileClone(CyberTrackerPropertiesProfile profile, String name, IProgressMonitor monitor) {
-		monitor.beginTask(Messages.CyberTrackerProfileFactory_CloneProfile_TaskName, 1);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerProfileFactory_CloneProfile_TaskName, 1);
 		
-		monitor.subTask(Messages.CyberTrackerProfileFactory_CloneProfile_TaskName);
+		progress.subTask(Messages.CyberTrackerProfileFactory_CloneProfile_TaskName);
 		CyberTrackerPropertiesProfile clone = createUsingDefaults(name);
-		
-		//NOTE: we are not coping isDefault and names
-		Map<ProfileOptionID, CyberTrackerPropertiesProfileOption> options = profile.getOptions();
-		for (ProfileOptionID id : options.keySet()) {
-			CyberTrackerPropertiesProfileOption option = options.get(id);
-			
-			CyberTrackerPropertiesProfileOption newOption = new CyberTrackerPropertiesProfileOption();
-			newOption.setProfile(clone);
-			newOption.setOptionId(option.getOptionId());
-			newOption.setDoubleValue(option.getDoubleValue());
-			newOption.setIntegerValue(option.getIntegerValue());
-			newOption.setStringValue(option.getStringValue());
-			
-			clone.getOptions().put(id, newOption);
-		}
+		try {	
+			//NOTE: we are not coping isDefault and names
+			Map<ProfileOptionID, CyberTrackerPropertiesProfileOption> options = profile.getOptions();
+			for (ProfileOptionID id : options.keySet()) {
+				CyberTrackerPropertiesProfileOption option = options.get(id);
+				
+				CyberTrackerPropertiesProfileOption newOption = new CyberTrackerPropertiesProfileOption();
+				newOption.setProfile(clone);
+				newOption.setOptionId(option.getOptionId());
+				newOption.setDoubleValue(option.getDoubleValue());
+				newOption.setIntegerValue(option.getIntegerValue());
+				newOption.setStringValue(option.getStringValue());
+				
+				clone.getOptions().put(id, newOption);
+				progress.checkCanceled();
+			}
 
-		if (monitor.isCanceled()) return null;
-		monitor.done();
+		}catch ( OperationCanceledException ex) {
+			return null;
+		}
 		return clone;
 	}
 

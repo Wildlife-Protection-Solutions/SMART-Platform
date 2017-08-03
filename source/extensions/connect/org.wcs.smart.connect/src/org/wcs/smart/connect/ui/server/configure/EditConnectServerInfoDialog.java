@@ -103,13 +103,16 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 				@Override
 				protected void loadDatabaseInformation(){
 					cs = temp;
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
+					
 						s.beginTransaction();
-						user = ConnectHibernateManager.getConnectUser(employee, s);			
-						s.getTransaction().commit();
-					}finally{
-						s.close();
+						try {
+							user = ConnectHibernateManager.getConnectUser(employee, s);			
+							s.getTransaction().commit();
+						}catch (Exception ex) {
+							s.getTransaction().rollback();
+							throw ex;
+						}
 					}
 				}
 				@Override
@@ -167,43 +170,41 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 			if (!validateServer()) return;
 		}
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			server = (ConnectServer) s.merge(server);
-			
-			server.setServerUrl(serverpnl.getServerUrl());
-			if (serverpnl.getCertificateFile() != null){
-				String certificateFile = serverpnl.getCertificateFile();
-				if (certificateFile.trim().isEmpty()){
-					//clear
-					certificateFile = null;
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				server = (ConnectServer) s.merge(server);
+				
+				server.setServerUrl(serverpnl.getServerUrl());
+				if (serverpnl.getCertificateFile() != null){
+					String certificateFile = serverpnl.getCertificateFile();
+					if (certificateFile.trim().isEmpty()){
+						//clear
+						certificateFile = null;
+					}
+					try{
+						server.setCertificateFile(certificateFile == null ?  null : Paths.get(certificateFile));
+					}catch (Exception ex){
+						ConnectPlugIn.displayLog(Messages.EditConnectServerInfoDialog_CertificationError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+						return;
+					}
 				}
-				try{
-					server.setCertificateFile(certificateFile == null ?  null : Paths.get(certificateFile));
-				}catch (Exception ex){
-					ConnectPlugIn.displayLog(Messages.EditConnectServerInfoDialog_CertificationError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-					return;
+				
+				for (IServerOptionsPanel pnl : optionPanels){
+					pnl.updateServer(server);
 				}
+				
+				s.getTransaction().commit();
+				
+				for (IServerOptionsPanel pnl : optionPanels){
+					pnl.afterSave(server);
+				}
+				
+			}catch (Exception ex){
+				ConnectPlugIn.displayLog(Messages.EditConnectServerInfoDialog_ServerError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+				return;
 			}
-			
-			for (IServerOptionsPanel pnl : optionPanels){
-				pnl.updateServer(server);
-			}
-			
-			s.getTransaction().commit();
-			
-			for (IServerOptionsPanel pnl : optionPanels){
-				pnl.afterSave(server);
-			}
-			
-		}catch (Exception ex){
-			ConnectPlugIn.displayLog(Messages.EditConnectServerInfoDialog_ServerError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-			return;
-		}finally{
-			s.close();
 		}
-		
 		
 		super.okPressed();
 	}

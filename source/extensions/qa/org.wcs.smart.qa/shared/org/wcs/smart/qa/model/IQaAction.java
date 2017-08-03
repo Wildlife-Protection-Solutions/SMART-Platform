@@ -24,8 +24,6 @@ package org.wcs.smart.qa.model;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
-
 /**
  * An action that can be applied to a QA result item.
  * 
@@ -78,11 +76,4 @@ public interface IQaAction {
 	 */
 	public String getName(Locale l);
 	
-	/**
-	 * 
-	 * @return the image for the action; can return null if no image applicable
-	 */
-	public default Image getImage() {
-		return null;
-	}
 }

@@ -32,6 +32,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -70,17 +71,16 @@ public class PatrolImporter {
 	 * Imports patrol data from the given file.
 	 * 
 	 * @param file  a xml or zip file
-	 * @param monitor progress monitor 
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
+	 * to call done() on the given monitor
 	 * @throws Exception
 	 */
 	public static Patrol importPatrol(File file, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		
 		if (SmartUtils.isZip(file)){
 			//process as zip file
-			monitor.beginTask(IMPORTING_PATROL_TASKNAME, 4);
 			return importXmlToPatrol(file, config, monitor);
 		}else{
-			monitor.beginTask(IMPORTING_PATROL_TASKNAME, 3);
 			return importPatrolFromFile(file, config, monitor);
 		}
 	}
@@ -89,26 +89,28 @@ public class PatrolImporter {
 	 * Imports a patrol that is an zip file.
 	 * 
 	 * @param zipFile zip file to import
-	 * @param monitor progress monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
+	 * to call done() on the given monitor
 	 * @return patrol created or null
 	 * @throws Exception
 	 */
 	private static Patrol importXmlToPatrol(File zipFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
-		
-		//unzip 
-		monitor.subTask(Messages.PatrolImporter_Progress_ProcessingFile);
+		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_PATROL_TASKNAME, 3);
+		progress.subTask(Messages.PatrolImporter_Progress_ProcessingFile);
+		progress.split(1);
 		File directory = unzip(zipFile);
 		if (directory == null || !directory.isDirectory()){
 			throw new Exception (MessageFormat.format(Messages.PatrolImporter_Error_UnzipError, new Object[]{ zipFile.getAbsoluteFile()}));
 		}
-		monitor.worked(1);
+		
 		
 		//file xml file
+		progress.split(1);
 		IXmlToPatrolConverter converter = null;
 		File xmlFile = null;
 		String[] files = directory.list();
 		if (files != null){
-			monitor.subTask(Messages.PatrolImporter_Progress_ReadingFile);
+			progress.subTask(Messages.PatrolImporter_Progress_ReadingFile);
 			for (int i = 0; i < files.length; i ++){
 				File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 				if (f.isFile()){
@@ -130,11 +132,10 @@ public class PatrolImporter {
 			}
 			throw new Exception (Messages.PatrolImporter_Error_XmlFileNotFound);
 		}
-		monitor.worked(1);
 		
-		Patrol p = convertAndSave(converter, config, directory, xmlFile, monitor);
+		Patrol p = convertAndSave(converter, config, directory, xmlFile, progress.split(1));
 		
-		monitor.subTask(Messages.PatrolImporter_Progress_RemovingTempFiles);
+		progress.subTask(Messages.PatrolImporter_Progress_RemovingTempFiles);
 		try{
 			FileUtils.deleteDirectory(directory);
 		}catch (Exception ex){
@@ -147,6 +148,8 @@ public class PatrolImporter {
 	/**
 	 * Imports a patrol that is a xml file.
 	 * @param xmlFile the xml file to import
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
+	 * to call done() on the given monitor
 	 * @return patrol created or null
 	 * @throws Exception
 	 */
@@ -175,10 +178,11 @@ public class PatrolImporter {
 	 */
 	private static Patrol  convertAndSave(IXmlToPatrolConverter converter, final ImportConfig config, 
 			File attachmentDirectory, File sourceFile, IProgressMonitor monitor) throws Exception {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolImporter_ReadingProgress, 5);
 		
-		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try {
-			monitor.subTask(Messages.PatrolImporter_ReadingProgress);
+		
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())) {
+			progress.split(1);
 			converter.convertFile(sourceFile, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 			
 			Patrol imported = converter.getImportedPatrol();
@@ -186,7 +190,8 @@ public class PatrolImporter {
 				imported.setId(null);
 			}
 			
-			monitor.subTask(Messages.PatrolImporter_Progress_Validating);
+			progress.split(1);
+			progress.subTask(Messages.PatrolImporter_Progress_Validating);
 			//check if a patrol in the database with the given patrol id already exists
 			if (imported.getId() != null){
 				
@@ -230,21 +235,19 @@ public class PatrolImporter {
 						config.addWarning(message, sourceFile);
 					}
 				}
-			}		
-			monitor.subTask(Messages.PatrolImporter_Progress_ConvertingPatrol);
-		} finally {
-			if (session.isOpen()){
-				session.close();
-			}
+			}	
 		}
-
+		progress.split(1);
+		progress.subTask(Messages.PatrolImporter_Progress_ConvertingPatrol);
+		
 		List<String> warnings = new ArrayList<String>();
 		warnings.addAll(converter.getWarnings());
 		//converting extra data
 		List<IConvertedExtraData> convertedExtraData = converter.convertExtraData();
-		monitor.worked(1);
-
+		
+		
 		//display reported conversion warnings if they present
+		progress.split(1);
 		if (!config.isIgnoreWarnings() && !warnings.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
 			for (String str: warnings){
@@ -277,26 +280,27 @@ public class PatrolImporter {
 		}
 		
 		//performing actual save in database
-		monitor.subTask(Messages.PatrolImporter_Progress_Saving);
+		progress.split(1);
+		progress.subTask(Messages.PatrolImporter_Progress_Saving);
 		Patrol imported = converter.getImportedPatrol();
 		if (imported == null)
 			return null;
-		session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		session.beginTransaction();
-		try {
-			PatrolHibernateManager.savePatrol(imported, session, true);
-			for (IConvertedExtraData extraData : convertedExtraData) {
-				extraData.saveInTransaction(session, imported);
+		
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			session.beginTransaction();
+			try {
+				PatrolHibernateManager.savePatrol(imported, session, true);
+				for (IConvertedExtraData extraData : convertedExtraData) {
+					extraData.saveInTransaction(session, imported);
+				}
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
+				return null;
 			}
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
-			return null;
-		}finally{
-			session.close();
 		}
-		monitor.worked(1);
+		
 		return imported;
 	}
 	

@@ -23,9 +23,11 @@ package org.wcs.smart.patrol.internal.advisors;
 
 import java.text.MessageFormat;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.patrol.internal.Messages;
@@ -52,7 +54,13 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		if (e.getUuid() == null){
 			return null;
 		}
-		Long cnt = (Long) session.createCriteria(PatrolLegMember.class).add(Restrictions.eq("id.member", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Long> c = cb.createQuery(Long.class);
+		Root<PatrolLegMember> root = c.from(PatrolLegMember.class);
+		c.select(cb.count(root));
+		c.where(cb.equal(root.get("id").get("member"), e));			  //$NON-NLS-1$//$NON-NLS-2$
+		Long cnt = session.createQuery(c).uniqueResult();
+		
 		if (cnt == 0){
 			return null;
 		}else{

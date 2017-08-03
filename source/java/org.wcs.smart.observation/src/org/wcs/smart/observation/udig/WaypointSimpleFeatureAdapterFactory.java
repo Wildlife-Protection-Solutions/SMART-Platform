@@ -33,25 +33,24 @@ import org.wcs.smart.observation.model.Waypoint;
  */
 public class WaypointSimpleFeatureAdapterFactory implements IAdapterFactory {
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (adapterType == Waypoint.class) {
 			if (adaptableObject instanceof WaypointSimpleFeature){
 				WaypointSimpleFeature sf = (WaypointSimpleFeature)adaptableObject;
 				if (sf.getWaypointUuid() != null){
 					Waypoint wp = new Waypoint();
 					wp.setUuid(sf.getWaypointUuid());
-					return wp;
+					return (T)wp;
 				}
 			}
 		}
 		return null;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		return new Class[]{Waypoint.class};
 	}
 

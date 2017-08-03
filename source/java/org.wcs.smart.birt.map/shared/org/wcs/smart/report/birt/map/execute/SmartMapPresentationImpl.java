@@ -57,7 +57,6 @@ import org.eclipse.birt.report.model.api.extension.ExtendedElementException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.mapgraphic.MapGraphic;
 import org.locationtech.udig.project.ILayer;
@@ -84,6 +83,7 @@ import org.locationtech.udig.project.render.displayAdapter.MapDisplayEvent;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.report.birt.map.AddLayersCommand;
 import org.wcs.smart.report.birt.map.BirtMapFactory;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
@@ -398,9 +398,12 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 		Session session = (Session)context.getAppContext().get(BirtConstants.SESSION_PARAM);
 		if (basemap.equals(SmartMapItem.DEFAULT_BASEMAP_KEY)) {
 			ConservationArea reportca = (ConservationArea) context.getAppContext().get(BirtConstants.CA_PARAM);
-			List<?> defaultmap = session.createCriteria(BasemapDefinition.class)
-					.add(Restrictions.eq("conservationArea", reportca)) //$NON-NLS-1$
-					.add(Restrictions.eq("isDefault", true)).list(); //$NON-NLS-1$
+			
+			List<BasemapDefinition> defaultmap = 
+					QueryFactory.buildQuery(session, BasemapDefinition.class, 
+							new Object[] {"conservationArea", reportca},  //$NON-NLS-1$
+							new Object[] {"isDefault", true}).getResultList(); //$NON-NLS-1$
+			
 			if (defaultmap.size() > 0){
 				return (BasemapDefinition) defaultmap.get(0);
 			}

@@ -152,10 +152,10 @@ public class ZipUtil {
 			File destinationLocation)
 			throws Exception {
     	
-    	ZipFile archiveFile = new ZipFile(file);
+    	
     	String[] outputZipRootFolder = new String[] { "null" }; //$NON-NLS-1$
     	
-		try {
+		try (ZipFile archiveFile = new ZipFile(file)){
 			byte[] buf = new byte[65536];
 
 			Enumeration<ZipArchiveEntry> entries = archiveFile.getEntries();
@@ -204,12 +204,7 @@ public class ZipUtil {
 			}
 		} catch (IOException e) {
 			throw new Exception("Unzip failed: " + e.getLocalizedMessage(), e); //$NON-NLS-1$
-		} finally {
-			try {
-				archiveFile.close();
-			} catch (IOException e) {
-			}
-		}
+		} 
 
 	}
 }

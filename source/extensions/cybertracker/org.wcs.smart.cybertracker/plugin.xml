@@ -137,7 +137,7 @@
       </handler>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption"
             supportsCcaa="false">
@@ -179,7 +179,7 @@
       </image>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.cybertracker.CybertrackerTemplateCloner"
             id="org.wcs.smart.cybertrackerTemplateCloner">
@@ -217,19 +217,19 @@
       </action>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="Cybertracker">
       </FilestoreDirectory>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.cybertracker.upgrade.CtDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.cybertracker.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>

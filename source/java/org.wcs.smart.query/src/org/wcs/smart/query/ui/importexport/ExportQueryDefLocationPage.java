@@ -207,15 +207,12 @@ public class ExportQueryDefLocationPage extends WizardPage {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<ConservationArea> cas = null;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					cas = HibernateManager.getConservationAreas(s);
 					cas.remove(SmartDB.getCurrentConservationArea());
 				}catch (Exception ex){
 					QueryPlugIn.displayLog(ex.getMessage(), ex);
 					return Status.OK_STATUS;
-				}finally{
-					s.close();
 				}
 				final List<ConservationArea> cas1 = cas;
 				Display.getDefault().syncExec(new Runnable(){

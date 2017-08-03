@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.udig.style;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,7 +28,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.ILayerListener;
 import org.locationtech.udig.project.LayerEvent;
@@ -82,22 +80,15 @@ public class SmartLayerStyleInterceptor implements LayerInterceptor {
 				//in job so we don't interfere with open session (namely reports)
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					Session s = HibernateManager.openSession();
-					try {
+					
+					try(Session s = HibernateManager.openSession()){
 						//we want to make sure we are loading from the current conservation area
 						//it would be possible to export a query, import into a different ca, but this
 						//value would still reference the old conservation area
-						@SuppressWarnings("unchecked")
-						List<SmartStyle> list = s.createCriteria(SmartStyle.class)
-									.add(Restrictions.eq("uuid", styleUuid)) //$NON-NLS-1$
-									.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-									.list();
-						if (list.size() > 0){
-							SmartStyle ss = list.get(0);
+						SmartStyle ss = s.get(SmartStyle.class,  styleUuid);
+						if (ss != null && ss.getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
 							styleString[0] = ss.getStyleString();
 						}
-					} finally {
-						s.close();
 					}
 					return Status.OK_STATUS;
 				}

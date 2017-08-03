@@ -31,10 +31,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.swt.graphics.Image;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -64,12 +62,11 @@ public class ErTrackDataProvider extends IQaDataProvider {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
 		List<TrackLocationData> tracks = new ArrayList<>();
 		
-		Query q = session.createQuery("FROM Mission WHERE survey.surveyDesign.conservationArea = :ca AND startDate between :start and :end"); //$NON-NLS-1$
+		Query<Mission> q = session.createQuery("FROM Mission WHERE survey.surveyDesign.conservationArea = :ca AND startDate between :start and :end", Mission.class); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.setParameter("start", startDate); //$NON-NLS-1$
 		q.setParameter("end", endDate); //$NON-NLS-1$
@@ -120,11 +117,6 @@ public class ErTrackDataProvider extends IQaDataProvider {
 	@Override
 	public UUID getFeatureSource(Session session, Object obj) {
 		return ((TrackLocationData)obj).getTrack().getUuid();
-	}
-
-	@Override
-	public Image getImage() {
-		return SmartContext.INSTANCE.getClass(ILabelProvider.class).getImage(getClass());
 	}
 
 }

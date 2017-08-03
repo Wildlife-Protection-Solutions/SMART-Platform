@@ -57,34 +57,30 @@ public class RemoveCyberTrackerJob extends Job {
 			"CT_PROPERTIES_PROFILE_OPTION",  //$NON-NLS-1$
 			"CT_PROPERTIES_PROFILE" }; //$NON-NLS-1$
 		
-		final Session session = HibernateManager.openSession();
-		final List<ConservationArea> caList = HibernateManager.getConservationAreas(session);
-		session.beginTransaction();
-		try {
-			//delete labels
-			if (DerbyHibernateExtensions.tableExists(session, "CT_PROPERTIES_PROFILE")){ //$NON-NLS-1$
-				session.createSQLQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.CT_PROPERTIES_PROFILE)").executeUpdate(); //$NON-NLS-1$
-			}
-			//delete tables
-			for (String table : tables){
-				if (DerbyHibernateExtensions.tableExists(session, table)){
-					session.createSQLQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
-				}
-			}		
-			//clean filestore
-			for (ConservationArea ca : caList) {
-				FileUtils.deleteDirectory(PdaUtil.getDowloadFolder(ca));
-			}
-			HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-			
-		} catch (Exception e) {
-			SmartPlugIn.log(Messages.RemoveCyberTrackerTablesJob_Error, e);
-		} finally {
+		try(final Session session = HibernateManager.openSession()){
+
+			final List<ConservationArea> caList = HibernateManager.getConservationAreas(session);
+			session.beginTransaction();
 			try {
-				session.close();
-			} catch (Exception ex) {
-				SmartPlugIn.log(ex.getMessage(), ex);
+				//delete labels
+				if (DerbyHibernateExtensions.tableExists(session, "CT_PROPERTIES_PROFILE")){ //$NON-NLS-1$
+					session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.CT_PROPERTIES_PROFILE)").executeUpdate(); //$NON-NLS-1$
+				}
+				//delete tables
+				for (String table : tables){
+					if (DerbyHibernateExtensions.tableExists(session, table)){
+						session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+					}
+				}		
+				//clean filestore
+				for (ConservationArea ca : caList) {
+					FileUtils.deleteDirectory(PdaUtil.getDowloadFolder(ca));
+				}
+				HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+				
+			} catch (Exception e) {
+				SmartPlugIn.log(Messages.RemoveCyberTrackerTablesJob_Error, e);
 			}
 		}
 		return Status.OK_STATUS;

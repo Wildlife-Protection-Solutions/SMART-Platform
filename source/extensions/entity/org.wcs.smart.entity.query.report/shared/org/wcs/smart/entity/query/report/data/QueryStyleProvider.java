@@ -26,7 +26,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
@@ -62,7 +62,7 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 			return null;
 		}
 		
-		Query query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		Query<?> query = s.createQuery("SELECT style FROM " + tableName + " WHERE uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		query.setParameter("uuid", queryUuid); //$NON-NLS-1$
 		List<?> results = query.list();
 		if (results.size() == 0 ) return null;

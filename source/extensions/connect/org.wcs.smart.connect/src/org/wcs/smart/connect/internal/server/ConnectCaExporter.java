@@ -31,6 +31,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.export.CaExporter;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -51,19 +52,21 @@ public class ConnectCaExporter extends CaExporter{
 	/**
 	 * Overrides the original export process to add the options
 	 * to perform some preprocessing on the export file before zipping it up.
+	 * 
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 */
 	@Override
 	public void export(File destFile, HashMap<String, String> options, IProgressMonitor monitor) throws Exception{
-		
+		SubMonitor progress = SubMonitor.convert(monitor, "", 3); //$NON-NLS-1$
 		File tempDir = SmartUtils.createTemporaryDirectory();
 		try{
-			exportToTempDirectory(tempDir, options, monitor);
+			exportToTempDirectory(tempDir, options, progress.split(2));
 			
 			//delete temporary unnecessary files
 			preprocess(tempDir);
 			
 			//zip up 
-			zipTempDirectory(tempDir, destFile, monitor);
+			zipTempDirectory(tempDir, destFile, progress.split(1));
 		}finally{
 			try{
 				FileUtils.deleteDirectory(tempDir);

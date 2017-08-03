@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -117,7 +119,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
 				IFilterProcessor filterer = null;
 				
 				//create a date filter that caches the dates so the same
@@ -132,13 +134,13 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, 
-							true, true, monitor);
+							true, true, progress.split(50));
 					
-					if (monitor.isCanceled()) return;
-					populateTemporaryTableExtra(c, session, monitor);
 					
-					if (monitor.isCanceled()) return;
-					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
+					populateTemporaryTableExtra(c, session, progress.split(10));
+					
+					progress.checkCanceled();
+					progress.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					//setting result size
 					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)) { //$NON-NLS-1$
 						if (rs.next()) { 
@@ -152,7 +154,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 						}
 					}
 					
-					monitor.subTask(Messages.DerbyEntityObservationEngine_FindDataColumns);
+					progress.subTask(Messages.DerbyEntityObservationEngine_FindDataColumns);
 					HashSet<String> dataColumns = new HashSet<>();
 					
 					//looking for attributes that have at least one value
@@ -180,13 +182,14 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 					}
 					
 					result.setDataColumns(dataColumns);
-					
+					progress.setWorkRemaining(0);
+				}catch (OperationCanceledException ex) {
+					return;
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {
 					if (filterer != null) filterer.dropTemporaryTables(c);
-					if (monitor.isCanceled()) dropTables(c);
-					monitor.done();
+					if (progress.isCanceled()) dropTables(c);
 					c.setAutoCommit(false);
 				}
 			}
@@ -265,33 +268,26 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 	}
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws Exception {
-		//NOTE: does 50 worked for monitor in total
+		SubMonitor progress = SubMonitor.convert(monitor, "", 50); //$NON-NLS-1$
+
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ob_observer", "varchar(512)"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
+		progress.split(12);
 		for (int i = 0; i < columnsToAdd.length; i ++){
 			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		}
-		
-		if (monitor.isCanceled()){
-			return;
-		}
-		
-		monitor.worked(12);
-		if (monitor.isCanceled()){
-			return;
-		}
-		
+
 		StringBuilder sql;
 		//ca information
 		if (SmartDB.isMultipleAnalysis()){
 			//ca id and names are only used for cross-ca analysis
-			monitor.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
+			progress.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
@@ -311,7 +307,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 			c.createStatement().executeUpdate(sql.toString());
 		}
 		// add observers
-		monitor.subTask(Messages.DerbyEntityObservationEngine_ObserverProgress);
+		progress.subTask(Messages.DerbyEntityObservationEngine_ObserverProgress);
 		sql = new StringBuilder();
 		sql.append("SELECT DISTINCT ob_observer_uuid FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
@@ -341,19 +337,14 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 			}
 			observerSt.executeBatch();
 		}
-		monitor.worked(12);
-		if (monitor.isCanceled()) {
-			return;
-		}		
+		progress.split(12);
+				
 		//populating categories
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
+		progress.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
 		populateTemporaryTableCategory(c, session);
-		monitor.worked(13);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_ListAttributesData);
+		
+		progress.split(13);
+		progress.subTask(Messages.DerbyObservationEngine_Progress_ListAttributesData);
 		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
@@ -361,23 +352,19 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 			}
 		};
 		populateAdditionalWpoaTable(c, session, listData);
-		monitor.worked(3);
-		if (monitor.isCanceled()){
-			return;
-		}
 		
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_TreeAttributesData);
+		progress.split(3);
+		progress.subTask(Messages.DerbyObservationEngine_Progress_TreeAttributesData);
 		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
 				return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, cauuid, uuid);
 			}
 		};
+		progress.split(3);
 		populateAdditionalWpoaTable(c, session, treeData);
-		monitor.worked(3);
-		if (monitor.isCanceled()){
-			return;
-		}
+		
+		progress.setWorkRemaining(0);
 	}
 
 	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws Exception {

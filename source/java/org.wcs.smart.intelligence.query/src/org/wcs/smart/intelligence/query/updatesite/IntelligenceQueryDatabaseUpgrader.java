@@ -47,25 +47,24 @@ public class IntelligenceQueryDatabaseUpgrader implements IDatabaseUpgrader {
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.IntelligenceQueryDatabaseUpgrader_InstallStatu, 1);
-		Session session = HibernateManager.openSession();
-		try{
-			session.beginTransaction();
-			Map<String, String> versions = UpgradeEngine.getVersions(session);
-			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			String currentPluginVersion = versions.get(IntelligenceQueryPlugIn.PLUGIN_ID);
-			
-			if (currentPluginVersion == null) {
-				(new AddIntelligenceQueriesJob()).installPlugin(session);
-			}else{
-				upgrade(currentPluginVersion, session);
+		try(Session session = HibernateManager.openSession()){
+			try{
+				session.beginTransaction();
+				Map<String, String> versions = UpgradeEngine.getVersions(session);
+				if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+				String currentPluginVersion = versions.get(IntelligenceQueryPlugIn.PLUGIN_ID);
+				
+				if (currentPluginVersion == null) {
+					(new AddIntelligenceQueriesJob()).installPlugin(session);
+				}else{
+					upgrade(currentPluginVersion, session);
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				throw ex;
 			}
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			session.getTransaction().rollback();
-			throw ex;
-		} finally { 
-			session.close();
-		}
+		} 
 		monitor.done();
 	}
 	
@@ -98,7 +97,7 @@ public class IntelligenceQueryDatabaseUpgrader implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql){
-			session.createSQLQuery(s).executeUpdate();
+			session.createNativeQuery(s).executeUpdate();
 		}
 		session.doWork(new Work(){
 			@Override

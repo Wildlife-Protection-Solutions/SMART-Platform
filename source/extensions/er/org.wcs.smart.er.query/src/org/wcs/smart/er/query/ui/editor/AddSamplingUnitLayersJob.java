@@ -12,7 +12,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayer;
@@ -28,6 +27,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.model.Query;
 
 public abstract class AddSamplingUnitLayersJob extends Job {
@@ -62,13 +62,12 @@ public abstract class AddSamplingUnitLayersJob extends Job {
 					return Status.OK_STATUS;
 				}
 				disposeService(monitor);
-				Session s = HibernateManager.openSession();
-				try {
-					List<?> items = s.createCriteria(SurveyDesign.class)
-					.add(Restrictions.eq("conservationArea", getQuery().getConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("keyId", sdkey)) //$NON-NLS-1$
-					.list();
-					
+				
+				try(Session s = HibernateManager.openSession()) {
+					List<SurveyDesign> items = QueryFactory.buildQuery(s, SurveyDesign.class,
+							new Object[] {"keyId", sdkey}, //$NON-NLS-1$
+							new Object[] {"conservationArea", getQuery().getConservationArea()}).getResultList(); //$NON-NLS-1$
+						
 					if (items.size() > 1){
 						throw new SQLException(MessageFormat.format(Messages.AddSamplingUnitLayersJob_SdNotFound, sdkey));
 					}else if (items.size() == 1){
@@ -96,8 +95,6 @@ public abstract class AddSamplingUnitLayersJob extends Job {
 				} catch (Exception ex) {
 					EcologicalRecordsPlugIn
 							.log("Error adding survey design sampling unit layers.", ex); //$NON-NLS-1$
-				} finally {
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}

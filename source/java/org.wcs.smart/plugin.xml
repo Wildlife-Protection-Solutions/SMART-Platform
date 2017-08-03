@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.wcs.smart.ca.export" name="Conservation Area Data Exporter" schema="schema/org.wcs.smart.ca.export.exsd"/>
-	<extension-point id="org.wcs.smart.ca.deleteAdvisor" name="Delete Advisor for Deleting Database Objects" schema="schema/org.wcs.smart.ca.deleteAdvisor.exsd"/>
- <extension-point id="org.wcs.smart.ca.templateCloner" name="SMART Conservation Area Template Cloner" schema="schema/org.wcs.smart.ca.templateCloner.exsd"/>
- <extension-point id="org.wcs.smart.ca.filestoredir" name="Filestore Contribution" schema="schema/org.wcs.smart.ca.filestoredir.exsd"/>
- <extension-point id="org.wcs.smart.ca.import" name="Conservation Area Data Importer" schema="schema/org.wcs.smart.ca.import.exsd"/>
- <extension-point id="org.wcs.smart.ca.datamodel.editAdvisor" name="DataModel Edit Advisor" schema="schema/org.wcs.smart.ca.datamodel.editAdvisor.exsd"/>
- <extension-point id="org.wcs.smart.dbUpgrage" name="Database Upgrade Extension Point" schema="schema/org.wcs.smart.dbUpgrage.exsd"/>
- <extension-point id="org.wcs.smart.ca.create" name="Conservation Area Create Handler" schema="schema/org.wcs.smart.ca.create.exsd"/>
- <extension-point id="org.wcs.smart.backup" name="System Backup" schema="schema/org.wcs.smart.backup.exsd"/>
- <extension-point id="org.wcs.smart.ca.login" name="org.wcs.smart.ca.login" schema="schema/org.wcs.smart.ca.login.exsd"/>
- <extension-point id="org.wcs.smart.startupoption" name="Advanced Start Up Option" schema="schema/org.wcs.smart.startupoption.exsd"/>
- <extension-point id="org.wcs.smart.changelog.installer" name="ChangeLog Tracker" schema="schema/org.wcs.smart.changelog.installer.exsd"/>
- <extension-point id="org.wcs.smart.startup.db" name="org.wcs.smart.startup.db" schema="schema/org.wcs.smart.startup.db.exsd"/>
- <extension-point id="org.wcs.smart.changelog.handler" name="Replication Event Handler" schema="schema/org.wcs.smart.changelog.handler.exsd"/>
- <extension-point id="org.wcs.smart.userlevel" name="SMART User Level" schema="schema/org.wcs.smart.userlevel.exsd"/>
+ <extension-point id="caExport" name="Conservation Area Data Exporter" schema="schema/org.wcs.smart.ca.export.exsd"/>
+ <extension-point id="caDeleteAdvisor" name="Delete Advisor for Deleting Database Objects" schema="schema/org.wcs.smart.ca.deleteAdvisor.exsd"/>
+ <extension-point id="caTemplateCloner" name="SMART Conservation Area Template Cloner" schema="schema/org.wcs.smart.ca.templateCloner.exsd"/>
+ <extension-point id="caFilestoreDir" name="Filestore Contribution" schema="schema/org.wcs.smart.ca.filestoredir.exsd"/>
+ <extension-point id="caImport" name="Conservation Area Data Importer" schema="schema/org.wcs.smart.ca.import.exsd"/>
+ <extension-point id="caDataModelAdvisor" name="DataModel Edit Advisor" schema="schema/org.wcs.smart.ca.datamodel.editAdvisor.exsd"/>
+ <extension-point id="dbUpgrade" name="Database Upgrade Extension Point" schema="schema/org.wcs.smart.dbUpgrage.exsd"/>
+ <extension-point id="caCreate" name="Conservation Area Create Handler" schema="schema/org.wcs.smart.ca.create.exsd"/>
+ <extension-point id="backup" name="System Backup" schema="schema/org.wcs.smart.backup.exsd"/>
+ <extension-point id="caLogin" name="org.wcs.smart.ca.login" schema="schema/org.wcs.smart.ca.login.exsd"/>
+ <extension-point id="startUpOption" name="Advanced Start Up Option" schema="schema/org.wcs.smart.startupoption.exsd"/>
+ <extension-point id="changeLogInstaller" name="ChangeLog Tracker" schema="schema/org.wcs.smart.changelog.installer.exsd"/>
+ <extension-point id="dbStartUp" name="org.wcs.smart.startup.db" schema="schema/org.wcs.smart.startup.db.exsd"/>
+ <extension-point id="changeLogEventHandler" name="Replication Event Handler" schema="schema/org.wcs.smart.changelog.handler.exsd"/>
+ <extension-point id="userlevel" name="SMART User Level" schema="schema/org.wcs.smart.userlevel.exsd"/>
    <extension
          id="product"
          name="Smart Application"
@@ -38,10 +38,6 @@
          <property
                name="windowImages"
                value="./images/icons/smart16.gif,./images/icons/smart32.gif,./images/icons/smart48.gif,./images/icons/smart64.gif,./images/icons/smart128.gif">
-         </property>
-         <property
-               name="preferenceCustomization"
-               value="smart_customization.ini">
          </property>
          <property
                name="appName"
@@ -70,6 +66,10 @@
          <property
                name="applicationCSSResources"
                value="platform:/plugin/org.eclipse.ui.themes/images/">
+         </property>
+         <property
+               name="preferenceCustomization "
+               value="smart_customization.ini">
          </property>
   <!--<property
         name="applicationXMI"
@@ -1169,7 +1169,7 @@
       </wizardPage>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             ca_property=".uuid"
             class="org.wcs.smart.ca.ConservationArea"
@@ -1450,7 +1450,7 @@
       </actionTool>
    </extension>
    <extension
-         point="org.wcs.smart.ca.export">
+         point="org.wcs.smart.caExport">
       <exporter
             caExporter="org.wcs.smart.internal.ca.export.HibernateDataExporter">
       </exporter>
@@ -1465,7 +1465,7 @@
       </exporter>
    </extension>
    <extension
-         point="org.wcs.smart.ca.import">
+         point="org.wcs.smart.caImport">
       <importer
             caImporter="org.wcs.smart.internal.ca.in.HibernateDataImporter">
       </importer>
@@ -1482,7 +1482,7 @@
       </page>
    </extension>
    <extension
-         point="org.wcs.smart.ca.deleteAdvisor">
+         point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
             advisor="org.wcs.smart.internal.ca.advisors.AgencyDeleteAdvisor"
             class="org.wcs.smart.ca.Agency">
@@ -1539,14 +1539,14 @@
       </wizard>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.internal.ca.export.ConservationAreaTemplateCloner"
             id="org.wcs.smart.conservationAreaCloner">
       </templateCloner>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="maps">
       </FilestoreDirectory>
@@ -1582,7 +1582,7 @@
       </processor>
    </extension>
    <extension
-         point="org.wcs.smart.startupoption">
+         point="org.wcs.smart.startUpOption">
       <StartUpOption
             clazz="org.wcs.smart.ui.internal.startup.CreateNewStartUpOption">
       </StartUpOption>
@@ -1594,13 +1594,13 @@
       </StartUpOption>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.upgrade.SmartChangeLogTracker">
       </ChangeLogTracker>
    </extension>
    <extension
-         point="org.wcs.smart.ca.login">
+         point="org.wcs.smart.caLogin">
       <loginHandler
             clazz="org.wcs.smart.udig.catalog.smart.ui.RefreshListener">
       </loginHandler>

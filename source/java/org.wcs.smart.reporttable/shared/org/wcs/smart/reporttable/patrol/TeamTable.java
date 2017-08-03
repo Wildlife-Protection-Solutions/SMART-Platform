@@ -24,7 +24,11 @@ package org.wcs.smart.reporttable.patrol;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.criterion.Restrictions;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
+import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
@@ -152,13 +156,16 @@ public class TeamTable  extends SmartBirtTable {
 	/**
 	 * @see org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable#getValues(org.wcs.smart.ca.ConservationArea)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<Object> getValues (SmartConnection connection) {
-		return connection.getSession()
-				.createCriteria(Team.class)
-				.add(Restrictions.in("conservationArea", connection.getConservationAreas())) //$NON-NLS-1$
-				.list(); 
+	public List<? extends Object> getValues (SmartConnection connection) {
+		Session session = connection.getSession();
+
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Team> c = cb.createQuery(Team.class);
+		Root<Team> root = c.from(Team.class);
+		c.where(root.get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$
+		
+		return session.createQuery(c).getResultList();
 	}
 
 	/**

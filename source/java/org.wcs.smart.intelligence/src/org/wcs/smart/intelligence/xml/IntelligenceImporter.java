@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
@@ -232,7 +232,7 @@ public class IntelligenceImporter {
 					return null;
 				}
 				
-				Query query = session.createQuery("SELECT l.value FROM Label l, Intelligence i WHERE l.id.language = :language AND lower(l.value) like :name AND l.id.element.uuid = i.uuid"); //$NON-NLS-1$
+				Query<?> query = session.createQuery("SELECT l.value FROM Label l, Intelligence i WHERE l.id.language = :language AND lower(l.value) like :name AND l.id.element.uuid = i.uuid"); //$NON-NLS-1$
 				query.setParameter("language", language); //$NON-NLS-1$
 				query.setParameter("name", name.toLowerCase()); //$NON-NLS-1$
 				List<?> result = query.list();

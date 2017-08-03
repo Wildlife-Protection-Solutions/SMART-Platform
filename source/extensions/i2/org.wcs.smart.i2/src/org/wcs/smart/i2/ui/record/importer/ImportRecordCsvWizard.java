@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -81,16 +82,18 @@ public class ImportRecordCsvWizard extends Wizard implements IPageChangingListen
 					try{
 						Integer numRecords = RecordImportEngine.INSTANCE.importRecords(config, eventBroker, monitor);
 						if (numRecords == null){
-							r[0] = false;
-							if (monitor.isCanceled()){
-								Display.getDefault().syncExec(()->{
-									MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportRecordWizard_ImportTitle, Messages.ImportRecordWizard_CancelledMsg);
-								});
-							}
+							throw new OperationCanceledException();
 						}else{
 							r[0] = true;
 							Display.getDefault().syncExec(()->{
 								MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportRecordWizard_ImportTitle, MessageFormat.format(Messages.ImportRecordWizard_SuccessMsg, numRecords));
+							});
+						}
+					}catch (OperationCanceledException ex) {
+						r[0] = false;
+						if (monitor.isCanceled()){
+							Display.getDefault().syncExec(()->{
+								MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportRecordWizard_ImportTitle, Messages.ImportRecordWizard_CancelledMsg);
 							});
 						}
 					}catch (Exception ex){

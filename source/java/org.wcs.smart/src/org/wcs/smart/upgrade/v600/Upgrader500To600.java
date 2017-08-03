@@ -22,8 +22,7 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 	public void upgrade(final IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.Upgrader500To600_ProgressMessage, 1);
 		thrownException = null;
-		final Session s = HibernateManager.openSession();
-		try {
+		try(Session s = HibernateManager.openSession()){
 			s.doWork(new Work() {
 				@Override
 				public void execute(Connection c) throws SQLException {
@@ -36,9 +35,6 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 					}
 				}
 			});
-
-		} finally {
-			s.close();
 		}
 		if (thrownException != null)
 			throw thrownException;

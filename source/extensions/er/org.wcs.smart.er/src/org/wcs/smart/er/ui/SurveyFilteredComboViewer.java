@@ -44,7 +44,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.er.hibernate.SurveyFilter;
@@ -255,9 +255,8 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
  
         private List<Survey> loadSurveyIds() {
         		//{survey uuid, survey id, start date, survey design name, sd uuid}
-        	Session session = HibernateManager.openSession();
-        	try{
-        		Query query = getFilter().buildQuery(session);
+        	try(Session session = HibernateManager.openSession()){
+        		Query<?> query = getFilter().buildQuery(session);
         		List<?> results = query.list();
         		List<Survey> surveys = new ArrayList<Survey>(results.size()+1);
         		boolean defaultPresent = preselectedSurvey == null; //indicated if default patrol id is in filtered list
@@ -294,8 +293,6 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
         		}
         		
         		return surveys;
-        	}finally{
-        		session.close();
         	}
         }
         

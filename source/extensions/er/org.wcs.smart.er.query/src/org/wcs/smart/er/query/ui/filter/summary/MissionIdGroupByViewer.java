@@ -24,9 +24,12 @@ package org.wcs.smart.er.query.ui.filter.summary;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
@@ -61,7 +64,7 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 		if (items != null && items.length > 0){
 			for (String it : items){
 				try{
-					Mission m = (Mission) session.load(Mission.class, UuidUtils.stringToUuid(it));
+					Mission m = session.load(Mission.class, UuidUtils.stringToUuid(it));
 					if (m != null){
 						allItems.add(new ListItem(m.getUuid(), m.getId()));
 					}
@@ -73,38 +76,37 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 		return allItems;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
 		String[] litems = groupBy.getRawItems();
 		if (litems != null){
 			return getItems(session);
 		}
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Mission> c = cb.createQuery(Mission.class);
+		Root<Mission> from = c.from(Mission.class);
+		c.select(from);
+		Join<?,?> fromdesign = from.join("survey").join("surveyDesign"); //$NON-NLS-1$ //$NON-NLS-2$
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		if (filter == null){
 			//get all surveys for the current ca
+			c.where(cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ 
+			c.orderBy(cb.asc(fromdesign.get("keyId")), cb.desc(from.get("startDate")), cb.desc(fromdesign.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			List<Mission> missions = session.createQuery(c).getResultList();
 			
-			List<Mission> missions = session.createCriteria(Mission.class, "m") //$NON-NLS-1$
-					.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
-					.createAlias("survey.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
-					.addOrder(Order.desc("startDate")) //$NON-NLS-1$
-					.addOrder(Order.desc("sd.startDate")) //$NON-NLS-1$ 
-					.list();
 			for (Mission m : missions){
 				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + " - " + m.getSurvey().getSurveyDesign().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				items.add(li);
 			}			
 		}else{
-			List<Mission> missions = session.createCriteria(Mission.class, "m") //$NON-NLS-1$
-				.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
-				.createAlias("survey.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("sd.keyId", filter.getKey())) //$NON-NLS-1$
-				.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
-				.addOrder(Order.desc("startDate")) //$NON-NLS-1$
-				.addOrder(Order.desc("sd.startDate")) //$NON-NLS-1$ 
-				.list();
+			c.where(cb.and(
+					cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$ 
+					cb.equal(fromdesign.get("keyId"), filter.getKey()))); //$NON-NLS-1$ 
+			c.orderBy(cb.asc(fromdesign.get("keyId")),  //$NON-NLS-1$ 
+					cb.desc(from.get("startDate")),  //$NON-NLS-1$
+					cb.desc(fromdesign.get("startDate")));  //$NON-NLS-1$ 
+			List<Mission> missions = session.createQuery(c).getResultList();
+			
 			for (Mission m : missions){
 				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				items.add(li);

@@ -31,11 +31,11 @@ import java.util.Set;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -132,59 +132,59 @@ public class QueryImportEngine {
 	 * @throws Exception
 	 */
 	public static void importNames(org.wcs.smart.query.model.Query query, QueryType qt, ConservationArea importCa) throws Exception{
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			query.getNames().clear();
-			String xmlDefaultName = null;
-			for (QueryName qn : qt.getName()){
-				if (qn.getIsDefault()){
-					xmlDefaultName = qn.getName();
-				}
-				List<?> values = session.createCriteria(Language.class).add(Restrictions.eq("ca",  //$NON-NLS-1$
-						importCa))
-						.add(Restrictions.eq("code",qn.getLanguage())).list(); //$NON-NLS-1$
-				if (values.size() > 0){
-					for (Object l : values){
-						query.updateName((Language)l, qn.getName());
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				query.getNames().clear();
+				String xmlDefaultName = null;
+				for (QueryName qn : qt.getName()){
+					if (qn.getIsDefault()){
+						xmlDefaultName = qn.getName();
+					}
+					List<Language> values = QueryFactory.buildQuery(session, Language.class,
+							new Object[] {"ca", importCa}, //$NON-NLS-1$
+							new Object[] {"code", qn.getLanguage()}).getResultList(); //$NON-NLS-1$
+					if (values.size() > 0){
+						for (Object l : values){
+							query.updateName((Language)l, qn.getName());
+						}
 					}
 				}
-			}
-			String defaultName = query.findNameNull(importCa.getDefaultLanguage());
-			if (defaultName == null){
-				if (xmlDefaultName != null){
-					query.updateName(importCa.getDefaultLanguage(), xmlDefaultName);
-				}else{
-					if (qt.getName().size()>0) {
-						query.updateName(importCa.getDefaultLanguage(), qt.getName().get(0).getName());
+				String defaultName = query.findNameNull(importCa.getDefaultLanguage());
+				if (defaultName == null){
+					if (xmlDefaultName != null){
+						query.updateName(importCa.getDefaultLanguage(), xmlDefaultName);
 					}else{
-						query.updateName(importCa.getDefaultLanguage(), Messages.QueryImportEngine_NoName);
+						if (qt.getName().size()>0) {
+							query.updateName(importCa.getDefaultLanguage(), qt.getName().get(0).getName());
+						}else{
+							query.updateName(importCa.getDefaultLanguage(), Messages.QueryImportEngine_NoName);
+						}
 					}
 				}
-			}
-			String name = query.findNameNull(SmartDB.getCurrentLanguage());
-			if (name == null){
-				name = query.findNameNull(importCa.getDefaultLanguage());
-			
+				String name = query.findNameNull(SmartDB.getCurrentLanguage());
 				if (name == null){
-					Set<Language> langs = new HashSet<Language>();
-					for(Label l : query.getNames()){
-						langs.add(l.getLanguage());
-					}
-					Language best = SmartUtils.findLanguageMatch(langs);
-					if (best != null){
-						name = query.findName(best);
-						query.updateName(SmartDB.getCurrentLanguage(), name);
-					}else{
-						name = ""; //$NON-NLS-1$
+					name = query.findNameNull(importCa.getDefaultLanguage());
+				
+					if (name == null){
+						Set<Language> langs = new HashSet<Language>();
+						for(Label l : query.getNames()){
+							langs.add(l.getLanguage());
+						}
+						Language best = SmartUtils.findLanguageMatch(langs);
+						if (best != null){
+							name = query.findName(best);
+							query.updateName(SmartDB.getCurrentLanguage(), name);
+						}else{
+							name = ""; //$NON-NLS-1$
+						}
 					}
 				}
+				query.setName(name);
+			
+			} finally {
+				session.getTransaction().rollback();
 			}
-			query.setName(name);
-		
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
 		}
 	}
 }

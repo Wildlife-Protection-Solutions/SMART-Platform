@@ -48,7 +48,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -104,9 +103,9 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 	private void loadAreaTypes(){
 		Session session = getSession();
 		session.beginTransaction();
-		List<?> areas = session.createCriteria(Area.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("type", type)).list(); //$NON-NLS-1$
+		
+		
+		List<?> areas = HibernateManager.loadAreas(type, session);
 		
 		tableViewer.setInput(areas.toArray());
 		tableViewer.refresh();

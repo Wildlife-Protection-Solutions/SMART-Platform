@@ -42,19 +42,17 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class NewEntityHandler {
 
 	@Execute
 	public void execute(Shell activeShell, MWindow activeWindow){
 		//check if data model is configured before continuing
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
 			if (dm == null || dm.getCategories().size() == 0){
 				MessageDialog.openInformation(activeShell, Messages.NewEntityHandler_DialogTitle, Messages.NewEntityHandler_DataModelNotInitialized);
 			}
-		}finally{
-			s.close();
 		}
 		NewEntityTypeWizard wizard = new NewEntityTypeWizard();
 		WizardDialog newEntityDialog = new WizardDialog(activeShell, wizard);

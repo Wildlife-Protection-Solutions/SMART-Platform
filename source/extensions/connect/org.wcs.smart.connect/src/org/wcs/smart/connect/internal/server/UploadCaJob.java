@@ -90,15 +90,15 @@ public class UploadCaJob extends FileUploaderJob {
 	 * Save sthe current status of the status object to the database
 	 */
 	private void saveStatus(){
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			s.saveOrUpdate(status);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			ConnectPlugIn.log(ex.getMessage(),ex);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				s.saveOrUpdate(status);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(),ex);
+			}
 		}finally{
-			s.close();
 			DerbyReplicationManager.INSTANCE.clearCachedReplicationState();
 		}
 	}
@@ -133,20 +133,19 @@ public class UploadCaJob extends FileUploaderJob {
 		displayComplete(errorMessage == null ? Messages.UploadCaJob_UnknownError : errorMessage);	
 		
 		//error disable and cleanup replication details
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-
-			//clean up change log and upload table
-			ChangeLogTableManager.INSTANCE.deleteAll(s, connect.getServer().getConservationArea());
-			
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			ConnectPlugIn.displayLog(Messages.UploadCaJob_ReplicationNotReenabled, ex);
-		}finally{
-			s.close();
-		}
+		try(Session s = HibernateManager.openSession()){
 		
+			s.beginTransaction();
+			try {
+				//clean up change log and upload table
+				ChangeLogTableManager.INSTANCE.deleteAll(s, connect.getServer().getConservationArea());
+				
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				ConnectPlugIn.displayLog(Messages.UploadCaJob_ReplicationNotReenabled, ex);
+			}
+		}		
 		super.connect.close();
 	}
 

@@ -49,8 +49,7 @@ public class PatrolPlanXmlExtraDataContribution implements IXmlExtraDataContribu
 
 	@Override
 	public List<ExtraDataType> exportData(Patrol patrol) throws Exception {
-		Session session = HibernateManager.openSession();
-		try {
+		try (Session session = HibernateManager.openSession()){
 			List<ExtraDataType> result = new ArrayList<ExtraDataType>();
 			//plan to which the patrol belong
 			Plan plan = PlanHibernateManager.getPlanForPatrol(patrol, session);
@@ -66,8 +65,6 @@ public class PatrolPlanXmlExtraDataContribution implements IXmlExtraDataContribu
 				result.add(planData);
 			}
 			return result;
-		} finally {
-			session.close();
 		}
 	}
 

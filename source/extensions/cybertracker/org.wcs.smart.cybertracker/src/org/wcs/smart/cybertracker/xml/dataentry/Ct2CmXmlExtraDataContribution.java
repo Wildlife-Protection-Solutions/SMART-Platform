@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
@@ -37,6 +36,7 @@ import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataLabelKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
 import org.wcs.smart.dataentry.model.xml.generated.NameType;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * CyberTracker contribution for dataentry module to provide ability to 
@@ -57,9 +57,8 @@ public class Ct2CmXmlExtraDataContribution implements IXmlCmExtraDataContributio
 		if (cm.getUuid() == null) {
 			return result;
 		}
-		ConfigurableModelCtPropertiesProfile p = (ConfigurableModelCtPropertiesProfile)session
-				.createCriteria(ConfigurableModelCtPropertiesProfile.class)
-				.add(Restrictions.eq("id.model", cm)).uniqueResult(); //$NON-NLS-1$
+		
+		ConfigurableModelCtPropertiesProfile p = QueryFactory.buildQuery(session, ConfigurableModelCtPropertiesProfile.class, "id.model", cm).uniqueResult();  //$NON-NLS-1$
 		if (p != null && p.getProfile() != null) {
 			CmExtraDataType data = fromProfile(p.getProfile());
 			data.setType(TYPE_PROFILE);

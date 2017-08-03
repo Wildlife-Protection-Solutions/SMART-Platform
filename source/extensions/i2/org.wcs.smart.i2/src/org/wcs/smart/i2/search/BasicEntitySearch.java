@@ -25,15 +25,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Criteria;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+
 
 /**
  * Basic search implementation 
@@ -97,59 +102,70 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		return this.entityTypes;
 	}
 	
-	@SuppressWarnings("unchecked")
+	/**
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 */
 	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor){
-		
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.BasicEntitySearch_taskName, maxResultCnt);
 		Long now = System.nanoTime();
 		
 		if (searchString != null && searchString.length() > 0){
 			//perform fuzzy search
-			monitor.beginTask(Messages.BasicEntitySearch_taskName, maxResultCnt);
+			
 			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, session);
 			int actualCnt = Math.min(sresults.size(), maxResultCnt);
 			for (int i = 0; i < actualCnt; i ++){
 				IntelEntity it = (IntelEntity) session.get(IntelEntity.class, sresults.get(i).getEntityUuid());
 				lazyLoadEntity(it, session);
 				sresults.get(i).setEntity(it);
-				monitor.worked(1);
+				progress.worked(1);
+				progress.checkCanceled();
 			}
-			monitor.done();;
 			return new IntelSearchResult(sresults.size(), sresults.subList(0, actualCnt), System.nanoTime() - now);
 		}
 
 		if (searchString == null || searchString.isEmpty()){
-			//search all entities
-			monitor.beginTask(Messages.BasicEntitySearch_taskName, maxResultCnt);
-			Criteria c = session.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
-			Criteria c1 = session.createCriteria(IntelEntity.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+			
+			
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			
+			CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
+			Root<IntelEntity> from2 = c2.from(IntelEntity.class);
+			List<Predicate> filters = new ArrayList<>();
+			filters.add(cb.equal(from2.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
 			if (entityTypes != null && !entityTypes.isEmpty()){
-				c.createAlias("entityType", "et"); //$NON-NLS-1$ //$NON-NLS-2$
-				c.add(Restrictions.in("et.keyId", entityTypes)); //$NON-NLS-1$
-				c1.createAlias("entityType", "et"); //$NON-NLS-1$ //$NON-NLS-2$
-				c1.add(Restrictions.in("et.keyId", entityTypes)); //$NON-NLS-1$
+				filters.add(from2.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
+				
 			}
+			c2.where(cb.and(filters.toArray(new Predicate[filters.size()])));			
+			c2.select(cb.count(from2));
+			Long maxCnt = session.createQuery(c2).uniqueResult();
 			
-			
-			Long maxCnt = (Long) c.setProjection(Projections.rowCount()).list().get(0);
-			
-			c1.setMaxResults(maxResultCnt);
-			
-			List<IntelEntity> items = c1.list();
+			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
+			Root<IntelEntity> from = c.from(IntelEntity.class);
+			c.select(from);
+			filters = new ArrayList<>();
+			filters.add(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+			if (entityTypes != null && !entityTypes.isEmpty()){
+				filters.add(from.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
+			Query<IntelEntity> q = session.createQuery(c).setMaxResults(maxResultCnt);
+			List<IntelEntity> items = q.getResultList();
 			List<IntelSearchResultItem> results = new ArrayList<IntelSearchResultItem>();
+			
 			for (IntelEntity it : items){
 				lazyLoadEntity(it, session);
 				IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(),"", 1.0); //$NON-NLS-1$
 				result.setEntity(it);
 				results.add(result);
-				monitor.worked(1);
+				progress.worked(1);
+				progress.checkCanceled();
 			}
-			monitor.done();
 			return new IntelSearchResult(maxCnt, results, System.nanoTime() - now);
 		}
 		//should never get here
-		monitor.done();
 		return new IntelSearchResult(0, Collections.emptyList(), 0);
 	}
 	

@@ -71,11 +71,11 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -477,11 +477,8 @@ public class BasicRecordSearchPanel extends Composite {
 			protected IStatus run(IProgressMonitor monitor) {
 				
 				IntelRecordResult result = null;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					result = search.doSearch(s, monitor);
-				}finally{
-					s.close();
 				}
 				IntelRecordResult fresult = result;
 				Display.getDefault().syncExec(()->{
@@ -503,24 +500,18 @@ public class BasicRecordSearchPanel extends Composite {
 	
 	private Job refreshSource = new Job(Messages.BasicRecordSearchPanel_RefershSourceJobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> sources = new ArrayList<>();
 			sources.add(""); //$NON-NLS-1$
-			Session s = HibernateManager.openSession();
-			try{
-				List<IntelRecordSource> srcs = s.createCriteria(IntelRecordSource.class)
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list();
+			try(Session s = HibernateManager.openSession()){
+				List<IntelRecordSource> srcs = QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
 					srcs.forEach(r->{
 					r.getName();
 					r.getIcon();
 				});
 				sources.addAll(srcs);
 				BasicRecordSearchPanel.this.sources = srcs;
-			}finally{
-				s.close();
 			}
 			
 			Display.getDefault().syncExec(()->{

@@ -180,12 +180,8 @@ public class MapView implements IDropTargetProvider, MapPart, IAdaptable {
     	UUID basemapuuid = (UUID) mapviewer.getMap().getBlackboard().get(MapSettings.BASEMAP_BLACKBOARD_UUID_KEY);
     	BasemapDefinition def = null;
     	if (basemapuuid != null){
-    		
-    		Session s = HibernateManager.openSession();
-    		try{
+    		try(Session s = HibernateManager.openSession()){
     			def = (BasemapDefinition) s.get(BasemapDefinition.class, basemapuuid);
-    		}finally{
-    			s.close();
     		}
     	}
     	if (def == null){

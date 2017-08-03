@@ -37,6 +37,7 @@ import org.wcs.smart.plan.ui.newPlanWizard.CreatePlanWizard;
  * @author jeffloun
  *
  */
+@SuppressWarnings("restriction")
 public class NewPlanHandler {
 
 	@Execute

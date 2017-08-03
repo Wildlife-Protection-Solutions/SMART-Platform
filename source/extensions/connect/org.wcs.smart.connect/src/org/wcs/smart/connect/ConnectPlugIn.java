@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.connect;
 
+import javax.ws.rs.ext.RuntimeDelegate;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -69,6 +72,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public ConnectPlugIn() {
+
 	}
 
 	/*
@@ -76,6 +80,8 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
+		//https://stackoverflow.com/questions/17366266/jax-rs-2-0-change-default-implementation	
+		System.setProperty(RuntimeDelegate.JAXRS_RUNTIME_DELEGATE_PROPERTY, ResteasyProviderFactory.class.getCanonicalName());
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaReplicationDeleteHandler(), CaReplicationDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaConnectDeleteHandler(), CaConnectDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addEmployeeListener(employeeDelete);

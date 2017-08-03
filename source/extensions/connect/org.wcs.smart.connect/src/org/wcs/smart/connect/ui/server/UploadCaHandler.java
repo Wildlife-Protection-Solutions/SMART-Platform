@@ -43,6 +43,7 @@ import org.wcs.smart.connect.internal.server.UploadCaEngine;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class UploadCaHandler {
 
 	@Execute

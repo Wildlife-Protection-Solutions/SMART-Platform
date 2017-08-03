@@ -131,16 +131,15 @@ public class ConnectServerWizard extends Wizard {
 		user.setSmartUser(SmartDB.getCurrentEmployee());
 		user.setServer(server);
 
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			s.save(server);
-			s.save(user);
-			s.getTransaction().commit();
-		}catch (Exception ex){			
-			ConnectPlugIn.displayLog(Messages.ConnectServerWizard_SaveError + ex.getMessage(), ex);
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				s.save(server);
+				s.save(user);
+				s.getTransaction().commit();
+			}catch (Exception ex){			
+				ConnectPlugIn.displayLog(Messages.ConnectServerWizard_SaveError + ex.getMessage(), ex);
+			}
 		}
 		
 		for (ServerOptionsWizardPage p : opPages){

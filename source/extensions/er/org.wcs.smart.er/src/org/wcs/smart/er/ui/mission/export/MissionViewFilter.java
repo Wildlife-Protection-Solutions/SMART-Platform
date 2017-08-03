@@ -24,7 +24,7 @@ package org.wcs.smart.er.ui.mission.export;
 
 import java.util.Date;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.SmartDB;
@@ -82,7 +82,7 @@ public class MissionViewFilter {
 	 * @param s
 	 * @return
 	 */
-	public Query buildQuery(Session s){ 
+	public Query<?> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT m.uuid, m.id, m.startDate, m.endDate, s.id, s.uuid, sd.name "); //$NON-NLS-1$
@@ -95,7 +95,7 @@ public class MissionViewFilter {
 		}
 		str.append("ORDER BY s.startDate desc, s.id, m.startDate desc, m.id"); //$NON-NLS-1$
 	
-		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (dateFilter != null) {
 			Date start = dateFilter.getStartDate();
 			if (start == null){

@@ -28,13 +28,13 @@ import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
@@ -114,11 +114,12 @@ public class DropItemFactory {
 	public List<DropItem> generateDropItem(AreaFilter filter){
 		
 		String queryKey = "area:" + filter.getType() + ":" + filter.getKey(); //$NON-NLS-1$ //$NON-NLS-2$
-		Area a = (Area) session.createCriteria(Area.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("type", filter.getType())) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", filter.getKey())) //$NON-NLS-1$
-				.uniqueResult();
+		
+		Area a = QueryFactory.buildQuery(session, Area.class,
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"type", filter.getType()}, //$NON-NLS-1$
+				new Object[] {"keyId", filter.getKey()}).uniqueResult(); //$NON-NLS-1$
+
 		if (a == null){
 			ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidAreaType, filter.getType(), filter.getKey()));
 			return Collections.singletonList(item);	
@@ -237,10 +238,11 @@ public class DropItemFactory {
 		
 		Category category = null;
 		if (filter.getCategoryKey() != null){
-			category = (Category) session.createCriteria(Category.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.eq("hkey", filter.getCategoryKey())) //$NON-NLS-1$
-					.uniqueResult();
+			
+			category = QueryFactory.buildQuery(session, Category.class,
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"hkey", filter.getCategoryKey()}).uniqueResult(); //$NON-NLS-1$
+			
 			if (category == null){
 				DropItem di = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidCategory, filter.getCategoryKey()));
 				return Collections.singletonList(di);
@@ -259,10 +261,11 @@ public class DropItemFactory {
 		}
 		queryKeyPart += ":" + filter.getAttributeKey(); //$NON-NLS-1$
 		
-		Attribute attribute = (Attribute) session.createCriteria(Attribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", filter.getAttributeKey())) //$NON-NLS-1$
-				.uniqueResult();
+
+		Attribute attribute = QueryFactory.buildQuery(session, Attribute.class,
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"keyId", filter.getAttributeKey()}).uniqueResult(); //$NON-NLS-1$
+
 		if (attribute == null){
 			DropItem di = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_AttributeKeyNotFound, filter.getAttributeKey()));
 			return Collections.singletonList(di);
@@ -301,10 +304,10 @@ public class DropItemFactory {
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
 			
-			AttributeTreeNode treeNode = (AttributeTreeNode) session.createCriteria(AttributeTreeNode.class)
-					.add(Restrictions.eq("hkey", filter.getKeyValue())) //$NON-NLS-1$
-					.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
-					.uniqueResult();
+			AttributeTreeNode treeNode = QueryFactory.buildQuery(session, AttributeTreeNode.class,
+					new Object[] {"hkey", filter.getKeyValue()}, //$NON-NLS-1$
+					new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
+	
 			if (treeNode == null){
 				DropItem di = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_TreeNodeNotFound, filter.getKeyValue(),attribute.getName()));
 				return Collections.singletonList(di);

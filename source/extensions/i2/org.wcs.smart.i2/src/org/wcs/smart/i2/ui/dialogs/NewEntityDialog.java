@@ -107,11 +107,8 @@ public class NewEntityDialog extends TitleAreaDialog{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<IntelEntityType> types = new ArrayList<IntelEntityType>();
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
-			}finally{
-				s.close();
 			}
 			
 			IntelEntityType toSelect = types.isEmpty() ? null : types.get(0);
@@ -198,19 +195,18 @@ public class NewEntityDialog extends TitleAreaDialog{
 			}
 		}
 		
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			session.saveOrUpdate(newEntity);
-			session.getTransaction().commit();
-		}catch (Exception ex){
-			if (session.getTransaction().isActive()) session.getTransaction().rollback();
-			MessageDialog.openWarning(getShell(), Messages.NewEntityDialog_ErrorDialogTitle, Messages.NewEntityDialog_SaveError + ex.getMessage());
-			Intelligence2PlugIn.log(ex.getMessage(), ex);
-			newEntity = null;
-			return;
-		}finally{
-			session.close();
+			try {
+				session.saveOrUpdate(newEntity);
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				MessageDialog.openWarning(getShell(), Messages.NewEntityDialog_ErrorDialogTitle, Messages.NewEntityDialog_SaveError + ex.getMessage());
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+				newEntity = null;
+				return;
+			}
 		}
 		
 		//fire events
@@ -295,8 +291,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 	}
 	
 	private void configureAttributePanel(IntelEntityType type){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.saveOrUpdate(type);
 			for (IntelEntityTypeAttribute a : type.getAttributes()){
 				a.getAttribute().getName();
@@ -306,8 +301,6 @@ public class NewEntityDialog extends TitleAreaDialog{
 					}
 				}
 			}
-		}finally{
-			s.close();
 		}
 		
 		for (Control c : attributePanel.getChildren()){
@@ -408,8 +401,7 @@ public class NewEntityDialog extends TitleAreaDialog{
 				Object type = ((IStructuredSelection)cmbEntityType.getSelection()).getFirstElement();
 				if (!(type instanceof IntelEntityType)) return;
 				
-				Session session = HibernateManager.openSession();
-				try{
+				try(Session session = HibernateManager.openSession()){
 					IntelEntityType etype = (IntelEntityType)session.get(IntelEntityType.class, ((IntelEntityType)type).getUuid());
 					IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
 					tmp.setAttribute(etype.getIdAttribute());
@@ -422,8 +414,6 @@ public class NewEntityDialog extends TitleAreaDialog{
 						setMessage(MESSAGE);
 						editor.setWarningMessage(null);
 					}
-				}finally{
-					session.close();
 				}
 			}
 		});

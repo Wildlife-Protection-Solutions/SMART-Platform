@@ -22,7 +22,7 @@
 package org.wcs.smart.plan;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -60,19 +60,19 @@ public class PlanCaDeleteHandler implements ICaDeleteHandler{
 	}
 
 	private void deletePatrolPlan(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete PatrolPlan p where p.id.plan in (select pp.id.plan from PatrolPlan pp where pp.id.plan.conservationArea = :ca)"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete PatrolPlan p where p.id.plan in (select pp.id.plan from PatrolPlan pp where pp.id.plan.conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 	
 	private void deletePlans(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from Plan where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from Plan where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
 
 	private void deletePlanTargets(ConservationArea ca, Session session) throws Exception{
-		Query q = session.createQuery("delete from PlanTarget pt WHERE pt in (SELECT pt2.uuid FROM PlanTarget pt2 where pt2.plan.conservationArea = :ca)"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from PlanTarget pt WHERE pt in (SELECT pt2.uuid FROM PlanTarget pt2 where pt2.plan.conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}

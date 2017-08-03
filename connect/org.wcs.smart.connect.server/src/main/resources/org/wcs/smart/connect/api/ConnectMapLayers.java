@@ -44,7 +44,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -230,14 +229,11 @@ public class ConnectMapLayers extends HttpServlet {
     	Session s = HibernateManager.getSession(context);
     	s.beginTransaction();
 		try{
-			toUpdate = (MapLayer)s.createCriteria(MapLayer.class)
-					.add(Restrictions.eq("uuid", oldUuid)) //$NON-NLS-1$
-					.uniqueResult();
+			toUpdate =s.get(MapLayer.class, oldUuid);
 			
 			if (toUpdate == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConnectMapLayers.MapLayerNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
-			
 			
 			toUpdate.setLayerOrder(newLayer.getLayerOrder());
 

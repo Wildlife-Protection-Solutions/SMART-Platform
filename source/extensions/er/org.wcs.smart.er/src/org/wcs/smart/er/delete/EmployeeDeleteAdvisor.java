@@ -24,12 +24,11 @@ package org.wcs.smart.er.delete;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionMember;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -52,9 +51,7 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		if (e.getUuid() == null){
 			return null;
 		}
-		Long cnt = (Long) session.createCriteria(MissionMember.class)
-				.add(Restrictions.eq("id.member", e)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount()).uniqueResult(); 
+		Long cnt = QueryFactory.buildCountQuery(session, MissionMember.class,  new Object[] {"id.member", e}); //$NON-NLS-1$
 		if (cnt == 0){
 			return null;
 		}else{

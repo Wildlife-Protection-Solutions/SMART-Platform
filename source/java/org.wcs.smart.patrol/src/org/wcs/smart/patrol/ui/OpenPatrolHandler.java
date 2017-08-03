@@ -59,6 +59,7 @@ import org.wcs.smart.patrol.model.Patrol;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class OpenPatrolHandler {
 
 	public static final String PATROL_PARAM = "patrolinput"; //$NON-NLS-1$
@@ -123,15 +124,13 @@ public class OpenPatrolHandler {
 	}
 	
 	private boolean checkDates(PatrolEditorInput pi, Shell activeShell){
-		Session s = HibernateManager.openSession();
 		Patrol patrol = null;
 		boolean canEdit = false;
-		try{
+	
+		try(Session s = HibernateManager.openSession()){
 			patrol = (Patrol)s.get(Patrol.class, pi.getUuid());
 			if (patrol == null) return false; //patrol not found so we cannot open it
 			canEdit = null == PatrolManager.getInstance().canEdit(patrol, ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s));	
-		}finally{
-			s.close();
 		}
 		
 		long patrolLengthMills = pi.getEndDate().getTime() - pi.getStartDate().getTime();

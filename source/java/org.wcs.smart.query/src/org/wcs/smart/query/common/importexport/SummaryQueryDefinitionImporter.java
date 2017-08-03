@@ -85,15 +85,15 @@ public abstract class SummaryQueryDefinitionImporter extends AbstractXmlQueryImp
 				if (part.getValue() != null && part.getValue().length() > 0) {
 					
 					summaryQuery.setQuery(part.getValue());
-					Session session = HibernateManager.openSession();
-					session.beginTransaction();
-					try {
-						SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
-						validateQuery(ca, sumDef, langCode, uuidLookup, session);					
-						summaryQuery.setQuery(sumDef.asQuery(), sumDef);
-					} finally {
-						session.getTransaction().rollback();
-						session.close();
+					try(Session session = HibernateManager.openSession()){
+						session.beginTransaction();
+						try {
+							SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
+							validateQuery(ca, sumDef, langCode, uuidLookup, session);					
+							summaryQuery.setQuery(sumDef.asQuery(), sumDef);
+						} finally {
+							session.getTransaction().rollback();
+						}
 					}
 				}
 			}

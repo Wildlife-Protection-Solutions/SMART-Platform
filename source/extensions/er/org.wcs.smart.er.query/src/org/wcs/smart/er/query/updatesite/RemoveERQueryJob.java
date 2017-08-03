@@ -56,37 +56,32 @@ public class RemoveERQueryJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		//drop tables
-		final Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			for (String table : LABELTABLES){
-				if (DerbyHibernateExtensions.tableExists(session, table)){
-					session.createSQLQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-			
-			for (String table : LABELTABLES){
-				if (DerbyHibernateExtensions.tableExists(session, table)){
-					session.createSQLQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
-				}
-			}		
-			
-			HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-
-		} catch (Exception e) {
-			try{
-				session.getTransaction().rollback();
-			}catch (Exception ex){
-				ERQueryPlugIn.log(ex.getMessage(), ex);	
-			}
-			ERQueryPlugIn.displayLog(Messages.RemoveERQueryJob_UninstallError, e);
-			return new Status(Status.ERROR,ERQueryPlugIn.PLUGIN_ID,e.getMessage());
-		} finally {
+		try(final Session session = HibernateManager.openSession()){
+			session.beginTransaction();
 			try {
-				session.close();
-			} catch (Exception ex) {
-				ERQueryPlugIn.log(ex.getMessage(), ex);
+				for (String table : LABELTABLES){
+					if (DerbyHibernateExtensions.tableExists(session, table)){
+						session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
+				
+				for (String table : LABELTABLES){
+					if (DerbyHibernateExtensions.tableExists(session, table)){
+						session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+					}
+				}		
+				
+				HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+	
+			} catch (Exception e) {
+				try{
+					session.getTransaction().rollback();
+				}catch (Exception ex){
+					ERQueryPlugIn.log(ex.getMessage(), ex);	
+				}
+				ERQueryPlugIn.displayLog(Messages.RemoveERQueryJob_UninstallError, e);
+				return new Status(Status.ERROR,ERQueryPlugIn.PLUGIN_ID,e.getMessage());
 			}
 		}
 

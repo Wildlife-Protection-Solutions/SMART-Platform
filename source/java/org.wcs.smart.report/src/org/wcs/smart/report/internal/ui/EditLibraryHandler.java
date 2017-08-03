@@ -36,6 +36,7 @@ import org.wcs.smart.report.ui.SmartLibraryEditorInput;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class EditLibraryHandler {
 
 	@Execute

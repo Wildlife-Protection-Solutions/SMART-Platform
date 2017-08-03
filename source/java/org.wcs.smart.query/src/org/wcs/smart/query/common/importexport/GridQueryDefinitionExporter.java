@@ -66,18 +66,18 @@ public abstract class GridQueryDefinitionExporter extends DefinitionQueryExporte
 		crsPart.setValue(gQuery.getCrsDefinition());
 		xmlQuery.getQueryPart().add(crsPart);
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			if (gQuery.getQueryDefinition().getValueFilter() != null){
-				processFilter(gQuery.getQueryDefinition().getValueFilter().getFilter(), xmlQuery, s);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				if (gQuery.getQueryDefinition().getValueFilter() != null){
+					processFilter(gQuery.getQueryDefinition().getValueFilter().getFilter(), xmlQuery, s);
+				}
+				if (gQuery.getQueryDefinition().getRateFilter() != null){
+					processFilter(gQuery.getQueryDefinition().getRateFilter().getFilter(), xmlQuery, s);
+				}
+			}finally{
+				s.getTransaction().rollback();
 			}
-			if (gQuery.getQueryDefinition().getRateFilter() != null){
-				processFilter(gQuery.getQueryDefinition().getRateFilter().getFilter(), xmlQuery, s);
-			}
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
 		}
 	}
 	

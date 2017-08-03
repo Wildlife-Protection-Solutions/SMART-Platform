@@ -45,6 +45,7 @@ import org.wcs.smart.ui.TranslateNamesHandler;
  * @author elitvin
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class TranslatePlanHandler extends TranslateNamesHandler {
 
 	@Override
@@ -60,13 +61,13 @@ public class TranslatePlanHandler extends TranslateNamesHandler {
 		Plan plan = null;
 		if (obj instanceof PlanEditorInput) {
 			UUID uuid = ((PlanEditorInput) obj).getUuid();
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				plan = (Plan) session.load(Plan.class, uuid);
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					plan = (Plan) session.load(Plan.class, uuid);
+				}finally{
+					session.getTransaction().rollback();
+				}
 			}
 		} else if (obj instanceof Plan) {
 			plan = (Plan) obj;

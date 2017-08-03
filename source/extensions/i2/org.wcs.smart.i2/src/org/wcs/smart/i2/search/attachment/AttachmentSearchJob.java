@@ -28,7 +28,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -74,6 +74,7 @@ public class AttachmentSearchJob extends Job {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		SubMonitor progress = SubMonitor.convert(monitor);
 		
 		List<ISmartAttachment> toSearch = new ArrayList<>();
 		toSearch.addAll(attachments);
@@ -81,11 +82,11 @@ public class AttachmentSearchJob extends Job {
 		List<IFileSearcher> searchers = AttachmentSearchEngine.INSTANCE.getFileSearchers();
 		collector.start();
 		try{
-			monitor.beginTask(Messages.AttachmentSearchJob_TaskName, searchers.size() * toSearch.size() * 5);
+			progress.beginTask(Messages.AttachmentSearchJob_TaskName, searchers.size() * toSearch.size() * 5);
 			for (IFileSearcher searcher : searchers){
 				for (ISmartAttachment a : toSearch){
 					monitor.subTask(MessageFormat.format(Messages.AttachmentSearchJob_SubTaskName,  a.getFilename()));
-					searcher.search(searchString, a, collector, new SubProgressMonitor(monitor, 5));
+					searcher.search(searchString, a, collector, progress.newChild(5));
 				}
 				if (monitor.isCanceled()){
 					collector.cancelled();
@@ -99,6 +100,7 @@ public class AttachmentSearchJob extends Job {
 			collector.done();
 		}
 		
+		SubMonitor.done(monitor);
 		return Status.OK_STATUS;
 	}
 

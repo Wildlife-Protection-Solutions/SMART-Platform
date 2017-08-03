@@ -29,6 +29,7 @@ import org.wcs.smart.ui.internal.ca.properties.BasemapPropertyPage;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowBasemapHandler extends ShowPropertyPageHandler {
 
 	/**

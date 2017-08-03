@@ -53,10 +53,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -111,52 +111,47 @@ public class AttributeDialog extends TitleAreaDialog {
 		return new Point(p.x,(int)(p.y*1.4));
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected void okPressed() {
 		Set<IntelEntity> modifiedEntities = new HashSet<>();
 		
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			for (IntelAttributeListItem i : allItems){
-				if(!attribute.getAttributeList().contains(i)){
-					//delete all reference to attribute list item
-					List<IntelEntityAttributeValue> items = s.createCriteria(IntelEntityAttributeValue.class)
-							.add(Restrictions.eq("attributeListItem", i)) //$NON-NLS-1$
-							.list();
-					for (IntelEntityAttributeValue item : items){
-						modifiedEntities.add(item.getEntity());
-						s.delete(item);
+		try(Session s = HibernateManager.openSession()){
+			try{
+				s.beginTransaction();
+				for (IntelAttributeListItem i : allItems){
+					if(!attribute.getAttributeList().contains(i)){
+						//delete all reference to attribute list item
+						
+						List<IntelEntityAttributeValue> items = QueryFactory.buildQuery(s, IntelEntityAttributeValue.class, "attributeListItem", i).getResultList();  //$NON-NLS-1$
+						for (IntelEntityAttributeValue item : items){
+							modifiedEntities.add(item.getEntity());
+							s.delete(item);
+						}
+						
+						List<IntelEntityRelationshipAttributeValue> items2 = QueryFactory.buildQuery(s, IntelEntityRelationshipAttributeValue.class, "attributeListItem", i).getResultList(); //$NON-NLS-1$
+						for (IntelEntityRelationshipAttributeValue item : items2){
+							modifiedEntities.add(item.getRelationship().getSourceEntity());
+							modifiedEntities.add(item.getRelationship().getTargetEntity());
+							s.delete(item);
+						}
+						
+						Query<?> q = s.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid"); //$NON-NLS-1$
+						q.setParameter("uuid", i.getUuid()); //$NON-NLS-1$
+						q.executeUpdate();
 					}
-					
-					List<IntelEntityRelationshipAttributeValue> items2 = s.createCriteria(IntelEntityRelationshipAttributeValue.class)
-							.add(Restrictions.eq("attributeListItem", i)) //$NON-NLS-1$
-							.list();
-					for (IntelEntityRelationshipAttributeValue item : items2){
-						modifiedEntities.add(item.getRelationship().getSourceEntity());
-						modifiedEntities.add(item.getRelationship().getTargetEntity());
-						s.delete(item);
-					}
-					
-					Query q = s.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :uuid"); //$NON-NLS-1$
-					q.setParameter("uuid", i.getUuid()); //$NON-NLS-1$
-					q.executeUpdate();
 				}
+				s.flush();
+				s.clear();
+				
+				s.saveOrUpdate(attribute);
+				
+				this.allItems = new ArrayList<IntelAttributeListItem>();
+				this.allItems.addAll(attribute.getAttributeList());
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				if (s.getTransaction().isActive())s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.AttributeDialog_SaveError +ex.getMessage(), ex);
+				return;
 			}
-			s.flush();
-			s.clear();
-			
-			s.saveOrUpdate(attribute);
-			
-			this.allItems = new ArrayList<IntelAttributeListItem>();
-			this.allItems.addAll(attribute.getAttributeList());
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			if (s.getTransaction().isActive())s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.AttributeDialog_SaveError +ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		
 		if (!modifiedEntities.isEmpty()) eventBroker.send(IntelEvents.ENTITY_MODIFIED, modifiedEntities);		
@@ -255,8 +250,7 @@ public class AttributeDialog extends TitleAreaDialog {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					if (attribute.getUuid() != null){
 						attribute = (IntelAttribute) s.get(IntelAttribute.class, attribute.getUuid());
 						attribute.getNames().size();
@@ -268,8 +262,6 @@ public class AttributeDialog extends TitleAreaDialog {
 					}
 					attributeSiblings = IntelHibernateManager.getAttributes(s, SmartDB.getCurrentConservationArea());
 					attributeSiblings.remove(attribute);
-				}finally{
-					s.close();
 				}
 				
 				allItems = new ArrayList<IntelAttributeListItem>();

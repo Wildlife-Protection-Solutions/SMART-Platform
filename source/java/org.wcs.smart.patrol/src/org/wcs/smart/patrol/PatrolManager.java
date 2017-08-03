@@ -27,10 +27,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -112,24 +114,16 @@ public class PatrolManager {
 	 * a patrol delete event is fired
 	 * 
 	 * @param ca the conservation area to delete
-	 * @param monitor the progress monitor; cannot be null
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
 	 * @throws Exception if conservation area not deleted
 	 */
 	public boolean deletePatrol(UUID patrolUuid, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{UuidUtils.uuidToString(patrolUuid)}), 4);
 		
-		int work = 1;
-		for (ArrayList<IPatrolDeleteHandler> data : deleteHandlers.values()){
-			work += data.size();
-		}
-		
-		monitor.beginTask(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{UuidUtils.uuidToString(patrolUuid)}), work);
-		monitor.worked(0);
 		Patrol patrol = null;
-		Session session = HibernateManager.openSession();
-		
-		try{
+		try(Session session = HibernateManager.openSession()){
 			patrol = (Patrol)session.load(Patrol.class, patrolUuid);
-			monitor.setTaskName(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{patrol == null ? patrolUuid.toString() : patrol.getId()}));
+			progress.subTask(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{patrol == null ? patrolUuid.toString() : patrol.getId()}));
 			
 			// ensure can edit patrol 
 			String canEdit = canEdit(patrol, ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session));
@@ -140,10 +134,10 @@ public class PatrolManager {
 			try{
 				File fileStore = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath());
 			
-				if (!runDeleteHandlers(patrol, session, monitor)){
+				if (!runDeleteHandlers(patrol, session, progress.split(1))){
 					return false;
 				}
-				monitor.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol);
+				progress.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol);
 				
 				//waypoint deletion is not cascaded; we must delete this explicitly
 				for (PatrolLeg pl : patrol.getLegs()){
@@ -155,33 +149,29 @@ public class PatrolManager {
 				}
 				session.delete(patrol);
 				session.getTransaction().commit();
-				monitor.worked(1);
+				progress.worked(1);
 			
-				runAfterDeleteHandlers(patrol, monitor);
+				runAfterDeleteHandlers(patrol, progress.split(1));
 			
 				if (fileStore.exists()){
-					monitor.subTask(Messages.PatrolManager_Progress_RemovingFileStore);
+					progress.subTask(Messages.PatrolManager_Progress_RemovingFileStore);
 					try{
 						FileUtils.forceDelete(fileStore);
 					}catch(Exception ex){
 						SmartPatrolPlugIn.displayLog(Messages.PatrolManager_Error_CouldNotDeleteFilestore + fileStore.getAbsolutePath(), ex);
 					}
 				}
-				monitor.worked(1);
+				progress.worked(1);
 
 			}catch (Exception ex){
 				if (session.getTransaction().isActive()) session.getTransaction().rollback();
 				throw ex;
 			}
-		}finally{
-			session.close();
 		}
 	
 		if (patrol != null){
 			PatrolEventManager.getInstance().patrolDeleted(patrol);
-		}
-		monitor.done();
-		
+		}		
 		return true;
 	}
 	
@@ -190,17 +180,20 @@ public class PatrolManager {
 	 * 
 	 */
 	private boolean runDeleteHandlers(Patrol patrol, Session session, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor);
 		ArrayList<Integer> items = new ArrayList<Integer> ();
 		items.addAll(deleteHandlers.keySet());
 		Collections.sort(items);
+		
+		progress.setWorkRemaining(deleteHandlers.values().stream().mapToInt(List::size).sum());
+		
 		for(int i = items.size() -1; i >= 0; i --){
 			ArrayList<IPatrolDeleteHandler> listeners = deleteHandlers.get(items.get(i));
 			for (IPatrolDeleteHandler listener : listeners){
-				boolean canDelete = listener.beforeDelete(patrol, session, monitor);
+				boolean canDelete = listener.beforeDelete(patrol, session, progress.split(1));
 				if (!canDelete){
 					return false;
 				}
-				monitor.worked(1);
 			}
 		}
 		return true;
@@ -211,14 +204,17 @@ public class PatrolManager {
 	 * 
 	 */
 	private void runAfterDeleteHandlers(Patrol patrol, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor);
 		ArrayList<Integer> items = new ArrayList<Integer> ();
 		items.addAll(deleteHandlers.keySet());
 		Collections.sort(items);
+		
+		progress.setWorkRemaining(deleteHandlers.values().stream().mapToInt(List::size).sum());
+		
 		for(int i = items.size() -1; i >= 0; i --){
 			ArrayList<IPatrolDeleteHandler> listeners = deleteHandlers.get(items.get(i));
 			for (IPatrolDeleteHandler listener : listeners){
-				listener.afterDelete(patrol, monitor);
-				monitor.worked(1);
+				listener.afterDelete(patrol, progress.split(1));
 			}
 		}
 	}

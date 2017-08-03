@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ID;
@@ -146,16 +146,12 @@ public class EntityTypeCcaaManager {
 						@Override
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 								InterruptedException {
-							Session s = HibernateManager.openSession();
-							try{
+							try(Session s = HibernateManager.openSession()){
 								List<EntityType> tts = (new EntityTypeMerger(Locale.getDefault())).mergeEntityTypes(
 										SmartDB.getConservationAreaConfiguration().getConservationAreas().toArray(new ConservationArea[SmartDB.getConservationAreaConfiguration().getConservationAreas().size()]),
 										SmartDB.getConservationAreaConfiguration().getMainConservationArea(),
 										s, monitor);
 								newTypes.addAll(tts);
-							}finally{
-								s.close();
-								
 							}
 							
 						}
@@ -193,10 +189,9 @@ public class EntityTypeCcaaManager {
 	 * @return
 	 */
 	public List<Entity> getEntities(String entityTypeKey, Session session){
-		Query q = session.createQuery("FROM Entity e WHERE e.entityType.keyId = :keyId and e.entityType.conservationArea in (:ca)"); //$NON-NLS-1$
+		Query<Entity> q = session.createQuery("FROM Entity e WHERE e.entityType.keyId = :keyId and e.entityType.conservationArea in (:ca)", Entity.class); //$NON-NLS-1$
 		q.setParameter("keyId", entityTypeKey); //$NON-NLS-1$
 		q.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
 		List<Entity> allEntities = q.list();	
 		return allEntities;
 	}

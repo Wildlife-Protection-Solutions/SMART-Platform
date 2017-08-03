@@ -25,7 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.criterion.Restrictions;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
@@ -37,6 +37,7 @@ import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTemplateCloner;
 import org.wcs.smart.query.QueryTypeManager;
@@ -56,34 +57,33 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.SurveyQueryCloner_CopyQueryProgress, 6);
-		try{
-			monitor.subTask(Messages.SurveyQueryCloner_GriddedTask);
-			cloneGriddedQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_SummaryTask);
-			cloneSummaryQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_ObservationTask);
-			cloneObservationQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_IncidentTask);
-			cloneWaypointQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_MissionTask);
-			cloneMissionQuery(engine);
-			monitor.worked(1);
-			
-			monitor.subTask(Messages.SurveyQueryCloner_MissionTrackTask);
-			cloneMissionTrackQuery(engine);
-			monitor.worked(1);
-		}finally{
-			monitor.done();
-		}
+	
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.SurveyQueryCloner_CopyQueryProgress, 6);
+	
+		progress.subTask(Messages.SurveyQueryCloner_GriddedTask);
+		cloneGriddedQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_SummaryTask);
+		cloneSummaryQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_ObservationTask);
+		cloneObservationQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_IncidentTask);
+		cloneWaypointQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_MissionTask);
+		cloneMissionQuery(engine);
+		progress.worked(1);
+		
+		progress.subTask(Messages.SurveyQueryCloner_MissionTrackTask);
+		cloneMissionTrackQuery(engine);
+		progress.worked(1);
+	
 	}
 	
 	/*
@@ -91,12 +91,10 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 	 */
 	private void cloneGriddedQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<SurveyGriddedQuery> queries = (List<SurveyGriddedQuery>) engine.getSession()
-			.createCriteria(SurveyGriddedQuery.class)
-			.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-			.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
-		
+		List<SurveyGriddedQuery> queries = QueryFactory.buildQuery(engine.getSession(), SurveyGriddedQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		for(SurveyGriddedQuery query : queries){
 			SurveyGriddedQuery clone = (SurveyGriddedQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveyGriddedQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
@@ -126,11 +124,10 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 	 */
 	private void cloneSummaryQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<SurveySummaryQuery> queries = (List<SurveySummaryQuery>) engine.getSession()
-			.createCriteria(SurveySummaryQuery.class)
-			.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-			.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
+		List<SurveySummaryQuery> queries = QueryFactory.buildQuery(engine.getSession(), SurveySummaryQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		for(SurveySummaryQuery query : queries){
 			SurveySummaryQuery clone = (SurveySummaryQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveySummaryQuery.KEY) );
@@ -158,11 +155,10 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 	 */
 	private void cloneObservationQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<SurveyObservationQuery> queries = (List<SurveyObservationQuery>) engine.getSession()
-		.createCriteria(SurveyObservationQuery.class)
-		.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-		.add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$
+		List<SurveyObservationQuery> queries = QueryFactory.buildQuery(engine.getSession(), SurveyObservationQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		for(SurveyObservationQuery query : queries){
 			SurveyObservationQuery clone = (SurveyObservationQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveyObservationQuery.KEY) );
@@ -193,11 +189,10 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 	 */
 	private void cloneWaypointQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<SurveyWaypointQuery> queries = (List<SurveyWaypointQuery>) engine.getSession()
-		.createCriteria(SurveyWaypointQuery.class)
-		.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-		.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
+		List<SurveyWaypointQuery> queries = QueryFactory.buildQuery(engine.getSession(), SurveyWaypointQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		for(SurveyWaypointQuery query : queries){
 			SurveyWaypointQuery clone = (SurveyWaypointQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveyWaypointQuery.KEY) );
@@ -228,11 +223,10 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 	 */
 	private void cloneMissionQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<MissionQuery> queries = (List<MissionQuery>) engine.getSession()
-		.createCriteria(MissionQuery.class)
-		.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-		.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
+		List<MissionQuery> queries = QueryFactory.buildQuery(engine.getSession(), MissionQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		for(MissionQuery query : queries){
 			MissionQuery clone = (MissionQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( MissionQuery.KEY) );
@@ -263,11 +257,10 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 	 */
 	private void cloneMissionTrackQuery(ConservationAreaClonerEngine engine) throws Exception{
 		Employee newEmployee = engine.getNewCa().getEmployees().get(0);
-		@SuppressWarnings("unchecked")
-		List<MissionTrackQuery> queries = (List<MissionTrackQuery>) engine.getSession()
-		.createCriteria(MissionTrackQuery.class)
-		.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
-		.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
+		List<MissionTrackQuery> queries = QueryFactory.buildQuery(engine.getSession(), MissionTrackQuery.class,
+				new Object[] {"conservationArea", engine.getTemplateCa()}, //$NON-NLS-1$
+				new Object[] {"isShared", true}) //$NON-NLS-1$
+				.getResultList();
 		
 		for(MissionTrackQuery query : queries){
 			MissionTrackQuery clone = (MissionTrackQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( MissionTrackQuery.KEY) );

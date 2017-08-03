@@ -119,9 +119,9 @@ public class GriddedTableContent {
 	 * Updates the results table data.  This
 	 * runs in the display thread.
 	 * 
-	 * @param items new results
+	 * @param items new results; if null then cancelled message will be displayed
 	 */
-	public void setTableData(final Collection<QueryGridResultItem> items, final IProgressMonitor monitor) {
+	public void setTableData(final Collection<QueryGridResultItem> items) {
 		
 		editor.getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
@@ -130,7 +130,7 @@ public class GriddedTableContent {
 					//window closed nothing to update
 					return;
 				}
-				if (monitor.isCanceled()){
+				if (items == null){
 					showCancelled();
 				}else{
 					lblNumResults.setText(String.valueOf(items.size()));

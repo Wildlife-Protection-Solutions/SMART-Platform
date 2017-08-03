@@ -31,6 +31,4 @@ Export-Package: org.wcs.smart.i2,
 Bundle-Activator: org.wcs.smart.i2.Intelligence2PlugIn
 Bundle-Vendor: org.wcs.smart
 Bundle-ClassPath: .,
- lib/java-string-similarity-0.19.jar,
- lib/jcip-annotations-1.0.jar,
- lib/commons-codec-1.6.jar
+ lib/java-string-similarity-0.24.jar

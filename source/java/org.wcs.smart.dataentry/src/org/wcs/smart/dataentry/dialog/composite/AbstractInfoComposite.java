@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -240,8 +240,8 @@ public abstract class AbstractInfoComposite extends Composite {
 							InterruptedException {
 						monitor.beginTask(Messages.AbstractInfoComposite_AddCategory, dialog.getCategories().size());
 					
-						Session s = HibernateManager.openSession();
-						try{
+						
+						try(Session s = HibernateManager.openSession()){
 							for (Category c : dialog.getCategories()){
 								Category c2 = c;
 								monitor.subTask(c.getName());
@@ -263,8 +263,6 @@ public abstract class AbstractInfoComposite extends Composite {
 								addCategory(c);
 								monitor.worked(1);
 							}
-						}finally{
-							s.close();
 						}
 						monitor.done();
 						
@@ -351,29 +349,28 @@ public abstract class AbstractInfoComposite extends Composite {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask(Messages.AbstractInfoComposite_DmLoadingTaskName, 2);
-					Session s = HibernateManager.openSession();
-					try{
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.AbstractInfoComposite_DmLoadingTaskName, 3);
+					try(Session s = HibernateManager.openSession()){
 						DataModel dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
-						monitor.worked(1);
+						progress.worked(1);
 						
 						//load categories into memory; no-lazy loading here.
 						//attributes are only loaded when needed (when added to the cm)
-						SubProgressMonitor sub = new SubProgressMonitor(monitor, 1);
-						sub.beginTask(Messages.AbstractInfoComposite_CategoriesSubTask, dataModel.getActiveCategories().size());
+						SubMonitor sub = progress.split(1);
+						sub.setWorkRemaining(dataModel.getActiveCategories().size());
+						sub.subTask(Messages.AbstractInfoComposite_CategoriesSubTask);
 						for (Category cat: dataModel.getActiveCategories()){
 							sub.subTask(cat.getName());
 							visitCategory(cat);
 							cat.getNames().size();
 							sub.worked(1);
 						}
-						sub.done();
+						
 						
 						cachedDataModel = dataModel;
-						monitor.worked(1);
+						progress.worked(1);
 					}finally{
 						monitor.done();
-						s.close();
 					}
 				}
 				

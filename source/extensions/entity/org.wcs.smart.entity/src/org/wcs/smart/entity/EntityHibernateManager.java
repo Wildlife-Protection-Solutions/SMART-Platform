@@ -24,8 +24,8 @@ package org.wcs.smart.entity;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.entity.ccca.EntityTypeCcaaManager;
 import org.wcs.smart.entity.internal.Messages;
@@ -89,14 +89,14 @@ public class EntityHibernateManager {
 		if (conservationArea.getIsCcaa()){
 			return EntityTypeCcaaManager.getInstance().findType(entityType);
 		}
-		org.hibernate.Query hq = session.createQuery("FROM EntityType WHERE keyId = :key and conservationArea = :ca"); //$NON-NLS-1$
+		Query<EntityType> hq = session.createQuery("FROM EntityType WHERE keyId = :key and conservationArea = :ca", EntityType.class); //$NON-NLS-1$
 		hq.setParameter("key", entityType); //$NON-NLS-1$
 		hq.setParameter("ca", conservationArea); //$NON-NLS-1$
-		List<?> data = hq.list();
+		List<EntityType> data = hq.list();
 		if (data.size() != 1){
 			throw new RuntimeException(MessageFormat.format(Messages.EntityHibernateManager_InvalidEntityTypeKey, new Object[]{entityType}));
 		}
-		EntityType et = (EntityType) data.get(0);
+		EntityType et = data.get(0);
 		return et;
 		
 	}
@@ -124,12 +124,11 @@ public class EntityHibernateManager {
 			}
 			return null;
 		}
-		Query q = session.createQuery("From EntityAttribute where entityType.conservationArea = :ca and entityType.keyId = :entitykey and keyId = :key"); //$NON-NLS-1$
+		Query<EntityAttribute> q = session.createQuery("From EntityAttribute where entityType.conservationArea = :ca and entityType.keyId = :entitykey and keyId = :key", EntityAttribute.class); //$NON-NLS-1$
 		q.setParameter("ca", conservationArea); //$NON-NLS-1$
 		q.setParameter("key", entityAttributeKey); //$NON-NLS-1$
 		q.setParameter("entitykey", entityKey); //$NON-NLS-1$
 		q.setCacheable(true);
-		@SuppressWarnings("unchecked")
 		List<EntityAttribute> results = q.list();
 		if (results.size() != 1 ){
 			throw new Exception(MessageFormat.format(Messages.EntityHibernateManager_InvalidEntityAttribute, new Object[]{entityAttributeKey, entityKey}));
@@ -149,26 +148,25 @@ public class EntityHibernateManager {
 		}
 		
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca and status = :stat"); //$NON-NLS-1$
-			q.setParameter("ca", conservationArea); //$NON-NLS-1$
-			q.setParameter("stat", Status.ACTIVE); //$NON-NLS-1$
-			
-			@SuppressWarnings("unchecked")
-			List<EntityType> items = q.list();
-			for (EntityType t : items){
-				t.getDmAttribute().getName();
-				for (EntityAttribute ea : t.getAttributes()){
-					ea.getName();
-					ea.getDmAttribute().getType();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				Query<EntityType> q = session.createQuery("FROM EntityType WHERE conservationArea = :ca and status = :stat", EntityType.class); //$NON-NLS-1$
+				q.setParameter("ca", conservationArea); //$NON-NLS-1$
+				q.setParameter("stat", Status.ACTIVE); //$NON-NLS-1$
+				
+				List<EntityType> items = q.list();
+				for (EntityType t : items){
+					t.getDmAttribute().getName();
+					for (EntityAttribute ea : t.getAttributes()){
+						ea.getName();
+						ea.getDmAttribute().getType();
+					}
 				}
+				return items;
+			} finally {
+				session.getTransaction().rollback();
 			}
-			return items;
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
 		}
 	}
 	
@@ -180,9 +178,8 @@ public class EntityHibernateManager {
 		if (conservationArea.getIsCcaa()){
 			return EntityTypeCcaaManager.getInstance().getAllEntityTypes();
 		}
-		Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca "); //$NON-NLS-1$
+		Query<EntityType> q = session.createQuery("FROM EntityType WHERE conservationArea = :ca ", EntityType.class); //$NON-NLS-1$
 		q.setParameter("ca", conservationArea); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
 		List<EntityType> items = q.list();
 		return items;
 	}

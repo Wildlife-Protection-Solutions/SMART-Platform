@@ -31,9 +31,12 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.IQaDataProvider;
@@ -48,33 +51,52 @@ import org.wcs.smart.qa.ui.configure.IParameterCollector;
  *
  */
 public enum InternalExtensionManager {
+	
 	INSTANCE;
 	
-	private HashMap<String, List<IQaAction>> providerActions = null;
+	private HashMap<String, List<QaActionInfo>> providerActions = null;
 
 	private List<QaRoutine> autoRoutines = null;
 	
 	private Boolean isAutoCleaned = Boolean.FALSE;
 	
+	private HashMap<Class<? extends IQaDataProvider>, Image> providerImages = null;
+	
+	/**
+	 * Get the image associated with the given data provider
+	 * @param dataProvider
+	 * @return
+	 */
+	public Image getImage(IQaDataProvider dataProvider) {
+		if (providerImages == null) readProviderImages();
+		
+		if (dataProvider.getClass() == SingleItemDataProvider.class) {
+			return getImage(((SingleItemDataProvider)dataProvider).getParent());
+		}
+		return providerImages.get(dataProvider.getClass());
+	}
+	
+	public void dispose() {
+		if (providerImages != null) {
+			providerImages.values().forEach(e->{if (!e.isDisposed()) e.dispose();});
+		}
+	}
+	
 	/**
 	 * 
 	 * @return list of routines defined for automatic configuration
 	 */
-	@SuppressWarnings("unchecked")
 	public synchronized List<QaRoutine> getAutoRoutines(){
 		if (autoRoutines != null) return autoRoutines;
 		List<QaRoutine> routines = new ArrayList<>();
-		Session session = HibernateManager.openSession();
-		try{
-			routines.addAll(session.createCriteria(QaRoutine.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("autoCheck", true)) //$NON-NLS-1$
-				.list());
+		
+		try(Session session = HibernateManager.openSession()){
+			routines.addAll(QueryFactory.buildQuery(session, QaRoutine.class, 
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"autoCheck", true}).getResultList()); //$NON-NLS-1$
 			
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
-		}finally{
-			session.close();
 		}
 		this.autoRoutines = routines;
 		return this.autoRoutines;
@@ -82,6 +104,37 @@ public enum InternalExtensionManager {
 	
 	public void clearAutoRoutines(){
 		this.autoRoutines = null;
+	}
+
+	
+	/**
+	 * reads the data provider images
+	 */
+	@SuppressWarnings("unchecked")
+	private synchronized void readProviderImages(){
+		if (providerImages != null) return;
+		
+		HashMap<Class<? extends IQaDataProvider>, Image> imgs = new HashMap<>();
+		IExtensionRegistry registry = RegistryFactory.getRegistry();
+		IExtensionPoint pnt = registry.getExtensionPoint(RoutineExtensionManager.QA_ROUTINE_TYPE_EXTENSION_ID);
+		IConfigurationElement[] config = pnt.getConfigurationElements();
+		for (IConfigurationElement e : config) {
+			if (e.getName().equals("data_provider")){ //$NON-NLS-1$
+				try{
+					Class<?extends IQaDataProvider> routineType = (Class<? extends IQaDataProvider>) e.createExecutableExtension("class").getClass(); //$NON-NLS-1$
+					String image = e.getAttribute("image"); //$NON-NLS-1$
+					if (image != null) {
+						ImageDescriptor id = AbstractUIPlugin.imageDescriptorFromPlugin(e.getNamespaceIdentifier(), image);
+						Image img = id.createImage();
+						if (img != null) imgs.put(routineType, img);
+						
+					}
+				}catch (Exception ex){
+					QaPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		}
+		this.providerImages = imgs;
 	}
 	
 	/**
@@ -111,7 +164,7 @@ public enum InternalExtensionManager {
 	}
 
 	
-	public List<IQaAction> getQaActions(IQaDataProvider provider, IEclipseContext context){
+	public List<QaActionInfo> getQaActions(IQaDataProvider provider, IEclipseContext context){
 		if (providerActions == null){
 			synchronized (INSTANCE) {
 				if (providerActions == null){
@@ -126,10 +179,16 @@ public enum InternalExtensionManager {
 							try{
 								String id = ((IQaDataProvider)e.createExecutableExtension("class")).getId(); //$NON-NLS-1$
 								IConfigurationElement[] kids = e.getChildren("qa_action"); //$NON-NLS-1$
-								List<IQaAction> actions = new ArrayList<>();
+								List<QaActionInfo> actions = new ArrayList<>();
 								for (IConfigurationElement kid : kids){
 									IQaAction action = (IQaAction)kid.createExecutableExtension("class"); //$NON-NLS-1$
-									actions.add(action);
+									
+									String image = kid.getAttribute("image"); //$NON-NLS-1$
+									ImageDescriptor descriptor = null;
+									if (image != null) {
+										descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(e.getNamespaceIdentifier(), image);
+									}
+									actions.add(new QaActionInfo(action, descriptor));
 									ContextInjectionFactory.inject(action, context);
 								}
 								providerActions.put(id, actions);
@@ -154,16 +213,15 @@ public enum InternalExtensionManager {
 			if (isAutoCleaned) return;
 			isAutoCleaned = true;
 		}
-		Session session = HibernateManager.openSession();
-		try {
-			session.beginTransaction();
-			QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea(), session);
-			session.getTransaction().commit();
-		} catch (Exception e) {
-			QaPlugIn.log(e.getMessage(), e);
-			session.getTransaction().rollback();
-		}finally{
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			try {
+				session.beginTransaction();
+				QaErrorCleaner.INSTANCE.cleanItems(SmartDB.getCurrentConservationArea(), session);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				QaPlugIn.log(e.getMessage(), e);
+				session.getTransaction().rollback();
+			}
 		}
 	}
 }

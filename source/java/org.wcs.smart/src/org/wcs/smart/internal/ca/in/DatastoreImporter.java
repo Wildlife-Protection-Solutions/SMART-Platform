@@ -32,6 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
@@ -50,21 +51,17 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DatastoreImporter implements ICaDataImporter {
 
-	private static final String FILESTORE_DIR_EXTENSION_ID = "org.wcs.smart.ca.filestoredir"; //$NON-NLS-1$
+	private static final String FILESTORE_DIR_EXTENSION_ID = "org.wcs.smart.caFilestoreDir"; //$NON-NLS-1$
 	
 	@Override
 	public void importData(ICaDataImportEngine engine, IProgressMonitor monitor)
 			throws Exception {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DatastoreImporter_ImportFilestore, 1);
 		try{
-			monitor.beginTask(Messages.DatastoreImporter_ImportFilestore, 1);	
-			importFileStore(engine.getImportDataDirectory(), engine.getConservationAreaUuid(), monitor);
-			monitor.worked(1);
+			importFileStore(engine.getImportDataDirectory(), engine.getConservationAreaUuid(), progress.split(1));
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.CaImporter_Error_FilestoreNotImported1 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-		}finally{
-			monitor.done();
-		}
-				
+		}				
 	}
 
 	
@@ -78,7 +75,7 @@ public class DatastoreImporter implements ICaDataImporter {
 	 * @throws IOException
 	 */
 	private void importFileStore(File dir, UUID cauuid, IProgressMonitor monitor) throws IOException{
-		monitor.setTaskName(Messages.CaImporter_Progress_ImportingFileStore);
+		monitor.subTask(Messages.CaImporter_Progress_ImportingFileStore);
 		File sourceFile = new File(dir, ICaDataExportEngine.FILESTORE_DIR);
 		
 		

@@ -99,8 +99,8 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param updated if the udig service needs to be reset; otherwise the existing service will be used
 	 */
 	private void loadData() {
-		Session s = openSession();
-		try{
+		
+		try(Session s = openSession()){
 			basemaps = HibernateManager.getBasemaps(s);
 			Collections.sort(basemaps, new Comparator<Object>(){
 				@Override
@@ -113,8 +113,6 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			if (basemaps.size() > 0){
 				lstBasemaps.setSelection(new StructuredSelection(basemaps.get(0)));
 			}
-		}finally{
-			s.close();
 		}
 	}
 
@@ -261,20 +259,19 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
-		Session s = openSession();
-		s.beginTransaction();
-		try{
-			basemaps.forEach(b -> s.saveOrUpdate(b));
-			itemsToDelete.forEach(b -> s.delete(b));
-			s.getTransaction().commit();
-			setChangesMade(false);
-			itemsToDelete.clear();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			SmartPlugIn.displayLog(Messages.BasemapPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
-			return false;
-		}finally{
-			s.close();
+		try(Session s = openSession()){
+			s.beginTransaction();
+			try{
+				basemaps.forEach(b -> s.saveOrUpdate(b));
+				itemsToDelete.forEach(b -> s.delete(b));
+				s.getTransaction().commit();
+				setChangesMade(false);
+				itemsToDelete.clear();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				SmartPlugIn.displayLog(Messages.BasemapPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
+				return false;
+			}
 		}
 		return true;
 	}

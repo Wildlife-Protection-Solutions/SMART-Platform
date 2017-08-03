@@ -203,86 +203,85 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 	
 	private ProcessingStatus run() throws Exception{
 		List<JSONObject> features = JsonCtParser.parseFeaturesFromJsonString(json);
-		Session session = HibernateManager.openSession(new AttachmentInterceptor());
-		try{
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
+		
 			session.beginTransaction();
-			
-			List<JSONObject> notProc = new ArrayList<JSONObject>();
-			notProc.addAll(features);
-			StringBuilder statusMsg = new StringBuilder();
-			List<IJsonProcessor> processors = getProcessors();
-			for (IJsonProcessor p : processors){
-				List<JSONObject> processed = p.processJson(features, session);
-				notProc.removeAll(processed);
-				String msg = p.getStatusMessage();
-				if (msg != null){
-					statusMsg.append(msg);
-				}
-			}
-
-			
-			if (notProc.size() == features.size()){
-				//nothing has been processed perhaps we re-queue this item
-				//for later as maybe something else needs to be processed first
-				session.getTransaction().rollback();
-				ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, Messages.CybertrackerItemProcessor_NoData);
-				return status;
-			}
-			
-			final boolean[] cont = new boolean[]{true};			
-			if (!notProc.isEmpty()){
-				//not all items have been processed
-				final List<String> warnings = new ArrayList<String>();
-				for (JSONObject o : notProc){
-					warnings.add(o.toJSONString());
-				}	
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						String message = MessageFormat.format(Messages.CybertrackerItemProcessor_ProcessedMsg, features.size() - notProc.size(), features.size(), notProc.size() );
-						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.CybertrackerItemProcessor_WarningTitle,message,
-								warnings, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-						if (wd.open() == 0){
-							cont[0] = true;
-						}else{
-							cont[0] = false;
-						}
+			try {
+				List<JSONObject> notProc = new ArrayList<JSONObject>();
+				notProc.addAll(features);
+				StringBuilder statusMsg = new StringBuilder();
+				List<IJsonProcessor> processors = getProcessors();
+				for (IJsonProcessor p : processors){
+					List<JSONObject> processed = p.processJson(features, session);
+					notProc.removeAll(processed);
+					String msg = p.getStatusMessage();
+					if (msg != null){
+						statusMsg.append(msg);
 					}
-					
-				});
-			}
-			if (!cont[0]){
+				}
+	
+				
+				if (notProc.size() == features.size()){
+					//nothing has been processed perhaps we re-queue this item
+					//for later as maybe something else needs to be processed first
+					session.getTransaction().rollback();
+					ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, Messages.CybertrackerItemProcessor_NoData);
+					return status;
+				}
+				
+				final boolean[] cont = new boolean[]{true};			
+				if (!notProc.isEmpty()){
+					//not all items have been processed
+					final List<String> warnings = new ArrayList<String>();
+					for (JSONObject o : notProc){
+						warnings.add(o.toJSONString());
+					}	
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							String message = MessageFormat.format(Messages.CybertrackerItemProcessor_ProcessedMsg, features.size() - notProc.size(), features.size(), notProc.size() );
+							WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), Messages.CybertrackerItemProcessor_WarningTitle,message,
+									warnings, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+							if (wd.open() == 0){
+								cont[0] = true;
+							}else{
+								cont[0] = false;
+							}
+						}
+						
+					});
+				}
+				if (!cont[0]){
+					session.getTransaction().rollback();
+					ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, Messages.CybertrackerItemProcessor_CancelledMsg);
+					return status;
+				}
+				
+				session.getTransaction().commit();
+				
+				ProcessingStatus status = new ProcessingStatus(Status.COMPLETE, MessageFormat.format(Messages.CybertrackerItemProcessor_CompleteMsg, statusMsg.toString()));
+				
+				
+				for (IJsonProcessor p : processors){
+					try{
+						p.afterSave();
+					}catch (Throwable t){
+						CyberTrackerPlugIn.displayError(Messages.CybertrackerItemProcessor_ErrorTitle, t.getMessage(), t);
+					}
+				}
+				return status;
+			}catch (UserCancelledException ex){
 				session.getTransaction().rollback();
-				ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, Messages.CybertrackerItemProcessor_CancelledMsg);
+				ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, Messages.CybertrackerItemProcessor_Cancelled2 + ex.getMessage());
+				return status;
+	
+			}catch (Exception ex){
+				CyberTrackerPlugIn.log(ex.getMessage(), ex);
+				session.getTransaction().rollback();
+				
+				ProcessingStatus status = new ProcessingStatus(Status.ERROR, MessageFormat.format(Messages.CybertrackerItemProcessor_DataProcessingError, ex.getMessage()));
 				return status;
 			}
-			
-			session.getTransaction().commit();
-			
-			ProcessingStatus status = new ProcessingStatus(Status.COMPLETE, MessageFormat.format(Messages.CybertrackerItemProcessor_CompleteMsg, statusMsg.toString()));
-			
-			
-			for (IJsonProcessor p : processors){
-				try{
-					p.afterSave();
-				}catch (Throwable t){
-					CyberTrackerPlugIn.displayError(Messages.CybertrackerItemProcessor_ErrorTitle, t.getMessage(), t);
-				}
-			}
-			return status;
-		}catch (UserCancelledException ex){
-			session.getTransaction().rollback();
-			ProcessingStatus status = new ProcessingStatus(Status.REQUEUED, Messages.CybertrackerItemProcessor_Cancelled2 + ex.getMessage());
-			return status;
-
-		}catch (Exception ex){
-			CyberTrackerPlugIn.log(ex.getMessage(), ex);
-			session.getTransaction().rollback();
-			
-			ProcessingStatus status = new ProcessingStatus(Status.ERROR, MessageFormat.format(Messages.CybertrackerItemProcessor_DataProcessingError, ex.getMessage()));
-			return status;
-		}finally{
-			session.close();
 		}
 	}
 }

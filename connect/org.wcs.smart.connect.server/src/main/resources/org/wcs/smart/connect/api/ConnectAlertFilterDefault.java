@@ -42,7 +42,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -148,10 +147,7 @@ public class ConnectAlertFilterDefault extends HttpServlet {
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			toUpdate = (AlertFilterDefault)s.createCriteria(AlertFilterDefault.class)
-					.add(Restrictions.eq("uuid", uuid)) //$NON-NLS-1$
-					.uniqueResult();
-			
+			toUpdate = s.get(AlertFilterDefault.class, uuid);			
 			if (toUpdate == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectAlert.AlertFilterDefaultsFound", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$

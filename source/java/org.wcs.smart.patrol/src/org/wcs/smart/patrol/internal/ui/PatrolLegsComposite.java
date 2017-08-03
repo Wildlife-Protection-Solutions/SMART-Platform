@@ -284,7 +284,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			    while ( i.hasNext() ) {
 			    	toBeMerged.add( ((PatrolLeg)i.next()) );
 			    }
-				MergePatrolLegDialog patrolLegDialog = new MergePatrolLegDialog(getShell(), toBeMerged, typeOps, session);
+				MergePatrolLegDialog patrolLegDialog = new MergePatrolLegDialog(getShell(), toBeMerged, typeOps, mandateOps);
 				if (patrolLegDialog.open() == Window.OK){
 					patrolLegDialog.getNewLeg().setPatrol(patrol);
 					legs.add(patrolLegDialog.getNewLeg());

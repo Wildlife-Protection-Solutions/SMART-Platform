@@ -24,7 +24,7 @@ package org.wcs.smart.i2.handlers;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
@@ -51,7 +51,7 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		monitor.subTask(Messages.DeleteCaHandler_SubTaskName);
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelObservationAttribute")); //$NON-NLS-1$
-		Query q = session.createQuery("delete from IntelObservationAttribute ioa where ioa.id.attribute in (select a from Attribute a where conservationArea = :ca)"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from IntelObservationAttribute ioa where ioa.id.attribute in (select a from Attribute a where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		

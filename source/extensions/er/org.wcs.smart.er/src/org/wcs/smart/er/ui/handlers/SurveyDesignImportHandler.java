@@ -36,7 +36,7 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
  * @author Jeff
  *
  */
-
+@SuppressWarnings("restriction")
 public class SurveyDesignImportHandler {
 
 	@Execute

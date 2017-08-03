@@ -93,15 +93,12 @@ public class SyncOnStartupProcessor {
 		job.schedule();
 		
 		ConnectServer cs = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s)){
 				//not replicating therefore nothing to do
 				return;
 			}
 			cs = ConnectHibernateManager.getConnectServer(s);
-		}finally{
-			s.close();
 		}
 		if (cs == null) return;
 		
@@ -141,15 +138,12 @@ public class SyncOnStartupProcessor {
 		if (SmartDB.getCurrentConservationArea() == null) return;
 		
 		ConnectServer cs = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s)){
 				//not replicating therefore nothing to do
 				return;
 			}
 			cs = ConnectHibernateManager.getConnectServer(s);
-		}finally{
-			s.close();
 		}
 		if (cs == null) return;
 		

@@ -30,11 +30,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
@@ -50,11 +50,9 @@ public class SurveyWaypointSourceUiProvider implements
 	@Override
 	public void findAndShow(UUID waypointUuid) {
 		SurveyWaypoint pw = null;
-		Session s = HibernateManager.openSession();
-		try{
-			pw = (SurveyWaypoint)s.createCriteria(SurveyWaypoint.class)
-					.add(Restrictions.eq("id.waypoint.uuid", waypointUuid)) //$NON-NLS-1$
-					.uniqueResult();
+		
+		try(Session s = HibernateManager.openSession()){
+			pw = QueryFactory.buildQuery(s, SurveyWaypoint.class, "id.waypoint.uuid", waypointUuid).uniqueResult(); //$NON-NLS-1$
 			if (pw == null){
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
 						ERROR_STR, 
@@ -63,8 +61,6 @@ public class SurveyWaypointSourceUiProvider implements
 			}
 			pw.getMissionDay().getMission().getId();
 			pw.getMissionDay().getMission().getUuid();
-		}finally{
-			s.close();
 		}
 		
 		IEclipseContext ctx = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf();

@@ -71,24 +71,25 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			List<Employee> e = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
-			Collections.sort(e, new Comparator<Employee>() {
-				@Override
-				public int compare(Employee arg0, Employee arg1) {
-					return Collator.getInstance().compare(getLabel(arg0).toUpperCase(), getLabel(arg1).toUpperCase());
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				List<Employee> e = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
+				Collections.sort(e, new Comparator<Employee>() {
+					@Override
+					public int compare(Employee arg0, Employee arg1) {
+						return Collator.getInstance().compare(getLabel(arg0).toUpperCase(), getLabel(arg1).toUpperCase());
+					}
+				});
+				for (Employee emp : e){
+					items.add(new ListItem(emp.getUuid(), getLabel(emp)));
 				}
-			});
-			for (Employee emp : e){
-				items.add(new ListItem(emp.getUuid(), getLabel(emp)));
+				
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.ObserverGroupByDropItem_ErrorLoadingEmployees, ex);
+			}finally {
+				s.getTransaction().rollback();
 			}
-			s.getTransaction().rollback();
-			s.close();
-		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.ObserverGroupByDropItem_ErrorLoadingEmployees, ex);
-			s.close();
 		}
 		
 		return items;

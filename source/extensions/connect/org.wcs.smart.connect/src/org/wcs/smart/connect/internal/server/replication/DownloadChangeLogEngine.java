@@ -79,13 +79,10 @@ public class DownloadChangeLogEngine {
 		try{
 			setServerStatus(ServerStatus.CONNECTING, Messages.DownloadChangeLogEngine_statusLineValue);
 			
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){
 				if (!DerbyReplicationManager.INSTANCE.canReplicate(session, ca)){
 					throw new Exception(Messages.DownloadChangeLogEngine_ReplicationNotEnabledError);
 				}
-			}finally{
-				session.close();
 			}
 			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.DOWNLOAD);
 			if (previous != null && 
@@ -97,14 +94,16 @@ public class DownloadChangeLogEngine {
 			record = SyncHistoryManager.INSTANCE.create(connect.getServer().getConservationArea(), connect.getServer(), ConnectSyncHistoryRecord.Type.DOWNLOAD);
 			
 			
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
-				serverInfo = (ConnectServerStatus) s.get(ConnectServerStatus.class, ca.getUuid());
-				s.update(record);
-				s.getTransaction().commit();
-			}finally{
-				s.close();
+				try {
+					serverInfo = (ConnectServerStatus) s.get(ConnectServerStatus.class, ca.getUuid());
+					s.update(record);
+					s.getTransaction().commit();
+				}catch(Exception ex) {
+					s.getTransaction().rollback();
+					throw ex;
+				}
 			}
 			
 			if (serverInfo == null){
@@ -131,13 +130,15 @@ public class DownloadChangeLogEngine {
 			//some error
 			try{
 				if (record != null){
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
-						record.setStatus(Status.ERROR);
-						s.getTransaction().commit();
-					}finally{
-						s.close();
+						try {
+							record.setStatus(Status.ERROR);
+							s.getTransaction().commit();
+						}catch (Exception ex2) {
+							s.getTransaction().rollback();
+							throw ex2;
+						}
 					}
 				}
 			}catch (Exception ex2){
@@ -174,13 +175,15 @@ public class DownloadChangeLogEngine {
 	}
 	
 	private void saveStatusRecord(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			s.saveOrUpdate(record);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+			try {
+				s.saveOrUpdate(record);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 	}
 	

@@ -30,6 +30,7 @@ import org.wcs.smart.ui.internal.ca.properties.EmployeePropertyPage;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowEmployeePropertyHandler  extends ShowPropertyPageHandler {
 
 	/**

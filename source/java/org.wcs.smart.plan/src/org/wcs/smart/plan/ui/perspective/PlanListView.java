@@ -70,6 +70,7 @@ import org.wcs.smart.util.E3Utils;
  * @author jeffloun
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class PlanListView implements IPlanFilterItem {
 
 	public static final String ID = "org.wcs.smart.plan.PlanListView"; //$NON-NLS-1$

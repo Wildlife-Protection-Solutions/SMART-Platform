@@ -33,7 +33,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.SQLQuery;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -113,7 +115,8 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyQueryEngine2_Progress_RunningQuery, 10);
+				
 				IFilterProcessor filterer = null;
 				try{
 					filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, query);
@@ -132,20 +135,16 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 				try {			
 					try{
 						ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
-						filterer.processFilter(c, query.getFilter().getFilter(), dFilter, cafilter, true, true, monitor);
+						filterer.processFilter(c, query.getFilter().getFilter(), dFilter, cafilter, true, true, progress.split(6));
 					}catch (Exception ex){
 						throw new SQLException (ex);
 					}
 					
-					if (monitor.isCanceled()) return;
-					populateTemporaryTableExtra(c, session, monitor);
+					populateTemporaryTableExtra(c, session, progress.split(3));
 					
-					if (monitor.isCanceled()) return;
-					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
-
-					
+					progress.checkCanceled();
 					//lookup for columns that have data
-					monitor.subTask(Messages.DerbyObservationEngine_FindDataColumns);
+					progress.subTask(Messages.DerbyObservationEngine_FindDataColumns);
 					HashSet<String> dataColumns = new HashSet<>();
 					
 					//looking for attributes that have at least one value
@@ -173,12 +172,17 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 					}
 					
 					result.setDataColumns(dataColumns);
+					progress.worked(1);
 					
+					progress.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					updateResultCount(session, result);
+					
+					progress.subTask(Messages.DerbyObservationEngine_LoadingResultTask);
+				}catch ( OperationCanceledException ex) {
+					return;
 				} finally {
 					filterer.dropTemporaryTables(c);
-					if (monitor.isCanceled()) dropTables(c);
-					monitor.done();
+					if (progress.isCanceled()) dropTables(c);
 					c.setAutoCommit(false);
 				}
 			}
@@ -189,10 +193,10 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 
 	public void updateResultCount(Session s, DerbyPagedObservationResult results){
 		//setting result size
-		Integer count = (Integer) s.createSQLQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
+		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
 		results.setItemCount(count);
 		
-		Integer wcount = (Integer) s.createSQLQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp").uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+		Integer wcount = (Integer) s.createNativeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp").uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 		results.setWpCount(wcount);
 	}
 	
@@ -290,6 +294,8 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 	}
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
+		SubMonitor progress = SubMonitor.convert(monitor, 27);
+		
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"p_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
@@ -313,35 +319,25 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 			return;
 		}
 		
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_StationData);
+		progress.subTask(Messages.DerbyObservationEngine_Progress_StationData);
+		progress.split(3);
 		populateTemporaryTableNameObjExtra("p_station_uuid", "p_station", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(7);
-		if (monitor.isCanceled()){
-			return;
-		}
 		
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_TeamData);
+		
+		progress.subTask(Messages.DerbyObservationEngine_Progress_TeamData);
+		progress.split(3);
 		populateTemporaryTableNameObjExtra("p_team_uuid", "p_team", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(7);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_MandateData);
+		
+		progress.subTask(Messages.DerbyObservationEngine_Progress_MandateData);
+		progress.split(3);
 		populateTemporaryTableNameObjExtra("pl_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(2);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
+		
+		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
+		progress.split(3);
 		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(2);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_LeaderPilotData);
+		
+		progress.subTask(Messages.DerbyObservationEngine_Progress_LeaderPilotData);
+		progress.split(4);
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT plm_leader FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
@@ -396,15 +392,13 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 			leaderSt.executeBatch();
 			observerSt.executeBatch();
 		} 
-		monitor.worked(12);
-		if (monitor.isCanceled()){
-			return;
-		}
+		
 		
 		//ca information
+		progress.split(1);
 		if (SmartDB.isMultipleAnalysis()){
 			//ca id and names are only used for cross-ca analysis
-			monitor.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
+			progress.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
@@ -425,14 +419,12 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		}
 				
 		//populating categories
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
+		progress.subTask(Messages.DerbyObservationEngine_Progress_CategoryData);
+		progress.split(6);
 		populateTemporaryTableCategory(c, session);
-		monitor.worked(13);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_ListAttributesData);
+		
+		progress.subTask(Messages.DerbyObservationEngine_Progress_ListAttributesData);
+		progress.split(4);
 		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
@@ -440,12 +432,10 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 			}
 		};
 		populateAdditionalWpoaTable(c, session, listData);
-		monitor.worked(3);
-		if (monitor.isCanceled()){
-			return;
-		}
 		
-		monitor.subTask(Messages.DerbyObservationEngine_Progress_TreeAttributesData);
+		
+		progress.subTask(Messages.DerbyObservationEngine_Progress_TreeAttributesData);
+		progress.split(4);
 		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
@@ -453,10 +443,6 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 			}
 		};
 		populateAdditionalWpoaTable(c, session, treeData);
-		monitor.worked(3);
-		if (monitor.isCanceled()){
-			return;
-		}
 	}
 
 	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
@@ -499,11 +485,11 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 	public void addListLabel(Session s, AttributeListItem item){
 		if (item == null) return;
 		String sql = "SELECT count(*) FROM " + queryDataTable + "_list WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
-		SQLQuery q = s.createSQLQuery(sql);
+		NativeQuery<?> q = s.createNativeQuery(sql);
 		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 		if ((Integer)q.uniqueResult() == 0){
 			sql = " INSERT INTO " + queryDataTable + "_list (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
-			q = s.createSQLQuery(sql);
+			q = s.createNativeQuery(sql);
 			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 			q.setParameter("label",  item.getName()); //$NON-NLS-1$
 			q.executeUpdate();
@@ -518,11 +504,11 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 	public void addTreeLabel(Session s, AttributeTreeNode item){
 		if (item == null) return;
 		String sql = "SELECT count(*) FROM " + queryDataTable + "_tree WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
-		SQLQuery q = s.createSQLQuery(sql);
+		NativeQuery<?> q = s.createNativeQuery(sql);
 		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 		if ((Integer)q.uniqueResult() == 0){
 			sql = " INSERT INTO " + queryDataTable + "_tree (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
-			q = s.createSQLQuery(sql);
+			q = s.createNativeQuery(sql);
 			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 			q.setParameter("label",  item.getName()); //$NON-NLS-1$
 			q.executeUpdate();

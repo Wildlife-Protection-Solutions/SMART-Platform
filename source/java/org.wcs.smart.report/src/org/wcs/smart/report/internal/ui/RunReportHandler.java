@@ -48,6 +48,7 @@ import org.wcs.smart.report.model.Report;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class RunReportHandler {
 
 	/* (non-Javadoc)

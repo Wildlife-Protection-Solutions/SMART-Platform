@@ -45,7 +45,7 @@ public class SmartTableResultSet  implements IResultSet {
 	private int m_currentRowId = -1;
 
 	private SmartTableResultSetMetadata metadata;
-	private List<Object> data;
+	private List<? extends Object> data;
 
 	private SmartBirtTable table;
 	private Object lastObject = null;

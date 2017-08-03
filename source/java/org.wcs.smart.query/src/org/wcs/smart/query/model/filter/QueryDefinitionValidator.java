@@ -196,7 +196,7 @@ public class QueryDefinitionValidator {
 		
 		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c" +  caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		org.hibernate.Query query = session.createQuery(sql);
+		org.hibernate.query.Query<?> query = session.createQuery(sql);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
 		query.setParameter("value", value); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
@@ -223,7 +223,7 @@ public class QueryDefinitionValidator {
 		
 		String sql = "SELECT c FROM " + objectType + " c WHERE keyId = :keyId and c" + caField + " = :ca "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		org.hibernate.Query query = session.createQuery(sql);
+		org.hibernate.query.Query<?> query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
 		query.setParameter("ca",ca); //$NON-NLS-1$
 		

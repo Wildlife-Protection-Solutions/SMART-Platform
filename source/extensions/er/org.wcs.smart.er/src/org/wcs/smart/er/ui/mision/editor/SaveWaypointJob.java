@@ -67,40 +67,39 @@ public class SaveWaypointJob extends Job {
 		synchronized (this) {
 			pnts.addAll(waypoints);
 		}
-		Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try {
-			saveSession.beginTransaction();
-			for (SurveyWaypoint wp : pnts) {
-				//update source id and conservation area
-				wp.getWaypoint().setSourceId(SurveyWaypointSource.KEY);
-				wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
-
-				saveSession.saveOrUpdate(wp.getWaypoint());
-				saveSession.saveOrUpdate(wp);
-				
-				// remove observations with no data
-				if (wp.getWaypoint().getObservations() != null) {
-					for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
-						List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-						for (WaypointObservationAttribute att : wo
-								.getAttributes()) {
-							if (!att.hasValue()) {
-								toDelete.add(att);
+		try(Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			try {
+				saveSession.beginTransaction();
+				for (SurveyWaypoint wp : pnts) {
+					//update source id and conservation area
+					wp.getWaypoint().setSourceId(SurveyWaypointSource.KEY);
+					wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
+	
+					saveSession.saveOrUpdate(wp.getWaypoint());
+					saveSession.saveOrUpdate(wp);
+					
+					// remove observations with no data
+					if (wp.getWaypoint().getObservations() != null) {
+						for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
+							List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
+							for (WaypointObservationAttribute att : wo
+									.getAttributes()) {
+								if (!att.hasValue()) {
+									toDelete.add(att);
+								}
 							}
+							wo.getAttributes().removeAll(toDelete);
 						}
-						wo.getAttributes().removeAll(toDelete);
 					}
+					ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);
 				}
-				ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);
+				saveSession.getTransaction().commit();
+			} catch (Exception ex) {
+				if (saveSession.getTransaction().isActive()) {
+					saveSession.getTransaction().rollback();
+				}
+				EcologicalRecordsPlugIn.displayLog(Messages.SaveWaypointJob_Error + ex.getLocalizedMessage(), ex);
 			}
-			saveSession.getTransaction().commit();
-		} catch (Exception ex) {
-			if (saveSession.getTransaction().isActive()) {
-				saveSession.getTransaction().rollback();
-			}
-			EcologicalRecordsPlugIn.displayLog(Messages.SaveWaypointJob_Error + ex.getLocalizedMessage(), ex);
-		} finally {
-			saveSession.close();
 		}
 		for (SurveyWaypoint wp : waypoints) {
 			try{

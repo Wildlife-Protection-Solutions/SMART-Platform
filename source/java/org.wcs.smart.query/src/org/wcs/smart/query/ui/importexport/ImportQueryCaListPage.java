@@ -27,6 +27,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -46,9 +50,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
@@ -83,7 +86,6 @@ public class ImportQueryCaListPage extends WizardPage {
 	}
 	
 	private Job loadQueriesJob = new Job(Messages.QueryListView_LoadQueryJobName){
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			HashMap<UUID, List<QueryEditorInput>> queries = new HashMap<UUID, List<QueryEditorInput>>();
@@ -94,8 +96,7 @@ public class ImportQueryCaListPage extends WizardPage {
 				match = currentCa.getDefaultLanguage();
 			}
 			
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){
 				QueryFolder caRootFolder = new QueryFolder();
 			
 				caRootFolder.setName(CaQueryHibernateManagerImpl.CONSERVATION_AREA_QUERIES_NAME);
@@ -104,11 +105,15 @@ public class ImportQueryCaListPage extends WizardPage {
 				caRootFolder.setRootFolder(true);
 				folders.add(caRootFolder);
 				
-				
-				List<QueryFolder> rootFolders = session.createCriteria(QueryFolder.class)
-						.add(Restrictions.eq("conservationArea", currentCa)) //$NON-NLS-1$
-						.add(Restrictions.isNull("employee")) //$NON-NLS-1$
-						.add(Restrictions.isNull("parentFolder")).list(); //$NON-NLS-1$
+				CriteriaBuilder cb = session.getCriteriaBuilder();
+				CriteriaQuery<QueryFolder> c = cb.createQuery(QueryFolder.class);
+				Root<QueryFolder> from = c.from(QueryFolder.class);
+				c.where(cb.and(
+						cb.equal(from.get("conservationArea"), currentCa), //$NON-NLS-1$
+						cb.isNull(from.get("employee")), //$NON-NLS-1$
+						cb.isNull(from.get("parentFolder")) //$NON-NLS-1$
+						));
+				List<QueryFolder> rootFolders = session.createQuery(c).getResultList();
 				List<QueryFolder> toName = new ArrayList<QueryFolder>();
 				toName.addAll(rootFolders);
 				while(toName.size() > 0){
@@ -121,7 +126,7 @@ public class ImportQueryCaListPage extends WizardPage {
 			
 
 				for (IQueryType type : QueryTypeManager.INSTANCE.getSupportedQueryTypes()){
-					Query hquery = session
+					Query<?> hquery = session
 						.createQuery("SELECT a.uuid, a.folder.uuid, a.isShared, a.id " //$NON-NLS-1$
 							+ "FROM " //$NON-NLS-1$
 							+ type.getHibernateClass().getSimpleName()
@@ -151,10 +156,7 @@ public class ImportQueryCaListPage extends WizardPage {
 						proxies.add(proxy);
 					}
 				}
-			}finally{
-				session.close();
 			}
-			
 			final HashMap<Integer, Object> data = new HashMap<Integer, Object>();
 			data.put(QueryListContentProvider.QUERY_KEY, queries);
 			data.put(QueryListContentProvider.FOLDER_KEY, folders);
@@ -186,9 +188,11 @@ public class ImportQueryCaListPage extends WizardPage {
 					return ll.getValue();
 				}else{
 					//load any label
-					ll = (org.wcs.smart.ca.Label) session.createCriteria(org.wcs.smart.ca.Label.class)
-							.add(Restrictions.eq("id.element.uuid", item)) //$NON-NLS-1$
-							.setMaxResults(1).uniqueResult();
+					CriteriaBuilder cb = session.getCriteriaBuilder();
+					CriteriaQuery<org.wcs.smart.ca.Label> c = cb.createQuery(org.wcs.smart.ca.Label.class);
+					Root<org.wcs.smart.ca.Label> from = c.from(org.wcs.smart.ca.Label.class);
+					c.where(cb.equal(from.get("id").get("element").get("uuid"), item)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					ll = session.createQuery(c).uniqueResult();
 					if (ll != null){
 						return ll.getValue();
 					}

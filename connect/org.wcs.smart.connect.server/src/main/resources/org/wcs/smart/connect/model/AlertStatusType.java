@@ -28,7 +28,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
  
 /**
@@ -43,18 +43,18 @@ public class AlertStatusType extends GenericEnumType<String, AlertStatusEnum> {
 			InvocationTargetException, IllegalAccessException {
 		super(AlertStatusEnum.class, AlertStatusEnum.values(), "name", Types.OTHER); //$NON-NLS-1$
 	}
- 
+
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names,
-			SessionImplementor session, Object owner)
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 			throws HibernateException, SQLException {
 		return nullSafeGet(rs, names, owner);
 	}
- 
+
 	@Override
-	public void nullSafeSet(PreparedStatement st, Object value, int index,
-			SessionImplementor session) throws HibernateException, SQLException {
+	public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
+			throws HibernateException, SQLException {
 		nullSafeSet(st, value, index);
+		
 	}
  
 }

@@ -32,6 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -384,6 +385,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					SubMonitor progress = SubMonitor.convert(monitor, "", 2); //$NON-NLS-1$
 					File tempDir;
 					try {
 						tempDir = PdaUtil.createTempDirectory();
@@ -393,12 +395,13 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 					}
 	
 					try {
-						File generated = exporter.export(tempDir, getConfigurableModelProvider(), monitor);
+						File generated = exporter.export(tempDir, getConfigurableModelProvider(), progress.split(1));
 						if (generated == null) {
 							return; //error is supposed to be tracked inside export call
 						}
+						progress.split(1);
 						if (toDevice) {
-							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Upload);
+							progress.subTask(Messages.CyberTrackerExportDialog_Task_Upload);
 							try {
 								final int code = PdaUtil.uploadPda(generated);
 								if (code != ICyberTrackerConstants.UPLOAD_CODE_SUCCESS) {
@@ -412,7 +415,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 							}
 
 						} else {
-							monitor.subTask(Messages.CyberTrackerExportDialog_Task_Copy);
+							progress.subTask(Messages.CyberTrackerExportDialog_Task_Copy);
 							try {
 								FileUtils.copyFile(generated, selectedFile);
 							} catch (IOException e) {
@@ -426,7 +429,6 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 						return;
 					} finally {
 						SmartFileUtils.deleteTempDirectory(tempDir);
-						monitor.done();
 					}
 					CyberTrackerPlugIn.displayInfo(Messages.CyberTrackerExportHandler_InfoDialog_Title, Messages.CyberTrackerExportHandler_InfoDialog_Message);
 					if (launch) {

@@ -52,8 +52,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
@@ -112,7 +112,6 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 	/**
 	 * Creates custom control for user-defined query text.
 	 */
-	@SuppressWarnings("unchecked")
 	private Control createPageControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
@@ -135,13 +134,8 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 			}
 		});
 		List<IntelEntityType> types = null;
-		Session s = HibernateManager.openSession();
-		try{
-			types = s.createCriteria(IntelEntityType.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.list();
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			types = QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 		}
 		
 		Collections.sort(types, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));

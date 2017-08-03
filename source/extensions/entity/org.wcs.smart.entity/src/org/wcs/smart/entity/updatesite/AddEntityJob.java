@@ -54,9 +54,7 @@ public class AddEntityJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		//required if run during restore to ensure Display.syncexec calls don't block
 		DisplayAccess.accessDisplayDuringStartup();
-				
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession();){
 			try{
 				session.beginTransaction();
 				installPlugin(session);
@@ -74,8 +72,6 @@ public class AddEntityJob extends Job {
 				return new Status(Status.ERROR,EntityPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
 					
 			}
-		}finally{
-			session.close();
 		}
 		monitor.done();
 		return Status.OK_STATUS;

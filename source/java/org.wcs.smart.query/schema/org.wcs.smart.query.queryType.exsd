@@ -73,7 +73,7 @@
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="executor" type="string" use="required">
+         <attribute name="executor" type="string">
             <annotation>
                <documentation>
                   

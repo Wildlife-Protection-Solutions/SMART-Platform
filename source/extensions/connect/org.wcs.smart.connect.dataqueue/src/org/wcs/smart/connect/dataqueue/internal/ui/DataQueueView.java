@@ -92,6 +92,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DataQueueView{ 
 	
 	public static final String ID = "org.wcs.smart.connect.dataqueue.queueview"; //$NON-NLS-1$
@@ -219,12 +220,9 @@ public class DataQueueView{
 					ConnectServer server = null;
 					ConnectUser user = null;
 					
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						server = ConnectHibernateManager.getConnectServer(s);
 						user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);
-					}finally{
-						s.close();
 					}
 					
 					if (server != null && user != null){

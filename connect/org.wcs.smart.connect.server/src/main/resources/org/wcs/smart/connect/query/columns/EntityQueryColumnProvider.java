@@ -30,8 +30,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
@@ -88,7 +91,6 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<QueryColumn> getObservationQueryColumns(Query query, Locale l,  Session s) throws SQLException {
 		ObservationOptions ops = QueryColumnUtils.getOptions(query.getConservationArea(), s);
 		ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
@@ -132,13 +134,14 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 			if (entityTypes.size() > 0){
 				String hql = "SELECT a.keyId as att_key, b.keyId as entity_key, c.type FROM EntityAttribute a join a.entityType b join a.dmAttribute c " //$NON-NLS-1$
 						+ "WHERE b.conservationArea.uuid IN (:cauuids) and b.keyId in (:entitytypes)"; //$NON-NLS-1$
-				org.hibernate.Query hq = s.createQuery(hql);
+				org.hibernate.query.Query<?> hq = s.createQuery(hql);
 				hq.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 				hq.setParameterList("entitytypes", entityTypes); //$NON-NLS-1$
 				
-				List<Object[]> attributes = hq.list();
+				List<?> attributes = hq.list();
 				List<EntityAttributeQueryColumn> entityAttributeColumns = new ArrayList<EntityAttributeQueryColumn>();
-				for (Object[] att : attributes){
+				for (Object attRow : attributes){
+					Object[] att = (Object[])attRow;
 					String attributeKey = (String) att[0];
 					String entityType = (String) att[1];
 					AttributeType type = (AttributeType) att[2];
@@ -146,11 +149,14 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 					//find attribute name for entity attribute; this is complicated 
 					//as it may be defined or it may be the attribute
 					//we also need to support cross-ca 
-					EntityAttribute ea = (EntityAttribute) s.createCriteria(EntityAttribute.class)
-							.add(Restrictions.eq("keyId", attributeKey)) //$NON-NLS-1$
-							.createCriteria("entityType", "et") //$NON-NLS-1$ //$NON-NLS-2$
-							.add(Restrictions.eq("et.keyId", entityType)) //$NON-NLS-1$
-							.uniqueResult();
+					CriteriaBuilder cb = s.getCriteriaBuilder();
+					CriteriaQuery<EntityAttribute> c = cb.createQuery(EntityAttribute.class);
+					Root<EntityAttribute> from = c.from(EntityAttribute.class);
+					c.where(cb.and(
+							cb.equal(from.get("keyId"), attributeKey), //$NON-NLS-1$
+							cb.equal(from.join("entityType").get("keyId"), entityType) //$NON-NLS-1$ //$NON-NLS-2$
+							));
+					EntityAttribute ea = s.createQuery(c).uniqueResult();
 					entityAttributeColumns.add(new EntityAttributeQueryColumn("[" + ea.getEntityType().getName() + "]" + ea.getName(), entityType, attributeKey, type)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				QueryColumnUtils.sortByName(entityAttributeColumns, l);

@@ -86,8 +86,7 @@ public class DerbyPagedIntellResults extends AbstractPagedQueryResultSet impleme
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				final String sql = "SELECT min(p.x), max(p.x), min(p.y), max(p.y) FROM " //$NON-NLS-1$
 						+ "" + queryTempTable + " t join " + engine.tableName(IntelligencePoint.class) + " p on t.intel_uuid = p.intelligence_uuid"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				s.doWork(new Work(){
@@ -104,8 +103,6 @@ public class DerbyPagedIntellResults extends AbstractPagedQueryResultSet impleme
 						}
 					}	
 				});
-			}finally{
-				s.close();
 			}
 		}
 		return bounds;

@@ -104,12 +104,9 @@ public class ObservationQueryColumnCache {
 			protected IStatus run(IProgressMonitor monitor) {
 				//load from the database 
 				ObservationOptions obsOptions = null;
-				Session session = HibernateManager.openSession();
-				try {
+				try(Session session = HibernateManager.openSession()){
 					obsOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-				} finally {
-					session.close();
-				}	
+				}
 				
 				ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
@@ -191,12 +188,9 @@ public class ObservationQueryColumnCache {
 			protected IStatus run(IProgressMonitor monitor) {
 				//load from the database 
 				ObservationOptions obsOptions = null;
-				Session session = HibernateManager.openSession();
-				try {
+				try(Session session = HibernateManager.openSession()){
 					obsOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-				} finally {
-					session.close();
-				}	
+				}
 				ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 				
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {

@@ -24,9 +24,11 @@ package org.wcs.smart.er.query.ui.filter.summary;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
@@ -80,32 +82,33 @@ public class SurveyIdGroupByViewer extends AbstractGroupByViewer<SurveyIdGroupBy
 		return di;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<ListItem> getItems(Session session, SurveyDesignFilter filter) {
 		if (groupBy.getRawItems() != null){
 			return getItems(session);
 		}
 		
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
+		Root<Survey> from = c.from(Survey.class);
+		c.select(from);
 		if (filter == null){
 			//get all surveys for the current ca
+			c.where(cb.equal(from.join("survey").get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
+			c.orderBy(cb.asc(from.join("survey").get("keyId"))); //$NON-NLS-1$ //$NON-NLS-2$
+			List<Survey> surveys = session.createQuery(c).getResultList();
 			
-			List<Survey> surveys = session.createCriteria(Survey.class, "survey") //$NON-NLS-1$
-					.createAlias("survey.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
-					.list();
 			for (Survey s : surveys){
 				ListItem li = new ListItem(s.getUuid(), s.getId() + " [" + s.getSurveyDesign().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				items.add(li);
 			}			
 		}else{
-			List<Survey> surveys = session.createCriteria(Survey.class, "survey") //$NON-NLS-1$
-				.createAlias("survey.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("sd.keyId", filter.getKey())) //$NON-NLS-1$
-				.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
-				.list();
+			c.where(cb.and(
+					cb.equal(from.join("survey").get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$ //$NON-NLS-2$
+					cb.equal(from.join("survey").get("keyId"), filter.getKey()))); //$NON-NLS-1$ //$NON-NLS-2$
+			c.orderBy(cb.asc(from.join("survey").get("keyId"))); //$NON-NLS-1$ //$NON-NLS-2$
+			List<Survey> surveys = session.createQuery(c).getResultList();
 			for (Survey s : surveys){
 				ListItem li = new ListItem(s.getUuid(), s.getId() );
 				items.add(li);

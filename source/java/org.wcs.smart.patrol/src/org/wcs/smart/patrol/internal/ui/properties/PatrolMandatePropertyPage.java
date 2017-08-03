@@ -143,9 +143,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			mandates = new ArrayList<PatrolMandate>(PatrolHibernateManager.getMandates(currentCa, s));
 			Collections.sort(mandates, new Comparator<PatrolMandate>(){
 				@Override
@@ -157,8 +155,6 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					return Collator.getInstance().compare(a,b);
 				}});
 			mandates.forEach(m -> m.getNames().size());
-		}finally{
-			s.close();
 		}
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
@@ -306,37 +302,36 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
-		Session s = HibernateManager.openSession();
-		try {
+		try(Session s = HibernateManager.openSession()) {
 			s.beginTransaction();
-			for (PatrolMandate m : toDelete){
-				s.delete(m);
-			}
-			s.flush();
-			ArrayList<PatrolMandate> siblings = new ArrayList<PatrolMandate>();
-			for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
-				PatrolMandate pm = (PatrolMandate) iterator.next();
-				siblings.remove(pm);
-				String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
-				siblings.add(pm);
-				if (error != null){
-					throw new Exception(error);
+			try {
+				for (PatrolMandate m : toDelete){
+					s.delete(m);
 				}
-				s.saveOrUpdate(pm);
+				s.flush();
+				ArrayList<PatrolMandate> siblings = new ArrayList<PatrolMandate>();
+				for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
+					PatrolMandate pm = (PatrolMandate) iterator.next();
+					siblings.remove(pm);
+					String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
+					siblings.add(pm);
+					if (error != null){
+						throw new Exception(error);
+					}
+					s.saveOrUpdate(pm);
+				}
+				s.getTransaction().commit();
+				toDelete.clear();
+				setChangesMade(false);
+				return true;
+			} catch (Exception ex) {
+				if (s.getTransaction().isActive()){
+					s.getTransaction().rollback();
+				}
+				SmartPatrolPlugIn.displayLog(
+						Messages.PatrolMandatePropertyPage_Error_SavingUpdates + ex.getLocalizedMessage(),
+						ex);
 			}
-			s.getTransaction().commit();
-			toDelete.clear();
-			setChangesMade(false);
-			return true;
-		} catch (Exception ex) {
-			if (s.getTransaction().isActive()){
-				s.getTransaction().rollback();
-			}
-			SmartPatrolPlugIn.displayLog(
-					Messages.PatrolMandatePropertyPage_Error_SavingUpdates + ex.getLocalizedMessage(),
-					ex);
-		}finally{
-			s.close();
 		}
 		return false;
 	}
@@ -365,8 +360,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!MessageDialog.openConfirm(getShell(), Messages.PatrolMandatePropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.PatrolMandatePropertyPage_ConfirmDeleteMessage, new Object[]{mandate.getName()}))){
 			return;
 		}
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			if (mandate.getUuid() != null){
 				if (DeleteManager.canDelete(mandate, s)){
 					mandates.remove(mandate);
@@ -376,12 +370,9 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			}else{
 				mandates.remove(mandate);
 			}
-				
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog( 
 					MessageFormat.format(Messages.PatrolMandatePropertyPage_Error_DeletingMandate + "\n\n" + ex.getLocalizedMessage(), new Object[]{mandate.getName()}), ex); //$NON-NLS-1$
-		}finally{
-			s.close();
 		}
 		
 		tableViewer.refresh();

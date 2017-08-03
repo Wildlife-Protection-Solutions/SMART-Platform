@@ -54,16 +54,15 @@ public class CleanUpQueryJob extends Job{
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			results.dispose(s);
-			s.getTransaction().commit();
-		}catch(SQLException ex){
-			ex.printStackTrace();
-			s.getTransaction().rollback();
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			try{
+				s.beginTransaction();
+				results.dispose(s);
+				s.getTransaction().commit();
+			}catch(SQLException ex){
+				ex.printStackTrace();
+				s.getTransaction().rollback();
+			}
 		}
 		return Status.OK_STATUS;
 	}

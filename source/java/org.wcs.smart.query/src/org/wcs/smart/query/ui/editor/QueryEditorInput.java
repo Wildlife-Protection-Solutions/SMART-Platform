@@ -148,11 +148,12 @@ public class QueryEditorInput implements IEditorInput {
 	/**
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
-	@SuppressWarnings("rawtypes")
+	
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter == IMappableQueryType.class && type instanceof IMappableQueryType){
-			return type;
+			return (T)type;
 		}
 		return null;
 	}

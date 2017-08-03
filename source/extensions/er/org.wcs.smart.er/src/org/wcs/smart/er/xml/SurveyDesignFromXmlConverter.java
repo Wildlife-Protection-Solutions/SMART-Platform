@@ -31,7 +31,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -52,6 +51,7 @@ import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.samplingunit.load.ISamplingUnitImporter;
 import org.wcs.smart.er.xml.model.surveydesign.NamesType;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -60,7 +60,6 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Jeff
  *
  */
-@SuppressWarnings("unchecked")
 public class SurveyDesignFromXmlConverter {
 
 	public static SurveyDesign fromXml(org.wcs.smart.er.xml.model.surveydesign.SurveyDesign xml, Session session) throws ParseException{
@@ -258,9 +257,11 @@ public class SurveyDesignFromXmlConverter {
 	}
 
 	private static MissionAttribute getMissionAttribute(org.wcs.smart.er.xml.model.surveydesign.MissionAttribute xmlattr, Session s) {
-		List<MissionAttribute> values = s.createCriteria(MissionAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", xmlattr.getKeyId())).list(); //$NON-NLS-1$ 
+		List<MissionAttribute> values = 
+				QueryFactory.buildQuery(s,  MissionAttribute.class,
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"keyId", xmlattr.getKeyId()}).getResultList(); //$NON-NLS-1$
+				 
 		if (values.size() > 0){
 			MissionAttribute attr = values.get(0);
 			
@@ -290,9 +291,10 @@ public class SurveyDesignFromXmlConverter {
 	}
 
 	private static SamplingUnitAttribute getSamplingUnitAttribute(org.wcs.smart.er.xml.model.surveydesign.SamplingUnitAttribute xmlsua, Session s) {
-		List<SamplingUnitAttribute> values = s.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", xmlsua.getKeyId())).list(); //$NON-NLS-1$ 
+		List<SamplingUnitAttribute> values = 
+				QueryFactory.buildQuery(s,  SamplingUnitAttribute.class,
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"keyId", xmlsua.getKeyId()}).getResultList(); //$NON-NLS-1$
 		if (values.size() > 0){
 			SamplingUnitAttribute attr = values.get(0);
 			
@@ -332,10 +334,10 @@ public class SurveyDesignFromXmlConverter {
 			if (label.isIsDefault()){
 				xmlDefaultName = label.getValue();
 			}
-			List<?> values = session.createCriteria(Language.class).
-				add(Restrictions.eq("ca", SmartDB.getCurrentConservationArea())). //$NON-NLS-1$ 
-				add(Restrictions.eq("code",label.getLanguage()) ).list(); //$NON-NLS-1$
-				
+			List<Language> values = 
+					QueryFactory.buildQuery(session,  Language.class,
+							new Object[] {"ca", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"code", label.getLanguage()}).getResultList(); //$NON-NLS-1$
 			if (values.size() > 0){
 				for (Object l : values){
 					toUpdate.updateName((Language)l, label.getValue());

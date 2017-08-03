@@ -28,7 +28,6 @@
    <launcher name="SMART">
       <linux icon="./images/icons/smart.xpm"/>
       <macosx icon="./images/icons/smart.icns"/>
-      <solaris/>
       <win useIco="true">
          <ico path="./images/icons/smart.ico"/>
          <bmp/>
@@ -119,10 +118,10 @@ limitations under the License.
    </plugins>
 
    <features>
-      <feature id="org.eclipse.rcp"/>
-      <feature id="org.wcs.smart-feature"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.emf.common"/>
+      <feature id="org.wcs.smart.feature"/>
+      <feature id="org.eclipse.rcp"/>
       <feature id="org.eclipse.equinox.p2.extras.feature"/>
    </features>
 

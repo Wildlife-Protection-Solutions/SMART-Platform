@@ -31,9 +31,7 @@ import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.opengis.referencing.FactoryException;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
@@ -47,6 +45,7 @@ import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.entity.ui.EntityLabelProvider;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.ReprojectUtils;
@@ -187,9 +186,6 @@ public class EntityCsvExporter implements ICsvDataExporter {
 		}
 	}
 
-	
-	
-	@SuppressWarnings("unchecked")
 	private List<Entity> getEntities(Session session, boolean onlyActive) {
 		if (SmartDB.isMultipleAnalysis()){
 			return EntityTypeCcaaManager.getInstance().getEntities(entityType.getKeyId(), session);
@@ -197,11 +193,12 @@ public class EntityCsvExporter implements ICsvDataExporter {
 		
 		session.beginTransaction();
 		try{
-			Criteria c = session.createCriteria(Entity.class).add(Restrictions.eq("entityType", entityType)); //$NON-NLS-1$
-			if (onlyActive){
-				c = c.add(Restrictions.eq("status", Status.ACTIVE)); //$NON-NLS-1$
+			Object[][] filters = new Object[onlyActive?2:1][2];
+			filters[0] = new Object[] {"entityType", entityType}; //$NON-NLS-1$
+			if (onlyActive) {
+				filters[1] = new Object[] {"status", Status.ACTIVE}; //$NON-NLS-1$
 			}
-			return c.list();
+			return QueryFactory.buildQuery(session, Entity.class, filters).getResultList();
 		}finally{
 			session.getTransaction().rollback();
 		}

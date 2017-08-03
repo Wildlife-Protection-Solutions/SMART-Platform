@@ -22,7 +22,7 @@
 package org.wcs.smart.cybertracker;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
@@ -50,7 +50,7 @@ public class CyberTrackerCaDeleteHandler implements ICaDeleteHandler {
 	}
 
 	private void deleteCTProperties(ConservationArea ca, Session session) {
-		Query q = session.createQuery("delete from CyberTrackerPropertiesOption where conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("delete from CyberTrackerPropertiesOption where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 

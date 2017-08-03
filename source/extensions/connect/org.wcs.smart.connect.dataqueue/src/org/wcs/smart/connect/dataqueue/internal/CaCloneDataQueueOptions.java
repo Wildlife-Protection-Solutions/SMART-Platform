@@ -25,10 +25,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Clones any data processing options configured for the conservation
@@ -39,31 +39,24 @@ import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
  */
 public class CaCloneDataQueueOptions implements IConservationAreaTemplateCloner {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
-		monitor.beginTask(Messages.CaCloneDataQueueOptions_task, 1);
-		try{
-			Session s = engine.getSession();
-			
-			List<DataQueueProcessingOption> options = s.createCriteria(DataQueueProcessingOption.class)
-					.add(Restrictions.eq("id.conservationArea", engine.getTemplateCa().getUuid())) //$NON-NLS-1$
-					.list();
-			
-			for (DataQueueProcessingOption op : options){
-				DataQueueProcessingOption cloneop = new DataQueueProcessingOption();
-				cloneop.setConservationArea(engine.getNewCa().getUuid());
-				cloneop.setOptionKey(op.getOptionKey());
-				cloneop.setValue(op.getValue());
+		monitor.subTask(Messages.CaCloneDataQueueOptions_task);
+		
+		Session s = engine.getSession();
+		List<DataQueueProcessingOption> options = QueryFactory.buildQuery(s, DataQueueProcessingOption.class, "id.conservationArea", engine.getTemplateCa().getUuid()).list(); //$NON-NLS-1$		
+		for (DataQueueProcessingOption op : options){
+			DataQueueProcessingOption cloneop = new DataQueueProcessingOption();
+			cloneop.setConservationArea(engine.getNewCa().getUuid());
+			cloneop.setOptionKey(op.getOptionKey());
+			cloneop.setValue(op.getValue());
 				
-				s.save(cloneop);
-			}
-			
-			s.flush();
-		}finally{
-			monitor.done();
+			s.save(cloneop);
 		}
+			
+		s.flush();
+		
 	}
 
 }

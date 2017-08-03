@@ -30,12 +30,10 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
@@ -68,11 +66,8 @@ public class OpenSourcePatrolAction implements IQaAction {
 		QaError item = items.get(0);
 		if (item.getDataProviderId().equals(PatrolWaypointDataProvider.ID)){
 			PatrolWaypoint pw = null;
-			Session s = HibernateManager.openSession();
-			try{
-				pw = (PatrolWaypoint) s.createCriteria(PatrolWaypoint.class)
-				.add(Restrictions.eq("id.waypoint.uuid", item.getSourceId())) //$NON-NLS-1$
-				.uniqueResult();
+			try(Session s = HibernateManager.openSession()){
+				pw = QueryFactory.buildQuery(s, PatrolWaypoint.class, "id.waypoint.uuid", item.getSourceId()).uniqueResult(); //$NON-NLS-1$
 				if (pw != null){
 					Patrol p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
 					p.getId();
@@ -80,8 +75,6 @@ public class OpenSourcePatrolAction implements IQaAction {
 					p.getStartDate();
 					p.getEndDate();
 				}
-			}finally{
-				s.close();
 			}
 			if (pw == null){
 				//not found
@@ -92,8 +85,8 @@ public class OpenSourcePatrolAction implements IQaAction {
 			}
 		}else if (item.getDataProviderId().equals(PatrolTrackDataProvider.ID)){
 			Track track = null;
-			Session s = HibernateManager.openSession();
-			try{
+			
+			try(Session s = HibernateManager.openSession()){
 				track = (Track) s.get(Track.class, item.getSourceId());
 				if (track != null){
 					Patrol p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
@@ -102,8 +95,6 @@ public class OpenSourcePatrolAction implements IQaAction {
 					p.getStartDate();
 					p.getEndDate();
 				}
-			}finally{
-				s.close();
 			}
 			if (track == null){
 				//not found
@@ -129,10 +120,5 @@ public class OpenSourcePatrolAction implements IQaAction {
 	@Override
 	public String getName(Locale l) {
 		return Messages.OpenSourcePatrolAction_ActionName;
-	}
-
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON);
 	}
 }

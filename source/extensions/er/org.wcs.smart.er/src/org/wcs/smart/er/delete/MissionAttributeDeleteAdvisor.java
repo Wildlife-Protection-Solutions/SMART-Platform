@@ -25,11 +25,11 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Delete advisor for mission attributes.  
@@ -44,7 +44,6 @@ public class MissionAttributeDeleteAdvisor implements IDeleteAdvisor {
 	public MissionAttributeDeleteAdvisor() {
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof MissionAttribute)){
@@ -53,8 +52,7 @@ public class MissionAttributeDeleteAdvisor implements IDeleteAdvisor {
 		
 		MissionAttribute ma = (MissionAttribute)object;
 		//find survey designs associated with mission
-		List<MissionProperty> designs = session.createCriteria(MissionProperty.class)
-				.add(Restrictions.eq("id.attribute", ma)).list(); //$NON-NLS-1$
+		List<MissionProperty> designs = QueryFactory.buildQuery(session, MissionProperty.class, "id.attribute", ma).getResultList(); //$NON-NLS-1$
 		if (designs.size() == 0){
 			return null;
 		}

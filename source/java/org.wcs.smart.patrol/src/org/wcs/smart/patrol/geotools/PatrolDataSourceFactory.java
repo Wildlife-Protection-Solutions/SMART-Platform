@@ -105,14 +105,12 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
 		
-		Session session = HibernateManager.openSession();
+		
 		Patrol patrol = null;
-		try{
+		try(Session session = HibernateManager.openSession()){
 			patrol = (Patrol)session.load(Patrol.class, UuidUtils.stringToUuid((String)params.get(PATROL_UUID.key)));	
 		}catch (Exception ex){
 			throw new IOException(ex);
-		}finally{
-			session.close();
 		}
 		if (patrol == null ){
 			throw new IOException(Messages.PatrolDataSourceFactory_Error_UnableReadPatrolDataSource);

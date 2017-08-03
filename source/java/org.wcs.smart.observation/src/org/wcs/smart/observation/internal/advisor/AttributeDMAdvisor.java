@@ -23,10 +23,11 @@ package org.wcs.smart.observation.internal.advisor;
 
 import java.text.MessageFormat;
 
-import org.hibernate.Criteria;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.observation.internal.Messages;
@@ -56,10 +57,14 @@ public class AttributeDMAdvisor implements IDeleteAdvisor {
 		}
 		Attribute attribute = (Attribute)object;
 		if (attribute.getUuid() == null ) return null;
-		Criteria query = session.createCriteria(WaypointObservationAttribute.class);
-		query.add(Restrictions.eq("id.attribute", attribute)); //$NON-NLS-1$
-		query.setProjection(Projections.rowCount());
-		long cnt = (Long)query.uniqueResult();
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Long> query = cb.createQuery(Long.class);
+		Root<WaypointObservationAttribute> from = query.from(WaypointObservationAttribute.class);
+		query.select(cb.count(from));
+		query.where(cb.equal(from.get("id").get("attribute"), attribute)); //$NON-NLS-1$ //$NON-NLS-2$
+		long cnt = session.createQuery(query).uniqueResult();
+		
 		if (cnt == 0){
 			return null;
 		}

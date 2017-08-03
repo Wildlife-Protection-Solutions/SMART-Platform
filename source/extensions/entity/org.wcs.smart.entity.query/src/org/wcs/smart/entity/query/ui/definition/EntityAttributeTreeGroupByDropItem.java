@@ -123,27 +123,27 @@ public class EntityAttributeTreeGroupByDropItem extends DropItem implements
 	@Override
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			List<AttributeTreeNode> nodes = QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute.getDmAttribute(), level, true);
-			for (AttributeTreeNode it : nodes) {
-				String name = it.getName();
-				if (it.getParent() != null){
-					name += "   (" + it.getParent().getFullCategoryName() +")" ;  //$NON-NLS-1$//$NON-NLS-2$
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				List<AttributeTreeNode> nodes = QueryDataModelManager.getInstance().getAttributeTreeNodes(session, attribute.getDmAttribute(), level, true);
+				for (AttributeTreeNode it : nodes) {
+					String name = it.getName();
+					if (it.getParent() != null){
+						name += "   (" + it.getParent().getFullCategoryName() +")" ;  //$NON-NLS-1$//$NON-NLS-2$
+					}
+					items.add(new ListItem(null, name, it.getHkey(), it.getName()));
 				}
-				items.add(new ListItem(null, name, it.getHkey(), it.getName()));
-			}
-			for (ListItem filter: filters){
-				if (!items.contains(filter)){
-					items.add(filter);
+				for (ListItem filter: filters){
+					if (!items.contains(filter)){
+						items.add(filter);
+					}
 				}
+			} catch (Exception ex) {
+				QueryPlugIn.displayLog(Messages.EntityAttributeTreeGroupByDropItem_ErrorLoadingTreeItmes, ex);
+			}finally {
+				session.getTransaction().rollback();
 			}
-			session.getTransaction().rollback();
-			session.close();
-		} catch (Exception ex) {
-			QueryPlugIn.displayLog(Messages.EntityAttributeTreeGroupByDropItem_ErrorLoadingTreeItmes, ex);
-			session.close();
 		}
 		return items;
 	}

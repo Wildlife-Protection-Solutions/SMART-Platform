@@ -24,8 +24,8 @@ package org.wcs.smart.i2.handlers;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -42,19 +42,14 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 
 	public DeleteIntelAttributeAdvisor() {
 	}
-
-	@SuppressWarnings("unchecked")
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof IntelAttribute)){
 			return Messages.DeleteIntelAttributeAdvisor_InvalidObject;
 		}
 		IntelAttribute attribute = (IntelAttribute) object;
-		List<IntelEntityTypeAttribute> links = 
-				session.createCriteria(IntelEntityTypeAttribute.class)
-			.add(Restrictions.eq("id.attribute", attribute)) //$NON-NLS-1$
-			.list();
 		
+		List<IntelEntityTypeAttribute> links = QueryFactory.buildQuery(session, IntelEntityTypeAttribute.class, "id.attribute", attribute).list(); //$NON-NLS-1$
 		if (!links.isEmpty()){
 			StringBuilder sb = new StringBuilder();
 			sb.append(Messages.DeleteIntelAttributeAdvisor_EntityTypeError);
@@ -68,11 +63,7 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 			return sb.toString();
 		}
 		
-		List<IntelRelationshipTypeAttribute> links2 = 
-				session.createCriteria(IntelRelationshipTypeAttribute.class)
-			.add(Restrictions.eq("id.attribute", attribute)) //$NON-NLS-1$
-			.list();
-		
+		List<IntelRelationshipTypeAttribute> links2 = QueryFactory.buildQuery(session, IntelRelationshipTypeAttribute.class, "id.attribute", attribute).list(); //$NON-NLS-1$
 		if (!links2.isEmpty()){
 			StringBuilder sb = new StringBuilder();
 			sb.append(Messages.DeleteIntelAttributeAdvisor_RelationshipTypeError);
@@ -86,11 +77,7 @@ public class DeleteIntelAttributeAdvisor implements IDeleteAdvisor {
 			return sb.toString();
 		}
 		
-		List<IntelRecordSourceAttribute> links3 = 
-				session.createCriteria(IntelRecordSourceAttribute.class)
-			.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
-			.list();
-		
+		List<IntelRecordSourceAttribute> links3 = QueryFactory.buildQuery(session, IntelRecordSourceAttribute.class, "attribute", attribute).list(); //$NON-NLS-1$
 		if (!links3.isEmpty()){
 			StringBuilder sb = new StringBuilder();
 			sb.append(Messages.DeleteIntelAttributeAdvisor_SourceError);

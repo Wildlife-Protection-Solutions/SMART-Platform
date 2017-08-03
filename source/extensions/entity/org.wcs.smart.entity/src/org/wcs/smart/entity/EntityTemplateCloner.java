@@ -27,8 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.hibernate.criterion.Restrictions;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -36,6 +35,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Clones entity types when a conservation area is cloned.  Will not
@@ -52,23 +52,27 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 	}
 
 	@Override
+	/**
+	 * 
+	 * @param engine
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 * @throws Exception
+	 */
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
 		this.engine = engine;
-		monitor.beginTask(Messages.EntityTemplateCloner_ProgressCloningTypes, 10);
-		try{
-			cloneEntityTypes(new SubProgressMonitor(monitor, 10));
-		}finally{
-			monitor.done();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntityTemplateCloner_ProgressCloningTypes, 10);
+		cloneEntityTypes(progress.newChild(10));
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void cloneEntityTypes(IProgressMonitor monitor) throws Exception{
-		List<EntityType> toClone = engine.getSession().createCriteria(EntityType.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
-		monitor.beginTask(Messages.EntityTemplateCloner_ProgressCloningTypes2, toClone.size());
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntityTemplateCloner_ProgressCloningTypes2, 1);
+		List<EntityType> toClone = QueryFactory.buildQuery(engine.getSession(), EntityType.class, "conservationArea", engine.getTemplateCa()).getResultList(); //$NON-NLS-1$
+		progress.setWorkRemaining(toClone.size());
+		
 		for (EntityType et : toClone){
-			monitor.subTask(MessageFormat.format(Messages.EntityTemplateCloner_ProgressCloning3, new Object[]{et.getName()}));
+			progress.subTask(MessageFormat.format(Messages.EntityTemplateCloner_ProgressCloning3, new Object[]{et.getName()}));
 			EntityType clone = new EntityType();
 			
 			clone.setConservationArea(engine.getNewCa());
@@ -107,14 +111,14 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 			}
 			
 			engine.getSession().save(clone);
-			monitor.worked(1);
+			progress.worked(1);
 		}
-		monitor.done();
-		
 	}
 
 	private Attribute findNewAttribute(Attribute oldAttribute) throws Exception{
-		List<?> attributes = engine.getSession().createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).add(Restrictions.eq("keyId", oldAttribute.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<Attribute> attributes = QueryFactory.buildQuery(engine.getSession(), Attribute.class,
+				new Object[] {"conservationArea", engine.getNewCa()}, //$NON-NLS-1$
+				new Object[] {"keyId", oldAttribute.getKeyId()}).getResultList(); //$NON-NLS-1$
 		if (attributes.size() == 1){
 			return (Attribute) attributes.get(0);
 		}

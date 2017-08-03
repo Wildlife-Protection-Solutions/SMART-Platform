@@ -81,13 +81,12 @@ public class RecordEditorInput implements IEditorInput{
 		}
 		return this.uuid;
 	}
-	
-	@SuppressWarnings("rawtypes")
+
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
-
+	
 	@Override
 	public boolean exists() {
 		return false;
@@ -138,4 +137,6 @@ public class RecordEditorInput implements IEditorInput{
 	public void setIsInitEditable(boolean isEditable){
 		this.initMode = isEditable;
 	}
+
+
 }

@@ -55,22 +55,21 @@ public class AddPlanJob extends Job {
 		//required if run during restore to ensure Display.syncexec calls don't block
 		DisplayAccess.accessDisplayDuringStartup();
 				
-		Session session = HibernateManager.openSession();
-		try{
-			session.beginTransaction();
-			installPlugin(session);
-			session.getTransaction().commit();
-		} catch (final Exception ex) {
-			if (session.getTransaction().isActive()) session.getTransaction().rollback();
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					SmartPlanPlugIn.displayLog(Messages.AddPlanJob_Error, ex);
-				}
-			});
-			return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, Messages.AddPlanJob_Error, ex); 
-		} finally {
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			try{
+				session.beginTransaction();
+				installPlugin(session);
+				session.getTransaction().commit();
+			} catch (final Exception ex) {
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlanPlugIn.displayLog(Messages.AddPlanJob_Error, ex);
+					}
+				});
+				return new Status(IStatus.ERROR, SmartPlanPlugIn.PLUGIN_ID, 1, Messages.AddPlanJob_Error, ex);	
+			}
 		}
 		monitor.done();
 		return Status.OK_STATUS;

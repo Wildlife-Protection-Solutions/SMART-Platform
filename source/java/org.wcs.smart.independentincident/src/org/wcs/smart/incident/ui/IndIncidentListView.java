@@ -63,7 +63,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.menus.IMenuService;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
@@ -80,6 +80,7 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class IndIncidentListView implements IIncidentFilteringView {
 
 	public static final String ID = "org.wcs.smart.observation.ui.incidientView"; //$NON-NLS-1$
@@ -115,29 +116,29 @@ public class IndIncidentListView implements IIncidentFilteringView {
 		protected IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask(Messages.IndIncidentListView_LoadingLabel, 1);
 
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				Query query = filter.buildQuery(s);
-				List<?> results  = query.list();
-				final IncidentEditorInput[] input = new IncidentEditorInput[results.size()];
-				int i = 0;
-				for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-					Object[] data = (Object[]) iterator.next();					
-					input[i++] = new IncidentEditorInput((UUID)data[0], (Integer)data[1], (Date)data[2]);
-				}
-				
-				monitor.internalWorked(0.5);
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						incidentListViewer.setInput(input);
-						incidentListViewer.refresh();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					Query<?> query = filter.buildQuery(s);
+					List<?> results  = query.list();
+					final IncidentEditorInput[] input = new IncidentEditorInput[results.size()];
+					int i = 0;
+					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+						Object[] data = (Object[]) iterator.next();					
+						input[i++] = new IncidentEditorInput((UUID)data[0], (Integer)data[1], (Date)data[2]);
 					}
-				});
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
+					
+					monitor.internalWorked(0.5);
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							incidentListViewer.setInput(input);
+							incidentListViewer.refresh();
+						}
+					});
+				}finally{
+					s.getTransaction().rollback();
+				}
 			}
 			return Status.OK_STATUS;
 		}

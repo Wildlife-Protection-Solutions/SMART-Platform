@@ -141,8 +141,7 @@ public class ObservationDialog extends Dialog {
 			protected IStatus run(IProgressMonitor monitor) {
 				
 				DataModel dm = null;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
 					List<Category> toVisit = new ArrayList<>();
 					toVisit.addAll(dm.getActiveCategories());
@@ -153,8 +152,6 @@ public class ObservationDialog extends Dialog {
 				}catch (Exception ex){
 					Intelligence2PlugIn.displayLog(Messages.ObservationDialog_DmLoadError + ex.getMessage(), ex);
 					return Status.OK_STATUS;
-				}finally{
-					s.close();
 				}
 				final DataModel fdm = dm;
 				Display.getDefault().syncExec(()->{
@@ -400,8 +397,7 @@ public class ObservationDialog extends Dialog {
 			c.dispose();
 		}
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			Category c = (Category) s.get(Category.class, category.getUuid());
 			
 			Label l = new Label(attributeComposite, SWT.WRAP);
@@ -449,8 +445,6 @@ public class ObservationDialog extends Dialog {
 			attributeComposite.setData(IAttributeField.class.getName(), fields);
 			
 			scattributes.setMinSize(attributes.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		}finally{
-			s.close();
 		}
 		List<Control> toColor = new ArrayList<Control>();
 		toColor.add(attributeComposite);

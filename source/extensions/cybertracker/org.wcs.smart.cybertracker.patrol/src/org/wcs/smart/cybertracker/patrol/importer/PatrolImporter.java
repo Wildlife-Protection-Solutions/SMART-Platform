@@ -23,13 +23,17 @@ package org.wcs.smart.cybertracker.patrol.importer;
 
 import java.sql.Time;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
@@ -64,56 +68,56 @@ public class PatrolImporter extends AbstractPatrolImporter {
 				return null;
 		}
 		Patrol patrol = null;
-		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try {
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
 			session.beginTransaction();
-			patrol = buildPatrol(ctPatrol, session);
-			
-			//check if duplicate of existing patrol
-			if (!checkDuplicate(ctPatrol, patrol, session)){
-				return null;
-			}
-			
-			PatrolLeg firstLeg = patrol.getFirstLeg();
-			if (firstLeg.getLeader() == null){
-				if (!fixLeaderError(firstLeg, ctPatrol, session)){
+			try {
+				
+				patrol = buildPatrol(ctPatrol, session);
+				
+				//check if duplicate of existing patrol
+				if (!checkDuplicate(ctPatrol, patrol, session)){
 					return null;
 				}
-			}
-			if (patrol.hasPilot() && firstLeg.getPilot() == null){
-				if (!fixPilotError(firstLeg, ctPatrol, session)){
+				
+				PatrolLeg firstLeg = patrol.getFirstLeg();
+				if (firstLeg.getLeader() == null){
+					if (!fixLeaderError(firstLeg, ctPatrol, session)){
+						return null;
+					}
+				}
+				if (patrol.hasPilot() && firstLeg.getPilot() == null){
+					if (!fixPilotError(firstLeg, ctPatrol, session)){
+						return null;
+					}
+				}
+				List<S> sList = extractAndPreProcessSights(ctPatrol);
+				RestTimeMap restMap = extractRestTime(sList, ctPatrol.getElementsMap());
+				sList = restMap.excludePauseS(sList);
+				for (S s : sList) {
+					addObservations(firstLeg, s, ctPatrol.getElementsMap(), session);
+				}
+				for (PatrolLegDay pld : firstLeg.getPatrolLegDays()) {
+					pld.setRestMinutes(restMap.getRestMinutes(pld.getDate()));
+				}
+				
+				if (!displayWarnings(ctPatrol))
 					return null;
-				}
-			}
-			List<S> sList = extractAndPreProcessSights(ctPatrol);
-			RestTimeMap restMap = extractRestTime(sList, ctPatrol.getElementsMap());
-			sList = restMap.excludePauseS(sList);
-			for (S s : sList) {
-				addObservations(firstLeg, s, ctPatrol.getElementsMap(), session);
-			}
-			for (PatrolLegDay pld : firstLeg.getPatrolLegDays()) {
-				pld.setRestMinutes(restMap.getRestMinutes(pld.getDate()));
-			}
-			
-			if (!displayWarnings(ctPatrol))
+	
+				//resize images if required
+				processImages(patrol.getLegs(),session);
+				
+				PatrolHibernateManager.savePatrol(patrol, session, true);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.PatrolImporter_Save_Error, e);
+					}
+				});
 				return null;
-
-			//resize images if required
-			processImages(patrol.getLegs(),session);
-			
-			PatrolHibernateManager.savePatrol(patrol, session, true);
-			session.getTransaction().commit();
-		} catch (final Exception e) {
-			session.getTransaction().rollback();
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(Messages.PatrolImporter_Save_Error, e);
-				}
-			});
-			return null;
-		}finally {
-			session.close();
+			}
 		}
 		//fire events
 		PatrolEventManager.getInstance().patrolAdded(patrol);
@@ -140,24 +144,29 @@ public class PatrolImporter extends AbstractPatrolImporter {
 	
 	protected boolean checkDuplicate(final CyberTrackerPatrol ctPatrol, Patrol patrol, final Session session){
 		
-		Criteria c = session.createCriteria(Patrol.class);
-		c.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
-		c.add(Restrictions.eq("startDate", patrol.getStartDate())); //$NON-NLS-1$
-		c.add(Restrictions.eq("endDate", patrol.getEndDate())); //$NON-NLS-1$
-		c.add(Restrictions.eq("patrolType", patrol.getPatrolType())); //$NON-NLS-1$
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Patrol> c = cb.createQuery(Patrol.class);
+		Root<Patrol> from = c.from(Patrol.class);
+		
+		List<Predicate> filters = new ArrayList<Predicate>();
+		filters.add(cb.equal(from.get("conservationArea"),  SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+		filters.add(cb.equal(from.get("startDate"), patrol.getStartDate())); //$NON-NLS-1$
+		filters.add(cb.equal(from.get("endDate"), patrol.getEndDate())); //$NON-NLS-1$
+		filters.add(cb.equal(from.get("patrolType"), patrol.getPatrolType())); //$NON-NLS-1$
 		if (patrol.getStation() == null){
-			c.add(Restrictions.isNull("station")); //$NON-NLS-1$
+			filters.add(cb.isNull(from.get("station"))); //$NON-NLS-1$
 		}else{
-			c.add(Restrictions.eq("station", patrol.getStation())); //$NON-NLS-1$
+			filters.add(cb.equal(from.get("station"), patrol.getStation())); //$NON-NLS-1$
 		}
 		if (patrol.getTeam() == null){
-			c.add(Restrictions.isNull("team")); //$NON-NLS-1$
+			filters.add(cb.isNull(from.get("team"))); //$NON-NLS-1$
 		}else{
-			c.add(Restrictions.eq("team", patrol.getTeam())); //$NON-NLS-1$
+			filters.add(cb.equal(from.get("team"), patrol.getTeam())); //$NON-NLS-1$
 		}
-		@SuppressWarnings("unchecked")
-		List<Patrol> patrols = c.list(); 
-
+		c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
+		List<Patrol> patrols = session.createQuery(c).getResultList();
+		
+		
 		boolean hasDuplicate = false;
 		if (patrols.size() > 0) {
 			//ensure that it is really a duplicate

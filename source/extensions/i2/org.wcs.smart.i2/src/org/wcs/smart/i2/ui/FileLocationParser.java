@@ -29,7 +29,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
@@ -82,11 +83,12 @@ public enum FileLocationParser {
 	 * @return
 	 */
 	public List<IntelLocation> parseFromGpx(File gpxFile, IProgressMonitor monitor){
-		if (monitor == null) monitor = new NullProgressMonitor();
+		SubMonitor progress  = SubMonitor.convert(monitor, 2);
+		
 		if (!gpxFile.getName().toLowerCase().endsWith(GPX_EXTENSION)) return Collections.emptyList();
 		List<IntelLocation> locations = new ArrayList<IntelLocation>();
 		try{
-			List<WptType> waypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(gpxFile.getAbsolutePath()), monitor);
+			List<WptType> waypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(gpxFile.getAbsolutePath()), progress.split(1));
 			
 			List<WptType> selectedPoints = new ArrayList<WptType>();
 			Display.getDefault().syncExec(()->{
@@ -95,7 +97,11 @@ public enum FileLocationParser {
 					selectedPoints.addAll(dialog.getWaypoints());
 				}
 			});
+			
+			progress.setWorkRemaining(selectedPoints.size());
+			progress.subTask(Messages.FileLocationParser_SubTaskName);
 			for (WptType wp : selectedPoints){
+				progress.split(1);
 				IntelLocation l = new IntelLocation();
 				Point pnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getLon().doubleValue(), wp.getLat().doubleValue()));
 				Date dt = GPSDataImport.findWaypointDate(wp);
@@ -108,6 +114,8 @@ public enum FileLocationParser {
 				}
 				locations.add(l);
 			}
+		}catch (OperationCanceledException cancelled) {
+			return Collections.emptyList();
 		}catch (Exception ex){
 			SmartPlugIn.log(ex.getMessage(), ex);
 		}

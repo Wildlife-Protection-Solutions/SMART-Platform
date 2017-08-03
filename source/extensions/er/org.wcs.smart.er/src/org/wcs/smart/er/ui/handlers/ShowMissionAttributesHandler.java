@@ -32,6 +32,7 @@ import org.wcs.smart.er.ui.missionattribute.MissionAttributeDialog;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ShowMissionAttributesHandler{
 
 	@Execute

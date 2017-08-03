@@ -50,7 +50,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.ErrorEditorPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.LogoutHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
@@ -323,68 +322,66 @@ public class ApplyChangeLogJob extends Job {
 			currentUser = SmartDB.getCurrentUser();
 		}
 		
-		Session session = HibernateManager.lockDatabase(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
-		try{	
+		try(Session session = HibernateManager.lockDatabase(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword())){
 			session.beginTransaction();
-			
-			//if not logged into a ca the replication won't be enabled
-			//and we do not want to re-enable it when complete
-			replicationEnabled = DerbyReplicationManager.INSTANCE.isReplicationSystemEnabled(session);
-			if (replicationEnabled){
-				// disable replication in db so we don't log items twice
-				DerbyReplicationManager.INSTANCE.disableReplication(session);
-			}
-			
-			//check plugin versions
-			HashMap<String, String> localPlugins = DerbyMetadataPackager.INSTANCE.getLocalPluginVersions(session);
-			
-			for(String pluginid : metadata.getPluginVersions().keySet()){
-				String version = metadata.getPluginVersion(pluginid);
-				String dbVersion = localPlugins.get(pluginid);
-				if (dbVersion == null){
-					throw new Exception(
-							MessageFormat.format(Messages.ApplyChangeLogJob_PluginError1, pluginid));
+			try {
+				
+				//if not logged into a ca the replication won't be enabled
+				//and we do not want to re-enable it when complete
+				replicationEnabled = DerbyReplicationManager.INSTANCE.isReplicationSystemEnabled(session);
+				if (replicationEnabled){
+					// disable replication in db so we don't log items twice
+					DerbyReplicationManager.INSTANCE.disableReplication(session);
 				}
-				if (!version.equals(dbVersion)){
-					throw new Exception(
-							MessageFormat.format(Messages.ApplyChangeLogJob_PluginError2, pluginid, dbVersion, version));
+				
+				//check plugin versions
+				HashMap<String, String> localPlugins = DerbyMetadataPackager.INSTANCE.getLocalPluginVersions(session);
+				
+				for(String pluginid : metadata.getPluginVersions().keySet()){
+					String version = metadata.getPluginVersion(pluginid);
+					String dbVersion = localPlugins.get(pluginid);
+					if (dbVersion == null){
+						throw new Exception(
+								MessageFormat.format(Messages.ApplyChangeLogJob_PluginError1, pluginid));
+					}
+					if (!version.equals(dbVersion)){
+						throw new Exception(
+								MessageFormat.format(Messages.ApplyChangeLogJob_PluginError2, pluginid, dbVersion, version));
+					}
 				}
+				//apply change log
+				applyChangeLog(filestoreDir, session);
+				
+				//update server revision
+				serverInfo.setServerRevision(metadata.getServerRevision());
+				session.saveOrUpdate(serverInfo);
+				session.getTransaction().commit();
+			}catch(Exception ex){
+				if (session.getTransaction().isActive()){
+					session.getTransaction().rollback();
+				}
+				throw ex;
 			}
-			//apply change log
-			applyChangeLog(filestoreDir, session);
-			
-			//update server revision
-			serverInfo.setServerRevision(metadata.getServerRevision());
-			session.saveOrUpdate(serverInfo);
-			session.getTransaction().commit();
-		}catch(Exception ex){
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
-			throw ex;
 		}finally{
-			session.close();
-			
 			HibernateManager.unlockDatabase(currentUser.getUserName(), currentUser.getPassword());
 			
 			if (replicationEnabled){
 				//re-enable replication if it was previously enabled
-				session = HibernateManager.openSession();
-				try{
+				try (Session session = HibernateManager.openSession()){
 					session.beginTransaction();
-					DerbyReplicationManager.INSTANCE.enableReplication(session);
-					session.getTransaction().commit();
-				}catch(Exception ex){
-					//replication could not be re-enabled.  This needs to kill the
-					//application and restart
-					ConnectPlugIn.displayLog(Messages.ApplyChangeLogJob_ReenableReplicationError, ex);
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							PlatformUI.getWorkbench().restart();
-						}});
-				}finally{
-					session.close();
+					try {
+						DerbyReplicationManager.INSTANCE.enableReplication(session);
+						session.getTransaction().commit();
+					}catch(Exception ex){
+						//replication could not be re-enabled.  This needs to kill the
+						//application and restart
+						ConnectPlugIn.displayLog(Messages.ApplyChangeLogJob_ReenableReplicationError, ex);
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								PlatformUI.getWorkbench().restart();
+							}});
+					}
 				}
 			}
 		}
@@ -404,11 +401,8 @@ public class ApplyChangeLogJob extends Job {
 	private boolean checkUser(){
 		if (SmartDB.getCurrentEmployee() == null) return true;
 		final Employee currentEmployee = SmartDB.getCurrentEmployee();
-		Session s = HibernateManager.openSession();
-		try{
-			final Employee afterDownload = (Employee) s.createCriteria(Employee.class)
-				.add(Restrictions.eq("uuid", currentEmployee.getUuid())) //$NON-NLS-1$
-				.uniqueResult();
+		try(Session s = HibernateManager.openSession()){
+			final Employee afterDownload = s.get(Employee.class, currentEmployee.getUuid());
 			final boolean[] cont = new boolean[]{true};
 			if (afterDownload == null ||
 					afterDownload.getSmartUserLevelKeys() == null ||
@@ -494,8 +488,6 @@ public class ApplyChangeLogJob extends Job {
 			}
 			if (!cont[0]) return false;
 			return true;
-		}finally{
-			s.close();
 		}
 		
 	}

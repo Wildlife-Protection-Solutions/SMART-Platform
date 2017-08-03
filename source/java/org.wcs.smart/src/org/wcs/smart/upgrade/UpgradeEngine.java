@@ -16,7 +16,7 @@ import org.apache.derby.tools.ij;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -92,20 +92,19 @@ public class UpgradeEngine {
 	 * @throws Exception
 	 */
 	public void upgradeSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
-		monitor.beginTask(Messages.UpgradeEngine_UpgradeTask, 5);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.UpgradeEngine_UpgradeTask, 4);
 		
-		monitor.subTask(Messages.UpgradeEngine_subprogress1);
+		progress.subTask(Messages.UpgradeEngine_subprogress1);
 		final boolean[] isOk = {false};
 		String lnewDbVersion = null;
 		String lexpectedDbVersion = null;
 		
-		Session s = HibernateManager.openSession();
-		try {
+		
+		try (Session s = HibernateManager.openSession()){
 			lnewDbVersion = getSmartVersion(s);
 			lexpectedDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
-		} finally {
-			s.close();
 		}
+		
 		final String newDbVersion = lnewDbVersion;
 		final String expectedDbVersion = lexpectedDbVersion;
 
@@ -157,33 +156,34 @@ public class UpgradeEngine {
 					break;
 				}
 			}
-			monitor.worked(1);
 			
-			monitor.subTask(Messages.UpgradeEngine_subprogress2);
+			SubMonitor sub1 = progress.split(1);
+			sub1.setWorkRemaining(UpgradeFromVersion.values().length * 2);
+			sub1.subTask(Messages.UpgradeEngine_subprogress2);
 			for (int i = startIndex; i < UpgradeFromVersion.values().length; i ++){
 				UpgradeFromVersion v = UpgradeFromVersion.values()[i];
 				IDatabaseUpgrader upgrader = v.upgradeEngine.newInstance();
-				upgrader.upgrade(new SubProgressMonitor(monitor, 0));
+				upgrader.upgrade(sub1.split(1));
 				upgradersRun.add(upgrader);
 				
+				
 				List<IDatabaseUpgrader> additionalItems = getCoreExtensions(v.fromVersion, v.toVersion);
+				SubMonitor sub = sub1.split(1);
+				sub.setWorkRemaining(additionalItems.size());
 				for (IDatabaseUpgrader item : additionalItems){
-					item.upgrade(new SubProgressMonitor(monitor, 0));
+					item.upgrade(sub.split(1));
 				}
 			}
-			monitor.worked(1);
 		}
 		
 		/* --- validate & update plugins ---*/
 		boolean requiresUpgrades = false;
-		monitor.subTask(Messages.UpgradeEngine_subprogress3);
+		progress.subTask(Messages.UpgradeEngine_subprogress3);
 		if (currentVersions != null) {
 			Map<String, String> backupVersions;
-			s = HibernateManager.openSession();
-			try {
+			
+			try(Session s = HibernateManager.openSession()) {
 				backupVersions = getVersions(s);
-			} finally {
-				s.close();
 			}
 			String problems = ""; //$NON-NLS-1$
 			for (String curPlugin : currentVersions.keySet()) {
@@ -212,42 +212,39 @@ public class UpgradeEngine {
 				
 			}
 		}
-		monitor.worked(1);
+		progress.worked(1);
 		
 		if (requiresUpgrades){
 			//uninstall all change log tracking
-			monitor.subTask(Messages.UpgradeEngine_subprogress5);
-			s = HibernateManager.openSession();
-			try{
+			progress.subTask(Messages.UpgradeEngine_subprogress5);
+
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s);
 				s.getTransaction().commit();
-			}finally{
-				s.close();
 			}
 	
 			//run all installers/upgraders
-			monitor.subTask(Messages.UpgradeEngine_pluginssubtask);
+			progress.subTask(Messages.UpgradeEngine_pluginssubtask);
 			List<IDatabaseUpgrader> extensions = getExtensions();
+			progress.setWorkRemaining(extensions.size() + 1);
+			SubMonitor sub = progress.split(1);
+			sub.setWorkRemaining(extensions.size() + 1);
 			for (IDatabaseUpgrader upgrader : extensions) {
 				//execute install/upgrade
-				upgrader.upgrade(new SubProgressMonitor(monitor, 0));
+				upgrader.upgrade(sub.split(1));
 			}
 			
 			//install change log tracking (if necessary)
-			monitor.subTask(Messages.UpgradeEngine_subprogress6);
-			s = HibernateManager.openSession();
-			try{
+			sub.subTask(Messages.UpgradeEngine_subprogress6);
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
 				s.getTransaction().commit();
-			}finally{
-				s.close();
 			}
+			sub.worked(1);
 		}
-		monitor.worked(1);
-		
-		monitor.done();
+		progress.worked(1);
 	}
 
 	/**
@@ -261,9 +258,13 @@ public class UpgradeEngine {
 		/* --- post process  --- */
 		//this is done here to ensure all plugin tables that are required
 		//to check delete are installed
+		SubMonitor progress = SubMonitor.convert(monitor);
+		progress.setWorkRemaining(upgradersRun.size());
 		for (IDatabaseUpgrader up : upgradersRun){
 			if (up instanceof Upgrader310To320){
-				((Upgrader310To320) up).postProcess(new SubProgressMonitor(monitor, 0));
+				((Upgrader310To320) up).postProcess(progress.split(1));
+			}else {
+				progress.worked(1);
 			}
 		}
 	}
@@ -274,7 +275,7 @@ public class UpgradeEngine {
 			return versions.get(SmartPlugIn.PLUGIN_ID);
 		}
 		//NOTE: before 3.0.0 db-version table contained only single column with one value
-		String version = (String) s.createSQLQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL).uniqueResult(); //$NON-NLS-1$
+		String version = (String) s.createNativeQuery("SELECT version FROM " + SmartDB.PLUGIN_VERSION_TBL).uniqueResult(); //$NON-NLS-1$
 		return version;
 	}
 
@@ -344,7 +345,7 @@ public class UpgradeEngine {
 	public static Map<String, String> getVersions(Session s) {
 		Map<String, String> versions = new HashMap<String, String>();
 		try {
-			List<?> tmpversions = s.createSQLQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+			List<?> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
 			for (Object x : tmpversions){
 				String pluginid = (String) ((Object[])x)[0];
 				String version = (String) ((Object[])x)[1];

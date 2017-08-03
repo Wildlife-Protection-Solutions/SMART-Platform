@@ -24,11 +24,13 @@ package org.wcs.smart.report.birt.map.properties;
 import java.util.List;
 
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.provider.PropertyDescriptorProvider;
+import org.eclipse.birt.report.model.api.DesignConfig;
 import org.eclipse.birt.report.model.api.DesignEngine;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.extension.ExtendedElementException;
 import org.eclipse.birt.report.model.api.metadata.IElementPropertyDefn;
+import org.eclipse.birt.report.model.api.metadata.IMetaDataDictionary;
 import org.wcs.smart.report.birt.map.execute.SmartMapPresentationImpl;
 import org.wcs.smart.report.birt.map.item.SmartMapItem;
 
@@ -133,7 +135,8 @@ public class DpiPropertyProvider extends PropertyDescriptorProvider {
 	@Override
 	public String getDisplayName( ) {		
 		IElementPropertyDefn propertyDefn;
-		propertyDefn = DesignEngine.getMetaDataDictionary( ) .getElement( element ).getProperty( property );
+		IMetaDataDictionary metadata = new DesignEngine( new DesignConfig( ) ).getMetaData( );
+		propertyDefn = metadata.getElement( element ).getProperty( property );
 		if ( propertyDefn != null ) {
 			return propertyDefn.getDisplayName() + ":"; //$NON-NLS-1$
 		}

@@ -26,13 +26,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.servlet.ServletContext;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
@@ -43,6 +44,7 @@ import org.wcs.smart.connect.model.SmartRole;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.model.StyleConfiguration;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.I18nUtil;
 
 /**
@@ -103,10 +105,7 @@ public class HibernateManager {
 	 * @return
 	 */
 	public static SmartUser getUser(Session session, String username){
-		SmartUser su = (SmartUser)session
-				.createCriteria(SmartUser.class)
-				.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-				.uniqueResult();
+		SmartUser su = QueryFactory.buildQuery(session,  SmartUser.class, "username", username).uniqueResult(); //$NON-NLS-1$
 		return su;
 	}
 	
@@ -117,12 +116,8 @@ public class HibernateManager {
 	 * @param username
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<SmartUserRole> getUserRoles(Session session, String username){
-		return (ArrayList<SmartUserRole>)session
-				.createCriteria(SmartUserRole.class)
-				.add(Restrictions.eq("id.username", username))//$NON-NLS-1$
-				.list(); 
+		return QueryFactory.buildQuery(session,  SmartUserRole.class, "id.username", username).list(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -131,12 +126,12 @@ public class HibernateManager {
 	 * @param session
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<SmartUser> getUsers(Session session){
-		return (List<SmartUser>)session
-					.createCriteria(SmartUser.class)
-					.addOrder(Order.asc("username")) //$NON-NLS-1$
-					.list();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<SmartUser> c = cb.createQuery(SmartUser.class);
+		Root<SmartUser> from = c.from(SmartUser.class);
+		c.orderBy(cb.asc(from.get("username"))); //$NON-NLS-1$
+		return session.createQuery(c).list();
 	}
 
 	/**
@@ -144,11 +139,8 @@ public class HibernateManager {
 	 * @param session
 	 * @return a list of conservation areas in the system
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<ConservationAreaInfo> getConservationAreaInfos(Session session) {
-		return (List<ConservationAreaInfo>)session
-				.createCriteria(ConservationAreaInfo.class)
-				.list();
+		return QueryFactory.buildQuery(session,  ConservationAreaInfo.class).list(); 
 	}
 
 	/**
@@ -158,15 +150,19 @@ public class HibernateManager {
 	 * 
 	 * Only Include actual Desktop CAs with DATA (exclude 'CCAA', 'NO DATA' and 'Uploading')
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<ConservationAreaInfo> getConservationAreaInfosWithoutCCAA(Session session, boolean includeDataOnly) {
-		Criteria list = session
-				.createCriteria(ConservationAreaInfo.class)
-				.add(Restrictions.ne("uuid", ConservationAreaInfo.CCAA_UUID)); //$NON-NLS-1$
-				if(includeDataOnly){
-					list.add(Restrictions.eq("status", ConservationAreaInfo.Status.DATA)); //$NON-NLS-1$
-				}
-				return (List<ConservationAreaInfo>)list.list();
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<ConservationAreaInfo> c = cb.createQuery(ConservationAreaInfo.class);
+		Root<ConservationAreaInfo> from = c.from(ConservationAreaInfo.class);
+		
+		Predicate[] p = new Predicate[includeDataOnly ? 2 : 1];
+		p[0] = cb.notEqual(from.get("uuid"), ConservationAreaInfo.CCAA_UUID); //$NON-NLS-1$
+		if (includeDataOnly) {
+			p[1] = cb.equal(from.get("status"), ConservationAreaInfo.Status.DATA); //$NON-NLS-1$
+		}
+		c.where(cb.and(p));
+		return session.createQuery(c).list();
 	}
 
 	
@@ -177,98 +173,67 @@ public class HibernateManager {
 	 * @return a specific conservation area 
 	 */
 	public static ConservationAreaInfo getConservationAreaInfo(Session session, UUID caUuid) {
-		return (ConservationAreaInfo)session
-				.createCriteria(ConservationAreaInfo.class)
-				.add(Restrictions.eq("uuid", caUuid)) //$NON-NLS-1$
-				.uniqueResult();
+		return session.get(ConservationAreaInfo.class, caUuid);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static List<AlertType> getAlertTypes(Session session) {
-		return (List<AlertType>)session
-				.createCriteria(AlertType.class)
-				.add(Restrictions.ne("uuid", AlertType.NULL_TYPE)) //$NON-NLS-1$
-				.addOrder(Order.asc("label")) //$NON-NLS-1$
-				.list();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<AlertType> c = cb.createQuery(AlertType.class);
+		Root<AlertType> from = c.from(AlertType.class);
+		c.where(cb.notEqual(from.get("uuid"), AlertType.NULL_TYPE)); //$NON-NLS-1$
+		c.orderBy(cb.asc(from.get("label"))); //$NON-NLS-1$
+		return session.createQuery(c).list();	
 	}
 
-	@SuppressWarnings("unchecked")
 	public static List<Alert> getAlerts(Session session) {
-		return (List<Alert>)session
-				.createCriteria(Alert.class)
-				.list();
+		return QueryFactory.buildQuery(session,  Alert.class).list();
 	}
 
 	public static Alert getAlert(Session session, UUID alertUuid) {
-		Alert a = (Alert)session
-				.createCriteria(Alert.class)
-				.add(Restrictions.eq("uuid", alertUuid)) //$NON-NLS-1$
-				.uniqueResult();
-		return a;
+		return session.get(Alert.class, alertUuid);
 	}
 
 	public static AlertType getAlertType(Session session, UUID typeUuid) {
-		AlertType a = (AlertType)session
-				.createCriteria(AlertType.class)
-				.add(Restrictions.eq("uuid", typeUuid)) //$NON-NLS-1$
-				.add(Restrictions.ne("uuid", AlertType.NULL_TYPE)) //$NON-NLS-1$
-				.uniqueResult();
-		return a;
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<AlertType> c = cb.createQuery(AlertType.class);
+		Root<AlertType> from = c.from(AlertType.class);
+		c.where(cb.and(
+				cb.equal(from.get("uuid"),  typeUuid), //$NON-NLS-1$
+				cb.notEqual(from.get("uuid"), AlertType.NULL_TYPE) //$NON-NLS-1$
+				));
+		return session.createQuery(c).uniqueResult();
 	}
+	
 	public static AlertType getAlertTypeIncludeUnknown(Session session, UUID typeUuid) {
-		AlertType a = (AlertType)session
-				.createCriteria(AlertType.class)
-				.add(Restrictions.eq("uuid", typeUuid)) //$NON-NLS-1$
-				.uniqueResult();
-		return a;
+		return session.get(AlertType.class, typeUuid);
 	}
 
 	public static Alert getAlertByUserId(Session session, String userGenId) {
-		Alert a = (Alert)session
-				.createCriteria(Alert.class)
-				.add(Restrictions.eq("userGeneratedId", userGenId)) //$NON-NLS-1$
-				.uniqueResult();
-		return a;
+		return QueryFactory.buildQuery(session, Alert.class, "userGeneratedId", userGenId).uniqueResult(); //$NON-NLS-1$
 	}
 
-	@SuppressWarnings("unchecked")
 	public static List<Alert> getAlertsByCa(Session session, UUID caUuid) {
-		return (List<Alert>)session
-				.createCriteria(Alert.class)
-				.add(Restrictions.eq("caUuid", caUuid)) //$NON-NLS-1$
-				.list();
+		return QueryFactory.buildQuery(session, Alert.class, "caUuid", caUuid).list(); //$NON-NLS-1$
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static List<MapLayer> getMapLayers(Session session) {
-		return (List<MapLayer>)session
-				.createCriteria(MapLayer.class)
-				.addOrder(Order.asc("layerOrder")) //$NON-NLS-1$
-				.list();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<MapLayer> c = cb.createQuery(MapLayer.class);
+		Root<MapLayer> from = c.from(MapLayer.class);
+		c.orderBy(cb.asc(from.get("layerOrder"))); //$NON-NLS-1$
+		return session.createQuery(c).list();
 	}
 
 	public static MapLayer getMapLayer(Session session, UUID layerUuid) {
-		MapLayer m = (MapLayer)session
-				.createCriteria(MapLayer.class)
-				.add(Restrictions.eq("uuid", layerUuid)) //$NON-NLS-1$
-				.uniqueResult();
-		return m;
+		return QueryFactory.buildQuery(session, MapLayer.class, "uuid", layerUuid).uniqueResult(); //$NON-NLS-1$
 	}
 
 	public static MapLayer getMapLayerByLayerName(Session session, String layerName) {
-		MapLayer m = (MapLayer)session
-				.createCriteria(MapLayer.class)
-				.add(Restrictions.eq("layerName", layerName)) //$NON-NLS-1$
-				.uniqueResult();
-		return m;
+		return QueryFactory.buildQuery(session, MapLayer.class, "layerName", layerName).uniqueResult(); //$NON-NLS-1$
 	}
 
-	@SuppressWarnings("unchecked")
 	public static List<AlertFilterDefault> getAlertFilterDefaults(Session session) {
-		List<AlertFilterDefault> defaults = null;
-		defaults = (List<AlertFilterDefault>)session
-				.createCriteria(AlertFilterDefault.class)
-				.list();
+		List<AlertFilterDefault> defaults = QueryFactory.buildQuery(session, AlertFilterDefault.class).list(); 
 		if(defaults.size() == 0){
 			AlertFilterDefault d = new AlertFilterDefault();
 			d.setDefaultPastHours(24);
@@ -282,16 +247,11 @@ public class HibernateManager {
 	}
 	
 	public static StyleConfiguration getStyleConfiguration(Session session) {
-		StyleConfiguration m = (StyleConfiguration)session
-				.createCriteria(StyleConfiguration.class)
-				.uniqueResult();
-		return m;
+		return QueryFactory.buildQuery(session, StyleConfiguration.class).uniqueResult(); 
 	}
-	@SuppressWarnings("unchecked")
+	
 	public static List<StyleConfiguration> getStyleConfigurations(Session session) {
-		return (List<StyleConfiguration>)session
-				.createCriteria(StyleConfiguration.class)
-				.list();
+		return QueryFactory.buildQuery(session, StyleConfiguration.class).list(); 
 	}
 
 	public static Object getInactiveUsers(Session s) {
@@ -325,17 +285,11 @@ public class HibernateManager {
 	 * @return
 	 */
 	public static SmartRole getSmartRole(Session s) {
-		return (SmartRole) s.createCriteria(SmartRole.class)
-		.add(Restrictions.eq("roleName", SmartRole.SYSTEM_ROLE_NAME))  //$NON-NLS-1$
-		.uniqueResult();
+		return QueryFactory.buildQuery(s, SmartRole.class, "roleName", SmartRole.SYSTEM_ROLE_NAME).uniqueResult();  //$NON-NLS-1$
 	}
 
 	public static SharedLink getSharedLink(Session s, UUID uuid) {
-		SharedLink a = (SharedLink)s
-				.createCriteria(SharedLink.class)
-				.add(Restrictions.eq("uuid", uuid)) //$NON-NLS-1$
-				.uniqueResult();
-		return a;
-
+		return QueryFactory.buildQuery(s, SharedLink.class, "uuid", uuid).uniqueResult(); //$NON-NLS-1$
 	}
+	
 }

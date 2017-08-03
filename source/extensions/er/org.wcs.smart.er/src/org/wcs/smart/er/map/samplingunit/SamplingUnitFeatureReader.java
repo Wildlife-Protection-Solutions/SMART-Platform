@@ -27,9 +27,7 @@ import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -39,6 +37,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -51,7 +50,7 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 
 	private SimpleFeatureType ftype;
 	private Session session;
-	private Iterator<Object> iterator;
+	private Iterator<SamplingUnit> iterator;
 		
 	/**
 	 * Creates a new feature reader.
@@ -59,21 +58,18 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
-	@SuppressWarnings("unchecked")
 	public SamplingUnitFeatureReader(SurveyDesign sd, SimpleFeatureType ftype) {
 		this.ftype = ftype;
 		this.session = HibernateManager.openSession();
 		
 		if (ftype.getTypeName().equals(GeometryType.PLOT.name())){
-			Criteria c = session.createCriteria(SamplingUnit.class)
-					.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
-					.add(Restrictions.eq("type", SamplingUnit.GeometryType.PLOT)); //$NON-NLS-1$
-			iterator = c.list().iterator();
+			iterator = QueryFactory.buildQuery(session, SamplingUnit.class,
+					new Object[] {"surveyDesign", sd}, //$NON-NLS-1$
+					new Object[] {"type", SamplingUnit.GeometryType.PLOT}).getResultList().iterator(); //$NON-NLS-1$
 		}else if (ftype.getTypeName().equals(GeometryType.TRANSECT.name())){
-			Criteria c = session.createCriteria(SamplingUnit.class)
-					.add(Restrictions.eq("surveyDesign", sd)) //$NON-NLS-1$
-					.add(Restrictions.eq("type", SamplingUnit.GeometryType.TRANSECT)); //$NON-NLS-1$
-			iterator = c.list().iterator();
+			iterator = QueryFactory.buildQuery(session, SamplingUnit.class,
+					new Object[] {"surveyDesign", sd}, //$NON-NLS-1$
+					new Object[] {"type", SamplingUnit.GeometryType.TRANSECT}).getResultList().iterator(); //$NON-NLS-1$
 		}
 	}
 	

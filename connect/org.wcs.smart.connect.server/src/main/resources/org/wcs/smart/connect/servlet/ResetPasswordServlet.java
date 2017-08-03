@@ -42,7 +42,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.apache.BcryptCredentialHandler;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
@@ -51,6 +50,7 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Servlet to support resetting of web application.  This
@@ -102,9 +102,7 @@ public class ResetPasswordServlet extends HttpServlet{
 				Session s = HibernateManager.getSession(request.getServletContext());
 				s.beginTransaction();
 				try{
-					SmartUser su = (SmartUser) s.createCriteria(SmartUser.class)
-						.add(Restrictions.eq("resetId", resetlink)) //$NON-NLS-1$
-						.uniqueResult();
+					SmartUser su = QueryFactory.buildQuery(s, SmartUser.class, "resetId", resetlink).uniqueResult(); //$NON-NLS-1$
 					if (su != null){
 						found = true;
 					}
@@ -173,8 +171,8 @@ public class ResetPasswordServlet extends HttpServlet{
 		Session s = HibernateManager.getSession(request.getServletContext());
 		s.beginTransaction();
 		try {
-			su = (SmartUser) s.createCriteria(SmartUser.class)
-					.add(Restrictions.eq("username", username)).uniqueResult(); //$NON-NLS-1$
+			su = QueryFactory.buildQuery(s, SmartUser.class, "username", username).uniqueResult(); //$NON-NLS-1$
+			
 			if (su == null) {
 				throw new SmartConnectException(Response.Status.NOT_FOUND,
 						Messages.getString("ResetPasswordServlet.UserNameNotFound", request.getLocale())); //$NON-NLS-1$
@@ -231,8 +229,7 @@ public class ResetPasswordServlet extends HttpServlet{
 		Session s = HibernateManager.getSession(request.getServletContext());
 		s.beginTransaction();
 		try {
-			su = (SmartUser) s.createCriteria(SmartUser.class)
-					.add(Restrictions.eq("resetId", resetToken)).uniqueResult(); //$NON-NLS-1$
+			su = QueryFactory.buildQuery(s, SmartUser.class, "resetId", resetToken).uniqueResult(); //$NON-NLS-1$
 			if (su == null) {
 				throw new SmartConnectException(Response.Status.BAD_REQUEST);
 			}

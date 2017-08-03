@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -129,37 +130,26 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			boolean populateObservation,
 			boolean includeEmptyObservations,
 			IProgressMonitor monitor) throws SQLException{
-		
-		monitor.beginTask(Messages.WaypointFilterProcessor_progress1, 3);
+		SubMonitor progress = SubMonitor.convert(monitor, 3);
+		progress.subTask(Messages.WaypointFilterProcessor_progress1);
 		
 		IFilter qFilter = queryFilter;
 		if (qFilter == null){
 			qFilter = EmptyFilter.INSTANCE;
 		}
 		
-		monitor.subTask(Messages.WaypointFilterProcessor_ProgressWaypointTable);
-		createWaypointTable(c, qFilter, dateFilter, caFilter, monitor);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
-
-		monitor.subTask(Messages.WaypointFilterProcessor_progress2);
-		createTemporaryTable(c);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.subTask(Messages.WaypointFilterProcessor_ProgressWaypointTable);
+		createWaypointTable(c, qFilter, dateFilter, caFilter, progress.split(1));
 		
-		monitor.subTask(Messages.WaypointFilterProcessor_ProgressFilterData);
+		progress.subTask(Messages.WaypointFilterProcessor_progress2);
+		progress.split(1);
+		createTemporaryTable(c);
+		
+		progress.subTask(Messages.WaypointFilterProcessor_ProgressFilterData);
+		progress.split(1);
 		populateTemporaryTable(qFilter, dateFilter, caFilter, 
 				includeEmptyObservations, c, populateObservation);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
-		
-		monitor.done();
+
 	}
 	
 	
@@ -370,7 +360,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	private void createWaypointTable(Connection c, IFilter filter, 
 			DateFilter dateFilter, ConservationAreaFilter caFilter, IProgressMonitor monitor)
 			throws SQLException {
-		
+		SubMonitor progress = SubMonitor.convert(monitor, 1);
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -462,11 +452,14 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		};
 		filter.accept(attProcessor);
 		
+		progress.setWorkRemaining(engine.filterTables.entrySet().size());
 		for (Entry<IFilter, String> cols : engine.filterTables.entrySet()){
 			IFilter lfilter = cols.getKey();
 			String colName = cols.getValue();
 			
-			monitor.subTask(Messages.WaypointFilterProcessor_progress4  + lfilter.asString() );
+			progress.subTask(Messages.WaypointFilterProcessor_progress4  + lfilter.asString() );
+			progress.split(1);
+			
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(colName);

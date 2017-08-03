@@ -34,7 +34,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -123,9 +123,8 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
 	}
 	
     private List<Intelligence> loadIntelligences() {
-    	Session s = HibernateManager.openSession();
-    	try {
-    		Query query = filter.buildQuery(s);
+    	try (Session s = HibernateManager.openSession()) {
+    		Query<?> query = filter.buildQuery(s);
     		List<?> results = query.list();
     		List<Intelligence> intelligences = new ArrayList<Intelligence>();
     		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
@@ -137,8 +136,6 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
     			intelligences.add(i);
     		}
     		return intelligences;
-    	} finally {
-    		s.close();
     	}
     }
 

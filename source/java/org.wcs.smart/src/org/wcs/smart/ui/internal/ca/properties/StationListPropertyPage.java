@@ -163,8 +163,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	public Composite createContent(Composite parent) {
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			stations = new ArrayList<Station>(HibernateManager.getStations(currentCa,s));
 			Collections.sort(stations, new Comparator<Station>() {
 				@Override
@@ -181,8 +180,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			});
 			stations.forEach(station -> station.getNames().size());
-		}finally{
-			s.close();
 		}
 
 		Composite container = new Composite(parent, SWT.NONE);
@@ -357,8 +354,8 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		if (!MessageDialog.openConfirm(getShell(), Messages.StationListPropertyPage_ConfirmDeleteTitle, MessageFormat.format(Messages.StationListPropertyPage_ConfirmDeleteMessage, new Object[]{s.getName()}))){
 			return;
 		}
-		Session session = HibernateManager.openSession();
-		try{
+		
+		try(Session session = HibernateManager.openSession()){
 			if (s.getUuid() != null){
 				if (DeleteManager.canDelete(s, session)){
 					stations.remove(s);
@@ -371,8 +368,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.StationListPropertyPage_Error_CouldNotDelete + s.getName() + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-		}	finally{
-			session.close();
 		}
 		
 		tableViewer.refresh();
@@ -412,8 +407,8 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 			return value;
 		} else if (type == Column.DESCIPTION) {
-			Session s = HibernateManager.openSession();
-			try{
+			
+			try(Session s = HibernateManager.openSession()){
 				String value = stn.findDescriptionNull(s, lang);
 				if (value == null){
 					value = stn.findDescriptionNull(s, SmartDB.getCurrentConservationArea().getDefaultLanguage());
@@ -422,8 +417,6 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 					}
 				}
 				return value;
-			}finally{
-				s.close();
 			}
 		}
 		return ""; //$NON-NLS-1$
@@ -481,22 +474,17 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		} else if (type == Column.DESCIPTION) {
 			String existing = null;
-			Session s = HibernateManager.openSession();
-			try{
+			
+			try(Session s = HibernateManager.openSession()){
 				existing = stn.findDescriptionNull(s, lang);
-			}finally{
-				s.close();
 			}
 			if (newValue.equals(existing)){
 				//no modification made
 				return;
 			}
 			if (validate(type, stn, newValue) == null){
-				s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					stn.updateDescription(s, lang, newValue.trim());
-				}finally{
-					s.close();
 				}
 				setChangesMade(true);
 			}
@@ -570,41 +558,40 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean  performSave() {
-		Session s = HibernateManager.openSession();
-		Transaction tx = s.beginTransaction();
-		try {
-			for(Station station : toDelete){
-				s.delete(station);
-			}
-			// add/update stations
-			for (int i = 0; i < stations.size(); i++) {
-				Station stn = (Station) stations.get(i);
-				s.saveOrUpdate(stn);
-
-				for (org.wcs.smart.ca.DescriptionLabel lbl : stn.getDescriptions(s)) {
-					if (lbl.getElementuuid() == null) {
-						if (stn.getDescUuid() == null) {
-							UUID uuid = (UUID) uuidGenerator.generate(
-									(SessionImplementor) s, lbl);
-							stn.setDescUuid(uuid);
-							s.saveOrUpdate(stn);
-						}
-						lbl.setElement(stn.getDescUuid());
-					}
-					s.saveOrUpdate(lbl);
+		try (Session s = HibernateManager.openSession()){
+			Transaction tx = s.beginTransaction();
+			try {
+				for(Station station : toDelete){
+					s.delete(station);
 				}
-
+				// add/update stations
+				for (int i = 0; i < stations.size(); i++) {
+					Station stn = (Station) stations.get(i);
+					s.saveOrUpdate(stn);
+	
+					for (org.wcs.smart.ca.DescriptionLabel lbl : stn.getDescriptions(s)) {
+						if (lbl.getElementuuid() == null) {
+							if (stn.getDescUuid() == null) {
+								UUID uuid = (UUID) uuidGenerator.generate(
+										(SessionImplementor) s, lbl);
+								stn.setDescUuid(uuid);
+								s.saveOrUpdate(stn);
+							}
+							lbl.setElement(stn.getDescUuid());
+						}
+						s.saveOrUpdate(lbl);
+					}
+	
+				}
+	
+				tx.commit();
+				toDelete.clear();
+				setChangesMade(false);
+				return true;
+			} catch (RuntimeException ex) {
+				tx.rollback();
+				SmartPlugIn.displayLog(Messages.StationListPropertyPage_Error_Saving + ex.getLocalizedMessage(), ex);
 			}
-
-			tx.commit();
-			toDelete.clear();
-			setChangesMade(false);
-			return true;
-		} catch (RuntimeException ex) {
-			tx.rollback();
-			SmartPlugIn.displayLog(Messages.StationListPropertyPage_Error_Saving + ex.getLocalizedMessage(), ex);
-		}finally{
-			s.close();
 		}
 		return false;
 	}

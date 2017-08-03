@@ -86,21 +86,21 @@ public class ReportItemNameCellEditor implements ICellModifier {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try {
-					session.saveOrUpdate(report);
-					report.updateName(SmartDB.getCurrentLanguage(),value);
-					report.setName(value);
-					session.getTransaction().commit();
-					ReportEventManager.getInstance().fireReportUpdated(report);
-				} catch (Exception ex) {
-					session.getTransaction().rollback();
-					ReportPlugIn.displayLog(
-							Messages.ReportItemNameCellEditor_Error_CouldNotSaveReport
-									+ ex.getLocalizedMessage(), ex);
-				} finally {
-					session.close();
+				try(Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try {
+						session.saveOrUpdate(report);
+						report.updateName(SmartDB.getCurrentLanguage(),value);
+						report.setName(value);
+						session.getTransaction().commit();
+						ReportEventManager.getInstance().fireReportUpdated(report);
+					} catch (Exception ex) {
+						session.getTransaction().rollback();
+						ReportPlugIn.displayLog(
+								Messages.ReportItemNameCellEditor_Error_CouldNotSaveReport
+										+ ex.getLocalizedMessage(), ex);
+					}
+					
 				}
 
 				return Status.OK_STATUS;
@@ -122,20 +122,19 @@ public class ReportItemNameCellEditor implements ICellModifier {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try {
-					session.saveOrUpdate((ReportFolder) folder);
-					folder.updateName(SmartDB.getCurrentLanguage(), value);
-					folder.setName(value);
-					session.getTransaction().commit();
-				} catch (Exception ex) {
-					if (session.getTransaction().isActive()) session.getTransaction().rollback();
-					ReportPlugIn.displayLog(
-							Messages.ReportItemNameCellEditor_Error_CouldNoSaveFolder
-									+ ex.getLocalizedMessage(), ex);
-				} finally {
-					session.close();
+				try(Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try {
+						session.saveOrUpdate((ReportFolder) folder);
+						folder.updateName(SmartDB.getCurrentLanguage(), value);
+						folder.setName(value);
+						session.getTransaction().commit();
+					} catch (Exception ex) {
+						if (session.getTransaction().isActive()) session.getTransaction().rollback();
+						ReportPlugIn.displayLog(
+								Messages.ReportItemNameCellEditor_Error_CouldNoSaveFolder
+										+ ex.getLocalizedMessage(), ex);
+					} 
 				}
 				ReportEventManager.getInstance().fireReportFolderModified(folder);
 				return Status.OK_STATUS;

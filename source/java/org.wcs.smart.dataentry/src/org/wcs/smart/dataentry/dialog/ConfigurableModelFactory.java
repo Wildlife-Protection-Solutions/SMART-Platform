@@ -40,6 +40,8 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.dataentry.CmDefaultListsUtil;
+import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -232,13 +234,31 @@ public class ConfigurableModelFactory {
 		}
 	}
 
+	public static void addDefaultTreeNodes(final Attribute attribute, ConfigurableModel model) {
+		CmAttributeConfig cfg = model.getDefaultConfigs().get(attribute);
+		if (cfg == null) {
+			//if we are here that this attribute was not added before (no data for it in default trees)
+			cfg = CmDefaultTreesUtil.buildDefaultTreeConfig(model, attribute);
+			model.getDefaultConfigs().put(attribute, cfg);
+		}
+	}	
+
+	public static void addDefaultListItems(final Attribute attribute, ConfigurableModel model) {
+		CmAttributeConfig cfg = model.getDefaultConfigs().get(attribute);
+		if (cfg == null) {
+			//if we are here that this attribute was not added before (no data for it in default configs)
+			cfg = CmDefaultListsUtil.buildDefaultListConfig(model, attribute);
+			model.getDefaultConfigs().put(attribute, cfg);
+		}
+	}
+	
 	private static void addAttributeDefaultValues(ConfigurableModel model, Attribute a) {
 		switch(a.getType()) {
 		case LIST:
-			model.addDefaultListItems(a);
+			addDefaultListItems(a, model);
 			break;
 		case TREE:
-			model.addDefaultTreeNodes(a);
+			addDefaultTreeNodes(a, model);
 			break;
 		default:
 			//nothing to add

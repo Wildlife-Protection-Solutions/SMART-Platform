@@ -138,8 +138,7 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					SurveyDesign lDesign = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 					sb.append("the_geom:"); //$NON-NLS-1$
 					if (typeName.equals(GeometryType.PLOT.name())){
@@ -175,8 +174,6 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 						}
 					}
 					
-				}finally{
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}

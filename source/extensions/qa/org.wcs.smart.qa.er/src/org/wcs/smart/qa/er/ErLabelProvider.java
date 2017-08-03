@@ -23,10 +23,7 @@ package org.wcs.smart.qa.er;
 
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.qa.er.internal.Messages;
-import org.wcs.smart.qa.model.IQaDataProvider;
 
 /**
  * Image provider for patrol data providers
@@ -35,17 +32,6 @@ import org.wcs.smart.qa.model.IQaDataProvider;
  *
  */
 public class ErLabelProvider extends ILabelProvider {
-
-	@Override
-	public Image getImage(Class<? extends IQaDataProvider> clazz) {
-		if (clazz.equals(ErTrackDataProvider.class))
-			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON) ;
-	
-		if (clazz.equals(ErWaypointDataProvider.class))
-			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON) ;
-
-		return null;
-	}
 
 	@Override
 	public String getString(Key key, Locale l) {

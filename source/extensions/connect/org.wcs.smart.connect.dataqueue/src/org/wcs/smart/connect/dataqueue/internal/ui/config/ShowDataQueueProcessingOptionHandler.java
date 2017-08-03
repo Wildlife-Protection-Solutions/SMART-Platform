@@ -28,6 +28,7 @@ import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.swt.widgets.Shell;
 
+@SuppressWarnings("restriction")
 public class ShowDataQueueProcessingOptionHandler {
 
 	@Execute

@@ -39,9 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.WorkbenchJob;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
@@ -61,6 +59,7 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -76,19 +75,22 @@ public class LoginHandler implements ILoginHandler {
 	@Override
 	public void onLogin() throws Exception {
 		ConnectServerStatus status;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+		
 			s.beginTransaction();
-			//enable replication; we always want to enable replication if logging
-			//into a database; triggers will ensure only correct ca data is recorded in
-			//the log tables
-			DerbyReplicationManager.INSTANCE.enableReplication(s);
-
-			//get status
-			status = (ConnectServerStatus)s.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());	
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+			try {
+				//enable replication; we always want to enable replication if logging
+				//into a database; triggers will ensure only correct ca data is recorded in
+				//the log tables
+				DerbyReplicationManager.INSTANCE.enableReplication(s);
+	
+				//get status
+				status = (ConnectServerStatus)s.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());	
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 
 		if (status == null){
@@ -102,18 +104,19 @@ public class LoginHandler implements ILoginHandler {
 		processCaUploadEvents(status);
 		
 		//clean up replication
-		s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){		
 			s.beginTransaction();
-			
-			if (!DerbyReplicationManager.INSTANCE.canReplicate(s, SmartDB.getCurrentConservationArea())){
-				//delete any replication records or sync history records
-				ChangeLogTableManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
-				SyncHistoryManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
+			try {	
+				if (!DerbyReplicationManager.INSTANCE.canReplicate(s, SmartDB.getCurrentConservationArea())){
+					//delete any replication records or sync history records
+					ChangeLogTableManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
+					SyncHistoryManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
+				}
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			s.getTransaction().commit();
-		}finally{
-			s.close();
 		}
 		
 		//process any upload sync tasks
@@ -143,15 +146,18 @@ public class LoginHandler implements ILoginHandler {
 		if (status.getStatus() == ConnectServerStatus.Status.BACKUP){
 			MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.LoginHandler_ExportCaDialogTitle, Messages.LoginHandler_ExportCaDialogMessage);
 			
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
-				s.saveOrUpdate(status);
-				status.setStatus(Status.ERROR);
-				s.getTransaction().commit();
-				return;
+				try {
+					s.saveOrUpdate(status);
+					status.setStatus(Status.ERROR);
+					s.getTransaction().commit();
+					return;
+				}catch (Exception ex) {
+					s.getTransaction().rollback();
+					throw ex;
+				}
 			}finally{
-				s.close();
 				DerbyReplicationManager.INSTANCE.clearCachedReplicationState();
 			}
 				
@@ -176,15 +182,18 @@ public class LoginHandler implements ILoginHandler {
 				}
 			}
 			if (!cont){
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
+				
 					s.beginTransaction();
-					status.setStatus(Status.ERROR);
-					s.saveOrUpdate(status);
-					s.getTransaction().commit();
-					return;
-				}finally{
-					s.close();
+					try {
+						status.setStatus(Status.ERROR);
+						s.saveOrUpdate(status);
+						s.getTransaction().commit();
+						return;
+					}catch (Exception ex) {
+						s.getTransaction().rollback();
+						throw ex;
+					}
 				}
 			}
 		}
@@ -198,7 +207,6 @@ public class LoginHandler implements ILoginHandler {
 	 * 
 	 * All other files/directories will be removed.
 	 */
-	@SuppressWarnings("unchecked")
 	private void cleanUpFilestore(){
 		//delete all files in the download temp directory
 		Path smartConnect = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), ConnectDatastore.CONNECT_FILESTORE_DIR)
@@ -223,30 +231,26 @@ public class LoginHandler implements ILoginHandler {
 		//2. an active download sync from any ca
 
 		final List<Path> filesToKeep = new ArrayList<Path>();
-		Session s = HibernateManager.openSession();
-		
-		try{
-			List<ConnectServerStatus> toKeep = s.createCriteria(ConnectServerStatus.class)
-					.add(Restrictions.eq("status", ConnectServerStatus.Status.UPLOAD)) //$NON-NLS-1$
-					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-					.list();
+		try(Session s = HibernateManager.openSession()){
+			
+			List<ConnectServerStatus> toKeep = QueryFactory.buildQuery(s, ConnectServerStatus.class, "status", ConnectServerStatus.Status.UPLOAD) //$NON-NLS-1$
+					.list(); 
+			
 			for(ConnectServerStatus server : toKeep){
 				Path fileToKeep = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), server.getLocalFile());
 				filesToKeep.add(fileToKeep);
 			}
 			
-			List<ConnectSyncHistoryRecord> upToKeep = s.createCriteria(ConnectSyncHistoryRecord.class)
-					.add(Restrictions.eq("status", ConnectSyncHistoryRecord.Status.ACTIVE)) //$NON-NLS-1$
-					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.UPLOAD)) //$NON-NLS-1$
-					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-					.list();
+			List<ConnectSyncHistoryRecord> upToKeep = QueryFactory.buildQuery(s, ConnectSyncHistoryRecord.class, 
+					new Object[] {"status", ConnectSyncHistoryRecord.Status.ACTIVE}, //$NON-NLS-1$
+					new Object[] {"type", ConnectSyncHistoryRecord.Type.UPLOAD} //$NON-NLS-1$
+					).list(); 
+			
 			for (ConnectSyncHistoryRecord syn : upToKeep){
 				Path fileToKeep = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), syn.getChangeLogZipFile());
 				filesToKeep.add(fileToKeep);
 			}
 			
-		}finally{
-			s.close();
 		}
 		
 		//delete all files that are not in the filesToKeep Array
@@ -288,8 +292,7 @@ public class LoginHandler implements ILoginHandler {
 		try{
 			List<ConnectSyncHistoryRecord> allActive = SyncHistoryManager.INSTANCE.getActiveSyncRecords(ca, Type.UPLOAD);
 			
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				record = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(s, ca,Type.UPLOAD);
 				
 				s.beginTransaction();
@@ -300,8 +303,6 @@ public class LoginHandler implements ILoginHandler {
 					}
 				}
 				s.getTransaction().commit();
-			}finally{
-				s.close();
 			}
 			
 			if (record == null ||
@@ -318,14 +319,16 @@ public class LoginHandler implements ILoginHandler {
 					//lets warn user; set status to error and return
 					MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.LoginHandler_SyncDialogTitle, Messages.LoginHandler_SyncDialogMessage);
 					
-					s = HibernateManager.openSession();
-					s.beginTransaction();
-					try{
-						record.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-						s.saveOrUpdate(record);
-						s.getTransaction().commit();
-					}finally{
-						s.close();
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try{
+							record.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+							s.saveOrUpdate(record);
+							s.getTransaction().commit();
+						}catch (Exception ex) {
+							s.getTransaction().rollback();
+							throw ex;
+						}
 					}
 					
 					return;
@@ -338,25 +341,29 @@ public class LoginHandler implements ILoginHandler {
 						try{
 							e.createUpload(new NullProgressMonitor());
 						}catch (NothingToUpdateException ex){
-							s = HibernateManager.openSession();
-							s.beginTransaction();
-							try{
-								record.setStatus(ConnectSyncHistoryRecord.Status.NODATA);
-								s.saveOrUpdate(record);
-								s.getTransaction().commit();
-							}finally{
-								s.close();
+							try(Session s = HibernateManager.openSession()){
+								s.beginTransaction();
+								try{
+									record.setStatus(ConnectSyncHistoryRecord.Status.NODATA);
+									s.saveOrUpdate(record);
+									s.getTransaction().commit();
+								}catch (Exception ex2) {
+									s.getTransaction().rollback();
+									throw ex2;
+								}
 							}
 						}
 					}else{
-						s = HibernateManager.openSession();
-						try{
+						try(Session s = HibernateManager.openSession()){
 							s.beginTransaction();
-							record.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-							s.saveOrUpdate(record);
-							s.getTransaction().commit();
-						}finally{
-							s.close();
+							try {
+								record.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+								s.saveOrUpdate(record);
+								s.getTransaction().commit();
+							}catch (Exception ex) {
+								s.getTransaction().rollback();
+								throw ex;
+							}
 						}
 					}
 				}

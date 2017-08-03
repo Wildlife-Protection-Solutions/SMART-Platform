@@ -27,11 +27,11 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -63,7 +63,6 @@ public class QueryAction implements ISmartConnectAction{
 		return new String[]{RUNQUERY_KEY};
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
 
@@ -72,7 +71,7 @@ public class QueryAction implements ISmartConnectAction{
 		ops.add(ro);
 		
 		//Get all CAs and add an "All Queries from XYZ" option for each
-		List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class).list();
+		List<ConservationAreaInfo> db = QueryFactory.buildQuery(s, ConservationAreaInfo.class).list();
 		for (ConservationAreaInfo ca : db){
 			ResourceOption r = new ResourceOption(Messages.getString("QueryAction.AllQueriesfromCA", l)+ ca.getLabel(), ca.getUuid()); //$NON-NLS-1$
 			ops.add(r);
@@ -93,9 +92,7 @@ public class QueryAction implements ISmartConnectAction{
 		List<ResourceOption> ops = new ArrayList<ResourceOption>();
 		
 		for (UUID id : uuidList){
-			ConservationAreaInfo info = (ConservationAreaInfo)s.createCriteria(ConservationAreaInfo.class)
-					.add(Restrictions.eq("uuid", id)) //$NON-NLS-1$
-					.uniqueResult();
+			ConservationAreaInfo info = s.get(ConservationAreaInfo.class, id);
 			ResourceOption ro =  new ResourceOption(Messages.getString("QueryAction.AllQueriesfromCA", l)+ info.getLabel(), info.getUuid()); //$NON-NLS-1$
 			ops.add(ro);
 		}

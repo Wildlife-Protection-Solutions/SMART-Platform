@@ -25,8 +25,8 @@ package org.wcs.smart.entity.event;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.entity.internal.Messages;
@@ -54,9 +54,9 @@ public class DmAttributeListItemDeleteAdvisor implements IDeleteAdvisor {
 		
 		//if entity is represented by list item cannot delete
 		AttributeListItem toDelete = (AttributeListItem)object;
-		Query q = session.createQuery("FROM Entity WHERE attributeListItem = :todelete"); //$NON-NLS-1$
+		Query<Entity> q = session.createQuery("FROM Entity WHERE attributeListItem = :todelete", Entity.class); //$NON-NLS-1$
 		q.setParameter("todelete", toDelete); //$NON-NLS-1$
-		List<?> results = q.list();
+		List<Entity> results = q.list();
 		if (results.size() > 0){
 			//attribute associated with an entity and cannot be deleted
 			return MessageFormat.format(Messages.DmAttributeListItemDeleteAdvisor_CannotDeleteEntityAssociation, 
@@ -65,11 +65,11 @@ public class DmAttributeListItemDeleteAdvisor implements IDeleteAdvisor {
 		
 		
 		//if an entity attribute is represented by the list item cannot delete
-		q = session.createQuery("FROM EntityAttributeValue v WHERE v.attributeListItem = :todelete"); //$NON-NLS-1$
-		q.setParameter("todelete", toDelete); //$NON-NLS-1$
-		results = q.list();
-		if (results.size() > 0){
-			EntityAttributeValue v1 = (EntityAttributeValue) results.get(0);
+		Query<EntityAttributeValue> q2 = session.createQuery("FROM EntityAttributeValue v WHERE v.attributeListItem = :todelete", EntityAttributeValue.class); //$NON-NLS-1$
+		q2.setParameter("todelete", toDelete); //$NON-NLS-1$
+		List<EntityAttributeValue> results2 = q2.list();
+		if (results2.size() > 0){
+			EntityAttributeValue v1 = results2.get(0);
 			//attribute associated with an entity and cannot be deleted
 			return MessageFormat.format(Messages.DmAttributeListItemDeleteAdvisor_CannotDeleteAttributeAssociation, 
 					new Object[]{v1.getEntityAttribute().getName(), v1.getEntity().getId()});	

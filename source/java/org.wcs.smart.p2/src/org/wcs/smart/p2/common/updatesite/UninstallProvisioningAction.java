@@ -60,14 +60,11 @@ public abstract class UninstallProvisioningAction extends ProvisioningAction {
 		if (upgradeTo == null) {
 			// We have an unistallation, not an upgrade
 			try{
-				//remove all change log tracking 
-				Session s = HibernateManager.openSession();
-				try{
+				//remove all change log tracking
+				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s, getPluginId());
 					s.getTransaction().commit();
-				}finally{
-					s.close();
 				}
 				performRemove();
 			}catch (Exception ex){

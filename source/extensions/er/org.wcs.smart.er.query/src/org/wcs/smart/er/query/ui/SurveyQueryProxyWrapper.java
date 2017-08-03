@@ -29,11 +29,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -126,16 +126,13 @@ public class SurveyQueryProxyWrapper extends QueryProxy{
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-                 	   Session s = HibernateManager.openSession();
-                 	   try{
-                 		   List<?> results = s.createCriteria(SurveyDesign.class)
-                 				   .add(Restrictions.eq("keyId", sdKey)) //$NON-NLS-1$
-                 				   .add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-                 		   if (results.size() > 0){
-                 			   surveydesign = (SurveyDesign) results.get(0);
+						try(Session s = HibernateManager.openSession()){
+							List<SurveyDesign> results = QueryFactory.buildQuery(s, SurveyDesign.class,
+									new Object[] {"keyId", sdKey}, //$NON-NLS-1$
+									new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
+							if (results.size() > 0){
+                 			   surveydesign = results.get(0);
                  		   }
-                 	   }finally{
-                 		   s.close();
                  	   }
                  	   return Status.OK_STATUS;
 					}};

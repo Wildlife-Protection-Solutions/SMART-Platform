@@ -86,30 +86,24 @@ public class AddEntityQueryJob extends Job {
 		//AND only admin users should be able to install plugins in the first place.
 		//so we shouldn't need to do this
 		//HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
-		Session session = HibernateManager.openSession();	
-		
-		try{
+		try(Session session = HibernateManager.openSession()){	
 			session.beginTransaction();
-			installPlugin(session);
-			session.getTransaction().commit();
-		}catch(final Throwable e){
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
-			//TODO: figure out what to do here, because this will install the new 
-			//version anyways
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					EntityQueryPlugIn.displayLog(Messages.AddEntityQueryJob_InstallError + e.getLocalizedMessage(), e);
+			try {
+				installPlugin(session);
+				session.getTransaction().commit();
+			}catch(final Throwable e){
+				if (session.getTransaction().isActive()){
+					session.getTransaction().rollback();
 				}
-			});
-			return new Status(Status.ERROR, EntityPlugIn.PLUGIN_ID, Messages.AddEntityQueryJob_InstallError, e);
-		}finally{
-			try{
-				session.close();
-			}catch (Exception ex){
-				//eat this
+				//TODO: figure out what to do here, because this will install the new 
+				//version anyways
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						EntityQueryPlugIn.displayLog(Messages.AddEntityQueryJob_InstallError + e.getLocalizedMessage(), e);
+					}
+				});
+				return new Status(Status.ERROR, EntityPlugIn.PLUGIN_ID, Messages.AddEntityQueryJob_InstallError, e);
 			}
 		}
 		monitor.done();
@@ -131,7 +125,7 @@ public class AddEntityQueryJob extends Job {
 		//check is required table exists		
 		for (int i = 0; i < CREATE_TABLE_SQL.length; i ++){
 			EntityQueryPlugIn.log(CREATE_TABLE_SQL[i], null);
-			session.createSQLQuery(CREATE_TABLE_SQL[i]).executeUpdate();
+			session.createNativeQuery(CREATE_TABLE_SQL[i]).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_1, session);
 	}

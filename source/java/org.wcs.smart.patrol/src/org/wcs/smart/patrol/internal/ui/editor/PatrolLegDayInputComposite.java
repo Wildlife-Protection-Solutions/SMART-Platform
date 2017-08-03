@@ -638,8 +638,7 @@ public class PatrolLegDayInputComposite {
 		ArrayList<PatrolWaypoint> added = new ArrayList<PatrolWaypoint>();
 		
 		final PatrolLegDay moveTo = dialog.getMoveToPosition();
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()){
 			IStructuredSelection selection = ((IStructuredSelection) observationTable.getSelection());
 			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 				PatrolWaypoint w = (PatrolWaypoint) iterator.next();
@@ -672,8 +671,6 @@ public class PatrolLegDayInputComposite {
 				}
 				
 			}
-		} finally {
-			session.close();
 		}
 		
 		Job j = editor.getPatrolEditor().moveWaypoints(added, deleted);

@@ -37,14 +37,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -76,23 +79,21 @@ public class PlanHibernateManager{
 	public static List<PlanEditorInput> getRootPlans(Session s, PlanFilter filter){
 		s.beginTransaction();
 		try{
-			Query filterQuery = filter.buildQuery(s);
-			
-			@SuppressWarnings("unchecked")
-			List<Object[]> results = filterQuery.list();
+			Query<?> filterQuery = filter.buildQuery(s);
+			List<?> results = filterQuery.list();
 			// ORDER BY p.name asc, p.id desc
-			Collections.sort(results, new Comparator<Object[]>(){
+			Collections.sort(results, new Comparator<Object>(){
 				@Override
-				public int compare(Object[] arg0, Object[] arg1) {
-					String name0 = (String)arg0[2];
-					String name1 = (String)arg1[2];
+				public int compare(Object arg0, Object arg1) {
+					String name0 = (String)((Object[])arg0)[2];
+					String name1 = (String)((Object[])arg1)[2];
 					if (name0 == null) name0 = ""; //$NON-NLS-1$
 					if (name1 == null) name1 = ""; //$NON-NLS-1$
 					int result = Collator.getInstance().compare(name0, name1);
 					if (result != 0)
 						return result;
-					String id0 = (String)arg0[1];
-					String id1 = (String)arg1[1];
+					String id0 = (String)((Object[])arg0)[1];
+					String id1 = (String)((Object[])arg1)[1];
 					if (id0 == null) id0 = ""; //$NON-NLS-1$
 					if (id1 == null) id1 = ""; //$NON-NLS-1$
 					return -Collator.getInstance().compare(id0, id1); //minus for desc sort
@@ -102,7 +103,8 @@ public class PlanHibernateManager{
 			Map<String, PlanEditorInput> inputs = new LinkedHashMap<String, PlanEditorInput>();
 			Map<String, String>parents = new LinkedHashMap<String,String>();
 			
-			for (Object[] data : results){
+			for (Object d : results){
+				Object[] data = (Object[])d;
 				String uuid = UuidUtils.uuidToString((UUID) data[0]);
 				String name = Plan.generateLabel((String)data[1], (String)data[2]);
 				
@@ -151,7 +153,7 @@ public class PlanHibernateManager{
 		Transaction tx = s.getTransaction();
 		tx.begin();
 		try{
-			Query q = s.createQuery("SELECT id FROM Plan WHERE id like :id and conservationArea = :ca ORDER BY id desc"); //$NON-NLS-1$
+			Query<?> q = s.createQuery("SELECT id FROM Plan WHERE id like :id and conservationArea = :ca ORDER BY id desc"); //$NON-NLS-1$
 			q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 			q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 
@@ -217,12 +219,19 @@ public class PlanHibernateManager{
 	 * @return
 	 */
 	public static boolean isDuplicatePlanId(Session s, String id, UUID excludePlanUuid) {
-		Criteria c = s.createCriteria(Plan.class).add(Restrictions.eq("id", id)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
-		if (excludePlanUuid != null){
-			c.add(Restrictions.ne("uuid", excludePlanUuid)); //$NON-NLS-1$
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		
+		CriteriaQuery<Long> c = cb.createQuery(Long.class);
+		Root<Plan> from = c.from(Plan.class);
+		c.select(cb.count(from));		
+		Predicate[] filters = new Predicate[excludePlanUuid != null ? 3 : 2];
+		filters[0] = cb.equal(from.get("id"), id); //$NON-NLS-1$
+		filters[1] = cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		if (excludePlanUuid != null) {
+			filters[2] = cb.notEqual(from.get("uuid"), excludePlanUuid); //$NON-NLS-1$
 		}
-		c.setProjection(Projections.rowCount());
-		Long cnt = (Long)c.list().get(0);
+		c.where(cb.and(filters));
+		Long cnt = s.createQuery(c).uniqueResult();
 		if (cnt == 0){
 			return false;
 		}else{
@@ -238,9 +247,8 @@ public class PlanHibernateManager{
 	 */
 	public static Set<Plan> deletePlan(UUID uuid) {
 		Set<Plan> deletedItems = new HashSet<Plan>();
-		Session session = HibernateManager.openSession();
 		Plan plan = null;
-		try {
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				plan = (Plan) session.get(Plan.class, uuid);
@@ -254,8 +262,6 @@ public class PlanHibernateManager{
 				SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_DeletePlan_Error + SharedUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
 				return null;
 			}
-		} finally {
-			session.close();
 		}
 		return deletedItems;
 	}
@@ -271,7 +277,7 @@ public class PlanHibernateManager{
 		parent.getChildren().clear();
 		//then delete me
 		String queryString = "DELETE FROM PatrolPlan WHERE id.plan = :plan"; //$NON-NLS-1$
-		Query q = session.createQuery(queryString).setParameter("plan", parent); //$NON-NLS-1$
+		Query<?>q = session.createQuery(queryString).setParameter("plan", parent); //$NON-NLS-1$
 		q.executeUpdate();
 		
 		session.delete(parent);
@@ -294,7 +300,7 @@ public class PlanHibernateManager{
 		
 		List<PatrolEditorInput> patrols = new ArrayList<PatrolEditorInput>();
 
-		Query q = session.createQuery(sql.toString());
+		Query<?> q = session.createQuery(sql.toString());
 		q.setParameter("uuid", plan); //$NON-NLS-1$
 
 		List<?> list = q.list();
@@ -325,11 +331,10 @@ public class PlanHibernateManager{
 		if (planUuid == null) {
 			return Collections.emptyList();
 		}
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()) {
 			String sql = "SELECT p.id FROM Plan p WHERE p.parent.uuid = :uuid AND (p.startDate < :start OR coalesce(p.endDate, p.startDate) > :end)"; //$NON-NLS-1$
 			List<String> plans = new ArrayList<String>();
-			Query q = session.createQuery(sql);
+			Query<?> q = session.createQuery(sql);
 			q.setParameter("uuid", planUuid); //$NON-NLS-1$
 			q.setParameter("start", start); //$NON-NLS-1$
 			q.setParameter("end", end); //$NON-NLS-1$
@@ -339,8 +344,6 @@ public class PlanHibernateManager{
 				plans.add((String) iterator.next());
 			}
 			return plans;		
-		} finally {
-			session.close();
 		}
 	}
 
@@ -350,11 +353,7 @@ public class PlanHibernateManager{
 	 * @return a list of Plans
 	 */
 	public static List<Plan> getPlans(ConservationArea ca, Session session) {
-		Criteria criteria = session.createCriteria(Plan.class);
-		criteria.add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Plan> plans = criteria.list();
-		return plans;
+		return QueryFactory.buildQuery(session, Plan.class, "conservationArea", ca).getResultList(); //$NON-NLS-1$
 	}
 
 	/**
@@ -365,10 +364,9 @@ public class PlanHibernateManager{
 	 * @throws  
 	 */
 	public static ListItem getPlan(Session session, String id) throws Exception {
-		Query q = session.createQuery("SELECT uuid, id, name FROM Plan WHERE uuid =:uuid"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("SELECT uuid, id, name FROM Plan WHERE uuid =:uuid"); //$NON-NLS-1$
 		q.setParameter("uuid", UuidUtils.stringToUuid(id)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Object[]> results = q.list();
+		List<?> results = q.list();
 		if (results.size() == 1) {
 			String displayName = Plan.generateLabel((String)((Object[])results.get(0))[1], (String)((Object[])results.get(0))[2]);
 			return new ListItem( (UUID)((Object[])results.get(0))[0], displayName);
@@ -385,10 +383,9 @@ public class PlanHibernateManager{
 	 * @return plan to which the patrol belong
 	 */
 	public static Plan getPlanForPatrol(Patrol patrol, Session session) {
-		List<?> plans = session.createCriteria(PatrolPlan.class).add(Restrictions.eq("id.patrol", patrol)).list(); //$NON-NLS-1$
-
+		List<PatrolPlan> plans = QueryFactory.buildQuery(session, PatrolPlan.class, "id.patrol", patrol).getResultList(); //$NON-NLS-1$
 		if (plans.size() == 1) {
-			return ((PatrolPlan) plans.get(0)).getPlan();
+			return plans.get(0).getPlan();
 		} else if (plans.size() > 1) {
 			SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_ErrorMatchingPatrolToPlan, null);
 		}
@@ -401,12 +398,9 @@ public class PlanHibernateManager{
 	 * @return a list of Plans
 	 */
 	public static List<Plan> getPlansById(Session session, ConservationArea ca, String id) {
-		Criteria criteria = session.createCriteria(Plan.class);
-		criteria.add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		criteria.add(Restrictions.eq("id", id)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Plan> plans = criteria.list();
-		return plans;
+		return QueryFactory.buildQuery(session, Plan.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"id", id}).getResultList(); //$NON-NLS-1$
 	}
 
 	

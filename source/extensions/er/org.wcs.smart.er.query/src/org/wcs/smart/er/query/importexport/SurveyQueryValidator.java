@@ -338,7 +338,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		
 		String sql = "SELECT c FROM SamplingUnit c WHERE id = :keyId and c.surveyDesign.conservationArea = :ca "; //$NON-NLS-1$ 
 		
-		org.hibernate.Query query = session.createQuery(sql);
+		org.hibernate.query.Query<?> query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
@@ -365,7 +365,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		}
 		String sql = "SELECT c FROM " + MissionAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
-		org.hibernate.Query query = session.createQuery(sql);
+		org.hibernate.query.Query<?> query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
@@ -388,7 +388,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		}
 		String sql = "SELECT c FROM " + SamplingUnitAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
-		org.hibernate.Query query = session.createQuery(sql);
+		org.hibernate.query.Query<?> query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		

@@ -86,11 +86,8 @@ public class EditPlanItemDialog extends AbstractPropertyJHeaderDialog {
 	protected boolean performSave() {
 		content.updateModel(plan);
 		boolean saved = false;
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			saved = PlanHibernateManager.savePlan(plan, session);
-		}finally{
-			session.close();
 		}
 		if (saved) {
 			setChangesMade(false);

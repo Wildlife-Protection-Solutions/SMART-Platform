@@ -27,6 +27,10 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
@@ -34,7 +38,6 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityType;
 
@@ -64,11 +67,14 @@ public class EntityLocationDataset  implements IQuery {
 	}
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		type = (IntelEntityType) connection.getSession().createCriteria(IntelEntityType.class)
-				.add(Restrictions.in("conservationArea", connection.getConservationAreas())) //$NON-NLS-1$
-			.add(Restrictions.eq("keyId", queryText)) //$NON-NLS-1$
-			.uniqueResult();
-		
+		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
+		CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
+		Root<IntelEntityType> from = c.from(IntelEntityType.class);
+		c.where(cb.and(
+				from.get("conservationArea").in(connection.getConservationAreas()), //$NON-NLS-1$
+				cb.equal(from.get("keyId"), queryText) //$NON-NLS-1$
+				));
+		type = connection.getSession().createQuery(c).uniqueResult();
 	}
 
 	@Override

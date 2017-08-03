@@ -85,26 +85,27 @@ public class EntityAttributeListGroupByDropItem extends DropItem implements
 	@Override
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			List<AttributeListItem> listitems = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute.getDmAttribute(), session);
-			for (AttributeListItem it : listitems){
-				items.add(new ListItem(null, it.getName(), it.getKeyId()));
-			}
-			if (filters != null){
-				for(ListItem filter : filters){
-					//add disabled items
-					if (!items.contains(filter)){
-						items.add(filter);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				List<AttributeListItem> listitems = QueryDataModelManager.getInstance().getActiveAttributeListItems(attribute.getDmAttribute(), session);
+				for (AttributeListItem it : listitems){
+					items.add(new ListItem(null, it.getName(), it.getKeyId()));
+				}
+				if (filters != null){
+					for(ListItem filter : filters){
+						//add disabled items
+						if (!items.contains(filter)){
+							items.add(filter);
+						}
 					}
 				}
+				
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.EntityAttributeListGroupByDropItem_ErrorLoadingListItem, ex);
+			}finally {
+				session.getTransaction().rollback();
 			}
-			session.getTransaction().rollback();
-			session.close();
-		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.EntityAttributeListGroupByDropItem_ErrorLoadingListItem, ex);
-			session.close();
 		}
 		return items;
 	}

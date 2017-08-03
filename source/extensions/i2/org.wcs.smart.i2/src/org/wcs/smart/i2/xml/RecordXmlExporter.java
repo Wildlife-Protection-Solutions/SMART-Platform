@@ -38,14 +38,14 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
@@ -98,203 +98,204 @@ public class RecordXmlExporter {
 		this.destFolder = destFolder;
 	}
 	
-	@SuppressWarnings("unchecked")
+	/**
+	 * 
+	 * @param recordUuid
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 * @return
+	 * @throws Exception
+	 */
 	public  boolean exportRecord(UUID recordUuid, IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(Messages.RecordXmlExporter_TaskName, 1);
-		try{
-			ObjectFactory factory = new ObjectFactory();
-			RecordType xmlRecord = null;
-			String fileName = null;
-			Path outputFile = null;
-			List<File> attachmentsToInclude = new ArrayList<File>();
+		SubMonitor progress = SubMonitor.convert(monitor,2);
+		
+		ObjectFactory factory = new ObjectFactory();
+		RecordType xmlRecord = null;
+		String fileName = null;
+		Path outputFile = null;
+		List<File> attachmentsToInclude = new ArrayList<File>();
 			
-			Session session = HibernateManager.openSession();
-			try{
-				IntelRecord record = (IntelRecord) session.get(IntelRecord.class, recordUuid);
-				if (record == null) throw new Exception(Messages.RecordXmlExporter_RecordNotFound);
+		try(Session session = HibernateManager.openSession()){
+			IntelRecord record = (IntelRecord) session.get(IntelRecord.class, recordUuid);
+			if (record == null) throw new Exception(Messages.RecordXmlExporter_RecordNotFound);
+			progress.subTask(MessageFormat.format(Messages.RecordXmlExporter_SubTaskName, record.getTitle()));
+			xmlRecord = factory.createRecordType();
+			fileName = URLUtils.cleanFilename(record.getTitle());
+			if (fileName.length() > 100){
+				fileName = fileName.substring(0, 100);
+			}
+			outputFile = destFolder.resolve(fileName + ".zip"); //$NON-NLS-1$
+			if (!overwriteAll && Files.exists(outputFile)){
+				final String oFile = outputFile.toString();
+				final int ok[] = new int[]{-1};
+				Display.getDefault().syncExec(()->{
+					MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), Messages.RecordXmlExporter_OverwriteDialog,
+							null, MessageFormat.format(Messages.RecordXmlExporter_OverwriteMessage, oFile),
+							MessageDialog.QUESTION,
+							new String[]{IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
+					ok[0] = md.open();
+				});
+				if (ok[0] == 0){
+					overwriteAll = true;
+				}else if (ok[0] == 1){
 					
-				xmlRecord = factory.createRecordType();
-				fileName = URLUtils.cleanFilename(record.getTitle());
-				if (fileName.length() > 100){
-					fileName = fileName.substring(0, 100);
+				}else if (ok[0] == 2){
+					return false;
 				}
-				outputFile = destFolder.resolve(fileName + ".zip"); //$NON-NLS-1$
-				if (!overwriteAll && Files.exists(outputFile)){
-					final String oFile = outputFile.toString();
-					final int ok[] = new int[]{-1};
-					Display.getDefault().syncExec(()->{
-						MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), Messages.RecordXmlExporter_OverwriteDialog,
-								null, MessageFormat.format(Messages.RecordXmlExporter_OverwriteMessage, oFile),
-								MessageDialog.QUESTION,
-								new String[]{IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
-						ok[0] = md.open();
-					});
-					if (ok[0] == 0){
-						overwriteAll = true;
-					}else if (ok[0] == 1){
-						
-					}else if (ok[0] == 2){
-						return false;
+			}
+			
+			xmlRecord.setTitle(record.getTitle());
+			xmlRecord.setStatus(record.getStatus().name());
+			if (record.getDescription() != null) xmlRecord.setNarrative(record.getDescription());
+			if (record.getComment() != null) xmlRecord.setScratchpad(record.getComment());
+			
+			if (record.getRecordSource() != null){
+				LabelUuid src = factory.createLabelUuid();
+				src.setName(record.getRecordSource().getKeyId());
+				src.setUuid(UuidUtils.uuidToString(record.getRecordSource().getUuid()));
+				xmlRecord.setSource(src);
+			}
+			
+			if (record.getAttributes() != null){
+				for (IntelRecordAttributeValue attribute : record.getAttributes()){
+					
+					RecordAttributeType xmlAttributeValue = factory.createRecordAttributeType();
+					
+					LabelUuid aUuid = factory.createLabelUuid();
+					aUuid.setUuid(UuidUtils.uuidToString(attribute.getAttribute().getUuid()));
+					if (attribute.getAttribute().getAttribute() != null){
+						aUuid.setName(attribute.getAttribute().getAttribute().getKeyId());	
+					}else if (attribute.getAttribute().getEntityType() != null){
+						aUuid.setName(attribute.getAttribute().getEntityType().getKeyId());
 					}
-				}
-				
-				xmlRecord.setTitle(record.getTitle());
-				xmlRecord.setStatus(record.getStatus().name());
-				if (record.getDescription() != null) xmlRecord.setNarrative(record.getDescription());
-				if (record.getComment() != null) xmlRecord.setScratchpad(record.getComment());
-				
-				if (record.getRecordSource() != null){
-					LabelUuid src = factory.createLabelUuid();
-					src.setName(record.getRecordSource().getKeyId());
-					src.setUuid(UuidUtils.uuidToString(record.getRecordSource().getUuid()));
-					xmlRecord.setSource(src);
-				}
-				
-				if (record.getAttributes() != null){
-					for (IntelRecordAttributeValue attribute : record.getAttributes()){
-						
-						RecordAttributeType xmlAttributeValue = factory.createRecordAttributeType();
-						
-						LabelUuid aUuid = factory.createLabelUuid();
-						aUuid.setUuid(UuidUtils.uuidToString(attribute.getAttribute().getUuid()));
-						if (attribute.getAttribute().getAttribute() != null){
-							aUuid.setName(attribute.getAttribute().getAttribute().getKeyId());	
-						}else if (attribute.getAttribute().getEntityType() != null){
-							aUuid.setName(attribute.getAttribute().getEntityType().getKeyId());
+					xmlAttributeValue.setRecordAttribute(aUuid);
+					
+					xmlAttributeValue.setNumberValue1(attribute.getNumberValue());
+					xmlAttributeValue.setNumberValue2(attribute.getNumberValue2());
+					xmlAttributeValue.setStringValue(attribute.getStringValue());
+					
+					if (attribute.getAttributeListItems() != null){
+						for (IntelRecordAttributeValueList listAttribute : attribute.getAttributeListItems()){
+							LabelUuid listItem = factory.createLabelUuid();;
+							listItem.setUuid(UuidUtils.uuidToString(listAttribute.getId().getElementUuid()));
+							xmlAttributeValue.getListValue().add(listItem);
 						}
-						xmlAttributeValue.setRecordAttribute(aUuid);
-						
-						xmlAttributeValue.setNumberValue1(attribute.getNumberValue());
-						xmlAttributeValue.setNumberValue2(attribute.getNumberValue2());
-						xmlAttributeValue.setStringValue(attribute.getStringValue());
-						
-						if (attribute.getAttributeListItems() != null){
-							for (IntelRecordAttributeValueList listAttribute : attribute.getAttributeListItems()){
-								LabelUuid listItem = factory.createLabelUuid();;
-								listItem.setUuid(UuidUtils.uuidToString(listAttribute.getId().getElementUuid()));
-								xmlAttributeValue.getListValue().add(listItem);
-							}
-						}	
-						xmlRecord.getAttributes().add(xmlAttributeValue);
-					}
+					}	
+					xmlRecord.getAttributes().add(xmlAttributeValue);
 				}
-				
-				if (record.getAttachments() != null){
-					for (IntelRecordAttachment attachment : record.getAttachments()){
-						attachment.getAttachment().computeFileLocation(session);
-						AttachmentType xmlAttachment = factory.createAttachmentType();
-						xmlAttachment.setFilename(attachment.getAttachment().getFilename());
-						//TODO: entity attachments
-						
-						xmlRecord.getAttachments().add(xmlAttachment);
-						attachmentsToInclude.add(attachment.getAttachment().getAttachmentFile());
-					}
+			}
+			
+			if (record.getAttachments() != null){
+				for (IntelRecordAttachment attachment : record.getAttachments()){
+					attachment.getAttachment().computeFileLocation(session);
+					AttachmentType xmlAttachment = factory.createAttachmentType();
+					xmlAttachment.setFilename(attachment.getAttachment().getFilename());
+					//TODO: entity attachments
+					
+					xmlRecord.getAttachments().add(xmlAttachment);
+					attachmentsToInclude.add(attachment.getAttachment().getAttachmentFile());
 				}
-				
-				if (record.getEntities() != null){
-					for (IntelEntityRecord r : record.getEntities()){
-						LabelUuid entity = factory.createLabelUuid();
-						entity.setUuid(UuidUtils.uuidToString(r.getEntity().getUuid()));
-						entity.setName(r.getEntity().getIdAttributeAsText());
-						xmlRecord.getEntities().add(entity);
-					}
+			}
+			
+			if (record.getEntities() != null){
+				for (IntelEntityRecord r : record.getEntities()){
+					LabelUuid entity = factory.createLabelUuid();
+					entity.setUuid(UuidUtils.uuidToString(r.getEntity().getUuid()));
+					entity.setName(r.getEntity().getIdAttributeAsText());
+					xmlRecord.getEntities().add(entity);
 				}
-				
-				SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STR);
-				if (record.getLocations() != null){
-					for (IntelLocation location : record.getLocations()){
-						LocationType xmlLocation = factory.createLocationType();
-						xmlRecord.getLocations().add(xmlLocation);
-						xmlLocation.setComment(location.getComment());
-						xmlLocation.setDatetime(dateFormat.format(location.getDateTime()));
-						xmlLocation.setGeometry( location.getGeom() );
-						xmlLocation.setId(location.getId());
-						
-						List<IntelEntityLocation> entities = session.createCriteria(IntelEntityLocation.class)
-								.add(Restrictions.eq("id.location", location)) //$NON-NLS-1$
-								.list();
-						for (IntelEntityLocation entity : entities){
-							LabelUuid xmlEntity =factory.createLabelUuid();;
-							xmlEntity.setUuid(UuidUtils.uuidToString(entity.getEntity().getUuid()));
-							xmlEntity.setName(entity.getEntity().getIdAttributeAsText());
-							xmlLocation.getEntities().add(xmlEntity);
-						}
-						
-						if (location.getObservations() != null){
-							for (IntelObservation observation : location.getObservations()){
-								ObservationType xmlObservation = factory.createObservationType();
-								xmlLocation.getObservation().add(xmlObservation);
+			}
+			
+			SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STR);
+			if (record.getLocations() != null){
+				for (IntelLocation location : record.getLocations()){
+					LocationType xmlLocation = factory.createLocationType();
+					xmlRecord.getLocations().add(xmlLocation);
+					xmlLocation.setComment(location.getComment());
+					xmlLocation.setDatetime(dateFormat.format(location.getDateTime()));
+					xmlLocation.setGeometry( location.getGeom() );
+					xmlLocation.setId(location.getId());
+					
+					List<IntelEntityLocation> entities = QueryFactory.buildQuery(session, IntelEntityLocation.class, "id.location", location).getResultList(); //$NON-NLS-1$
+					for (IntelEntityLocation entity : entities){
+						LabelUuid xmlEntity =factory.createLabelUuid();;
+						xmlEntity.setUuid(UuidUtils.uuidToString(entity.getEntity().getUuid()));
+						xmlEntity.setName(entity.getEntity().getIdAttributeAsText());
+						xmlLocation.getEntities().add(xmlEntity);
+					}
+					
+					if (location.getObservations() != null){
+						for (IntelObservation observation : location.getObservations()){
+							ObservationType xmlObservation = factory.createObservationType();
+							xmlLocation.getObservation().add(xmlObservation);
+							
+							LabelUuid xmlCategory = factory.createLabelUuid();
+							xmlCategory.setUuid(UuidUtils.uuidToString(observation.getCategory().getUuid()));
+							xmlCategory.setName(observation.getCategory().getHkey());
+							
+							xmlObservation.setCategory(xmlCategory);
+							
+							for (IntelObservationAttribute attribute : observation.getObservationAttributes()){
+								ObservationAttributeType xmlObsAttribute = factory.createObservationAttributeType();
 								
-								LabelUuid xmlCategory = factory.createLabelUuid();
-								xmlCategory.setUuid(UuidUtils.uuidToString(observation.getCategory().getUuid()));
-								xmlCategory.setName(observation.getCategory().getHkey());
+								LabelUuid xmlAttribute = factory.createLabelUuid();
+								xmlAttribute.setUuid(UuidUtils.uuidToString(attribute.getAttribute().getUuid()));
+								xmlAttribute.setName(attribute.getAttribute().getKeyId());
+								xmlObsAttribute.setAttribute(xmlAttribute);
 								
-								xmlObservation.setCategory(xmlCategory);
+								xmlObsAttribute.setNumberValue(attribute.getNumberValue());
+								xmlObsAttribute.setStringValue(attribute.getStringValue());
 								
-								for (IntelObservationAttribute attribute : observation.getObservationAttributes()){
-									ObservationAttributeType xmlObsAttribute = factory.createObservationAttributeType();
-									
-									LabelUuid xmlAttribute = factory.createLabelUuid();
-									xmlAttribute.setUuid(UuidUtils.uuidToString(attribute.getAttribute().getUuid()));
-									xmlAttribute.setName(attribute.getAttribute().getKeyId());
-									xmlObsAttribute.setAttribute(xmlAttribute);
-									
-									xmlObsAttribute.setNumberValue(attribute.getNumberValue());
-									xmlObsAttribute.setStringValue(attribute.getStringValue());
-									
-									if (attribute.getAttributeListItem() != null){
-										LabelUuid xmlList = factory.createLabelUuid();
-										xmlList.setUuid(UuidUtils.uuidToString(attribute.getAttributeListItem().getUuid()));
-										xmlList.setName(attribute.getAttributeListItem().getKeyId());
-										xmlObsAttribute.setListValue(xmlList);
-									}
-									if (attribute.getAttributeTreeNode() != null){
-										LabelUuid xmlTree = factory.createLabelUuid();
-										xmlTree.setUuid(UuidUtils.uuidToString(attribute.getAttributeTreeNode().getUuid()));
-										xmlTree.setName(attribute.getAttributeTreeNode().getHkey());
-										xmlObsAttribute.setTreeValue(xmlTree);
-									}
-									
-									xmlObservation.getAttributes().add(xmlObsAttribute);
+								if (attribute.getAttributeListItem() != null){
+									LabelUuid xmlList = factory.createLabelUuid();
+									xmlList.setUuid(UuidUtils.uuidToString(attribute.getAttributeListItem().getUuid()));
+									xmlList.setName(attribute.getAttributeListItem().getKeyId());
+									xmlObsAttribute.setListValue(xmlList);
+								}
+								if (attribute.getAttributeTreeNode() != null){
+									LabelUuid xmlTree = factory.createLabelUuid();
+									xmlTree.setUuid(UuidUtils.uuidToString(attribute.getAttributeTreeNode().getUuid()));
+									xmlTree.setName(attribute.getAttributeTreeNode().getHkey());
+									xmlObsAttribute.setTreeValue(xmlTree);
 								}
 								
+								xmlObservation.getAttributes().add(xmlObsAttribute);
 							}
+							
 						}
 					}
 				}
-			}finally{
-				session.close();
 			}
-			
-			Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
-			Path xmlFile = tempDir.resolve(fileName + ".xml"); //$NON-NLS-1$
-			try(OutputStream out = Files.newOutputStream(xmlFile)){
-				writeRecord(xmlRecord, out);
-			}
-			Path attachDir = null;
-			if (attachmentsToInclude.size() > 0){
-				attachDir = tempDir.resolve(ATTACHMENT_DIR);
-				Files.createDirectory(attachDir);
-				for (File f : attachmentsToInclude){
-					Files.copy(f.toPath(), attachDir.resolve(f.getName()));
-				}
-			}
-			
-			File[] zip = new File[]{xmlFile.toFile()};
-			if (attachDir != null){
-				zip = new File[]{xmlFile.toFile(), attachDir.toFile()};
-			}
-			//zip of Files
-			ZipUtil.createZip(zip, outputFile.toFile(), new SubProgressMonitor(monitor,1));
-			
-			try{
-				FileUtils.deleteDirectory(tempDir.toFile());
-			}catch (Exception ex){
-				ex.printStackTrace();
-			}
-		}finally{
-			monitor.done();
 		}
+		
+		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
+		Path xmlFile = tempDir.resolve(fileName + ".xml"); //$NON-NLS-1$
+		try(OutputStream out = Files.newOutputStream(xmlFile)){
+			writeRecord(xmlRecord, out);
+		}
+		Path attachDir = null;
+		if (attachmentsToInclude.size() > 0){
+			attachDir = tempDir.resolve(ATTACHMENT_DIR);
+			Files.createDirectory(attachDir);
+			for (File f : attachmentsToInclude){
+				Files.copy(f.toPath(), attachDir.resolve(f.getName()));
+			}
+		}
+		progress.worked(1);
+		
+		File[] zip = new File[]{xmlFile.toFile()};
+		if (attachDir != null){
+			zip = new File[]{xmlFile.toFile(), attachDir.toFile()};
+		}
+		//zip of Files
+		ZipUtil.createZip(zip, outputFile.toFile(), progress.split(1));
+			
+		try{
+			FileUtils.deleteDirectory(tempDir.toFile());
+		}catch (Exception ex){
+			ex.printStackTrace();
+		}
+
 		return true;
 	}
 }

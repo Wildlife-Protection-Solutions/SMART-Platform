@@ -22,6 +22,7 @@ import org.wcs.smart.ui.internal.ca.properties.ProjectionPropertyDialog;
  * @author egouge
  *
  */
+@SuppressWarnings("restriction")
 public class ShowProjectionsPageHandler extends ShowPropertyPageHandler {
 
 	/**

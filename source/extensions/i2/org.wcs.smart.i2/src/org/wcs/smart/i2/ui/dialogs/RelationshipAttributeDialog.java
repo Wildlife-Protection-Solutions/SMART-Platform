@@ -117,8 +117,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 			Job j = new Job(""){ //$NON-NLS-1$
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					Session s = HibernateManager.openSession();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						type = (IntelRelationshipType) s.get(IntelRelationshipType.class, relationship.getRelationshipType().getUuid());
 						type.getAttributes().forEach(e -> {
 							e.getAttribute().getName();
@@ -126,8 +125,6 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 								e.getAttribute().getAttributeList().forEach(i -> i.getName());
 							}
 						});
-					}finally{
-						s.close();
 					}
 					Display.getDefault().syncExec(() -> initEditor());
 					return Status.OK_STATUS;

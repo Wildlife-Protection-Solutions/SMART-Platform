@@ -9,7 +9,7 @@ Require-Bundle: org.wcs.smart.patrol.query,
  org.wcs.smart.report,
  org.wcs.smart.report.birt.query,
  org.wcs.smart
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: org.wcs.smart
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy

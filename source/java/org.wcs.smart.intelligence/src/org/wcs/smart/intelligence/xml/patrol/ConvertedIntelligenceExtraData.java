@@ -29,7 +29,7 @@ import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -140,13 +140,11 @@ public class ConvertedIntelligenceExtraData implements IConvertedExtraData {
 		
 		//name and received date are known and contain valid data
 		//try to fetch this intelligence from database
-		Session session = HibernateManager.openSession();
-		try {
-			Query query = session.createQuery("SELECT i FROM Intelligence i, Label lbl WHERE i.receivedDate = :receivedDate AND lbl.id.element.uuid = i.uuid AND lbl.value = :name AND lbl.id.language = :language"); //$NON-NLS-1$
+		try (Session session = HibernateManager.openSession()){
+			Query<Intelligence> query = session.createQuery("SELECT i FROM Intelligence i, Label lbl WHERE i.receivedDate = :receivedDate AND lbl.id.element.uuid = i.uuid AND lbl.value = :name AND lbl.id.language = :language", Intelligence.class); //$NON-NLS-1$
 			query.setParameter("receivedDate", receivedDate); //$NON-NLS-1$
 			query.setParameter("name", name); //$NON-NLS-1$
 			query.setParameter("language", language); //$NON-NLS-1$
-			@SuppressWarnings("unchecked")
 			List<Intelligence> list = query.list();
 			if (list.isEmpty()) {
 				warnings.add(moduleMsgLabel + MessageFormat.format(Messages.ConvertedIntelligenceExtraData_IntelligenceNotFound, name, DateFormat.getDateInstance(DateFormat.LONG).format(receivedDate)));
@@ -156,9 +154,7 @@ public class ConvertedIntelligenceExtraData implements IConvertedExtraData {
 				warnings.add(moduleMsgLabel + MessageFormat.format(Messages.ConvertedIntelligenceExtraData_MultipleIntelligenceFound, name, DateFormat.getDateInstance(DateFormat.LONG).format(receivedDate)));
 			}
 			return list.get(0);
-		} finally {
-			session.close();
-		}
+		} 
 	}
 
 	private static String findNameInLanguage(Language language, List<LabelType> names) {

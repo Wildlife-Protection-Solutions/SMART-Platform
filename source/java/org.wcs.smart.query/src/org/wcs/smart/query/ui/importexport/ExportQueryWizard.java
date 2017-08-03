@@ -43,7 +43,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -51,6 +50,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -92,7 +92,6 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private List<Projection> supportedProjections = null;
 	private Projection defaultProjection = null;
 	
-	@SuppressWarnings("unchecked")
 	private ExportQueryWizard(Query query, List<QueryEditorInput> initSelection) {
 		this.query = query;
 		if (this.query != null){
@@ -104,13 +103,10 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		
 		setDialogSettings(QueryPlugIn.getDefault().getDialogSettings());
 		
-		Session s = HibernateManager.openSession();
-		try{
-			supportedProjections = s.createCriteria(Projection.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+		try(Session s = HibernateManager.openSession()){
+			supportedProjections = QueryFactory.buildQuery(s,Projection.class, 
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
 			defaultProjection = HibernateManager.getCurrentViewProjection(s);
-		}finally{
-			s.close();
 		}
 		super.setNeedsProgressMonitor(true);
 	}
@@ -452,11 +448,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 				monitor.subTask(MessageFormat.format(Messages.ExportQueryWizard_ExportProgress2, new Object[]{query.getName()}));
 			}else if (qi instanceof QueryEditorInput){
 				monitor.subTask(MessageFormat.format(Messages.ExportQueryWizard_ExportProgress2, new Object[]{((QueryEditorInput)qi).getName()}));
-				Session session = HibernateManager.openSession();
-				try{
+				
+				try(Session session = HibernateManager.openSession()){
 					query = QueryHibernateManager.getInstance().findQuery(session, ((QueryEditorInput)qi).getUuid(), ((QueryEditorInput)qi).getType());
-				}finally{
-					session.close();
 				}
 				if (query == null){
 					MessageDialog.openError(getShell(), Messages.ExportQueryWizard_QueryNotFound, MessageFormat.format(Messages.ExportQueryWizard_QueryNotFoundMsg, new Object[]{((QueryEditorInput)qi).getName() + " [" + ((QueryEditorInput)qi).getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$

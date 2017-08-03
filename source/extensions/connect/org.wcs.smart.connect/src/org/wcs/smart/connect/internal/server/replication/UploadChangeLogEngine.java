@@ -30,7 +30,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -75,18 +75,19 @@ public class UploadChangeLogEngine {
 	 * Configured to run in either a progress monitor dialog
 	 * or a background job.
 	 * 
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception
 	 */
 	public void createUpload(IProgressMonitor monitor) throws NothingToUpdateException, PackageToLargeException, Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.UploadChangeLogEngine_TaskName, 3);
+		
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			throw new Exception(Messages.UploadChangeLogEngine_AlreadyProcessing);
 		}
 		
 		try{
 			Long currentRevisionNo = -1l;
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){
 				if (!DerbyReplicationManager.INSTANCE.canReplicate(session, ca)){
 					throw new Exception(Messages.UploadChangeLogEngine_ReplicationNotEnabled);
 				}
@@ -94,11 +95,7 @@ public class UploadChangeLogEngine {
 				if (currentRevisionNo == null){
 					currentRevisionNo = -1l;
 				}
-			}finally{
-				session.close();
 			}
-
-			monitor.beginTask(Messages.UploadChangeLogEngine_TaskName, 3);
 
 			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.UPLOAD);
 			if ((previous == null && currentRevisionNo == -1) ||
@@ -121,13 +118,15 @@ public class UploadChangeLogEngine {
 				}
 				
 				record.setStartRevision(startRevision);
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
-					s.saveOrUpdate(record);
-					s.getTransaction().commit();
-				}finally{
-					s.close();
+					try {
+						s.saveOrUpdate(record);
+						s.getTransaction().commit();
+					}catch (Exception ex) {
+						s.getTransaction().rollback();
+						throw ex;
+					}
 				}
 			}else if (previous != null && previous.getStatus() == Status.ACTIVE){
 				//we know that another one is not currently running because of
@@ -139,7 +138,7 @@ public class UploadChangeLogEngine {
 				throw new IllegalStateException("No active sync record found."); //$NON-NLS-1$
 			}
 			
-			monitor.worked(1);
+			progress.worked(1);
 			 
 			//package changes
 			if (record.getStatusUrl() == null){
@@ -147,7 +146,7 @@ public class UploadChangeLogEngine {
 				if (!Files.exists(FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile() + ".zip"))){ //$NON-NLS-1$
 					//package does not exist; we need to create it
 					ChangeLogPackager packer = new ChangeLogPackager(record);
-					packer.createPackage(new SubProgressMonitor(monitor, 1));
+					packer.createPackage(progress.split(1));
 					record.setEndRevision(packer.getLastRevision());
 
 					//throw exception if necessary
@@ -194,7 +193,7 @@ public class UploadChangeLogEngine {
 				}
 			}
 			
-			monitor.worked(1);
+			progress.worked(1);
 			
 			//upload package to server
 			UploadChangeLogJob upload = new UploadChangeLogJob(record, connect);
@@ -229,13 +228,15 @@ public class UploadChangeLogEngine {
 	}
 	
 	private void saveRecord(ConnectSyncHistoryRecord current){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			s.saveOrUpdate(current);
-			s.getTransaction().commit();
-		}finally{
-			s.close();
+			try{
+				s.saveOrUpdate(current);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
 		}
 	}
 }

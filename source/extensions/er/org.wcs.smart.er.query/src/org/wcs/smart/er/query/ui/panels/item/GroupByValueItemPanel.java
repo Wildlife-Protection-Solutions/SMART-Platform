@@ -48,7 +48,6 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;

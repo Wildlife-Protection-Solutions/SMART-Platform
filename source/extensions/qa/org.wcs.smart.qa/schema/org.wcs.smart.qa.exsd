@@ -81,6 +81,18 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="image" type="string">
+            <annotation>
+               <documentation>
+                  A plugin relative path to the image to be associated with this data provider.
+
+ The path may include $arg$ elements. However, the path must not have a leading &quot;.&quot; or path separator. Clients should use a path like &quot;icons/mysample.png&quot; rather than &quot;./icons/mysample.png&quot; or &quot;/icons/mysample.png&quot;.
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="resource"/>
+               </appinfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
@@ -108,6 +120,16 @@
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.qa.routine.IQaAction"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="image" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="resource"/>
                </appinfo>
             </annotation>
          </attribute>

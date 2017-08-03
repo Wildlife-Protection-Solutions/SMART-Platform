@@ -29,8 +29,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 import org.eclipse.ui.progress.IElementCollector;
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -75,7 +75,6 @@ public class SurveyListTreeNodeContentProvider implements
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void fetchDeferredChildren(Object object,
 			IElementCollector collector, IProgressMonitor monitor) {
@@ -87,13 +86,13 @@ public class SurveyListTreeNodeContentProvider implements
 			return ;
 		}
 		
-		Session s = HibernateManager.openSession();
-		try {
+		
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			if (node.getType() == Type.SURVEY){
 				//get missions
 				//get surveys
-				Query q = s.createQuery("FRom Mission where survey.uuid = :uuid ORDER BY startDate desc"); //$NON-NLS-1$
+				Query<Mission> q = s.createQuery("FRom Mission where survey.uuid = :uuid ORDER BY startDate desc", Mission.class); //$NON-NLS-1$
 				q.setParameter("uuid", node.getUuid()); //$NON-NLS-1$
 				List<Mission> kids = q.list();
 				List<SurveyListTreeNode> allKids = new ArrayList<SurveyListTreeNode>();
@@ -104,8 +103,6 @@ public class SurveyListTreeNodeContentProvider implements
 				collector.add(allKids.toArray(), monitor);
 			}
 			s.getTransaction().commit();
-		}finally{
-			s.close();
 		}
 		
 	}

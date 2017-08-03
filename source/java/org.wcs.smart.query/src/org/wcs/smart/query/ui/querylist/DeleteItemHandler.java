@@ -52,6 +52,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class DeleteItemHandler {
 
 	@Execute
@@ -103,25 +104,24 @@ public class DeleteItemHandler {
 	
 	private void deleteQuery(QueryEditorInput o, Shell activeShell) {	
 		//need to save and refresh query list view
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			Query query = QueryHibernateManager.getInstance().findQuery(s, o.getUuid(), o.getType());
-			if (query == null) throw new Exception(Messages.DeleteItemHandler_ErrorQueryNotFound);
-			
-			if (!QueryEventManager.getInstance().fireBeforeDelete(query, s)){
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				Query query = QueryHibernateManager.getInstance().findQuery(s, o.getUuid(), o.getType());
+				if (query == null) throw new Exception(Messages.DeleteItemHandler_ErrorQueryNotFound);
+				
+				if (!QueryEventManager.getInstance().fireBeforeDelete(query, s)){
+					s.getTransaction().rollback();
+					return;
+				}
+				s.delete(query);
+				s.getTransaction().commit();
+			}catch (Exception ex){
 				s.getTransaction().rollback();
+				QueryPlugIn.log(MessageFormat.format(
+					Messages.DeleteItemHandler_ErrorDeletingQueryB, new Object[]{ o.getName()}) + ex.getLocalizedMessage(), ex);
 				return;
 			}
-			s.delete(query);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			QueryPlugIn.log(MessageFormat.format(
-				Messages.DeleteItemHandler_ErrorDeletingQueryB, new Object[]{ o.getName()}) + ex.getLocalizedMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		QueryEventManager.getInstance().fireQueryDeleted(o);
 	}
@@ -145,24 +145,23 @@ public class DeleteItemHandler {
 		
 		QueryFolder parent = folder.getParentFolder();
 		//need to save and refresh query list view
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			if (parent == null){
-				s.delete(folder);
-			}else{
-				s.update(folder);
-				parent.getChildren().remove(folder);
-				folder.setParentFolder(null);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				if (parent == null){
+					s.delete(folder);
+				}else{
+					s.update(folder);
+					parent.getChildren().remove(folder);
+					folder.setParentFolder(null);
+				}
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				QueryPlugIn.log(
+						MessageFormat.format(
+								Messages.DeleteItemHandler_ErrorDeleteFolder, new Object[]{folder.getName()}), ex);
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			QueryPlugIn.log(
-					MessageFormat.format(
-							Messages.DeleteItemHandler_ErrorDeleteFolder, new Object[]{folder.getName()}), ex);
-		}finally{
-			s.close();
 		}
 		QueryEventManager.getInstance().fireFolderDeleted(folder);
 	}

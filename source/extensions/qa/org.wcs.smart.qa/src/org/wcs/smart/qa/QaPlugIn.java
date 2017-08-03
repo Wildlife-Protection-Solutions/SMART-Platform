@@ -83,6 +83,7 @@ public class QaPlugIn extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
+		InternalExtensionManager.INSTANCE.dispose();
 	}
 
 	@Override

@@ -23,7 +23,7 @@ package org.wcs.smart.patrol.internal.ui.views;
 
 import java.util.Date;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
@@ -230,7 +230,7 @@ public class PatrolViewFilter {
 	 * @param s
 	 * @return
 	 */
-	public Query buildQuery(Session s){ 
+	public Query<?> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT p.uuid, p.id, p.patrolType, p.startDate, p.endDate "); //$NON-NLS-1$
@@ -277,7 +277,7 @@ public class PatrolViewFilter {
 		
 		str.append("ORDER BY " + sortBy.field + " " + sortByDir.sql ); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (types != null && types.length > 0){
 			query.setParameterList("pt", this.types); //$NON-NLS-1$
 		}

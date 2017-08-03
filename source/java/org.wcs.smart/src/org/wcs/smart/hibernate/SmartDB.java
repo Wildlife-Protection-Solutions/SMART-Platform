@@ -24,7 +24,7 @@ package org.wcs.smart.hibernate;
 import java.io.File;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
@@ -109,17 +109,8 @@ public class SmartDB {
 	 * @return shared user or null if shared user not found
 	 */
 	public static Employee getSharedEmployee(){
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			return getSharedEmployee(s);
-		}finally{
-			try{
-				s.getTransaction().rollback();
-			}catch (Exception ex){
-				//eatme
-			}
-			s.close();
 		}
 	}
 	/**
@@ -130,10 +121,9 @@ public class SmartDB {
 	 * @return shared user or null if shared user not found
 	 */
 	public static Employee getSharedEmployee(Session session){
-		Query q = session.createQuery("From Employee e WHERE e.uuid = :e and e.conservationArea.uuid = :ca"); //$NON-NLS-1$
+		Query<Employee> q = session.createQuery("From Employee e WHERE e.uuid = :e and e.conservationArea.uuid = :ca", Employee.class); //$NON-NLS-1$
 		q.setParameter("e", Employee.SHARED_UUID); //$NON-NLS-1$
 		q.setParameter("ca", ConservationArea.MULTIPLE_CA); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
 		List<Employee> es = q.list();
 		if (es.size() > 0){
 			return es.get(0);

@@ -40,7 +40,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.XmlMultiExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -148,34 +148,34 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 		Job loadPatrols = new Job(Messages.MultiPatrolExportDialog_LoadPatrolJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					Query q = currentFilter.buildQuery(s);
-					List<?> results = q.list();
-					final Object[][] data = new Object[results.size()][2];
-					int counter = 0;
-					for(Object x : results){
-						Object[] row = (Object[])x;
-						
-						String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[3]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[4]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						Object[] thisdata = {pname, (UUID)row[0], row[1]};
-						data[counter++] = thisdata;
-					}
-					
-					getShell().getDisplay().asyncExec(new Runnable(){
-						@Override
-						public void run() {
-							getTableViewer().setInput(data);
-							getTableViewer().refresh();
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
+						Query<?> q = currentFilter.buildQuery(s);
+						List<?> results = q.list();
+						final Object[][] data = new Object[results.size()][2];
+						int counter = 0;
+						for(Object x : results){
+							Object[] row = (Object[])x;
+							
+							String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[3]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[4]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							Object[] thisdata = {pname, (UUID)row[0], row[1]};
+							data[counter++] = thisdata;
 						}
-					});
+						
+						getShell().getDisplay().asyncExec(new Runnable(){
+							@Override
+							public void run() {
+								getTableViewer().setInput(data);
+								getTableViewer().refresh();
+							}
+						});
 					
-				}finally{
-					if (s.getTransaction().isActive()){
-						s.getTransaction().commit();
+					}finally{
+						if (s.getTransaction().isActive()){
+							s.getTransaction().commit();
+						}
 					}
-					s.close();
 				}
 				return Status.OK_STATUS;
 			}

@@ -31,13 +31,13 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -67,38 +67,36 @@ public class CmAttributeListDropItem extends AttributeListDropItem {
 			protected IStatus run(IProgressMonitor monitor) {
 				
 				final ArrayList<ListItem> items = new ArrayList<ListItem>();
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					List<AttributeListItem> litems = QueryDataModelManager.getInstance().getActiveAttributeListItems(CmAttributeListDropItem.this.attribute, s);
-					for (AttributeListItem item : litems){
-						CmAttributeListItem cmItem = null;
-						cmItem = (CmAttributeListItem) s.createCriteria(CmAttributeListItem.class)
-								.add(Restrictions.eq("listItem", item))  //$NON-NLS-1$
-								.add(Restrictions.eq("config", CmAttributeListDropItem.this.cmAttribute.getConfig())) //$NON-NLS-1$
-								.uniqueResult();
-						
-						if (cmItem == null){
-							items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
-						}else if (cmItem.getIsActive()){
-							String cmName = cmItem.findNameNull(SmartDB.getCurrentLanguage());
-							if (cmName != null){
-								items.add(new ListItem(item.getUuid(), cmName, item.getKeyId()));
-							}else{
-								items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));	
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
+						List<AttributeListItem> litems = QueryDataModelManager.getInstance().getActiveAttributeListItems(CmAttributeListDropItem.this.attribute, s);
+						for (AttributeListItem item : litems){
+							CmAttributeListItem cmItem = QueryFactory.buildQuery(s, CmAttributeListItem.class,
+									new Object[] {"listItem", item}, //$NON-NLS-1$
+									new Object[] {"config", CmAttributeListDropItem.this.cmAttribute.getConfig()}).uniqueResult(); //$NON-NLS-1$
+							
+							if (cmItem == null){
+								items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
+							}else if (cmItem.getIsActive()){
+								String cmName = cmItem.findNameNull(SmartDB.getCurrentLanguage());
+								if (cmName != null){
+									items.add(new ListItem(item.getUuid(), cmName, item.getKeyId()));
+								}else{
+									items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));	
+								}
 							}
 						}
+						//add the any item
+						items.add(0, BasicDropItemFactory.ANY_OPTION);				
+						if (currentSelection != null && !items.contains(currentSelection)){
+							//item is not longer active; but still in query
+							items.add(currentSelection);
+						}
+	
+					}finally{
+						s.getTransaction().rollback();
 					}
-					//add the any item
-					items.add(0, BasicDropItemFactory.ANY_OPTION);				
-					if (currentSelection != null && !items.contains(currentSelection)){
-						//item is not longer active; but still in query
-						items.add(currentSelection);
-					}
-
-				}finally{
-					s.getTransaction().rollback();
-					s.close();
 				}
 				Display.getDefault().asyncExec(new Runnable(){
 					@Override

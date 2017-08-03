@@ -26,7 +26,9 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,11 +37,9 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Criteria;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -84,24 +84,18 @@ public class EntityDatasetResultSet implements IResultSet {
 		this.metadata = metadata;
 		this.type = type;
 		
-		Criteria c = connection.getSession().createCriteria(IntelEntity.class)
-			.add(Restrictions.eq("entityType", type)); //$NON-NLS-1$
-		Criteria c2 = connection.getSession().createCriteria(IntelEntity.class)
-				.add(Restrictions.eq("entityType", type)); //$NON-NLS-1$
-		
+		List<Object[]> filters1 = new ArrayList<>();
+		filters1.add(new Object[] {"entityType", type}); //$NON-NLS-1$
 		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		if (index > 0){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
-				c = c.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(entity))); //$NON-NLS-1$
-				c2 = c2.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(entity))); //$NON-NLS-1$
+				filters1.add(new Object[] {"uuid", UuidUtils.stringToUuid(entity)}); //$NON-NLS-1$
 			}
 		}
-			
-		m_maxRows = (Long)c.setProjection(Projections.rowCount()).uniqueResult();
 		
-		results = c2.setReadOnly(true)
-				.scroll(ScrollMode.FORWARD_ONLY);
+		m_maxRows = QueryFactory.buildCountQuery(connection.getSession(), IntelEntity.class, filters1.toArray(new Object[filters1.size()][2]));
+		results = QueryFactory.buildQuery(connection.getSession(), IntelEntity.class, filters1.toArray(new Object[filters1.size()][2])).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
 		
 		this.connection = connection;
 		this.m_currentRowId = 0;

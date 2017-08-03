@@ -132,15 +132,13 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 
 	@Override
 	protected Composite createContent(Composite parent) {
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			sourceTypes = new ArrayList<IntelligenceSource>(IntelligenceHibernateManager.getSourceTypes(currentCa, s));
 			for (IntelligenceSource st : sourceTypes){
 				st.getNames().size();
 			}
-		}finally{
-			s.close();
 		}
+		
 		Collections.sort(sourceTypes, new Comparator<IntelligenceSource>(){
 			@Override
 			public int compare(IntelligenceSource o1, IntelligenceSource o2) {
@@ -363,8 +361,8 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 		if (!MessageDialog.openConfirm(getShell(), Messages.SourceTypesPropertyDialog_Delete, MessageFormat.format(Messages.SourceTypesPropertyDialog_DeleteConfirmation, new Object[]{source.getName()}))){
 			return;
 		}
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			if (source.getUuid() != null){
 				if (DeleteManager.canDelete(source, s)){
 					sourceTypes.remove(source);
@@ -378,10 +376,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog( 
 					MessageFormat.format(Messages.SourceTypesPropertyDialog_CannotDelete_Error + "\n\n" + ex.getLocalizedMessage(), new Object[]{source.getName()}), ex); //$NON-NLS-1$
-		}finally{
-			s.close();
-		}
-		
+		}		
 		tableViewer.refresh();
 		
 	}
@@ -400,34 +395,33 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 	
 	@Override
 	protected boolean performSave() {
-		Session s = HibernateManager.openSession();
-		try {
-			s.beginTransaction();
-			for (IntelligenceSource m : toDelete){
-				s.delete(m);
-			}
-			ArrayList<IntelligenceSource> siblings = new ArrayList<IntelligenceSource>();
-			for (Iterator<?> iterator = sourceTypes.iterator(); iterator.hasNext();) {
-				IntelligenceSource pm = (IntelligenceSource) iterator.next();
-				siblings.remove(pm);
-				String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
-				siblings.add(pm);
-				if (error != null){
-					throw new Exception(error);
+		try(Session s = HibernateManager.openSession()){
+			try {
+				s.beginTransaction();
+				for (IntelligenceSource m : toDelete){
+					s.delete(m);
 				}
-				s.saveOrUpdate(pm);
+				ArrayList<IntelligenceSource> siblings = new ArrayList<IntelligenceSource>();
+				for (Iterator<?> iterator = sourceTypes.iterator(); iterator.hasNext();) {
+					IntelligenceSource pm = (IntelligenceSource) iterator.next();
+					siblings.remove(pm);
+					String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
+					siblings.add(pm);
+					if (error != null){
+						throw new Exception(error);
+					}
+					s.saveOrUpdate(pm);
+				}
+				s.getTransaction().commit();
+				toDelete.clear();
+				setChangesMade(false);
+				return true;
+			} catch (Exception ex) {
+				if (s.getTransaction().isActive()){
+					s.getTransaction().rollback();
+				}
+				SmartPatrolPlugIn.displayLog(Messages.SourceTypesPropertyDialog_SaveError + ex.getLocalizedMessage(), ex);
 			}
-			s.getTransaction().commit();
-			toDelete.clear();
-			setChangesMade(false);
-			return true;
-		} catch (Exception ex) {
-			if (s.getTransaction().isActive()){
-				s.getTransaction().rollback();
-			}
-			SmartPatrolPlugIn.displayLog(Messages.SourceTypesPropertyDialog_SaveError + ex.getLocalizedMessage(), ex);
-		}finally{
-			s.close();
 		}
 		return false;
 	}

@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -103,8 +104,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyPatrolEngine_Progress_RunningQuery, 5);
 				
-				monitor.beginTask(Messages.DerbyPatrolEngine_Progress_RunningQuery, 4);
 				IFilterProcessor filterer = null;
 				try{
 					filterer = DerbyPatrolEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, query);
@@ -124,22 +125,19 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 					try{
 						ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 						filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							cafilter, false, false, monitor);
+							cafilter, false, false, progress.split(4));
 					}catch (Exception ex){
 						throw new SQLException (ex);
 					}
-					if (monitor.isCanceled()){
-						return;
-					}
-					monitor.subTask(Messages.DerbyPatrolEngine_Progress_LoadingResults);
+					
+					progress.subTask(Messages.DerbyPatrolEngine_Progress_LoadingResults);
+					progress.split(1);
 					myResults = new PatrolQueryMemoryResult(getResults(c, session));
 					
-					monitor.worked(1);
 				} finally {
 					dropTable(c, queryDataTable);
 					// ensure temporary tables get dropped
 					filterer.dropTemporaryTables(c);
-					monitor.done();
 					c.setAutoCommit(false);
 				}
 			}

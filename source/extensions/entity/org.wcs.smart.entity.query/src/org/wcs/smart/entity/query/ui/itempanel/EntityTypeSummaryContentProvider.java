@@ -251,29 +251,28 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try{
-					
-					List<AttributeTreeNode> nodes = null;
-					
-					if (parent.getObject() instanceof EntityAttribute){
-						Attribute att = ((EntityAttribute)parent.getObject()).getDmAttribute();
+				try(Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try{
 						
-						att = QueryDataModelManager.getInstance().getAttribute(session, att);
-						nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(att, session);
+						List<AttributeTreeNode> nodes = null;
 						
-					}else if (parent.getObject() instanceof AttributeTreeNode){
-						AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
-						node.getAttribute().getName();
-						nodes = node.getActiveChildren();
+						if (parent.getObject() instanceof EntityAttribute){
+							Attribute att = ((EntityAttribute)parent.getObject()).getDmAttribute();
+							
+							att = QueryDataModelManager.getInstance().getAttribute(session, att);
+							nodes = QueryDataModelManager.getInstance().getActiveAttributeTreeNodes(att, session);
+							
+						}else if (parent.getObject() instanceof AttributeTreeNode){
+							AttributeTreeNode node = (AttributeTreeNode)parent.getObject();
+							node.getAttribute().getName();
+							nodes = node.getActiveChildren();
+						}
+						kids.addAll(nodes);					
+						session.getTransaction().rollback();
+					}catch (Exception ex){
+						QueryPlugIn.log(Messages.EntityTypeSummaryContentProvider_ErrorLoadingTree + ex.getLocalizedMessage(), ex);
 					}
-					kids.addAll(nodes);					
-					session.getTransaction().rollback();
-				}catch (Exception ex){
-					QueryPlugIn.log(Messages.EntityTypeSummaryContentProvider_ErrorLoadingTree + ex.getLocalizedMessage(), ex);
-				}finally{
-					session.close();
 				}
 				return Status.OK_STATUS;
 			}

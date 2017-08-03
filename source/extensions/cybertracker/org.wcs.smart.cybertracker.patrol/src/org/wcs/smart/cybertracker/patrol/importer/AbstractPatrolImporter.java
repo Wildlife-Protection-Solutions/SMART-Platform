@@ -86,8 +86,8 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				Session session = HibernateManager.openSession();
-				try {
+				
+				try (Session session = HibernateManager.openSession()){
 					List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session);
 					List<ImportError> trProblem = ctPatrol.getProblems().get(PatrolMeta.TRANSPORT);
 					String message = trProblem != null && !trProblem.isEmpty() ? trProblem.get(0).getMessage() : null;
@@ -97,19 +97,12 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 					}
 					ctPatrol.setPatrolTransportType(selectorDialog.getSelectedTransportType());
 				} catch (final Exception e) {
-					session.getTransaction().rollback();
 					Display.getDefault().syncExec(new Runnable() {
 						@Override
 						public void run() {
 							SmartPlugIn.displayLog(Messages.SmartImporter_Transport_Load_Error, e);
 						}
 					});
-				}
-				finally {
-					if (session.getTransaction().isActive()){
-						session.getTransaction().rollback();
-					}
-					session.close();
 				}
 			}
 		});

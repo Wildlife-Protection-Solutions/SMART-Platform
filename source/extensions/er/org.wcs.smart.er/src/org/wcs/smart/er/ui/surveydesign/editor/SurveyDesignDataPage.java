@@ -410,15 +410,12 @@ public class SurveyDesignDataPage extends EditorPart {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					Session session = HibernateManager.openSession();
-					try{
+					try(Session session = HibernateManager.openSession()){
 						if (node.getType() == TreeNode.Type.MISSION){
 							DeleteSurveyElementHandler.deleteMission(node.getUuid(), session);
 						}else if (node.getType() == TreeNode.Type.SURVEY){
 							DeleteSurveyElementHandler.deleteSurvey(node.getUuid(), session);
 						}
-					}finally{
-						session.close();
 					}
 				}
 			});
@@ -527,35 +524,35 @@ public class SurveyDesignDataPage extends EditorPart {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<TreeNode> nodes = new ArrayList<TreeNode>();
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				SurveyFilter sf = new SurveyFilter();
-				sf.setDateFilter(null, null, null);
-				sf.setSurveyState(null);
-				sf.setSurveyDesignKeyFilters(new String[]{parentEditor.getSurveyDesign().getKeyId()});
-
-				List<SurveyProxy> surveys = SurveyHibernateManager.getSurveys(s, sf);
-				for(SurveyProxy in : surveys){
-					Survey ss = (Survey) s.load(Survey.class, in.getUuid());
-					TreeNode node = new TreeNode(ss.getUuid(), ss.getId(), ss.getStartDate(), ss.getEndDate(), TreeNode.Type.SURVEY);					
-					for (Mission m : ss.getMissions()){
-						TreeNode kid = new TreeNode(m.getUuid(), m.getId(), m.getStartDate(), m.getEndDate(), TreeNode.Type.MISSION);
-						node.addKid(kid);
-						for (MissionPropertyValue mpv : m.getMissionPropertyValues()){
-							kid.addAttribute(mpv.getMissionAttribute().getKeyId(), mpv.getValueAsString(Locale.getDefault()));
+			try(Session s= HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					SurveyFilter sf = new SurveyFilter();
+					sf.setDateFilter(null, null, null);
+					sf.setSurveyState(null);
+					sf.setSurveyDesignKeyFilters(new String[]{parentEditor.getSurveyDesign().getKeyId()});
+	
+					List<SurveyProxy> surveys = SurveyHibernateManager.getSurveys(s, sf);
+					for(SurveyProxy in : surveys){
+						Survey ss = (Survey) s.load(Survey.class, in.getUuid());
+						TreeNode node = new TreeNode(ss.getUuid(), ss.getId(), ss.getStartDate(), ss.getEndDate(), TreeNode.Type.SURVEY);					
+						for (Mission m : ss.getMissions()){
+							TreeNode kid = new TreeNode(m.getUuid(), m.getId(), m.getStartDate(), m.getEndDate(), TreeNode.Type.MISSION);
+							node.addKid(kid);
+							for (MissionPropertyValue mpv : m.getMissionPropertyValues()){
+								kid.addAttribute(mpv.getMissionAttribute().getKeyId(), mpv.getValueAsString(Locale.getDefault()));
+							}
 						}
+						node.sortKids();
+						nodes.add(node);
+						if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					}
-					node.sortKids();
-					nodes.add(node);
-					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+					
+					Collections.sort(nodes, treeNodeComparator);
+					
+				}finally{
+					s.getTransaction().rollback();
 				}
-				
-				Collections.sort(nodes, treeNodeComparator);
-				
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
 			}
 
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;

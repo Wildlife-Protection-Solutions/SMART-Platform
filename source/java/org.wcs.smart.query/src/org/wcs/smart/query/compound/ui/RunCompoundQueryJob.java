@@ -88,13 +88,10 @@ public class RunCompoundQueryJob extends Job{
 			results = new CompoundMapQueryResults();
 			query.setCachedResults(results);
 		}else{
-			Session session  = HibernateManager.openSession();
-			try{
-				results.clear(session);
+			try(Session s = HibernateManager.openSession()){
+				results.clear(s);
 			}catch (Exception ex){
 				ex.printStackTrace();
-			}finally{
-				session.close();
 			}
 		}
 
@@ -113,8 +110,7 @@ public class RunCompoundQueryJob extends Job{
 
 		List<QueryItem> items = new ArrayList<QueryItem>();
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			for (CompoundMapQueryLayer layer : query.getLayers()){
 				IQueryType type =  QueryTypeManager.INSTANCE.findQueryType(layer.getQueryType());
 				//always reload query here so we have the latest query definition
@@ -135,8 +131,6 @@ public class RunCompoundQueryJob extends Job{
 					}
 				}
 			}
-		}finally{
-			s.close();
 		}
 		
 		//these old query layers and services 

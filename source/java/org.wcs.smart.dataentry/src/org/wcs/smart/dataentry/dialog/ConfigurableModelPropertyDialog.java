@@ -60,7 +60,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
@@ -285,26 +284,25 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
 				monitor.beginTask(Messages.ConfigurableModelPropertyDialog_ProgressDelete, 2);
-				Session session = HibernateManager.openSession();
-				session.setFlushMode(FlushMode.COMMIT);
-				session.beginTransaction();
-				try {
-					ConfigurableModel currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
-					monitor.worked(1);
-					if (DeleteManager.canDelete(currentCm, session)){
-						currentCm.getNodes().clear();
-						
-						session.delete(currentCm);
-						session.getTransaction().commit();
-						//deleting filestore
-						DataentryHibernateManager.deleteFilestore(currentCm);
+				try(Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try {
+						ConfigurableModel currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
+						monitor.worked(1);
+						if (DeleteManager.canDelete(currentCm, session)){
+							currentCm.getNodes().clear();
+							
+							session.delete(currentCm);
+							session.getTransaction().commit();
+							//deleting filestore
+							DataentryHibernateManager.deleteFilestore(currentCm);
+						}
+					}catch (Exception ex){
+						session.getTransaction().rollback();
+						SmartPlugIn.log("Error deleting configurable model", ex); //$NON-NLS-1$
+						throw new InvocationTargetException(new Exception(Messages.ConfigurableModelPropertyDialog_ErrorDelete + "\n\n" + ex.getMessage())); //$NON-NLS-1$
 					}
-				}catch (Exception ex){
-					session.getTransaction().rollback();
-					SmartPlugIn.log("Error deleting configurable model", ex); //$NON-NLS-1$
-					throw new InvocationTargetException(new Exception(Messages.ConfigurableModelPropertyDialog_ErrorDelete + "\n\n" + ex.getMessage())); //$NON-NLS-1$
 				} finally {
-					session.close();
 					monitor.done();
 				}
 			}
@@ -352,16 +350,14 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 
 	private List<ConfigurableModel> getModelsList() {
 		List<ConfigurableModel> modelList = new ArrayList<ConfigurableModel>();
-		Session s = HibernateManager.openSession();
-		
-		try {
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			modelList = DataentryHibernateManager.getConfigurableModels(s);
-			s.getTransaction().rollback();
-		} catch (Exception ex) {
-			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
-		} finally {
-			s.close();
+			try {
+				modelList = DataentryHibernateManager.getConfigurableModels(s);
+				s.getTransaction().rollback();
+			} catch (Exception ex) {
+				SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
+			}
 		}
 		return modelList;
 	}

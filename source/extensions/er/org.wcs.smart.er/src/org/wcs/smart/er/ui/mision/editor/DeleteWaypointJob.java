@@ -62,21 +62,20 @@ public class DeleteWaypointJob extends Job {
 			pnts.addAll(waypoints);
 		}
 		
-		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try{
-			session.beginTransaction();
-			for (SurveyWaypoint wp : pnts) {
-				session.delete(wp);
-				session.delete(wp.getWaypoint());
+		try(Session session = HibernateManager.openSession()){
+			try{
+				session.beginTransaction();
+				for (SurveyWaypoint wp : pnts) {
+					session.delete(wp);
+					session.delete(wp.getWaypoint());
+				}
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+				EcologicalRecordsPlugIn.displayLog(Messages.DeleteWaypointJob_Error + ex.getLocalizedMessage(), ex);
 			}
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().rollback();
-			}
-			EcologicalRecordsPlugIn.displayLog(Messages.DeleteWaypointJob_Error + ex.getLocalizedMessage(), ex);
-		}finally{
-			session.close();
 		}
 		for (SurveyWaypoint wp : waypoints){
 			try{

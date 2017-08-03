@@ -80,13 +80,13 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 				return Status.OK_STATUS;
 			}
 			List<String> data = null;
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				data = PatrolHibernateManager.getPatrolIds(s);
-				s.getTransaction().rollback();
-			}finally{
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					data = PatrolHibernateManager.getPatrolIds(s);
+				}finally {
+					s.getTransaction().rollback();
+				}
 			}
 			final List<String> fdata = data;
 			Display.getDefault().asyncExec(new Runnable(){

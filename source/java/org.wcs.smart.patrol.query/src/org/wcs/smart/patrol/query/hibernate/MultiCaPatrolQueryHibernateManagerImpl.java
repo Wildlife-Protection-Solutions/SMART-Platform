@@ -27,9 +27,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hibernate.Criteria;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -52,32 +55,28 @@ public class MultiCaPatrolQueryHibernateManagerImpl extends
 	private Collection<ListItem> getNamedKeyItem(Session session, Class<? extends NamedKeyItem> clazz, boolean onlyActive) {
 		
 		HashMap<String, ListItem> keyToItem = new HashMap<String, ListItem>();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
 		
-			Criteria c = session
-					.createCriteria(clazz)
-					.add(Restrictions.in("conservationArea", SmartDB //$NON-NLS-1$
-							.getConservationAreaConfiguration()
-							.getConservationAreas()));
-			if (onlyActive){
-				c.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
-			}
-			List<?> teams = c.list();
-
-			for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
-				NamedKeyItem namedItem = (NamedKeyItem) iterator.next();
-				ListItem item = keyToItem.get(namedItem.getKeyId());
-				if (item == null) {
-					item = new ListItem(null, namedItem.getName(), namedItem.getKeyId());
-					keyToItem.put(namedItem.getKeyId(), item);
-				} else if (namedItem.getNames().iterator().next().getLanguage().getCa().equals(
-						SmartDB.getConservationAreaConfiguration()
-								.getMainConservationArea())) {
-					item.updateName(namedItem.getName());
-				}
-
-			}
+		CriteriaQuery<? extends NamedKeyItem> c = cb.createQuery(clazz);
+		Root<? extends NamedKeyItem> from = c.from(clazz);
+		Predicate[] where = new Predicate[onlyActive? 2 : 1];
+		where[0] = from.get("conservationArea").in(SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
+		if (onlyActive) where[1] = cb.equal(from.get("isActive"), true); //$NON-NLS-1$
+		c.where(cb.and(where));
 		
-
+		List<?> teams = session.createQuery(c).getResultList();
+		for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
+			NamedKeyItem namedItem = (NamedKeyItem) iterator.next();
+			ListItem item = keyToItem.get(namedItem.getKeyId());
+			if (item == null) {
+				item = new ListItem(null, namedItem.getName(), namedItem.getKeyId());
+				keyToItem.put(namedItem.getKeyId(), item);
+			} else if (namedItem.getNames().iterator().next().getLanguage().getCa().equals(
+					SmartDB.getConservationAreaConfiguration()
+							.getMainConservationArea())) {
+				item.updateName(namedItem.getName());
+			}
+		}
 		return keyToItem.values();
 
 	}

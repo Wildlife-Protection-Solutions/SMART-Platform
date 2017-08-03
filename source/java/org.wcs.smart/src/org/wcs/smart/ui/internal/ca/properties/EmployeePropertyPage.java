@@ -73,7 +73,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.PermissionManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
@@ -172,11 +172,8 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		super(parent, Messages.EmployeePropertyPage_Dialog_Title);
 
 		//load the current ca
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			this.currentCa = (ConservationArea) s.load(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
-		}finally{
-			s.close();
 		}
 	}
 
@@ -316,18 +313,16 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		return container;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void refreshEmployeeList() {
-		Session s = HibernateManager.openSession();
-		try{
-			employees = s.createCriteria(Employee.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+		try(Session s = HibernateManager.openSession()){	
+			Query<Employee> query = s.createQuery("FROM Employee WHERE conservationArea = :ca", Employee.class); //$NON-NLS-1$
+			query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+			employees = query.getResultList();
+			
 			employees.forEach(e -> {
 				if (e.getAgency() != null) e.getAgency().getName();
 				if (e.getRank() != null) e.getRank().getName();
 			});
-		}finally{
-			s.close();
 		}
 		tblEmployee.setInput(employees);
 		tblEmployee.refresh();
@@ -339,8 +334,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	private List<Agency> getAgencies(){
 		if (agencies == null){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), s);
 				Collections.sort(agencies, new Comparator<Object>(){
 					@Override
@@ -352,8 +346,6 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 						a.getRanks().forEach(r -> r.getNames());
 					}
 				});
-			}finally{
-				s.close();
 			}
 		}
 		return agencies;
@@ -421,64 +413,62 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					monitor.beginTask(Messages.EmployeePropertyPage_ProgessDeleteEmployee, toDelete.size());
-					Session s = HibernateManager.openSession();					
-					Transaction tx = s.beginTransaction();
-					try{
-						for (Employee del : toDelete){
-							del = (Employee) s.get(Employee.class, del.getUuid()); //reload employee see #2178
-							if (del == null) continue; //employee not found cannot remove
-							
-							monitor.subTask(SmartLabelProvider.getFullLabel(del));
-							String deleteError = null;
-							try{
-								//first run before delete 
-								ConservationAreaManager.getInstance().fireEmployeeBeforeDelete(del, s);
-								
-								//validate delete
-								if (!DeleteManager.canDelete(del, s)){
-									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{SmartLabelProvider.getFullLabel(del)});
-								}else{
-									//delete
-									if (del.equals(SmartDB.getCurrentEmployee())){
-										restart[0] = true;
-									}
-									s.delete(del);
-									employees.remove(del);
-								}
-							}catch (Exception ex){
-								deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{SmartLabelProvider.getFullLabel(del)}); //$NON-NLS-1$
-								SmartPlugIn.log(ex.getMessage(), ex);
-							}
-							
-							if (deleteError != null){
-								final String errormsg = deleteError;
-								Display.getDefault().syncExec(new Runnable(){
-									@Override
-									public void run() {
-										MessageDialog.openInformation(getShell(), Messages.EmployeePropertyPage_8, errormsg);
-									}});
-								
-							}
-							monitor.worked(1);
-						}
-						monitor.subTask(Messages.EmployeePropertyPage_ProgressCommitChanges);
-						tx.commit();
-					}catch ( final Exception ex){
+					try(Session s = HibernateManager.openSession()){					
+						Transaction tx = s.beginTransaction();
 						try{
-							tx.rollback();
-						}catch (Exception ex2){
-							SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
-						}
-						Display.getDefault().syncExec(new Runnable(){
-
-							@Override
-							public void run() {
-								SmartPlugIn.displayLog(Messages.EmployeePropertyPage_Error_CannotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$
+							for (Employee del : toDelete){
+								del = (Employee) s.get(Employee.class, del.getUuid()); //reload employee see #2178
+								if (del == null) continue; //employee not found cannot remove
 								
-							}});
-						
-					}finally{
-						s.close();
+								monitor.subTask(SmartLabelProvider.getFullLabel(del));
+								String deleteError = null;
+								try{
+									//first run before delete 
+									ConservationAreaManager.getInstance().fireEmployeeBeforeDelete(del, s);
+									
+									//validate delete
+									if (!DeleteManager.canDelete(del, s)){
+										deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{SmartLabelProvider.getFullLabel(del)});
+									}else{
+										//delete
+										if (del.equals(SmartDB.getCurrentEmployee())){
+											restart[0] = true;
+										}
+										s.delete(del);
+										employees.remove(del);
+									}
+								}catch (Exception ex){
+									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{SmartLabelProvider.getFullLabel(del)}); //$NON-NLS-1$
+									SmartPlugIn.log(ex.getMessage(), ex);
+								}
+								
+								if (deleteError != null){
+									final String errormsg = deleteError;
+									Display.getDefault().syncExec(new Runnable(){
+										@Override
+										public void run() {
+											MessageDialog.openInformation(getShell(), Messages.EmployeePropertyPage_8, errormsg);
+										}});
+									
+								}
+								monitor.worked(1);
+							}
+							monitor.subTask(Messages.EmployeePropertyPage_ProgressCommitChanges);
+							tx.commit();
+						}catch ( final Exception ex){
+							try{
+								tx.rollback();
+							}catch (Exception ex2){
+								SmartPlugIn.log("Error rolling back transaction", ex2); //$NON-NLS-1$
+							}
+							Display.getDefault().syncExec(new Runnable(){
+	
+								@Override
+								public void run() {
+									SmartPlugIn.displayLog(Messages.EmployeePropertyPage_Error_CannotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$
+									
+								}});
+						}	
 					}
 				}
 			});

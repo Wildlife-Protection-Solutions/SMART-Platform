@@ -32,7 +32,7 @@ import org.hibernate.Session;
  */
 public interface IDatabaseStartupRunner {
 	
-	public static final String EXTENSION_ID = "org.wcs.smart.startup.db"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.dbStartUp"; //$NON-NLS-1$
 	
 	public static final String CLASS_ATTRIBUTE_NAME = "StartUpRunner"; //$NON-NLS-1$
 	

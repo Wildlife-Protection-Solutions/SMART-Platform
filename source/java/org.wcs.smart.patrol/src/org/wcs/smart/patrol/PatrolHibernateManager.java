@@ -31,20 +31,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.internal.Messages;
@@ -106,15 +110,11 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param onlyActive <code>true</code> if only active status should be loaded; <code>false</code> returns all stations 
 	 * @return list of stations
 	 */
-	@SuppressWarnings("unchecked")
 	private static List<Team> getTeams(ConservationArea ca, Session s, boolean onlyActive){
-		List<Team> list = null;
-		Criteria query = s.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		if (onlyActive){
-			query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
-		}
-		list = query.list();
-		return list;
+		Object[][] filters = new Object[onlyActive?2:1][2];
+		filters[0] = new Object[] {"conservationArea", ca}; //$NON-NLS-1$
+		if (onlyActive) filters[1] = new Object[] {"isActive", true}; //$NON-NLS-1$
+		return QueryFactory.buildQuery(s,Team.class,filters).getResultList();
 	}
 	
 	
@@ -147,15 +147,11 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param onlyActive <code>true</code> if only active mandates should be retured, <code>false</code> for all 
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	private static List<PatrolMandate> getMandates(ConservationArea ca, Session s, boolean onlyActive){
-		List<PatrolMandate> list = null;
-		Criteria query = s.createCriteria(PatrolMandate.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		if (onlyActive){
-			query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
-		}
-		list = query.list();
-		return list;
+		Object[][] filters = new Object[onlyActive ? 2 : 1][2];
+		filters[0] = new Object[] {"conservationArea", ca}; //$NON-NLS-1$
+		if (onlyActive) filters[1] = new Object[] {"isActive", true}; //$NON-NLS-1$
+		return QueryFactory.buildQuery(s,PatrolMandate.class,filters).getResultList();
 	}
 	
 	
@@ -168,15 +164,12 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param type patrol type 
 	 * @return list of active transportation types for the given patrol type
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
-		List<PatrolTransportType> types = null;
-		types = s.createCriteria(PatrolTransportType.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("patrolType", type)) //$NON-NLS-1$
-				.add(Restrictions.eq("isActive", true)).list(); //$NON-NLS-1$ 
-		return types;
-		
+		return QueryFactory.buildQuery(s,PatrolTransportType.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"patrolType", type}, //$NON-NLS-1$
+				new Object[] {"isActive", true}) //$NON-NLS-1$
+				.getResultList(); 		
 	}
 	
 	/**
@@ -188,15 +181,13 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * 
 	 * @return list of active transportation types for the given patrol type
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s){
 		List<PatrolTransportType> types = null;
 		String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true' and p.conservationArea=:ca and patroltype.id.conservationArea = :ca2"; //'true' = derby fix //$NON-NLS-1$
-		Query q = s.createQuery(query);
+		Query<PatrolTransportType> q = s.createQuery(query, PatrolTransportType.class);
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.setParameter("ca2", ca); //$NON-NLS-1$
 		types = q.list();
-//		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list();
 		return types;
 	}
 	
@@ -209,13 +200,11 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param type patrol type 
 	 * @return list of transportation types for the given patrol type
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<PatrolTransportType> getPatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
-		List<PatrolTransportType> types = null;
-		types = s.createCriteria(PatrolTransportType.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("patrolType", type)).list(); //$NON-NLS-1$ 
-		return types;
+		return QueryFactory.buildQuery(s,PatrolTransportType.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"patrolType", type}) //$NON-NLS-1$
+				.getResultList(); 		
 	}
 	
 	/**
@@ -242,11 +231,15 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param s active session
 	 * @return list of active patrol types
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<PatrolType> getActivePatrolTypes(ConservationArea ca, Session s){
-		Criteria query = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca)); //$NON-NLS-1$
-		query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
-		return query.list();
+		CriteriaBuilder cb = s.getCriteriaBuilder();
+		CriteriaQuery<PatrolType> c = cb.createQuery(PatrolType.class);
+		Root<PatrolType> root = c.from(PatrolType.class);
+		c.where(cb.and(
+				cb.equal(root.get("id").get("conservationArea"), ca),  //$NON-NLS-1$//$NON-NLS-2$
+				cb.equal(root.get("isActive"), true)  //$NON-NLS-1$
+				));			
+		return s.createQuery(c).getResultList();
 	}
 
 	/**
@@ -272,21 +265,24 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param onlyActive <code>true</code> if only active patrol types are to be returned, <code>false</code> otherwise
 	 * @return list of patrol types
 	 */
-	@SuppressWarnings("unchecked")
 	private static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s, boolean onlyActive, boolean excludeHidden){
-		s.beginTransaction();
 		List<PatrolType> types = null;
+		s.beginTransaction();
 		try{
-			Criteria query = s.createCriteria(PatrolType.class)
-					.add(Restrictions.eq("id.conservationArea", ca)); //$NON-NLS-1$
-			if (onlyActive){
-				query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<PatrolType> c = cb.createQuery(PatrolType.class);
+			Root<PatrolType> root = c.from(PatrolType.class);
+			
+			Predicate[] filters = new Predicate[onlyActive ? 2  : 1];
+			filters[0] = cb.equal(root.get("id").get("conservationArea"), ca);  //$NON-NLS-1$//$NON-NLS-2$
+			if (onlyActive) {
+				filters[1] = cb.equal(root.get("isActive"), true); //$NON-NLS-1$
 			}
-			types = query.list();
-			s.getTransaction().rollback();
+			c.where(cb.and(filters));
+			types = s.createQuery(c).getResultList();
+			s.getTransaction().commit();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_20, ex);
-			s.close();
 			return null;
 		}
 		
@@ -336,10 +332,15 @@ public class PatrolHibernateManager extends HibernateManager{
 			return null;
 		}
 		try {
-			Criteria query = s.createCriteria(PatrolType.class)
-					.add(Restrictions.eq("id.conservationArea", ca)) //$NON-NLS-1$
-					.add(Restrictions.eq("id.type", type)); //$NON-NLS-1$
-			return (PatrolType)query.uniqueResult();
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<PatrolType> c = cb.createQuery(PatrolType.class);
+			Root<PatrolType> root = c.from(PatrolType.class);
+			c.where(cb.and(
+					cb.equal(root.get("id").get("conservationArea"), ca),  //$NON-NLS-1$//$NON-NLS-2$
+					cb.equal(root.get("id").get("type"), type)  //$NON-NLS-1$//$NON-NLS-2$
+					));			
+			return s.createQuery(c).uniqueResult();
+
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_LoadPatrolTypeError + type, e);
 			return null;
@@ -356,11 +357,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return <code>true</code> if id already exists; <code>false</code> otherwise
 	 */
 	public static boolean isDuplicateId(String newId, ConservationArea ca, Session session){
-		Criteria c = session.createCriteria(Patrol.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$ 
-				.add(Restrictions.eq("id", newId)) //$NON-NLS-1$ 
-				.setProjection(Projections.rowCount()); 
-		Long cnt = (Long)c.uniqueResult();
+		Long cnt = QueryFactory.buildCountQuery(session, Patrol.class, new Object[] {"conservationArea", ca}, new Object[] {"id", newId}); //$NON-NLS-1$ //$NON-NLS-2$
 		if (cnt > 0){
 			return true;
 		}
@@ -382,7 +379,7 @@ public class PatrolHibernateManager extends HibernateManager{
 		StringBuilder sb = new StringBuilder();
 		sb.append(p.getConservationArea().getId());
 
-		Query q = s
+		Query<?> q = s
 				.createQuery("SELECT id FROM Patrol WHERE id like :id and conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("id", sb.toString() + "%_%"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("ca", p.getConservationArea()); //$NON-NLS-1$
@@ -501,11 +498,9 @@ public class PatrolHibernateManager extends HibernateManager{
 	}
 
 	public static Map<PatrolScreenOptionMeta, ScreenOption> getScreenOptions(ConservationArea ca, Session session) {
-		@SuppressWarnings("unchecked")
-		List<ScreenOption> results = session.createCriteria(ScreenOption.class)
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-				.add(Restrictions.eq("resource", PatrolScreenOptionMeta.PATROL_RESOURCE_ID)) //$NON-NLS-1$
-				.list();
+		List<ScreenOption> results = QueryFactory.buildQuery(session, ScreenOption.class, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"resource", PatrolScreenOptionMeta.PATROL_RESOURCE_ID}).getResultList(); //$NON-NLS-1$
 		Map<PatrolScreenOptionMeta, ScreenOption> options = new HashMap<PatrolScreenOptionMeta, ScreenOption>();
 		for (ScreenOption screenOption : results) {
 			screenOption.getUuidList().size();
@@ -524,12 +519,27 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param session
 	 * @return all patrol ids for the current conservation area
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<String> getPatrolIds(Session session){
 		String hql = "Select id FROM Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
-		Query q = session.createQuery(hql);
+		Query<?> q = session.createQuery(hql);
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<String> data = q.list();
-		return data;
+		List<?> data = q.list();
+		return (List<String>)data;
+	}
+	
+	/**
+	 * Gets the patrol waypoint object that references the given waypoint;
+	 * @param session
+	 * @param wp
+	 * @return
+	 */
+	public static PatrolWaypoint getPatrolWaypoint(Session session, Waypoint wp) {
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<PatrolWaypoint> c = cb.createQuery(PatrolWaypoint.class);
+		Root<PatrolWaypoint> from = c.from(PatrolWaypoint.class);
+		c.where(cb.equal(from.get("id").get("waypoint"), wp)); //$NON-NLS-1$ //$NON-NLS-2$
+		PatrolWaypoint pw = session.createQuery(c).uniqueResult();
+		return pw;
 	}
 }

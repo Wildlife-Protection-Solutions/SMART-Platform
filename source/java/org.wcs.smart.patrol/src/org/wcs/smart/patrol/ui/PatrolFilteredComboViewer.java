@@ -47,7 +47,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -249,9 +249,9 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
         }
  
         private List<Patrol> loadPatrolIds() {
-        	Session s = PatrolHibernateManager.openSession();
-        	try {
-        		Query query = filter.buildQuery(s);
+        	
+        	try(Session s = PatrolHibernateManager.openSession()) {
+        		Query<?> query = filter.buildQuery(s);
         		List<?> results = query.list();
         		List<Patrol> patrols = new ArrayList<Patrol>(results.size()+1);
         		boolean defaultPresent = preselectedPatrol == null; //indicated if default patrol id is in filtered list
@@ -279,8 +279,6 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
         			patrols.add(preselectedPatrol);
         		}
         		return patrols;
-        	} finally {
-        		s.close();
         	}
         }
         

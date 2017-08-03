@@ -74,11 +74,11 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.themes.ColorUtil;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
@@ -692,8 +692,7 @@ public class RecordSummaryPage extends EditorPart{
 			protected IStatus run(IProgressMonitor monitor) {
 				final HashMap<Label, String> labels = new HashMap<>();
 				
-				Session session =  HibernateManager.openSession();
-				try{
+				try(Session session = HibernateManager.openSession()){
 					for (Entry<IntelRecordAttributeValue,Label> v : attributes.entrySet()){
 						if (v.getKey().getAttributeListItems().isEmpty()){
 							labels.put(v.getValue(), ""); //$NON-NLS-1$
@@ -718,8 +717,6 @@ public class RecordSummaryPage extends EditorPart{
 							labels.put(v.getValue(), sb.substring(0, sb.length()-2));
 						}
 					}
-				}finally{
-					session.close();
 				}
 				Display.getDefault().syncExec(()->{
 					for(Entry<Label,String> v : labels.entrySet()){
@@ -869,15 +866,12 @@ public class RecordSummaryPage extends EditorPart{
 	private void loadRecordSources(final Viewer cmbSource){
 		Job srcLoader = new Job(Messages.RecordSummaryPage_loadingSourcesJobName){
 
-			@SuppressWarnings("unchecked")
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<Object> allInput = new ArrayList<Object>();
-				Session s = HibernateManager.openSession();
-				try{
-					List<IntelRecordSource> sources = s.createCriteria(IntelRecordSource.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.list();
+				try(Session s = HibernateManager.openSession()){
+					
+					List<IntelRecordSource> sources = QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 					sources.forEach(src -> {
 						src.getName();
 						if (src.getAttributes() != null){
@@ -890,8 +884,6 @@ public class RecordSummaryPage extends EditorPart{
 						}
 					});
 					allInput.addAll(sources);
-				}finally{
-					s.close();
 				}
 				allInput.add(0, ""); //$NON-NLS-1$
 				Display.getDefault().syncExec(()->{

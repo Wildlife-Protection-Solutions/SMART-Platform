@@ -27,10 +27,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import javax.persistence.EntityManagerFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.Joinable;
 import org.wcs.smart.ca.ConservationArea;
@@ -136,7 +138,10 @@ public class PostgresqlExporters {
 		query.append(tableName + " a join "); //$NON-NLS-1$
 		
 		String attributeTableName = null;
-		ClassMetadata m = exportEngine.getSession().getSessionFactory().getClassMetadata(Attribute.class);
+		
+		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory) exportEngine.getSession().getSessionFactory()).getMetamodel();
+		AbstractEntityPersister info = ((AbstractEntityPersister)mi.entityPersister(Attribute.class));
+		ClassMetadata m = info.getClassMetadata();
 		if (m instanceof Joinable){
 			attributeTableName = ((Joinable)m).getTableName();
 		}
@@ -184,7 +189,7 @@ public class PostgresqlExporters {
 		
 		String version = (String)exportEngine
 			.getSession()
-			.createSQLQuery("SELECT version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' AND plugin_id = 'org.wcs.smart'") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.createNativeQuery("SELECT version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' AND plugin_id = 'org.wcs.smart'") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			.uniqueResult();
 		
 		Path file = exportEngine.getExportLocation().toPath().resolve(ICaDataExportEngine.CA_INFO_FILENAME);
@@ -204,11 +209,11 @@ public class PostgresqlExporters {
 	/* helper function */
 	private List<PostgresqlTableInfo> getTableInformation(ICaDataExportEngine engine){
 		List<PostgresqlTableInfo> tables = new ArrayList<PostgresqlTableInfo>();
-		
-		Map<String, ClassMetadata> x = engine.getSession().getSessionFactory().getAllClassMetadata();
-		
+		MetamodelImplementor mi = (MetamodelImplementor)((EntityManagerFactory) engine.getSession().getSessionFactory()).getMetamodel();
 		for (SmartTable st : SmartTable.values()){
-			ClassMetadata metadata = x.get(st.hibernateClass.getName());
+			
+			AbstractEntityPersister entityinfo = ((AbstractEntityPersister)mi.entityPersister(st.hibernateClass));
+			ClassMetadata metadata = entityinfo.getClassMetadata();
 			if (metadata == null || metadata.hasSubclasses()){
 				//this is not mapped to a db table
 				//System.out.println("NOT MAPPED:" + st.hibernateClass.getName()); //$NON-NLS-1$

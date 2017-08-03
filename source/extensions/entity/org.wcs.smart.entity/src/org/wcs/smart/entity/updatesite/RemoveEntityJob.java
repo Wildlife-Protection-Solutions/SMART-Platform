@@ -66,37 +66,37 @@ public class RemoveEntityJob extends Job {
 
 	
 	private IStatus dropTables(){
-		Session session = HibernateManager.openSession();
-		try {
-			session.beginTransaction();
-			for (int i = 0; i < SQL.length; i ++){
-				if (SQL[i].equals("")) continue; //$NON-NLS-1$
+		try(Session session = HibernateManager.openSession()){
+			try {
+				session.beginTransaction();
+				for (int i = 0; i < SQL.length; i ++){
+					if (SQL[i].equals("")) continue; //$NON-NLS-1$
+					
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery(SQL[i]).executeUpdate();
+					}
+				}
 				
-				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-					session.createSQLQuery(SQL[i]).executeUpdate();
+				for (int i = 0; i < TABLES.length; i ++){
+					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
+						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
+					}
+				}
+				HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, null, session);
+				session.getTransaction().commit();
+			} catch (final Exception e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.RemoveEntityJob_Error, e);
+					}
+				});
+				return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.RemoveEntityJob_UninstallError + e.getLocalizedMessage(), e); 
+			} finally {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
 				}
 			}
-			
-			for (int i = 0; i < TABLES.length; i ++){
-				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
-				}
-			}
-			HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-		} catch (final Exception e) {
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(Messages.RemoveEntityJob_Error, e);
-				}
-			});
-			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.RemoveEntityJob_UninstallError + e.getLocalizedMessage(), e); 
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().rollback();
-			}
-			session.close();
 		}
 		return Status.OK_STATUS;
 	}

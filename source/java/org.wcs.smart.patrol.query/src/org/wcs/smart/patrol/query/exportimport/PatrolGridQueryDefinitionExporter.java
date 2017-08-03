@@ -53,15 +53,15 @@ public class PatrolGridQueryDefinitionExporter extends GridQueryDefinitionExport
 		super.writeQuerySpecifics(query, xmlQuery);
 		PatrolGridQueryDefinition def = (PatrolGridQueryDefinition)((GriddedQuery)query).getQueryDefinition();
 				
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			if (def.getZeroDataFilter() != null){
-				processFilter(def.getZeroDataFilter().getFilter(), xmlQuery, s);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				if (def.getZeroDataFilter() != null){
+					processFilter(def.getZeroDataFilter().getFilter(), xmlQuery, s);
+				}
+			}finally{
+				s.getTransaction().rollback();
 			}
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
 		}
 	}
 	/*

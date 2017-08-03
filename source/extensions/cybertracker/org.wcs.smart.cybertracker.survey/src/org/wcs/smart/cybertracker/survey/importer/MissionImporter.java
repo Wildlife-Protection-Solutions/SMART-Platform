@@ -39,9 +39,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -77,6 +75,7 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
@@ -116,84 +115,84 @@ public class MissionImporter extends AbstractSmartImporter {
 
 		boolean fireSurveyAdded = false;
 		boolean fireMissionAdded = false;
-		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try {
+		
+		try (Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
 			//check if duplicate any of existing mission
 			if (!checkDuplicate(ctSurvey, session)){
 				return null;
 			}
 			
 			session.beginTransaction();
-			if (survey == null) {
-				//this mean that user wants a new survey to be created
-				survey = createNewSurvey(ctSurvey, newSurveyId);
-				session.save(survey);
-				fireSurveyAdded = true;
-			}
-			if (mission == null) {
-				//this mean that user wants a new mission to be created
-				mission = createNewMission(ctSurvey, survey, session);
-				fireMissionAdded = true;
-				createMissingMissionDays(mission);
-
-				//import mission properties
-				for (MissionPropertyValue mpv : ctSurvey.getMissionProperties()) {
-					mpv.setMission(mission);
-					mission.getMissionPropertyValues().add(mpv);
+			try {
+				if (survey == null) {
+					//this mean that user wants a new survey to be created
+					survey = createNewSurvey(ctSurvey, newSurveyId);
+					session.save(survey);
+					fireSurveyAdded = true;
 				}
-			} else {
-				mission = (Mission) session.load(Mission.class, mission.getUuid()); //reloading mission object to avoid lazy initialization exception
-				validateExistingMission(ctSurvey, mission, session);
-			}
-			
-			if (mission.getLeader() == null){
-				if (!fixLeaderError(mission, ctSurvey, session)){
+				if (mission == null) {
+					//this mean that user wants a new mission to be created
+					mission = createNewMission(ctSurvey, survey, session);
+					fireMissionAdded = true;
+					createMissingMissionDays(mission);
+	
+					//import mission properties
+					for (MissionPropertyValue mpv : ctSurvey.getMissionProperties()) {
+						mpv.setMission(mission);
+						mission.getMissionPropertyValues().add(mpv);
+					}
+				} else {
+					mission = (Mission) session.load(Mission.class, mission.getUuid()); //reloading mission object to avoid lazy initialization exception
+					validateExistingMission(ctSurvey, mission, session);
+				}
+				
+				if (mission.getLeader() == null){
+					if (!fixLeaderError(mission, ctSurvey, session)){
+						return null;
+					}
+				}
+				
+				//import observations
+				List<S> sList = extractAndPreProcessSights(ctSurvey);
+				RestTimeMap restMap = extractRestTime(sList, ctSurvey.getElementsMap());
+				sList = restMap.excludePauseS(sList);
+				for (S s : sList) {
+					MissionDay mday = findOrAddMissionDay(mission, s);
+					Waypoint wp = findOrAddWaypoint(mday, s, ctSurvey.getElementsMap(), session);
+					if (wp != null) {
+						addObservations(wp, s, ctSurvey.getElementsMap(), session);
+					}
+				}
+				for (MissionDay mday : mission.getMissionDays()) {
+					mday.setRestMinutes(restMap.getRestMinutes(mday.getDate()));
+				}
+	
+				//import tracks
+				appendTracks(ctSurvey, mission);
+	
+				//process images
+				processImages(mission, session);
+				
+				if (!displayWarnings(ctSurvey))
 					return null;
+	
+				SurveyHibernateManager.saveMission(mission, session, true);
+				session.getTransaction().commit();
+				if (fireSurveyAdded) {
+					SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_ADDED, survey);
 				}
-			}
-			
-			//import observations
-			List<S> sList = extractAndPreProcessSights(ctSurvey);
-			RestTimeMap restMap = extractRestTime(sList, ctSurvey.getElementsMap());
-			sList = restMap.excludePauseS(sList);
-			for (S s : sList) {
-				MissionDay mday = findOrAddMissionDay(mission, s);
-				Waypoint wp = findOrAddWaypoint(mday, s, ctSurvey.getElementsMap(), session);
-				if (wp != null) {
-					addObservations(wp, s, ctSurvey.getElementsMap(), session);
-				}
-			}
-			for (MissionDay mday : mission.getMissionDays()) {
-				mday.setRestMinutes(restMap.getRestMinutes(mday.getDate()));
-			}
-
-			//import tracks
-			appendTracks(ctSurvey, mission);
-
-			//process images
-			processImages(mission, session);
-			
-			if (!displayWarnings(ctSurvey))
+				SurveyEventHandler.getInstance().fireEvent(fireMissionAdded ? EventType.MISSION_ADDED : EventType.MISSION_MODIFIED, mission);
+				return mission;
+			} catch (final Exception e) {
+				session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.MissionImporter_SaveError, e);
+					}
+				});
 				return null;
-
-			SurveyHibernateManager.saveMission(mission, session, true);
-			session.getTransaction().commit();
-			if (fireSurveyAdded) {
-				SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_ADDED, survey);
 			}
-			SurveyEventHandler.getInstance().fireEvent(fireMissionAdded ? EventType.MISSION_ADDED : EventType.MISSION_MODIFIED, mission);
-			return mission;
-		} catch (final Exception e) {
-			session.getTransaction().rollback();
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(Messages.MissionImporter_SaveError, e);
-				}
-			});
-			return null;
-		} finally {
-			session.close();
 		}
 	}
 	
@@ -232,12 +231,10 @@ public class MissionImporter extends AbstractSmartImporter {
 	}
 
 	protected boolean checkDuplicate(final CyberTrackerSurvey ctSurvey, final Session session) {
-		Criteria c = session.createCriteria(Mission.class);
-		c.add(Restrictions.eq("startDate", ctSurvey.getStartDate())); //$NON-NLS-1$
-		c.add(Restrictions.eq("endDate", ctSurvey.getEndDate())); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<Mission> missions = c.list(); 
-
+		List<Mission> missions = QueryFactory.buildQuery(session, Mission.class,
+				new Object[] {"startDate", ctSurvey.getStartDate()}, //$NON-NLS-1$
+				new Object[] {"endDate", ctSurvey.getEndDate()}).getResultList(); //$NON-NLS-1$
+		
 		Mission duplicate = null;
 		if (missions.size() > 0) {
 			//we need a comparator to sort employee no matter how, but fast

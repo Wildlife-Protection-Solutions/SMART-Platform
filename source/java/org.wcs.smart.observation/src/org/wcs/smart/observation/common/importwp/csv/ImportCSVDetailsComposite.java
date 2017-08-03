@@ -97,8 +97,7 @@ public class ImportCSVDetailsComposite extends Composite{
 	public ImportCSVDetailsComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			//	load projection list
 			session.beginTransaction();
 			try{
@@ -107,8 +106,6 @@ public class ImportCSVDetailsComposite extends Composite{
 			}finally{
 				session.getTransaction().commit();
 			}
-		}finally{
-			session.close();
 		}
 		
 		

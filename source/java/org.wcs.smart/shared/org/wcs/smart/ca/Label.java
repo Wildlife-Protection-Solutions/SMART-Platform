@@ -37,13 +37,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.StatelessSession;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.dialect.PostgreSQL82Dialect;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.type.PostgresUUIDType;
+import org.hibernate.query.NativeQuery;
 import org.wcs.smart.util.I18nUtil;
 
 /**
@@ -170,45 +168,42 @@ public class Label  {
 		  }
 	}
 	
-	private static synchronized String searchAll(Locale lang, UUID element, Session session){
+	public static synchronized String searchAll(Locale lang, UUID element, Session session){
 		if (lang == null) return ""; //$NON-NLS-1$
-
-		SQLQuery query = session.createSQLQuery("SELECT a.code, b.value, a.isdefault from smart.language a, smart.i18n_label b where a.uuid = b.language_uuid and b.element_uuid = :element"); //$NON-NLS-1$
-		if (((SessionFactoryImplementor)session.getSessionFactory()).getDialect() instanceof PostgreSQL82Dialect){
-			query.setParameter("element", element, PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		}else{
+		try(StatelessSession ss = session.getSessionFactory().openStatelessSession()){
+			NativeQuery<?> query = ss.createNativeQuery("SELECT a.code, b.value, a.isdefault from smart.language a, smart.i18n_label b where a.uuid = b.language_uuid and b.element_uuid = :element"); //$NON-NLS-1$
 			query.setParameter("element", element); //$NON-NLS-1$
+			List<?> options = query.list();
+	
+			if (options.size() == 1){
+				return (String)((Object[])options.get(0))[1];
+			}
+				
+			String langmatch = null;
+			String defaultvalue = null;
+			for (Object obj : options){
+				String label = (String)((Object[])obj)[1];
+				String code = (String)((Object[])obj)[0];
+				Locale test = null;
+				if (code.contains("_")){ //$NON-NLS-1$
+					String[] bits = code.split("_"); //$NON-NLS-1$
+					test = new Locale(bits[0], bits[1]);
+				}else{
+					test = new Locale(code);
+				}
+				if (test.equals(lang)){
+					return label;
+				}else if (test.getLanguage().equals(lang.getLanguage())){
+					langmatch = label;
+				}
+				if ((Boolean)((Object[])obj)[2]){
+					defaultvalue = label;
+				}
+				}
+			if (langmatch != null) return langmatch;
+			if (defaultvalue != null) return defaultvalue;
+			return null;
 		}
-		List<?> options = query.list();
-
-		if (options.size() == 1){
-			return (String)((Object[])options.get(0))[1];
-		}
-			
-		String langmatch = null;
-		String defaultvalue = null;
-		for (Object obj : options){
-			String label = (String)((Object[])obj)[1];
-			String code = (String)((Object[])obj)[0];
-			Locale test = null;
-			if (code.contains("_")){ //$NON-NLS-1$
-				String[] bits = code.split("_"); //$NON-NLS-1$
-				test = new Locale(bits[0], bits[1]);
-			}else{
-				test = new Locale(code);
-			}
-			if (test.equals(lang)){
-				return label;
-			}else if (test.getLanguage().equals(lang.getLanguage())){
-				langmatch = label;
-			}
-			if ((Boolean)((Object[])obj)[2]){
-				defaultvalue = label;
-			}
-			}
-		if (langmatch != null) return langmatch;
-		if (defaultvalue != null) return defaultvalue;
-		return null;
 	}
 	
 	@Transient

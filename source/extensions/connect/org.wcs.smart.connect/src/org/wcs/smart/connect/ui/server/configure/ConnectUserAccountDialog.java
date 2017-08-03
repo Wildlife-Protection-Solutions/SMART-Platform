@@ -41,8 +41,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
@@ -82,30 +82,29 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 			return;
 		}
 
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			if (toUpdate != null){
-				for (ConnectUser cu : toUpdate){
-					s.saveOrUpdate(cu);
-					cu.setConnectUsername(username);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				if (toUpdate != null){
+					for (ConnectUser cu : toUpdate){
+						s.saveOrUpdate(cu);
+						cu.setConnectUsername(username);
+					}
+				}else{
+					for (Object e : lstUsers.getCheckedElements()){
+						if (! (e instanceof Employee) ) continue;
+						ConnectUser user = new ConnectUser();
+						user.setConnectUsername(username);
+						user.setSmartUser((Employee)e);
+						user.setServer(server);
+						s.save(user);
+					}
 				}
-			}else{
-				for (Object e : lstUsers.getCheckedElements()){
-					if (! (e instanceof Employee) ) continue;
-					ConnectUser user = new ConnectUser();
-					user.setConnectUsername(username);
-					user.setSmartUser((Employee)e);
-					user.setServer(server);
-					s.save(user);
-				}
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				ConnectPlugIn.displayLog(Messages.ConnectUserAccountDialog_UpdateError + ex.getMessage(), ex);
+				return;
 			}
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			ConnectPlugIn.displayLog(Messages.ConnectUserAccountDialog_UpdateError + ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		super.okPressed();
 	}
@@ -180,23 +179,21 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 	
 	Job loadUsers = new Job(Messages.ConnectUserAccountDialog_loadusersjobname){
 		@Override
-		@SuppressWarnings("unchecked")
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Employee> e = null;
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				String q = "FROM Employee e WHERE e.conservationArea = :ca and smartUserId is not null and e.uuid not in (SELECT uuid FROM ConnectUser)"; //$NON-NLS-1$
-				Query query = s.createQuery(q);
-				query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				e = query.list();
-				s.getTransaction().commit();
-			}catch (Exception ex){
-				if (s.getTransaction().isActive()) s.getTransaction().rollback();
-				ConnectPlugIn.log("Could not load SMART Desktop user:" + ex.getMessage(), ex); //$NON-NLS-1$
-				return Status.OK_STATUS;
-			}finally{
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					String q = "FROM Employee e WHERE e.conservationArea = :ca and smartUserId is not null and e.uuid not in (SELECT uuid FROM ConnectUser)"; //$NON-NLS-1$
+					Query<Employee> query = s.createQuery(q, Employee.class);
+					query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+					e = query.list();
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					if (s.getTransaction().isActive()) s.getTransaction().rollback();
+					ConnectPlugIn.log("Could not load SMART Desktop user:" + ex.getMessage(), ex); //$NON-NLS-1$
+					return Status.OK_STATUS;
+				}
 			}
 			
 			final List<Employee> emp = e;

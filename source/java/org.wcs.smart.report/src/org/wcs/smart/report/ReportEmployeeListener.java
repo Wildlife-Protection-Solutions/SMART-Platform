@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.report;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IEmployeeListener;
@@ -50,7 +50,7 @@ public class ReportEmployeeListener implements IEmployeeListener {
 			StringBuilder sql = new StringBuilder();
 			sql.append("DELETE from Report "); //$NON-NLS-1$
 			sql.append(" WHERE owner = :owner"); //$NON-NLS-1$
-			Query q = s.createQuery(sql.toString());
+			Query<?> q = s.createQuery(sql.toString());
 			q.setParameter("owner", e); //$NON-NLS-1$
 			q.executeUpdate();
 		}
@@ -62,7 +62,7 @@ public class ReportEmployeeListener implements IEmployeeListener {
 			StringBuilder sql = new StringBuilder();
 			sql.append("DELETE from ReportFolder "); //$NON-NLS-1$
 			sql.append(" WHERE employee = :owner"); //$NON-NLS-1$
-			Query q = s.createQuery(sql.toString());
+			Query<?> q = s.createQuery(sql.toString());
 			q.setParameter("owner", e); //$NON-NLS-1$
 			q.executeUpdate();
 		}

@@ -33,6 +33,7 @@ import org.wcs.smart.er.ui.meta.MissionMetaConfigDialog;
  * @author elitvin
  * @since 3.3.0
  */
+@SuppressWarnings("restriction")
 public class MissionScreenOptionsMetaHandler  {
 
 	@Execute

@@ -582,12 +582,13 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter.equals(Waypoint.class) && getWaypointUuid() != null){
 			Waypoint wp = new Waypoint();
 			wp.setUuid(getWaypointUuid());
-			return wp;
+			return (T)wp;
 		}
 		return null;
 	}

@@ -314,34 +314,33 @@ public class AttributeListDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					Session s = HibernateManager.openSession();
 					List<String> warnings = new ArrayList<String>();
-					try{
+					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
-						for (IntelAttribute a : toDelete){
-							try {
-								AttributeManager.INSTANCE.deleteAttribute(a, s);
-							}catch(Exception ex){
-								warnings.add(a.getName() + ": " + ex.getMessage()); //$NON-NLS-1$
-							}
-						}
-						s.getTransaction().commit();
-						if (!warnings.isEmpty()){
-							Display.getDefault().syncExec(new Runnable(){
-								@Override
-								public void run() {
-									WarningDialog wd = new WarningDialog(getShell(), Messages.AttributeListDialog_DeleteDialogTitle, Messages.AttributeListDialog_DeleteErrorMsg, warnings);
-									wd.open();		
+						try {
+							for (IntelAttribute a : toDelete){
+								try {
+									AttributeManager.INSTANCE.deleteAttribute(a, s);
+								}catch(Exception ex){
+									warnings.add(a.getName() + ": " + ex.getMessage()); //$NON-NLS-1$
 								}
+							}
+							s.getTransaction().commit();
+							if (!warnings.isEmpty()){
+								Display.getDefault().syncExec(new Runnable(){
+									@Override
+									public void run() {
+										WarningDialog wd = new WarningDialog(getShell(), Messages.AttributeListDialog_DeleteDialogTitle, Messages.AttributeListDialog_DeleteErrorMsg, warnings);
+										wd.open();		
+									}
+									
+								});
 								
-							});
-							
+							}
+						}catch (Exception ex){
+							s.getTransaction().rollback();
+							Intelligence2PlugIn.displayLog(Messages.AttributeListDialog_DeleteError + ex.getMessage(), ex);
 						}
-					}catch (Exception ex){
-						s.getTransaction().rollback();
-						Intelligence2PlugIn.displayLog(Messages.AttributeListDialog_DeleteError + ex.getMessage(), ex);
-					}finally{
-						s.close();
 					}			
 				}
 			});

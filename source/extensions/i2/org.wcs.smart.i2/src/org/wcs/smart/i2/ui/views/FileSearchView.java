@@ -80,6 +80,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class FileSearchView {
 
 	private static final String SECTION_LABEL_KEY = "LABEL"; //$NON-NLS-1$

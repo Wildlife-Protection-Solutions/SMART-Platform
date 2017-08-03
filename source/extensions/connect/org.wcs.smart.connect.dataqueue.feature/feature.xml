@@ -4,7 +4,7 @@
       label="Core SMART Connect Data Queue Module (Required)"
       version="6.0.0.qualifier"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart-feature">
+      license-feature="org.wcs.smart.feature">
 
    <description>
       Adds support for SMART Connect Data Queue processing.

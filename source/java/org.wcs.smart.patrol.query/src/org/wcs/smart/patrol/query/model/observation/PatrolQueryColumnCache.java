@@ -111,12 +111,8 @@ public class PatrolQueryColumnCache {
 			protected IStatus run(IProgressMonitor monitor) {
 				//load from the database 
 				ObservationOptions patrolOps = null;
-				Session session = HibernateManager.openSession();
-				
-				try {
+				try (Session session = HibernateManager.openSession()){
 					patrolOps = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-				} finally {
-					session.close();
 				}	
 				ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 				
@@ -220,13 +216,9 @@ public class PatrolQueryColumnCache {
 			protected IStatus run(IProgressMonitor monitor) {
 				//load from the database 
 				ObservationOptions patrolOps = null;
-				Session session = HibernateManager.openSession();
-				
-				try {
+				try (Session session = HibernateManager.openSession()){
 					patrolOps = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-				} finally {
-					session.close();
-				}	
+				}
 				ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 				
 				for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
@@ -297,57 +289,57 @@ public class PatrolQueryColumnCache {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					//load from the database 
-					Session session = HibernateManager.openSession();
-					session.beginTransaction();
-					try {
-						ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
-					
-						for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
-							FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
-							boolean add = true;
-							if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
-										item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
-										item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
-										item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
-										item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION||
-										item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE||
-										item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
-										item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
-										item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
-								// do nothing, don't want these columns for patrol queries
-								add = false;
-							}else{
-								if (item == FixedColumns.CA_ID || item == FixedColumns.CA_NAME){
-									add = SmartDB.isMultipleAnalysis();
+					try(Session session = HibernateManager.openSession()){
+						session.beginTransaction();
+						try {
+							ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
+						
+							for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
+								FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+								boolean add = true;
+								if (item == FixedQueryColumn.FixedColumns.WAYPOINT_X||  
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_Y||
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT||
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE||
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION||
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE||
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_ID||
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
+									// do nothing, don't want these columns for patrol queries
+									add = false;
+								}else{
+									if (item == FixedColumns.CA_ID || item == FixedColumns.CA_NAME){
+										add = SmartDB.isMultipleAnalysis();
+									}
 								}
-							}
-							if (add){
-								FixedQueryColumn c = new FixedQueryColumn(item, Locale.getDefault());
-								if ( item == FixedQueryColumn.FixedColumns.PATROL_ARMED || 
-										item == FixedQueryColumn.FixedColumns.PATROL_ID || 
-										item == FixedQueryColumn.FixedColumns.PATROL_LEG_ID ||
-										item == FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER ||
-										item == FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT ||
-										item == FixedQueryColumn.FixedColumns.PATROL_MANDATE ||
-										item == FixedQueryColumn.FixedColumns.PATROL_OBJETIVE ||
-										item == FixedQueryColumn.FixedColumns.PATROL_STATION ||
-										item == FixedQueryColumn.FixedColumns.PATROL_TEAM ||
-										item == FixedQueryColumn.FixedColumns.TRANSPORT_TYPE ){
-									c.setEdit(true);
+								if (add){
+									FixedQueryColumn c = new FixedQueryColumn(item, Locale.getDefault());
+									if ( item == FixedQueryColumn.FixedColumns.PATROL_ARMED || 
+											item == FixedQueryColumn.FixedColumns.PATROL_ID || 
+											item == FixedQueryColumn.FixedColumns.PATROL_LEG_ID ||
+											item == FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER ||
+											item == FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT ||
+											item == FixedQueryColumn.FixedColumns.PATROL_MANDATE ||
+											item == FixedQueryColumn.FixedColumns.PATROL_OBJETIVE ||
+											item == FixedQueryColumn.FixedColumns.PATROL_STATION ||
+											item == FixedQueryColumn.FixedColumns.PATROL_TEAM ||
+											item == FixedQueryColumn.FixedColumns.TRANSPORT_TYPE ){
+										c.setEdit(true);
+									}
+									
+									cols.add(c);
 								}
-								
-								cols.add(c);
+									
 							}
-								
+	
+							patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
+						
+						} finally {
+							if (session.getTransaction().isActive()){
+								session.getTransaction().rollback();
+							}
 						}
-
-						patrolQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
-					
-					} finally {
-						if (session.getTransaction().isActive()){
-							session.getTransaction().rollback();
-						}
-						session.close();
 					}
 					return Status.OK_STATUS;
 				}

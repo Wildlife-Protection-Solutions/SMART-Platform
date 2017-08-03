@@ -65,9 +65,8 @@ public class EntityComparisonInput  implements IEditorInput{
 		return this.entitiesToCompare;
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
 

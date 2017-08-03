@@ -98,25 +98,24 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		
 		if (query.getUuid() != null){
 			//load translations from db
-			Session s = HibernateManager.openSession();
-			s.clear();
-			try{
-				s.beginTransaction();
-				
-				/* load query names */
-				s.saveOrUpdate(query);
-				query.getNames().size();
-				
-				Query tmp = (Query) s.load(Query.class, this.query.getUuid());
-				this.names = new HashMap<Language, String>();
-				for (org.wcs.smart.ca.Label l : tmp.getNames()){
-					names.put(l.getLanguage(), l.getValue());
+			try(Session s = HibernateManager.openSession()){
+				s.clear();
+				try{
+					s.beginTransaction();
+					
+					/* load query names */
+					s.saveOrUpdate(query);
+					query.getNames().size();
+					
+					Query tmp = (Query) s.load(Query.class, this.query.getUuid());
+					this.names = new HashMap<Language, String>();
+					for (org.wcs.smart.ca.Label l : tmp.getNames()){
+						names.put(l.getLanguage(), l.getValue());
+					}
+					this.names.put(SmartDB.getCurrentLanguage(), tmp.getName());
+				}finally {
+					s.getTransaction().rollback();
 				}
-				this.names.put(SmartDB.getCurrentLanguage(), tmp.getName());
-				
-				s.getTransaction().rollback();				
-			}finally{
-				s.close();
 			}
 		}else{
 			//load translations from object

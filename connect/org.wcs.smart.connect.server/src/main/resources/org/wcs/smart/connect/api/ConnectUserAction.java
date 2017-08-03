@@ -45,10 +45,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -69,6 +68,7 @@ import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.ISmartConnectAction;
 import org.wcs.smart.connect.security.ResourceOption;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -121,10 +121,7 @@ public class ConnectUserAction extends HttpServlet {
 	//returns a list of uuids of all the CAs that the current user is a CA-Admin for. 
 	private List<UUID> getAdminCas(Session s){
 		ArrayList<UUID> items = new ArrayList<UUID>();
-		@SuppressWarnings("unchecked")
-		List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
-				.add(Restrictions.eq("username", request.getUserPrincipal().getName())) //$NON-NLS-1$
-				.list();
+		List<SmartUserAction> actions = QueryFactory.buildQuery(s, SmartUserAction.class, "username", request.getUserPrincipal().getName()).list(); //$NON-NLS-1$
 		for (SmartUserAction a : actions){
 			if(a.getAction().equals(CaAdminAccountAction.KEY)){
 				items.add(a.getResource());	
@@ -209,7 +206,6 @@ public class ConnectUserAction extends HttpServlet {
 	 * 
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	@GET
     @Path("/roles")
     public List<SmartActionsProxy> getRoles(){
@@ -217,8 +213,7 @@ public class ConnectUserAction extends HttpServlet {
 		Session s = HibernateManager.getSession(context, request.getLocale());
 		s.beginTransaction();
 		try{
-			List<SmartRole> roles = s.createCriteria(SmartRole.class)
-					.add(Restrictions.eq("isSystem", false)).list(); //$NON-NLS-1$
+			List<SmartRole> roles = QueryFactory.buildQuery(s, SmartRole.class, "isSystem", false).list(); //$NON-NLS-1$
 			
 			List<SmartActionsProxy> actionResources = new ArrayList<SmartActionsProxy>();
 			for (SmartRole r : roles){
@@ -262,10 +257,7 @@ public class ConnectUserAction extends HttpServlet {
 		Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
 		s.beginTransaction();
 		try{
-			@SuppressWarnings("unchecked")
-			List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
-					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-					.list();
+			List<SmartUserAction> actions = QueryFactory.buildQuery(s, SmartUserAction.class, "username", username).list(); //$NON-NLS-1$
 			if(restricted){
 				for (SmartUserAction a : actions){
 					if (a.getAction().equals(AdminAccountAction.KEY)){
@@ -289,10 +281,7 @@ public class ConnectUserAction extends HttpServlet {
 				items.add(p);
 			}
 			
-			@SuppressWarnings("unchecked")
-			List<SmartUserRole> roles = s.createCriteria(SmartUserRole.class)
-					.add(Restrictions.eq("id.username", username)) //$NON-NLS-1$
-					.list();
+			List<SmartUserRole> roles = QueryFactory.buildQuery(s, SmartUserRole.class, "id.username", username).list(); //$NON-NLS-1$
 			
 			for (SmartUserRole r : roles){
 				if (!r.getRole().isSystem){
@@ -360,13 +349,9 @@ public class ConnectUserAction extends HttpServlet {
 				hasAdminRights(resource, s);//throws an exception if they don't
 			}
 			
-			@SuppressWarnings("unchecked")
-			List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
-					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
-					.add(Restrictions.eq("action", action)) //$NON-NLS-1$
-					.list();
-			
-			
+			List<SmartUserAction> actions = QueryFactory.buildQuery(s, SmartUserAction.class,
+					new Object[] {"username", username}, //$NON-NLS-1$
+					new Object[] {"action", action}).list(); //$NON-NLS-1$
 			for(SmartUserAction a : actions){
 				if ((resource == null && a.getResource() == null) ||
 					(a.getResource() != null && a.getResource().toString().equals(resource))){		
@@ -543,10 +528,9 @@ public class ConnectUserAction extends HttpServlet {
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			
-			@SuppressWarnings("unchecked")
-			List<SmartRoleAction> actions = s.createCriteria(SmartRoleAction.class)
-					.add(Restrictions.eq("role", role)) //$NON-NLS-1$
-					.add(Restrictions.eq("action", action)) //$NON-NLS-1$
+			List<SmartRoleAction> actions = QueryFactory.buildQuery(s, SmartRoleAction.class,
+					new Object[] {"role", role}, //$NON-NLS-1$
+					new Object[] {"action", action}) //$NON-NLS-1$
 					.list();
 			
 			for(SmartRoleAction a : actions){
@@ -653,7 +637,6 @@ public class ConnectUserAction extends HttpServlet {
 	 * 
 	 * @param roleid
 	 */
-	@SuppressWarnings("unchecked")
 	@GET
     @Path("/roles/{roleid}/action")
     public List<SmartUserPermissionProxy> getRoleActions(@PathParam("roleid") String roleid){
@@ -666,9 +649,7 @@ public class ConnectUserAction extends HttpServlet {
 			}
 			List<SmartUserPermissionProxy> privis = new ArrayList<SmartUserPermissionProxy>();
 			
-			List<SmartRoleAction> actions = s.createCriteria(SmartRoleAction.class)
-					.add(Restrictions.eq("role", role)) //$NON-NLS-1$
-					.list();
+			List<SmartRoleAction> actions = QueryFactory.buildQuery(s, SmartRoleAction.class, "role", role).list(); //$NON-NLS-1$
 			for (SmartRoleAction a : actions){
 				SmartUserPermissionProxy proxy = new SmartUserPermissionProxy(Type.ACTION);
 				proxy.setKey(a.getAction());
@@ -760,7 +741,6 @@ public class ConnectUserAction extends HttpServlet {
 	 * @param username
 	 * @param action
 	 */
-	@SuppressWarnings("unchecked")
 	@DELETE
     @Path("/user/{username}/role/{role}")
     public void deleteUserRole(@PathParam("username") String username,
@@ -772,7 +752,7 @@ public class ConnectUserAction extends HttpServlet {
 		s.beginTransaction();
 		try{
 			
-			Query q = s.createQuery("FROM SmartUserRole r WHERE r.id.username = :username and r.id.role.roleId = :roleId"); //$NON-NLS-1$
+			Query <SmartUserRole>q = s.createQuery("FROM SmartUserRole r WHERE r.id.username = :username and r.id.role.roleId = :roleId", SmartUserRole.class); //$NON-NLS-1$
 			q.setParameter("username", username); //$NON-NLS-1$
 			q.setParameter("roleId", role); //$NON-NLS-1$
 			
@@ -861,9 +841,7 @@ public class ConnectUserAction extends HttpServlet {
 		
 		//is the resource a Conservation Area
 		if(resourceUuid != null){
-			ConservationArea ca = (ConservationArea) s.createCriteria(ConservationArea.class)
-					.add(Restrictions.eq("uuid",resourceUuid)) //$NON-NLS-1$
-					.uniqueResult(); 
+			ConservationArea ca = (ConservationArea) s.get(ConservationArea.class, resourceUuid);
 			if (ca != null){
 				//is the user an admin ca?
 				for (UUID u : list){
@@ -886,9 +864,7 @@ public class ConnectUserAction extends HttpServlet {
 		
 		
 		//same as above but now we check reports
-		Report r = (Report)s.createCriteria(Report.class)
-				.add(Restrictions.eq("uuid", resourceUuid)) //$NON-NLS-1$
-				.uniqueResult(); 
+		Report r = (Report)s.get(Report.class, resourceUuid);
 		if(r != null ){
 			for (UUID u : list){
 				if(u.equals(r.getConservationArea().getUuid() ) ){

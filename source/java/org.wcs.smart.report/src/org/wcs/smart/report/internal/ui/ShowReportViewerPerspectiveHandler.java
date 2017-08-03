@@ -31,6 +31,7 @@ import org.wcs.smart.ui.ShowPerspectiveHandler;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowReportViewerPerspectiveHandler {
 
 	@Execute

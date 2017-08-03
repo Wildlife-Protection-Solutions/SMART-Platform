@@ -25,7 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -86,10 +86,9 @@ public class ConvertedCt2CmExtraData implements IConvertedCmExtraData {
 		
 		//name is known and contain valid data
 		//try to fetch this profile from database
-		Query query = session.createQuery("SELECT pr FROM CyberTrackerPropertiesProfile pr, Label lbl WHERE lbl.id.element.uuid = pr.uuid AND lbl.value = :name AND lbl.id.language = :language"); //$NON-NLS-1$
+		Query<CyberTrackerPropertiesProfile> query = session.createQuery("SELECT pr FROM CyberTrackerPropertiesProfile pr, Label lbl WHERE lbl.id.element.uuid = pr.uuid AND lbl.value = :name AND lbl.id.language = :language", CyberTrackerPropertiesProfile.class); //$NON-NLS-1$
 		query.setParameter("name", name); //$NON-NLS-1$
 		query.setParameter("language", language); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
 		List<CyberTrackerPropertiesProfile> list = query.list();
 		if (list.isEmpty()) {
 			warnings.add(MessageFormat.format(Messages.ConvertedCt2CmExtraData_NameNotFound, name));

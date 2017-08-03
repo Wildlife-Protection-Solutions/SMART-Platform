@@ -25,7 +25,8 @@ import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
@@ -67,16 +68,16 @@ public class DownloadChangeLogJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask(Messages.DownloadChangeLogJob_DownloadTaskName, 3);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DownloadChangeLogJob_DownloadTaskName, 11);
 		try{
 			/* request ca */
-			monitor.subTask(Messages.DownloadChangeLogJob_InitDownloadSubtax);
+			progress.subTask(Messages.DownloadChangeLogJob_InitDownloadSubtax);
 			String statusUrl = connect.startChangeLogDownload(serverInfo.getUuid(), serverInfo.getVersion(), serverInfo.getServerRevision());
-			monitor.worked(1);
-			if (monitor.isCanceled()) return cancelled();
+			progress.worked(1);
+			progress.checkCanceled();
 			
 			/* wait for ca export to be created */
-			monitor.subTask(Messages.DownloadChangeLogJob_WaitTaskName);
+			progress.subTask(Messages.DownloadChangeLogJob_WaitTaskName);
 			Long start = System.nanoTime();
 			WorkItemStatus status = null ;
 			int waitTime = ConnectServerOption.ConnectionOption.RETY_WAIT_TIME.getIntegerValue(connect.getServer());
@@ -89,27 +90,31 @@ public class DownloadChangeLogJob extends Job {
 				}catch (Exception ex){
 					ConnectPlugIn.log("Error requesting ca update download status.", ex); //$NON-NLS-1$
 				}
-				if (monitor.isCanceled()) return cancelled();
+				
 			}
-			monitor.worked(1);
+			progress.checkCanceled();
+			progress.worked(5);
 			
 			if (status.getStatus() == WorkItemStatus.Status.ERROR){
 				record.setStatus(Status.ERROR);
 				record.setErrorString(SmartConnect.parseErrorMessage(status.getMessage()));
 			}else{
 				/* download file */
-				monitor.subTask(Messages.DownloadChangeLogJob_DownloadSubTas);
+				progress.subTask(Messages.DownloadChangeLogJob_DownloadSubTas);
 				String message = status.getMessage();
 				JsonNode nd = (new ObjectMapper()).readTree(message);
 				String downloadUrl = nd.get("file_url").asText(); //$NON-NLS-1$
-				if (monitor.isCanceled()) return cancelled();
+				
 				Integer promptSize = null;
 				if (ConnectServerOption.ConnectionOption.PACKAGE_PROMPT.getBooleanValue(connect.getServer())){
 					promptSize = ConnectServerOption.ConnectionOption.PACKAGE_PROMPT_SIZE.getIntegerValue(connect.getServer());
 				}
-				downloadFile = connect.downloadFileFromUrl(downloadUrl, promptSize, new SubProgressMonitor(monitor, 1));
+				progress.checkCanceled();
+				downloadFile = connect.downloadFileFromUrl(downloadUrl, promptSize, progress.split(5));
 			}
-			monitor.done();
+			
+		}catch (OperationCanceledException ex) {
+			return cancelled();
 		}catch (PackageToLargeException ex){
 			record.setStatus(Status.ERROR);
 			record.setErrorString(ex.getMessage());

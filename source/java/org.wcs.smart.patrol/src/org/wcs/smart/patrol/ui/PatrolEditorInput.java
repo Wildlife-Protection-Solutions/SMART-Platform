@@ -28,7 +28,6 @@ import java.util.UUID;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
@@ -76,10 +75,6 @@ public class PatrolEditorInput implements IEditorInput {
 		this.type = type;
 		this.startDate = startDate;
 		this.endDate = endDate;
-		
-		if (startDate == null || endDate == null){
-			System.out.println("Patrol start date or end date is null for editor input");
-		}
 	}
 	
 	/**
@@ -128,7 +123,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
 

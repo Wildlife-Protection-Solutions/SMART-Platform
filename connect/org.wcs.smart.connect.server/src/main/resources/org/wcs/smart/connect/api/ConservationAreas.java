@@ -62,11 +62,9 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.GenericJDBCException;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.type.PostgresUUIDType;
 import org.mindrot.jbcrypt.BCrypt;
 import org.wcs.smart.ca.Area.AreaType;
@@ -90,6 +88,7 @@ import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -200,7 +199,6 @@ public class ConservationAreas extends HttpServlet{
 	 * @param includeSpatialBoundaries Boolean - true to get GeoJson data on CA boundaries, false to skip it as this can take a long time for lots of CAs and lots of boundaries.  
 	 * @return Returns a JSON array of ConservationAreaProxy objects for the updated user. (https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/model/ConservationAreaProxy.java)
 	 */
-	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
     public List<ConservationAreaProxy> getConservationAreas(@QueryParam("organizationFilter") String organizationFilter, @QueryParam("caJsonFilter") String caJsonFilter, @QueryParam("includeSpatialBoundaries") Boolean includeSpatialBoundaries){
@@ -209,7 +207,7 @@ public class ConservationAreas extends HttpServlet{
 		s.beginTransaction();
 		try{
 			List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
-			List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class).list();
+			List<ConservationAreaInfo> db = QueryFactory.buildQuery(s, ConservationAreaInfo.class).list();
 			for (ConservationAreaInfo ca : db){
 				ConservationArea smartca = (ConservationArea) s.get(ConservationArea.class, ca.getUuid());
 				ConservationAreaProxy proxy = new ConservationAreaProxy(ca);
@@ -233,7 +231,7 @@ public class ConservationAreas extends HttpServlet{
 							sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
 							sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
 							
-							SQLQuery query = s.createSQLQuery(sb.toString());
+							NativeQuery<?> query = s.createNativeQuery(sb.toString());
 							query.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 							query.setParameter("type", AreaType.ADMIN.name()); //$NON-NLS-1$
 							proxy.setAdministrativeAreasJson((String)query.uniqueResult() );
@@ -273,13 +271,12 @@ public class ConservationAreas extends HttpServlet{
 							sb.append(" LIMIT 1"); //$NON-NLS-1$
 							
 							
-							SQLQuery query = s.createSQLQuery(sb.toString());
+							NativeQuery<?> query = s.createNativeQuery(sb.toString());
 							query.setParameter("json", caJsonFilter); //$NON-NLS-1$
 							query.setParameter("ca", smartca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 							query.setParameter("area", AreaType.CA.name()); //$NON-NLS-1$
 							Boolean result = ((BigInteger)query.uniqueResult()).intValue() > 0;
 							
-									
 							if(result != null && result == true){
 								passedBoundary=true;//can't cast straight to a bool because the result is null if there is no caBoundary layer
 							}else{
@@ -705,7 +702,7 @@ public class ConservationAreas extends HttpServlet{
 				sb.append("FROM smart.area_geometries "); //$NON-NLS-1$
 				sb.append("WHERE ca_uuid = :ca and area_type = :type"); //$NON-NLS-1$
 				
-				SQLQuery query = s.createSQLQuery(sb.toString());
+				NativeQuery<?> query = s.createNativeQuery(sb.toString());
 				query.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 				query.setParameter("type", AreaType.ADMIN.name()); //$NON-NLS-1$
 				proxy.setAdministrativeAreasJson((String)query.uniqueResult() );
@@ -795,8 +792,7 @@ public class ConservationAreas extends HttpServlet{
 			
 			UUID uuid = UUID.fromString(caUuid);
 			
-			ConservationAreaInfo serverDelete = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
-					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
+			ConservationAreaInfo serverDelete = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uuid);
 			if (serverDelete == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
@@ -817,14 +813,14 @@ public class ConservationAreas extends HttpServlet{
 			
 			//delete desktop data
 			String query = "DELETE FROM smart.conservation_area WHERE uuid = :uuid"; //$NON-NLS-1$
-			Query q = s.createSQLQuery(query);
-			q.setParameter("uuid", serverDelete.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-			q.executeUpdate();
+			s.createNativeQuery(query)
+				.setParameter("uuid", serverDelete.getUuid(), PostgresUUIDType.INSTANCE) //$NON-NLS-1$
+				.executeUpdate();
 			
 			//delete plugin data
-			q = s.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca"); //$NON-NLS-1$
-			q.setParameter("ca", serverDelete.getUuid()); //$NON-NLS-1$
-			q.executeUpdate();
+			s.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca") //$NON-NLS-1$
+						.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
+						.executeUpdate();
 
 			//delete change log data
 			ChangeLogManager.INSTANCE.deleteItems(s, serverDelete.getUuid());
@@ -833,9 +829,9 @@ public class ConservationAreas extends HttpServlet{
 			if (deleteAll){
 				
 				//delete actions associated with resource
-				q = s.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca"); //$NON-NLS-1$
-				q.setParameter("ca", serverDelete.getUuid()); //$NON-NLS-1$
-				q.executeUpdate();
+				s.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca") //$NON-NLS-1$
+					.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
+					.executeUpdate();
 				
 				//delete server only data
 				s.delete(serverDelete);
@@ -899,8 +895,7 @@ public class ConservationAreas extends HttpServlet{
 		try{
 			validateAdd(s);
 			
-			ConservationAreaInfo ca = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
-					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
+			ConservationAreaInfo ca = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uuid);
 			if (ca != null){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.CaExistsError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
@@ -945,10 +940,7 @@ public class ConservationAreas extends HttpServlet{
 		s.beginTransaction();
 		try{
 			UUID uuid = UUID.fromString(caUuid);
-			ConservationAreaInfo ca = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
-					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
-
-					
+			ConservationAreaInfo ca = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uuid);					
 			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
 			if (lengthHeader == null){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length not set"); //$NON-NLS-1$
@@ -1060,8 +1052,7 @@ public class ConservationAreas extends HttpServlet{
 		s.beginTransaction();
 		try{
 			UUID uuid = UUID.fromString(caUuid);
-			ConservationAreaInfo ca = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
-					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
+			ConservationAreaInfo ca = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uuid);
 			if (ca == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.CaNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}

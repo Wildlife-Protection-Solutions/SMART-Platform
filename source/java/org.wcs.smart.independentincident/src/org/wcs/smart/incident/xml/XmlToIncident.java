@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -338,17 +338,17 @@ public class XmlToIncident {
 	}
 	private Attribute findAttribute(String key, Category category){
 		String sql = "FROM Attribute WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
-		Query query = session.createQuery(sql);
+		Query<Attribute> query = session.createQuery(sql, Attribute.class);
 		query.setParameter("key", key); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<Attribute> results = query.list();
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
 			throw new IllegalStateException(Messages.XmlToIncident_TooManyAttributes);
 		}else{
-			Attribute att = (Attribute) results.get(0);
+			Attribute att = results.get(0);
 			//ensure attribute exists for category
 			if (findCategoryAttribute(category, att)){
 				return att;
@@ -379,14 +379,14 @@ public class XmlToIncident {
 	private Category findCategory(String key){
 		String[] bits = key.split("\\."); //$NON-NLS-1$
 		String sql = "FROM Category WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
-		Query query = session.createQuery(sql);
+		Query<Category> query = session.createQuery(sql, Category.class);
 		query.setParameter("key", bits[bits.length - 1]); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		
-		List<?> results = query.list();
+		List<Category> results = query.list();
 		Category found = null;
-		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-			Category options = (Category) iterator.next();
+		for (Iterator<Category> iterator = results.iterator(); iterator.hasNext();) {
+			Category options = iterator.next();
 			if (options.getHkey().equals(key)){
 				found = options;
 				break;

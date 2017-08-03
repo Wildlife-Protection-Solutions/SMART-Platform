@@ -41,7 +41,6 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
@@ -231,46 +230,43 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			protected IStatus run(IProgressMonitor monitor) {
 				getEntityType();
 				
-				final Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					if (entityType.getUuid() != null){
-						s.saveOrUpdate(entityType);
-					}
-					entityType.getNames().size();
-					
+				try(final Session s = HibernateManager.openSession()){
+					s.beginTransaction();
 					try{
-						Projection viewProjection = HibernateManager.getCurrentViewProjection(s);
-						if (viewProjection != null){
-							currentPrj = viewProjection;
-							currentPrj.setParsedCoordinateReferenceSystem( ReprojectUtils.stringToCrs(viewProjection.getDefinition()) );
-						}else{
-							currentPrj = new Projection();
-							currentPrj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-							currentPrj.setName(SmartDB.DATABASE_CRS.getName().toString());
+						if (entityType.getUuid() != null){
+							s.saveOrUpdate(entityType);
 						}
-					}catch (Exception ex){
-						EntityPlugIn.displayLog(ex.getMessage(), ex);
-					}
-					
-					availablePrj = s.createCriteria(Projection.class)
-							.add(Restrictions.eq("conservationArea", entityType.getConservationArea())).list(); //$NON-NLS-1$
-					
-					Display.getDefault().syncExec(new Runnable(){
-
-						@Override
-						public void run() {
-							for (int i = 0; i < partsToUpdate.length; i ++){
-								if (partsToUpdate[i] != null){
-									partsToUpdate[i].updatePage(s, typeChanged);
-								}
+						entityType.getNames().size();
+						
+						try{
+							Projection viewProjection = HibernateManager.getCurrentViewProjection(s);
+							if (viewProjection != null){
+								currentPrj = viewProjection;
+								currentPrj.setParsedCoordinateReferenceSystem( ReprojectUtils.stringToCrs(viewProjection.getDefinition()) );
+							}else{
+								currentPrj = new Projection();
+								currentPrj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
+								currentPrj.setName(SmartDB.DATABASE_CRS.getName().toString());
 							}
-							setPartName(entityType.getLabel());							
-						}});
-
-				}finally{
-					s.getTransaction().rollback();
-					s.close();
+						}catch (Exception ex){
+							EntityPlugIn.displayLog(ex.getMessage(), ex);
+						}
+						availablePrj = HibernateManager.getCaProjectionList(entityType.getConservationArea(), s);
+						Display.getDefault().syncExec(new Runnable(){
+	
+							@Override
+							public void run() {
+								for (int i = 0; i < partsToUpdate.length; i ++){
+									if (partsToUpdate[i] != null){
+										partsToUpdate[i].updatePage(s, typeChanged);
+									}
+								}
+								setPartName(entityType.getLabel());							
+							}});
+	
+					}finally{
+						s.getTransaction().rollback();
+					}
 				}
 				return Status.OK_STATUS;
 			}};
@@ -341,26 +337,26 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 		}
 		UUID uuid = ((EntityTypeEditorInput) getEditorInput()).getUuid();
 		EntityType et = null;
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try{
-			et = (EntityType) session.get(EntityType.class, uuid);
-			if (et == null) throw new RuntimeException(MessageFormat.format("Entity type not found ({0})", uuid.toString())); //$NON-NLS-1$
-			et.getDmAttribute().getName();
-			et.getName();
-			
-			//ensure attributes are lazily loaded
-			if (et.getAttributes() != null){
-				for (EntityAttribute att : et.getAttributes()){
-					att.getName().length();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try{
+				et = (EntityType) session.get(EntityType.class, uuid);
+				if (et == null) throw new RuntimeException(MessageFormat.format("Entity type not found ({0})", uuid.toString())); //$NON-NLS-1$
+				et.getDmAttribute().getName();
+				et.getName();
+				
+				//ensure attributes are lazily loaded
+				if (et.getAttributes() != null){
+					for (EntityAttribute att : et.getAttributes()){
+						att.getName().length();
+					}
 				}
+			}catch (Exception ex){
+				ex.printStackTrace();
+				throw ex;
+			}finally{
+				session.getTransaction().rollback();
 			}
-		}catch (Exception ex){
-			ex.printStackTrace();
-			throw ex;
-		}finally{
-			session.getTransaction().rollback();
-			session.close();
 		}
 		
 		return et;
@@ -382,19 +378,18 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
 				monitor.beginTask(MessageFormat.format(Messages.EntityTypeEditor_SaveProgress, new Object[]{et.getName()}), 0);
-				Session s = HibernateManager.openSession();
-				try{
-					s.beginTransaction();
-					s.saveOrUpdate(et);
-					s.getTransaction().commit();
-				}catch (Exception ex){
-					if (s.getTransaction().isActive()){
-						s.getTransaction().rollback();
+				try(Session s = HibernateManager.openSession()){
+					try{
+						s.beginTransaction();
+						s.saveOrUpdate(et);
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						if (s.getTransaction().isActive()){
+							s.getTransaction().rollback();
+						}
+						EntityPlugIn.displayLog(Messages.EntityTypeEditor_EditingSavingType + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+						return;
 					}
-					EntityPlugIn.displayLog(Messages.EntityTypeEditor_EditingSavingType + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-					return;
-				}finally{
-					s.close();
 				}
 				
 				//fire associated event changes

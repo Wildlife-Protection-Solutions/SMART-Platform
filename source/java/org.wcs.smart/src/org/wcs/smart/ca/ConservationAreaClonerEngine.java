@@ -36,7 +36,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -62,7 +62,7 @@ public class ConservationAreaClonerEngine {
 
 	private static final String ALL_KEY = "org.wcs.smart.*"; //$NON-NLS-1$
 
-	public static final String EXTENSION_ID = "org.wcs.smart.ca.templateCloner"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.caTemplateCloner"; //$NON-NLS-1$
 	
 	private ConservationArea templateCa;
 	private ConservationArea newCa;
@@ -248,13 +248,15 @@ public class ConservationAreaClonerEngine {
 	 * Creates a new conservation area in the database, copying all the existing information
 	 * from the template conservation area.
 	 * 
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
+		
 	 * @throws Exception
 	 */
 	public void processTemplate(IProgressMonitor monitor) throws Exception{
-		List<Cloner> cloners = getCloners();
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaClonerEngine_Progress_CopyingCa, 1);
 		
-		monitor.beginTask(Messages.ConservationAreaClonerEngine_Progress_CopyingCa, cloners.size() * 10);
+		List<Cloner> cloners = getCloners();
+		progress.setWorkRemaining(cloners.size());
 		
 		List<Cloner> allCloners = new ArrayList<Cloner>();
 		allCloners.addAll(cloners);
@@ -329,7 +331,7 @@ public class ConservationAreaClonerEngine {
 					cnt++;
 				}else{
 					cnt = 0;
-					c.cloner.cloneTemplateData(this, new SubProgressMonitor(monitor, 10));
+					c.cloner.cloneTemplateData(this, progress.split(1));
 					processed.add(c.id);
 				}
 				if (cnt > cloners.size()){
@@ -368,7 +370,7 @@ public class ConservationAreaClonerEngine {
 					cnt++;
 				}else{
 					cnt = 0;
-					c.cloner.cloneTemplateData(this, new SubProgressMonitor(monitor, 10));
+					c.cloner.cloneTemplateData(this, progress.split(1));
 					processed.add(c.id);
 				}
 				if (cnt > runAtEnd.size()){
@@ -396,7 +398,6 @@ public class ConservationAreaClonerEngine {
 		}finally{
 			session.close();
 			SmartHibernateManager.setUserName(SmartDB.DbUser.LOGIN.getUserName(), SmartDB.DbUser.LOGIN.getPassword());
-			monitor.done();
 		}	
 	}
 	

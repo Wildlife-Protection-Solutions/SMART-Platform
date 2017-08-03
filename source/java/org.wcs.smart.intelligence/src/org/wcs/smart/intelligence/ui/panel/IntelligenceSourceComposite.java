@@ -92,21 +92,20 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	 */
 	public IntelligenceSourceComposite(Composite parent, int style) {
 		super(parent, style);
-		Session s = HibernateManager.openSession();
-		try {
-			sourceTypeList = IntelligenceHibernateManager.getActiveSourceTypes(SmartDB.getCurrentConservationArea(), s);
-		} catch (Exception e) {
-			IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_SourceLoad_Error, e);
-			sourceTypeList = new ArrayList<IntelligenceSource>();
-		}
-
-		try {
-			informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), s, true);
-		} catch (Exception e) {
-			IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_InformantLoad_Error, e);
-			informantList = new ArrayList<Informant>();
-		} finally {
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			try {
+				sourceTypeList = IntelligenceHibernateManager.getActiveSourceTypes(SmartDB.getCurrentConservationArea(), s);
+			} catch (Exception e) {
+				IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_SourceLoad_Error, e);
+				sourceTypeList = new ArrayList<IntelligenceSource>();
+			}
+	
+			try {
+				informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), s, true);
+			} catch (Exception e) {
+				IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_InformantLoad_Error, e);
+				informantList = new ArrayList<Informant>();
+			}
 		}
 		Collections.sort(informantList, new Comparator<Informant>() {
 			@Override

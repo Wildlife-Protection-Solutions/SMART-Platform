@@ -30,14 +30,14 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import org.hibernate.SQLQuery;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.NativeQuery;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.query.DataModelColumn;
@@ -151,7 +151,6 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		return reader.read(b.getBytes(1l, (int) b.length()));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public IResultItem asResultItem(ScrollableResults sc, Session session){
 		
@@ -183,10 +182,8 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		
 		//add attachments
 		if (item.getObservationUuid() != null){
-			List<IntelObservationAttribute> attributes = session.createCriteria(IntelObservationAttribute.class)
-					.add(Restrictions.eq("id.observation.uuid", item.getObservationUuid())) //$NON-NLS-1$
-					.list();
-			
+			List<IntelObservationAttribute> attributes = 
+					QueryFactory.buildQuery(session, IntelObservationAttribute.class, "id.observation.uuid", item.getObservationUuid()).getResultList(); //$NON-NLS-1$
 			for (IntelObservationAttribute a : attributes){
 				if (a.getAttribute().getType() == AttributeType.LIST){
 					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItem().getName());	
@@ -215,24 +212,18 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	@Override
 	public List<? extends IResultItem> getData(int offset, int pageSize) {
 		final List<IResultItem> items = new ArrayList<>();
-
-		Session session = SmartContext.INSTANCE.getClass(IConnectionFactory.class).openSession();
-		try{
+		try(Session session = SmartContext.INSTANCE.getClass(IConnectionFactory.class).openSession()){
 			String sortSql = configureSort(session);
 			String sql = "SELECT * FROM " + resultsTable + sortSql; //$NON-NLS-1$
 			SqlGenerator.logString(sql);
-			ScrollableResults sc = session.createSQLQuery(sql).scroll();
-			try{
+			
+			try(ScrollableResults sc = session.createNativeQuery(sql).scroll()){
 				if (!sc.setRowNumber(offset)) return items;
 				for (int i = 0; i <= pageSize; i ++){
 					items.add(asResultItem(sc, session));
 					if (!sc.next()) break; //nothing else to get
 				}
-			}finally{
-				sc.close();
-			}	
-		}finally{
-			session.close();
+			}
 		}
 		return items;
 	}
@@ -280,26 +271,26 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 					case BOOLEAN:
 					case NUMERIC:
 						String updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createSQLQuery(updateQuery).executeUpdate();
+						session.createNativeQuery(updateQuery).executeUpdate();
 						
 						updateQuery = "UPDATE " + resultsTable + " SET dbl_sort = (SELECT a.double_value FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						SqlGenerator.logString(updateQuery);
-						session.createSQLQuery(updateQuery).executeUpdate();
+						session.createNativeQuery(updateQuery).executeUpdate();
 						break;
 					case DATE:
 						updateQuery = "UPDATE " + resultsTable + " SET date_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createSQLQuery(updateQuery).executeUpdate();
+						session.createNativeQuery(updateQuery).executeUpdate();
 						
 						updateQuery = "UPDATE " + resultsTable + " SET date_sort = (SELECT date(a.string_value) FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						SqlGenerator.logString(updateQuery);
-						session.createSQLQuery(updateQuery).executeUpdate();
+						session.createNativeQuery(updateQuery).executeUpdate();
 						break;
 					case LIST:		
 						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createSQLQuery(updateQuery).executeUpdate();
+						session.createNativeQuery(updateQuery).executeUpdate();
 						
 						String attribute = "SELECT distinct a.list_element_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.list_element_uuid is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						List<Object> listitems = session.createSQLQuery(attribute).list();
+						List<Object> listitems = session.createNativeQuery(attribute).list();
 						for (Object b : listitems){
 							UUID uuid = null;
 							if (b instanceof UUID){ 
@@ -311,7 +302,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 							if (item != null){
 								updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE observation_uuid in (select observation_uuid FROM smart.i_observation_attribute a WHERE " + resultsTable + ".observation_uuid = a.observation_uuid and a.list_element_uuid = :listitem)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								
-								SQLQuery q = session.createSQLQuery(updateQuery);
+								NativeQuery<?> q = session.createNativeQuery(updateQuery);
 								q.setParameter("value", item.getName()); //$NON-NLS-1$
 								q.setParameter("listitem", item.getUuid()); //$NON-NLS-1$
 								q.executeUpdate();
@@ -320,24 +311,24 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 						break;
 					case TEXT:
 						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createSQLQuery(updateQuery).executeUpdate();
+						session.createNativeQuery(updateQuery).executeUpdate();
 						
 						updateQuery = "UPDATE " + resultsTable + " SET str_sort = (SELECT a.string_value FROM smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid WHERE a.observation_uuid = " + resultsTable + ".observation_uuid and b.keyid ='" + attributeKey + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						SqlGenerator.logString(updateQuery);
-						session.createSQLQuery(updateQuery).executeUpdate();
+						session.createNativeQuery(updateQuery).executeUpdate();
 						break;
 					case TREE:
 						updateQuery = "UPDATE " + resultsTable + " SET str_sort = null"; //$NON-NLS-1$ //$NON-NLS-2$
-						session.createSQLQuery(updateQuery).executeUpdate();
+						session.createNativeQuery(updateQuery).executeUpdate();
 						
 						attribute = "SELECT distinct a.tree_node_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.tree_node_uuid is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						List<byte[]> treenodes = session.createSQLQuery(attribute).list();
+						List<byte[]> treenodes = session.createNativeQuery(attribute).list();
 						for (byte[] b : treenodes){
 							AttributeTreeNode item = (AttributeTreeNode) session.get(AttributeTreeNode.class, UuidUtils.byteToUUID(b));
 							if (item != null){
 								updateQuery = "UPDATE " + resultsTable + " SET str_sort = :value WHERE observation_uuid in (select observation_uuid FROM smart.i_observation_attribute a WHERE " + resultsTable + ".observation_uuid = a.observation_uuid and a.tree_node_uuid = :listitem)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								
-								SQLQuery q = session.createSQLQuery(updateQuery);
+								NativeQuery<?> q = session.createNativeQuery(updateQuery);
 								q.setParameter("value", item.getName()); //$NON-NLS-1$
 								q.setParameter("listitem", item.getUuid()); //$NON-NLS-1$
 								q.executeUpdate();
@@ -401,7 +392,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		String sql = "DROP TABLE " + resultsTable; //$NON-NLS-1$
 		resultsTable = null;
 		SqlGenerator.logString(sql);
-		session.createSQLQuery(sql).executeUpdate();
+		session.createNativeQuery(sql).executeUpdate();
 	}
 
 	@Override

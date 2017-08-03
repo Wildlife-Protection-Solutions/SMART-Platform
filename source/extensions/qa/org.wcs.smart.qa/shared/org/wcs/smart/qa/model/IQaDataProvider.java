@@ -27,7 +27,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 
@@ -52,14 +51,6 @@ public abstract class IQaDataProvider {
 	 * @return
 	 */
 	public abstract String getName(Locale l);
-	
-	/**
-	 * An image representing the data returned; can be null
-	 * 
-	 * @param l
-	 * @return
-	 */
-	public abstract Image getImage();
 	
 	/**
 	 * Find all the data between the start and end date.

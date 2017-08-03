@@ -60,8 +60,8 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 		LocationLayerType geomType = LocationLayerType.valueOf(ftype.getName().getLocalPart());
 		ArrayList<IntelLocation> locations = new ArrayList<IntelLocation>();
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+
 			List<IntelEntityLocation> alllocations = EntityManager.INSTANCE.getEntityLocations(s, entityUuid, dFilter);
 			
 			for (IntelEntityLocation location : alllocations){
@@ -71,8 +71,6 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 					location.getLocation().getRecord().getTitle();
 				}
 			}
-		}finally{
-			s.close();
 		}		
 		fIterator = locations.iterator();
 	}

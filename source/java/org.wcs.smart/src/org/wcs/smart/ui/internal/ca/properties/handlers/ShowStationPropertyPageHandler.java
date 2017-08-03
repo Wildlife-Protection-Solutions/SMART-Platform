@@ -27,6 +27,7 @@ import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
 /**
  * Handler for showing station property page dialog.
  */
+@SuppressWarnings("restriction")
 public class ShowStationPropertyPageHandler extends ShowPropertyPageHandler {
 
 	/**

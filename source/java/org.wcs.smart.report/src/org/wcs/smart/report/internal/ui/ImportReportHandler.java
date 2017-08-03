@@ -34,6 +34,7 @@ import org.wcs.smart.ui.ShowPerspectiveHandler;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ImportReportHandler  {
 
 	@Execute

@@ -37,7 +37,8 @@ public interface IFileSearcher {
 	 * @Param searchString the string to search for
 	 * @param attachment the attachment to search
 	 * @param collection the match collector for collecting search results
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
+	 * to call done() on the given monitor. 
 	 */
 	public void search(String searchString, ISmartAttachment attachment, IMatchCollector collector, IProgressMonitor monitor);
 }

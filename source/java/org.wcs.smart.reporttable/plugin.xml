@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.wcs.smart.data.oda.smart.table">
+         point="org.wcs.smart.report.birt.query.smartTable">
       <TableCategory
             icon="images/icons/obj16/smart16.gif"
             id="org.wcs.smart.ca.tables"

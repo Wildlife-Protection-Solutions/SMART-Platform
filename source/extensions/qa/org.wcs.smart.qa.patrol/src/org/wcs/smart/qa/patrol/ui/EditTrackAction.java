@@ -25,10 +25,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -57,8 +55,7 @@ public class EditTrackAction  implements IQaAction {
 		
 		Track track = null;
 		Patrol p = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			track = (Track) s.get(Track.class, item.getSourceId());
 			if (track != null){
 				//load hibernate objects necessary for editing
@@ -68,8 +65,6 @@ public class EditTrackAction  implements IQaAction {
 				track.getPatrolLegDay().getTracks().size();
 				track.getGeom().equals(null);
 			}
-		}finally{
-			s.close();
 		}
 		
 		if (track == null){
@@ -113,11 +108,6 @@ public class EditTrackAction  implements IQaAction {
 	@Override
 	public String getName(Locale l) {
 		return Messages.EditTrackAction_ActionName;
-	}
-
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON);
 	}
 
 }

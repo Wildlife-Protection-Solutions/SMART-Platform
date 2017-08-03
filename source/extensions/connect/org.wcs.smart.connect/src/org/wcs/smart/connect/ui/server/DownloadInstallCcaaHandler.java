@@ -56,6 +56,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DownloadInstallCcaaHandler {
 	
 	@Execute
@@ -66,8 +67,7 @@ public class DownloadInstallCcaaHandler {
 			return;
 		}
 		boolean sync = false;
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			//prompt user to sync any existing changes to server before downloading
 			if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), 
 					session)){
@@ -78,8 +78,6 @@ public class DownloadInstallCcaaHandler {
 					}
 				}
 			}
-		}finally{
-			session.close();
 		}
 		if (sync){
 			runDownloadSync(SmartDB.getCurrentConservationArea(), activeShell);

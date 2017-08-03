@@ -78,10 +78,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -96,6 +94,7 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.newwizard.StatusComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
@@ -304,37 +303,36 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 						return;
 					}
 					
-					Session s = HibernateManager.openSession();
-					s.beginTransaction();
-					try{
-						EntityType et = parentEditor.getEntityType();
-						Query q = s.createQuery("SELECT keyId FROM EntityType where conservationArea = :ca and uuid != :uuid"); //$NON-NLS-1$
-						q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-						q.setParameter("uuid", et.getUuid()); //$NON-NLS-1$
-						@SuppressWarnings("unchecked")
-						List<String> items = q.list();
-						List<NamedKeyItem> siblings = new ArrayList<NamedKeyItem>();
-						for (String i : items){
-							NamedKeyItem k = new EntityType();
-							k.setKeyId(i);
-							siblings.add(k);
-						}
-						KeyInputDialog id = new KeyInputDialog(getSite().getShell(), et.getKeyId(), siblings);
-						int ret = id.openNoWarning();
-						if (ret != Window.CANCEL) {
-							parentEditor.getEntityType().setKeyId(id.getValue());
-							s.saveOrUpdate(et);
-							s.getTransaction().commit();
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						try{
+							EntityType et = parentEditor.getEntityType();
+							Query<?> q = s.createQuery("SELECT keyId FROM EntityType where conservationArea = :ca and uuid != :uuid"); //$NON-NLS-1$
+							q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+							q.setParameter("uuid", et.getUuid()); //$NON-NLS-1$
 							
-							EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, et);
-						}else{
+							List<?> items = q.list();
+							List<NamedKeyItem> siblings = new ArrayList<NamedKeyItem>();
+							for (Object i : items){
+								NamedKeyItem k = new EntityType();
+								k.setKeyId((String)i);
+								siblings.add(k);
+							}
+							KeyInputDialog id = new KeyInputDialog(getSite().getShell(), et.getKeyId(), siblings);
+							int ret = id.openNoWarning();
+							if (ret != Window.CANCEL) {
+								parentEditor.getEntityType().setKeyId(id.getValue());
+								s.saveOrUpdate(et);
+								s.getTransaction().commit();
+								
+								EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, et);
+							}else{
+								s.getTransaction().rollback();
+							}
+						}catch(Exception ex){
+							EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_EditKeyError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 							s.getTransaction().rollback();
 						}
-					}catch(Exception ex){
-						EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_EditKeyError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-						s.getTransaction().rollback();
-					}finally{
-						s.close();
 					}
 				}
 			});
@@ -673,17 +671,16 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				getEditorSite().getShell(), toEdit);
 		
 		if (dialog.open() == IDialogConstants.OK_ID) {
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				session.saveOrUpdate(toEdit);
-				session.getTransaction().commit();
-			}catch (Exception ex){
-				session.getTransaction().rollback();
-				EntityPlugIn.displayLog(ex.getMessage(), ex);
-				return;
-			}finally{
-				session.close();
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					session.saveOrUpdate(toEdit);
+					session.getTransaction().commit();
+				}catch (Exception ex){
+					session.getTransaction().rollback();
+					EntityPlugIn.displayLog(ex.getMessage(), ex);
+					return;
+				}
 			}
 			
 			EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, toEdit);
@@ -698,88 +695,85 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		final List<Attribute> dmAttributes = new ArrayList<Attribute>();
 		final ArrayList<Attribute> attributeToAdd = new ArrayList<Attribute>();
 		
-		final Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			//load attributes from datamodel
-			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
+		try(final Session s = HibernateManager.openSession()){
+			s.beginTransaction();
 			try{
-				pmd.run(true, false, new IRunnableWithProgress() {
-			
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException,
-					InterruptedException {
-						monitor.beginTask(Messages.EntityTypeConfigurationPage_LoadAttributeProgressName, 1);
-						//we do this to ensure the local is setup propery as this thread is not
-						//the same thread as the sesssion <s> was opened in.
-						HibernateManager.initContext();
-						Criteria c = s.createCriteria(Attribute.class)
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));	 //$NON-NLS-1$
-						@SuppressWarnings("unchecked")
-						List<Attribute> atts = c.list();
-						dmAttributes.addAll(atts);
-					}
-				});
-			}catch (Exception ex){
-				EntityPlugIn.displayLog(ex.getMessage(), ex);
-				return;
-			}
-			
-			//display add attribute dialog 1
-			DataModel tmpDm = new DataModel(SmartDB.getCurrentConservationArea(), Collections.<Category>emptyList(), dmAttributes);
-			AddAttributeDialog1 d1 = new AddAttributeDialog1(parentEditor.getSite().getShell(), 
-				null, tmpDm, SmartDB.getCurrentLanguage(), s){
-			
-				@Override
-				protected void buttonPressed(int buttonId) {
-					if (IDialogConstants.NEXT_ID == buttonId) {
-						setReturnCode(NEXT);
-					} else if (IDialogConstants.FINISH_ID == buttonId) {
-						Object[] checked = checkboxTableViewer.getCheckedElements();
-						for (int i = 0; i < checked.length; i++) {
-							Object x = checked[i];
-							if (x instanceof Attribute){
-								attributeToAdd.add((Attribute)x);
-							}
+				//load attributes from datamodel
+				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
+				try{
+					pmd.run(true, false, new IRunnableWithProgress() {
+				
+						@Override
+						public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+							monitor.beginTask(Messages.EntityTypeConfigurationPage_LoadAttributeProgressName, 1);
+							//we do this to ensure the local is setup propery as this thread is not
+							//the same thread as the sesssion <s> was opened in.
+							HibernateManager.initContext();
+							List<Attribute> atts = QueryFactory.buildQuery(s, Attribute.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+							dmAttributes.addAll(atts);
 						}
-						setReturnCode(FINISH);
-					} else if (IDialogConstants.CANCEL_ID == buttonId) {
-						setReturnCode(CANCEL);
-					}
-					close();
-				}
-			};
-		
-			int ret = d1.open();
-			if (ret == AddAttributeDialog1.CANCEL){
-				return;
-			}else if (ret == AddAttributeDialog1.NEXT){
-				Attribute att = new Attribute();
-				att.setConservationArea(SmartDB.getCurrentConservationArea());
-			
-				AddAttributeDialog2 d2 = new AddAttributeDialog2(getSite().getShell(), att,
-						tmpDm.getAttributes(),
-						SmartDB.getCurrentConservationArea().getDefaultLanguage(), s);
-			
-				//show new attribute dialog
-				ret = d2.open();
-				if (ret == Window.CANCEL){
+					});
+				}catch (Exception ex){
+					EntityPlugIn.displayLog(ex.getMessage(), ex);
 					return;
 				}
-				attributeToAdd.add(att);	
-				DataModelManager.INSTANCE.fireAddListener(s, att);
-			}
-			s.getTransaction().commit();
+				
+				//display add attribute dialog 1
+				DataModel tmpDm = new DataModel(SmartDB.getCurrentConservationArea(), Collections.<Category>emptyList(), dmAttributes);
+				AddAttributeDialog1 d1 = new AddAttributeDialog1(parentEditor.getSite().getShell(), 
+					null, tmpDm, SmartDB.getCurrentLanguage(), s){
+				
+					@Override
+					protected void buttonPressed(int buttonId) {
+						if (IDialogConstants.NEXT_ID == buttonId) {
+							setReturnCode(NEXT);
+						} else if (IDialogConstants.FINISH_ID == buttonId) {
+							Object[] checked = checkboxTableViewer.getCheckedElements();
+							for (int i = 0; i < checked.length; i++) {
+								Object x = checked[i];
+								if (x instanceof Attribute){
+									attributeToAdd.add((Attribute)x);
+								}
+							}
+							setReturnCode(FINISH);
+						} else if (IDialogConstants.CANCEL_ID == buttonId) {
+							setReturnCode(CANCEL);
+						}
+						close();
+					}
+				};
 			
-			//schedule the data model changed listener; we have saved modifications to the data model
-			fireDataModelListeners.schedule();
-		}catch (Exception ex){
-			EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_SaveError, ex);
-		}finally{
-			if (s.getTransaction().isActive()){
-				s.getTransaction().rollback();
+				int ret = d1.open();
+				if (ret == AddAttributeDialog1.CANCEL){
+					return;
+				}else if (ret == AddAttributeDialog1.NEXT){
+					Attribute att = new Attribute();
+					att.setConservationArea(SmartDB.getCurrentConservationArea());
+				
+					AddAttributeDialog2 d2 = new AddAttributeDialog2(getSite().getShell(), att,
+							tmpDm.getAttributes(),
+							SmartDB.getCurrentConservationArea().getDefaultLanguage(), s);
+				
+					//show new attribute dialog
+					ret = d2.open();
+					if (ret == Window.CANCEL){
+						return;
+					}
+					attributeToAdd.add(att);	
+					DataModelManager.INSTANCE.fireAddListener(s, att);
+				}
+				s.getTransaction().commit();
+				
+				//schedule the data model changed listener; we have saved modifications to the data model
+				fireDataModelListeners.schedule();
+			}catch (Exception ex){
+				EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_SaveError, ex);
+			}finally{
+				if (s.getTransaction().isActive()){
+					s.getTransaction().rollback();
+				}
 			}
-			s.close();
 		}
 
 		addAttributes(attributeToAdd);
@@ -852,67 +846,67 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					Session s = HibernateManager.openSession();
-					try{
-						s.beginTransaction();
-						
-						s.saveOrUpdate(parentEditor.getEntityType());
-						
-						Query q = s.createQuery("DELETE EntityAttributeValue WHERE id.entityAttribute IN (:toDelete)"); //$NON-NLS-1$
-						q.setParameterList("toDelete", toDelete); //$NON-NLS-1$
-						q.executeUpdate();						
-						
-						parentEditor.getEntityType().getAttributes().removeAll(toDelete);
-						for (final EntityAttribute ea : toDelete){
+					try(Session s = HibernateManager.openSession()){
+						try{
+							s.beginTransaction();
 							
-							//at this point we should try to delete the attribute as well
-							boolean canDeleteAttribute = false;
-							try{
-								if (DeleteManager.canDelete(ea.getDmAttribute(), s)){
-									canDeleteAttribute = true;
+							s.saveOrUpdate(parentEditor.getEntityType());
+							
+							Query<?> q = s.createQuery("DELETE EntityAttributeValue WHERE id.entityAttribute IN (:toDelete)"); //$NON-NLS-1$
+							q.setParameterList("toDelete", toDelete); //$NON-NLS-1$
+							q.executeUpdate();						
+							
+							parentEditor.getEntityType().getAttributes().removeAll(toDelete);
+							for (final EntityAttribute ea : toDelete){
+								
+								//at this point we should try to delete the attribute as well
+								boolean canDeleteAttribute = false;
+								try{
+									if (DeleteManager.canDelete(ea.getDmAttribute(), s)){
+										canDeleteAttribute = true;
+									}
+								}catch (Exception ex){
+									//something is using this attribute therefore
+									//it cannot be deleted
 								}
-							}catch (Exception ex){
-								//something is using this attribute therefore
-								//it cannot be deleted
-							}
-							
-							if (canDeleteAttribute){
-								final int[] ret = {-1};
-								Display.getDefault().syncExec(new Runnable(){
-
-									@Override
-									public void run() {
-										MessageDialog dialog = new MessageDialog(getSite().getShell(), Messages.EntityTypeConfigurationPage_DeleteAttributeDialogTitle, null,
-												MessageFormat.format(Messages.EntityTypeConfigurationPage_DeleteAttributeDialogMessage, new Object[]{ ea.getDmAttribute().getName() } ), 
-												MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-										ret[0] = dialog.open();
-									}});
-							
-								if (ret[0] == 0){  //YES
-									boolean deletel = DataModelManager.INSTANCE.validateDelete(ea.getDmAttribute(), monitor, s);
-									if (deletel){
-										DataModelManager.INSTANCE.fireDeleteListener(s, ea.getDmAttribute());
-										s.delete(ea.getDmAttribute());
+								
+								if (canDeleteAttribute){
+									final int[] ret = {-1};
+									Display.getDefault().syncExec(new Runnable(){
+	
+										@Override
+										public void run() {
+											MessageDialog dialog = new MessageDialog(getSite().getShell(), Messages.EntityTypeConfigurationPage_DeleteAttributeDialogTitle, null,
+													MessageFormat.format(Messages.EntityTypeConfigurationPage_DeleteAttributeDialogMessage, new Object[]{ ea.getDmAttribute().getName() } ), 
+													MessageDialog.CONFIRM, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+											ret[0] = dialog.open();
+										}});
+								
+									if (ret[0] == 0){  //YES
+										boolean deletel = DataModelManager.INSTANCE.validateDelete(ea.getDmAttribute(), monitor, s);
+										if (deletel){
+											DataModelManager.INSTANCE.fireDeleteListener(s, ea.getDmAttribute());
+											s.delete(ea.getDmAttribute());
+										}
 									}
 								}
 							}
+							
+							s.getTransaction().commit();
+							
+							try{
+								EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, parentEditor.getEntityType());
+							}catch(Exception ex){
+								EntityPlugIn.displayLog(ex.getMessage(), ex);
+							}
+						}catch (Exception ex){
+							EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_DeleteAttributeError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+							
+						}finally{
+							if (s.getTransaction().isActive()){
+								s.getTransaction().rollback();
+							}
 						}
-						
-						s.getTransaction().commit();
-						
-						try{
-							EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, parentEditor.getEntityType());
-						}catch(Exception ex){
-							EntityPlugIn.displayLog(ex.getMessage(), ex);
-						}
-					}catch (Exception ex){
-						EntityPlugIn.displayLog(Messages.EntityTypeConfigurationPage_DeleteAttributeError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-						
-					}finally{
-						if (s.getTransaction().isActive()){
-							s.getTransaction().rollback();
-						}
-						s.close();
 					}
 				}
 			});
@@ -932,8 +926,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		boolean fire = false;
 		Object type = ((StructuredSelection)attributeTable.getSelection()).getFirstElement();
 		if (type instanceof EntityAttribute){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				s.saveOrUpdate(type);
 				EntityTypeEditDmAttributeDialog dia = new EntityTypeEditDmAttributeDialog(getSite().getShell(), (EntityAttribute)type, s);
 				if (dia.open()==EntityTypeEditDmAttributeDialog.OK){
@@ -948,10 +941,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 						return;
 					}
 				}
-				fire = dia.fireEvents();
-				
-			}finally{
-				s.close();
+				fire = dia.fireEvents();	
 			}
 			
 			if (fire){

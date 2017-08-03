@@ -5,7 +5,7 @@
       version="6.0.0.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.intelligence"
-      license-feature="org.wcs.smart-feature">
+      license-feature="org.wcs.smart.feature">
 
    <description>
       This plugin allows for tracking of intelligence related records and associating those records with patrols.

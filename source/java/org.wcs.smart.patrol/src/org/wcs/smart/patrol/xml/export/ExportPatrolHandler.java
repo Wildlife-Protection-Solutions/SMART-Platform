@@ -55,6 +55,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ExportPatrolHandler {
 
 	
@@ -91,18 +92,17 @@ public class ExportPatrolHandler {
 						try {
 							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_LoadingPatrol,new Object[]{ UuidUtils.uuidToString(puuid)}));
 							Patrol p = null;
-							Session s = HibernateManager.openSession();
-							s.beginTransaction();
-							
-							try {
-								p = (Patrol) s.load(Patrol.class, puuid);
-								id = p.getId();
-							} catch (Exception ex) {
-								SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_CouldNotFindPatrol, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
-								continue;
-							} finally {
-								s.getTransaction().commit();
-								s.close();
+							try(Session s = HibernateManager.openSession()){
+								s.beginTransaction();
+								try {
+									p = (Patrol) s.load(Patrol.class, puuid);
+									id = p.getId();
+								} catch (Exception ex) {
+									SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_CouldNotFindPatrol, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
+									continue;
+								} finally {
+									s.getTransaction().commit();
+								}
 							}
 
 							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_ExportingPatrol,new Object[]{ id }));

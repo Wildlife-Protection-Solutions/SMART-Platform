@@ -180,14 +180,14 @@ public class AreaTreeNode implements IItemTreeNode{
 					new Object[]{SmartLabelProvider.getAreaTypeName(at)})) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					Session session = HibernateManager.openSession();
-					session.beginTransaction();
-					try {
-						List<Area> items = HibernateManager.loadAreas(at, session);
-						areas.put(at, items.toArray(new Area[items.size()]));
-					} finally {
-						session.getTransaction().rollback();
-						session.close();
+					try(Session session = HibernateManager.openSession()){
+						session.beginTransaction();
+						try {
+							List<Area> items = HibernateManager.loadAreas(at, session);
+							areas.put(at, items.toArray(new Area[items.size()]));
+						} finally {
+							session.getTransaction().rollback();
+						}
 					}
 					viewer.getControl().getDisplay().asyncExec(new Runnable() {
 						@Override

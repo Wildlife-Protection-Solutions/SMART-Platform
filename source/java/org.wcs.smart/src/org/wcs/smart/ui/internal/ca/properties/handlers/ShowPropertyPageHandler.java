@@ -42,6 +42,7 @@ import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
  * 
  * @since 1.0.0
  */
+
 public class ShowPropertyPageHandler {
 
 	private Class<? extends Dialog> page = null;

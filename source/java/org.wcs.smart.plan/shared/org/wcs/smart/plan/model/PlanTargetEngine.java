@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.model.Track;
@@ -211,7 +211,7 @@ public class PlanTargetEngine {
 		sql.append(" WHERE pp.id.plan  =:uuid ");//$NON-NLS-1$
 		
 		List<Track> tracks = new ArrayList<Track>();
-		Query q = session.createQuery(sql.toString());
+		Query<?> q = session.createQuery(sql.toString());
 		q.setParameter("uuid", plan); //$NON-NLS-1$
 
 		List<?> list = q.list();
@@ -250,7 +250,7 @@ public class PlanTargetEngine {
 			sql.append(" JOIN pld.tracks as t"); //$NON-NLS-1$
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 
-			Query q = session.createQuery(sql.toString());
+			Query<?> q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
 			List<?> rs = q.list();
@@ -263,7 +263,7 @@ public class PlanTargetEngine {
 			sql.append(" JOIN pp.id.patrol p"); //$NON-NLS-1$
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 
-			Query q = session.createQuery(sql.toString());
+			Query<?> q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
 			List<?> list = q.list();
@@ -286,7 +286,7 @@ public class PlanTargetEngine {
 			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 			
-			Query q = session.createQuery(sql.toString());
+			Query<?> q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
 			List<?> list = q.list();
@@ -311,7 +311,7 @@ public class PlanTargetEngine {
 			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 			
-			Query q = session.createQuery(sql.toString());
+			Query<?> q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
 			List<?> list = q.list();

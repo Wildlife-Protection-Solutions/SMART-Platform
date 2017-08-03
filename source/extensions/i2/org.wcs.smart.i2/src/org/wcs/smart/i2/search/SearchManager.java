@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.i2.search;
 
-import info.debatty.java.stringsimilarity.Levenshtein;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,13 +29,18 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.apache.commons.codec.language.DoubleMetaphone;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.util.UuidUtils;
+
+import info.debatty.java.stringsimilarity.Levenshtein;
 
 
 public enum SearchManager {
@@ -48,7 +51,6 @@ public enum SearchManager {
 	private static final DoubleMetaphone DOUBLE_METAPHONE = new DoubleMetaphone();
 	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+"); //$NON-NLS-1$
 	
-	@SuppressWarnings("unchecked")
 	public List<IntelSearchResultItem> fuzzySearch(String searchFor, List<String> typeKeys, Session session){
 		
 		Map<UUID, IntelSearchResultItem> results = new HashMap<>();
@@ -64,11 +66,16 @@ public enum SearchManager {
 
 		List<byte[]> types = null;
 		if (typeKeys != null && !typeKeys.isEmpty()){
-			List<IntelEntityType> stypes = session.createCriteria(IntelEntityType.class)
-			.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())) //$NON-NLS-1$
-			.add(Restrictions.in("keyId", typeKeys)) //$NON-NLS-1$
-			.list();
-			types = stypes.stream()
+			 CriteriaBuilder cb = session.getCriteriaBuilder();
+			 CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
+			 Root<IntelEntityType> from = c.from(IntelEntityType.class);
+			 c.where(cb.and(
+					 from.get("conservationArea").in(SmartDB.getConservationAreaConfiguration().getConservationAreas()), //$NON-NLS-1$
+					 from.get("keyId").in(typeKeys) //$NON-NLS-1$
+					 ));
+			 List<IntelEntityType> stypes = session.createQuery(c).getResultList();
+			 
+			 types = stypes.stream()
 					.map(iet -> UuidUtils.uuidToByte(iet.getUuid()))
 					.collect(Collectors.toList());
 		}
@@ -104,7 +111,7 @@ public enum SearchManager {
 		}
 
 		// create the query and parameters
-		Query q = session.createSQLQuery(sql.toString());
+		Query<?> q = session.createNativeQuery(sql.toString());
 		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
 		if (types != null){
 			q.setParameterList("types", types); //$NON-NLS-1$
@@ -113,11 +120,12 @@ public enum SearchManager {
 			q.setParameter("m" + i, metas.get(i)); //$NON-NLS-1$
 		}
 		q.setParameter("ml", "%" + searchFor + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		List<Object[]> items = q.list();
+		List<?> items = q.list();
 		
 		ParsedString searchString = new ParsedString(searchFor);
 		//search through each row and compute a rating value
-		for (Object[] row : items){
+		for (Object rr : items){
+			Object[] row = (Object[])rr;
 			String fullstring = (String)row[0];
 			UUID uuid = UuidUtils.byteToUUID((byte[])row[1]);
 			Double value = 0.0;

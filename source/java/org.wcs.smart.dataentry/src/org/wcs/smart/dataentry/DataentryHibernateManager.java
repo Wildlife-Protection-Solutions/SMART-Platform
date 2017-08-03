@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -39,6 +37,7 @@ import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -71,10 +70,7 @@ public class DataentryHibernateManager extends HibernateManager {
 	 * @return all ConfigurableModels
 	 */
 	public static List<ConfigurableModel> getConfigurableModels(ConservationArea ca, Session session) {
-		Criteria query = session.createCriteria(ConfigurableModel.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<ConfigurableModel> list = query.list();
-		return list;
+		return QueryFactory.buildQuery(session, ConfigurableModel.class, "conservationArea", ca).list(); //$NON-NLS-1$
 	}
 
 	/**
@@ -88,13 +84,13 @@ public class DataentryHibernateManager extends HibernateManager {
 	public static ConfigurableModel getFullConfigurableModel(UUID uuid) {
 		if (uuid == null)
 			return null;
-		Session session = openSession();
-		session.beginTransaction();
-		try {
-			return getFullConfigurableModel(uuid, session);
-		} finally {
-			session.getTransaction().commit();
-			session.close();
+		try(Session session = openSession()){
+			session.beginTransaction();
+			try {
+				return getFullConfigurableModel(uuid, session);
+			} finally {
+				session.getTransaction().commit();
+			}
 		}
 	}
 	
@@ -109,9 +105,7 @@ public class DataentryHibernateManager extends HibernateManager {
 	public static ConfigurableModel getFullConfigurableModel(UUID uuid, Session session) {
 		if (uuid == null)
 			return null;
-		Criteria query = session.createCriteria(ConfigurableModel.class)
-				.add(Restrictions.eq("uuid", uuid)); //$NON-NLS-1$
-		ConfigurableModel model = (ConfigurableModel) query.uniqueResult();
+		ConfigurableModel model = session.get(ConfigurableModel.class,  uuid);
 		model.getNames().size();
 		fetchNodesData(model.getNodes());
 		return model;
@@ -130,11 +124,9 @@ public class DataentryHibernateManager extends HibernateManager {
 		if (cm.getUuid() == null) {
 			return new ArrayList<>();
 		}
-		@SuppressWarnings("unchecked")
-		List<CmAttributeConfig> result = session.createCriteria(CmAttributeConfig.class)
-				.add(Restrictions.eq("attribute", attribute))
-				.add(Restrictions.eq("model", cm)).list();
-		return result;
+		return QueryFactory.buildQuery(session, CmAttributeConfig.class,
+				new Object[] {"attribute", attribute}, //$NON-NLS-1$
+				new Object[] {"model", cm}).list(); //$NON-NLS-1$
 	}
 	
 	/**

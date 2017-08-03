@@ -120,7 +120,7 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 			}
 			queryService = new EntityQueryService(parentEditor.getCurrentQuery());
 			try {
-	    		List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
+	    		List<? extends IGeoResource> layers = queryService.resources(monitor);
 	    		AddLayersCommand command = new AddLayersCommand(layers);
 	    		if (getMap() == null) return Status.CANCEL_STATUS;
 	    		getMap().sendCommandSync(command);

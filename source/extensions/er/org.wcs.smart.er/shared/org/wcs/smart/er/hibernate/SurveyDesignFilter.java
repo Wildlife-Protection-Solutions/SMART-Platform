@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.hibernate;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -79,7 +79,7 @@ public class SurveyDesignFilter {
 	 * @param s
 	 * @return
 	 */
-	public Query buildQuery(Session s){ 
+	public Query<?> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
 		str.append("SELECT s.uuid, s.name, s.state, s.keyId "); //$NON-NLS-1$
@@ -97,7 +97,7 @@ public class SurveyDesignFilter {
 		str.append(" ) "); //$NON-NLS-1$
 		str.append("ORDER BY s.name asc"); //$NON-NLS-1$
 		
-		Query query = s.createQuery(str.toString())
+		Query<?> query = s.createQuery(str.toString())
 				.setParameter("ca", ca); //$NON-NLS-1$
 
 		

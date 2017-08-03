@@ -59,7 +59,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.menus.IMenuService;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
@@ -84,6 +84,7 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class EntityTypeListView implements IEntityTypeFilteringView{
 	
 	public static final String ID = "org.wcs.smart.entity.typelist"; //$NON-NLS-1$
@@ -121,22 +122,22 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 				}
 				monitor.internalWorked(0.5);
 			}else{
-				Session s = HibernateManager.openSession();
-				s.beginTransaction();
-				try{
-					Query query = filter.buildQuery(s);
-					List<?> results = query.list();
-					input = new EntityTypeEditorInput[results.size()];
-					int i = 0;
-					for	(Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-						Object[] data = (Object[]) iterator.next();					
-						input[i++] = new EntityTypeEditorInput((UUID)data[0], (String)data[1], (String)data[2]);
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
+						Query<?> query = filter.buildQuery(s);
+						List<?> results = query.list();
+						input = new EntityTypeEditorInput[results.size()];
+						int i = 0;
+						for	(Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+							Object[] data = (Object[]) iterator.next();					
+							input[i++] = new EntityTypeEditorInput((UUID)data[0], (String)data[1], (String)data[2]);
+						}
+						
+						monitor.internalWorked(0.5);
+					}finally{
+						s.getTransaction().rollback();
 					}
-					
-					monitor.internalWorked(0.5);
-				}finally{
-					s.getTransaction().rollback();
-					s.close();
 				}
 			}
 			

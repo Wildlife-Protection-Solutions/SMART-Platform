@@ -30,8 +30,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 import org.eclipse.ui.progress.IElementCollector;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
@@ -104,34 +104,33 @@ public class ReportFolderModelAdapter implements IDeferredWorkbenchAdapter {
 			IElementCollector collector, IProgressMonitor monitor) {
 		
 		ReportFolder parent = (ReportFolder)object;
-		Session s = HibernateManager.openSession();
-		try {
-			s.beginTransaction();
-			List<Object> kids = new ArrayList<Object>();
-
-			
-			// get kid folders
-			List<?> kidFolders = s.createCriteria(ReportFolder.class)
-					.add(Restrictions.eq("parentFolder", parent)).list(); //$NON-NLS-1$
-			kids.addAll(kidFolders);
-
-			// kid queries
-			List<?> kidQueries = s.createCriteria(Report.class)
-					.add(Restrictions.eq("folder", parent)).list(); //$NON-NLS-1$
-			kids.addAll(kidQueries);
-
-			//ensure ca is loaded for report items
-			for (Object  x : kids){
-				if (x instanceof Report){
-					((Report) x).getConservationArea().getId();
+		try(Session s = HibernateManager.openSession()){
+			try {
+				s.beginTransaction();
+				List<Object> kids = new ArrayList<Object>();
+	
+				
+				// get kid folders
+				List<?> kidFolders = QueryFactory.buildQuery(s, ReportFolder.class, "parentFolder", parent).getResultList(); //$NON-NLS-1$
+				kids.addAll(kidFolders);
+	
+				// kid queries
+				List<?> kidQueries = QueryFactory.buildQuery(s, Report.class, "folder", parent).getResultList(); //$NON-NLS-1$
+				kids.addAll(kidQueries);
+	
+				//ensure ca is loaded for report items
+				for (Object  x : kids){
+					if (x instanceof Report){
+						((Report) x).getConservationArea().getId();
+					}
 				}
+				LazyReportContentProvider.sortItems(kids);
+				collector.add(kids.toArray(), monitor);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
 			}
-			LazyReportContentProvider.sortItems(kids);
-			collector.add(kids.toArray(), monitor);
-			s.getTransaction().commit();
-			
-		}finally{
-			s.close();
 		}
 		
 	}

@@ -61,7 +61,7 @@ that are not known until runtime.  Tables can belong to categories (for UI purpo
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="identifier" basedOn="org.wcs.smart.data.oda.smart.table/TableCategory/@id"/>
+                  <meta.attribute kind="identifier" basedOn="org.wcs.smart.report.birt.query.smartTable/TableCategory/@id"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -93,7 +93,7 @@ that are not known until runtime.  Tables can belong to categories (for UI purpo
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="identifier" basedOn="org.wcs.smart.data.oda.smart.table/TableCategory/@id"/>
+                  <meta.attribute kind="identifier" basedOn="org.wcs.smart.report.birt.query.smartTable/TableCategory/@id"/>
                </appinfo>
             </annotation>
          </attribute>

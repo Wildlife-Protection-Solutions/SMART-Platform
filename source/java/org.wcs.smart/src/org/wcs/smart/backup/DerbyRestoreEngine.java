@@ -29,16 +29,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
@@ -76,17 +78,22 @@ public class DerbyRestoreEngine {
 	 * @param currentShell the current shell for displaying input boxes
 	 * @return <code>true</code> if can restore, <code>false</code> otherwise
 	 */
-	@SuppressWarnings("unchecked")
 	public static boolean validateUserRestore(Shell currentShell) {
 		// a backup can be restored if:
 		// 1. there are no conservation areas
 		// 2. the user is an admin user in at least one conservation area (we
 		// don't care which one).
 
-		Session session = HibernateManager.openSession();
-		try {
-			Long cnt = (Long) session.createCriteria(ConservationArea.class).add(Restrictions.ne("uuid", ConservationArea.MULTIPLE_CA)) //$NON-NLS-1$
-					.setProjection(Projections.rowCount()).uniqueResult();
+		
+		try(Session session = HibernateManager.openSession()) {
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			
+			CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+			Root<ConservationArea> root = cq.from(ConservationArea.class);
+			cq.select(cb.count(root));
+			cq.where(cb.equal(root.get("uuid"), ConservationArea.MULTIPLE_CA)); //$NON-NLS-1$
+			Long cnt = session.createQuery(cq).getSingleResult();
+			
 			if (cnt == 0) {
 				//there are no conservation areas
 				return true;
@@ -108,8 +115,10 @@ public class DerbyRestoreEngine {
 				String username = dialog.getUserName();
 				String password = dialog.getPassword();
 
-				List<Employee> matching = session.createCriteria(Employee.class)
-						.add(Restrictions.eq("smartUserId", username).ignoreCase()).list(); //$NON-NLS-1$
+				CriteriaQuery<Employee> q = cb.createQuery(Employee.class);
+				Root<Employee> root2 = q.from(Employee.class);
+				q.where(cb.equal(cb.upper(root2.get("smartUserId")), username.toUpperCase())); //$NON-NLS-1$
+				List<Employee> matching = session.createQuery(q).getResultList();
 				
 				boolean found = false;
 				for (Employee e : matching){
@@ -133,8 +142,6 @@ public class DerbyRestoreEngine {
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.DerbyRestoreEngine_UserValidationError, ex);
 			return false;
-		} finally {
-			session.close();
 		}
 	}
 	
@@ -161,12 +168,12 @@ public class DerbyRestoreEngine {
 	 */
 	public static void restoreSystem(File backupFile, IProgressMonitor monitor)
 			throws Exception {
-		monitor.beginTask(Messages.DerbyRestoreEngine_Progress_RestoringFile, 7);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyRestoreEngine_Progress_RestoringFile, 7);
 		if (!backupFile.exists()) {
 			throw new Exception(Messages.DerbyRestoreEngine_Error_NoBackupFile + " '" + backupFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_ExtractingBackup);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_ExtractingBackup);
 		/* extract contents of backup file to temporary directory */
 		File temp = SmartUtils.createTemporaryDirectory();
 		
@@ -186,7 +193,7 @@ public class DerbyRestoreEngine {
 			throw new Exception(Messages.DerbyRestoreEngine_BackupExtractionError
 					+ ex.getLocalizedMessage(), ex);
 		}
-		monitor.worked(1);
+		progress.worked(1);
 
 		File dbFile = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 		File dataFile = new File(SmartProperties.getInstance().getProperty( SmartProperties.PROP_FILESTORE));
@@ -219,22 +226,20 @@ public class DerbyRestoreEngine {
 		
 		/* get database versions */
 		HashMap<String, String> versions = new HashMap<String, String>();
-		Session s = HibernateManager.openSession();
-		try{
-			List<?> tmpversions = s.createSQLQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+		
+		try(Session s = HibernateManager.openSession()){
+			List<?> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
 			for (Object x : tmpversions){
 				String pluginid = (String) ((Object[])x)[0];
 				String version = (String) ((Object[])x)[1];
 				versions.put(pluginid, version);
 			}
-		}finally{
-			s.close();
 		}
 		
 		/* shut down the database */
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_ShutDown);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_ShutDown);
 		HibernateManager.endSessionFactory(true, false);
-		monitor.worked(1);
+		progress.worked(1);
 
 		/* connect to the extractedDb and verify version */
 		SmartHibernateManager.setDatabaseParameter(extractedDb.getAbsolutePath());
@@ -243,20 +248,17 @@ public class DerbyRestoreEngine {
 		
 		//check to install all plugins in backup and also installed in current version
 		StringBuilder missingPlugins = new StringBuilder();
-		s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			Map<String,String> backupVersions = UpgradeEngine.getVersions(s);
 			for (String pluginId : backupVersions.keySet()){
 				if (!versions.keySet().contains(pluginId)){
 					missingPlugins.append(pluginId);
 					missingPlugins.append("\n"); //$NON-NLS-1$
 				}
-			}
-			
-			
-		}finally{
-			s.close();
+			}	
 		}
+		
 		if (missingPlugins.length() > 0){
 			HibernateManager.endSessionFactory(true, true);
 			cleanUp(new File[] { temp });
@@ -269,9 +271,9 @@ public class DerbyRestoreEngine {
 		try{
 			SmartContext.INSTANCE.setFilestoreLocation(extractedFilestore.getAbsolutePath());
 			UpgradeEngine upgrader = new UpgradeEngine();
-			upgrader.upgradeSystem(new SubProgressMonitor(monitor, 1), versions);
+			upgrader.upgradeSystem(progress.split(1), versions);
 			validateConfiguration(versions);
-			upgrader.postProcess(new SubProgressMonitor(monitor, 1));
+			upgrader.postProcess(progress.split(1));
 		}catch (Exception ex){
 			HibernateManager.endSessionFactory(true, true);
 			String cleanUpErr = cleanUp(new File[] { temp });
@@ -293,7 +295,7 @@ public class DerbyRestoreEngine {
 
 		
 		/* create a copy of the current files incase something goes wrong */
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_MovingFiles);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_MovingFiles);
 		File dbFileBack = null;
 		File dataFileBack = null;
 		try {
@@ -323,7 +325,7 @@ public class DerbyRestoreEngine {
 					Messages.DerbyRestoreEngine_Error_CouldNotCreateTempBackup
 							+ ex.getLocalizedMessage(), ex);
 		}
-		monitor.worked(1);
+		progress.worked(1);
 
 		/* delete existing data */
 		try {
@@ -346,12 +348,9 @@ public class DerbyRestoreEngine {
 		}
 
 		/* restore the unzipped backup files */
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_RestoringFiles);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_RestoringFiles);
 		try {
-			
 			FileUtils.copyDirectory(extractedDb, dbFile);
-
-			
 			if (extractedFilestore.isFile()){
 				//directory was empty
 				dataFile.mkdir();
@@ -376,10 +375,10 @@ public class DerbyRestoreEngine {
 					Messages.DerbyRestoreEngine_Error_RestoreFailedRevertSuccessful
 							+ ex.getLocalizedMessage(), ex);
 		}
-		monitor.worked(1);
+		progress.worked(1);
 
 		/* clean up */
-		monitor.setTaskName(Messages.DerbyRestoreEngine_Progress_CleanUp);
+		progress.subTask(Messages.DerbyRestoreEngine_Progress_CleanUp);
 		final String cleanUpErr = cleanUp(new File[] { temp, dbFileBack, dataFileBack });
 		if (cleanUpErr.length() > 0) {
 			Display.getDefault().syncExec(new Runnable(){
@@ -398,7 +397,7 @@ public class DerbyRestoreEngine {
 			
 		}
 
-		monitor.worked(1);
+		progress.worked(1);
 
 	}
 	
@@ -411,10 +410,8 @@ public class DerbyRestoreEngine {
 	 * 	@throws Exception
  	*/
 	private static void validateConfiguration(HashMap<String, String> versions) throws Exception {
-		Session s;
-		s = HibernateManager.openSession();
-		try{
-			List<?> tmpversions = s.createSQLQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+		try(Session s = HibernateManager.openSession()){
+			List<?> tmpversions = s.createNativeQuery("SELECT plugin_id, version FROM " + SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
 			List<String> missingFromBackup = new ArrayList<String>();
 			List<String> missingFromSystem = new ArrayList<String>();
 			List<String> versionError = new ArrayList<String>();
@@ -481,8 +478,6 @@ public class DerbyRestoreEngine {
 				}
 				throw new Exception(sb.toString());
 			}
-		}finally{
-			s.close();
 		}
 	}
 

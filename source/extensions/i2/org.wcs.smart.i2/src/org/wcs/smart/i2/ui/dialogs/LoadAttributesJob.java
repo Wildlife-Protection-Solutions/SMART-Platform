@@ -50,17 +50,12 @@ public abstract class LoadAttributesJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		attributes = null;
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){
 			attributes  = IntelHibernateManager.getAttributes(session, SmartDB.getCurrentConservationArea());
 			for (IntelAttribute ia : attributes){
 				ia.getName();
-			}
-				
-		}finally{
-			session.close();
+			}		
 		}
-			
 		afterLoad();
 		return Status.OK_STATUS;
 	}

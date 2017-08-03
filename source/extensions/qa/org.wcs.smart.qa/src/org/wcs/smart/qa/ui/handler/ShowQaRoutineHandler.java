@@ -27,6 +27,7 @@ import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.qa.ui.configure.RoutinesListDialog;
 
+@SuppressWarnings("restriction")
 public class ShowQaRoutineHandler {
 
 	@Execute

@@ -32,7 +32,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
@@ -179,11 +180,12 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		
 		session.doWork(new Work() {
 			@Override
-			public void execute(Connection c) throws SQLException {		
+			public void execute(Connection c) throws SQLException {	
+				
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				c.setAutoCommit(true);
 				try {
-					monitor.beginTask(Messages.DerbySummaryEngine_ProcessingQueryProgress, query.getQueryDefinition().getValuePart().getValueItems().size()*10 + 40);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbySummaryEngine_ProcessingQueryProgress, query.getQueryDefinition().getValuePart().getValueItems().size()*10 + 40);
 					
 					SurveyDesignFilter surveyFilter = null;
 					if (query.getSurveyDesign() != null){
@@ -191,12 +193,10 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					}
 
 					
-					monitor.subTask(Messages.DerbySummaryEngine_LoadingTableProgress);
+					progress.subTask(Messages.DerbySummaryEngine_LoadingTableProgress);
 					getHeaderInfo(query, sumResults, surveyFilter, session);
-					monitor.worked(10);
-					if (monitor.isCanceled()){
-						return;
-					}
+					progress.worked(10);
+					progress.checkCanceled();
 					
 					boolean needsObservationValue = false;
 					boolean needsObservationRate = false;
@@ -255,65 +255,54 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter, query);
 					try{
-						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, new SubProgressMonitor(monitor, 10));
+						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, progress.split(10));
 					}finally{
 						filterer.dropTemporaryTables(c);
 					}
-					if (monitor.isCanceled()){
-						return;
-					}
 					
-					monitor.subTask(Messages.DerbySummaryEngine_ProgressCategoryKeys);
+					
+					progress.subTask(Messages.DerbySummaryEngine_ProgressCategoryKeys);
+					progress.split(10);
 					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
-					monitor.worked(10);
-					if (monitor.isCanceled()){
-						return;
-					}
 					
-					monitor.subTask(Messages.DerbySummaryEngine_ProgressRateFilter);
+					
+					progress.subTask(Messages.DerbySummaryEngine_ProgressRateFilter);
 					String vFilter = valueFilter.asString();
 					String rFilter = rateFilter.asString();
 					
 					if (vFilter.equals(rFilter)){
+						progress.split(10);
 						rateTable = valueTable;
-						monitor.worked(10);
 					}else{
 						rateTable = createTempTableName();
 						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, surveyFilter, query);
 						try{
-							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, new SubProgressMonitor(monitor, 10));
+							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, progress.split(10));
 						}finally{
 							rfilterer.dropTemporaryTables(c);
 						}
-						if (monitor.isCanceled()){
-							return;
-						}
+						progress.checkCanceled();
 						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
-						if (monitor.isCanceled()){
-							return;
-						}
 					}
 					
-					monitor.subTask(Messages.DerbySummaryEngine_ProgressValues);
+					progress.subTask(Messages.DerbySummaryEngine_ProgressValues);
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupBy, query.getQueryDefinition().getValuePart(),
-							query, new SubProgressMonitor(monitor, query.getQueryDefinition().getValuePart().getValueItems().size() * 10));
-					
-					if (monitor.isCanceled() || data == null){
+							query, progress.split(query.getQueryDefinition().getValuePart().getValueItems().size() * 10));
+					progress.checkCanceled();
+					if (data == null){
 						return ;
 					}
 					sumResults.setData(data);
-					
-					if (monitor.isCanceled()){
-						return;
-					}
-					monitor.worked(10);
+					progress.checkCanceled();
+					progress.worked(10);
+				}catch(OperationCanceledException ex) {
+					return;
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
-					monitor.done();
 					c.setAutoCommit(false);
 				}
 			}
@@ -395,24 +384,18 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			GroupByPart groupBy, 
 			ValuePart values, Query query,
 			IProgressMonitor monitor) throws SQLException{
-		monitor.beginTask(Messages.DerbySummaryEngine_ProgressValues2, values.getValueItems().size());
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbySummaryEngine_ProgressValues2, values.getValueItems().size());
 		
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
-			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
+			progress.split(1);
+			progress.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
 			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, query, valueTable) ; 
 			if (data != null){
 				results.putAll( data );	
 			}
-			
-			monitor.worked(1);
-			if (monitor.isCanceled()){
-				return null;
-			}
 		}
-		monitor.done();
 		return results;
-		
 	}
 
 

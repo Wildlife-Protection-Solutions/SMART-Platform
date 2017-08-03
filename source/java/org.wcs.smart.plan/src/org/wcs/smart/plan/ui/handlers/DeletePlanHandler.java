@@ -55,6 +55,7 @@ import org.wcs.smart.plan.ui.editor.PlanEditorInput;
  * @author jeffloun
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class DeletePlanHandler{ 
 
 	@Execute

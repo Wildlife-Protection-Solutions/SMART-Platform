@@ -29,6 +29,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -38,8 +42,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -57,6 +59,7 @@ import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.ui.dropitems.SamplingUnitDropItem;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.WrappedTreeNode;
@@ -88,26 +91,23 @@ public class FilterContentProvider implements ITreeContentProvider{
 	
 	private IQueryType qType;
 	
-	@SuppressWarnings("unchecked")
 	private Job loadMissionPropertiesJob = new Job(Messages.SurveyItemContentProvider_loadMissionJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
-				s.beginTransaction();
-				if (design != null){
-					s.update(design);
-					for (MissionProperty p : design.getMissionProperties()){
-						p.getAttribute().getName();
+			try(Session s = HibernateManager.openSession()){
+				try{
+					s.beginTransaction();
+					if (design != null){
+						s.update(design);
+						for (MissionProperty p : design.getMissionProperties()){
+							p.getAttribute().getName();
+						}
+					}else{
+						allMissionAttributes = QueryFactory.buildQuery(s, MissionAttribute.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 					}
-				}else{
-					allMissionAttributes = s.createCriteria(MissionAttribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.list();
+				}finally {
+					s.getTransaction().rollback();
 				}
-				s.getTransaction().rollback();
-			}finally{
-				s.close();
 			}
 			
 			Display.getDefault().asyncExec(new Runnable(){
@@ -119,18 +119,18 @@ public class FilterContentProvider implements ITreeContentProvider{
 			return Status.OK_STATUS;
 		}
 	};
-	@SuppressWarnings("unchecked")
+	
 	private Job loadSurveyJob = new Job(Messages.SurveyItemContentProvider_LoadSurveyJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				if (design != null){
-					allSurveys = s.createCriteria(Survey.class)
-							.add(Restrictions.eq("surveyDesign", design)) //$NON-NLS-1$
-							.addOrder(Order.desc("startDate")) //$NON-NLS-1$
-							.addOrder(Order.asc("id")) //$NON-NLS-1$
-							.list(); 
+					CriteriaBuilder cb = s.getCriteriaBuilder();
+					CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
+					Root<Survey> from = c.from(Survey.class);
+					c.where(cb.equal(from.get("surveyDesign"),design)); //$NON-NLS-1$
+					c.orderBy(cb.desc(from.get("startDate")), cb.asc(from.get("id"))); //$NON-NLS-1$ //$NON-NLS-2$
+					allSurveys = s.createQuery(c).getResultList();
 					for (Survey survey : allSurveys){
 						for (Mission m : survey.getMissions()){
 							m.getId();	
@@ -139,8 +139,6 @@ public class FilterContentProvider implements ITreeContentProvider{
 				}else{
 					allSurveys = null;
 				}
-			}finally{
-				s.close();
 			}
 			
 			Display.getDefault().asyncExec(new Runnable(){
@@ -158,18 +156,18 @@ public class FilterContentProvider implements ITreeContentProvider{
 		protected IStatus run(IProgressMonitor monitor) {
 			
 			List<Object> lUnits = null;
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				if (design != null){
-					List<SamplingUnit> allUnits = SurveyHibernateManager.getInstance().getSamplingUnits(design, s, null);
-					lUnits = new ArrayList<Object>();
-					lUnits.addAll(allUnits);
-					lUnits.add(SamplingUnitDropItem.NONE);
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					if (design != null){
+						List<SamplingUnit> allUnits = SurveyHibernateManager.getInstance().getSamplingUnits(design, s, null);
+						lUnits = new ArrayList<Object>();
+						lUnits.addAll(allUnits);
+						lUnits.add(SamplingUnitDropItem.NONE);
+					}
+				}finally{
+					s.getTransaction().rollback();
 				}
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
 			}
 			
 			sunits = lUnits;
@@ -189,35 +187,30 @@ public class FilterContentProvider implements ITreeContentProvider{
 	};
 	
 	private Job loadSamplingUnitAttributes = new Job(Messages.FilterContentProvider_loadingSuAttributeJobName){
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<SamplingUnitAttribute> lAttributes = null;
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				if (design != null){
-					List<SurveyDesignSamplingUnitAttribute> attributes = s.createCriteria(SurveyDesignSamplingUnitAttribute.class)
-							.add(Restrictions.eq("id.surveyDesign", design)) //$NON-NLS-1$
-							.list();
-					
-					lAttributes = new ArrayList<SamplingUnitAttribute>();
-					for (SurveyDesignSamplingUnitAttribute a : attributes){
-						lAttributes.add(a.getSamplingUnitAttribute());			
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					if (design != null){
+						List<SurveyDesignSamplingUnitAttribute> attributes = QueryFactory.buildQuery(s, SurveyDesignSamplingUnitAttribute.class,"id.surveyDesign", design).getResultList(); //$NON-NLS-1$
+						
+						lAttributes = new ArrayList<SamplingUnitAttribute>();
+						for (SurveyDesignSamplingUnitAttribute a : attributes){
+							lAttributes.add(a.getSamplingUnitAttribute());			
+						}
+					}else{					
+						lAttributes = QueryFactory.buildQuery(s, SamplingUnitAttribute.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 					}
-				}else{					
-					lAttributes = s.createCriteria(SamplingUnitAttribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.list();
+					
+					for (SamplingUnitAttribute a : lAttributes){
+						a.getName();
+						a.getType();
+					}
+				}finally {
+					s.getTransaction().rollback();
 				}
-				
-				for (SamplingUnitAttribute a : lAttributes){
-					a.getName();
-					a.getType();
-				}
-				s.getTransaction().rollback();
-			}finally{
-				s.close();
 			}
 			
 			Collections.sort(lAttributes, new Comparator<SamplingUnitAttribute>() {

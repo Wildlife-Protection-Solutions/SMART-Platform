@@ -51,8 +51,7 @@ public enum AutoProcessingManager {
 	private List<IProcessingStatusListener> listeners = new ArrayList<IProcessingStatusListener>();
 	
 	public void onStartUp(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			ConnectServer cs = ConnectHibernateManager.getConnectServer(s);
 			if (cs == null) return;
 			
@@ -74,8 +73,6 @@ public enum AutoProcessingManager {
 				wj.schedule();
 				
 			}
-		}finally{
-			s.close();
 		}
 	}
 	

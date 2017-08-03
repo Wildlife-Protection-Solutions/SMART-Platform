@@ -24,11 +24,14 @@ package org.wcs.smart.data.oda.smart.query.common;
 import java.text.MessageFormat;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -60,8 +63,11 @@ public class PatrolReportQueryListener extends QueryListenerAdapter {
 	public boolean beforeSave(Query query, Session session) {
 		if (query.getUuid() == null) return true;
 		try{
-			@SuppressWarnings("unchecked")
-			List<ReportQuery> queries = session.createCriteria(ReportQuery.class).add(Restrictions.eq("id.queryUuid", query.getUuid())).list(); //$NON-NLS-1$
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<ReportQuery> c = cb.createQuery(ReportQuery.class);
+			Root<ReportQuery> from = c.from(ReportQuery.class);
+			c.where(cb.equal(from.get("id").get("queryUuid"), query.getUuid())); //$NON-NLS-1$ //$NON-NLS-2$
+			List<ReportQuery> queries = session.createQuery(c).getResultList();
 			if (queries.size() == 0) {
 				return true;
 			}else{

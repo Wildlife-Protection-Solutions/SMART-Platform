@@ -52,64 +52,58 @@ public class RemoveIntelligenceJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		final Session session = HibernateManager.openSession();
+		try(final Session session = HibernateManager.openSession()){
 		final List<ConservationArea> caList = HibernateManager.getConservationAreas(session);
-		session.beginTransaction();
-		try {
-			//delete labels
-			if (DerbyHibernateExtensions.tableExists(session, "intelligence_source")){ //$NON-NLS-1$
-				session.createSQLQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.intelligence_source)").executeUpdate(); //$NON-NLS-1$
-			}
-			if (DerbyHibernateExtensions.tableExists(session, "intelligence")){ //$NON-NLS-1$
-				session.createSQLQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.intelligence)").executeUpdate(); //$NON-NLS-1$
-			}
-
-			//delete actual tables
-			if (DerbyHibernateExtensions.tableExists(session, "intelligence_attachment")){ //$NON-NLS-1$
-				session.createSQLQuery("DROP TABLE smart.intelligence_attachment").executeUpdate(); //$NON-NLS-1$
-			}
-			if (DerbyHibernateExtensions.tableExists(session, "intelligence_point")){ //$NON-NLS-1$
-				session.createSQLQuery("DROP TABLE smart.intelligence_point").executeUpdate(); //$NON-NLS-1$
-			}
-			if (DerbyHibernateExtensions.tableExists(session, "patrol_intelligence")){ //$NON-NLS-1$
-				session.createSQLQuery("DROP TABLE smart.patrol_intelligence").executeUpdate(); //$NON-NLS-1$
-			}
-			//NOTE: derby acts stupid if this constraint is not manually removed
-			if (DerbyHibernateExtensions.tableExists(session, "intelligence")){ //$NON-NLS-1$
-				session.createSQLQuery("ALTER TABLE smart.intelligence DROP CONSTRAINT intelligence_source_uuid_fk").executeUpdate(); //$NON-NLS-1$
-				session.createSQLQuery("DROP TABLE smart.intelligence").executeUpdate(); //$NON-NLS-1$
-			}
-			if (DerbyHibernateExtensions.tableExists(session, "intelligence_source")){ //$NON-NLS-1$
-				session.createSQLQuery("DROP TABLE smart.intelligence_source").executeUpdate(); //$NON-NLS-1$
-			}	
-			if (DerbyHibernateExtensions.tableExists(session, "informant")){ //$NON-NLS-1$
-				session.createSQLQuery("DROP TABLE smart.informant").executeUpdate(); //$NON-NLS-1$
-			}	
-			
-			//delete filestore entries
-			for (ConservationArea ca : caList) {
-				File folder = new File(ca.getFileDataStoreLocation() + File.separator + Intelligence.INTELLIGENCE_DIR);
-				FileUtils.deleteDirectory(folder);
-			}
+			session.beginTransaction();
+			try {
+				//delete labels
+				if (DerbyHibernateExtensions.tableExists(session, "intelligence_source")){ //$NON-NLS-1$
+					session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.intelligence_source)").executeUpdate(); //$NON-NLS-1$
+				}
+				if (DerbyHibernateExtensions.tableExists(session, "intelligence")){ //$NON-NLS-1$
+					session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.intelligence)").executeUpdate(); //$NON-NLS-1$
+				}
 	
-			//remove from plugin table
-			HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, null, session);
-			try {
-				session.getTransaction().commit();
-			} catch (Exception ex) {
-				SmartPlugIn.log(ex.getMessage(), ex);
-			}
-			
-		} catch (Exception e) {
-			IntelligencePlugIn.displayLog(Messages.RemoveIntelligenceJob_Error, e);
-		} finally {
-			try {
-				session.close();
-			} catch (Exception ex) {
-				IntelligencePlugIn.log(ex.getMessage(), ex);
+				//delete actual tables
+				if (DerbyHibernateExtensions.tableExists(session, "intelligence_attachment")){ //$NON-NLS-1$
+					session.createNativeQuery("DROP TABLE smart.intelligence_attachment").executeUpdate(); //$NON-NLS-1$
+				}
+				if (DerbyHibernateExtensions.tableExists(session, "intelligence_point")){ //$NON-NLS-1$
+					session.createNativeQuery("DROP TABLE smart.intelligence_point").executeUpdate(); //$NON-NLS-1$
+				}
+				if (DerbyHibernateExtensions.tableExists(session, "patrol_intelligence")){ //$NON-NLS-1$
+					session.createNativeQuery("DROP TABLE smart.patrol_intelligence").executeUpdate(); //$NON-NLS-1$
+				}
+				//NOTE: derby acts stupid if this constraint is not manually removed
+				if (DerbyHibernateExtensions.tableExists(session, "intelligence")){ //$NON-NLS-1$
+					session.createNativeQuery("ALTER TABLE smart.intelligence DROP CONSTRAINT intelligence_source_uuid_fk").executeUpdate(); //$NON-NLS-1$
+					session.createNativeQuery("DROP TABLE smart.intelligence").executeUpdate(); //$NON-NLS-1$
+				}
+				if (DerbyHibernateExtensions.tableExists(session, "intelligence_source")){ //$NON-NLS-1$
+					session.createNativeQuery("DROP TABLE smart.intelligence_source").executeUpdate(); //$NON-NLS-1$
+				}	
+				if (DerbyHibernateExtensions.tableExists(session, "informant")){ //$NON-NLS-1$
+					session.createNativeQuery("DROP TABLE smart.informant").executeUpdate(); //$NON-NLS-1$
+				}	
+				
+				//delete filestore entries
+				for (ConservationArea ca : caList) {
+					File folder = new File(ca.getFileDataStoreLocation() + File.separator + Intelligence.INTELLIGENCE_DIR);
+					FileUtils.deleteDirectory(folder);
+				}
+		
+				//remove from plugin table
+				HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, null, session);
+				try {
+					session.getTransaction().commit();
+				} catch (Exception ex) {
+					SmartPlugIn.log(ex.getMessage(), ex);
+				}
+				
+			} catch (Exception e) {
+				IntelligencePlugIn.displayLog(Messages.RemoveIntelligenceJob_Error, e);
 			}
 		}
-		
 		return Status.OK_STATUS;
 	}
 

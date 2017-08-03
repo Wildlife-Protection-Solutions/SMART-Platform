@@ -229,7 +229,7 @@
       </menuContribution>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.er.query.model.SurveyObservationQuery"
             supportsCcaa="true">
@@ -287,7 +287,7 @@
       </queryproperty>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.er.query.internal.SurveyQueryCloner"
             id="org.wcs.smart.query.er.SurveyQueryCloner">
@@ -318,7 +318,7 @@
       </action>
    </extension>
    <extension
-         point="org.wcs.smart.query.export.format">
+         point="org.wcs.smart.query.exportFormat">
       <Exporter
             class="org.wcs.smart.er.query.importexport.SurveyGridQueryDefinitionExporter">
       </Exporter>
@@ -345,13 +345,13 @@
       </QueryImporter>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.er.query.upgrade.ERQueryDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.er.query.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>

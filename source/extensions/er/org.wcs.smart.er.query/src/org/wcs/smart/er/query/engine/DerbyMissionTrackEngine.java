@@ -28,7 +28,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -100,7 +101,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyObservationEngine_progress1, 80);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyObservationEngine_progress1, 80);
 				SurveyDesignFilter filter = null;
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
@@ -118,14 +119,12 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 				try {
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							caFilter, false, false, new SubProgressMonitor(monitor, 50));
+							caFilter, false, false, progress.split(50));
 					
-					if (monitor.isCanceled()) return;
+					populateTemporaryTableExtra(c, session, query, progress.split(20));
 					
-					populateTemporaryTableExtra(c, session, query, new SubProgressMonitor(monitor, 20));
-					
-					if (monitor.isCanceled()) return;
-					monitor.subTask(Messages.DerbyObservationEngine_progress2);
+					progress.checkCanceled();
+					progress.subTask(Messages.DerbyObservationEngine_progress2);
 					//setting result size
 					try (ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)){ //$NON-NLS-1$
 						if (rs.next()) { 
@@ -138,13 +137,14 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 							result.setMissionCnt(rs.getInt(1));
 						}
 					}
-					monitor.worked(10);
+					progress.worked(10);
+				}catch(OperationCanceledException ex) {
+					return ;
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {
 					filterer.dropTemporaryTables(c);
-					if (monitor.isCanceled()) dropTables(c);
-					monitor.done();
+					if (progress.isCanceled()) dropTables(c);
 					c.setAutoCommit(false);
 				}
 			}
@@ -199,8 +199,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 
 	private void populateTemporaryTableExtra(Connection c, Session session, 
 			MissionTrackQuery query, IProgressMonitor monitor) throws SQLException {
-
-		monitor.beginTask(Messages.DerbyMissionEngine_ProgressAdditionalData, 4);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyMissionEngine_ProgressAdditionalData, 4);
 		
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -213,18 +212,13 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
+		
 
 		//survey design name
 		monitor.subTask(Messages.DerbyObservationEngine_progress3);
 		populateTemporaryTableNameObjExtra("surveydesign_uuid", "surveydesign_name", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
 		//ca information
 		if (SmartDB.isMultipleAnalysis()){
@@ -248,18 +242,12 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 			
 		monitor.subTask(Messages.DerbyMissionEngine_ProgressMissionProperties);
 		populateAdditionalMissionTable(c,session);
 		populateAdditionalSuTable(c,session);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 
 	}
 

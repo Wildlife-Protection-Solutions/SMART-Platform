@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.ISurveyQuery;
@@ -49,6 +48,7 @@ import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
 import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
@@ -114,19 +114,14 @@ public class GriddedDefinitionPanel extends
 			Job j = new Job(
 					Messages.SurveyObservationQuery_loadingDesignJobName) {
 
-				@SuppressWarnings("unchecked")
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					List<SurveyDesign> results = null; 
-					Session s = HibernateManager.openSession();
-					try{
-						results = s
-							.createCriteria(SurveyDesign.class)
-							.add(Restrictions.eq("keyId", sq.getSurveyDesign())) //$NON-NLS-1$
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.list(); 
-					}finally{
-						s.close();
+					
+					try(Session s = HibernateManager.openSession()){
+						results = QueryFactory.buildQuery(s, SurveyDesign.class,
+								new Object[] {"keyId", sq.getSurveyDesign()}, //$NON-NLS-1$
+								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
 					}
 					
 					if (results.size() > 0) {

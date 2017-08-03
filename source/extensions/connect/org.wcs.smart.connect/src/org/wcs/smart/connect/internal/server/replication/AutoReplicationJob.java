@@ -106,8 +106,7 @@ public class AutoReplicationJob extends Job {
 		ConnectUser user = null;
 		ConnectServerStatus serverStatus = null;
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(caToReplicate.getUuid(), s)){
 				setServerStatus(ServerStatus.ERROR, Messages.AutoReplicationJob_ReplicationNoEnabledError);
 				return Status.OK_STATUS;
@@ -116,9 +115,8 @@ public class AutoReplicationJob extends Job {
 			server = ConnectHibernateManager.getConnectServer(s);
 			serverStatus = ConnectHibernateManager.getConnectServerStatus(s);
 			user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);
-		}finally{
-			s.close();
 		}
+		
 		if (server != null) millisecondsToRepeat = ConnectionOption.SYNC_MINUTE.getIntegerValue(server) * 60 * 1000l;
 		if (server == null || serverStatus == null){
 			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_ServerError);

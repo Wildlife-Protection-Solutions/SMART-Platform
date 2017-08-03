@@ -8,7 +8,7 @@
       </tab>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             ca_property=".model.conservationArea"
             class="org.wcs.smart.connect.cybertracker.model.ConnectAlert"
@@ -39,13 +39,13 @@
       </action>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.connect.cybertracker.updatesite.ConnectCtChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.connect.cybertracker.upgrade.ConnectCtDatabaseUpgrader">
       </dbUpgrader>
@@ -57,7 +57,7 @@
       </alertExtension>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.connect.cybertracker.ConnectCtTemplateCloner"
             id="org.wcs.smart.connect.cybertracker.templateCloner">

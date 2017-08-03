@@ -76,7 +76,6 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.internal.ui.IDropTargetProvider;
@@ -109,6 +108,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
@@ -262,7 +262,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 	public static IEditorInput MAPINPUT = new IEditorInput() {
 		
 		@Override
-		public Object getAdapter(Class adapter) {
+		public <T> T getAdapter(Class<T> adapter) {
 			return null;
 		}
 		
@@ -490,8 +490,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 				//only if the record is part of the working set
 				if (!WorkingSetManager.INSTANCE.isSet()) return;
 				boolean refresh = false;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					IntelWorkingSet set = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
 					Object data = (Object) event.getProperty(IEventBroker.DATA);
 					Collection<?> items= null;
@@ -519,8 +518,6 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 						}	
 					}
 					
-				}finally{
-					s.close();
 				}
 				if (refresh){
 					mapViewer.getRenderManager().refresh(null);
@@ -718,14 +715,10 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 				protected IStatus run(IProgressMonitor monitor) {
 					UUID wset = UuidUtils.stringToUuid(uuid);
 					IntelWorkingSet ws = null;
-					Session s = HibernateManager.openSession();
-					try{
-						ws = (IntelWorkingSet)s.createCriteria(IntelWorkingSet.class)
-								.add(Restrictions.eq("uuid", wset)) //$NON-NLS-1$
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-								.uniqueResult();
-					}finally{
-						s.close();
+					try(Session s = HibernateManager.openSession()){
+						ws = QueryFactory.buildQuery(s, IntelWorkingSet.class,
+								new Object[] {"uuid", wset}, //$NON-NLS-1$
+								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
 					}
 					try {
 						WorkingSetManager.INSTANCE.setActiveWorkingSet(ws, parentContext);

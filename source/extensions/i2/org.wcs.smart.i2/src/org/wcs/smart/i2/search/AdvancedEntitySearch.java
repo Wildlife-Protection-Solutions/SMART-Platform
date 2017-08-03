@@ -33,10 +33,9 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -91,21 +90,20 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		return this.searchString;
 	}
 	
-	@SuppressWarnings("unchecked")
+	/**
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 */
 	@Override
 	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor) {
 		
 		if (searchString == null || searchString.trim().isEmpty()){
 			Long now = System.nanoTime();
-			Long eCount = (Long)session.createCriteria(IntelEntity.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-			.setProjection(Projections.rowCount())
-			.uniqueResult();
 			
-			List<IntelEntity> entities = session.createCriteria(IntelEntity.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-			.setMaxResults(maxResultCnt)
-			.list();
+			Long eCount = QueryFactory.buildCountQuery(session, IntelEntity.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}); //$NON-NLS-1$
+			
+			Query<IntelEntity> q = QueryFactory.buildQuery(session, IntelEntity.class, "conservationArea", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+			List<IntelEntity> entities = q.setMaxResults(maxResultCnt).getResultList();
 			
 			List<IntelSearchResultItem> items = new ArrayList<>();
 			for (IntelEntity e : entities){
@@ -116,7 +114,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			return results;
 		}else{
 			Long now = System.nanoTime();
-			Query q = null;
+			Query<?> q = null;
 			try{
 				q = parseQueryString(session);
 			}catch (Exception ex){
@@ -124,11 +122,11 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				return new IntelSearchResult(0, Collections.emptyList(), 0);
 			}
 			try{
-				List<UUID> uuids = q.list();
+				List<?> uuids = q.list();
 				int totalCount = uuids.size();
 				List<IntelSearchResultItem> items = new ArrayList<>();
 				for (int i = 0; i < Math.min(totalCount, maxResultCnt); i ++){
-					UUID uuid = uuids.get(i);
+					UUID uuid = (UUID) uuids.get(i);
 					items.add(new IntelSearchResultItem(uuid, null, 1, lazyLoadEntity((IntelEntity)session.get(IntelEntity.class, uuid), session)));
 				}
 				
@@ -155,7 +153,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	}
 
 	
-	private Query parseQueryString(Session session) throws Exception{
+	private Query<?> parseQueryString(Session session) throws Exception{
 		String stokens[] = searchString.split("\\|"); //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
@@ -282,7 +280,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		sb.append(" ) "); //$NON-NLS-1$
 		
 		//System.out.println(sb.toString());
-		Query q = session.createQuery(sb.toString());
+		Query<?> q = session.createQuery(sb.toString());
 		for (Entry<String,Object> param : params.entrySet()){
 			q.setParameter(param.getKey(), param.getValue());
 		}

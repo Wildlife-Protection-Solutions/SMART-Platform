@@ -40,6 +40,7 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class NewSurveyDesignHandler {
 
 	@Execute

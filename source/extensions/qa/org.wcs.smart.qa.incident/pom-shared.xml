@@ -22,7 +22,7 @@
 		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.independentincident</artifactId>
+    			<artifactId>org.wcs.smart.incident</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>

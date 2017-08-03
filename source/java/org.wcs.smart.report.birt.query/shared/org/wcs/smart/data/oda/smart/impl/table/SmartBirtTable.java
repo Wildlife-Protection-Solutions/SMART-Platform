@@ -99,7 +99,7 @@ public abstract class SmartBirtTable {
 	 * @param currentSession the open active session
 	 * @return the values for the given conservation area
 	 */
-	public abstract List<Object> getValues(SmartConnection connection);
+	public abstract List<? extends Object> getValues(SmartConnection connection);
 
 	/**
 	 * Given an object returns the value for the given column

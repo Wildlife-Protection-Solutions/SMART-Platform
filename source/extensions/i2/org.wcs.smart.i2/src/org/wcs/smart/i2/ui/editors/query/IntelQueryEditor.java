@@ -148,18 +148,16 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		query.setQueryString(queryString);
 		
 		boolean isNew = query.getUuid() == null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-		
-			s.saveOrUpdate(query);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_ErrorSavingQuery + ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
+			try {
+				s.saveOrUpdate(query);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_ErrorSavingQuery + ex.getMessage(), ex);
+				return;
+			}
 		}
 		if (isNew){
 			eventBroker.post(IntelEvents.QUERY_NEW, query);
@@ -210,17 +208,17 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		clone.updateName(SmartDB.getCurrentLanguage(), clone.getName());
 		clone.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), clone.getName());
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
+		
 			s.beginTransaction();
-			s.save(clone);
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_CloneError + ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
+			try {
+				s.save(clone);
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_CloneError + ex.getMessage(), ex);
+				return;
+			}
 		}
 		
 		eventBroker.post(IntelEvents.QUERY_NEW, query);
@@ -575,8 +573,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 				query = temp;
 			}else{
 				
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					IntelRecordObservationQuery temp = (IntelRecordObservationQuery)s.get(IntelRecordObservationQuery.class, uuid);
 					if (temp == null){
 						Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_QueryNotfoundError, null);
@@ -599,8 +596,6 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 					Intelligence2PlugIn.displayLog(Messages.IntelQueryEditor_LoadError + ex.getMessage(), ex);
 					getSite().getPage().closeEditor(IntelQueryEditor.this, false);
 					return Status.OK_STATUS;
-				}finally{
-					s.close();
 				}
 			}
 			final List<DropItem> fGeneratedDropItems = generatedDropItems;

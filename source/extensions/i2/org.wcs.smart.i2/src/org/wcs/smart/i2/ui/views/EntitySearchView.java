@@ -112,6 +112,7 @@ import org.wcs.smart.ui.properties.FilterComposite;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class EntitySearchView {
 
 	/**
@@ -181,7 +182,6 @@ public class EntitySearchView {
 					entityList.setEntities(null);
 				}
 			});
-			monitor.done();
 		}
 		
 		@Override
@@ -193,7 +193,6 @@ public class EntitySearchView {
 					entityList.setEntities(entities);
 				}
 			});
-			monitor.done();
 			
 		}
 		
@@ -365,16 +364,13 @@ public class EntitySearchView {
 			Object x = ((IStructuredSelection)cmbSavedSearch.getSelection()).getFirstElement();
 			if (x instanceof SearchProxy){
 				IntelEntitySearch toEdit = null;
-				Session s = HibernateManager.openSession();
-				try{
+				try(Session s = HibernateManager.openSession()){
 					toEdit = (IntelEntitySearch) s.get(IntelEntitySearch.class, ((SearchProxy) x).getUuid());
 					if (toEdit == null) return;
 					toEdit.getNames().size();	
 				}catch (Exception ex){
 					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.EntitySearchView_RenameError1, ((SearchProxy) x).getName(), ex.getMessage()), ex);
 					return;
-				}finally{
-					s.close();
 				}
 				
 				try {
@@ -432,11 +428,8 @@ public class EntitySearchView {
 		if (!(x instanceof SearchProxy)) return;
 		
 		IntelEntitySearch search = null;
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			search = (IntelEntitySearch)s.get(IntelEntitySearch.class, ((SearchProxy)x).getUuid());
-		}finally{
-			s.close();
 		}
 		if (search == null) return; //not found
 		
@@ -470,19 +463,18 @@ public class EntitySearchView {
 			}
 			
 			IntelEntitySearch toDelete = null;
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
-				toDelete = (IntelEntitySearch) s.get(IntelEntitySearch.class, ((SearchProxy) x).getUuid());
-				if (toDelete != null){
-					s.delete(toDelete);
+				try {
+					toDelete = (IntelEntitySearch) s.get(IntelEntitySearch.class, ((SearchProxy) x).getUuid());
+					if (toDelete != null){
+						s.delete(toDelete);
+					}
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.EntitySearchView_DeleteError, ((SearchProxy) x).getName(), ex.getMessage()), ex);
+					return;
 				}
-				s.getTransaction().commit();
-			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.EntitySearchView_DeleteError, ((SearchProxy) x).getName(), ex.getMessage()), ex);
-				return;
-			}finally{
-				s.close();
 			}
 			if (toDelete != null) context.get(IEventBroker.class).send(IntelEvents.ENTITY_SEARCH_DELETED, toDelete);
 		}
@@ -693,11 +685,8 @@ public class EntitySearchView {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<Object> types = new ArrayList<Object>();
-				Session session = HibernateManager.openSession();
-				try{
+				try(Session session = HibernateManager.openSession()){
 					types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(session, SmartDB.getCurrentConservationArea()));
-				}finally{
-					session.close();
 				}
 				
 				types.add(0, Messages.EntitySearchView_AllTypesOption);

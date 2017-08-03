@@ -30,6 +30,7 @@ import org.wcs.smart.ui.internal.ca.properties.CcaaUserPropertyPage;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowCcaaUsersPropertyPageHandler extends ShowPropertyPageHandler {
 
 	/**

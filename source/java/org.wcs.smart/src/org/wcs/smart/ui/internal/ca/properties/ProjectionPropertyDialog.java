@@ -186,14 +186,11 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 			}
 		});
 		
-		//init data 
-		Session s = HibernateManager.openSession();
-		try{
+		//init data
+		try(Session s = HibernateManager.openSession()){
 			projections = new ArrayList<Projection>(HibernateManager.getCaProjectionList(s));
 			lstViewer.setInput(projections);
 			projectionViewer.setInput(projections);
-		}finally{
-			s.close();
 		}
 		for (Projection p : projections){
 			if (p.getIsDefault()){
@@ -210,19 +207,18 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 
 	@Override
 	protected boolean performSave() {
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			projectionsToDelete.forEach(p -> s.delete(p));
-			projections.forEach(p -> s.saveOrUpdate(p));
-			s.getTransaction().commit();
-			projectionsToDelete.clear();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			SmartPlugIn.displayLog(Messages.ProjectionPropertyDialog_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
-			return false;
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				projectionsToDelete.forEach(p -> s.delete(p));
+				projections.forEach(p -> s.saveOrUpdate(p));
+				s.getTransaction().commit();
+				projectionsToDelete.clear();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				SmartPlugIn.displayLog(Messages.ProjectionPropertyDialog_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
+				return false;
+			}
 		}
 		ConservationAreaManager.getInstance().fireProjectionListModified();
 		

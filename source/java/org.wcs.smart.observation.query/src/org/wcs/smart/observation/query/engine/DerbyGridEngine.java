@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -111,7 +113,7 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyGridEngine_Progress_RunningQuery, 4);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyGridEngine_Progress_RunningQuery, 10);
 				//turn on auto-commit because we want ddl to commit immediately so we don't lock up the database
 				c.setAutoCommit(true);
 				try {
@@ -119,9 +121,10 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 					IValueItem valueItem = query.getQueryDefinition().getValuePart();				
 					
 					//get numerator results
-					Collection<QueryGridResultItem> numeratorResults = getItems(gridDef, valueItem, query.getQueryDefinition().getValueFilter(), c, session, monitor, true);
+					Collection<QueryGridResultItem> numeratorResults = getItems(gridDef, valueItem, query.getQueryDefinition().getValueFilter(), c, session, progress.split(9), true);
 					
-					//combine with the patrol existance value
+					
+					progress.split(1);
 					HashMap<String, QueryGridResultItem> items = new HashMap<String, QueryGridResultItem>();
 					for (QueryGridResultItem it : numeratorResults){
 						items.put(it.getTileId(), it);
@@ -129,13 +132,13 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 
 					myResults = new GridQueryResult(items.values());
 					
-					monitor.worked(1);
+				}catch (OperationCanceledException ex) {
+					return;
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryGridTable(c);
-					monitor.done();
 					c.setAutoCommit(false);
 				}
 			}
@@ -153,7 +156,8 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 	private Collection<QueryGridResultItem> getItems(Grid gridDef, IValueItem value, 
 			QueryFilter filter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
-		monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
+		SubMonitor progress = SubMonitor.convert(monitor, 5);
+		progress.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
 		
 		if (needsFilter) {
 			try {
@@ -185,16 +189,15 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 			
 			try{
 				ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
-				filterer.processFilter(c, filter.getFilter(), dFilter, cafilter, needsObservation, false, monitor);
+				filterer.processFilter(c, filter.getFilter(), dFilter, cafilter, needsObservation, false, progress.split(4));
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}
-
-			if (monitor.isCanceled()) {
-				return null;
-			}
 		}
-		monitor.subTask(Messages.DerbyGridEngine_Progress_CalculatingGridValue);
+		
+		progress.setWorkRemaining(1);
+		progress.split(1);
+		progress.subTask(Messages.DerbyGridEngine_Progress_CalculatingGridValue);
 		return getGridResults(c, session, gridDef, value);
 	}
 	/**

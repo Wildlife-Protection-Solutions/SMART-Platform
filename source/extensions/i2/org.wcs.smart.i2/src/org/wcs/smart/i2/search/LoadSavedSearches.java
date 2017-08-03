@@ -29,8 +29,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -50,24 +50,17 @@ public abstract class LoadSavedSearches extends Job{
 		super(Messages.LoadSavedSearches_jobname);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		beforeSearch();
 		List<SearchProxy> searches = new ArrayList<SearchProxy>();
-		Session session = HibernateManager.openSession();
-		try{
-			List<IntelEntitySearch> objects = session.createCriteria(IntelEntitySearch.class)
-			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-			.list();
-			
+		try(Session session = HibernateManager.openSession()){
+			List<IntelEntitySearch> objects = QueryFactory.buildQuery(session,IntelEntitySearch.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList();  //$NON-NLS-1$
 			objects.forEach(o -> searches.add(new SearchProxy(o.getUuid(), o.getName())));
 			
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(Messages.LoadSavedSearches_errorMsg + ex.getMessage() , ex);
 			return Status.OK_STATUS;
-		}finally{	
-			session.close();
 		}
 		searches.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 		searchesLoaded(searches);

@@ -134,7 +134,7 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 				+ engine.getQueryDataTable()
 				+ " foo left join " + engine.tableName(MissionDay.class) + " c on c.mission_uuid = foo.mission_uuid  " //$NON-NLS-1$ //$NON-NLS-2$
 				+ " left join " + engine.tableName(MissionTrack.class) + " bar on  bar.mission_day_uuid = c.uuid " //$NON-NLS-1$ //$NON-NLS-2$
-				+ " GROUP BY " + sb.toString().substring(0, sb.length() - 1);  //$NON-NLS-1$  //$NON-NLS-2$
+				+ " GROUP BY " + sb.toString().substring(0, sb.length() - 1);  //$NON-NLS-1$
 				
 				if(sortColumn != null){
 					sql += " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql;//$NON-NLS-1$ //$NON-NLS-2$

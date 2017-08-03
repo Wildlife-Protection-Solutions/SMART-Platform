@@ -57,20 +57,19 @@ public class SaveMissionTracksJob extends Job {
     
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			for (MissionTrack t : tracks) {
-				session.saveOrUpdate(t);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				for (MissionTrack t : tracks) {
+					session.saveOrUpdate(t);
+				}
+				session.getTransaction().commit();
+	        	return Status.OK_STATUS;
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				EcologicalRecordsPlugIn.displayLog(Messages.SaveMissionJob_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+		        return Status.CANCEL_STATUS;
 			}
-			session.getTransaction().commit();
-        	return Status.OK_STATUS;
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			EcologicalRecordsPlugIn.displayLog(Messages.SaveMissionJob_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-	        return Status.CANCEL_STATUS;
-		} finally {
-			session.close();
 		}
     }
 	

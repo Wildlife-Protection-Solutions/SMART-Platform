@@ -43,17 +43,18 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.control.WarningDialog;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -207,10 +208,16 @@ public class RecordXmlImporter {
 		}		
 	}
 	
-	
+	/**
+	 * 
+	 * @param zipFile zip file to import
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
+	 * to call done() on the given monitor
+	 */
 	public void importRecord(Path zipFile, IProgressMonitor monitor) {
-		monitor.beginTask(MessageFormat.format(Messages.RecordXmlImporter_TaskName, zipFile.toString()), 1);
+		SubMonitor progress = SubMonitor.convert(monitor, 1);
 		
+		progress.subTask(MessageFormat.format(Messages.RecordXmlImporter_TaskName, zipFile.toString()));
 		List<String> warnings = allWarnings.get(zipFile);
 		if (warnings == null){
 			warnings = new ArrayList<String>();
@@ -361,10 +368,8 @@ public class RecordXmlImporter {
 			warnings.clear();
 			warnings.add(MessageFormat.format(Messages.RecordXmlImporter_ProcessingError1, zipFile.toString(), ex.getMessage()));
 			Intelligence2PlugIn.log(MessageFormat.format(Messages.RecordXmlImporter_ProcessingError2, zipFile.toString(), ex.getMessage()), ex);
-		
-		}finally{
-			monitor.done();
 		}
+		progress.worked(1);
 	}
 	
 	private List<IntelRecordAttributeValue> parseRecordSourceAttributes(List<RecordAttributeType> attributes, IntelRecord record, Session session, List<String> warnings){
@@ -451,8 +456,6 @@ public class RecordXmlImporter {
 		return newValues;		
 	}
 	
-	
-	@SuppressWarnings("unchecked")
 	private IntelRecordSource parseRecordSource(LabelUuid source, Session session, List<String> warnings){
 		if (source == null) return null;
 		
@@ -463,9 +466,7 @@ public class RecordXmlImporter {
 		}
 		
 		//search keys
-		List<IntelRecordSource> sources = session.createCriteria(IntelRecordSource.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.list();
+		List<IntelRecordSource> sources = QueryFactory.buildQuery(session, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
 		for (IntelRecordSource s : sources){
 			if (s.getKeyId().equals(source.getName())){
 				return s;
@@ -543,10 +544,9 @@ public class RecordXmlImporter {
 			return src;
 		}
 		
-		Category c = (Category) session.createCriteria(Category.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("hkey", categoryItem.getName())) //$NON-NLS-1$
-				.uniqueResult();
+		Category c = QueryFactory.buildQuery(session, Category.class,
+				 new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				 new Object[] {"hkey", categoryItem.getName()}).uniqueResult(); //$NON-NLS-1$
 		if (c != null) return c;
 		
 		//add to warnings;
@@ -605,8 +605,9 @@ public class RecordXmlImporter {
 					if (recordAttribute.getListValue() == null) continue;
 					
 					//search uuid
+					UUID listUuid = UuidUtils.stringToUuid(recordAttribute.getListValue().getUuid());
 					for (AttributeListItem listItem : srcAttribute.getAttributeList()){
-						if (listItem.getUuid().equals(recordAttribute.getListValue().getUuid())){
+						if (listItem.getUuid().equals(listUuid)){
 							newValue.setAttributeListItem(listItem);
 							break;
 						}
@@ -629,15 +630,14 @@ public class RecordXmlImporter {
 				case TREE:
 					if (recordAttribute.getTreeValue() == null) continue;
 					
-					AttributeTreeNode treeNode = (AttributeTreeNode)session.createCriteria(AttributeTreeNode.class)
-						.add(Restrictions.eq("attribute", srcAttribute)) //$NON-NLS-1$
-						.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(recordAttribute.getTreeValue().getUuid()))) //$NON-NLS-1$
-						.uniqueResult();
+					AttributeTreeNode treeNode = QueryFactory.buildQuery(session, AttributeTreeNode.class,
+							 new Object[] {"attribute",srcAttribute}, //$NON-NLS-1$
+							 new Object[] {"uuid", UuidUtils.stringToUuid(recordAttribute.getTreeValue().getUuid())}).uniqueResult(); //$NON-NLS-1$
+					
 					if (treeNode == null){
-						treeNode = (AttributeTreeNode)session.createCriteria(AttributeTreeNode.class)
-								.add(Restrictions.eq("attribute", srcAttribute)) //$NON-NLS-1$
-								.add(Restrictions.eq("hkey", recordAttribute.getTreeValue().getName())) //$NON-NLS-1$
-								.uniqueResult();
+						treeNode = QueryFactory.buildQuery(session, AttributeTreeNode.class,
+								 new Object[] {"attribute",srcAttribute}, //$NON-NLS-1$
+								 new Object[] {"hkey", recordAttribute.getTreeValue().getName()}).uniqueResult(); //$NON-NLS-1$
 					}
 					if (treeNode == null){
 						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_TreeNodeNotFound, srcAttribute.getName(), recordAttribute.getTreeValue().getName()));

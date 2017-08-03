@@ -635,7 +635,7 @@
    </extension>
 
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.plan.model.Plan"
             supportsCcaa="false">
@@ -747,7 +747,7 @@
       </page>
    </extension>
    <extension
-         point="org.wcs.smart.ca.deleteAdvisor">
+         point="org.wcs.smart.caDeleteAdvisor">
       <DeleteAdvisor
             advisor="org.wcs.smart.plan.advisors.StationDeleteAdvisor"
             class="org.wcs.smart.ca.Station">
@@ -919,7 +919,7 @@
       </dataSetUI>
    </extension>
    <extension
-         point="org.wcs.smart.report.birt.maplayer">
+         point="org.wcs.smart.birt.map.maplayer">
       <MapLayer
             maplayer="org.wcs.smart.plan.report.PlanTargetMapLayer">
       </MapLayer>
@@ -931,7 +931,7 @@
       </StyleProvider>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.plan.PlanTemplateCloner"
             id="org.wcs.smart.planTemplateCloner">
@@ -966,7 +966,7 @@
       </action>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="plans">
       </FilestoreDirectory>
@@ -979,13 +979,13 @@
       </toc>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.plan.upgrade.PlanDatabaseUpgrader">
       </dbUpgrader>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.plan.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>

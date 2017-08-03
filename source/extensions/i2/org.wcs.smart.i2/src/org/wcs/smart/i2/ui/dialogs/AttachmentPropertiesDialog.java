@@ -177,8 +177,7 @@ public class AttachmentPropertiesDialog {
 		
 		properties = new HashMap<String, List<Entry>>();
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			if (attachment.getUuid() != null){
 				attachment = (IntelAttachment) s.get(IntelAttachment.class, attachment.getUuid());
 			}
@@ -194,8 +193,6 @@ public class AttachmentPropertiesDialog {
 				details.add(new Entry(Messages.AttachmentPropertiesDialog_PathLabel, Messages.AttachmentPropertiesDialog_PathError +e.getMessage()));
 			}
 			properties.put(DETAILS_KEY, details);
-		}finally{
-			s.close();
 		}
 		
 		

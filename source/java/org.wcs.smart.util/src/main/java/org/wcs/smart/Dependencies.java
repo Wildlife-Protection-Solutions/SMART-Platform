@@ -7,6 +7,8 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.SubMonitor;
+
 /**
  * A tool to scan directories and determine which i18n files and added that shouldn't be
  * and which should be.
@@ -19,7 +21,6 @@ public class Dependencies {
 	
 	
 	public static void main(String[] args) throws Exception{
-		
 		File toSearch = new File("C:\\data\\SMART\\Exports\\win32.win32.x86\\smart\\plugins");
 		String[] files2 = toSearch.list();
 		

@@ -31,6 +31,7 @@ import org.wcs.smart.patrol.internal.ui.properties.TeamPropertyPage;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowPatrolTeamsHandler {
 
 	@Execute

@@ -5,7 +5,7 @@
    <extension-point id="org.wcs.smart.connect.status.contribution" name="Connect Status Contribution" schema="schema/org.wcs.smart.connect.status.contribution.exsd"/>
    <extension-point id="org.wcs.smart.connect.ca.export" name="Connect Conservation Area Export Processor" schema="schema/org.wcs.smart.connect.ca.export.exsd"/>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             class="org.wcs.smart.connect.model.ConnectServer"
             supportsCcaa="true">
@@ -36,25 +36,25 @@
       </class>
    </extension>
    <extension
-         point="org.wcs.smart.ca.filestoredir">
+         point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="smart_connect">
       </FilestoreDirectory>
    </extension>
    <extension
-         point="org.wcs.smart.startup.db">
+         point="org.wcs.smart.dbStartUp">
       <StartUpRunner
             class="org.wcs.smart.connect.replication.DerbyStartUpRunner">
       </StartUpRunner>
    </extension>
    <extension
-         point="org.wcs.smart.ca.login">
+         point="org.wcs.smart.caLogin">
       <loginHandler
             clazz="org.wcs.smart.connect.replication.LoginHandler">
       </loginHandler>
    </extension>
    <extension
-         point="org.wcs.smart.startupoption">
+         point="org.wcs.smart.startUpOption">
       <StartUpOption
             clazz="org.wcs.smart.connect.ui.startup.ImportFromConnectStartupOption">
       </StartUpOption>
@@ -147,7 +147,7 @@
       </processor>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.connect.CloneConnect"
             id="org.wcs.smart.connect.CloneConnectConservationArea">
@@ -172,7 +172,7 @@
       </action>
    </extension>
    <extension
-         point="org.wcs.smart.changelog.installer">
+         point="org.wcs.smart.changeLogInstaller">
       <ChangeLogTracker
             clazz="org.wcs.smart.connect.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>
@@ -387,7 +387,7 @@
       </propertyTester>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.connect.upgrade.ConnectDatabaseUpgrader">
       </dbUpgrader>

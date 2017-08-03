@@ -24,13 +24,12 @@ package org.wcs.smart.er.delete;
 import java.text.MessageFormat;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Delete sampling unit advisor.
@@ -47,21 +46,14 @@ public class SamplingUnitDeleteAdvisor implements IDeleteAdvisor {
 		}
 		SamplingUnit su = (SamplingUnit)object;
 		//check survey waypoints for references
-		Long wpCnt = (Long) session.createCriteria(SurveyWaypoint.class)
-				.add(Restrictions.eq("samplingUnit", su)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount())
-				.list().get(0);
+		Long wpCnt = QueryFactory.buildCountQuery(session, SurveyWaypoint.class, new Object[] {"samplingUnit", su}); //$NON-NLS-1$
 
 		if (wpCnt > 0){
 			return MessageFormat.format(Messages.SamplingUnitDeleteAdvisor_WaypointError, new Object[]{wpCnt});
 		}
 		
 		//check mission tracks for references
-		Long suCnt = (Long) session.createCriteria(MissionTrack.class)
-				.add(Restrictions.eq("samplingUnit", su)) //$NON-NLS-1$
-				.setProjection(Projections.rowCount())
-				.list().get(0);
-
+		Long suCnt = QueryFactory.buildCountQuery(session, MissionTrack.class, new Object[] {"samplingUnit", su}); //$NON-NLS-1$
 		if (suCnt > 0){
 			return MessageFormat.format(Messages.SamplingUnitDeleteAdvisor_TrackError, new Object[]{suCnt});
 		}

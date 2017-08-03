@@ -31,9 +31,7 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
@@ -43,6 +41,7 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -70,97 +69,96 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 				return false;
 		}
 		
-		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
-		try {
-			session.beginTransaction();
-			
-			patrol = (Patrol) session.get(Patrol.class, patrol.getUuid());
-
-			PatrolLeg tmpLeg = new PatrolLeg();
-			initLegData(tmpLeg, ctPatrol, session);
-			if (!checkDuplicate(ctPatrol, tmpLeg, patrol, session)){
-				return false;
-			}
-
-			List<String> memberOverlaps = validateMemberOverlaping(patrol, ctPatrol);
-			if (!memberOverlaps.isEmpty()) {
-				String msg = ""; //$NON-NLS-1$
-				for (Iterator<String> i = memberOverlaps.iterator(); i.hasNext();) {
-					msg += i.next();
-					if (i.hasNext())
-						msg += "\n"; //$NON-NLS-1$
-				}
-				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_MemberOverlapError_Title, msg, null);
-				return false;	
-			}
-			
-			PatrolLeg leg = patrol.addLeg();
-			initLegData(leg, ctPatrol, session);
-		
-			if (patrol.getStartDate().getTime() > leg.getStartDate().getTime()) {
-				if (!isValidTimeDelta(leg.getEndDate(), patrol.getStartDate()))
-					addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_Start, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrol.getStartDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(leg.getEndDate())));
-				patrol.setStartDate(leg.getStartDate());
+		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+			try {
+				session.beginTransaction();
 				
-			}
-
-			if (patrol.getEndDate().getTime() < leg.getEndDate().getTime()) {
-				if (!isValidTimeDelta(patrol.getEndDate(), leg.getStartDate()))
-					addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_End, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrol.getEndDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(leg.getStartDate())));
-				patrol.setEndDate(leg.getEndDate());
-			}
-			
-			if (leg.getLeader() == null){
-				if (!fixLeaderError(leg, ctPatrol, session)){
+				patrol = (Patrol) session.get(Patrol.class, patrol.getUuid());
+	
+				PatrolLeg tmpLeg = new PatrolLeg();
+				initLegData(tmpLeg, ctPatrol, session);
+				if (!checkDuplicate(ctPatrol, tmpLeg, patrol, session)){
 					return false;
 				}
-			}
-			if (leg.getType().getPatrolType().requiresPilot() && leg.getPilot() == null){
-				if (!fixPilotError(leg, ctPatrol, session)){
+	
+				List<String> memberOverlaps = validateMemberOverlaping(patrol, ctPatrol);
+				if (!memberOverlaps.isEmpty()) {
+					String msg = ""; //$NON-NLS-1$
+					for (Iterator<String> i = memberOverlaps.iterator(); i.hasNext();) {
+						msg += i.next();
+						if (i.hasNext())
+							msg += "\n"; //$NON-NLS-1$
+					}
+					CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_MemberOverlapError_Title, msg, null);
+					return false;	
+				}
+				
+				PatrolLeg leg = patrol.addLeg();
+				initLegData(leg, ctPatrol, session);
+			
+				if (patrol.getStartDate().getTime() > leg.getStartDate().getTime()) {
+					if (!isValidTimeDelta(leg.getEndDate(), patrol.getStartDate()))
+						addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_Start, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrol.getStartDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(leg.getEndDate())));
+					patrol.setStartDate(leg.getStartDate());
+					
+				}
+	
+				if (patrol.getEndDate().getTime() < leg.getEndDate().getTime()) {
+					if (!isValidTimeDelta(patrol.getEndDate(), leg.getStartDate()))
+						addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_End, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrol.getEndDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(leg.getStartDate())));
+					patrol.setEndDate(leg.getEndDate());
+				}
+				
+				if (leg.getLeader() == null){
+					if (!fixLeaderError(leg, ctPatrol, session)){
+						return false;
+					}
+				}
+				if (leg.getType().getPatrolType().requiresPilot() && leg.getPilot() == null){
+					if (!fixPilotError(leg, ctPatrol, session)){
+						return false;
+					}
+				}
+				List<String> patrolMetaWarnings = reportPatrolMetaWarnings(patrol, ctPatrol);
+				for (String warnMsg : patrolMetaWarnings) {
+					addWarning(warnMsg);
+				}
+				
+				List<S> sList = extractAndPreProcessSights(ctPatrol);
+				RestTimeMap restMap = extractRestTime(sList, ctPatrol.getElementsMap());
+				sList = restMap.excludePauseS(sList);
+				for (S s : sList) {
+					addObservations(leg, s, ctPatrol.getElementsMap(), session);
+				}
+				for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+					pld.setRestMinutes(restMap.getRestMinutes(pld.getDate()));
+				}
+	
+				if (!displayWarnings(ctPatrol))
 					return false;
-				}
-			}
-			List<String> patrolMetaWarnings = reportPatrolMetaWarnings(patrol, ctPatrol);
-			for (String warnMsg : patrolMetaWarnings) {
-				addWarning(warnMsg);
-			}
-			
-			List<S> sList = extractAndPreProcessSights(ctPatrol);
-			RestTimeMap restMap = extractRestTime(sList, ctPatrol.getElementsMap());
-			sList = restMap.excludePauseS(sList);
-			for (S s : sList) {
-				addObservations(leg, s, ctPatrol.getElementsMap(), session);
-			}
-			for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-				pld.setRestMinutes(restMap.getRestMinutes(pld.getDate()));
-			}
-
-			if (!displayWarnings(ctPatrol))
-				return false;
-			
-
-			//resize images if required
-			processImages(Collections.singletonList(leg),session);
-			
-			PatrolHibernateManager.savePatrol(patrol, session, true);
-			session.getTransaction().commit();
-			PatrolEventManager.getInstance().patrolSaved(patrol, true);
-			return true;
-		} catch (final Exception e) {
-			session.getTransaction().rollback();
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(Messages.PatrolLegImporter_ErrorDialog_Message, e);
-				}
-			});
-			return false;
-		}
-		finally {
-			if (session.getTransaction().isActive()){
+				
+	
+				//resize images if required
+				processImages(Collections.singletonList(leg),session);
+				
+				PatrolHibernateManager.savePatrol(patrol, session, true);
+				session.getTransaction().commit();
+				PatrolEventManager.getInstance().patrolSaved(patrol, true);
+				return true;
+			} catch (final Exception e) {
 				session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(Messages.PatrolLegImporter_ErrorDialog_Message, e);
+					}
+				});
+				return false;
+			} finally {
+				if (session.getTransaction().isActive()){
+					session.getTransaction().rollback();
+				}
 			}
-			session.close();
 		}
 	}
 
@@ -240,17 +238,13 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 			PatrolLeg patrolLeg,
 			Patrol importTo,
 			final Session session){
-		
-		Criteria c = session.createCriteria(PatrolLeg.class);
+
 		//search for a leg with the samte start date, end date and transport type
-		c.add(Restrictions.eq("patrol", importTo)); //$NON-NLS-1$
-		c.add(Restrictions.eq("startDate", patrolLeg.getStartDate())); //$NON-NLS-1$
-		c.add(Restrictions.eq("endDate", patrolLeg.getEndDate())); //$NON-NLS-1$
-		c.add(Restrictions.eq("type", patrolLeg.getType())); //$NON-NLS-1$
-		
-		@SuppressWarnings("unchecked")
-		List<PatrolLeg> patrols = c.list(); 
-		
+		List<PatrolLeg> patrols = QueryFactory.buildQuery(session, PatrolLeg.class, 
+			new Object[] {"patrol", importTo}, //$NON-NLS-1$
+			new Object[] {"startDate", patrolLeg.getStartDate()}, //$NON-NLS-1$
+			new Object[] {"endDate", patrolLeg.getEndDate()}, //$NON-NLS-1$
+			new Object[] {"type", patrolLeg.getType()}).getResultList(); //$NON-NLS-1$
 		if (patrols.size() > 0){
 			final StringBuilder smartPatrols = new StringBuilder();
 			for (PatrolLeg p : patrols){

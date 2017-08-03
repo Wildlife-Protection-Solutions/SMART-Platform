@@ -109,11 +109,9 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
-			Session s = HibernateManager.openSession();
-			try{
-			final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
+			try(Session s = HibernateManager.openSession()){
+				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
 				s.doWork(new Work(){
-	
 					@Override
 					public void execute(Connection c) throws SQLException {
 						try(ResultSet q = c.createStatement().executeQuery(sql)){
@@ -127,8 +125,6 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 						}
 					}	
 				});
-			}finally{
-				s.close();
 			}
 		}
 		return bounds;

@@ -29,7 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -100,7 +101,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbyObservationEngine_progress1, 80);
+				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyObservationEngine_progress1, 80);
 				SurveyDesignFilter filter = null;
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
@@ -127,13 +128,12 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, 
-							needsObservations, false, new SubProgressMonitor(monitor, 50));
+							needsObservations, false, progress.split(50));
 					
-					if (monitor.isCanceled()) return;
 					
-					populateTemporaryTableExtra(c, session, query, new SubProgressMonitor(monitor, 20));
+					populateTemporaryTableExtra(c, session, query, progress.split(20));
 					
-					if (monitor.isCanceled()) return;
+					progress.checkCanceled();
 					monitor.subTask(Messages.DerbyObservationEngine_progress2);
 					//setting result size					
 					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)) { //$NON-NLS-1$
@@ -141,13 +141,14 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 							result.setItemCount(rs.getInt(1));
 						}
 					}
-					monitor.worked(10);
+					progress.worked(10);
+				}catch(OperationCanceledException ex) {
+					return;
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {
 					if (filterer != null) filterer.dropTemporaryTables(c);
-					if (monitor.isCanceled()) dropTables(c);
-					monitor.done();
+					if (progress.isCanceled()) dropTables(c);
 					c.setAutoCommit(false);
 				}
 			}
@@ -201,7 +202,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 	private void populateTemporaryTableExtra(Connection c, Session session, 
 			MissionQuery query, IProgressMonitor monitor) throws SQLException {
 
-		monitor.beginTask(Messages.DerbyMissionEngine_ProgressAdditionalData, 5);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyMissionEngine_ProgressAdditionalData, 5);
 		
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -215,18 +216,13 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 			QueryPlugIn.logSql(sql);
 			c.createStatement().execute(sql);
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
+		
 
 		//survey design name
 		monitor.subTask(Messages.DerbyObservationEngine_progress3);
 		populateTemporaryTableNameObjExtra("surveydesign_uuid", "surveydesign_name", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
 		//ca information
 		if (SmartDB.isMultipleAnalysis()){
@@ -250,10 +246,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
 		//mission leader
 		monitor.subTask(Messages.DerbyMissionEngine_ProgressMissionLeader);
@@ -301,18 +294,11 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 			}
 			leaderSt.executeBatch();
 		}
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
+		progress.split(1);
 		
 		monitor.subTask(Messages.DerbyMissionEngine_ProgressMissionProperties);
 		populateAdditionalMissionTable(c,session);
-		monitor.worked(1);
-		if (monitor.isCanceled()){
-			return;
-		}
-
+		progress.split(1);
 	}
 
 	private void populateAdditionalMissionTable(Connection c, Session session) throws SQLException {
@@ -413,7 +399,6 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		return sql.toString();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		SurveyQueryResultItem it = new SurveyQueryResultItem();
@@ -436,12 +421,12 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
 		//need to add the tracks
-		org.hibernate.Query q = session.createQuery("FROM MissionTrack WHERE missionDay.mission.uuid = :uuid"); //$NON-NLS-1$
+		org.hibernate.query.Query<?> q = session.createQuery("FROM MissionTrack WHERE missionDay.mission.uuid = :uuid"); //$NON-NLS-1$
 		q.setParameter("uuid", UuidUtils.byteToUUID(rs.getBytes("mission_uuid")));  //$NON-NLS-1$//$NON-NLS-2$
-		List<MissionTrack> mts = q.list();
-		for (MissionTrack mt : mts){
+		List<?> mts = q.list();
+		for (Object mt : mts){
 			try {
-				it.addTracks(mt.getLineString());
+				it.addTracks(((MissionTrack )mt).getLineString());
 			} catch (Exception e) {
 				ERQueryPlugIn.log(e.getMessage(),e);
 			}

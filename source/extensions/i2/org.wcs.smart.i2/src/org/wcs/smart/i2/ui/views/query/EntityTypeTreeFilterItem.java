@@ -33,9 +33,9 @@ import javax.imageio.ImageIO;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.ImageData;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -75,24 +75,20 @@ public class EntityTypeTreeFilterItem extends DeferredTreeFilterItem {
 			
 		}
 	}
-	
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<FilterTreeItem> getChildren() {
 		if (kids == null ){
 			synchronized (LOCK) {
 				if (kids == null){
-					Session s = HibernateManager.openSession();
-					try{
-						List<IntelEntity> entities = s.createCriteria(IntelEntity.class).add(Restrictions.eq("entityType.uuid", typeUuid)).list(); //$NON-NLS-1$
+					try(Session s = HibernateManager.openSession()){
+						List<IntelEntity> entities = 
+								QueryFactory.buildQuery(s, IntelEntity.class, "entityType.uuid", typeUuid).list(); //$NON-NLS-1$
 						ArrayList<FilterTreeItem> temp = new ArrayList<>();
 						for (IntelEntity e : entities){
 							temp.add(new EntityTreeFilterItem(e));
 						}
 						kids = temp;
-					}finally{
-						s.close();
 					}
 				}
 			}

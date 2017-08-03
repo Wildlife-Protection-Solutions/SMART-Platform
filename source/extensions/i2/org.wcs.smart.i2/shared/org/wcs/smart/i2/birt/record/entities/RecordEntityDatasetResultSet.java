@@ -35,7 +35,7 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
@@ -80,7 +80,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 		if (index >= 0){
 			hql += " AND r.uuid = :record"; //$NON-NLS-1$
 		}
-		Query query = connection.getSession().createQuery(hql);
+		Query<IntelEntityRecord> query = connection.getSession().createQuery(hql, IntelEntityRecord.class);
 		query.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
 		
 		if (index >= 0){

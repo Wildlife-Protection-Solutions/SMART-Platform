@@ -255,7 +255,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	public void dropTable(Session s, String tableName) throws SQLException  {
 		String sql = "DROP TABLE IF EXISTS " + tableName; //$NON-NLS-1$
 		logger.finest(sql);
-		s.createSQLQuery(sql).executeUpdate();
+		s.createNativeQuery(sql).executeUpdate();
 	}
 
 	public void dropTable(Connection c, String tableName) throws SQLException  {
@@ -548,9 +548,9 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 				String auth = crsid.split(":")[0]; //$NON-NLS-1$
 				int code = Integer.parseInt(crsid.split(":")[1]); //$NON-NLS-1$
 				
-				org.hibernate.Query q = session.createSQLQuery("SELECT srid, srtext FROM " + spatialRefSys + " WHERE auth_name = :auth and auth_srid = :srid"); //$NON-NLS-1$ //$NON-NLS-2$
-				q.setString("auth", auth); //$NON-NLS-1$
-				q.setInteger("srid", code); //$NON-NLS-1$
+				org.hibernate.query.NativeQuery<?> q = session.createNativeQuery("SELECT srid, srtext FROM " + spatialRefSys + " WHERE auth_name = :auth and auth_srid = :srid"); //$NON-NLS-1$ //$NON-NLS-2$
+				q.setParameter("auth", auth); //$NON-NLS-1$
+				q.setParameter("srid", code); //$NON-NLS-1$
 				Object[] data = (Object[]) q.uniqueResult();
 				if (data != null){
 					CoordinateReferenceSystem c = CRS.parseWKT((String)data[1]);
@@ -564,7 +564,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		}
 		//if above fails, lets search entire list for match
 		@SuppressWarnings("unchecked")
-		List<Object[]> choices = session.createSQLQuery("SELECT srid, srtext from " + spatialRefSys).list(); //$NON-NLS-1$
+		List<Object[]> choices = session.createNativeQuery("SELECT srid, srtext from " + spatialRefSys).list(); //$NON-NLS-1$
 		for (Object[] data : choices){
 			try{
 				CoordinateReferenceSystem c = CRS.parseWKT((String)data[1]);
@@ -600,9 +600,9 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sb.append( value );
 		sb.append(" = a.lbl FROM (SELECT "); //$NON-NLS-1$
 		sb.append(tablePrefix(Label.class));
-		sb.append(".value as lbl, ");
+		sb.append(".value as lbl, "); //$NON-NLS-1$
 		sb.append(tablePrefix(Label.class));
-		sb.append(".element_uuid as uuid ");
+		sb.append(".element_uuid as uuid "); //$NON-NLS-1$
 		sb.append("FROM "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(Label.class));
 		sb.append(" JOIN "); //$NON-NLS-1$
@@ -611,17 +611,17 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sb.append(tablePrefix(Label.class));
 		sb.append(".language_uuid  = "); //$NON-NLS-1$
 		sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
-		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
-		sb.append(" WHERE upper(code) = '" + locale.toString().toUpperCase() + "'");
+		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		sb.append(" WHERE upper(code) = '" + locale.toString().toUpperCase() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if (locale.toString().toUpperCase().endsWith(locale.getLanguage().toUpperCase())){
-			sb.append(" UNION ");
+			sb.append(" UNION "); //$NON-NLS-1$
 			
 			sb.append(" SELECT "); //$NON-NLS-1$
 			sb.append(tablePrefix(Label.class));
-			sb.append(".value as lbl, ");
+			sb.append(".value as lbl, "); //$NON-NLS-1$
 			sb.append(tablePrefix(Label.class));
-			sb.append(".element_uuid as uuid ");
+			sb.append(".element_uuid as uuid "); //$NON-NLS-1$
 			sb.append("FROM "); //$NON-NLS-1$
 			sb.append(tableNamePrefix(Label.class));
 			sb.append(" JOIN "); //$NON-NLS-1$
@@ -630,22 +630,22 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			sb.append(tablePrefix(Label.class));
 			sb.append(".language_uuid  = "); //$NON-NLS-1$
 			sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
-			sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
-			sb.append(" WHERE upper(code) = '" + locale.getLanguage().toUpperCase() + "'");
+			sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			sb.append(" WHERE upper(code) = '" + locale.getLanguage().toUpperCase() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 			
-			sb.append("AND " + tablePrefix(Label.class) + ".element_uuid not in (");
-			sb.append(" SELECT " + tablePrefix(Label.class) + ".element_uuid as uuid FROM " + tableNamePrefix(Label.class) + " JOIN " + tableNamePrefix(Language.class) + " on " + tablePrefix(Label.class) + ".language_uuid = " + tablePrefix(Language.class) + ".uuid");
-			sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
-			sb.append(" WHERE  upper(code) = '" +  locale.toString().toUpperCase()+ "')");
+			sb.append("AND " + tablePrefix(Label.class) + ".element_uuid not in ("); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" SELECT " + tablePrefix(Label.class) + ".element_uuid as uuid FROM " + tableNamePrefix(Label.class) + " JOIN " + tableNamePrefix(Language.class) + " on " + tablePrefix(Label.class) + ".language_uuid = " + tablePrefix(Language.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			sb.append(" WHERE  upper(code) = '" +  locale.toString().toUpperCase()+ "')"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
-		sb.append(" UNION ");
+		sb.append(" UNION "); //$NON-NLS-1$
 		
 		sb.append(" SELECT "); //$NON-NLS-1$
 		sb.append(tablePrefix(Label.class));
-		sb.append(".value as lbl, ");
+		sb.append(".value as lbl, "); //$NON-NLS-1$
 		sb.append(tablePrefix(Label.class));
-		sb.append(".element_uuid as uuid ");
+		sb.append(".element_uuid as uuid "); //$NON-NLS-1$
 		sb.append("FROM "); //$NON-NLS-1$
 		sb.append(tableNamePrefix(Label.class));
 		sb.append(" JOIN "); //$NON-NLS-1$
@@ -654,16 +654,16 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sb.append(tablePrefix(Label.class));
 		sb.append(".language_uuid  = "); //$NON-NLS-1$
 		sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
-		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
-		sb.append(" WHERE " + tablePrefix(Language.class) + ".isdefault ");
+		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		sb.append(" WHERE " + tablePrefix(Language.class) + ".isdefault "); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		sb.append("AND " + tablePrefix(Label.class) + ".element_uuid not in (");
-		sb.append(" SELECT " + tablePrefix(Label.class) + ".element_uuid as uuid FROM " + tableNamePrefix(Label.class) + " JOIN " + tableNamePrefix(Language.class) + " on " + tablePrefix(Label.class) + ".language_uuid = " + tablePrefix(Language.class) + ".uuid");
-		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$
-		sb.append(" WHERE  upper(code) IN( '" +  locale.toString().toUpperCase()+ "',  '" +  locale.getLanguage().toUpperCase() + "'))");
+		sb.append("AND " + tablePrefix(Label.class) + ".element_uuid not in ("); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" SELECT " + tablePrefix(Label.class) + ".element_uuid as uuid FROM " + tableNamePrefix(Label.class) + " JOIN " + tableNamePrefix(Language.class) + " on " + tablePrefix(Label.class) + ".language_uuid = " + tablePrefix(Language.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		sb.append(" JOIN ( SELECT DISTINCT " + uuid + " FROM " + tableName + ") z ON z." + uuid + " = " + tablePrefix(Label.class) + ".element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		sb.append(" WHERE  upper(code) IN( '" +  locale.toString().toUpperCase()+ "',  '" +  locale.getLanguage().toUpperCase() + "'))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		sb.append(") a ");
-		sb.append(" WHERE a.uuid = " + tableName + "." + uuid); //$NON-NLS-1$
+		sb.append(") a "); //$NON-NLS-1$
+		sb.append(" WHERE a.uuid = " + tableName + "." + uuid); //$NON-NLS-1$ //$NON-NLS-2$
 
 
 		logger.finest(sb.toString());

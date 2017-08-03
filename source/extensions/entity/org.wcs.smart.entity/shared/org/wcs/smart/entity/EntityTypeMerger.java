@@ -28,10 +28,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -39,6 +42,7 @@ import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.Status;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Merges entity types across Conservation Areas.
@@ -71,7 +75,7 @@ public class EntityTypeMerger {
 		
 		//entity types must have the same keyid, dm attribute keyid and type
 		String hql = "SELECT count(*), e.keyId, e.type, a.keyId FROM EntityType e, Attribute a WHERE e.dmAttribute.uuid = a.uuid and e.conservationArea in (:ca) GROUP BY e.keyId, e.type, a.keyId";//$NON-NLS-1$
-		Query q = session.createQuery(hql);
+		Query<?> q = session.createQuery(hql);
 		q.setParameterList("ca", cas);//$NON-NLS-1$
 		
 		List<?> data = q.list();
@@ -90,11 +94,9 @@ public class EntityTypeMerger {
 		for (String entityType : keys){
 			if (monitor != null ) monitor.setTaskName(SmartContext.INSTANCE.getClass(IEntityLabelProvider.class).getLabel(IEntityLabelProvider.MERGE_PROGRESS1_KEY, l));
 			
-			EntityType shared = (EntityType) session
-					.createCriteria(EntityType.class)
-					.add(Restrictions.eq("keyId", entityType)) //$NON-NLS-1$
-					.add(Restrictions.eq("conservationArea", defaultCa)) //$NON-NLS-1$
-					.list().get(0);
+			EntityType shared = QueryFactory.buildQuery(session, EntityType.class, 
+					new Object[] {"keyId", entityType}, //$NON-NLS-1$
+					new Object[] {"conservationArea", defaultCa}).uniqueResult(); //$NON-NLS-1$
 			
 			EntityType et = new EntityType();
 			et.setType(shared.getType());
@@ -135,18 +137,21 @@ public class EntityTypeMerger {
 		return copy;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private Attribute findAttribute(Session session, String keyId, ConservationArea[] cas, ConservationArea defaultCa){
-		Attribute a = (Attribute) session.createCriteria(Attribute.class)
-				.add(Restrictions.eq("conservationArea", defaultCa)) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
-				.uniqueResult();
+		Attribute a = QueryFactory.buildQuery(session, Attribute.class, 
+				new Object[] {"conservationArea", defaultCa}, //$NON-NLS-1$
+				new Object[] {"keyId", keyId}).uniqueResult(); //$NON-NLS-1$
 		if (a != null ) return cloneAttribute(a, defaultCa);
 		
-		List<Attribute> attributes = (List<Attribute>) session.createCriteria(Attribute.class)
-				.add(Restrictions.in("conservationArea", cas)) //$NON-NLS-1$
-				.add(Restrictions.eq("keyId", keyId)) //$NON-NLS-1$
-				.list();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Attribute> c = cb.createQuery(Attribute.class);
+		Root<Attribute> from = c.from(Attribute.class);
+		c.where(cb.and(
+				from.get("conservationArea").in((Object[])cas), //$NON-NLS-1$
+				cb.equal(from.get("keyId"), keyId) //$NON-NLS-1$
+				));
+		List<Attribute> attributes = session.createQuery(c).getResultList();
+		
 		if (attributes.size() > 0){
 			return cloneAttribute(attributes.get(0), defaultCa);
 		}
@@ -158,7 +163,7 @@ public class EntityTypeMerger {
 			+ "WHERE e.dmAttribute.uuid = a.uuid and e.entityType.keyId = :entityType and e.entityType.conservationArea in (:cas) "  //$NON-NLS-1$
 			+ " GROUP BY e.keyId, a.keyId";//$NON-NLS-1$
 		
-		Query q = session.createQuery(hql);
+		Query<?> q = session.createQuery(hql);
 		q.setParameter("entityType", entityType);//$NON-NLS-1$
 		q.setParameterList("cas", cas); //$NON-NLS-1$
 		

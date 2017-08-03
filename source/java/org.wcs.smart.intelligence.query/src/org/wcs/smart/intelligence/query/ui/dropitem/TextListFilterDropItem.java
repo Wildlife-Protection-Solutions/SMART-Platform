@@ -82,16 +82,13 @@ public class TextListFilterDropItem  extends DropItem{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<ListItem> items = new ArrayList<ListItem>();
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				 if (filter == IntelligenceFilterOption.PATROLID){
 					List<String> pids =  PatrolHibernateManager.getPatrolIds(s);
 					for (String i : pids){
 						items.add(new ListItem(null, i, i));
 					}
 				}
-			}finally{
-				s.close();
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){

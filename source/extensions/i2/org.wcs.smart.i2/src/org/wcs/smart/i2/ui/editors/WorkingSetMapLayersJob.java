@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.editors;
 
 import java.io.IOException;
@@ -116,42 +137,41 @@ public class WorkingSetMapLayersJob extends Job {
 			}
 			if (resource == null) return;
 			IWorkingSetMapLayer workingSetMapLayer = null;
-			Session s = HibernateManager.openSession();
-			try{
-				s.beginTransaction();
-				if (resource.getResourceType() == IntelWorkingSetCategory.ENTITY){
-					//find working set
-					org.hibernate.Query q = s.createQuery("FROM IntelWorkingSetEntity i WHERE i.id.entity.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
-					q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
-					q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
-					workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
-				}else if (resource.getResourceType() == IntelWorkingSetCategory.RECORD){
-					org.hibernate.Query q = s.createQuery("FROM IntelWorkingSetRecord i WHERE i.id.record.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
-					q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
-					q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
-					workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
-				}else if (resource.getResourceType() == IntelWorkingSetCategory.QUERIES){
-					org.hibernate.Query q = s.createQuery("FROM IntelWorkingSetQuery i WHERE i.id.query.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
-					q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
-					q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
-					workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
-				}
-				if (workingSetMapLayer != null){
-					java.util.Map<String, StyleBlackboard> styles = StyleManager.INSTANCE.fromStringMap(workingSetMapLayer.getMapStyle());
-					styles.put(getLayerStyleIdentifier(layer.getGeoResource()).toString(), (StyleBlackboard)layer.getStyleBlackboard());
-					try {
-						String styleString = StyleManager.INSTANCE.asString(styles);
-						workingSetMapLayer.setMapStyle(styleString);
-					} catch (IOException e) {
-						Intelligence2PlugIn.log(e.getMessage(), e);
+			try(Session s = HibernateManager.openSession()){
+				try{
+					s.beginTransaction();
+					if (resource.getResourceType() == IntelWorkingSetCategory.ENTITY){
+						//find working set
+						org.hibernate.query.Query<?> q = s.createQuery("FROM IntelWorkingSetEntity i WHERE i.id.entity.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
+						q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
+						q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
+						workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
+					}else if (resource.getResourceType() == IntelWorkingSetCategory.RECORD){
+						org.hibernate.query.Query<?> q = s.createQuery("FROM IntelWorkingSetRecord i WHERE i.id.record.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
+						q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
+						q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
+						workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
+					}else if (resource.getResourceType() == IntelWorkingSetCategory.QUERIES){
+						org.hibernate.query.Query<?> q = s.createQuery("FROM IntelWorkingSetQuery i WHERE i.id.query.uuid = :uuid and i.id.workingSet.uuid = :uuid2"); //$NON-NLS-1$
+						q.setParameter("uuid", resource.getResourceId()); //$NON-NLS-1$
+						q.setParameter("uuid2", WorkingSetManager.INSTANCE.getActiveWorkingSet()); //$NON-NLS-1$
+						workingSetMapLayer = (IWorkingSetMapLayer) q.uniqueResult();
 					}
+					if (workingSetMapLayer != null){
+						java.util.Map<String, StyleBlackboard> styles = StyleManager.INSTANCE.fromStringMap(workingSetMapLayer.getMapStyle());
+						styles.put(getLayerStyleIdentifier(layer.getGeoResource()).toString(), (StyleBlackboard)layer.getStyleBlackboard());
+						try {
+							String styleString = StyleManager.INSTANCE.asString(styles);
+							workingSetMapLayer.setMapStyle(styleString);
+						} catch (IOException e) {
+							Intelligence2PlugIn.log(e.getMessage(), e);
+						}
+					}
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					s.getTransaction().rollback();
+					Intelligence2PlugIn.log(ex.getMessage(), ex);
 				}
-				s.getTransaction().commit();
-			}catch (Exception ex){
-				s.getTransaction().rollback();
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
-			}finally{
-				s.close();
 			}
 			
 		}
@@ -190,8 +210,7 @@ public class WorkingSetMapLayersJob extends Job {
 		
 		IntelWorkingSet workingset = null;
 		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
-			Session s = HibernateManager.openSession();
-			try{
+			try(Session s = HibernateManager.openSession()){
 				workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
 				if (workingset == null) return Status.OK_STATUS; //ws not found
 				if (workingset.getEntities() != null){
@@ -203,8 +222,6 @@ public class WorkingSetMapLayersJob extends Job {
 				if (workingset.getQueries() != null){
 					workingset.getQueries().forEach(e->e.getQuery().getName());
 				}
-			}finally{
-				s.close();
 			}
 		}
 		if (workingset == null){

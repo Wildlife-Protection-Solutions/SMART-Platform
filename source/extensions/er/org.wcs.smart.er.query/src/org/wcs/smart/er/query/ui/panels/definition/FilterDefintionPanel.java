@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.internal.Messages;
@@ -57,6 +56,7 @@ import org.wcs.smart.er.query.ui.dropitems.SamplingUnitDropItem;
 import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
@@ -219,14 +219,12 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					if ( sq.getSurveyDesign() == null ) return Status.OK_STATUS;
-					Session s = HibernateManager.openSession();
-					try{
-						List<?> results = s
-							.createCriteria(SurveyDesign.class)
-							.add(Restrictions.eq("keyId", sq.getSurveyDesign())) //$NON-NLS-1$
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.list(); 
-
+					
+					try(Session s = HibernateManager.openSession()){
+						List<SurveyDesign> results = QueryFactory.buildQuery(s, SurveyDesign.class,
+								new Object[] {"keyId", sq.getSurveyDesign()}, //$NON-NLS-1$
+								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
+		
 						if (results.size() > 0) {
 							final SurveyDesign sd = (SurveyDesign) results.get(0);
 							Display.getDefault().syncExec(new Runnable() {
@@ -246,8 +244,6 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 							});
 							
 						}
-					}finally{
-						s.close();
 					}
 
 					return Status.OK_STATUS;

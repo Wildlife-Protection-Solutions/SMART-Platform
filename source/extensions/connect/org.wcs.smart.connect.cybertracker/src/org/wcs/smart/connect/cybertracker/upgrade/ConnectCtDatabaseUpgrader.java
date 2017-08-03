@@ -46,25 +46,24 @@ public class ConnectCtDatabaseUpgrader implements IDatabaseUpgrader {
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.ConnectCtDatabaseUpgrader_UpgageTaskName, 1);
-		Session session = HibernateManager.openSession();
-		try {
+		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
-			Map<String, String> versions = UpgradeEngine.getVersions(session);
-			if (versions == null)
-				throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
-			String currentPluginVersion = versions.get(ConnectCtPlugIn.PLUGIN_ID);
-
-			if (currentPluginVersion == null) {
-				(new AddConnectCtJob()).installPlugin(session);
-			} else {
-				upgrade(currentPluginVersion, session);
+			try {
+				Map<String, String> versions = UpgradeEngine.getVersions(session);
+				if (versions == null)
+					throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+				String currentPluginVersion = versions.get(ConnectCtPlugIn.PLUGIN_ID);
+	
+				if (currentPluginVersion == null) {
+					(new AddConnectCtJob()).installPlugin(session);
+				} else {
+					upgrade(currentPluginVersion, session);
+				}
+				session.getTransaction().commit();
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				throw ex;
 			}
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			throw ex;
-		} finally {
-			session.close();
 		}
 		monitor.done();
 	}

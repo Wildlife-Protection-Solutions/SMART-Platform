@@ -67,22 +67,21 @@ public abstract class SummaryQueryDefinitionExporter extends DefinitionQueryExpo
 		
 		xmlQuery.getQueryPart().add(defPart);
 			
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			if (summary.getQueryDefinition().getValueFilter() != null){
-				processFilter(summary.getQueryDefinition().getValueFilter().getFilter(), xmlQuery, s);
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				if (summary.getQueryDefinition().getValueFilter() != null){
+					processFilter(summary.getQueryDefinition().getValueFilter().getFilter(), xmlQuery, s);
+				}
+				if (summary.getQueryDefinition().getRateFilter() != null){
+					processFilter(summary.getQueryDefinition().getRateFilter().getFilter(), xmlQuery, s);
+				}
+				
+				processGroupBy(summary.getQueryDefinition().getRowGroupByPart(), xmlQuery, s);
+				processGroupBy(summary.getQueryDefinition().getColumnGroupByPart(), xmlQuery, s);
+			}finally{
+				s.getTransaction().rollback();
 			}
-			if (summary.getQueryDefinition().getRateFilter() != null){
-				processFilter(summary.getQueryDefinition().getRateFilter().getFilter(), xmlQuery, s);
-			}
-			
-			processGroupBy(summary.getQueryDefinition().getRowGroupByPart(), xmlQuery, s);
-			processGroupBy(summary.getQueryDefinition().getColumnGroupByPart(), xmlQuery, s);
-
-		}finally{
-			s.getTransaction().rollback();
-			s.close();
 		}
 	}
 

@@ -27,10 +27,9 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.hibernate.cfg.Configuration;
+import org.hibernate.boot.Metadata;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.integrator.spi.Integrator;
-import org.hibernate.metamodel.source.MetadataImplementor;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 
 /**
@@ -46,26 +45,12 @@ public class SmartIntegrator implements Integrator {
 	//http://in.relation.to/2012/01/09/event-listener-registration/
 	
 	@Override
-	public void integrate(Configuration configuration,
-			SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
-
-		//find all contributions and run integrate
-		for (Integrator i : getMappings()){
-			i.integrate(configuration, sessionFactory, serviceRegistry);
-		}
-	}
-
-    /** 
-     * Ignore this form!  Just do nothing in impl.  It uses the new metamodel api slated for completion in 5.0
-     */
-	@Override
-	public void integrate(MetadataImplementor metadata,
-			SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
+	public void integrate(Metadata metadata, SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
 		for (Integrator i : getMappings()){
 			i.integrate(metadata, sessionFactory, serviceRegistry);
 		}
 	}
-
+	
 	@Override
 	public void disintegrate(SessionFactoryImplementor sessionFactory,
 			SessionFactoryServiceRegistry serviceRegistry) {
@@ -92,5 +77,7 @@ public class SmartIntegrator implements Integrator {
 		}
 		return items;
 	}
+
+
 	
 }

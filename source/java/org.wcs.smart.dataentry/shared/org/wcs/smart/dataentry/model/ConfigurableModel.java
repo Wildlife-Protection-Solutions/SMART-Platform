@@ -45,8 +45,6 @@ import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.dataentry.CmDefaultListsUtil;
-import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -112,26 +110,6 @@ public class ConfigurableModel extends NamedItem {
 	}
 	public void setPhotoFirst(Boolean photoFirst) {
 		this.photoFirst = Boolean.TRUE.equals(photoFirst); //null <==> false
-	}
-
-	@Transient
-	public void addDefaultTreeNodes(final Attribute attribute) {
-		CmAttributeConfig cfg = getDefaultConfigs().get(attribute);
-		if (cfg == null) {
-			//if we are here that this attribute was not added before (no data for it in default trees)
-			cfg = CmDefaultTreesUtil.buildDefaultTreeConfig(this, attribute);
-			getDefaultConfigs().put(attribute, cfg);
-		}
-	}	
-
-	@Transient
-	public void addDefaultListItems(final Attribute attribute) {
-		CmAttributeConfig cfg = getDefaultConfigs().get(attribute);
-		if (cfg == null) {
-			//if we are here that this attribute was not added before (no data for it in default configs)
-			cfg = CmDefaultListsUtil.buildDefaultListConfig(this, attribute);
-			getDefaultConfigs().put(attribute, cfg);
-		}
 	}
 	
 	/**

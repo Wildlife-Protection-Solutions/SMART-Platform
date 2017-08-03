@@ -34,6 +34,12 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public interface IConfigurableModelProvider {
 	
+	/**
+	 * 
+	 * @param session
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
+	 * @return
+	 */
 	public ConfigurableModel getConfigurableModel(Session session, IProgressMonitor monitor);
 
 	public Object getExportSource();

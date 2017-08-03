@@ -156,30 +156,30 @@ public class EntityTypeFilterDialog extends SmartFilterDialog {
 		setTitle(Messages.EntityTypeFilterDialog_DialogTitle);
 		getShell().setText(Messages.EntityTypeFilterDialog_DialogTitle);
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			Composite composite = new Composite((Composite) filter, SWT.NONE);
-			composite.setLayout(new GridLayout(1, false));
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-			Composite status = createGroupComposite(Messages.EntityTypeFilterDialog_StatusGroupTitle, composite);
-			createStatusComposite(session, status);
-			
-			Composite type = createGroupComposite(Messages.EntityTypeFilterDialog_EntityTypeGroupName, composite);
-			createTypeComposite(session, type);
-			
-			Composite patrolIdComp = createGroupComposite(Messages.EntityTypeFilterDialog_IdNameGroupName, composite);
-			idFilterCmp = new StringFilterComposite(
-					patrolIdComp, SWT.NONE,  EntityTypeFilter.SEARCH_FIELDS);
-			
-			idFilterCmp.setIncludeAllRadioLabel(Messages.EntityTypeFilterDialog_IncludeAll);
-			idFilterCmp.setFilterRadioLabel(Messages.EntityTypeFilterDialog_FilterLabel);
-			
-			updateControlsValues();
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				Composite composite = new Composite((Composite) filter, SWT.NONE);
+				composite.setLayout(new GridLayout(1, false));
+				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	
+				Composite status = createGroupComposite(Messages.EntityTypeFilterDialog_StatusGroupTitle, composite);
+				createStatusComposite(session, status);
+				
+				Composite type = createGroupComposite(Messages.EntityTypeFilterDialog_EntityTypeGroupName, composite);
+				createTypeComposite(session, type);
+				
+				Composite patrolIdComp = createGroupComposite(Messages.EntityTypeFilterDialog_IdNameGroupName, composite);
+				idFilterCmp = new StringFilterComposite(
+						patrolIdComp, SWT.NONE,  EntityTypeFilter.SEARCH_FIELDS);
+				
+				idFilterCmp.setIncludeAllRadioLabel(Messages.EntityTypeFilterDialog_IncludeAll);
+				idFilterCmp.setFilterRadioLabel(Messages.EntityTypeFilterDialog_FilterLabel);
+				
+				updateControlsValues();
+			} finally {
+				session.getTransaction().rollback();
+			}
 		}
 		
 		return filter;

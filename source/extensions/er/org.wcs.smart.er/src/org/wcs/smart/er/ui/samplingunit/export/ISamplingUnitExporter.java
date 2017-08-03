@@ -50,7 +50,7 @@ public interface ISamplingUnitExporter {
 	 * @param sd the survey design containing sampling units to export
 	 * @param session current session
 	 * @param options set of import options
-	 * @param monitor progress monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * 
 	 * @throws Exception
 	 */

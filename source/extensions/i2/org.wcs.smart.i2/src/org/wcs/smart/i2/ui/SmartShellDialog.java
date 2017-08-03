@@ -43,7 +43,7 @@ public abstract class SmartShellDialog implements Listener {
 	protected Shell parentShell;
 	
 	public SmartShellDialog(Shell parentShell) {
-		this(parentShell, SWT.NO_TRIM);
+		this(parentShell, SWT.NO_TRIM | SWT.ON_TOP);
 	}
 	
 	public SmartShellDialog(Shell parentShell, int style) {

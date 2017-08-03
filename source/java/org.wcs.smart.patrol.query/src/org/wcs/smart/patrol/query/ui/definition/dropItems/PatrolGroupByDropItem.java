@@ -224,15 +224,15 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
 		
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			items = data.getAllValues(s);
-			s.getTransaction().rollback();
-			s.close();
-		}catch (Exception ex){
-			QueryPlugIn.displayLog(Messages.PatrolGroupByDropItem_Error_LoadingListItems, ex);
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				items = data.getAllValues(s);
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(Messages.PatrolGroupByDropItem_Error_LoadingListItems, ex);
+			}finally {
+				s.getTransaction().rollback();
+			}
 		}
 		Collections.sort(items);
 		return items;

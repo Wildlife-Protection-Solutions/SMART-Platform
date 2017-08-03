@@ -87,12 +87,15 @@ public class ConnectCtAlertProvider implements IAlertProvider {
 							@Override
 							public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 								monitor.beginTask(Messages.ConnectCtAlertProvider_LoadAlertsTaskName, 1);
-								Session s = HibernateManager.openSession();
-								s.beginTransaction();
-								alerts.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, true));
-								properties = ConnectCtHibernateManager.getCtProperties(cm, s);
-								s.getTransaction().rollback();
-								s.close();
+								try(Session s = HibernateManager.openSession()){
+									s.beginTransaction();
+									try {
+										alerts.addAll(ConnectCtHibernateManager.getConnectAlerts(cm, s, true));
+										properties = ConnectCtHibernateManager.getCtProperties(cm, s);
+									}finally {
+										s.getTransaction().rollback();
+									}
+								}
 							}
 						});
 					} catch (Exception e) {

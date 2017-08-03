@@ -25,11 +25,11 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Sampling unit attribute delete advisor.  Cannot delete
@@ -39,7 +39,6 @@ import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
  */
 public class SamplingUnitAttributeDeleteAdvisor implements IDeleteAdvisor {
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof SamplingUnitAttribute)){
@@ -49,8 +48,8 @@ public class SamplingUnitAttributeDeleteAdvisor implements IDeleteAdvisor {
 		SamplingUnitAttribute sua = (SamplingUnitAttribute)object;
 		
 		//find missions which use this attribute
-		List<SurveyDesignSamplingUnitAttribute> designs = session.createCriteria(SurveyDesignSamplingUnitAttribute.class)
-				.add(Restrictions.eq("id.samplingUnitAttribute", sua)).list(); //$NON-NLS-1$
+		List<SurveyDesignSamplingUnitAttribute> designs = 
+				QueryFactory.buildQuery(session, SurveyDesignSamplingUnitAttribute.class, "id.samplingUnitAttribute", sua).getResultList(); //$NON-NLS-1$
 		if (designs.size() == 0){
 			return null;
 		}

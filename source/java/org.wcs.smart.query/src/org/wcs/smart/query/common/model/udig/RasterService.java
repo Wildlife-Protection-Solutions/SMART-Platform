@@ -35,7 +35,7 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
@@ -406,10 +406,9 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 
 
 	public void dispose(IProgressMonitor monitor) {
-		if (monitor == null){
-        	monitor = new NullProgressMonitor();
-        }
-		super.dispose(monitor);
+		SubMonitor progress = SubMonitor.convert(monitor);
+		
+		super.dispose(progress);
     	
 		if (this.reader != null){
 			this.reader.dispose();
@@ -424,9 +423,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
     		int steps = (int) ((double) 99 / (double) geoResources.size());
     		for( IGeoResource resolve : this.geoResources ) {
     			try {
-    				SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor, steps);
-    				resolve.dispose(subProgressMonitor);
-    				subProgressMonitor.done();
+    				resolve.dispose(progress.split(steps));
     			} catch (Throwable e) {
     				QueryPlugIn.log("Could not dispose query service.", e); //$NON-NLS-1$
     			}

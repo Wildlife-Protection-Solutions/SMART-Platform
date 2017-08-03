@@ -24,7 +24,7 @@ package org.wcs.smart.entity.event;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -50,11 +50,11 @@ public class DmAttributeTreeNodeDeleteAdvisor implements IDeleteAdvisor {
 		
 		AttributeTreeNode toDelete = (AttributeTreeNode) object;
 		//if an entity attribute is represented by the list item cannot delete
-		Query q = session.createQuery("FROM EntityAttributeValue v WHERE v.attributeTreeNode = :todelete"); //$NON-NLS-1$
+		Query<EntityAttributeValue> q = session.createQuery("FROM EntityAttributeValue v WHERE v.attributeTreeNode = :todelete", EntityAttributeValue.class); //$NON-NLS-1$
 		q.setParameter("todelete", toDelete); //$NON-NLS-1$
-		List<?> results = q.list();
+		List<EntityAttributeValue> results = q.list();
 		if (results.size() > 0){
-			EntityAttributeValue v1 = (EntityAttributeValue) results.get(0);
+			EntityAttributeValue v1 = results.get(0);
 			//attribute associated with an entity and cannot be deleted
 			return MessageFormat.format(
 					Messages.DmAttributeTreeNodeDeleteAdvisor_CannotDeleteTreeNode,

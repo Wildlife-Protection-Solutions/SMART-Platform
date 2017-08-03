@@ -39,7 +39,7 @@ import org.hibernate.Session;
  */
 public interface IDmEditAdvisor {
 
-	public static final String EXTENSION_ID = "org.wcs.smart.ca.datamodel.editAdvisor"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.caDataModelAdvisor"; //$NON-NLS-1$
 	
 	/**
 	 * 

@@ -120,20 +120,17 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append(Messages.SmartInstallationInfoPage_DbPluginVersions);
 		sb.append(SharedUtils.LINE_SEPARATOR);
-		Session s = HibernateManager.openSession();
-		try{
-			List<?> data = s.createSQLQuery("SELECT plugin_id, version FROM " +SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
+		
+		try(Session s = HibernateManager.openSession()){
+			List<?> data = s.createNativeQuery("SELECT plugin_id, version FROM " +SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
 			for (Object x : data){
 				Object[] z = (Object[])x;
 				sb.append("  " + (String)z[0] + ": " + (String)z[1]);  //$NON-NLS-1$//$NON-NLS-2$
 				sb.append(SharedUtils.LINE_SEPARATOR);
 			}
-				
 		}catch (Exception ex){
 			SmartPlugIn.log(ex.getMessage(), ex);
 			sb.append(ex.getLocalizedMessage());
-		}finally{
-			s.close();
 		}
 
 		txt.setText(sb.toString());

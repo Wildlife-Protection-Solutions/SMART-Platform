@@ -169,15 +169,13 @@ public class EmployeeDialog extends Dialog {
 					return true;
 				}					
 			}
-			Session tmp = HibernateManager.openSession();
-			try{
-			if (!HibernateManager.validateUserIdUnique(smartUser, ca, tmp)){
-				MessageDialog.openError(this.getShell(), Messages.EmployeeDialog_Error_InvalidUserId_DialogTitle1, 
+			
+			try(Session tmp = HibernateManager.openSession()){
+				if (!HibernateManager.validateUserIdUnique(smartUser, ca, tmp)){
+					MessageDialog.openError(this.getShell(), Messages.EmployeeDialog_Error_InvalidUserId_DialogTitle1, 
 						MessageFormat.format(Messages.EmployeeDialog_Error_InvalidUserId_DialogMessage1, new Object[]{smartUser}));
-				return false;
-			}
-			}finally{
-				tmp.close();
+					return false;
+				}
 			}
 		}
 		return true;
@@ -196,35 +194,34 @@ public class EmployeeDialog extends Dialog {
 			}
 			eComposite.updateEmploye(toUpdate);
 			
-			Session session = HibernateManager.openSession();
-			try{
-				session.beginTransaction();
-				if (toUpdate.getId().equals(AUTO_GENERATE)){
-					//if they left the default "automatic", auto-generate an id for them
-					HibernateManager.generateEmployeeId(toUpdate, session);
-				}else if (toUpdate.getUuid() != null){
-					//validate that there will always be
-					//one employee with admin privileges 
-					//in the database
-					String error = HibernateManager.validateSmartUserChanges(session, toUpdate);
-					if (error != null){
-						session.getTransaction().rollback();
-						session.refresh(toUpdate);
-						SmartPlugIn.displayLog(error, null);
-						return false;
+			
+			try(Session session = HibernateManager.openSession()){
+				try {
+					session.beginTransaction();
+					if (toUpdate.getId().equals(AUTO_GENERATE)){
+						//if they left the default "automatic", auto-generate an id for them
+						HibernateManager.generateEmployeeId(toUpdate, session);
+					}else if (toUpdate.getUuid() != null){
+						//validate that there will always be
+						//one employee with admin privileges 
+						//in the database
+						String error = HibernateManager.validateSmartUserChanges(session, toUpdate);
+						if (error != null){
+							session.getTransaction().rollback();
+							session.refresh(toUpdate);
+							SmartPlugIn.displayLog(error, null);
+							return false;
+						}
 					}
+					//save results to database
+					session.saveOrUpdate(toUpdate);
+					session.getTransaction().commit();
+					return true;
+				}catch (RuntimeException ex){
+					session.getTransaction().rollback();
+					SmartPlugIn.displayLog(Messages.EmployeeDialog_Error_SaveError + ex.getLocalizedMessage(), ex);
+					return false;
 				}
-				//save results to database
-				session.saveOrUpdate(toUpdate);
-				session.getTransaction().commit();
-				return true;
-			}catch (RuntimeException ex){
-				session.getTransaction().rollback();
-				session.close();
-				SmartPlugIn.displayLog(Messages.EmployeeDialog_Error_SaveError + ex.getLocalizedMessage(), ex);
-				return false;
-			}finally{
-				session.close();
 			}
 		}
 		return false;

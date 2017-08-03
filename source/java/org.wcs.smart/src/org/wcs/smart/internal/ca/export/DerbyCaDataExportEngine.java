@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
+import org.hibernate.query.Query;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
@@ -73,8 +73,9 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 				" AND (a.autoincrementvalue is null or (a.autoincrementvalue is not null and a.columndefault is not null)) " + //not an generated always identity column //$NON-NLS-1$
 				"order by a.columnnumber"; //$NON-NLS-1$
 		
+		
 		@SuppressWarnings("unchecked")
-		List<String> data = getSession().createSQLQuery(sql).list();
+		List<String> data = getSession().createNativeQuery(sql).list();
 		if (data.size() == 0){
 			throw new IllegalStateException("Could not determine table columns for table " + tableName); //$NON-NLS-1$
 		}
@@ -143,7 +144,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 			String caPropertyQuery) throws Exception {
 		
 		
-		Query q = getSession().createQuery("from " //$NON-NLS-1$
+		Query<?> q = getSession().createQuery("from " //$NON-NLS-1$
 				+ hibernateClass + " a where a" //$NON-NLS-1$
 				+ caPropertyQuery + " = :ca"); //$NON-NLS-1$
 		
@@ -186,7 +187,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	 */
 	@Override
 	public void writeQuery(String fileName, String query){
-		SQLQuery sqlQuery = getSession().createSQLQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" + //$NON-NLS-1$ //$NON-NLS-2$
+		NativeQuery<?> sqlQuery = getSession().createNativeQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" + //$NON-NLS-1$ //$NON-NLS-2$
 				createFileName(getExportLocation(), fileName + ".dat").getAbsolutePath() + "', null, null, 'utf-8')" ); //$NON-NLS-1$ //$NON-NLS-2$
 		sqlQuery.executeUpdate();
 	}

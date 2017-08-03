@@ -48,7 +48,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
@@ -70,6 +69,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
@@ -232,43 +232,43 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		if (this.mission == null){
 			
 			UUID muuid = ((MissionEditorInput) getEditorInput()).getUuid();
-			Session session = HibernateManager.openSession();
-			
-			
-			session.beginTransaction();
-			try{
-				this.mission = (Mission) session.load(Mission.class, muuid);
-				missionDates = new Date[]{new Date(mission.getStartDate().getTime()), new Date(mission.getEndDate().getTime())};
-				//load mission items so don't have lazy loading issues later.
-				
-				for (MissionDay md : mission.getMissionDays()){
-					md.getTracks().size();
-					try{
-						for (SurveyWaypoint wp : md.getWaypoints()){
-							ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					this.mission = (Mission) session.load(Mission.class, muuid);
+					missionDates = new Date[]{new Date(mission.getStartDate().getTime()), new Date(mission.getEndDate().getTime())};
+					//load mission items so don't have lazy loading issues later.
+					
+					for (MissionDay md : mission.getMissionDays()){
+						md.getTracks().size();
+						try{
+							for (SurveyWaypoint wp : md.getWaypoints()){
+								ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
+							}
+						}catch (Exception ex){
+							EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 						}
-					}catch (Exception ex){
-						EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 					}
-				}
-
-				this.trackDistanceDirection = mission.getSurvey().getSurveyDesign().getTrackDistanceDirection();
-				this.trackObserver = mission.getSurvey().getSurveyDesign().getTrackObserver();
-				this.configurableModel = mission.getSurvey().getSurveyDesign().getConfigurableModel();
+	
+					this.trackDistanceDirection = mission.getSurvey().getSurveyDesign().getTrackDistanceDirection();
+					this.trackObserver = mission.getSurvey().getSurveyDesign().getTrackObserver();
+					this.configurableModel = mission.getSurvey().getSurveyDesign().getConfigurableModel();
+					
+					List<Projection> tmp = HibernateManager.getCaProjectionList(session);
+					this.projections = tmp.toArray(new Projection[tmp.size()]);
 				
-				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
-				this.projections = tmp.toArray(new Projection[tmp.size()]);
-			
-				this.options = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-				this.viewProjection = HibernateManager.getCurrentViewProjection(session);
-
-				this.sUnits = SurveyHibernateManager.getInstance().getSamplingUnits(mission.getSurvey().getSurveyDesign(), session, null);
-				for (SamplingUnit s : sUnits){
-					s.getId();
+					this.options = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+					this.viewProjection = HibernateManager.getCurrentViewProjection(session);
+	
+					this.sUnits = SurveyHibernateManager.getInstance().getSamplingUnits(mission.getSurvey().getSurveyDesign(), session, null);
+					for (SamplingUnit s : sUnits){
+						s.getId();
+					}
+					session.getTransaction().commit();
+				}catch (Exception ex) {
+					session.getTransaction().rollback();
+					throw ex;
 				}
-				session.getTransaction().commit();
-			}finally{
-				session.close();
 			}
 		}
 		return this.mission;
@@ -402,17 +402,11 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 */
 	public void findAndShow(UUID waypointUuid){
 		SurveyWaypoint wp = null;
-		Session s = HibernateManager.openSession();
 		
-		try{
-			wp = (SurveyWaypoint) s.createCriteria(SurveyWaypoint.class)
-					.add(Restrictions.eq("id.waypoint.uuid", waypointUuid)) //$NON-NLS-1$
-					.uniqueResult();
-			if (wp == null) return;
-			
+		try(Session s = HibernateManager.openSession()){
+			wp = QueryFactory.buildQuery(s, SurveyWaypoint.class, "id.waypoint.uuid", waypointUuid).uniqueResult(); //$NON-NLS-1$
+			if (wp == null) return;	
 			wp.getMissionDay().getDate();
-		}finally{
-			s.close();
 		}
 		
 		final SurveyWaypoint wp2 = wp;

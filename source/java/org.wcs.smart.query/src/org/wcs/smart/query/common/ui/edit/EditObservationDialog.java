@@ -27,6 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -40,11 +44,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -148,14 +151,12 @@ public class EditObservationDialog extends TitleAreaDialog{
 		return p;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		List<Attribute> allAttributes = new ArrayList<>();
 		Category category = null;
 		
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			if (woUuid == null){
 				toEdit = new WaypointObservation();
 				toEdit.setAttributes(new ArrayList<>());
@@ -176,11 +177,13 @@ public class EditObservationDialog extends TitleAreaDialog{
 			all.setLayout(new GridLayout(1, false));
 			all.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-			List<Category> roots = s.createCriteria(Category.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-					.add(Restrictions.isNull("parent")) //$NON-NLS-1$
-					.list();
-			
+			CriteriaBuilder cb = s.getCriteriaBuilder();
+			CriteriaQuery<Category> cQuery = cb.createQuery(Category.class);
+			Root<Category> root =cQuery.from(Category.class);
+			cQuery.where(cb.and(
+					cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+					cb.isNull(root.get("parent")))); //$NON-NLS-1$
+			List<Category> roots = s.createQuery(cQuery).getResultList();
 			List<Category> lazy = new ArrayList<>(roots);
 			while(!lazy.isEmpty()){
 				Category l = lazy.remove(0);
@@ -194,8 +197,7 @@ public class EditObservationDialog extends TitleAreaDialog{
 			categoryViewer.setInput(roots);
 			categoryViewer.setValue(category);
 			categoryViewer.addSelectionChangedListener(e-> {
-					Session session = HibernateManager.openSession();
-					try{
+					try(Session session = HibernateManager.openSession()){
 						Category c = (Category) session.get(Category.class, categoryViewer.getValue().getUuid());
 						List<Attribute> allatts = new ArrayList<>();
 						c.getAllAttribute(allatts, true);
@@ -204,8 +206,6 @@ public class EditObservationDialog extends TitleAreaDialog{
 							configureAttribute(allatts);
 						}
 						lastCategory = c;
-					}finally{
-						session.close();
 					}
 					
 			});
@@ -222,8 +222,6 @@ public class EditObservationDialog extends TitleAreaDialog{
 			lastCategory = category;
 			loadTrees(allAttributes);
 			configureAttribute(allAttributes);
-		}finally{
-			s.close();
 		}
 		
 		setTitle(Messages.EditObservationDialog_Title);

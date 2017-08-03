@@ -112,7 +112,7 @@
       </view>
    </extension>
    <extension
-         point="org.wcs.smart.hibernate.mapping">
+         point="org.wcs.smart.hibernate.libs.mapping">
       <class
             ca_property=".conservationArea"
             class="org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem"
@@ -131,7 +131,7 @@
       </Panel>
    </extension>
    <extension
-         point="org.wcs.smart.ca.login">
+         point="org.wcs.smart.caLogin">
       <loginHandler
             clazz="org.wcs.smart.connect.dataqueue.internal.LoginHandler">
       </loginHandler>
@@ -143,7 +143,7 @@
       </contribution>
    </extension>
    <extension
-         point="org.wcs.smart.dbUpgrage">
+         point="org.wcs.smart.dbUpgrade">
       <dbUpgrader
             upgrader="org.wcs.smart.connect.dataqueue.installer.ConnectDataQueueDatabaseUpgrader">
       </dbUpgrader>
@@ -172,7 +172,7 @@
             class="org.wcs.smart.connect.dataqueue.internal.server.ConnectCaExportProcessor"></processor>
    </extension>
    <extension
-         point="org.wcs.smart.ca.templateCloner">
+         point="org.wcs.smart.caTemplateCloner">
       <templateCloner
             class="org.wcs.smart.connect.dataqueue.internal.CaCloneDataQueueOptions"
             id="org.wcs.smart.connect.dataqueue.ca.cloner">

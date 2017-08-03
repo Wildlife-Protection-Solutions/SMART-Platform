@@ -54,25 +54,25 @@ public class AddDataQueueCtMissionJob extends Job {
 		//required if run during restore to ensure Display.syncexec calls don't block
 		DisplayAccess.accessDisplayDuringStartup();
 						
-		Session session = HibernateManager.openSession();
-		try{
+		try(Session session = HibernateManager.openSession()){		
 			monitor.beginTask(Messages.AddDataQueueCtMissionJob_CreateTableTask, 10);
 			session.beginTransaction();
-			installPlugin(session);
-			session.getTransaction().commit();
-		}catch(Exception ex){
-			if (session.getTransaction().isActive()) session.getTransaction().rollback();
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					MessageDialog.openError(Display.getDefault().getActiveShell(),
-							Messages.AddDataQueueCtMissionJob_ErrorMsg,
-							Messages.AddDataQueueCtMissionJob_InstallError);
-				}
-				
-			});
-			return new Status(Status.ERROR, PlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
-		}finally{
+			try{
+				installPlugin(session);
+				session.getTransaction().commit();
+			}catch(Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openError(Display.getDefault().getActiveShell(),
+								Messages.AddDataQueueCtMissionJob_ErrorMsg,
+								Messages.AddDataQueueCtMissionJob_InstallError);
+					}
+					
+				});
+				return new Status(Status.ERROR, PlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
+			}
 			session.close();
 		}
 		return Status.OK_STATUS;

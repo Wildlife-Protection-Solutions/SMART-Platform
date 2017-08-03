@@ -172,16 +172,15 @@ public class SaveSearchDialog extends TitleAreaDialog{
 			search.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), search.getName());
 			search.setSearchString(isearch.serialize());
 			
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
-				session.save(search);
-				session.getTransaction().commit();
-			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(Messages.SaveSearchDialog_SaveError + ex.getMessage(), ex);
-				return;
-			}finally{
-				session.close();
+				try {
+					session.save(search);
+					session.getTransaction().commit();
+				}catch (Exception ex){
+					Intelligence2PlugIn.displayLog(Messages.SaveSearchDialog_SaveError + ex.getMessage(), ex);
+					return;
+				}
 			}
 			savedSearch = search;
 			broker.send(IntelEvents.ENTITY_SEARCH_NEW, search);
@@ -189,17 +188,16 @@ public class SaveSearchDialog extends TitleAreaDialog{
 			return;
 		}else if (x instanceof SearchProxy){
 			IntelEntitySearch eSearch = null;
-			Session session = HibernateManager.openSession();
-			try{
+			try(Session session = HibernateManager.openSession()){			
 				session.beginTransaction();
-				eSearch = (IntelEntitySearch) session.get(IntelEntitySearch.class, ((SearchProxy) x).getUuid());
-				eSearch.setSearchString(isearch.serialize());
-				session.getTransaction().commit();
-			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(Messages.SaveSearchDialog_OverwriteError + ex.getMessage(), ex);
-				return;
-			}finally{
-				session.close();
+				try{
+					eSearch = (IntelEntitySearch) session.get(IntelEntitySearch.class, ((SearchProxy) x).getUuid());
+					eSearch.setSearchString(isearch.serialize());
+					session.getTransaction().commit();
+				}catch (Exception ex){
+					Intelligence2PlugIn.displayLog(Messages.SaveSearchDialog_OverwriteError + ex.getMessage(), ex);
+					return;
+				}
 			}
 			savedSearch = eSearch;
 			broker.send(IntelEvents.ENTITY_SEARCH_MODIFIED, eSearch);

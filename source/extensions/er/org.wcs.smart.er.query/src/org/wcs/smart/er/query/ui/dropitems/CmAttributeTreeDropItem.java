@@ -38,13 +38,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
@@ -91,40 +91,36 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try{
-				CmAttribute attribute = (CmAttribute) s.load(CmAttribute.class, cmAttribute.getUuid());
-				roots = attribute.getCurrentTree();
-				List<CmAttributeTreeNode> toLoad = new ArrayList<CmAttributeTreeNode>(roots);
-				while(toLoad.size() > 0){
-					CmAttributeTreeNode n = toLoad.remove(0);
-					n.getName();
-					if (n.getDmTreeNode() != null){
-						n.getDmTreeNode().getName();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try{
+					CmAttribute attribute = (CmAttribute) s.load(CmAttribute.class, cmAttribute.getUuid());
+					roots = attribute.getCurrentTree();
+					List<CmAttributeTreeNode> toLoad = new ArrayList<CmAttributeTreeNode>(roots);
+					while(toLoad.size() > 0){
+						CmAttributeTreeNode n = toLoad.remove(0);
+						n.getName();
+						if (n.getDmTreeNode() != null){
+							n.getDmTreeNode().getName();
+						}
+						toLoad.addAll(n.getChildren());
 					}
-					toLoad.addAll(n.getChildren());
+					if (currentSelection != null){
+						defaultNode = QueryFactory.buildQuery(s, CmAttributeTreeNode.class,
+								new Object[] {"dmTreeNode", currentSelection}, //$NON-NLS-1$
+								new Object[] {"config", attribute.getConfig()}).uniqueResult(); //$NON-NLS-1$
+					}
+					
+				}catch(Exception ex){
+					QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
+				}finally{
+					s.getTransaction().rollback();
 				}
-				if (currentSelection != null){
-					defaultNode = (CmAttributeTreeNode) s.createCriteria(CmAttributeTreeNode.class)
-							.add(Restrictions.eq("dmTreeNode", currentSelection))  //$NON-NLS-1$
-							.add(Restrictions.eq("config", attribute.getConfig())) //$NON-NLS-1$
-							.uniqueResult();
-				}
-				
-			}catch(Exception ex){
-				QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
-			}finally{
-				s.getTransaction().rollback();
-				s.close();
 			}
 			input = roots;
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
-//					if (defaultNode != null && lblitem != null && !lblitem.isDisposed()){
-//						lblitem.setText( formatStringForLabel(defaultNode.getDefaultName()));
-//					}
 					updateLabel();
 					if (treeviewer == null || 
 							treeviewer.getTreeViewer().getControl().isDisposed()){

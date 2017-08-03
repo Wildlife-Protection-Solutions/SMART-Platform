@@ -82,22 +82,22 @@ public class MissionMemberDropItem extends DropItem implements IFilterDropItem {
 			final Employee lCurrentValue = currentValue;
 			
 			final List<Employee> data = new ArrayList<Employee>();
-			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			try {
-				List<Employee> employees = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
-				data.addAll(employees);
-				Collections.sort(data, new Comparator<Employee>() {
-					@Override
-					public int compare(Employee e0, Employee e1) {
-						return Collator.getInstance().compare(
-								SmartLabelProvider.getFullLabel(e0).toUpperCase(), 
-								SmartLabelProvider.getFullLabel(e1).toUpperCase());
-					}
-				});
-				s.getTransaction().rollback();
-			} finally {
-				s.close();
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try {
+					List<Employee> employees = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
+					data.addAll(employees);
+					Collections.sort(data, new Comparator<Employee>() {
+						@Override
+						public int compare(Employee e0, Employee e1) {
+							return Collator.getInstance().compare(
+									SmartLabelProvider.getFullLabel(e0).toUpperCase(), 
+									SmartLabelProvider.getFullLabel(e1).toUpperCase());
+						}
+					});
+				}finally {
+					s.getTransaction().rollback();
+				}
 			}
 			
 			

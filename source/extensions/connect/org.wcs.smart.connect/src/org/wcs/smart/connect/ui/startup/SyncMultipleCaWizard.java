@@ -27,7 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
@@ -84,35 +85,31 @@ public class SyncMultipleCaWizard extends Wizard {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask(Messages.SyncMultipleCaWizard_SyncTaskName, allCas.size() + 1);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.SyncMultipleCaWizard_SyncTaskName, allCas.size() + 1);
 					try{
-						monitor.subTask(Messages.SyncMultipleCaWizard_ValidateSubtaskName);
+						progress.subTask(Messages.SyncMultipleCaWizard_ValidateSubtaskName);
 						
 						List<CaUserDetails> details = validateCaUsers(activeShell, allCas, username, password);
-						monitor.worked(1 + (allCas.size() - details.size()));
+						progress.worked(1 + (allCas.size() - details.size()));
 						
 						HibernateManager.endSessionFactory(true, false);
 						HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 						
 						try{
 							for (CaUserDetails cainfo : details){
-								if (monitor.isCanceled()){
-									errors.add(Messages.SyncMultipleCaWizard_Cancelled);
-									break;
-								}
-								monitor.subTask(cainfo.ca.getNameLabel());
-								if (syncCa(cainfo, monitor)){
+								progress.subTask(cainfo.ca.getNameLabel());
+								if (syncCa(cainfo, progress.split(1))){
 									okCnt[0] ++;
 								}
 							}
+						}catch (OperationCanceledException e) {
+							errors.add(Messages.SyncMultipleCaWizard_Cancelled);
 						}finally{
 							HibernateManager.endSessionFactory(true, true);
 							HibernateManager.setUserName(SmartDB.DbUser.LOGIN.getUserName(), SmartDB.DbUser.LOGIN.getPassword());	
 						}
 					}catch (Exception ex){
 						errors.add(ex.getMessage());
-					}finally{
-						monitor.done();
 					}
 					
 				}
@@ -134,11 +131,9 @@ public class SyncMultipleCaWizard extends Wizard {
 	/**
 	 * Returns true if completed okay, false if error.  Adds to error log.
 	 *  
-	 * @param details
-	 * @param monitor
-	 * @return
 	 */
 	private boolean syncCa(CaUserDetails details, IProgressMonitor monitor) {
+		SubMonitor progress = SubMonitor.convert(monitor, "", 1); //$NON-NLS-1$
 		try {
 			SmartConnect connect = SmartConnect.findInstance(details.server, 
 					details.connectUser.getConnectUsername(),
@@ -150,7 +145,7 @@ public class SyncMultipleCaWizard extends Wizard {
 			
 			//then we can sync 
 			SyncChangesRunnable runnable = new SyncChangesRunnable(connect, details.ca, true);
-			runnable.run(new SubProgressMonitor(monitor, 1));
+			runnable.run(progress.split(1));
 			
 			String status = runnable.getStatus();
 			if (status != null){
@@ -214,13 +209,10 @@ public class SyncMultipleCaWizard extends Wizard {
 			
 			ConnectServer server = null;
 			ConnectUser cu = null;
-			Session s = HibernateManager.openSession();
 			String connectPassword = null;
-			try{
+			try(Session s = HibernateManager.openSession()){
 				cu = ConnectHibernateManager.getConnectUser(e, s);
 				server = ConnectHibernateManager.getConnectServer(s,ca);
-			}finally{
-				s.close();
 			}
 			if (server == null){
 				errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_SkippedServerInvalid, ca.getNameLabel()));

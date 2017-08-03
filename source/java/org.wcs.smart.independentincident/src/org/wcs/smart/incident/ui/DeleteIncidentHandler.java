@@ -37,7 +37,7 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -54,6 +54,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class DeleteIncidentHandler{
 
 	@Execute
@@ -82,16 +83,21 @@ public class DeleteIncidentHandler{
 			return;
 		}
 				
-		Session s = HibernateManager.openSession();
-		try{
+		
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			Query q=s.createQuery("delete Waypoint w where w.uuid = :wp"); //$NON-NLS-1$
-			for (IncidentEditorInput w : toDelete){
-				q.setParameter("wp", w.getUuid()); //$NON-NLS-1$
-				q.executeUpdate();
+			try {
+				Query<?> q = s.createQuery("delete Waypoint w where w.uuid = :wp"); //$NON-NLS-1$
+				for (IncidentEditorInput w : toDelete){
+					q.setParameter("wp", w.getUuid()); //$NON-NLS-1$
+					q.executeUpdate();
+				}
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				IncidentPlugIn.displayLog(Messages.DeleteIncidentHandler_Error1 + ex.getMessage(), ex);
+				return;
 			}
-			s.getTransaction().commit();
-			
 			for (IncidentEditorInput w : toDelete){
 				File f = new File(new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), IndepedentIncidentSource.FILESTORE_LOC), UuidUtils.getDirectoryPath(w.getUuid()));
 				if (f.exists()){
@@ -103,9 +109,6 @@ public class DeleteIncidentHandler{
 					}
 				}
 			}
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			IncidentPlugIn.displayLog(Messages.DeleteIncidentHandler_Error1 + ex.getMessage(), ex);
 		}
 		
 		//fire events

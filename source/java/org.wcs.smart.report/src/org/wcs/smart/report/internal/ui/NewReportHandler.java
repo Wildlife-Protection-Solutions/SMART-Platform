@@ -64,6 +64,7 @@ import org.wcs.smart.report.model.RootReportFolder;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class NewReportHandler {
 
 	@Execute
@@ -131,29 +132,22 @@ public class NewReportHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				File reportFile = null;
-				Session hsession = null;
-				try{
-					hsession = HibernateManager.openSession();
+				try(Session hsession = HibernateManager.openSession()){
+					
 					hsession.beginTransaction();
+					try {
+						//save report object o database
+						report.setId(ReportManager.generateReportId(SmartDB.getCurrentConservationArea(), hsession));
+						report.setFilename(ReportManager.generateFilename(report));
 					
-					//save report object o database
-					report.setId(ReportManager.generateReportId(SmartDB.getCurrentConservationArea(), hsession));
-					report.setFilename(ReportManager.generateFilename(report));
-					
-					hsession.save(report);
-					hsession.getTransaction().commit();
-				}catch (Exception ex){
-					if (hsession != null){
-						hsession.getTransaction().rollback();
-					}
-					ReportPlugIn.displayLog(Messages.NewReportHandler_Error_CouldNotCreateReport + ex.getLocalizedMessage(), ex);
-					return Status.OK_STATUS;
-				}finally{
-					if (hsession != null){
-						hsession.close();
+						hsession.save(report);
+						hsession.getTransaction().commit();
+					}catch (Exception ex){
+						hsession.getTransaction().rollback();						
+						ReportPlugIn.displayLog(Messages.NewReportHandler_Error_CouldNotCreateReport + ex.getLocalizedMessage(), ex);
+						return Status.OK_STATUS;
 					}
 				}
-
 				boolean canEdit = true;
 				try{
 					//create report file with default library

@@ -77,10 +77,8 @@ public class ObservationValueRateFilterPanel extends ValueRateFilterDeifnitionPa
 			return;
 		}
 		
-		Session session = null;
-		try{
+		try(Session session = HibernateManager.openSession()){
 			//---- generate drop items for value filter
-			session = HibernateManager.openSession();
 			session.beginTransaction();
 			List<DropItem> copies = new ArrayList<DropItem>();
 			if (filterPart != null){
@@ -94,13 +92,6 @@ public class ObservationValueRateFilterPanel extends ValueRateFilterDeifnitionPa
 			if (filterPart != null) rateFilter.setFilterType(filterPart.getFilterType());
 		}catch (Exception ex){
 			QueryPlugIn.displayLog(Messages.GriddedFilterPanel_CopyError, ex);
-			if (session != null && session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
-		}finally{
-			if (session != null){
-				session.close();
-			}
 		}
 	}
 

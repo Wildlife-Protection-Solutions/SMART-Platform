@@ -50,7 +50,7 @@ import org.wcs.smart.util.UuidUtils;
 * @author Jeff
 *
 */
-
+@SuppressWarnings("restriction")
 public class MissionExportHandler{
 	
 	@Execute
@@ -81,18 +81,17 @@ public class MissionExportHandler{
 						try {
 							monitor.subTask(MessageFormat.format(Messages.MissionExportHandler_1,new Object[]{ UuidUtils.uuidToString(puuid)}));
 							Mission m = null;
-							Session s = HibernateManager.openSession();
-							s.beginTransaction();
-							
-							try {
-								m = (Mission) s.load(Mission.class, puuid);
-								id = m.getId();
-							} catch (Exception ex) {
-								EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.MissionExportHandler_2, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
-								continue;
-							} finally {
-								s.getTransaction().commit();
-								s.close();
+							try(Session s = HibernateManager.openSession()){
+								s.beginTransaction();
+								try {
+									m = (Mission) s.load(Mission.class, puuid);
+									id = m.getId();
+								} catch (Exception ex) {
+									EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.MissionExportHandler_2, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
+									continue;
+								} finally {
+									s.getTransaction().commit();
+								}
 							}
 
 							monitor.subTask(MessageFormat.format(Messages.MissionExportHandler_3,new Object[]{ id }));

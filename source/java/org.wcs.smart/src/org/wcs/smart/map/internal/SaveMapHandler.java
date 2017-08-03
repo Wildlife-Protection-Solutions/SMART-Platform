@@ -48,6 +48,7 @@ import org.wcs.smart.util.E3Utils;
  * @author egouge
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class SaveMapHandler {
 
 	@Execute

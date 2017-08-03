@@ -24,9 +24,12 @@ package org.wcs.smart.i2;
 import java.text.Collator;
 import java.util.List;
 
-import org.hibernate.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.i2.internal.Messages;
@@ -51,11 +54,13 @@ public enum EntityTypeManager {
 	 * @param ca
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public List<IntelEntityType> getEntityTypes(Session session, ConservationArea ca){
-		List<IntelEntityType> types = session.createCriteria(IntelEntityType.class)
-			.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
-			.list();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
+		Root<IntelEntityType> root = c.from(IntelEntityType.class);
+		c.where(cb.equal(root.get("conservationArea"), ca)); //$NON-NLS-1$
+		
+		List<IntelEntityType> types = session.createQuery(c).getResultList();
 		types.sort((IntelEntityType a, IntelEntityType b) -> Collator.getInstance().compare(a.getName(), b.getName()));
 		return types;
 	}
@@ -76,7 +81,7 @@ public enum EntityTypeManager {
 	public void deleteEntityType(IntelEntityType type, Session session) throws Exception{
 		
 		//update relationships references to null
-		Query q = session.createQuery("UPDATE IntelRelationshipType SET sourceEntityType = null where sourceEntityType = :type"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("UPDATE IntelRelationshipType SET sourceEntityType = null where sourceEntityType = :type"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();
 		

@@ -88,8 +88,7 @@ public class EditRoutineDialog extends TitleAreaDialog{
 	 * Initialize the ui controls with the routine data
 	 */
 	private void initControls(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			this.routine = (QaRoutine) s.get(QaRoutine.class, routine.getUuid());
 			if (this.routine == null){
 				return;
@@ -98,8 +97,6 @@ public class EditRoutineDialog extends TitleAreaDialog{
 			for (QaRoutineParameter p : routine.getParameters()){
 				p.getParameterId();
 			}
-		}finally{
-			s.close();
 		}
 		txtName.setText(routine.getName());
 		if (routine.getDescription() != null){
@@ -125,31 +122,30 @@ public class EditRoutineDialog extends TitleAreaDialog{
 	
 	@Override
 	protected void okPressed(){
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
-			QaRoutine r = (QaRoutine)s.get(QaRoutine.class, routine.getUuid());
-			String name = txtName.getText().trim();
-			r.setName(name);
-			r.updateName(SmartDB.getCurrentLanguage(), name);
-			if (txtDescription.getText().trim().isEmpty()){
-				r.setDescription(null);
-			}else{
-				r.setDescription(txtDescription.getText().trim());
+			try {
+				QaRoutine r = (QaRoutine)s.get(QaRoutine.class, routine.getUuid());
+				String name = txtName.getText().trim();
+				r.setName(name);
+				r.updateName(SmartDB.getCurrentLanguage(), name);
+				if (txtDescription.getText().trim().isEmpty()){
+					r.setDescription(null);
+				}else{
+					r.setDescription(txtDescription.getText().trim());
+				}
+				r.setAutoCheck(btnAuto.getSelection());
+				
+				if (collector != null){
+					collector.updateParameters(r);
+				}
+				
+				s.getTransaction().commit();
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				QaPlugIn.displayLog(Messages.EditRoutineDialog_SaveError + ex.getMessage(), ex);
+				return;
 			}
-			r.setAutoCheck(btnAuto.getSelection());
-			
-			if (collector != null){
-				collector.updateParameters(r);
-			}
-			
-			s.getTransaction().commit();
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			QaPlugIn.displayLog(Messages.EditRoutineDialog_SaveError + ex.getMessage(), ex);
-			return;
-		}finally{
-			s.close();
 		}
 		InternalExtensionManager.INSTANCE.clearAutoRoutines();
 		super.okPressed();

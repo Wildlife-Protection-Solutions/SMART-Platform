@@ -32,6 +32,7 @@ import org.eclipse.ui.internal.e4.compatibility.CompatibilityPart;
  *
  */
 //E3
+@SuppressWarnings("restriction")
 public class E3Utils {
 
 	/**
@@ -48,6 +49,7 @@ public class E3Utils {
 	 * @param part
 	 * @return
 	 */
+	
 	public static Object getSourceObject(MPart part) {
 		if (part == null)
 			return null;

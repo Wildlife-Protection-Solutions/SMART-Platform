@@ -67,15 +67,14 @@ public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImpor
 		}
 		
 
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getManager(importCa), importCa);
-			
-			warnings.addAll(validator.validate(queryFilter.getFilter()));
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getManager(importCa), importCa);
+				warnings.addAll(validator.validate(queryFilter.getFilter()));
+			} finally {
+				session.getTransaction().rollback();
+			}
 		}
 		return queryFilter.asString();
 	}

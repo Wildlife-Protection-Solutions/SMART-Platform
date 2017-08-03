@@ -25,7 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.wcs.smart.connect.internal.Messages;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 
 public class IOUtils {
 
@@ -52,16 +53,21 @@ public class IOUtils {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public static long copy(InputStream input, OutputStream output, CopyProgressMonitor monitor) throws InterruptedException, IOException{
+	public static long copy(InputStream input, OutputStream output, long expectedSize, SubMonitor progress) throws OperationCanceledException, IOException{
+		progress.setWorkRemaining(100);
 		byte[] buffer = new byte[DEFAULT_BUFFER_SIZE]; 
 		long count = 0;
         int n = 0;
+        int lastValue = 0;
         while (EOF != (n = input.read(buffer))) {
             output.write(buffer, 0, n);
             count += n;
             
-            if (monitor.isCanceled()) throw new InterruptedException(Messages.IOUtils_DownloadCancelled);
-            monitor.addToCopiedCount(n);
+    		int thisPercent = (int)((count / (double)expectedSize) * 100);
+    		if (thisPercent != lastValue) progress.worked(thisPercent - lastValue);
+    		lastValue = thisPercent;           
+            
+            progress.checkCanceled();
         }
         return count;
 	}

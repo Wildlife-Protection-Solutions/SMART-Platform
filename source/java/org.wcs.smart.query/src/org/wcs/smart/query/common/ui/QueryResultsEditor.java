@@ -46,7 +46,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import org.locationtech.udig.project.internal.command.navigation.ZoomCommand;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
@@ -55,7 +54,6 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
@@ -82,8 +80,6 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.util.ReprojectUtils;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -195,18 +191,18 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		protected IStatus run(IProgressMonitor monitor) {
 			QueryEditorInput input = (QueryEditorInput) QueryResultsEditor.this.getEditorInput();
 
-			Session session = HibernateManager.openSession();
-			session.beginTransaction();
-			try{
-				Query squery = (SimpleQuery) QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
-				query = new QueryProxy(squery);
-				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
-			}catch (Exception ex){
-				QueryPlugIn.displayLog(MessageFormat.format(
-						Messages.QueryResultsEditor_Error_CouldNotParse, new Object[]{ input.getName()})+ ex.getLocalizedMessage(), ex);
-			}finally{
-				session.getTransaction().rollback();
-				session.close();
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try{
+					Query squery = (SimpleQuery) QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
+					query = new QueryProxy(squery);
+					query.getQueryType().getDropItemFactory().generateDropItems(query, session);
+				}catch (Exception ex){
+					QueryPlugIn.displayLog(MessageFormat.format(
+							Messages.QueryResultsEditor_Error_CouldNotParse, new Object[]{ input.getName()})+ ex.getLocalizedMessage(), ex);
+				}finally{
+					session.getTransaction().rollback();
+				}
 			}
 			
 			
@@ -580,26 +576,26 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		Job j = new Job("update drop items") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				final Session session = HibernateManager.openSession();
-				session.beginTransaction();
-				try {
-					getSite().getShell().getDisplay().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								getQueryProxy().getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
-							} catch (Exception ex) {
-								QueryPlugIn.log(ex.getMessage(), ex);
+				try(final Session session = HibernateManager.openSession()){
+					session.beginTransaction();
+					try {
+						getSite().getShell().getDisplay().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									getQueryProxy().getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
+								} catch (Exception ex) {
+									QueryPlugIn.log(ex.getMessage(), ex);
+								}
 							}
+						});
+					} finally {
+						try{
+							session.getTransaction().rollback();
+						}catch(Exception ex){
+							QueryPlugIn.log(ex.getMessage(), ex);
 						}
-					});
-				} finally {
-					try{
-						session.getTransaction().rollback();
-					}catch(Exception ex){
-						QueryPlugIn.log(ex.getMessage(), ex);
 					}
-					session.close();
 				}
 				return Status.OK_STATUS;
 			}

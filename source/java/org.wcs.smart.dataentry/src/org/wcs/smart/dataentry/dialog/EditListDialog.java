@@ -63,7 +63,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
@@ -78,6 +77,7 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -536,17 +536,15 @@ public class EditListDialog extends TitleAreaDialog{
 		}
 		
 		if (x instanceof AttributeListItem) {
-			Session s = HibernateManager.openSession();
-			try{
+			
+			try(Session s = HibernateManager.openSession()){
 				AttributeListItem tmp = (AttributeListItem) x;
-				List<?> items = s.createCriteria(CmAttributeListItem.class)
-					.add(Restrictions.eq("listItem", tmp))  //$NON-NLS-1$
-					.add(Restrictions.eq("config", attribute.getConfig())).list(); //$NON-NLS-1$
+				List<CmAttributeListItem> items = QueryFactory.buildQuery(s, CmAttributeListItem.class,
+						new Object[] {"listItem", tmp}, //$NON-NLS-1$
+						new Object[] {"config", attribute.getConfig()}).list(); //$NON-NLS-1$
 				if (items.size() > 0) {
 					return (CmAttributeListItem) items.get(0);
 				}
-			}finally{
-				s.close();
 			}
 		}
 		return null;

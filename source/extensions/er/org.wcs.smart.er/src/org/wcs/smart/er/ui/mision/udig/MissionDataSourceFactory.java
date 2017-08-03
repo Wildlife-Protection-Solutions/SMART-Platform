@@ -107,9 +107,9 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
 		
-		Session session = HibernateManager.openSession();
+		
 		Mission mission = null;
-		try{
+		try(Session session = HibernateManager.openSession()){
 			String uuid = (String)params.get(MISSION_UUID.key);
 			if (uuid != null){
 				mission = (Mission)session.load(Mission.class, UuidUtils.stringToUuid(uuid));
@@ -123,8 +123,6 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 			}
 		}catch (Exception ex){
 			throw new IOException(ex);
-		}finally{
-			session.close(); 
 		}
 		if (mission == null){
 			throw new IOException(Messages.MissionDataSourceFactory_MissionNotFound);

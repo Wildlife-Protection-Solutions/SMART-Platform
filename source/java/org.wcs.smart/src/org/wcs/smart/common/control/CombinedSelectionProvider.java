@@ -38,7 +38,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 public class CombinedSelectionProvider implements ISelectionProvider {
 
 	private ISelection currentSelection = null;
-	private ListenerList selectionListeners = new ListenerList();
+	private ListenerList<ISelectionChangedListener> selectionListeners = new ListenerList<>();
 
 	private ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
 		public void selectionChanged(SelectionChangedEvent event) {
@@ -79,7 +79,7 @@ public class CombinedSelectionProvider implements ISelectionProvider {
 
 	}
 
-	private synchronized void fireSelectionChanged(ListenerList list,
+	private synchronized void fireSelectionChanged(ListenerList<ISelectionChangedListener> list,
 			ISelection selection, ISelectionProvider provider) {
 		this.currentSelection = selection;
 		SelectionChangedEvent event = new SelectionChangedEvent(provider,

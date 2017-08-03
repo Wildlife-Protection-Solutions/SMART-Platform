@@ -78,11 +78,8 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	 */
 	public ObservationOptionsPropertyPage(Shell parent) {
 		super(parent, Messages.PatrolOptionsPropertyPage_DialogTitle);
-		Session s = HibernateManager.openSession();
-		try{
+		try(Session s = HibernateManager.openSession()){
 			patrolOption = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -257,22 +254,21 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		patrolOption.setTrackObserver(btnTrackObserver.getSelection());
 		patrolOption.setEditTime(Integer.parseInt(txtEditTime.getText()));
 	
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			s.saveOrUpdate(patrolOption);
-			s.getTransaction().commit();
-			setChangesMade(false);
-			
-			//fire event for options modified
-			WaypointEventManager.getInstance().waypointOptionsModified();
-			
-			return true;
-		}catch (Exception ex){
-			s.getTransaction().rollback();
-			ObservationPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
-		}finally{
-			s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				s.saveOrUpdate(patrolOption);
+				s.getTransaction().commit();
+				setChangesMade(false);
+				
+				//fire event for options modified
+				WaypointEventManager.getInstance().waypointOptionsModified();
+				
+				return true;
+			}catch (Exception ex){
+				s.getTransaction().rollback();
+				ObservationPlugIn.displayLog(Messages.PatrolOptionsPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
+			}
 		}
 		return false;
 	}

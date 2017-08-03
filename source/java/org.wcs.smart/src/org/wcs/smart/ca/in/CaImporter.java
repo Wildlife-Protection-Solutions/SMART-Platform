@@ -37,12 +37,10 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
@@ -70,7 +68,7 @@ public class CaImporter {
 	/**
 	 * Export code extension point
 	 */
-	private static final String IMPORT_EXTENSION_ID = "org.wcs.smart.ca.import"; //$NON-NLS-1$
+	private static final String IMPORT_EXTENSION_ID = "org.wcs.smart.caImport"; //$NON-NLS-1$
 	
 	
 	/**
@@ -78,7 +76,8 @@ public class CaImporter {
 	 * area backup file.
 	 * 
 	 * @param file the conservation area backup file
-	 * @param monitor the progress monitor
+	 * @param monitor the progress monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
+      //        to call done() on the given monitor
 	 * @throws Exception
 	 */
 	public static void importCa(File file, IProgressMonitor monitor) throws Exception{
@@ -89,7 +88,8 @@ public class CaImporter {
 	/**
 	 * Imports conservation area data from backup file.
 	 * @param f
-	 * @param monitor
+	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility
+      //        to call done() on the given monitor
 	 * @throws Exception
 	 */
 	private void importCaFromFile(File f, IProgressMonitor monitor) throws Exception{
@@ -97,43 +97,46 @@ public class CaImporter {
 			throw new IOException(Messages.CaImporter_Error_CouldNotFindImportFile + f.getAbsolutePath());
 		}
 		
-		List<ICaDataImporter> importers = getImportExtensions();
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaImporter_Progress_ImportingCa, 1); 
 		
-		monitor.beginTask(Messages.CaImporter_Progress_ImportingCa, 50 + importers.size() * 10);
+		List<ICaDataImporter> importers = getImportExtensions();
+		progress.setWorkRemaining(50 + importers.size() * 10);
 		
 		//TODO: consider doing a disk space check to ensure
 		//enough disk space for this operation
-		monitor.subTask(Messages.CaImporter_Progress_BackupCurrent);
+		progress.subTask(Messages.CaImporter_Progress_BackupCurrent);
 		HibernateManager.endSessionFactory(true, false);
 		File dbBackup = backup();
-		monitor.worked(10);
+		progress.worked(10);
 		
-		monitor.subTask(Messages.CaImporter_Progress_UnzippingFile);
+		progress.subTask(Messages.CaImporter_Progress_UnzippingFile);
 		File dir = unzipFile(f);
 		
 		/* need to login as admin user to restore */
 		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
-		Session session = HibernateManager.openSession();
-		try{
-			monitor.worked(10);
+		
+		try(Session session = HibernateManager.openSession()){
+			progress.worked(10);
 			
-			monitor.subTask(Messages.CaImporter_Progress_ValidatingCaImport);
+			progress.subTask(Messages.CaImporter_Progress_ValidatingCaImport);
 			UUID cauuid = validateConservationAreaInfo(dir, session);
-			monitor.worked(10);
+			progress.worked(10);
 			
-			monitor.subTask(Messages.CaImporter_ValidatingPluginProgressMessage);
+			progress.subTask(Messages.CaImporter_ValidatingPluginProgressMessage);
 			if (!validatePlugInConfiguration(dir, session)){
 				return;
 			}
-			monitor.worked(10);
+			progress.worked(10);
 			
 			
 			CaImportEngine engine = new CaImportEngine(session, dir, cauuid);
 			try{
+				session.getTransaction().begin();
 				for (ICaDataImporter importer : getImportExtensions()){
-					importer.importData(engine, new SubProgressMonitor(monitor, 10));
+					importer.importData(engine, progress.split(10));
 				}
+				session.getTransaction().commit();
 			}catch (Exception ex){
 				try{
 					try{
@@ -146,9 +149,9 @@ public class CaImporter {
 				}
 				throw new Exception(Messages.CaImporter_Error_SystemRestored + ex.getLocalizedMessage(), ex);
 			}
-			monitor.worked(10);			
+			progress.worked(10);			
 		}finally{
-			monitor.subTask(Messages.CaImporter_Progress_CleanUp);
+			progress.subTask(Messages.CaImporter_Progress_CleanUp);
 			try{
 				cleanUp(dbBackup);
 			}catch (Exception ex){
@@ -160,16 +163,8 @@ public class CaImporter {
 				SmartPlugIn.log(Messages.CaImporter_Error_CleanUpFailed + dir.toString(), ex);
 			}
 			
-			try{
-				if (session.isOpen()){
-					session.close();
-				}
-			}catch (Exception ex){
-				SmartPlugIn.log(Messages.CaImporter_Error_CouldNotCloseSession, ex);
-			}
 			/* disconnect from admin user */
 			HibernateManager.endSessionFactory(true, true);
-			monitor.done();
 		}
 		
 	}
@@ -246,8 +241,8 @@ public class CaImporter {
 			session.beginTransaction();
 			try{
 				uuid = UuidUtils.stringToUuid(cauuid);
-				long cnt = (Long)session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", uuid)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
-				if (cnt != 0){				
+				ConservationArea existingCa = session.get(ConservationArea.class, uuid);
+				if (existingCa != null) {				
 					throw new Exception(MessageFormat.format(Messages.CaImporter_Error_CaAlreadyExists, new Object[]{name, id}));
 				}
 			}finally{	

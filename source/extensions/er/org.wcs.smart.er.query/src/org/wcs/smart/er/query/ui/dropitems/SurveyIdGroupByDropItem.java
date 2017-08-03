@@ -24,6 +24,11 @@ package org.wcs.smart.er.query.ui.dropitems;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -39,10 +44,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.ToolTip;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
@@ -87,34 +89,37 @@ public class SurveyIdGroupByDropItem extends DropItem implements IGroupByDropIte
 	 * 
 	 * @see org.wcs.smart.query.ui.formulaDnd.IGroupByDropItem#getListItem()
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<ListItem> getListItem() {
 		List<ListItem> items = new ArrayList<ListItem>();
 			
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		try{
-			Criteria q = s.createCriteria(Survey.class)
-					.createAlias("surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
-					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
-			if (currentDesign != null){
-				q.add(Restrictions.eq("surveyDesign", currentDesign)); //$NON-NLS-1$
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
+				Root<Survey> from = c.from(Survey.class);
+				c.select(from);
+
+				Predicate[] filters = new Predicate[currentDesign == null ? 1 : 2];
+				filters[0] = cb.equal(from.get("surveyDesign").get("conservationArea"), SmartDB.getCurrentConservationArea()); //$NON-NLS-1$ //$NON-NLS-2$
+				if (currentDesign != null){
+					filters[1] = cb.equal(from.get("surveyDesign"), currentDesign); //$NON-NLS-1$
+				}
+				c.where(cb.and(filters));
+				c.orderBy(cb.asc(from.get("surveyDesign").get("keyId")), cb.desc(from.get("surveyDesign").get("startDate")), cb.desc(from.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				
+				List<Survey> ss = s.createQuery(c).getResultList();
+				for (Survey survey : ss){
+					items.add(new ListItem(survey.getUuid(), survey.getId() + " [" + survey.getSurveyDesign().getName() + "]")); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				
+				
+			}catch (Exception ex){
+				ERQueryPlugIn.displayLog(Messages.SurveyIdGroupByDropItem_LoadError, ex);
+			}finally {
+				s.getTransaction().rollback();
 			}
-			q.addOrder(Order.asc("sd.keyId")); //$NON-NLS-1$ 
-			q.addOrder(Order.desc("sd.startDate")); //$NON-NLS-1$
-			q.addOrder(Order.desc("startDate")); //$NON-NLS-1$
-			
-			List<Survey> ss = q.list();
-			for (Survey survey : ss){
-				items.add(new ListItem(survey.getUuid(), survey.getId() + " [" + survey.getSurveyDesign().getName() + "]")); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			s.getTransaction().rollback();
-			s.close();
-		}catch (Exception ex){
-			ERQueryPlugIn.displayLog(Messages.SurveyIdGroupByDropItem_LoadError, ex);
-		}finally{
-			s.close();
 		}
 		
 		return items;

@@ -29,6 +29,7 @@ import org.wcs.smart.ui.internal.ca.properties.CaPropertyPage;
  * @author Emily
  * @since 1.0.0
  */
+@SuppressWarnings("restriction")
 public class ShowCaPropertyHandler extends ShowPropertyPageHandler {
 
 	/**

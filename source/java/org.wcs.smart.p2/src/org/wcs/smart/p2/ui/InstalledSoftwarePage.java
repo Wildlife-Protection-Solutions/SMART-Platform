@@ -70,7 +70,6 @@ import org.eclipse.ui.about.InstallationPage;
 import org.eclipse.ui.menus.AbstractContributionFactory;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.wcs.smart.SmartApp;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.p2.internal.Messages;
