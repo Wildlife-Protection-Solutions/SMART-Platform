@@ -175,6 +175,7 @@ public class Messages extends NLS {
 	public static String MergePatrolsDialog_MergingPatrols;
 	public static String MergePatrolsDialog_Note1;
 	public static String MergePatrolsDialog_Note2;
+	public static String MergePatrolLegDialog_MandateLabel;
 	public static String MergePatrolsDialog_ObjectiveAndMandate;
 	public static String MergePatrolsDialog_PatrolId;
 	public static String MergePatrolsDialog_PatrolToLong;
