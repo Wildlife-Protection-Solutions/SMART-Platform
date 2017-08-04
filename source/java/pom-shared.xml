@@ -13,7 +13,8 @@
         	<geotools.version>11.2</geotools.version>
         	<jts.version>1.13</jts.version>
         	<hibernate.version>5.2.10.Final</hibernate.version>
-        	<birt.version>4.6.0-20160607</birt.version>
+        	<!--<birt.version>4.6.0-20160607</birt.version>-->
+        	<birt.version>4.4.2</birt.version>
         	<udig.version>2.0.1-SNAPSHOT</udig.version>
         	
         	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
