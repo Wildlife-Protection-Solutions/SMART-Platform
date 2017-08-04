@@ -450,6 +450,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				if (!editor.getEditMode()) return;
 				
 				IntelLocation loc = getSelectedLocation();
+				if (loc == null) return;
 				try {
 					if (!(loc.getGeometry() instanceof com.vividsolutions.jts.geom.Point)) return;
 				} catch (ParseException e1) {
