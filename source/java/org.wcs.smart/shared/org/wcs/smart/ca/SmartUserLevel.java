@@ -23,8 +23,6 @@ package org.wcs.smart.ca;
 
 import java.util.Locale;
 
-import javax.annotation.Nonnull;
-
 /**
  * SMART User level must contain at a minimum a key.  This key must be unique and
  * is stored in the system.
@@ -40,7 +38,7 @@ public class SmartUserLevel {
 	 * 
 	 * @param key cannot be null
 	 */
-	public SmartUserLevel(@Nonnull String key){
+	public SmartUserLevel(String key){
 		this.key = key;
 	}
 	

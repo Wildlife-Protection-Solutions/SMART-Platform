@@ -544,7 +544,7 @@
 			
 		<!-- BIRT -->
 		<!-- required to prevent class "org.eclipse.core.runtime.IExtensionRegistry"'s signer information does not match signer information of other classes in the same package -->
-		<dependency>
+		<!--<dependency>
     			<groupId>org.eclipse.birt.runtime</groupId>
     			<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
     			<version>3.4.3.v201405301249</version>
@@ -554,123 +554,8 @@
     			<artifactId>common</artifactId>
     			<version>3.6.200-v20130402-1505</version>
 		</dependency>
-
-		<!-- report maps -->
-		<!--desktop 3.110.0.v20170612-1255-->
-		<!--required for udig Shp Plugin-->
-		<dependency>
-    			<groupId>org.eclipse.platform</groupId>
-    			<artifactId>org.eclipse.ui.workbench</artifactId>
-    			<version>3.108.3</version>
-			
-			<exclusions> 
-			<exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.core.runtime</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.help</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.jface</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.swt</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.jface.databinding</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.core.databinding.property</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.core.databinding.observable</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.core.services</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.core.contexts</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.core.di</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.workbench.swt</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.di</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.model.workbench</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.css.swt.theme</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.bindings</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.css.swt</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.css.core</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.workbench3</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.workbench.addons.swt</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.emf</groupId>
-      <artifactId>org.eclipse.emf.ecore</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.ui.services</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.emf</groupId>
-      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-    </exclusion>
-    <exclusion>
-      <groupId>org.eclipse.platform</groupId>
-      <artifactId>org.eclipse.e4.core.di.extensions</artifactId>
-    </exclusion>
-    			</exclusions>
-		</dependency>
-
-		<!-- required for udig (wms plugin/image descriptor) -->
-		<dependency>
-    			<groupId>org.eclipse.platform</groupId>
-    			<artifactId>org.eclipse.jface</artifactId>
-    			<version>3.12.2</version>
-        		<exclusions>
-				<exclusion>
-        				<groupId>*</groupId>
-            				<artifactId>*</artifactId>
-       				</exclusion>
-    			</exclusions>
-		</dependency>
+	-->
+		
 
 		
 		<dependency>

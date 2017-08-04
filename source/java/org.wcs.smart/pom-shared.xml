@@ -14,158 +14,110 @@
 	<artifactId>org.wcs.smart.core</artifactId>
 	<name>SMART Core Module</name>
 	<packaging>bundle</packaging>
+
 	<dependencies>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.hibernate</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+
 	<dependency>
-
-<groupId>org.geotools</groupId>
-
-<artifactId>gt-data</artifactId>
-
-<version>${geotools.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.geotools</groupId>
-
-<artifactId>gt-opengis</artifactId>
-
-<version>${geotools.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.geotools</groupId>
-
-<artifactId>gt-render</artifactId>
-
-<version>${geotools.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.geotools</groupId>
-
-<artifactId>gt-brewer</artifactId>
-
-<version>${geotools.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.locationtech.udig</groupId>
-
-<artifactId>org.locationtech.udig.catalog</artifactId>
-
-<version>${udig.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.locationtech.udig</groupId>
-
-<artifactId>org.locationtech.udig.project</artifactId>
-
-<version>${udig.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.locationtech.udig</groupId>
-
-<artifactId>org.locationtech.udig.mapgraphic</artifactId>
-
-<version>${udig.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.locationtech.udig</groupId>
-
-<artifactId>org.locationtech.udig.legend</artifactId>
-
-<version>${udig.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.locationtech.udig</groupId>
-
-<artifactId>org.locationtech.udig.style</artifactId>
-
-<version>${udig.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.locationtech.udig</groupId>
-
-<artifactId>org.locationtech.udig.style.sld</artifactId>
-
-<version>${udig.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.locationtech.udig</groupId>
-
-<artifactId>org.locationtech.udig.core</artifactId>
-
-<version>${udig.version}</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.locationtech.udig</groupId>
-
-<artifactId>org.locationtech.udig.ui</artifactId>
-
-<version>${udig.version}</version>
-
-</dependency>
-
-
-<dependency>
-
-<groupId>com.google.code.gson</groupId>
-
-<artifactId>gson</artifactId>
-
-<version>2.8.1</version>
-
-</dependency>
-
-<dependency>
-
-<groupId>org.eclipse.birt.runtime</groupId>
-
-<artifactId>org.eclipse.birt.runtime</artifactId>
-
-<version>${birt.version}</version>
-
-</dependency>
-
-
-<dependency>
-
-<groupId>swt</groupId>
-
-<artifactId>swt-win32</artifactId>
-
-<version>2.1.0</version>
-
-</dependency>
-		
+		<groupId>org.geotools</groupId>
+		<artifactId>gt-data</artifactId>
+		<version>${geotools.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.geotools</groupId>
+		<artifactId>gt-opengis</artifactId>
+		<version>${geotools.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.geotools</groupId>
+		<artifactId>gt-render</artifactId>
+		<version>${geotools.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.geotools</groupId>
+		<artifactId>gt-brewer</artifactId>
+		<version>${geotools.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.locationtech.udig</groupId>
+		<artifactId>org.locationtech.udig.catalog</artifactId>
+		<version>${udig.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.locationtech.udig</groupId>
+		<artifactId>org.locationtech.udig.project</artifactId>
+		<version>${udig.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.locationtech.udig</groupId>
+		<artifactId>org.locationtech.udig.mapgraphic</artifactId>
+		<version>${udig.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.locationtech.udig</groupId>
+		<artifactId>org.locationtech.udig.legend</artifactId>
+		<version>${udig.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.locationtech.udig</groupId>
+		<artifactId>org.locationtech.udig.style</artifactId>
+		<version>${udig.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.locationtech.udig</groupId>
+		<artifactId>org.locationtech.udig.style.sld</artifactId>
+		<version>${udig.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.locationtech.udig</groupId>
+		<artifactId>org.locationtech.udig.core</artifactId>
+		<version>${udig.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.locationtech.udig</groupId>
+		<artifactId>org.locationtech.udig.ui</artifactId>
+		<version>${udig.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>com.google.code.gson</groupId>
+		<artifactId>gson</artifactId>
+		<version>2.8.1</version>
+	</dependency>
+	
+
+	<dependency>
+		<groupId>swt</groupId>
+		<artifactId>swt-win32</artifactId>
+		<version>2.1.0</version>
+	</dependency>
+
+
+	<!-- BIRT -->
+	<dependency>
+		<groupId>org.eclipse.birt.runtime</groupId>
+		<artifactId>org.eclipse.birt.runtime</artifactId>
+		<version>${birt.version}</version>
+	</dependency>
+	<dependency>
+    		<groupId>org.eclipse.scout.sdk.deps</groupId>
+    		<artifactId>org.eclipse.ui.workbench</artifactId>
+    		<version>3.108.0.v20160602-1232</version>
+		</dependency>
 	</dependencies>
 </project>
