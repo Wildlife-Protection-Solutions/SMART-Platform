@@ -80,6 +80,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
@@ -398,7 +399,7 @@ public class RecordSummaryPage extends EditorPart{
 		txtShortName.setTextLimit(IntelRecord.MAX_TITLE_LENGTH);
 		
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_StatusLabel);
-		if (recordEditor.getEditMode()){
+		if (recordEditor.getEditMode() && IntelSecurityManager.INSTANCE.canEditRecordStatus()){
 			TableComboViewer cmbStatus = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
 			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

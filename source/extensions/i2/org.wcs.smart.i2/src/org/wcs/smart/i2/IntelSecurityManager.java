@@ -92,4 +92,14 @@ public enum IntelSecurityManager {
 	public boolean canViewQueries(){
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE);
 	}
+	
+	/**
+	 * Determine if the current user can
+	 * edit the record status
+	 * 
+	 * @return
+	 */
+	public boolean canEditRecordStatus(){
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE);
+	}
 }
