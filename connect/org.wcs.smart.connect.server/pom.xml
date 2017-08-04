@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.wcs.smart.connect</groupId>
 		<artifactId>org.wcs.smart.connect</artifactId>
-		<version>6.0.1-SNAPSHOT</version>
+		<version>6.0.0-SNAPSHOT</version>
 	</parent>
 	
 	<groupId>org.wcs.smart.connect.server</groupId>
@@ -16,7 +16,7 @@
 
 	<properties>
 		<smart.env>devel</smart.env>
-		<!--<birt.version>4.6.0-20160607</birt.version>-->
+		<birt.version>4.4.2</birt.version>
     </properties>
     	
 	<build>
@@ -86,16 +86,10 @@
 			<artifactId>resteasy-multipart-provider</artifactId>
 			<version>${resteasy.version}</version>
 		</dependency>
-		
-		<!--<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>async-http-servlet-3.0</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>-->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-servlet-initializer</artifactId>
-            <version>${resteasy.version}</version>
+           		<artifactId>resteasy-servlet-initializer</artifactId>
+            		<version>${resteasy.version}</version>
 		</dependency>
 		<dependency>
 	    		<groupId>org.jboss.resteasy</groupId>
@@ -137,7 +131,7 @@
 			<groupId>org.hibernate</groupId>
             		<artifactId>hibernate-ehcache</artifactId>
 			<version>${hibernate.version}</version>
-		</dependency>
+        	</dependency>
 		
 		<!-- tomcat provided dependencies -->
 		<dependency>
@@ -155,7 +149,7 @@
 		<dependency>
 			<groupId>de.svenkubiak</groupId>
 			<artifactId>jBCrypt</artifactId>
-			<version>0.4</version>
+			<version>0.4.1</version>
 			<scope>provided</scope>
 		</dependency>
 		
@@ -193,7 +187,31 @@
     			<artifactId>org.wcs.smart.observation</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
-	
+			<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.qa</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+			<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.qa.er</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+			<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.qa.incident</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+			<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.qa.patrol</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.hibernate</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.query</artifactId>
@@ -321,11 +339,6 @@
 		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.birt</artifactId>
-    			<version>${smart.version}</version>
-		</dependency>		
-		<dependency>
-    			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.birt.map</artifactId>
     			<version>${smart.version}</version>
 		</dependency>		
@@ -344,26 +357,6 @@
     			<artifactId>org.wcs.smart.i2</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
-		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.qa</artifactId>
-    			<version>${smart.version}</version>
-		</dependency>		
-		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.qa.patrol</artifactId>
-    			<version>${smart.version}</version>
-		</dependency>
-		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.qa.incident</artifactId>
-    			<version>${smart.version}</version>
-		</dependency>		
-		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.qa.er</artifactId>
-    			<version>${smart.version}</version>
-		</dependency>
 		
 		<!-- JTS -->
 		<dependency>
@@ -372,20 +365,80 @@
     			<version>${jts.version}</version>
 		</dependency>
 		
-		<!--udig and geotools extras-->
+		<!-- geotools and udig -->
 		<dependency>
-			<groupId>org.locationtech.udig</groupId>
-			<artifactId>org.locationtech.udig.catalog.wms</artifactId>
-			<version>${udig.version}</version>
-		</dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-referencing</artifactId>
+            		<version>${geotools.version}</version>
+        	</dependency>
+        	<dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-api</artifactId>
+            		<version>${geotools.version}</version>
+        	</dependency>
 		<dependency>
-			<groupId>org.locationtech.udig</groupId>
-			<artifactId>org.locationtech.udig.render.wms.basic</artifactId>
-			<version>${udig.version}</version>
-		</dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-main</artifactId>
+        		<version>${geotools.version}</version>
+        	</dependency>
+        	<dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-opengis</artifactId>
+        		<version>${geotools.version}</version>
+        	</dependency>
+        	<dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-shapefile</artifactId>
+        		<version>${geotools.version}</version>
+        	</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-epsg-hsql</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>	
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-geotiff</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-data</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-opengis</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-render</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-brewer</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-wms</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>	
+		<dependency>
+			<groupId>org.geotools.xsd</groupId>
+			<artifactId>gt-xsd-core</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>	
+		<dependency>
+			<groupId>org.geotools.xsd</groupId>
+			<artifactId>gt-xsd-sld</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>			
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-image</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
@@ -393,5 +446,262 @@
   			<artifactId>gt-geojson</artifactId>
   			<version>${geotools.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.catalog</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.catalog.rasterings</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.catalog.shp</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.catalog.geotiff</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.catalog.wms</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.catalog.worldimage</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.project</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.project.ui</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+        	<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.mapgraphic</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.style</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.style.sld</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.style.wms</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.legend</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.core</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.ui</artifactId>
+			<version>${udig.version}</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.render.feature.basic</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.render.feature.shapefile</artifactId>
+			<version>${udig.version}</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.render.gridcoverage.basic</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.locationtech.udig</groupId>
+			<artifactId>org.locationtech.udig.render.wms.basic</artifactId>
+			<version>${udig.version}</version>
+		</dependency>
+			
+		<!-- BIRT -->
+		<!-- required to prevent class "org.eclipse.core.runtime.IExtensionRegistry"'s signer information does not match signer information of other classes in the same package -->
+		<dependency>
+    			<groupId>org.eclipse.birt.runtime</groupId>
+    			<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
+    			<version>3.4.3.v201405301249</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.eclipse.equinox</groupId>
+    			<artifactId>common</artifactId>
+    			<version>3.6.200-v20130402-1505</version>
+		</dependency>
+
+		<!-- report maps -->
+		<!--desktop 3.110.0.v20170612-1255-->
+		<!--required for udig Shp Plugin-->
+		<dependency>
+    			<groupId>org.eclipse.platform</groupId>
+    			<artifactId>org.eclipse.ui.workbench</artifactId>
+    			<version>3.108.3</version>
+			
+			<exclusions> 
+			<exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.core.runtime</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.help</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.jface</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.swt</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.jface.databinding</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.core.databinding.property</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.core.databinding.observable</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.core.services</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.core.contexts</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.core.di</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.workbench.swt</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.di</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.model.workbench</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.css.swt.theme</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.bindings</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.css.swt</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.css.core</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.workbench3</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.workbench.addons.swt</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.ui.services</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+    </exclusion>
+    <exclusion>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.e4.core.di.extensions</artifactId>
+    </exclusion>
+    			</exclusions>
+		</dependency>
+
+		<!-- required for udig (wms plugin/image descriptor) -->
+		<dependency>
+    			<groupId>org.eclipse.platform</groupId>
+    			<artifactId>org.eclipse.jface</artifactId>
+    			<version>3.12.2</version>
+        		<exclusions>
+				<exclusion>
+        				<groupId>*</groupId>
+            				<artifactId>*</artifactId>
+       				</exclusion>
+    			</exclusions>
+		</dependency>
+
+		
+		<dependency>
+			<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.core.commands</artifactId>
+			<version>3.8.1</version>
+			<!-- on desktop this is 3.9.0.v20170530-1048 -->
+		</dependency>
+		
+		
+		
+		<dependency>
+    			<groupId>com.ibm.icu</groupId>
+    			<artifactId>icu4j</artifactId>
+    			<version>59.1</version>
+		</dependency>
+		<dependency>
+	    		<groupId>joda-time</groupId>
+	    		<artifactId>joda-time</artifactId>
+	    		<version>1.6</version>
+		</dependency>
+		<dependency>
+	    		<groupId>org.picocontainer</groupId>
+	    		<artifactId>picocontainer</artifactId>
+	    		<version>2.15</version>
+		</dependency>
+		<dependency>
+	    		<groupId>com.google.guava</groupId>
+	    		<artifactId>guava</artifactId>
+	    		<version>22.0</version>
+		</dependency>
+
 	</dependencies>
 </project>
