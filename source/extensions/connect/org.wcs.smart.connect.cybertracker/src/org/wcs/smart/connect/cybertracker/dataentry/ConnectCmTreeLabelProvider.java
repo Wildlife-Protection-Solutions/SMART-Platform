@@ -48,8 +48,8 @@ public class ConnectCmTreeLabelProvider extends LabelProvider implements IColorP
 
 	public ConnectCmTreeLabelProvider(ConfigurableModel model) {
 		cmLabelProvider = new ConfigurableModelLabelProvider();
-		liLabelProvider = new CmListItemLabelProvider(model);
-		tnLabelProvider = new CmTreeLabelProvider(model);
+		liLabelProvider = new CmListItemLabelProvider();
+		tnLabelProvider = new CmTreeLabelProvider();
 	}
 	
 	private LabelProvider findLabelProvider(Object element) {

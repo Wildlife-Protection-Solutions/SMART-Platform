@@ -377,7 +377,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		((GridData)tree.getTree().getLayoutData()).heightHint = 300;
 		
 		tree.setContentProvider(new CmAttributeTreeContentProvider(false, true));
-		tree.setLabelProvider(new CmTreeLabelProvider(attribute.getNode().getModel()));
+		tree.setLabelProvider(new CmTreeLabelProvider());
 		tree.setInput(attribute);
 		tree.addSelectionChangedListener(new ISelectionChangedListener() {
 			

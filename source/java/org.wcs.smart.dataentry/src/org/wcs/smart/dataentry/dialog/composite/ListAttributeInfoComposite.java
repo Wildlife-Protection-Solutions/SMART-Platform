@@ -238,7 +238,7 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 
 	private void createListControl(Composite parent) {
 		listViewer = new TableViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-		listViewer.setLabelProvider(new CmListItemLabelProvider(getModel()));
+		listViewer.setLabelProvider(new CmListItemLabelProvider());
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 	}

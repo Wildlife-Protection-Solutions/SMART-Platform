@@ -21,18 +21,11 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.util.List;
-
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
@@ -44,13 +37,6 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
  *
  */
 public class CmListItemLabelProvider extends NamedItemLabelProvider implements IColorProvider{
-	
-	private ConfigurableModel model;
-	
-	public CmListItemLabelProvider(ConfigurableModel model) {
-		this.model = model;
-	}
-	
 	
 	@Override
 	public String getText(Object element) {
@@ -74,20 +60,6 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 	private CmAttributeListItem getListItem(Object element){
 		if (element instanceof CmAttributeListItem) {
 			return (CmAttributeListItem) element;
-		}
-		
-		//Evgeniy: it looks like the code below never works as it closes hibernate session that must remain open while configurable model is editor is opened
-		if (element instanceof AttributeListItem){
-			try(Session session = HibernateManager.openSession()){
-				AttributeListItem dmAttr = (AttributeListItem) element;
-				List<CmAttributeListItem> items = QueryFactory.buildQuery(session, CmAttributeListItem.class,
-						new Object[] {"listItem", dmAttr}, //$NON-NLS-1$
-						new Object[] {"config", model.getDefaultConfigs().get(dmAttr)}).list(); //$NON-NLS-1$	
-				if (items.size() > 0){
-					CmAttributeListItem node = (CmAttributeListItem) items.get(0);
-					return node;
-				}
-			}
 		}
 		return null;
 	}

@@ -439,7 +439,7 @@ public class EditListDialog extends TitleAreaDialog{
 		
 		final TableViewer listViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
-		listViewer.setLabelProvider(new CmListItemLabelProvider(attribute.getNode().getModel()));
+		listViewer.setLabelProvider(new CmListItemLabelProvider());
 		listViewer.setInput(attribute.getCurrentList());
 		
 		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {

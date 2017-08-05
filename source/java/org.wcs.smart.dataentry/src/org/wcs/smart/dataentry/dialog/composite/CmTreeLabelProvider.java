@@ -21,19 +21,13 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider.CmTreeRootNode;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
@@ -46,12 +40,6 @@ import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
  */
 public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 
-	private ConfigurableModel model;
-	
-	public CmTreeLabelProvider(ConfigurableModel model) {
-		this.model = model;
-	}
-		
 	@Override
 	public String getText(Object element) {
 		if (element instanceof CmTreeRootNode){
@@ -86,22 +74,6 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 	private CmAttributeTreeNode getTreeNode(Object element){
 		if (element instanceof CmAttributeTreeNode) {
 			return (CmAttributeTreeNode) element;
-		}
-		
-		//Evgeniy: it looks like the code below never works as it closes hibernate session that must remain open while configurable model is editor is opened
-		if (element instanceof AttributeTreeNode){
-			
-			try(Session session = HibernateManager.openSession()){
-				AttributeTreeNode dmAttr = (AttributeTreeNode) element;
-				List<CmAttributeTreeNode> items = QueryFactory.buildQuery(session, CmAttributeTreeNode.class,
-						new Object[] {"dmTreeNode", dmAttr}, //$NON-NLS-1$
-						new Object[] {"config", model.getDefaultConfigs().get(dmAttr)}).list(); //$NON-NLS-1$	
-
-				if (items.size() > 0){
-					CmAttributeTreeNode node = (CmAttributeTreeNode) items.get(0);
-					return node;
-				}
-			}
 		}
 		return null;
 	}

@@ -198,7 +198,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 	private void createTreeControl(Composite container) {
 		attributeTreeViewer = new TreeViewer(container);
 		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		attributeTreeViewer.setLabelProvider(new CmTreeLabelProvider(getModel()));
+		attributeTreeViewer.setLabelProvider(new CmTreeLabelProvider());
 		attributeTreeViewer.setContentProvider(new CmAttributeTreeContentProvider(false, false));
 	}
 
