@@ -41,6 +41,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
@@ -654,5 +657,52 @@ public class SmartUtils {
 			return null;
 		}
 		return imageTransform;
+	}
+	
+	/**
+	 * Returns a color that represent the color of list items when
+	 * users mouse over the item
+	 * 
+	 * User must dispose of color when finished with it.
+	 * @param d
+	 * @return
+	 */
+	public static Color getListHighlightColor(Display display) {
+		return new Color(display, blend(new RGB(255, 255, 255), display.getSystemColor(SWT.COLOR_LIST_SELECTION).getRGB(), 90));
+	}
+	
+	/**
+	 * Returns a color that represent the color of list items when
+	 * users selects an item
+	 * 
+	 * User must dispose of color when finished with it.
+	 * @param d
+	 * @return
+	 */
+	public static Color getListSelectedColor(Display display) {
+		return new Color(display, blend(new RGB(255, 255, 255), display.getSystemColor(SWT.COLOR_LIST_SELECTION).getRGB(), 75));
+		
+	}
+
+	private static RGB blend(RGB c1, RGB c2, int ratio) {
+		int r = blend(c1.red, c2.red, ratio);
+		int g = blend(c1.green, c2.green, ratio);
+		int b = blend(c1.blue, c2.blue, ratio);
+		return new RGB(r, g, b);
+	}
+	 /**
+     * Blends c1 and c2 based in the provided ratio.
+     * 
+     * @param c1
+     *            first color
+     * @param c2
+     *            second color
+     * @param ratio
+     *            percentage of the first color in the blend (0-100)
+     * @return the RGB value of the blended color
+     */
+	private static int blend(int v1, int v2, int ratio) {
+		int b = (ratio * v1 + (100 - ratio) * v2) / 100;
+		return Math.min(255, b);
 	}
 }

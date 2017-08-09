@@ -54,15 +54,15 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
@@ -75,6 +75,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -86,6 +87,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -100,7 +102,11 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
+//import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.ui.DeleteRecordHandler;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
@@ -108,9 +114,12 @@ import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
+import org.wcs.smart.i2.ui.views.RecordsViewContentProvider.GroupBy;
+import org.wcs.smart.i2.ui.views.RecordsViewContentProvider.SortBy;
 import org.wcs.smart.i2.xml.RecordXmlExporter;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
+import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -125,6 +134,10 @@ public class RecordsView {
 	
 	private static final String DIR_PREF_KEY = ID + ".export.dir"; //$NON-NLS-1$
 
+	
+	private final Color LIST_HIGHLIGHT_COLOR = SmartUtils.getListHighlightColor(Display.getDefault());
+	private final Color LIST_SELECTION_COLOR = SmartUtils.getListSelectedColor(Display.getDefault());
+	
 	@Inject
 	private IEclipseContext context;
 	
@@ -134,20 +147,20 @@ public class RecordsView {
 
 	private TableViewer lstInProgress;
 	private TableViewer lstNewRecords;
-	private TableViewer lstAllRecords;
+	private TreeViewer lstAllRecords;
 	
 	private RecordViewerFilter filter;
 	private BasicRecordSearchPanel basicSearchPnl;
+
 	
 	private List<RecordLabelProvider> labelProviders = new ArrayList<>();
 	
 	private ISelectionChangedListener selectOne = new ISelectionChangedListener() {
-		
 		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			if (event.getSelection().isEmpty()) return;
 			
-			for (TableViewer viewer : new TableViewer[]{lstInProgress, lstNewRecords, lstAllRecords}){
+			for (Viewer viewer : new Viewer[]{lstInProgress, lstNewRecords, lstAllRecords}){
 				if (event.getSelectionProvider() != viewer){
 					viewer.setSelection(null);
 				}
@@ -155,7 +168,7 @@ public class RecordsView {
 			
 		}
 	};
-	
+   
 	@PostConstruct
 	public void createPartControl(final Composite parent) {
 		parent.setLayout(new GridLayout());
@@ -175,7 +188,9 @@ public class RecordsView {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object x = ((IStructuredSelection)event.getSelection()).getFirstElement();
-				if (x instanceof IntelRecord){
+				if (x instanceof IntelRecordProxy) {
+					(new OpenRecordHandler()).openRecord( ((IntelRecordProxy)x).asRecord(), false);
+				}else if (x instanceof IntelRecord){
 					(new OpenRecordHandler()).openRecord((IntelRecord)x, false);
 				}else if (x instanceof RecordEditorInput){
 					(new OpenRecordHandler()).openRecord((RecordEditorInput)x, false);
@@ -197,8 +212,8 @@ public class RecordsView {
 		RecordLabelProvider provider = new RecordLabelProvider();
 		labelProviders.add(provider);
 		lstNewRecords = new TableViewer(newRecords, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI | SWT.BORDER);
-		lstNewRecords.setContentProvider(ArrayContentProvider.getInstance());
-		lstNewRecords.setLabelProvider(provider);
+		lstNewRecords.setContentProvider(new RecordsViewContentProvider());
+		lstNewRecords.setLabelProvider(new RecordsViewLabelProvider());
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstNewRecords.addDoubleClickListener(openListener);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -210,8 +225,9 @@ public class RecordsView {
 		labelProviders.add(provider);
 		inProgress.setLayout(new GridLayout());
 		lstInProgress = new TableViewer(inProgress, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER);
-		lstInProgress.setContentProvider(ArrayContentProvider.getInstance());
-		lstInProgress.setLabelProvider(provider);
+	
+		lstInProgress.setContentProvider(new RecordsViewContentProvider());
+		lstInProgress.setLabelProvider(new RecordsViewLabelProvider());
 		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstInProgress.addDoubleClickListener(openListener);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -249,40 +265,66 @@ public class RecordsView {
 			}
 		});
 		
-		lstAllRecords = new TableViewer(allRecordsSection, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
-		lstAllRecords.setContentProvider(ArrayContentProvider.getInstance());
+		lstAllRecords = new TreeViewer(allRecordsSection, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);		
+		lstAllRecords.setContentProvider(new RecordsViewContentProvider());
+		lstAllRecords.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) { return ""; }; //$NON-NLS-1$
+			@Override
+			public Image getImage(Object element) { return null; };
+		});
+		
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		
+		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true);
+		lstAllRecords.getTree().addListener(SWT.MeasureItem, new Listener() {
+	 		public void handleEvent(Event event) {
+	 			TreeItem item = (TreeItem)event.item;
+	 			Image trailingImage = lblprovider.getImage(item.getData());
+	 			String txt = lblprovider.getText(item.getData());
+	 			int width = 0;
+	 			int height = 0;
+	 			if (trailingImage != null) {
+	 				width += trailingImage.getBounds().width;
+	 				height = trailingImage.getBounds().height;
+	 			}
+	 			width += event.gc.stringExtent(txt).x + 1;
+	 			height = Math.max(height,  event.gc.stringExtent(txt).y);
+	 			event.width = width;
+	 			event.height = height;
+	 		}
+	 	});
+	 	
+		lstAllRecords.getTree().addListener(SWT.PaintItem, new Listener() {
+			public void handleEvent(Event event) {
+				TreeItem item = (TreeItem) event.item;
+				Image trailingImage = lblprovider.getImage(item.getData());
+				int offset = 0;
+				Color c = event.gc.getBackground();
+				if (trailingImage != null) {
+					int x = event.x + event.width;
+					int itemHeight = lstAllRecords.getTree().getItemHeight();
+					int imageHeight = trailingImage.getBounds().height;
+					int y = event.y + (itemHeight - imageHeight) / 2;
+					event.gc.drawImage(trailingImage, x, y);
+					offset = x + trailingImage.getBounds().width;
+				}
+				if ((event.detail & SWT.SELECTED) == SWT.SELECTED) {
+					c = LIST_SELECTION_COLOR;
+				}else if ( (event.detail & SWT.HOT) == SWT.HOT) {
+					c = LIST_HIGHLIGHT_COLOR;
+				}
+				String text = lblprovider.getText(item.getData());
+				event.gc.setBackground(c);
+				event.gc.drawText(text, offset+1, event.y+1);
+				
+			}
+		});
+		
 		lstAllRecords.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAllRecords.addDoubleClickListener(openListener);
 		lstAllRecords.addSelectionChangedListener(selectOne);
-		lstAllRecords.getTable().setLinesVisible(false);
-		lstAllRecords.getTable().setHeaderVisible(false);
-		
-		TableViewerColumn statusColumn = new TableViewerColumn(lstAllRecords, SWT.NONE);
-		statusColumn.getColumn().setWidth(24);
-		statusColumn.setLabelProvider(new ColumnLabelProvider(){
-			@Override
-			public Image getImage(Object element){
-				if (element instanceof RecordEditorInput){
-					switch(((RecordEditorInput) element).getStatus()){
-					case COMPLETE:
-						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_DONE);
-					case NEW:
-						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_NEW);
-					case PROCESSING:
-						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_IP);					
-					}
-				}
-				return null;
-			}
-			
-		});
-		provider = new RecordLabelProvider();
-		labelProviders.add(provider);
-		TableViewerColumn nameColumn = new TableViewerColumn(lstAllRecords, SWT.NONE);
-		nameColumn.setLabelProvider(provider);
-		nameColumn.getColumn().setWidth(200);
-		
+
 		Composite basicSearch = toolkit.createComposite(tabPart);
 		basicSearch.setLayout(new GridLayout());
 		((GridLayout)basicSearch.getLayout()).marginWidth = 0;
@@ -350,19 +392,20 @@ public class RecordsView {
 		loadRecordsJob.schedule(0);
 	}
 
-	private void createMenu(Viewer control){
-		Menu m = new Menu(control.getControl());
-		control.getControl().setMenu(m);
+	private void createMenu(StructuredViewer viewer){
+		Menu m = new Menu(viewer.getControl());
+		viewer.getControl().setMenu(m);
 	
 		MenuItem mi = new MenuItem(m, SWT.PUSH);
 		mi.setText(Messages.RecordsView_OpenMenu);
 		mi.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 					Object x = (Object) iterator.next();
-				
-					if (x instanceof IntelRecord){
+					if (x instanceof IntelRecordProxy) {
+						(new OpenRecordHandler()).openRecord( ((IntelRecordProxy)x).asRecord(), false);
+					}else if (x instanceof IntelRecord){
 						(new OpenRecordHandler()).openRecord((IntelRecord)x, false);
 					}else if (x instanceof RecordEditorInput){
 						(new OpenRecordHandler()).openRecord((RecordEditorInput)x, false);
@@ -373,7 +416,7 @@ public class RecordsView {
 		m.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {
-				mi.setEnabled(!control.getSelection().isEmpty());
+				mi.setEnabled(!viewer.getSelection().isEmpty());
 			}
 			
 			@Override
@@ -388,9 +431,11 @@ public class RecordsView {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					List<Object> toDelete = new ArrayList<>();
-					for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+					for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 						Object x = (Object) iterator.next();
-						if (x instanceof IntelRecord || x instanceof RecordEditorInput){
+						if (x instanceof IntelRecordProxy) {
+							toDelete.add( ((IntelRecordProxy)x).asRecord() );
+						}else if (x instanceof IntelRecord || x instanceof RecordEditorInput){
 							toDelete.add(x);
 						}
 					}
@@ -403,12 +448,52 @@ public class RecordsView {
 			m.addMenuListener(new MenuListener() {
 				@Override
 				public void menuShown(MenuEvent e) {
-					miDelete.setEnabled(!control.getSelection().isEmpty());
+					miDelete.setEnabled(!viewer.getSelection().isEmpty());
 				}
 				
 				@Override
 				public void menuHidden(MenuEvent e) {}
 			});
+		}
+		new MenuItem(m, SWT.SEPARATOR);
+		
+		if (viewer instanceof TreeViewer) {
+			MenuItem groupBy = new MenuItem(m, SWT.CASCADE);
+			groupBy.setText(Messages.RecordsView_GroupByMenuItem);
+			Menu groupByMenu = new Menu(groupBy);
+			groupBy.setMenu(groupByMenu);
+			for (RecordsViewContentProvider.GroupBy g : RecordsViewContentProvider.GroupBy.values()) {
+				MenuItem gb = new MenuItem(groupByMenu, SWT.RADIO);
+				gb.setText(g.getGuiName());
+				if (g == GroupBy.NONE) {
+					gb.setSelection(true);
+				}
+				gb.addListener(SWT.Selection, e->{
+					for (MenuItem mi1 : groupByMenu.getItems()) mi1.setSelection(false);
+					gb.setSelection(true);
+					((RecordsViewContentProvider)lstAllRecords.getContentProvider()).setGroupBy(g);
+					lstAllRecords.refresh();
+					lstAllRecords.expandAll();
+				});;
+			}
+		}
+		
+		MenuItem sortBy = new MenuItem(m, SWT.CASCADE);
+		sortBy.setText(Messages.RecordsView_SortByMenuItem);
+		Menu sortByMenu = new Menu(sortBy);
+		sortBy.setMenu(sortByMenu);
+		for (RecordsViewContentProvider.SortBy g : RecordsViewContentProvider.SortBy.values()) {
+			MenuItem gb = new MenuItem(sortByMenu, SWT.RADIO);
+			gb.setText(g.getGuiName());
+			if (g == SortBy.DATE) {
+				gb.setSelection(true);
+			}
+			gb.addListener(SWT.Selection, e->{
+				for (MenuItem mi1 : sortByMenu.getItems()) mi1.setSelection(false);
+				gb.setSelection(true);
+				((RecordsViewContentProvider)viewer.getContentProvider()).setSortBy(g);
+				viewer.refresh();
+			});;
 		}
 		
 		new MenuItem(m, SWT.SEPARATOR);
@@ -421,9 +506,11 @@ public class RecordsView {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					List<RecordEditorInput> toAdd = new ArrayList<>();
-					for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+					for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 						Object x = (Object) iterator.next();	
-						if (x instanceof IntelRecord){
+						if (x instanceof IntelRecordProxy) {
+							toAdd.add( new RecordEditorInput(((IntelRecordProxy)x).asRecord()) );
+						}else if (x instanceof IntelRecord){
 							toAdd.add(new RecordEditorInput((IntelRecord) x));
 						}else if (x instanceof RecordEditorInput){
 							toAdd.add((RecordEditorInput) x);
@@ -436,7 +523,7 @@ public class RecordsView {
 			m.addMenuListener(new MenuListener() {
 				@Override
 				public void menuShown(MenuEvent e) {
-					miAdd.setEnabled(!control.getSelection().isEmpty() && WorkingSetManager.INSTANCE.isSet());
+					miAdd.setEnabled(!viewer.getSelection().isEmpty() && WorkingSetManager.INSTANCE.isSet());
 				}
 				
 				@Override
@@ -455,9 +542,11 @@ public class RecordsView {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				List<UUID> toExport = new ArrayList<UUID>();
-				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 					Object x = (Object) iterator.next();	
-					if (x instanceof IntelRecord){
+					if (x instanceof IntelRecordProxy) {
+						toExport.add( ((IntelRecordProxy)x).getUuid() );
+					}else if (x instanceof IntelRecord){
 						toExport.add(((IntelRecord)x).getUuid());
 					}else if (x instanceof RecordEditorInput){
 						toExport.add(((RecordEditorInput)x).getUuid());
@@ -469,7 +558,7 @@ public class RecordsView {
 		m.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {
-				miExportCsv.setEnabled(!control.getSelection().isEmpty());
+				miExportCsv.setEnabled(!viewer.getSelection().isEmpty());
 			}
 			
 			@Override
@@ -482,9 +571,11 @@ public class RecordsView {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				List<UUID> toExport = new ArrayList<UUID>();
-				for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+				for (Iterator<?> iterator = ((IStructuredSelection)viewer.getSelection()).iterator(); iterator.hasNext();) {
 					Object x = (Object) iterator.next();	
-					if (x instanceof IntelRecord){
+					if (x instanceof IntelRecordProxy) {
+						toExport.add( ((IntelRecordProxy)x).getUuid() );
+					}else if (x instanceof IntelRecord){
 						toExport.add(((IntelRecord)x).getUuid());
 					}else if (x instanceof RecordEditorInput){
 						toExport.add(((RecordEditorInput)x).getUuid());
@@ -496,7 +587,7 @@ public class RecordsView {
 		m.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {
-				miExportXml.setEnabled(!control.getSelection().isEmpty());
+				miExportXml.setEnabled(!viewer.getSelection().isEmpty());
 			}
 			
 			@Override
@@ -611,6 +702,8 @@ public class RecordsView {
 
 	@PreDestroy
 	public void dispose() {
+		LIST_HIGHLIGHT_COLOR.dispose();
+		LIST_SELECTION_COLOR.dispose();
 	}
 	
 	public static class RecordsViewWrapper extends DIViewPart<RecordsView>{
@@ -654,8 +747,8 @@ public class RecordsView {
 			});
 			
 			// -- load new and inprogress images --
-			final List<IntelRecord> inProgress = new ArrayList<IntelRecord>();
-			final List<IntelRecord> newRecords = new ArrayList<IntelRecord>();
+			final List<IntelRecordProxy> inProgress = new ArrayList<IntelRecordProxy>();
+			final List<IntelRecordProxy> newRecords = new ArrayList<IntelRecordProxy>();
 			
 			try(Session s = HibernateManager.openSession()){
 				
@@ -675,11 +768,14 @@ public class RecordsView {
 					if (r.getRecordSource() != null){
 						r.getRecordSource().getIcon();
 					}
+					IntelRecordProxy proxy = null;
+					proxy = new IntelRecordProxy(r.getTitle(), r.getUuid(), r.getRecordSource(), r.getStatus());
 					if (r.getStatus() == IntelRecord.Status.PROCESSING){
-						inProgress.add(r);
+						inProgress.add(proxy);
 					}else if (r.getStatus() == IntelRecord.Status.NEW){
-						newRecords.add(r);
+						newRecords.add(proxy);
 					}
+					if (proxy != null) proxy.setDate(computeDate(r));
 				}
 			}
 			
@@ -695,17 +791,20 @@ public class RecordsView {
 			
 			//--load all records --
 			
-			final List<RecordEditorInput> allRecords = new ArrayList<RecordEditorInput>();
+			final List<IntelRecordProxy> allRecords = new ArrayList<IntelRecordProxy>();
 			try(Session s = HibernateManager.openSession()){
 				Query<?> q = s.createQuery("SELECT title, uuid, dateCreated, recordSource.uuid, status FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc"); //$NON-NLS-1$
 				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				List<?> items = q.list();
 				for (Object it : items){
 					Object[] item = (Object[])it;
-					allRecords.add(new RecordEditorInput((String)item[0], (UUID)item[1], (Date)item[2], (UUID)item[3], (IntelRecord.Status)item[4]));
+					IntelRecordProxy r = new IntelRecordProxy((String)item[0], (UUID)item[1], item[3] == null ? null : s.get(IntelRecordSource.class,(UUID)item[3]), (IntelRecord.Status)item[4]);
+					allRecords.add(r);
+					r.setDate(computeDate(s.get(IntelRecord.class, r.getUuid())));
 				}
+				
 			}
-			allRecords.sort((x,y)->-1 * x.getDateCreated().compareTo(y.getDateCreated()));
+			allRecords.sort((x,y)->-1 * x.getDate().compareTo(y.getDate()));
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -718,6 +817,33 @@ public class RecordsView {
 
 			
 			return Status.OK_STATUS;
+		}
+		
+		private Date computeDate(IntelRecord r) {
+			Date d = null;
+			if (r.getLocations() != null) {
+				for (IntelLocation l : r.getLocations()) {
+					if (d == null || l.getDateTime().after(d)) {
+						d = l.getDateTime();
+					}
+				}
+			}
+			if (d == null && r.getAttributes() != null) {
+				for (IntelRecordAttributeValue v : r.getAttributes()) {
+					if (v.getAttribute().getAttribute().getType() == AttributeType.DATE) {
+						Date d2 = v.getDateValue();
+						if (d2 != null) {
+							if (d == null || d2.after(d)) {
+								d = d2;
+							}
+						}
+					}
+				}
+			}
+			if (d == null) {
+				d = r.getDateCreated();
+			}
+			return d;
 		}
 		
 	};
@@ -733,10 +859,10 @@ public class RecordsView {
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			if (filterString == null || filterString.isEmpty()) return true;
-		
-			RecordEditorInput in = (RecordEditorInput)element;
-			if (in.getName().toUpperCase().matches(filterString)) return true;
-			if (DateFormat.getDateInstance().format(in.getDateCreated()).toUpperCase().matches(filterString)) return true;
+			if (!(element instanceof IntelRecordProxy)) return true;
+			IntelRecordProxy in = (IntelRecordProxy)element;
+			if (in.getTitle().toUpperCase().matches(filterString)) return true;
+			if (DateFormat.getDateInstance().format(in.getDate()).toUpperCase().matches(filterString)) return true;
 			return false;
 		}
 		

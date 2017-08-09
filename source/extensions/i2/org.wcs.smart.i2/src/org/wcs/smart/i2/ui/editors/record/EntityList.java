@@ -37,7 +37,6 @@ import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowData;
@@ -73,6 +72,7 @@ import org.wcs.smart.i2.ui.editors.record.EntityListComposite.Type;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Displays a list of entities.
@@ -111,9 +111,8 @@ public class EntityList extends Composite {
 		((GridLayout)getLayout()).marginHeight = 0;
 		((GridLayout)getLayout()).marginWidth = 0;
 		
-		Color color = parent.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
-		selectionColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 75));
-		mouseOverColor = new Color(parent.getDisplay(), blend(new RGB(255, 255, 255), color.getRGB(), 90));
+		selectionColor = SmartUtils.getListSelectedColor(parent.getDisplay());
+		mouseOverColor = SmartUtils.getListHighlightColor(parent.getDisplay());
 		
 		addListener(SWT.Dispose, (e)->{
 			selectionColor.dispose(); 
@@ -666,9 +665,7 @@ public class EntityList extends Composite {
 						}
 						siblings.get(i).colorAll();
 					}
-					
-				}else{
-					
+				}else{					
 					clearSelection();
 					isSelected = true;
 				}
@@ -677,28 +674,4 @@ public class EntityList extends Composite {
 		}
 		
 	}
-	
-    private static int blend(int v1, int v2, int ratio) {
-        int b = (ratio * v1 + (100 - ratio) * v2) / 100;
-        return Math.min(255, b);
-    }
-
-    /**
-     * Blends c1 and c2 based in the provided ratio.
-     * 
-     * @param c1
-     *            first color
-     * @param c2
-     *            second color
-     * @param ratio
-     *            percentage of the first color in the blend (0-100)
-     * @return the RGB value of the blended color
-     * @since 3.1
-     */
-    private static RGB blend(RGB c1, RGB c2, int ratio) {
-        int r = blend(c1.red, c2.red, ratio);
-        int g = blend(c1.green, c2.green, ratio);
-        int b = blend(c1.blue, c2.blue, ratio);
-        return new RGB(r, g, b);
-    }
 }
