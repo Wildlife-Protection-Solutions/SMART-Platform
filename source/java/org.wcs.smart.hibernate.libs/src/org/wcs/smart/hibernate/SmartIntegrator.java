@@ -40,7 +40,7 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
  */
 public class SmartIntegrator implements Integrator {
 	
-	public static final String EXTENSION_ID = "org.wcs.smart.hibernate.interceptor"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.hibernate.libs.interceptor"; //$NON-NLS-1$
 	
 	//http://in.relation.to/2012/01/09/event-listener-registration/
 	
