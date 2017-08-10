@@ -34,7 +34,7 @@ public interface IChangeTrackerInstaller {
 	/**
 	 * Change log installer extension id
 	 */
-	public static final String EXTENSION_ID = "org.wcs.smart.changelog.installer"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.changeLogInstaller"; //$NON-NLS-1$
 	
 	/**
 	 * Should create triggers for all tables for the CURRENT version of
