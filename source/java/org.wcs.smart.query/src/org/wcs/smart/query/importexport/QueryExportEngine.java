@@ -36,7 +36,7 @@ import org.wcs.smart.query.model.Query;
  */
 public class QueryExportEngine {
 	
-	public static final String MAPPING_ID = "org.wcs.smart.query.export.format"; //$NON-NLS-1$
+	public static final String MAPPING_ID = "org.wcs.smart.query.exportFormat"; //$NON-NLS-1$
 	
 	/**
 	 * Returns all valid query exporters for the given query.
