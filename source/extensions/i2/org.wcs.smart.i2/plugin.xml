@@ -321,7 +321,7 @@
                </visibleWhen>
             </command>
             <menu
-                  label="%ImportDataMenuItem">
+                  label="Import/Export Data">
                <command
                      commandId="org.wcs.smart.i2.entity.import"
                      label="%ImportEntitiesCommandName"
@@ -336,6 +336,20 @@
                      commandId="org.wcs.smart.i2.command.record.import.xml"
                      label="Import Records from XML..."
                      style="push">
+               </command>
+               <separator
+                     name="org.wcs.smart.i2.separator1"
+                     visible="true">
+               </separator>
+               <command
+                     commandId="org.wcs.smart.i2.command.export.model.xml"
+                     style="push"
+                     tooltip="export entity types, relationship types, attributes to xml file">
+               </command>
+               <command
+                     commandId="org.wcs.smart.i2.command.import.model.xml"
+                     style="push"
+                     tooltip="import model elements from an xml file">
                </command>
             </menu>
             <separator
@@ -794,6 +808,14 @@
             id="org.wcs.smart.i2.command.record.import.xml"
             name="Import Records From XML">
       </command>
+      <command
+            id="org.wcs.smart.i2.command.export.model.xml"
+            name="Export Model Elements to XML...">
+      </command>
+      <command
+            id="org.wcs.smart.i2.command.import.model.xml"
+            name="Import Model Elements from XML...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -898,6 +920,14 @@
       <handler
             class="org.wcs.smart.i2.ui.record.importer.ImportRecordXmlHandler$ImportRecordXmlHandlerWrapper"
             commandId="org.wcs.smart.i2.command.record.import.xml">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ExportModelXmlHandler$ExportModelXmlHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.export.model.xml">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ImportModelFromXmlHandler$ImportModelFromXmlHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.import.model.xml">
       </handler>
    </extension>
    <extension

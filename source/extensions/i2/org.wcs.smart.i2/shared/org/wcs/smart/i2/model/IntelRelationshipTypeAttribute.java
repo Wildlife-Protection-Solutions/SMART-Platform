@@ -72,8 +72,8 @@ public class IntelRelationshipTypeAttribute{
 		return id.getAttribute();
 	}
 
-	public void setAttribute(IntelAttribute attachment) {
-		id.setAttribute(attachment);
+	public void setAttribute(IntelAttribute attribute) {
+		id.setAttribute(attribute);
 	}
 
 	@Column(name="seq_order")
