@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.wcs.smart.report.birt.map.ExtensionManager;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
 
 /**
@@ -64,7 +65,7 @@ public enum BirtStyleManager {
 		List<IBirtLayerStyleProvider> items = new ArrayList<IBirtLayerStyleProvider>();
 		
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
-        IExtensionPoint extensionPoint = registry.getExtensionPoint("org.wcs.smart.report.birt.maplayer"); //$NON-NLS-1$
+        IExtensionPoint extensionPoint = registry.getExtensionPoint(ExtensionManager.EXTENSION_ID);
         if (extensionPoint == null)
             return items;
         IExtension[] extensions = extensionPoint.getExtensions();

@@ -31,8 +31,6 @@ import org.locationtech.udig.project.internal.StyleBlackboard;
  */
 public interface IBirtLayerStyleProvider {
 
-	public static final String EXTENSION_ID = "org.wcs.smart.birt.map.styleprovider"; //$NON-NLS-1$
-	
 	/**
 	 * Gets the style for a given birt layer.
 	 * @param extensionId the layer dataset extension point id
