@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ILoginHandler;
+import org.wcs.smart.LoginLogEntry;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
@@ -293,6 +294,9 @@ public class SmartStartUp {
 					//	disconnect from the database & setup correct user level
 					SmartDB.setConservationAreaConfiguration(ccaaUser, password, ca, config);
 					
+					//Record this Login in the login-log
+					recordLogin(ccaaUser, ca);
+					
 					try (Session s = HibernateManager.openSession()){
 					}
 				}
@@ -314,6 +318,9 @@ public class SmartStartUp {
 				}
 				//	disconnect from the database & setup correct user level
 				SmartDB.setConservationAreaConfiguration(e, password, ca, config);
+				
+				//Record this Login in the login-log
+				recordLogin(e, ca);
 				
 				try(Session s = HibernateManager.openSession()){}
 
@@ -351,6 +358,20 @@ public class SmartStartUp {
 		return true;
 	}
 	
+	
+	private static void recordLogin(Employee e, ConservationArea ca) {
+		Session s = HibernateManager.openSession();
+		s.beginTransaction();
+		LoginLogEntry l = new LoginLogEntry();
+		l.setCaId(ca.getId());
+		l.setCaName(ca.getName());
+		l.setSmartUserId(e.getSmartUserId());
+		l.setUserLevels(e.getSmartUserLevelKeys());
+		s.save(l);
+		s.getTransaction().commit();
+		s.close();
+		
+	}
 		
 	/**
 	 * Opens the create new conservation area wizard.

@@ -316,6 +316,23 @@
                   tooltip="%logout.command.tooltip">
             </command>
             <command
+                  commandId="org.wcs.smart.command.logoflogins"
+                  label="%logoflogins.command.label"
+                  mnemonic="%logoflogins.command.mnemonic"
+                  style="push"
+                  tooltip="%logoflogins.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                  </or>
+               </visibleWhen>
+            </command>
+            <command
                   commandId="org.wcs.smart.command.exit"
                   id="org.wcs.menu.file.exit"
                   label="%exit.command.label"
@@ -954,6 +971,10 @@
             id="org.wcs.smart.command.ccaa.users.show"
             name="%manageusers.command.name">
       </command>
+      <command
+            id="org.wcs.smart.command.logoflogins"
+            name="%logoflogins.command.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -1128,6 +1149,10 @@
             </not>
          </activeWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.ui.internal.userlog.ShowLoginLogDialog$ShowUserLogDialogHandlerWrapper"
+            commandId="org.wcs.smart.command.logoflogins">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
@@ -1263,6 +1288,10 @@
       <class
             class="org.wcs.smart.ca.SmartStyle"
             supportsCcaa="true">
+      </class>
+      <class
+            class="org.wcs.smart.LoginLogEntry"
+            supportsCcaa="false">
       </class>
    </extension>
    <extension

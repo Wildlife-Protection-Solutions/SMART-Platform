@@ -3,5 +3,8 @@
 <plugin>
    <extension-point id="mapping" name="Hibernate Entity Class" schema="schema/org.wcs.smart.hibernate.mapping.exsd"/>
    <extension-point id="interceptor" name="Hibernate Interceptor" schema="schema/org.wcs.smart.hibernate.interceptor.exsd"/>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+   </extension>
 
 </plugin>

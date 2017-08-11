@@ -894,6 +894,11 @@ public class Messages extends NLS {
 	public static String LocationSelectComposite_X_Label;
 	public static String LocationSelectComposite_Y_Invalid_Error;
 	public static String LocationSelectComposite_Y_Label;
+	public static String LoginLogDialog_0;
+	public static String LoginLogDialog_1;
+	public static String LoginLogDialog_2;
+	public static String LoginLogDialog_3;
+	public static String LogOfLogins_Dialog_Title;
 	public static String MapComposite_Map_Name;
 	public static String MapComposite_MapResizeJob_Title;
 	public static String MapComposite_PointLayer_Add_Error;
@@ -1243,6 +1248,7 @@ public class Messages extends NLS {
 	public static String BrowserView_refreshtooltip;
 	public static String NumericAttributeField_InvalidNumericAttribute;
 	public static String TreeAttributeField_InvalidTreeValue;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

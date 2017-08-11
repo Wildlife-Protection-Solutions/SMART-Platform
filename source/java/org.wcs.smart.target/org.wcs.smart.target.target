@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="SMART - Oxygen" sequenceNumber="38">
+<?pde version="3.8"?><target name="SMART - Oxygen" sequenceNumber="47">
 <locations>
 <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.media.jai_imageio-feature.feature.group" version="1.1.3"/>
@@ -56,13 +56,14 @@
 <unit id="org.eclipse.rcp.feature.group" version="4.7.0.v20170612-1255"/>
 <repository location="http://download.eclipse.org/eclipse/updates/4.7/"/>
 </location>
+<location path="C:\SMARTDesktopEnv\udig_forSmart6\udig-platform\features\org.locationtech.udig_sdk-feature\target\repository" type="Directory"/>
 </locations>
 <includeBundles>
 <plugin id="ch.ethz.iks.r_osgi.remote"/>
 <plugin id="ch.ethz.iks.r_osgi.remote.source"/>
 <plugin id="ch.ethz.iks.slp"/>
 <plugin id="ch.ethz.iks.slp.source"/>
-<plugin id="com.google.guava"/>
+<plugin id="com.google.guava" version="21.0.0.v20170206-1425"/>
 <plugin id="com.google.guava.source"/>
 <plugin id="com.ibm.icu"/>
 <plugin id="com.ibm.icu.source"/>
@@ -78,22 +79,22 @@
 <plugin id="javax.el.source"/>
 <plugin id="javax.inject"/>
 <plugin id="javax.inject.source"/>
-<plugin id="javax.media.jai_imageio"/>
-<plugin id="javax.media.jai_imageio.win32.win32.x86"/>
+<plugin id="javax.media.jai_imageio" version="1.1.3"/>
+<plugin id="javax.media.jai_imageio.win32.win32.x86" version="1.1.3"/>
 <plugin id="javax.servlet" version="3.1.0.v201410161800"/>
 <plugin id="javax.servlet.jsp"/>
 <plugin id="javax.servlet.jsp.source"/>
 <plugin id="javax.servlet.source" version="3.1.0.v201410161800"/>
 <plugin id="javax.wsdl"/>
-<plugin id="javax.xml"/>
+<plugin id="javax.xml" version="1.3.4.v201005080400"/>
 <plugin id="javax.xml.rpc"/>
 <plugin id="javax.xml.soap"/>
 <plugin id="javax.xml.stream"/>
-<plugin id="net.miginfocom.layout"/>
+<plugin id="net.miginfocom.layout" version="3.7.1.v200911230030"/>
 <plugin id="net.miginfocom.layout.source"/>
-<plugin id="net.miginfocom.layout.swt"/>
+<plugin id="net.miginfocom.layout.swt" version="3.7.1.v201505121915"/>
 <plugin id="net.miginfocom.layout.swt.source"/>
-<plugin id="org.apache.ant"/>
+<plugin id="org.apache.ant" version="1.10.1.v20170504-0840"/>
 <plugin id="org.apache.ant.source"/>
 <plugin id="org.apache.axis"/>
 <plugin id="org.apache.batik.bridge" version="1.7.0.v201011041433"/>
@@ -331,7 +332,7 @@
 <plugin id="org.eclipse.birt.resources.source"/>
 <plugin id="org.eclipse.birt.source"/>
 <plugin id="org.eclipse.compare"/>
-<plugin id="org.eclipse.compare.core"/>
+<plugin id="org.eclipse.compare.core" version="3.6.100.v20170516-0820"/>
 <plugin id="org.eclipse.compare.core.source"/>
 <plugin id="org.eclipse.compare.source"/>
 <plugin id="org.eclipse.compare.win32"/>
@@ -348,13 +349,13 @@
 <plugin id="org.eclipse.core.databinding.property"/>
 <plugin id="org.eclipse.core.databinding.property.source"/>
 <plugin id="org.eclipse.core.databinding.source"/>
-<plugin id="org.eclipse.core.expressions"/>
+<plugin id="org.eclipse.core.expressions" version="3.6.0.v20170207-1037"/>
 <plugin id="org.eclipse.core.expressions.source"/>
 <plugin id="org.eclipse.core.externaltools"/>
 <plugin id="org.eclipse.core.externaltools.source"/>
-<plugin id="org.eclipse.core.filebuffers"/>
+<plugin id="org.eclipse.core.filebuffers" version="3.6.100.v20170203-1130"/>
 <plugin id="org.eclipse.core.filebuffers.source"/>
-<plugin id="org.eclipse.core.filesystem"/>
+<plugin id="org.eclipse.core.filesystem" version="1.7.0.v20170406-1337"/>
 <plugin id="org.eclipse.core.filesystem.linux.ppc64"/>
 <plugin id="org.eclipse.core.filesystem.linux.ppc64le"/>
 <plugin id="org.eclipse.core.filesystem.linux.x86"/>
@@ -365,19 +366,19 @@
 <plugin id="org.eclipse.core.filesystem.win32.x86_64"/>
 <plugin id="org.eclipse.core.jobs"/>
 <plugin id="org.eclipse.core.jobs.source"/>
-<plugin id="org.eclipse.core.net"/>
+<plugin id="org.eclipse.core.net" version="1.3.100.v20170516-0820"/>
 <plugin id="org.eclipse.core.net.linux.x86"/>
 <plugin id="org.eclipse.core.net.linux.x86_64"/>
 <plugin id="org.eclipse.core.net.source"/>
 <plugin id="org.eclipse.core.net.win32.x86"/>
 <plugin id="org.eclipse.core.net.win32.x86_64"/>
-<plugin id="org.eclipse.core.resources"/>
+<plugin id="org.eclipse.core.resources" version="3.12.0.v20170417-1558"/>
 <plugin id="org.eclipse.core.resources.source"/>
 <plugin id="org.eclipse.core.resources.win32.x86"/>
 <plugin id="org.eclipse.core.resources.win32.x86_64"/>
-<plugin id="org.eclipse.core.runtime"/>
+<plugin id="org.eclipse.core.runtime" version="3.13.0.v20170207-1030"/>
 <plugin id="org.eclipse.core.runtime.source"/>
-<plugin id="org.eclipse.core.variables"/>
+<plugin id="org.eclipse.core.variables" version="3.4.0.v20170113-2056"/>
 <plugin id="org.eclipse.core.variables.source"/>
 <plugin id="org.eclipse.datatools.common.doc.user"/>
 <plugin id="org.eclipse.datatools.connectivity"/>
@@ -488,7 +489,7 @@
 <plugin id="org.eclipse.debug.core.source"/>
 <plugin id="org.eclipse.debug.ui"/>
 <plugin id="org.eclipse.debug.ui.source"/>
-<plugin id="org.eclipse.draw2d"/>
+<plugin id="org.eclipse.draw2d" version="3.10.100.201606061308"/>
 <plugin id="org.eclipse.draw2d.doc.isv"/>
 <plugin id="org.eclipse.draw2d.source"/>
 <plugin id="org.eclipse.e4.core.commands"/>
@@ -680,9 +681,9 @@
 <plugin id="org.eclipse.emf.codegen.source"/>
 <plugin id="org.eclipse.emf.codegen.ui"/>
 <plugin id="org.eclipse.emf.codegen.ui.source"/>
-<plugin id="org.eclipse.emf.common"/>
+<plugin id="org.eclipse.emf.common" version="2.13.0.v20170609-0707"/>
 <plugin id="org.eclipse.emf.common.source"/>
-<plugin id="org.eclipse.emf.common.ui"/>
+<plugin id="org.eclipse.emf.common.ui" version="2.12.0.v20170609-0928"/>
 <plugin id="org.eclipse.emf.common.ui.source"/>
 <plugin id="org.eclipse.emf.converter"/>
 <plugin id="org.eclipse.emf.converter.source"/>
@@ -691,21 +692,21 @@
 <plugin id="org.eclipse.emf.databinding.edit.source"/>
 <plugin id="org.eclipse.emf.databinding.source"/>
 <plugin id="org.eclipse.emf.doc"/>
-<plugin id="org.eclipse.emf.ecore"/>
-<plugin id="org.eclipse.emf.ecore.change"/>
+<plugin id="org.eclipse.emf.ecore" version="2.13.0.v20170609-0707"/>
+<plugin id="org.eclipse.emf.ecore.change" version="2.11.0.v20170609-0707"/>
 <plugin id="org.eclipse.emf.ecore.change.edit"/>
 <plugin id="org.eclipse.emf.ecore.change.edit.source"/>
 <plugin id="org.eclipse.emf.ecore.change.source"/>
-<plugin id="org.eclipse.emf.ecore.edit"/>
+<plugin id="org.eclipse.emf.ecore.edit" version="2.9.0.v20170609-0928"/>
 <plugin id="org.eclipse.emf.ecore.edit.source"/>
 <plugin id="org.eclipse.emf.ecore.editor"/>
 <plugin id="org.eclipse.emf.ecore.editor.source"/>
 <plugin id="org.eclipse.emf.ecore.source"/>
-<plugin id="org.eclipse.emf.ecore.xmi"/>
+<plugin id="org.eclipse.emf.ecore.xmi" version="2.13.0.v20170609-0707"/>
 <plugin id="org.eclipse.emf.ecore.xmi.source"/>
-<plugin id="org.eclipse.emf.edit"/>
+<plugin id="org.eclipse.emf.edit" version="2.12.0.v20170609-0928"/>
 <plugin id="org.eclipse.emf.edit.source"/>
-<plugin id="org.eclipse.emf.edit.ui"/>
+<plugin id="org.eclipse.emf.edit.ui" version="2.13.0.v20170609-0928"/>
 <plugin id="org.eclipse.emf.edit.ui.source"/>
 <plugin id="org.eclipse.emf.example.installer"/>
 <plugin id="org.eclipse.emf.exporter"/>
@@ -755,12 +756,12 @@
 <plugin id="org.eclipse.equinox.coordinator.source"/>
 <plugin id="org.eclipse.equinox.device"/>
 <plugin id="org.eclipse.equinox.device.source"/>
-<plugin id="org.eclipse.equinox.ds"/>
+<plugin id="org.eclipse.equinox.ds" version="1.5.0.v20170307-1429"/>
 <plugin id="org.eclipse.equinox.ds.source"/>
 <plugin id="org.eclipse.equinox.event"/>
 <plugin id="org.eclipse.equinox.event.source"/>
-<plugin id="org.eclipse.equinox.frameworkadmin"/>
-<plugin id="org.eclipse.equinox.frameworkadmin.equinox"/>
+<plugin id="org.eclipse.equinox.frameworkadmin" version="2.0.300.v20160504-1450"/>
+<plugin id="org.eclipse.equinox.frameworkadmin.equinox" version="1.0.800.v20170524-1345"/>
 <plugin id="org.eclipse.equinox.frameworkadmin.equinox.source"/>
 <plugin id="org.eclipse.equinox.frameworkadmin.source"/>
 <plugin id="org.eclipse.equinox.http.jetty"/>
@@ -790,49 +791,49 @@
 <plugin id="org.eclipse.equinox.launcher.win32.win32.x86_64"/>
 <plugin id="org.eclipse.equinox.metatype"/>
 <plugin id="org.eclipse.equinox.metatype.source"/>
-<plugin id="org.eclipse.equinox.p2.artifact.repository"/>
+<plugin id="org.eclipse.equinox.p2.artifact.repository" version="1.1.600.v20170511-1106"/>
 <plugin id="org.eclipse.equinox.p2.artifact.repository.source"/>
 <plugin id="org.eclipse.equinox.p2.console"/>
 <plugin id="org.eclipse.equinox.p2.console.source"/>
-<plugin id="org.eclipse.equinox.p2.core"/>
+<plugin id="org.eclipse.equinox.p2.core" version="2.4.100.v20160419-0834"/>
 <plugin id="org.eclipse.equinox.p2.core.source"/>
-<plugin id="org.eclipse.equinox.p2.director"/>
+<plugin id="org.eclipse.equinox.p2.director" version="2.3.300.v20160504-1450"/>
 <plugin id="org.eclipse.equinox.p2.director.app"/>
 <plugin id="org.eclipse.equinox.p2.director.app.source"/>
 <plugin id="org.eclipse.equinox.p2.director.source"/>
-<plugin id="org.eclipse.equinox.p2.directorywatcher"/>
+<plugin id="org.eclipse.equinox.p2.directorywatcher" version="1.1.100.v20150423-1455"/>
 <plugin id="org.eclipse.equinox.p2.directorywatcher.source"/>
 <plugin id="org.eclipse.equinox.p2.discovery"/>
 <plugin id="org.eclipse.equinox.p2.discovery.compatibility"/>
 <plugin id="org.eclipse.equinox.p2.discovery.compatibility.source"/>
 <plugin id="org.eclipse.equinox.p2.discovery.source"/>
-<plugin id="org.eclipse.equinox.p2.engine"/>
+<plugin id="org.eclipse.equinox.p2.engine" version="2.5.0.v20170319-2002"/>
 <plugin id="org.eclipse.equinox.p2.engine.source"/>
-<plugin id="org.eclipse.equinox.p2.extensionlocation"/>
+<plugin id="org.eclipse.equinox.p2.extensionlocation" version="1.2.300.v20160419-0834"/>
 <plugin id="org.eclipse.equinox.p2.extensionlocation.source"/>
-<plugin id="org.eclipse.equinox.p2.garbagecollector"/>
+<plugin id="org.eclipse.equinox.p2.garbagecollector" version="1.0.300.v20160504-1450"/>
 <plugin id="org.eclipse.equinox.p2.garbagecollector.source"/>
 <plugin id="org.eclipse.equinox.p2.installer"/>
 <plugin id="org.eclipse.equinox.p2.installer.source"/>
-<plugin id="org.eclipse.equinox.p2.jarprocessor"/>
+<plugin id="org.eclipse.equinox.p2.jarprocessor" version="1.0.500.v20160504-1450"/>
 <plugin id="org.eclipse.equinox.p2.jarprocessor.source"/>
-<plugin id="org.eclipse.equinox.p2.metadata"/>
-<plugin id="org.eclipse.equinox.p2.metadata.repository"/>
+<plugin id="org.eclipse.equinox.p2.metadata" version="2.3.200.v20170511-1106"/>
+<plugin id="org.eclipse.equinox.p2.metadata.repository" version="1.2.400.v20170511-1106"/>
 <plugin id="org.eclipse.equinox.p2.metadata.repository.source"/>
 <plugin id="org.eclipse.equinox.p2.metadata.source"/>
 <plugin id="org.eclipse.equinox.p2.operations"/>
 <plugin id="org.eclipse.equinox.p2.operations.source"/>
-<plugin id="org.eclipse.equinox.p2.publisher"/>
-<plugin id="org.eclipse.equinox.p2.publisher.eclipse"/>
+<plugin id="org.eclipse.equinox.p2.publisher" version="1.4.200.v20170511-1216"/>
+<plugin id="org.eclipse.equinox.p2.publisher.eclipse" version="1.2.200.v20170511-1216"/>
 <plugin id="org.eclipse.equinox.p2.publisher.eclipse.source"/>
 <plugin id="org.eclipse.equinox.p2.publisher.source"/>
-<plugin id="org.eclipse.equinox.p2.reconciler.dropins"/>
+<plugin id="org.eclipse.equinox.p2.reconciler.dropins" version="1.1.400.v20160504-1450"/>
 <plugin id="org.eclipse.equinox.p2.reconciler.dropins.source"/>
-<plugin id="org.eclipse.equinox.p2.repository"/>
+<plugin id="org.eclipse.equinox.p2.repository" version="2.3.300.v20170511-1216"/>
 <plugin id="org.eclipse.equinox.p2.repository.source"/>
 <plugin id="org.eclipse.equinox.p2.repository.tools"/>
 <plugin id="org.eclipse.equinox.p2.repository.tools.source"/>
-<plugin id="org.eclipse.equinox.p2.touchpoint.eclipse"/>
+<plugin id="org.eclipse.equinox.p2.touchpoint.eclipse" version="2.1.500.v20170516-0526"/>
 <plugin id="org.eclipse.equinox.p2.touchpoint.eclipse.source"/>
 <plugin id="org.eclipse.equinox.p2.touchpoint.natives"/>
 <plugin id="org.eclipse.equinox.p2.touchpoint.natives.source"/>
@@ -862,7 +863,7 @@
 <plugin id="org.eclipse.equinox.region.source"/>
 <plugin id="org.eclipse.equinox.registry"/>
 <plugin id="org.eclipse.equinox.registry.source"/>
-<plugin id="org.eclipse.equinox.security"/>
+<plugin id="org.eclipse.equinox.security" version="1.2.300.v20170505-1235"/>
 <plugin id="org.eclipse.equinox.security.linux.x86_64"/>
 <plugin id="org.eclipse.equinox.security.linux.x86_64.source"/>
 <plugin id="org.eclipse.equinox.security.macosx"/>
@@ -877,7 +878,7 @@
 <plugin id="org.eclipse.equinox.servletbridge"/>
 <plugin id="org.eclipse.equinox.servletbridge.source"/>
 <plugin id="org.eclipse.equinox.simpleconfigurator"/>
-<plugin id="org.eclipse.equinox.simpleconfigurator.manipulator"/>
+<plugin id="org.eclipse.equinox.simpleconfigurator.manipulator" version="2.0.300.v20170515-0721"/>
 <plugin id="org.eclipse.equinox.simpleconfigurator.manipulator.source"/>
 <plugin id="org.eclipse.equinox.simpleconfigurator.source"/>
 <plugin id="org.eclipse.equinox.supplement"/>
@@ -898,7 +899,7 @@
 <plugin id="org.eclipse.equinox.weaving.hook.source"/>
 <plugin id="org.eclipse.equinox.wireadmin"/>
 <plugin id="org.eclipse.equinox.wireadmin.source"/>
-<plugin id="org.eclipse.gef"/>
+<plugin id="org.eclipse.gef" version="3.11.0.201606061308"/>
 <plugin id="org.eclipse.gef.doc.isv"/>
 <plugin id="org.eclipse.gef.examples.ui.pde"/>
 <plugin id="org.eclipse.gef.source"/>
@@ -1011,7 +1012,7 @@
 <plugin id="org.eclipse.jface.databinding"/>
 <plugin id="org.eclipse.jface.databinding.source"/>
 <plugin id="org.eclipse.jface.source"/>
-<plugin id="org.eclipse.jface.text"/>
+<plugin id="org.eclipse.jface.text" version="3.12.0.v20170523-1043"/>
 <plugin id="org.eclipse.jface.text.source"/>
 <plugin id="org.eclipse.jsch.core"/>
 <plugin id="org.eclipse.jsch.core.source"/>
@@ -1066,34 +1067,34 @@
 <plugin id="org.eclipse.team.genericeditor.diff.extension.source"/>
 <plugin id="org.eclipse.team.ui"/>
 <plugin id="org.eclipse.team.ui.source"/>
-<plugin id="org.eclipse.text"/>
+<plugin id="org.eclipse.text" version="3.6.100.v20170203-0814"/>
 <plugin id="org.eclipse.text.source"/>
-<plugin id="org.eclipse.ui"/>
+<plugin id="org.eclipse.ui" version="3.109.0.v20170411-1742"/>
 <plugin id="org.eclipse.ui.browser"/>
 <plugin id="org.eclipse.ui.browser.source"/>
-<plugin id="org.eclipse.ui.cheatsheets"/>
+<plugin id="org.eclipse.ui.cheatsheets" version="3.5.100.v20170515-0748"/>
 <plugin id="org.eclipse.ui.cheatsheets.source"/>
 <plugin id="org.eclipse.ui.cocoa"/>
 <plugin id="org.eclipse.ui.cocoa.source"/>
-<plugin id="org.eclipse.ui.console"/>
+<plugin id="org.eclipse.ui.console" version="3.7.0.v20170315-0941"/>
 <plugin id="org.eclipse.ui.console.source"/>
-<plugin id="org.eclipse.ui.editors"/>
+<plugin id="org.eclipse.ui.editors" version="3.11.0.v20170202-1823"/>
 <plugin id="org.eclipse.ui.editors.source"/>
 <plugin id="org.eclipse.ui.externaltools"/>
 <plugin id="org.eclipse.ui.externaltools.source"/>
-<plugin id="org.eclipse.ui.forms"/>
+<plugin id="org.eclipse.ui.forms" version="3.7.100.v20170517-1755"/>
 <plugin id="org.eclipse.ui.forms.source"/>
 <plugin id="org.eclipse.ui.genericeditor"/>
 <plugin id="org.eclipse.ui.genericeditor.source"/>
-<plugin id="org.eclipse.ui.ide"/>
+<plugin id="org.eclipse.ui.ide" version="3.13.0.v20170516-1223"/>
 <plugin id="org.eclipse.ui.ide.application"/>
 <plugin id="org.eclipse.ui.ide.application.source"/>
 <plugin id="org.eclipse.ui.ide.source"/>
-<plugin id="org.eclipse.ui.intro"/>
+<plugin id="org.eclipse.ui.intro" version="3.5.100.v20170418-0710"/>
 <plugin id="org.eclipse.ui.intro.quicklinks"/>
 <plugin id="org.eclipse.ui.intro.quicklinks.source"/>
 <plugin id="org.eclipse.ui.intro.source"/>
-<plugin id="org.eclipse.ui.intro.universal"/>
+<plugin id="org.eclipse.ui.intro.universal" version="3.3.100.v20170515-1335"/>
 <plugin id="org.eclipse.ui.intro.universal.source"/>
 <plugin id="org.eclipse.ui.monitoring"/>
 <plugin id="org.eclipse.ui.monitoring.source"/>
@@ -1106,19 +1107,19 @@
 <plugin id="org.eclipse.ui.source"/>
 <plugin id="org.eclipse.ui.themes"/>
 <plugin id="org.eclipse.ui.themes.source"/>
-<plugin id="org.eclipse.ui.views"/>
-<plugin id="org.eclipse.ui.views.properties.tabbed"/>
+<plugin id="org.eclipse.ui.views" version="3.9.0.v20170226-1833"/>
+<plugin id="org.eclipse.ui.views.properties.tabbed" version="3.8.0.v20170516-1617"/>
 <plugin id="org.eclipse.ui.views.properties.tabbed.source"/>
 <plugin id="org.eclipse.ui.views.source"/>
 <plugin id="org.eclipse.ui.win32"/>
 <plugin id="org.eclipse.ui.win32.source"/>
 <plugin id="org.eclipse.ui.workbench"/>
 <plugin id="org.eclipse.ui.workbench.source"/>
-<plugin id="org.eclipse.ui.workbench.texteditor"/>
+<plugin id="org.eclipse.ui.workbench.texteditor" version="3.10.100.v20170426-2021"/>
 <plugin id="org.eclipse.ui.workbench.texteditor.source"/>
 <plugin id="org.eclipse.update.configurator"/>
 <plugin id="org.eclipse.update.configurator.source"/>
-<plugin id="org.eclipse.xsd"/>
+<plugin id="org.eclipse.xsd" version="2.13.0.v20170609-0928"/>
 <plugin id="org.eclipse.xsd.cheatsheets"/>
 <plugin id="org.eclipse.xsd.cheatsheets.source"/>
 <plugin id="org.eclipse.xsd.doc"/>
@@ -1135,18 +1136,128 @@
 <plugin id="org.eclipse.xsd.mapping"/>
 <plugin id="org.eclipse.xsd.mapping.editor"/>
 <plugin id="org.eclipse.xsd.source"/>
-<plugin id="org.hamcrest.core"/>
+<plugin id="org.hamcrest.core" version="1.3.0.v201303031735"/>
 <plugin id="org.hamcrest.core.source"/>
 <plugin id="org.hamcrest.library"/>
 <plugin id="org.hamcrest.library.source"/>
 <plugin id="org.junit"/>
 <plugin id="org.junit.source"/>
+<plugin id="org.locationtech.udig"/>
+<plugin id="org.locationtech.udig.bookmarks"/>
+<plugin id="org.locationtech.udig.bookmarks.source"/>
+<plugin id="org.locationtech.udig.browser"/>
+<plugin id="org.locationtech.udig.browser.source"/>
+<plugin id="org.locationtech.udig.catalog"/>
+<plugin id="org.locationtech.udig.catalog.arcgrid"/>
+<plugin id="org.locationtech.udig.catalog.arcgrid.source"/>
+<plugin id="org.locationtech.udig.catalog.arcsde"/>
+<plugin id="org.locationtech.udig.catalog.arcsde.source"/>
+<plugin id="org.locationtech.udig.catalog.db2"/>
+<plugin id="org.locationtech.udig.catalog.db2.source"/>
+<plugin id="org.locationtech.udig.catalog.geotiff"/>
+<plugin id="org.locationtech.udig.catalog.geotiff.source"/>
+<plugin id="org.locationtech.udig.catalog.geotools"/>
+<plugin id="org.locationtech.udig.catalog.geotools.source"/>
+<plugin id="org.locationtech.udig.catalog.imageio"/>
+<plugin id="org.locationtech.udig.catalog.imageio.source"/>
+<plugin id="org.locationtech.udig.catalog.jgrass"/>
+<plugin id="org.locationtech.udig.catalog.jgrass.source"/>
+<plugin id="org.locationtech.udig.catalog.kml"/>
+<plugin id="org.locationtech.udig.catalog.kml.source"/>
+<plugin id="org.locationtech.udig.catalog.mysql"/>
+<plugin id="org.locationtech.udig.catalog.mysql.source"/>
+<plugin id="org.locationtech.udig.catalog.oracle"/>
+<plugin id="org.locationtech.udig.catalog.oracle.source"/>
+<plugin id="org.locationtech.udig.catalog.postgis"/>
+<plugin id="org.locationtech.udig.catalog.postgis.source"/>
+<plugin id="org.locationtech.udig.catalog.rasterings"/>
+<plugin id="org.locationtech.udig.catalog.rasterings.source"/>
+<plugin id="org.locationtech.udig.catalog.shp"/>
+<plugin id="org.locationtech.udig.catalog.shp.source"/>
+<plugin id="org.locationtech.udig.catalog.source"/>
+<plugin id="org.locationtech.udig.catalog.ui"/>
+<plugin id="org.locationtech.udig.catalog.ui.source"/>
+<plugin id="org.locationtech.udig.catalog.wfs"/>
+<plugin id="org.locationtech.udig.catalog.wfs.source"/>
+<plugin id="org.locationtech.udig.catalog.wms"/>
+<plugin id="org.locationtech.udig.catalog.wms.source"/>
+<plugin id="org.locationtech.udig.catalog.wmt"/>
+<plugin id="org.locationtech.udig.catalog.wmt.source"/>
+<plugin id="org.locationtech.udig.catalog.worldimage"/>
+<plugin id="org.locationtech.udig.catalog.worldimage.source"/>
+<plugin id="org.locationtech.udig.core"/>
+<plugin id="org.locationtech.udig.core.source"/>
+<plugin id="org.locationtech.udig.feature.editor"/>
+<plugin id="org.locationtech.udig.feature.editor.source"/>
+<plugin id="org.locationtech.udig.help"/>
+<plugin id="org.locationtech.udig.image.georeferencing"/>
+<plugin id="org.locationtech.udig.image.georeferencing.source"/>
+<plugin id="org.locationtech.udig.info"/>
+<plugin id="org.locationtech.udig.info.source"/>
+<plugin id="org.locationtech.udig.jconsole"/>
+<plugin id="org.locationtech.udig.jconsole.source"/>
+<plugin id="org.locationtech.udig.legend"/>
+<plugin id="org.locationtech.udig.legend.source"/>
+<plugin id="org.locationtech.udig.libs"/>
+<plugin id="org.locationtech.udig.libs.db2"/>
+<plugin id="org.locationtech.udig.libs.oracle"/>
+<plugin id="org.locationtech.udig.libs.source"/>
+<plugin id="org.locationtech.udig.mapgraphic"/>
+<plugin id="org.locationtech.udig.mapgraphic.source"/>
+<plugin id="org.locationtech.udig.omsbox"/>
+<plugin id="org.locationtech.udig.omsbox.source"/>
+<plugin id="org.locationtech.udig.printing.model"/>
+<plugin id="org.locationtech.udig.printing.model.edit"/>
+<plugin id="org.locationtech.udig.printing.model.edit.source"/>
+<plugin id="org.locationtech.udig.printing.model.source"/>
+<plugin id="org.locationtech.udig.printing.ui"/>
+<plugin id="org.locationtech.udig.printing.ui.source"/>
+<plugin id="org.locationtech.udig.project"/>
+<plugin id="org.locationtech.udig.project.edit"/>
+<plugin id="org.locationtech.udig.project.edit.source"/>
+<plugin id="org.locationtech.udig.project.source"/>
+<plugin id="org.locationtech.udig.project.ui"/>
+<plugin id="org.locationtech.udig.project.ui.editor"/>
+<plugin id="org.locationtech.udig.project.ui.editor.source"/>
+<plugin id="org.locationtech.udig.project.ui.source"/>
+<plugin id="org.locationtech.udig.render.feature.basic"/>
+<plugin id="org.locationtech.udig.render.feature.basic.source"/>
+<plugin id="org.locationtech.udig.render.feature.shapefile"/>
+<plugin id="org.locationtech.udig.render.feature.shapefile.source"/>
+<plugin id="org.locationtech.udig.render.gridcoverage.basic"/>
+<plugin id="org.locationtech.udig.render.gridcoverage.basic.source"/>
+<plugin id="org.locationtech.udig.render.wms.basic"/>
+<plugin id="org.locationtech.udig.render.wms.basic.source"/>
+<plugin id="org.locationtech.udig.render.wmt.basic"/>
+<plugin id="org.locationtech.udig.render.wmt.basic.source"/>
+<plugin id="org.locationtech.udig.style"/>
+<plugin id="org.locationtech.udig.style.advanced"/>
+<plugin id="org.locationtech.udig.style.advanced.source"/>
+<plugin id="org.locationtech.udig.style.jgrass"/>
+<plugin id="org.locationtech.udig.style.jgrass.source"/>
+<plugin id="org.locationtech.udig.style.sld"/>
+<plugin id="org.locationtech.udig.style.sld.source"/>
+<plugin id="org.locationtech.udig.style.source"/>
+<plugin id="org.locationtech.udig.style.wms"/>
+<plugin id="org.locationtech.udig.style.wms.source"/>
+<plugin id="org.locationtech.udig.tool.default"/>
+<plugin id="org.locationtech.udig.tool.default.source"/>
+<plugin id="org.locationtech.udig.tool.select"/>
+<plugin id="org.locationtech.udig.tool.select.source"/>
+<plugin id="org.locationtech.udig.tools"/>
+<plugin id="org.locationtech.udig.tools.edit"/>
+<plugin id="org.locationtech.udig.tools.edit.source"/>
+<plugin id="org.locationtech.udig.tools.jgrass"/>
+<plugin id="org.locationtech.udig.tools.jgrass.source"/>
+<plugin id="org.locationtech.udig.tools.source"/>
+<plugin id="org.locationtech.udig.ui"/>
+<plugin id="org.locationtech.udig.ui.source"/>
 <plugin id="org.mozilla.javascript"/>
 <plugin id="org.mozilla.javascript.source"/>
 <plugin id="org.objectweb.asm"/>
 <plugin id="org.objectweb.asm.source"/>
-<plugin id="org.sat4j.core"/>
-<plugin id="org.sat4j.pb"/>
+<plugin id="org.sat4j.core" version="2.3.5.v201308161310"/>
+<plugin id="org.sat4j.pb" version="2.3.5.v201404071733"/>
 <plugin id="org.slf4j.api"/>
 <plugin id="org.slf4j.api.source"/>
 <plugin id="org.tukaani.xz"/>
