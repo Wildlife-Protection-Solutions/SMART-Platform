@@ -806,15 +806,15 @@
       </command>
       <command
             id="org.wcs.smart.i2.command.record.import.xml"
-            name="Import Records From XML">
+            name="%ImportRecordsFromXmlCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.export.model.xml"
-            name="Export Model Elements to XML...">
+            name="%ExportModelElementsCommandName">
       </command>
       <command
             id="org.wcs.smart.i2.command.import.model.xml"
-            name="Import Model Elements from XML...">
+            name="%ImportModelElementsCommandName">
       </command>
    </extension>
    <extension
