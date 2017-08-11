@@ -48,6 +48,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -95,21 +96,21 @@ public class IntelDataToXml {
 		this.session = session;
 	}
 	
-	public void export(Path outputFile, List<UUID> attributes, List<UUID> sources, List<UUID> relationshipTypes, List<UUID> entityTypes, boolean exportRecordTemplate, IProgressMonitor monitor) throws IOException{
-		SubMonitor progress = SubMonitor.convert(monitor,"Exporting model elements to xml file", 4);
+	public void export(Path outputFile, List<UUID> attributes, List<UUID> sources, List<UUID> relationshipTypes, List<UUID> entityTypes, boolean exportRecordTemplate, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor,Messages.IntelDataToXml_ExportTaskName, 4);
 		toXml(attributes, sources, relationshipTypes, entityTypes, exportRecordTemplate, progress.split(3));
 		if (data  != null) {
 			writeData(outputFile, progress.split(1));
 		}else {
-			throw new IOException("XML conversion failed");
+			throw new IOException(Messages.IntelDataToXml_ConvservationFailedMsg);
 		}
 		
 	}
 	
-	private void writeData(Path outputFile, IProgressMonitor monitor) throws IOException {
+	private void writeData(Path outputFile, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, 3);
 		
-		monitor.subTask("Exporting xml data");
+		monitor.subTask(Messages.IntelDataToXml_ExportTask);
 		progress.split(1);
 		
 		Path tempDir = Files.createTempDirectory("smart." + System.nanoTime()); //$NON-NLS-1$
@@ -152,7 +153,7 @@ public class IntelDataToXml {
 	
 	private void toXml(List<UUID> attributes, List<UUID> sources, List<UUID> relationshipTypes, List<UUID> entityTypes, boolean exportRecordTemplate, IProgressMonitor monitor) {
 	
-		SubMonitor progress = SubMonitor.convert(monitor, "Exporting data to xml", 7);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelDataToXml_ExportTask2, 7);
 		
 		Set<IntelRecordSource> isources = new HashSet<>();
 		Set<IntelAttribute> iattributes = new HashSet<>();
@@ -161,7 +162,7 @@ public class IntelDataToXml {
 		Set<IntelRelationshipGroup> igroups = new HashSet<>();
 		filesToInclude = new HashSet<>();
 		
-		progress.subTask("Collecting data");
+		progress.subTask(Messages.IntelDataToXml_CollectionDataTask);
 		progress.split(1);
 		Path recordTemplate = null;
 		if (exportRecordTemplate) {
@@ -261,27 +262,27 @@ public class IntelDataToXml {
 		});
 		
 		
-		progress.subTask("exporting attributes types");
+		progress.subTask(Messages.IntelDataToXml_attributesTask);
 		progress.split(1);
 		List<Attribute> xmlAttributes = convertAttributes(iattributes);
 		
-		progress.subTask("exporting record sources");
+		progress.subTask(Messages.IntelDataToXml_recordSourceTask);
 		progress.split(1);
 		List<RecordSource> xmlSources = convertRecordSource(isources);
 		
-		progress.subTask("exporting relationship groups");
+		progress.subTask(Messages.IntelDataToXml_relationshipGroupTask);
 		progress.split(1);
 		List<RelationshipGroup> xmlGroups = convertRelationshipGroups(igroups);
 		
-		progress.subTask("exporting relationship types");
+		progress.subTask(Messages.IntelDataToXml_relationshipTypeTask);
 		progress.split(1);
 		List<RelationshipType> xmlRelationships = convertRelationshipType(irelationshiptypes);
 		
-		progress.subTask("exporting entity types");
+		progress.subTask(Messages.IntelDataToXml_entityTypeTask);
 		progress.split(1);
 		List<EntityType> xmlEntities = convertEntityType(ientitytypes, filesToInclude);
 		
-		progress.subTask("converting ");
+		progress.subTask(Messages.IntelDataToXml_conversionTask);
 		data = new IntelligenceData();
 		data.getAttributes().addAll(xmlAttributes);
 		data.getEntities().addAll(xmlEntities);

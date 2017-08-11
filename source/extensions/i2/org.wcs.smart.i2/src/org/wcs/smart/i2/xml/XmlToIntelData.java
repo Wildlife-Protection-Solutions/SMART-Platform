@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.xml;
 
 import java.io.IOException;
@@ -29,6 +50,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -56,6 +78,12 @@ import org.wcs.smart.util.ZipUtil;
 
 import com.ibm.icu.text.MessageFormat;
 
+/**
+ * Converts xml data to intelligence model objects
+ * 
+ * @author Emily
+ *
+ */
 public class XmlToIntelData {
 
 	private ConservationArea ca;
@@ -68,9 +96,9 @@ public class XmlToIntelData {
 	}
 	
 	public void importXmlData(Path zipFile, IProgressMonitor monitor) throws IOException {
-		SubMonitor progress = SubMonitor.convert(monitor, "Converting xml data to model elements", 10);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.XmlToIntelData_conversiontask, 10);
 		warnings = new ArrayList<>();
-		rootPath = Files.createTempDirectory("smart." + System.nanoTime());
+		rootPath = Files.createTempDirectory("smart." + System.nanoTime()); //$NON-NLS-1$
 		try {
 			try {
 				ZipUtil.unzipFolder(zipFile.toFile(), rootPath.toFile());
@@ -82,7 +110,7 @@ public class XmlToIntelData {
 			IntelligenceData data = null;
 			try {
 				progress.split(1);
-				progress.subTask("Reading xml file");
+				progress.subTask(Messages.XmlToIntelData_readingfileTask);
 				data = readXmlFile(xmlFile);
 			}catch (Exception ex) {
 				throw new IOException(ex);
@@ -116,52 +144,52 @@ public class XmlToIntelData {
 
 		//process attributes
 		progress.split(1);
-		progress.subTask("processing attributes");
+		progress.subTask(Messages.XmlToIntelData_attributesTask);
 		List<IntelAttribute> attributes = processAttributes(data.getAttributes());
 		
 		//attribute mappings
 		HashMap<String, IntelAttribute> attributeMapping = new HashMap<>();
-		List<IntelAttribute> existingAttributes = QueryFactory.buildQuery(session, IntelAttribute.class, "conservationArea", ca).list();
+		List<IntelAttribute> existingAttributes = QueryFactory.buildQuery(session, IntelAttribute.class, "conservationArea", ca).list(); //$NON-NLS-1$
 		existingAttributes.forEach(e->attributeMapping.put(e.getKeyId(), e));
 		attributes.forEach(e->attributeMapping.put(e.getKeyId(), e));
 		
 		//process entities
 		progress.split(1);
-		progress.subTask("processing entity types");
+		progress.subTask(Messages.XmlToIntelData_entitytypesTask);
 		List<IntelEntityType> entities = proecessEntityTypes(data.getEntities(), attributeMapping);
 		
 		//entity mappings
 		HashMap<String, IntelEntityType> entityMappings = new HashMap<>();
-		List<IntelEntityType> existingEntities = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", ca).list();
+		List<IntelEntityType> existingEntities = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", ca).list(); //$NON-NLS-1$
 		existingEntities.forEach(e->entityMappings.put(e.getKeyId(), e));
 		entities.forEach(e->entityMappings.put(e.getKeyId(), e));
 		
 		//process & save record sources
 		progress.split(1);
-		progress.subTask("processing record sources");
+		progress.subTask(Messages.XmlToIntelData_recourdsourceTask);
 		List<IntelRecordSource> recordSources = processRecordSources(data.getRecordSource(), attributeMapping, entityMappings);
 
 		//processing relationship groups
 		progress.split(1);
-		progress.subTask("processing relationship groups");
+		progress.subTask(Messages.XmlToIntelData_relationshipgroupsTask);
 		List<IntelRelationshipGroup> relationshipGroups = processRelationshipGroups(data.getRelationshipGroups());
 				
 		//relationship group mappings
 		HashMap<String, IntelRelationshipGroup> relationshipGroupMappings = new HashMap<>();
-		List<IntelRelationshipGroup> existingGroups = QueryFactory.buildQuery(session, IntelRelationshipGroup.class, "conservationArea", ca).list();
+		List<IntelRelationshipGroup> existingGroups = QueryFactory.buildQuery(session, IntelRelationshipGroup.class, "conservationArea", ca).list(); //$NON-NLS-1$
 		existingGroups.forEach(e->relationshipGroupMappings.put(e.getKeyId(), e));
 		relationshipGroups.forEach(e->relationshipGroupMappings.put(e.getKeyId(), e));
 		
 		//process & save relationship type
 		progress.split(1);
-		progress.subTask("processing relationship types");
+		progress.subTask(Messages.XmlToIntelData_relationshiptypesTask);
 		List<IntelRelationshipType> relationshipTypes = processRelationshipTypes(data.getRelationships(), attributeMapping, entityMappings, relationshipGroupMappings);
 		
 		//validate warnings with user
 		if (!warnings.isEmpty()) {
 			boolean[] ret = new boolean[] {false};
 			Display.getDefault().syncExec(()->{
-				WarningDialog warningDialog = new WarningDialog(Display.getDefault().getActiveShell(), "Import Intelligence Model Data", "The following warnings were generating while converting and validating the data.  Do you want to continue?", warnings, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+				WarningDialog warningDialog = new WarningDialog(Display.getDefault().getActiveShell(), Messages.XmlToIntelData_WarningsTitle, Messages.XmlToIntelData_WarningsMsg, warnings, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 				if (warningDialog.open() == 0) {
 					ret[0] = true;
 				}
@@ -172,7 +200,7 @@ public class XmlToIntelData {
 		
 		//save changes
 		progress.split(1);
-		progress.subTask("saving changes");
+		progress.subTask(Messages.XmlToIntelData_SaveTask);
 		session.beginTransaction();
 		try {
 			attributes.forEach(a->session.save(a));
@@ -185,6 +213,7 @@ public class XmlToIntelData {
 			session.getTransaction().rollback();
 			throw ex;
 		}
+		List<String> copyErrors = new ArrayList<String>();
 		entities.forEach(e->{
 			if (e.getBirtTemplate() != null) {
 				Path src = rootPath.resolve(e.getBirtTemplate());
@@ -195,13 +224,12 @@ public class XmlToIntelData {
 					}
 					Files.copy(src, trg, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					copyErrors.add(MessageFormat.format(Messages.XmlToIntelData_EntityCopyError, e.getName()));
+					Intelligence2PlugIn.log(e1.getMessage(), e1);
 				}
 			}
 		});
 		if (data.getRecordTemplate() != null) {
-			//TODO: copy record template
 			Path trg = IntelReportManager.INSTANCE.getRecordTemplate(ca);
 			Path src = rootPath.resolve(trg.getFileName());
 			try {
@@ -210,40 +238,54 @@ public class XmlToIntelData {
 				}
 				Files.copy(src, trg, StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				copyErrors.add(Messages.XmlToIntelData_SourceCopyError);
+				Intelligence2PlugIn.log(e1.getMessage(), e1);
 			}
 		}
+		
+		if (!copyErrors.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(Messages.XmlToIntelData_BirtCopyErrors);
+			sb.append("\n"); //$NON-NLS-1$
+			for (String x : copyErrors) {
+				sb.append(x);
+				sb.append("\n"); //$NON-NLS-1$
+			}
+			Display.getDefault().syncExec(()->{
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.XmlToIntelData_CopyErrorTitle, sb.toString());
+			});	
+		}
 		progress.done();
+		
 		StringBuilder sb = new StringBuilder();
 		if (attributes.size() > 0) {
-			sb.append(MessageFormat.format("{0} attributes", attributes.size()));
-			sb.append("\n");
+			sb.append(MessageFormat.format(Messages.XmlToIntelData_AtributeStatus, attributes.size()));
+			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (entities.size() > 0) {
-			sb.append(MessageFormat.format("{0} entity types", entities.size()));
-			sb.append("\n");
+			sb.append(MessageFormat.format(Messages.XmlToIntelData_EntityTypesStatus, entities.size()));
+			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (relationshipGroups.size() > 0) {
-			sb.append(MessageFormat.format("{0} relationship groups", relationshipGroups.size()));
-			sb.append("\n");
+			sb.append(MessageFormat.format(Messages.XmlToIntelData_RelationshipGroupStatus, relationshipGroups.size()));
+			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (relationshipTypes.size() > 0) {
-			sb.append(MessageFormat.format("{0} relationship types", relationshipTypes.size()));
-			sb.append("\n");
+			sb.append(MessageFormat.format(Messages.XmlToIntelData_RelationshipTypeStatus, relationshipTypes.size()));
+			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (recordSources.size() > 0) {
-			sb.append(MessageFormat.format("{0} record sources", recordSources.size()));
-			sb.append("\n");
+			sb.append(MessageFormat.format(Messages.XmlToIntelData_RecordSourceStatus, recordSources.size()));
+			sb.append("\n"); //$NON-NLS-1$
 		}
 		if (sb.length() == 0) {
-			sb.append("No data imported.");
+			sb.append(Messages.XmlToIntelData_NothingImorted2);
 		}else {
-			sb.insert(0, "The following data has been imported:\n");
+			sb.insert(0, Messages.XmlToIntelData_DataImportedMsg);
 		}
 		
 		Display.getDefault().syncExec(()->{
-			MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Data Imported", sb.toString());
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.XmlToIntelData_NothingImported, sb.toString());
 		});
 
 	}
@@ -262,7 +304,7 @@ public class XmlToIntelData {
 			if (xmlSource.getGroupKey() != null) {
 				IntelRelationshipGroup group = groups.get(xmlSource.getGroupKey());
 				if (group == null) {
-					warnings.add(MessageFormat.format("Relationship group with key {0} that is associated with the relationship {1} could not be found.  This relationship type will not be associated with a group.", src.getKeyId(), src.getName()));
+					warnings.add(MessageFormat.format(Messages.XmlToIntelData_RelationshipGroupNotFound, src.getKeyId(), src.getName()));
 				}else {
 					src.setRelationshipGroup(group);
 				}
@@ -271,7 +313,7 @@ public class XmlToIntelData {
 			if (xmlSource.getSrcTypeKey() != null) {
 				IntelEntityType srcType = entities.get(xmlSource.getSrcTypeKey());
 				if (srcType == null) {
-					warnings.add(MessageFormat.format("The source entity type {0} associated with relationship {1} could not be found.  The source type for this relationship will be set to unknown.", xmlSource.getSrcTypeKey(), src.getName()));
+					warnings.add(MessageFormat.format(Messages.XmlToIntelData_RelationshipSourceEntityNotFound, xmlSource.getSrcTypeKey(), src.getName()));
 				}else {
 					src.setSourceEntityType(srcType);
 				}
@@ -279,7 +321,7 @@ public class XmlToIntelData {
 			if (xmlSource.getTargetTypeKey() != null) {
 				IntelEntityType trgType = entities.get(xmlSource.getTargetTypeKey());
 				if (trgType == null) {
-					warnings.add(MessageFormat.format("The target entity type {0} associated with relationship {1} could not be found.  The target type for this relationship will be set to unknown.", xmlSource.getSrcTypeKey(), src.getName()));
+					warnings.add(MessageFormat.format(Messages.XmlToIntelData_RelationshipTargetEntityNotFound, xmlSource.getSrcTypeKey(), src.getName()));
 				}else {
 					src.setTargetEntityType(trgType);
 				}
@@ -293,7 +335,7 @@ public class XmlToIntelData {
 				IntelAttribute attribute = attributes.get(xmlAttribute.getAttributeKey());
 				if (attribute == null) {					
 					//skip
-					warnings.add(MessageFormat.format("Attribute with key {0} associated with relationship type {1} ({2}) could not be found.  This attribute will not be associated with the relationship type.", xmlAttribute.getAttributeKey(), src.getName(), src.getKeyId()));
+					warnings.add(MessageFormat.format(Messages.XmlToIntelData_RelationshipTypeAttributeExists, xmlAttribute.getAttributeKey(), src.getName(), src.getKeyId()));
 					continue;	
 				}
 				newAttribute.setAttribute(attribute);
@@ -307,7 +349,7 @@ public class XmlToIntelData {
 		
 		//validate 
 		List<IntelRelationshipType> toAdd = new ArrayList<>();
-		List<IntelRelationshipType> existingSources = QueryFactory.buildQuery(session, IntelRelationshipType.class, "conservationArea", ca).list();
+		List<IntelRelationshipType> existingSources = QueryFactory.buildQuery(session, IntelRelationshipType.class, "conservationArea", ca).list(); //$NON-NLS-1$
 		for (IntelRelationshipType newSource : newSources) {
 			IntelRelationshipType found = null;
 			for (IntelRelationshipType existingSource : existingSources) {
@@ -321,7 +363,7 @@ public class XmlToIntelData {
 				toAdd.add(newSource);
 			} else {
 				warnings.add(MessageFormat.format(
-						"The relationship type {0} ({1}) already exists in the system.  This relationship type will not be imported.",
+						Messages.XmlToIntelData_RelationshipTypeExists,
 						found.getName(), found.getKeyId()));
 			}
 		}
@@ -344,7 +386,7 @@ public class XmlToIntelData {
 		
 		//validate 
 		List<IntelRelationshipGroup> toAdd = new ArrayList<>();
-		List<IntelRelationshipGroup> existingSources = QueryFactory.buildQuery(session, IntelRelationshipGroup.class, "conservationArea", ca).list();
+		List<IntelRelationshipGroup> existingSources = QueryFactory.buildQuery(session, IntelRelationshipGroup.class, "conservationArea", ca).list(); //$NON-NLS-1$
 		for (IntelRelationshipGroup newSource : newGroups) {
 			IntelRelationshipGroup found = null;
 			for (IntelRelationshipGroup existingSource : existingSources) {
@@ -374,7 +416,7 @@ public class XmlToIntelData {
 			IntelAttribute idAttribute = attributes.get(xmlSource.getIdAttribute());
 			if (idAttribute == null) {
 				//ERROR
-				warnings.add(MessageFormat.format("Intelligence attribute with key {0} that is the ID attribute for entity type {1} ({2}) could not be found.  This entity type will not be imported.", xmlSource.getIdAttribute(), src.getName(), src.getKeyId()));
+				warnings.add(MessageFormat.format(Messages.XmlToIntelData_EntityTypeIdAttributeNotFound, xmlSource.getIdAttribute(), src.getName(), src.getKeyId()));
 				continue;
 			}
 			src.setIdAttribute(idAttribute);
@@ -398,7 +440,7 @@ public class XmlToIntelData {
 				IntelAttribute attribute = attributes.get(xmlAttribute.getAttributeKey());
 				if (attribute == null) {
 					//skip
-					warnings.add(MessageFormat.format("Intelligence attribute with key {0} associated with entity type {1} ({2}) could not be found.  This attribute will not be associated with the entity type.", xmlSource.getIdAttribute(), src.getName(), src.getKeyId()));
+					warnings.add(MessageFormat.format(Messages.XmlToIntelData_EntityTypeAttributeNotFound, xmlSource.getIdAttribute(), src.getName(), src.getKeyId()));
 					continue;
 				}
 				newAttribute.setAttribute(attribute);
@@ -411,7 +453,7 @@ public class XmlToIntelData {
 		
 		//validate 
 		List<IntelEntityType> toAdd = new ArrayList<>();
-		List<IntelEntityType> existingSources = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", ca).list();
+		List<IntelEntityType> existingSources = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", ca).list(); //$NON-NLS-1$
 		for (IntelEntityType newSource : newSources) {
 			IntelEntityType found = null;
 			for (IntelEntityType existingSource : existingSources) {
@@ -425,7 +467,7 @@ public class XmlToIntelData {
 				toAdd.add(newSource);
 			} else {
 				warnings.add(MessageFormat.format(
-						"The entity type {0} ({1}) already exists in the system.  This entity type will not be imported.",
+						Messages.XmlToIntelData_EntityTypeExists,
 						found.getName(), found.getKeyId()));
 			}
 		}
@@ -451,7 +493,7 @@ public class XmlToIntelData {
 					if (xmlSrcAttribute.getAttributeKey() != null) {
 						IntelAttribute srcAttribute = attributes.get(xmlSrcAttribute.getAttributeKey());
 						if (srcAttribute == null) {
-							warnings.add(MessageFormat.format("Attribute ({0}) associated with record source ({1}) could not be found in the Conservation Area.  This attribute will be removed from the record source.",
+							warnings.add(MessageFormat.format(Messages.XmlToIntelData_RecordSourceAttributeNotFound,
 									xmlSrcAttribute.getAttributeKey(), src.getName()
 									));
 							continue;
@@ -460,7 +502,7 @@ public class XmlToIntelData {
 					}else if(xmlSrcAttribute.getEntityTypeKey() != null) {
 						IntelEntityType srcType = entityTypes.get(xmlSrcAttribute.getEntityTypeKey());
 						if (srcType == null) {
-							warnings.add(MessageFormat.format("Entity Type ({0}) associated with record source ({1}) could not be found in the Conservation Area.  This entity type attribute will be removed from the record source.",
+							warnings.add(MessageFormat.format(Messages.XmlToIntelData_RecordSourceEntityTypeNotFound,
 									xmlSrcAttribute.getEntityTypeKey(), src.getName()
 									));
 
@@ -470,7 +512,7 @@ public class XmlToIntelData {
 					}
 					if (attribute.getAttribute() == null && attribute.getEntityType() == null) {
 						//ERROR
-						warnings.add(MessageFormat.format("Record source attribute {1} does not reference a valid attribute or entity type.  This attribute will be removed from the record source.",
+						warnings.add(MessageFormat.format(Messages.XmlToIntelData_RecordSourceAttributeNoValidReference,
 								xmlSrcAttribute.getAttributeKey() == null ? xmlSrcAttribute.getAttributeKey() : xmlSrcAttribute.getEntityTypeKey()
 								));
 						continue;
@@ -489,7 +531,7 @@ public class XmlToIntelData {
 		
 		//validate 
 		List<IntelRecordSource> toAdd = new ArrayList<>();
-		List<IntelRecordSource> existingSources = QueryFactory.buildQuery(session, IntelRecordSource.class, "conservationArea", ca).list();
+		List<IntelRecordSource> existingSources = QueryFactory.buildQuery(session, IntelRecordSource.class, "conservationArea", ca).list(); //$NON-NLS-1$
 		for (IntelRecordSource newSource : newSources) {
 			IntelRecordSource found = null;
 			for (IntelRecordSource existingSource : existingSources) {
@@ -502,7 +544,7 @@ public class XmlToIntelData {
 				//we need to add this attribute
 				toAdd.add(newSource);
 			}else {
-				warnings.add(MessageFormat.format("The record source {0} ({1}) already exists in the system.  This source will not be imported.", found.getName(), found.getKeyId())); 
+				warnings.add(MessageFormat.format(Messages.XmlToIntelData_RecordSourceExists, found.getName(), found.getKeyId())); 
 			}
 		}
 		return toAdd;
@@ -535,7 +577,7 @@ public class XmlToIntelData {
 		
 		//validate 
 		List<IntelAttribute> toAdd = new ArrayList<>();
-		List<IntelAttribute> existingAttributes = QueryFactory.buildQuery(session, IntelAttribute.class, "conservationArea", ca).list();
+		List<IntelAttribute> existingAttributes = QueryFactory.buildQuery(session, IntelAttribute.class, "conservationArea", ca).list(); //$NON-NLS-1$
 		for (IntelAttribute newAttribute : newAttributes) {
 			IntelAttribute found = null;
 			for (IntelAttribute existingAttribute : existingAttributes) {
@@ -550,7 +592,7 @@ public class XmlToIntelData {
 			}else {
 				if (!found.getType().equals(newAttribute.getType())){
 					//different attribute types; this is a warning but not an error
-					warnings.add(MessageFormat.format("The attribute {0} ({1}) of type {2} already exists in the database but has a different type in the xml file {3}", found.getName(), found.getKeyId(), found.getType().getGuiName(Locale.getDefault()), newAttribute.getType().getGuiName(Locale.getDefault()))); 
+					warnings.add(MessageFormat.format(Messages.XmlToIntelData_AttributeExistsDifferentType, found.getName(), found.getKeyId(), found.getType().getGuiName(Locale.getDefault()), newAttribute.getType().getGuiName(Locale.getDefault()))); 
 				}
 			}
 		}
@@ -560,7 +602,7 @@ public class XmlToIntelData {
 	
 	private void updateNames(org.wcs.smart.ca.NamedItem item, Collection<NamedItem> names) {
 		String defaultValue = null;
-		String blankName = "Attribute";
+		String blankName = Messages.XmlToIntelData_AttributeDefaultName;
 		if (!names.isEmpty()) blankName = names.iterator().next().getValue();
 		
 		for (NamedItem ni : names) {
