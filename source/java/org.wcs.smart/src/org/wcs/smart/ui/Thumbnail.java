@@ -25,6 +25,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.MouseAdapter;
@@ -61,11 +66,25 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class Thumbnail {
 
+	private static final ISchedulingRule LOAD_MUTEX = new ISchedulingRule() {
+		
+		@Override
+		public boolean isConflicting(ISchedulingRule rule) {
+			return (rule == this);
+		}
+		
+		@Override
+		public boolean contains(ISchedulingRule rule) {
+			return (rule == this);
+		}
+	};
 	private Image image;
 	private ISmartAttachment attachment;
 	
 	private int thumbnailSize = 100;
 	private boolean autoDispose;
+	private Composite thumbnailComposite;
+	
 	/*
 	 * double click listener to
 	 * open attachment
@@ -139,65 +158,95 @@ public class Thumbnail {
 		}
 	}
 	
-	public Image getImage(){
+	/**
+	 * Waits until loading the image is complete and then returns
+	 * the loaded iamage
+	 * @return
+	 */
+	public Image getImage() {
+		try {
+			loadImageDataJob.join();
+		}catch (Exception ex){
+			//eat me
+			ex.printStackTrace();
+		}
 		return this.image;
 	}
 	/*
 	 * generate the thumbnail in memory 
 	 */
 	private void loadImageData() throws Exception{
-		if (attachment == null) return;
-		try {
-			File file = null;
-			if( attachment.getCopyFromLocation() != null){
-				file = attachment.getCopyFromLocation();
-			}else{
-				file = attachment.getAttachmentFile();
-			}
-			
-			if (file.length() > 200 * Math.pow(10, 6)) {
-				// skip images > 200MB
-				return;
-			}
 		
-			Image rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
-			
-			//scale image
-			Rectangle bounds = rawImage.getBounds();
-			int x = 0, y = 0, width = 0, height = 0;
-			if (bounds.width > bounds.height) {
-				width = thumbnailSize;
-				height = bounds.height * thumbnailSize / bounds.width;
-				y = (thumbnailSize - height) / 2;
-			} else {
-				height = thumbnailSize;
-				width = bounds.width * thumbnailSize / bounds.height;
-				x = (thumbnailSize - width) / 2;
-			}
-			//resize image
-			Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-			GC gc = new GC(image2);
-			gc.drawImage(rawImage, 0,0, bounds.width, bounds.height, x, y, width, height);
-			rawImage.dispose();
-
-			//transform based on exif orientation data
-			Transform imageTransform = SmartUtils.getExifImageTransform(file,  thumbnailSize, thumbnailSize);
-			if (imageTransform != null){
-		        Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-				GC gc3 = new GC(image3);
-				gc3.setTransform(imageTransform);
-				gc3.drawImage(image2, 0,0);
-				image2.dispose();
-		        image = image3;
-			}else{
-				image = image2;
-			}
-		} catch (SWTException ex) {
-			//eatme
-			ex.printStackTrace();
-		}
+		loadImageDataJob.setRule(LOAD_MUTEX);
+		loadImageDataJob.schedule();
+		
 	}
 	
+	//load image data in background
+	private Job loadImageDataJob = new Job("loading image data") { //$NON-NLS-1$
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			if (attachment == null)
+				return Status.OK_STATUS;
+			try {
+				File file = null;
+				if (attachment.getCopyFromLocation() != null) {
+					file = attachment.getCopyFromLocation();
+				} else {
+					file = attachment.getAttachmentFile();
+				}
+
+				if (file.length() > 200 * Math.pow(10, 6)) {
+					// skip images > 200MB
+					return Status.OK_STATUS;
+				}
+
+				Image rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
+
+				// scale image
+				Rectangle bounds = rawImage.getBounds();
+				int x = 0, y = 0, width = 0, height = 0;
+				if (bounds.width > bounds.height) {
+					width = thumbnailSize;
+					height = bounds.height * thumbnailSize / bounds.width;
+					y = (thumbnailSize - height) / 2;
+				} else {
+					height = thumbnailSize;
+					width = bounds.width * thumbnailSize / bounds.height;
+					x = (thumbnailSize - width) / 2;
+				}
+				// resize image
+				Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
+				GC gc = new GC(image2);
+				gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
+				rawImage.dispose();
+
+				// transform based on exif orientation data
+				Transform imageTransform = SmartUtils.getExifImageTransform(file, thumbnailSize, thumbnailSize);
+				if (imageTransform != null) {
+					Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
+					GC gc3 = new GC(image3);
+					gc3.setTransform(imageTransform);
+					gc3.drawImage(image2, 0, 0);
+					image2.dispose();
+					image = image3;
+				} else {
+					image = image2;
+				}
+				if (thumbnailComposite != null) {
+					Display.getDefault().syncExec(() -> {
+						if (!thumbnailComposite.isDisposed())
+							thumbnailComposite.redraw();
+					});
+				}
+			} catch (SWTException ex) {
+				// eatme
+				ex.printStackTrace();
+			}
+			return Status.OK_STATUS;
+		}
+	};
 	/**
 	 * Creates a thumbnail with a border.
 	 * @param parent
@@ -212,10 +261,10 @@ public class Thumbnail {
 	 * @param parent
 	 */
 	public Composite createThumbnail(Composite parent, int style){
-		final Composite c = new Composite(parent, style);
-		c.setLocation(0,0);
-		c.setSize(thumbnailSize, thumbnailSize);
-		c.addMouseListener(doubleClickListener);
+		thumbnailComposite = new Composite(parent, style);
+		thumbnailComposite.setLocation(0,0);
+		thumbnailComposite.setSize(thumbnailSize, thumbnailSize);
+		thumbnailComposite.addMouseListener(doubleClickListener);
 		
 		String fileName = null;
 		if (attachment == null){
@@ -239,7 +288,7 @@ public class Thumbnail {
 						}else{
 							List<String> toDraw = new ArrayList<String>();
 							
-							int width = c.getClientArea().width - 8;
+							int width = thumbnailComposite.getClientArea().width - 8;
 							
 							int size = 0;
 							StringBuilder sb = new StringBuilder();
@@ -268,10 +317,10 @@ public class Thumbnail {
 			}
 		};
 		if (autoDispose){
-			c.addListener(SWT.Dispose, listener);
+			thumbnailComposite.addListener(SWT.Dispose, listener);
 		}
-		c.addListener(SWT.Paint, listener);
+		thumbnailComposite.addListener(SWT.Paint, listener);
 		
-		return c;
+		return thumbnailComposite;
 	}
 }
