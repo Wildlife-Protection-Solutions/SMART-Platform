@@ -97,7 +97,7 @@ public abstract class RelationshipSearchJob extends Job{
 									)
 							)
 					));
-			List<IntelRelationshipType> rtypes = s.createQuery(c).getResultList();
+			rtypes = s.createQuery(c).getResultList();
 			for (IntelRelationshipType i : rtypes){
 				i.getSourceEntityType();
 				i.getTargetEntityType();

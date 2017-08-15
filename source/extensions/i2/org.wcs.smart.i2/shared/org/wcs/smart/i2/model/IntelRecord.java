@@ -63,6 +63,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	private Date dateCreated;
 	private Date dateModified;
 	private Date dateExported;
+	private Date primaryDate;
 
 	private Employee createdBy;
 	private Employee lastModifiedBy;
@@ -125,6 +126,26 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 		this.dateCreated = dateCreated;
 	}
 
+	/**
+	 * Set the primary_date.
+	 * 
+	 * @param dateModified
+	 *            date_modified
+	 */
+	public void setPrimaryDate(Date primaryDate) {
+		this.primaryDate = primaryDate;
+	}
+
+	/**
+	 * Get the primary_date.
+	 * 
+	 * @return date_modified
+	 */
+	@Column(name="primary_date")
+	public Date getPrimaryDate() {
+		return this.primaryDate;
+	}
+	
 
 	/**
 	 * Set the date_modified.

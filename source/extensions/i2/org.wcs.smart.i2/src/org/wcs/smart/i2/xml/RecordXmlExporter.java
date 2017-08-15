@@ -29,12 +29,14 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.datatype.DatatypeFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,7 +48,10 @@ import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
@@ -57,6 +62,7 @@ import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.xml.record.AttachmentType;
+import org.wcs.smart.i2.xml.record.AttributeType;
 import org.wcs.smart.i2.xml.record.LabelUuid;
 import org.wcs.smart.i2.xml.record.LocationType;
 import org.wcs.smart.i2.xml.record.ObjectFactory;
@@ -146,6 +152,10 @@ public class RecordXmlExporter {
 			
 			xmlRecord.setTitle(record.getTitle());
 			xmlRecord.setStatus(record.getStatus().name());
+			GregorianCalendar cal = new GregorianCalendar();
+			cal.setTime(record.getPrimaryDate());
+			xmlRecord.setPrimaryDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(cal));
+			
 			if (record.getDescription() != null) xmlRecord.setNarrative(record.getDescription());
 			if (record.getComment() != null) xmlRecord.setScratchpad(record.getComment());
 			
@@ -162,6 +172,23 @@ public class RecordXmlExporter {
 					RecordAttributeType xmlAttributeValue = factory.createRecordAttributeType();
 					
 					LabelUuid aUuid = factory.createLabelUuid();
+					if (attribute.getAttribute().findNameNull(  SmartDB.getCurrentConservationArea().getDefaultLanguage() ) != null) {
+						xmlAttributeValue.setAlias(attribute.getAttribute().findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+					}
+					if (attribute.getAttribute().getEntityType() != null) {
+						if (attribute.getAttribute().getIsMultiple() != null && attribute.getAttribute().getIsMultiple()) {
+							xmlAttributeValue.setType(AttributeType.MULTI_ENTITY);	
+						}else {
+							xmlAttributeValue.setType(AttributeType.SINGLE_ENTITY);
+						}
+						
+					}else {
+						if (attribute.getAttribute().getIsMultiple() != null && attribute.getAttribute().getIsMultiple()) {
+							xmlAttributeValue.setType(AttributeType.MULTI_ATTRIBUTE);
+						}else {
+							xmlAttributeValue.setType(AttributeType.SINGLE_ATTRIBUTE);	
+						}
+					}
 					aUuid.setUuid(UuidUtils.uuidToString(attribute.getAttribute().getUuid()));
 					if (attribute.getAttribute().getAttribute() != null){
 						aUuid.setName(attribute.getAttribute().getAttribute().getKeyId());	
@@ -178,6 +205,17 @@ public class RecordXmlExporter {
 						for (IntelRecordAttributeValueList listAttribute : attribute.getAttributeListItems()){
 							LabelUuid listItem = factory.createLabelUuid();;
 							listItem.setUuid(UuidUtils.uuidToString(listAttribute.getId().getElementUuid()));
+							
+							if (listAttribute.getId().getValue().getAttribute().getAttribute() != null) {
+								//attribute type
+								IntelAttributeListItem item = session.get(IntelAttributeListItem.class, listAttribute.getId().getElementUuid());
+								listItem.setName(item.getKeyId());
+							}else if (listAttribute.getId().getValue().getAttribute().getEntityType() != null) {
+								//entity type
+								IntelEntity ie = session.get(IntelEntity.class, listAttribute.getId().getElementUuid());
+								listItem.setName(ie.getIdAttributeAsText());
+							}
+							
 							xmlAttributeValue.getListValue().add(listItem);
 						}
 					}	
@@ -202,6 +240,7 @@ public class RecordXmlExporter {
 					LabelUuid entity = factory.createLabelUuid();
 					entity.setUuid(UuidUtils.uuidToString(r.getEntity().getUuid()));
 					entity.setName(r.getEntity().getIdAttributeAsText());
+					entity.setKeyid(r.getEntity().getEntityType().getKeyId());
 					xmlRecord.getEntities().add(entity);
 				}
 			}
@@ -221,6 +260,7 @@ public class RecordXmlExporter {
 						LabelUuid xmlEntity =factory.createLabelUuid();;
 						xmlEntity.setUuid(UuidUtils.uuidToString(entity.getEntity().getUuid()));
 						xmlEntity.setName(entity.getEntity().getIdAttributeAsText());
+						xmlEntity.setKeyid(entity.getEntity().getEntityType().getKeyId());
 						xmlLocation.getEntities().add(xmlEntity);
 					}
 					

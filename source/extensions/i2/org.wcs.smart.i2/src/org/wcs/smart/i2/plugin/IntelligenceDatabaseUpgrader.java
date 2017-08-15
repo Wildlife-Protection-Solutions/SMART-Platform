@@ -70,11 +70,24 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @param session is active transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
-//		if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_1)){
-//			upgradeV1ToV2(session);
-//		}
+		if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_1)){
+			upgradeV1toV2(session);
+		}
 	}
 	
+	private static void upgradeV1toV2(Session session) {
+		@SuppressWarnings("nls")
+		String[] sql = new String[]{
+				//primary date field
+				"alter table smart.i_record ADD COLUMN primary_date timestamp",
+				"update smart.i_record set primary_date = (select a.maxdatetime from (select record_uuid, max(datetime) as maxdatetime from smart.I_LOCATION group by record_uuid) a where a.record_uuid = smart.i_record.uuid )",
+				"update smart.i_record set primary_date = date_created where primary_date is null",
+				"alter table smart.i_record ALTER COLUMN primary_date NOT NULL"
+		};
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_2, session);
+	}
 	
-
 }

@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.search;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Intelligence search result package. Contains a list of top rated items
@@ -34,11 +35,13 @@ public class IntelSearchResult {
 
 	private long totalMatched;
 	private List<IntelSearchResultItem> results;
+	private List<UUID> allResults;
 	private long totalTime;
 	
-	public IntelSearchResult(long totalCnt, List<IntelSearchResultItem> results, long totalTime){
-		this.totalMatched = totalCnt;
+	public IntelSearchResult(List<UUID> allResults, List<IntelSearchResultItem> results, long totalTime){
+		this.totalMatched = allResults.size();
 		this.results = results;
+		this.allResults = allResults;
 		this.totalTime = totalTime;
 	}
 	
@@ -49,6 +52,16 @@ public class IntelSearchResult {
 	public long getTotalMatched(){
 		return this.totalMatched;
 	}
+	
+	/**
+	 * The uuids for all matches 
+	 * 
+	 * @return
+	 */
+	public List<UUID> getAllResults(){
+		return this.allResults;
+	}
+	
 	
 	/**
 	 * The top matches.  The maximum number of items

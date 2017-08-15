@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.entity.exporter.EntityRelationshipExporter;
 import org.wcs.smart.i2.internal.Messages;
@@ -65,6 +66,7 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 	
 	private Text txtOutput;
 	private Text txtDegree;
+	private DelimiterCombo cmbDelimiters;
 	
 	public EntityRelationshipExportDialog(IntelEntity entity, Shell parentShell) {
 		super(parentShell);
@@ -115,6 +117,13 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		txtDegree.setText(getDefaultDegree());
 		txtDegree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		txtDegree.addListener(SWT.Modify, e->validate());
+		
+		l = new Label(main, SWT.NONE);
+		l.setText(Messages.EntityRelationshipExportDialog_DelimiterLabel);
+		
+		cmbDelimiters = new DelimiterCombo (main, SWT.DROP_DOWN);
+		cmbDelimiters.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
 		
 		setTitle(MessageFormat.format(Messages.EntityRelationshipExportDialog_Title,entity.getIdAttributeAsText()));
 		getShell().setText(Messages.EntityRelationshipExportDialog_ShellTitle);
@@ -201,6 +210,7 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		Path eFile = EntityRelationshipExporter.getEntityFile(outputDir, name);
 		Path rFile = EntityRelationshipExporter.getRelationshipFile(outputDir, name);
 		
+		
 		if (Files.exists(eFile) || Files.exists(rFile)){
 			if (!MessageDialog.openQuestion(getShell(), Messages.EntityRelationshipExportDialog_ExportTitle, MessageFormat.format(Messages.EntityRelationshipExportDialog_ExportMsg2, eFile.toString(), rFile.toString()))){
 				return false;
@@ -209,6 +219,7 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
+			char delimiter = cmbDelimiters.getDelimiter();
 			pmd.run(true, true, new IRunnableWithProgress() {
 				
 				@Override
@@ -217,7 +228,7 @@ public class EntityRelationshipExportDialog extends TitleAreaDialog{
 					
 					EntityRelationshipExporter exporter = new EntityRelationshipExporter();
 					try{
-						if (!exporter.exportEntity(entity, degrees, outputDir, monitor)){
+						if (!exporter.exportEntity(entity, degrees, outputDir, delimiter, monitor)){
 							isOk[0] = false;
 						}else{
 							isOk[0] = true;

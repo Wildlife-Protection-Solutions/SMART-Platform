@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -48,7 +49,10 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -76,6 +80,7 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.xml.record.AttachmentType;
+import org.wcs.smart.i2.xml.record.AttributeType;
 import org.wcs.smart.i2.xml.record.LabelUuid;
 import org.wcs.smart.i2.xml.record.LocationType;
 import org.wcs.smart.i2.xml.record.ObservationAttributeType;
@@ -154,15 +159,6 @@ public class RecordXmlImporter {
 				List<IntelEntityLocation> locations = entityLocations.get(r);
 				if (r.getAttachments() != null){
 					for (IntelRecordAttachment recordAttachment : r.getAttachments()){
-//						File baseFolder = new File(recordAttachment.getAttachment().getDatastoreFolderPath(session));
-//						String fileName = recordAttachment.getAttachment().getFilename();
-//						
-//						int cnt = 1;
-//						File attachmentFile = new File(baseFolder, fileName);
-//						while(attachmentFile.exists()){
-//							fileName 
-//						}
-//						recordAttachment.getAttachment().computeFileLocation(session);
 						session.saveOrUpdate(recordAttachment.getAttachment());
 					}
 				}
@@ -265,6 +261,11 @@ public class RecordXmlImporter {
 			IntelRecord newRecord = new IntelRecord();
 			newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
 			newRecord.setTitle(type.getTitle().trim());
+			if (type.getPrimaryDate() != null) {
+				newRecord.setPrimaryDate(type.getPrimaryDate().toGregorianCalendar().getTime());
+			}else {
+				newRecord.setPrimaryDate(new Date());
+			}
 			if (type.getScratchpad() != null) newRecord.setComment(type.getScratchpad());
 			if (type.getNarrative() != null) newRecord.setDescription(type.getNarrative());
 
@@ -287,7 +288,7 @@ public class RecordXmlImporter {
 			if (type.getEntities() != null && !type.getEntities().isEmpty()) {
 				newRecord.setEntities(new ArrayList<IntelEntityRecord>());
 				for (LabelUuid e : type.getEntities()) {
-					IntelEntity entity = parseEntity(e, session, warnings);
+					IntelEntity entity = parseEntity(e, findEntityType(session, e.getKeyid()), session, warnings);
 					if (entity != null) {
 						IntelEntityRecord r = new IntelEntityRecord();
 						r.setEntity(entity);
@@ -333,7 +334,7 @@ public class RecordXmlImporter {
 					if (xmlLocation.getEntities() != null && !xmlLocation.getEntities().isEmpty()) {
 
 						for (LabelUuid xmlEntity : xmlLocation.getEntities()) {
-							IntelEntity entity = parseEntity(xmlEntity, session, warnings);
+							IntelEntity entity = parseEntity(xmlEntity, findEntityType(session, xmlEntity.getKeyid()), session, warnings);
 							if (entity != null) {
 								IntelEntityLocation ieLocation = new IntelEntityLocation();
 								ieLocation.setEntity(entity);
@@ -372,13 +373,20 @@ public class RecordXmlImporter {
 		progress.worked(1);
 	}
 	
+	private boolean nullEquals(Boolean test, boolean value) {
+		if (test == null) return !value;
+		return test.booleanValue() == value;
+	}
+	
 	private List<IntelRecordAttributeValue> parseRecordSourceAttributes(List<RecordAttributeType> attributes, IntelRecord record, Session session, List<String> warnings){
 		if (attributes == null || attributes.isEmpty()) return null;
 		List<IntelRecordAttributeValue> newValues = new ArrayList<IntelRecordAttributeValue>();
+		HashSet<IntelRecordSourceAttribute> usedAttributes = new HashSet<>();
 		
 		for (RecordAttributeType recordAttribute : attributes){
 			UUID attributeUuid = UuidUtils.stringToUuid(recordAttribute.getRecordAttribute().getUuid());
 			
+			//first search for uuid
 			IntelRecordSourceAttribute srcAttribute = null;
 			for (IntelRecordSourceAttribute a : record.getRecordSource().getAttributes()){
 				if (a.getUuid().equals(attributeUuid)){
@@ -387,10 +395,61 @@ public class RecordXmlImporter {
 				}
 			}
 
+			if (srcAttribute == null) {
+				List<IntelRecordSourceAttribute> possibleMatches = new ArrayList<>();
+
+				if (recordAttribute.getType().equals(AttributeType.MULTI_ATTRIBUTE) || 
+						recordAttribute.getType().equals(AttributeType.SINGLE_ATTRIBUTE)) {					
+					boolean isMulti = recordAttribute.getType().equals(AttributeType.MULTI_ATTRIBUTE);
+					//search by key
+					for (IntelRecordSourceAttribute a : record.getRecordSource().getAttributes()) {
+						if (nullEquals(a.getIsMultiple(), isMulti) 
+								&& a.getAttribute() != null 
+								&& a.getAttribute().getKeyId().equals(recordAttribute.getRecordAttribute().getName())) {
+							if (!usedAttributes.contains(a)){
+								possibleMatches.add(a);
+							}
+						}
+					}
+				}else if (recordAttribute.getType().equals(AttributeType.MULTI_ENTITY) || 
+						recordAttribute.getType().equals(AttributeType.SINGLE_ENTITY)) {
+					
+					boolean isMulti = recordAttribute.getType().equals(AttributeType.MULTI_ENTITY);
+					for (IntelRecordSourceAttribute a : record.getRecordSource().getAttributes()) {
+						if (nullEquals(a.getIsMultiple(), isMulti)  && a.getEntityType() != null && a.getEntityType().getKeyId().equals(recordAttribute.getRecordAttribute().getName())) {
+							if (!usedAttributes.contains(a)){
+								possibleMatches.add(a);
+							}
+						}
+					}
+				}
+				
+				if (possibleMatches.size() == 1) {
+					srcAttribute = possibleMatches.get(0);
+				}else if (possibleMatches.size() > 1) {
+					String alias = recordAttribute.getAlias();
+					for (IntelRecordSourceAttribute poss : possibleMatches) {
+						if ((alias == null || alias.length() == 0) && poss.getNames().isEmpty()) {
+							srcAttribute = poss;
+							break;
+						}
+						for (Label l :poss.getNames()) {
+							if (l.getValue().equalsIgnoreCase(alias)) {
+								srcAttribute = poss;
+								break;
+							}
+						}
+						if (srcAttribute != null) break;
+					}
+					if (srcAttribute == null) srcAttribute = possibleMatches.get(0);
+				}
+			}
+			
 			if (srcAttribute == null){
 				warnings.add(MessageFormat.format(Messages.RecordXmlImporter_SourceAttributenotFound, recordAttribute.getRecordAttribute().getName(), record.getRecordSource().getName()));
 				continue;
 			}
+			usedAttributes.add(srcAttribute);
 			
 			IntelRecordAttributeValue newValue = new IntelRecordAttributeValue();
 			newValue.setAttribute(srcAttribute);
@@ -421,7 +480,7 @@ public class RecordXmlImporter {
 							listItems.add(newItem);
 						}
 					}
-					if (!srcAttribute.getIsMultiple() && listItems.size() > 1){
+					if (nullEquals(srcAttribute.getIsMultiple(), false) && listItems.size() > 1){
 						listItems = Collections.singletonList(listItems.get(0));
 					}
 					newValue.setAttributeListItems(listItems);
@@ -438,10 +497,10 @@ public class RecordXmlImporter {
 				
 				List<IntelRecordAttributeValueList> listItems = new ArrayList<IntelRecordAttributeValueList>();
 				for (LabelUuid list : recordAttribute.getListValue()){
-					UUID item = parseEntity(list,srcAttribute.getEntityType(), session, warnings);
+					IntelEntity item = parseEntity(list,srcAttribute.getEntityType(), session, warnings);
 					if (item != null){
 						IntelRecordAttributeValueList newItem = new IntelRecordAttributeValueList();
-						newItem.getId().setElementUuid(item);
+						newItem.getId().setElementUuid(item.getUuid());
 						newItem.getId().setValue(newValue);
 						listItems.add(newItem);
 					}
@@ -500,37 +559,45 @@ public class RecordXmlImporter {
 		return null;
 	}
 	
-	private UUID parseEntity(LabelUuid entityListItem, IntelEntityType type, Session session, List<String> warnings){
-		if (entityListItem == null) return null;
-		
-		//search uuids
-		IntelEntity src = (IntelEntity) session.get(IntelEntity.class, UuidUtils.stringToUuid(entityListItem.getUuid()));
-		if (src != null && src.getConservationArea().equals(SmartDB.getCurrentConservationArea()) && src.getEntityType().equals(type)){
-			return src.getUuid();
-		}
-		
-		//search ids??
-		//TODO:
-		
-		//add to warnings;
-		warnings.add(MessageFormat.format(Messages.RecordXmlImporter_EntityOfTypeNotFound, entityListItem.getName(), type.getName()));
-		return null;
+	/*
+	 * search for entity type with given key in the current conservation area
+	 */
+	private IntelEntityType findEntityType(Session session, String entityTypeKey) {
+		return QueryFactory.buildQuery(session,  IntelEntityType.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$
 	}
 	
-	private IntelEntity parseEntity(LabelUuid entityListItem, Session session, List<String> warnings){
+	private IntelEntity parseEntity(LabelUuid entityListItem, IntelEntityType type, Session session, List<String> warnings){
 		if (entityListItem == null) return null;
 		
 		//search uuids
 		IntelEntity src = (IntelEntity) session.get(IntelEntity.class, UuidUtils.stringToUuid(entityListItem.getUuid()));
-		if (src != null && src.getConservationArea().equals(SmartDB.getCurrentConservationArea()) ){
+		if (src != null && src.getConservationArea().equals(SmartDB.getCurrentConservationArea()) && (type == null || src.getEntityType().equals(type))){
 			return src;
 		}
 		
-		//search ids??
-		//TODO:
-		
+		//search id by type; if no type don't search
+		if (type == null) return null;
+		Query<IntelEntity> search = QueryFactory.buildQuery(session, IntelEntity.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"entityType", type}); //$NON-NLS-1$
+		List<IntelEntity> ids = new ArrayList<>();
+		try(ScrollableResults results = search.scroll()) {
+			while(results.next()) {
+				IntelEntity entity = (IntelEntity)results.get()[0];
+				if ( entity.getIdAttributeAsText().equals(entityListItem.getName()) ){
+					ids.add(entity);
+				}
+			}
+		}
+		if (ids.size() == 1) return ids.get(0);
+		if (ids.size() > 1) {
+			warnings.add(MessageFormat.format(Messages.RecordXmlImporter_MultiEntitiesFound, entityListItem.getName(), type.getName()));	
+			return null;
+		}
 		//add to warnings;
-		warnings.add(MessageFormat.format(Messages.RecordXmlImporter_EntityNotFound, entityListItem.getName()));
+		warnings.add(MessageFormat.format(Messages.RecordXmlImporter_EntityOfTypeNotFound, entityListItem.getName(), type.getName()));
 		return null;
 	}
 	
@@ -553,7 +620,6 @@ public class RecordXmlImporter {
 		warnings.add(MessageFormat.format(Messages.RecordXmlImporter_CategoryNotFound, categoryItem.getName()));
 		return null;
 	}
-	
 	
 	
 	private List<IntelObservationAttribute> parseObservationAttributes(List<ObservationAttributeType> attributes, IntelObservation newObservation, Session session, List<String> warnings){

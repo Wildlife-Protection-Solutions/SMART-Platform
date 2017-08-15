@@ -27,6 +27,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -80,6 +82,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.dialogs.ExportEntityToFileDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
 import org.wcs.smart.i2.ui.handler.CompareEntitiesHandler;
@@ -97,6 +100,7 @@ import org.wcs.smart.util.E3Utils;
 public class EntitySearchResultTable extends Composite {
 
 	private static final String ICON_SIZE_KEY = "org.wcs.smart.i2.ui.views.EntitySearchResultTable.iconsize"; //$NON-NLS-1$
+	
 	private enum IconSize{
 		SMALL(50, Messages.EntitySearchResultTable_SmallOp), 
 		MEDIUM(100, Messages.EntitySearchResultTable_MediumOp),
@@ -336,6 +340,18 @@ public class EntitySearchResultTable extends Composite {
 		dialog.open();
 	}
 	
+	private void exportEntityToFile(boolean filter){
+		List<UUID> toexport = null;
+		if (filter) {
+			toexport = getCurrentSelection().stream().map(e->e.getUuid()).collect(Collectors.toList());
+		}else {
+			toexport = entities.getAllResults();
+		}
+		if (toexport.isEmpty()) return;
+		ExportEntityToFileDialog dialog = new ExportEntityToFileDialog(getShell(), toexport);
+		dialog.open();
+	}
+	
 	private void printEntities(){
 		EntityExportDialog dialog = new EntityExportDialog(getShell(), getCurrentSelection());
 		dialog.open();
@@ -463,13 +479,37 @@ public class EntitySearchResultTable extends Composite {
 			}
 		});
 		
-		MenuItem mnuExport = new MenuItem(menu, SWT.PUSH);
-		mnuExport.setText(Messages.EntitySearchResultTable_ExportMenuItem);
+		MenuItem miExport = new MenuItem(menu, SWT.CASCADE);
+		miExport.setText(Messages.EntitySearchResultTable_ExportMenu);
+		
+		Menu exportMenu  = new Menu(miExport);
+		miExport.setMenu(exportMenu);
+		
+		MenuItem mnuExport = new MenuItem(exportMenu, SWT.PUSH);
+		mnuExport.setText(Messages.EntitySearchResultTable_ExportMenuItem2);
 		mnuExport.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_EXPORT));
 		mnuExport.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				exportEntity();
+			}
+		});
+		
+		MenuItem mnuExportXml = new MenuItem(exportMenu, SWT.PUSH);
+		mnuExportXml.setText(Messages.EntitySearchResultTable_ExportToXML);
+		mnuExportXml.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				exportEntityToFile(true);
+			}
+		});
+		
+		MenuItem mnuExportXml2 = new MenuItem(exportMenu, SWT.PUSH);
+		mnuExportXml2.setText(Messages.EntitySearchResultTable_ExportAllEntitiesToXml);
+		mnuExportXml2.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				exportEntityToFile(false);
 			}
 		});
 		

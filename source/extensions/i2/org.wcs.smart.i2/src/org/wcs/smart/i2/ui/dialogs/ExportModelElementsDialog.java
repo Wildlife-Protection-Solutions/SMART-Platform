@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -240,8 +241,10 @@ public class ExportModelElementsDialog extends TitleAreaDialog{
 		txtOutputFile = new Text(fileSection, SWT.BORDER);
 		txtOutputFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		String initDir = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_DIR_KEY);
-		if (initDir != null) {
+		if (initDir != null && initDir.length() != 0) {
 			txtOutputFile.setText(initDir);
+		}else {
+			txtOutputFile.setText(System.getProperty("user.home") + File.separator + "intelligencemodel.zip"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		Button btnBrowse = new Button(fileSection, SWT.NONE);
 		btnBrowse.setText("..."); //$NON-NLS-1$

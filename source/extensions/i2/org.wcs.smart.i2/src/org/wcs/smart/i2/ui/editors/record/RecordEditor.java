@@ -604,7 +604,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		if (p == null) return;
 		IntelLocation newLocation = new IntelLocation();
 		newLocation.setComment(null);
-		newLocation.setDateTime(dateTime == null ? record.getDateCreated() : dateTime);
+		newLocation.setDateTime(dateTime == null ? record.getPrimaryDate() : dateTime);
 		newLocation.setGeometry(p);
 		addNewLocations(Collections.singletonList(newLocation));
 	}

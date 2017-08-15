@@ -59,6 +59,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -106,6 +107,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Summary Page for record editor.
@@ -398,6 +400,20 @@ public class RecordSummaryPage extends EditorPart{
 		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtShortName.setTextLimit(IntelRecord.MAX_TITLE_LENGTH);
 		
+		
+		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_PrimaryDateLabel);
+		if (recordEditor.getEditMode()){
+			DateTime dtPrimaryDate = new DateTime(leftPart, SWT.DATE | SWT.LONG | SWT.CALENDAR | SWT.DROP_DOWN);
+			SmartUtils.initDateDateTimeWidget(dtPrimaryDate, recordEditor.getRecord().getPrimaryDate());
+			dtPrimaryDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			dtPrimaryDate.addListener(SWT.Selection, e->{
+				recordEditor.getRecord().setPrimaryDate( SmartUtils.getDate(dtPrimaryDate) );
+				recordEditor.setDirty(true);
+			});
+		}else {
+			toolkit.createLabel(leftPart, DateFormat.getDateInstance().format(recordEditor.getRecord().getPrimaryDate()));
+		}
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_StatusLabel);
 		if (recordEditor.getEditMode() && IntelSecurityManager.INSTANCE.canEditRecordStatus()){
 			TableComboViewer cmbStatus = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
@@ -431,7 +447,6 @@ public class RecordSummaryPage extends EditorPart{
 					recordEditor.setDirty(true);
 				}
 			});
-			
 		}else{
 			Composite temp = toolkit.createComposite(leftPart);
 			temp.setLayout(new GridLayout(2, false));
@@ -440,10 +455,8 @@ public class RecordSummaryPage extends EditorPart{
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			Label l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
 			l.setImage(RecordLabelProvider.getRecordStatusImage(recordEditor.getRecord().getStatus()));
-			
-			l = toolkit.createLabel(temp,  RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
-			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			
+			l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
+			l.setText(RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
 		}
 		
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_SourceLabel);

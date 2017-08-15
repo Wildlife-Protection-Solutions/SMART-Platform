@@ -328,6 +328,15 @@
                      style="push">
                </command>
                <command
+                     commandId="org.wcs.smart.i2.command.import.entity.xml"
+                     label="Import Entities from XML..."
+                     style="push">
+               </command>
+               <separator
+                     name="org.wcs.smart.i2.separator1"
+                     visible="true">
+               </separator>
+               <command
                      commandId="org.wcs.smart.i2.command.record.import"
                      label="%ImportRecordsCommandName"
                      style="push">
@@ -338,7 +347,7 @@
                      style="push">
                </command>
                <separator
-                     name="org.wcs.smart.i2.separator1"
+                     name="org.wcs.smart.i2.separator2"
                      visible="true">
                </separator>
                <command
@@ -789,6 +798,10 @@
             name="%ImportEntitiesCommandName3">
       </command>
       <command
+            id="org.wcs.smart.i2.command.import.entity.xml"
+            name="Import Entities From XML">
+      </command>
+      <command
             id="org.wcs.smart.i2.command.record.import"
             name="%ImportRecordsCommandName3">
       </command>
@@ -928,6 +941,10 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.ImportModelFromXmlHandler$ImportModelFromXmlHandlerWrapper"
             commandId="org.wcs.smart.i2.command.import.model.xml">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ImportEntitiesFromXmlHandler$ImportEntitiesFromXmlHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.import.entity.xml">
       </handler>
    </extension>
    <extension

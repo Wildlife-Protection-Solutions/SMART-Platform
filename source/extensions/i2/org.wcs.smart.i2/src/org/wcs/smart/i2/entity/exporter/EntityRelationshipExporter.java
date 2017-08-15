@@ -25,15 +25,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -63,22 +66,72 @@ public class EntityRelationshipExporter {
 		
 	}
 	
-	public boolean exportEntity(IntelEntity entity, int degrees, Path outputDirectory, IProgressMonitor monitor) throws Exception{
+	/**
+	 * Exports the collection of entities to an csv file.  Will NOT export relationships
+	 * 
+	 * @param entities
+	 * @param degrees
+	 * @param csvFile
+	 * @param delimiter
+	 * @param monitor
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean exportEntities(Collection<UUID> entities, int degrees, Path csvFile, char delimiter, IProgressMonitor monitor) throws Exception{
+		String name = csvFile.getFileName().toString();
+		int idx = name.lastIndexOf('.');
+		if (idx > 0) {
+			name = name.substring(0,idx);
+		}
+		Path entityFile = csvFile;
+		return doExport(entities, degrees, entityFile, null, delimiter, monitor);
+	}
+	
+	
+	/**
+	 * Exports entities and relationships up to n degrees to csv files
+	 * 
+	 * @param entity
+	 * @param degrees
+	 * @param outputDirectory
+	 * @param delimiter
+	 * @param monitor
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean exportEntity(IntelEntity entity, int degrees, Path outputDirectory, char delimiter, IProgressMonitor monitor) throws Exception{
+		Path entities = getEntityFile(outputDirectory, entity.getIdAttributeAsText());
+		Path relationships = getRelationshipFile(outputDirectory, entity.getIdAttributeAsText());
+		return doExport(Collections.singletonList(entity.getUuid()), degrees, entities, relationships, delimiter, monitor);
+	}
+	
+	/**
+	 * 
+	 * @param entity
+	 * @param degrees
+	 * @param entityFile
+	 * @param relationshipFile if null, relationships will not be exported
+	 * @param monitor
+	 * @return
+	 */
+	private boolean doExport(Collection<UUID> entities, int degrees, Path entityFile, Path relationshipFile, char delimiter, IProgressMonitor monitor) throws Exception {
 		if (monitor == null) monitor = new NullProgressMonitor();
 		
 		monitor.beginTask(Messages.EntityRelationshipExporter_ProgressMsg, 4);
 		AttributeValueLabelProvider provider = new AttributeValueLabelProvider();
 		try(Session s = HibernateManager.openSession()){
-
-			entity = (IntelEntity)s.get(IntelEntity.class,  entity.getUuid());
-			
 			HashSet<IntelEntity> entitiesToExport = new HashSet<>();
+			entities.forEach(entity->{
+				IntelEntity ia = (IntelEntity)s.get(IntelEntity.class,  entity);
+				entitiesToExport.add(ia);
+			});
+			
 			HashSet<IntelEntityRelationship> relationshipsToExport = new HashSet<>();
-			entitiesToExport.add(entity);
+			
 			
 			int degree = 1;
 			Set<IntelEntity> toSearch = new HashSet<>();
-			toSearch.add(entity);
+			toSearch.addAll(entitiesToExport);
 			
 			
 			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg);
@@ -143,11 +196,8 @@ public class EntityRelationshipExporter {
 			if (monitor.isCanceled()) return false;
 			monitor.worked(1);
 			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg3);
-			
-			Path entities = getEntityFile(outputDirectory, entity.getIdAttributeAsText());
-			Path relationships = getRelationshipFile(outputDirectory, entity.getIdAttributeAsText());
-			
-			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(entities))){
+						
+			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(entityFile), delimiter)){
 				String[] data = new String[entityAttributes.size() + 3];
 				int i = 0;
 				data[i++] = Messages.EntityRelationshipExporter_UuidColumnName;
@@ -180,47 +230,47 @@ public class EntityRelationshipExporter {
 			monitor.worked(1);
 			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg4);
 			
-			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(relationships))){
-				String[] data = new String[relationshipAttributes.size() + 6];
-				int i = 0;
-				data[i++] = Messages.EntityRelationshipExporter_RelationshipUuidColumnName;
-				data[i++] = Messages.EntityRelationshipExporter_RelationshipType;
-				data[i++] = Messages.EntityRelationshipExporter_SrcEntityUuid;
-				data[i++] = Messages.EntityRelationshipExporter_SrcEntityId;
-				data[i++] = Messages.EntityRelationshipExporter_TargetEntityUuid;
-				data[i++] = Messages.EntityRelationshipExporter_TargetEntityId;
-				
-				for (IntelAttribute ia : relationshipAttributes){
-					data[i++] = ia.getName();
-				}
-				writer.writeNext(data);
-				
-				for(IntelEntityRelationship e : relationshipsToExport){
-					data = new String[data.length];
-					i=0;
-					data[i++] = UuidUtils.uuidToString(e.getUuid());
-					data[i++] = e.getRelationshipType().getName();
-					data[i++] = UuidUtils.uuidToString(e.getSourceEntity().getUuid());
-					data[i++] = e.getSourceEntity().getIdAttributeAsText();
-					data[i++] = UuidUtils.uuidToString(e.getTargetEntity().getUuid());
-					data[i++] = e.getTargetEntity().getIdAttributeAsText();
+			if (relationshipFile != null) {
+				try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(relationshipFile), delimiter)){
+					String[] data = new String[relationshipAttributes.size() + 6];
+					int i = 0;
+					data[i++] = Messages.EntityRelationshipExporter_RelationshipUuidColumnName;
+					data[i++] = Messages.EntityRelationshipExporter_RelationshipType;
+					data[i++] = Messages.EntityRelationshipExporter_SrcEntityUuid;
+					data[i++] = Messages.EntityRelationshipExporter_SrcEntityId;
+					data[i++] = Messages.EntityRelationshipExporter_TargetEntityUuid;
+					data[i++] = Messages.EntityRelationshipExporter_TargetEntityId;
+					
 					for (IntelAttribute ia : relationshipAttributes){
-						IntelEntityRelationshipAttributeValue v = e.findAttributeValue(ia);
-						if (v != null){
-							data[i++] = provider.getText(v);
-						}else{
-							data[i++] = ""; //$NON-NLS-1$
-						}
+						data[i++] = ia.getName();
 					}
 					writer.writeNext(data);
 					
-					if (monitor.isCanceled()) return false;
+					for(IntelEntityRelationship e : relationshipsToExport){
+						data = new String[data.length];
+						i=0;
+						data[i++] = UuidUtils.uuidToString(e.getUuid());
+						data[i++] = e.getRelationshipType().getName();
+						data[i++] = UuidUtils.uuidToString(e.getSourceEntity().getUuid());
+						data[i++] = e.getSourceEntity().getIdAttributeAsText();
+						data[i++] = UuidUtils.uuidToString(e.getTargetEntity().getUuid());
+						data[i++] = e.getTargetEntity().getIdAttributeAsText();
+						for (IntelAttribute ia : relationshipAttributes){
+							IntelEntityRelationshipAttributeValue v = e.findAttributeValue(ia);
+							if (v != null){
+								data[i++] = provider.getText(v);
+							}else{
+								data[i++] = ""; //$NON-NLS-1$
+							}
+						}
+						writer.writeNext(data);
+						
+						if (monitor.isCanceled()) return false;
+					}
 				}
 			}
 			monitor.worked(1);
 			monitor.done();
-			
-			
 		}finally{
 			try{
 				provider.dispose();

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/Intelligence" xmlns:tns="http://www.example.org/Intelligence" elementFormDefault="qualified">
+
+    <complexType name="AttributeValue">
+    	<attribute name="attributeKey" type="string"></attribute>
+		<attribute name="type" type="tns:AttributeType"></attribute>
+        <attribute name="stringValue" type="string"></attribute>
+    	<attribute name="doubleValue" type="double"></attribute>
+    	<attribute name="doubleValue2" type="double"></attribute>
+    	<attribute name="listKey" type="string"></attribute>
+    </complexType>
+    
+	<simpleType name="AttributeType">
+    	<restriction base="string">
+    		<enumeration value="NUMERIC"></enumeration>
+    		<enumeration value="TEXT"></enumeration>
+    		<enumeration value="BOOLEAN"></enumeration>
+    		<enumeration value="LIST"></enumeration>
+    		<enumeration value="DATE"></enumeration>
+    		<enumeration value="POSITION"></enumeration>
+    	</restriction>
+    </simpleType>
+
+	<complexType name="Attachment">
+		<attribute name="filename" type="string"></attribute>
+		<attribute name="isPrimary" type="boolean"></attribute>
+		<attribute name="description" type="string"></attribute>
+	</complexType>
+
+	<complexType name="Record">
+		<attribute name="title" type="string"></attribute>
+		<attribute name="recordSourceKey" type="string"></attribute>
+		<attribute name="recordKey" type="string"></attribute>
+	</complexType>
+
+	<complexType name="Location">
+		<attribute name="id" type="string"></attribute>
+		<attribute name="recordKey" type="string"></attribute>
+	</complexType>
+
+	<complexType name="Entity">
+		<sequence>
+			<element name="id" type="string" maxOccurs="1" minOccurs="1"></element>
+            <element name="scratchpad" type="string" maxOccurs="1" minOccurs="0"></element>
+            <element name="attributes" type="tns:AttributeValue" maxOccurs="unbounded" minOccurs="1"></element>
+			<element name="attachments" type="tns:Attachment" maxOccurs="unbounded" minOccurs="0"></element>
+			<element name="records" type="tns:Record" maxOccurs="unbounded" minOccurs="0"></element>
+			<element name="locations" type="tns:Location" maxOccurs="unbounded" minOccurs="0"></element>
+		</sequence>
+		<attribute name="entityTypeKey" type="string"></attribute>
+	</complexType>
+
+	<complexType name="Relationship">
+		<sequence>
+			<element name="attributes" type="tns:AttributeValue" maxOccurs="unbounded" minOccurs="1"></element>
+		</sequence>
+		<attribute name="relationshipTypeKey" type="string"></attribute>
+		<attribute name="sourceEntityId" type="string"></attribute>
+		<attribute name="sourceEntityTypeKey" type="string"></attribute>
+		<attribute name="targetEntityId" type="string"></attribute>
+		<attribute name="targetEntityTypeKey" type="string"></attribute>
+	</complexType>
+
+
+	<complexType name="InstanceData">
+		<sequence>
+			<element name="entities" type="tns:Entity" maxOccurs="unbounded" minOccurs="0"></element>
+			<element name="relationships" type="tns:Relationship" maxOccurs="unbounded" minOccurs="0"></element>
+		</sequence>
+	</complexType>
+
+    <element name="data" type="tns:InstanceData"></element>
+</schema>

@@ -43,6 +43,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -102,17 +103,14 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
-//import org.wcs.smart.i2.model.IntelRecord;
-import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.ui.DeleteRecordHandler;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
+import org.wcs.smart.i2.ui.handler.NewRecordHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.i2.ui.views.RecordsViewContentProvider.GroupBy;
 import org.wcs.smart.i2.ui.views.RecordsViewContentProvider.SortBy;
@@ -423,6 +421,16 @@ public class RecordsView {
 			public void menuHidden(MenuEvent e) {}
 		});
 		
+		MenuItem miNew = new MenuItem(m, SWT.PUSH);
+		miNew.setText(Messages.RecordsView_NewRecordMenuItem);
+		miNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miNew.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				(new NewRecordHandler()).createNewRecord(context);
+			}
+		});
+		
 		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			MenuItem miDelete = new MenuItem(m, SWT.PUSH);
 			miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -641,6 +649,8 @@ public class RecordsView {
 				for (UUID record : toExport){
 					try{
 						if (exporter.exportRecord(record, progress.newChild(1))) cnt ++;
+					}catch(OperationCanceledException ex) {
+						break;
 					}catch (Exception ex){
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openError(context.get(Shell.class), Messages.RecordsView_ErrorTitle, Messages.RecordsView_ErrorMessage + ex.getMessage());
@@ -769,13 +779,13 @@ public class RecordsView {
 						r.getRecordSource().getIcon();
 					}
 					IntelRecordProxy proxy = null;
-					proxy = new IntelRecordProxy(r.getTitle(), r.getUuid(), r.getRecordSource(), r.getStatus());
+					proxy = new IntelRecordProxy(r.getTitle(), r.getUuid(), r.getRecordSource(), r.getStatus(), r.getPrimaryDate());
 					if (r.getStatus() == IntelRecord.Status.PROCESSING){
 						inProgress.add(proxy);
 					}else if (r.getStatus() == IntelRecord.Status.NEW){
 						newRecords.add(proxy);
 					}
-					if (proxy != null) proxy.setDate(computeDate(r));
+//					if (proxy != null) proxy.setDate(computeDate(r));
 				}
 			}
 			
@@ -793,14 +803,14 @@ public class RecordsView {
 			
 			final List<IntelRecordProxy> allRecords = new ArrayList<IntelRecordProxy>();
 			try(Session s = HibernateManager.openSession()){
-				Query<?> q = s.createQuery("SELECT title, uuid, dateCreated, recordSource.uuid, status FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc"); //$NON-NLS-1$
+				Query<?> q = s.createQuery("SELECT title, uuid, primaryDate, recordSource.uuid, status FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc"); //$NON-NLS-1$
 				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				List<?> items = q.list();
 				for (Object it : items){
 					Object[] item = (Object[])it;
-					IntelRecordProxy r = new IntelRecordProxy((String)item[0], (UUID)item[1], item[3] == null ? null : s.get(IntelRecordSource.class,(UUID)item[3]), (IntelRecord.Status)item[4]);
+					IntelRecordProxy r = new IntelRecordProxy((String)item[0], (UUID)item[1], item[3] == null ? null : s.get(IntelRecordSource.class,(UUID)item[3]), (IntelRecord.Status)item[4], (Date)item[2]);
 					allRecords.add(r);
-					r.setDate(computeDate(s.get(IntelRecord.class, r.getUuid())));
+//					r.setDate(computeDate(s.get(IntelRecord.class, r.getUuid())));
 				}
 				
 			}
@@ -819,32 +829,32 @@ public class RecordsView {
 			return Status.OK_STATUS;
 		}
 		
-		private Date computeDate(IntelRecord r) {
-			Date d = null;
-			if (r.getLocations() != null) {
-				for (IntelLocation l : r.getLocations()) {
-					if (d == null || l.getDateTime().after(d)) {
-						d = l.getDateTime();
-					}
-				}
-			}
-			if (d == null && r.getAttributes() != null) {
-				for (IntelRecordAttributeValue v : r.getAttributes()) {
-					if (v.getAttribute().getAttribute().getType() == AttributeType.DATE) {
-						Date d2 = v.getDateValue();
-						if (d2 != null) {
-							if (d == null || d2.after(d)) {
-								d = d2;
-							}
-						}
-					}
-				}
-			}
-			if (d == null) {
-				d = r.getDateCreated();
-			}
-			return d;
-		}
+//		private Date computeDate(IntelRecord r) {
+//			Date d = null;
+//			if (r.getLocations() != null) {
+//				for (IntelLocation l : r.getLocations()) {
+//					if (d == null || l.getDateTime().after(d)) {
+//						d = l.getDateTime();
+//					}
+//				}
+//			}
+//			if (d == null && r.getAttributes() != null) {
+//				for (IntelRecordAttributeValue v : r.getAttributes()) {
+//					if (v.getAttribute().getAttribute().getType() == AttributeType.DATE) {
+//						Date d2 = v.getDateValue();
+//						if (d2 != null) {
+//							if (d == null || d2.after(d)) {
+//								d = d2;
+//							}
+//						}
+//					}
+//				}
+//			}
+//			if (d == null) {
+//				d = r.getDateCreated();
+//			}
+//			return d;
+//		}
 		
 	};
 	

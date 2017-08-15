@@ -53,7 +53,7 @@ public class NewRecordHandler {
 		newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
 		newRecord.setDateCreated(new Date());
 		newRecord.setEntities(new ArrayList<IntelEntityRecord>());
-		
+		newRecord.setPrimaryDate(new Date());
 		RecordEditorInput input = new RecordEditorInput(newRecord);
 		
 		//open perspective

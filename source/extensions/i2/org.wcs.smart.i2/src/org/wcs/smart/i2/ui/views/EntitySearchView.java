@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.views;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -579,7 +580,7 @@ public class EntitySearchView {
 	
 	@Inject
 	@Optional
-	private void entityModified(@UIEventTopic(IntelEvents.ENTITY_ALL) List<IntelEntity> entity){
+	private void entityModified(@UIEventTopic(IntelEvents.ENTITY_ALL) Collection<IntelEntity> entity){
 		doSearch(null, searchDelay);
 	}
 	

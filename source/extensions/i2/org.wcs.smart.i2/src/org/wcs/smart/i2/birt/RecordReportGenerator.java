@@ -77,7 +77,6 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
-import org.wcs.smart.i2.birt.entity.EntityDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
 import org.wcs.smart.i2.birt.record.RecordAttributeDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.RecordDataset;

@@ -15,7 +15,8 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.rec
     		<element name="source" type="tns:LabelUuid"></element>
     		<element name="narrative" type="string"></element>
     		<element name="scratchpad" type="string"></element>
-    		<element name="attributes" type="tns:RecordAttributeType"
+            <element name="primary_date" type="date"></element>
+            <element name="attributes" type="tns:RecordAttributeType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="entities" type="tns:LabelUuid"
@@ -24,15 +25,22 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.rec
     		<element name="attachments" type="tns:AttachmentType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="locations" type="tns:LocationType" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="locations" type="tns:LocationType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
     	</sequence>
     </complexType>
     
     <complexType name="LabelUuid">
     	<sequence>
-    		<element name="name" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="uuid" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="name" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="uuid" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
     	</sequence>
+    	<attribute name="keyid" type="string"></attribute>
     </complexType>
 
     <complexType name="AttachmentType">
@@ -71,12 +79,24 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.rec
     <complexType name="RecordAttributeType">
     	<sequence>
 
-            <element name="record_attribute" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
-            <element name="string_value" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="number_value_1" type="double" maxOccurs="1" minOccurs="0"></element>
-    		<element name="number_value_2" type="double" maxOccurs="1" minOccurs="0"></element>
-    		<element name="list_value" type="tns:LabelUuid" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="record_attribute" type="tns:LabelUuid"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="string_value" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="number_value_1" type="double" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="number_value_2" type="double" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="list_value" type="tns:LabelUuid"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
     	</sequence>
+    	<attribute name="type" type="tns:AttributeType"></attribute>
+    	<attribute name="alias" type="string"></attribute>
     </complexType>
 
     <complexType name="ObservationAttributeType">
@@ -88,4 +108,13 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.rec
     		<element name="tree_value" type="tns:LabelUuid" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     </complexType>
+
+    <simpleType name="AttributeType">
+    	<restriction base="string">
+    		<enumeration value="SINGLE_ATTRIBUTE"></enumeration>
+    		<enumeration value="SINGLE_ENTITY"></enumeration>
+    		<enumeration value="MULTI_ATTRIBUTE"></enumeration>
+    		<enumeration value="MULTI_ENTITY"></enumeration>
+    	</restriction>
+    </simpleType>
 </schema>

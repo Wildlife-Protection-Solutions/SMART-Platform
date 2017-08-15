@@ -24,6 +24,7 @@ package org.wcs.smart.i2.search;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -32,6 +33,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.SmartDB;
@@ -114,15 +116,19 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			//perform fuzzy search
 			
 			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, session);
-			int actualCnt = Math.min(sresults.size(), maxResultCnt);
-			for (int i = 0; i < actualCnt; i ++){
+			List<UUID> allUuids = new ArrayList<>();
+			
+			int toLoad = Math.min(sresults.size(), maxResultCnt);
+			for (int i = 0; i < toLoad; i ++){
 				IntelEntity it = (IntelEntity) session.get(IntelEntity.class, sresults.get(i).getEntityUuid());
 				lazyLoadEntity(it, session);
 				sresults.get(i).setEntity(it);
 				progress.worked(1);
 				progress.checkCanceled();
 			}
-			return new IntelSearchResult(sresults.size(), sresults.subList(0, actualCnt), System.nanoTime() - now);
+			sresults.forEach(e->allUuids.add(e.getEntityUuid()));
+			
+			return new IntelSearchResult(allUuids, sresults.subList(0, toLoad), System.nanoTime() - now);
 		}
 
 		if (searchString == null || searchString.isEmpty()){
@@ -130,43 +136,51 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			
 			CriteriaBuilder cb = session.getCriteriaBuilder();
 			
-			CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
-			Root<IntelEntity> from2 = c2.from(IntelEntity.class);
-			List<Predicate> filters = new ArrayList<>();
-			filters.add(cb.equal(from2.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
-			if (entityTypes != null && !entityTypes.isEmpty()){
-				filters.add(from2.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
-				
-			}
-			c2.where(cb.and(filters.toArray(new Predicate[filters.size()])));			
-			c2.select(cb.count(from2));
-			Long maxCnt = session.createQuery(c2).uniqueResult();
+//			CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
+//			Root<IntelEntity> from2 = c2.from(IntelEntity.class);
+//			List<Predicate> filters = new ArrayList<>();
+//			filters.add(cb.equal(from2.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+//			if (entityTypes != null && !entityTypes.isEmpty()){
+//				filters.add(from2.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
+//				
+//			}
+//			c2.where(cb.and(filters.toArray(new Predicate[filters.size()])));			
+//			c2.select(cb.count(from2));
+//			Long maxCnt = session.createQuery(c2).uniqueResult();
 			
 			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
 			Root<IntelEntity> from = c.from(IntelEntity.class);
 			c.select(from);
-			filters = new ArrayList<>();
+			ArrayList<Predicate> filters = new ArrayList<>();
 			filters.add(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
 			if (entityTypes != null && !entityTypes.isEmpty()){
 				filters.add(from.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
-			Query<IntelEntity> q = session.createQuery(c).setMaxResults(maxResultCnt);
-			List<IntelEntity> items = q.getResultList();
-			List<IntelSearchResultItem> results = new ArrayList<IntelSearchResultItem>();
+			Query<IntelEntity> q = session.createQuery(c);//.setMaxResults(maxResultCnt);
 			
-			for (IntelEntity it : items){
-				lazyLoadEntity(it, session);
-				IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(),"", 1.0); //$NON-NLS-1$
-				result.setEntity(it);
-				results.add(result);
-				progress.worked(1);
-				progress.checkCanceled();
+			List<UUID> allUuids = new ArrayList<>();
+			
+			List<IntelSearchResultItem> results = new ArrayList<IntelSearchResultItem>(maxResultCnt);
+			try(ScrollableResults r = q.scroll()){
+				while(r.next()) {
+					IntelEntity it = (IntelEntity) r.get()[0];
+					if(results.size() < maxResultCnt) {
+						lazyLoadEntity(it, session);
+						IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(),"", 1.0); //$NON-NLS-1$
+						result.setEntity(it);
+						results.add(result);
+						progress.worked(1);
+						progress.checkCanceled();
+					}
+					allUuids.add(it.getUuid());
+				}
 			}
-			return new IntelSearchResult(maxCnt, results, System.nanoTime() - now);
+			
+			return new IntelSearchResult(allUuids, results, System.nanoTime() - now);
 		}
 		//should never get here
-		return new IntelSearchResult(0, Collections.emptyList(), 0);
+		return new IntelSearchResult(Collections.emptyList(), Collections.emptyList(), 0);
 	}
 	
 

@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -100,17 +101,21 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		if (searchString == null || searchString.trim().isEmpty()){
 			Long now = System.nanoTime();
 			
-			Long eCount = QueryFactory.buildCountQuery(session, IntelEntity.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}); //$NON-NLS-1$
-			
 			Query<IntelEntity> q = QueryFactory.buildQuery(session, IntelEntity.class, "conservationArea", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-			List<IntelEntity> entities = q.setMaxResults(maxResultCnt).getResultList();
-			
-			List<IntelSearchResultItem> items = new ArrayList<>();
-			for (IntelEntity e : entities){
-				items.add(new IntelSearchResultItem(e.getUuid(), null, 1, lazyLoadEntity(e, session)));
+			List<IntelSearchResultItem> items = new ArrayList<>(maxResultCnt);
+			List<UUID> allResults = new ArrayList<>();
+			try(ScrollableResults scroll = q.scroll()){
+				while(scroll.next()) {
+					IntelEntity entity = (IntelEntity) scroll.get()[0];
+					if (items.size() < maxResultCnt) {
+						items.add(new IntelSearchResultItem(entity.getUuid(), null, 1, lazyLoadEntity(entity, session)));		
+					}
+					allResults.add(entity.getUuid());
+				}
 			}
+			
 			Long done = System.nanoTime();
-			IntelSearchResult results = new IntelSearchResult(eCount, items, (done - now)); 
+			IntelSearchResult results = new IntelSearchResult(allResults, items, (done - now)); 
 			return results;
 		}else{
 			Long now = System.nanoTime();
@@ -119,23 +124,27 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				q = parseQueryString(session);
 			}catch (Exception ex){
 				Intelligence2PlugIn.displayLog(Messages.AdvancedEntitySearch_ParseError + ex.getMessage(), ex);
-				return new IntelSearchResult(0, Collections.emptyList(), 0);
+				return new IntelSearchResult(Collections.emptyList(), Collections.emptyList(), 0);
 			}
 			try{
 				List<?> uuids = q.list();
 				int totalCount = uuids.size();
-				List<IntelSearchResultItem> items = new ArrayList<>();
-				for (int i = 0; i < Math.min(totalCount, maxResultCnt); i ++){
+				List<IntelSearchResultItem> items = new ArrayList<>(Math.min(totalCount, maxResultCnt));
+				List<UUID> allUuids = new ArrayList<>();
+				for (int i = 0; i < uuids.size(); i ++){
 					UUID uuid = (UUID) uuids.get(i);
-					items.add(new IntelSearchResultItem(uuid, null, 1, lazyLoadEntity((IntelEntity)session.get(IntelEntity.class, uuid), session)));
+					if (items.size() < maxResultCnt) {
+						items.add(new IntelSearchResultItem(uuid, null, 1, lazyLoadEntity((IntelEntity)session.get(IntelEntity.class, uuid), session)));
+					}
+					allUuids.add(uuid);
 				}
 				
 				Long done = System.nanoTime();
-				IntelSearchResult results = new IntelSearchResult(totalCount, items, (done - now));
+				IntelSearchResult results = new IntelSearchResult(allUuids, items, (done - now));
 				return results;
 			}catch (Exception ex){
 				Intelligence2PlugIn.displayLog(Messages.AdvancedEntitySearch_ExecuteError + ex.getMessage(), ex);
-				return new IntelSearchResult(0, Collections.emptyList(), 0);
+				return new IntelSearchResult(Collections.emptyList(), Collections.emptyList(), 0);
 			}
 		}
 	}

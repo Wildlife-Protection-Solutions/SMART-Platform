@@ -42,23 +42,24 @@ public class IntelRecordProxy {
 	
 	private Date date;
 	
-	public IntelRecordProxy(String title, UUID uuid, IntelRecordSource source, IntelRecord.Status status){
+	public IntelRecordProxy(String title, UUID uuid, IntelRecordSource source, IntelRecord.Status status, Date date){
 		this.title = title;
 		this.uuid = uuid;
 		this.source = source;
 		this.status = status;
-	}
-	
-	/**
-	 * For proxy items the date should be the most recent location date OR if there
-	 * are not location dates then the most recent date attribute OR if there
-	 * are not date attributes then the creation date
-	 * 
-	 * @param date
-	 */
-	public void setDate(Date date) {
 		this.date = date;
 	}
+	
+//	/**
+//	 * For proxy items the date should be the most recent location date OR if there
+//	 * are not location dates then the most recent date attribute OR if there
+//	 * are not date attributes then the creation date
+//	 * 
+//	 * @param date
+//	 */
+//	public void setDate(Date date) {
+//		this.date = date;
+//	}
 	
 	public Date getDate() {
 		return this.date;
