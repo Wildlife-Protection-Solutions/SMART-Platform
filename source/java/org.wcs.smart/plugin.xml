@@ -283,6 +283,23 @@
                   </or>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.command.logoflogins"
+                  label="%logoflogins.command.label"
+                  mnemonic="%logoflogins.command.mnemonic"
+                  style="push"
+                  tooltip="%logoflogins.command.tooltip">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                  </or>
+               </visibleWhen>
+            </command>
             <separator
                   name="org.wcs.smart.file.separator1"
                   visible="true">
@@ -314,23 +331,6 @@
                   mnemonic="%logoutcommand.mnemonic"
                   style="push"
                   tooltip="%logout.command.tooltip">
-            </command>
-            <command
-                  commandId="org.wcs.smart.command.logoflogins"
-                  label="%logoflogins.command.label"
-                  mnemonic="%logoflogins.command.mnemonic"
-                  style="push"
-                  tooltip="%logoflogins.command.tooltip">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                  </or>
-               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.command.exit"
