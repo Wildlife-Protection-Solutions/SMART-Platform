@@ -530,7 +530,7 @@ public class RoutinesListDialog extends TitleAreaDialog {
 				tblRoutines.setInput(routines);
 				if (lastSelection == null && !routines.isEmpty()){
 					tblRoutines.setSelection(new StructuredSelection(routines.get(0)));
-				}else{
+				}else if (lastSelection != null){
 					tblRoutines.setSelection(new StructuredSelection(lastSelection));
 				}
 				

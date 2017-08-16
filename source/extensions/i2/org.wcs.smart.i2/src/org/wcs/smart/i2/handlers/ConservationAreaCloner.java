@@ -65,19 +65,19 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		cloneAttributes(engine);
 		progress.worked(1);
 		
-		progress.setTaskName(Messages.ConservationAreaCloner_EntityTypeSubTask);
+		progress.subTask(Messages.ConservationAreaCloner_EntityTypeSubTask);
 		cloneEntityTypes(engine);
 		progress.worked(1);
 		
-		progress.setTaskName(Messages.ConservationAreaCloner_GroupsSubTask);
+		progress.subTask(Messages.ConservationAreaCloner_GroupsSubTask);
 		cloneRelationshipGroups(engine);
 		progress.worked(1);
 		
-		progress.setTaskName(Messages.ConservationAreaCloner_RelationshiptypesSubTask);
+		progress.subTask(Messages.ConservationAreaCloner_RelationshiptypesSubTask);
 		cloneRelationshipTypes(engine);
 		progress.worked(1);
 		
-		progress.setTaskName(Messages.ConservationAreaCloner_SourceTypesSubTask);
+		progress.subTask(Messages.ConservationAreaCloner_SourceTypesSubTask);
 		cloneRecordSource(engine);
 		progress.worked(1);
 			

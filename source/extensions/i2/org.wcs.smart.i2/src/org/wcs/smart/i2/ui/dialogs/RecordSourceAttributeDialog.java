@@ -801,6 +801,15 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 				//delete all records for removed sources
 				for (IntelRecordSource source : toDelete){
 					if (source.getUuid() == null) continue;
+										
+					//delete all attributes for records with this source
+					Query<?> q2 = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.value IN (SELECT a FROM IntelRecordAttributeValue a join a.record b WHERE b.recordSource = :source)"); //$NON-NLS-1$
+					q2.setParameter("source", source); //$NON-NLS-1$
+					q2.executeUpdate();
+					
+					Query<?> q1 = session.createQuery("DELETE FROM IntelRecordAttributeValue where record IN (FROM IntelRecord WHERE recordSource = :source)"); //$NON-NLS-1$
+					q1.setParameter("source", source); //$NON-NLS-1$
+					q1.executeUpdate();
 					
 					//update intelligence records to have no source
 					Query<?> q = session.createQuery("UPDATE IntelRecord SET recordSource = null WHERE recordSource = :source"); //$NON-NLS-1$

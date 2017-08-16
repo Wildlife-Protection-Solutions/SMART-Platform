@@ -360,6 +360,7 @@ public class RecordSummaryPage extends EditorPart{
 	
 	public void initPage(){
 		if (summaryPart != null){
+			if (summaryPart.isDisposed()) return;
 			for (Control c : summaryPart.getChildren()){
 				c.dispose();
 			}
