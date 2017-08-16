@@ -527,6 +527,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_Member_Label;
 	public static String PatrolSummaryEditor_MultiLegPatrol_Label;
 	public static String PatrolSummaryEditor_NoManadateLabel;
+	public static String PatrolSummaryEditor_NoMandateLabel;
 	public static String PatrolSummaryEditor_NoStationLabel;
 	public static String PatrolSummaryEditor_NoTeamLabel;
 	public static String PatrolSummaryEditor_Objective_Label;

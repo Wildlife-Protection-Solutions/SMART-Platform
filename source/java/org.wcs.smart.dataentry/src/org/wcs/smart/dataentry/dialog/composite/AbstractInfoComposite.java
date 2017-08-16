@@ -216,6 +216,7 @@ public abstract class AbstractInfoComposite extends Composite {
 		node.setModel(getModel());
 		node.setName(Messages.AbstractInfoComposite_NewGroupDefaultName);
 		node.updateName(SmartDB.getCurrentLanguage(), node.getName());
+		node.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), node.getName());
 		addToParent(node);
 	}
 	

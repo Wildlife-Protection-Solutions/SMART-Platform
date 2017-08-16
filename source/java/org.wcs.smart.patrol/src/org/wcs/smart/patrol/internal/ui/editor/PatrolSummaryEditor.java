@@ -725,7 +725,11 @@ public class PatrolSummaryEditor extends EditorPart {
 				updateDateTable();
 				if (!isMulti){
 					txtTransport.setText(patrol.getFirstLeg().getType().getName());
-					txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
+					if (patrol.getFirstLeg().getMandate() != null) {
+						txtMandate.setText(patrol.getFirstLeg().getMandate().getName());
+					}else {
+						txtMandate.setText(Messages.PatrolSummaryEditor_NoMandateLabel);
+					}
 				}
 			}finally{
 				session.getTransaction().rollback();
@@ -960,7 +964,9 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 				Date d = ((PatrolLegDay) element).getDate();
 				return DateFormat.getDateInstance(DateFormat.MEDIUM).format(d) + " " + dayOfWeekFormatter.format(d) ; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.MANDATE){
-				return ((PatrolLegDay) element).getPatrolLeg().getMandate().getName();
+				if (((PatrolLegDay)element).getPatrolLeg().getMandate() != null) 
+					return ((PatrolLegDay) element).getPatrolLeg().getMandate().getName();
+				return ""; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.DISTANCE){
 				if (((PatrolLegDay) element).getTrack() != null){
 					return String.valueOf( ((PatrolLegDay) element).getTrack().getDistance() );
