@@ -51,7 +51,7 @@ import org.wcs.smart.upgrade.v600.Upgrader500To600;
  */
 public class UpgradeEngine {
 
-	private static final String EXTENSION_ID = "org.wcs.smart.dbUpgrage"; //$NON-NLS-1$
+	private static final String EXTENSION_ID = "org.wcs.smart.dbUpgrade"; //$NON-NLS-1$
 	
 	public enum UpgradeFromVersion {
 		V112("1.1.2", "2.0.0", Upgrader112To200.class), //$NON-NLS-1$ //$NON-NLS-2$

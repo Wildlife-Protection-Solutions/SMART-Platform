@@ -26,10 +26,12 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 			s.doWork(new Work() {
 				@Override
 				public void execute(Connection c) throws SQLException {
+					s.beginTransaction();
 					try {
 						c.setAutoCommit(false);
 						upgrade(c, s, monitor);
 						c.setAutoCommit(true);
+						s.getTransaction().commit();
 					} catch (final Exception e) {
 						thrownException = new Exception(Messages.Upgrader500To600_ErrorMessage, e);
 					}
@@ -49,7 +51,6 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.patrol_leg ADD COLUMN mandate_uuid char(16) for bit data", //$NON-NLS-1$
 				"UPDATE smart.patrol_leg SET mandate_uuid = (SELECT p.mandate_uuid FROM smart.patrol p WHERE p.uuid = smart.patrol_leg.patrol_uuid)", //$NON-NLS-1$
 				"ALTER TABLE SMART.PATROL_LEG ADD CONSTRAINT MANDATE_UUID_FK FOREIGN KEY (MANDATE_UUID) REFERENCES SMART.PATROL_MANDATE(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"ALTER TABLE smart.patrol_leg ALTER COLUMN mandate_uuid SET NOT NULL", //$NON-NLS-1$
 				"ALTER TABLE smart.patrol DROP COLUMN mandate_uuid", //$NON-NLS-1$
 				"CREATE TABLE SMART.LOGIN_LOG (uuid char(16) for bit data not null, smart_userid varchar(16) not null, smart_userlevels varchar(5000) not null, login_timestamp timestamp not null, ca_id varchar(8) not null, ca_name varchar(256) not null )", //$NON-NLS-1$
 				"GRANT INSERT ON SMART.LOGIN_LOG TO PUBLIC" //$NON-NLS-1$

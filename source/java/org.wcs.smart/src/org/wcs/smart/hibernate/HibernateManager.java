@@ -672,14 +672,14 @@ public class HibernateManager extends SmartHibernateManager{
 			CriteriaQuery<Category> c = cb.createQuery(Category.class);
 			Root<Category> root = c.from(Category.class);
 			c.where(cb.and(
-					cb.equal(root.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+					cb.equal(root.get("conservationArea"), ca), //$NON-NLS-1$
 					cb.isNull(root.get("parent")) //$NON-NLS-1$
 					));
 			c.orderBy(cb.asc(root.get("categoryOrder"))); //$NON-NLS-1$
 			List<Category> rootCategories = session.createQuery(c).getResultList();
 						
 			List<Attribute> attribute = QueryFactory.buildQuery(session, Attribute.class, 
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).getResultList(); //$NON-NLS-1$
+					new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$
 			
 			DataModel dm = new DataModel(ca, rootCategories, attribute);
 			return dm;
