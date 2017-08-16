@@ -898,6 +898,9 @@ public class Messages extends NLS {
 	public static String LoginLogDialog_1;
 	public static String LoginLogDialog_2;
 	public static String LoginLogDialog_3;
+	public static String LoginLogDialog_4;
+	public static String LoginLogDialog_5;
+	public static String LoginLogDialog_6;
 	public static String LogOfLogins_Dialog_Title;
 	public static String MapComposite_Map_Name;
 	public static String MapComposite_MapResizeJob_Title;

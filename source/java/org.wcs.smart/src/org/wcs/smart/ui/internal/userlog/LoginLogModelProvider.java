@@ -36,16 +36,15 @@ public enum LoginLogModelProvider {
     private List<LoginLogEntry> entries;
 
     private LoginLogModelProvider() {
+    }
+
+    public List<LoginLogEntry> getLog() {
     	entries = new ArrayList<LoginLogEntry>();
         // get the login entries from the database
     	try(Session s = HibernateManager.openSession()){	
 			Query<LoginLogEntry> query = s.createQuery("FROM LoginLogEntry ORDER BY loginTimestamp", LoginLogEntry.class); //$NON-NLS-1$
 			entries = query.getResultList();
 		}
-
-    }
-
-    public List<LoginLogEntry> getLog() {
         return entries;
     }
 
