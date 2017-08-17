@@ -132,7 +132,6 @@ public class RecordsView {
 	
 	private static final String DIR_PREF_KEY = ID + ".export.dir"; //$NON-NLS-1$
 
-	
 	private final Color LIST_HIGHLIGHT_COLOR = SmartUtils.getListHighlightColor(Display.getDefault());
 	private final Color LIST_SELECTION_COLOR = SmartUtils.getListSelectedColor(Display.getDefault());
 	
@@ -421,16 +420,17 @@ public class RecordsView {
 			public void menuHidden(MenuEvent e) {}
 		});
 		
-		MenuItem miNew = new MenuItem(m, SWT.PUSH);
-		miNew.setText(Messages.RecordsView_NewRecordMenuItem);
-		miNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		miNew.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				(new NewRecordHandler()).createNewRecord(context);
-			}
-		});
-		
+		if (IntelSecurityManager.INSTANCE.canCreateRecord()) {
+			MenuItem miNew = new MenuItem(m, SWT.PUSH);
+			miNew.setText(Messages.RecordsView_NewRecordMenuItem);
+			miNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			miNew.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					(new NewRecordHandler()).createNewRecord(context);
+				}
+			});
+		}			
 		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
 			MenuItem miDelete = new MenuItem(m, SWT.PUSH);
 			miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -506,7 +506,7 @@ public class RecordsView {
 		
 		new MenuItem(m, SWT.SEPARATOR);
 		
-		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()){
 			MenuItem miAdd = new MenuItem(m, SWT.PUSH);
 			miAdd.setText(Messages.RecordsView_AddToWs);
 			miAdd.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));

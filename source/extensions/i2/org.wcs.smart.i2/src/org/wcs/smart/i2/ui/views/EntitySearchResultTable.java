@@ -525,20 +525,22 @@ public class EntitySearchResultTable extends Composite {
 			});
 		}
 		
-		new MenuItem(menu, SWT.SEPARATOR);
 		
-		MenuItem mnuWorkingset = new MenuItem(menu, SWT.PUSH);
-		mnuWorkingset.setText(Messages.EntitySearchResultTable_AddToWsMenuItem);
-		mnuWorkingset.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-		mnuWorkingset.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				WorkingSetManager.INSTANCE.addEntityToActiveWorkingSet(getCurrentSelection(), context);
-			}
-		});
+		MenuItem mnuWorkingset = null;
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()) {
+			new MenuItem(menu, SWT.SEPARATOR);
+			mnuWorkingset = new MenuItem(menu, SWT.PUSH);
+			mnuWorkingset.setText(Messages.EntitySearchResultTable_AddToWsMenuItem);
+			mnuWorkingset.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+			mnuWorkingset.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					WorkingSetManager.INSTANCE.addEntityToActiveWorkingSet(getCurrentSelection(), context);
+				}
+			});
+		}
 		
-		
-		
+		MenuItem fmnuWorkingset = mnuWorkingset;
 		menu.addMenuListener(new MenuListener() {
 			private MenuItem mnuAddToRecord = null;
 			private Menu subRecord = null;
@@ -547,7 +549,7 @@ public class EntitySearchResultTable extends Composite {
 				boolean hasSelection = !getCurrentSelection().isEmpty();
 				mnuOpen.setEnabled(hasSelection);
 				mnuPrint.setEnabled(hasSelection);
-				mnuWorkingset.setEnabled(hasSelection && WorkingSetManager.INSTANCE.isSet());
+				if (fmnuWorkingset != null) fmnuWorkingset.setEnabled(hasSelection && WorkingSetManager.INSTANCE.isSet());
 				mnuCompare.setEnabled(getCurrentSelection().size() > 0);
 				
 				if (mnuAddToRecord == null || mnuAddToRecord.isDisposed()){

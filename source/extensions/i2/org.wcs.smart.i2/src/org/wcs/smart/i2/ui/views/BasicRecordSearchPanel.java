@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.i2.ui.views;
 
-import java.awt.image.BufferedImage;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -35,16 +33,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -57,26 +54,27 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
@@ -92,6 +90,7 @@ import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Basic search panel for narrative view
@@ -101,6 +100,9 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class BasicRecordSearchPanel extends Composite {
 
+	private final Color LIST_HIGHLIGHT_COLOR = SmartUtils.getListHighlightColor(Display.getDefault());
+	private final Color LIST_SELECTION_COLOR = SmartUtils.getListSelectedColor(Display.getDefault());
+	
 	private TableComboViewer cmbSource;
 	private TableViewer tblResults;
 	private FilterComposite txtNarrative;
@@ -112,12 +114,15 @@ public class BasicRecordSearchPanel extends Composite {
 	
 	private IEclipseContext context;
 	
-	private List<IntelRecordSource> sources = null;
-	
 	public BasicRecordSearchPanel(Composite parent, FormToolkit toolkit, IEclipseContext context) {
 		super(parent, SWT.NONE);
 		this.context = context;
 		createControls(toolkit);
+		
+		addListener(SWT.Dispose, e->{
+			LIST_HIGHLIGHT_COLOR.dispose();
+			LIST_SELECTION_COLOR.dispose();
+		});
 	}
 	
 	private void createControls(FormToolkit toolkit){
@@ -214,68 +219,60 @@ public class BasicRecordSearchPanel extends Composite {
 			}
 		});
 		
-		TableViewerColumn statusColumn = new TableViewerColumn(tblResults, SWT.NONE);
-		statusColumn.getColumn().setWidth(27);
-		statusColumn.setLabelProvider(new ColumnLabelProvider(){
+//		TableViewerColumn statusColumn = new TableViewerColumn(tblResults, SWT.NONE);
+		
+		tblResults.setLabelProvider(new LabelProvider() {
 			@Override
-			public Image getImage(Object element){
-				if (element instanceof IntelRecordSearchResultItem){
-					switch(((IntelRecordSearchResultItem) element).getStatus()){
-					case COMPLETE:
-						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_DONE);
-					case NEW:
-						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_NEW);
-					case PROCESSING:
-						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_IP);
-					}
-				}
-				return super.getImage(element);
-			}
+			public String getText(Object element) { return ""; }; //$NON-NLS-1$
+			@Override
+			public Image getImage(Object element) { return null; };
 		});
 		
-		TableViewerColumn nameColumn = new TableViewerColumn(tblResults, SWT.NONE);
-		nameColumn.getColumn().setWidth(250);
-		nameColumn.setLabelProvider(new ColumnLabelProvider(){
-				HashMap<UUID, Image> images = new HashMap<UUID, Image>();
+		tblResults.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		
+		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true);
+		tblResults.getControl().addListener(SWT.MeasureItem, new Listener() {
+	 		public void handleEvent(Event event) {
+	 			TableItem item = (TableItem)event.item;
+	 			Image trailingImage = lblprovider.getImage(item.getData());
+	 			String txt = lblprovider.getText(item.getData());
+	 			int width = 0;
+	 			int height = 0;
+	 			if (trailingImage != null) {
+	 				width += trailingImage.getBounds().width;
+	 				height = trailingImage.getBounds().height;
+	 			}
+	 			width += event.gc.stringExtent(txt).x + 1;
+	 			height = Math.max(height,  event.gc.stringExtent(txt).y);
+	 			event.width = width;
+	 			event.height = height;
+	 		}
+	 	});
+	 	
+		tblResults.getControl().addListener(SWT.PaintItem, new Listener() {
+			public void handleEvent(Event event) {
+				TableItem item = (TableItem) event.item;
+				Image trailingImage = lblprovider.getImage(item.getData());
+				int offset = 0;
+				Color c = event.gc.getBackground();
+				if (trailingImage != null) {
+					int x = event.x + event.width;
+					int itemHeight = tblResults.getTable().getItemHeight();
+					int imageHeight = trailingImage.getBounds().height;
+					int y = event.y + (itemHeight - imageHeight) / 2;
+					event.gc.drawImage(trailingImage, x, y);
+					offset = x + trailingImage.getBounds().width;
+				}
+				if ((event.detail & SWT.SELECTED) == SWT.SELECTED) {
+					c = LIST_SELECTION_COLOR;
+				}else if ( (event.detail & SWT.HOT) == SWT.HOT) {
+					c = LIST_HIGHLIGHT_COLOR;
+				}
+				String text = lblprovider.getText(item.getData());
+				event.gc.setBackground(c);
+				event.gc.drawText(text, offset+1, event.y+1);
 				
-				@Override
-				public void dispose(){
-					for (Image i : images.values()) i.dispose();
-					images.clear();
-				}
-				@Override
-				public String getText(Object element){
-					if (element instanceof IntelRecordSearchResultItem){
-						return ((IntelRecordSearchResultItem) element).getTitle();
-					}
-					return super.getText(element);
-				}
-				@Override
-				public Image getImage(Object element){
-					if (element instanceof IntelRecordSearchResultItem){
-						UUID srcUuid = ((IntelRecordSearchResultItem) element).getRecordSourceUuid();
-						Image i = images.get(srcUuid);
-						if (i == null){
-							if (sources != null){
-								for (IntelRecordSource s : sources){
-									if (s.getUuid().equals(srcUuid)){
-										try{
-											BufferedImage image = s.getIconAsImage();
-											if (image != null){
-												i = AWTSWTImageUtils.convertToSWTImage(image);
-												images.put(srcUuid, i);
-											}
-										}catch (Exception ex){
-										}
-										break;
-									}
-								}
-							}
-						}
-						return i;
-					}
-					return super.getImage(element);
-				}
+			}
 		});
 		
 		tblResults.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -325,7 +322,7 @@ public class BasicRecordSearchPanel extends Composite {
 					Object o= iterator.next();
 					if (o instanceof IntelRecordSearchResultItem){
 						IntelRecordSearchResultItem x = (IntelRecordSearchResultItem) o;
-						selection.add(new RecordEditorInput(x.getTitle(), x.getRecordUuid(), null, x.getRecordSourceUuid(), x.getStatus()));
+						selection.add(new RecordEditorInput(x.getTitle(), x.getRecordUuid(), null, x.getRecordSource().getUuid(), x.getStatus()));
 					}
 					
 				}
@@ -363,7 +360,7 @@ public class BasicRecordSearchPanel extends Composite {
 		open.addListener(SWT.Selection, e->openSelection());
 		
 		MenuItem ws = null;
-		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()){
 				ws = new MenuItem(mnu, SWT.PUSH);
 				ws.setText(Messages.BasicRecordSearchPanel_AddToWsMenuItem);
 				ws.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
@@ -384,7 +381,7 @@ public class BasicRecordSearchPanel extends Composite {
 						Object x = (Object) iterator.next();
 						if (x instanceof IntelRecordSearchResultItem){
 							IntelRecordSearchResultItem item = (IntelRecordSearchResultItem) x;
-							toDelete.add(new RecordEditorInput(item.getTitle(), item.getRecordUuid(), null, item.getRecordSourceUuid(), null));
+							toDelete.add(new RecordEditorInput(item.getTitle(), item.getRecordUuid(), null, item.getRecordSource().getUuid(), null));
 						}
 					}
 					if ((new DeleteRecordHandler()).deleteRecords(toDelete, context)){
@@ -422,7 +419,7 @@ public class BasicRecordSearchPanel extends Composite {
 		for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();	
 			if (x instanceof IntelRecordSearchResultItem){
-				RecordEditorInput e = new RecordEditorInput(null, ((IntelRecordSearchResultItem) x).getRecordUuid(), null, ((IntelRecordSearchResultItem) x).getRecordSourceUuid(), null);
+				RecordEditorInput e = new RecordEditorInput(null, ((IntelRecordSearchResultItem) x).getRecordUuid(), null, ((IntelRecordSearchResultItem) x).getRecordSource().getUuid(), null);
 				toAdd.add(e);
 			}
 		}
@@ -494,31 +491,6 @@ public class BasicRecordSearchPanel extends Composite {
 	
 	public void refreshSource(){
 		cmbSource.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		refreshSource.setSystem(true);
-		refreshSource.schedule();
 	}
-	
-	private Job refreshSource = new Job(Messages.BasicRecordSearchPanel_RefershSourceJobName){
 
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			List<Object> sources = new ArrayList<>();
-			sources.add(""); //$NON-NLS-1$
-			try(Session s = HibernateManager.openSession()){
-				List<IntelRecordSource> srcs = QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
-					srcs.forEach(r->{
-					r.getName();
-					r.getIcon();
-				});
-				sources.addAll(srcs);
-				BasicRecordSearchPanel.this.sources = srcs;
-			}
-			
-			Display.getDefault().syncExec(()->{
-					cmbSource.setInput(sources);
-			});
-			return Status.OK_STATUS;
-		}
-		
-	};
 }

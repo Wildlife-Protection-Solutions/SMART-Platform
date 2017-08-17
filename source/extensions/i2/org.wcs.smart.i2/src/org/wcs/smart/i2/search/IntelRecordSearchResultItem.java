@@ -24,6 +24,7 @@ package org.wcs.smart.i2.search;
 import java.util.UUID;
 
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordSource;
 
 /**
  * Record search result item
@@ -35,7 +36,7 @@ public class IntelRecordSearchResultItem {
 	
 	private String title;
 	private UUID record;
-	private UUID recordSource;
+	private IntelRecordSource recordSource;
 	private IntelRecord.Status status;
 	
 	private String localMatch;
@@ -46,7 +47,7 @@ public class IntelRecordSearchResultItem {
 	 * @param matchedString
 	 * @param rate
 	 */
-	public IntelRecordSearchResultItem(UUID record, UUID recordSource, String title, IntelRecord.Status status, String localMatch, int[][] matchRanges) {
+	public IntelRecordSearchResultItem(UUID record, IntelRecordSource recordSource, String title, IntelRecord.Status status, String localMatch, int[][] matchRanges) {
 		this.title = title;
 		this.record = record;
 		this.recordSource = recordSource;
@@ -82,7 +83,7 @@ public class IntelRecordSearchResultItem {
 	 * 
 	 * @return the uuid of the source of the matched record 
 	 */
-	public UUID getRecordSourceUuid(){
+	public IntelRecordSource getRecordSource(){
 		return this.recordSource;
 	}
 	

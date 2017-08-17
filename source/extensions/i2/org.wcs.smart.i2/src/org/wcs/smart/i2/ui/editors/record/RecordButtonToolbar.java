@@ -83,10 +83,11 @@ public class RecordButtonToolbar extends Composite{
 	}
 	
 	public void enableWs(boolean enable){
-		wsetItem.setEnabled(enable);
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()) wsetItem.setEnabled(enable);
 	}
 	
-	public void setEditMode(boolean editMode){		
+	public void setEditMode(boolean editMode){	
+		if (!IntelSecurityManager.INSTANCE.canEditRecord()) return;
 		if (editItem.isDisposed()) return;
 		editItem.setSelection(editMode);
 		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
@@ -202,7 +203,8 @@ public class RecordButtonToolbar extends Composite{
 		wsetItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				WorkingSetManager.INSTANCE.addRecordToActiveWorkingSet(Collections.singleton(recordEditor.getRecord()), recordEditor.getContext());
+				if (IntelSecurityManager.INSTANCE.canEditWorkingSet())
+					WorkingSetManager.INSTANCE.addRecordToActiveWorkingSet(Collections.singleton(recordEditor.getRecord()), recordEditor.getContext());
 			}
 		});
 		wsetItem.setEnabled(false);
@@ -217,9 +219,14 @@ public class RecordButtonToolbar extends Composite{
 				
 			}
 		});
-		editItem.setSelection(recordEditor.getEditMode());
+		
+		if (IntelSecurityManager.INSTANCE.canEditRecord()){
+			editItem.setSelection(recordEditor.getEditMode());
+			editItem.setEnabled(recordEditor.getEditMode());	
+		}else{
+			editItem.setSelection(false);
+			editItem.setEnabled(false);
+		}
 	}
-	
-	
 
 }

@@ -37,11 +37,21 @@ public enum IntelSecurityManager {
 	}
 	
 	/**
+	 * Determine if the current user can edit working set
+	 * @return
+	 */
+	public boolean canEditWorkingSet(){
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDataEntryUserLevel.INSTANCE); 
+	}
+	
+	/**
 	 * Determine if the current user can edit a query
 	 * @return
 	 */
 	public boolean canEditQuery(){
-		return true;
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDataEntryUserLevel.INSTANCE); 
 	}
 	
 	/**
@@ -75,13 +85,23 @@ public enum IntelSecurityManager {
 	}
 	
 	/**
+	 * Determine if the current user can create record
+	 * @return
+	 */
+	public boolean canCreateRecord(){
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDataEntryUserLevel.INSTANCE);
+	}
+	
+	/**
 	 * Determine if the current user can view and modify
 	 * working sets
 	 * 
 	 * @return
 	 */
 	public boolean canViewWorkingSets(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE);
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelReadOnlyUserLevel.INSTANCE);
 	}
 	
 	/**
@@ -90,7 +110,8 @@ public enum IntelSecurityManager {
 	 * @return
 	 */
 	public boolean canViewQueries(){
-		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE);
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelReadOnlyUserLevel.INSTANCE); 
 	}
 	
 	/**
@@ -101,5 +122,16 @@ public enum IntelSecurityManager {
 	 */
 	public boolean canEditRecordStatus(){
 		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE);
+	}
+	
+	/**
+	 * Determine if the current user can
+	 * edit the record 
+	 * 
+	 * @return
+	 */
+	public boolean canEditRecord(){
+		return UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelAnalystUserLevel.INSTANCE) ||
+				UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), IntelDataEntryUserLevel.INSTANCE);
 	}
 }

@@ -105,6 +105,7 @@ public class RecordMapPage extends SmartMapEditorPart {
 	private SimpleFeatureType pointFeatureType = null;
 	private LocationAttributeMapLayer attributeLayer;
 	private LocationListComposite locationPanel;
+	private ToolItem importItem ;
 	
 	private Job localMapLayerJob = new Job(Messages.RecordMapPage_jobname) { 
 		
@@ -222,7 +223,9 @@ public class RecordMapPage extends SmartMapEditorPart {
 	}
 
 	public void setEditMode(boolean editMode){
-		tools.getTool(DrawPolygonTool.ID).setEnabled(editMode);
+		super.tools.getTool(DrawPolygonTool.ID).setEnabled(editMode);
+        super.tools.getTool(DrawPointTool.ID).setEnabled(editMode);
+        importItem.setEnabled(editMode);
 	}
 	
 	
@@ -302,10 +305,13 @@ public class RecordMapPage extends SmartMapEditorPart {
 		
 		ToolBar bar = super.tools.getToolbar();
 		
-		ToolItem importItem = new ToolItem(bar, SWT.DROP_DOWN);
+		importItem = new ToolItem(bar, SWT.DROP_DOWN);
 		importItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_LOCATION_IMPORT));
 		importItem.setToolTipText(Messages.RecordMapPage_ImportMenuItem);
 		
+		if (!recordEditor.getEditMode()) {
+			importItem.setEnabled(false);
+		}
 		Menu dd = new Menu(bar);
 		
 		MenuItem fromFile = new MenuItem(dd, SWT.PUSH);
@@ -332,6 +338,9 @@ public class RecordMapPage extends SmartMapEditorPart {
 		sash.setWeights(new int[]{8,2});
         getMap().getBlackboard().put(RecordEditor.class.getName(), recordEditor);
         addLayers();
+        
+        super.tools.getTool(DrawPolygonTool.ID).setEnabled(recordEditor.getEditMode());
+        super.tools.getTool(DrawPointTool.ID).setEnabled(recordEditor.getEditMode());
 	}
 
 	//udig does not support selection from multiple layers 

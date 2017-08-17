@@ -217,6 +217,19 @@
                   commandId="org.wcs.smart.i2.command.record.new"
                   label="%NewRecordCommandName"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_data_entry">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.entity.new"
@@ -234,6 +247,19 @@
                   commandId="org.wcs.smart.i2.command.query.record.new"
                   label="%NewQueryCommandName"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_data_entry">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.i2.separator1"
@@ -360,6 +386,19 @@
                      style="push"
                      tooltip="import model elements from an xml file">
                </command>
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_data_entry">
+                     </test>
+                  </or>
+               </visibleWhen>
             </menu>
             <separator
                   name="org.wcs.smart.i2.separator3"
@@ -384,10 +423,16 @@
                </parameter>
                <visibleWhen
                      checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
-                  </test>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_read_only">
+                     </test>
+                  </or>
                </visibleWhen>
             </command>
             <visibleWhen
@@ -405,6 +450,10 @@
                      <test
                            property="org.wcs.smart.smartAdminUser"
                            value="intel_data_entry">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_read_only">
                      </test>
                   </or>
                </and>
@@ -437,6 +486,10 @@
                               property="org.wcs.smart.smartAdminUser"
                               value="intel_analyst">
                         </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_data_entry">
+                        </test>
                      </or>
                   </and>
                </visibleWhen>
@@ -466,6 +519,10 @@
                               property="org.wcs.smart.smartAdminUser"
                               value="intel_data_entry">
                         </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_data_entry">
+                        </test>
                      </or>
                   </and>
                </visibleWhen>
@@ -477,26 +534,38 @@
                   commandId="org.eclipse.ui.file.save">
                <visibleWhen
                      checkEnabled="false">
-                  <or>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
-                        </equals>
-                     </with>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
-                        </equals>
-                     </with>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.i2.report.entity.edit">
-                        </equals>
-                     </with>
-                  </or>
+                  <and>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_analyst">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_data_entry">
+                        </test>
+                     </or>
+                     <or>
+                        <with
+                              variable="activeWorkbenchWindow.activePerspective">
+                           <equals
+                                 value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                           </equals>
+                        </with>
+                        <with
+                              variable="activeWorkbenchWindow.activePerspective">
+                           <equals
+                                 value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                           </equals>
+                        </with>
+                        <with
+                              variable="activeWorkbenchWindow.activePerspective">
+                           <equals
+                                 value="org.wcs.smart.i2.report.entity.edit">
+                           </equals>
+                        </with>
+                     </or>
+                  </and>
                </visibleWhen>
             </command>
             <command
@@ -505,20 +574,32 @@
                   style="push">
                <visibleWhen
                      checkEnabled="false">
-                  <or>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
-                        </equals>
-                     </with>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
-                        </equals>
-                     </with>
-                  </or>
+                  <and>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_analyst">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_data_entry">
+                        </test>
+                     </or>
+                     <or>
+                        <with
+                              variable="activeWorkbenchWindow.activePerspective">
+                           <equals
+                                 value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                           </equals>
+                        </with>
+                        <with
+                              variable="activeWorkbenchWindow.activePerspective">
+                           <equals
+                                 value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                           </equals>
+                        </with>
+                     </or>
+                  </and>
                </visibleWhen>
             </command>
          </toolbar>
@@ -561,20 +642,32 @@
                label="%SaveAsCommand2">
             <visibleWhen
                   checkEnabled="false">
-               <or>
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
-                     </equals>
-                  </with>
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
-                     </equals>
-                  </with>
-               </or>
+               <and>
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_data_entry">
+                     </test>
+                  </or>
+                  <or>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+                        </equals>
+                     </with>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+                        </equals>
+                     </with>
+                  </or>
+               </and>
             </visibleWhen>
          </command>
          <command
@@ -601,6 +694,32 @@
          <separator
                name="org.wcs.smart.query.separator3"
                visible="true">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_data_entry">
+                  </test>
+               </or>
+            </visibleWhen>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_data_entry">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+               </and>
+            </visibleWhen>
          </separator>
       </menuContribution>
       <menuContribution
@@ -609,6 +728,19 @@
          <command
                commandId="org.wcs.smart.i2.command.record.new"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_data_entry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.i2.command.record.view.refresh"
@@ -618,6 +750,19 @@
       <menuContribution
             allPopups="false"
             locationURI="popup:outlinemenu?after=org.eclipse.birt.report.designer.ui.actions.NewJointDataSetAction">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_data_entry">
+                  </test>
+               </or>
+            </visibleWhen>
          <separator
                name="org.wcs.smart.i2.entity.template.query.separator"
                visible="true">
@@ -650,6 +795,19 @@
          <command
                commandId="org.wcs.smart.i2.command.query.record.new"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_analyst">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="intel_data_entry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.i2.command.query.refresh"
@@ -1842,6 +2000,9 @@
       </SMARTUserLevel>
       <SMARTUserLevel
             class="org.wcs.smart.i2.IntelDataEntryUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.IntelReadOnlyUserLevel">
       </SMARTUserLevel>
    </extension>
    <extension

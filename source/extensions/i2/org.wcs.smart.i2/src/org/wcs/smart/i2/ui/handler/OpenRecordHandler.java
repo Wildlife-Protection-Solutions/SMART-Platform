@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -43,7 +44,11 @@ public class OpenRecordHandler {
 	public void openRecord(RecordEditorInput input, boolean editMode){
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
-			input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || editMode);
+			if (IntelSecurityManager.INSTANCE.canEditRecord()) {
+				input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || editMode);
+			}else {
+				input.setIsInitEditable(false);
+			}
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, RecordEditor.ID);
 		} catch (PartInitException e) {
 			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.OpenRecordHandler_OpenError, e.getMessage()), e);
@@ -51,10 +56,7 @@ public class OpenRecordHandler {
 	}
 	
 	public void openRecord(IntelRecord record, boolean editMode){
-		
 		RecordEditorInput input = new RecordEditorInput(record);
 		openRecord(input, editMode);
-		
-		
 	}
 }

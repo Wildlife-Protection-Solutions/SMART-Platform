@@ -42,6 +42,7 @@ import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.search.IntelRecordSearchResultItem;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 
@@ -90,6 +91,54 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 		images.values().forEach(w->w.dispose());
 	}
 	
+	private Image combineImage(IntelRecord.Status status, IntelRecordSource source) {
+		String key = ""; //$NON-NLS-1$
+		IntelRecordSource rsrc = source;
+		if (rsrc == null) {
+			key += "NONE"; //$NON-NLS-1$
+		}else {
+			key += rsrc.getKeyId();
+		}
+		key += "_" + status.name(); //$NON-NLS-1$
+		if (images.containsKey(key)) return images.get(key);
+
+		//merge images
+		Image img1 = RecordLabelProvider.getRecordStatusImage(status);
+		Image img2 = srcProvider.getImage(source);
+		if (img1 == null && img2 == null) return null;
+		if (img1 == null) {
+			images.put(key, img2);
+			return img2;
+		}
+		if (img2 == null) {
+			images.put(key, img1);
+			return img1;
+		}
+
+		int w1 = img1.getBounds().width;
+		int width = w1+ img2.getBounds().width;
+		int height = Math.max(img1.getBounds().height,  img2.getBounds().height);
+		int depth = Math.max(img1.getImageData().depth,  img2.getImageData().depth);
+		PaletteData palette = img1.getImageData().palette;
+		
+		ImageData newData = new ImageData(width, height, depth, palette);
+		
+		for (int x = 0; x < w1; x ++) {
+			for (int y = 0; y < height; y ++) {
+				RGB b = img1.getImageData().palette.getRGB(img1.getImageData().getPixel(x, y));
+				newData.setPixel(x, y, newData.palette.getPixel(b));
+				newData.setAlpha(x, y, img1.getImageData().getAlpha(x, y));
+				
+				b = img2.getImageData().palette.getRGB(img2.getImageData().getPixel(x, y));
+				newData.setPixel(x+w1, y, newData.palette.getPixel(b));
+				newData.setAlpha(x+w1, y, img2.getImageData().getAlpha(x, y));
+			}
+		}
+		Image combined = new Image(Display.getDefault(), newData);
+		images.put(key, combined);
+		return combined;
+	}
+	
 	@Override
 	public Image getImage(Object element){
 		if (element instanceof IntelRecordProxy) {
@@ -98,53 +147,14 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 				//only display source image
 				return srcProvider.getImage(proxy.getRecordSource());
 			}
-			
-			String key = ""; //$NON-NLS-1$
-			IntelRecordSource rsrc = proxy.getRecordSource();
-			if (rsrc == null) {
-				key += "NONE"; //$NON-NLS-1$
-			}else {
-				key += rsrc.getKeyId();
+			return combineImage(proxy.getStatus(), proxy.getRecordSource());
+		}else if (element instanceof IntelRecordSearchResultItem) {
+			IntelRecordSearchResultItem item = (IntelRecordSearchResultItem)element;
+			if (!sourceAndStatusImg) {
+				//only display source image
+				return srcProvider.getImage(item.getRecordSource());
 			}
-			IntelRecord.Status status = proxy.getStatus();
-			key += "_" + status.name(); //$NON-NLS-1$
-			if (images.containsKey(key)) return images.get(key);
-
-			//merge images
-			Image img1 = RecordLabelProvider.getRecordStatusImage(proxy.getStatus());
-			Image img2 = srcProvider.getImage(proxy.getRecordSource());
-			if (img1 == null && img2 == null) return null;
-			if (img1 == null) {
-				images.put(key, img2);
-				return img2;
-			}
-			if (img2 == null) {
-				images.put(key, img1);
-				return img1;
-			}
-
-			int w1 = img1.getBounds().width;
-			int width = w1+ img2.getBounds().width;
-			int height = Math.max(img1.getBounds().height,  img2.getBounds().height);
-			int depth = Math.max(img1.getImageData().depth,  img2.getImageData().depth);
-			PaletteData palette = img1.getImageData().palette;
-			
-			ImageData newData = new ImageData(width, height, depth, palette);
-			
-			for (int x = 0; x < w1; x ++) {
-				for (int y = 0; y < height; y ++) {
-					RGB b = img1.getImageData().palette.getRGB(img1.getImageData().getPixel(x, y));
-					newData.setPixel(x, y, newData.palette.getPixel(b));
-					newData.setAlpha(x, y, img1.getImageData().getAlpha(x, y));
-					
-					b = img2.getImageData().palette.getRGB(img2.getImageData().getPixel(x, y));
-					newData.setPixel(x+w1, y, newData.palette.getPixel(b));
-					newData.setAlpha(x+w1, y, img2.getImageData().getAlpha(x, y));
-				}
-			}
-			Image combined = new Image(Display.getDefault(), newData);
-			images.put(key, combined);
-			return combined;
+			return combineImage(item.getStatus(), item.getRecordSource());
 		}else if (element instanceof IntelRecordSource) {
 			return srcProvider.getImage(element);
 		}else if (element instanceof IntelRecord.Status) {
@@ -170,7 +180,10 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(element, Locale.getDefault());
 		}else if (element instanceof Date) {
 			return DATE_FORMAT.format((Date)element);
+		}else if (element instanceof IntelRecordSearchResultItem) {
+			return ((IntelRecordSearchResultItem)element).getTitle();
 		}
+			
 		return super.getText(element);
 	}
 	

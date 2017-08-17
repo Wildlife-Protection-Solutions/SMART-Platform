@@ -551,7 +551,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private void subscribeToEvents(){
 		eventHandles = new ArrayList<EventHandler>();
 		
-		EventHandler handler = (e) -> wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+		EventHandler handler = (e) -> {
+			if (IntelSecurityManager.INSTANCE.canEditWorkingSet())
+					wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+				else
+					wsetItem.setEnabled(false);
+		};
 		eventHandles.add(handler);
 		eventBroker.subscribe(IntelEvents.ACTIVE_WS_SET, handler);
 		
@@ -1053,7 +1058,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				WorkingSetManager.INSTANCE.addEntityToActiveWorkingSet(Collections.singleton(getEntity()), context);
 			}
 		});
-		wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+		wsetItem.setEnabled(IntelSecurityManager.INSTANCE.canEditWorkingSet() && WorkingSetManager.INSTANCE.isSet());
 		
 		
 		editItem = new ToolItem(buttonBar, SWT.CHECK);
@@ -1310,7 +1315,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				int colIndex = relationshipTree.getCell(new Point(event.x, event.y)).getColumnIndex();
 				if (colIndex == 4){
 					Object x = ((IStructuredSelection)relationshipTree.getSelection()).getFirstElement();
-					if (x instanceof IntelEntityRelationship){
+					if (getEditMode() && x instanceof IntelEntityRelationship){
 						editRelationshipAttributes((IntelEntityRelationship) x);
 					}
 				}else if (colIndex == 3){

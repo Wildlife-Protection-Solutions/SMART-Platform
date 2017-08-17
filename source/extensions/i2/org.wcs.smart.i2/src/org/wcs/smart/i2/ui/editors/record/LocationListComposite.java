@@ -737,6 +737,9 @@ public class LocationListComposite extends Composite{
 
 		@Override
 		protected boolean canEdit(Object element) {
+			if (!LocationListComposite.this.editor.getEditMode()){
+				return false;
+			}
 			return true;
 		}
 	}

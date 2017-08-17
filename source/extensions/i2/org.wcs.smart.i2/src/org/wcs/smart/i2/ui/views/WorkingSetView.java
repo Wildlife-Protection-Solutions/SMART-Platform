@@ -95,6 +95,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -190,26 +191,28 @@ public class WorkingSetView {
 		
 		ToolBar tools = new ToolBar(header, SWT.FLAT);
 		
-		copyItem = new ToolItem(tools, SWT.PUSH);
-		copyItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_COPY));
-		copyItem.setToolTipText(Messages.WorkingSetView_copyTooltip);
-		copyItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				copyWorkingSet();	
-			}
-		});
-		copyItem.setEnabled(false);
-		
-		newItem = new ToolItem(tools, SWT.PUSH);
-		newItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		newItem.setToolTipText(Messages.WorkingSetView_createnewTooltip);
-		newItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				newWorkingSet();	
-			}
-		});
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()) {
+			copyItem = new ToolItem(tools, SWT.PUSH);
+			copyItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_COPY));
+			copyItem.setToolTipText(Messages.WorkingSetView_copyTooltip);
+			copyItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					copyWorkingSet();	
+				}
+			});
+			copyItem.setEnabled(false);
+			
+			newItem = new ToolItem(tools, SWT.PUSH);
+			newItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			newItem.setToolTipText(Messages.WorkingSetView_createnewTooltip);
+			newItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					newWorkingSet();	
+				}
+			});
+		}
 		
 		selectItem = new ToolItem(tools, SWT.PUSH);
 		selectItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_SELECT));
@@ -703,7 +706,7 @@ public class WorkingSetView {
 	@Optional
 	private void workingSetSet(@UIEventTopic(IntelEvents.ACTIVE_WS_SET) IntelWorkingSet activeWorkingSet){
 		setWorkingSet(activeWorkingSet);
-		copyItem.setEnabled(activeWorkingSet != null);
+		if (copyItem != null) copyItem.setEnabled(activeWorkingSet != null);
 	}
 	
 	@Inject

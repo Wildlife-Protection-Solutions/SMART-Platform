@@ -67,6 +67,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -119,125 +120,128 @@ public class WorkingSetListDialog extends TitleAreaDialog {
 				okPressed();
 			}
 		});
-		Menu menu =  new Menu(lstViewer.getControl());
-		lstViewer.getControl().setMenu(menu);
 		
-		Composite buttonComp = new Composite(parent, SWT.NONE);
-		buttonComp.setLayout(new GridLayout());
-		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		
-		Button btnAdd = new Button(buttonComp, SWT.PUSH);
-		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.setToolTipText(Messages.WorkingSetListDialog_addTooltip);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnAdd.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				addItem();
-			}
-		});
-
-		Button btnCopy = new Button(buttonComp, SWT.PUSH);
-		btnCopy.setText(Messages.WorkingSetListDialog_CopyLabel);
-		btnCopy.setToolTipText(Messages.WorkingSetListDialog_copytooltip);
-		btnCopy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnCopy.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				copyItem();
-			}
-		});
-		btnCopy.setEnabled(false);
-		
-		Button btnRename = new Button(buttonComp, SWT.PUSH);
-		btnRename.setText(Messages.WorkingSetListDialog_RenameLabel);
-		btnRename.setToolTipText(Messages.WorkingSetListDialog_renametooltip);
-		btnRename.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnRename.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				renameItem();
-			}
-		});
-		btnRename.setEnabled(false);
-		
-		
-		Button btnDelete = new Button(buttonComp, SWT.PUSH);
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setToolTipText(Messages.WorkingSetListDialog_deletetooltip);
-		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnDelete.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				deleteItem();
-			}
-		});
-		btnDelete.setEnabled(false);
-		
-		lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				boolean enabled = getSelectedItem() != null;
-				btnDelete.setEnabled(enabled);
-				btnRename.setEnabled(enabled);
-				btnCopy.setEnabled(enabled);
-			}
-		});
-		MenuItem renameItem = new MenuItem(menu, SWT.PUSH);
-		renameItem.setText(Messages.WorkingSetListDialog_RenameLabel);
-		renameItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				renameItem();
-			}
-		});
-		
-		new MenuItem(menu, SWT.SEPARATOR);
-		
-		MenuItem addItem = new MenuItem(menu, SWT.PUSH);
-		addItem.setText(DialogConstants.ADD_BUTTON_TEXT);
-		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		addItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addItem();
-			}
-		});
-		
-		MenuItem copyItem = new MenuItem(menu, SWT.PUSH);
-		copyItem.setText(Messages.WorkingSetListDialog_createcopyLabel);
-//		copyItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		copyItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				copyItem();
-			}
-		});
-		
-		new MenuItem(menu, SWT.SEPARATOR);
-		
-		MenuItem deleteItem = new MenuItem(menu, SWT.PUSH);
-		deleteItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteItem();
-			}
-		});
-		menu.addMenuListener(new MenuListener() {
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()) {
+			Menu menu =  new Menu(lstViewer.getControl());
+			lstViewer.getControl().setMenu(menu);
 			
-			@Override
-			public void menuShown(MenuEvent e) {
-				boolean hasSelection = getSelectedItem() != null;
-				deleteItem.setEnabled(hasSelection);
-				renameItem.setEnabled(hasSelection);
-				copyItem.setEnabled(hasSelection);
-			}
+			Composite buttonComp = new Composite(parent, SWT.NONE);
+			buttonComp.setLayout(new GridLayout());
+			buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			
-			@Override
-			public void menuHidden(MenuEvent e) {}
-		});
+			Button btnAdd = new Button(buttonComp, SWT.PUSH);
+			btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+			btnAdd.setToolTipText(Messages.WorkingSetListDialog_addTooltip);
+			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			btnAdd.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					addItem();
+				}
+			});
+	
+			Button btnCopy = new Button(buttonComp, SWT.PUSH);
+			btnCopy.setText(Messages.WorkingSetListDialog_CopyLabel);
+			btnCopy.setToolTipText(Messages.WorkingSetListDialog_copytooltip);
+			btnCopy.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			btnCopy.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					copyItem();
+				}
+			});
+			btnCopy.setEnabled(false);
+			
+			Button btnRename = new Button(buttonComp, SWT.PUSH);
+			btnRename.setText(Messages.WorkingSetListDialog_RenameLabel);
+			btnRename.setToolTipText(Messages.WorkingSetListDialog_renametooltip);
+			btnRename.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			btnRename.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					renameItem();
+				}
+			});
+			btnRename.setEnabled(false);
+			
+			
+			Button btnDelete = new Button(buttonComp, SWT.PUSH);
+			btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			btnDelete.setToolTipText(Messages.WorkingSetListDialog_deletetooltip);
+			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			btnDelete.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					deleteItem();
+				}
+			});
+			btnDelete.setEnabled(false);
+			
+			lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					boolean enabled = getSelectedItem() != null;
+					btnDelete.setEnabled(enabled);
+					btnRename.setEnabled(enabled);
+					btnCopy.setEnabled(enabled);
+				}
+			});
+			MenuItem renameItem = new MenuItem(menu, SWT.PUSH);
+			renameItem.setText(Messages.WorkingSetListDialog_RenameLabel);
+			renameItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					renameItem();
+				}
+			});
+			
+			new MenuItem(menu, SWT.SEPARATOR);
+			
+			MenuItem addItem = new MenuItem(menu, SWT.PUSH);
+			addItem.setText(DialogConstants.ADD_BUTTON_TEXT);
+			addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			addItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					addItem();
+				}
+			});
+			
+			MenuItem copyItem = new MenuItem(menu, SWT.PUSH);
+			copyItem.setText(Messages.WorkingSetListDialog_createcopyLabel);
+	//		copyItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			copyItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					copyItem();
+				}
+			});
+			
+			new MenuItem(menu, SWT.SEPARATOR);
+			
+			MenuItem deleteItem = new MenuItem(menu, SWT.PUSH);
+			deleteItem.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			deleteItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					deleteItem();
+				}
+			});
+			menu.addMenuListener(new MenuListener() {
+				
+				@Override
+				public void menuShown(MenuEvent e) {
+					boolean hasSelection = getSelectedItem() != null;
+					deleteItem.setEnabled(hasSelection);
+					renameItem.setEnabled(hasSelection);
+					copyItem.setEnabled(hasSelection);
+				}
+				
+				@Override
+				public void menuHidden(MenuEvent e) {}
+			});
+		}
 		
 		setTitle(Messages.WorkingSetListDialog_Title);
 		getShell().setText(Messages.WorkingSetListDialog_Title);

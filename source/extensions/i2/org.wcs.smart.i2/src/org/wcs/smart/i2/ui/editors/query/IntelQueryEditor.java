@@ -78,6 +78,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -239,7 +240,7 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 
 	public void setDirty(boolean isDirty){
 		this.isDirty = isDirty;
-		saveItem.setEnabled(isDirty);
+		if (saveItem != null) saveItem.setEnabled(isDirty);
 		panel.setQueryState(isDirty);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
@@ -293,7 +294,10 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		eventBroker.subscribe(IntelEvents.QUERY_DELETED, handler);
 		eventHandles.add(handler);
 		
-		handler = (e) -> wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+		handler = (e) -> {
+			if (wsetItem != null) wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+		};
+		
 		eventHandles.add(handler);
 		eventBroker.subscribe(IntelEvents.ACTIVE_WS_SET, handler);
 		
@@ -329,21 +333,23 @@ public class IntelQueryEditor extends EditorPart implements MapPart{
 		ToolBar headerToolbar = new ToolBar(headerComp, SWT.FLAT);
 		headerToolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
-		saveItem = new ToolItem(headerToolbar, SWT.PUSH);
-		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-		saveItem.addListener(SWT.Selection, (event)->IntelQueryEditor.this.getSite().getPage().saveEditor(IntelQueryEditor.this, false));
-		saveItem.setToolTipText(Messages.IntelQueryEditor_saveTooltip);
+		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+			saveItem = new ToolItem(headerToolbar, SWT.PUSH);
+			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+			saveItem.addListener(SWT.Selection, (event)->IntelQueryEditor.this.getSite().getPage().saveEditor(IntelQueryEditor.this, false));
+			saveItem.setToolTipText(Messages.IntelQueryEditor_saveTooltip);
+			
+			ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
+			saveAsItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEAS_EDIT));
+			saveAsItem.addListener(SWT.Selection, (event)->doSaveAs());
+			saveAsItem.setToolTipText(Messages.IntelQueryEditor_saveAsTooltip);
 		
-		ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
-		saveAsItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEAS_EDIT));
-		saveAsItem.addListener(SWT.Selection, (event)->doSaveAs());
-		saveAsItem.setToolTipText(Messages.IntelQueryEditor_saveAsTooltip);
-		
-		wsetItem = new ToolItem(headerToolbar, SWT.PUSH);
-		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-		wsetItem.addListener(SWT.Selection, (event)->WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(Collections.singleton(getQuery()), context));
-		wsetItem.setToolTipText(Messages.IntelQueryEditor_AddWsTooltip);
-		wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+			wsetItem = new ToolItem(headerToolbar, SWT.PUSH);
+			wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
+			wsetItem.addListener(SWT.Selection, (event)->WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(Collections.singleton(getQuery()), context));
+			wsetItem.setToolTipText(Messages.IntelQueryEditor_AddWsTooltip);
+			wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
+		}
 		
 		ToolItem exportItem = new ToolItem(headerToolbar, SWT.PUSH);
 		exportItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EXPORT_QUERY));

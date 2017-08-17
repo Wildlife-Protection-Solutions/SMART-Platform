@@ -461,7 +461,7 @@ public class QueryView {
 			items.add(miRename);
 		}
 		
-		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()){
 			new MenuItem(m, SWT.SEPARATOR);
 			
 			MenuItem miAdd = new MenuItem(m, SWT.PUSH);

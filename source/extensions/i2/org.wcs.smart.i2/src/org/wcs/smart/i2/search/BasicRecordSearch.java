@@ -149,7 +149,7 @@ public class BasicRecordSearch implements IRecordSearch{
 				}
 			}
 			
-			resultItems.add(new IntelRecordSearchResultItem(uuid, src, title, (IntelRecord.Status)i[3], localMatch.length() == 0 ? null : localMatch.toString(), matchRanges.toArray(new int[matchRanges.size()][2])));
+			resultItems.add(new IntelRecordSearchResultItem(uuid, src == null ? null : session.get(IntelRecordSource.class, src), title, (IntelRecord.Status)i[3], localMatch.length() == 0 ? null : localMatch.toString(), matchRanges.toArray(new int[matchRanges.size()][2])));
 		}
 		
 		IntelRecordResult results = new IntelRecordResult(cnt, resultItems, System.nanoTime() - startTime);
