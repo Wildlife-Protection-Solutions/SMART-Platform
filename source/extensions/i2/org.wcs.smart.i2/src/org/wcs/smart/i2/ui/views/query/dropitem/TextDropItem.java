@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.views.query.dropitem;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
@@ -70,6 +71,7 @@ public class TextDropItem extends DropItem {
 	protected void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText( formatStringForLabel(getText()));  
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		initDrag(lbl);
 
 	}

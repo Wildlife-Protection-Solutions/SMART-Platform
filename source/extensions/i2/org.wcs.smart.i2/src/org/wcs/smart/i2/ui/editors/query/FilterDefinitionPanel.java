@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.Operator;
@@ -390,27 +391,29 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		ToolBar toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		saveItem = new ToolItem(toolbar, SWT.PUSH);
-		saveItem.setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
-		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-		saveItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				saveQuery();
-			}
-		});
-		
-		ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
-		clear.setToolTipText(Messages.FilterDefinitionPanel_clearTooltip);
-		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
-		clear.addSelectionListener(new SelectionAdapter() {
+		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+			saveItem = new ToolItem(toolbar, SWT.PUSH);
+			saveItem.setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
+			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+			saveItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					saveQuery();
+				}
+			});
 			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				clear();
-				fireQueryChangedListeners();
-			}
-		});
+			ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
+			clear.setToolTipText(Messages.FilterDefinitionPanel_clearTooltip);
+			clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+			clear.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					clear();
+					fireQueryChangedListeners();
+				}
+			});
+		}
 		
 		runItem = new ToolItem(toolbar, SWT.PUSH);
 		runItem.setToolTipText(Messages.FilterDefinitionPanel_runtooltip);
@@ -426,7 +429,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	}
 	
 	public void setQueryState(boolean isDirty){
-		this.saveItem.setEnabled(isDirty);
+		if (this.saveItem != null) this.saveItem.setEnabled(isDirty);
 	}
 	/**
 	 * Runs the current query

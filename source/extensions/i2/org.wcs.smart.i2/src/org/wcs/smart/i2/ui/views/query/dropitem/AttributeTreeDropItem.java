@@ -49,6 +49,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ui.editors.query.FilterDefinitionPanel;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
@@ -211,7 +212,7 @@ public class AttributeTreeDropItem extends DropItem {
 				showTree();
 			}
 		});
-		
+		btnEdit.setEnabled(IntelSecurityManager.INSTANCE.canEditQuery());
 		if (currentSelection != null){
 			lblitem.setText( formatStringForLabel(currentSelection.getName()));
 		}else{

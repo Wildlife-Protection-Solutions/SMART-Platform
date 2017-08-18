@@ -35,6 +35,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.query.Operator;
 
 /**
@@ -149,6 +150,8 @@ public class OptionDropItem extends DropItem {
 		if (currentOption == null){
 			currentOption = options[0];
 		}
+		
+		combo.getControl().setEnabled(IntelSecurityManager.INSTANCE.canEditQuery());
 		
 		combo.setSelection(new StructuredSelection(currentOption));
 		initDrag(combo.getControl());

@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -156,20 +157,22 @@ public abstract class DropItem {
 		
 		createComposite(inner);
 		
-		Label lblX = new Label(inner, SWT.NONE);
-		lblX.setToolTipText(Messages.DropItem_DeleteItemTooltip);
-		lblX.setLayoutData(new GridData(SWT.TOP, SWT.RIGHT, false, true));
-		lblX.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_DELETE_SMALL));
-		lblX.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				targetPanel.removeItem(DropItem.this);
-				targetPanel.fireQueryChangedListeners();
-			}
-			
-		});
-		lblX.addListener(SWT.MouseEnter, e-> lblX.setCursor(lblX.getDisplay().getSystemCursor(SWT.CURSOR_HAND)));
-		lblX.addListener(SWT.MouseExit, e-> lblX.setCursor(null));
+		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+			Label lblX = new Label(inner, SWT.NONE);
+			lblX.setToolTipText(Messages.DropItem_DeleteItemTooltip);
+			lblX.setLayoutData(new GridData(SWT.TOP, SWT.RIGHT, false, true));
+			lblX.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_DELETE_SMALL));
+			lblX.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseUp(MouseEvent e) {
+					targetPanel.removeItem(DropItem.this);
+					targetPanel.fireQueryChangedListeners();
+				}
+				
+			});
+			lblX.addListener(SWT.MouseEnter, e-> lblX.setCursor(lblX.getDisplay().getSystemCursor(SWT.CURSOR_HAND)));
+			lblX.addListener(SWT.MouseExit, e-> lblX.setCursor(null));
+		}
 		
 		initDrag(main);
 		initDrag(inner);
@@ -191,6 +194,8 @@ public abstract class DropItem {
 	 * @param comp control to register
 	 */
 	protected void initDrag(Control comp){
+		if (!IntelSecurityManager.INSTANCE.canEditEntity()) return;
+		
 		DragSource dsource = new DragSource(comp, DND.DROP_MOVE);
 		dsource.setTransfer(IDefinitionPanel.DND_TYPES);
 		dsource.addDragListener(new DragSourceListener() {
