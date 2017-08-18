@@ -94,7 +94,11 @@
       </command>
       <command
             id="org.wcs.smart.connect.server.downloadreplaceca"
-            name="Replace CA with CA from Connect ">
+            name="%replaceca.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.connect.server.changelog.syncmulti"
+            name="%syncmulti.command.name">
       </command>
    </extension>
    <extension
@@ -192,6 +196,14 @@
             </command>
             <separator
                   name="org.wcs.smart.connect.separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.connect.server.changelog.syncmulti"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.connect.separator3"
                   visible="true">
             </separator>
             <command
@@ -414,6 +426,16 @@
       <handler
             class="org.wcs.smart.connect.ui.server.DownloadReplaceCaHandler$DownloadReplaceCaHandlerWrapper"
             commandId="org.wcs.smart.connect.server.downloadreplaceca">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.connect.replication.isEnabled"
+                  value="true">
+            </test>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.connect.ui.server.SyncMultiChangeLogHandler$SyncMultiChangeLogHandlerWrapper"
+            commandId="org.wcs.smart.connect.server.changelog.syncmulti">
          <enabledWhen>
             <test
                   property="org.wcs.smart.connect.replication.isEnabled"

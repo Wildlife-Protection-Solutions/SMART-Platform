@@ -52,8 +52,10 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Lists conservation area from a smart connect server.
@@ -63,12 +65,17 @@ import org.wcs.smart.hibernate.QueryFactory;
  */
 public class LocalCaListPage extends WizardPage implements ISelectionChangedListener{
 
+	public static final String NAME = "CALIST"; //$NON-NLS-1$
+	
 	private CheckboxTableViewer cmbList;
 	private Text txtUsername;
 	private Text txtPassword;
 	
+	private String initUsername = null;
+	private String initPassword = null;
+	
 	public LocalCaListPage(){
-		super("CALIST"); //$NON-NLS-1$
+		super(NAME);
 	}
 	
 	@Override
@@ -154,9 +161,17 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		});
 		initList();
 		
+		if (initUsername != null) this.txtUsername.setText(initUsername);
+		if (initPassword != null) this.txtPassword.setText(initPassword);
+		
 		setTitle(Messages.LocalCaListPage_Title);
 		setMessage(Messages.LocalCaListPage_Message);
 		setControl(outer);
+	}
+	
+	public void setUsernamePassword(String username, String password) {
+		this.initPassword = password;
+		this.initUsername = username;
 	}
 	
 	public String getUsername() {
@@ -182,6 +197,18 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 			ConnectPlugIn.log(ex.getMessage(), ex);
 			setErrorMessage(Messages.LocalCaListPage_CaLoadError + ex.getMessage());
 			return;
+		}
+		
+		if (SmartDB.getCurrentConservationArea() != null) {
+			//we are logged in so we can validate replication enabled state fo ca
+			for (Iterator<ConservationArea> iterator = ca.iterator(); iterator.hasNext();) {
+				ConservationArea conservationArea = (ConservationArea) iterator.next();
+				try(Session session = HibernateManager.openSession()){
+					if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(conservationArea.getUuid(), session)) {
+						iterator.remove();
+					}
+				}
+			}
 		}
 		
 		Collections.sort(ca, new Comparator<ConservationArea>() {

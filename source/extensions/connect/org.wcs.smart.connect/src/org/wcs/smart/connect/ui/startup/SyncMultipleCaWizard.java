@@ -93,9 +93,10 @@ public class SyncMultipleCaWizard extends Wizard {
 						progress.worked(1 + (allCas.size() - details.size()));
 						
 						HibernateManager.endSessionFactory(true, false);
-						HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 						
+						SmartDB.DbUser currentUser = SmartDB.getCurrentUser();
 						try{
+							HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 							for (CaUserDetails cainfo : details){
 								progress.subTask(cainfo.ca.getNameLabel());
 								if (syncCa(cainfo, progress.split(1))){
@@ -106,7 +107,8 @@ public class SyncMultipleCaWizard extends Wizard {
 							errors.add(Messages.SyncMultipleCaWizard_Cancelled);
 						}finally{
 							HibernateManager.endSessionFactory(true, true);
-							HibernateManager.setUserName(SmartDB.DbUser.LOGIN.getUserName(), SmartDB.DbUser.LOGIN.getPassword());	
+							HibernateManager.setUserName(currentUser.getUserName(), currentUser.getPassword());
+							
 						}
 					}catch (Exception ex){
 						errors.add(ex.getMessage());
@@ -211,8 +213,8 @@ public class SyncMultipleCaWizard extends Wizard {
 			ConnectUser cu = null;
 			String connectPassword = null;
 			try(Session s = HibernateManager.openSession()){
-				cu = ConnectHibernateManager.getConnectUser(e, s);
-				server = ConnectHibernateManager.getConnectServer(s,ca);
+				cu = ConnectHibernateManager.getConnectUser(e, ca, s);
+				server = ConnectHibernateManager.getConnectServer(s, ca);
 			}
 			if (server == null){
 				errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_SkippedServerInvalid, ca.getNameLabel()));
@@ -247,7 +249,7 @@ public class SyncMultipleCaWizard extends Wizard {
 				});
 				if (values[0] == null){
 					errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_SkippedServerAccountInvalid, ca.getNameLabel()));
-					break;
+					continue;
 				}
 				cu = new ConnectUser();
 				cu.setConnectUsername(values[0]);

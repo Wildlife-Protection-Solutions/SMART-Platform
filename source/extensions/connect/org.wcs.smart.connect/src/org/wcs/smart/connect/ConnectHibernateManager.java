@@ -60,14 +60,27 @@ public class ConnectHibernateManager {
 	}
 	/**
 	 * Gets the connect user associated with the given employee or null
-	 * if none found
+	 * if none found.  The employee must be associated with the current 
+	 * Conservation Area.
 	 * @param e
 	 * @param session
 	 * @return
 	 */
 	public static ConnectUser getConnectUser(Employee e, Session session){
+		return getConnectUser(e, SmartDB.getCurrentConservationArea(), session);
+	}
+	
+	/**
+	 * Gets the connect user associated with the given employee or null
+	 * if none found.  Verifies the found connect user is the same as the
+	 * given ca.
+	 * @param e
+	 * @param session
+	 * @return
+	 */
+	public static ConnectUser getConnectUser(Employee e, ConservationArea ca, Session session){
 		ConnectUser user = QueryFactory.buildQuery(session, ConnectUser.class, "uuid", e.getUuid()).uniqueResult(); //$NON-NLS-1$
-		if (SmartDB.getCurrentConservationArea() != null && !SmartDB.getCurrentConservationArea().equals(e.getConservationArea())){
+		if (ca != null && !ca.equals(e.getConservationArea())){
 			return null;
 		}
 		return user;
