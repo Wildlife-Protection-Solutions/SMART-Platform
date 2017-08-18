@@ -95,3 +95,16 @@ alter table smart.cm_attribute_tree_node alter column config_uuid SET NOT NULL;
 
 delete from smart.CM_ATTRIBUTE_OPTION where OPTION_ID = 'DISPLAY_MODE' OR OPTION_ID = 'CUSTOM_CONFIG';
 ---- END OF SECTION
+
+
+--i2 UPDATES
+alter table smart.i_record ADD COLUMN primary_date date;
+update smart.i_record set primary_date = (select a.maxdatetime from (select record_uuid, max(datetime) as maxdatetime from smart.I_LOCATION group by record_uuid) a where a.record_uuid = smart.i_record.uuid );
+update smart.i_record set primary_date = date_created where primary_date is null;
+alter table smart.i_record ALTER COLUMN primary_date SET NOT NULL;
+
+UPDATE connect.connect_plugin_version SET version = '2.0' WHERE plugin_id = 'org.wcs.smart.i2';
+UPDATE connect.ca_plugin_version SET version = '2.0' WHERE plugin_id = 'org.wcs.smart.i2';
+
+
+				
