@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.ui.internal.userlog;
 
-import java.sql.Timestamp;
+import java.util.Calendar;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -41,13 +42,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.wcs.smart.LoginLogEntry;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 
-import com.ibm.icu.util.Calendar;
+
 
 /**
  * Shows the Log of User-login activity 
@@ -66,43 +66,47 @@ public class LoginLogDialog extends Dialog {
 
 	}
 	
+	@Override
+	public Point getInitialSize() {
+		Point p = super.getInitialSize();
+		if (p.y > 500) p.y = 500;
+		return p;
+	}
+	
 	/**
 	 * Create contents of the dialog.
 	 */
 	@Override
 	public Control createDialogArea(Composite parent){
+		parent = (Composite)super.createDialogArea(parent);
 		createViewer(parent);
 		Button button = new Button(parent, SWT.PUSH);
         button.setText(Messages.LoginLogDialog_4);
         button.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                Shell shell = parent.getShell();
-                boolean confirm = MessageDialog.openConfirm(shell, Messages.LoginLogDialog_5, Messages.LoginLogDialog_6);
+                boolean confirm = MessageDialog.openConfirm(getShell(), Messages.LoginLogDialog_5, Messages.LoginLogDialog_6);
                 if(confirm == false) return;
                 
-                Session s = HibernateManager.openSession();
-                Transaction transaction = s.beginTransaction();
-                try{
-
-                	
-                	Calendar cal = Calendar.getInstance();
-                	cal.add(Calendar.YEAR, -1);
-                	Timestamp yearAgo = new Timestamp(cal.getTimeInMillis());
-                	
-               	  	String hql = "delete from LoginLogEntry where loginTimestamp < :time"; //$NON-NLS-1$
-					Query query = s.createQuery(hql);
-               	  	query.setParameter("time",  yearAgo); //$NON-NLS-1$
-               	  	query.executeUpdate();
-
-                	transaction.commit();
-               	} catch (Throwable t) {
-					transaction.rollback();
-                	throw t;
+                try(Session s = HibernateManager.openSession()){
+                	s.beginTransaction();
+	                try{
+	                	Calendar cal = Calendar.getInstance();
+	                	cal.add(Calendar.YEAR, -1);
+	                	
+	                	String hql = "delete from LoginLogEntry where loginTimestamp < :time"; //$NON-NLS-1$
+						Query<?> query = s.createQuery(hql);
+	               	  	query.setParameter("time",  cal.getTime()); //$NON-NLS-1$
+	               	  	query.executeUpdate();
+	
+	                	s.getTransaction().commit();
+	                } catch (Throwable t) {
+	                	s.getTransaction().rollback();
+	                	throw t;
+	                }
                	}
                 viewer.setInput(LoginLogModelProvider.INSTANCE.getLog());
                 viewer.refresh();
-
             }
         });
         
