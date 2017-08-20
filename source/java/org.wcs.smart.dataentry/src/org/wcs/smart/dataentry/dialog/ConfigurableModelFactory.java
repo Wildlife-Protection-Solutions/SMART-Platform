@@ -368,6 +368,9 @@ public class ConfigurableModelFactory {
 	}
 
 	private static CmAttributeConfig cloneCmAttributeConfig(CmAttributeConfig cfgToClone, ConfigurableModel clonedCm, Map<UUID, UuidItem> o2iMap) {
+		if (cfgToClone == null) {
+			return null;
+		}
 		if (o2iMap.containsKey(cfgToClone.getUuid())) {
 			return (CmAttributeConfig) o2iMap.get(cfgToClone.getUuid());
 		}
