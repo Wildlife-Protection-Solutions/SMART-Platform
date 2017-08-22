@@ -217,7 +217,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 						SmartPlugIn.log("Could not delete cleared file: " + to.toString(), ex); //$NON-NLS-1$
 					}
 				}
-			} else if (!from.equals(to)) {
+			} else if (from.exists() && !from.equals(to)) {
 				try {
 					FileUtils.copyFile(from, to);
 				} catch (IOException e) {
