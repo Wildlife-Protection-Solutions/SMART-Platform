@@ -61,6 +61,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -290,8 +291,13 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						ConfigurableModel currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
 						monitor.worked(1);
 						if (DeleteManager.canDelete(currentCm, session)){
-							currentCm.getNodes().clear();
-							
+
+							Query<?> deleteq = session.createQuery("DELETE FROM CmAttributeConfig WHERE model = :model"); //$NON-NLS-1$
+							deleteq.setParameter("model", currentCm); //$NON-NLS-1$
+							deleteq.executeUpdate();
+								
+//							currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
+
 							session.delete(currentCm);
 							session.getTransaction().commit();
 							//deleting filestore
