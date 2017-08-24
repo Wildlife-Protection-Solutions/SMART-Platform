@@ -37,12 +37,16 @@ public enum LockManager {
 	
 	public void lockDatabase(Session session, ConservationAreaInfo info) throws Exception{
 		Integer lockKey = info.getLockKey();
-		session.createNativeQuery("SELECT cast(pg_advisory_lock(" + lockKey + ") as varchar)").list(); //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeQuery("SELECT cast(pg_advisory_lock(" + lockKey + ") as varchar)").uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public void releaseDatabase(Session session, ConservationAreaInfo info ) throws Exception{
 		Integer lockKey = info.getLockKey();
-		session.createNativeQuery("SELECT cast(pg_advisory_unlock(" + lockKey + ") as varchar)").list(); //$NON-NLS-1$ //$NON-NLS-2$
+		String wasunlocked = (String) session.createNativeQuery("SELECT cast(pg_advisory_unlock(" + lockKey + ") as varchar)").uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+		if (!Boolean.valueOf(wasunlocked)) {
+			throw new Exception("The database could not be unlocked.  This will cause deadlock issues.  You must restart the database server."); //$NON-NLS-1$
+		}
+		
 	}
 }
 

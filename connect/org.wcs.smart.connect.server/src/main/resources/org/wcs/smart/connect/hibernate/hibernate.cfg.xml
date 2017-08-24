@@ -11,6 +11,12 @@
 		<property name="show_sql">false</property> 
 		
 		<property name="hibernate.current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext</property>
+		<!--  this is required to ensure the same connection is held the entire time -->
+		<!--  the database lock is help (see LockManager).  Otherwise between transactions -->
+		<!--  a different database connection is sometimes  used for the same session and the -->
+		<!--  unlock connection may be different from the lock connection which will cause the unlock to -->
+		<!--  fail and the lock to never be release requireing a system restart. -->
+		<property name="hibernate.connection.release_mode">on_close</property>
 
 		
 		<property name="cache.use_second_level_cache">false</property>
