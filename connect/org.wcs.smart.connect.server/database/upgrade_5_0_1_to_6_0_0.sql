@@ -8,7 +8,7 @@ UPDATE smart.patrol_leg SET mandate_uuid = (SELECT p.mandate_uuid FROM smart.pat
 
 ALTER TABLE SMART.PATROL_LEG 
 ADD CONSTRAINT MANDATE_UUID_FK FOREIGN KEY (MANDATE_UUID) REFERENCES SMART.PATROL_MANDATE(UUID)  
-ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED INITIALLY IMMEDIATE;
 
 ALTER TABLE smart.patrol_leg ALTER COLUMN mandate_uuid SET NOT NULL;
 
@@ -57,10 +57,10 @@ CREATE TABLE smart.qa_routine_parameter(
   PRIMARY KEY (uuid, qa_routine_uuid)
 );
 
-ALTER TABLE smart.qa_routine ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE smart.qa_error ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE smart.qa_routine_parameter ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa_routine (uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE smart.qa_error ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa_routine (uuid) ON DELETE CASCADE DEFERRABLE;
+ALTER TABLE smart.qa_routine ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.qa_error ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.qa_routine_parameter ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa_routine (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.qa_error ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa_routine (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
 
 
@@ -68,18 +68,18 @@ ALTER TABLE smart.qa_error ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa
 delete from smart.CONFIGURABLE_MODEL;
 
 CREATE TABLE smart.cm_attribute_config(uuid UUID not null, cm_uuid UUID not null, dm_attribute_uuid UUID not null, display_mode varchar(10), is_default boolean, primary key (uuid));
-ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (CM_UUID) REFERENCES SMART.CONFIGURABLE_MODEL(UUID) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES SMART.DM_ATTRIBUTE(UUID) ON DELETE CASCADE DEFERRABLE;
+ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (CM_UUID) REFERENCES SMART.CONFIGURABLE_MODEL(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES SMART.DM_ATTRIBUTE(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
 
 alter table smart.cm_attribute add column config_uuid UUID;
-ALTER TABLE smart.cm_attribute ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE ;
+ALTER TABLE smart.cm_attribute ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 
 alter table smart.cm_attribute_list add column config_uuid UUID;
-ALTER TABLE SMART.CM_ATTRIBUTE_LIST ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE ; 
+ALTER TABLE SMART.CM_ATTRIBUTE_LIST ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ; 
 
 alter table smart.cm_attribute_tree_node add column config_uuid UUID;
-ALTER TABLE SMART.CM_ATTRIBUTE_TREE_NODE ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE ;
+ALTER TABLE SMART.CM_ATTRIBUTE_TREE_NODE ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 
 drop table SMART.CM_DM_ATTRIBUTE_SETTINGS;
 
@@ -98,7 +98,7 @@ delete from smart.CM_ATTRIBUTE_OPTION where OPTION_ID = 'DISPLAY_MODE' OR OPTION
 
 
 --i2 UPDATES
-alter table smart.i_record ADD COLUMN primary_date date;
+alter table smart.i_record ADD COLUMN primary_date timestamp;
 update smart.i_record set primary_date = (select a.maxdatetime from (select record_uuid, max(datetime) as maxdatetime from smart.I_LOCATION group by record_uuid) a where a.record_uuid = smart.i_record.uuid );
 update smart.i_record set primary_date = date_created where primary_date is null;
 alter table smart.i_record ALTER COLUMN primary_date SET NOT NULL;
@@ -107,4 +107,1246 @@ UPDATE connect.connect_plugin_version SET version = '2.0' WHERE plugin_id = 'org
 UPDATE connect.ca_plugin_version SET version = '2.0' WHERE plugin_id = 'org.wcs.smart.i2';
 
 
-				
+
+
+--TRIGGERS FOR CHANGELOG
+
+--- QA MODULE TRIGGERS --- 
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+DROP TRIGGER trg_query_folder ON smart.query_folder;                                                                                  
+DROP TRIGGER trg_report ON smart.report;                                                                                              
+DROP TRIGGER trg_report_folder ON smart.report_folder;                                                                                
+DROP TRIGGER trg_saved_maps ON smart.saved_maps;                                                                                      
+DROP TRIGGER trg_station ON smart.station;                                                                                            
+DROP TRIGGER trg_summary_query ON smart.summary_query;                                                                                
+DROP TRIGGER trg_team ON smart.team;                                                                                                  
+DROP TRIGGER trg_waypoint ON smart.waypoint;                                                                                          
+DROP TRIGGER trg_waypoint_query ON smart.waypoint_query;                                                                              
+DROP TRIGGER trg_configurable_model ON smart.configurable_model;                                                                      
+DROP TRIGGER trg_screen_option ON smart.screen_option;                                                                                
+DROP TRIGGER trg_compound_query ON smart.compound_query;                                                                              
+DROP TRIGGER trg_agency ON smart.agency;                                                                                              
+DROP TRIGGER trg_area_geometries ON smart.area_geometries;                                                                            
+DROP TRIGGER trg_ca_projection ON smart.ca_projection;                                                                                
+DROP TRIGGER trg_conservation_area ON smart.conservation_area;                                                                        
+DROP TRIGGER trg_dm_attribute ON smart.dm_attribute;                                                                                  
+DROP TRIGGER trg_dm_category ON smart.dm_category;                                                                                    
+DROP TRIGGER trg_employee ON smart.employee;                                                                                          
+DROP TRIGGER trg_gridded_query ON smart.gridded_query;                                                                                
+DROP TRIGGER trg_language ON smart.language;                                                                                          
+DROP TRIGGER trg_map_styles ON smart.map_styles;                                                                                      
+DROP TRIGGER trg_observation_options ON smart.observation_options;                                                                    
+DROP TRIGGER trg_observation_query ON smart.observation_query;                                                                        
+DROP TRIGGER trg_obs_gridded_query ON smart.obs_gridded_query;                                                                            
+DROP TRIGGER trg_obs_observation_query ON smart.obs_observation_query;                                                                
+DROP TRIGGER trg_obs_summary_query ON smart.obs_summary_query;                                                                        
+DROP TRIGGER trg_obs_waypoint_query ON smart.obs_waypoint_query;                                                                      
+DROP TRIGGER trg_patrol ON smart.patrol;                                                                                              
+DROP TRIGGER trg_patrol_mandate ON smart.patrol_mandate;                                                                              
+DROP TRIGGER trg_patrol_query ON smart.patrol_query;                                                                                  
+DROP TRIGGER trg_patrol_transport ON smart.patrol_transport;                                                                          
+DROP TRIGGER trg_patrol_type ON smart.patrol_type;                                                                                    
+DROP TRIGGER trg_dm_attribute_list ON smart.dm_attribute_list;                                                                        
+DROP TRIGGER trg_dm_attribute_tree ON smart.dm_attribute_tree;                                                                        
+DROP TRIGGER trg_dm_att_agg_map ON smart.dm_att_agg_map;                                                                              
+DROP TRIGGER trg_dm_cat_att_map ON smart.dm_cat_att_map;                                                                              
+DROP TRIGGER trg_i18n_label ON smart.i18n_label;                                                                                      
+DROP TRIGGER trg_patrol_leg ON smart.patrol_leg;                                                                                      
+DROP TRIGGER trg_patrol_leg_day ON smart.patrol_leg_day;                                                                              
+DROP TRIGGER trg_patrol_leg_members ON smart.patrol_leg_members;                                                                      
+DROP TRIGGER trg_patrol_waypoint ON smart.patrol_waypoint;                                                                            
+DROP TRIGGER trg_rank ON smart.rank;                                                                                                  
+DROP TRIGGER trg_report_query ON smart.report_query;                                                                                  
+DROP TRIGGER trg_track ON smart.track;                                                                                                
+DROP TRIGGER trg_wp_attachments ON smart.wp_attachments;                                                                              
+DROP TRIGGER trg_wp_observation ON smart.wp_observation;                                                                              
+DROP TRIGGER trg_wp_observation_attributes ON smart.wp_observation_attributes;                                                        
+DROP TRIGGER trg_cm_attribute ON smart.cm_attribute;                                                                                  
+DROP TRIGGER trg_cm_attribute_list ON smart.cm_attribute_list;                                                                        
+DROP TRIGGER trg_cm_attribute_option ON smart.cm_attribute_option;                                                                    
+DROP TRIGGER trg_cm_attribute_tree_node ON smart.cm_attribute_tree_node;                                                              
+DROP TRIGGER trg_cm_node ON smart.cm_node;                                                                                            
+DROP TRIGGER trg_screen_option_uuid ON smart.screen_option_uuid;                                                                      
+DROP TRIGGER trg_cm_attribute_config ON smart.cm_attribute_config;                                                                    
+DROP TRIGGER trg_compound_query_layer ON smart.compound_query_layer;                                                                  
+DROP TRIGGER trg_connect_ct_properties ON smart.connect_ct_properties;                                                                
+DROP TRIGGER trg_connect_alert ON smart.connect_alert;                                                                                
+DROP TRIGGER trg_plan ON smart.plan;                                                                                                  
+DROP TRIGGER trg_plan_target ON smart.plan_target;                                                                                    
+DROP TRIGGER trg_plan_target_point ON smart.plan_target_point;                                                                        
+DROP TRIGGER trg_patrol_plan ON smart.patrol_plan;                                                                                    
+DROP TRIGGER trg_ct_patrol_link ON smart.ct_patrol_link;                                                                              
+DROP TRIGGER trg_ct_mission_link ON smart.ct_mission_link;                                                                            
+DROP TRIGGER trg_informant ON smart.informant;                                                                                        
+DROP TRIGGER trg_intelligence ON smart.intelligence;                                                                                  
+DROP TRIGGER trg_intelligence_source ON smart.intelligence_source;                                                                    
+DROP TRIGGER trg_patrol_intelligence ON smart.patrol_intelligence;                                                                    
+DROP TRIGGER trg_intelligence_attachment ON smart.intelligence_attachment;                                                            
+DROP TRIGGER trg_intelligence_point ON smart.intelligence_point;                                                                      
+DROP TRIGGER trg_intel_record_query ON smart.intel_record_query;                                                                      
+DROP TRIGGER trg_intel_summary_query ON smart.intel_summary_query;                                                                    
+DROP TRIGGER trg_i_attachment ON smart.i_attachment;                                                                                  
+DROP TRIGGER trg_i_attribute ON smart.i_attribute;                                                                                    
+DROP TRIGGER trg_i_entity ON smart.i_entity;                                                                                          
+DROP TRIGGER trg_i_entity_search ON smart.i_entity_search;                                                                            
+DROP TRIGGER trg_i_entity_type ON smart.i_entity_type;                                                                                
+DROP TRIGGER trg_i_location ON smart.i_location;                                                                                      
+DROP TRIGGER trg_i_record ON smart.i_record;                                                                                          
+DROP TRIGGER trg_i_record_obs_query ON smart.i_record_obs_query;                                                                      
+DROP TRIGGER trg_i_relationship_group ON smart.i_relationship_group;                                                                  
+DROP TRIGGER trg_i_relationship_type ON smart.i_relationship_type;                                                                    
+DROP TRIGGER trg_i_working_set ON smart.i_working_set;                                                                                
+DROP TRIGGER trg_i_recordsource ON smart.i_recordsource;                                                                              
+DROP TRIGGER trg_i_attribute_list_item ON smart.i_attribute_list_item;                                                                
+DROP TRIGGER trg_i_entity_attachment ON smart.i_entity_attachment;                                                                    
+DROP TRIGGER trg_i_entity_attribute_value ON smart.i_entity_attribute_value;                                                          
+DROP TRIGGER trg_i_entity_location ON smart.i_entity_location;                                                                        
+DROP TRIGGER trg_i_entity_record ON smart.i_entity_record;                                                                            
+DROP TRIGGER trg_i_entity_relationship ON smart.i_entity_relationship;                                                                
+DROP TRIGGER trg_i_entity_relationship_attribute_value ON smart.i_entity_relationship_attribute_value;                                
+DROP TRIGGER trg_i_entity_type_attribute ON smart.i_entity_type_attribute;                                                            
+DROP TRIGGER trg_i_entity_type_attribute_group ON smart.i_entity_type_attribute_group;                                                
+DROP TRIGGER trg_i_observation ON smart.i_observation;                                                                                
+DROP TRIGGER trg_i_observation_attribute ON smart.i_observation_attribute;                                                            
+DROP TRIGGER trg_i_record_attachment ON smart.i_record_attachment;                                                                    
+DROP TRIGGER trg_i_relationship_type_attribute ON smart.i_relationship_type_attribute;                                                
+DROP TRIGGER trg_i_working_set_entity ON smart.i_working_set_entity;                                                                  
+DROP TRIGGER trg_i_working_set_query ON smart.i_working_set_query;                                                                    
+DROP TRIGGER trg_i_working_set_record ON smart.i_working_set_record;                                                                  
+DROP TRIGGER trg_i_record_attribute_value ON smart.i_record_attribute_value;                                                          
+DROP TRIGGER trg_i_record_attribute_value_list ON smart.i_record_attribute_value_list;                                                
+DROP TRIGGER trg_i_recordsource_attribute ON smart.i_recordsource_attribute;                                                          
+DROP TRIGGER trg_mission_attribute ON smart.mission_attribute;                                                                        
+DROP TRIGGER trg_sampling_unit_attribute ON smart.sampling_unit_attribute;                                                            
+DROP TRIGGER trg_survey_design ON smart.survey_design;                                                                                
+DROP TRIGGER trg_mission ON smart.mission;                                                                                            
+DROP TRIGGER trg_mission_attribute_list ON smart.mission_attribute_list;                                                              
+DROP TRIGGER trg_mission_day ON smart.mission_day;                                                                                    
+DROP TRIGGER trg_mission_member ON smart.mission_member;                                                                              
+DROP TRIGGER trg_mission_property ON smart.mission_property;                                                                          
+DROP TRIGGER trg_mission_property_value ON smart.mission_property_value;                                                              
+DROP TRIGGER trg_mission_track ON smart.mission_track;                                                                                
+DROP TRIGGER trg_sampling_unit ON smart.sampling_unit;                                                                                
+DROP TRIGGER trg_sampling_unit_attribute_list ON smart.sampling_unit_attribute_list;                                                  
+DROP TRIGGER trg_sampling_unit_attribute_value ON smart.sampling_unit_attribute_value;                                                
+DROP TRIGGER trg_survey ON smart.survey;                                                                                              
+DROP TRIGGER trg_survey_waypoint ON smart.survey_waypoint;                                                                            
+DROP TRIGGER trg_survey_design_property ON smart.survey_design_property;                                                              
+DROP TRIGGER trg_survey_design_sampling_unit ON smart.survey_design_sampling_unit;                                                    
+DROP TRIGGER trg_survey_gridded_query ON smart.survey_gridded_query;                                                                  
+DROP TRIGGER trg_survey_mission_query ON smart.survey_mission_query;                                                                  
+DROP TRIGGER trg_survey_mission_track_query ON smart.survey_mission_track_query;                                                      
+DROP TRIGGER trg_survey_observation_query ON smart.survey_observation_query;                                                          
+DROP TRIGGER trg_survey_summary_query ON smart.survey_summary_query;                                                                  
+DROP TRIGGER trg_survey_waypoint_query ON smart.survey_waypoint_query;                                                                
+DROP TRIGGER trg_entity_type ON smart.entity_type;                                                                                    
+DROP TRIGGER trg_entity ON smart.entity;                                                                                              
+DROP TRIGGER trg_entity_attribute ON smart.entity_attribute;                                                                          
+DROP TRIGGER trg_entity_attribute_value ON smart.entity_attribute_value;                                                              
+DROP TRIGGER trg_entity_gridded_query ON smart.entity_gridded_query;                                                                  
+DROP TRIGGER trg_entity_observation_query ON smart.entity_observation_query;                                                          
+DROP TRIGGER trg_entity_summary_query ON smart.entity_summary_query;                                                                  
+DROP TRIGGER trg_entity_waypoint_query ON smart.entity_waypoint_query;                                                                
+DROP TRIGGER trg_ct_properties_option ON smart.ct_properties_option;                                                                  
+DROP TRIGGER trg_ct_properties_profile ON smart.ct_properties_profile;                                                                
+DROP TRIGGER trg_ct_properties_profile_option ON smart.ct_properties_profile_option;                                                  
+DROP TRIGGER trg_cm_ct_properties_profile ON smart.cm_ct_properties_profile;                                                          
+DROP TRIGGER trg_connect_account ON smart.connect_account;                                                                            
+DROP TRIGGER trg_qa_routine ON smart.qa_routine;                                                                                      
+DROP TRIGGER trg_qa_error ON smart.qa_error;                                                                                          
+DROP TRIGGER trg_qa_routine_parameter ON smart.qa_routine_parameter;                                                                  
+DROP TRIGGER trg_observation_attachment on smart.observation_attachment;
+
+ DROP FUNCTION connect.trg_changelog_common();
+ DROP FUNCTION connect.trg_cm_attribute();
+ DROP FUNCTION connect.trg_cm_attribute_config();
+ DROP FUNCTION connect.trg_cm_attribute_list();
+ DROP FUNCTION connect.trg_cm_attribute_option();
+ DROP FUNCTION connect.trg_cm_attribute_tree_node();
+ DROP FUNCTION connect.trg_cm_ct_properties_profile();
+ DROP FUNCTION connect.trg_cm_node();
+ DROP FUNCTION connect.trg_compound_query_layer();
+ DROP FUNCTION connect.trg_connect_account();
+ DROP FUNCTION connect.trg_connect_alert();
+ DROP FUNCTION connect.trg_connect_ct_properties();
+ DROP FUNCTION connect.trg_ct_mission_link();
+ DROP FUNCTION connect.trg_ct_patrol_link();
+ DROP FUNCTION connect.trg_ct_properties_profile_option();
+ DROP FUNCTION connect.trg_dm_att_agg_map();
+ DROP FUNCTION connect.trg_dm_attribute_list();
+ DROP FUNCTION connect.trg_dm_attribute_tree();
+ DROP FUNCTION connect.trg_dm_cat_att_map();
+ DROP FUNCTION connect.trg_entity();
+ DROP FUNCTION connect.trg_entity_attribute();
+ DROP FUNCTION connect.trg_entity_attribute_value();
+ DROP FUNCTION connect.trg_i18n_label();
+ DROP FUNCTION connect.trg_i_attribute_list_item();
+ DROP FUNCTION connect.trg_i_entity_attachment();
+ DROP FUNCTION connect.trg_i_entity_attribute_value();
+ DROP FUNCTION connect.trg_i_entity_location();
+ DROP FUNCTION connect.trg_i_entity_record();
+ DROP FUNCTION connect.trg_i_entity_relationship();
+ DROP FUNCTION connect.trg_i_entity_relationship_attribute_value();
+ DROP FUNCTION connect.trg_i_entity_type_attribute();
+ DROP FUNCTION connect.trg_i_entity_type_attribute_group();
+ DROP FUNCTION connect.trg_i_observation();
+ DROP FUNCTION connect.trg_i_observation_attribute();
+ DROP FUNCTION connect.trg_i_record_attachment();
+ DROP FUNCTION connect.trg_i_record_attribute_value();
+ DROP FUNCTION connect.trg_i_record_attribute_value_list();
+ DROP FUNCTION connect.trg_i_recordsource_attribute();
+ DROP FUNCTION connect.trg_i_relationship_type_attribute();
+ DROP FUNCTION connect.trg_i_working_set_entity();
+ DROP FUNCTION connect.trg_i_working_set_query();
+ DROP FUNCTION connect.trg_i_working_set_record();
+ DROP FUNCTION connect.trg_intelligence_attachment();
+ DROP FUNCTION connect.trg_intelligence_point();
+ DROP FUNCTION connect.trg_mission();
+ DROP FUNCTION connect.trg_mission_attribute_list();
+ DROP FUNCTION connect.trg_mission_day();
+ DROP FUNCTION connect.trg_mission_member();
+ DROP FUNCTION connect.trg_mission_property();
+ DROP FUNCTION connect.trg_mission_property_value();
+ DROP FUNCTION connect.trg_mission_track();
+ DROP FUNCTION connect.trg_observation_attachment();
+ DROP FUNCTION connect.trg_patrol_intelligence();
+ DROP FUNCTION connect.trg_patrol_leg();
+ DROP FUNCTION connect.trg_patrol_leg_day();
+ DROP FUNCTION connect.trg_patrol_leg_members();
+ DROP FUNCTION connect.trg_patrol_plan();
+ DROP FUNCTION connect.trg_patrol_type();
+ DROP FUNCTION connect.trg_patrol_waypoint();
+ DROP FUNCTION connect.trg_plan_target();
+ DROP FUNCTION connect.trg_plan_target_point();
+ DROP FUNCTION connect.trg_qa_routine_parameter();
+ DROP FUNCTION connect.trg_rank();
+ DROP FUNCTION connect.trg_report_query();
+ DROP FUNCTION connect.trg_sampling_unit();
+ DROP FUNCTION connect.trg_sampling_unit_attribute_list();
+ DROP FUNCTION connect.trg_sampling_unit_attribute_value();
+ DROP FUNCTION connect.trg_screen_option_uuid();
+ DROP FUNCTION connect.trg_survey();
+ DROP FUNCTION connect.trg_survey_design_property();
+ DROP FUNCTION connect.trg_survey_design_sampling_unit();
+ DROP FUNCTION connect.trg_survey_waypoint();
+ DROP FUNCTION connect.trg_track();
+ DROP FUNCTION connect.trg_wp_attachments();
+ DROP FUNCTION connect.trg_wp_observation();
+ DROP FUNCTION connect.trg_wp_observation_attributes();
+ DROP FUNCTION connect.trg_conservation_area();
+ DROP FUNCTION connect.trg_observation_options();
+
+CREATE OR REPLACE FUNCTION connect.trg_changelog_common() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str,  ca_uuid) 
+ 		VALUES
+ 		(uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, ROW.CA_UUID);
+ RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+
+--- QA MODULE TRIGGERS --- 
+CREATE OR REPLACE FUNCTION connect.trg_qa_routine_parameter() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, r.CA_UUID FROM smart.qa_routine r WHERE r.uuid = ROW.qa_routine_uuid;
+ RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+CREATE CONSTRAINT TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.qa_routine DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_qa_error AFTER INSERT OR UPDATE OR DELETE ON smart.qa_error DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_qa_routine_parameter AFTER INSERT OR UPDATE OR DELETE ON smart.qa_routine_parameter DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_qa_routine_parameter();
+
+
+
+
+
+-- CONNECT ACCOUNT -- 
+CREATE OR REPLACE FUNCTION connect.trg_connect_account() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'employee_uuid', ROW.EMPLOYEE_UUID, null, null, null, server.CA_UUID FROM smart.connect_server server WHERE server.uuid = ROW.connect_uuid;
+ RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+CREATE CONSTRAINT TRIGGER trg_connect_account AFTER INSERT OR UPDATE OR DELETE ON smart.connect_account DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_connect_account();
+
+
+
+-- CT PROPERTIES -- 
+
+CREATE OR REPLACE FUNCTION connect.trg_ct_properties_profile_option() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, p.CA_UUID FROM smart.ct_properties_profile p WHERE p.uuid = ROW.profile_uuid;
+ RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_cm_ct_properties_profile() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'cm_uuid', ROW.CM_UUID, null, null, null, cm.CA_UUID FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+CREATE CONSTRAINT TRIGGER trg_ct_properties_option AFTER INSERT OR UPDATE OR DELETE ON smart.ct_properties_option DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_ct_properties_profile AFTER INSERT OR UPDATE OR DELETE ON smart.ct_properties_profile DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+CREATE CONSTRAINT TRIGGER trg_ct_properties_profile_option AFTER INSERT OR UPDATE OR DELETE ON smart.ct_properties_profile_option DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_ct_properties_profile_option();
+CREATE CONSTRAINT TRIGGER trg_cm_ct_properties_profile AFTER INSERT OR UPDATE OR DELETE ON smart.cm_ct_properties_profile DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_ct_properties_profile();
+
+
+
+--ENTITY QUERIES
+
+CREATE CONSTRAINT TRIGGER trg_entity_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_gridded_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_entity_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_observation_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_entity_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_entity_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_waypoint_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+--ENTITIES
+
+CREATE OR REPLACE FUNCTION connect.trg_entity() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, et.CA_UUID FROM smart.entity_type et WHERE et.uuid = ROW.entity_type_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION connect.trg_entity_attribute() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, et.CA_UUID FROM smart.entity_type et WHERE et.uuid = ROW.entity_type_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_entity_attribute_value() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_attribute_uuid', ROW.entity_attribute_uuid, 'entity_uuid', ROW.entity_uuid, null, et.CA_UUID FROM smart.entity_type et, smart.entity e WHERE e.entity_type_uuid = et.uuid and e.uuid = ROW.entity_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+CREATE CONSTRAINT TRIGGER trg_entity_type AFTER INSERT OR UPDATE OR DELETE ON smart.entity_type DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_entity AFTER INSERT OR UPDATE OR DELETE ON smart.entity DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_entity();
+CREATE CONSTRAINT TRIGGER trg_entity_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.entity_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_entity_attribute();
+CREATE CONSTRAINT TRIGGER trg_entity_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.entity_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_entity_attribute_value();
+
+
+-- ER QUERIES
+CREATE CONSTRAINT TRIGGER trg_survey_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_gridded_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_survey_mission_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_mission_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_survey_mission_track_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_mission_track_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_survey_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_observation_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_survey_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_survey_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_waypoint_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+-- ER CORE
+CREATE OR REPLACE FUNCTION connect.trg_mission() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID FROM smart.survey s, smart.survey_design sd WHERE s.survey_design_uuid = sd.uuid and s.uuid = ROW.survey_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION connect.trg_mission_attribute_list() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, ma.CA_UUID FROM smart.mission_attribute ma WHERE ma.uuid = ROW.mission_attribute_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_mission_day() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID FROM smart.mission m, smart.survey s, smart.survey_design sd 
+ 		WHERE s.survey_design_uuid = sd.uuid and s.uuid = m.survey_uuid and m.uuid = ROW.mission_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_mission_member() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'mission_uuid', ROW.mission_uuid, 'employee_uuid', ROW.employee_uuid, null, e.CA_UUID FROM smart.employee e
+ 		WHERE e.uuid = ROW.employee_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_mission_property() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'survey_design_uuid', ROW.survey_design_uuid, 'mission_attribute_uuid', ROW.mission_attribute_uuid, null, sd.CA_UUID FROM smart.survey_design sd
+ 		WHERE sd.uuid = ROW.survey_design_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_mission_property_value() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'mission_uuid', ROW.mission_uuid, 'mission_attribute_uuid', ROW.mission_attribute_uuid, null, ma.CA_UUID 
+ 		FROM smart.mission_attribute ma
+ 		WHERE ma.uuid = ROW.mission_attribute_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_mission_track() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
+ 		FROM smart.mission_day md, smart.mission m, smart.survey s, smart.survey_design sd 
+ 		WHERE s.survey_design_uuid = sd.uuid and s.uuid = m.survey_uuid and m.uuid = md.mission_uuid and md.uuid = ROW.mission_day_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+ 
+ 
+CREATE OR REPLACE FUNCTION connect.trg_sampling_unit() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
+ 		FROM smart.survey_design sd 
+ 		WHERE sd.uuid = ROW.survey_design_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_sampling_unit_attribute_list() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sa.CA_UUID 
+ 		FROM smart.sampling_unit_attribute sa
+ 		WHERE sa.uuid = ROW.sampling_unit_attribute_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_sampling_unit_attribute_value() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'su_attribute_uuid', ROW.su_attribute_uuid, 'su_uuid', ROW.su_uuid, null, sa.CA_UUID 
+ 		FROM smart.sampling_unit_attribute sa
+ 		WHERE sa.uuid = ROW.su_attribute_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+ 
+CREATE OR REPLACE FUNCTION connect.trg_survey() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
+ 		FROM smart.survey_design sd
+ 		WHERE sd.uuid = ROW.survey_design_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+
+CREATE OR REPLACE FUNCTION connect.trg_survey_design_property() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
+ 		FROM smart.survey_design sd
+ 		WHERE sd.uuid = ROW.survey_design_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_survey_design_sampling_unit() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'survey_design_uuid', ROW.survey_design_uuid, 'su_attribute_uuid', ROW.su_attribute_uuid, null, sd.CA_UUID 
+ 		FROM smart.survey_design sd
+ 		WHERE sd.uuid = ROW.survey_design_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_survey_waypoint() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'wp_uuid', ROW.wp_uuid, 'mission_day_uuid', ROW.mission_day_uuid, null, wp.CA_UUID 
+ 		FROM smart.waypoint wp
+ 		WHERE wp.uuid = ROW.wp_uuid;
+ 	RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+ 
+CREATE CONSTRAINT TRIGGER trg_mission_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.mission_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_sampling_unit_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_survey_design AFTER INSERT OR UPDATE OR DELETE ON smart.survey_design DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_mission AFTER INSERT OR UPDATE OR DELETE ON smart.mission DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission();
+CREATE CONSTRAINT TRIGGER trg_mission_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.mission_attribute_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_attribute_list();
+CREATE CONSTRAINT TRIGGER trg_mission_day AFTER INSERT OR UPDATE OR DELETE ON smart.mission_day DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_day();
+CREATE CONSTRAINT TRIGGER trg_mission_member AFTER INSERT OR UPDATE OR DELETE ON smart.mission_member DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_member();
+CREATE CONSTRAINT TRIGGER trg_mission_property AFTER INSERT OR UPDATE OR DELETE ON smart.mission_property DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_property();
+CREATE CONSTRAINT TRIGGER trg_mission_property_value AFTER INSERT OR UPDATE OR DELETE ON smart.mission_property_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_property_value();
+CREATE CONSTRAINT TRIGGER trg_mission_track AFTER INSERT OR UPDATE OR DELETE ON smart.mission_track DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_track();
+CREATE CONSTRAINT TRIGGER trg_sampling_unit AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_sampling_unit();
+CREATE CONSTRAINT TRIGGER trg_sampling_unit_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit_attribute_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_sampling_unit_attribute_list();
+CREATE CONSTRAINT TRIGGER trg_sampling_unit_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_sampling_unit_attribute_value();
+CREATE CONSTRAINT TRIGGER trg_survey AFTER INSERT OR UPDATE OR DELETE ON smart.survey DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_survey();
+CREATE CONSTRAINT TRIGGER trg_survey_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.survey_waypoint DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_survey_waypoint(); 
+CREATE CONSTRAINT TRIGGER trg_survey_design_property AFTER INSERT OR UPDATE OR DELETE ON smart.survey_design_property DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_survey_design_property(); 
+CREATE CONSTRAINT TRIGGER trg_survey_design_sampling_unit AFTER INSERT OR UPDATE OR DELETE ON smart.survey_design_sampling_unit DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_survey_design_sampling_unit(); 
+
+-- ADVANCED INTELLIGENCE --
+
+CREATE OR REPLACE FUNCTION connect.trg_i_attribute_list_item() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		FROM smart.i_attribute i
+ 		WHERE i.uuid = ROW.attribute_uuid;
+ RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_entity_attribute_value() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.i_entity i where i.uuid = ROW.entity_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+ 
+CREATE OR REPLACE FUNCTION connect.trg_i_entity_attachment() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'attachment_uuid', ROW.attachment_uuid, null, i.CA_UUID 
+ 		from smart.i_entity i where i.uuid = ROW.entity_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+ 
+CREATE OR REPLACE FUNCTION connect.trg_i_entity_location() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'location_uuid', ROW.location_uuid, null, i.CA_UUID 
+ 		from smart.i_entity i where i.uuid = ROW.entity_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_entity_record() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'record_uuid', ROW.record_uuid, null, i.CA_UUID 
+ 		from smart.i_entity i where i.uuid = ROW.entity_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION connect.trg_i_entity_relationship() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.i_relationship_type i where i.uuid = ROW.relationship_type_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_entity_relationship_attribute_value() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_relationship_uuid', ROW.entity_relationship_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.i_attribute i where i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_entity_type_attribute() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_type_uuid', ROW.entity_type_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.i_entity_type i where i.uuid = ROW.entity_type_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_entity_type_attribute_group() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.i_entity_type i where i.uuid = ROW.entity_type_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_observation() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.i_location i where i.uuid = ROW.location_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_observation_attribute() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'observation_uuid', ROW.observation_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.dm_attribute i where i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_record_attachment() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_uuid', ROW.record_uuid, 'attachment_uuid', ROW.attachment_uuid, null, i.CA_UUID 
+ 		from smart.i_record i where i.uuid = ROW.record_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_relationship_type_attribute() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'relationship_type_uuid', ROW.relationship_type_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.i_attribute i where i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_working_set_entity() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'working_set_uuid', ROW.working_set_uuid, 'entity_uuid', ROW.entity_uuid, null, i.CA_UUID 
+ 		from smart.i_working_set i where i.uuid = ROW.working_set_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_working_set_query() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'working_set_uuid', ROW.working_set_uuid, 'query_uuid', ROW.query_uuid, null, i.CA_UUID 
+ 		from smart.i_working_set i where i.uuid = ROW.working_set_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_working_set_record() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'working_set_uuid', ROW.working_set_uuid, 'record_uuid', ROW.record_uuid, null, i.CA_UUID 
+ 		from smart.i_working_set i where i.uuid = ROW.working_set_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_record_attribute_value() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_uuid', ROW.record_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.i_record i where i.uuid = ROW.record_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_record_attribute_value_list() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'value_uuid', ROW.value_uuid, 'element_uuid', ROW.element_uuid, null, i.CA_UUID 
+ 		from smart.i_record_attribute_value v, smart.i_record i where v.uuid = ROW.value_uuid and i.uuid = v.record_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_i_recordsource_attribute() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.i_recordsource i WHERE i.uuid = ROW.source_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+
+CREATE CONSTRAINT TRIGGER trg_i_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.i_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_entity AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_entity_search AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_search DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_entity_type AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_type DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_location AFTER INSERT OR UPDATE OR DELETE ON smart.i_location DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_record DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_record_obs_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_obs_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_relationship_group AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_group DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_relationship_type AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_type DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_working_set AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_recordsource AFTER INSERT OR UPDATE OR DELETE ON smart.i_recordsource DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_i_attribute_list_item AFTER INSERT OR UPDATE OR DELETE ON smart.i_attribute_list_item DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_attribute_list_item();
+CREATE CONSTRAINT TRIGGER trg_i_entity_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_attachment();
+CREATE CONSTRAINT TRIGGER trg_i_entity_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_attribute_value();
+CREATE CONSTRAINT TRIGGER trg_i_entity_location AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_location DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_location();
+CREATE CONSTRAINT TRIGGER trg_i_entity_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_record DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_record();
+CREATE CONSTRAINT TRIGGER trg_i_entity_relationship AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_relationship DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_relationship();
+CREATE CONSTRAINT TRIGGER trg_i_entity_relationship_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_relationship_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_relationship_attribute_value();
+CREATE CONSTRAINT TRIGGER trg_i_entity_type_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_type_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_type_attribute();
+CREATE CONSTRAINT TRIGGER trg_i_entity_type_attribute_group AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_type_attribute_group DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_type_attribute_group();
+CREATE CONSTRAINT TRIGGER trg_i_observation AFTER INSERT OR UPDATE OR DELETE ON smart.i_observation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_observation();
+CREATE CONSTRAINT TRIGGER trg_i_observation_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_observation_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_observation_attribute();
+CREATE CONSTRAINT TRIGGER trg_i_record_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_record_attachment();
+CREATE CONSTRAINT TRIGGER trg_i_relationship_type_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_type_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_relationship_type_attribute();
+CREATE CONSTRAINT TRIGGER trg_i_working_set_entity AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set_entity DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_working_set_entity();
+CREATE CONSTRAINT TRIGGER trg_i_working_set_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_working_set_query();
+CREATE CONSTRAINT TRIGGER trg_i_working_set_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set_record DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_working_set_record();
+CREATE CONSTRAINT TRIGGER trg_i_record_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_record_attribute_value();
+CREATE CONSTRAINT TRIGGER trg_i_record_attribute_value_list AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_record_attribute_value_list();
+CREATE CONSTRAINT TRIGGER trg_i_recordsource_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_recordsource_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_recordsource_attribute();
+
+
+-- INTELLIGENCE QUERIES --
+CREATE CONSTRAINT TRIGGER trg_intel_record_query AFTER INSERT OR UPDATE OR DELETE ON smart.intel_record_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_intel_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.intel_summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+
+
+--INTELLIGENCE
+
+CREATE OR REPLACE FUNCTION connect.trg_patrol_intelligence() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'intelligence_uuid', ROW.intelligence_uuid, null, p.CA_UUID 
+ 		from smart.patrol p where p.uuid = ROW.patrol_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_intelligence_attachment() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_intelligence_point() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE CONSTRAINT TRIGGER trg_informant AFTER INSERT OR UPDATE OR DELETE ON smart.informant DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_intelligence AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_intelligence_source AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence_source DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_patrol_intelligence AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_intelligence DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_intelligence();
+CREATE CONSTRAINT TRIGGER trg_intelligence_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_intelligence_attachment();
+CREATE CONSTRAINT TRIGGER trg_intelligence_point AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence_point DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_intelligence_point();
+
+
+
+--PLANNING
+
+CREATE OR REPLACE FUNCTION connect.trg_plan_target() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
+ 		from smart.plan p where p.uuid = ROW.plan_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_plan_target_point() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
+ 		FROM smart.plan_target pt, smart.plan p WHERE p.uuid = pt.plan_uuid and pt.uuid = ROW.plan_target_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_patrol_plan() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'plan_uuid', ROW.plan_uuid, null, p.CA_UUID 
+ 		FROM smart.patrol p where p.uuid = ROW.patrol_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+
+CREATE CONSTRAINT TRIGGER trg_plan AFTER INSERT OR UPDATE OR DELETE ON smart.plan DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_plan_target AFTER INSERT OR UPDATE OR DELETE ON smart.plan_target DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_plan_target();
+CREATE CONSTRAINT TRIGGER trg_plan_target_point AFTER INSERT OR UPDATE OR DELETE ON smart.plan_target_point DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_plan_target_point();
+CREATE CONSTRAINT TRIGGER trg_patrol_plan AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_plan DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_plan();
+
+-- CYBERTRACKER --
+
+CREATE OR REPLACE FUNCTION connect.trg_connect_ct_properties() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
+ 		FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_connect_alert() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
+ 		FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE CONSTRAINT TRIGGER trg_connect_ct_properties AFTER INSERT OR UPDATE OR DELETE ON smart.connect_ct_properties DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_connect_ct_properties();
+CREATE CONSTRAINT TRIGGER trg_connect_alert AFTER INSERT OR UPDATE OR DELETE ON smart.connect_alert DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_connect_alert();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_ct_mission_link() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ct_uuid', ROW.ct_uuid, null, null, null, sd.CA_UUID 
+ 		FROM smart.mission mm, smart.survey s, smart.survey_design sd WHERE mm.survey_uuid = s.uuid and s.survey_design_uuid = sd.uuid and mm.uuid = ROW.mission_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE CONSTRAINT TRIGGER trg_ct_mission_link AFTER INSERT OR UPDATE OR DELETE ON smart.ct_mission_link DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_ct_mission_link();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_ct_patrol_link() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ct_uuid', ROW.ct_uuid, null, null, null, pp.CA_UUID 
+ 		FROM smart.patrol pp, smart.patrol_leg pl WHERE pl.patrol_uuid = pp.uuid and pl.uuid = ROW.patrol_leg_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE CONSTRAINT TRIGGER trg_ct_patrol_link AFTER INSERT OR UPDATE OR DELETE ON smart.ct_patrol_link DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_ct_patrol_link();
+
+
+--SMART CORE
+CREATE OR REPLACE FUNCTION connect.trg_patrol_type() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ca_uuid', ROW.ca_uuid, 'patrol_type', null, ROW.patrol_type,  ROW.CA_UUID);
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_dm_attribute_list() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, da.CA_UUID 
+ 		FROM smart.dm_attribute da WHERE da.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_dm_attribute_tree() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, da.CA_UUID 
+ 		FROM smart.dm_attribute da WHERE da.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_dm_att_agg_map() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, 'agg_name', null, ROW.agg_name, a.CA_UUID 
+ 		FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_dm_cat_att_map() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'category_uuid', ROW.category_uuid, null, null, null, a.CA_UUID 
+ 		FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_i18n_label() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'element_uuid', ROW.element_uuid, 'language_uuid', ROW.language_uuid, null, l.CA_UUID 
+ 		FROM smart.language l WHERE l.uuid = ROW.language_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_observation_attachment() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
+ 		FROM smart.wp_observation ob, smart.waypoint wp where ob.wp_uuid = wp.uuid and ob.uuid = ROW.obs_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_patrol_leg() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
+ 		FROM smart.patrol p WHERE p.uuid = ROW.patrol_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_patrol_leg_day() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
+ 		FROM smart.patrol p, smart.patrol_leg pl where pl.patrol_uuid = p.uuid and pl.uuid = ROW.patrol_leg_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_patrol_leg_members() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_leg_uuid', ROW.patrol_leg_uuid, 'employee_uuid', ROW.employee_uuid, null, e.CA_UUID 
+ 		FROM smart.employee e WHERE e.uuid = ROW.employee_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_patrol_waypoint() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'leg_day_uuid', ROW.leg_day_uuid, 'wp_uuid', ROW.wp_uuid, null, wp.CA_UUID 
+ 		FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_rank() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
+ 		FROM smart.agency a WHERE a.uuid = ROW.agency_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_report_query() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'report_uuid', ROW.report_uuid, 'query_uuid', ROW.query_uuid, null, r.CA_UUID 
+ 		from smart.report r where r.uuid = ROW.report_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_track() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
+ 		FROM smart.patrol p, smart.patrol_leg pl, smart.patrol_leg_day pld WHERE p.uuid = pl.patrol_uuid and pl.uuid = pld.patrol_leg_uuid and pld.uuid = ROW.patrol_leg_day_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_wp_attachments() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
+ 		FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_wp_observation() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
+ 		FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_wp_observation_attributes() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, a.CA_UUID 
+ 		FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_cm_attribute() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
+ 		FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_cm_attribute_list() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
+ 		FROM smart.configurable_model cm, smart.cm_attribute_config cf where cm.uuid = cf.cm_uuid and cf.uuid = ROW.config_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_cm_attribute_option() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, dm.CA_UUID 
+ 		FROM smart.cm_attribute cm, smart.dm_attribute dm where cm.attribute_uuid = dm.uuid and cm.uuid = ROW.cm_attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_cm_attribute_tree_node() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
+ 		FROM smart.configurable_model cm, smart.cm_attribute_config cf where cm.uuid = cf.cm_uuid and cf.uuid = ROW.config_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_cm_node() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
+ 		FROM smart.configurable_model cm where cm.uuid = ROW.cm_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_screen_option_uuid() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, op.CA_UUID 
+ 		FROM smart.screen_option op where op.uuid = ROW.option_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+
+CREATE OR REPLACE FUNCTION connect.trg_cm_attribute_config() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
+ 		FROM smart.configurable_model cm where cm.uuid = ROW.cm_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+CREATE OR REPLACE FUNCTION connect.trg_compound_query_layer() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cq.CA_UUID 
+ 		FROM smart.compound_query cq where cq.uuid = ROW.compound_query_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
+
+
+CREATE OR REPLACE FUNCTION connect.trg_conservation_area() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, ROW.UUID); 
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_observation_options() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ca_uuid', ROW.ca_uuid, null, null, null, ROW.ca_UUID); 
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE CONSTRAINT TRIGGER trg_conservation_area AFTER INSERT OR UPDATE OR DELETE ON smart.conservation_area DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_conservation_area();
+
+CREATE CONSTRAINT TRIGGER trg_query_folder AFTER INSERT OR UPDATE OR DELETE ON smart.query_folder DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_report AFTER INSERT OR UPDATE OR DELETE ON smart.report DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_report_folder AFTER INSERT OR UPDATE OR DELETE ON smart.report_folder DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_saved_maps AFTER INSERT OR UPDATE OR DELETE ON smart.saved_maps DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_station AFTER INSERT OR UPDATE OR DELETE ON smart.station DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_team AFTER INSERT OR UPDATE OR DELETE ON smart.team DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.waypoint DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.waypoint_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_configurable_model AFTER INSERT OR UPDATE OR DELETE ON smart.configurable_model DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_screen_option AFTER INSERT OR UPDATE OR DELETE ON smart.screen_option DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_compound_query AFTER INSERT OR UPDATE OR DELETE ON smart.compound_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_agency AFTER INSERT OR UPDATE OR DELETE ON smart.agency DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_area_geometries AFTER INSERT OR UPDATE OR DELETE ON smart.area_geometries DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_ca_projection AFTER INSERT OR UPDATE OR DELETE ON smart.ca_projection DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_dm_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.dm_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_dm_category AFTER INSERT OR UPDATE OR DELETE ON smart.dm_category DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_employee AFTER INSERT OR UPDATE OR DELETE ON smart.employee DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.gridded_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_language AFTER INSERT OR UPDATE OR DELETE ON smart.language DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_map_styles AFTER INSERT OR UPDATE OR DELETE ON smart.map_styles DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_observation_options AFTER INSERT OR UPDATE OR DELETE ON smart.observation_options DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_observation_options();
+CREATE CONSTRAINT TRIGGER trg_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.observation_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_obs_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_gridded_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_obs_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_observation_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_obs_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_obs_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_waypoint_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_patrol AFTER INSERT OR UPDATE OR DELETE ON smart.patrol DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_patrol_mandate AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_mandate DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_patrol_query AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE CONSTRAINT TRIGGER trg_patrol_transport AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_transport DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();  
+
+
+CREATE CONSTRAINT TRIGGER trg_patrol_type AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_type DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_type();
+CREATE CONSTRAINT TRIGGER trg_dm_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.dm_attribute_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_dm_attribute_list();
+CREATE CONSTRAINT TRIGGER trg_dm_attribute_tree AFTER INSERT OR UPDATE OR DELETE ON smart.dm_attribute_tree DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_dm_attribute_tree();
+CREATE CONSTRAINT TRIGGER trg_dm_att_agg_map AFTER INSERT OR UPDATE OR DELETE ON smart.dm_att_agg_map DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_dm_att_agg_map();
+CREATE CONSTRAINT TRIGGER trg_dm_cat_att_map AFTER INSERT OR UPDATE OR DELETE ON smart.dm_cat_att_map DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_dm_cat_att_map();
+CREATE CONSTRAINT TRIGGER trg_i18n_label AFTER INSERT OR UPDATE OR DELETE ON smart.i18n_label DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i18n_label();
+CREATE CONSTRAINT TRIGGER trg_patrol_leg AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_leg DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_leg();
+CREATE CONSTRAINT TRIGGER trg_patrol_leg_day AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_leg_day DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_leg_day();
+CREATE CONSTRAINT TRIGGER trg_patrol_leg_members AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_leg_members DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_leg_members();
+CREATE CONSTRAINT TRIGGER trg_patrol_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_waypoint DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_waypoint();
+CREATE CONSTRAINT TRIGGER trg_rank AFTER INSERT OR UPDATE OR DELETE ON smart.rank DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_rank();
+CREATE CONSTRAINT TRIGGER trg_report_query AFTER INSERT OR UPDATE OR DELETE ON smart.report_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_report_query();
+CREATE CONSTRAINT TRIGGER trg_track AFTER INSERT OR UPDATE OR DELETE ON smart.track DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_track();
+CREATE CONSTRAINT TRIGGER trg_wp_attachments AFTER INSERT OR UPDATE OR DELETE ON smart.wp_attachments DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_wp_attachments();
+CREATE CONSTRAINT TRIGGER trg_wp_observation AFTER INSERT OR UPDATE OR DELETE ON smart.wp_observation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_wp_observation();
+CREATE CONSTRAINT TRIGGER trg_wp_observation_attributes AFTER INSERT OR UPDATE OR DELETE ON smart.wp_observation_attributes DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_wp_observation_attributes();
+CREATE CONSTRAINT TRIGGER trg_observation_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.observation_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_observation_attachment();
+CREATE CONSTRAINT TRIGGER trg_cm_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute();
+CREATE CONSTRAINT TRIGGER trg_cm_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute_list();
+CREATE CONSTRAINT TRIGGER trg_cm_attribute_option AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_option DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute_option();
+CREATE CONSTRAINT TRIGGER trg_cm_attribute_tree_node AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_tree_node DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute_tree_node();
+CREATE CONSTRAINT TRIGGER trg_cm_node AFTER INSERT OR UPDATE OR DELETE ON smart.cm_node DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_node();
+CREATE CONSTRAINT TRIGGER trg_screen_option_uuid AFTER INSERT OR UPDATE OR DELETE ON smart.screen_option_uuid DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_screen_option_uuid();
+CREATE CONSTRAINT TRIGGER trg_cm_attribute_config AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_config DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute_config();
+CREATE CONSTRAINT TRIGGER trg_compound_query_layer AFTER INSERT OR UPDATE OR DELETE ON smart.compound_query_layer DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_compound_query_layer();
+
+
+-- Lock the change log table so cannot apply chnages at the same time as sync or packaging conservation area
+DROP TRIGGER trg_connect_account_before ON connect.change_log;
+DROP TRIGGER trg_connect_account_after ON connect.change_log; 
+DROP FUNCTION connect.trg_changelog_before();
+DROP FUNCTION connect.trg_changelog_after();
+
+CREATE OR REPLACE FUNCTION connect.trg_changelog_before() RETURNS trigger AS $$
+DECLARE
+  canlock boolean;
+BEGIN
+	SELECT pg_try_advisory_lock(a.lock_key) into canlock FROM connect.ca_info a WHERE a.ca_uuid = NEW.ca_uuid;
+	IF (canlock) THEN return NEW; ELSE RAISE EXCEPTION 'Database Locked to Editing'; END IF;
+END$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION connect.trg_changelog_after() RETURNS trigger AS $$
+DECLARE
+BEGIN
+	PERFORM pg_advisory_unlock(a.lock_key) FROM connect.ca_info a WHERE a.ca_uuid = NEW.ca_uuid;
+RETURN NEW; END$$ LANGUAGE 'plpgsql';
+
+CREATE  TRIGGER trg_connect_account_before BEFORE INSERT ON connect.change_log  FOR EACH ROW execute procedure connect.trg_changelog_before();
+CREATE  TRIGGER trg_connect_account_after AFTER INSERT ON connect.change_log  FOR EACH ROW execute procedure connect.trg_changelog_after();
+

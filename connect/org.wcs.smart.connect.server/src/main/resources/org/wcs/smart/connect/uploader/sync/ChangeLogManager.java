@@ -54,6 +54,21 @@ public enum ChangeLogManager {
 	private static final String CHANGE_LOG_INFO_TABLE = "connect.change_log_history"; //$NON-NLS-1$
 	
 	/**
+	 * Disables all triggers in the system. Use with care, always enable after complete
+	 */
+	public void disableAllTriggers(Session session) {
+		session.createNativeQuery("SET session_replication_role = replica").executeUpdate(); //$NON-NLS-1$
+	}
+	
+	
+	/**
+	 * Re-enables all triggers in the system. 
+	 */
+	public void enableAllTriggers(Session session) {
+		session.createNativeQuery("SET session_replication_role = DEFAULT").executeUpdate(); //$NON-NLS-1$
+	}
+	
+	/**
 	 * Delete all change log items with a revision 
 	 * less than or equal to the maxrevision for the given conservation area.  
 	 * Inserts a record into the change_log_history table to track

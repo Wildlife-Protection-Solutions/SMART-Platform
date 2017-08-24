@@ -104,12 +104,13 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 					logger.log(Level.SEVERE, ex2.getMessage(), ex2);	
 				}
 				
+				//set error message/status
 				session.beginTransaction();
 				item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
-				try{
-					item.setMessage(MessageFormat.format(Messages.getString("SyncUploadCaProcessor.ProcessingError2", item.getLocale()), ex.getMessage())); //$NON-NLS-1$
-				}catch (Exception ex2){}
+				item.setMessage(MessageFormat.format(Messages.getString("SyncUploadCaProcessor.ProcessingError2", item.getLocale()), ex.getMessage())); //$NON-NLS-1$
+				session.saveOrUpdate(item);
 				session.getTransaction().commit();
+				
 			}
 		}finally{
 			try{

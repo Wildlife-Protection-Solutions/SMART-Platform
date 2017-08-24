@@ -35,6 +35,7 @@ import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.uploader.IUploadItemProcessor;
+import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 
 /**
  * A upload item processor that loads a conservation area export into
@@ -55,8 +56,9 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 	@Override
 	public void processItem(WorkItem item, Session session) {
 		session.beginTransaction();
-		
+		ChangeLogManager.INSTANCE.disableAllTriggers(session);
 		try{
+			
 			session.update(item);
 
 			ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
@@ -70,9 +72,15 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			}
 			
 			//load data
-			PostgresqlCaLoader ldr = new PostgresqlCaLoader(session, item);
-			ldr.importData(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()), info);
-			session.flush();
+//			try {
+				
+
+				PostgresqlCaLoader ldr = new PostgresqlCaLoader(session, item);
+				ldr.importData(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()), info);
+				session.flush();
+//			}finally {
+//				
+//			}
 			
 			//update ca item label
 			ConservationArea area =CaProcessorUtils.updateCaLabel(session, info);
@@ -113,6 +121,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 				session.getTransaction().rollback();
 			}
 		}finally{
+			ChangeLogManager.INSTANCE.enableAllTriggers(session);
 			cleanUp(item);
 		}
 	}

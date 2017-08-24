@@ -132,8 +132,14 @@ public class PostgresqlSyncProcessor {
 			}
 			
 			
-			//apply change log
-			applyChangeLog(changeLogFile, filestoreDir);
+			//disable triggers
+			try {
+				ChangeLogManager.INSTANCE.disableAllTriggers(session);
+				//apply change log
+				applyChangeLog(changeLogFile, filestoreDir);
+			}finally {
+				ChangeLogManager.INSTANCE.enableAllTriggers(session);
+			}
 
 			//update info label
 			CaProcessorUtils.updateCaLabel(session, info);
