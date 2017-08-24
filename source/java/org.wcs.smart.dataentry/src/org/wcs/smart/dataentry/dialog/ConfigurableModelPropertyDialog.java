@@ -295,8 +295,6 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 							Query<?> deleteq = session.createQuery("DELETE FROM CmAttributeConfig WHERE model = :model"); //$NON-NLS-1$
 							deleteq.setParameter("model", currentCm); //$NON-NLS-1$
 							deleteq.executeUpdate();
-								
-//							currentCm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid()); //we need an object that is attached to current session
 
 							session.delete(currentCm);
 							session.getTransaction().commit();
