@@ -520,8 +520,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 					break;
 				}
 			}
-			if (newpt.getTransportTypes().isEmpty()) newpt.setTransportTypes(new ArrayList<>());
 		}
+		if (newpt.getTransportTypes().isEmpty()) newpt.setTransportTypes(new ArrayList<>());
 		newPtt.setPatrolType(newpt.getType());
 		newpt.getTransportTypes().add(newPtt);
 		newPtt.updateName(currentCa.getDefaultLanguage(), Messages.PatrolTypePropertyPage_DefaultTransportionTypeName);
