@@ -18,7 +18,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */package org.wcs.smart.entity.updatesite;
+ */
+package org.wcs.smart.entity.updatesite;
 
 import org.wcs.smart.changetracking.AbstractChangeTrackerInstaller;
 import org.wcs.smart.entity.EntityPlugIn;

@@ -203,7 +203,7 @@
                   style="push">
             </command>
             <separator
-                  name="org.wcs.smart.connect.separator3"
+                  name="org.wcs.smart.connect.separator4"
                   visible="true">
             </separator>
             <command

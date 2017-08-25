@@ -67,7 +67,13 @@ import org.wcs.smart.util.UuidUtils;
  * applying change logs or deleting a conservation area.  By default this should be turned on 
  * and only turned off when specifically wanting to disable change logging.
  * 
- *  
+ * SYSTEM ASSUMPTION:
+ * We only log changes made to files in directories that whose root directory 
+ * (relative to the filestore directory)
+ * can be converted to a uuid.  We then assume this uuid represents the Conservation Area UUID.  
+ * Plugins should NEVER make a folder in the root datastore directory that is named with
+ * a value that can be converted to a UUID.  Data outside a Conservation Area directory
+ * is not replicated. 
  * 
  * @author Emily
  *

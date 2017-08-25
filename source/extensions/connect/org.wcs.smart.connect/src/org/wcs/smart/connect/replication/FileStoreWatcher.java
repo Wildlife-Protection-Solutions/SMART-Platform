@@ -134,7 +134,7 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     	try{
     		caUuid = UuidUtils.stringToUuid(relativePath.getName(0).toString());
     	}catch (Exception ex){
-    		//no in a ca directory so we do not replication
+    		//not in a ca directory so we do not replicate
     		return;
     	}
     	
