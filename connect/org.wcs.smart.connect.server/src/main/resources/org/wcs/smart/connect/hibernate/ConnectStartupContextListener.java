@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.hibernate;
 
 import java.beans.Introspector;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -84,6 +85,7 @@ import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.report.BirtEngine;
+import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 
 /**
  * Web listener to configure the hibernate connection on start up and shut down.
@@ -122,9 +124,14 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		//clean up BIRT
 		BirtEngine.destroyBirtEngine();
 		
+		//remove filewatcher
+		try {
+			ChangeLogManager.INSTANCE.shutDownFilestoreWatcher();
+		} catch (IOException ex) {
+			logger.warning("Error shutting down file store watcher"); //$NON-NLS-1$
+		}
 		
 		//destroy geotools stuff
-		
 		//jdbc drivers
 		ClassLoader webappClassLoader = getClass().getClassLoader();
 		Enumeration<Driver> drivers = DriverManager.getDrivers();
@@ -325,6 +332,13 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		sce.getServletContext().setAttribute(HibernateManager.CONTEXT_KEY, sf);
 		
 		logger.info("Hibernate SessionFactory Configured successfully"); //$NON-NLS-1$
+		
+		// register filestore watcher for replication events
+		try {
+			ChangeLogManager.INSTANCE.watchFilestore(sf);
+		} catch (IOException ex) {
+			logger.log(Level.SEVERE, "Could not configure filestore watcher used for logging changes to filestore. " + ex.getMessage(), ex); //$NON-NLS-1$
+		}
 		
 		//start executor for running background jobs
 		int numthreads = 1;

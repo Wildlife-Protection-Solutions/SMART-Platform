@@ -131,15 +131,7 @@ public class PostgresqlSyncProcessor {
 				}
 			}
 			
-			
-			//disable triggers
-			try {
-				ChangeLogManager.INSTANCE.disableAllTriggers(session);
-				//apply change log
-				applyChangeLog(changeLogFile, filestoreDir);
-			}finally {
-				ChangeLogManager.INSTANCE.enableAllTriggers(session);
-			}
+			applyChangeLog(changeLogFile, filestoreDir);
 
 			//update info label
 			CaProcessorUtils.updateCaLabel(session, info);
@@ -150,7 +142,21 @@ public class PostgresqlSyncProcessor {
 
 	private void applyChangeLog(Path changelogFile, Path changelogFilestore) throws Exception{
 		PostgresqlChangeLogDeserializer processor = new PostgresqlChangeLogDeserializer(changelogFile, changelogFilestore);
-		processor.processFile(session);
+		
+		//disable writing to change log table; all changes written to tables will
+		//not be written to change log table. We will write those changes once
+		//we turn back on the triggers
+		try {
+			//we need to lock the entire database here as this disables all triggers and at this point
+			//only the Conservation Area is locked
+			ChangeLogManager.INSTANCE.disableChangeTracking(info, session);
+			//apply change log
+			processor.processFile(session);
+		}finally {
+			ChangeLogManager.INSTANCE.enableChangeTracking(info, session);
+		}
+		//write all change log 
+		processor.writeToChangeLog(session);
 	}
 
 }

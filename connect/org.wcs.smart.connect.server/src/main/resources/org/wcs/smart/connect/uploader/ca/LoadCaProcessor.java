@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.uploader.ca;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.logging.Level;
@@ -56,11 +57,10 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 	@Override
 	public void processItem(WorkItem item, Session session) {
 		session.beginTransaction();
-		ChangeLogManager.INSTANCE.disableAllTriggers(session);
+		
 		try{
-			
-			session.update(item);
-
+			ChangeLogManager.INSTANCE.disableChangeTracking(item.getConservationAreaInfo(), session);
+		
 			ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
 			
 			if (info.getStatus() != ConservationAreaInfo.Status.UPLOADING){
@@ -72,15 +72,9 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			}
 			
 			//load data
-//			try {
-				
-
-				PostgresqlCaLoader ldr = new PostgresqlCaLoader(session, item);
-				ldr.importData(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()), info);
-				session.flush();
-//			}finally {
-//				
-//			}
+			PostgresqlCaLoader ldr = new PostgresqlCaLoader(session, item);
+			ldr.importData(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()), info);
+			session.flush();
 			
 			//update ca item label
 			ConservationArea area =CaProcessorUtils.updateCaLabel(session, info);
@@ -121,7 +115,13 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 				session.getTransaction().rollback();
 			}
 		}finally{
-			ChangeLogManager.INSTANCE.enableAllTriggers(session);
+			try {
+				session.beginTransaction();
+				ChangeLogManager.INSTANCE.enableChangeTracking(item.getConservationAreaInfo(), session);
+				session.getTransaction().commit();
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Unable to reset triggers - system should be shutdown and restarted." + e.getMessage(), e);
+			}
 			cleanUp(item);
 		}
 	}

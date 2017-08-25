@@ -25,8 +25,14 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 
 /**
- * Tools for locking an release the database for applying 
- * conservation area changes.
+ * Tools for locking and releasing the database for applying 
+ * Conservation Area changes.
+ * 
+ * If users are writing changes to the filestore they should consider locking the database 
+ * for the Conservation Area before writing to the datastore, 
+ * otherwise if the database is locked from another process the filestore change will 
+ * be made but not recorded in the change log table (and thus never replicated out to other users). 
+ * This affects all filestore changes include reports, observation & waypoint attachments etc.
  * 
  * @author Emily
  *

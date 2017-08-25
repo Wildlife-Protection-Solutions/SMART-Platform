@@ -15,8 +15,10 @@
 		<!--  the database lock is help (see LockManager).  Otherwise between transactions -->
 		<!--  a different database connection is sometimes  used for the same session and the -->
 		<!--  unlock connection may be different from the lock connection which will cause the unlock to -->
-		<!--  fail and the lock to never be release requireing a system restart. -->
-		<property name="hibernate.connection.release_mode">on_close</property>
+		<!--  fail and the lock to never be release requiring a system restart. -->
+		<!-- <property name="hibernate.connection.release_mode">on_close</property> -->
+		<property name="hibernate.connection.handling_mode">DELAYED_ACQUISITION_AND_HOLD</property>
+		
 
 		
 		<property name="cache.use_second_level_cache">false</property>

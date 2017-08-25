@@ -374,9 +374,9 @@ BEGIN
  RETURN ROW;
 END$$ LANGUAGE 'plpgsql';
 
-CREATE CONSTRAINT TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.qa_routine DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_qa_error AFTER INSERT OR UPDATE OR DELETE ON smart.qa_error DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_qa_routine_parameter AFTER INSERT OR UPDATE OR DELETE ON smart.qa_routine_parameter DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_qa_routine_parameter();
+CREATE TRIGGER trg_qa_routine AFTER INSERT OR UPDATE OR DELETE ON smart.qa_routine FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_qa_error AFTER INSERT OR UPDATE OR DELETE ON smart.qa_error FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_qa_routine_parameter AFTER INSERT OR UPDATE OR DELETE ON smart.qa_routine_parameter FOR EACH ROW execute procedure connect.trg_qa_routine_parameter();
 
 
 
@@ -398,7 +398,7 @@ BEGIN
  		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'employee_uuid', ROW.EMPLOYEE_UUID, null, null, null, server.CA_UUID FROM smart.connect_server server WHERE server.uuid = ROW.connect_uuid;
  RETURN ROW;
 END$$ LANGUAGE 'plpgsql';
-CREATE CONSTRAINT TRIGGER trg_connect_account AFTER INSERT OR UPDATE OR DELETE ON smart.connect_account DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_connect_account();
+CREATE TRIGGER trg_connect_account AFTER INSERT OR UPDATE OR DELETE ON smart.connect_account FOR EACH ROW execute procedure connect.trg_connect_account();
 
 
 
@@ -437,20 +437,20 @@ BEGIN
  	RETURN ROW;
 END$$ LANGUAGE 'plpgsql';
 
-CREATE CONSTRAINT TRIGGER trg_ct_properties_option AFTER INSERT OR UPDATE OR DELETE ON smart.ct_properties_option DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_ct_properties_profile AFTER INSERT OR UPDATE OR DELETE ON smart.ct_properties_profile DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_ct_properties_option AFTER INSERT OR UPDATE OR DELETE ON smart.ct_properties_option FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_ct_properties_profile AFTER INSERT OR UPDATE OR DELETE ON smart.ct_properties_profile FOR EACH ROW execute procedure connect.trg_changelog_common();
 
-CREATE CONSTRAINT TRIGGER trg_ct_properties_profile_option AFTER INSERT OR UPDATE OR DELETE ON smart.ct_properties_profile_option DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_ct_properties_profile_option();
-CREATE CONSTRAINT TRIGGER trg_cm_ct_properties_profile AFTER INSERT OR UPDATE OR DELETE ON smart.cm_ct_properties_profile DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_ct_properties_profile();
+CREATE TRIGGER trg_ct_properties_profile_option AFTER INSERT OR UPDATE OR DELETE ON smart.ct_properties_profile_option FOR EACH ROW execute procedure connect.trg_ct_properties_profile_option();
+CREATE TRIGGER trg_cm_ct_properties_profile AFTER INSERT OR UPDATE OR DELETE ON smart.cm_ct_properties_profile FOR EACH ROW execute procedure connect.trg_cm_ct_properties_profile();
 
 
 
 --ENTITY QUERIES
 
-CREATE CONSTRAINT TRIGGER trg_entity_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_gridded_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_entity_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_observation_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_entity_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_entity_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_waypoint_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_entity_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_gridded_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_entity_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_observation_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_entity_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_summary_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_entity_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.entity_waypoint_query FOR EACH ROW execute procedure connect.trg_changelog_common();
 
 --ENTITIES
 
@@ -504,19 +504,19 @@ BEGIN
  	RETURN ROW;
 END$$ LANGUAGE 'plpgsql';
 
-CREATE CONSTRAINT TRIGGER trg_entity_type AFTER INSERT OR UPDATE OR DELETE ON smart.entity_type DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_entity AFTER INSERT OR UPDATE OR DELETE ON smart.entity DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_entity();
-CREATE CONSTRAINT TRIGGER trg_entity_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.entity_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_entity_attribute();
-CREATE CONSTRAINT TRIGGER trg_entity_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.entity_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_entity_attribute_value();
+CREATE TRIGGER trg_entity_type AFTER INSERT OR UPDATE OR DELETE ON smart.entity_type FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_entity AFTER INSERT OR UPDATE OR DELETE ON smart.entity FOR EACH ROW execute procedure connect.trg_entity();
+CREATE TRIGGER trg_entity_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.entity_attribute FOR EACH ROW execute procedure connect.trg_entity_attribute();
+CREATE TRIGGER trg_entity_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.entity_attribute_value FOR EACH ROW execute procedure connect.trg_entity_attribute_value();
 
 
 -- ER QUERIES
-CREATE CONSTRAINT TRIGGER trg_survey_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_gridded_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_survey_mission_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_mission_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_survey_mission_track_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_mission_track_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_survey_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_observation_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_survey_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_survey_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_waypoint_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_survey_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_gridded_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_survey_mission_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_mission_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_survey_mission_track_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_mission_track_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_survey_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_observation_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_survey_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_summary_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_survey_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.survey_waypoint_query FOR EACH ROW execute procedure connect.trg_changelog_common();
 
 -- ER CORE
 CREATE OR REPLACE FUNCTION connect.trg_mission() RETURNS trigger AS $$
@@ -780,23 +780,23 @@ BEGIN
  	RETURN ROW;
 END$$ LANGUAGE 'plpgsql';
  
-CREATE CONSTRAINT TRIGGER trg_mission_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.mission_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_sampling_unit_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_survey_design AFTER INSERT OR UPDATE OR DELETE ON smart.survey_design DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_mission AFTER INSERT OR UPDATE OR DELETE ON smart.mission DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission();
-CREATE CONSTRAINT TRIGGER trg_mission_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.mission_attribute_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_attribute_list();
-CREATE CONSTRAINT TRIGGER trg_mission_day AFTER INSERT OR UPDATE OR DELETE ON smart.mission_day DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_day();
-CREATE CONSTRAINT TRIGGER trg_mission_member AFTER INSERT OR UPDATE OR DELETE ON smart.mission_member DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_member();
-CREATE CONSTRAINT TRIGGER trg_mission_property AFTER INSERT OR UPDATE OR DELETE ON smart.mission_property DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_property();
-CREATE CONSTRAINT TRIGGER trg_mission_property_value AFTER INSERT OR UPDATE OR DELETE ON smart.mission_property_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_property_value();
-CREATE CONSTRAINT TRIGGER trg_mission_track AFTER INSERT OR UPDATE OR DELETE ON smart.mission_track DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_mission_track();
-CREATE CONSTRAINT TRIGGER trg_sampling_unit AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_sampling_unit();
-CREATE CONSTRAINT TRIGGER trg_sampling_unit_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit_attribute_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_sampling_unit_attribute_list();
-CREATE CONSTRAINT TRIGGER trg_sampling_unit_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_sampling_unit_attribute_value();
-CREATE CONSTRAINT TRIGGER trg_survey AFTER INSERT OR UPDATE OR DELETE ON smart.survey DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_survey();
-CREATE CONSTRAINT TRIGGER trg_survey_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.survey_waypoint DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_survey_waypoint(); 
-CREATE CONSTRAINT TRIGGER trg_survey_design_property AFTER INSERT OR UPDATE OR DELETE ON smart.survey_design_property DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_survey_design_property(); 
-CREATE CONSTRAINT TRIGGER trg_survey_design_sampling_unit AFTER INSERT OR UPDATE OR DELETE ON smart.survey_design_sampling_unit DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_survey_design_sampling_unit(); 
+CREATE TRIGGER trg_mission_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.mission_attribute FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_sampling_unit_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit_attribute FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_survey_design AFTER INSERT OR UPDATE OR DELETE ON smart.survey_design FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_mission AFTER INSERT OR UPDATE OR DELETE ON smart.mission FOR EACH ROW execute procedure connect.trg_mission();
+CREATE TRIGGER trg_mission_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.mission_attribute_list FOR EACH ROW execute procedure connect.trg_mission_attribute_list();
+CREATE TRIGGER trg_mission_day AFTER INSERT OR UPDATE OR DELETE ON smart.mission_day FOR EACH ROW execute procedure connect.trg_mission_day();
+CREATE TRIGGER trg_mission_member AFTER INSERT OR UPDATE OR DELETE ON smart.mission_member FOR EACH ROW execute procedure connect.trg_mission_member();
+CREATE TRIGGER trg_mission_property AFTER INSERT OR UPDATE OR DELETE ON smart.mission_property FOR EACH ROW execute procedure connect.trg_mission_property();
+CREATE TRIGGER trg_mission_property_value AFTER INSERT OR UPDATE OR DELETE ON smart.mission_property_value FOR EACH ROW execute procedure connect.trg_mission_property_value();
+CREATE TRIGGER trg_mission_track AFTER INSERT OR UPDATE OR DELETE ON smart.mission_track FOR EACH ROW execute procedure connect.trg_mission_track();
+CREATE TRIGGER trg_sampling_unit AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit FOR EACH ROW execute procedure connect.trg_sampling_unit();
+CREATE TRIGGER trg_sampling_unit_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit_attribute_list FOR EACH ROW execute procedure connect.trg_sampling_unit_attribute_list();
+CREATE TRIGGER trg_sampling_unit_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.sampling_unit_attribute_value FOR EACH ROW execute procedure connect.trg_sampling_unit_attribute_value();
+CREATE TRIGGER trg_survey AFTER INSERT OR UPDATE OR DELETE ON smart.survey FOR EACH ROW execute procedure connect.trg_survey();
+CREATE TRIGGER trg_survey_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.survey_waypoint FOR EACH ROW execute procedure connect.trg_survey_waypoint(); 
+CREATE TRIGGER trg_survey_design_property AFTER INSERT OR UPDATE OR DELETE ON smart.survey_design_property FOR EACH ROW execute procedure connect.trg_survey_design_property(); 
+CREATE TRIGGER trg_survey_design_sampling_unit AFTER INSERT OR UPDATE OR DELETE ON smart.survey_design_sampling_unit FOR EACH ROW execute procedure connect.trg_survey_design_sampling_unit(); 
 
 -- ADVANCED INTELLIGENCE --
 
@@ -936,42 +936,42 @@ CREATE OR REPLACE FUNCTION connect.trg_i_recordsource_attribute() RETURNS trigge
 RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
 
-CREATE CONSTRAINT TRIGGER trg_i_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.i_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_entity AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_entity_search AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_search DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_entity_type AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_type DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_location AFTER INSERT OR UPDATE OR DELETE ON smart.i_location DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_record DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_record_obs_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_obs_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_relationship_group AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_group DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_relationship_type AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_type DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_working_set AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_recordsource AFTER INSERT OR UPDATE OR DELETE ON smart.i_recordsource DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_i_attribute_list_item AFTER INSERT OR UPDATE OR DELETE ON smart.i_attribute_list_item DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_attribute_list_item();
-CREATE CONSTRAINT TRIGGER trg_i_entity_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_attachment();
-CREATE CONSTRAINT TRIGGER trg_i_entity_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_attribute_value();
-CREATE CONSTRAINT TRIGGER trg_i_entity_location AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_location DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_location();
-CREATE CONSTRAINT TRIGGER trg_i_entity_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_record DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_record();
-CREATE CONSTRAINT TRIGGER trg_i_entity_relationship AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_relationship DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_relationship();
-CREATE CONSTRAINT TRIGGER trg_i_entity_relationship_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_relationship_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_relationship_attribute_value();
-CREATE CONSTRAINT TRIGGER trg_i_entity_type_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_type_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_type_attribute();
-CREATE CONSTRAINT TRIGGER trg_i_entity_type_attribute_group AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_type_attribute_group DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_entity_type_attribute_group();
-CREATE CONSTRAINT TRIGGER trg_i_observation AFTER INSERT OR UPDATE OR DELETE ON smart.i_observation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_observation();
-CREATE CONSTRAINT TRIGGER trg_i_observation_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_observation_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_observation_attribute();
-CREATE CONSTRAINT TRIGGER trg_i_record_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_record_attachment();
-CREATE CONSTRAINT TRIGGER trg_i_relationship_type_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_type_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_relationship_type_attribute();
-CREATE CONSTRAINT TRIGGER trg_i_working_set_entity AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set_entity DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_working_set_entity();
-CREATE CONSTRAINT TRIGGER trg_i_working_set_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_working_set_query();
-CREATE CONSTRAINT TRIGGER trg_i_working_set_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set_record DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_working_set_record();
-CREATE CONSTRAINT TRIGGER trg_i_record_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_record_attribute_value();
-CREATE CONSTRAINT TRIGGER trg_i_record_attribute_value_list AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_record_attribute_value_list();
-CREATE CONSTRAINT TRIGGER trg_i_recordsource_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_recordsource_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i_recordsource_attribute();
+CREATE TRIGGER trg_i_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.i_attachment FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_attribute FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_entity AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_entity_search AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_search FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_entity_type AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_type FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_location AFTER INSERT OR UPDATE OR DELETE ON smart.i_location FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_record FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_record_obs_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_obs_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_relationship_group AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_group FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_relationship_type AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_type FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_working_set AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_recordsource AFTER INSERT OR UPDATE OR DELETE ON smart.i_recordsource FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_attribute_list_item AFTER INSERT OR UPDATE OR DELETE ON smart.i_attribute_list_item FOR EACH ROW execute procedure connect.trg_i_attribute_list_item();
+CREATE TRIGGER trg_i_entity_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_attachment FOR EACH ROW execute procedure connect.trg_i_entity_attachment();
+CREATE TRIGGER trg_i_entity_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_attribute_value FOR EACH ROW execute procedure connect.trg_i_entity_attribute_value();
+CREATE TRIGGER trg_i_entity_location AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_location FOR EACH ROW execute procedure connect.trg_i_entity_location();
+CREATE TRIGGER trg_i_entity_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_record FOR EACH ROW execute procedure connect.trg_i_entity_record();
+CREATE TRIGGER trg_i_entity_relationship AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_relationship FOR EACH ROW execute procedure connect.trg_i_entity_relationship();
+CREATE TRIGGER trg_i_entity_relationship_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_relationship_attribute_value FOR EACH ROW execute procedure connect.trg_i_entity_relationship_attribute_value();
+CREATE TRIGGER trg_i_entity_type_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_type_attribute FOR EACH ROW execute procedure connect.trg_i_entity_type_attribute();
+CREATE TRIGGER trg_i_entity_type_attribute_group AFTER INSERT OR UPDATE OR DELETE ON smart.i_entity_type_attribute_group FOR EACH ROW execute procedure connect.trg_i_entity_type_attribute_group();
+CREATE TRIGGER trg_i_observation AFTER INSERT OR UPDATE OR DELETE ON smart.i_observation FOR EACH ROW execute procedure connect.trg_i_observation();
+CREATE TRIGGER trg_i_observation_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_observation_attribute FOR EACH ROW execute procedure connect.trg_i_observation_attribute();
+CREATE TRIGGER trg_i_record_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attachment FOR EACH ROW execute procedure connect.trg_i_record_attachment();
+CREATE TRIGGER trg_i_relationship_type_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_relationship_type_attribute FOR EACH ROW execute procedure connect.trg_i_relationship_type_attribute();
+CREATE TRIGGER trg_i_working_set_entity AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set_entity FOR EACH ROW execute procedure connect.trg_i_working_set_entity();
+CREATE TRIGGER trg_i_working_set_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set_query FOR EACH ROW execute procedure connect.trg_i_working_set_query();
+CREATE TRIGGER trg_i_working_set_record AFTER INSERT OR UPDATE OR DELETE ON smart.i_working_set_record FOR EACH ROW execute procedure connect.trg_i_working_set_record();
+CREATE TRIGGER trg_i_record_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value FOR EACH ROW execute procedure connect.trg_i_record_attribute_value();
+CREATE TRIGGER trg_i_record_attribute_value_list AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value_list FOR EACH ROW execute procedure connect.trg_i_record_attribute_value_list();
+CREATE TRIGGER trg_i_recordsource_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_recordsource_attribute FOR EACH ROW execute procedure connect.trg_i_recordsource_attribute();
 
 
 -- INTELLIGENCE QUERIES --
-CREATE CONSTRAINT TRIGGER trg_intel_record_query AFTER INSERT OR UPDATE OR DELETE ON smart.intel_record_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_intel_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.intel_summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_intel_record_query AFTER INSERT OR UPDATE OR DELETE ON smart.intel_record_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_intel_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.intel_summary_query FOR EACH ROW execute procedure connect.trg_changelog_common();
 
 
 
@@ -998,12 +998,12 @@ CREATE OR REPLACE FUNCTION connect.trg_intelligence_point() RETURNS trigger AS $
  		from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
 RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
-CREATE CONSTRAINT TRIGGER trg_informant AFTER INSERT OR UPDATE OR DELETE ON smart.informant DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_intelligence AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_intelligence_source AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence_source DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_patrol_intelligence AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_intelligence DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_intelligence();
-CREATE CONSTRAINT TRIGGER trg_intelligence_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_intelligence_attachment();
-CREATE CONSTRAINT TRIGGER trg_intelligence_point AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence_point DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_intelligence_point();
+CREATE TRIGGER trg_informant AFTER INSERT OR UPDATE OR DELETE ON smart.informant FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_intelligence AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_intelligence_source AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence_source FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_patrol_intelligence AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_intelligence FOR EACH ROW execute procedure connect.trg_patrol_intelligence();
+CREATE TRIGGER trg_intelligence_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence_attachment FOR EACH ROW execute procedure connect.trg_intelligence_attachment();
+CREATE TRIGGER trg_intelligence_point AFTER INSERT OR UPDATE OR DELETE ON smart.intelligence_point FOR EACH ROW execute procedure connect.trg_intelligence_point();
 
 
 
@@ -1031,10 +1031,10 @@ CREATE OR REPLACE FUNCTION connect.trg_patrol_plan() RETURNS trigger AS $$ DECLA
 RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
 
-CREATE CONSTRAINT TRIGGER trg_plan AFTER INSERT OR UPDATE OR DELETE ON smart.plan DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_plan_target AFTER INSERT OR UPDATE OR DELETE ON smart.plan_target DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_plan_target();
-CREATE CONSTRAINT TRIGGER trg_plan_target_point AFTER INSERT OR UPDATE OR DELETE ON smart.plan_target_point DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_plan_target_point();
-CREATE CONSTRAINT TRIGGER trg_patrol_plan AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_plan DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_plan();
+CREATE TRIGGER trg_plan AFTER INSERT OR UPDATE OR DELETE ON smart.plan FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_plan_target AFTER INSERT OR UPDATE OR DELETE ON smart.plan_target FOR EACH ROW execute procedure connect.trg_plan_target();
+CREATE TRIGGER trg_plan_target_point AFTER INSERT OR UPDATE OR DELETE ON smart.plan_target_point FOR EACH ROW execute procedure connect.trg_plan_target_point();
+CREATE TRIGGER trg_patrol_plan AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_plan FOR EACH ROW execute procedure connect.trg_patrol_plan();
 
 -- CYBERTRACKER --
 
@@ -1052,8 +1052,8 @@ CREATE OR REPLACE FUNCTION connect.trg_connect_alert() RETURNS trigger AS $$ DEC
  		FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
 RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
-CREATE CONSTRAINT TRIGGER trg_connect_ct_properties AFTER INSERT OR UPDATE OR DELETE ON smart.connect_ct_properties DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_connect_ct_properties();
-CREATE CONSTRAINT TRIGGER trg_connect_alert AFTER INSERT OR UPDATE OR DELETE ON smart.connect_alert DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_connect_alert();
+CREATE TRIGGER trg_connect_ct_properties AFTER INSERT OR UPDATE OR DELETE ON smart.connect_ct_properties FOR EACH ROW execute procedure connect.trg_connect_ct_properties();
+CREATE TRIGGER trg_connect_alert AFTER INSERT OR UPDATE OR DELETE ON smart.connect_alert FOR EACH ROW execute procedure connect.trg_connect_alert();
 
 
 CREATE OR REPLACE FUNCTION connect.trg_ct_mission_link() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
@@ -1063,7 +1063,7 @@ CREATE OR REPLACE FUNCTION connect.trg_ct_mission_link() RETURNS trigger AS $$ D
  		FROM smart.mission mm, smart.survey s, smart.survey_design sd WHERE mm.survey_uuid = s.uuid and s.survey_design_uuid = sd.uuid and mm.uuid = ROW.mission_uuid;
 RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
-CREATE CONSTRAINT TRIGGER trg_ct_mission_link AFTER INSERT OR UPDATE OR DELETE ON smart.ct_mission_link DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_ct_mission_link();
+CREATE TRIGGER trg_ct_mission_link AFTER INSERT OR UPDATE OR DELETE ON smart.ct_mission_link FOR EACH ROW execute procedure connect.trg_ct_mission_link();
 
 
 CREATE OR REPLACE FUNCTION connect.trg_ct_patrol_link() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
@@ -1073,7 +1073,7 @@ CREATE OR REPLACE FUNCTION connect.trg_ct_patrol_link() RETURNS trigger AS $$ DE
  		FROM smart.patrol pp, smart.patrol_leg pl WHERE pl.patrol_uuid = pp.uuid and pl.uuid = ROW.patrol_leg_uuid;
 RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
-CREATE CONSTRAINT TRIGGER trg_ct_patrol_link AFTER INSERT OR UPDATE OR DELETE ON smart.ct_patrol_link DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_ct_patrol_link();
+CREATE TRIGGER trg_ct_patrol_link AFTER INSERT OR UPDATE OR DELETE ON smart.ct_patrol_link FOR EACH ROW execute procedure connect.trg_ct_patrol_link();
 
 
 --SMART CORE
@@ -1265,66 +1265,66 @@ CREATE OR REPLACE FUNCTION connect.trg_observation_options() RETURNS trigger AS 
  		VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ca_uuid', ROW.ca_uuid, null, null, null, ROW.ca_UUID); 
 RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
-CREATE CONSTRAINT TRIGGER trg_conservation_area AFTER INSERT OR UPDATE OR DELETE ON smart.conservation_area DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_conservation_area();
+CREATE TRIGGER trg_conservation_area AFTER INSERT OR UPDATE OR DELETE ON smart.conservation_area FOR EACH ROW execute procedure connect.trg_conservation_area();
 
-CREATE CONSTRAINT TRIGGER trg_query_folder AFTER INSERT OR UPDATE OR DELETE ON smart.query_folder DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_report AFTER INSERT OR UPDATE OR DELETE ON smart.report DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_report_folder AFTER INSERT OR UPDATE OR DELETE ON smart.report_folder DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_saved_maps AFTER INSERT OR UPDATE OR DELETE ON smart.saved_maps DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_station AFTER INSERT OR UPDATE OR DELETE ON smart.station DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_team AFTER INSERT OR UPDATE OR DELETE ON smart.team DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.waypoint DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.waypoint_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_configurable_model AFTER INSERT OR UPDATE OR DELETE ON smart.configurable_model DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_screen_option AFTER INSERT OR UPDATE OR DELETE ON smart.screen_option DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_compound_query AFTER INSERT OR UPDATE OR DELETE ON smart.compound_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_agency AFTER INSERT OR UPDATE OR DELETE ON smart.agency DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_area_geometries AFTER INSERT OR UPDATE OR DELETE ON smart.area_geometries DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_ca_projection AFTER INSERT OR UPDATE OR DELETE ON smart.ca_projection DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_dm_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.dm_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_dm_category AFTER INSERT OR UPDATE OR DELETE ON smart.dm_category DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_employee AFTER INSERT OR UPDATE OR DELETE ON smart.employee DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.gridded_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_language AFTER INSERT OR UPDATE OR DELETE ON smart.language DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_map_styles AFTER INSERT OR UPDATE OR DELETE ON smart.map_styles DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_observation_options AFTER INSERT OR UPDATE OR DELETE ON smart.observation_options DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_observation_options();
-CREATE CONSTRAINT TRIGGER trg_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.observation_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_obs_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_gridded_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_obs_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_observation_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_obs_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_summary_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_obs_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_waypoint_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_patrol AFTER INSERT OR UPDATE OR DELETE ON smart.patrol DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_patrol_mandate AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_mandate DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_patrol_query AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE CONSTRAINT TRIGGER trg_patrol_transport AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_transport DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_changelog_common();  
+CREATE TRIGGER trg_query_folder AFTER INSERT OR UPDATE OR DELETE ON smart.query_folder FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_report AFTER INSERT OR UPDATE OR DELETE ON smart.report FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_report_folder AFTER INSERT OR UPDATE OR DELETE ON smart.report_folder FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_saved_maps AFTER INSERT OR UPDATE OR DELETE ON smart.saved_maps FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_station AFTER INSERT OR UPDATE OR DELETE ON smart.station FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.summary_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_team AFTER INSERT OR UPDATE OR DELETE ON smart.team FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.waypoint FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.waypoint_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_configurable_model AFTER INSERT OR UPDATE OR DELETE ON smart.configurable_model FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_screen_option AFTER INSERT OR UPDATE OR DELETE ON smart.screen_option FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_compound_query AFTER INSERT OR UPDATE OR DELETE ON smart.compound_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_agency AFTER INSERT OR UPDATE OR DELETE ON smart.agency FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_area_geometries AFTER INSERT OR UPDATE OR DELETE ON smart.area_geometries FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_ca_projection AFTER INSERT OR UPDATE OR DELETE ON smart.ca_projection FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_dm_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.dm_attribute FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_dm_category AFTER INSERT OR UPDATE OR DELETE ON smart.dm_category FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_employee AFTER INSERT OR UPDATE OR DELETE ON smart.employee FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.gridded_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_language AFTER INSERT OR UPDATE OR DELETE ON smart.language FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_map_styles AFTER INSERT OR UPDATE OR DELETE ON smart.map_styles FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_observation_options AFTER INSERT OR UPDATE OR DELETE ON smart.observation_options FOR EACH ROW execute procedure connect.trg_observation_options();
+CREATE TRIGGER trg_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.observation_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_obs_gridded_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_gridded_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_obs_observation_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_observation_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_obs_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_summary_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_obs_waypoint_query AFTER INSERT OR UPDATE OR DELETE ON smart.obs_waypoint_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_patrol AFTER INSERT OR UPDATE OR DELETE ON smart.patrol FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_patrol_mandate AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_mandate FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_patrol_query AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_patrol_transport AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_transport FOR EACH ROW execute procedure connect.trg_changelog_common();  
 
 
-CREATE CONSTRAINT TRIGGER trg_patrol_type AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_type DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_type();
-CREATE CONSTRAINT TRIGGER trg_dm_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.dm_attribute_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_dm_attribute_list();
-CREATE CONSTRAINT TRIGGER trg_dm_attribute_tree AFTER INSERT OR UPDATE OR DELETE ON smart.dm_attribute_tree DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_dm_attribute_tree();
-CREATE CONSTRAINT TRIGGER trg_dm_att_agg_map AFTER INSERT OR UPDATE OR DELETE ON smart.dm_att_agg_map DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_dm_att_agg_map();
-CREATE CONSTRAINT TRIGGER trg_dm_cat_att_map AFTER INSERT OR UPDATE OR DELETE ON smart.dm_cat_att_map DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_dm_cat_att_map();
-CREATE CONSTRAINT TRIGGER trg_i18n_label AFTER INSERT OR UPDATE OR DELETE ON smart.i18n_label DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_i18n_label();
-CREATE CONSTRAINT TRIGGER trg_patrol_leg AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_leg DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_leg();
-CREATE CONSTRAINT TRIGGER trg_patrol_leg_day AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_leg_day DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_leg_day();
-CREATE CONSTRAINT TRIGGER trg_patrol_leg_members AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_leg_members DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_leg_members();
-CREATE CONSTRAINT TRIGGER trg_patrol_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_waypoint DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_patrol_waypoint();
-CREATE CONSTRAINT TRIGGER trg_rank AFTER INSERT OR UPDATE OR DELETE ON smart.rank DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_rank();
-CREATE CONSTRAINT TRIGGER trg_report_query AFTER INSERT OR UPDATE OR DELETE ON smart.report_query DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_report_query();
-CREATE CONSTRAINT TRIGGER trg_track AFTER INSERT OR UPDATE OR DELETE ON smart.track DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_track();
-CREATE CONSTRAINT TRIGGER trg_wp_attachments AFTER INSERT OR UPDATE OR DELETE ON smart.wp_attachments DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_wp_attachments();
-CREATE CONSTRAINT TRIGGER trg_wp_observation AFTER INSERT OR UPDATE OR DELETE ON smart.wp_observation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_wp_observation();
-CREATE CONSTRAINT TRIGGER trg_wp_observation_attributes AFTER INSERT OR UPDATE OR DELETE ON smart.wp_observation_attributes DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_wp_observation_attributes();
-CREATE CONSTRAINT TRIGGER trg_observation_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.observation_attachment DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_observation_attachment();
-CREATE CONSTRAINT TRIGGER trg_cm_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute();
-CREATE CONSTRAINT TRIGGER trg_cm_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_list DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute_list();
-CREATE CONSTRAINT TRIGGER trg_cm_attribute_option AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_option DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute_option();
-CREATE CONSTRAINT TRIGGER trg_cm_attribute_tree_node AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_tree_node DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute_tree_node();
-CREATE CONSTRAINT TRIGGER trg_cm_node AFTER INSERT OR UPDATE OR DELETE ON smart.cm_node DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_node();
-CREATE CONSTRAINT TRIGGER trg_screen_option_uuid AFTER INSERT OR UPDATE OR DELETE ON smart.screen_option_uuid DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_screen_option_uuid();
-CREATE CONSTRAINT TRIGGER trg_cm_attribute_config AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_config DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_cm_attribute_config();
-CREATE CONSTRAINT TRIGGER trg_compound_query_layer AFTER INSERT OR UPDATE OR DELETE ON smart.compound_query_layer DEFERRABLE INITIALLY DEFERRED FOR EACH ROW execute procedure connect.trg_compound_query_layer();
+CREATE TRIGGER trg_patrol_type AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_type FOR EACH ROW execute procedure connect.trg_patrol_type();
+CREATE TRIGGER trg_dm_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.dm_attribute_list FOR EACH ROW execute procedure connect.trg_dm_attribute_list();
+CREATE TRIGGER trg_dm_attribute_tree AFTER INSERT OR UPDATE OR DELETE ON smart.dm_attribute_tree FOR EACH ROW execute procedure connect.trg_dm_attribute_tree();
+CREATE TRIGGER trg_dm_att_agg_map AFTER INSERT OR UPDATE OR DELETE ON smart.dm_att_agg_map FOR EACH ROW execute procedure connect.trg_dm_att_agg_map();
+CREATE TRIGGER trg_dm_cat_att_map AFTER INSERT OR UPDATE OR DELETE ON smart.dm_cat_att_map FOR EACH ROW execute procedure connect.trg_dm_cat_att_map();
+CREATE TRIGGER trg_i18n_label AFTER INSERT OR UPDATE OR DELETE ON smart.i18n_label FOR EACH ROW execute procedure connect.trg_i18n_label();
+CREATE TRIGGER trg_patrol_leg AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_leg FOR EACH ROW execute procedure connect.trg_patrol_leg();
+CREATE TRIGGER trg_patrol_leg_day AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_leg_day FOR EACH ROW execute procedure connect.trg_patrol_leg_day();
+CREATE TRIGGER trg_patrol_leg_members AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_leg_members FOR EACH ROW execute procedure connect.trg_patrol_leg_members();
+CREATE TRIGGER trg_patrol_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_waypoint FOR EACH ROW execute procedure connect.trg_patrol_waypoint();
+CREATE TRIGGER trg_rank AFTER INSERT OR UPDATE OR DELETE ON smart.rank FOR EACH ROW execute procedure connect.trg_rank();
+CREATE TRIGGER trg_report_query AFTER INSERT OR UPDATE OR DELETE ON smart.report_query FOR EACH ROW execute procedure connect.trg_report_query();
+CREATE TRIGGER trg_track AFTER INSERT OR UPDATE OR DELETE ON smart.track FOR EACH ROW execute procedure connect.trg_track();
+CREATE TRIGGER trg_wp_attachments AFTER INSERT OR UPDATE OR DELETE ON smart.wp_attachments FOR EACH ROW execute procedure connect.trg_wp_attachments();
+CREATE TRIGGER trg_wp_observation AFTER INSERT OR UPDATE OR DELETE ON smart.wp_observation FOR EACH ROW execute procedure connect.trg_wp_observation();
+CREATE TRIGGER trg_wp_observation_attributes AFTER INSERT OR UPDATE OR DELETE ON smart.wp_observation_attributes FOR EACH ROW execute procedure connect.trg_wp_observation_attributes();
+CREATE TRIGGER trg_observation_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.observation_attachment FOR EACH ROW execute procedure connect.trg_observation_attachment();
+CREATE TRIGGER trg_cm_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute FOR EACH ROW execute procedure connect.trg_cm_attribute();
+CREATE TRIGGER trg_cm_attribute_list AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_list FOR EACH ROW execute procedure connect.trg_cm_attribute_list();
+CREATE TRIGGER trg_cm_attribute_option AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_option FOR EACH ROW execute procedure connect.trg_cm_attribute_option();
+CREATE TRIGGER trg_cm_attribute_tree_node AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_tree_node FOR EACH ROW execute procedure connect.trg_cm_attribute_tree_node();
+CREATE TRIGGER trg_cm_node AFTER INSERT OR UPDATE OR DELETE ON smart.cm_node FOR EACH ROW execute procedure connect.trg_cm_node();
+CREATE TRIGGER trg_screen_option_uuid AFTER INSERT OR UPDATE OR DELETE ON smart.screen_option_uuid FOR EACH ROW execute procedure connect.trg_screen_option_uuid();
+CREATE TRIGGER trg_cm_attribute_config AFTER INSERT OR UPDATE OR DELETE ON smart.cm_attribute_config FOR EACH ROW execute procedure connect.trg_cm_attribute_config();
+CREATE TRIGGER trg_compound_query_layer AFTER INSERT OR UPDATE OR DELETE ON smart.compound_query_layer FOR EACH ROW execute procedure connect.trg_compound_query_layer();
 
 
 -- Lock the change log table so cannot apply chnages at the same time as sync or packaging conservation area
@@ -1333,10 +1333,26 @@ DROP TRIGGER trg_connect_account_after ON connect.change_log;
 DROP FUNCTION connect.trg_changelog_before();
 DROP FUNCTION connect.trg_changelog_after();
 
+
+--If we upgrade to Postgresql 9.6 this function can be removed
+--and changed to current_setting('ca.trigger.t' || NEW.ca_uuid, true)
+CREATE OR REPLACE FUNCTION connect.dolog(cauuid UUID) RETURNS boolean AS $$
+DECLARE
+	canrun boolean;
+BEGIN
+	--check if we should log this ca
+	select current_setting('ca.trigger.t' || cauuid) into canrun;
+	return canrun;
+	EXCEPTION WHEN others THEN
+		RETURN TRUE;
+END$$ LANGUAGE 'plpgsql';
+
 CREATE OR REPLACE FUNCTION connect.trg_changelog_before() RETURNS trigger AS $$
 DECLARE
   canlock boolean;
 BEGIN
+	--check if we should log this ca
+	IF (NOT connect.dolog(NEW.ca_uuid)) THEN RETURN NULL; END IF;
 	SELECT pg_try_advisory_lock(a.lock_key) into canlock FROM connect.ca_info a WHERE a.ca_uuid = NEW.ca_uuid;
 	IF (canlock) THEN return NEW; ELSE RAISE EXCEPTION 'Database Locked to Editing'; END IF;
 END$$ LANGUAGE 'plpgsql';

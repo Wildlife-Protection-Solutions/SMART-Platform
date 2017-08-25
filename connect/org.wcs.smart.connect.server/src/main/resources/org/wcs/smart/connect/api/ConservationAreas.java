@@ -778,85 +778,106 @@ public class ConservationAreas extends HttpServlet{
 		}
 		
 		UUID caUuidToDelete = null;
-		Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
-		s.beginTransaction();
-		try{
-			SmartUser su = HibernateManager.getUser(s, username);
-			if (su == null){
-				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			}
-			if (!BCrypt.checkpw(password, su.getPassword())){
-				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-			}
-			
-			
-			UUID uuid = UUID.fromString(caUuid);
-			
-			ConservationAreaInfo serverDelete = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uuid);
-			if (serverDelete == null){
-				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			}
-			if((version.equals(null) || version.equals("")) && serverDelete.getVersion()==null){ //$NON-NLS-1$
-				//no problem, you can delete unversioned CAs without a version paramater.
-			}else if((version == null || version.equals("")) || !(serverDelete.getVersion().equals(UUID.fromString(version))) ){ //null version no longer acceptable at this point, or it doens't match the version //$NON-NLS-1$
-				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionDoesNotExist" + serverDelete.getVersion() + "  -- " + UUID.fromString(version), SmartUtils.getRequestLocale(request))); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			validateDelete(serverDelete.getUuid(), s);
+		//Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
+		ConservationAreaInfo serverDelete = null;
+		try(Session s = HibernateManager.openNewSession(context, SmartUtils.getRequestLocale(request))){
+			s.beginTransaction();
+			try{
+				SmartUser su = HibernateManager.getUser(s, username);
+				if (su == null){
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+				if (!BCrypt.checkpw(password, su.getPassword())){
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+				
+				
+				UUID uuid = UUID.fromString(caUuid);
+				
+				serverDelete = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uuid);
+				if (serverDelete == null){
+					throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+				}
+				if((version.equals(null) || version.equals("")) && serverDelete.getVersion()==null){ //$NON-NLS-1$
+					//no problem, you can delete unversioned CAs without a version paramater.
+				}else if((version == null || version.equals("")) || !(serverDelete.getVersion().equals(UUID.fromString(version))) ){ //null version no longer acceptable at this point, or it doens't match the version //$NON-NLS-1$
+					throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionDoesNotExist" + serverDelete.getVersion() + "  -- " + UUID.fromString(version), SmartUtils.getRequestLocale(request))); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				validateDelete(serverDelete.getUuid(), s);
+	
+				
+				//need to do some of the (deleteall) work before the desktop data is gone
+				caUuidToDelete = serverDelete.getUuid();
+				if (deleteAll){
+					// delete query actions associated with any query from the CA being deleted
+					QueryManager.INSTANCE.removeAccessToQueriesFromCa(serverDelete.getUuid(), s);
+				}
+				
 
-			
-			//need to do some of the (deleteall) work before the desktop data is gone
-			caUuidToDelete = serverDelete.getUuid();
-			if (deleteAll){
-				// delete query actions associated with any query from the CA being deleted
-				QueryManager.INSTANCE.removeAccessToQueriesFromCa(serverDelete.getUuid(), s);
-			}
-			
-			//delete desktop data
-			String query = "DELETE FROM smart.conservation_area WHERE uuid = :uuid"; //$NON-NLS-1$
-			s.createNativeQuery(query)
-				.setParameter("uuid", serverDelete.getUuid(), PostgresUUIDType.INSTANCE) //$NON-NLS-1$
-				.executeUpdate();
-			
-			//delete plugin data
-			s.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca") //$NON-NLS-1$
-						.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
+				//disable change tracking while we delete the Conservation Area
+				ChangeLogManager.INSTANCE.disableChangeTracking(serverDelete, s);
+				try {
+
+					//delete desktop data
+					String query = "DELETE FROM smart.conservation_area WHERE uuid = :uuid"; //$NON-NLS-1$
+					s.createNativeQuery(query)
+						.setParameter("uuid", serverDelete.getUuid(), PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 						.executeUpdate();
-
-			//delete change log data
-			ChangeLogManager.INSTANCE.deleteItems(s, serverDelete.getUuid());
+		
+					//delete plugin data
+					s.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca") //$NON-NLS-1$
+								.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
+								.executeUpdate();
+		
+					//delete change log data
+					ChangeLogManager.INSTANCE.deleteItems(s, serverDelete.getUuid());
+					
+					caUuidToDelete = serverDelete.getUuid();
+					if (deleteAll){
+						
+						//delete actions associated with resource
+						s.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca") //$NON-NLS-1$
+							.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
+							.executeUpdate();
+						
+						//delete server only data
+						s.delete(serverDelete);
+					}else{
+						serverDelete.setStatus(Status.NODATA);
+						serverDelete.setVersion(null);
+					}
 			
-			caUuidToDelete = serverDelete.getUuid();
-			if (deleteAll){
+					s.getTransaction().commit();
 				
-				//delete actions associated with resource
-				s.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca") //$NON-NLS-1$
-					.setParameter("ca", serverDelete.getUuid()) //$NON-NLS-1$
-					.executeUpdate();
-				
-				//delete server only data
-				s.delete(serverDelete);
-			}else{
-				serverDelete.setStatus(Status.NODATA);
-				serverDelete.setVersion(null);
+					//delete all ca data and findstore
+					try{
+						DataStoreManager.INSTANCE.deleteDirectory(caUuidToDelete);
+					}catch (Exception ex){
+						logger.severe(Messages.getString("ConservationAreas.CouldNotDeleteFilestore", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+					}
+				}finally {
+					//re-enable triggers
+					try {
+						s.beginTransaction();
+						ChangeLogManager.INSTANCE.enableChangeTracking(serverDelete, s);
+						s.getTransaction().commit();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}catch (SmartConnectException ex){
+				logger.log(Level.WARNING, ex.getMessage(), ex);
+				s.getTransaction().rollback();
+				throw ex;
+			}catch (Exception ex){
+				logger.log(Level.SEVERE, ex.getMessage(), ex);
+				s.getTransaction().rollback();
+				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+						Messages.getString("ConservationAreas.CouldNotDeleteCa", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 			}
-			
-			s.getTransaction().commit();
-		}catch (SmartConnectException ex){
-			logger.log(Level.WARNING, ex.getMessage(), ex);
-			s.getTransaction().rollback();
-			throw ex;
-		}catch (Exception ex){
-			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			s.getTransaction().rollback();
-			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-					Messages.getString("ConservationAreas.CouldNotDeleteCa", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
-		//delete all ca data and findstore
-		try{
-			DataStoreManager.INSTANCE.deleteDirectory(caUuidToDelete);
-		}catch (Exception ex){
-			logger.severe(Messages.getString("ConservationAreas.CouldNotDeleteFilestore", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-		}
+
 
 	}
 	

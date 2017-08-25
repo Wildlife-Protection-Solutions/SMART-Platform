@@ -49,8 +49,11 @@ import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
  */
 public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 
+	private List<ChangeLogItem> newItems;
+	
 	public PostgresqlChangeLogDeserializer(Path changeLogFile, Path changeLogFilestore) {
 		super(changeLogFile, changeLogFilestore);
+		newItems =  new ArrayList<>();
 	}
 
 	@Override
@@ -116,11 +119,24 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 		processFileInsert(item, changeLogFilestore, c);
 	}
 
+	
 	@Override
 	protected void saveItem(ChangeLogItem item, Session s) throws Exception {
-		ChangeLogManager.INSTANCE.insertItem(s, item);
+		//add item to list of changes; we will write these changes later
+		//after we turn back on track changes
+		newItems.add(item);
+		
 	}
 
+	/**
+	 * Writes all changes to change log table.
+	 * 
+	 * @param s
+	 */
+	public void writeToChangeLog(Session s) {
+		for (ChangeLogItem i  : newItems) ChangeLogManager.INSTANCE.insertItem(s, i);
+	}
+	
 	@Override
 	protected void processDataDelete(ChangeLogItem item, Connection c) throws Exception{
 		StringBuilder sb = new StringBuilder();

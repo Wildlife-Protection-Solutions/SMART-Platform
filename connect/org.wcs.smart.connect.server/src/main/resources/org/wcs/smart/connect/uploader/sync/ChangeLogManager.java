@@ -21,22 +21,33 @@
  */
 package org.wcs.smart.connect.uploader.sync;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response.Status;
 
-import org.hibernate.query.NativeQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.id.UUIDGenerationStrategy;
+import org.hibernate.id.UUIDGenerator;
+import org.hibernate.id.uuid.StandardRandomStrategy;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.type.PostgresUUIDType;
+import org.hibernate.type.UUIDBinaryType;
+import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.datastore.FileStoreWatcher;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
 import org.wcs.smart.connect.model.WorkItem;
 
@@ -53,19 +64,78 @@ public enum ChangeLogManager {
 	private static final String CHANGE_LOG_TABLE = "connect.change_log"; //$NON-NLS-1$
 	private static final String CHANGE_LOG_INFO_TABLE = "connect.change_log_history"; //$NON-NLS-1$
 	
+	
+	private FileStoreWatcher fileWatcher = null;
+	private Thread fileStoreReplication;
+	private UUIDGenerator uuidGenerator = null;
+	
+
 	/**
-	 * Disables all triggers in the system. Use with care, always enable after complete
+	 * Uses Hibernate to generate uuid for an object.
+	 * 
+	 * @param session
+	 * @param object
+	 * @return
 	 */
-	public void disableAllTriggers(Session session) {
-		session.createNativeQuery("SET session_replication_role = replica").executeUpdate(); //$NON-NLS-1$
+	public UUID generateUuid(Session session, Object object) {
+		if (uuidGenerator != null) return (UUID) uuidGenerator.generate((SessionImplementor)session, object);
+		Properties prop = new Properties();
+		prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
+		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
+		UUIDGenerator uuidGenerator = UUIDGenerator.buildSessionFactoryUniqueIdentifierGenerator();
+		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
+		return (UUID) uuidGenerator.generate((SessionImplementor)session, object);
+		
+	}
+	
+	public void watchFilestore(SessionFactory sf)  throws IOException {
+		fileWatcher = new FileStoreWatcher(sf);
+		
+		/*
+		 * We may want to add code here to ignore changes to informant
+		 * files; however that is only necessaary if we are going to be editing informant
+		 * files on the server
+		 */
+		fileWatcher.register( DataStoreManager.INSTANCE.getRootDirectory().toPath()  );
+		//run filestore watcher in new thread (background)		
+		fileStoreReplication = new Thread(fileWatcher);
+		fileStoreReplication.start();
+	}
+	
+	public void shutDownFilestoreWatcher() throws IOException {
+		if (fileWatcher != null){
+			fileWatcher.deregister();
+			fileWatcher = null;
+		}
+		
+		if (fileStoreReplication != null){
+			fileStoreReplication.interrupt();
+			fileStoreReplication = null;
+		}
+	}
+	/**
+	 * Disables the writing of changes to the change log table for a specific Conservation Area.  When 
+	 * disabled all changes made to database are not logged to the log table (for the given Conservation
+	 * Area).  Other Conservation Area modifications will still be written.
+	 * Also disables the filestore watcher for the Conservation Area.
+	 * 
+	 * 
+	 * 
+	 */
+	public void disableChangeTracking(ConservationAreaInfo ca, Session session)  throws IOException {
+		session.createNativeQuery("SET  \"ca.trigger.t" + ca.getUuid().toString() + "\" = false ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		fileWatcher.ignoreCa(ca);
 	}
 	
 	
 	/**
-	 * Re-enables all triggers in the system. 
+	 * Re-enables the writing of changes to the change log table for a specific Conservation Area.
+	 * Also re-enabled the filestore watcher for the Conservation Area
+	 *  
 	 */
-	public void enableAllTriggers(Session session) {
-		session.createNativeQuery("SET session_replication_role = DEFAULT").executeUpdate(); //$NON-NLS-1$
+	public void enableChangeTracking(ConservationAreaInfo ca, Session session)  throws IOException {
+		session.createNativeQuery("SET  \"ca.trigger.t" + ca.getUuid().toString() + "\" = true ").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		fileWatcher.addCa(ca);
 	}
 	
 	/**

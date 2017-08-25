@@ -66,7 +66,7 @@ public class LoginServlet extends HttpServlet {
 			request.setAttribute("loginerror",  //$NON-NLS-1$
 					Messages.getString("LoginServlet.LoginFail", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$ 
 		}
-		
+
 		Session s = HibernateManager.getSession(request.getServletContext());
 		Long userCnt = 1l;
 		try{

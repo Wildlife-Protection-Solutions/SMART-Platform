@@ -138,6 +138,7 @@ public class SmartContextListener implements ServletContextListener{
 			throw new IllegalStateException("Cannot initialize datastore.", ex); //$NON-NLS-1$
 		}
 		SmartContext.INSTANCE.setFilestoreLocation(DataStoreManager.INSTANCE.getRootDirectory().getAbsolutePath());
+
 	}
 
 

@@ -132,8 +132,8 @@ public class PostgresqlCaLoader {
 			}
 			
 		}
-		
 	}
+	
 	/**
 	 * Processes all database files, loading them into the database
 	 * one at a time.
