@@ -27,6 +27,8 @@ function getReportParametersForUi(num){
 	
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
+		document.getElementById('report1paramshidden').value = "";
+		document.getElementById('report2paramshidden').value = "";
 	}
 	parent.innerHTML = "<font style='color:red'>" +i18n("dashboard.loadingparameters") + "</font>";
 	
@@ -216,14 +218,21 @@ function checkForCustomDates(){
 		document.getElementById('report2To').disabled = true;
 	}
 	
-	//Set the Custom date fields all the time, so we can just use that date range when submitting
+	//Update the Custom date fields all the time, so we can just use that date range when submitting
 	var startYear = new Date();
 	var e = document.getElementById('filterDate1');
 	var days = e.options[e.selectedIndex].value;
+	
 	if(days != -1){
-		startYear.setDate(startYear.getDate() - days);
-		picker2.setDate(new Date(), false);
+		if(days > 0){
+			startYear.setDate(startYear.getDate() - days);
+		}else if(days == -30){//"month to date" options
+			startYear.setDate(startYear.getDate() - getMonthToDate());
+		}else if(days == -365){//year to date option
+			startYear.setDate(startYear.getDate() - getYearToDate());
+		}
 		picker1.setDate(startYear, false);
+		picker2.setDate(new Date(), false);
 	}
 	
 	
@@ -231,10 +240,17 @@ function checkForCustomDates(){
 	e = document.getElementById('filterDate2');
 	days = e.options[e.selectedIndex].value;
 	if(days != -1){
-		startYear.setDate(startYear.getDate() - days);
-		picker4.setDate(new Date(), false);
+		if(days > 0){
+			startYear.setDate(startYear.getDate() - days);
+		}else if(days == -30){//"month to date" options
+			startYear.setDate(startYear.getDate() - getMonthToDate());
+		}else if(days == -365){//year to date option
+			startYear.setDate(startYear.getDate() - getYearToDate());
+		}
 		picker3.setDate(startYear, false);
+		picker4.setDate(new Date(), false);
 	}
+
 }
 
 //enable save date buttons
@@ -347,20 +363,78 @@ function updateReportsFromDashBoardJson(){
 		document.getElementById('report1paramshidden').value = dashboard.parameterList1;
 		document.getElementById('report2paramshidden').value = dashboard.parameterList2;
 		
-		if (document.getElementById('reportdate1') != null){
-			document.getElementById('reportdate1').innerHTML = dashboard.customDate1From + " - " + dashboard.customDate1To;
-			document.getElementById('reportdate1').parentElement.style.display="block";
-		
-			document.getElementById('reportdate2').innerHTML = dashboard.customDate2From + " - " + dashboard.customDate2To;
-			document.getElementById('reportdate2').parentElement.style.display="block";
+		var from1override=0;
+		var from2override=0;
+		if(dashboard.dateRange1 == -30){
+			from1override = getMonthToDate();
+		}else if(dashboard.dateRange1 == -365){
+			from1override = getYearToDate();
 		}
 		
+		if(dashboard.dateRange2 == -30){
+			from2override = getMonthToDate();
+		}else if(dashboard.dateRange2 == -365){
+			from2override = getYearToDate();
+		}
 		document.getElementById('filterDate1').value = dashboard.dateRange1;
 		document.getElementById('filterDate2').value = dashboard.dateRange2;
-		document.getElementById('report1From').value = dashboard.customDate1From;
-		document.getElementById('report1To').value = dashboard.customDate1To;
-		document.getElementById('report2From').value = dashboard.customDate2From;
-		document.getElementById('report2To').value = dashboard.customDate2To;
+
+		
+		//if it is a "... to date" type of date range, we need to override the saved from-to date range
+		if(from1override == 0){//no override, setup dates as they are in the database
+			document.getElementById('report1From').value = dashboard.customDate1From;
+			document.getElementById('report1To').value = dashboard.customDate1To;
+			
+			if (document.getElementById('reportdate1') != null){
+				document.getElementById('reportdate1').innerHTML = dashboard.customDate1From + " - " + dashboard.customDate1To;
+				document.getElementById('reportdate1').parentElement.style.display="block";
+			}
+		}else{
+			var start = new Date();
+			start.setDate(start.getDate() - from1override);
+			picker1.setDate(start, false);
+			picker2.setDate(new Date(), false);
+
+			//now that the picker is set, update the reportdate1 field from the correct picker date 
+			if (document.getElementById('reportdate1') != null){
+
+				document.getElementById('report1From').value = picker1.toString("MMM DD, YYYY");
+				document.getElementById('report1To').value = picker2.toString("MMM DD, YYYY");
+			
+				document.getElementById('reportdate1').innerHTML = picker1.toString("MMM DD, YYYY") + " - " + picker2.toString("MMM DD, YYYY");
+				document.getElementById('reportdate1').parentElement.style.display="block";
+			}
+		}
+		
+
+		
+		if(from2override == 0){//no override, setup dates as they are in the database
+			document.getElementById('report2From').value = dashboard.customDate2From;
+			document.getElementById('report2To').value = dashboard.customDate2To;
+			
+			if (document.getElementById('reportdate2') != null){
+				document.getElementById('reportdate2').innerHTML = dashboard.customDate2From + " - " + dashboard.customDate2To;
+				document.getElementById('reportdate2').parentElement.style.display="block";
+			}
+		}else{
+			var start = new Date();
+			start.setDate(start.getDate() - from2override);
+			picker3.setDate(start, false);
+			picker4.setDate(new Date(), false);
+
+			//now that the picker is set, update the reportdate1 field from the correct picker date 
+			if (document.getElementById('reportdate2') != null){
+
+				document.getElementById('report2From').value = picker3.toString("MMM DD, YYYY");
+				document.getElementById('report2To').value = picker4.toString("MMM DD, YYYY");
+			
+				document.getElementById('reportdate2').innerHTML = picker3.toString("MMM DD, YYYY") + " - " + picker4.toString("MMM DD, YYYY");
+				document.getElementById('reportdate2').parentElement.style.display="block";
+			}
+		}
+
+
+		
 		
 		//if we are not are the admin page we can write the label in the header, otherwise we put it in the input box on the admin page
 		if(document.getElementById('report1select') == null){
@@ -758,4 +832,30 @@ function frame2load(){
 function updateReportCustomParamsHiddenValue(){
 	document.getElementById('report1paramshidden').value = getRepor1CustomParameters();
 	document.getElementById('report2paramshidden').value = getRepor2CustomParameters();
+}
+
+function getYearToDate(){
+	Date.prototype.isLeapYear = function() {
+	    var year = this.getFullYear();
+	    if((year & 3) != 0) return false;
+	    return ((year % 100) != 0 || (year % 400) == 0);
+	};
+
+	// Get Day of Year
+	Date.prototype.getDOY = function() {
+	    var dayCount = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+	    var mn = this.getMonth();
+	    var dn = this.getDate();
+	    var dayOfYear = dayCount[mn] + dn;
+	    if(mn > 1 && this.isLeapYear()) dayOfYear++;
+	    return dayOfYear;
+	};
+	
+	var date = new Date();
+	return date.getDOY() - 1;
+}
+
+function getMonthToDate(){
+	var date = new Date();
+	return date.getDate() - 1;
 }

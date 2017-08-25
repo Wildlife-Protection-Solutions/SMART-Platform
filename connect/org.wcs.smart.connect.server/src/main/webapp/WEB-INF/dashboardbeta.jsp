@@ -55,6 +55,8 @@
 					<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
 					<option value=180><fmt:message key="dashboardbeta.sixmonths"/></option>
 					<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
+					<option value=-30><fmt:message key="dashboardbeta.monthtodate"/></option>
+					<option value=-365><fmt:message key="dashboardbeta.yeartodate"/></option>
 					<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
 				</select>
 				<span><input type="text" id="report1From" class="date-input-center uielement"> - <input type="text" id="report1To" class="date-input-center uielement"></span>
@@ -76,6 +78,8 @@
 					<option value=30><fmt:message key="dashboardbeta.onemonth"/></option>
 					<option value=180><fmt:message key="dashboardbeta.sixmonths"/></option>
 					<option value=365><fmt:message key="dashboardbeta.oneyear"/></option>
+					<option value=-30><fmt:message key="dashboardbeta.monthtodate"/></option>
+					<option value=-365><fmt:message key="dashboardbeta.yeartodate"/></option>
 					<option value=-1><fmt:message key="dashboardbeta.custom"/></option>
 				</select>
 				<span><input type="text" id="report2From" class="date-input-center uielement"> - <input type="text" id="report2To" class="date-input-center uielement"></span>
