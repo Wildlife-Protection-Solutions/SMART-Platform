@@ -970,6 +970,7 @@ public class Messages extends NLS {
 	public static String RecordCsvExporter_DateCreatedColumn;
 	public static String RecordCsvExporter_DateModifiedColumn;
 	public static String RecordCsvExporter_ErrorMsg;
+	public static String RecordCsvExporter_PrimaryDateColumn;
 	public static String RecordCsvExporter_ProgressMsg;
 	public static String RecordCsvExporter_Sourcecolumn;
 	public static String RecordCsvExporter_StatusColumn;
@@ -1007,10 +1008,13 @@ public class Messages extends NLS {
 	public static String RecordExportJob_JobName;
 	public static String RecordExportJob_NoTemplate;
 	public static String RecordImportConfig_RecordNarrativeColumnName;
+	public static String RecordImportConfig_RecordPrimaryDateColumnName;
 	public static String RecordImportConfig_RecordScratchpadColumnName;
 	public static String RecordImportConfig_RecordSourceColumnName;
 	public static String RecordImportConfig_RecordTitleColumnName;
 	public static String RecordImportEngine_AttributeConversionError;
+	public static String RecordImportEngine_DateParseError;
+	public static String RecordImportEngine_DuplicateTitle;
 	public static String RecordImportEngine_EntityConversionError;
 	public static String RecordImportEngine_InvalidBoolean;
 	public static String RecordImportEngine_InvalidDate;
@@ -1022,9 +1026,13 @@ public class Messages extends NLS {
 	public static String RecordImportEngine_LoadingSubTaskName;
 	public static String RecordImportEngine_MissingYValue;
 	public static String RecordImportEngine_MultipleEntitiesFound;
+	public static String RecordImportEngine_MultiRecordsExist;
 	public static String RecordImportEngine_NoEntitiesFound;
+	public static String RecordImportEngine_OverwriteBtn;
 	public static String RecordImportEngine_ReadingSubTask;
 	public static String RecordImportEngine_SaveError;
+	public static String RecordImportEngine_SingleRecordExists;
+	public static String RecordImportEngine_SkipBtn;
 	public static String RecordImportEngine_TaskName;
 	public static String RecordImportEngine_WarningMessage;
 	public static String RecordImportEngine_WarningTitle;
@@ -1092,6 +1100,7 @@ public class Messages extends NLS {
 	public static String RecordSummaryPage_CreatedByLabel;
 	public static String RecordSummaryPage_CreateLabel;
 	public static String RecordSummaryPage_DetailsSection;
+	public static String RecordSummaryPage_DuplicateTitleWarning;
 	public static String RecordSummaryPage_EntitiesSection;
 	public static String RecordSummaryPage_EntityDetailLink;
 	public static String RecordSummaryPage_EntityListLink;

@@ -352,11 +352,25 @@
                      commandId="org.wcs.smart.i2.entity.import"
                      label="%ImportEntitiesCommandName"
                      style="push">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                  </visibleWhen>
                </command>
                <command
                      commandId="org.wcs.smart.i2.command.import.entity.xml"
                      label="Import Entities from XML..."
                      style="push">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                  </visibleWhen>
                </command>
                <separator
                      name="org.wcs.smart.i2.separator1"
@@ -366,11 +380,37 @@
                      commandId="org.wcs.smart.i2.command.record.import"
                      label="%ImportRecordsCommandName"
                      style="push">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_analyst">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_data_entry">
+                        </test>
+                     </or>
+                  </visibleWhen>
                </command>
                <command
                      commandId="org.wcs.smart.i2.command.record.import.xml"
                      label="Import Records from XML..."
                      style="push">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_analyst">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="intel_data_entry">
+                        </test>
+                     </or>
+                  </visibleWhen>
                </command>
                <separator
                      name="org.wcs.smart.i2.separator2"
@@ -380,11 +420,25 @@
                      commandId="org.wcs.smart.i2.command.export.model.xml"
                      style="push"
                      tooltip="export entity types, relationship types, attributes to xml file">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                  </visibleWhen>
                </command>
                <command
                      commandId="org.wcs.smart.i2.command.import.model.xml"
                      style="push"
                      tooltip="import model elements from an xml file">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="intel_analyst">
+                     </test>
+                  </visibleWhen>
                </command>
                <visibleWhen
                      checkEnabled="false">
@@ -488,7 +542,7 @@
                         </test>
                         <test
                               property="org.wcs.smart.smartAdminUser"
-                              value="intel_data_entry">
+                              value="intel_read_only">
                         </test>
                      </or>
                   </and>
@@ -521,7 +575,7 @@
                         </test>
                         <test
                               property="org.wcs.smart.smartAdminUser"
-                              value="intel_data_entry">
+                              value="intel_read_only">
                         </test>
                      </or>
                   </and>

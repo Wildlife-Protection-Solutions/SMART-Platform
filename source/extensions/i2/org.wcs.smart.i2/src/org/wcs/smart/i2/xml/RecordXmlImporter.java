@@ -61,6 +61,7 @@ import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
@@ -79,6 +80,7 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.i2.record.importer.RecordImportEngine;
 import org.wcs.smart.i2.xml.record.AttachmentType;
 import org.wcs.smart.i2.xml.record.AttributeType;
 import org.wcs.smart.i2.xml.record.LabelUuid;
@@ -150,12 +152,39 @@ public class RecordXmlImporter {
 			}
 		}
 		
-		ArrayList<IntelRecord> loaded = new ArrayList<IntelRecord>();
+		ArrayList<IntelRecord> loaded = new ArrayList<>();
+		ArrayList<IntelRecord> deleted = new ArrayList<>();
+		ArrayList<IntelEntity> modified = new ArrayList<>();
+
 		
 		StringBuilder error = new StringBuilder();
 		for (IntelRecord r : records){
 			session.beginTransaction();
 			try{
+				
+				Long cnt = QueryFactory.buildCountQuery(session, IntelRecord.class, 
+						new Object[] {"conservationArea", r.getConservationArea()}, //$NON-NLS-1$
+						new Object[] {"title", r.getTitle()}); //$NON-NLS-1$
+				int action = RecordImportEngine.confirmDuplicate(cnt, r.getTitle());
+				if (action == 2) {
+					//delete
+					IntelRecord delete= QueryFactory.buildQuery(session, IntelRecord.class, 
+							new Object[] {"conservationArea", r.getConservationArea()},  //$NON-NLS-1$
+							new Object[] {"title", r.getTitle()}).uniqueResult();  //$NON-NLS-1$
+					for (IntelEntityRecord d : delete.getEntities()) {
+						modified.add(d.getEntity());
+					}
+					RecordManager.INSTANCE.deleteRecord(delete, session);
+					deleted.add(delete);
+				}else if (action == 1) {
+					//save
+					
+				}else if (action == 0) {
+					//skip
+					session.getTransaction().rollback();
+					continue;
+				}
+				
 				List<IntelEntityLocation> locations = entityLocations.get(r);
 				if (r.getAttachments() != null){
 					for (IntelRecordAttachment recordAttachment : r.getAttachments()){
@@ -178,6 +207,8 @@ public class RecordXmlImporter {
 		
 		try{
 			broker.send(IntelEvents.RECORD_NEW, loaded);
+			if (!deleted.isEmpty()) broker.send(IntelEvents.RECORD_DELETE, deleted);
+			if (!modified.isEmpty()) broker.send(IntelEvents.ENTITY_MODIFIED, modified);
 		}catch (Exception ex){
 			error.append(Messages.RecordXmlImporter_EventError + ex.getMessage());
 			Intelligence2PlugIn.log(ex.getMessage(), ex);

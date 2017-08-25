@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
@@ -47,17 +48,20 @@ import org.hibernate.query.Query;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
@@ -67,6 +71,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.record.importer.RecordImportConfig.Column;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -93,7 +98,7 @@ public enum RecordImportEngine {
 	 * @throws Exception
 	 */
 	public Integer importRecords(RecordImportConfig config, IEventBroker eventBroker, IProgressMonitor pMonitor) throws Exception{
-		SubMonitor monitor = SubMonitor.convert(pMonitor, Messages.RecordImportEngine_TaskName, 5);
+		SubMonitor monitor = SubMonitor.convert(pMonitor, Messages.RecordImportEngine_TaskName, 4);
 		
 		//ensure the file exists
 		if (!Files.exists(config.getFile())) throw new FileNotFoundException(config.getFile().toString());
@@ -184,6 +189,20 @@ public enum RecordImportEngine {
 				if (scratchColumn != null && !data[scratchColumn].trim().isEmpty()){
 					record.setComment(data[scratchColumn].trim());
 				}
+				//record date
+				Integer primaryDateColumn = config.getMappedColumn(Column.PRIMARY_DATE);
+				if (primaryDateColumn != null && !data[primaryDateColumn].trim().isEmpty()){
+					record.setComment(data[primaryDateColumn].trim());
+					try{
+						record.setPrimaryDate( Date.from(LocalDate.parse(data[primaryDateColumn], dateFormatter).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+					}catch (Exception ex){
+						warnings.add(MessageFormat.format(Messages.RecordImportEngine_DateParseError, data[primaryDateColumn], record.getTitle()));
+					}
+					
+				}
+				if (record.getPrimaryDate() == null) {
+					record.setPrimaryDate(new Date());
+				}
 				
 				//source
 				Integer srcColumn = config.getMappedColumn(Column.SOURCE);
@@ -258,15 +277,48 @@ public enum RecordImportEngine {
 		
 		
 		kidMonitor = monitor.split(1);
-		kidMonitor.setWorkRemaining(addedItems.size());
+		kidMonitor.setWorkRemaining(addedItems.size()+1);
 		//save change
-		try(Session s = HibernateManager.openSession()){
+		List<IntelRecord> toSave = new ArrayList<>();
+		List<IntelRecord> toDelete = new ArrayList<>();
+		List<IntelEntity> modifiedEntities = new ArrayList<>();
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			s.beginTransaction();
 			try{
-				//save new records
+				kidMonitor.split(1);
+				//check for duplicate names
 				for (IntelRecord i : addedItems){
-					s.save(i);
+					Long cnt = QueryFactory.buildCountQuery(s, IntelRecord.class, 
+							new Object[] {"conservationArea", i.getConservationArea()}, //$NON-NLS-1$
+							new Object[] {"title", i.getTitle()}); //$NON-NLS-1$
+					int action = confirmDuplicate(cnt, i.getTitle());
+					if (action == 2) {
+						//delete
+						IntelRecord delete= QueryFactory.buildQuery(s, IntelRecord.class, 
+								new Object[] {"conservationArea", i.getConservationArea()},  //$NON-NLS-1$
+								new Object[] {"title", i.getTitle()}).uniqueResult();  //$NON-NLS-1$
+						toDelete.add(delete);
+						toSave.add(i);
+					}else if (action == 1) {
+						//save
+						toSave.add(i);
+					}else if (action == 0) {
+						//skip
+					}
+				}
+				
+				kidMonitor.setWorkRemaining(toDelete.size() + toSave.size());
+				for (IntelRecord i : toDelete) {
 					kidMonitor.split(1);
+					for (IntelEntityRecord e : i.getEntities()){
+						modifiedEntities.add(e.getEntity());
+					}
+					RecordManager.INSTANCE.deleteRecord(i, s);
+				}
+				//save new records
+				for (IntelRecord i : toSave){
+					kidMonitor.split(1);
+					s.save(i);
 				}
 				s.getTransaction().commit();
 			}catch (OperationCanceledException ex) {
@@ -278,9 +330,10 @@ public enum RecordImportEngine {
 				return null;
 			}
 		}
-		
-		eventBroker.send(IntelEvents.RECORD_NEW, addedItems);
-		return addedItems.size();
+		if (!modifiedEntities.isEmpty()) eventBroker.send(IntelEvents.ENTITY_MODIFIED, modifiedEntities);
+		if (!toDelete.isEmpty()) eventBroker.send(IntelEvents.RECORD_DELETE, toDelete);
+		eventBroker.send(IntelEvents.RECORD_NEW, toSave);		
+		return toSave.size();
 	}
 
 
@@ -400,6 +453,44 @@ public enum RecordImportEngine {
 					new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);	
 			if (wd.open() == 0){
 				r[0] = true;
+			}
+		});
+		return r[0];	
+	}
+
+	/**
+	 * 
+	 * @param cnt number of duplicate records
+	 * @param title title
+	 * @return 2 - overwrite existing record, 1 - save without changing, 0 - skip
+	 */
+	public static int confirmDuplicate(long cnt, String title){
+		if (cnt == 0) return 1;
+		
+		int r[] = new int[]{1};
+		Display.getDefault().syncExec(()->{
+			if (cnt == 1) {
+				MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), Messages.RecordImportEngine_DuplicateTitle, null, 
+						 MessageFormat.format(Messages.RecordImportEngine_SingleRecordExists, title),
+						MessageDialog.QUESTION, 1, new String[] {Messages.RecordImportEngine_OverwriteBtn, DialogConstants.SAVE_TEXT, Messages.RecordImportEngine_SkipBtn});
+				int open = md.open();
+				if (open == 0) {
+					r[0] = 2;
+				}else if (open == 1) {
+					r[0] = 1;
+				}else {
+					r[0] = 0;
+				}
+			}else {
+				MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), Messages.RecordImportEngine_DuplicateTitle, null, 
+						 MessageFormat.format(Messages.RecordImportEngine_MultiRecordsExist, cnt, title),
+						MessageDialog.QUESTION, 0, new String[] {DialogConstants.SAVE_TEXT, Messages.RecordImportEngine_SkipBtn});
+				if (md.open() == 1) {
+					r[0] = 1;
+					return;
+				}
+				r[0] = 0;
+				return;
 			}
 		});
 		return r[0];	

@@ -232,9 +232,10 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 			columnOptions.add(3, RecordImportConfig.Column.SOURCE);
 			columnOptions.add(4, RecordImportConfig.Column.NARRATIVE);
 			columnOptions.add(5, RecordImportConfig.Column.SCRATCHPAD);
-			columnOptions.add(6, Messages.AttributeMappingWizardPage1_IntelAttribute);
-			columnOptions.add(7, Messages.AttributeMappingWizardPage1_SourceSpecificAttributes);
-			columnOptions.addAll(7, attributes);
+			columnOptions.add(6, RecordImportConfig.Column.PRIMARY_DATE);
+			columnOptions.add(7, Messages.AttributeMappingWizardPage1_IntelAttribute);
+			columnOptions.add(8, Messages.AttributeMappingWizardPage1_SourceSpecificAttributes);
+			columnOptions.addAll(9, attributes);
 			
 			Display.getDefault().syncExec(()->{
 				for (Control c : mappingPanel.getChildren()){

@@ -22,16 +22,23 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -66,11 +73,13 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.internal.SharedImages;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.themes.ColorUtil;
 import org.geotools.referencing.CRS;
@@ -115,6 +124,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class RecordSummaryPage extends EditorPart{
 
 	private FormToolkit  toolkit;
@@ -126,12 +136,13 @@ public class RecordSummaryPage extends EditorPart{
 	
 	private EntityListComposite entityPanel;
 	private AttachmentListComposite attachmentPanel;
-//	private LocationListComposite locationPanel;
 	
 	private RecordEditor recordEditor;
 	
 	private SmartSection detailSection;
 	
+	private Text txtShortName;
+	private ControlDecoration decShortName;
 	private Label lblLastModified;
 	private Label lblLastModifiedBy;
 	
@@ -357,7 +368,7 @@ public class RecordSummaryPage extends EditorPart{
 	public void setEditMode(boolean editMode){		
 		buttonToolBar.setEditMode(editMode);
 	}
-	
+
 	public void initPage(){
 		if (summaryPart != null){
 			if (summaryPart.isDisposed()) return;
@@ -389,18 +400,25 @@ public class RecordSummaryPage extends EditorPart{
 		if (!recordEditor.getEditMode()){
 			style = SWT.NONE;
 		}
-		Text txtShortName = toolkit.createText(leftPart, recordEditor.getRecord().getTitle(), style);
+	
+		txtShortName = toolkit.createText(leftPart, recordEditor.getRecord().getTitle(), style);
 		txtShortName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
+				decShortName.hide();
 				recordEditor.getRecord().setTitle(txtShortName.getText());
 				recordEditor.setDirty(true);
+				checkDuplicateName.schedule(250);
 			}
 		});
 		txtShortName.setEditable(recordEditor.getEditMode());
 		txtShortName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtShortName.setTextLimit(IntelRecord.MAX_TITLE_LENGTH);
 		
+		decShortName = new ControlDecoration(txtShortName, SWT.TOP | SWT.LEFT);
+		decShortName.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(SharedImages.IMG_DEC_FIELD_WARNING));
+		decShortName.hide();
+		checkDuplicateName.schedule(250);
 		
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_PrimaryDateLabel);
 		if (recordEditor.getEditMode()){
@@ -928,6 +946,60 @@ public class RecordSummaryPage extends EditorPart{
 		};
 		srcLoader.setSystem(false);
 		srcLoader.schedule();
-		
 	}
+	
+	/*
+	 * job to check for duplicate names
+	 */
+	private Job checkDuplicateName = new Job("check duplicate name") { //$NON-NLS-1$
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			String[] title = new String[] {null};
+			
+			Display.getDefault().syncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					if (txtShortName == null || txtShortName.isDisposed()) return;
+					title[0] = txtShortName.getText();					
+				}
+				
+			});
+			if (title[0] == null) return org.eclipse.core.runtime.Status.OK_STATUS;
+			IntelRecord record = recordEditor.getRecord();
+			if (record == null) return org.eclipse.core.runtime.Status.OK_STATUS;
+			try(Session s = HibernateManager.openSession()){
+				boolean isnew = record.getUuid() == null;
+				CriteriaBuilder cb = s.getCriteriaBuilder();
+				CriteriaQuery<Long> c = cb.createQuery(Long.class);
+				Root<IntelRecord> from = c.from(IntelRecord.class);
+				c.select(cb.count(from));
+				Predicate[] p = new Predicate[isnew?2:3];
+				p[0] = cb.equal(from.get("conservationArea"), record.getConservationArea()); //$NON-NLS-1$
+				p[1] = cb.equal(from.get("title"), record.getTitle()); //$NON-NLS-1$
+				if (!isnew) {
+					p[2] =cb.notEqual(from.get("uuid"), record.getUuid()); //$NON-NLS-1$
+				} 
+				c.where(cb.and(p));
+				Long dupCnt = s.createQuery(c).uniqueResult();
+				
+				if (dupCnt > 0) {
+					Display.getDefault().syncExec(new Runnable() {
+
+						@Override
+						public void run() {
+							if (txtShortName == null || txtShortName.isDisposed()) return;
+							decShortName.setDescriptionText(MessageFormat.format(Messages.RecordSummaryPage_DuplicateTitleWarning, dupCnt));
+							decShortName.show();					
+						}
+						
+					});
+					
+				}
+			}
+			return org.eclipse.core.runtime.Status.OK_STATUS;
+		}
+		
+	};
 }

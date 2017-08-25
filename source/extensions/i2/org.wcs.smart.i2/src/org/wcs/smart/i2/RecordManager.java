@@ -58,7 +58,7 @@ public enum RecordManager {
 	 * Delete an intelligence record, associated locations, and attachments
 	 * 
 	 */
-	private void deleteRecord(IntelRecord record, Session session) throws Exception{
+	public void deleteRecord(IntelRecord record, Session session) throws Exception{
 		
 		record = (IntelRecord) session.get(IntelRecord.class, record.getUuid());
 

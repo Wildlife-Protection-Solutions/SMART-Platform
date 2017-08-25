@@ -261,6 +261,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		return this.mapPage;
 	}
 	
+
+	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		if (!summaryPage.saveAttributes(monitor)){
@@ -272,15 +274,13 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		boolean isnew = record.getUuid() == null;
 		
 		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
-		
 			s.beginTransaction();
-			try {	
+			try {
 				if (record.getAttachments() != null){
 					for (IntelRecordAttachment a : record.getAttachments()){
 						s.saveOrUpdate(a.getAttachment());
 					}
 				}
-				
 				
 				for (IntelEntityRecord r : summaryPage.getDeleteEntityLinks()){
 					if (r.getRecord().getUuid() != null){
