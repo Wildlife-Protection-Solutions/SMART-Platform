@@ -63,7 +63,7 @@ public class Employee {
 	 */
 	public static final UUID SHARED_UUID = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR);
 	
-	private static final String USER_LEVEL_SEP = ","; //$NON-NLS-1$
+	public static final String USER_LEVEL_SEP = ","; //$NON-NLS-1$
 	
 	//non internationalizable
 	public static final char DB_FEMALE = 'F';

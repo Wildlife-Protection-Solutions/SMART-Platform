@@ -100,7 +100,7 @@ public class EmployeeDialog extends Dialog {
 	@Override 
 	protected Point getInitialSize() {
 		Point p = super.getInitialSize();
-		p.x = (int)(p.x * 1.2);
+		p.x = Math.min(500, (int)(p.x * 1.2));
 		return p;
 	}
 	
