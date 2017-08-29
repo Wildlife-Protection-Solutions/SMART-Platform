@@ -25,7 +25,7 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.locationtech.udig.project.ui.internal.LayersView;
-import org.wcs.smart.i2.IntelSecurityManager;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
@@ -52,10 +52,16 @@ public class IntelDataAnalysisPerspective implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(true);
 
 		IFolderLayout rightFolder = layout.createFolder("org.wcs.smart.i2.analysis.right", IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
-		rightFolder.addView(EntitySearchView.ID);
-		layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
-		rightFolder.addView(RecordsView.ID);
-		layout.getViewLayout(RecordsView.ID).setCloseable(false);
+		if (IntelSecurityManager.INSTANCE.canViewEntities() || 
+				IntelSecurityManager.INSTANCE.canEditEntity()) {
+			rightFolder.addView(EntitySearchView.ID);
+			layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
+		}
+		if (IntelSecurityManager.INSTANCE.canViewRecords() || 
+				IntelSecurityManager.INSTANCE.canEditRecord()) {
+			rightFolder.addView(RecordsView.ID);
+			layout.getViewLayout(RecordsView.ID).setCloseable(false);
+		}
 		if (IntelSecurityManager.INSTANCE.canViewQueries()){
 			rightFolder.addView(QueryView.ID);
 			layout.getViewLayout(QueryView.ID).setCloseable(false);

@@ -19,23 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2;
+package org.wcs.smart.i2.security;
 
 import org.wcs.smart.ca.SmartUserLevel;
 
 /**
- * Intelligence data entry user level 
- * 
+ * Permission to edit record
+ *  
  * @author Emily
  *
  */
-public class IntelDataEntryUserLevel extends SmartUserLevel {
+public class IntelEditRecordUserLevel extends SmartUserLevel{
+
+	public static final IntelEditRecordUserLevel INSTANCE = new IntelEditRecordUserLevel();
 	
-	public static final IntelDataEntryUserLevel INSTANCE = new IntelDataEntryUserLevel();
+	private static final String KEY = "INTEL_RECORD_EDIT"; //$NON-NLS-1$
 	
-	private static final String KEY = "INTEL_DATA_ENTRY"; //$NON-NLS-1$
-	
-	public IntelDataEntryUserLevel() {
+	public IntelEditRecordUserLevel() {
 		super(KEY);
 	}
+
 }

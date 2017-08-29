@@ -98,13 +98,13 @@ import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.DeleteRecordHandler;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.SectionTabHeader;
@@ -726,6 +726,20 @@ public class RecordsView {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			
+			if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
+				Display.getDefault().syncExec(()->{
+					lstAllRecords.getControl().setEnabled(false);
+					lstInProgress.getControl().setEnabled(false);
+					lstNewRecords.getControl().setEnabled(false);
+					
+					lstAllRecords.setInput(new String[] {"You do not have permission to view records"});
+					lstInProgress.setInput(new String[] {"You do not have permission to view records"});
+					lstNewRecords.setInput(new String[] {"You do not have permission to view records"});
+				});
+				return Status.OK_STATUS;
+			}
+			
 			// -- load record source images --
 			final List<IntelRecordSource> sources = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){

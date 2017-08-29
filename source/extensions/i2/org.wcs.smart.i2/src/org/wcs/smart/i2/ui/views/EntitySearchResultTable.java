@@ -73,7 +73,6 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
-import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -81,6 +80,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.ExportEntityToFileDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
@@ -168,6 +168,10 @@ public class EntitySearchResultTable extends Composite {
 			}
 			
 		}
+		
+		setLayout(new GridLayout());
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
 	}
 	
 	/**
@@ -227,10 +231,6 @@ public class EntitySearchResultTable extends Composite {
 			core = null;
 			components = null;
 		}
-		
-		setLayout(new GridLayout());
-		((GridLayout)getLayout()).marginWidth = 0;
-		((GridLayout)getLayout()).marginHeight = 0;
 		
 		core = toolkit.createComposite(this, SWT.NONE);
 		core.setLayout(new GridLayout());

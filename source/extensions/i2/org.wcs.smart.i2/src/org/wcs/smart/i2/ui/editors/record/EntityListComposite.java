@@ -60,6 +60,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -98,29 +99,31 @@ public class EntityListComposite extends Composite{
 		((GridLayout)compEntityEdit.getLayout()).marginHeight = 0 ;
 		((GridLayout)compEntityEdit.getLayout()).marginWidth = 0 ;
 		
-		Button btnAdd = new Button(compEntityEdit, SWT.PUSH);
-		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.addSelectionListener(new SelectionAdapter(){
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				EntityListShell shell = new EntityListShell(EntityListComposite.this.getShell(), editor);
-				ContextInjectionFactory.inject(shell, editor.getContext());
-				int x = btnAdd.getLocation().x + btnAdd.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-				int y =  btnAdd.getLocation().y;
-				shell.addListener(SWT.Close, new Listener() {
-					@Override
-					public void handleEvent(Event event) {
-						IntelEntity target = shell.getTargetEntity();
-						if (target != null){
-							linkEntity(target);
+		if (IntelSecurityManager.INSTANCE.canViewEntities()) {
+			Button btnAdd = new Button(compEntityEdit, SWT.PUSH);
+			btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+			btnAdd.addSelectionListener(new SelectionAdapter(){
+	
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					EntityListShell shell = new EntityListShell(EntityListComposite.this.getShell(), editor);
+					ContextInjectionFactory.inject(shell, editor.getContext());
+					int x = btnAdd.getLocation().x + btnAdd.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+					int y =  btnAdd.getLocation().y;
+					shell.addListener(SWT.Close, new Listener() {
+						@Override
+						public void handleEvent(Event event) {
+							IntelEntity target = shell.getTargetEntity();
+							if (target != null){
+								linkEntity(target);
+							}
 						}
-					}
-				});
-				shell.open(btnAdd.toDisplay(x,y));
-			}
-			
-		});
+					});
+					shell.open(btnAdd.toDisplay(x,y));
+				}
+				
+			});
+		}
 		updateEditMode();
 		
 		lstEntities = new EntityList(this, toolkit);

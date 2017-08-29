@@ -34,8 +34,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Drop item that displays a text box where the user can enter 

@@ -42,9 +42,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.SmartUtils;
 
 public class DateDropItem extends DropItem {

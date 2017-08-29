@@ -68,6 +68,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -142,7 +143,6 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.EntityManager;
-import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
@@ -167,6 +167,7 @@ import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
@@ -1047,7 +1048,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				
 			}
 		});
-		deleteItem.setEnabled(isEditMode);
+		deleteItem.setEnabled(getEditMode() && IntelSecurityManager.INSTANCE.canEditEntity());
 		
 		wsetItem = new ToolItem(buttonBar, SWT.PUSH);
 		wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
@@ -1067,7 +1068,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				setEditMode(!isEditMode);
+				setEditMode(!getEditMode());
 				
 			}
 		});
@@ -1136,7 +1137,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	public void setEditMode(boolean isEdit){
-		if (isEdit && !IntelSecurityManager.INSTANCE.canEditEntity()){
+		if (isEdit && !(IntelSecurityManager.INSTANCE.canEditEntity() || IntelSecurityManager.INSTANCE.canCreateEntity())){
 			//cannot change the edit more; this user cannot edit entities
 			return;
 		}
@@ -1147,7 +1148,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		this.isEditMode = isEdit;
 		if (entity != null) initControl();
 	
-		if (!deleteItem.isDisposed()) deleteItem.setEnabled(isEdit);
+		if (!deleteItem.isDisposed()) deleteItem.setEnabled(isEdit && IntelSecurityManager.INSTANCE.canEditEntity());
 		if (!editItem.isDisposed()) editItem.setSelection(isEdit);
 	}
 	
@@ -1312,7 +1313,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 		relationshipTree.getTree().addListener(SWT.MouseDoubleClick, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				int colIndex = relationshipTree.getCell(new Point(event.x, event.y)).getColumnIndex();
+				ViewerCell cell = relationshipTree.getCell(new Point(event.x, event.y));
+				if (cell == null) return;
+				int colIndex = cell.getColumnIndex();
 				if (colIndex == 4){
 					Object x = ((IStructuredSelection)relationshipTree.getSelection()).getFirstElement();
 					if (getEditMode() && x instanceof IntelEntityRelationship){
@@ -1452,7 +1455,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 				}
 			
-				if (isEditMode){
+				if (getEditMode()){
 				
 					if (mnuEdit == null){
 						mnuEdit = new MenuItem(thumbMenu,SWT.DEFAULT);
@@ -1556,18 +1559,20 @@ public class EntityEditor extends EditorPart implements MapPart{
 		Menu recordsMenu = new Menu(tblRecords.getTable());
 		tblRecords.getTable().setMenu(recordsMenu);
 		
-		MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
-		open.setText(Messages.EntityEditor_OpenRecordMnuItem);
-		open.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				openSelectedRecord();
-			}
-		});
-		
+		if (IntelSecurityManager.INSTANCE.canViewRecords()) {
+			MenuItem open = new MenuItem(recordsMenu, SWT.PUSH);
+			open.setText(Messages.EntityEditor_OpenRecordMnuItem);
+			open.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					openSelectedRecord();
+				}
+			});
+		}
 	}
 	
 	private void openSelectedRecord(){
+		if (!IntelSecurityManager.INSTANCE.canViewRecords()) return;
 		if (tblRecords.getSelection().isEmpty()) return;
 		Object x = ((IStructuredSelection)tblRecords.getSelection()).getFirstElement();
 		if (x instanceof IntelRecord){
@@ -1669,7 +1674,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					});
 				}
 				
-				if (isEditMode){
+				if (getEditMode()){
 					if (mnuDelete == null){
 						mnuSep = new MenuItem(thumbMenu, SWT.SEPARATOR);
 						mnuDelete = new MenuItem(thumbMenu,SWT.DEFAULT);
@@ -1804,7 +1809,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}else{
 			txtScratchpad.setText(entity.getComment());
 		}
-		txtScratchpad.setEditable(isEditMode);
+		txtScratchpad.setEditable(getEditMode());
 		for (Listener l : ls) txtScratchpad.addListener(SWT.Modify, l);
 		
 		if (entity.getPrimaryAttachment() != null){
@@ -1879,7 +1884,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}else{
 					if (!group.equals(a.getAttributeGroup())) continue;
 				}
-				if (isEditMode){
+				if (getEditMode()){
 					AttributeFieldEditor e = new AttributeFieldEditor(part, a.getAttribute());
 					e.adapt(toolkit);
 					IntelEntityAttributeValue initValue = entity.findAttributeValue(a.getAttribute());
@@ -1934,7 +1939,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		compAttributes.layout(true);
 		
 		//attachment composite
-		if (isEditMode){
+		if (getEditMode()){
 			attachmentEditPanel.setVisible(true);
 			((GridData)attachmentEditPanel.getLayoutData()).heightHint = attachmentEditPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 			

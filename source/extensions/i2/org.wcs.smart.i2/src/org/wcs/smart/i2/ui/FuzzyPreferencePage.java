@@ -48,7 +48,6 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.IntelAnalystUserLevel;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -56,6 +55,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.search.SearchDataGenerator;
 import org.wcs.smart.i2.search.SearchManager;
+import org.wcs.smart.i2.security.IntelAnalystUserLevel;
 import org.wcs.smart.user.UserLevelManager;
 
 /**

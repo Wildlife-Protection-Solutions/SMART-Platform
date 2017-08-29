@@ -56,6 +56,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.SmartShellDialog;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
@@ -149,7 +150,7 @@ public class EntityListShell extends SmartShellDialog {
 		}
 		List<Object> allItems = new ArrayList<Object>();
 		allItems.add(ALL_ENTITIES);
-		allItems.add(NEW_ENTITY);
+		if (IntelSecurityManager.INSTANCE.canCreateEntity()) allItems.add(NEW_ENTITY);
 		if (entities != null){
 			entities.forEach(a -> allItems.add(a.getEntity()));
 		}

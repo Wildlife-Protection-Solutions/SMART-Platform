@@ -19,23 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2;
+package org.wcs.smart.i2.security;
 
 import org.wcs.smart.ca.SmartUserLevel;
 
 /**
- * Read only usere level for intelligence module 
- * 
+ * Permission to view records
  * @author Emily
  *
  */
-public class IntelReadOnlyUserLevel extends SmartUserLevel {
-
-	public static final IntelReadOnlyUserLevel INSTANCE = new IntelReadOnlyUserLevel();
+public class IntelViewRecordsUserLevel extends SmartUserLevel{
 	
-	private static final String KEY = "INTEL_READ_ONLY"; //$NON-NLS-1$
+	public static final IntelViewRecordsUserLevel INSTANCE = new IntelViewRecordsUserLevel();
 	
-	public IntelReadOnlyUserLevel() {
+	private static final String KEY = "INTEL_RECORD_VIEW"; //$NON-NLS-1$
+	
+	public IntelViewRecordsUserLevel() {
 		super(KEY);
 	}
 

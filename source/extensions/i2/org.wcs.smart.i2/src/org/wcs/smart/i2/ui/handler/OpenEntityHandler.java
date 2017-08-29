@@ -27,10 +27,10 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.editors.EntityEditor;
 import org.wcs.smart.i2.ui.editors.EntityEditorInput;
@@ -50,7 +50,7 @@ public class OpenEntityHandler {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
 			IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityEditor.ID);
 			if (editor instanceof EntityEditor){
-				if (IntelSecurityManager.INSTANCE.canEditEntity() && pId.equals(IntelDataAssessmentPerspective.ID)){
+				if ( (IntelSecurityManager.INSTANCE.canEditEntity() && pId.equals(IntelDataAssessmentPerspective.ID)) || IntelSecurityManager.INSTANCE.canCreateEntity()){
 					((EntityEditor)editor).setEditMode(true);
 				}
 			}

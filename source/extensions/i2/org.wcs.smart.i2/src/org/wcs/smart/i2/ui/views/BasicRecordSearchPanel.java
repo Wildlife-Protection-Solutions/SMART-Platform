@@ -75,7 +75,6 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.IntelSecurityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
@@ -83,6 +82,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.search.BasicRecordSearch;
 import org.wcs.smart.i2.search.IntelRecordResult;
 import org.wcs.smart.i2.search.IntelRecordSearchResultItem;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.DeleteRecordHandler;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
@@ -156,6 +156,7 @@ public class BasicRecordSearchPanel extends Composite {
 				doSearch();
 			}
 		});
+		cmbSource.getControl().setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
 		
 		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_NarrativeLabel);
 		
@@ -166,7 +167,8 @@ public class BasicRecordSearchPanel extends Composite {
 				doSearch();
 			}
 		});
-
+		txtNarrative.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
+		
 		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_TitleLabel);
 		
 		
@@ -177,12 +179,14 @@ public class BasicRecordSearchPanel extends Composite {
 				doSearch();
 			}
 		});
+		txtSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
 		
 		Composite btnComp = toolkit.createComposite(top);
 		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		btnComp.setLayout(new GridLayout(2, false));
 		((GridLayout)btnComp.getLayout()).marginWidth  = 0;
 		((GridLayout)btnComp.getLayout()).marginHeight  = 0;
+		btnComp.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
 		
 		Hyperlink btnExport = toolkit.createHyperlink(btnComp, Messages.BasicRecordSearchPanel_ExportLink, SWT.NONE);
 		btnExport.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
@@ -193,10 +197,12 @@ public class BasicRecordSearchPanel extends Composite {
 			}
 		});
 		btnExport.setToolTipText(Messages.BasicRecordSearchPanel_ExportTooltip);
+		btnExport.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
 		
 		Button btnSearch = toolkit.createButton(btnComp, Messages.BasicRecordSearchPanel_SearchBtn,  SWT.PUSH);
 		btnSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		btnSearch.addListener(SWT.Selection, e->doSearch());
+		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
 	
 	}
 
@@ -229,7 +235,9 @@ public class BasicRecordSearchPanel extends Composite {
 		});
 		
 		tblResults.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		
+		if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
+			tblResults.setInput(new String[] {"You do not have permission to view records"});
+		}
 		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true);
 		tblResults.getControl().addListener(SWT.MeasureItem, new Listener() {
 	 		public void handleEvent(Event event) {

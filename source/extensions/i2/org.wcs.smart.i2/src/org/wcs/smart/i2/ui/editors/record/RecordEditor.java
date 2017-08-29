@@ -240,6 +240,9 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				@Override
 				public void run() {
 					initPage();
+					if (record.getUuid() == null) {
+						setDirty(true);
+					}
 				}
 				
 			});

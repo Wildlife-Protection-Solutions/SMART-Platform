@@ -66,6 +66,7 @@ import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.editors.RelationshipSearchJob;
 import org.wcs.smart.i2.ui.editors.record.EntityListComposite.Type;
@@ -205,6 +206,7 @@ public class EntityList extends Composite {
 	}
 	
 	private void openEntity(){
+		if (!IntelSecurityManager.INSTANCE.canViewEntities()) return;
 		if (!getCurrentSelection().isEmpty()){
 			(new OpenEntityHandler()).openEntity(getCurrentSelection().get(0), listParent.getEditor().getContext());
 		}
@@ -240,80 +242,82 @@ public class EntityList extends Composite {
 						});
 					}
 					if (mnuRelationship == null || mnuRelationship.isDisposed()){
-						mnuRelationship = new MenuItem(mnuEntities, SWT.CASCADE, 0);
-						mnuRelationship.setText(Messages.EntityList_NewRelMenuItem);
-						
-						if (!getCurrentSelection().isEmpty()){
+						if (IntelSecurityManager.INSTANCE.canEditEntity()) {
+							mnuRelationship = new MenuItem(mnuEntities, SWT.CASCADE, 0);
+							mnuRelationship.setText(Messages.EntityList_NewRelMenuItem);
 							
-							final IntelEntity srcEntity = getCurrentSelection().get(0);
-							List<IntelEntity> targets = listParent.getEditor().getRecord().getEntities()
-								.stream()
-								.map(ie->ie.getEntity())
-								.collect(Collectors.toList());
-							targets.remove(srcEntity);
-							Menu mm = new Menu(mnuRelationship);
-							mnuRelationship.setMenu(mm);
-							
-							for (IntelEntity targetEntity : targets){
-								MenuItem m = new MenuItem(mm, SWT.CASCADE);
-								m.setText(targetEntity.getIdAttributeAsText());
-								m.setData(targetEntity);
-														
-								Menu rMenu = new Menu(m);
-								m.setMenu(rMenu);
-								rMenu.addMenuListener(new MenuListener() {
-									
-									@Override
-									public void menuShown(MenuEvent e) {
-										for (MenuItem kid : rMenu.getItems()) kid.dispose();
-										
-										MenuItem loading = new MenuItem(rMenu, SWT.PUSH);
-										loading.setText(DialogConstants.LOADING_TEXT);
-										loading.setEnabled(false);
-										
-										(new RelationshipSearchJob(srcEntity.getEntityType(), targetEntity.getEntityType()) {
-											@Override
-											protected void afterLoad() {
-												Display.getDefault().syncExec(()->{
-													
-													loading.dispose();
-													if (rtypes.isEmpty()){
-														MenuItem loading = new MenuItem(rMenu, SWT.PUSH);
-														loading.setText(Messages.EntityList_NoTypesFoundMsg);
-														loading.setEnabled(false);
-														return;
-													}
-													for (IntelRelationshipType t : rtypes){
-														MenuItem mi = new MenuItem(rMenu, SWT.PUSH);
-														String name = t.getName();
-														if (t.getRelationshipGroup() != null){
-															name = name + " (" + t.getRelationshipGroup().getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-														}
-														mi.setText(name);
-														mi.addSelectionListener(new SelectionAdapter(){
-
-															@Override
-															public void widgetSelected(
-																	SelectionEvent e) {
-																createRelationship(srcEntity, targetEntity, t);																
-															}
+							if (!getCurrentSelection().isEmpty()){
+								
+								final IntelEntity srcEntity = getCurrentSelection().get(0);
+								List<IntelEntity> targets = listParent.getEditor().getRecord().getEntities()
+									.stream()
+									.map(ie->ie.getEntity())
+									.collect(Collectors.toList());
+								targets.remove(srcEntity);
+								Menu mm = new Menu(mnuRelationship);
+								mnuRelationship.setMenu(mm);
+								
+								for (IntelEntity targetEntity : targets){
+									MenuItem m = new MenuItem(mm, SWT.CASCADE);
+									m.setText(targetEntity.getIdAttributeAsText());
+									m.setData(targetEntity);
 															
-														});
-													}
-												});
-											}
-										}).schedule(0); 
-									}
-									
-									@Override
-									public void menuHidden(MenuEvent e) {
-									}
-								});
+									Menu rMenu = new Menu(m);
+									m.setMenu(rMenu);
+									rMenu.addMenuListener(new MenuListener() {
+										
+										@Override
+										public void menuShown(MenuEvent e) {
+											for (MenuItem kid : rMenu.getItems()) kid.dispose();
+											
+											MenuItem loading = new MenuItem(rMenu, SWT.PUSH);
+											loading.setText(DialogConstants.LOADING_TEXT);
+											loading.setEnabled(false);
+											
+											(new RelationshipSearchJob(srcEntity.getEntityType(), targetEntity.getEntityType()) {
+												@Override
+												protected void afterLoad() {
+													Display.getDefault().syncExec(()->{
+														
+														loading.dispose();
+														if (rtypes.isEmpty()){
+															MenuItem loading = new MenuItem(rMenu, SWT.PUSH);
+															loading.setText(Messages.EntityList_NoTypesFoundMsg);
+															loading.setEnabled(false);
+															return;
+														}
+														for (IntelRelationshipType t : rtypes){
+															MenuItem mi = new MenuItem(rMenu, SWT.PUSH);
+															String name = t.getName();
+															if (t.getRelationshipGroup() != null){
+																name = name + " (" + t.getRelationshipGroup().getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+															}
+															mi.setText(name);
+															mi.addSelectionListener(new SelectionAdapter(){
+	
+																@Override
+																public void widgetSelected(
+																		SelectionEvent e) {
+																	createRelationship(srcEntity, targetEntity, t);																
+																}
+																
+															});
+														}
+													});
+												}
+											}).schedule(0); 
+										}
+										
+										@Override
+										public void menuHidden(MenuEvent e) {
+										}
+									});
+								}
 							}
 						}
 					}
 				}
-				mnuOpen.setEnabled(!getCurrentSelection().isEmpty());
+				if (mnuOpen != null) mnuOpen.setEnabled(getCurrentSelection() != null && !getCurrentSelection().isEmpty());
 				if (mnuDelete != null && !mnuDelete.isDisposed()) mnuDelete.setEnabled(!getCurrentSelection().isEmpty());
 				if (mnuRelationship != null && !mnuRelationship.isDisposed()) mnuRelationship.setEnabled(!getCurrentSelection().isEmpty());
 				
@@ -326,14 +330,16 @@ public class EntityList extends Composite {
 			}
 		});
 		
-		mnuOpen = new MenuItem(mnuEntities, SWT.PUSH);
-		mnuOpen.setText(Messages.EntityList_OpenItem);
-		mnuOpen.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				openEntity();
-			}
-		});
+		if (IntelSecurityManager.INSTANCE.canViewEntities()) {
+			mnuOpen = new MenuItem(mnuEntities, SWT.PUSH);
+			mnuOpen.setText(Messages.EntityList_OpenItem);
+			mnuOpen.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					openEntity();
+				}
+			});
+		}
 		
 		List<Control> kids = new ArrayList<Control>();
 		kids.add(parent);

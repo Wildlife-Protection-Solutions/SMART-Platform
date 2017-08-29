@@ -70,6 +70,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.SmartShellDialog;
@@ -134,6 +135,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 		
 		btnAddFilter = toolkit.createButton(top, Messages.AdvancedEntitySearchPanel_addFilterBtn, SWT.PUSH);
 		btnAddFilter.addListener(SWT.Selection, e-> showFilterMenu(e));
+		btnAddFilter.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		ToolBar tb = new ToolBar(top, SWT.FLAT);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
@@ -142,6 +144,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 		clear.setToolTipText(Messages.AdvancedEntitySearchPanel_Cleartooltip);
 		clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
 		clear.addListener(SWT.Selection, (event)->searchPanel.clear());
+		clear.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		searchPanel = new EntitySearchPanel(){
 			public String validate(){
@@ -153,6 +156,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 			}
 		};
 		searchPanel.addQueryModifiedListener((event)->searchPanel.validate());
+		
 
 		
 		Composite c = searchPanel.createComposite(this);
@@ -167,6 +171,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 		
 		btnSearch = toolkit.createButton(bottom, Messages.AdvancedEntitySearchPanel_SaveButton, SWT.PUSH);
 		btnSearch.addListener(SWT.Selection, e->doSearch());
+		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		Hyperlink saveSearch = toolkit.createHyperlink(bottom, Messages.AdvancedEntitySearchPanel_SaveSearchlink, SWT.NONE);
 		saveSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
@@ -176,6 +181,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 				saveSearch();
 			}
 		});
+		saveSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 	}
 	
 	private void saveSearch(){

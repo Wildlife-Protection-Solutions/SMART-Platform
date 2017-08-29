@@ -100,6 +100,7 @@ import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.search.LoadSavedSearches;
 import org.wcs.smart.i2.search.SearchProxy;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntitySearchJob;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.SaveSearchDialog;
@@ -337,6 +338,10 @@ public class EntitySearchView {
 		advancedSearch.addHyperlinkListener(hlistener);
 		savedSearch.addHyperlinkListener(hlistener);
 		
+		basicSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		advancedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		savedSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		
 		hlFont = basicSearch.getFont();
 		FontData fd = basicSearch.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -356,9 +361,9 @@ public class EntitySearchView {
 		
 		ToolItem delete = new ToolItem(tb, SWT.PUSH);
 		delete.addListener(SWT.Selection, (event)->deleteSavedSearch());
-		
 		delete.setToolTipText(Messages.EntitySearchView_DeleteTooltip);
 		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		delete.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		ToolItem rename = new ToolItem(tb, SWT.PUSH);
 		rename.addListener(SWT.Selection, (event)->{
@@ -385,12 +390,13 @@ public class EntitySearchView {
 		});
 		rename.setToolTipText(Messages.EntitySearchView_renametooltip);
 		rename.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+		rename.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		ToolItem refresh = new ToolItem(tb, SWT.PUSH);
 		refresh.addListener(SWT.Selection, (event)->loadSearchJob.schedule());
 		refresh.setToolTipText(Messages.EntitySearchView_refreshtooltip);
 		refresh.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
-		
+		refresh.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		toolkit.createLabel(core, Messages.EntitySearchView_SavedSearchLabel);
 		
@@ -408,10 +414,12 @@ public class EntitySearchView {
 			}
 		});
 		cmbSavedSearch.setInput(new String[]{DialogConstants.LOADING_TEXT});
-	
+		cmbSavedSearch.getControl().setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		
 		Button btnLoad = toolkit.createButton(core, Messages.EntitySearchView_LoadButtonText, SWT.PUSH);
 		btnLoad.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false, 2, 1));
 		btnLoad.addListener(SWT.Selection, (event)->loadSearch());
+		btnLoad.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 	}
 	
 	private void createAdvancedSearch(Composite parent){
@@ -523,6 +531,7 @@ public class EntitySearchView {
 				doBasicSearch(searchDelay);
 			}
 		});
+		txtSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 
 		
 		toolkit.createLabel(core, Messages.EntitySearchView_EtLabel);
@@ -539,6 +548,7 @@ public class EntitySearchView {
 				doBasicSearch(500);
 			}
 		});
+		cmbEntityType.getControl().setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		Composite bottom = toolkit.createComposite(search,  SWT.NONE);
 		bottom.setLayout(new GridLayout(2, false));
@@ -554,6 +564,8 @@ public class EntitySearchView {
 				doBasicSearch(0);	
 			}
 		});
+		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		
 		Hyperlink saveSearch = toolkit.createHyperlink(bottom, Messages.EntitySearchView_SaveSearchButton, SWT.NONE);
 		saveSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		saveSearch.addHyperlinkListener(new HyperlinkAdapter() {
@@ -562,6 +574,7 @@ public class EntitySearchView {
 				saveBasicSearch();
 			}
 		});
+		saveSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
 		
 		return search;
 	}
@@ -661,6 +674,10 @@ public class EntitySearchView {
 	 * executes search
 	 */
 	private void doSearch(IIntelEntitySearch search, long delay){
+		if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
+			entityList.setSearchError(new Exception("You do not have permission to view entities."));
+			return;
+		}
 		if (search != null){
 			searchJob.setSearch(search);
 		}

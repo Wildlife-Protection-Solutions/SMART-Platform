@@ -19,24 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2;
+package org.wcs.smart.i2.security;
 
 import org.wcs.smart.ca.SmartUserLevel;
 
 /**
- * Intelligence analyst user level
+ * Permission to view entities
  * 
  * @author Emily
  *
  */
-public class IntelAnalystUserLevel extends SmartUserLevel {
+public class IntelViewEntityUserLevel extends SmartUserLevel{
+
+	public static final IntelViewEntityUserLevel INSTANCE = new IntelViewEntityUserLevel();
 	
-	public static final IntelAnalystUserLevel INSTANCE = new IntelAnalystUserLevel();
+	private static final String KEY = "INTEL_ENTITY_VIEW"; //$NON-NLS-1$
 	
-	private static final String KEY = "INTEL_ANALYST"; //$NON-NLS-1$
-	
-	public IntelAnalystUserLevel() {
+	public IntelViewEntityUserLevel() {
 		super(KEY);
 	}
 
 }
+

@@ -219,16 +219,10 @@
                   style="push">
                <visibleWhen
                      checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_data_entry">
-                     </test>
-                  </or>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="create_record">
+                  </test>
                </visibleWhen>
             </command>
             <command
@@ -238,8 +232,8 @@
                <visibleWhen
                      checkEnabled="false">
                   <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
+                        property="org.wcs.smart.i2.permission"
+                        value="create_entity">
                   </test>
                </visibleWhen>
             </command>
@@ -249,16 +243,10 @@
                   style="push">
                <visibleWhen
                      checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_data_entry">
-                     </test>
-                  </or>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="create_query">
+                  </test>
                </visibleWhen>
             </command>
             <separator
@@ -272,8 +260,8 @@
                <visibleWhen
                      checkEnabled="false">
                   <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
                   </test>
                </visibleWhen>
             </command>
@@ -284,8 +272,8 @@
                <visibleWhen
                      checkEnabled="false">
                   <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
                   </test>
                </visibleWhen>
             </command>
@@ -296,8 +284,8 @@
                <visibleWhen
                      checkEnabled="false">
                   <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
                   </test>
                </visibleWhen>
             </command>
@@ -308,8 +296,8 @@
                <visibleWhen
                      checkEnabled="false">
                   <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
                   </test>
                </visibleWhen>
             </command>
@@ -320,8 +308,8 @@
                <visibleWhen
                      checkEnabled="false">
                   <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
                   </test>
                </visibleWhen>
             </command>
@@ -341,8 +329,8 @@
                <visibleWhen
                      checkEnabled="false">
                   <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
                   </test>
                </visibleWhen>
             </command>
@@ -355,8 +343,8 @@
                   <visibleWhen
                         checkEnabled="false">
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
+                           property="org.wcs.smart.i2.permission"
+                           value="import_data">
                      </test>
                   </visibleWhen>
                </command>
@@ -367,8 +355,8 @@
                   <visibleWhen
                         checkEnabled="false">
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
+                           property="org.wcs.smart.i2.permission"
+                           value="import_data">
                      </test>
                   </visibleWhen>
                </command>
@@ -382,16 +370,10 @@
                      style="push">
                   <visibleWhen
                         checkEnabled="false">
-                     <or>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_analyst">
-                        </test>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_data_entry">
-                        </test>
-                     </or>
+                     <test
+                           property="org.wcs.smart.i2.permission"
+                           value="import_data">
+                     </test>
                   </visibleWhen>
                </command>
                <command
@@ -400,16 +382,10 @@
                      style="push">
                   <visibleWhen
                         checkEnabled="false">
-                     <or>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_analyst">
-                        </test>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_data_entry">
-                        </test>
-                     </or>
+                     <test
+                           property="org.wcs.smart.i2.permission"
+                           value="import_data">
+                     </test>
                   </visibleWhen>
                </command>
                <separator
@@ -423,8 +399,8 @@
                   <visibleWhen
                         checkEnabled="false">
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
+                           property="org.wcs.smart.i2.permission"
+                           value="configure">
                      </test>
                   </visibleWhen>
                </command>
@@ -435,8 +411,8 @@
                   <visibleWhen
                         checkEnabled="false">
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
+                           property="org.wcs.smart.i2.permission"
+                           value="configure">
                      </test>
                   </visibleWhen>
                </command>
@@ -444,12 +420,12 @@
                      checkEnabled="false">
                   <or>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
+                           property="org.wcs.smart.i2.permission"
+                           value="import_data">
                      </test>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_data_entry">
+                           property="org.wcs.smart.i2.permission"
+                           value="configure">
                      </test>
                   </or>
                </visibleWhen>
@@ -466,6 +442,13 @@
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
                </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="assessment_perspective">
+                  </test>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
@@ -477,16 +460,10 @@
                </parameter>
                <visibleWhen
                      checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_read_only">
-                     </test>
-                  </or>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="analyst_perspective">
+                  </test>
                </visibleWhen>
             </command>
             <visibleWhen
@@ -498,16 +475,12 @@
                   </test>
                   <or>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
+                           property="org.wcs.smart.i2.permission"
+                           value="analyst_perspective">
                      </test>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_data_entry">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_read_only">
+                           property="org.wcs.smart.i2.permission"
+                           value="assessment_perspective">
                      </test>
                   </or>
                </and>
@@ -535,16 +508,10 @@
                            forcePluginActivation="true"
                            property="org.wcs.smart.caSingle">
                      </test>
-                     <or>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_analyst">
-                        </test>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_read_only">
-                        </test>
-                     </or>
+                     <test
+                           property="org.wcs.smart.i2.permission"
+                           value="analyst_perspective">
+                     </test>
                   </and>
                </visibleWhen>
             </command>
@@ -564,20 +531,10 @@
                            forcePluginActivation="true"
                            property="org.wcs.smart.caSingle">
                      </test>
-                     <or>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_analyst">
-                        </test>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_data_entry">
-                        </test>
-                        <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_read_only">
-                        </test>
-                     </or>
+                     <test
+                           property="org.wcs.smart.i2.permission"
+                           value="assessment_perspective">
+                     </test>
                   </and>
                </visibleWhen>
             </command>
@@ -591,12 +548,12 @@
                   <and>
                      <or>
                         <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_analyst">
+                              property="org.wcs.smart.i2.permission"
+                              value="analyst_perspective">
                         </test>
                         <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_data_entry">
+                              property="org.wcs.smart.i2.permission"
+                              value="assessment_perspective">
                         </test>
                      </or>
                      <or>
@@ -631,12 +588,12 @@
                   <and>
                      <or>
                         <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_analyst">
+                              property="org.wcs.smart.i2.permission"
+                              value="analyst_perspective">
                         </test>
                         <test
-                              property="org.wcs.smart.smartAdminUser"
-                              value="intel_data_entry">
+                              property="org.wcs.smart.i2.permission"
+                              value="assessment_perspective">
                         </test>
                      </or>
                      <or>
@@ -699,13 +656,13 @@
                <and>
                   <or>
                      <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_analyst">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="intel_data_entry">
-                     </test>
+                              property="org.wcs.smart.i2.permission"
+                              value="analyst_perspective">
+                        </test>
+                        <test
+                              property="org.wcs.smart.i2.permission"
+                              value="assessment_perspective">
+                        </test>
                   </or>
                   <or>
                      <with
@@ -751,27 +708,27 @@
             <visibleWhen
                   checkEnabled="false">
                <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_data_entry">
-                  </test>
+                 <test
+                              property="org.wcs.smart.i2.permission"
+                              value="analyst_perspective">
+                        </test>
+                        <test
+                              property="org.wcs.smart.i2.permission"
+                              value="assessment_perspective">
+                        </test>
                </or>
             </visibleWhen>
             <visibleWhen
                   checkEnabled="false">
                <and>
                   <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_data_entry">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
-                  </test>
+                              property="org.wcs.smart.i2.permission"
+                              value="analyst_perspective">
+                        </test>
+                        <test
+                              property="org.wcs.smart.i2.permission"
+                              value="assessment_perspective">
+                        </test>
                </and>
             </visibleWhen>
          </separator>
@@ -784,16 +741,10 @@
                style="push">
             <visibleWhen
                   checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_data_entry">
-                  </test>
-               </or>
+               <test
+                     property="org.wcs.smart.i2.permission"
+                     value="create_record">
+               </test>
             </visibleWhen>
          </command>
          <command
@@ -806,16 +757,10 @@
             locationURI="popup:outlinemenu?after=org.eclipse.birt.report.designer.ui.actions.NewJointDataSetAction">
             <visibleWhen
                   checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_data_entry">
-                  </test>
-               </or>
+               <test
+                     property="org.wcs.smart.i2.permission"
+                     value="configure">
+               </test>
             </visibleWhen>
          <separator
                name="org.wcs.smart.i2.entity.template.query.separator"
@@ -837,8 +782,8 @@
             <visibleWhen
                   checkEnabled="false">
                <test
-                     property="org.wcs.smart.smartAdminUser"
-                     value="intel_analyst">
+                     property="org.wcs.smart.i2.permission"
+                     value="create_entity">
                </test>
             </visibleWhen>
          </command>
@@ -851,16 +796,10 @@
                style="push">
             <visibleWhen
                   checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_analyst">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="intel_data_entry">
-                  </test>
-               </or>
+               <test
+                     property="org.wcs.smart.i2.permission"
+                     value="create_query">
+               </test>
             </visibleWhen>
          </command>
          <command
@@ -1049,8 +988,8 @@
             commandId="org.wcs.smart.i2.command.entitytypelist.show">
          <enabledWhen>
             <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="intel_analyst">
+                  property="org.wcs.smart.i2.permission"
+                  value="configure">
             </test>
          </enabledWhen>
       </handler>
@@ -1059,8 +998,8 @@
             commandId="org.wcs.smart.i2.command.attributelist.show">
          <enabledWhen>
             <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="intel_analyst">
+                  property="org.wcs.smart.i2.permission"
+                  value="configure">
             </test>
          </enabledWhen>
       </handler>
@@ -1069,8 +1008,8 @@
             commandId="org.wcs.smart.i2.command.relationshiptypelist.show">
          <enabledWhen>
             <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="intel_analyst">
+                  property="org.wcs.smart.i2.permission"
+                  value="configure">
             </test>
          </enabledWhen>
       </handler>
@@ -1079,8 +1018,8 @@
             commandId="org.wcs.smart.i2.command.entity.new">
          <enabledWhen>
             <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="intel_analyst">
+                  property="org.wcs.smart.i2.permission"
+                  value="create_entity">
             </test>
          </enabledWhen>
       </handler>
@@ -1089,8 +1028,8 @@
             commandId="org.wcs.smart.i2.command.relationshipgrouplist.show">
          <enabledWhen>
             <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="intel_analyst">
+                  property="org.wcs.smart.i2.permission"
+                  value="configure">
             </test>
          </enabledWhen>
       </handler>
@@ -1111,8 +1050,8 @@
             commandId="org.wcs.smart.i2.entity.template.querybindings.fix">
          <enabledWhen>
             <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="intel_analyst">
+                  property="org.wcs.smart.i2.permission"
+                  value="configure">
             </test>
          </enabledWhen>
       </handler>
@@ -1133,8 +1072,8 @@
             commandId="org.wcs.smart.i2.command.record.configuration">
          <enabledWhen>
             <test
-                  property="org.wcs.smart.smartAdminUser"
-                  value="intel_analyst">
+                  property="org.wcs.smart.i2.permission"
+                  value="configure">
             </test>
          </enabledWhen>
       </handler>
@@ -2050,13 +1989,31 @@
    <extension
          point="org.wcs.smart.userlevel">
       <SMARTUserLevel
-            class="org.wcs.smart.i2.IntelAnalystUserLevel">
+            class="org.wcs.smart.i2.security.IntelAnalystUserLevel">
       </SMARTUserLevel>
       <SMARTUserLevel
-            class="org.wcs.smart.i2.IntelDataEntryUserLevel">
+            class="org.wcs.smart.i2.security.IntelReadOnlyUserLevel">
       </SMARTUserLevel>
       <SMARTUserLevel
-            class="org.wcs.smart.i2.IntelReadOnlyUserLevel">
+            class="org.wcs.smart.i2.security.IntelCreateEntityUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.security.IntelViewEntityUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.security.IntelEditEntityUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.security.IntelViewRecordsUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.security.IntelEditRecordUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.security.IntelCreateRecordUserLevel">
+      </SMARTUserLevel>
+      <SMARTUserLevel
+            class="org.wcs.smart.i2.security.IntelQueryAllUserLevel">
       </SMARTUserLevel>
    </extension>
    <extension
@@ -2103,6 +2060,16 @@
       <ChangeLogTracker
             clazz="org.wcs.smart.i2.plugin.ChangeTrackerInstaller">
       </ChangeLogTracker>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.wcs.smart.i2.security.PermissionTester"
+            id="org.wcs.smart.i2.permission"
+            namespace="org.wcs.smart.i2"
+            properties="permission"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
 
 </plugin>
