@@ -186,6 +186,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String ZOOM_IMAGE = "org.wsc.smart.ZOOM_IMAGE"; //$NON-NLS-1$
 	
 	/**
+	 * Reisize
+	 */
+	public static final String RESIZE_IMAGE = "org.wsc.smart.RESIZE_ICON"; //$NON-NLS-1$
+	
+	/**
 	 * Browser images
 	 */
 	public static final String BROWSER_FORWARD = "org.wsc.smart.browser.forward"; //$NON-NLS-1$
@@ -407,7 +412,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(BROWSER_STOP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/stop.png")); //$NON-NLS-1$
 	     
 	     reg.put(ZOOM_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/elcl16/zoom_tool.png")); //$NON-NLS-1$
-	 
+	     reg.put(RESIZE_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/resize.png")); //$NON-NLS-1$
+
+	     
 	     reg.put(GOTO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
 	     reg.put(EDIT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit.png")); //$NON-NLS-1$
 	     
