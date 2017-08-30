@@ -42,7 +42,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Table(name="connect.users")
 public class SmartUser extends ConnectUuidItem {
 
-	public static final int MAX_USERNAME_LENGTH = 32;
+	public static final int MAX_USERNAME_LENGTH = 256;
 	public static final int MIN_USERNAME_LENGTH = 4;
 	public static final int MAX_PASS_LENGTH = 32;
 	public static final int MIN_PASS_LENGTH = 8;

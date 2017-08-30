@@ -19,6 +19,8 @@ UPDATE connect.ca_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wc
 update connect.connect_version set version = '6.0.0';
 
 
+ALTER TABLE connect.users ALTER COLUMN username TYPE varchar(256);
+
 -- QA Plugin
 
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.qa', '1.0');
