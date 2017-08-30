@@ -36,10 +36,20 @@ public class EntityEditorInput implements IEditorInput{
 	private UUID uuid;
 	private IntelEntityType type;
 	
+	private boolean defaultEditMode = false;
+	
 	public EntityEditorInput(String name, UUID uuid, IntelEntityType type){
 		this.name = name;
 		this.uuid = uuid;
 		this.type = type;
+	}
+	
+	public boolean getDefaultEditMode() {
+		return this.defaultEditMode;
+	}
+	
+	public void setDefaultEditMode(boolean editMode) {
+		this.defaultEditMode = editMode;
 	}
 	
 	public IntelEntityType getType(){

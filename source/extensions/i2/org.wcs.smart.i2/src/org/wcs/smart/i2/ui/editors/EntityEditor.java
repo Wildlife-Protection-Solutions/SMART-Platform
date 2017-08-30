@@ -535,7 +535,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		this.input = (EntityEditorInput) input;
 		setInput(input);
 		setSite(site);
-		
+		setEditMode(this.input.getDefaultEditMode());
 		super.setPartName(input.getName());
 	}
 
@@ -1147,9 +1147,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}
 		this.isEditMode = isEdit;
 		if (entity != null) initControl();
-	
-		if (!deleteItem.isDisposed()) deleteItem.setEnabled(isEdit && IntelSecurityManager.INSTANCE.canEditEntity());
-		if (!editItem.isDisposed()) editItem.setSelection(isEdit);
+		if (deleteItem != null && !deleteItem.isDisposed()) deleteItem.setEnabled(isEdit && IntelSecurityManager.INSTANCE.canEditEntity());
+		if (editItem != null && !editItem.isDisposed()) editItem.setSelection(isEdit);
 	}
 	
 	public void setDirty(boolean isDirty){
@@ -1911,6 +1910,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 						});
 					}
 					fieldEditors.add(e);
+					
+//					if (e.getTextAttributeControl() != null) {
+//						e.getTextAttributeControl().addListener(SWT.Resize, ex->{
+//							attributelist.reflow(true);
+//						});
+//					}
 				}else{
 					Label key = toolkit.createLabel(part, a.getAttribute().getName() + ":"); //$NON-NLS-1$
 					key.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -1929,6 +1934,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 				
 			}
+//			attributelist.reflow(true);
 			attributelist.layout(true);
 			part.setVisible(true);
 		}

@@ -100,12 +100,12 @@ import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.i2.ui.SectionTabHeader;
@@ -655,6 +655,12 @@ public class RecordSummaryPage extends EditorPart{
 								af.updateValue(tmp);
 								recordEditor.getMapPage().updateLocationAttribute(tmp);
 							}
+						});
+					}
+					
+					if (af.getTextAttributeControl() != null) {
+						af.getTextAttributeControl().addListener(SWT.Resize, e->{
+							sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 						});
 					}
 				}else{

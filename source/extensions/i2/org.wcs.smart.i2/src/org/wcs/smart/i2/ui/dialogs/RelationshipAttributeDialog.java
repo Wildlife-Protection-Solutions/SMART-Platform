@@ -72,6 +72,8 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 	private Composite core;
 	private boolean modified = false;
 	
+	private ScrolledComposite scroll;
+	
 	public RelationshipAttributeDialog(Shell parentShell, IntelEntityRelationship relationship) {
 		super(parentShell);
 		this.relationship = relationship;
@@ -95,7 +97,7 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 			Label l = new Label(parent, SWT.NONE);
 			l.setText(Messages.RelationshipAttributeDialog_NoAttributes);
 		}else{
-			ScrolledComposite scroll = new ScrolledComposite(parent, SWT.V_SCROLL);
+			scroll = new ScrolledComposite(parent, SWT.V_SCROLL);
 			scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			scroll.setExpandHorizontal(true);
 			scroll.setExpandVertical(true);
@@ -166,6 +168,11 @@ public class RelationshipAttributeDialog  extends TitleAreaDialog {
 					modified();
 				}
 			});
+			if (editor.getTextAttributeControl() != null) {
+				editor.getTextAttributeControl().addListener(SWT.Resize, ex->{
+					scroll.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+				});
+			}
 		}
 		getShell().layout(true, true);
 		((ScrolledComposite)core.getParent()).setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));

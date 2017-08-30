@@ -24,7 +24,6 @@ package org.wcs.smart.i2.ui.handler;
 import java.text.MessageFormat;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -48,12 +47,10 @@ public class OpenEntityHandler {
 		EntityEditorInput input = new EntityEditorInput(entity.getIdAttributeAsText(), entity.getUuid(), entity.getEntityType());
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
-			IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityEditor.ID);
-			if (editor instanceof EntityEditor){
-				if ( (IntelSecurityManager.INSTANCE.canEditEntity() && pId.equals(IntelDataAssessmentPerspective.ID)) || IntelSecurityManager.INSTANCE.canCreateEntity()){
-					((EntityEditor)editor).setEditMode(true);
-				}
+			if ( (IntelSecurityManager.INSTANCE.canEditEntity() && pId.equals(IntelDataAssessmentPerspective.ID)) || IntelSecurityManager.INSTANCE.canCreateEntity()){
+				input.setDefaultEditMode(true);
 			}
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityEditor.ID);
 		} catch (PartInitException e) {
 			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.OpenEntityHandler_OpenError, e.getMessage()), e);
 		}

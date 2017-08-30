@@ -79,6 +79,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
+import org.wcs.smart.i2.ui.MultiLineText;
 import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.ui.OnOffButton;
 import org.wcs.smart.util.GeometryUtils;
@@ -101,6 +102,7 @@ public class AttributeFieldEditor {
 	
 	private Composite parent;
 	private Text txtValue;
+	private MultiLineText txtMulti;
 	private Text txtValue2;
 	private Label lblProj;
 	private OnOffButton btnOnOff;
@@ -279,6 +281,15 @@ public class AttributeFieldEditor {
 	}
 	
 	/**
+	 * 
+	 * @return the multi line text attribute control.  May need to add
+	 * resize listeners to this control to correctly update the ui
+	 */
+	public MultiLineText getTextAttributeControl() { 
+		return txtMulti; 
+	}
+	
+	/**
 	 * returns true if the value is set; false if not set and should be removed
 	 * from attribute list.
 	 * 
@@ -333,7 +344,7 @@ public class AttributeFieldEditor {
 			}
 			
 		}else if (attribute.getType() == AttributeType.TEXT){
-			String svalue = ((Text)txtValue).getText();
+			String svalue = txtMulti.getText();
 			if (!svalue.trim().isEmpty()){
 				value.setStringValue(svalue.trim());
 				add = true;
@@ -422,7 +433,7 @@ public class AttributeFieldEditor {
 			}
 			
 		}else if (attribute.getType() == AttributeType.TEXT){
-			String svalue = ((Text)txtValue).getText();
+			String svalue = txtMulti.getText();
 			if (!svalue.trim().isEmpty()){
 				value.setStringValue(svalue.trim());
 				add = true;
@@ -436,7 +447,7 @@ public class AttributeFieldEditor {
 	
 	public void initControl(IntelEntityRelationshipAttributeValue value){
 		if (attribute.getType() == AttributeType.TEXT){
-			txtValue.setText(value.getStringValue());
+			txtValue.setText(txtMulti.getText());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
 		}else if (attribute.getType() ==  AttributeType.LIST){
@@ -517,7 +528,7 @@ public class AttributeFieldEditor {
 				add = true;
 			}
 		}else if (attribute.getType() == AttributeType.TEXT){
-			String svalue = ((Text)txtValue).getText();
+			String svalue = txtMulti.getText();
 			if (!svalue.trim().isEmpty()){
 				value.setStringValue(svalue.trim());
 				add = true;
@@ -528,7 +539,7 @@ public class AttributeFieldEditor {
 	
 	public void initControl(IntelEntityAttributeValue value){
 		if (attribute.getType() == AttributeType.TEXT){
-			txtValue.setText(value.getStringValue());
+			txtMulti.setText(value.getStringValue());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
 		}else if (attribute.getType() == AttributeType.POSITION){
@@ -559,7 +570,7 @@ public class AttributeFieldEditor {
 	public void initControl(IntelRecordAttributeValue value){
 		if ( value.getAttribute() == null ) return;
 		if (attribute.getType() == AttributeType.TEXT){
-			txtValue.setText(value.getStringValue());
+			txtMulti.setText(value.getStringValue());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
 		}else if (attribute.getType() == AttributeType.POSITION){
@@ -690,19 +701,15 @@ public class AttributeFieldEditor {
 	private void createControl(){
 		Label l = new Label(parent, SWT.NONE);
 		l.setText(this.name + ":"); //$NON-NLS-1$
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		l.setLayoutData(new GridData(SWT.RIGHT, attribute.getType() == AttributeType.TEXT ? SWT.TOP : SWT.CENTER, false, false));
 		
 		if (attribute.getType() == AttributeType.TEXT){
-			txtValue = new Text(parent, SWT.BORDER);
-			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			((GridData)txtValue.getLayoutData()).widthHint = 100;
-			cd = createDecoration(txtValue);
-			txtValue.addModifyListener(new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					modified();
-				}
-			});
+			txtMulti = new MultiLineText(parent);
+			txtMulti.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)txtMulti.getLayoutData()).widthHint = 100;
+			txtMulti.addListener(SWT.Modify, (e)->modified());
+			cd = createDecoration(txtMulti);
 			
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue = new Text(parent, SWT.BORDER);

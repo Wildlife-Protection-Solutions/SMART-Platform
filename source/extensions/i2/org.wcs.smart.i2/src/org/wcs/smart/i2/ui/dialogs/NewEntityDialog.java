@@ -357,6 +357,9 @@ public class NewEntityDialog extends TitleAreaDialog{
 						AttributeFieldEditor leditor = new AttributeFieldEditor(content, attribute.getAttribute());
 						leditor.addSelectionListener(listener);
 						attributeControls.add(leditor);
+						if (leditor.getTextAttributeControl() != null) {
+							leditor.getTextAttributeControl().addListener(SWT.Resize, e-> sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
+						}
 					}
 				});
 			}
@@ -380,6 +383,10 @@ public class NewEntityDialog extends TitleAreaDialog{
 				AttributeFieldEditor leditor = new AttributeFieldEditor(content, attribute.getAttribute());
 				leditor.addSelectionListener(listener);
 				attributeControls.add(leditor);
+				
+				if (leditor.getTextAttributeControl() != null) {
+					leditor.getTextAttributeControl().addListener(SWT.Resize, e-> sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
+				}
 			}
 		});
 		
