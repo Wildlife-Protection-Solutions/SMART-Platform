@@ -118,9 +118,9 @@ public class CtDataApi extends HttpServlet {
 			item.setConservationArea(ca);
 			item.setName("CyberTracker " + DateFormat.getDateTimeInstance().format(new Date())); //$NON-NLS-1$
 			if (request.getHeader(HttpHeaders.CONTENT_ENCODING) != null && request.getHeader(HttpHeaders.CONTENT_ENCODING).equalsIgnoreCase("deflate")){ //$NON-NLS-1$
-				item.setType(DataQueueItem.Type.JSON_ZLIB_CT);
+				item.setType("JSON_ZLIB_CT");
 			}else{
-				item.setType(DataQueueItem.Type.JSON_CT);
+				item.setType("JSON_CT");
 			}
 			item.setFile(null);
 			item.setStatus(Status.UPLOADING);

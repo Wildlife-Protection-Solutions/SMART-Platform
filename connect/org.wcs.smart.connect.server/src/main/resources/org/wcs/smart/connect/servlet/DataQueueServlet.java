@@ -17,8 +17,8 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
+import org.wcs.smart.connect.dataqueue.DataQueueManager;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
-import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
@@ -59,25 +59,28 @@ public class DataQueueServlet extends HttpServlet {
 		
 		Locale l = SmartUtils.getRequestLocale(request);
 		List<Object[]> uploadTypes = new ArrayList<Object[]>();
-		for (DataQueueItem.Type type : DataQueueItem.Type.values()){
+		for ( String type : DataQueueManager.INSTANCE.getDataTypes()){
 			switch(type){
-			case INCIDENT_XML:
-				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.IncidentXmlName", l), type.name()}); //$NON-NLS-1$
+			case "INCIDENT_XML": //$NON-NLS-1$
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.IncidentXmlName", l), type}); //$NON-NLS-1$
 				break;
-			case MISSION_XML:
-				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.MissionXmlName", l), type.name()}); //$NON-NLS-1$
+			case "MISSION_XML": //$NON-NLS-1$
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.MissionXmlName", l), type}); //$NON-NLS-1$
 				break;
-			case PATROL_XML:
-				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.PatrolXmlName",l), type.name()}); //$NON-NLS-1$
+			case "PATROL_XML": //$NON-NLS-1$
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.PatrolXmlName",l), type}); //$NON-NLS-1$
 				break;
-			case JSON_CT:
-				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtJsonName",l), type.name()}); //$NON-NLS-1$
+			case "JSON_CT": //$NON-NLS-1$
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtJsonName",l), type}); //$NON-NLS-1$
 				break;
-			case JSON_ZLIB_CT:
-				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtZLibJsonName",l), type.name()}); //$NON-NLS-1$
+			case "JSON_ZLIB_CT": //$NON-NLS-1$
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtZLibJsonName",l), type}); //$NON-NLS-1$
+				break;
+			case "I2_RECORD_XML": //$NON-NLS-1$
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.I2RecordXmlName", l), type}); //$NON-NLS-1$
 				break;
 			default:
-				uploadTypes.add(new Object[]{type.name(), type.name()});
+				uploadTypes.add(new Object[]{type, type});
 				break;
 			}
 		}
@@ -99,6 +102,5 @@ public class DataQueueServlet extends HttpServlet {
 		request.getRequestDispatcher("/WEB-INF/dataqueue.jsp").forward(request, response); //$NON-NLS-1$
 		
 	}
-
 
 }

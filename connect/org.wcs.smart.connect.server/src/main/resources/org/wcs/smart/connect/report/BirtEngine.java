@@ -31,11 +31,13 @@ import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.core.framework.IPlatformContext;
 import org.eclipse.birt.core.framework.Platform;
 import org.eclipse.birt.core.framework.PlatformServletContext;
+import org.eclipse.birt.core.framework.jar.ServiceLauncher;
 import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
 import org.eclipse.core.internal.registry.RegistryProviderFactory;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.locationtech.udig.catalog.internal.wms.WmsPlugin;
@@ -95,6 +97,7 @@ public class BirtEngine {
 					EngineConstants.APPCONTEXT_CLASSLOADER_KEY,
 					Thread.currentThread().getContextClassLoader());
 			
+			
 			// if you are using 3.7 POJO Runtime no need to setEngineHome
 			//config.setEngineHome("");
 			IPlatformContext context = new PlatformServletContext(sc);
@@ -102,6 +105,7 @@ public class BirtEngine {
 			
 			try {
 				Platform.startup(config);
+				
 			} catch (BirtException e) {
 				e.printStackTrace();
 			}

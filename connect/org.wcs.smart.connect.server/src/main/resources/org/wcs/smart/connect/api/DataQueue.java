@@ -195,7 +195,12 @@ public class DataQueue {
 		
 		List<DataQueueItem> items = new ArrayList<DataQueueItem>();
 		for (ServerDataQueueItemProxy item : proxyitems){
-			items.add(item);
+			DataQueueItem i = new DataQueueItem();
+			i.setConservationArea(item.getConservationArea());
+			i.setName(item.getName());
+			i.setType(item.getType());
+			i.setUuid(item.getUuid());
+			items.add(i);
 		}
 		return items;
 	}
