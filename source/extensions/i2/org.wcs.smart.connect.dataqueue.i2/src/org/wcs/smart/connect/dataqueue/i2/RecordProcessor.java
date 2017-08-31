@@ -33,6 +33,7 @@ import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.xml.RecordXmlImporter;
 
 /**
@@ -57,6 +58,10 @@ public class RecordProcessor implements IItemProcessor {
 	@Override
 	public ProcessingStatus process(DataQueueItem item, IProgressMonitor monitor)
 			throws Exception {
+		
+		if (!IntelSecurityManager.INSTANCE.canCreateRecord()) {
+			return new ProcessingStatus(LocalDataQueueItem.Status.ERROR, Messages.RecordProcessor_invaliduser);
+		}
 		LocalDataQueueItem litem = (LocalDataQueueItem)item;
 		Path file = litem.getFullFilePath();
 		
