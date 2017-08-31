@@ -29,7 +29,6 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.er.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
-import org.wcs.smart.connect.dataqueue.model.DataQueueItem.Type;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption.DataQueueProcessingOptionPk;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
@@ -48,13 +47,14 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class MissionProcessor implements IItemProcessor {
 
-
+	public static final String MISSION_XML = "MISSION_XML"; //$NON-NLS-1$
+	
 	public MissionProcessor() {
 	}
 
 	@Override
-	public boolean canProcess(Type type) {
-		return (type == Type.MISSION_XML);
+	public boolean canProcess(String type) {
+		return type.toUpperCase().equals(MISSION_XML);
 	}
 
 	@Override

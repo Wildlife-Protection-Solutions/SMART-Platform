@@ -19,20 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.dataqueue.incident;
+package org.wcs.smart.connect.dataqueue.i2;
 
 import java.nio.file.Path;
-import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
-import org.wcs.smart.connect.dataqueue.incident.internal.Messages;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.connect.dataqueue.i2.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
-import org.wcs.smart.incident.event.IncidentEventManager;
-import org.wcs.smart.incident.xml.IncidentImporter;
-import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.xml.RecordXmlImporter;
 
 /**
  * Independent incident data queue processor for importing
@@ -41,16 +42,16 @@ import org.wcs.smart.observation.model.Waypoint;
  * @author Emily
  *
  */
-public class IncidentProcessor implements IItemProcessor {
+public class RecordProcessor implements IItemProcessor {
 
-	public static final String INCIDENT_XML = "INCIDENT_XML"; //$NON-NLS-1$
+	public static final String RECORD_XML = "I2_RECORD_XML"; //$NON-NLS-1$
 
-	public IncidentProcessor() {
+	public RecordProcessor() {
 	}
 
 	@Override
 	public boolean canProcess(String type) {
-		return type.toUpperCase().equals(INCIDENT_XML);
+		return type.toUpperCase().equals(RECORD_XML);
 	}
 
 	@Override
@@ -59,17 +60,27 @@ public class IncidentProcessor implements IItemProcessor {
 		LocalDataQueueItem litem = (LocalDataQueueItem)item;
 		Path file = litem.getFullFilePath();
 		
-		Waypoint wp = IncidentImporter.importIncident(file.toFile(), monitor);
-		if (wp == null){
-			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, Messages.IncidentProcessor_nothingloaded);	
-		}else{
-			try{
-				IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_ADDED, wp);
-			}catch (Exception ex){
-				ConnectDataQueuePlugin.log(Messages.IncidentProcessor_, ex);
+		IEventBroker broker = SmartPlugIn.getDefault().getWorkbench().getService(IEclipseContext.class).get(IEventBroker.class);
+		try(Session session = HibernateManager.openSession()){
+			RecordXmlImporter importer = new RecordXmlImporter(session);
+			
+			importer.importRecord(file, monitor);
+			Object[] results = importer.finishSingleTransaction(broker);
+			if (results == null) {
+				return new ProcessingStatus(LocalDataQueueItem.Status.ERROR, Messages.RecordProcessor_cancelled);		
+			}else {
+				int value = (int) results[0];
+				if (value == 0) {
+					return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, (String)results[1]);	
+				}else if (value == 1) {
+					return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE, (String)results[1]);
+				}else {
+					return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, Messages.RecordProcessor_unknowncode + (String)results[1]);
+				}
 			}
-			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE, MessageFormat.format(Messages.IncidentProcessor_incidentloaded, wp.getId()));			
 		}
+
+		
 	}
 
 }

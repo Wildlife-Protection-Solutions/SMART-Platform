@@ -3,12 +3,12 @@
 <plugin>
    <extension
          point="org.wcs.smart.connect.dataqueue.processor">
-      <processor
-            class="org.wcs.smart.connect.dataqueue.incident.IncidentProcessor">
-      </processor>
       <datatype
-            key="INCIDENT_XML">
+            key="I2_RECORD_XML">
       </datatype>
+      <processor
+            class="org.wcs.smart.connect.dataqueue.i2.RecordProcessor">
+      </processor>
    </extension>
 
 </plugin>

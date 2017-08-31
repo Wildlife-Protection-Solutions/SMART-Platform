@@ -89,6 +89,24 @@ public class ConnectDataQueueDatabaseUpgrader implements IDatabaseUpgrader {
 				}
 			});
 			HibernateManager.setPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, ConnectDataQueuePlugin.DB_VERSION_2, session);
+			currentVersion = ConnectDataQueuePlugin.DB_VERSION_2;
+		}
+		
+		if (currentVersion.equalsIgnoreCase(ConnectDataQueuePlugin.DB_VERSION_2)) {
+			String[] sql = new String[]{
+					"ALTER TABLE smart.connect_data_queue DROP CONSTRAINT type_chk", //$NON-NLS-1$
+			};
+			
+			session.doWork(new Work() {
+				@Override
+				public void execute(Connection c) throws SQLException {
+					for (int i = 0; i < sql.length; i ++){
+						c.createStatement().execute(sql[i]);
+					}
+				}
+			});
+			HibernateManager.setPlugInVersion(ConnectDataQueuePlugin.PLUGIN_ID, ConnectDataQueuePlugin.DB_VERSION_3, session);
+			currentVersion = ConnectDataQueuePlugin.DB_VERSION_3;
 		}
 	}
 

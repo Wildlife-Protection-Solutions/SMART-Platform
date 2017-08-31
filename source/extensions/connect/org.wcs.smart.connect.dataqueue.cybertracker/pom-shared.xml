@@ -10,16 +10,8 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	
-	<artifactId>org.wcs.smart.connect.dataqueue.cybertracker.patrol</artifactId>
-	<name>SMART Connect Cybertracker Data Queue Patrol Module</name>
+	<artifactId>org.wcs.smart.connect.dataqueue.cybertracker</artifactId>
+	<name>SMART Connect Cybertracker Data Queue Module</name>
 	<packaging>bundle</packaging>
-	
-	<dependencies>
-		<dependency>
-    			<groupId>org.wcs.smart</groupId>
-    			<artifactId>org.wcs.smart.patrol</artifactId>
-    			<version>${smart.version}</version>
-		</dependency>
-	</dependencies>
 	
 </project>

@@ -7,6 +7,12 @@
       <processor
             class="org.wcs.smart.connect.dataqueue.cybertracker.CybertrackerItemProcessor">
       </processor>
+      <datatype
+            key="JSON_CT">
+      </datatype>
+      <datatype
+            key="JSON_ZLIB_CT">
+      </datatype>
    </extension>
 
 </plugin>

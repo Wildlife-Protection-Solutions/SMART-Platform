@@ -12,7 +12,7 @@
 	
 	<artifactId>org.wcs.smart.connect.cybertracker</artifactId>
 	<name>SMART Connect Cybertracker Alert Module</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>

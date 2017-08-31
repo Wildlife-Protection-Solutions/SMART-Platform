@@ -27,7 +27,6 @@ import java.text.MessageFormat;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
-import org.wcs.smart.connect.dataqueue.model.DataQueueItem.Type;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
 import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption.DataQueueProcessingOptionPk;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
@@ -46,13 +45,14 @@ import org.wcs.smart.patrol.xml.in.PatrolImporter;
  */
 public class PatrolDataQueueProcessor implements IItemProcessor {
 
+	public static final String PATROL_XML = "PATROL_XML"; //$NON-NLS-1$
 
 	public PatrolDataQueueProcessor() {
 	}
 
 	@Override
-	public boolean canProcess(Type type) {
-		return (type == Type.PATROL_XML);
+	public boolean canProcess(String type) {
+		return type.toUpperCase().equals(PATROL_XML);
 	}
 
 	@Override

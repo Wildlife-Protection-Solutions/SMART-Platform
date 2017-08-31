@@ -49,7 +49,6 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.connect.dataqueue.cybertracker.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
-import org.wcs.smart.connect.dataqueue.model.DataQueueItem.Type;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem.Status;
 import org.wcs.smart.connect.dataqueue.process.IItemProcessor;
@@ -65,6 +64,9 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithProgress {
 
+	public static final String CT_TYPE = "JSON_CT"; //$NON-NLS-1$
+	public static final String CT_ZIP_TYPE = "JSON_ZLIB_CT"; //$NON-NLS-1$
+			
 	private String json;
 	private ProcessingStatus returnValue;
 	private Exception returnException;
@@ -88,8 +90,8 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 	}
 
 	@Override
-	public boolean canProcess(Type type) {
-		return type == Type.JSON_CT || type == Type.JSON_ZLIB_CT;
+	public boolean canProcess(String type) {
+		return (type.toUpperCase().equals(CT_TYPE) || type.toUpperCase().equals(CT_ZIP_TYPE));
 	}
 	
 	@Override
@@ -103,9 +105,9 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 		
 		final CloseMsgDialog[] id = {null};
 		
-		if (item.getType() == Type.JSON_ZLIB_CT){
+		if (item.getType().toUpperCase().equals(CT_ZIP_TYPE)){
 			json = ZLibUtil.decompressFile(litem.getFullFilePath().toFile());
-		}else if (item.getType() == Type.JSON_CT){
+		}else if (item.getType().toUpperCase().equals(CT_TYPE)){
 			try(Reader in = Files.newBufferedReader(litem.getFullFilePath(), StandardCharsets.UTF_8)){
 				json = IOUtils.toString(in);
 			}

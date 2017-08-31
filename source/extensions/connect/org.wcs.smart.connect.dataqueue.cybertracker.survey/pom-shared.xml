@@ -12,7 +12,7 @@
 	
 	<artifactId>org.wcs.smart.connect.dataqueue.cybertracker.survey</artifactId>
 	<name>SMART Connect Cybertracker Data Queue Survey Module</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>

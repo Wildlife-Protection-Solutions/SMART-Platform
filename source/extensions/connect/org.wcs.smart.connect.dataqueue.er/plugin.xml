@@ -6,9 +6,12 @@
       <processor
             class="org.wcs.smart.connect.dataqueue.er.MissionProcessor">
       </processor>
+      <datatype
+            key="MISSION_XML">
+      </datatype>
    </extension>
    <extension
-         point="org.wcs.smart.connect.dataqueue.processor.option">
+         point="org.wcs.smart.connect.dataqueue.processorOption">
       <option_panel
             class="org.wcs.smart.connect.dataqueue.er.ui.ErProcessorOptionPanel">
       </option_panel>

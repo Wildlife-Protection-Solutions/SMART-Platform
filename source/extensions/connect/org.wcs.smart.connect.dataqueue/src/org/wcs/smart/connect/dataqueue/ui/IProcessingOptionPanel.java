@@ -37,7 +37,7 @@ import org.wcs.smart.connect.dataqueue.model.DataQueueProcessingOption;
  */
 public interface IProcessingOptionPanel {
 	
-	public static final String EXTENSION_ID = "org.wcs.smart.connect.dataqueue.processor.option"; //$NON-NLS-1$
+	public static final String EXTENSION_ID = "org.wcs.smart.connect.dataqueue.processorOption"; //$NON-NLS-1$
 	
 	public static final String DESKTOP_ONLY_MESSAGE = Messages.IProcessingOptionPanel_InfoMessage;
 	

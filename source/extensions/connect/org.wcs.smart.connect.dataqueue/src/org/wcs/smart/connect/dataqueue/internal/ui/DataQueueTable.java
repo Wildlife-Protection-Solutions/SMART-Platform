@@ -102,7 +102,7 @@ public class DataQueueTable extends Composite{
 			}else if (this == NAME){
 				return item.getName();
 			}else if (this == TYPE){
-				return item.getType().name();
+				return item.getType();
 			}else if (this == PROGRESS){
 				return item.getStatus().getGuiName();
 			}else if (this == DATE){

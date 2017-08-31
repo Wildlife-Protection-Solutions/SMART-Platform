@@ -40,7 +40,7 @@ public interface IItemProcessor {
 	 * @param type
 	 * @return <code>true</code> if the processor can process the provided type.
 	 */
-	public boolean canProcess(DataQueueItem.Type type);
+	public boolean canProcess(String type);
 	
 	/**
 	 * Processes the item and returns associated status.  Throws an exception

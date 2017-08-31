@@ -43,26 +43,26 @@ import org.wcs.smart.ca.UuidItem;
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public class DataQueueItem extends UuidItem{
 
-	public enum Type{
-		PATROL_XML,
-		INCIDENT_XML,
-		MISSION_XML,
-		JSON_CT,
-		JSON_ZLIB_CT,
-	}
+//	public enum Type{
+//		PATROL_XML,
+//		INCIDENT_XML,
+//		MISSION_XML,
+//		JSON_CT,
+//		JSON_ZLIB_CT,
+//	}
 	
-	private Type type;
+	private String type;
 	private UUID caUuid;
 	private String name;
 
 	
 	@Column(name="type")
-	@Enumerated(EnumType.STRING)
-	public Type getType(){
+//	@Enumerated(EnumType.STRING)
+	public String getType(){
 		return this.type;
 	}
 	
-	public void setType(Type type){
+	public void setType(String type){
 		this.type = type;
 	}
 	

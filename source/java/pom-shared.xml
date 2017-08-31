@@ -54,6 +54,13 @@
 		<module>../extensions/connect/org.wcs.smart.connect.cybertracker/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.patrol/pom-shared.xml</module>
 		<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker.survey/pom-shared.xml</module>
+		
+		<module>../extensions/connect/org.wcs.smart.connect.dataqueue.cybertracker/pom-shared.xml</module>
+		<module>../extensions/connect/org.wcs.smart.connect.dataqueue.patrol/pom-shared.xml</module>
+		<module>../extensions/connect/org.wcs.smart.connect.dataqueue.er/pom-shared.xml</module>
+		<module>../extensions/connect/org.wcs.smart.connect.dataqueue.independentincident/pom-shared.xml</module>
+		<module>../extensions/i2/org.wcs.smart.connect.dataqueue.i2/pom-shared.xml</module>
+		
 		<module>../extensions/qa/org.wcs.smart.qa/pom-shared.xml</module>
 		<module>../extensions/qa/org.wcs.smart.qa.er/pom-shared.xml</module>
 		<module>../extensions/qa/org.wcs.smart.qa.incident/pom-shared.xml</module>

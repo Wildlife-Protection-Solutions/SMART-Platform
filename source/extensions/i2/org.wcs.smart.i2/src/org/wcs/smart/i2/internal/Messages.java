@@ -601,6 +601,7 @@ public class Messages extends NLS {
 	public static String ImportRecordXmlDialog_Message;
 	public static String ImportRecordXmlDialog_TaskName;
 	public static String ImportRecordXmlDialog_Title;
+	public static String ImportRecordXmlDialog_XMLFiles;
 	public static String ImportRecordXmlDialog_zipFiles;
 	public static String IntelDataToXml_attributesTask;
 	public static String IntelDataToXml_CollectionDataTask;
@@ -1162,6 +1163,7 @@ public class Messages extends NLS {
 	public static String RecordXmlExporter_RecordNotFound;
 	public static String RecordXmlExporter_SubTaskName;
 	public static String RecordXmlExporter_TaskName;
+	public static String RecordXmlImporter_attachmentwarning;
 	public static String RecordXmlImporter_AttributeListNotFound;
 	public static String RecordXmlImporter_CategoryAttributeNotFound;
 	public static String RecordXmlImporter_CategoryNotFound;
@@ -1176,6 +1178,8 @@ public class Messages extends NLS {
 	public static String RecordXmlImporter_NoXmlFileFound;
 	public static String RecordXmlImporter_ParseError;
 	public static String RecordXmlImporter_ParseError2;
+	public static String RecordXmlImporter_ProcessingCompleteMsg;
+	public static String RecordXmlImporter_ProcessingCompleteMsgEventError;
 	public static String RecordXmlImporter_ProcessingError1;
 	public static String RecordXmlImporter_ProcessingError2;
 	public static String RecordXmlImporter_SaveError;

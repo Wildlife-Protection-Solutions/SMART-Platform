@@ -169,8 +169,8 @@ public class ImportRecordXmlDialog extends TitleAreaDialog {
 
 	private void addFile() {
 		FileDialog fd = new FileDialog(getShell(), SWT.MULTI);
-		fd.setFilterExtensions(new String[]{"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fd.setFilterNames(new String[]{Messages.ImportRecordXmlDialog_allFiles, Messages.ImportRecordXmlDialog_zipFiles});
+		fd.setFilterExtensions(new String[]{"*.zip", "*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		fd.setFilterNames(new String[]{Messages.ImportRecordXmlDialog_allFiles, Messages.ImportRecordXmlDialog_XMLFiles, Messages.ImportRecordXmlDialog_zipFiles});
 		if (fd.open() != null){
 			Path root = Paths.get(fd.getFilterPath());
 			for (String f : fd.getFileNames()){

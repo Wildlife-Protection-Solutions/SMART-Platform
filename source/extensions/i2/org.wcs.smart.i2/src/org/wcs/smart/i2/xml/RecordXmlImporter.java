@@ -89,6 +89,7 @@ import org.wcs.smart.i2.xml.record.ObservationAttributeType;
 import org.wcs.smart.i2.xml.record.ObservationType;
 import org.wcs.smart.i2.xml.record.RecordAttributeType;
 import org.wcs.smart.i2.xml.record.RecordType;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -118,6 +119,7 @@ public class RecordXmlImporter {
 	private HashMap<Path, List<String>> allWarnings;
 	//temporary directories to cleanup after attachments imported
 	private List<Path> tempDirs;
+	private boolean isZip = false;
 	
 	public RecordXmlImporter(Session session){
 		this.session = session;
@@ -127,8 +129,142 @@ public class RecordXmlImporter {
 		tempDirs = new ArrayList<Path>();
 	}
 	
+	/**
+	 * Saves all records to the database; if cannot save any of the records all will fail.
+	 * @param broker
+	 * @return a two element object array - the first is 0 if error occured while processing events; 1 if everything went ok; the second 
+	 * is the status string.  Will return null if user cancelled.
+	 * @throws Exception
+	 */
+	public Object[] finishSingleTransaction(IEventBroker broker) throws Exception{
+		ArrayList<IntelRecord> loaded = new ArrayList<>();
+		ArrayList<IntelRecord> deleted = new ArrayList<>();
+		ArrayList<IntelEntity> modified = new ArrayList<>();
+		try {
+			if (!showWarnings()) return null;
+			session.beginTransaction();
+			try {
+				for (IntelRecord r : records){
+					if (!doSave(r, session, modified, deleted)) continue;
+					loaded.add(r);
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+				throw ex;
+			}
+			
+			try{
+				broker.send(IntelEvents.RECORD_NEW, loaded);
+				if (!deleted.isEmpty()) broker.send(IntelEvents.RECORD_DELETE, deleted);
+				if (!modified.isEmpty()) broker.send(IntelEvents.ENTITY_MODIFIED, modified);
+			}catch (Exception ex){
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+
+				return new Object[] {0,MessageFormat.format(Messages.RecordXmlImporter_ProcessingCompleteMsgEventError, loaded.size(), records.size())};
+			}
+		}finally {
+			cleanUp();
+		}
+		return new Object[] {1, MessageFormat.format(Messages.RecordXmlImporter_ProcessingCompleteMsg, loaded.size(), records.size())};		
+	}
 	
+	/**
+	 * Saves records one at a time.  If one fails it will move on to the next
+	 * and try to save that one.
+	 * 
+	 * @param broker
+	 * @return if something was saved; false if the uesr cancelled
+	 */
 	public boolean finish(IEventBroker broker){
+		
+		
+		ArrayList<IntelRecord> loaded = new ArrayList<>();
+		ArrayList<IntelRecord> deleted = new ArrayList<>();
+		ArrayList<IntelEntity> modified = new ArrayList<>();
+
+		StringBuilder error = new StringBuilder();
+		try {
+			if (!showWarnings()) return false;
+			
+			for (IntelRecord r : records){
+				session.beginTransaction();
+				try{
+					if (!doSave(r, session, modified, deleted)) {
+						session.getTransaction().rollback();
+						continue;
+					}
+					session.getTransaction().commit();
+					loaded.add(r);
+				}catch (Exception ex){
+					session.getTransaction().rollback();
+					error.append(MessageFormat.format(Messages.RecordXmlImporter_SaveError, r.getTitle(), ex.getMessage()));
+					Intelligence2PlugIn.log(ex.getMessage(), ex);
+				}
+			}
+			
+			try{
+				broker.send(IntelEvents.RECORD_NEW, loaded);
+				if (!deleted.isEmpty()) broker.send(IntelEvents.RECORD_DELETE, deleted);
+				if (!modified.isEmpty()) broker.send(IntelEvents.ENTITY_MODIFIED, modified);
+			}catch (Exception ex){
+				error.append(Messages.RecordXmlImporter_EventError + ex.getMessage());
+				Intelligence2PlugIn.log(ex.getMessage(), ex);
+			}
+		}finally {
+			cleanUp();
+		}
+		
+		Display.getDefault().syncExec(()->{
+			if (error.length() > 0){
+				error.insert(0, MessageFormat.format(Messages.RecordXmlImporter_ImportFinishedError, loaded.size(), records.size()));
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.RecordXmlImporter_ImportCompleteTitle, error.toString());
+			}else{
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.RecordXmlImporter_ImportCompleteTitle, MessageFormat.format(Messages.RecordXmlImporter_ImportFinished, loaded.size(), records.size()));
+			}
+		});
+		return true;
+	}
+	
+	private boolean doSave(IntelRecord r, Session s, ArrayList<IntelEntity> modified, ArrayList<IntelRecord> deleted) throws Exception{
+		Long cnt = QueryFactory.buildCountQuery(session, IntelRecord.class, 
+				new Object[] {"conservationArea", r.getConservationArea()}, //$NON-NLS-1$
+				new Object[] {"title", r.getTitle()}); //$NON-NLS-1$
+		int action = RecordImportEngine.confirmDuplicate(cnt, r.getTitle());
+		if (action == 2) {
+			//delete
+			IntelRecord delete= QueryFactory.buildQuery(session, IntelRecord.class, 
+					new Object[] {"conservationArea", r.getConservationArea()},  //$NON-NLS-1$
+					new Object[] {"title", r.getTitle()}).uniqueResult();  //$NON-NLS-1$
+			for (IntelEntityRecord d : delete.getEntities()) {
+				modified.add(d.getEntity());
+			}
+			RecordManager.INSTANCE.deleteRecord(delete, session);
+			deleted.add(delete);
+		}else if (action == 1) {
+			//save
+			
+		}else if (action == 0) {
+			//skip
+			return false;
+		}
+		
+		List<IntelEntityLocation> locations = entityLocations.get(r);
+		if (r.getAttachments() != null){
+			for (IntelRecordAttachment recordAttachment : r.getAttachments()){
+				session.saveOrUpdate(recordAttachment.getAttachment());
+			}
+		}
+		
+		session.saveOrUpdate(r);
+		if (locations != null){
+			for (IntelEntityLocation l : locations) session.saveOrUpdate(l);
+		}
+		return true;
+	}
+	
+	private boolean showWarnings() {
 		List<String> warnings = new ArrayList<String>();
 		for (Entry<Path, List<String>> warn : allWarnings.entrySet()){
 			if (!warn.getValue().isEmpty()){
@@ -151,80 +287,10 @@ public class RecordXmlImporter {
 				return false;
 			}
 		}
-		
-		ArrayList<IntelRecord> loaded = new ArrayList<>();
-		ArrayList<IntelRecord> deleted = new ArrayList<>();
-		ArrayList<IntelEntity> modified = new ArrayList<>();
-
-		
-		StringBuilder error = new StringBuilder();
-		for (IntelRecord r : records){
-			session.beginTransaction();
-			try{
-				
-				Long cnt = QueryFactory.buildCountQuery(session, IntelRecord.class, 
-						new Object[] {"conservationArea", r.getConservationArea()}, //$NON-NLS-1$
-						new Object[] {"title", r.getTitle()}); //$NON-NLS-1$
-				int action = RecordImportEngine.confirmDuplicate(cnt, r.getTitle());
-				if (action == 2) {
-					//delete
-					IntelRecord delete= QueryFactory.buildQuery(session, IntelRecord.class, 
-							new Object[] {"conservationArea", r.getConservationArea()},  //$NON-NLS-1$
-							new Object[] {"title", r.getTitle()}).uniqueResult();  //$NON-NLS-1$
-					for (IntelEntityRecord d : delete.getEntities()) {
-						modified.add(d.getEntity());
-					}
-					RecordManager.INSTANCE.deleteRecord(delete, session);
-					deleted.add(delete);
-				}else if (action == 1) {
-					//save
-					
-				}else if (action == 0) {
-					//skip
-					session.getTransaction().rollback();
-					continue;
-				}
-				
-				List<IntelEntityLocation> locations = entityLocations.get(r);
-				if (r.getAttachments() != null){
-					for (IntelRecordAttachment recordAttachment : r.getAttachments()){
-						session.saveOrUpdate(recordAttachment.getAttachment());
-					}
-				}
-				
-				session.saveOrUpdate(r);
-				if (locations != null){
-					for (IntelEntityLocation l : locations) session.saveOrUpdate(l);
-				}
-				session.getTransaction().commit();
-				loaded.add(r);
-			}catch (Exception ex){
-				session.getTransaction().rollback();
-				error.append(MessageFormat.format(Messages.RecordXmlImporter_SaveError, r.getTitle(), ex.getMessage()));
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
-			}
-		}
-		
-		try{
-			broker.send(IntelEvents.RECORD_NEW, loaded);
-			if (!deleted.isEmpty()) broker.send(IntelEvents.RECORD_DELETE, deleted);
-			if (!modified.isEmpty()) broker.send(IntelEvents.ENTITY_MODIFIED, modified);
-		}catch (Exception ex){
-			error.append(Messages.RecordXmlImporter_EventError + ex.getMessage());
-			Intelligence2PlugIn.log(ex.getMessage(), ex);
-		}
-		cleanUp();
-		
-		Display.getDefault().syncExec(()->{
-			if (error.length() > 0){
-				error.insert(0, MessageFormat.format(Messages.RecordXmlImporter_ImportFinishedError, loaded.size(), records.size()));
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.RecordXmlImporter_ImportCompleteTitle, error.toString());
-			}else{
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.RecordXmlImporter_ImportCompleteTitle, MessageFormat.format(Messages.RecordXmlImporter_ImportFinished, loaded.size(), records.size()));
-			}
-		});
 		return true;
 	}
+	
+	
 	
 	private void cleanUp(){
 		for (Path p : tempDirs){
@@ -237,7 +303,7 @@ public class RecordXmlImporter {
 	
 	/**
 	 * 
-	 * @param zipFile zip file to import
+	 * @param zipFile zip file or xml file to import
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
 	 * to call done() on the given monitor
 	 */
@@ -255,21 +321,29 @@ public class RecordXmlImporter {
 		try{
 			RecordType type = null;
 			
-			//unzip file
-			tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
-			tempDirs.add(tempDir);
-			ZipUtil.unzipFolder(zipFile.toFile(), tempDir.toFile());
-			
-			//search temp dir for xml file
 			Path xmlFile = null;
-			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(tempDir)) {
-	            for (Path path : directoryStream) {
-	            	if (!Files.isDirectory(path) && path.toString().endsWith(".xml")){ //$NON-NLS-1$
-	            		xmlFile = path;
-	            		break;
-	            	}
-	            }
-	        } catch (IOException ex) {}
+			
+			if (SmartUtils.isZip(zipFile.toFile())) {
+				isZip = true;
+				//unzip file
+				tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
+				tempDirs.add(tempDir);
+				ZipUtil.unzipFolder(zipFile.toFile(), tempDir.toFile());
+				
+				//search temp dir for xml file
+				
+				try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(tempDir)) {
+		            for (Path path : directoryStream) {
+		            	if (!Files.isDirectory(path) && path.toString().endsWith(".xml")){ //$NON-NLS-1$
+		            		xmlFile = path;
+		            		break;
+		            	}
+		            }
+		        } catch (IOException ex) {}
+			}else {
+				isZip = false;
+				xmlFile = zipFile;
+			}
 			
 			if (xmlFile == null) throw new Exception(MessageFormat.format(Messages.RecordXmlImporter_NoXmlFileFound, zipFile.toString()));
 			
@@ -331,20 +405,26 @@ public class RecordXmlImporter {
 
 			if (type.getAttachments() != null && !type.getAttachments().isEmpty()) {
 				// TODO: entity links?
-				newRecord.setAttachments(new ArrayList<IntelRecordAttachment>());
-				for (AttachmentType xmlAttachment : type.getAttachments()) {
-					Path importFile = xmlFile.getParent().resolve(RecordXmlExporter.ATTACHMENT_DIR).resolve(xmlAttachment.getFilename());
-					IntelAttachment newAttachment = new IntelAttachment();
-					newAttachment.setCopyFromLocation(importFile.toFile());
-					newAttachment.setFilename(xmlAttachment.getFilename());
-					newAttachment.setConservationArea(SmartDB.getCurrentConservationArea());
-					newAttachment.setDateCreated(new Date());
-					newAttachment.setCreatedBy(SmartDB.getCurrentEmployee());
-					
-					IntelRecordAttachment attach = new IntelRecordAttachment();
-					attach.setAttachment(newAttachment);
-					attach.setRecord(newRecord);
-					newRecord.getAttachments().add(attach);
+				if (isZip) {
+					newRecord.setAttachments(new ArrayList<IntelRecordAttachment>());
+					for (AttachmentType xmlAttachment : type.getAttachments()) {
+						Path importFile = xmlFile.getParent().resolve(RecordXmlExporter.ATTACHMENT_DIR).resolve(xmlAttachment.getFilename());
+						IntelAttachment newAttachment = new IntelAttachment();
+						newAttachment.setCopyFromLocation(importFile.toFile());
+						newAttachment.setFilename(xmlAttachment.getFilename());
+						newAttachment.setConservationArea(SmartDB.getCurrentConservationArea());
+						newAttachment.setDateCreated(new Date());
+						newAttachment.setCreatedBy(SmartDB.getCurrentEmployee());
+						
+						IntelRecordAttachment attach = new IntelRecordAttachment();
+						attach.setAttachment(newAttachment);
+						attach.setRecord(newRecord);
+						newRecord.getAttachments().add(attach);
+					}
+				}else {
+					if (!type.getAttachments().isEmpty()) {
+						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_attachmentwarning, type.getAttachments().size()));
+					}
 				}
 			}
 			

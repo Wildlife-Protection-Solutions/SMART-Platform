@@ -12,7 +12,7 @@
 	
 	<artifactId>org.wcs.smart.connect.dataqueue</artifactId>
 	<name>SMART Connect Data Queue Module</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>
