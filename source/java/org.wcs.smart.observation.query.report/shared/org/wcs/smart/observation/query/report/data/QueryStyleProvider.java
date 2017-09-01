@@ -26,13 +26,14 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.report.birt.map.AbstractQueryStyleProvider;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**
@@ -43,7 +44,7 @@ import org.wcs.smart.udig.style.StyleManager;
 public class QueryStyleProvider extends AbstractQueryStyleProvider{
 
 	@Override
-	public StyleBlackboard getStyle(String queryType, UUID queryUuid, Session s) {
+	public StyleBlackboard getStyle(String queryType, UUID queryUuid, MapLayerInfo.LayerType layerType, Session s) {
 		if (queryUuid == null) return null;
 		String tableName = null;
 		String resourceKey = null;

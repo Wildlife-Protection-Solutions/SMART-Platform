@@ -44,6 +44,7 @@ import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.report.table.SurveySamplingUnitTable;
 import org.wcs.smart.report.birt.map.AbstractQueryStyleProvider;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.udig.style.StyleManager;
 
 /**
@@ -55,12 +56,11 @@ import org.wcs.smart.udig.style.StyleManager;
 public class QueryStyleProvider extends AbstractQueryStyleProvider{
 
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText,
-			Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session s) {
 		if (extensionId.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)){
 		
 			ParsedQuery pquery = AbstractSmartBirtQuery.parseQueryText(queryText);
-			return getStyle(pquery.getType(), pquery.getUuid(), s);
+			return getStyle(pquery.getType(), pquery.getUuid(), layerType, s);
 		}else if (extensionId.equals(SmartTableQuery.SMART_DATASET_TYPE)){
 			Style style = null;
 			if (queryText.toUpperCase().startsWith(SurveySamplingUnitTable.SU_PREFIX + ":" + GeometryType.TRANSECT.name())){ //$NON-NLS-1$
@@ -79,7 +79,7 @@ public class QueryStyleProvider extends AbstractQueryStyleProvider{
 	}
 	
 	@Override
-	public StyleBlackboard getStyle(String queryType, UUID queryUuid, Session s) {
+	public StyleBlackboard getStyle(String queryType, UUID queryUuid, MapLayerInfo.LayerType layerType, Session s) {
 		if (queryUuid == null) return null;
 		String tableName = null;
 		String resourceKey = null;

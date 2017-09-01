@@ -29,6 +29,7 @@ import org.wcs.smart.plan.map.udig.PlanTargetGeoResource;
 import org.wcs.smart.plan.report.oda.PlanPatrolQuery;
 import org.wcs.smart.plan.report.oda.PlanTargetQuery;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
 
 /**
  * Style provider for plan points.
@@ -39,7 +40,7 @@ public class PlanPointsStyleProvider implements IBirtLayerStyleProvider {
 
 
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText,
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, 
 			Session s) {
 		if (extensionId.equals(PlanTargetQuery.SMART_PLAN_TARGET_ID)){
 			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();

@@ -49,7 +49,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		LOC_COMMENT("loc:comment"), //$NON-NLS-1$
 		LOC_GEOMTRY("loc:geom"); //$NON-NLS-1$
 		
-		String key;
+		public String key;
 		Column(String key){
 			this.key = key;
 		}

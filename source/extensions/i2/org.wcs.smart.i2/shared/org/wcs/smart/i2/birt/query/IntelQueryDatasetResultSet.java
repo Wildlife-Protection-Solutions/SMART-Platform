@@ -1,38 +1,67 @@
-package org.wcs.smart.i2.birt.entity;
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.i2.birt.query;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.UUID;
+import java.util.Locale;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.query.Query;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelEntityAttributeValue;
-import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.util.UuidUtils;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.PagedResultSetIterator;
+import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 
-public class EntityLocationAttributeDatasetResultSet implements IResultSet {
-	
+/**
+ * Intelligence record attribute dataset results
+ * @author Emily
+ *
+ */
+public class IntelQueryDatasetResultSet implements IResultSet {
+
 	private long m_maxRows = -1;
 	private int m_currentRowId = -1;
 
-	private Object currentItem;
+	private IResultItem currentItem;
 	private Object lastRowItem;
 	
-	private EntityLocationAttributeDatasetResultSetMetadata metadata;
-	private AbstractIntelBirtConnection connection;
-	private ScrollableResults results;
+	private IPagedQueryResultSet results;
+	private PagedResultSetIterator iterator;
+	
+	private IntelQueryDataset dataset;
 	
 	/**
 	 * Creates a new summary results set
@@ -42,44 +71,39 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	 * @param metadata
 	 *            the metadata
 	 */
-	public EntityLocationAttributeDatasetResultSet(IntelEntityType type,
-			EntityLocationAttributeDatasetResultSetMetadata metadata, 
-			AbstractIntelBirtConnection connection, HashMap<Integer, Object> parameters,
-			EntityParameterMetadata pmetadata) {
+	public IntelQueryDatasetResultSet(IntelQueryDataset dataset, HashMap<Integer, Object> parameters) throws OdaException {
+		this.dataset = dataset;
 		
-		this.metadata = metadata;
-
-		String hql = "FROM IntelEntityAttributeValue v join v.id.attribute a join v.id.entity e where a.type = :type and e.entityType = :etype"; //$NON-NLS-1$
-		
-		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
-		UUID entity = null;
-		if (index > 0 && parameters.get(index) != null){
-			hql += " AND e.uuid = :euuid"; //$NON-NLS-1$
-			entity = UuidUtils.stringToUuid((String) parameters.get(index)); 
+		IntelRecordObservationQuery query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
+		if (query == null) {
+			throw new OdaException("Intelligence Record Observtion Query not found");
 		}
 		
-		String cnt = "SELECT count(*) " + hql; //$NON-NLS-1$
-		Query<?> q = connection.getSession().createQuery(cnt);
-		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
-		q.setParameter("etype", type); //$NON-NLS-1$
-		if (entity != null){
-			q.setParameter("euuid", entity); //$NON-NLS-1$
-		}
-		m_maxRows = (Long)q.uniqueResult();
-		
-		
-		q = connection.getSession().createQuery(hql);
-		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
-		q.setParameter("etype", type); //$NON-NLS-1$
-		if (entity != null){
-			q.setParameter("euuid", entity); //$NON-NLS-1$
+		int sindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.START_DATE.getName());
+		int eindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.END_DATE.getName());
+		Date[] dfilter = new Date[] {null, null};
+		if (sindex > 0 && eindex > 0 && parameters.get(sindex) != null && parameters.get(eindex) != null) {
+			dfilter[0] = (Date) parameters.get(sindex);
+			dfilter[1] = (Date) parameters.get(eindex);
 		}
 		
+		IntelObservationQueryEngine engine = new IntelObservationQueryEngine();
+		HashMap<String, Object> eparameters = new HashMap<>();
+		eparameters.put(Session.class.getName(), dataset.getConnection().getSession());
+		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
+		eparameters.put(Date.class.getName(), dfilter);
+		eparameters.put(Locale.class.getName(), dataset.getConnection().getCurrentLocale());
+		eparameters.put(ConservationArea.class.getName(), query.getConservationArea());
+		try {
+			results = engine.executeQuery(query, eparameters);
+			m_maxRows = results.getItemCount();
+			iterator = results.iterator(dataset.getConnection().getSession());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		results = q.setReadOnly(true)
-				.scroll(ScrollMode.FORWARD_ONLY);
 		
-		this.connection = connection;
 		this.m_currentRowId = 0;
 	}
 	
@@ -89,7 +113,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getMetaData()
 	 */
 	public IResultSetMetaData getMetaData() throws OdaException {
-		return metadata;
+		return dataset.getMetaData();
 	}
 
 	/**
@@ -114,8 +138,8 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	 */
 	public boolean next() throws OdaException {
 		m_currentRowId++;
-		if (results.next()){
-			currentItem = results.get();
+		if (iterator.hasNext()) {
+			currentItem = iterator.next();
 			return true;
 		}
 		return false;
@@ -125,7 +149,15 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#close()
 	 */
 	public void close() throws OdaException {
-		results.close();
+		iterator.close();
+		try {
+			dataset.getConnection().getSession().beginTransaction();
+			results.dispose(dataset.getConnection().getSession());
+			dataset.getConnection().getSession().getTransaction().commit();
+		} catch (SQLException e) {
+			dataset.getConnection().getSession().getTransaction().rollback();
+			throw new OdaException(e);
+		}
 		results = null;
 		m_maxRows = -1;
 	}
@@ -152,9 +184,11 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntityAttributeValue i = (IntelEntityAttributeValue) ((Object[])currentItem)[0];
-		return EntityLocationAttributeDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
-		
+		try{
+			return ((IntelQueryDatasetResultSetMetadata)getMetaData()).getQueryColumn(colIndex - 1).getValue(currentItem);
+		}catch (Exception ex){
+			return "ERROR: " + ex.getMessage(); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -238,14 +272,14 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getDate(int)
 	 */
-	public Date getDate(int index) throws OdaException {
+	public java.sql.Date getDate(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
-		if (lastRowItem instanceof Date) {
-			return (Date) lastRowItem;
+		if (lastRowItem instanceof java.sql.Date) {
+			return (java.sql.Date) lastRowItem;
 		} else if (lastRowItem instanceof Time) {
-			return new Date(((Time) lastRowItem).getTime());
+			return new java.sql.Date(((Time) lastRowItem).getTime());
 		} else if (lastRowItem instanceof java.util.Date) {
-			return new Date(((java.util.Date) lastRowItem).getTime());
+			return new java.sql.Date(((java.util.Date) lastRowItem).getTime());
 		}else if (lastRowItem == null){
 			return null;
 		}
@@ -257,7 +291,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	 * org.eclipse.datatools.connectivity.oda.IResultSet#getDate(java.lang.String
 	 * )
 	 */
-	public Date getDate(String columnName) throws OdaException {
+	public java.sql.Date getDate(String columnName) throws OdaException {
 		return getDate(findColumn(columnName));
 	}
 
@@ -268,6 +302,8 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem instanceof Time) {
 			return (Time) lastRowItem;
+		}else if (lastRowItem instanceof Timestamp) {
+			return new Time(((Timestamp)lastRowItem).getTime());
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -390,8 +426,8 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	 * .String)
 	 */
 	public int findColumn(String columnName) throws OdaException {
-		for (int i = 0; i < metadata.getColumnCount(); i++) {
-			if (metadata.getColumnName(i).equals(columnName)) {
+		for (int i = 0; i < getMetaData().getColumnCount(); i++) {
+			if (getMetaData().getColumnName(i).equals(columnName)) {
 				return i + 1;
 			}
 		}

@@ -329,7 +329,7 @@ public class Messages extends NLS {
 	public static String EntityRelationshipListShell_NoRelationshipsFound;
 	public static String EntityReportGenerator_AttachmentHeader;
 	public static String EntityReportGenerator_AttributeHeader;
-	public static String EntityReportGenerator_IntelligenceDataSourceName;
+	public static String EntityReportGenerator_IntelligenceDataSourceName1;
 	public static String EntityReportGenerator_LinkToReportParameter;
 	public static String EntityReportGenerator_LocationHeader;
 	public static String EntityReportGenerator_OfLabel;

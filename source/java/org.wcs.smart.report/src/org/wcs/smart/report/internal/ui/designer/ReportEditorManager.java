@@ -89,8 +89,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 				OdaDataSetHandle handle = (OdaDataSetHandle) ds.getHandle(ev
 						.getTarget().getRoot());
 
-				if (handle.getExtensionID().startsWith(
-						ReportManager.SMART_DATASOURCE_ID)
+				if (handle.getExtensionID().startsWith("org.wcs.smart") //$NON-NLS-1$
 						&& ne.getOldName() == null
 						&& ne.getNewName().startsWith(
 								org.eclipse.birt.report.designer.nls.Messages
@@ -113,8 +112,8 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 					OdaDataSetHandle handle = (OdaDataSetHandle) (ds)
 							.getHandle(ev.getTarget().getRoot());
 					if (ce.getAction() == ContentEvent.ADD
-							&& handle.getExtensionID().equals(
-									ReportManager.SMART_DATASET_TYPE)) {
+							&& handle.getExtensionID().startsWith("org.wcs.smart")) { //$NON-NLS-1$
+//									ReportManager.SMART_DATASET_TYPE)) {
 						
 						//link parameters
 						PropertyHandle odaDataSetParameterProp = handle

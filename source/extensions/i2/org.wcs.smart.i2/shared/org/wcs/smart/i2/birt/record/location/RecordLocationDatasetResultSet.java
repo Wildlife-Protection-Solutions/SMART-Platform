@@ -86,7 +86,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 		Root<IntelLocation> from = c.from(IntelLocation.class);
 		List<Predicate> filters = new ArrayList<>();
 		filters.add(from.get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$
-		if (index >= 0){
+		if (index >= 0 && parameters.get(index) != null){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
 			filters.add(cb.equal(from.get("record.uuid"), recordUuid)); //$NON-NLS-1$
 		}

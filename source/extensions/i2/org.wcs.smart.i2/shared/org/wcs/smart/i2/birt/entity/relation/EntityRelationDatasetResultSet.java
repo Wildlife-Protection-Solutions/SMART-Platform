@@ -97,7 +97,7 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 		HashMap<String, Object> values = new HashMap<String, Object>();
 		values.put("type", type); //$NON-NLS-1$
 		int index =pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
-		if (index >= 0){
+		if (index >= 0 ){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
 				q1 += " AND ( l.sourceEntity.uuid = :uuid1 or l.targetEntity.uuid = :uuid2 )"; //$NON-NLS-1$

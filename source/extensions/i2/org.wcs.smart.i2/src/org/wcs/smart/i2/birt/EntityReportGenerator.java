@@ -141,7 +141,7 @@ public enum EntityReportGenerator {
 		rdh.getParameters().add(shandler);
 		
 		//add intelligence data source
-		String dataSourceName = Messages.EntityReportGenerator_IntelligenceDataSourceName;
+		String dataSourceName = Messages.EntityReportGenerator_IntelligenceDataSourceName1;
 		OdaDataSourceHandle datasource = rdh.getElementFactory().newOdaDataSource(dataSourceName, IntelBirtDataSource.ODA_DATA_SOURCE_ID);
 		rdh.getDataSources().add(datasource);
 		DataSourceDesign dSource = modelAdapter.createDataSourceDesign(datasource);

@@ -112,7 +112,7 @@ public class StyleCellEditor extends DialogCellEditor {
 								String queryText = ((OdaDataSetHandle)mapLayer.getHandle().getDataSet()).getQueryText();
 								sb = BirtStyleManager.INSTANCE.getStyle(
 										((OdaDataSetHandle)mapLayer.getHandle().getDataSet()).getExtensionID(),
-										queryText, session);
+										queryText, mapLayer.getLayerType(), session);
 							}
 						}
 						

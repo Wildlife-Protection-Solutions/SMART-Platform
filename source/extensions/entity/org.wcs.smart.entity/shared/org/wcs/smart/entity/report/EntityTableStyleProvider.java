@@ -34,6 +34,7 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.data.oda.smart.impl.table.SmartTableQuery;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
 
 
 /**
@@ -46,8 +47,7 @@ public class EntityTableStyleProvider implements IBirtLayerStyleProvider {
 
 
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText,
-			Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session s) {
 		
 		if (extensionId.equals(SmartTableQuery.SMART_DATASET_TYPE)){
 			Style style = null;

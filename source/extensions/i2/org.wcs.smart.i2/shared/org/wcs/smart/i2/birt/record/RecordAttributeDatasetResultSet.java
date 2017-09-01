@@ -93,7 +93,7 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 //				.addOrder(Order.asc("a.order")); //$NON-NLS-1$
 //		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
-		if (index >= 0){
+		if (index >= 0 && parameters.get(index) != null){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
 			filters.add(cb.equal(from.join("record").get("uuid"), recordUuid)); //$NON-NLS-1$ //$NON-NLS-2$
 		}

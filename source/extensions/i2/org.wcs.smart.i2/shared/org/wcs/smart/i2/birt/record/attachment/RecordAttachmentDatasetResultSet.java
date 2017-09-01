@@ -83,7 +83,7 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 		Query<IntelRecordAttachment> query = connection.getSession().createQuery(hql, IntelRecordAttachment.class);
 		query.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
 		
-		if (index >= 0){
+		if (index >= 0 && parameters.get(index) != null){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
 			query.setParameter("record",  recordUuid); //$NON-NLS-1$
 		}

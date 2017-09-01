@@ -38,20 +38,20 @@ public abstract class AbstractQueryStyleProvider implements IBirtLayerStyleProvi
 	/**
 	 * Find the default style for the query query.  Should return null
 	 * if cannot style query.
+	 * 
 	 * @param queryType the query type
 	 * @param uuid the query uuid
 	 * @param s
 	 * @return
 	 */
-	public abstract StyleBlackboard getStyle(String queryType, UUID uuid, Session s);
+	public abstract StyleBlackboard getStyle(String queryType, UUID uuid, MapLayerInfo.LayerType layerType, Session s);
 	
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText,
-			Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session s) {
 		if (!extensionId.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)) return null;
 		
 		ParsedQuery pquery = AbstractSmartBirtQuery.parseQueryText(queryText);
-		return getStyle(pquery.getType(), pquery.getUuid(), s);
+		return getStyle(pquery.getType(), pquery.getUuid(), layerType, s);
 	}
 	
 	

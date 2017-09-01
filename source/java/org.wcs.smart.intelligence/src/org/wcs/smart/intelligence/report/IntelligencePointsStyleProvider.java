@@ -28,6 +28,7 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.intelligence.map.IntelligenceGeoResource;
 import org.wcs.smart.intelligence.report.oda.IntelligencePointsQuery;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
 
 /**
  * Style provided for intelligence points.
@@ -39,8 +40,7 @@ public class IntelligencePointsStyleProvider implements IBirtLayerStyleProvider 
 
 
 	@Override
-	public StyleBlackboard getStyle(String extensionId, String queryText,
-			Session s) {
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session s) {
 		if (!extensionId.equals(IntelligencePointsQuery.ID)) return null;
 		
 		StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();

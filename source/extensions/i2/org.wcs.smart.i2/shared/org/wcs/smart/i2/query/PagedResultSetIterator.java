@@ -60,4 +60,7 @@ public class PagedResultSetIterator {
 		return results.asResultItem(resultSet, session);
 	}
 	
+	public void close() {
+		resultSet.close();
+	}
 }

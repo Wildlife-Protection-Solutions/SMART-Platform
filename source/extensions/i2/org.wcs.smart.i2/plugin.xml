@@ -1173,10 +1173,10 @@
    </extension>
    <extension
          id="org.wcs.smart.i2.oda.datasource"
-         name="SMART Intelligence Data Source"
+         name="SMART Advanced Intelligence Data Source"
          point="org.eclipse.datatools.connectivity.oda.dataSource">
       <dataSource
-            defaultDisplayName="SMART Intelligence Data Source"
+            defaultDisplayName="SMART Advanced Intelligence Data Source"
             driverClass="org.wcs.smart.i2.birt.datasource.IntelBirtDataSource"
             id="org.wcs.smart.i2.birt.datasource"
             odaVersion="3.0"
@@ -1782,6 +1782,60 @@
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
+      <dataSet
+            defaultDisplayName="Advanced Intelligence Query"
+            id="org.wcs.smart.i2.birt.dataset.query">
+         <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
    </extension>
    
    <extension
@@ -1792,8 +1846,8 @@
          <newDataSourceWizard
                includesProgressMonitor="false"
                pageClass="org.wcs.smart.i2.birt.datasource.ui.IntelligenceDataSourceWizardPage"
-               pageTitle="SMART Intelligence Data Source"
-               windowTitle="SMART Intelligence Data Source">
+               pageTitle="SMART Advanced Intelligence Data Source"
+               windowTitle="SMART Advanced Intelligence Data Source">
          </newDataSourceWizard>
       </dataSourceUI>
       <dataSetUI
@@ -1910,7 +1964,7 @@
          <dataSetPage
                displayName="Record Locations"
                id="org.wcs.smart.i2.birt.ui.dataset.record.location.wizard.page.list"
-               wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelRecordDetailsWizardPage">
+               wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelRecordLocationWizardPage">
          </dataSetPage>
       </dataSetUI>
        <dataSetUI
@@ -1941,6 +1995,20 @@
                 wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelEntityAttributeLocaitonWizardPage">
           </dataSetPage>
        </dataSetUI>
+       <dataSetUI
+             id="org.wcs.smart.i2.birt.dataset.query"
+             supportsInParameters="true"
+             supportsOutParameters="false">
+          <dataSetWizard
+                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+                windowTitle="Advanced Intelligence Queries">
+          </dataSetWizard>
+          <dataSetPage
+                displayName="Advanced Intelligence Queries"
+                id="org.wcs.smart.i2.birt.ui.dataset.query.wizard.page.list"
+                wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelQueryWizardPage">
+          </dataSetPage>
+       </dataSetUI>
    </extension>
    <extension
          point="org.wcs.smart.birt.map.maplayer">
@@ -1955,6 +2023,12 @@
       </MapLayer>
       <StyleProvider
             styleprovider="org.wcs.smart.i2.birt.map.entity.EntityAttributeMapLayer">
+      </StyleProvider>
+      <MapLayer
+            maplayer="org.wcs.smart.i2.birt.query.QueryMapLayer">
+      </MapLayer>
+      <StyleProvider
+            styleprovider="org.wcs.smart.i2.birt.query.QueryMapLayer">
       </StyleProvider>
    </extension>
    <extension

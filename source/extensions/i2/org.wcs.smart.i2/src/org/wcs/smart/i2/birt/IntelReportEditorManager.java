@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.i2.birt;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.ModuleHandle;
@@ -43,17 +41,6 @@ import org.wcs.smart.birt.BirtSmartUtils;
 import org.wcs.smart.birt.ui.IReportEditorManager;
 import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.birt.entity.EntityDataset;
-import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
-import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
-import org.wcs.smart.i2.birt.entity.location.EntityLocationDataset;
-import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
-import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
-import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
-import org.wcs.smart.i2.birt.record.RecordDataset;
-import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
-import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
-import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
 
 /**
  * Manager for entity report editor.
@@ -66,21 +53,23 @@ public class IntelReportEditorManager implements IReportEditorManager{
 
 	private RCPMultiPageReportEditor editor;
 	
-	private static final Set<String> SUPPORTED_DATASETS = new HashSet<String>();
-	static{
-		SUPPORTED_DATASETS.add(EntityLocationAttributeDataset.DATASET_TYPE);
-		SUPPORTED_DATASETS.add(EntityDataset.DATASET_TYPE);
-		SUPPORTED_DATASETS.add(EntityLocationDataset.DATASET_TYPE);
-		SUPPORTED_DATASETS.add(EntityRecordDataset.DATASET_TYPE);
-		SUPPORTED_DATASETS.add(EntityAttachmentDataset.DATASET_TYPE);
-		SUPPORTED_DATASETS.add(EntityRelationDataset.DATASET_TYPE);
-		
-		SUPPORTED_DATASETS.add(RecordDataset.DATASET_TYPE);
-		SUPPORTED_DATASETS.add(RecordAttributeDataset.DATASET_TYPE);
-		SUPPORTED_DATASETS.add(RecordEntityDataset.DATASET_TYPE);
-		SUPPORTED_DATASETS.add(RecordAttachmentDataset.DATASET_TYPE);
-		SUPPORTED_DATASETS.add(RecordLocationDataset.DATASET_TYPE);
-	};
+//	private static final Set<String> SUPPORTED_DATASETS = new HashSet<String>();
+//	static{
+//		SUPPORTED_DATASETS.add(EntityLocationAttributeDataset.DATASET_TYPE);
+//		SUPPORTED_DATASETS.add(EntityDataset.DATASET_TYPE);
+//		SUPPORTED_DATASETS.add(EntityLocationDataset.DATASET_TYPE);
+//		SUPPORTED_DATASETS.add(EntityRecordDataset.DATASET_TYPE);
+//		SUPPORTED_DATASETS.add(EntityAttachmentDataset.DATASET_TYPE);
+//		SUPPORTED_DATASETS.add(EntityRelationDataset.DATASET_TYPE);
+//		
+//		SUPPORTED_DATASETS.add(RecordDataset.DATASET_TYPE);
+//		SUPPORTED_DATASETS.add(RecordAttributeDataset.DATASET_TYPE);
+//		SUPPORTED_DATASETS.add(RecordEntityDataset.DATASET_TYPE);
+//		SUPPORTED_DATASETS.add(RecordAttachmentDataset.DATASET_TYPE);
+//		SUPPORTED_DATASETS.add(RecordLocationDataset.DATASET_TYPE);
+//		
+//		SUPPORTED_DATASETS.add(IntelQueryDataset.DATASET_TYPE);
+//	};
 	
 	// This listener is a hack to name the
 	// smart query datasources with the query name
@@ -96,7 +85,7 @@ public class IntelReportEditorManager implements IReportEditorManager{
 				OdaDataSetHandle handle = (OdaDataSetHandle) ds.getHandle(ev.getTarget().getRoot());
 
 				String dsId = handle.getExtensionID();
-				if ( SUPPORTED_DATASETS.contains(dsId)
+				if ( dsId.startsWith("org.wcs.smart") //$NON-NLS-1$
 						&& ne.getOldName() == null
 						&& ne.getNewName().startsWith(org.eclipse.birt.report.designer.nls.Messages.getString("dataset.new.defaultName")) //$NON-NLS-1$
 						&& (ds.getDisplayName() == null || !ds.getDisplayName().equals(ne.getNewName()))) {
@@ -126,7 +115,7 @@ public class IntelReportEditorManager implements IReportEditorManager{
 					
 					OdaDataSet ds = (OdaDataSet) ce.getContent();
 					OdaDataSetHandle handle = (OdaDataSetHandle) (ds).getHandle(ev.getTarget().getRoot());
-					if (SUPPORTED_DATASETS.contains(handle.getExtensionID())) {
+					if (handle.getExtensionID().startsWith("org.wcs.smart")) { //$NON-NLS-1$
 						//link parameters
 						PropertyHandle odaDataSetParameterProp = handle.getPropertyHandle(OdaDataSetHandle.PARAMETERS_PROP);
 						List<?> items = odaDataSetParameterProp.getItems();

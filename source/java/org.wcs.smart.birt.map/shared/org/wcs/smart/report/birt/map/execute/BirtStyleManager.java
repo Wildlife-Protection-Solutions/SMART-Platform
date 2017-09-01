@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.report.birt.map.ExtensionManager;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
+import org.wcs.smart.report.birt.map.MapLayerInfo;
 
 /**
  * Style manager for BIRT Map layers.
@@ -46,7 +47,7 @@ public enum BirtStyleManager {
 	
 	private volatile List<IBirtLayerStyleProvider> styleProviders = null;
 	
-	public StyleBlackboard getStyle(String extensionId, String queryText, Session session) throws Exception{
+	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session session) throws Exception{
 		if (styleProviders == null){
 			synchronized (INSTANCE) {
 				styleProviders = getProviders();
@@ -54,7 +55,7 @@ public enum BirtStyleManager {
 		}
 		
 		for (IBirtLayerStyleProvider p : styleProviders){
-			StyleBlackboard style = p.getStyle(extensionId, queryText, session);
+			StyleBlackboard style = p.getStyle(extensionId, queryText, layerType, session);
 			if (style != null) return style;
 		}
 		return null;
