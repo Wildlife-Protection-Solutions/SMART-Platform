@@ -100,7 +100,10 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case LOC_DATE:
 				return DateFormat.getDateInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
 			case LOC_GEOMTRY:
-				return ((Geometry)toFormat).toText();
+				if (toFormat instanceof Geometry) {
+					return ((Geometry)toFormat).toText();
+				}
+				return toFormat.toString();
 			case LOC_TIME:
 				return DateFormat.getTimeInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
 			case RECORD_STATUS:
