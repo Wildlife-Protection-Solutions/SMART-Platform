@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +37,9 @@ import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.query.engine.i2.ConnectIntelObservationResultItem;
+import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
+import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -107,6 +111,43 @@ public class CsvExporter {
 					data = new String[cols.size()];
 					for (int i = 0; i < cols.size(); i ++){
 						data[i] = results.getValueAsString(resultItem, cols.get(i), session);
+					}
+					writer.writeNext(data);
+					
+				}
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw ex;
+		}
+		
+	}
+	
+	
+	
+	/**
+	 * Exports advanced query results 
+	 * 
+	 */
+	public void exportResults(IntelObservationQueryResults results, Session session) throws Exception{
+		try (CSVWriter writer = new CSVWriter(
+				new OutputStreamWriter(new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8) ,delimiter)) {
+				
+				List<IQueryColumn> cols = results.getQueryColumns();
+				
+				//headers
+				String[] data = new String[cols.size()];
+				for (int i = 0; i < cols.size(); i ++){
+					data[i] = cols.get(i).getColumnName();
+				}
+				writer.writeNext(data);
+				
+				//get data and write
+				ResultSet rs = results.getResultSet(session);
+				while(rs.next()) {
+					ConnectIntelObservationResultItem resultItem = results.asResultItem(rs,  session);
+					data = new String[cols.size()];
+					for (int i = 0; i < cols.size(); i ++){
+						data[i] = results.getValueAsString(resultItem, cols.get(i), l, session);
 					}
 					writer.writeNext(data);
 					

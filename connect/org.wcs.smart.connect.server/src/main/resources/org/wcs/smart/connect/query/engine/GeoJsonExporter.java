@@ -26,6 +26,7 @@ package org.wcs.smart.connect.query.engine;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,6 +48,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ProjectionProvider;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.query.engine.i2.ConnectIntelObservationResultItem;
+import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
+import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -144,9 +148,67 @@ public class GeoJsonExporter {
 				}
 			}			
 		});
-		
-
 	}
+	
+	
+	/**
+	 * Exports advanced query results 
+	 * 
+	 */
+	public void exportResults(IntelObservationQueryResults results, Session session) throws IOException{
+		geoJsonOutput = new String();
+
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try{
+					FeatureJSON fjson = new FeatureJSON();
+					StringWriter writer = new StringWriter();
+					StringWriter crsWriter = new StringWriter();
+
+					List<IQueryColumn> columns = results.getQueryColumns();
+					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false)); //$NON-NLS-1$
+					ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
+					
+					ResultSet rs = results.getResultSet(session);
+					while(rs.next()) {
+						ConnectIntelObservationResultItem resultItem = results.asResultItem(rs,  session);
+						SimpleFeature sf = results.toFeature(resultItem, columns, session, type);
+						features.add(sf);
+					}
+					//reproject 
+					List<SimpleFeature> reprojected = new ArrayList<SimpleFeature>();
+					if (prjProvider == null || CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, prjProvider.getProjection().getParsedCoordinateReferenceSystem())){
+						reprojected = features;
+					}else{
+						MathTransform transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, prjProvider.getProjection().getParsedCoordinateReferenceSystem(), true);
+						for (SimpleFeature f : features){
+							SimpleFeature copy = SimpleFeatureBuilder.copy(f);
+							copy.setDefaultGeometry(JTS.transform((Geometry)f.getDefaultGeometry(), transform));
+							reprojected.add(copy);
+						}
+						
+					}
+					fjson.writeCRS(prjProvider.getProjection().getParsedCoordinateReferenceSystem(), crsWriter); //write the new projection into JSON
+					SimpleFeatureCollection collection = DataUtilities.collection(reprojected);
+					if(collection != null && collection.getSchema() != null){
+						fjson.writeFeatureCollection(collection, writer);
+						geoJsonOutput = writer.toString();
+						if(crsWriter != null){//add the project to the JSON, the JSON library kinda sucks and has no way to write it in automatically from what I can tell...
+							geoJsonOutput = "{\"crs\":" + crsWriter.toString() + "," + geoJsonOutput.substring(1);  //the substring pulls off the opening bracket of the json. Replaces the { at the start and add the crs value/object into the json    //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					}else{
+						geoJsonOutput = "{}"; //$NON-NLS-1$
+					}
+					
+				}catch (Exception ex){
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					throw new SQLException(ex);
+				}
+			}			
+		});
+	}
+	
 	
 	public String getGeoJsonOutput(){
 		return geoJsonOutput;

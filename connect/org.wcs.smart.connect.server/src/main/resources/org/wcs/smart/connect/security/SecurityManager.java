@@ -134,6 +134,9 @@ public enum SecurityManager {
 		return canAccess(s, username, action, null);
 	}
 	
+	/**
+	 * 
+	 */
 	public boolean canAccessAtLeastOneResouce(Session s, String username, String action){
 		//ensure the user is active
 		if (!isActive(s, username)) return false;

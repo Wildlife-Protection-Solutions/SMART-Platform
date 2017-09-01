@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.hibernate.internal.util.ReflectHelper;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
@@ -51,6 +52,7 @@ import org.wcs.smart.connect.query.engine.er.PsqlErMissionTrackEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErObservationEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErSummaryEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErWaypointEngine;
+import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryEngine;
 import org.wcs.smart.connect.query.engine.intelligence.PsqlRecordQueryIntelligenceEngine;
 import org.wcs.smart.connect.query.engine.intelligence.PsqlSummaryIntelligenceQueryEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsGridEngine;
@@ -76,6 +78,7 @@ import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
@@ -200,7 +203,9 @@ public enum QueryManager {
 		DATE_FILTERS.put(EntityWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
 		
 		DATE_FILTERS.put(IntelligenceRecordQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
-		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});			
+		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
+		
+		DATE_FILTERS.put(IntelRecordObservationQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
 	}
 	
 	/**
@@ -217,6 +222,16 @@ public enum QueryManager {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Find the intelligence query
+	 * @param uuid
+	 * @param session
+	 * @return
+	 */
+	public IntelRecordObservationQuery findIntelQuery(UUID uuid, Session session){
+		return session.get(IntelRecordObservationQuery.class, uuid);
 	}
 	
 	/**
@@ -289,6 +304,34 @@ public enum QueryManager {
 	}
 	
 	/**
+	 * Gets all advanced intelligence queries from the database
+	 * @param session
+	 * @return
+	 */
+	public List<QueryProxy> getAdvanedIntelligenceQueries(Session session, final Locale l){
+		List<QueryProxy> queries = new ArrayList<>();
+		List<IntelRecordObservationQuery> intelQuery = QueryFactory.buildQuery(session, IntelRecordObservationQuery.class).list();
+		for (IntelRecordObservationQuery q : intelQuery) {
+			QueryProxy qp = new QueryProxy(q.getUuid(), q.getName(), Messages.getString("QueryManager.AdvIntlQueryTypeName", l), //$NON-NLS-1$
+						q.getConservationArea().getName(), 
+						q.getConservationArea().getId(),
+						true,
+						q.getConservationArea().getUuid(),
+						q.getConservationArea().getIsCcaa(),
+						IntelRecordObservationQuery.KEY.toLowerCase());
+			queries.add(qp);
+		}
+		Collections.sort(queries, new Comparator<QueryProxy>() {
+
+			@Override
+			public int compare(QueryProxy o1, QueryProxy o2) {
+				Collator textCompare = Collator.getInstance(l);
+				return textCompare.compare(o1.getName(), o2.getName());
+			}
+		});
+		return queries;
+	}
+	/**
 	 * Find the query engine for running the given query.
 	 * 
 	 * @param query
@@ -307,6 +350,18 @@ public enum QueryManager {
 	}
 	
 	/**
+	 * Find the query engine for intel record observation queries
+	 * @param i2query
+	 * @return
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public IntelObservationQueryEngine findQueryEngine(IntelRecordObservationQuery i2query) throws InstantiationException, IllegalAccessException{
+		return new IntelObservationQueryEngine();
+	}
+	
+	
+	/**
 	 *Determines if the given query type has an associated query engine
 	 * 
 	 * @return true if the given query type has an associated query
@@ -316,6 +371,7 @@ public enum QueryManager {
 		for (IQueryEngine e : engines){
 			if (e.canExecute(queryTypeKey)) return true;
 		}
+		if (queryTypeKey.toUpperCase().equals(IntelRecordObservationQuery.KEY)) return true;
 		return false;
 	}
 	

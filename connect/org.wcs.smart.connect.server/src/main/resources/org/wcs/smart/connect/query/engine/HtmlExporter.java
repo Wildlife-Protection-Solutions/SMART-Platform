@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.query.engine;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +33,9 @@ import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.query.engine.i2.ConnectIntelObservationResultItem;
+import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
+import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -85,15 +89,13 @@ public class HtmlExporter {
 	 * @param results
 	 * @param session
 	 */
-	
 	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws Exception{
+		IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
+		List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
+		
 		try{
 			htmlText.append("<table>");
 			htmlText.append("<tr>");
-
-			IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
-			List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
-			
 			//headers
 			for (int i = 0; i < cols.size(); i ++){
 				htmlText.append("<th style='border: solid 1px grey;'>" + cols.get(i).getName() + "</th>");
@@ -109,6 +111,42 @@ public class HtmlExporter {
 				htmlText.append("<tr>");
 				for (int i = 0; i < cols.size(); i ++){
 					htmlText.append("<td style='border: solid 1px grey;'>" + results.getValueAsString(resultItem, cols.get(i), session) + "</td>");
+				}
+				htmlText.append("</tr>");
+			}					
+
+			htmlText.append("</table></body></html>");				
+			
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw ex;
+		}
+	}
+	
+	
+	/**
+	 * Exports advanced query results 
+	 * 
+	 */
+	public void exportResults(IntelObservationQueryResults results, Session session) throws Exception{
+		try{
+			htmlText.append("<table>");
+			htmlText.append("<tr>");
+			//headers
+			List<IQueryColumn> cols = results.getQueryColumns();
+			for (int i = 0; i < cols.size(); i ++){
+				htmlText.append("<th style='border: solid 1px grey;'>" + cols.get(i).getColumnName() + "</th>");
+			}
+			htmlText.append("</tr>");
+			
+			//get data and write
+			ResultSet rs = results.getResultSet(session);
+			while(rs.next()) {
+				ConnectIntelObservationResultItem resultItem = results.asResultItem(rs,  session);
+				
+				htmlText.append("<tr>");
+				for (int i = 0; i < cols.size(); i ++){
+					htmlText.append("<td style='border: solid 1px grey;'>" + results.getValueAsString(resultItem, cols.get(i), l, session) + "</td>");
 				}
 				htmlText.append("</tr>");
 			}					

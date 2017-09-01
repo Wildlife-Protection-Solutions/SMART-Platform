@@ -39,6 +39,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
+import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
@@ -270,6 +271,46 @@ public class QueryColumnUtils {
 				sb.append(ColumnType.TIME_STR.geotoolsType);
 			}else{
 				sb.append(columns.get(i).getType().geotoolsType);
+			}
+		}
+		return sb.toString();
+	}
+	
+	public static String createFeatureDefinitionStringAdvIntel(List<IQueryColumn> columns, boolean supportsTime, boolean forShape){
+		StringBuilder sb = new StringBuilder();
+		HashSet<String> names = new HashSet<String>();
+		for (int i = 0; i < columns.size(); i++){
+			if (!columns.get(i).isVisible()) continue;	//skip non visible columns
+			sb.append(","); //$NON-NLS-1$
+			String name = columns.get(i).getColumnName();
+			name = name.replaceAll(" ", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+			name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			if (forShape && name.length() > 10){
+				name = name.substring(0, 10);
+			}
+			String tempname = name;
+			int cnt = 1;
+			while(names.contains(tempname)){
+				String postfix = "_" + cnt; //$NON-NLS-1$
+				tempname = name + postfix;
+				if ( forShape && tempname.length() > 10){
+					tempname = name.substring(0, 10-postfix.length()) + postfix;
+				}
+				cnt++;
+			}
+			//Name is not a valid attribute name
+			if (tempname.equalsIgnoreCase("Name")){ //$NON-NLS-1$
+				tempname = tempname +"_"; //$NON-NLS-1$
+			}
+			names.add(tempname);
+			sb.append(tempname);
+			sb.append(":"); //$NON-NLS-1$
+			if (columns.get(i).getDataType() == IQueryColumn.Type.TIME && !supportsTime){
+				//time is not supported so convert to string
+				sb.append(ColumnType.TIME_STR.geotoolsType);
+			}else{
+				sb.append(columns.get(i).getDataType().getFeatureType());
 			}
 		}
 		return sb.toString();

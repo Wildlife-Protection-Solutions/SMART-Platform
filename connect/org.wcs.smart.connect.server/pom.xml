@@ -354,6 +354,31 @@
 		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.connect.dataqueue.cybertracker</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.connect.dataqueue.er</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.connect.dataqueue.independentincident</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>		
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.connect.dataqueue.patrol</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>		
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.connect.dataqueue.i2</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.i2</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
@@ -404,11 +429,6 @@
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-data</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-opengis</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
@@ -556,16 +576,12 @@
 		</dependency>
 	-->
 		
-
-		
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.core.commands</artifactId>
-			<version>3.8.1</version>
-			<!-- on desktop this is 3.9.0.v20170530-1048 -->
+			<version>3.8.1</version>	
 		</dependency>
-		
-		
+		<!-- on desktop this is 3.9.0.v20170530-1048 -->
 		
 		<dependency>
     			<groupId>com.ibm.icu</groupId>
@@ -588,5 +604,11 @@
 	    		<version>22.0</version>
 		</dependency>
 
+
+<dependency>
+    <groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+    <artifactId>Tidy</artifactId>
+    <version>1</version>
+</dependency>
 	</dependencies>
 </project>

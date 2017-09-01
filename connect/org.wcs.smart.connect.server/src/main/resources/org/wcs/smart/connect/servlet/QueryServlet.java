@@ -40,6 +40,7 @@ import org.wcs.smart.connect.query.engine.GeoJsonExporter;
 import org.wcs.smart.connect.query.engine.HtmlExporter;
 import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
@@ -79,6 +80,7 @@ public class QueryServlet extends HttpServlet {
 					executableQueryTypes.add(type.toLowerCase());
 				}
 			}
+			executableQueryTypes.add(IntelRecordObservationQuery.KEY.toLowerCase());
 		}catch (Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 		}

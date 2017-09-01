@@ -18,6 +18,15 @@ UPDATE connect.connect_plugin_version SET version = '6.0.0' WHERE plugin_id = 'o
 UPDATE connect.ca_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
 update connect.connect_version set version = '6.0.0';
 
+ALTER TABLE connect.data_queue DROP CONSTRAINT type_chk;
+
+
+CREATE OR REPLACE FUNCTION smart.hkeylength(hkey varchar) RETURNS integer AS $$
+BEGIN
+	RETURN length(hkey) - length(replace(hkey, '.', ''));
+
+END;
+$$LANGUAGE plpgsql;
 
 ALTER TABLE connect.users ALTER COLUMN username TYPE varchar(256);
 

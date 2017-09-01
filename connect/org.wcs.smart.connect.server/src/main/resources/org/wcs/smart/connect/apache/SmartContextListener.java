@@ -32,6 +32,7 @@ import javax.servlet.annotation.WebListener;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.i18n.labels.AdvancedLabelProviderImpl;
 import org.wcs.smart.connect.i18n.labels.EntityLabelProvider;
 import org.wcs.smart.connect.i18n.labels.EntityQueryLabelProvider;
 import org.wcs.smart.connect.i18n.labels.ErLabelProvider;
@@ -129,6 +130,8 @@ public class SmartContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.ILabelProvider.class, new QaLabelProvider());
 		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.patrol.ILabelProvider.class, new QaPatrolLabelProvider());
 		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.incident.ILabelProvider.class, new QaIncidentLabelProvider());
+		
+		SmartContext.INSTANCE.setClass(org.wcs.smart.i2.IIntelligenceLabelProvider.class, new AdvancedLabelProviderImpl());
 		
 		/* filestore configurations */
 		SmartContext.INSTANCE.setTempFilestoreLocation((File)arg0.getServletContext().getAttribute(ServletContext.TEMPDIR));

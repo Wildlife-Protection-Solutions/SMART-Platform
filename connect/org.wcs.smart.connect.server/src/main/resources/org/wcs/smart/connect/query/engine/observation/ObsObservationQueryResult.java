@@ -263,8 +263,6 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet {
 
 	@Override
 	public void setSorting(QueryColumn arg0, int arg1) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
