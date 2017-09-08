@@ -30,6 +30,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Intelligence data source wizard page
@@ -52,8 +53,14 @@ public class IntelligenceDataSourceWizardPage extends DataSourceWizardPage {
 
 	@Override
 	public void createPageCustomControl(Composite arg0) {
-		Label lbl = new Label(arg0, SWT.NONE);
-		lbl.setText(Messages.IntelligenceDataSourceWizardPage_NotConfigurable);
+		if (canAccessDataSource()) {
+			Label lbl = new Label(arg0, SWT.NONE);
+			lbl.setText(Messages.IntelligenceDataSourceWizardPage_NotConfigurable);
+		}else {
+			Label lbl = new Label(arg0, SWT.NONE);
+			lbl.setText("Unauthorized - you are not authorized to use this data source");
+			setPageComplete(false);
+		}
 		setTitle(Messages.IntelligenceDataSourceWizardPage_Title);
 	}
 
@@ -63,6 +70,12 @@ public class IntelligenceDataSourceWizardPage extends DataSourceWizardPage {
 
 	}
 	
+	private boolean canAccessDataSource() {
+		return (IntelSecurityManager.INSTANCE.canViewEntities() || 
+    			IntelSecurityManager.INSTANCE.canViewRecords() ||
+    			IntelSecurityManager.INSTANCE.canViewQueries());
+	}
+	
 	@Override
     protected Runnable createTestConnectionRunnable( final IConnectionProfile profile )
     {
@@ -70,7 +83,12 @@ public class IntelligenceDataSourceWizardPage extends DataSourceWizardPage {
         {
             public void run() 
             {
-                PingJob.PingUIJob.showTestConnectionMessage( getShell(), null );
+            	if (canAccessDataSource()) {
+            		PingJob.PingUIJob.showTestConnectionMessage( getShell(), null );	
+            	}else {
+            		PingJob.PingUIJob.showTestConnectionMessage( getShell(), new Exception("Unauthorized - You are unathorized to access the intelligence data source") );	
+            	}
+                
             }
         };
     }

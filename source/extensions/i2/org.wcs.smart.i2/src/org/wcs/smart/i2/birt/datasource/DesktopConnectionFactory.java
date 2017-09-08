@@ -21,19 +21,11 @@
  */
 package org.wcs.smart.i2.birt.datasource;
 
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
-
 public class DesktopConnectionFactory implements IConnectionFactory{
 
 	@Override
 	public AbstractIntelBirtConnection createConnection() {
 		return new DesktopIntelBirtConnection();
-	}
-
-	@Override
-	public Session openSession() {
-		return HibernateManager.openSession();
 	}
 
 }

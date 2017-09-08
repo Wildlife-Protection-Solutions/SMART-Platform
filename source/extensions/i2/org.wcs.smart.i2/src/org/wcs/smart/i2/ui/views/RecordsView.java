@@ -733,9 +733,9 @@ public class RecordsView {
 					lstInProgress.getControl().setEnabled(false);
 					lstNewRecords.getControl().setEnabled(false);
 					
-					lstAllRecords.setInput(new String[] {"You do not have permission to view records"});
-					lstInProgress.setInput(new String[] {"You do not have permission to view records"});
-					lstNewRecords.setInput(new String[] {"You do not have permission to view records"});
+					lstAllRecords.setInput(new String[] {Messages.RecordsView_unauthorized});
+					lstInProgress.setInput(new String[] {Messages.RecordsView_unauthorized});
+					lstNewRecords.setInput(new String[] {Messages.RecordsView_unauthorized});
 				});
 				return Status.OK_STATUS;
 			}

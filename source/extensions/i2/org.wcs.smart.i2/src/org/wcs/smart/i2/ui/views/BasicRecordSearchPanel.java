@@ -236,7 +236,7 @@ public class BasicRecordSearchPanel extends Composite {
 		
 		tblResults.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
-			tblResults.setInput(new String[] {"You do not have permission to view records"});
+			tblResults.setInput(new String[] {Messages.BasicRecordSearchPanel_unauthorized});
 		}
 		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true);
 		tblResults.getControl().addListener(SWT.MeasureItem, new Listener() {

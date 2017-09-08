@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.i2.birt.datasource;
 
-import org.hibernate.Session;
-
 /**
  * Creates a BIRT data source connection.
  * 
@@ -31,11 +29,10 @@ import org.hibernate.Session;
  */
 public interface IConnectionFactory {
 
-	public AbstractIntelBirtConnection createConnection();
-	
 	/**
-	 * Opens a new hibernate session; the user is responsible for closing it when done
+	 * Create the BIRT Connection
 	 * @return
 	 */
-	public Session openSession();
+	public AbstractIntelBirtConnection createConnection();
+
 }

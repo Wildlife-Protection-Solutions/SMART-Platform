@@ -33,12 +33,10 @@ import java.util.UUID;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.FilterQueryColumn;
@@ -133,49 +131,46 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	}
 	
 	
-	private UUID asUuid(ScrollableResults sc, int index){
-		Object x = sc.get(index);
+	private UUID asUuid(Object x){
 		if (x == null) return null;
 		if (x instanceof UUID) return (UUID) x;
 		if (x instanceof byte[]) return UuidUtils.byteToUUID((byte[])x);
 		return null;
 	}
 	
-	private Geometry asGeometry(ScrollableResults sc, int index) throws Exception{
-		Object x = sc.get(index);
+	private Geometry asGeometry(Object x) throws Exception{
 		if (x == null) return null;
 		if (!(x instanceof Blob)) return null;
-		
 		Blob b = (Blob)x;
 		WKBReader reader = new WKBReader();
 		return reader.read(b.getBytes(1l, (int) b.length()));
 	}
 	
 	@Override
-	public IResultItem asResultItem(ScrollableResults sc, Session session){
+	public IResultItem asResultItem(Object[] rowData, Session session){
 		
 		IntelObservationResultItem item = new IntelObservationResultItem();
 		
-		item.setObservationUuid(asUuid(sc,columnNameToIndex.get("observation_uuid"))); //$NON-NLS-1$
-		item.setLocationUuid(asUuid(sc,columnNameToIndex.get("location_uuid"))); //$NON-NLS-1$
-		item.setRecordUuid(asUuid(sc,columnNameToIndex.get("record_uuid"))); //$NON-NLS-1$
-		item.setRecordStatus((String)sc.get(columnNameToIndex.get("record_status"))); //$NON-NLS-1$
-		item.setRecordTitle((String)sc.get(columnNameToIndex.get("record_title"))); //$NON-NLS-1$
+		item.setObservationUuid(asUuid(rowData[columnNameToIndex.get("observation_uuid")])); //$NON-NLS-1$
+		item.setLocationUuid(asUuid(rowData[columnNameToIndex.get("location_uuid")])); //$NON-NLS-1$
+		item.setRecordUuid(asUuid(rowData[columnNameToIndex.get("record_uuid")])); //$NON-NLS-1$
+		item.setRecordStatus((String)rowData[columnNameToIndex.get("record_status")]); //$NON-NLS-1$
+		item.setRecordTitle((String)rowData[columnNameToIndex.get("record_title")]); //$NON-NLS-1$
 		
-		item.setLocationId((String)sc.get(columnNameToIndex.get("loc_id"))); //$NON-NLS-1$
-		item.setLocationDate((Timestamp)sc.get(columnNameToIndex.get("loc_datetime"))); //$NON-NLS-1$
-		item.setLocationComment((String)sc.get(columnNameToIndex.get("loc_comment"))); //$NON-NLS-1$
+		item.setLocationId((String)rowData[columnNameToIndex.get("loc_id")]); //$NON-NLS-1$
+		item.setLocationDate((Timestamp)rowData[columnNameToIndex.get("loc_datetime")]); //$NON-NLS-1$
+		item.setLocationComment((String)rowData[columnNameToIndex.get("loc_comment")]); //$NON-NLS-1$
 		try{
-			item.setGeometry(asGeometry(sc, columnNameToIndex.get("loc_geometry")), null); //$NON-NLS-1$
+			item.setGeometry(asGeometry(rowData[columnNameToIndex.get("loc_geometry")]), null); //$NON-NLS-1$
 		}catch (Exception ex){
 			ex.printStackTrace();
 			item.setGeometry(null, ex);
 		}
-		item.setCategoryUuid(asUuid(sc,columnNameToIndex.get("category_uuid"))); //$NON-NLS-1$
+		item.setCategoryUuid(asUuid(rowData[columnNameToIndex.get("category_uuid")])); //$NON-NLS-1$
 		
 		List<String> categories = new ArrayList<String>();
 		for (int i = 0; i < categoryCnt; i ++){
-			Object x = sc.get(columnNameToIndex.get("category_" + i)); //$NON-NLS-1$
+			Object x = rowData[columnNameToIndex.get("category_" + i)]; //$NON-NLS-1$
 			if (x != null) categories.add((String)x);
 		}
 		item.setCategoryLabels(categories.toArray(new String[categories.size()]));
@@ -199,7 +194,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		//filter columns
 		for (Entry<IQueryFilter, String> filterColumn : filterToColumn.entrySet()){
 			boolean value = false;
-			if (sc.get(columnNameToIndex.get(filterColumn.getValue())) != null){//filter columns only contain true and null values
+			if (rowData[columnNameToIndex.get(filterColumn.getValue())] != null){//filter columns only contain true and null values
 				value = true;
 			};
 			item.addFilterValue(filterColumn.getKey(), value);
@@ -210,19 +205,18 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 	
 	
 	@Override
-	public List<? extends IResultItem> getData(int offset, int pageSize) {
+	public List<? extends IResultItem> getData(int offset, int pageSize, Session session) {
 		final List<IResultItem> items = new ArrayList<>();
-		try(Session session = SmartContext.INSTANCE.getClass(IConnectionFactory.class).openSession()){
-			String sortSql = configureSort(session);
-			String sql = "SELECT * FROM " + resultsTable + sortSql; //$NON-NLS-1$
-			SqlGenerator.logString(sql);
+		
+		String sortSql = configureSort(session);
+		String sql = "SELECT * FROM " + resultsTable + sortSql; //$NON-NLS-1$
+		SqlGenerator.logString(sql);
 			
-			try(ScrollableResults sc = session.createNativeQuery(sql).scroll()){
-				if (!sc.setRowNumber(offset)) return items;
-				for (int i = 0; i <= pageSize; i ++){
-					items.add(asResultItem(sc, session));
-					if (!sc.next()) break; //nothing else to get
-				}
+		try(ScrollableResults sc = session.createNativeQuery(sql).scroll()){
+			if (!sc.setRowNumber(offset)) return items;
+			for (int i = 0; i <= pageSize; i ++){
+				items.add(asResultItem(sc.get(), session));
+				if (!sc.next()) break; //nothing else to get
 			}
 		}
 		return items;

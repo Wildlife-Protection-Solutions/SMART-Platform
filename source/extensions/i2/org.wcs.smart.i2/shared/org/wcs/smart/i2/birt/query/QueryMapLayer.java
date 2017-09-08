@@ -30,40 +30,14 @@ import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.opengis.style.AnchorPoint;
-import org.opengis.style.ChannelSelection;
-import org.opengis.style.ColorMap;
-import org.opengis.style.ColorReplacement;
-import org.opengis.style.ContrastEnhancement;
-import org.opengis.style.ContrastMethod;
-import org.opengis.style.Description;
-import org.opengis.style.Displacement;
-import org.opengis.style.ExtensionSymbolizer;
-import org.opengis.style.ExternalGraphic;
-import org.opengis.style.ExternalMark;
 import org.opengis.style.FeatureTypeStyle;
-import org.opengis.style.Fill;
-import org.opengis.style.Font;
-import org.opengis.style.Graphic;
-import org.opengis.style.GraphicFill;
-import org.opengis.style.GraphicLegend;
-import org.opengis.style.GraphicStroke;
-import org.opengis.style.Halo;
-import org.opengis.style.LinePlacement;
 import org.opengis.style.LineSymbolizer;
-import org.opengis.style.Mark;
-import org.opengis.style.PointPlacement;
 import org.opengis.style.PointSymbolizer;
 import org.opengis.style.PolygonSymbolizer;
 import org.opengis.style.RasterSymbolizer;
 import org.opengis.style.Rule;
-import org.opengis.style.SelectedChannelType;
-import org.opengis.style.ShadedRelief;
-import org.opengis.style.Stroke;
 import org.opengis.style.Style;
-import org.opengis.style.StyleVisitor;
 import org.opengis.style.Symbolizer;
-import org.opengis.style.TextSymbolizer;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
@@ -81,6 +55,9 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class QueryMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvider { 
 
+	//SLD Layer style 
+	private static final String SLDID = "org.locationtech.udig.style.sld"; //$NON-NLS-1$
+	
 	public QueryMapLayer() {
 	}
 
@@ -110,15 +87,14 @@ public class QueryMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvi
 		}
 		return null;
 	}
-
-	String SLDID = "org.locationtech.udig.style.sld";
-//	@Override
+	
+	@Override
 	public StyleBlackboard getStyle(String extensionId, String queryText, MapLayerInfo.LayerType layerType, Session s) {
 		if (!extensionId.equals(IntelQueryDataset.DATASET_TYPE)) return null;
 	
 		UUID uuid = null;
 		try {
-			uuid = UuidUtils.stringToUuid( queryText.split(":") [1]);
+			uuid = UuidUtils.stringToUuid( queryText.split(IntelQueryDataset.QUERY_DEF_SEP) [1]);
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
@@ -137,6 +113,8 @@ public class QueryMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvi
 			return null;
 		}
 		if (styles == null) return null;
+		
+		//search for style with correct symbolizer
 		for (StyleBlackboard sb : styles.values()) {
 			Style ss = (Style) sb.get(SLDID);
 			for (FeatureTypeStyle fts: ss.featureTypeStyles()) {

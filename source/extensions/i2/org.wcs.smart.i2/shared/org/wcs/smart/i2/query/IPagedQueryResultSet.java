@@ -68,7 +68,7 @@ public interface IPagedQueryResultSet {
 	 * @param pageSize
 	 * @return
 	 */
-	public List<? extends IResultItem> getData(int offset, int pageSize);
+	public List<? extends IResultItem> getData(int offset, int pageSize, Session session);
 	
 	
 	/**
@@ -78,7 +78,7 @@ public interface IPagedQueryResultSet {
 	 * @param session
 	 * @return
 	 */
-	public IResultItem asResultItem(ScrollableResults sc, Session session);
+	public IResultItem asResultItem(Object[] rowData, Session session);
 
 	/**
 	 * 

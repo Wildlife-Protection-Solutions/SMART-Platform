@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,30 +19,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.datasource.ui;
+package org.wcs.smart.i2.birt;
 
-import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
+import java.util.Properties;
+
+import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSourceEditorPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IWorkbenchPropertyPage;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
- * Record locations wizard page
- * 
+ * Advanced intelligence data source property page 
+ *
  * @author Emily
  *
  */
-public class IntelRecordLocationWizardPage extends IntelRecordDetailsWizardPage {
+public class AdvancedIntelDataSourcePropertyPage extends DataSourceEditorPage implements IWorkbenchPropertyPage {
 
-
-	public IntelRecordLocationWizardPage(String pageName) {
-		super(pageName);
+	public AdvancedIntelDataSourcePropertyPage() {
+		setTitle(Messages.AdvancedIntelDataSourcePropertyPage_title);
 	}
 
 	@Override
-	public String getDatasetType() {
-		return RecordLocationDataset.DATASET_TYPE;
+	protected Control createContents(Composite parent) {
+		Label lbl = new Label(parent, SWT.NONE);
+		lbl.setText(Messages.AdvancedIntelDataSourcePropertyPage_notconfigurable);
+		return parent;
 	}
 
 	@Override
-	public String getName(){
-		return "Record Locations";
+	protected void createAndInitCustomControl(Composite parent, Properties profileProps) {
+	
+		
 	}
+
+	@Override
+	public Properties collectCustomProperties(Properties dataSourceProps) {
+		return dataSourceProps;
+	}
+
 }

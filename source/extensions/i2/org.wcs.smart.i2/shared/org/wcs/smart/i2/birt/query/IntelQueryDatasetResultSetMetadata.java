@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.birt.query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
@@ -38,14 +39,25 @@ import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	
 	private List<IQueryColumn> columns;
+	private List<String> names;
 	
 	public IntelQueryDatasetResultSetMetadata(IntelQueryDataset dataset) throws OdaException{
 		IntelRecordObservationQuery query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
 		if (query == null) {
-			throw new OdaException("Intelligence Record Observtion Query not found");
+			throw new OdaException("Intelligence Record Observtion Query not found"); //$NON-NLS-1$
 		}
 		try {
 			columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
+			names = new ArrayList<>(columns.size());
+			//ensure names are unique
+			for(IQueryColumn c: columns) {
+				String name = c.getColumnName();
+				int i = 0;
+				while(names.contains(name)) {
+					name += name + " " + i++; //$NON-NLS-1$
+				}
+				names.add(name);
+			}
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
@@ -59,13 +71,13 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	public IQueryColumn getQueryColumn(int index) {
 		return columns.get(index);
 	}
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnCount()
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return columns.size();
-		
+		return columns.size();		
 	}
 
 	/**
@@ -81,7 +93,7 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return columns.get(index-1).getColumnName();
+		return names.get(index-1);
 	}
 
 	/**
@@ -89,7 +101,7 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		return columns.get(index-1).getKey();
+		return  columns.get(index-1).getKey();
 	}
 
 	/**

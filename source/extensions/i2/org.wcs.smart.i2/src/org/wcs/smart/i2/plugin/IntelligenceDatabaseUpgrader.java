@@ -87,7 +87,16 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.i_record ADD COLUMN primary_date timestamp", //$NON-NLS-1$
 				"update smart.i_record set primary_date = (select a.maxdatetime from (select record_uuid, max(datetime) as maxdatetime from smart.I_LOCATION group by record_uuid) a where a.record_uuid = smart.i_record.uuid )", //$NON-NLS-1$
 				"update smart.i_record set primary_date = date_created where primary_date is null", //$NON-NLS-1$
-				"alter table smart.i_record ALTER COLUMN primary_date NOT NULL" //$NON-NLS-1$
+				"alter table smart.i_record ALTER COLUMN primary_date NOT NULL", //$NON-NLS-1$
+				//unique constraint for attribute key id
+				"alter table smart.i_attribute add constraint ca_attribute_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+				//unique constraint for entity type id
+				"alter table smart.i_entity_type add constraint ca_entity_type_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+				//unique relationship types
+				"alter table smart.i_relationship_type add constraint ca_relationship_type_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+				"alter table smart.i_relationship_group add constraint ca_relationship_group_type_key_unq unique(ca_uuid, keyid)", //$NON-NLS-1$
+				//record source type key
+				"alter table smart.i_recordsource add constraint ca_recordsource_type_key_unq unique(ca_uuid, keyid)" //$NON-NLS-1$
 		};
 		for (String s : sql){
 			session.createNativeQuery(s).executeUpdate();

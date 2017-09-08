@@ -96,14 +96,17 @@ public class ReportView implements IReportListener{
 					options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 					options.setOutputFormat(HTMLRenderOption.HTML);
 					
-					Session s = HibernateManager.openSession();
-					try{
-						SmartReportRunner.INSTANCE.runReport(report,
+					try(Session s = HibernateManager.openSession()){
+						try {
+							s.beginTransaction();
+						
+							SmartReportRunner.INSTANCE.runReport(report,
 								SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 								ReportEngineManager.getBirtReportEngine(), 
 								options, s, selectedParams);
-					}finally{
-						if (s.isOpen())s.close();
+						}finally {
+							s.getTransaction().rollback();
+						}
 					}
 					
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;

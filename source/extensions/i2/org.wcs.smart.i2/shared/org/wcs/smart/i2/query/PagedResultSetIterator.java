@@ -23,6 +23,8 @@ package org.wcs.smart.i2.query;
 
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.internal.ScrollableResultsImpl;
+import org.hibernate.query.NativeQuery;
 
 /**
  * Query result set iterator
@@ -32,11 +34,10 @@ import org.hibernate.Session;
  */
 public class PagedResultSetIterator {
 
-	private IPagedQueryResultSet results;
+	protected IPagedQueryResultSet results;
+	protected Session session;
 	
-	private Session session;
 	private ScrollableResults resultSet;
-	
 	
 	/**
 	 * results can be null if results not computed yest
@@ -46,18 +47,21 @@ public class PagedResultSetIterator {
 	public PagedResultSetIterator(IPagedQueryResultSet results, Session session){
 		this.results = results;
 		this.session = session;
-		if (results != null){
-			resultSet = session.createNativeQuery("SELECT * FROM " + results.getQueryDataTable()).scroll(); //$NON-NLS-1$
-		}
+	}
+	
+	protected void createResultSet() {
+		this.resultSet = session.createNativeQuery("SELECT * FROM " + results.getQueryDataTable()).scroll(); //$NON-NLS-1$
 	}
 	
 	public boolean hasNext(){
 		if (results == null) return false;
+		if (resultSet == null) createResultSet();
 		return resultSet.next();
 	}
 	
 	public IResultItem next(){
-		return results.asResultItem(resultSet, session);
+		Object[] data = resultSet.get();
+		return results.asResultItem(data, session);
 	}
 	
 	public void close() {

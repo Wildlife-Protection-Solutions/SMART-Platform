@@ -95,7 +95,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		
 		int index1 = pmetadata.findParameterIndex(DataSourceParameter.START_DATE.getName());
 		int index2 = pmetadata.findParameterIndex(DataSourceParameter.END_DATE.getName());
-		if (index1 > 0 && index2 > 0){
+		if (index1 > 0 && index2 > 0 && parameters.get(index1) != null && parameters.get(index2) != null){
 			Date startDate = (Date) parameters.get(index1);
 			Calendar start = Calendar.getInstance();
 			start.setTime(startDate);

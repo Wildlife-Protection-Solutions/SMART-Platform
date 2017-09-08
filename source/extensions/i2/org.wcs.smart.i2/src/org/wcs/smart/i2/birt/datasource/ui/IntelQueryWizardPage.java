@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -38,13 +39,15 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.query.IntelQueryDataset;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.UuidUtils;
 
 public class IntelQueryWizardPage extends DataSetWizardPage {
 
 	private TableViewer lstQueries;
-	private String message = "Select Query to Add";
+	private String message = Messages.IntelQueryWizardPage_message;
 	
 	/**
 	 * Constructor
@@ -90,6 +93,14 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 
 		composite.setLayoutData(gridData);
 
+		if (!IntelSecurityManager.INSTANCE.canViewQueries()) {
+			setPageComplete(false);
+			Label l = new Label(composite, SWT.NONE);
+			l.setText(Messages.IntelQueryWizardPage_unauthorized);
+			setControl(composite);
+			return composite;
+		}
+		
 		lstQueries = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		lstQueries.setLabelProvider(new LabelProvider() {
 			public String getText(Object x) {
@@ -143,7 +154,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 			IntelRecordObservationQuery selection = null;
 			
 			for(IntelRecordObservationQuery t : types){
-				String queryKey = IntelRecordObservationQuery.KEY +":"+UuidUtils.uuidToString(t.getUuid());
+				String queryKey = IntelRecordObservationQuery.KEY + IntelQueryDataset.QUERY_DEF_SEP + UuidUtils.uuidToString(t.getUuid());
 				if(queryKey.equals(queryText)){
 					selection = t;
 					break;
@@ -208,6 +219,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 	 * blank text. Set page message accordingly.
 	 */
 	private void validateData() {
+		if (lstQueries == null) return;
 		boolean isValid = true;
 		if (lstQueries.getSelection().isEmpty()) {
 			isValid = false;
@@ -222,7 +234,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 		if (isValid) {
 			setMessage(message);
 		} else {
-			setMessage("Must select a query.", ERROR);
+			setMessage(Messages.IntelQueryWizardPage_queryRequired, ERROR);
 		}
 
 		setPageComplete(isValid);
@@ -234,12 +246,11 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 	 */
 	private boolean hasValidData() {
 		validateData();
-
 		return canLeave();
 	}
 
 	private String getQueryText() {
-		return IntelRecordObservationQuery.KEY + ":" + UuidUtils.uuidToString(getSelectedEntityType().getUuid());
+		return IntelRecordObservationQuery.KEY + IntelQueryDataset.QUERY_DEF_SEP + UuidUtils.uuidToString(getSelectedEntityType().getUuid());
 	}
 	/**
 	 * Saves the user-defined value in this page, and updates the specified
@@ -248,7 +259,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 	private void savePage(DataSetDesign dataSetDesign) {
 		// save user-defined query text
 		
-		dataSetDesign.setQueryText(getQueryText()); //$NON-NLS-1$
+		dataSetDesign.setQueryText(getQueryText());
 
 		// obtain query's current runtime metadata, and maps it to the
 		// dataSetDesign
@@ -398,7 +409,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 
 			for (ParameterDefinition param : paramDesign
 					.getParameterDefinitions()) {
-				param.setDefaultScalarValue("TODO: Link to Report Parameter");
+				param.setDefaultScalarValue(Messages.IntelQueryWizardPage_linktoreport);
 			}
 		}
 	}

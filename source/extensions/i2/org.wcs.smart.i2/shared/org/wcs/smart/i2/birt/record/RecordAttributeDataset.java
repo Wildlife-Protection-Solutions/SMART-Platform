@@ -35,6 +35,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 
 /**
  * Intelligence Record attributes dataset
@@ -60,6 +61,9 @@ public class RecordAttributeDataset implements IQuery {
 	}
 	@Override
 	public void prepare(String queryText) throws OdaException {
+		if (!connection.hasPermission(Permission.RECORD)) {
+			throw new OdaException("Unauthorized.  You do not have permission to access intelligence record datasets"); //$NON-NLS-1$
+		}
 	}
 
 	@Override

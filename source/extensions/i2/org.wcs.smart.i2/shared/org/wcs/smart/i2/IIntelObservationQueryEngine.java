@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,30 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.datasource.ui;
+package org.wcs.smart.i2;
 
-import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
+import java.util.HashMap;
+
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
 
 /**
- * Record locations wizard page
+ * Intelligence Observation query engine.
  * 
  * @author Emily
  *
  */
-public class IntelRecordLocationWizardPage extends IntelRecordDetailsWizardPage {
+public interface IIntelObservationQueryEngine {
 
-
-	public IntelRecordLocationWizardPage(String pageName) {
-		super(pageName);
+	public static IIntelObservationQueryEngine createEngine() {
+		try {
+			return SmartContext.INSTANCE.getClass(IIntelObservationQueryEngine.class).getClass().newInstance();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
+	
+	public IPagedQueryResultSet executeQuery(IntelRecordObservationQuery query,  HashMap<String, Object> parameters) throws Exception;
 
-	@Override
-	public String getDatasetType() {
-		return RecordLocationDataset.DATASET_TYPE;
-	}
-
-	@Override
-	public String getName(){
-		return "Record Locations";
-	}
 }

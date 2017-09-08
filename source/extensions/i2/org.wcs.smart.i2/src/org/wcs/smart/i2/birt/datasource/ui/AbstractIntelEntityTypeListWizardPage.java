@@ -50,6 +50,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -60,6 +61,7 @@ import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 
 /**
@@ -119,7 +121,14 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 				| GridData.VERTICAL_ALIGN_FILL);
 
 		composite.setLayoutData(gridData);
-
+		
+		if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
+			setPageComplete(false);
+			Label l = new Label(composite, SWT.NONE);
+			l.setText(Messages.AbstractIntelEntityTypeListWizardPage_unauthorized);
+			return composite;
+		}
+		
 		lstEntityTypes = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		lstEntityTypes.setLabelProvider(new EntityTypeLabelProvider());
 		lstEntityTypes.setContentProvider(ArrayContentProvider.getInstance());
@@ -230,6 +239,7 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 	 * blank text. Set page message accordingly.
 	 */
 	private void validateData() {
+		if (lstEntityTypes == null) return ;
 		boolean isValid = true;
 		if (lstEntityTypes.getSelection().isEmpty()) {
 			isValid = false;

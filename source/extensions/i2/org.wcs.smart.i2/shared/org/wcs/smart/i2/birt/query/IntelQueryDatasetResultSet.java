@@ -38,12 +38,12 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.i2.IIntelObservationQueryEngine;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
-import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 
 /**
  * Intelligence record attribute dataset results
@@ -76,7 +76,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 		
 		IntelRecordObservationQuery query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
 		if (query == null) {
-			throw new OdaException("Intelligence Record Observtion Query not found");
+			throw new OdaException("Intelligence Record Observtion Query not found"); //$NON-NLS-1$
 		}
 		
 		int sindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.START_DATE.getName());
@@ -87,7 +87,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 			dfilter[1] = (Date) parameters.get(eindex);
 		}
 		
-		IntelObservationQueryEngine engine = new IntelObservationQueryEngine();
+		IIntelObservationQueryEngine engine = IIntelObservationQueryEngine.createEngine();
 		HashMap<String, Object> eparameters = new HashMap<>();
 		eparameters.put(Session.class.getName(), dataset.getConnection().getSession());
 		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
@@ -151,11 +151,11 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	public void close() throws OdaException {
 		iterator.close();
 		try {
-			dataset.getConnection().getSession().beginTransaction();
+//			dataset.getConnection().getSession().beginTransaction();
 			results.dispose(dataset.getConnection().getSession());
-			dataset.getConnection().getSession().getTransaction().commit();
+//			dataset.getConnection().getSession().getTransaction().commit();
 		} catch (SQLException e) {
-			dataset.getConnection().getSession().getTransaction().rollback();
+//			dataset.getConnection().getSession().getTransaction().rollback();
 			throw new OdaException(e);
 		}
 		results = null;

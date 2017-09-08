@@ -34,6 +34,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IResultItem;
@@ -145,8 +147,12 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (input == null){ return Status.OK_STATUS; }
-			final List<? extends IResultItem> data = input.getData(from, pageSize);
+			List<? extends IResultItem> ldata = null;
+			try(Session s = HibernateManager.openSession()){
+				ldata = input.getData(from, pageSize, s);
+			}
 			if (viewer.getControl().isDisposed()) return Status.CANCEL_STATUS;
+			final List<? extends IResultItem> data = ldata;
 			viewer.getControl().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {

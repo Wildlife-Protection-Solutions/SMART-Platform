@@ -28,6 +28,7 @@ import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * BIRT Connection for intelligence datasets 
@@ -62,6 +63,16 @@ public class DesktopIntelBirtConnection extends AbstractIntelBirtConnection {
 		return SmartDB.getConservationAreaConfiguration().getConservationAreas();
 	}
 
-	
+	public boolean hasPermission(Permission permission) {
+		switch(permission) {
+		case ENTITY:
+			return IntelSecurityManager.INSTANCE.canViewEntities();
+		case QUERY:
+			return IntelSecurityManager.INSTANCE.canViewQueries();
+		case RECORD:
+			return IntelSecurityManager.INSTANCE.canViewRecords();
+		}
+		return false;
+	}
 
 }

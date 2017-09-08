@@ -23,10 +23,13 @@ package org.wcs.smart.i2.birt.datasource.ui;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Intelligence record attributes.  A wizard page with no options. 
@@ -47,9 +50,24 @@ public class IntelRecordAttributesWizardPage extends IntelRecordDetailsWizardPag
 
 	@Override
 	public void createPageCustomControl(Composite parent) {
-		Label l = new Label(parent, SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
+		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
+		composite.setLayoutData(gridData);
+		
+		setMessage(Messages.IntelRecordAttributesWizardPage_message);
+		
+		if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
+			setPageComplete(false);
+			Label l = new Label(composite, SWT.NONE);
+			l.setText(Messages.IntelRecordAttributesWizardPage_unauthorized);
+			setControl(composite);
+			return;
+		}
+		
+		Label l = new Label(composite, SWT.NONE);
 		l.setText(Messages.IntelRecordAttributesWizardPage_NotConfigurable);
-		setControl(parent);
+		setControl(composite);
 	}
 
 	@Override

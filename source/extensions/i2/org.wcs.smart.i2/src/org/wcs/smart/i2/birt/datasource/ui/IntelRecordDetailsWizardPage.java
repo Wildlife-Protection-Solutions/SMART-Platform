@@ -37,12 +37,15 @@ import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSess
 import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.record.RecordDataset;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Intelligence record wizard page.  A wizard page with no options. 
@@ -63,9 +66,25 @@ public class IntelRecordDetailsWizardPage extends DataSetWizardPage {
 
 	@Override
 	public void createPageCustomControl(Composite parent) {
-		Label l = new Label(parent, SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
+		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL
+				| GridData.VERTICAL_ALIGN_FILL);
+		composite.setLayoutData(gridData);
+		
+		setMessage(Messages.IntelRecordDetailsWizardPage_message);
+
+		if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
+			setPageComplete(false);
+			Label l = new Label(composite, SWT.NONE);
+			l.setText(Messages.IntelRecordDetailsWizardPage_unauthorized);
+			setControl(composite);
+			return;
+		}
+		
+		Label l = new Label(composite, SWT.NONE);
 		l.setText(Messages.IntelRecordDetailsWizardPage_NoConfOptions);
-		setControl(parent);
+		setControl(composite);
 	}
 
 	/**
@@ -81,7 +100,7 @@ public class IntelRecordDetailsWizardPage extends DataSetWizardPage {
 		savePage(design);
 		return design;
 	}
-	
+
 	
 	/**
 	 * Saves the user-defined value in this page, and updates the specified

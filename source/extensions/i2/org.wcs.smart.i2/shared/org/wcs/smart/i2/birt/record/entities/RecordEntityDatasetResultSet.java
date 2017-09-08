@@ -77,7 +77,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 		this.metadata = metadata;
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		String hql = "SELECT ir FROM IntelEntityRecord ir join ir.id.record r WHERE r.conservationArea IN (:ca )"; //$NON-NLS-1$
-		if (index >= 0){
+		if (index >= 0  && parameters.get(index) != null){
 			hql += " AND r.uuid = :record"; //$NON-NLS-1$
 		}
 		Query<IntelEntityRecord> query = connection.getSession().createQuery(hql, IntelEntityRecord.class);

@@ -79,6 +79,11 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	 */
 	public static final String PROJECTION_PROVIDER_CONTEXT_VAR = "org.wcs.smart.report.crs"; //$NON-NLS-1$
 	
+	public static enum Permission{
+		ENTITY,
+		RECORD,
+		QUERY,
+	}
 	
 	protected boolean m_isOpen = false;
 	protected Session localSession;
@@ -112,13 +117,29 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 		m_isOpen = false;
 	}
 
-	
+	/**
+	 * Find/open hibernate database session
+	 */
 	public abstract void openSession();
 	
+	/**
+	 * Close hibernate database session
+	 */
 	public abstract void closeSession();
 
+	/**
+	 * Get all conservation areas that should be used in the queries 
+	 * 
+	 * @return
+	 */
 	public abstract Collection<ConservationArea> getConservationAreas();
 
+	/**
+	 * Returns of the current user has the given permission
+	 * @param permission
+	 * @return true if user has access to permission; false otherwise
+	 */
+	public abstract boolean hasPermission(Permission permission);
 	
 	@SuppressWarnings("unchecked")
 	@Override

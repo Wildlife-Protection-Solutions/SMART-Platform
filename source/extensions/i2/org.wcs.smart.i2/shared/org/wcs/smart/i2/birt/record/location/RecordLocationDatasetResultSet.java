@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -63,7 +64,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 	
 	private ScrollableResults results;
 	private RecordLocationDatasetResultSetMetadata metadata;
-//	private IntelBirtConnection connection;
+	private Locale l;
 	
 	/**
 	 * Creates a new summary results set
@@ -77,7 +78,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 			AbstractIntelBirtConnection connection, 
 			HashMap<Integer, Object> parameters,
 			RecordParameterMetadata pmetadata) {
-
+		this.l = connection.getCurrentLocale();
 		this.metadata = metadata;
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		
@@ -165,7 +166,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelLocation i = (IntelLocation) ((Object[])currentItem)[0];
-		return RecordLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		return RecordLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, l);
 	}
 
 	/**

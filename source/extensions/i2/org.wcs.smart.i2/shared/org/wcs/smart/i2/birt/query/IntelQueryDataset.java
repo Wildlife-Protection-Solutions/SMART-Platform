@@ -36,6 +36,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -57,6 +58,8 @@ public class IntelQueryDataset implements IQuery {
 	
 	private String queryType;
 	private UUID queryUuid;
+
+	public static final String QUERY_DEF_SEP = ":"; //$NON-NLS-1$
 	
 	public IntelQueryDataset(AbstractIntelBirtConnection connection){
 		this.connection = connection;
@@ -65,7 +68,10 @@ public class IntelQueryDataset implements IQuery {
 	}
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		String[] bits = queryText.split(":"); //$NON-NLS-1$
+		if (!connection.hasPermission(Permission.QUERY)) {
+			throw new OdaException("Unauthorized.  You do not have permission to access intelligence query datasets"); //$NON-NLS-1$
+		}
+		String[] bits = queryText.split(IntelQueryDataset.QUERY_DEF_SEP);
 		String queryType = bits[0];
 		UUID uuid = null;
 		if (bits.length >= 2 &&  !bits[1].isEmpty()){

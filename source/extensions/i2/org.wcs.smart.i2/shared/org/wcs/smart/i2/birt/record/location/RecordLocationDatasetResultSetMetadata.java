@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.birt.record.location;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,7 +63,7 @@ public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaDat
 		public String getId(){
 			return this.id;
 		}
-		public Object getValue(IntelLocation location) {
+		public Object getValue(IntelLocation location, Locale l) {
 			if (this == RECORD_UUID) return location.getRecord().getUuid();
 			if (this == ID) return location.getId();
 			if (this == GEOM) {
@@ -75,7 +76,10 @@ public class RecordLocationDatasetResultSetMetadata implements IResultSetMetaDat
 			}
 			if (this == DATE) return location.getDateTime();
 			if (this == COMMENT) return location.getComment();
-			if (this == OBSERVATION) return "TODO:"; //$NON-NLS-1$
+			if (this == OBSERVATION) {
+				if (location.getObservations() == null || location.getObservations().isEmpty()) return ""; //$NON-NLS-1$
+				return MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.OBS_COUNT_LABEL, l), location.getObservations().size());
+			}
 			return null;
 		}
 	}

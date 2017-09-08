@@ -26,6 +26,7 @@ import org.eclipse.datatools.connectivity.oda.IDriver;
 import org.eclipse.datatools.connectivity.oda.LogConfiguration;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 
 /**
  * BIRT Datasource for intelligence data sources.
@@ -42,7 +43,11 @@ public class IntelBirtDataSource implements IDriver {
 	public IConnection getConnection(String dataSourceType) throws OdaException {
 		// assumes that this driver supports only one type of data source,
 		// ignores the specified dataSourceType
-		return SmartContext.INSTANCE.getClass(IConnectionFactory.class).createConnection();
+		AbstractIntelBirtConnection connection = SmartContext.INSTANCE.getClass(IConnectionFactory.class).createConnection();
+		if (connection.hasPermission(Permission.ENTITY) || connection.hasPermission(Permission.RECORD) || connection.hasPermission(Permission.QUERY)) {
+			return connection;
+		}
+		throw new OdaException("Unauthorized - You do not have permission to access to the advanced intelligence data source."); //$NON-NLS-1$
 	}
 
 	/**

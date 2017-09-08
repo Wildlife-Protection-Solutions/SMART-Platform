@@ -34,6 +34,7 @@ import org.wcs.smart.i2.birt.datasource.DesktopConnectionFactory;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.handlers.DeleteCaHandler;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
+import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 
 
 /**
@@ -145,6 +146,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	
 		SmartContext.INSTANCE.setClass(IIntelligenceLabelProvider.class, new IntelligenceLabelProviderImpl());
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new DesktopConnectionFactory());
+		SmartContext.INSTANCE.setClass(IIntelObservationQueryEngine.class, new IntelObservationQueryEngine());
+		
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteCaHandler(), DeleteCaHandler.EXECUTE_ORDER);
 	}
 

@@ -675,7 +675,7 @@ public class EntitySearchView {
 	 */
 	private void doSearch(IIntelEntitySearch search, long delay){
 		if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
-			entityList.setSearchError(new Exception("You do not have permission to view entities."));
+			entityList.setSearchError(new Exception(Messages.EntitySearchView_unauthorized));
 			return;
 		}
 		if (search != null){

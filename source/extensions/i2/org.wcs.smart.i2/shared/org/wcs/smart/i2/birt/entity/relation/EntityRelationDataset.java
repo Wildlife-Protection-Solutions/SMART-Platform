@@ -44,6 +44,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
@@ -76,6 +77,9 @@ public class EntityRelationDataset  implements IQuery {
 
 	@Override
 	public void prepare(String queryText) throws OdaException {
+		if (!connection.hasPermission(Permission.ENTITY)) {
+			throw new OdaException("Unauthorized.  You do not have permission to access intelligence entity datasets"); //$NON-NLS-1$
+		}
 		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
 		CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
 		Root<IntelEntityType> from = c.from(IntelEntityType.class);

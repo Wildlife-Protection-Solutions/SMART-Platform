@@ -6,6 +6,7 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.i2.internal.messages"; //$NON-NLS-1$
 	public static String AbstractIntelEntityTypeListWizardPage_EntityTypeRequired;
 	public static String AbstractIntelEntityTypeListWizardPage_LinkParameter;
+	public static String AbstractIntelEntityTypeListWizardPage_unauthorized;
 	public static String AddIntelligenceJob_InstallError;
 	public static String AddIntelligenceJob_JobName;
 	public static String AdvancedEntitySearch_AttributeTypeNotSupported;
@@ -28,6 +29,8 @@ public class Messages extends NLS {
 	public static String AdvancedEntitySearchPanel_SaveDialogMsg;
 	public static String AdvancedEntitySearchPanel_SaveDialogTitle;
 	public static String AdvancedEntitySearchPanel_SaveSearchlink;
+	public static String AdvancedIntelDataSourcePropertyPage_notconfigurable;
+	public static String AdvancedIntelDataSourcePropertyPage_title;
 	public static String AttachmentListComposite_AddAttachmentItem;
 	public static String AttachmentListComposite_AttachmentsLinked;
 	public static String AttachmentListComposite_LinkEntityItem;
@@ -114,6 +117,7 @@ public class Messages extends NLS {
 	public static String BasicRecordSearchPanel_SearchResultTimeLabel;
 	public static String BasicRecordSearchPanel_SourceLabel;
 	public static String BasicRecordSearchPanel_TitleLabel;
+	public static String BasicRecordSearchPanel_unauthorized;
 	public static String CleanUpJob_jobname;
 	public static String CompareEntitiesHandler_DifferentTypeError;
 	public static String CompareEntitiesHandler_EntityRequired;
@@ -390,6 +394,7 @@ public class Messages extends NLS {
 	public static String EntitySearchView_SaveSearchButton;
 	public static String EntitySearchView_SearchLabel;
 	public static String EntitySearchView_SerachButton;
+	public static String EntitySearchView_unauthorized;
 	public static String EntityToXml_ConvertingEntitiesSubTask;
 	public static String EntityToXml_ConvertingRelationshipsSubTask;
 	public static String EntityToXml_ConvertingXmlSubTask;
@@ -791,11 +796,19 @@ public class Messages extends NLS {
 	public static String IntelQueryEditor_TabSectionsLabel;
 	public static String IntelQueryNameLabel_ErrorMsg;
 	public static String IntelQueryNameLabel_ErrorTitle;
+	public static String IntelQueryWizardPage_linktoreport;
+	public static String IntelQueryWizardPage_message;
+	public static String IntelQueryWizardPage_queryRequired;
+	public static String IntelQueryWizardPage_unauthorized;
+	public static String IntelRecordAttributesWizardPage_message;
 	public static String IntelRecordAttributesWizardPage_Name;
 	public static String IntelRecordAttributesWizardPage_NotConfigurable;
+	public static String IntelRecordAttributesWizardPage_unauthorized;
 	public static String IntelRecordDetailsWizardPage_LinkParameters;
+	public static String IntelRecordDetailsWizardPage_message;
 	public static String IntelRecordDetailsWizardPage_Name;
 	public static String IntelRecordDetailsWizardPage_NoConfOptions;
+	public static String IntelRecordDetailsWizardPage_unauthorized;
 	public static String IntelRecordGeoResourceInfo_Title;
 	public static String IntelRecordService_DefaultName;
 	public static String IntelRecordServiceInfo_Description;
@@ -1148,6 +1161,7 @@ public class Messages extends NLS {
 	public static String RecordsView_OpenMenu;
 	public static String RecordsView_SelectFolder;
 	public static String RecordsView_SortByMenuItem;
+	public static String RecordsView_unauthorized;
 	public static String RecordsView_unprocessedSection;
 	public static String RecordsView_XmlTaskName;
 	public static String RecordsViewContentProvider_DateSortByOption;

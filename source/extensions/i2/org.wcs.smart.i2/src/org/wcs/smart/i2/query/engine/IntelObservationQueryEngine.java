@@ -41,6 +41,7 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.i2.IIntelObservationQueryEngine;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.DataModelColumn;
@@ -60,7 +61,7 @@ import com.vividsolutions.jts.io.WKBReader;
  * @author Emily
  *
  */
-public class IntelObservationQueryEngine {
+public class IntelObservationQueryEngine implements IIntelObservationQueryEngine {
 
 	
 	private IntelObservationQueryResults queryResults;
@@ -99,7 +100,6 @@ public class IntelObservationQueryEngine {
 			public IPagedQueryResultSet execute(Connection connection) throws SQLException {
 				
 				connection.setAutoCommit(true);
-				session.beginTransaction();
 				try{
 					if (parsedQuery.getFilterType() == IQueryFilter.FilterType.OBSERVATION){
 						queryResults = new IntelObservationQueryResults();
@@ -172,7 +172,6 @@ public class IntelObservationQueryEngine {
 					throw new SQLException(ex);
 				}finally{
 					connection.setAutoCommit(false);
-					session.getTransaction().commit();
 				}
 				return null;
 			}

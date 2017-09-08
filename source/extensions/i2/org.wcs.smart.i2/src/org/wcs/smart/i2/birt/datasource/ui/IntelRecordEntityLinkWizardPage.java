@@ -21,28 +21,27 @@
  */
 package org.wcs.smart.i2.birt.datasource.ui;
 
-import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
+import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
 
 /**
- * Record locations wizard page
- * 
+ * Wizard page for intel record entity links
  * @author Emily
  *
  */
-public class IntelRecordLocationWizardPage extends IntelRecordDetailsWizardPage {
+public class IntelRecordEntityLinkWizardPage  extends IntelRecordDetailsWizardPage {
 
 
-	public IntelRecordLocationWizardPage(String pageName) {
+	public IntelRecordEntityLinkWizardPage(String pageName) {
 		super(pageName);
 	}
 
 	@Override
 	public String getDatasetType() {
-		return RecordLocationDataset.DATASET_TYPE;
+		return RecordEntityDataset.DATASET_TYPE;
 	}
 
 	@Override
 	public String getName(){
-		return "Record Locations";
+		return "Record Entity Links";
 	}
 }

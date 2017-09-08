@@ -94,14 +94,17 @@ public class RunReportJob extends Job {
 				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
 				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 				
-				Session session = HibernateManager.openSession();
-				try{
-					SmartReportRunner.INSTANCE.runReport(report, 
+				try(Session s = HibernateManager.openSession()){
+					try {
+						s.beginTransaction();
+					
+						SmartReportRunner.INSTANCE.runReport(report,
 							SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 							ReportEngineManager.getBirtReportEngine(), 
-							options, session, reportParameters);
-				}finally{
-					if (session.isOpen()) session.close();
+							options, s, reportParameters);
+					}finally {
+						s.getTransaction().rollback();
+					}
 				}
 			}
 		} catch (Exception e) {
