@@ -23,7 +23,7 @@ ALTER TABLE connect.data_queue DROP CONSTRAINT type_chk;
 
 CREATE OR REPLACE FUNCTION smart.hkeylength(hkey varchar) RETURNS integer AS $$
 BEGIN
-	RETURN length(hkey) - length(replace(hkey, '.', ''));
+	RETURN length(hkey) - length(replace(hkey, '.', '')) - 1;
 
 END;
 $$LANGUAGE plpgsql;

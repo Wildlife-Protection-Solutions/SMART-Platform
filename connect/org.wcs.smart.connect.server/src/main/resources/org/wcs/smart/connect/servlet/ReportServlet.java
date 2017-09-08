@@ -20,7 +20,6 @@ public class ReportServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
 		String[][] formats = new String[ReportFormat.values().length][2];
 		int cnt = 0;
 		for (ReportFormat rf : ReportFormat.values()){
@@ -31,6 +30,4 @@ public class ReportServlet extends HttpServlet {
 		request.setAttribute("reportformats", formats); //$NON-NLS-1$
 		request.getRequestDispatcher("/WEB-INF/report.jsp").forward(request, response); //$NON-NLS-1$
 	}
-
-
 }

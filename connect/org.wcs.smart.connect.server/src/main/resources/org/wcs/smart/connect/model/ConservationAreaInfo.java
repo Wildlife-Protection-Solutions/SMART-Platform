@@ -32,7 +32,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.GenerationTime;
-import org.hibernate.annotations.Type;
 import org.wcs.smart.ca.ConservationArea;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -70,7 +69,6 @@ public class ConservationAreaInfo {
 	 * @return the uuid for the list element
 	 */
 	@Id
-	@Type(type = "pg-uuid")
 	@Column(name="ca_uuid")
 	public UUID getUuid() {
 		return caUuid;
@@ -81,7 +79,7 @@ public class ConservationAreaInfo {
 	}
 	
 	@Column(name="version")
-	@Type(type = "pg-uuid")
+//	@Type(type = "pg-uuid")
 	public UUID getVersion(){
 		return this.version;
 	}

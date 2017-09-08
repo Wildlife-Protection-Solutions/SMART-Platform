@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.query.engine.i2;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.i2.IIntelObservationQueryEngine;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.IQueryColumn;
@@ -51,7 +53,7 @@ import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
  * @author Emily
  *
  */
-public class IntelObservationQueryEngine {
+public class IntelObservationQueryEngine implements IIntelObservationQueryEngine{
 
 	
 	private IntelObservationQueryResults queryResults;
@@ -119,7 +121,7 @@ public class IntelObservationQueryEngine {
 						SqlGenerator.logString(sql);
 						session.createNativeQuery(sql).executeUpdate();
 						computeQueryColumns(session, flocale, query);
-//						computeCount(session);
+						computeCount(session);
 //						computeBounds(session);
 						
 						//session.getTransaction().commit();
@@ -136,12 +138,11 @@ public class IntelObservationQueryEngine {
 			}
 		});		
 	}
-//	
-//	private void computeCount(Session session){
-//		Integer obs = (Integer) session.createNativeQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult(); //$NON-NLS-1$
-//		Integer wp = (Integer) session.createNativeQuery("SELECT count(distinct location_uuid) FROM " + queryResults.getQueryDataTable()).uniqueResult(); //$NON-NLS-1$
-//		queryResults.setResultCount(obs, wp);
-//	}
+	
+	private void computeCount(Session session){
+		BigInteger obs = (BigInteger) session.createNativeQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult(); //$NON-NLS-1$
+		queryResults.setRowCount(obs.intValue());
+	}
 //	
 //	private void computeBounds(Session session){
 ////		very slow: Query q = session.createNativeQuery("SELECT geometry FROM smart.i_location WHERE uuid in (select location_uuid FROM " + queryResults.getQueryDataTable() + ")");

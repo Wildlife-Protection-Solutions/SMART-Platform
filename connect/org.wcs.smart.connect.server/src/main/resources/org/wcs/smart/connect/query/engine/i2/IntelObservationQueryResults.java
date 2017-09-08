@@ -52,14 +52,16 @@ import org.wcs.smart.i2.query.FilterQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn.Column;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
-import org.wcs.smart.i2.query.IPagedQueryResultSet.SortDirection;
 import org.wcs.smart.i2.query.IQueryColumn;
+import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.util.UuidUtils;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBReader;
 
@@ -69,11 +71,12 @@ import com.vividsolutions.jts.io.WKBReader;
  * @author Emily
  *
  */
-public class IntelObservationQueryResults  implements IQueryResult {
+public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryResultSet {
 
 	//data details
 	private String resultsTable = null;
 	private int categoryCnt;
+	private int rowCount;
 	
 	//sorting
 	private IQueryColumn lastSortColumn = null;
@@ -118,6 +121,14 @@ public class IntelObservationQueryResults  implements IQueryResult {
 		return this.resultsTable;
 	}
 	
+	/**
+	 * Sets the total number of records in the results
+	 * @param rowCount
+	 */
+	public void setRowCount(int rowCount) {
+		this.rowCount = rowCount;
+	}
+	
 	
 	public void setSortColumn(IQueryColumn sortColumn, IPagedQueryResultSet.SortDirection sortDirection){
 		this.sortColumn = sortColumn;
@@ -132,10 +143,7 @@ public class IntelObservationQueryResults  implements IQueryResult {
 	public String getValueAsString(IntelObservationResultItem item, IQueryColumn qc, Locale l, Session session){
 		return qc.getValue(item, l);
 	}
-	
-//	public Object getValue(IResultItem item, IQueryColumn column, Session session){
-//		return column.getValue(item);
-//	}
+
 	
 	/**
 	 * Converts a results set record to a feature
@@ -187,47 +195,45 @@ public class IntelObservationQueryResults  implements IQueryResult {
 		return sb.toString();
 	}
 	
-	private UUID asUuid(ResultSet sc, int index) throws SQLException{
-		Object x = sc.getObject(index);
+	private UUID asUuid(Object x) {
 		if (x == null) return null;
 		if (x instanceof UUID) return (UUID) x;
 		if (x instanceof byte[]) return UuidUtils.byteToUUID((byte[])x);
 		return null;
 	}
 	
-	private Geometry asGeometry(ResultSet sc, int index) throws Exception{
-		Object x = sc.getObject(index);
+	private Geometry asGeometry(Object x) throws Exception{
 		if (x == null) return null;
 		if (!(x instanceof byte[])) return null;
 		WKBReader reader = new WKBReader();
 		return reader.read((byte[])x);
 	}
 	
-//	@Override
-	public ConnectIntelObservationResultItem asResultItem(ResultSet sc, Session session) throws SQLException{
+	@Override
+	public ConnectIntelObservationResultItem asResultItem(Object[] rowData, Session session) {
 		
 		ConnectIntelObservationResultItem item = new ConnectIntelObservationResultItem();
 		
-		item.setObservationUuid(asUuid(sc,columnNameToIndex.get("observation_uuid"))); //$NON-NLS-1$
-		item.setLocationUuid(asUuid(sc,columnNameToIndex.get("location_uuid"))); //$NON-NLS-1$
-		item.setRecordUuid(asUuid(sc,columnNameToIndex.get("record_uuid"))); //$NON-NLS-1$
-		item.setRecordStatus((String)sc.getString(columnNameToIndex.get("record_status"))); //$NON-NLS-1$
-		item.setRecordTitle((String)sc.getString(columnNameToIndex.get("record_title"))); //$NON-NLS-1$
+		item.setObservationUuid(asUuid(rowData[columnNameToIndex.get("observation_uuid")])); //$NON-NLS-1$
+		item.setLocationUuid(asUuid(rowData[columnNameToIndex.get("location_uuid")])); //$NON-NLS-1$
+		item.setRecordUuid(asUuid(rowData[columnNameToIndex.get("record_uuid")])); //$NON-NLS-1$
+		item.setRecordStatus((String)rowData[columnNameToIndex.get("record_status")]); //$NON-NLS-1$
+		item.setRecordTitle((String)rowData[columnNameToIndex.get("record_title")]); //$NON-NLS-1$
 		
-		item.setLocationId((String)sc.getString(columnNameToIndex.get("loc_id"))); //$NON-NLS-1$
-		item.setLocationDate((Timestamp)sc.getObject(columnNameToIndex.get("loc_datetime"))); //$NON-NLS-1$
-		item.setLocationComment((String)sc.getObject(columnNameToIndex.get("loc_comment"))); //$NON-NLS-1$
+		item.setLocationId((String)rowData[columnNameToIndex.get("loc_id")]); //$NON-NLS-1$
+		item.setLocationDate((Timestamp)rowData[columnNameToIndex.get("loc_datetime")]); //$NON-NLS-1$
+		item.setLocationComment((String)rowData[columnNameToIndex.get("loc_comment")]); //$NON-NLS-1$
 		try{
-			item.setGeometry(asGeometry(sc, columnNameToIndex.get("loc_geometry")), null); //$NON-NLS-1$
+			item.setGeometry(asGeometry(rowData[ columnNameToIndex.get("loc_geometry")]), null); //$NON-NLS-1$
 		}catch (Exception ex){
 			ex.printStackTrace();
 			item.setGeometry(null, ex);
 		}
-		item.setCategoryUuid(asUuid(sc,columnNameToIndex.get("category_uuid"))); //$NON-NLS-1$
+		item.setCategoryUuid(asUuid(rowData[columnNameToIndex.get("category_uuid")])); //$NON-NLS-1$
 		
 		List<String> categories = new ArrayList<String>();
 		for (int i = 0; i < categoryCnt; i ++){
-			Object x = sc.getObject(columnNameToIndex.get("category_" + i)); //$NON-NLS-1$
+			Object x = rowData[columnNameToIndex.get("category_" + i)]; //$NON-NLS-1$
 			if (x != null) categories.add((String)x);
 		}
 		item.setCategoryLabels(categories.toArray(new String[categories.size()]));
@@ -251,7 +257,7 @@ public class IntelObservationQueryResults  implements IQueryResult {
 		//filter columns
 		for (Entry<IQueryFilter, String> filterColumn : filterToColumn.entrySet()){
 			boolean value = false;
-			if (sc.getObject(columnNameToIndex.get(filterColumn.getValue())) != null){//filter columns only contain true and null values
+			if (rowData[columnNameToIndex.get(filterColumn.getValue())] != null){//filter columns only contain true and null values
 				value = true;
 			};
 			item.addFilterValue(filterColumn.getKey(), value);
@@ -320,7 +326,7 @@ public class IntelObservationQueryResults  implements IQueryResult {
 						session.createNativeQuery(updateQuery).executeUpdate();
 						
 						String attribute = "SELECT distinct a.list_element_uuid FROM " + resultsTable + " b join smart.i_observation_attribute a join smart.dm_attribute b on a.attribute_uuid = b.uuid and b.keyid = '" + attributeKey + "' on b.observation_uuid = a.observation_uuid and a.list_element_uuid is not null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						List<Object> listitems = session.createNativeQuery(attribute).list();
+						List<?> listitems = session.createNativeQuery(attribute).list();
 						for (Object b : listitems){
 							UUID uuid = null;
 							if (b instanceof UUID){ 
@@ -434,19 +440,83 @@ public class IntelObservationQueryResults  implements IQueryResult {
 			return "ASC"; //$NON-NLS-1$
 		}
 	}
+	
 
-	public ResultSet getResultSet(Session session) {
-		return session.doReturningWork(new ReturningWork<ResultSet>() {
-			@Override
-			public ResultSet execute(Connection c) throws SQLException {
-				if(sortColumn != null){
-					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + getQueryDataTable() + " ORDER BY sortkeydbl " + getSqlSort() + ", sortkeytxt " + getSqlSort()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + getQueryDataTable()); //$NON-NLS-1$
+	@Override
+	public void setSorting(IQueryColumn sortColumn, SortDirection direction) {
+		this.sortDirection = direction;
+		this.sortColumn = sortColumn;
+	}
+
+	@Override
+	public List<? extends IResultItem> getData(int offset, int pageSize, Session session) {
+		throw new UnsupportedOperationException("use iterator instead"); //$NON-NLS-1$
+	}
+
+	@Override
+	public Envelope getEnvelope() {
+		throw new UnsupportedOperationException("results envelope not supported on connect"); //$NON-NLS-1$;
+	}
+
+	@Override
+	public PagedResultSetIterator iterator(Session session) {
+		IPagedQueryResultSet results = this;
+		return new PagedResultSetIterator( results,session ) {
+			
+			private ResultSet rs = null;
+			
+			protected void createResultSet() {
+				rs = session.doReturningWork(new ReturningWork<ResultSet>() {
+
+					@Override
+					public ResultSet execute(Connection c) throws SQLException {
+						if (sortColumn != null) {
+							return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+									ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + getQueryDataTable() + " ORDER BY sortkeydbl " + getSqlSort() + ", sortkeytxt " + getSqlSort()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}else {
+							return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+									ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + getQueryDataTable()); //$NON-NLS-1$
+						}
+						
+					}});					
 			}
-		});
+			
+			public boolean hasNext(){
+				if (results == null) return false;
+				if (rs == null) createResultSet();
+				try {
+					return rs.next();
+				} catch (SQLException e) {
+					throw new IllegalStateException(e);
+				}
+			}
+			
+			public IResultItem next(){
+				try {
+					Object[] data = new Object[rs.getMetaData().getColumnCount()+1];
+					for (int i = 1; i < data.length; i ++) {
+						data[i] = rs.getObject(i);
+					}
+					return results.asResultItem(data, session);
+				}catch (SQLException e) {
+					throw new IllegalStateException(e);
+				}
+			}
+			
+			public void close() {
+				try {
+					rs.close();	
+				}catch(SQLException e) {
+					throw new IllegalStateException(e);
+				}
+				
+			}
+		};
+	}
+
+	@Override
+	public int getItemCount() {
+		return this.rowCount;
 	}
 
 }

@@ -74,7 +74,7 @@ import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryEngine;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
-import org.wcs.smart.connect.security.AdvIntelQueryAction;
+import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -415,8 +415,8 @@ public class QueryApi extends HttpServlet{
 		String name = request.getUserPrincipal().getName();
 			
 		//check for permission to this query for this user.
-		if (!SecurityManager.INSTANCE.canAccess(s, name, AdvIntelQueryAction.RUNQUERY_KEY,  query.getUuid())){
-			if (SecurityManager.INSTANCE.canAccess(s, name, AdvIntelQueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
+		if (!SecurityManager.INSTANCE.canAccess(s, name, AdvIntelAction.RUNQUERY_KEY,  query.getUuid())){
+			if (SecurityManager.INSTANCE.canAccess(s, name, AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
 				//access is OK since they have access to All Queries in this CA.
 			}else{
 				return new QueryResult(createErrorResponse(Status.BAD_REQUEST, Messages.getString("QueryApi.PermissionError", SmartUtils.getRequestLocale(request)))); //$NON-NLS-1$
@@ -569,7 +569,7 @@ public class QueryApi extends HttpServlet{
 		s.beginTransaction();
 		try{
 			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY) && 
-					!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), AdvIntelQueryAction.RUNQUERY_KEY)){
+					!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY)){
 				//no query access
 				return allowed;
 			}
@@ -605,16 +605,16 @@ public class QueryApi extends HttpServlet{
 
 	private List<QueryProxy> getAdvancedIntelQueries(Session s, Locale l) {
 		List<QueryProxy> queries = QueryManager.INSTANCE.getAdvanedIntelligenceQueries(s,  request.getLocale());
-		if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelQueryAction.RUNQUERY_KEY, null)){
+		if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, null)){
 			//can access all queries
 			return queries;
 		}
 		List<QueryProxy> allowed = new ArrayList<>();
 		for (QueryProxy q : queries){
 			//Do they have access to all queries from this CA? if yes then add it.
-			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelQueryAction.RUNQUERY_KEY, q.getCaUuid())){
+			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, q.getCaUuid())){
 				allowed.add(q);
-			}else if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelQueryAction.RUNQUERY_KEY, q.getUuid())){
+			}else if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, q.getUuid())){
 				//Do they have specific permission to this query? if yes then add it.
 				allowed.add(q);
 				

@@ -52,7 +52,6 @@ import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.dataqueue.DataQueueAction;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem.Status;
-import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -118,9 +117,9 @@ public class CtDataApi extends HttpServlet {
 			item.setConservationArea(ca);
 			item.setName("CyberTracker " + DateFormat.getDateTimeInstance().format(new Date())); //$NON-NLS-1$
 			if (request.getHeader(HttpHeaders.CONTENT_ENCODING) != null && request.getHeader(HttpHeaders.CONTENT_ENCODING).equalsIgnoreCase("deflate")){ //$NON-NLS-1$
-				item.setType("JSON_ZLIB_CT");
+				item.setType("JSON_ZLIB_CT"); //$NON-NLS-1$
 			}else{
-				item.setType("JSON_CT");
+				item.setType("JSON_CT"); //$NON-NLS-1$
 			}
 			item.setFile(null);
 			item.setStatus(Status.UPLOADING);

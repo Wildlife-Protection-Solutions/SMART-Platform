@@ -205,6 +205,7 @@ public class ReportApi extends HttpServlet{
 						items.put(SmartConnection.LOCALE_CONTEXT_VAR, request.getLocale());
 						items.put(BirtConstants.CA_PARAM, report.getConservationArea());
 						items.put(ServerSmartConnection.CCAA_FILTER_KEY, conservationAreas);
+						items.put(ServerSmartConnection.CURRENT_USER_KEY, request.getUserPrincipal().getName());
 						
 						try{
 							Map<String, Object> parameters = new HashMap<String, Object>();

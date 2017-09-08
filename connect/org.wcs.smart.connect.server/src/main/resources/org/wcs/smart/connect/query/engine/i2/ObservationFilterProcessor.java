@@ -152,12 +152,12 @@ public class ObservationFilterProcessor {
 		
 		//create indexes to help with performance
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + obsTable + "_location_uuid_idx on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName(obsTable) + " on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + obsTable + "_observation_uuid_idx on " + obsTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append("CREATE INDEX " + SqlGenerator.createIndexName(obsTable) + " on " + obsTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		

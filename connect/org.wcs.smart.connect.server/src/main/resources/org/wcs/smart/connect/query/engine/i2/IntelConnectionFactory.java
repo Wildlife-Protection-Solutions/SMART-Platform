@@ -19,49 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.model;
+package org.wcs.smart.connect.query.engine.i2;
 
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 
 /**
- * Smart connect user action entity.
+ * Advanced intelligence BIRT connection factory .
+ * 
  * @author Emily
  *
  */
-@Entity
-@Table(name="connect.user_actions")
-public class SmartUserAction extends ConnectUuidItem{
+public class IntelConnectionFactory implements IConnectionFactory {
 
-	private String username;
-	private String actionKey;
-	private UUID resource;
-	
-	@Column(name="username")
-	public String getUsername() {
-		return username;
+	@Override
+	public AbstractIntelBirtConnection createConnection() {
+		return new IntelConnection();
 	}
-	public void setUsername(String username) {
-		this.username = username;
-	}
-	
-	@Column(name="action")
-	public String getAction(){
-		return this.actionKey;
-	}
-	
-	public void setAction(String actionKey){
-		this.actionKey = actionKey;
-	}
-	
-	@Column(name="resource")
-	public UUID getResource(){
-		return this.resource;
-	}
-	public void setResource(UUID resource){
-		this.resource = resource;
-	}
+
 }

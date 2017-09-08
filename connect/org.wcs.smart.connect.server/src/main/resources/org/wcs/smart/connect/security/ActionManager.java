@@ -45,7 +45,7 @@ public enum ActionManager {
 		actions.add(new CaAction());
 		actions.add(new AlertAction());
 		actions.add(new QueryAction());
-		actions.add(new AdvIntelQueryAction());
+		actions.add(new AdvIntelAction());
 		actions.add(new DataQueueAction());
 		actions.add(new ReportAction());
 		

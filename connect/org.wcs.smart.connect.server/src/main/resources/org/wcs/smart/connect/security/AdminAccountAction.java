@@ -63,7 +63,7 @@ public class AdminAccountAction implements ISmartConnectAction{
 	}
 
 	@Override
-	public String getResourceName(UUID resource, Session s, Locale l) {
+	public String getResourceName(String actionKey, UUID resource, Session s, Locale l) {
 		return null;
 	}
 

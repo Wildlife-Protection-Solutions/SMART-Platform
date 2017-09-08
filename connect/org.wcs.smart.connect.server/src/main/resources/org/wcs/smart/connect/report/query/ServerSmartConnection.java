@@ -47,6 +47,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
  */
 public class ServerSmartConnection extends SmartConnection {
 	public static final String  CCAA_FILTER_KEY = "org.wcs.smart.report.ca.filter"; //$NON-NLS-1$
+	public static final String  CURRENT_USER_KEY = "org.wcs.smart.servlet.user"; //$NON-NLS-1$
 	
 	private SmartBirtTableUtils tableFinder = null;
 	

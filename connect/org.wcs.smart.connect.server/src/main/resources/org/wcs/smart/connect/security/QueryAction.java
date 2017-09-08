@@ -111,7 +111,7 @@ public class QueryAction implements ISmartConnectAction{
 	}
 
 	@Override
-	public String getResourceName(UUID resource, Session s, Locale l) {
+	public String getResourceName(String actionKey, UUID resource, Session s, Locale l) {
 		if (resource == null) return Messages.getString("QueryAction.AllQueries", l); //$NON-NLS-1$
 		
 		

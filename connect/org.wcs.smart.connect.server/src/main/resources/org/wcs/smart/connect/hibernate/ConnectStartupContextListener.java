@@ -328,7 +328,6 @@ public class ConnectStartupContextListener implements ServletContextListener{
 
 		ServiceRegistry service = new StandardServiceRegistryBuilder().applySettings(config.getProperties()).build();
 		SessionFactory sf = config.buildSessionFactory(service);
-		
 		sce.getServletContext().setAttribute(HibernateManager.CONTEXT_KEY, sf);
 		
 		logger.info("Hibernate SessionFactory Configured successfully"); //$NON-NLS-1$

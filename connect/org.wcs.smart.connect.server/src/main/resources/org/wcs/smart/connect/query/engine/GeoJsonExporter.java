@@ -26,7 +26,6 @@ package org.wcs.smart.connect.query.engine;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -51,6 +50,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.i2.ConnectIntelObservationResultItem;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
 import org.wcs.smart.i2.query.IQueryColumn;
+import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -170,9 +170,9 @@ public class GeoJsonExporter {
 					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false)); //$NON-NLS-1$
 					ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
 					
-					ResultSet rs = results.getResultSet(session);
-					while(rs.next()) {
-						ConnectIntelObservationResultItem resultItem = results.asResultItem(rs,  session);
+					PagedResultSetIterator rs = results.iterator(session);
+					while(rs.hasNext()) {
+						ConnectIntelObservationResultItem resultItem = (ConnectIntelObservationResultItem) rs.next();
 						SimpleFeature sf = results.toFeature(resultItem, columns, session, type);
 						features.add(sf);
 					}

@@ -8,8 +8,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Type;
-
 /**
  * SMART Connect action associated with a user role.
  * @author Emily
@@ -24,7 +22,6 @@ public class SmartRoleAction  extends ConnectUuidItem{
 	private UUID resource;
 	
 	@JoinColumn(name="role_id")
-	@Type(type = "pg-uuid")
 	@ManyToOne
 	public SmartRole getRole() {
 		return role;
@@ -43,7 +40,6 @@ public class SmartRoleAction  extends ConnectUuidItem{
 	}
 	
 	@Column(name="resource")
-	@Type(type = "pg-uuid")
 	public UUID getResource(){
 		return this.resource;
 	}

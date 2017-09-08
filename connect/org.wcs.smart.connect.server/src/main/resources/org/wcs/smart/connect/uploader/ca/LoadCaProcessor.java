@@ -120,7 +120,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 				ChangeLogManager.INSTANCE.enableChangeTracking(item.getConservationAreaInfo(), session);
 				session.getTransaction().commit();
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Unable to reset triggers - system should be shutdown and restarted." + e.getMessage(), e);
+				logger.log(Level.SEVERE, MessageFormat.format(Messages.getString("LoadCaProcessor.UnableToResetTriigers", item.getLocale()),  e.getMessage()), e); //$NON-NLS-1$
 			}
 			cleanUp(item);
 		}

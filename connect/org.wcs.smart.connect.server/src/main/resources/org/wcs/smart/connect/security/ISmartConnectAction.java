@@ -81,5 +81,5 @@ public interface ISmartConnectAction {
 	 * @param s current session with open transaction
 	 * @return the name associated with the resource uuid
 	 */
-	public String getResourceName(UUID resource, Session s, Locale l);
+	public String getResourceName(String actionKey, UUID resource, Session s, Locale l);
 }

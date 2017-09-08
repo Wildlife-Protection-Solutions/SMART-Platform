@@ -276,7 +276,7 @@ public class ConnectUserAction extends HttpServlet {
 				ISmartConnectAction action = ActionManager.INSTANCE.findAction(a.getAction());
 				p.setName(action.getActionName(a.getAction(), SmartUtils.getRequestLocale(request)));
 				if (a.getResource() != null){
-					p.setResourceName(action.getResourceName(a.getResource(), s, SmartUtils.getRequestLocale(request)));
+					p.setResourceName(action.getResourceName(a.getAction(), a.getResource(), s, SmartUtils.getRequestLocale(request)));
 				}
 				items.add(p);
 			}
@@ -658,7 +658,7 @@ public class ConnectUserAction extends HttpServlet {
 				ISmartConnectAction action = ActionManager.INSTANCE.findAction(a.getAction());
 				proxy.setName(action.getActionName(a.getAction(), SmartUtils.getRequestLocale(request)));
 				if (a.getResource() != null){
-					proxy.setResourceName(action.getResourceName(a.getResource(), s, SmartUtils.getRequestLocale(request)));
+					proxy.setResourceName(action.getResourceName(a.getAction(), a.getResource(), s, SmartUtils.getRequestLocale(request)));
 				}
 				privis.add(proxy);
 			}

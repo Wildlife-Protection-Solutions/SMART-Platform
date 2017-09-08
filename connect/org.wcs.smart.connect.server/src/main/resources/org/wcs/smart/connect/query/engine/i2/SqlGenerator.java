@@ -39,13 +39,15 @@ public class SqlGenerator {
 	private static AtomicLong tableCnter = new AtomicLong();
 	private static AtomicLong indexCnter = new AtomicLong();
 	
+	public static final String QUERY_TEMP_SCHEMA = "query_temp"; //$NON-NLS-1$
 	/**
 	 * Creates a temporary query table with unique name.   
 	 * 
 	 * @return
 	 */
 	public static synchronized String createTempTableName(){
-		return "query_temp_i2_" + tableCnter.incrementAndGet();//$NON-NLS-1$ 
+		String tablename = QUERY_TEMP_SCHEMA + ".query_temp_i2_" + tableCnter.incrementAndGet();//$NON-NLS-1$
+		return tablename;
 	}
 	
 	/**
@@ -54,6 +56,10 @@ public class SqlGenerator {
 	 * @return
 	 */
 	public static synchronized String createIndexName(String prefix){
+		int index = prefix.indexOf('.');
+		if (index > 0) {
+			prefix = prefix.substring(index+1);
+		}
 		return prefix + "_" + indexCnter.incrementAndGet() + "_idx";//$NON-NLS-1$ //$NON-NLS-2$ 
 	}
 	
@@ -120,19 +126,24 @@ public class SqlGenerator {
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
 		sql = new StringBuilder();
-		sql.append("ALTER TABLE " + tempTable + " RENAME TO " + obsTable); //$NON-NLS-1$ //$NON-NLS-2$
+		String newname = obsTable;
+		int index = newname.indexOf('.');
+		if (index > 0) {
+			newname = newname.substring(index+1);
+		}
+		sql.append("ALTER TABLE " + tempTable + " RENAME TO " + newname); //$NON-NLS-1$ //$NON-NLS-2$
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
 		if (locationIndex){
 			sql = new StringBuilder();
-			sql.append("CREATE INDEX " + obsTable + "_location_uuid_idx on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sql.append("CREATE INDEX " + SqlGenerator.createIndexName( obsTable ) + " on " + obsTable + " (location_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
 			s.createNativeQuery(sql.toString()).executeUpdate();
 		}
 		if (observationIndex){
 			sql = new StringBuilder();
-			sql.append("CREATE INDEX " + obsTable + "_observation_uuid_idx on " + obsTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sql.append("CREATE INDEX " + SqlGenerator.createIndexName( obsTable ) + " on " + obsTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			logString(sql.toString());
 			s.createNativeQuery(sql.toString()).executeUpdate();
 		}

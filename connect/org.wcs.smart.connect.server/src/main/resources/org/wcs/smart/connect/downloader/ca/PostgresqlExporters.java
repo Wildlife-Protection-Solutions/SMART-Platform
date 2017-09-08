@@ -117,7 +117,7 @@ public class PostgresqlExporters {
 		sb.append(" on b.ca_uuid = c.ca_uuid "); //$NON-NLS-1$
 		sb.append("WHERE b.ca_uuid = a.ca_uuid and a.ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString()  + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		System.out.println(sb.toString());
+		//System.out.println(sb.toString());
 		exportEngine.writeQuery(filename, sb.toString());
 	}
 

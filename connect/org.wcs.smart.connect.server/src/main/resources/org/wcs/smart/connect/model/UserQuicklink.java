@@ -30,8 +30,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Type;
-
 /**
  * A UserQuicklink entity. Keeps a link specific to a single user, all of these are shown on their homepage. "order" is the order users want the links (Ascending) displayed.  
  *
@@ -46,7 +44,6 @@ public class UserQuicklink extends ConnectUuidItem{
 	private int order;
 	
     @JoinColumn(name = "quicklink_uuid")
-    @Type(type = "pg-uuid")
     @ManyToOne
 	public Quicklink getQuicklink() {
 		return quicklink;

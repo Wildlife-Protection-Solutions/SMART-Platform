@@ -23,7 +23,6 @@ package org.wcs.smart.connect.i18n.labels;
 
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.entity.EntityDatasetMetadata;
@@ -68,11 +67,11 @@ public class AdvancedLabelProviderImpl implements
 		IIntelligenceLabelProvider {
 
 	public String getDataSourceProductName(String dataSetType, Locale l){
-		if (dataSetType.equals(RecordDataset.DATASET_TYPE)) return "Record Details";
-		if (dataSetType.equals(RecordAttributeDataset.DATASET_TYPE)) return "Record Attributes";
-		if (dataSetType.equals(RecordEntityDataset.DATASET_TYPE)) return "Record Entities";
-		if (dataSetType.equals(RecordLocationDataset.DATASET_TYPE)) return "Record Locations";
-		if (dataSetType.equals(RecordAttachmentDataset.DATASET_TYPE)) return "Record Attachments";
+		if (dataSetType.equals(RecordDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.DatasetTypeRecordDetails", l); //$NON-NLS-1$
+		if (dataSetType.equals(RecordAttributeDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.DatasetTypeRecordAttributes", l); //$NON-NLS-1$
+		if (dataSetType.equals(RecordEntityDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.DatasetTypeRecordEntities", l); //$NON-NLS-1$
+		if (dataSetType.equals(RecordLocationDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.DatasetTypeRecordLocations", l); //$NON-NLS-1$
+		if (dataSetType.equals(RecordAttachmentDataset.DATASET_TYPE)) return Messages.getString("AdvancedLabelProviderImpl.DatasetTypeRecordAttachments", l); //$NON-NLS-1$
 		
 		return ""; //$NON-NLS-1$
 	}
@@ -84,36 +83,36 @@ public class AdvancedLabelProviderImpl implements
 			
 			AttributeType type = (AttributeType) item;
 			switch(type){
-			case BOOLEAN: return "BOOLEAN";
-			case DATE: return "DATE";
-			case LIST: return "LIST";
-			case NUMERIC: return "NUMERIC";
-			case POSITION: return "POSITION";
-			case TEXT: return "TEXT";
+			case BOOLEAN: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypeBoolean", l); //$NON-NLS-1$
+			case DATE: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypeDate", l); //$NON-NLS-1$
+			case LIST: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypeList", l); //$NON-NLS-1$
+			case NUMERIC: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypeNumeric", l); //$NON-NLS-1$
+			case POSITION: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypePosition", l); //$NON-NLS-1$
+			case TEXT: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypeText", l); //$NON-NLS-1$
 			}
 		}
-		if (item == QUERY_COLUMN_CATEGORY_LABEL) return "Category {0}";
-		if (item == OBS_COUNT_LABEL ) return "{0} Observations";
-		if (item == IntelWorkingSetCategory.ENTITY) return "Entities";
-		if (item == IntelWorkingSetCategory.RECORD) return "Records";
-		if (item == IntelWorkingSetCategory.QUERIES) return "Queries";
+		if (item == QUERY_COLUMN_CATEGORY_LABEL) return Messages.getString("AdvancedLabelProviderImpl.CategoryColumnLabel", l); //$NON-NLS-1$
+		if (item == OBS_COUNT_LABEL ) return Messages.getString("AdvancedLabelProviderImpl.ObservationColumnLabel", l); //$NON-NLS-1$
+		if (item == IntelWorkingSetCategory.ENTITY) return Messages.getString("AdvancedLabelProviderImpl.WsEnitiesLabel", l); //$NON-NLS-1$
+		if (item == IntelWorkingSetCategory.RECORD) return Messages.getString("AdvancedLabelProviderImpl.WsRecordsLabel", l); //$NON-NLS-1$
+		if (item == IntelWorkingSetCategory.QUERIES) return Messages.getString("AdvancedLabelProviderImpl.WsQueriesLabel", l); //$NON-NLS-1$
 		
-		if (item == FixedQueryColumn.Column.LOC_COMMENT) return  "Comment";
-		if (item == FixedQueryColumn.Column.LOC_DATE) return"Date";
-		if (item == FixedQueryColumn.Column.LOC_TIME) return "Time";
-		if (item == FixedQueryColumn.Column.LOC_GEOMTRY) return "Geometry";
-		if (item == FixedQueryColumn.Column.LOC_ID) return "ID";
-		if (item == FixedQueryColumn.Column.RECORD_STATUS) return "Record Status";
-		if (item == FixedQueryColumn.Column.RECORD_TITLE) return "Record Title";
+		if (item == FixedQueryColumn.Column.LOC_COMMENT) return  Messages.getString("AdvancedLabelProviderImpl.QueryColComment", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.LOC_DATE) return Messages.getString("AdvancedLabelProviderImpl.QueryColDate", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.LOC_TIME) return Messages.getString("AdvancedLabelProviderImpl.QueryColTime", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.LOC_GEOMTRY) return Messages.getString("AdvancedLabelProviderImpl.QueryColGeom", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.LOC_ID) return Messages.getString("AdvancedLabelProviderImpl.QueryColId", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.RECORD_STATUS) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordStatus", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.RECORD_TITLE) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordTital", l); //$NON-NLS-1$
 						
-		if (item == IntelRecord.Status.NEW) return "Unprocessed";
-		if (item == IntelRecord.Status.PROCESSING) return "In Progress";
-		if (item == IntelRecord.Status.COMPLETE) return "Complete";
+		if (item == IntelRecord.Status.NEW) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusUnprocessed", l); //$NON-NLS-1$
+		if (item == IntelRecord.Status.PROCESSING) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusInProgress", l); //$NON-NLS-1$
+		if (item == IntelRecord.Status.COMPLETE) return Messages.getString("AdvancedLabelProviderImpl.IntelRecordStatusComplete", l); //$NON-NLS-1$
 		
 		if (item instanceof Operator){
 			switch((Operator)item){
-				case AND: return "And";
-				case BETWEEN: return "Between";
+				case AND: return Messages.getString("AdvancedLabelProviderImpl.AndOp", l); //$NON-NLS-1$
+				case BETWEEN: return Messages.getString("AdvancedLabelProviderImpl.BetweenOp", l); //$NON-NLS-1$
 				case BRACKETS: return "( )"; //$NON-NLS-1$
 				case BRACKET_CLOSE: return ")"; //$NON-NLS-1$
 				case BRACKET_OPEN: return "("; //$NON-NLS-1$
@@ -122,112 +121,112 @@ public class AdvancedLabelProviderImpl implements
 				case GREATERTHANEQUALS: return ">="; //$NON-NLS-1$
 				case LESSTHAN: return "<"; //$NON-NLS-1$
 				case LESSTHANEQUALS: return "<="; //$NON-NLS-1$
-				case NOT: return "Not";
+				case NOT: return Messages.getString("AdvancedLabelProviderImpl.NotOp", l); //$NON-NLS-1$
 				case NOTEQUALS: return "!="; //$NON-NLS-1$
-				case NOT_BETWEEN: return "Not Between";
-				case OR: return "Or";
-				case STR_CONTAINS: return "Contains";
-				case STR_EQUALS: return "Equals";
-				case STR_NOTCONTAINS: return "Not Equals";
+				case NOT_BETWEEN: return Messages.getString("AdvancedLabelProviderImpl.NotBetweenOp", l); //$NON-NLS-1$
+				case OR: return Messages.getString("AdvancedLabelProviderImpl.OrOp", l); //$NON-NLS-1$
+				case STR_CONTAINS: return Messages.getString("AdvancedLabelProviderImpl.ContainsOp", l); //$NON-NLS-1$
+				case STR_EQUALS: return Messages.getString("AdvancedLabelProviderImpl.EqualsOp", l); //$NON-NLS-1$
+				case STR_NOTCONTAINS: return Messages.getString("AdvancedLabelProviderImpl.NotEqualsOp", l); //$NON-NLS-1$
 			}
 		}
 		
-		if (item instanceof CsvQueryExporter) return "Comma Separated Values";
-		if (item instanceof ShpQueryExporter) return "Shapefile";
-		if (item == IntelQueryColumnProvider.ANY_ITEM) return "<Any>";
+		if (item instanceof CsvQueryExporter) return Messages.getString("AdvancedLabelProviderImpl.CsvExporter", l); //$NON-NLS-1$
+		if (item instanceof ShpQueryExporter) return Messages.getString("AdvancedLabelProviderImpl.ShpExporter", l); //$NON-NLS-1$
+		if (item == IntelQueryColumnProvider.ANY_ITEM) return Messages.getString("AdvancedLabelProviderImpl.AnyLabel", l); //$NON-NLS-1$
 		if (item == Boolean.TRUE) return  Messages.getString("SmartLabelProvider.BooleanYesOp",l); //$NON-NLS-1$
 		if (item == Boolean.FALSE) return Messages.getString("SmartLabelProvider.BooleanNoOp",l); //$NON-NLS-1$
 		
 		
-		if (item == RecordLocationDatasetResultSetMetadata.Column.COMMENT) return "Comment";
-		if (item == RecordLocationDatasetResultSetMetadata.Column.DATE) return "Date";
-		if (item == RecordLocationDatasetResultSetMetadata.Column.GEOM) return "Geometry";
-		if (item == RecordLocationDatasetResultSetMetadata.Column.ID) return "ID";
-		if (item == RecordLocationDatasetResultSetMetadata.Column.OBSERVATION) return "Observation";
-		if (item == RecordLocationDatasetResultSetMetadata.Column.RECORD_UUID) return "Record UUID";
+		if (item == RecordLocationDatasetResultSetMetadata.Column.COMMENT) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColComment", l); //$NON-NLS-1$
+		if (item == RecordLocationDatasetResultSetMetadata.Column.DATE) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColDate", l); //$NON-NLS-1$
+		if (item == RecordLocationDatasetResultSetMetadata.Column.GEOM) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColGeom", l); //$NON-NLS-1$
+		if (item == RecordLocationDatasetResultSetMetadata.Column.ID) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColId", l); //$NON-NLS-1$
+		if (item == RecordLocationDatasetResultSetMetadata.Column.OBSERVATION) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColObs", l); //$NON-NLS-1$
+		if (item == RecordLocationDatasetResultSetMetadata.Column.RECORD_UUID) return Messages.getString("AdvancedLabelProviderImpl.RecordLocationDatasetColRecorduuid", l); //$NON-NLS-1$
 		
-		if (item == RecordEntityDatasetResultSetMetadata.Column.ENTITY_ID) return "Entity ID";
-		if (item == RecordEntityDatasetResultSetMetadata.Column.ENTITY_IMAGE) return "Primary Image";
-		if (item == RecordEntityDatasetResultSetMetadata.Column.ENTITY_UUID) return "Entity UUID";
-		if (item == RecordEntityDatasetResultSetMetadata.Column.UUID) return "Record UUID";
+		if (item == RecordEntityDatasetResultSetMetadata.Column.ENTITY_ID) return Messages.getString("AdvancedLabelProviderImpl.RecordEntityDatasetColEntityId", l); //$NON-NLS-1$
+		if (item == RecordEntityDatasetResultSetMetadata.Column.ENTITY_IMAGE) return Messages.getString("AdvancedLabelProviderImpl.RecordEntityDatasetColImage", l); //$NON-NLS-1$
+		if (item == RecordEntityDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.RecordEntityDatasetColEntityUuid", l); //$NON-NLS-1$
+		if (item == RecordEntityDatasetResultSetMetadata.Column.UUID) return Messages.getString("AdvancedLabelProviderImpl.RecordEntityDatasetColRecordUuid", l); //$NON-NLS-1$
 		
-		if (item == EntityDatasetResultSetMetadata.Column.ENTITY_UUID) return "Entity UUID";
-		if (item == EntityDatasetResultSetMetadata.Column.ID) return "ID";
-		if (item == EntityDatasetResultSetMetadata.Column.TYPE_KEY) return "Entity Type Key";
-		if (item == EntityDatasetResultSetMetadata.Column.TYPE) return "Entity Type";
-		if (item == EntityDatasetResultSetMetadata.Column.DATE_CREATED) return "Date Created";
-		if (item == EntityDatasetResultSetMetadata.Column.DATE_MODIFIED) return "Date Modified";
-		if (item == EntityDatasetResultSetMetadata.Column.CREATED_BY) return "Created By";
-		if (item == EntityDatasetResultSetMetadata.Column.MODIFIED_BY) return "Last Modified By";
-		if (item == EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE) return "Primary Image";
+		if (item == EntityDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColEntityUuid", l); //$NON-NLS-1$
+		if (item == EntityDatasetResultSetMetadata.Column.ID) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColId", l); //$NON-NLS-1$
+		if (item == EntityDatasetResultSetMetadata.Column.TYPE_KEY) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColEntityTypeKey", l); //$NON-NLS-1$
+		if (item == EntityDatasetResultSetMetadata.Column.TYPE) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColEntityType", l); //$NON-NLS-1$
+		if (item == EntityDatasetResultSetMetadata.Column.DATE_CREATED) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColDateCreated", l); //$NON-NLS-1$
+		if (item == EntityDatasetResultSetMetadata.Column.DATE_MODIFIED) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColDateMod", l); //$NON-NLS-1$
+		if (item == EntityDatasetResultSetMetadata.Column.CREATED_BY) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColCreatedBy", l); //$NON-NLS-1$
+		if (item == EntityDatasetResultSetMetadata.Column.MODIFIED_BY) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColModBy", l); //$NON-NLS-1$
+		if (item == EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColImage", l); //$NON-NLS-1$
 		
-		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ENTITY_UUID) return "Entity UUID";
-		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE_KEY) return "Attribute Key";
-		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE_NAME) return "Attribute Name";
-		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.GEOMETRY)  return "Geometry";
+		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationAttributeDatasetColEntity", l); //$NON-NLS-1$
+		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE_KEY) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationAttributeDatasetColAttributeKey", l); //$NON-NLS-1$
+		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE_NAME) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationAttributeDatasetColAttributeName", l); //$NON-NLS-1$
+		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.GEOMETRY)  return Messages.getString("AdvancedLabelProviderImpl.EntityLocationAttributeDatasetColGeom", l); //$NON-NLS-1$
 			
-		if (item == EntityAttachmentDatasetResultSetMetadata.Column.ENTITY_UUID) return "Entity UUID";
-		if (item == EntityAttachmentDatasetResultSetMetadata.Column.FILE_NAME) return  "Name";
-		if (item == EntityAttachmentDatasetResultSetMetadata.Column.DATE_CREATED) return  "Date Created";
-		if (item == EntityAttachmentDatasetResultSetMetadata.Column.PATH) return  "Path";
+		if (item == EntityAttachmentDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityAttachmentDatasetColEntity", l); //$NON-NLS-1$
+		if (item == EntityAttachmentDatasetResultSetMetadata.Column.FILE_NAME) return  Messages.getString("AdvancedLabelProviderImpl.EntityAttachmentDatasetColFileName", l); //$NON-NLS-1$
+		if (item == EntityAttachmentDatasetResultSetMetadata.Column.DATE_CREATED) return  Messages.getString("AdvancedLabelProviderImpl.EntityAttachmentDatasetColDateCreated", l); //$NON-NLS-1$
+		if (item == EntityAttachmentDatasetResultSetMetadata.Column.PATH) return  Messages.getString("AdvancedLabelProviderImpl.EntityAttachmentDatasetColFile", l); //$NON-NLS-1$
 				
-		if (item == EntityLocationDatasetResultSetMetadata.Column.ENTITY_UUID) return "Entity UUID";
-		if (item == EntityLocationDatasetResultSetMetadata.Column.ID) return "ID";
-		if (item == EntityLocationDatasetResultSetMetadata.Column.GEOM) return "Geometry";
-		if (item == EntityLocationDatasetResultSetMetadata.Column.DATE) return "Date";
-		if (item == EntityLocationDatasetResultSetMetadata.Column.COMMENT) return "Comment";
-		if (item == EntityLocationDatasetResultSetMetadata.Column.OBSERVATION) return "Observation";
+		if (item == EntityLocationDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColEntity", l); //$NON-NLS-1$
+		if (item == EntityLocationDatasetResultSetMetadata.Column.ID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColId", l); //$NON-NLS-1$
+		if (item == EntityLocationDatasetResultSetMetadata.Column.GEOM) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColGeom", l); //$NON-NLS-1$
+		if (item == EntityLocationDatasetResultSetMetadata.Column.DATE) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColDate", l); //$NON-NLS-1$
+		if (item == EntityLocationDatasetResultSetMetadata.Column.COMMENT) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColComment", l); //$NON-NLS-1$
+		if (item == EntityLocationDatasetResultSetMetadata.Column.OBSERVATION) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColObservation", l); //$NON-NLS-1$
 				
-		if (item == EntityRecordDatasetResultSetMetadata.Column.ENTITY_UUID) return "Entity UUID";
-		if (item == EntityRecordDatasetResultSetMetadata.Column.TITLE) return "Title";
-		if (item == EntityRecordDatasetResultSetMetadata.Column.STATUS) return "Status";
-		if (item == EntityRecordDatasetResultSetMetadata.Column.DATE_RECIEVED) return "Date Received";
-		if (item == EntityRecordDatasetResultSetMetadata.Column.DATE_MODIFIED) return "Date Modified";
-		if (item == EntityRecordDatasetResultSetMetadata.Column.DESCRIPTION) return "Description";
+		if (item == EntityRecordDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityRecordDatasetColEntity", l); //$NON-NLS-1$
+		if (item == EntityRecordDatasetResultSetMetadata.Column.TITLE) return Messages.getString("AdvancedLabelProviderImpl.EntityRecordDatasetColTitle", l); //$NON-NLS-1$
+		if (item == EntityRecordDatasetResultSetMetadata.Column.STATUS) return Messages.getString("AdvancedLabelProviderImpl.EntityRecordDatasetColStatus", l); //$NON-NLS-1$
+		if (item == EntityRecordDatasetResultSetMetadata.Column.DATE_RECIEVED) return Messages.getString("AdvancedLabelProviderImpl.EntityRecordDatasetColDateRec", l); //$NON-NLS-1$
+		if (item == EntityRecordDatasetResultSetMetadata.Column.DATE_MODIFIED) return Messages.getString("AdvancedLabelProviderImpl.EntityRecordDatasetColDateMod", l); //$NON-NLS-1$
+		if (item == EntityRecordDatasetResultSetMetadata.Column.DESCRIPTION) return Messages.getString("AdvancedLabelProviderImpl.EntityRecordDatasetColDescription", l); //$NON-NLS-1$
 
-		if (item == EntityRelationDatasetResultSetMetadata.Column.ENTITY_UUID) return "Entity UUID";
-		if (item == EntityRelationDatasetResultSetMetadata.Column.SOURCE_RELATION_UUID) return "Source Relation UUID";
-		if (item == EntityRelationDatasetResultSetMetadata.Column.SOURCE_RELATION_ID) return "Source Relation";
-		if (item == EntityRelationDatasetResultSetMetadata.Column.TARGET_RELATION_UUID) return "Target Relation UUID";
-		if (item == EntityRelationDatasetResultSetMetadata.Column.TARGET_RELATION_ID) return "Target Relation";
-		if (item == EntityRelationDatasetResultSetMetadata.Column.GROUP_NAME) return "Group";
-		if (item == EntityRelationDatasetResultSetMetadata.Column.GROUP_KEY) return "Group Key";
-		if (item == EntityRelationDatasetResultSetMetadata.Column.RELATIONSHIP_TYPE) return  "Relationship Type";
-		if (item == EntityRelationDatasetResultSetMetadata.Column.RELATIONSHIP_TYPE_KEY) return "Relationship Type Key";
+		if (item == EntityRelationDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityRelationDatasetColEntity", l); //$NON-NLS-1$
+		if (item == EntityRelationDatasetResultSetMetadata.Column.SOURCE_RELATION_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityRelationDatasetColSrcRelationUUID", l); //$NON-NLS-1$
+		if (item == EntityRelationDatasetResultSetMetadata.Column.SOURCE_RELATION_ID) return Messages.getString("AdvancedLabelProviderImpl.EntityRelationDatasetColSrcRelation", l); //$NON-NLS-1$
+		if (item == EntityRelationDatasetResultSetMetadata.Column.TARGET_RELATION_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityRelationDatasetColTrgRelationUuid", l); //$NON-NLS-1$
+		if (item == EntityRelationDatasetResultSetMetadata.Column.TARGET_RELATION_ID) return Messages.getString("AdvancedLabelProviderImpl.EntityRelationDatasetColTrgRelation", l); //$NON-NLS-1$
+		if (item == EntityRelationDatasetResultSetMetadata.Column.GROUP_NAME) return Messages.getString("AdvancedLabelProviderImpl.EntityRelationDatasetColGroup", l); //$NON-NLS-1$
+		if (item == EntityRelationDatasetResultSetMetadata.Column.GROUP_KEY) return Messages.getString("AdvancedLabelProviderImpl.EntityRelationDatasetColGroupKey", l); //$NON-NLS-1$
+		if (item == EntityRelationDatasetResultSetMetadata.Column.RELATIONSHIP_TYPE) return  Messages.getString("AdvancedLabelProviderImpl.EntityRelationDatasetColRtype", l); //$NON-NLS-1$
+		if (item == EntityRelationDatasetResultSetMetadata.Column.RELATIONSHIP_TYPE_KEY) return Messages.getString("AdvancedLabelProviderImpl.EntityRelationDatasetColRtypeKey", l); //$NON-NLS-1$
 		
-		if (item == RecordAttachmentDatasetResultSetMetadata.Column.RECORD_UUID) return "Record UUID";
-		if (item == RecordAttachmentDatasetResultSetMetadata.Column.FILE_NAME) return "Name";
-		if (item == RecordAttachmentDatasetResultSetMetadata.Column.DATE_CREATED) return "Date Created";
-		if (item == RecordAttachmentDatasetResultSetMetadata.Column.PATH) return "Path";
+		if (item == RecordAttachmentDatasetResultSetMetadata.Column.RECORD_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityAttachmentDatasetColRecord", l); //$NON-NLS-1$
+		if (item == RecordAttachmentDatasetResultSetMetadata.Column.FILE_NAME) return Messages.getString("AdvancedLabelProviderImpl.EntityAttachmentDatasetColName", l); //$NON-NLS-1$
+		if (item == RecordAttachmentDatasetResultSetMetadata.Column.DATE_CREATED) return Messages.getString("AdvancedLabelProviderImpl.EntityAttachmentDatasetColDateCreated", l); //$NON-NLS-1$
+		if (item == RecordAttachmentDatasetResultSetMetadata.Column.PATH) return Messages.getString("AdvancedLabelProviderImpl.EntityAttachmentDatasetColPath", l); //$NON-NLS-1$
 		
-		if (item == RecordAttributeDatasetResultSetMetadata.Column.RECORD_UUID) return "Record UUID";
-		if (item == RecordAttributeDatasetResultSetMetadata.Column.ATTRIBUTE) return "Attribute Name";
-		if (item == RecordAttributeDatasetResultSetMetadata.Column.TEXT) return "Attribute Value";
-		if (item == RecordAttributeDatasetResultSetMetadata.Column.STRING_VALUE) return "String Value";
-		if (item == RecordAttributeDatasetResultSetMetadata.Column.NUMBER_VALUE) return "Number Value";
-		if (item == RecordAttributeDatasetResultSetMetadata.Column.DATE_VALUE) return "Date Value";
+		if (item == RecordAttributeDatasetResultSetMetadata.Column.RECORD_UUID) return Messages.getString("AdvancedLabelProviderImpl.RecordAttributeDatasetColRecordUuid", l); //$NON-NLS-1$
+		if (item == RecordAttributeDatasetResultSetMetadata.Column.ATTRIBUTE) return Messages.getString("AdvancedLabelProviderImpl.RecordAttributeDatasetColName", l); //$NON-NLS-1$
+		if (item == RecordAttributeDatasetResultSetMetadata.Column.TEXT) return Messages.getString("AdvancedLabelProviderImpl.RecordAttributeDatasetColValue", l); //$NON-NLS-1$
+		if (item == RecordAttributeDatasetResultSetMetadata.Column.STRING_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordAttributeDatasetStrValue", l); //$NON-NLS-1$
+		if (item == RecordAttributeDatasetResultSetMetadata.Column.NUMBER_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordAttributeDatasetColNumberValue", l); //$NON-NLS-1$
+		if (item == RecordAttributeDatasetResultSetMetadata.Column.DATE_VALUE) return Messages.getString("AdvancedLabelProviderImpl.RecordAttributeDatasetColDateValue", l); //$NON-NLS-1$
 		
-		if (item == RecordDatasetResultSetMetadata.Column.UUID) return "UUID";
-		if (item == RecordDatasetResultSetMetadata.Column.TITLE) return "Title";
-		if (item == RecordDatasetResultSetMetadata.Column.DESCRIPTION) return "Description";
-		if (item == RecordDatasetResultSetMetadata.Column.SCRATCHPAD) return "Scatchpad";
-		if (item == RecordDatasetResultSetMetadata.Column.CREATED_BY) return "Created By";
-		if (item == RecordDatasetResultSetMetadata.Column.LAST_MODIFIED_BY) return "Last Modified By";
-		if (item == RecordDatasetResultSetMetadata.Column.CREATED) return "Date Created";
-		if (item == RecordDatasetResultSetMetadata.Column.LAST_MODIFIED) return "Date Last Modified";
-		if (item == RecordDatasetResultSetMetadata.Column.STATUS) return "Status";
-		if (item == RecordDatasetResultSetMetadata.Column.STATUS_KEY) return "Status Key";
-		if (item == RecordDatasetResultSetMetadata.Column.SOURCE) return "Record Source";
-		if (item == RecordDatasetResultSetMetadata.Column.SOURCE_ICON) return "Record Source Image";
+		if (item == RecordDatasetResultSetMetadata.Column.UUID) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColuuid", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.TITLE) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColTitle", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.DESCRIPTION) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColDescription", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.SCRATCHPAD) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColScratchPad", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.CREATED_BY) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColCreatedBy", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.LAST_MODIFIED_BY) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetModBy", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.CREATED) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColCreated", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.LAST_MODIFIED) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColMod", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.STATUS) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColStatus", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.STATUS_KEY) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColStatusKey", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.SOURCE) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColSrc", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.SOURCE_ICON) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColSrcImg", l); //$NON-NLS-1$
 		
 		
-		if (item.equals(EntityDatasetMetadata.class)) return "Intelligence Entity Types";
-		if (item.equals(EntityLocationAttributeDatasetMetadata.class)) return "Intelligence Entity Location Attributes";
-		if (item.equals(EntityAttachmentDatasetMetadata.class)) return "Intelligence Entity Locations";
-		if (item.equals(EntityLocationDatasetMetadata.class)) return "IntelligenceLabelProviderImpl_EntityLocationDsName";
-		if (item.equals(EntityRecordDatasetMetadata.class)) return "Intelligence Entity Records";
-		if (item.equals(EntityRelationDatasetMetadata.class)) return "Intelligence Entity Relationships";
-		if (item.equals(RecordMetadata.class)) return "Intelligence Records";
+		if (item.equals(EntityDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityDataset", l); //$NON-NLS-1$
+		if (item.equals(EntityLocationAttributeDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationAttributes", l); //$NON-NLS-1$
+		if (item.equals(EntityAttachmentDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityAttachment", l); //$NON-NLS-1$
+		if (item.equals(EntityLocationDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityLocations", l); //$NON-NLS-1$
+		if (item.equals(EntityRecordDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityRecords", l); //$NON-NLS-1$
+		if (item.equals(EntityRelationDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityRelation", l); //$NON-NLS-1$
+		if (item.equals(RecordMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.RecordMetadata", l); //$NON-NLS-1$
 	
 		return ""; //$NON-NLS-1$
 	}

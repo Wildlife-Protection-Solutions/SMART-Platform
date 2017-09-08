@@ -30,7 +30,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
 
 /**
  * This represents entities with simple uuid field.
@@ -69,7 +68,6 @@ public class ConnectUuidItem {
 	@Id
 	@GeneratedValue(generator="uuid")
 	@GenericGenerator(name= "uuid", strategy="uuid2")
-	@Type(type = "pg-uuid")
 	public UUID getUuid() {
 		return uuid;
 	}

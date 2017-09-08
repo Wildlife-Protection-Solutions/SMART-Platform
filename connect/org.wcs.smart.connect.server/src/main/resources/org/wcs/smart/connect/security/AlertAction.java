@@ -97,7 +97,7 @@ public class AlertAction implements ISmartConnectAction{
 	
 	
 	@Override
-	public String getResourceName(UUID resource, Session s, Locale l) {
+	public String getResourceName(String actionKey, UUID resource, Session s, Locale l) {
 		if (resource == null) return Messages.getString("CaAction.AllCas", l); //$NON-NLS-1$
 		ConservationAreaInfo info = s.get(ConservationAreaInfo.class, resource);
 		if (info == null) return resource.toString();

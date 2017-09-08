@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +39,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.i2.ConnectIntelObservationResultItem;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
 import org.wcs.smart.i2.query.IQueryColumn;
+import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -142,9 +142,9 @@ public class CsvExporter {
 				writer.writeNext(data);
 				
 				//get data and write
-				ResultSet rs = results.getResultSet(session);
-				while(rs.next()) {
-					ConnectIntelObservationResultItem resultItem = results.asResultItem(rs,  session);
+				PagedResultSetIterator rs = results.iterator(session);
+				while(rs.hasNext()) {
+					ConnectIntelObservationResultItem resultItem = (ConnectIntelObservationResultItem) rs.next();;
 					data = new String[cols.size()];
 					for (int i = 0; i < cols.size(); i ++){
 						data[i] = results.getValueAsString(resultItem, cols.get(i), l, session);
