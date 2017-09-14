@@ -171,72 +171,77 @@ public class ReportApi extends HttpServlet{
 			}else{
 				conservationAreas.add(report.getConservationArea());
 			}
+		}finally {
+			s.getTransaction().rollback();
+		}
 				
-			try{
-				IReportEngine engine = BirtEngine.getBirtEngine(context);
-				java.nio.file.Path reportFile = FileSystems.getDefault().getPath(
-					report.getConservationArea().getFileDataStoreLocation(),
-					Report.REPORT_DIR,
-					report.getFilename());
+		try{
+			IReportEngine engine = BirtEngine.getBirtEngine(context);
+			java.nio.file.Path reportFile = FileSystems.getDefault().getPath(
+				report.getConservationArea().getFileDataStoreLocation(),
+				Report.REPORT_DIR,
+				report.getFilename());
 
 			
-				try(InputStream inStream = Files.newInputStream(reportFile)){
+			try(InputStream inStream = Files.newInputStream(reportFile)){
 					final IReportRunnable design = engine.openReportDesign(inStream);
 					
-					try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
-						RenderOption options ;
-						if (rformat == ReportFormat.HTML){
-							options = new HTMLRenderOption();
-							((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images"); //$NON-NLS-1$
-							((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images")); //$NON-NLS-1$
-							options.setOutputFormat(HTMLRenderOption.HTML);
-						}else{
-							options = new RenderOption();
-							options.setEmitterID(rformat.getEmitterId());
-						}
-						options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
-						options.setImageHandler(new HTMLServerImageHandler());
-						options.setOutputStream(bos);
+				try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
+					RenderOption options ;
+					if (rformat == ReportFormat.HTML){
+						options = new HTMLRenderOption();
+						((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images"); //$NON-NLS-1$
+						((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images")); //$NON-NLS-1$
+						options.setOutputFormat(HTMLRenderOption.HTML);
+					}else{
+						options = new RenderOption();
+						options.setEmitterID(rformat.getEmitterId());
+					}
+					options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+					options.setImageHandler(new HTMLServerImageHandler());
+					options.setOutputStream(bos);
 		
-						IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal() == null ? "" : request.getUserPrincipal().getName()); //$NON-NLS-1$
+					IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal() == null ? "" : request.getUserPrincipal().getName()); //$NON-NLS-1$
 		
-						Map<Object,Object> items = task.getAppContext();
-						items.put(BirtConstants.SESSION_PARAM, HibernateManager.getSession(context, request.getLocale()));
-						items.put(SmartConnection.LOCALE_CONTEXT_VAR, request.getLocale());
-						items.put(BirtConstants.CA_PARAM, report.getConservationArea());
-						items.put(ServerSmartConnection.CCAA_FILTER_KEY, conservationAreas);
-						items.put(ServerSmartConnection.CURRENT_USER_KEY, request.getUserPrincipal().getName());
+					Session reportSession = HibernateManager.getSession(context, request.getLocale());
 						
-						try{
-							Map<String, Object> parameters = new HashMap<String, Object>();
+					Map<Object,Object> items = task.getAppContext();
+					items.put(BirtConstants.SESSION_PARAM, reportSession);
+					items.put(SmartConnection.LOCALE_CONTEXT_VAR, request.getLocale());
+					items.put(BirtConstants.CA_PARAM, report.getConservationArea());
+					items.put(ServerSmartConnection.CCAA_FILTER_KEY, conservationAreas);
+					items.put(ServerSmartConnection.CURRENT_USER_KEY, request.getUserPrincipal().getName());
+						
+					reportSession.beginTransaction();
+					try{
+						Map<String, Object> parameters = new HashMap<String, Object>();
 							//put all the non-constant parameters in the hashmap
 
-							covertParametersToMap(parameters, parameterList, s, uuid);
+						covertParametersToMap(parameters, parameterList, reportSession, uuid);
 //							parameters.put("reportUuid", reportUuid);
 //							parameters.put("cafilter", cafilter);
 							
-							task.setRenderOption(options);
-							task.setParameterValues(parameters);
-							task.run();
-						}finally{
-							task.close();
-						}
-					
-						if(rformat != ReportFormat.HTML){
-							return writeBinary(bos, rformat, report);
-						}else{
-							String html = bos.toString(StandardCharsets.UTF_8.name());
-							return writeHtml(html);
-						}
+						task.setRenderOption(options);
+						task.setParameterValues(parameters);
+						task.run();
+					}finally{
+						reportSession.getTransaction().rollback();
+						task.close();
+					}
+				
+					if(rformat != ReportFormat.HTML){
+						return writeBinary(bos, rformat, report);
+					}else{
+						String html = bos.toString(StandardCharsets.UTF_8.name());
+						return writeHtml(html);
 					}
 				}
-			}catch(Exception ex){
-				logger.log(Level.SEVERE, ex.getMessage(), ex);
-				throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, Messages.getString("ReportApi.ReportError", request.getLocale()) + ex.getMessage());  //$NON-NLS-1$
 			}
-		}finally{
-			s.getTransaction().rollback();
+		}catch(Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, Messages.getString("ReportApi.ReportError", request.getLocale()) + ex.getMessage());  //$NON-NLS-1$
 		}
+		
 	}
 	
 	private Response writeBinary(ByteArrayOutputStream bos, ReportFormat outFormat, Report r){

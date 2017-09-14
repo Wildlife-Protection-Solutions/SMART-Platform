@@ -118,6 +118,18 @@ UPDATE connect.connect_plugin_version SET version = '2.0' WHERE plugin_id = 'org
 UPDATE connect.ca_plugin_version SET version = '2.0' WHERE plugin_id = 'org.wcs.smart.i2';
 
 
+CREATE OR REPLACE FUNCTION smart.metaphoneContains(metaphone varchar(4), searchstring varchar) RETURNS boolean AS $$
+DECLARE
+	part varchar;
+BEGIN
+	IF (metaphone IS NULL OR searchstring IS NULL) THEN RETURN false; END IF;
+	FOREACH PART IN ARRAY string_to_array(searchstring, ' ')
+	LOOP
+    		IF (metaphone = part) THEN RETURN TRUE; END IF;
+	END LOOP;
+	RETURN FALSE;
+END;
+$$LANGUAGE plpgsql;
 
 
 --TRIGGERS FOR CHANGELOG

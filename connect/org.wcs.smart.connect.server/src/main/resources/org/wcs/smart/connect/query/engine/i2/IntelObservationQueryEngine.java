@@ -208,6 +208,7 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 			{"observation_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"location_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"source_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_status", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_title", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_id", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -255,7 +256,7 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " + newTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" ( " + insert.toString() + ")" ); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("SELECT o.uuid, a.location_uuid, r.uuid, r.status, r.title, l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
+		sb.append("SELECT o.uuid, a.location_uuid, r.uuid, r.source_uuid, r.status, r.title, l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
 		sb.append(select);
 		sb.append(" FROM " + observationTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" JOIN smart.i_location l on a.location_uuid = l.uuid "); //$NON-NLS-1$

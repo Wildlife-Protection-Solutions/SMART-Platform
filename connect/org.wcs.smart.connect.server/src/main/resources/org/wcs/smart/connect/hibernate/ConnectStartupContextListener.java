@@ -291,6 +291,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 	
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
+				
 		System.setProperty("org.eclipse.emf.common.util.ReferenceClearingQueue", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		System.setProperty("org.geotools.referencing.forceXY", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		

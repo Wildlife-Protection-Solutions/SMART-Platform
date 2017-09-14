@@ -29,6 +29,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import org.hibernate.type.PostgresUUIDType;
+import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.datastore.DataStoreManager;
@@ -139,6 +141,8 @@ public class SmartContextListener implements ServletContextListener{
 		
 		SmartContext.INSTANCE.setClass(IIntelObservationQueryEngine.class, new IntelObservationQueryEngine());
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new IntelConnectionFactory());
+		
+		SmartContext.INSTANCE.setClass(UUIDBinaryType.class, PostgresUUIDType.INSTANCE);
 		
 		/* filestore configurations */
 		SmartContext.INSTANCE.setTempFilestoreLocation((File)arg0.getServletContext().getAttribute(ServletContext.TEMPDIR));

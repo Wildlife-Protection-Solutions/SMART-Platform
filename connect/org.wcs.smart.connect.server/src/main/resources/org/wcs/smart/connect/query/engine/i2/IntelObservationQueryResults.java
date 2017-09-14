@@ -47,6 +47,7 @@ import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.columns.QueryColumnUtils;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.FilterQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn;
@@ -219,6 +220,11 @@ public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryR
 		item.setRecordUuid(asUuid(rowData[columnNameToIndex.get("record_uuid")])); //$NON-NLS-1$
 		item.setRecordStatus((String)rowData[columnNameToIndex.get("record_status")]); //$NON-NLS-1$
 		item.setRecordTitle((String)rowData[columnNameToIndex.get("record_title")]); //$NON-NLS-1$
+		
+		UUID recordSourceUuid = asUuid(rowData[columnNameToIndex.get("source_uuid")]); //$NON-NLS-1$
+		if (recordSourceUuid != null) {
+			item.setRecordSource(session.get(IntelRecordSource.class, recordSourceUuid));
+		}
 		
 		item.setLocationId((String)rowData[columnNameToIndex.get("loc_id")]); //$NON-NLS-1$
 		item.setLocationDate((Timestamp)rowData[columnNameToIndex.get("loc_datetime")]); //$NON-NLS-1$
