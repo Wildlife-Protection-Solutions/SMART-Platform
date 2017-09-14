@@ -201,6 +201,12 @@
             <command
                   commandId="org.wcs.smart.connect.server.changelog.syncmulti"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.connect.separator4"

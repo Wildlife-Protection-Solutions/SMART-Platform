@@ -248,7 +248,7 @@ public class SmartStartUp {
 						session.beginTransaction();
 						try {
 							Query<Employee> e = session.createQuery("FROM Employee WHERE conservationArea = :ca and upper(smartUserId) = :id", Employee.class); //$NON-NLS-1$
-							e.setParameter("conservationArea", ca); //$NON-NLS-1$
+							e.setParameter("ca", ca); //$NON-NLS-1$
 							e.setParameter("id", users.get(0).getSmartUserId().toUpperCase()); //$NON-NLS-1$
 							ccaaUser = e.uniqueResult();
 							
@@ -360,16 +360,21 @@ public class SmartStartUp {
 	
 	
 	private static void recordLogin(Employee e, ConservationArea ca) {
-		Session s = HibernateManager.openSession();
-		s.beginTransaction();
-		LoginLogEntry l = new LoginLogEntry();
-		l.setCaId(ca.getId());
-		l.setCaName(ca.getName());
-		l.setSmartUserId(e.getSmartUserId());
-		l.setUserLevels(e.getSmartUserLevelKeys());
-		s.save(l);
-		s.getTransaction().commit();
-		s.close();
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				LoginLogEntry l = new LoginLogEntry();
+				l.setCaId(ca.getId());
+				l.setCaName(ca.getName());
+				l.setSmartUserId(e.getSmartUserId());
+				l.setUserLevels(e.getSmartUserLevelKeys());
+				s.save(l);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				SmartPlugIn.log(ex.getMessage(),  ex);
+				s.getTransaction().rollback();
+			}
+		}
 		
 	}
 		
