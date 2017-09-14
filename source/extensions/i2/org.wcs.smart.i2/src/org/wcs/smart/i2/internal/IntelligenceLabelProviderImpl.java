@@ -38,6 +38,8 @@ import org.wcs.smart.i2.birt.entity.records.EntityRecordDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetResultSetMetadata;
+import org.wcs.smart.i2.birt.entity.search.EntitySearchDataset;
+import org.wcs.smart.i2.birt.entity.search.EntitySearchDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
 import org.wcs.smart.i2.birt.record.RecordAttributeDatasetResultSetMetadata;
 import org.wcs.smart.i2.birt.record.RecordDataset;
@@ -57,6 +59,7 @@ import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.export.CsvQueryExporter;
 import org.wcs.smart.i2.query.export.ShpQueryExporter;
+import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -117,6 +120,8 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.LOC_ID) return Messages.IntelligenceLabelProviderImpl_IDColumnLabel;
 		if (item == FixedQueryColumn.Column.RECORD_STATUS) return Messages.IntelligenceLabelProviderImpl_StatusColumnLabel;
 		if (item == FixedQueryColumn.Column.RECORD_TITLE) return Messages.IntelligenceLabelProviderImpl_TitleColumnLabel;
+		if (item == FixedQueryColumn.Column.RECORD_SOURCE) return Messages.IntelligenceLabelProviderImpl_Source;
+
 						
 		if (item == IntelRecord.Status.NEW) return Messages.IntelligenceLabelProviderImpl_RecordUnprocessedLabel;
 		if (item == IntelRecord.Status.PROCESSING) return Messages.IntelligenceLabelProviderImpl_RecordInProgressLabel;
@@ -173,6 +178,19 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == EntityDatasetResultSetMetadata.Column.CREATED_BY) return Messages.IntelligenceLabelProviderImpl_EntityRsCreatedByColumn;
 		if (item == EntityDatasetResultSetMetadata.Column.MODIFIED_BY) return Messages.IntelligenceLabelProviderImpl_EntityRsLastModifiedByColumn;
 		if (item == EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE) return Messages.IntelligenceLabelProviderImpl_EntityRsPrimaryKeyColumn;
+		
+		if (item == EntitySearchDataset.NOT_FOUND_KEY) return Messages.IntelligenceLabelProviderImpl_SearchNotFound;
+		
+		if (item == EntitySearchDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.IntelligenceLabelProviderImpl_EntityRsEntityUUIDColumn;
+		if (item == EntitySearchDatasetResultSetMetadata.Column.ID) return Messages.IntelligenceLabelProviderImpl_EntityRsEntityIDColumn;
+		if (item == EntitySearchDatasetResultSetMetadata.Column.TYPE_KEY) return Messages.IntelligenceLabelProviderImpl_EntityRsEntityTypeKeyColumn;
+		if (item == EntitySearchDatasetResultSetMetadata.Column.TYPE) return Messages.IntelligenceLabelProviderImpl_EntityRsEntityTypeColumn;
+		if (item == EntitySearchDatasetResultSetMetadata.Column.DATE_CREATED) return Messages.IntelligenceLabelProviderImpl_EntityRsDateCreatedColumn;
+		if (item == EntitySearchDatasetResultSetMetadata.Column.DATE_MODIFIED) return Messages.IntelligenceLabelProviderImpl_EntityRsDateModifiedColumn;
+		if (item == EntitySearchDatasetResultSetMetadata.Column.CREATED_BY) return Messages.IntelligenceLabelProviderImpl_EntityRsCreatedByColumn;
+		if (item == EntitySearchDatasetResultSetMetadata.Column.MODIFIED_BY) return Messages.IntelligenceLabelProviderImpl_EntityRsLastModifiedByColumn;
+		if (item == EntitySearchDatasetResultSetMetadata.Column.PRIMARY_IMAGE) return Messages.IntelligenceLabelProviderImpl_EntityRsPrimaryKeyColumn;
+		
 		
 		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsEntityUUIDColumn;
 		if (item == EntityLocationAttributeDatasetResultSetMetadata.Column.ATTRIBUTE_KEY) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsAttributeKeyColumn;
@@ -243,6 +261,10 @@ public class IntelligenceLabelProviderImpl implements
 		if (item.equals(EntityRelationDatasetMetadata.class)) return Messages.IntelligenceLabelProviderImpl_EntityRelationDsName;
 		if (item.equals(RecordMetadata.class)) return Messages.IntelligenceLabelProviderImpl_DefaultRecordDatasetName;
 	
+		if (item.equals(AdvancedEntitySearch.Error.ATTRIBUTE_TYPE_NOT_SUPPORTED)) return Messages.IntelligenceLabelProviderImpl_AdvIntelEntitySearchParseError;
+		if (item.equals(AdvancedEntitySearch.Error.PARSE_ERROR)) return Messages.IntelligenceLabelProviderImpl_AdvIntelEntitySearchRunError;
+		if (item.equals(AdvancedEntitySearch.Error.RUN_ERROR)) return Messages.IntelligenceLabelProviderImpl_AdvIntelEntitySearchAttributeTypeNotFoundError;
+		if (item.equals(AdvancedEntitySearch.Error.TOKEN_NOT_SUPPORTED)) return Messages.IntelligenceLabelProviderImpl_AdvIntelEntitySearchTokenNotSupportedError;
 		return ""; //$NON-NLS-1$
 	}
 	

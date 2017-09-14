@@ -149,27 +149,7 @@ public class EntityComparisonEditor extends EditorPart{
 		((GridLayout)parent.getLayout()).verticalSpacing = 0;
 		((GridLayout)parent.getLayout()).horizontalSpacing = 0;
 		toolkit.adapt(parent);
-		
-		//TODO: when we merge entities
-//		if (IntelSecurityManager.INSTANCE.canEditEntity()){
-//			Hyperlink l = toolkit.createHyperlink(parent, "Merge...", SWT.NONE);
-//			l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-//			
-//			l.addHyperlinkListener(new IHyperlinkListener() {
-//				@Override
-//				public void linkExited(HyperlinkEvent e) {
-//				}
-//				
-//				@Override
-//				public void linkEntered(HyperlinkEvent e) {
-//				}
-//				
-//				@Override
-//				public void linkActivated(HyperlinkEvent e) {
-//					MessageDialog.openInformation(getSite().getShell(), "TODO", "TODO: implement a dialog where users can pick which attributes to use in merged entity");
-//				}
-//			});
-//		}
+
 		table = new EntityComparisonTable(parent);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		addDropTarget(parent);

@@ -625,6 +625,7 @@ public class Messages extends NLS {
 	public static String IntelEntityLocationWizardPage_SelectType;
 	public static String IntelEntityRecordWizardPage_SelectType;
 	public static String IntelEntityRelationWizardPage_SelectType;
+	public static String IntelEntitySearchWizardPage_unauthorized;
 	public static String IntelEntityService_DefaultName;
 	public static String IntelEntityService_Title;
 	public static String IntelEntityServiceInfo_description;
@@ -638,6 +639,11 @@ public class Messages extends NLS {
 	public static String IntelligenceDatabaseUpgrader_TaskName;
 	public static String IntelligenceDataSourceWizardPage_NotConfigurable;
 	public static String IntelligenceDataSourceWizardPage_Title;
+	public static String IntelligenceDataSourceWizardPage_unauthorized;
+	public static String IntelligenceLabelProviderImpl_AdvIntelEntitySearchAttributeTypeNotFoundError;
+	public static String IntelligenceLabelProviderImpl_AdvIntelEntitySearchParseError;
+	public static String IntelligenceLabelProviderImpl_AdvIntelEntitySearchRunError;
+	public static String IntelligenceLabelProviderImpl_AdvIntelEntitySearchTokenNotSupportedError;
 	public static String IntelligenceLabelProviderImpl_AndLabel;
 	public static String IntelligenceLabelProviderImpl_AnyLabel;
 	public static String IntelligenceLabelProviderImpl_BetweenLabel;
@@ -746,7 +752,9 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnUUID;
 	public static String IntelligenceLabelProviderImpl_RecordsWorkingSetLabel;
 	public static String IntelligenceLabelProviderImpl_RecordUnprocessedLabel;
+	public static String IntelligenceLabelProviderImpl_SearchNotFound;
 	public static String IntelligenceLabelProviderImpl_ShapefileLabel;
+	public static String IntelligenceLabelProviderImpl_Source;
 	public static String IntelligenceLabelProviderImpl_StatusColumnLabel;
 	public static String IntelligenceLabelProviderImpl_StrEqualsLabel;
 	public static String IntelligenceLabelProviderImpl_TextAttributeName;
@@ -800,6 +808,7 @@ public class Messages extends NLS {
 	public static String IntelQueryWizardPage_message;
 	public static String IntelQueryWizardPage_queryRequired;
 	public static String IntelQueryWizardPage_unauthorized;
+	public static String IntelRecordAttachmentsWizardPage_RecordAttachmentsDatasetName;
 	public static String IntelRecordAttributesWizardPage_message;
 	public static String IntelRecordAttributesWizardPage_Name;
 	public static String IntelRecordAttributesWizardPage_NotConfigurable;
@@ -809,7 +818,9 @@ public class Messages extends NLS {
 	public static String IntelRecordDetailsWizardPage_Name;
 	public static String IntelRecordDetailsWizardPage_NoConfOptions;
 	public static String IntelRecordDetailsWizardPage_unauthorized;
+	public static String IntelRecordEntityLinkWizardPage_RecordEntityLinksDatasetName;
 	public static String IntelRecordGeoResourceInfo_Title;
+	public static String IntelRecordLocationWizardPage_RecordLocationsDatasetName;
 	public static String IntelRecordService_DefaultName;
 	public static String IntelRecordServiceInfo_Description;
 	public static String IntelRecordServiceInfo_keyword1;
@@ -823,6 +834,7 @@ public class Messages extends NLS {
 	public static String IntelReportManager_EntityPositionAttributeDatasetName;
 	public static String IntelReportManager_EntityRecordDatasetName;
 	public static String IntelReportManager_EntityRelationshipDatasetName;
+	public static String IntelReportManager_EntitySearchesDatasetName;
 	public static String IntelReportManager_RecordAttachmentsDatasetName;
 	public static String IntelReportManager_RecordAttributeDatasetName;
 	public static String IntelReportManager_RecordDatasetName;

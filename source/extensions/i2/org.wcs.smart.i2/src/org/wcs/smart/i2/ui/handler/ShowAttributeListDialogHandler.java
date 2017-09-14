@@ -84,7 +84,6 @@ public class ShowAttributeListDialogHandler extends ShowDialogHandler {
 		super.execute(activeShell, context);
 		
 		//refresh all record editors
-		//TODO: consider events instead;
 		for (MPart part : partService.getParts()){
 			Object x = E3Utils.getSourceObject(part);
 			if (x instanceof RecordEditor){

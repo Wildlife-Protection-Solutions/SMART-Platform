@@ -81,18 +81,6 @@ public abstract class DropItem {
 			widget = null;
 		}
 	}
-	
-//	/**
-//	 * Moves this drop item to a new panel.
-//	 * 
-//	 * @param newPanel new drop item panel
-//	 */
-//	public void moveParent(IDefinitionPanel newPanel){
-//		//TODO: not necessarily supported on all os's
-//		widget.setParent(newPanel.getDropTargetComposite());
-//		targetPanel = newPanel;
-//	}
-	
 	/**
 	 * @return the drop item widget or null
 	 * if widget not created

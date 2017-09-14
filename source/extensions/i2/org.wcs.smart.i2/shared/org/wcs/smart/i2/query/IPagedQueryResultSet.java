@@ -24,7 +24,6 @@ package org.wcs.smart.i2.query;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 
 import com.vividsolutions.jts.geom.Envelope;

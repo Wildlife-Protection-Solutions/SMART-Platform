@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.birt.datasource.ui;
 
 import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Record attachments wizard page.
@@ -43,6 +44,6 @@ public class IntelRecordAttachmentsWizardPage extends IntelRecordDetailsWizardPa
 
 	@Override
 	public String getName(){
-		return "Record Attachments";
+		return Messages.IntelRecordAttachmentsWizardPage_RecordAttachmentsDatasetName;
 	}
 }

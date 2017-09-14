@@ -23,8 +23,6 @@ package org.wcs.smart.i2.query;
 
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.internal.ScrollableResultsImpl;
-import org.hibernate.query.NativeQuery;
 
 /**
  * Query result set iterator

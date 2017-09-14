@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.birt.datasource.ui;
 
 import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Record locations wizard page
@@ -43,6 +44,6 @@ public class IntelRecordLocationWizardPage extends IntelRecordDetailsWizardPage 
 
 	@Override
 	public String getName(){
-		return "Record Locations";
+		return Messages.IntelRecordLocationWizardPage_RecordLocationsDatasetName;
 	}
 }

@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.i2.search;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Locale;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelEntity;
 
 /**
@@ -55,10 +59,11 @@ public interface IIntelEntitySearch {
 	/**
 	 * Perform the search
 	 * @param session
+	 * @param locale
 	 * @param monitor
 	 * @return
 	 */
-	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor);
+	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception;
 	
 	/**
 	 * Serialize the search for saving the search to the database.
@@ -85,9 +90,35 @@ public interface IIntelEntitySearch {
 				it.getPrimaryAttachment().getCopyFromLocation();
 				it.getPrimaryAttachment().computeFileLocation(session);
 			} catch (Exception e) {
-				Intelligence2PlugIn.log("Unable to compute attachment location", e); //$NON-NLS-1$
+//				Intelligence2PlugIn.log("Unable to compute attachment location", e); //$NON-NLS-1$
+				//TODO: log this
+				e.printStackTrace();
 			}
 		}
 		return it;
+	}
+	
+	/**
+	 * Parses the search string into a basic or advanced entity search, searching the 
+	 * given conservation area.
+	 * 
+	 * @param searchString
+	 * @param ca
+	 * @return
+	 */
+	public static IIntelEntitySearch parseSearchString(String searchString, Collection<ConservationArea> cas) {
+		if (searchString.startsWith(IIntelEntitySearch.Type.BASIC.key + IIntelEntitySearch.SEPARATOR)){
+			//basic search
+			return BasicEntitySearch.parse(searchString, cas);
+		}else if (searchString.startsWith(IIntelEntitySearch.Type.ADVANCED.key + IIntelEntitySearch.SEPARATOR)){
+			//advanced search
+			return AdvancedEntitySearch.parse(searchString, cas);
+		}
+		
+		return null;
+	}
+	
+	public static IIntelEntitySearch parseSearchString(String searchString, ConservationArea ca) {
+		return parseSearchString(searchString, Collections.singletonList(ca));
 	}
 }

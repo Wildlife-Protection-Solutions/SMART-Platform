@@ -52,6 +52,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
@@ -228,10 +229,19 @@ public class RecordXmlExporter {
 					attachment.getAttachment().computeFileLocation(session);
 					AttachmentType xmlAttachment = factory.createAttachmentType();
 					xmlAttachment.setFilename(attachment.getAttachment().getFilename());
-					//TODO: entity attachments
-					
 					xmlRecord.getAttachments().add(xmlAttachment);
 					attachmentsToInclude.add(attachment.getAttachment().getAttachmentFile());
+					
+					//entity attachments
+					for (IntelEntityRecord entity : record.getEntities()){
+						for (IntelEntityAttachment ea : entity.getEntity().getEntityAttachments()){
+							if (!ea.getAttachment().equals(attachment.getAttachment())) continue;
+							LabelUuid entityAttachment = new LabelUuid();
+							entityAttachment.setUuid(UuidUtils.uuidToString(entity.getEntity().getUuid()));
+							xmlAttachment.getEntities().add(entityAttachment);
+						}
+					}
+					
 				}
 			}
 			

@@ -58,7 +58,7 @@ public class IntelligenceDataSourceWizardPage extends DataSourceWizardPage {
 			lbl.setText(Messages.IntelligenceDataSourceWizardPage_NotConfigurable);
 		}else {
 			Label lbl = new Label(arg0, SWT.NONE);
-			lbl.setText("Unauthorized - you are not authorized to use this data source");
+			lbl.setText(Messages.IntelligenceDataSourceWizardPage_unauthorized);
 			setPageComplete(false);
 		}
 		setTitle(Messages.IntelligenceDataSourceWizardPage_Title);
@@ -86,7 +86,7 @@ public class IntelligenceDataSourceWizardPage extends DataSourceWizardPage {
             	if (canAccessDataSource()) {
             		PingJob.PingUIJob.showTestConnectionMessage( getShell(), null );	
             	}else {
-            		PingJob.PingUIJob.showTestConnectionMessage( getShell(), new Exception("Unauthorized - You are unathorized to access the intelligence data source") );	
+            		PingJob.PingUIJob.showTestConnectionMessage( getShell(), new Exception(Messages.IntelligenceDataSourceWizardPage_unauthorized) );	
             	}
                 
             }

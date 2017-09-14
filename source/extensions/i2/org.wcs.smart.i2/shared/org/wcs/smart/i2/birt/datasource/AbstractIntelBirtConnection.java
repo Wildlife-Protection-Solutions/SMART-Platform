@@ -52,6 +52,7 @@ import org.wcs.smart.i2.birt.entity.records.EntityRecordDataset;
 import org.wcs.smart.i2.birt.entity.records.EntityRecordDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDataset;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetMetadata;
+import org.wcs.smart.i2.birt.entity.search.EntitySearchDataset;
 import org.wcs.smart.i2.birt.query.IntelQueryDataset;
 import org.wcs.smart.i2.birt.record.RecordAttributeDataset;
 import org.wcs.smart.i2.birt.record.RecordDataset;
@@ -222,6 +223,8 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 			return new RecordMetadata(this, dataSetType);
 		}else if (dataSetType.equals(IntelQueryDataset.DATASET_TYPE)){
 			return new RecordMetadata(this, dataSetType);
+		}else if (dataSetType.equals(EntitySearchDataset.DATASET_TYPE)){
+			return new RecordMetadata(this, dataSetType);
 		}
 		throw new OdaException(
 				MessageFormat.format("Dataset {0} not supported by SMART", //$NON-NLS-1$
@@ -257,6 +260,8 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 				return new RecordAttachmentDataset(this);
 			}else if (dataSetType.equals(IntelQueryDataset.DATASET_TYPE)) {
 				return new IntelQueryDataset(this);
+			}else if (dataSetType.equals(EntitySearchDataset.DATASET_TYPE)){
+				return new EntitySearchDataset(this);
 			}
 			throw new OdaException(
 					MessageFormat.format("Dataset {0} not supported by SMART", //$NON-NLS-1$

@@ -22,8 +22,10 @@
 package org.wcs.smart.i2.search;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -36,8 +38,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 
@@ -55,7 +56,13 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	private String searchString = null;
 	private List<String> entityTypes = null;
 	
-	public static BasicEntitySearch parse(String queryString){
+	private Collection<ConservationArea> cas;
+	
+	public static BasicEntitySearch parse(String queryString, ConservationArea ca){
+		return parse(queryString, Collections.singleton(ca));
+	}
+	
+	public static BasicEntitySearch parse(String queryString, Collection<ConservationArea> cas){
 		String[] bits = queryString.split(SEPARATOR);
 		if (!bits[0].equals(Type.BASIC.key)) return null; //not a basic search
 		
@@ -69,7 +76,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			types = bits[3].split(":"); //$NON-NLS-1$
 		}
 		
-		BasicEntitySearch search = new BasicEntitySearch(searchString, maxResultsCnt);
+		BasicEntitySearch search = new BasicEntitySearch(searchString, maxResultsCnt, cas);
 		if (types != null){
 			search.entityTypes = new ArrayList<>();
 			for (String t : types){
@@ -81,17 +88,30 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	
 
 	
-	public BasicEntitySearch(String searchString){
+	public BasicEntitySearch(String searchString, Collection<ConservationArea> cas){
 		this.searchString = searchString;
+		this.cas = cas;
 	}
 	
-	public BasicEntitySearch(String searchString, int maxResults){
-		this(searchString);
+	public BasicEntitySearch(String searchString, ConservationArea ca){
+		this(searchString, Collections.singleton(ca));
+	}
+	
+	public BasicEntitySearch(String searchString, int maxResults, Collection<ConservationArea> cas){
+		this(searchString, cas);
 		this.maxResultCnt = maxResults;
 	}
 	
-	public BasicEntitySearch(String searchString, List<IntelEntityType> entityTypeFilter){
-		this(searchString);
+	public BasicEntitySearch(String searchString, int maxResults, ConservationArea ca){
+		this(searchString, maxResults, Collections.singleton(ca));
+	}
+	
+	public BasicEntitySearch(String searchString, List<IntelEntityType> entityTypeFilter, ConservationArea ca){
+		this(searchString, entityTypeFilter, Collections.singleton(ca));
+	}
+	
+	public BasicEntitySearch(String searchString, List<IntelEntityType> entityTypeFilter, Collection<ConservationArea> cas){
+		this(searchString, cas);
 		this.entityTypes = new ArrayList<String>();
 		entityTypeFilter.forEach(e -> entityTypes.add(e.getKeyId()));
 	}
@@ -108,23 +128,22 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
 	 * to call done() on the given monitor
 	 */
-	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor){
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.BasicEntitySearch_taskName, maxResultCnt);
+	public IntelSearchResult doSearch(Session session, Locale l, IProgressMonitor monitor){
+		SubMonitor progress = SubMonitor.convert(monitor, maxResultCnt);
 		Long now = System.nanoTime();
 		
 		if (searchString != null && searchString.length() > 0){
 			//perform fuzzy search
 			
-			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, session);
+			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, cas, session);
 			List<UUID> allUuids = new ArrayList<>();
 			
 			int toLoad = Math.min(sresults.size(), maxResultCnt);
 			for (int i = 0; i < toLoad; i ++){
+				progress.split(1);
 				IntelEntity it = (IntelEntity) session.get(IntelEntity.class, sresults.get(i).getEntityUuid());
 				lazyLoadEntity(it, session);
 				sresults.get(i).setEntity(it);
-				progress.worked(1);
-				progress.checkCanceled();
 			}
 			sresults.forEach(e->allUuids.add(e.getEntityUuid()));
 			
@@ -132,32 +151,18 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		}
 
 		if (searchString == null || searchString.isEmpty()){
-			
-			
 			CriteriaBuilder cb = session.getCriteriaBuilder();
-			
-//			CriteriaQuery<Long> c2 = cb.createQuery(Long.class);
-//			Root<IntelEntity> from2 = c2.from(IntelEntity.class);
-//			List<Predicate> filters = new ArrayList<>();
-//			filters.add(cb.equal(from2.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
-//			if (entityTypes != null && !entityTypes.isEmpty()){
-//				filters.add(from2.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
-//				
-//			}
-//			c2.where(cb.and(filters.toArray(new Predicate[filters.size()])));			
-//			c2.select(cb.count(from2));
-//			Long maxCnt = session.createQuery(c2).uniqueResult();
 			
 			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
 			Root<IntelEntity> from = c.from(IntelEntity.class);
 			c.select(from);
 			ArrayList<Predicate> filters = new ArrayList<>();
-			filters.add(cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$
+			filters.add(from.get("conservationArea").in(this.cas)); //$NON-NLS-1$
 			if (entityTypes != null && !entityTypes.isEmpty()){
 				filters.add(from.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
-			Query<IntelEntity> q = session.createQuery(c);//.setMaxResults(maxResultCnt);
+			Query<IntelEntity> q = session.createQuery(c);
 			
 			List<UUID> allUuids = new ArrayList<>();
 			
@@ -166,25 +171,21 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 				while(r.next()) {
 					IntelEntity it = (IntelEntity) r.get()[0];
 					if(results.size() < maxResultCnt) {
+						progress.split(1);
 						lazyLoadEntity(it, session);
 						IntelSearchResultItem result = new IntelSearchResultItem(it.getUuid(),"", 1.0); //$NON-NLS-1$
 						result.setEntity(it);
 						results.add(result);
-						progress.worked(1);
-						progress.checkCanceled();
 					}
 					allUuids.add(it.getUuid());
 				}
 			}
-			
 			return new IntelSearchResult(allUuids, results, System.nanoTime() - now);
 		}
 		//should never get here
 		return new IntelSearchResult(Collections.emptyList(), Collections.emptyList(), 0);
 	}
-	
-
-	
+		
 	@Override
 	public String serialize(){
 		StringBuilder sb = new StringBuilder();
@@ -200,25 +201,4 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		return sb.toString();
 	}
 	
-	
-	public BasicEntitySearch deserialize(String search){
-		String[] bits = search.split(":"); //$NON-NLS-1$
-		if (bits.length < 2) return null;
-		if (!bits[0].equals("basic")) return null; //$NON-NLS-1$
-		
-		
-		int maxCnt = Integer.parseInt(bits[1]);
-		String searchString = bits[2];
-		
-		BasicEntitySearch basicSearch = new BasicEntitySearch(searchString, maxCnt);
-		if (bits.length >= 3){
-			basicSearch.entityTypes = new ArrayList<>();
-		}
-		for (int i = 3; i < bits.length; i ++){
-			String entityKey = bits[i];
-			basicSearch.entityTypes.add(entityKey);
-		}
-		
-		return basicSearch;
-	}
 }

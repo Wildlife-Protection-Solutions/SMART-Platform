@@ -68,6 +68,7 @@ import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -115,6 +116,7 @@ public class RecordXmlImporter {
 	//records and entity locations to save
 	private List<IntelRecord> records;
 	private HashMap<IntelRecord, List<IntelEntityLocation>> entityLocations;
+	private HashMap<IntelRecord, List<IntelEntityAttachment>> entityAttachments;
 	//list of warnings
 	private HashMap<Path, List<String>> allWarnings;
 	//temporary directories to cleanup after attachments imported
@@ -125,6 +127,7 @@ public class RecordXmlImporter {
 		this.session = session;
 		records = new ArrayList<IntelRecord>();
 		entityLocations = new HashMap<>();
+		entityAttachments = new HashMap<>();
 		allWarnings = new HashMap<Path, List<String>>();
 		tempDirs = new ArrayList<Path>();
 	}
@@ -178,8 +181,6 @@ public class RecordXmlImporter {
 	 * @return if something was saved; false if the uesr cancelled
 	 */
 	public boolean finish(IEventBroker broker){
-		
-		
 		ArrayList<IntelRecord> loaded = new ArrayList<>();
 		ArrayList<IntelRecord> deleted = new ArrayList<>();
 		ArrayList<IntelEntity> modified = new ArrayList<>();
@@ -254,6 +255,14 @@ public class RecordXmlImporter {
 		if (r.getAttachments() != null){
 			for (IntelRecordAttachment recordAttachment : r.getAttachments()){
 				session.saveOrUpdate(recordAttachment.getAttachment());
+			}
+		}
+		
+		List<IntelEntityAttachment> attachments = entityAttachments.get(r);
+		if (attachments != null) {
+			for (IntelEntityAttachment entityAttachment : attachments){
+				session.saveOrUpdate(entityAttachment);
+				modified.add(entityAttachment.getEntity());
 			}
 		}
 		
@@ -404,7 +413,6 @@ public class RecordXmlImporter {
 			}
 
 			if (type.getAttachments() != null && !type.getAttachments().isEmpty()) {
-				// TODO: entity links?
 				if (isZip) {
 					newRecord.setAttachments(new ArrayList<IntelRecordAttachment>());
 					for (AttachmentType xmlAttachment : type.getAttachments()) {
@@ -420,6 +428,20 @@ public class RecordXmlImporter {
 						attach.setAttachment(newAttachment);
 						attach.setRecord(newRecord);
 						newRecord.getAttachments().add(attach);
+						
+						List<IntelEntityAttachment> newAttachments = new ArrayList<>();
+						for (LabelUuid entityUuid : xmlAttachment.getEntities()) {
+							for (IntelEntityRecord entityRecord : newRecord.getEntities()) {
+								if (entityRecord.getEntity().getUuid().equals(UuidUtils.stringToUuid(entityUuid.getUuid()))) {
+									IntelEntityAttachment entityAttachment = new IntelEntityAttachment();
+									entityAttachment.setAttachment(newAttachment);
+									entityAttachment.setEntity(entityRecord.getEntity());
+									newAttachments.add(entityAttachment);
+									break;
+								}
+							}
+						}
+						entityAttachments.put(newRecord, newAttachments);
 					}
 				}else {
 					if (!type.getAttachments().isEmpty()) {

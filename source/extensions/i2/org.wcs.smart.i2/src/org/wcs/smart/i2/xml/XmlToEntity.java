@@ -290,7 +290,6 @@ public class XmlToEntity {
 				//TODO: look to reuse ?  likely impossible although I supposed we could compare files byte of byte??
 				IntelAttachment attachment = new IntelAttachment();
 				attachment.setDateCreated(new Date());
-				//TODO: if must be user from ca
 				attachment.setCreatedBy(SmartDB.getCurrentEmployee());
 				attachment.setConservationArea(ca);
 				attachment.setCopyFromLocation(rootPath.resolve(xmlAttachment.getFilename()).toFile());

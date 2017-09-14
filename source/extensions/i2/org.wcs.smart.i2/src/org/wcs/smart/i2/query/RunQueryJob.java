@@ -92,8 +92,13 @@ public abstract class RunQueryJob extends Job {
 		
 		IPagedQueryResultSet results = null;
 		try(Session session = HibernateManager.openSession()){
-			parameters.put(Session.class.getName(), session);
-			results = (new IntelObservationQueryEngine()).executeQuery(query, parameters);	
+			session.beginTransaction();
+			try {
+				parameters.put(Session.class.getName(), session);
+				results = (new IntelObservationQueryEngine()).executeQuery(query, parameters);
+			}finally {
+				session.getTransaction().commit();
+			}
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(Messages.RunQueryJob_error + ex.getMessage(), ex);
 			onError(ex);

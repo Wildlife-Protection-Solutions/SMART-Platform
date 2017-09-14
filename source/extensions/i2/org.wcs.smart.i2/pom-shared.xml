@@ -39,17 +39,37 @@
           		<groupId>net.sf.opencsv</groupId>
           		<artifactId>opencsv</artifactId>
         		<version>2.3</version>
-       	</dependency>
-       	<dependency>
+       		</dependency>
+	       	<dependency>
            		<groupId>org.geotools</groupId>
            		<artifactId>gt-shapefile</artifactId>
-       		<version>${geotools.version}</version>
-       	</dependency> 
-       	<dependency>
-		    <groupId>commons-codec</groupId>
-    		<artifactId>commons-codec</artifactId>
-    		<version>1.9</version>
+       			<version>${geotools.version}</version>
+       		</dependency> 
+       		<dependency>
+			<groupId>commons-codec</groupId>
+    			<artifactId>commons-codec</artifactId>
+    			<version>1.9</version>
 		</dependency>
+		<dependency>
+    			<groupId>info.debatty</groupId>
+    			<artifactId>java-string-similarity</artifactId>
+    			<version>0.24</version>
+		</dependency>
+		<!-- sub monitor requirements for searches -->
+		<!--<dependency>
+		    <groupId>org.eclipse.scout.sdk.deps</groupId>
+		    <artifactId>org.eclipse.equinox.common</artifactId>
+		    <version>3.8.0.v20160509-1230</version>
+		    <scope>provided</scope>
+		</dependency>-->
+			<dependency>
+    		<groupId>org.eclipse.scout.sdk.deps</groupId>
+    		<artifactId>org.eclipse.ui.workbench</artifactId>
+    		<version>3.108.0.v20160602-1232</version>
+    		<scope>provided</scope>
+	</dependency>
 	</dependencies>
+	
+
 	
 </project>

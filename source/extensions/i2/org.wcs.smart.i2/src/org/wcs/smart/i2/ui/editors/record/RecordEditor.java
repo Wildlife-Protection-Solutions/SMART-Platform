@@ -455,8 +455,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			//entity deleted
 			subscribeToEvent(IntelEvents.ENTITY_DELETE, (event)->{
 				if (isDirty){
-					//TODO: try to just remove this entity link; 
-					//for now just a warning; note payload could be single intel entity or collection or entities
+					//for now just a warning
 					MessageDialog.openWarning(getSite().getShell(), Messages.RecordEditor_WarningDialogTitle, MessageFormat.format(Messages.RecordEditor_WarningDialogMsg, getEditorInput().getName()) );
 				}else{
 					//refresh the entire editor

@@ -119,17 +119,14 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 						PropertyHandle odaDataSetParameterProp = handle
 								.getPropertyHandle(OdaDataSetHandle.PARAMETERS_PROP);
 						List<?> items = odaDataSetParameterProp.getItems();
-						for (Iterator<?> iterator = items.iterator(); iterator
-								.hasNext();) {
-							OdaDataSetParameter parameter = (OdaDataSetParameter) iterator
-									.next();
-							if (parameter.getName().equals(
-									SmartReportParameters.PARAM_START_DATE_KEY)
-									|| parameter
-											.getName()
-											.equals(SmartReportParameters.PARAM_END_DATE_KEY)) {
-								parameter.setDefaultValue(""); //$NON-NLS-1$
-								parameter.setParamName(parameter.getName());
+						if (items != null) {
+							for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
+								OdaDataSetParameter parameter = (OdaDataSetParameter) iterator.next();
+								if (parameter.getName().equals(SmartReportParameters.PARAM_START_DATE_KEY)
+										|| parameter.getName().equals(SmartReportParameters.PARAM_END_DATE_KEY)) {
+									parameter.setDefaultValue(""); //$NON-NLS-1$
+									parameter.setParamName(parameter.getName());
+								}
 							}
 						}
 						

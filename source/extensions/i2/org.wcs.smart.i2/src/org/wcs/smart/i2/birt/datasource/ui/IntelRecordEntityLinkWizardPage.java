@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.birt.datasource.ui;
 
 import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
+import org.wcs.smart.i2.internal.Messages;
 
 /**
  * Wizard page for intel record entity links
@@ -42,6 +43,6 @@ public class IntelRecordEntityLinkWizardPage  extends IntelRecordDetailsWizardPa
 
 	@Override
 	public String getName(){
-		return "Record Entity Links";
+		return Messages.IntelRecordEntityLinkWizardPage_RecordEntityLinksDatasetName;
 	}
 }

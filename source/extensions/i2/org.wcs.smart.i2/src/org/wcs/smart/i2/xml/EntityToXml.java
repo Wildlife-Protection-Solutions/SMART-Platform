@@ -223,8 +223,7 @@ public class EntityToXml {
 					try {
 						attach.getAttachment().computeFileLocation(session);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						Intelligence2PlugIn.log(e.getMessage(), e);
 					}
 					xmlAttachment.setFilename(attach.getAttachment().getFilename());
 					xmlAttachment.setDescription(attach.getAttachment().getDescription());

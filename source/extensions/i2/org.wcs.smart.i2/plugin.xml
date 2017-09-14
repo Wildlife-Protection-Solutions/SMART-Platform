@@ -1836,6 +1836,60 @@
                odaScalarDataType="JavaObject">
          </dataTypeMapping>
       </dataSet>
+      <dataSet
+            defaultDisplayName="Saved Entity Search"
+            id="org.wcs.smart.i2.birt.dataset.entity.search">
+         <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+      </dataSet>
    </extension>
    
    <extension
@@ -2007,6 +2061,19 @@
                 displayName="Advanced Intelligence Queries"
                 id="org.wcs.smart.i2.birt.ui.dataset.query.wizard.page.list"
                 wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelQueryWizardPage">
+          </dataSetPage>
+       </dataSetUI>
+       <dataSetUI
+             id="org.wcs.smart.i2.birt.dataset.entity.search"
+             supportsInParameters="true"
+             supportsOutParameters="false">
+          <dataSetWizard
+                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+                windowTitle="Advanced Intelligence Entity Searches"></dataSetWizard>
+          <dataSetPage
+                displayName="Advanced Intelligence Entity Search"
+                id="org.wcs.smart.i2.birt.ui.dataset.query.wizard.page.list"
+                wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelEntitySearchWizardPage">
           </dataSetPage>
        </dataSetUI>
    </extension>

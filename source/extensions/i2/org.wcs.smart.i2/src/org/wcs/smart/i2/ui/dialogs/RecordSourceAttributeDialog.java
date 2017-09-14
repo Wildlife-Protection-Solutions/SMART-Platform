@@ -333,7 +333,6 @@ public class RecordSourceAttributeDialog extends TitleAreaDialog{
 						}
 						((IntelRecordSourceAttribute) element).setName(null);
 					}else{
-						//TODO: also add to default language;
 						IntelRecordSourceAttribute e = (IntelRecordSourceAttribute)element;
 						e.updateName(SmartDB.getCurrentLanguage(), (String)value);
 						e.setName((String)value);

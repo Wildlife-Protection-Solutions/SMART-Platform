@@ -441,17 +441,14 @@ public class EntitySearchView {
 			search = (IntelEntitySearch)s.get(IntelEntitySearch.class, ((SearchProxy)x).getUuid());
 		}
 		if (search == null) return; //not found
-		
-		String searchString = search.getSearchString();
-		if (searchString.startsWith(IIntelEntitySearch.Type.BASIC.key + IIntelEntitySearch.SEPARATOR)){
-			//basic search
-			BasicEntitySearch basicsearch = BasicEntitySearch.parse(searchString);
-			setSearch(basicsearch);
+		IIntelEntitySearch iSearch = IIntelEntitySearch.parseSearchString(search.getSearchString(), search.getConservationArea());
+		if (iSearch instanceof BasicEntitySearch) {
+			setSearch((BasicEntitySearch)iSearch);
 			updateHyperlink(new HyperlinkEvent(basicSearch, null, null, -1));
 			doSearch(null, searchDelay);
-		}else if (searchString.startsWith(IIntelEntitySearch.Type.ADVANCED.key + IIntelEntitySearch.SEPARATOR)){
+		}else if (iSearch instanceof AdvancedEntitySearch){
 			//advanced search
-			AdvancedEntitySearch advsearch = AdvancedEntitySearch.parse(searchString);
+			AdvancedEntitySearch advsearch = (AdvancedEntitySearch) iSearch;
 			advancedSearchPanel.initPanel(advsearch);
 			updateHyperlink(new HyperlinkEvent(advancedSearch, null, null, -1));
 			advancedSearchPanel.doSearch();
@@ -624,7 +621,7 @@ public class EntitySearchView {
 			}
 			
 		}
-		BasicEntitySearch search = new BasicEntitySearch(txtSearch.getPatternFilter(), filters);
+		BasicEntitySearch search = new BasicEntitySearch(txtSearch.getPatternFilter(), filters, SmartDB.getCurrentConservationArea());
 		return search;
 	}
 	

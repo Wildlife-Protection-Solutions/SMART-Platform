@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.search;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +36,11 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.codec.language.DoubleMetaphone;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
-import org.wcs.smart.hibernate.SmartDB;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StringType;
+import org.hibernate.type.UUIDBinaryType;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.util.UuidUtils;
 
@@ -50,8 +54,8 @@ public enum SearchManager {
 	private static final Levenshtein LEVENSHTEIN_DISTANCE = new Levenshtein();
 	private static final DoubleMetaphone DOUBLE_METAPHONE = new DoubleMetaphone();
 	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+"); //$NON-NLS-1$
-	
-	public List<IntelSearchResultItem> fuzzySearch(String searchFor, List<String> typeKeys, Session session){
+		
+	public List<IntelSearchResultItem> fuzzySearch(String searchFor, List<String> typeKeys, Collection<ConservationArea> conservationAreas, Session session){
 		
 		Map<UUID, IntelSearchResultItem> results = new HashMap<>();
 
@@ -64,20 +68,17 @@ public enum SearchManager {
 		});
 		
 
-		List<byte[]> types = null;
+		List<UUID> types = null;
 		if (typeKeys != null && !typeKeys.isEmpty()){
 			 CriteriaBuilder cb = session.getCriteriaBuilder();
 			 CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
 			 Root<IntelEntityType> from = c.from(IntelEntityType.class);
 			 c.where(cb.and(
-					 from.get("conservationArea").in(SmartDB.getConservationAreaConfiguration().getConservationAreas()), //$NON-NLS-1$
+					 from.get("conservationArea").in(conservationAreas), //$NON-NLS-1$
 					 from.get("keyId").in(typeKeys) //$NON-NLS-1$
 					 ));
 			 List<IntelEntityType> stypes = session.createQuery(c).getResultList();
-			 
-			 types = stypes.stream()
-					.map(iet -> UuidUtils.uuidToByte(iet.getUuid()))
-					.collect(Collectors.toList());
+			 types = stypes.stream().map(iet->iet.getUuid()).collect(Collectors.toList());
 		}
 				
 		StringBuilder sql = new StringBuilder();
@@ -111,8 +112,12 @@ public enum SearchManager {
 		}
 
 		// create the query and parameters
-		Query<?> q = session.createNativeQuery(sql.toString());
-		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
+		NativeQuery<?> q = session.createNativeQuery(sql.toString());
+		//these two lines are required to get this to work
+		//on Connect with the postgresql libraries
+		q.addScalar("string_value", StringType.INSTANCE);
+		q.addScalar("entity_uuid", SmartContext.INSTANCE.getClass(UUIDBinaryType.class));
+		q.setParameterList("cas", conservationAreas); //$NON-NLS-1$
 		if (types != null){
 			q.setParameterList("types", types); //$NON-NLS-1$
 		}
@@ -127,7 +132,12 @@ public enum SearchManager {
 		for (Object rr : items){
 			Object[] row = (Object[])rr;
 			String fullstring = (String)row[0];
-			UUID uuid = UuidUtils.byteToUUID((byte[])row[1]);
+			UUID uuid = null;
+			if (row[1] instanceof UUID) {
+				uuid = (UUID)row[1];
+			}else if(row[1] instanceof byte[]) {
+				uuid = UuidUtils.byteToUUID((byte[])row[1]);
+			}
 			Double value = 0.0;
 			if (searchFor.equalsIgnoreCase(fullstring)){
 				value = 1.0;

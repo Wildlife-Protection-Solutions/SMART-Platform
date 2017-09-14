@@ -19,13 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.birt.entity;
+package org.wcs.smart.i2.birt.entity.search;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
@@ -33,20 +29,16 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
-import org.wcs.smart.i2.IntelHibernateManager;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 
 /**
- * Entity dataset result set metadata
+ * Entity search dataset result set metadata
  * 
  * @author Emily
  *
  */
-public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
+public class EntitySearchDatasetResultSetMetadata implements IResultSetMetaData {
 	
 	public static enum Column{
 		ENTITY_UUID("entity:entity_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
@@ -66,12 +58,15 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 			this.id = id;
 			this.type = type;
 		}
+		
 		public String getColumnName(Locale l){
 			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 		}
+		
 		public String getId(){
 			return this.id;
 		}
+		
 		public Object getValue(IntelEntity entity, Locale l) throws IOException {
 			if (this == ENTITY_UUID) return entity.getUuid();
 			if (this == ID) return entity.getIdAttributeAsText(l);
@@ -90,47 +85,11 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 			return null;
 		}
 	}
-	
-	private List<String> attributeColumnNames;
-	private List<String> attributeColumnLabels;
-	private List<IntelEntityTypeAttribute> attributes;
+
 	private Locale l;
 	
-	public EntityDatasetResultSetMetadata(IntelEntityType type, Locale l){
+	public EntitySearchDatasetResultSetMetadata(Locale l){
 		this.l = l;
-		HashSet<String> fixedLabels = new HashSet<>();
-		for (Column c : Column.values()){
-			fixedLabels.add(c.getColumnName(l));
-		}
-		if (type.getAttributes() == null){
-			attributes = Collections.emptyList();
-		}else{
-			attributes = type.getAttributes();
-		}
-			
-		Collections.sort(attributes, (a,b)->{
-			if (a.getOrder() == b.getOrder()) {
-				return a.getAttribute().getKeyId().compareTo(b.getAttribute().getKeyId());
-			}
-			return Integer.compare(a.getOrder(), b.getOrder());
-		});
-		
-		attributeColumnNames = new ArrayList<String>(attributes.size());
-		attributeColumnLabels = new ArrayList<String>(attributes.size());
-		for (IntelEntityTypeAttribute attribute : attributes){
-			String corelabel = attribute.getAttribute().getName();
-			String name = "attribute:" + attribute.getAttribute().getKeyId(); //$NON-NLS-1$
-			
-			attributeColumnNames.add(name);
-			int add = 1;
-			String label = corelabel;
-			while(attributeColumnLabels.contains(label) || fixedLabels.contains(label)){
-				label = corelabel + "_" + add; //$NON-NLS-1$
-				add++;
-			}
-			attributeColumnLabels.add(label);
-		}
-		
 	}
 	
 	/**
@@ -139,7 +98,6 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public int getColumnCount() throws OdaException {
 		int cnt = Column.values().length;
-		cnt += attributes.size();
 		return cnt;
 	}
 
@@ -156,12 +114,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		if (index < Column.values().length) return Column.values()[index-1].getColumnName(l);
-		index = index - Column.values().length;
-		if (index < attributes.size()){
-			return attributeColumnLabels.get(index);
-		}
-		return Column.PRIMARY_IMAGE.getColumnName(l);
+		return Column.values()[index-1].getColumnName(l);
 	}
 
 	/**
@@ -169,12 +122,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		if (index < Column.values().length) return Column.values()[index-1].id;
-		index = index - Column.values().length;
-		if (index < attributes.size()){
-			return attributeColumnNames.get(index);
-		}
-		return Column.PRIMARY_IMAGE.id;
+		return Column.values()[index-1].id;
 	}
 
 	/**
@@ -182,13 +130,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnType(int index) throws OdaException {
-		if (index <= 8) return Column.values()[index-1].type;
-		index = index - 9;
-		if (index < attributes.size()){
-			AttributeType attType = attributes.get(index).getAttribute().getType();
-			return IntelHibernateManager.getAttributeSqlType(attType);
-		}
-		return Column.PRIMARY_IMAGE.type;
+		return Column.values()[index-1].type;
 	}
 
 	/**
@@ -197,7 +139,7 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
 		 int nativeTypeCode = getColumnType( index );
-	     return AbstractIntelBirtConnection.getNativeDataTypeName( nativeTypeCode, EntityDataset.DATASET_TYPE );
+	     return AbstractIntelBirtConnection.getNativeDataTypeName( nativeTypeCode, EntitySearchDataset.DATASET_TYPE );
 	}
 
 	/**

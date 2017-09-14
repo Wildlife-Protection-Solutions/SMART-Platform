@@ -141,7 +141,6 @@ public class SqlGenerator {
 	
 	
 	public static void logString(String string){
-		//TODO:
 		//System.out.println(string);
 	}
 }

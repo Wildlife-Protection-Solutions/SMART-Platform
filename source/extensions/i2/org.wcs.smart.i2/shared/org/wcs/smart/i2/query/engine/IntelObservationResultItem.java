@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.IGeometryResultItem;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 
@@ -40,6 +41,7 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	private UUID observationUuid;
 	private UUID locationUuid;
 	private UUID recordUuid;
+	private IntelRecordSource recordSource;
 	
 	private String recordStatus;
 	private String recordTitle;
@@ -67,6 +69,14 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	}
 	public void setObservationUuid(UUID observationUuid){
 		this.observationUuid = observationUuid;
+	}
+	
+	public void setRecordSource(IntelRecordSource s ) {
+		this.recordSource = s;
+	}
+	
+	public IntelRecordSource getRecordSource() {
+		return this.recordSource;
 	}
 	
 	public String getRecordStatus(){

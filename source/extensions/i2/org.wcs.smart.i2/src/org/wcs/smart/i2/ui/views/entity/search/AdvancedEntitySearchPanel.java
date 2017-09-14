@@ -202,7 +202,7 @@ public class AdvancedEntitySearchPanel extends Composite {
 		}
 		
 		if (search == null){
-			search = new AdvancedEntitySearch();
+			search = new AdvancedEntitySearch(SmartDB.getCurrentConservationArea());
 		}
 		search.setSearchString(searchPanel.getQueryPart());
 		return true;

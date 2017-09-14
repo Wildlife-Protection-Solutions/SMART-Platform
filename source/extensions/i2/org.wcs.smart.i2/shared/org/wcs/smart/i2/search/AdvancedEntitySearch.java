@@ -24,22 +24,27 @@ package org.wcs.smart.i2.search;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.UUID;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.query.Operator;
@@ -54,6 +59,13 @@ import org.wcs.smart.util.SharedUtils;
  */
 public class AdvancedEntitySearch implements IIntelEntitySearch{
 	
+	public enum Error{
+		PARSE_ERROR,
+		RUN_ERROR,
+		ATTRIBUTE_TYPE_NOT_SUPPORTED,
+		TOKEN_NOT_SUPPORTED
+	}
+	
 	private int maxResultCnt = MAX_RESULT_CNT;
 	
 	private String searchString = null;
@@ -62,8 +74,13 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	
 	public static final String ATTRIBUTE_KEY = "a"; //$NON-NLS-1$
 	
+	private Collection<ConservationArea> cas;
 	
-	public static AdvancedEntitySearch parse(String searchString){
+	public static AdvancedEntitySearch parse(String searchString, ConservationArea ca){
+		return parse(searchString, Collections.singleton(ca));
+	}
+	
+	public static AdvancedEntitySearch parse(String searchString, Collection<ConservationArea> cas){
 		String[] bits = searchString.split(SEPARATOR);
 		if (!bits[0].equals(Type.ADVANCED.key)) return null;
 		
@@ -72,15 +89,19 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		if (bits.length >= 3){
 			ss = bits[2];
 		}
-		AdvancedEntitySearch search = new AdvancedEntitySearch();
+		AdvancedEntitySearch search = new AdvancedEntitySearch(cas);
 		search.searchString = ss;
 		search.maxResultCnt = maxCnt;
 		return search;
 	}
 	
 	
-	public AdvancedEntitySearch(){
-		
+	public AdvancedEntitySearch(Collection<ConservationArea> cas){
+		this.cas = cas;
+	}
+	
+	public AdvancedEntitySearch(ConservationArea ca){
+		this(Collections.singleton(ca));
 	}
 	
 	public void setSearchString(String searchString){
@@ -96,12 +117,16 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	 * to call done() on the given monitor
 	 */
 	@Override
-	public IntelSearchResult doSearch(Session session, IProgressMonitor monitor) {
+	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception {
 		
 		if (searchString == null || searchString.trim().isEmpty()){
 			Long now = System.nanoTime();
 			
-			Query<IntelEntity> q = QueryFactory.buildQuery(session, IntelEntity.class, "conservationArea", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+			CriteriaBuilder cb = session.getCriteriaBuilder();
+			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
+			Root<IntelEntity> from = c.from(IntelEntity.class);
+			c.where(from.get("conservationArea").in(cas)); //$NON-NLS-1$
+			Query<IntelEntity> q = session.createQuery(c);
 			List<IntelSearchResultItem> items = new ArrayList<>(maxResultCnt);
 			List<UUID> allResults = new ArrayList<>();
 			try(ScrollableResults scroll = q.scroll()){
@@ -121,10 +146,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			Long now = System.nanoTime();
 			Query<?> q = null;
 			try{
-				q = parseQueryString(session);
+				q = parseQueryString(session, locale);
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(Messages.AdvancedEntitySearch_ParseError + ex.getMessage(), ex);
-				return new IntelSearchResult(Collections.emptyList(), Collections.emptyList(), 0);
+				throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.PARSE_ERROR, locale), ex.getMessage())  ,ex);
 			}
 			try{
 				List<?> uuids = q.list();
@@ -143,8 +167,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				IntelSearchResult results = new IntelSearchResult(allUuids, items, (done - now));
 				return results;
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(Messages.AdvancedEntitySearch_ExecuteError + ex.getMessage(), ex);
-				return new IntelSearchResult(Collections.emptyList(), Collections.emptyList(), 0);
+				throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.RUN_ERROR, locale), ex.getMessage()), ex);
 			}
 		}
 	}
@@ -162,7 +185,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	}
 
 	
-	private Query<?> parseQueryString(Session session) throws Exception{
+	private Query<?> parseQueryString(Session session, Locale locale) throws Exception{
 		String stokens[] = searchString.split("\\|"); //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
@@ -191,8 +214,8 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		HashMap<String, Object> params = new HashMap<>();
 		
 		sb.append(" WHERE "); //$NON-NLS-1$
-		sb.append(" ie.conservationArea = :ca AND ( "); //$NON-NLS-1$
-		params.put("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		sb.append(" ie.conservationArea in (:ca) AND ( "); //$NON-NLS-1$
+		params.put("ca", this.cas); //$NON-NLS-1$
 		
 		for (String t : stokens){
 			t = t.trim();
@@ -279,11 +302,11 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					params.put(pname, listKey);
 					sb.append(" ) "); //$NON-NLS-1$
 				}else{
-					throw new Exception(MessageFormat.format(Messages.AdvancedEntitySearch_AttributeTypeNotSupported, bits[1]));
+					throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.ATTRIBUTE_TYPE_NOT_SUPPORTED, locale), bits[1]));
 				}
-				
 			}else{
-				throw new Exception(MessageFormat.format(Messages.AdvancedEntitySearch_UnsupportedToken, t));
+				throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.TOKEN_NOT_SUPPORTED, locale), t));
+				
 			}
 		}
 		sb.append(" ) "); //$NON-NLS-1$
@@ -291,7 +314,11 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		//System.out.println(sb.toString());
 		Query<?> q = session.createQuery(sb.toString());
 		for (Entry<String,Object> param : params.entrySet()){
-			q.setParameter(param.getKey(), param.getValue());
+			if (param.getValue() instanceof Collection) {
+				q.setParameterList(param.getKey(), (Collection<?>)param.getValue());
+			}else {
+				q.setParameter(param.getKey(), param.getValue());
+			}
 		}
 		return q;
 		

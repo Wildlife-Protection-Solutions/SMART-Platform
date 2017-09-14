@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.editors.record;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -52,6 +53,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.search.BasicEntitySearch;
@@ -172,8 +174,8 @@ public class EntitySearchShell extends SmartShellDialog {
 			
 			List<IntelSearchResultItem> entities = new ArrayList<IntelSearchResultItem>();
 			try(Session s = HibernateManager.openSession()){
-				BasicEntitySearch search = new BasicEntitySearch(searchText[0], 50);
-				entities.addAll(search.doSearch(s, new NullProgressMonitor()).getResults());
+				BasicEntitySearch search = new BasicEntitySearch(searchText[0], 50, SmartDB.getCurrentConservationArea());
+				entities.addAll(search.doSearch(s, Locale.getDefault(), new NullProgressMonitor()).getResults());
 			}
 			Display.getDefault().syncExec(() -> {
 				if (tblEntityList.getTable().isDisposed()) return;

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui;
 
+import java.util.Locale;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -29,6 +31,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.search.BasicEntitySearch;
@@ -43,7 +46,7 @@ import org.wcs.smart.i2.search.IntelSearchResult;
  */
 public abstract class EntitySearchJob extends Job{
 
-	private IIntelEntitySearch search = new BasicEntitySearch(null);
+	private IIntelEntitySearch search = new BasicEntitySearch(null, SmartDB.getCurrentConservationArea());
 	
 	public EntitySearchJob() {
 		super(Messages.EntitySearchJob_JobName);
@@ -62,7 +65,9 @@ public abstract class EntitySearchJob extends Job{
 			
 			IntelSearchResult entities = null; 
 			try(Session s = HibernateManager.openSession()){
-				entities = search.doSearch(s, progress.split(1));
+				entities = search.doSearch(s, Locale.getDefault(), progress.split(1));
+			}catch (OperationCanceledException ex) {
+				throw ex;
 			}catch (Exception ex){
 				Intelligence2PlugIn.log(ex.getMessage(), ex);
 				onError(ex);

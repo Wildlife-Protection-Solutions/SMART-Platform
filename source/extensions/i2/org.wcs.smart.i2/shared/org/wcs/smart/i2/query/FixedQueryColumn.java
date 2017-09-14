@@ -28,6 +28,7 @@ import java.util.Locale;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -43,6 +44,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 	public enum Column{
 		RECORD_TITLE("record:title"), //$NON-NLS-1$
 		RECORD_STATUS("record:status"), //$NON-NLS-1$
+		RECORD_SOURCE("record:source"), //$NON-NLS-1$
 		LOC_ID("loc:id"), //$NON-NLS-1$
 		LOC_DATE("loc:date"), //$NON-NLS-1$
 		LOC_TIME("loc:time"), //$NON-NLS-1$
@@ -86,6 +88,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			return i.getLocationDate();
 		case RECORD_STATUS:
 			return IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase());
+		case RECORD_SOURCE:
+			return i.getRecordSource();
 		case RECORD_TITLE:
 			return i.getRecordTitle();
 		}
@@ -112,6 +116,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case LOC_ID:
 			case RECORD_TITLE:
 				return (String)toFormat;
+			case RECORD_SOURCE:
+				return ((IntelRecordSource)toFormat).getName();
 		}
 		return toFormat.toString();
 	}
@@ -135,6 +141,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case LOC_ID:
 			case RECORD_STATUS:
 			case RECORD_TITLE:
+			case RECORD_SOURCE:
 				return Type.STRING;
 		}
 		return Type.STRING;
