@@ -81,11 +81,11 @@ import org.wcs.smart.er.ui.mision.udig.MissionDataSource;
 import org.wcs.smart.er.ui.mision.udig.MissionGeoResource;
 import org.wcs.smart.er.ui.mision.udig.MissionService;
 import org.wcs.smart.er.ui.mision.udig.MissionServiceExtension;
-import org.wcs.smart.er.ui.mision.udig.SplitTool;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
 import org.wcs.smart.ui.map.TracksComposite;
+import org.wcs.smart.ui.map.tool.SplitTrackTool;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
@@ -293,10 +293,10 @@ public class MissionTracksComposite extends TracksComposite {
 	protected void splitTrack(ToolItem splitToolItem) {
 		if (!confirmChanges()) return;
 
-		final SplitTool spTool = (SplitTool) ApplicationGIS.getToolManager().findTool(SplitTool.ID);
+		final SplitTrackTool spTool = (SplitTrackTool) ApplicationGIS.getToolManager().findTool(SplitTrackTool.ID);
 		if (spTool != null){
 
-			spTool.setFinishCommand(new SplitTool.FinishCommand() {
+			spTool.setFinishCommand(new SplitTrackTool.FinishCommand() {
 				
 				@Override
 				public void onFinish(List<Coordinate> points) {
@@ -368,7 +368,7 @@ public class MissionTracksComposite extends TracksComposite {
 				}
 			});
 			setInfo(Messages.TracksComposite_SplitInformation);
-			ApplicationGIS.getToolManager().getToolAction(SplitTool.ID, SplitTool.CATEGORY_ID).run();	
+			ApplicationGIS.getToolManager().getToolAction(SplitTrackTool.ID, SplitTrackTool.CATEGORY_ID).run();	
 		}
 	}
 	

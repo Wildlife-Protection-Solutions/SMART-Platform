@@ -868,24 +868,6 @@
       </FilestoreDirectory>
    </extension>
    <extension
-         point="org.locationtech.udig.project.ui.tool">
-      <modalTool
-            categoryId="org.wcs.smart.udig.maptools"
-            class="org.wcs.smart.er.ui.mision.udig.SplitTool"
-            icon="images/icons/obj16/split_track.png"
-            id="org.wcs.smart.er.track.split"
-            name="%splittrack.modalTool.name"
-            onToolbar="true"
-            tooltip="%splittrack.modalTool.tooltip">
-         <cursor
-               hotspotX="10"
-               hotspotY="10"
-               id="org.wcs.smart.er.track.split.pointer"
-               image="images/pointers/split_pointer.png">
-         </cursor>
-      </modalTool>
-   </extension>
-   <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
             adaptableType="org.wcs.smart.er.ui.mision.udig.SurveyFeature"
