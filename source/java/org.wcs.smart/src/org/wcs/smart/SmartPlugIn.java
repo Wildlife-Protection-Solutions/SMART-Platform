@@ -223,11 +223,11 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	/**
 	 * Track point editor icons
 	 */
-	public static final String IMPORT_TRACK_ICON = "org.wcs.smart.er.track.import"; //$NON-NLS-1$
-	public static final String SPLIT_TRACK_ICON = "org.wcs.smart.er.track.split"; //$NON-NLS-1$
-	public static final String MERGE_TRACK_ICON = "org.wcs.smart.er.track.merge"; //$NON-NLS-1$
-	public static final String EDIT_TRACK_ICON = "org.wcs.smart.er.track.edit"; //$NON-NLS-1$
-	public static final String ZOOM_TRACK_ICON = "org.wcs.smart.er.track.zoom"; //$NON-NLS-1$
+	public static final String IMPORT_TRACK_ICON = "org.wcs.smart.track.import"; //$NON-NLS-1$
+	public static final String SPLIT_TRACK_ICON = "org.wcs.smart.track.split"; //$NON-NLS-1$
+	public static final String MERGE_TRACK_ICON = "org.wcs.smart.track.merge"; //$NON-NLS-1$
+	public static final String EDIT_TRACK_ICON = "org.wcs.smart.track.edit"; //$NON-NLS-1$
+	public static final String ZOOM_TRACK_ICON = "org.wcs.smart.track.zoom"; //$NON-NLS-1$
 	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution

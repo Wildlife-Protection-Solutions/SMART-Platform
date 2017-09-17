@@ -1096,6 +1096,7 @@ public class Messages extends NLS {
 	public static String SmartUtils_ValidationMessage_2;
 	public static String SmartUtils_ValidationMessage_3a;
 	public static String SmartWorkbenchWindowAdvisor_WindowTitle;
+	public static String SplitTrackTool_Error;
 	public static String StartUpAdvancedDialog_DialogContent_Label;
 	public static String StartUpAdvancedDialog_DialogHeader;
 	public static String StartUpAdvancedDialog_DialogTitle;
