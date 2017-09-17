@@ -55,7 +55,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 	private boolean isChanged = false;
 	
 	private MissionDay missionDay;
-	private TracksComposite cmp;
+	private MissionTracksComposite cmp;
 
 	public MissionTrackEditDialog(Shell shell, MissionDay mission) {
 		super(shell);
@@ -81,7 +81,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 				getShell().setText(title);
 				setMessage(Messages.MissionTrackEditDialog_Message);
 	
-				cmp = new TracksComposite(comp, this);
+				cmp = new MissionTracksComposite(comp, this);
 				cmp.addChangeListener(new ISurveyListener() {
 					@Override
 					public void compositeModified() {

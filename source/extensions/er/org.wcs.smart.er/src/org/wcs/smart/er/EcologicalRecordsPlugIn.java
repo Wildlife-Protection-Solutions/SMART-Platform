@@ -78,12 +78,6 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 	public static final String SUEXPORT_ICON = "org.wcs.smart.er.su.export"; //$NON-NLS-1$
 	public static final String SUIMPORT_ICON = "org.wcs.smart.er.su.import"; //$NON-NLS-1$
 	
-	public static final String IMPORT_TRACK_ICON = "org.wcs.smart.er.track.import"; //$NON-NLS-1$
-	public static final String SPLIT_TRACK_ICON = "org.wcs.smart.er.track.split"; //$NON-NLS-1$
-	public static final String MERGE_TRACK_ICON = "org.wcs.smart.er.track.merge"; //$NON-NLS-1$
-	public static final String EDIT_TRACK_ICON = "org.wcs.smart.er.track.edit"; //$NON-NLS-1$
-	public static final String ZOOM_TRACK_ICON = "org.wcs.smart.er.track.zoom"; //$NON-NLS-1$
-	
 	public static final String MISSION_LEADER_ICON = "org.wcs.smart.er.mission.leader"; //$NON-NLS-1$
 	public static final String MISSION_MEMBER_ICON = "org.wcs.smart.er.mission.member"; //$NON-NLS-1$
 	
@@ -160,13 +154,7 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
      	
      	reg.put(MISSION_LEADER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission_leader.png")); //$NON-NLS-1$
      	reg.put(MISSION_MEMBER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/mission_member.png")); //$NON-NLS-1$
-    
-     	reg.put(IMPORT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_track.png")); //$NON-NLS-1$
-     	reg.put(SPLIT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/split_track.png")); //$NON-NLS-1$
-     	reg.put(EDIT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit_track.png")); //$NON-NLS-1$
-     	reg.put(MERGE_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/merge_track.png")); //$NON-NLS-1$
-     	reg.put(ZOOM_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_track.png")); //$NON-NLS-1$
-     	
+
      	reg.put(FILTER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/survey_design_filter.png")); //$NON-NLS-1$
     }
     
