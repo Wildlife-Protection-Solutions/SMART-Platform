@@ -219,6 +219,15 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Refresh icon
 	 */
 	public static final String REFRESH_ICON = "org.wsc.smart.action.refresh"; //$NON-NLS-1$
+
+	/**
+	 * Track point editor icons
+	 */
+	public static final String IMPORT_TRACK_ICON = "org.wcs.smart.er.track.import"; //$NON-NLS-1$
+	public static final String SPLIT_TRACK_ICON = "org.wcs.smart.er.track.split"; //$NON-NLS-1$
+	public static final String MERGE_TRACK_ICON = "org.wcs.smart.er.track.merge"; //$NON-NLS-1$
+	public static final String EDIT_TRACK_ICON = "org.wcs.smart.er.track.edit"; //$NON-NLS-1$
+	public static final String ZOOM_TRACK_ICON = "org.wcs.smart.er.track.zoom"; //$NON-NLS-1$
 	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
@@ -421,6 +430,12 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(CLEAR_SELECTION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/clear_selection.png")); //$NON-NLS-1$
 	     reg.put(REFRESH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/arrow_refresh.png")); //$NON-NLS-1$
 	     reg.put(UNDO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/undo.png")); //$NON-NLS-1$
+	     
+	     reg.put(IMPORT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/import_track.png")); //$NON-NLS-1$
+	     reg.put(SPLIT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/split_track.png")); //$NON-NLS-1$
+	     reg.put(EDIT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/edit_track.png")); //$NON-NLS-1$
+	     reg.put(MERGE_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/merge_track.png")); //$NON-NLS-1$
+	     reg.put(ZOOM_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/zoom_track.png")); //$NON-NLS-1$
 	}
 	
 	/**
