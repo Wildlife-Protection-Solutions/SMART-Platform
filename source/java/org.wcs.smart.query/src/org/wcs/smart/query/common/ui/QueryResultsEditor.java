@@ -56,6 +56,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
@@ -93,11 +94,13 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	protected QueryProxy query;
 	protected QueryResultsTablePage page1;
 	protected QueryMapPageEditor page2;
+	protected QueryResultsImagePage page3;
+	
 	private boolean isDirty = false;
 	private Projection currentPrj = null;
 	private boolean editMode = false;
 	/*
-	 * Listener for changes to area names/ids
+	 * Listener for changes to area names/ids 
 	 */
 	private IAreaModifiedListener areaListener = null;
 	
@@ -122,13 +125,23 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				}
 			}
 			final IProgressMonitor mymonitor = page1.createProgressMonitor();
+			if (page3 != null) page3.setResult(null);
 			try {
 				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor); 
 				if (monitor.isCanceled() || mymonitor.isCanceled()){
 					page1.updateAndShowTable(null);
+//					if (page3 != null) page3.setResult(null);
 					return Status.CANCEL_STATUS;
 				}
 				page1.updateAndShowTable((IPagedQueryResultSet)results);
+				if (page3 != null) {
+					if (results instanceof IPagedImageResultSet) {
+						page3.setResult((IPagedImageResultSet)results);
+					}else {
+						page3.setResult(null);
+					}
+				}
+				
 			} catch (Exception ex) {
 				String message = Messages.QueryResultsEditor_ErrorRunningQuery;
 				if (ex.getCause() != null){
@@ -364,16 +377,25 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		showBusy(true);
 		try {
 			page1 = new QueryResultsTablePage(this);
-			addPage(0, page1, input);
-			setPageText(0, Messages.QueryResultsEditor_TableResultsTabName);
-			setPageImage(0, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
+			int pageIndex = 0;
+			addPage(pageIndex, page1, input);
+			setPageText(pageIndex, Messages.QueryResultsEditor_TableResultsTabName);
+			setPageImage(pageIndex, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
 			page1.updateQueryName();
 			
+			if (displayImagePage()) {
+				pageIndex++;
+				page3 = new QueryResultsImagePage(this);
+				addPage(pageIndex, page3, input);
+				setPageText(pageIndex, Messages.QueryResultsEditor_AttachmentsTabName);
+				setPageImage(pageIndex, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.ATTACHMENT_ICON));
+			}
 			
+			pageIndex++;
 			page2 = new QueryMapPageEditor(this);
-			addPage(1, page2, input);
-			setPageText(1, Messages.QueryResultsEditor_MappedResultsTabName);
-			setPageImage(1, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+			addPage(pageIndex, page2, input);
+			setPageText(pageIndex, Messages.QueryResultsEditor_MappedResultsTabName);
+			setPageImage(pageIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 			
 			setTitleImage(input.getType().getImage());
 			
@@ -723,5 +745,13 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 */
 	protected EditingSupport getEditingSupport(ColumnViewer viewer, QueryColumn column){ 
 		return null;
+	}
+	
+	/**
+	 * true if an image page should be included.  In this case the query results extend IPagedImageResultsProvider
+	 * @return
+	 */
+	protected boolean displayImagePage() {
+		return false;
 	}
 }

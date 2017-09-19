@@ -681,7 +681,6 @@ public class SmartUtils {
 	 */
 	public static Color getListSelectedColor(Display display) {
 		return new Color(display, blend(new RGB(255, 255, 255), display.getSystemColor(SWT.COLOR_LIST_SELECTION).getRGB(), 75));
-		
 	}
 
 	private static RGB blend(RGB c1, RGB c2, int ratio) {

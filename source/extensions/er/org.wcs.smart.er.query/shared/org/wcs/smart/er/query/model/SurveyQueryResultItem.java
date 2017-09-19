@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -550,6 +551,11 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 			Waypoint wp = new Waypoint();
 			wp.setUuid(getWaypointUuid());
 			return (T)wp;
+		}
+		if (adapter.equals(WaypointObservation.class) && getObservationUuid() != null){
+			WaypointObservation wo = new WaypointObservation();
+			wo.setUuid(getObservationUuid());
+			return (T)wo;
 		}
 		return null;
 	}

@@ -48,7 +48,7 @@ import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
-import org.wcs.smart.i2.ui.SmartShellDialog;
+import org.wcs.smart.ui.SmartShellDialog;
 
 /**
  * Shell dialog for displaying details of an intel location.

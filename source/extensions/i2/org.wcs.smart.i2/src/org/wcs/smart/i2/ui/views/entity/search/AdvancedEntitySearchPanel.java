@@ -73,7 +73,6 @@ import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
-import org.wcs.smart.i2.ui.SmartShellDialog;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
@@ -83,6 +82,7 @@ import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem.InputType;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
+import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SharedUtils;
 

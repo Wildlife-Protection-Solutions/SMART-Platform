@@ -45,7 +45,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.ObservationTreeViewer;
-import org.wcs.smart.i2.ui.SmartShellDialog;
+import org.wcs.smart.ui.SmartShellDialog;
 
 /**
  * Shell dialog for displaying details of an intel location.

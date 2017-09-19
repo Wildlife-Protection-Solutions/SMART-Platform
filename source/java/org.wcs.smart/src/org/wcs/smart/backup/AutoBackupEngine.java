@@ -218,6 +218,7 @@ public class AutoBackupEngine {
 	 */
 	private static boolean timerIsExpired(Properties properties, String key){
 		//implement edge cases of  0 = always backup; and  -1 = off
+		if (properties.getProperty(key) == null) return false;
 		double days = Double.valueOf(properties.getProperty(key));
 		if (days < 0) return false;
 		if (daysSinceBackup(properties) >= days || days == 0){

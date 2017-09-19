@@ -46,9 +46,9 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
-import org.wcs.smart.i2.ui.SmartShellDialog;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.EntitySearchView.EntitySearchViewWrapper;
+import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**

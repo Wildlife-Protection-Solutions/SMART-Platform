@@ -46,6 +46,7 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
 import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -309,4 +310,12 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 			}
 		};	
 	}
+	
+	@Override
+	protected boolean displayImagePage() {
+		IQueryType type = ((QueryEditorInput)getEditorInput()).getType();
+		if (type.getKey().equals(PatrolObservationQuery.KEY)) return true;
+		return false;
+	}
+	
 }

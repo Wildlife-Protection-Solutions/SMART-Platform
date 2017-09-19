@@ -461,6 +461,7 @@ public class Messages extends NLS {
 	public static String QueryMapPageEditor_ErrorRefreshing;
 	public static String QueryMapPageEditor_RefreshJobName1;
 	public static String QueryMapPageEditor_UnknownStatus;
+	public static String QueryResultsEditor_AttachmentsTabName;
 	public static String QueryResultsEditor_Error_CouldNotLoad;
 	public static String QueryResultsEditor_Error_CouldNotParse;
 	public static String QueryResultsEditor_Error_DialogTitle;
@@ -471,6 +472,12 @@ public class Messages extends NLS {
 	public static String QueryResultsEditor_MappedResultsTabName;
 	public static String QueryResultsEditor_RunQueryJobName;
 	public static String QueryResultsEditor_TableResultsTabName;
+	public static String QueryResultsImagePage_changeSizeTooltip;
+	public static String QueryResultsImagePage_countLabel;
+	public static String QueryResultsImagePage_LargeIconSize;
+	public static String QueryResultsImagePage_MediumIconSize;
+	public static String QueryResultsImagePage_selectedLabel;
+	public static String QueryResultsImagePage_SmallIconSize;
 	public static String QueryResultsTable_InitQueryResultsTableJobName;
 	public static String RasterService_InvalidRasterStyle;
 	public static String RasterService_keyword1;

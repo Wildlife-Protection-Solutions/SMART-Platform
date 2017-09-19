@@ -58,9 +58,9 @@ import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
-import org.wcs.smart.i2.ui.SmartShellDialog;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
+import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**

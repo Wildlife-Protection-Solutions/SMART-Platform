@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.ui.SmartShellDialog;
 
 /**
  * Pop out an attachment in shell dialog.

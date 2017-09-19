@@ -48,7 +48,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
-import org.wcs.smart.i2.ui.SmartShellDialog;
+import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**

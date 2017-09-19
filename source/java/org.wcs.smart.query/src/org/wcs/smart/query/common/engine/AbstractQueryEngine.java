@@ -306,6 +306,23 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	public abstract boolean canExecute(String querytype);
 	
 	protected boolean checkColumnHasValues(Connection c, String tableName, String columnName) {
+		
+		//see if column exists
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT count(*) "); //$NON-NLS-1$
+		sb.append("FROM sys.SYSSCHEMAS s, sys.systables t, sys.syscolumns c "); //$NON-NLS-1$
+		sb.append(" WHERE s.schemaid = t.schemaid and c.referenceid = t.tableid "); //$NON-NLS-1$
+		sb.append(" and t.tablename = '" + tableName.toUpperCase() + "' and c.columnname = '" + columnName.toUpperCase() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		try(ResultSet rs = c.createStatement().executeQuery(sb.toString())){
+			if (rs.next()) {
+				if (rs.getInt(1) <= 0) return true; //no column in table
+			}else {
+				return true;
+			}
+		} catch (SQLException e) {
+			SmartPlugIn.log(MessageFormat.format("Unexpected error while checking column with name ''{1}'' for values in table ''{0}''.", tableName, columnName), e); //$NON-NLS-1$
+		}
 		try(ResultSet rs = c.createStatement().executeQuery("select count (*) from "+tableName+" where "+columnName+" is not null")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (rs.next()) {
 				int count = rs.getInt(1);

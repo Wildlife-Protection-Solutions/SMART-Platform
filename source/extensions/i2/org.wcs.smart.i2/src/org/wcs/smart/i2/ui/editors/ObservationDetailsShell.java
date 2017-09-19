@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.ObservationTreeViewer;
-import org.wcs.smart.i2.ui.SmartShellDialog;
+import org.wcs.smart.ui.SmartShellDialog;
 
 /**
  * Shell for displaying the observation details of an intel location.

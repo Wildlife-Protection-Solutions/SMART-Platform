@@ -72,12 +72,13 @@ public abstract class QueryLazyResultsTable extends QueryResultsTable {
 			}
 
 			//update tooltip
-			for(QueryTableViewerColumn t : tableViewerColumns){
-				if (t.getColumn().getTooltip() != null){
-					t.getTableColumn().getColumn().setToolTipText(t.getColumn().getTooltip());
+			if (tableViewerColumns != null) {
+				for(QueryTableViewerColumn t : tableViewerColumns){
+					if (t.getColumn().getTooltip() != null){
+						t.getTableColumn().getColumn().setToolTipText(t.getColumn().getTooltip());
+					}
 				}
 			}
-
 		}
 	}
 

@@ -27,7 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.wcs.smart.i2.ui.SmartShellDialog;
+import org.wcs.smart.ui.SmartShellDialog;
 
 /**
  * For the entity editor, adds listeners required to a column view to display

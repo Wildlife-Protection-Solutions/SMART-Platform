@@ -24,16 +24,29 @@ package org.wcs.smart.patrol.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -42,9 +55,13 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
@@ -57,7 +74,11 @@ import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.QueryImageDataImpl;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -74,13 +95,17 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implements IObservationPagedQueryResultSet, IWaypointUpdateableResultSet {
+public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implements IObservationPagedQueryResultSet, IWaypointUpdateableResultSet, IPagedImageResultSet {
 	
 	private int wpCount = 0;
 
 	private boolean hasSortColumns = false;
 	private Set<String> dataColumns = null;
 
+	//image results
+	private String imageTempTable = null;
+	private int imageDataCnt = -1;
+	
 	public DerbyPagedObservationResult(String queryTempTable, DerbyPatrolQueryEngine engine) {
 		super(queryTempTable, engine);
 	}
@@ -704,8 +729,265 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 		}
 		return false;
 	}
-
-
 	
+	@Override
+	public void dispose(Session session)throws SQLException {
+		super.dispose(session);
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				if (imageTempTable != null) engine.dropTable(c, imageTempTable);
+			}
+		});
+	}
 	
+	@Override
+	public List<IQueryImageData> getImageData(int offset, int pageSize) {
+		
+		if (imageTempTable == null) {
+			initImageData();
+		}
+		
+		final String imageSql = "SELECT * FROM " + imageTempTable ;  //$NON-NLS-1$
+			
+		List<IQueryImageData>  imageData = new ArrayList<>();
+		try(Session session = HibernateManager.openSession()){
+		
+			ResultSet imageResultSet = session.doReturningWork(new ReturningWork<ResultSet>() {
+				@Override
+				public ResultSet execute(Connection c) throws SQLException {
+					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(imageSql);	
+				}
+			});
+			
+			imageResultSet.absolute(offset);
+			int to = offset + pageSize;
+			if (to >= imageDataCnt) {
+				to = imageDataCnt;
+			}
+			for(int x = offset; x < to; x++) {
+				imageResultSet.next();
+
+				Object data = imageResultSet.getObject(1);
+				UUID attachUuid = null;
+				if (data instanceof UUID) {
+					attachUuid = (UUID)data;
+				}else if (data instanceof byte[]) {
+					attachUuid = UuidUtils.byteToUUID((byte[])data);
+				}
+				
+				ISmartAttachment a = session.get(ObservationAttachment.class, attachUuid);
+				String description = null;
+				if (a != null) {
+					ObservationAttachment aa = (ObservationAttachment)a;
+					StringBuilder sb = new StringBuilder();
+					sb.append(aa.getObservation().getCategory().getFullCategoryName());
+					sb.append("\n");
+					sb.append(DateFormat.getDateTimeInstance().format(aa.getObservation().getWaypoint().getDateTime()));
+					sb.append("\n");
+					description = sb.toString();
+				}
+				if (a == null) {
+					a = session.get(WaypointAttachment.class, attachUuid);
+					if (a != null) {
+						WaypointAttachment aa = (WaypointAttachment)a;
+						StringBuilder sb = new StringBuilder();
+						sb.append(DateFormat.getDateTimeInstance().format(aa.getWaypoint().getDateTime()));
+						sb.append("\n");
+						description = sb.toString();
+					}
+				}
+				if (a != null) {
+					try {
+						a.computeFileLocation(session);
+					} catch (Exception e) {
+						QueryPlugIn.log(e.getMessage(), e);
+					}
+					QueryImageDataImpl d = new QueryImageDataImpl(description, a, attachUuid);
+					imageData.add(d);
+				}
+			}
+		}catch (SQLException ex) {
+			QueryPlugIn.log("Error loading image data: " + ex.getMessage(), ex); //$NON-NLS-1$
+		}
+		
+		return imageData;
+	}
+
+	public void createTooltip(IQueryImageData data, final Composite parent) {
+		Job j = new Job("create tooltip") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				PatrolWaypoint pw = null;
+				Waypoint wp = null;
+				WaypointObservation o = null;
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					
+					ObservationAttachment oba = s.get(ObservationAttachment.class, data.getAttachments().getUuid());
+					if (oba != null) {
+						o = oba.getObservation();
+						pw = QueryFactory.buildQuery(s,  PatrolWaypoint.class, "id.waypoint", o.getWaypoint()).uniqueResult(); //$NON-NLS-1$
+						pw.getPatrolLegDay().getPatrolLeg().getPatrol().getId();
+						wp = pw.getWaypoint();
+						if (o.getAttributes() != null) {
+							for (WaypointObservationAttribute a : o.getAttributes()) {
+								a.getAttribute().getName();
+								a.getAttributeValueAsString(Locale.getDefault());
+							}
+						}
+						o.getCategory().getFullCategoryName();
+					}else {
+						WaypointAttachment obw = s.get(WaypointAttachment.class,  data.getAttachments().getUuid());
+						wp = obw.getWaypoint();
+						pw = QueryFactory.buildQuery(s,  PatrolWaypoint.class, "id.waypoint", obw.getWaypoint()).uniqueResult(); //$NON-NLS-1$
+						pw.getPatrolLegDay().getPatrolLeg().getPatrol().getId();
+						for (WaypointObservation wo : wp.getObservations()) {
+							if (wo.getAttributes() != null) {
+								for (WaypointObservationAttribute a : wo.getAttributes()) {
+									a.getAttribute().getName();
+									a.getAttributeValueAsString(Locale.getDefault());
+								}
+							}
+							wo.getCategory().getFullCategoryName();
+						}
+						
+					}
+					s.getTransaction().rollback();
+				}
+				
+				PatrolWaypoint fpw = pw;
+				WaypointObservation fo = o;
+				
+				Display.getDefault().syncExec(()->{
+					ScrolledComposite scroll = new ScrolledComposite(parent, SWT.V_SCROLL );
+					scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+					scroll.setBackground(parent.getBackground());
+					Composite main = new Composite(scroll, SWT.NONE);
+					scroll.setContent(main);
+					main.setLayout(new GridLayout(2, false));
+					
+					main.setBackground(parent.getBackground());
+					((GridLayout)main.getLayout()).marginWidth = 0;
+					((GridLayout)main.getLayout()).marginHeight = 0;
+					
+					Label l = new Label(main, SWT.NONE);
+					l.setText("Patrol ID:");
+					l.setBackground(parent.getBackground());
+					
+					l = new Label(main, SWT.NONE);
+					l.setText(fpw.getPatrolLegDay().getPatrolLeg().getPatrol().getId());
+					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					l.setBackground(parent.getBackground());
+					
+					l = new Label(main, SWT.NONE);
+					l.setText("Waypoint ID:");
+					l.setBackground(parent.getBackground());
+					
+					l = new Label(main, SWT.NONE);
+					l.setText(String.valueOf(fpw.getWaypoint().getId()));
+					l.setBackground(parent.getBackground());
+					
+					l = new Label(main, SWT.NONE);
+					l.setText("Waypoint Date:");
+					l.setBackground(parent.getBackground());
+					
+					l = new Label(main, SWT.NONE);
+					l.setText(DateFormat.getDateInstance().format(fpw.getWaypoint().getDateTime()));
+					l.setBackground(parent.getBackground());
+					
+					if (fo != null) {
+						l = new Label(main, SWT.NONE);
+						l.setText("Observation:");
+						l.setBackground(parent.getBackground());
+						
+						l = new Label(main, SWT.NONE);
+						l.setText(fo.getCategory().getFullCategoryName());
+						l.setBackground(parent.getBackground());
+						
+						if (fo.getAttributes() != null) {
+							new Label(main, SWT.NONE);
+							Composite other = new Composite(main, SWT.NONE);
+							other.setLayout(new GridLayout(2, false));
+							other.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							other.setBackground(parent.getBackground());
+							((GridLayout)other.getLayout()).marginWidth = 0;
+							((GridLayout)other.getLayout()).marginHeight = 0;
+							
+							l = new Label(other, SWT.SEPARATOR | SWT.HORIZONTAL);
+							l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+							
+							for (WaypointObservationAttribute a : fo.getAttributes()) {
+								l = new Label(other, SWT.NONE);
+								l.setText(a.getAttribute().getName()+":");
+								l.setBackground(parent.getBackground());
+								
+								l = new Label(other, SWT.NONE);
+								l.setText(a.getAttributeValueAsString(Locale.getDefault()));
+								l.setBackground(parent.getBackground());
+								l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							}
+						}
+					}
+					
+					parent.layout(true, true);
+					main.setSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+					main.layout();					
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		j.schedule();
+	}
+
+	@Override
+	public int getImageCount() {
+		if (imageTempTable == null) {
+			initImageData();
+		}
+		return imageDataCnt;
+	}
+	
+	private synchronized void initImageData() {
+		if (imageTempTable != null) return;
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				imageTempTable = engine.createTempTableName();
+				
+				StringBuilder sb = new StringBuilder();
+				sb.append("CREATE TABLE "); //$NON-NLS-1$
+				sb.append(imageTempTable);
+				sb.append("(attach_uuid char(16) for bit data)"); //$NON-NLS-1$
+				s.createNativeQuery(sb.toString()).executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append(" INSERT INTO "); //$NON-NLS-1$
+				sb.append(imageTempTable);
+				sb.append(" SELECT distinct e.uuid "); //$NON-NLS-1$
+				sb.append("FROM "); //$NON-NLS-1$
+				sb.append(queryTempTable);
+				sb.append(" a join "); //$NON-NLS-1$
+				sb.append("(SELECT b.obs_uuid as obs_uuid, b.uuid as uuid FROM smart.observation_attachment b "); //$NON-NLS-1$
+				sb.append(" UNION "); //$NON-NLS-1$
+				sb.append("SELECT c.uuid as obs_uuid, d.uuid as uuid FROM smart.wp_observation c JOIN smart.waypoint b on c.wp_uuid = b.uuid "); //$NON-NLS-1$
+				sb.append("JOIN smart.wp_attachments d on d.wp_uuid = b.uuid) e "); //$NON-NLS-1$
+				sb.append("on a.ob_uuid = e.obs_uuid"); //$NON-NLS-1$
+				
+				s.createNativeQuery(sb.toString()).executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
+				sb.append(imageTempTable);
+				imageDataCnt = (int) s.createNativeQuery(sb.toString()).uniqueResult();
+				
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				imageTempTable = null;
+				s.getTransaction().rollback();
+				QueryPlugIn.log("Error computing attachment details: " + ex.getMessage(), ex); //$NON-NLS-1$
+			}
+		}
+	}
 }

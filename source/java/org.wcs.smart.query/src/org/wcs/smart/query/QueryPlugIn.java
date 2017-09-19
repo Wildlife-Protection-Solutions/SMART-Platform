@@ -193,6 +193,11 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public static final String TABLE_ICON = "org.wcs.smart.query.tableicon"; //$NON-NLS-1$
 	
 	/**
+	 * Attachment Icon
+	 */
+	public static final String ATTACHMENT_ICON = "org.wcs.smart.query.attachmenticon"; //$NON-NLS-1$
+	
+	/**
 	 * Compound query icon
 	 */
 	public static final String COMPOUND_ICON = "org.wcs.smart.query.compoundquery"; //$NON-NLS-1$
@@ -297,6 +302,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(START_HOUR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/starthour.png"));//$NON-NLS-1$
 		reg.put(END_HOUR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/endhour.png"));//$NON-NLS-1$
 		reg.put(TABLE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/table_icon.png"));//$NON-NLS-1$)
+		reg.put(ATTACHMENT_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/attachment_icon.png"));//$NON-NLS-1$)
 		reg.put(COMPOUND_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/compound_query.png"));//$NON-NLS-1$)
 		reg.put(DATE_APPLY_ALL, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/date_apply_all.png")); //$NON-NLS-1$
 		reg.put(CLEAR_STYLE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/clearstyle.png")); //$NON-NLS-1$

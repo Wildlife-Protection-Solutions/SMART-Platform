@@ -195,7 +195,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		return items;
 	}
 	
-		/**
+	/**
 	 *Opens a result set in the given session that accessed the query results
 	 */
 	@Override

@@ -45,6 +45,7 @@ import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
@@ -129,16 +130,18 @@ public abstract class QueryResultsTable {
 
 	public void updateColumnsVisibility(final SimpleQuery query, final IProjectionProvider prjProvider) {
 		List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
-		for (QueryTableViewerColumn column : tableViewerColumns){
-			column.getColumn().setProjectionProvider(prjProvider);
-			for (QueryColumn c : cols){
-				if (column.getColumn().equals(c)){
-					if (isColumnDisplayed(query, c)){
-						column.show();
-					}else{
-						column.hide();
+		if (tableViewerColumns != null) {
+			for (QueryTableViewerColumn column : tableViewerColumns){
+				column.getColumn().setProjectionProvider(prjProvider);
+				for (QueryColumn c : cols){
+					if (column.getColumn().equals(c)){
+						if (isColumnDisplayed(query, c)){
+							column.show();
+						}else{
+							column.hide();
+						}
+						break;
 					}
-					break;
 				}
 			}
 		}
@@ -254,9 +257,21 @@ public abstract class QueryResultsTable {
 			return;
 		}
 
-		List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
-		tableViewerColumns = createColumns(table,cols);
-		table.refresh(true);
+		Job j = new Job("initialize table columns") { //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<QueryColumn> cols = query.computeQueryColumns(Locale.getDefault(), null, prjProvider);
+				Display.getDefault().syncExec(()->{
+					tableViewerColumns = createColumns(table,cols);
+					table.refresh(true);	
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		j.setSystem(true);
+		j.schedule();
+		
+		
 		this.query = query;
 		createMenu(null);
 	}
