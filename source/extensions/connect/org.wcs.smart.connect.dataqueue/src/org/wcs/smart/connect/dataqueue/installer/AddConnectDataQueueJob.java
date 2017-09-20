@@ -79,7 +79,13 @@ public class AddConnectDataQueueJob extends Job {
 				currentVersion = ConnectDataQueuePlugin.DB_VERSION_1;
 			}
 			//run the upgrader to upgrade to the current version
-			ConnectDataQueueDatabaseUpgrader.upgrade(currentVersion, session);
+			session.beginTransaction();
+			try {
+				ConnectDataQueueDatabaseUpgrader.upgrade(currentVersion, session);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+			}
 		}
 		return Status.OK_STATUS;
 	}	
