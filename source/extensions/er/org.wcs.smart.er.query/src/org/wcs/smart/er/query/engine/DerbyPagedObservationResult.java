@@ -29,11 +29,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
+import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
 import org.wcs.smart.query.model.QueryColumn;
 
 
@@ -44,11 +50,19 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult extends AbstractSurveyPagedResult implements IObservationPagedQueryResultSet, ISurveyQueryMissionResult{
+public class DerbyPagedObservationResult extends AbstractSurveyPagedResult implements IObservationPagedQueryResultSet, ISurveyQueryMissionResult, IPagedImageResultSet{
 
 	private int wpCount = 0;
 
 	private Set<String> dataColumns = null;
+	
+	private PagedImageQueryResults imageResults = new PagedImageQueryResults() {
+		
+		@Override
+		protected void initImageData() {
+			DerbyPagedObservationResult.this.initImageData();
+		}
+	};
 	
 	public DerbyPagedObservationResult(String queryTempTable, DerbySurveyQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
@@ -141,4 +155,74 @@ public class DerbyPagedObservationResult extends AbstractSurveyPagedResult imple
 		this.dataColumns = dataColumns;
 	}
 
+	@Override
+	public void dispose(Session session) throws SQLException {
+		super.dispose(session);
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				if (imageResults.getResultsTable() != null) engine.dropTable(c, imageResults.getResultsTable());
+
+			}
+		});
+	}
+
+	@Override
+	public List<IQueryImageData> getImageData(int offset, int pageSize) {
+		return imageResults.getImageData(offset, pageSize);
+	}
+
+	@Override
+	public void createTooltip(IQueryImageData data, final Composite parent) {
+		SurveyAttachmentTooltipProvider job = new SurveyAttachmentTooltipProvider(data, parent);
+		job.schedule();
+	}
+
+	@Override
+	public int getImageCount() {
+		return imageResults.getImageCount();
+	}
+
+	private synchronized void initImageData() {
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				String imageTempTable = engine.createTempTableName();
+				
+				StringBuilder sb = new StringBuilder();
+				sb.append("CREATE TABLE "); //$NON-NLS-1$
+				sb.append(imageTempTable);
+				sb.append("(attach_uuid char(16) for bit data, seq_order integer GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1))"); //$NON-NLS-1$
+				s.createNativeQuery(sb.toString()).executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append(" INSERT INTO "); //$NON-NLS-1$
+				sb.append(imageTempTable + "(attach_uuid) "); //$NON-NLS-1$
+				sb.append(" SELECT z.uuid "); //$NON-NLS-1$
+				sb.append("FROM "); //$NON-NLS-1$
+				sb.append(" (SELECT distinct e.uuid, a.wp_uuid, a.wp_date, a.wp_id FROM "); //$NON-NLS-1$
+				sb.append(queryTempTable);
+				sb.append(" a join "); //$NON-NLS-1$
+				sb.append("(SELECT b.obs_uuid as obs_uuid, b.uuid as uuid FROM smart.observation_attachment b "); //$NON-NLS-1$
+				sb.append(" UNION "); //$NON-NLS-1$
+				sb.append("SELECT c.uuid as obs_uuid, d.uuid as uuid FROM smart.wp_observation c JOIN smart.waypoint b on c.wp_uuid = b.uuid "); //$NON-NLS-1$
+				sb.append("JOIN smart.wp_attachments d on d.wp_uuid = b.uuid) e "); //$NON-NLS-1$
+				sb.append("on a.ob_uuid = e.obs_uuid ORDER BY a.wp_date desc, a.wp_id) z"); //$NON-NLS-1$
+				s.createNativeQuery(sb.toString()).executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
+				sb.append(imageTempTable);
+				
+				int imageDataCnt = (int) s.createNativeQuery(sb.toString()).uniqueResult();
+				
+				imageResults.setResults(imageTempTable, imageDataCnt);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				imageResults.setResults(null, -1);
+				s.getTransaction().rollback();
+				QueryPlugIn.log("Error computing attachment details: " + ex.getMessage(), ex); //$NON-NLS-1$
+			}
+		}
+	}
 }

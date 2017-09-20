@@ -83,6 +83,11 @@ public class Messages extends NLS {
 	public static String SummaryFilterPanel_RefreshTreeJobName;
 	public static String SummaryQuery_DefaultQueryName;
 	public static String SummaryValueGroupByPanel_GroupByValuePanelTitle;
+	public static String WaypointAttachmentTooltipProvider_ObsLbl;
+	public static String WaypointAttachmentTooltipProvider_SourceLbl;
+	public static String WaypointAttachmentTooltipProvider_WpDateLbl;
+	public static String WaypointAttachmentTooltipProvider_WpIdlbl;
+	public static String WaypointAttachmentTooltipProvider_WpObsLbl;
 	public static String WaypointFilterProcessor_filterProgress;
 	public static String WaypointFilterProcessor_progress1;
 	public static String WaypointSourceFilter_InvalidSourceFilter;

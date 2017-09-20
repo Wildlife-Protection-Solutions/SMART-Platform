@@ -26,7 +26,13 @@ import java.util.UUID;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
@@ -45,13 +51,30 @@ public class ObservationResultInfoProvider extends AbstractObservationInfoProvid
 			UUID waypointUuid = ((ObservationQueryResultItem) resultItem).getWaypointUuid();
 			String waypointSourceKey = ((ObservationQueryResultItem) resultItem).getSourceId();
 			showItem(waypointUuid, waypointSourceKey);
-		} else {
-			MessageDialog
-					.openError(
-							Display.getDefault().getActiveShell(),
-							ERROR_STR,
-							MessageFormat.format(OP_NOT_SUPPORTED_STR,resultItem.getClass().getName()));
+			return;
+		}else if (resultItem instanceof IQueryImageData) {
+			
+			try(Session s = HibernateManager.openSession()){
+				ObservationAttachment a = s.get(ObservationAttachment.class, ((IQueryImageData) resultItem).getAttachment().getUuid());
+				Waypoint wp = null;
+				if (a != null) {
+					wp = a.getObservation().getWaypoint();
+				}else {
+					WaypointAttachment w = s.get(WaypointAttachment.class, ((IQueryImageData) resultItem).getAttachment().getUuid());
+					wp = w.getWaypoint();
+				}
+				if (wp != null) {
+					showItem(wp.getUuid(), wp.getSourceId());
+					return;
+				}
+			}
 		}
+		MessageDialog
+				.openError(
+						Display.getDefault().getActiveShell(),
+						ERROR_STR,
+						MessageFormat.format(OP_NOT_SUPPORTED_STR,resultItem.getClass().getName()));
+		
 
 	}
 

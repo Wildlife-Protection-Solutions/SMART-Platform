@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.ui.Thumbnail;
@@ -63,7 +62,7 @@ public class AttachmentTable extends Composite implements Listener {
 	
 	private ScrolledForm infoSection;
 	
-	private Menu thumbMenu;
+	private IMenuCreator thumbMenu;
 	
 	private Color selectionColor = null;
 	private Color mouseOverColor = null;
@@ -89,7 +88,7 @@ public class AttachmentTable extends Composite implements Listener {
 				if (resultSet == null) {
 					return Status.CANCEL_STATUS;
 				}
-				monitor.setTaskName(currentIndex + "/" + resultSet.getImageCount());
+				monitor.setTaskName(currentIndex + "/" + resultSet.getImageCount()); //$NON-NLS-1$
 				if (currentIndex > resultSet.getImageCount()) {
 					break;
 				}
@@ -137,13 +136,22 @@ public class AttachmentTable extends Composite implements Listener {
 		}		
 	};
 	
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbMenu){
+		this(parent, toolkit, SWT.NONE, thumbMenu);
+	}
+	
 	public AttachmentTable(Composite parent, FormToolkit toolkit){
 		this(parent, toolkit, SWT.NONE);
 	}
 	
 	public AttachmentTable(Composite parent, FormToolkit toolkit,  int style){
+		this(parent, toolkit, style, null);
+	}
+	
+	public AttachmentTable(Composite parent, FormToolkit toolkit,  int style, IMenuCreator thumbMenu){
 		super(parent, style);
 		this.toolkit = toolkit;
+		this.thumbMenu = thumbMenu;
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
@@ -182,8 +190,13 @@ public class AttachmentTable extends Composite implements Listener {
 			if (thumb == null) return;
 			scheduleLoadJob();
 		});
+		
+		createMenu();
 	}
 
+	private void createMenu() {
+		
+	}
 	public void setThumbnailSize(int size) {
 		this.thumbnailSize = size;
 		setResultSet(resultSet);
@@ -269,10 +282,10 @@ public class AttachmentTable extends Composite implements Listener {
 	/*
 	 * get selected attachments
 	 */
-	public List<ISmartAttachment> getSelection(){
-		List<ISmartAttachment> sel = new ArrayList<ISmartAttachment>();
+	public List<IQueryImageData> getSelection(){
+		List<IQueryImageData> sel = new ArrayList<IQueryImageData>();
 		for (ThumbnailComposite.ThumbInfo t : thumb.thumbs){
-			if (t.isSelected) sel.add(t.file.getAttachments());
+			if (t.isSelected) sel.add(t.file);
 		}
 		return sel;
 	}
@@ -353,7 +366,7 @@ public class AttachmentTable extends Composite implements Listener {
 				parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 				if (t.thumb == null) t.createThumb();
 				Composite thumbNameComp = t.thumb.createThumbnail(parent, SWT.NONE);
-				if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu);
+				if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu.createMenu(thumbNameComp));
 //				thumbNameComp.setToolTipText(t.tooltip);
 				thumbNameComp.setData(t);
 				thumbNameComp.addDisposeListener(new DisposeListener() {
@@ -397,7 +410,7 @@ public class AttachmentTable extends Composite implements Listener {
 			
 			public void createThumb(){
 				if (thumb == null){
-					thumb = new Thumbnail(file.getAttachments(), thumbnailSize, false);
+					thumb = new Thumbnail(file.getAttachment(), thumbnailSize, false);
 				}
 			}
 			
@@ -419,6 +432,7 @@ public class AttachmentTable extends Composite implements Listener {
 				kids.add(thumbGui);
 				while(!kids.isEmpty()){
 					Control c = kids.remove(0);
+					if (c == null) continue;
 					c.setBackground(color);
 					if (c instanceof Composite){
 						for (Control cc : ((Composite)c).getChildren()){
@@ -505,4 +519,8 @@ public class AttachmentTable extends Composite implements Listener {
 		}
 	}
 
+	
+	public interface IMenuCreator{
+		public Menu createMenu(Composite composite);
+	}
 }

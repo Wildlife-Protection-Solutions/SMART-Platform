@@ -25,8 +25,17 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PlatformUI;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
+import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.ui.editor.PatrolQueryResultsEditor;
+import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.common.ui.ShowInTableInfoProvider;
 import org.wcs.smart.util.E3Utils;
 
@@ -37,6 +46,26 @@ public class PatrolQueryShowInTableResultProvider extends ShowInTableInfoProvide
 	 */
 	@Override
 	public void doWork(IResultItem resultItem) {
+		if (resultItem instanceof IQueryImageData) {
+			try(Session s = HibernateManager.openSession()){
+				PatrolWaypoint pw = PatrolQueryPlugIn.findWaypoint(s, (IQueryImageData)resultItem);
+				if (pw == null) return;
+				
+				WaypointObservation wo = PatrolQueryPlugIn.findObservation(s, (IQueryImageData)resultItem);
+				PatrolQueryResultItem tmp = new PatrolQueryResultItem();
+				tmp.setPatrolUuid(pw.getPatrolLegDay().getPatrolLeg().getPatrol().getUuid());
+				//tmp.setPatrolLegUuid(pw.getPatrolLegDay().getPatrolLeg().getUuid());
+				tmp.setWaypointUuid(pw.getWaypoint().getUuid());
+				//TODO: this is only applicable for observation queries
+				if (wo != null) {
+					tmp.setObservationUuid(wo.getUuid());
+				}else if (!pw.getWaypoint().getObservations().isEmpty()) {
+					//this attachment is associated with a waypoint so pick any random observation to zoom to
+					tmp.setObservationUuid(pw.getWaypoint().getObservations().get(0).getUuid());
+				}
+				resultItem = tmp;
+			}
+		}
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		EPartService service = ctx.get(EPartService.class);
 		for (MPart p : service.getParts()){
@@ -49,6 +78,12 @@ public class PatrolQueryShowInTableResultProvider extends ShowInTableInfoProvide
 				}
 				if (src instanceof PatrolQueryResultsEditor){
 					PatrolQueryResultsEditor e = (PatrolQueryResultsEditor) src;
+					e.showTablePage();
+					e.getQueryResultsTable().revealSelection(resultItem);	
+				}
+				if (src instanceof QueryResultsEditor){
+					QueryResultsEditor e = (QueryResultsEditor) src;
+					if (e.getQuery().getTypeKey().equals(PatrolWaypointQuery.KEY)) ((PatrolQueryResultItem)resultItem).setObservationUuid(null);
 					e.showTablePage();
 					e.getQueryResultsTable().revealSelection(resultItem);	
 				}

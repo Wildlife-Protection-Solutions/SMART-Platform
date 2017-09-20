@@ -176,6 +176,12 @@ public class Messages extends NLS {
 	public static String SummaryDefinitionPanel_Name;
 	public static String SummaryDefinitionPanel_SurveyDesignLabel;
 	public static String SummaryDefinitionPanel_ValueRequiredError;
+	public static String SurveyAttachmentTooltipProvider_MissionLbl;
+	public static String SurveyAttachmentTooltipProvider_ObservationLbl;
+	public static String SurveyAttachmentTooltipProvider_SurveyLbl;
+	public static String SurveyAttachmentTooltipProvider_WpDateLbl;
+	public static String SurveyAttachmentTooltipProvider_WpIdLbl;
+	public static String SurveyAttachmentTooltipProvider_WpObservationLbls;
 	public static String SurveyDataModelTreeNode_CompleteDataModelLabel;
 	public static String SurveyDataModelTreeNode_ConfigurableModelLabel;
 	public static String SurveyDataModelTreeNode_NodeName;

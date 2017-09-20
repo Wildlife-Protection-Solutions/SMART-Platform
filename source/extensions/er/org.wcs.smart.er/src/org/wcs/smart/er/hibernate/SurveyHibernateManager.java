@@ -45,7 +45,6 @@ import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.Survey;
-import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;

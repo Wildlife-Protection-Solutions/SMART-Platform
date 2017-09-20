@@ -473,7 +473,14 @@ public class Messages extends NLS {
 	public static String QueryResultsEditor_RunQueryJobName;
 	public static String QueryResultsEditor_TableResultsTabName;
 	public static String QueryResultsImagePage_changeSizeTooltip;
+	public static String QueryResultsImagePage_CouldNotCreateDirectory;
+	public static String QueryResultsImagePage_CouldNotExport;
 	public static String QueryResultsImagePage_countLabel;
+	public static String QueryResultsImagePage_ExportComplete;
+	public static String QueryResultsImagePage_ExportCompleteMsg;
+	public static String QueryResultsImagePage_ExportDialogMessage;
+	public static String QueryResultsImagePage_ExportDialogTitle;
+	public static String QueryResultsImagePage_ExportMenuItem;
 	public static String QueryResultsImagePage_LargeIconSize;
 	public static String QueryResultsImagePage_MediumIconSize;
 	public static String QueryResultsImagePage_selectedLabel;

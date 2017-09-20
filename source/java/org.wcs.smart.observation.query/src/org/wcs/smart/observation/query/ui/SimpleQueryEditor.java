@@ -24,7 +24,9 @@ package org.wcs.smart.observation.query.ui;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
+import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationAttributeQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
@@ -34,6 +36,7 @@ import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 /**
  * Query editor for simple observation queries
  * @author Emily
@@ -64,4 +67,11 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 
 	}
 
+	@Override
+	protected boolean displayImagePage() {
+		IQueryType type = ((QueryEditorInput)getEditorInput()).getType();
+		if (type.getKey().equals(ObsObservationQuery.KEY)) return true;
+		if (type.getKey().equals(ObservationWaypointQuery.KEY)) return true;
+		return false;
+	}
 }

@@ -25,9 +25,16 @@ import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -57,7 +64,24 @@ public class PatrolZoomToResultProvider extends AbstractZoomToInfoProvider {
 						Display.getDefault().getActiveShell(),
 						ERROR_STR,
 						Messages.PatrolZoomToResultProvider_TrackGeomNotFound);
+					return;
 				}
+			}
+			
+		}
+		if (resultItem instanceof IQueryImageData) {
+			PatrolEditorInput input = null;
+			PatrolWaypoint pw = null;
+			try(Session s = HibernateManager.openSession()){
+				pw = PatrolQueryPlugIn.findWaypoint(s, (IQueryImageData)resultItem);
+				if (pw != null) {
+					Patrol p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
+					input = new PatrolEditorInput(p);
+				}
+			}
+			if (input != null) {
+				zoomTo(pw.getWaypoint().getX(), pw.getWaypoint().getY());
+				return;
 			}
 		}
 		

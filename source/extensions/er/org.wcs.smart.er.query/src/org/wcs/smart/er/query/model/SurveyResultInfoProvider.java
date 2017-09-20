@@ -31,10 +31,18 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 
@@ -76,6 +84,26 @@ public class SurveyResultInfoProvider implements IQueryResultInfoProvider {
 			waypointUuid = ((SurveyQueryResultItem)resultItem).getWaypointUuid();
 		}
 		
+		if (resultItem instanceof IQueryImageData) {
+			SurveyWaypoint sw = null;
+			try(Session s = HibernateManager.openSession()){
+				ObservationAttachment a = s.get(ObservationAttachment.class, ((IQueryImageData) resultItem).getAttachment().getUuid());
+				Waypoint wp = null;
+				if (a != null) {
+					wp = a.getObservation().getWaypoint();
+				}else {
+					WaypointAttachment w = s.get(WaypointAttachment.class, ((IQueryImageData) resultItem).getAttachment().getUuid());
+					wp = w.getWaypoint();
+				}
+				if(wp != null) {
+					sw = QueryFactory.buildQuery(s, SurveyWaypoint.class, "id.waypoint", wp).uniqueResult(); //$NON-NLS-1$
+					missionUuid = sw.getMissionDay().getMission().getUuid();
+					missionId = sw.getMissionDay().getMission().getId();
+					waypointUuid = wp.getUuid();
+				}
+			}
+			
+		}
 		if (missionUuid != null){
 			MWindow mwindow = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf().get(MWindow.class);
 			

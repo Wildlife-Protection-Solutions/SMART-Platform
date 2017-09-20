@@ -21,14 +21,22 @@
  */
 package org.wcs.smart.query.common.ui;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
@@ -38,9 +46,14 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.ui.image.AttachmentTable;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryEditCommand;
+import org.wcs.smart.query.model.IQueryResultInfoProvider;
 
 /**
  * Results page for displaying a list of observations represented
@@ -49,7 +62,9 @@ import org.wcs.smart.query.internal.Messages;
  * @author Emily
  *
  */
-public class QueryResultsImagePage extends EditorPart  {
+public class QueryResultsImagePage extends EditorPart  implements AttachmentTable.IMenuCreator{
+	
+	private static final String PREFERENCE_ICONSIZE = "org.wcs.smart.query.imagesize"; //$NON-NLS-1$
 	
 	private enum IconSize{
 		SMALL(100, Messages.QueryResultsImagePage_SmallIconSize), 
@@ -72,8 +87,18 @@ public class QueryResultsImagePage extends EditorPart  {
 	private Label lblNumSelected;
 	private Label iconSizeLabel;
 	
+	private QueryResultsEditor editor;
+	
 	public QueryResultsImagePage(QueryResultsEditor parent) {
 		super();
+		this.editor = parent;
+		
+		String size = QueryPlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_ICONSIZE);
+		if (size != null) {
+			try {
+				iconSize = IconSize.valueOf(size.toUpperCase());
+			}catch (Throwable t) {}
+		}
 	}
 	
 	@Override
@@ -107,6 +132,8 @@ public class QueryResultsImagePage extends EditorPart  {
 		}
 		iconSizeLabel.setText(newSize.label);
 		iconSizeLabel.getParent().getParent().layout(true, true);
+		
+		QueryPlugIn.getDefault().getPreferenceStore().putValue(PREFERENCE_ICONSIZE, iconSize.name());
 	}
 	
 	
@@ -168,7 +195,8 @@ public class QueryResultsImagePage extends EditorPart  {
 		iconSizeLabel.addListener(SWT.MouseDown, e->mnuIconSize.setVisible(true));
 		
 		//image reuslts table
-		imageTable = new AttachmentTable(outer, toolkit);
+		imageTable = new AttachmentTable(outer, toolkit, this);
+		imageTable.setThumbnailSize(this.iconSize.size);
 		imageTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		imageTable.addListener(SWT.Selection, e->{
@@ -190,6 +218,90 @@ public class QueryResultsImagePage extends EditorPart  {
 			lblNumImages.getParent().layout(true, true);
 		});
 		
+	}
+	
+	@Override
+	public Menu createMenu(Composite parent) {
+		Menu thumbMenu = new Menu(parent);
+		
+		thumbMenu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent evt) {
+				for (MenuItem mi : thumbMenu.getItems()) mi.dispose();
+				if (editor.getQuery() != null && imageTable.getSelection().size() > 0) {
+					IQueryResultInfoProvider[] provider = QueryTypeManager.INSTANCE.findQueryType(editor.getQuery().getTypeKey()).getResultProviders();
+					for (IQueryResultInfoProvider p : provider) {
+						if (!(p instanceof IQueryEditCommand)) {
+							MenuItem mnuItem = new MenuItem(thumbMenu, SWT.Deactivate);
+							mnuItem.setText(p.getName());
+							mnuItem.setImage(p.getImage());
+							mnuItem.addListener(SWT.Selection, e->{
+								p.doWork(imageTable.getSelection().get(0));
+							});
+						}
+					}
+					new MenuItem(thumbMenu, SWT.SEPARATOR);
+				}
+				MenuItem mnuExport = new MenuItem(thumbMenu, SWT.DEFAULT);
+				mnuExport.setText(Messages.QueryResultsImagePage_ExportMenuItem);
+				mnuExport.addListener(SWT.Selection, e->{
+					DirectoryDialog dd = new DirectoryDialog(parent.getShell());
+					dd.setText(Messages.QueryResultsImagePage_ExportDialogTitle);
+					dd.setMessage(Messages.QueryResultsImagePage_ExportDialogMessage);
+					String directory = dd.open();
+					if (directory == null) return;
+					
+					Path exportPath = Paths.get(directory);
+					if (!Files.exists(exportPath)) {
+						try {
+							Files.createDirectories(exportPath);
+						} catch (IOException e1) {
+							QueryPlugIn.displayLog(MessageFormat.format(Messages.QueryResultsImagePage_CouldNotCreateDirectory, e1.getMessage()), e1);
+							return;
+						}
+					}
+					
+					int cnt = 0;
+					int size = 0;
+					for (IQueryImageData a : imageTable.getSelection()) {
+						size++;
+
+						//check duplicate filenames
+						String name = a.getAttachment().getFilename();
+						String prefix = name;
+						String suffix = name;
+						int index = prefix.lastIndexOf("."); //$NON-NLS-1$
+						if (index > 0) {
+							prefix = prefix.substring(0, index);
+							suffix = name.substring(index);
+						}
+						Path outputFile = exportPath.resolve(prefix + suffix);
+						int cnter = 1;
+						while(Files.exists(outputFile)) {
+							outputFile = exportPath.resolve(prefix + "_" + cnter + suffix); //$NON-NLS-1$
+							cnter ++;
+						}
+						
+						try {
+							Files.copy(a.getAttachment().getAttachmentFile().toPath(), outputFile);
+							cnt ++;
+						}catch (IOException e1) {
+							QueryPlugIn.displayLog(MessageFormat.format(Messages.QueryResultsImagePage_CouldNotExport, a.getAttachment().getFilename(), e1.getMessage()), e1);
+						}
+					}
+					MessageDialog.openInformation(parent.getShell(), Messages.QueryResultsImagePage_ExportComplete, MessageFormat.format(Messages.QueryResultsImagePage_ExportCompleteMsg, cnt, size,exportPath.toString()));
+				});
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+				
+			}
+		});
+		
+		
+		return thumbMenu;
 	}
 
 	@Override

@@ -78,6 +78,11 @@ public class Messages extends NLS {
 	public static String GriddedFilterPanel_CopyError;
 	public static String GriddedFilterPanel_RefreshJobName;
 	public static String GriddedQuery_DefaultQueryName;
+	public static String PatrolAttachmentTooltipProvider_ObservationLbl;
+	public static String PatrolAttachmentTooltipProvider_PatrolIdLbl;
+	public static String PatrolAttachmentTooltipProvider_WpDateLbl;
+	public static String PatrolAttachmentTooltipProvider_WpIdLbl;
+	public static String PatrolAttachmentTooltipProvider_WpObsLbl;
 	public static String PatrolAttributeValueItem_AttributeNotFound;
 	public static String PatrolAttributeValueItem_CategoryNotFound;
 	public static String PatrolAttributeValueItem_ListItemNotFound;

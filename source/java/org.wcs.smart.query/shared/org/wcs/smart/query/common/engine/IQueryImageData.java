@@ -29,18 +29,8 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
  * @author Emily
  *
  */
-public interface IQueryImageData {
-
+public interface IQueryImageData extends IResultItem{
 	
-//	public String key;
-//	
-//	public List<ISmartAttachment> attachments;
-	
-	public ISmartAttachment getAttachments();
-	
-	public String getHeaderString();
-	
-	
-	
+	public ISmartAttachment getAttachment();
 	
 }

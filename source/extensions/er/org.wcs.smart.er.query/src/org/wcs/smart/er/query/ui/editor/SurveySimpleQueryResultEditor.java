@@ -35,13 +35,16 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.query.common.ui.ISummaryInfo;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Editor for displaying survey query results.  The editor includes two pages
@@ -157,5 +160,13 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 		}else{
 			return super.createInfoSection();
 		}
+	}
+	
+	@Override
+	protected boolean displayImagePage() {
+		IQueryType type = ((QueryEditorInput)getEditorInput()).getType();
+		if (type.getKey().equals(SurveyObservationQuery.KEY)) return true;
+		if (type.getKey().equals(SurveyWaypointQuery.KEY)) return true;
+		return false;
 	}
 }

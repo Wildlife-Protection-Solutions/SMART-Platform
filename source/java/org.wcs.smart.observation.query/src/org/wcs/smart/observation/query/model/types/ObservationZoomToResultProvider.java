@@ -25,7 +25,13 @@ import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
@@ -38,16 +44,37 @@ public class ObservationZoomToResultProvider extends AbstractZoomToInfoProvider 
 
 	@Override
 	public void doWork(IResultItem resultItem) {
+		
 		if (resultItem instanceof ObservationQueryResultItem) {
 			ObservationQueryResultItem item = (ObservationQueryResultItem) resultItem;
 			zoomTo(item.getWaypointX(null), item.getWaypointY(null));
-		} else {
-			MessageDialog
-					.openError(
+			return;
+		}
+		if (resultItem instanceof IQueryImageData) {
+			Waypoint wp = null;
+			IQueryImageData data = (IQueryImageData)resultItem;
+			try(Session s = HibernateManager.openSession()){
+				ObservationAttachment a = s.get(ObservationAttachment.class, data.getAttachment().getUuid());
+				if (a != null) {
+					wp = a.getObservation().getWaypoint();
+				}else {
+					WaypointAttachment w = s.get(WaypointAttachment.class, data.getAttachment().getUuid());
+					if (w != null) wp = w.getWaypoint();
+				}
+				if (wp != null) {
+					wp.getX(); wp.getY();
+				}
+			}
+			if (wp != null) {
+				zoomTo(wp.getX(), wp.getY());
+				return;
+			}
+		} 
+		
+		MessageDialog.openError(
 							Display.getDefault().getActiveShell(),
 							ERROR_STR,
 							MessageFormat.format(OP_NOT_SUPPORTED_STR,resultItem.getClass().getName()));
-		}
 	}
 
 }
