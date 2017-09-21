@@ -84,7 +84,9 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 					workbench.getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
 				}
 				
-				AutoBackupEngine.autoBackup(workbench.getActiveWorkbenchWindow().getShell());
+				if (workbench.getActiveWorkbenchWindow() != null && workbench.getActiveWorkbenchWindow().getShell() != null) {
+					AutoBackupEngine.autoBackup(workbench.getActiveWorkbenchWindow().getShell());
+				}
 				
 				return true;
 				
