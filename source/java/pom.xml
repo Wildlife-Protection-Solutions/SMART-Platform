@@ -166,12 +166,12 @@
        						<ws>win32</ws>
        						<arch>x86_64</arch>
        					</environment>
-       					<!-- tycho requires mars or later
+       					<!-- tycho requires mars or later-->
        					<environment>
        						<os>macosx</os>
        						<ws>cocoa</ws>
        						<arch>x86_64</arch>
-       					</environment>-->
+       					</environment>
 				</environments>     
 			</configuration>
 		</plugin>
