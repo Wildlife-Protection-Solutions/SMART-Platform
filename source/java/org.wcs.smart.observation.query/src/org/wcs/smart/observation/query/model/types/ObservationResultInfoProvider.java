@@ -52,8 +52,8 @@ public class ObservationResultInfoProvider extends AbstractObservationInfoProvid
 			String waypointSourceKey = ((ObservationQueryResultItem) resultItem).getSourceId();
 			showItem(waypointUuid, waypointSourceKey);
 			return;
-		}else if (resultItem instanceof IQueryImageData) {
-			
+		}
+		if (resultItem instanceof IQueryImageData) {
 			try(Session s = HibernateManager.openSession()){
 				ObservationAttachment a = s.get(ObservationAttachment.class, ((IQueryImageData) resultItem).getAttachment().getUuid());
 				Waypoint wp = null;
