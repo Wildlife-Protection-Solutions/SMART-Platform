@@ -63,7 +63,7 @@ public class AttributeDMAdvisor implements IDeleteAdvisor {
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<CategoryAttribute> query = cb.createQuery(CategoryAttribute.class);
 		Root<CategoryAttribute> root = query.from(CategoryAttribute.class);
-		query.where(cb.equal(root.get("id.attribute"), attribute)); //$NON-NLS-1$
+		query.where(cb.equal(root.get("id").get("attribute"), attribute)); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		List<CategoryAttribute> items = session.createQuery(query).getResultList();
 		if (items.size() == 0){

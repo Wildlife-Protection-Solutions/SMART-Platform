@@ -469,6 +469,18 @@ public class Messages extends NLS {
 	public static String DataModelMergeAndUpdater_AttributeTypeError;
 	public static String DataModelMergeAndUpdater_CategoriesTask;
 	public static String DataModelMergeAndUpdater_TaskName;
+	public static String DataModelMergeDialog_allfileslbl;
+	public static String DataModelMergeDialog_CaMsg;
+	public static String DataModelMergeDialog_CaRequiredErr;
+	public static String DataModelMergeDialog_CurrentCaOp;
+	public static String DataModelMergeDialog_Message;
+	public static String DataModelMergeDialog_SelectedCaOp;
+	public static String DataModelMergeDialog_SelectFileMsg;
+	public static String DataModelMergeDialog_ShellTitle;
+	public static String DataModelMergeDialog_Title;
+	public static String DataModelMergeDialog_UsernameErr;
+	public static String DataModelMergeDialog_ValidFileRequiredErr;
+	public static String DataModelMergeDialog_xmlfilelbl;
 	public static String DataModelMerger_SubTask1;
 	public static String DataModelMerger_SubTask2;
 	public static String DataModelMerger_SubTask3;
@@ -509,6 +521,9 @@ public class Messages extends NLS {
 	public static String DataModelPropertyPage_ExportXml_Button;
 	public static String DataModelPropertyPage_FileNotFound;
 	public static String DataModelPropertyPage_MergeButton;
+	public static String DataModelPropertyPage_MergeCompleteInfo;
+	public static String DataModelPropertyPage_MergeCompleteMsg;
+	public static String DataModelPropertyPage_MergeProgressMsg;
 	public static String DataModelPropertyPage_MergerError;
 	public static String DataModelPropertyPage_MergeTooltip;
 	public static String DataModelPropertyPage_ModifyWarning_DialogMessage;

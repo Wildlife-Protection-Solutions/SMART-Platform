@@ -29,11 +29,10 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -51,14 +50,23 @@ public class DataModelMergeAndUpdater {
 	private DataModel sourceDm;
 	private DataModel targetDm;
 	
-	private ConservationArea sourceConservationArea;
-	
+	private Language currentSystemLanguage; 
 	private List<String> warnings;
 	
-	public DataModelMergeAndUpdater(DataModel source, DataModel target, ConservationArea sourceCa){
+	/**
+	 * 
+	 * @param source the data model to update; items are added to this data model.  The conservation area property of this data model must be set.
+	 * @param target the data model to update from; this data model is not modified.  This conservation area property of this data model is optional
+	 */
+	public DataModelMergeAndUpdater(DataModel source, DataModel target){
+		if (source.getConservationArea() == null) throw new IllegalStateException("Conservation area property of data model object not set."); //$NON-NLS-1$
 		this.sourceDm = source;
 		this.targetDm = target;
-		this.sourceConservationArea = sourceCa;
+	}
+	
+	public DataModelMergeAndUpdater(DataModel source, DataModel target, Language currentSystemLanguage){
+		this(source, target);
+		this.currentSystemLanguage = currentSystemLanguage;
 	}
 	
 	/**
@@ -159,7 +167,7 @@ public class DataModelMergeAndUpdater {
 		Category newSource = new Category();
 		newSource.setKeyId(target.getKeyId());
 		newSource.setHkey(target.getHkey());
-		newSource.setConservationArea(sourceConservationArea);
+		newSource.setConservationArea(sourceDm.getConservationArea());
 		newSource.setCategoryOrder(target.getCategoryOrder());
 		newSource.setChildren(new ArrayList<Category>());
 		newSource.setAttributes(new ArrayList<CategoryAttribute>());
@@ -195,7 +203,7 @@ public class DataModelMergeAndUpdater {
 				Attribute newSource = new Attribute();
 				newSource.setKeyId(targetAttribute.getKeyId());
 				newSource.setType(targetAttribute.getType());
-				newSource.setConservationArea(sourceConservationArea);
+				newSource.setConservationArea(sourceDm.getConservationArea());
 				sourceDm.getAttributes().add(newSource);
 				mergeAttribute(newSource, targetAttribute);
 			}
@@ -364,21 +372,51 @@ public class DataModelMergeAndUpdater {
 	}
 	
 	private void mergeNames(NamedItem source, NamedItem target){
-		for (Language l : sourceConservationArea.getLanguages()){
-			String targetName = target.findNameNull(l);
-			if (targetName != null){
-				source.updateName(l, targetName);
+		String defaultValue = null;
+		for (Language l : sourceDm.getConservationArea().getLanguages()) {
+			if (!l.isDefault()) continue;
+			
+			for (Label trgLabel : target.getNames()) {
+				if (l.getCode().equals(trgLabel.getLanguage().getCode())) {
+					defaultValue = trgLabel.getValue();
+					break;
+				}
+			}
+			break;
+		}
+		
+		
+		for (Language l : sourceDm.getConservationArea().getLanguages()){
+			for (Label trgLabel : target.getNames()) {
+				if (trgLabel.getLanguage().getCode().equals(l.getCode())){
+					source.updateName(l, trgLabel.getValue());
+				}
 			}
 		}
 		
-		source.setName(source.findNameNull(SmartDB.getCurrentLanguage()));
-		if (source.getName() == null){
-			source.setName(source.findName(sourceConservationArea.getDefaultLanguage()));
+		Language defaultLanguage = sourceDm.getConservationArea().getDefaultLanguage();
+		if (source.findNameNull(defaultLanguage) == null) {
+			if (defaultValue != null) {
+				source.updateName(defaultLanguage, defaultValue);
+			}else {
+				if (!source.getNames().isEmpty()) {
+					source.updateName(defaultLanguage, source.getNames().iterator().next().getValue());
+				}else {
+					source.updateName(defaultLanguage, target.getNames().iterator().next().getValue());
+				}
+			}
+		}
+		if (source.getName() == null) {
+			//we want to update the name to match
+			//this is only going to work if the current system language is from the same conservation
+			//area as the source data model.  Otherwise this will always return null.  This is
+			//okay for us as we only need the name set for the current conservation area being displayed
+			source.setName(source.findNameNull(currentSystemLanguage));
 		}
 	}
 	
 	private int compareNames(NamedItem o1, NamedItem o2){
-		return Collator.getInstance().compare(o1.findName(sourceConservationArea.getDefaultLanguage()), o2.findName(sourceConservationArea.getDefaultLanguage()));
+		return Collator.getInstance().compare(o1.findName(sourceDm.getConservationArea().getDefaultLanguage()), o2.findName(sourceDm.getConservationArea().getDefaultLanguage()));
 	}
 	private void resortCategories(List<Category> kids){
 		Collections.sort(kids, new Comparator<Category>(){

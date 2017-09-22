@@ -355,6 +355,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 						dm = dmToClone.clone(ca, code, progress.split(1));
 						
 					}else if (isBlank){
+						progress = SubMonitor.convert(monitor);
 						dm = new DataModel(ca, new ArrayList<Category>(), new ArrayList<Attribute>());
 					}
 					

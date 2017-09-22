@@ -57,6 +57,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -82,6 +84,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelSmartToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
+import org.wcs.smart.ui.ca.datamodel.DataModelMergeDialog;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
 import org.wcs.smart.ui.ca.properties.AttributeInfoPanel;
@@ -317,6 +320,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				updateInfoPanel();
 			}
 		});
+		createMenu(viewer);
 		
 		Composite rightPanel = new Composite(comp, SWT.NONE);
 		rightPanel.setLayout(new GridLayout(1, false));
@@ -443,6 +447,55 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		return thisparent;
 	}
+	
+	private void createMenu(Viewer dmViewer) {
+		Menu mnu = new Menu(dmViewer.getControl());
+
+		MenuItem miAddCategory = new MenuItem(mnu, SWT.PUSH);
+		miAddCategory.setText(Messages.DataModelPropertyPage_AddCategory_Button);
+		miAddCategory.setToolTipText(Messages.DataModelPropertyPage_AddCategory_Tooltip);
+		miAddCategory.addListener(SWT.Selection, e->addCategory());
+		miAddCategory.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		
+		MenuItem miAddAttribute = new MenuItem(mnu, SWT.PUSH);
+		miAddAttribute.setText(Messages.DataModelPropertyPage_AddAttribute_Button);
+		miAddAttribute.setToolTipText(Messages.DataModelPropertyPage_AddAttribute_Tooltip);
+		miAddAttribute.addListener(SWT.Selection, e->addAttribute());
+		miAddAttribute.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem miEdit = new MenuItem(mnu, SWT.PUSH);
+		miEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		miEdit.setToolTipText(Messages.DataModelPropertyPage_Edit_Tooltip);
+		miEdit.addListener(SWT.Selection, e->editElement());
+		miEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		
+		MenuItem miEnable = new MenuItem(mnu, SWT.PUSH);
+		miEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		miEnable.setToolTipText(Messages.DataModelPropertyPage_Disable_Tooltip);
+		miEnable.addListener(SWT.Selection, e->disableElement());
+
+		new MenuItem(mnu, SWT.SEPARATOR);
+				
+		MenuItem miDelete = new MenuItem(mnu, SWT.PUSH);
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.setToolTipText(Messages.DataModelPropertyPage_Delete_Tooltip);
+		miDelete.addListener(SWT.Selection, e->deleteElement());
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		
+		mnu.addListener(SWT.Show, e->{
+			miAddCategory.setEnabled(btnAddCategory.isEnabled());
+			miAddAttribute.setEnabled(btnAddAttribute.isEnabled());
+			miEnable.setEnabled(btnDisableElement.isEnabled());
+			miEnable.setText(btnDisableElement.getText());
+			miEnable.setToolTipText(btnDisableElement.getToolTipText());
+			miDelete.setEnabled(btnDeleteElement.isEnabled());		
+			miEdit.setEnabled(btnModifyElement.isEnabled());
+		});
+		
+		dmViewer.getControl().setMenu(mnu);
+	}
 
 	private void mergeDataModel(){
 		if (changesMade){
@@ -452,21 +505,19 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			if (!performSave()) return;
 			if (changesMade) return;	//something went wrong 
 		}
-		FileDialog fd = new FileDialog(this.getShell(), SWT.OPEN);
-		fd.setFilterNames(new String[]{Messages.DataModelPropertyPage_XmlFile_FilterName});
-		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
 		
-		String file = fd.open();
-		if (file == null){
-			//nothing selected
-			return;
-		}
-		final File f = new File(file);
+		DataModelMergeDialog mergeDialog = new DataModelMergeDialog(getShell());
+		int code = mergeDialog.open();
+		if (code == Window.CANCEL) return;
+
+		final File f = new File(mergeDialog.getFile());
 		if (!f.exists()){
 			MessageDialog.openError(getShell(), Messages.DataModelPropertyPage_ErrorDialogTitle, MessageFormat.format(Messages.DataModelPropertyPage_FileNotFound, f.toString()));
 			return;
 		}
-		
+	
+		final List<ConservationArea> conservationAreas = mergeDialog.getSelectedConservationAreas();
+
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -477,29 +528,40 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModelPropertyPage_TaskName, 2);
 					try{
 						
-						DataModel sourceDm = ((DataModel) viewer.getInput());
-						
 						progress.subTask(Messages.DataModelPropertyPage_Progress1);
 						DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
 						DataModel targetDm = converter.convert(f, currentCa, false);
 						progress.worked(1);
 						
-						progress.subTask(Messages.DataModelPropertyPage_Progress2);
-						DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, currentCa);
+						List<String> warnings = new ArrayList<>();
+						progress.setWorkRemaining(conservationAreas.size());
 						
-						final List<String> warnings = updater.merge(progress.setWorkRemaining(1));
+						for (ConservationArea ca : conservationAreas) {
+							progress.setTaskName(MessageFormat.format(Messages.DataModelPropertyPage_MergeProgressMsg, ca.getNameLabel()));
+							
+							DataModel sourceDm = null;
+							if (ca.equals(SmartDB.getCurrentConservationArea())) {
+								sourceDm = ((DataModel) viewer.getInput());
+							}else {
+								sourceDm = HibernateManager.loadDataModel(ca, session);
+							}
 						
-						//add any new objects that are not saved via relationships
-						for (Attribute a : sourceDm.getAttributes()){
-							if (a.getUuid() == null){
-								session.save(a);
+							DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, SmartDB.getCurrentLanguage());					
+							warnings.addAll(updater.merge(progress.split(1)));
+							
+							//add any new objects that are not saved via relationships
+							for (Attribute a : sourceDm.getAttributes()){
+								if (a.getUuid() == null){
+									session.save(a);
+								}
+							}
+							for (Category c : sourceDm.getCategories()){
+								if (c.getUuid() == null){
+									session.save(c);
+								}
 							}
 						}
-						for (Category c : sourceDm.getCategories()){
-							if (c.getUuid() == null){
-								session.save(c);
-							}
-						}
+						session.flush();
 						
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
@@ -510,6 +572,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 											Messages.DataModelPropertyPage_WarningDialogTitle, Messages.DataModelPropertyPage_WarningsMessage, warnings);
 									wd.open();
 								}
+								
+								MessageDialog.openInformation(getShell(), Messages.DataModelPropertyPage_MergeCompleteMsg, 
+										MessageFormat.format(Messages.DataModelPropertyPage_MergeCompleteInfo, conservationAreas.size()));
 								viewer.refresh();
 								//update selection to refresh panel
 								viewer.setSelection(viewer.getSelection());
@@ -644,7 +709,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * Disabled data model object
 	 */
 	private void disableElement(){
-		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		Object o = getViewerSelection();
 		if (o instanceof Category){
 			((DataModel)viewer.getInput()).disableCategory((Category)o, !((Category)o).getIsActive());
 			DataModelManager.INSTANCE.fireEnabledStateListener(getSession(), o);
@@ -684,7 +749,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * Deletes the currently selected item
 	 */
 	private void deleteElement(){
-		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		Object o = getViewerSelection();
 		if (o instanceof Category){
 			final Category cat  = (Category)o;
 			boolean ret = MessageDialog.openConfirm(getShell(), DELETE_DIALOG_TITLE, Messages.DataModelPropertyPage_ConfirmDeleteCategory_DialogMessage + cat.getFullCategoryName(getLanguage()));
@@ -765,6 +830,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}catch (Exception ex){
 								//something is using this attribute therefore
 								//it cannot be deleted
+								//ex.printStackTrace();
 							}
 							
 							if (canDeleteAttribute){
@@ -815,11 +881,15 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		updateInfoPanel();
 	}
 	
+	private Object getViewerSelection() {
+		return ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+
+	}
 	/*
 	 * adds a category
 	 */
 	private void addCategory(){
-		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		Object o = getViewerSelection();
 		List<Category> siblings = null;
 		if (o instanceof DataModelContentProvider.RootNode){
 			siblings = ((DataModel) viewer.getInput()).getCategories();
@@ -873,7 +943,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * modifies category or attribute
 	 */
 	private void editElement(){
-		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		Object o = getViewerSelection();
 		if (o instanceof Category){
 			try{
 				String canEdit = DataModelManager.INSTANCE.canEdit((Category)o, session);
@@ -952,7 +1022,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * adds an attribute
 	 */
 	private void addAttribute(){
-		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		Object o = getViewerSelection();
 		if (! (o instanceof Category)){
 			return;
 		}
@@ -1021,7 +1091,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * updates the info panel with the current selected item
 	 */
 	private void updateInfoPanel() {
-		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		Object o = getViewerSelection();
 		
 		if (o instanceof Category){
 			((StackLayout)infoInnerPanel.getLayout()).topControl = catInfoPanel;
