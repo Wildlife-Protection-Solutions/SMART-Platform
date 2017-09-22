@@ -367,10 +367,8 @@ public class AttachmentTable extends Composite implements Listener {
 				if (t.thumb == null) t.createThumb();
 				Composite thumbNameComp = t.thumb.createThumbnail(parent, SWT.NONE);
 				if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu.createMenu(thumbNameComp));
-//				thumbNameComp.setToolTipText(t.tooltip);
 				thumbNameComp.setData(t);
-				thumbNameComp.addDisposeListener(new DisposeListener() {
-					
+				thumbNameComp.addDisposeListener(new DisposeListener() {					
 					@Override
 					public void widgetDisposed(DisposeEvent e) {
 						thumbNameComp.setMenu(null);
@@ -473,9 +471,12 @@ public class AttachmentTable extends Composite implements Listener {
 					}
 				}else if (event.type == SWT.MouseHover) {
 					if (this != lastHover || shell.isDisposed()) {
-						shell = new AttachmentTooltipShell(getShell(), resultSet, file);
-						shell.open(thumbGui.toDisplay(event.x+10, event.y));
-						lastHover = this;
+						getShell().getDisplay().asyncExec(()->{
+							//EG: running this in async exec makes it work nicely on mac
+							shell = new AttachmentTooltipShell(getShell(), resultSet, file);
+							shell.open(thumbGui.toDisplay(event.x+10, event.y));
+							lastHover = this;
+						});
 					}
 				}
 			}
