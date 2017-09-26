@@ -99,6 +99,9 @@ public class WaypointInfoView {
 
 	private UUID selectedWaypointUuid;
 	
+	private boolean showImages = true;
+	private boolean showText = true;
+	
 	//listener for modifications to waypoints
 	private IWaypointEventListener waypointListener = new IWaypointEventListener() {
 		@Override
@@ -202,7 +205,8 @@ public class WaypointInfoView {
 			}
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-//			final Date wpDate2 = wpDate;
+
+
 			final Waypoint lcurrentWp = currentWp;
 			
 			final List<Label> categoryLabels = new ArrayList<Label>();
@@ -232,13 +236,16 @@ public class WaypointInfoView {
 						lblWaypointId.setText(String.valueOf(lcurrentWp.getId()));
 						lblDateTime.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lcurrentWp.getDateTime())); 
 
+						
 						int widthHint = infoSection.getBody().getBounds().width - 20;						
 						for (List<DisplayData> d : data.values()) {
-							Label lbl = toolkit.createLabel(infoSection.getBody(), SmartUtils.formatStringForLabel(d.get(0).categoryLabel), SWT.WRAP);
-							lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-							((GridData) lbl.getLayoutData()).widthHint = widthHint;
-							lbl.setFont(boldFont);
-							categoryLabels.add(lbl);
+							if (showText) {
+								Label lbl = toolkit.createLabel(infoSection.getBody(), SmartUtils.formatStringForLabel(d.get(0).categoryLabel), SWT.WRAP);
+								lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+								((GridData) lbl.getLayoutData()).widthHint = widthHint;
+								lbl.setFont(boldFont);
+								categoryLabels.add(lbl);
+							}
 
 							Composite attributeComp = toolkit.createComposite(infoSection.getBody());
 							attributeComp.setLayout(new GridLayout(2, false));
@@ -247,41 +254,45 @@ public class WaypointInfoView {
 							attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 							for (int i = 0 ; i < d.size(); i ++){
-								for (int k = 0; k < d.get(i).attributeLabels.size(); k ++){
-									Label l = toolkit.createLabel(attributeComp,SmartUtils.formatStringForLabel(d.get(i).attributeLabels.get(k) + ":"), SWT.WRAP); //$NON-NLS-1$
-									l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-									((GridData) l.getLayoutData()).widthHint = 100;
-									attributeLabels.add(l);
-
-									l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(d.get(i).attributeValues.get(k)), SWT.WRAP);
-									l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-									((GridData) l.getLayoutData()).widthHint = 100;
-									attributeValuesLabels.add(l);
+								if (showText) {
+									for (int k = 0; k < d.get(i).attributeLabels.size(); k ++){
+										Label l = toolkit.createLabel(attributeComp,SmartUtils.formatStringForLabel(d.get(i).attributeLabels.get(k) + ":"), SWT.WRAP); //$NON-NLS-1$
+										l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+										((GridData) l.getLayoutData()).widthHint = 100;
+										attributeLabels.add(l);
+	
+										l = toolkit.createLabel(attributeComp, SmartUtils.formatStringForLabel(d.get(i).attributeValues.get(k)), SWT.WRAP);
+										l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+										((GridData) l.getLayoutData()).widthHint = 100;
+										attributeValuesLabels.add(l);
+									}
 								}
-
-								//Waypoint Composite
-								if (d.get(i).attchmentFileNames.size() > 0){
-									ThumbnailComposite tc = new ThumbnailComposite(attributeComp);
-									tc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-									toolkit.adapt(tc);
-									tc.setFiles(d.get(i).attchmentFileNames);
-									obsThumbs.add(tc);
+								if (showImages) {
+									//Waypoint Composite
+									if (d.get(i).attchmentFileNames.size() > 0){
+										ThumbnailComposite tc = new ThumbnailComposite(attributeComp);
+										tc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+										toolkit.adapt(tc);
+										tc.setFiles(d.get(i).attchmentFileNames);
+										obsThumbs.add(tc);
+									}
 								}
 								
 								
-								if (i < d.size() - 1) {
+								if (showText && i < d.size() - 1) {
 									Label l = toolkit.createLabel(attributeComp, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 									l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 								}
+							}	
+							if (showText) {
+								Label l2 = toolkit.createLabel(infoSection.getBody(),"", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+								l2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 							}
-
-							Label l2 = toolkit.createLabel(infoSection.getBody(),"", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
-							l2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 						}
 					}
 					
 			
-					if (lcurrentWp != null && lcurrentWp.getAttachments() != null && lcurrentWp.getAttachments().size() > 1){
+					if (showImages && lcurrentWp != null && lcurrentWp.getAttachments() != null && lcurrentWp.getAttachments().size() > 1){
 						compThumbnails = toolkit.createComposite(infoSection.getBody());
 						compThumbnails.setLayout(new GridLayout());
 						toolkit.createLabel(compThumbnails, Messages.WaypointInfoView_LoadingThumbnails); 
@@ -289,16 +300,26 @@ public class WaypointInfoView {
 						compThumbnails = null;
 					}
 					
+					if (!showImages) {
+						createHiddenLabels();						
+					}
+					
 					infoSection.getBody().pack();
 					infoSection.getBody().layout();
 					infoSection.reflow(true);
 					lblWaypointId.getParent().layout();
+					
+					
+
 				}	
 			});
 			
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
+
+				
+			if (!showImages) return Status.OK_STATUS;
 			//load thumbnails
 			if (currentWp != null && currentWp.getAttachments() != null){
 				for(WaypointAttachment att: currentWp.getAttachments()){
@@ -374,18 +395,39 @@ public class WaypointInfoView {
 								infoSection.reflow(true);
 							}
 						};
+						createHiddenLabels();
+						
 						compThumbnails.addListener(SWT.Resize, resize);
 						compThumbnails.layout(true);
 						infoSection.getBody().pack();
 						infoSection.getBody().layout();
 						infoSection.reflow(true);
 						lblWaypointId.getParent().layout();
-						
+					
+
 					}
 				});
 			}
 			return Status.OK_STATUS;
-		}};
+		}
+		
+		private void createHiddenLabels() {
+			if (!showText) createLabel(Messages.WaypointInfoView_DetailsHidden);
+			if (!showImages) createLabel(Messages.WaypointInfoView_AttachmentsHidden);
+		}
+		
+		private void createLabel(String msg) {
+			Label l = toolkit.createLabel(infoSection.getBody(), msg);
+			FontData fd = l.getFont().getFontData()[0];
+			fd.setStyle(SWT.ITALIC);
+			Font f = new Font(l.getDisplay(), fd);
+			l.setFont(f);
+			l.addListener(SWT.Dispose, e->f.dispose());
+			l.setForeground(l.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
+		}
+		
+	};
+	
 	
 	/**
 	 * Creates new view
@@ -395,6 +437,21 @@ public class WaypointInfoView {
 		WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_MODIFIED, waypointListener);
 	}
 
+	public void setImagesVisible(boolean isVisible) {
+		this.showImages = isVisible;
+		forceRefresh();
+	}
+	
+	public void setTextVisible(boolean isVisible) {
+		this.showText = isVisible;
+		forceRefresh();
+	}
+	
+	private void forceRefresh() {
+		updateUiJob.cancel();
+		updateUiJob.schedule();
+	}
+	
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
 	 */
@@ -420,7 +477,6 @@ public class WaypointInfoView {
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginWidth = gl.marginHeight = 0;
 		parent.setLayout(gl);
-		
 		
 		Composite main = toolkit.createComposite(parent);
 		gl = new GridLayout(1, false);

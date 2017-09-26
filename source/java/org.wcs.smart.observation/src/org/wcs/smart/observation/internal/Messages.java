@@ -199,7 +199,11 @@ public class Messages extends NLS {
 	public static String SearchTree_RemoveAllCategories_Tooltip;
 	public static String SearchTree_RemoveCategories_ToolTip;
 	public static String SmartPatrolPlugIn_Error_DialogMessage1;
+	public static String WaypointInfoView_AttachmentsHidden;
+
 	public static String WaypointInfoView_DateTimeLabel;
+
+	public static String WaypointInfoView_DetailsHidden;
 	public static String WaypointInfoView_LoadingThumbnails;
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;

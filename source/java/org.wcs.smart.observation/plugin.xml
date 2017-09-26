@@ -191,6 +191,24 @@
                visible="true">
          </separator>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.observation.waypointInfo">
+         <command
+               commandId="org.wcs.smart.observation.waypointinfoview.images.toggle"
+               icon="images/icons/obj16/hide_images.png"
+               label="%command.toggleattachments.label"
+               style="toggle"
+               tooltip="%command.toggleattachments.tooltip">
+         </command>
+         <command
+               commandId="org.wcs.smart.observation.waypointinfoview.text.toggle"
+               icon="images/icons/obj16/hide_text.png"
+               label="%command.toggletext.label"
+               style="toggle"
+               tooltip="%command.toggletext.tooltip">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
@@ -225,6 +243,22 @@
                optional="true">
          </commandParameter>
       </command>
+      <command
+            id="org.wcs.smart.observation.waypointinfoview.images.toggle"
+            name="%command.toggleimages.name">
+         <state
+               class="org.eclipse.ui.handlers.RegistryToggleState:false"
+               id="org.eclipse.ui.commands.toggleState">
+         </state>
+      </command>
+            <command
+            id="org.wcs.smart.observation.waypointinfoview.text.toggle"
+            name="%command.toggletext.name">
+               <state
+                     class="org.eclipse.ui.handlers.RegistryToggleState:false"
+                     id="org.eclipse.ui.commands.toggleState">
+               </state>
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -243,6 +277,14 @@
                </test>
             </and>
          </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.observation.ui.WpInfoViewToggleImagesHandler$WpInfoViewToggleImagesHandlerWrapper"
+            commandId="org.wcs.smart.observation.waypointinfoview.images.toggle">
+      </handler>
+      <handler
+            class="org.wcs.smart.observation.ui.WpInfoViewToggleTextHandler$WpInfoViewToggleTextHandlerWrapper"
+            commandId="org.wcs.smart.observation.waypointinfoview.text.toggle">
       </handler>
    </extension>
    <extension
