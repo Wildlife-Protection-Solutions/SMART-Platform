@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.connect.dataqueue.cybertracker.feature.nl_ka"
       label="SMART Connect Data Queue Cybertracker Module Georgian Language Pack"
-      version="5.0.0"
+      version="5.0.1"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 
