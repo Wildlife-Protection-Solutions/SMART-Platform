@@ -150,25 +150,28 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	}
 	
 	public boolean close(){
-		
-		//evict all items from cache to ensure they are correctly loaded next time
-		getSession().getSessionFactory().getCache().evictEntityRegion(Category.class);
-		getSession().getSessionFactory().getCache().evictEntityRegion(Attribute.class);
-		getSession().getSessionFactory().getCache().evictEntityRegion(AttributeTreeNode.class);
-		getSession().getSessionFactory().getCache().evictEntityRegion(AttributeListItem.class);
-		getSession().getSessionFactory().getCache().evictEntityRegion(CategoryAttribute.class);
-		
-		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.attributeList"); //$NON-NLS-1$
-		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.activeTreeNodes"); //$NON-NLS-1$
-		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.tree"); //$NON-NLS-1$
-		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.children"); //$NON-NLS-1$
-		getSession().getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.activeChildren"); //$NON-NLS-1$
-		
-		if (getSession().getTransaction().isActive()){
-			getSession().getTransaction().rollback();
-		}
-		if (session != null && session.isOpen()){
-			session.close();
+		Session session = getSession();
+		try {
+			//evict all items from cache to ensure they are correctly loaded next time
+			session.getSessionFactory().getCache().evictEntityRegion(Category.class);
+			session.getSessionFactory().getCache().evictEntityRegion(Attribute.class);
+			session.getSessionFactory().getCache().evictEntityRegion(AttributeTreeNode.class);
+			session.getSessionFactory().getCache().evictEntityRegion(AttributeListItem.class);
+			session.getSessionFactory().getCache().evictEntityRegion(CategoryAttribute.class);
+			
+			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.attributeList"); //$NON-NLS-1$
+			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.activeTreeNodes"); //$NON-NLS-1$
+			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.Attribute.tree"); //$NON-NLS-1$
+			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.children"); //$NON-NLS-1$
+			session.getSessionFactory().getCache().evictCollectionRegion("org.wcs.smart.ca.datamodel.AttributeTreeNode.activeChildren"); //$NON-NLS-1$
+			
+			if (currentTransaction != null && currentTransaction.isActive()) {
+				currentTransaction.rollback();
+			}
+		}finally {
+			if (session != null && session.isOpen()){
+				session.close();
+			}
 		}
 		return super.close();
 	}
@@ -673,7 +676,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		
-		try(final Session s = getSession()) {
+		try{
 			pmd.run(false, false, new IRunnableWithProgress() {
 				
 				@Override
