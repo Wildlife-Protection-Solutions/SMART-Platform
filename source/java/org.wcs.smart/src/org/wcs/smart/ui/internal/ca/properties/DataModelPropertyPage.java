@@ -150,6 +150,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	}
 	
 	public boolean close(){
+		boolean r = super.close();
+		if (!r) return false;
+		
 		Session session = getSession();
 		try {
 			//evict all items from cache to ensure they are correctly loaded next time
@@ -173,7 +176,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				session.close();
 			}
 		}
-		return super.close();
+		return r;
 	}
 	
 	/**
