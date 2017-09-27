@@ -318,6 +318,45 @@
    <feature url="features/org.wcs.smart.entity.feature.nl.ka_5.0.1.jar" id="org.wcs.smart.entity.feature.nl.ka" version="5.0.1">
       <category name="entity"/>
    </feature>
+   <feature url="features/org.wcs.smart.er.feature.nl.es_5.0.2.jar" id="org.wcs.smart.er.feature.nl.es" version="5.0.2">
+      <category name="ecologicalrecords"/>
+   </feature>
+   <feature url="features/org.wcs.smart.er.feature.nl.ka_5.0.1.jar" id="org.wcs.smart.er.feature.nl.ka" version="5.0.1">
+      <category name="ecologicalrecords"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.feature.nl_ka_5.0.1.jar" id="org.wcs.smart.connect.feature.nl_ka" version="5.0.1">
+      <category name="connect"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.es_5.0.1.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.es" version="5.0.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature.nl.ka_5.0.1.jar" id="org.wcs.smart.cybertracker.patrol.feature.nl.ka" version="5.0.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.es_5.0.2.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.es" version="5.0.2">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature.nl.ka_5.0.1.jar" id="org.wcs.smart.cybertracker.survey.feature.nl.ka" version="5.0.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature.nl_ka_5.0.1.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature.nl_ka" version="5.0.1">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.survey.feature.nl_es_5.0.1.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.survey.feature.nl_es" version="5.0.1">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.survey.feature.nl_ka_5.0.1.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.survey.feature.nl_ka" version="5.0.1">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.er.feature.nl_ka_5.0.1.jar" id="org.wcs.smart.connect.dataqueue.er.feature.nl_ka" version="5.0.1">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.feature.nl_ka_5.0.1.jar" id="org.wcs.smart.connect.dataqueue.feature.nl_ka" version="5.0.1">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.independentincident.feature.nl_ka_5.0.1.jar" id="org.wcs.smart.connect.dataqueue.independentincident.feature.nl_ka" version="5.0.1">
+      <category name="connectdq"/>
+   </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>
          The SMART Intelligence plug-in contains the choice of two intelligence modules that allows users to organize, maintain and query intelligence information. Intelligence information may have been gathered by earlier patrols, or may have been received from external sources. Intelligence information may be useful to Conservation Area managers when they plan future patrols.
