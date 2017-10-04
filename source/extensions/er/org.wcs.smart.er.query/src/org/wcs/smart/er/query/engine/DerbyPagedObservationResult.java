@@ -35,7 +35,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
@@ -50,7 +50,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult extends AbstractSurveyPagedResult implements IObservationPagedQueryResultSet, ISurveyQueryMissionResult, IPagedImageResultSet{
+public class DerbyPagedObservationResult extends AbstractSurveyPagedResult implements IObservationPagedQueryResultSet, ISurveyQueryMissionResult, IDesktopPagedImageResultSet{
 
 	private int wpCount = 0;
 

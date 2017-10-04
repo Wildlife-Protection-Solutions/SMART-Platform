@@ -40,6 +40,12 @@
     			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.birt.map</artifactId>
     			<version>${smart.version}</version>
-		</dependency>		
+		</dependency>	
+		<dependency>
+    		<groupId>org.eclipse.scout.sdk.deps</groupId>
+    		<artifactId>org.eclipse.ui.workbench</artifactId>
+    		<version>3.108.0.v20160602-1232</version>
+    		<scope>provided</scope>
+		</dependency>
 	</dependencies>
 </project>

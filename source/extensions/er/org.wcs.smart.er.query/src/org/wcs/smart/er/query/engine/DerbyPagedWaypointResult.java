@@ -34,7 +34,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
@@ -45,7 +45,7 @@ import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
  * @author Emily
  *
  */
-public class DerbyPagedWaypointResult extends AbstractSurveyPagedResult implements ISurveyQueryMissionResult, IPagedImageResultSet{
+public class DerbyPagedWaypointResult extends AbstractSurveyPagedResult implements ISurveyQueryMissionResult, IDesktopPagedImageResultSet{
 
 	private PagedImageQueryResults imageResults = new PagedImageQueryResults() {
 		
