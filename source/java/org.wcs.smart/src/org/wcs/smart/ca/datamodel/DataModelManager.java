@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.ca.datamodel;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
@@ -384,24 +384,7 @@ public enum DataModelManager {
 	 * @return <code>null</code> if the key is valid otherwise a string description of the error
 	 */
 	public String validateKey(String key, Collection<? extends NamedKeyItem> otherValues){
-		if (key == null || key.isEmpty()){
-			return Messages.DataModel_Error_Key_NotEmpty;
-		}
-		if (key.length() > NamedKeyItem.MAX_KEY_LENGTH ){
-			return MessageFormat.format(Messages.DataModel_Error_Key_ToLong, new Object[]{DmObject.MAX_KEY_LENGTH});
-		}
-		if (!key.matches(NamedKeyItem.VALID_DM_KEY_PATTERN)){
-			return Messages.DataModel_Error_Key_InvalidCharacters;
-		}
-		if (checkKeyExists(key, otherValues)){
-			return Messages.DataModel_Error_Key_NotUnique;
-		}
-		for (String keyword: NamedKeyItem.KEYWORDS){
-			if (keyword.equals(key)){
-				return MessageFormat.format(Messages.DataModel_KeywordKeyError, new Object[]{keyword});
-			}
-		}
-		return null;
+		return SimpleDataModel.validateKey(key, otherValues, Locale.getDefault());
 	}
 	
 	/*

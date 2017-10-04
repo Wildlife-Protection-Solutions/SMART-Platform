@@ -25,12 +25,14 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DmObject;
-import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
@@ -48,10 +50,17 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
  */
 public class XmlDataModelValidator {
 
-	private DataModel dm;
+	public static enum I18NMessages{
+		INVALID_KEY,
+		INVALID_NAME
+	}
 	
-	public XmlDataModelValidator(DataModel dm){
+	private DataModel dm;
+	private Locale locale;
+	
+	public XmlDataModelValidator(DataModel dm, Locale locale){
 		this.dm = dm;
+		this.locale = locale;
 	}
 	
 	/**
@@ -142,6 +151,11 @@ public class XmlDataModelValidator {
 		}
 	}
 	
+	private String getLabel(I18NMessages message) {
+		return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(message, locale);
+		
+	}
+	
 	private void validate(String key, List<NameType> names, List<DmObjectWrapper> siblings) throws ParseException{
 
 		List<DmObjectWrapper> kids = new ArrayList<DmObjectWrapper>();
@@ -152,21 +166,17 @@ public class XmlDataModelValidator {
 				break;
 			}
 		}
-		String error = DataModelManager.INSTANCE.validateKey(key, kids);
+		String error = SimpleDataModel.validateKey(key, kids, locale);
 		if (error != null) {
-			throw new ParseException(MessageFormat.format(
-					Messages.XmlDataModelValidator_InvalidKey, new Object[] {
-							key, error }), 0);
+			throw new ParseException(MessageFormat.format(getLabel(I18NMessages.INVALID_KEY), new Object[] {key, error }), 0);
 		}
 	
 		for (NameType nt : names) {
 			Language l = new Language();
 			l.setCode(nt.getLanguageCode());
-			error = org.wcs.smart.ca.datamodel.DataModel.validateName(nt.getValue(), l);
+			error = SimpleDataModel.validateName(nt.getValue(), l, locale);
 			if (error != null) {
-				throw new ParseException(MessageFormat.format(
-					Messages.XmlDataModelValidator_InvalidName, new Object[] {
-							nt.getValue(), error }), 0);
+				throw new ParseException(MessageFormat.format(getLabel(I18NMessages.INVALID_NAME), new Object[] {nt.getValue(), error }), 0);
 			}
 			
 		}

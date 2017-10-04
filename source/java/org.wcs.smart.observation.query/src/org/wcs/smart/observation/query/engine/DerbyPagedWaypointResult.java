@@ -37,7 +37,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
@@ -47,7 +47,7 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IPagedImageResultSet{
+public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implements IDesktopPagedImageResultSet{
 	
 	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
 		 //NOTE: order is important as we don't want to change "patrolleg" to "pleg"

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
+import java.util.Locale;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -54,14 +55,14 @@ public class XmlSmartDataModelManager {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public static DataModel readDataModel(InputStream file) throws JAXBException, ParseException{
+	public static DataModel readDataModel(InputStream file, Locale locale) throws JAXBException, ParseException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Unmarshaller un = context.createUnmarshaller();	
 		Object o = un.unmarshal(file);
 		DataModel x = (DataModel) o;
 		
 		//validate data model
-		XmlDataModelValidator validation = new XmlDataModelValidator(x);
+		XmlDataModelValidator validation = new XmlDataModelValidator(x, locale);
 		validation.validate();
 		
 		return x;

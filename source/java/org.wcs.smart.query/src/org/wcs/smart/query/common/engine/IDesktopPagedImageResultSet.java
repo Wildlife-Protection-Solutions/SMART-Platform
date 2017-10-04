@@ -21,31 +21,21 @@
  */
 package org.wcs.smart.query.common.engine;
 
-import java.util.List;
+import org.eclipse.swt.widgets.Composite;
 
 /**
- * Interface for queries that also return a set of attachments associated
- * with the results.
+ * Extension of paged image result set that also provides the ability to
+ * create a tooltip for an image item.
  * 
  * @author Emily
  *
  */
-public interface IPagedImageResultSet {
+public interface IDesktopPagedImageResultSet extends IPagedImageResultSet{
 
 	/**
-	 * Gets all data starting from the given offset
-	 * for the given page size.
-	 * 
-	 * @param offset
-	 * @param pageSize
-	 * @return
+	 * Creates a tooltip widget
+	 * @param data
+	 * @param parent
 	 */
-	public List<IQueryImageData> getImageData(int offset, int pageSize);
-
-	/**
-	 * 
-	 * @return the total number of items with images
-	 */
-	public int getImageCount();
-
+	public void createTooltip(IQueryImageData data, Composite parent);
 }

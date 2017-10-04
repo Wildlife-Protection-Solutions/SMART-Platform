@@ -109,7 +109,7 @@ public class StyleManager {
 	 * @throws IOException
 	 * @throws WorkbenchException
 	 */
-	public Map<String,StyleBlackboard> fromStringMap(String string) throws IOException, WorkbenchException{
+	public Map<String,StyleBlackboard> fromStringMap(String string) throws IOException{
 		
 		HashMap<String, StyleBlackboard> maps = new HashMap<String, StyleBlackboard>();
 		if (string == null){ 
@@ -145,7 +145,12 @@ public class StyleManager {
 					reader.endObject();
 					if (styleId != null && value != null){
 						StyleContent sc = loadStyleContent(styleId);
-						XMLMemento memento = XMLMemento.createReadRoot(new StringReader(value));
+						XMLMemento memento = null;
+						try{
+							XMLMemento.createReadRoot(new StringReader(value));
+						}catch (WorkbenchException ex) {
+							throw new IOException(ex.getMessage(), ex);
+						}
 						if (sc != null){
 							Object style = sc.load(memento);
 							if (style != null){

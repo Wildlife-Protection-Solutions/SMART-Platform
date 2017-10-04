@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.ui.Thumbnail;
@@ -473,9 +474,11 @@ public class AttachmentTable extends Composite implements Listener {
 					if (this != lastHover || shell.isDisposed()) {
 						getShell().getDisplay().asyncExec(()->{
 							//EG: running this in async exec makes it work nicely on mac
-							shell = new AttachmentTooltipShell(getShell(), resultSet, file);
-							shell.open(thumbGui.toDisplay(event.x+10, event.y));
-							lastHover = this;
+							if (resultSet instanceof IDesktopPagedImageResultSet) {
+								shell = new AttachmentTooltipShell(getShell(), (IDesktopPagedImageResultSet)resultSet, file);
+								shell.open(thumbGui.toDisplay(event.x+10, event.y));
+								lastHover = this;
+							}
 						});
 					}
 				}

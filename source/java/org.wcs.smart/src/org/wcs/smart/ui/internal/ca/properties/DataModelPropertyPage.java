@@ -64,6 +64,7 @@ import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -787,13 +788,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}
 						}
 					}catch (final Exception ex){
-						Display.getDefault().syncExec(new Runnable() {
-								
-							@Override
-							public void run() {
-								MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DataModelPropertyPage_DeleteErrorDialogTitle, ex.getLocalizedMessage());
-							}
-						});
+						SmartPlugIn.displayLog(MessageFormat.format(Messages.DataModelPropertyPage_DeleteError, ex.getMessage()), ex);
 					}	
 				}
 			});
@@ -861,20 +856,25 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 										
 										dataModel.getAttributes().remove(catAtt.getAttribute());
 										if (catAtt.getAttribute().getUuid() != null){
-											getSession().delete(catAtt.getAttribute());
+											//the following caused a hibernate error; so we use delete statements directly
+											//getSession().delete(catAtt.getAttribute());
+											
+											Query<?> deleteq = session.createQuery("DELETE FROM AttributeTreeNode WHERE attribute = :attribute"); //$NON-NLS-1$
+											deleteq.setParameter("attribute", catAtt.getAttribute()); //$NON-NLS-1$
+											deleteq.executeUpdate();
+											
+											deleteq = session.createQuery("DELETE FROM Attribute WHERE uuid = :attribute"); //$NON-NLS-1$
+											deleteq.setParameter("attribute", catAtt.getAttribute().getUuid()); //$NON-NLS-1$
+											deleteq.executeUpdate();
+											
+											getSession().flush();
 										}
 									}
 								}
 							}
 						}
 					}catch (final Exception ex){
-						Display.getDefault().syncExec(new Runnable() {
-								
-							@Override
-							public void run() {
-								MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.DataModelPropertyPage_DeleteErrorDialogTitle, ex.getLocalizedMessage());
-							}
-						});
+						SmartPlugIn.displayLog(MessageFormat.format(Messages.DataModelPropertyPage_DeleteError, ex.getMessage()), ex); 
 					}
 				}
 			});

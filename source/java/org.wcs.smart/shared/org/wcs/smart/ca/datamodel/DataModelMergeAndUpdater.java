@@ -27,13 +27,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.internal.Messages;
 
 /**
  * Merges a source data model with a target data model updating
@@ -47,26 +49,58 @@ import org.wcs.smart.internal.Messages;
  */
 public class DataModelMergeAndUpdater {
 
-	private DataModel sourceDm;
-	private DataModel targetDm;
+	public static enum I18NMessages{
+		MERGE_TASKNAME,
+		MERGE_CAT_TASKNAME,
+		ATT_NOT_FOUND,
+		MERGE_ATT_TASKNAME,
+		ATT_TYPE_MISMATCH
+	}
+	
+	private SimpleDataModel sourceDm;
+	private SimpleDataModel targetDm;
 	
 	private Language currentSystemLanguage; 
 	private List<String> warnings;
+	
+	private Locale locale = null;
 	
 	/**
 	 * 
 	 * @param source the data model to update; items are added to this data model.  The conservation area property of this data model must be set.
 	 * @param target the data model to update from; this data model is not modified.  This conservation area property of this data model is optional
 	 */
-	public DataModelMergeAndUpdater(DataModel source, DataModel target){
+	public DataModelMergeAndUpdater(SimpleDataModel source, SimpleDataModel target){
 		if (source.getConservationArea() == null) throw new IllegalStateException("Conservation area property of data model object not set."); //$NON-NLS-1$
 		this.sourceDm = source;
 		this.targetDm = target;
+		locale = Locale.getDefault();
 	}
 	
-	public DataModelMergeAndUpdater(DataModel source, DataModel target, Language currentSystemLanguage){
+	/**
+	 * 
+	 * @param source the source data model to update.  The conservation area property of this data model must be set.
+	 * @param target the target data model (this data model is not modified)
+	 * @param currentSystemLanguage the current system language (can be null)
+	 */
+	public DataModelMergeAndUpdater(SimpleDataModel source, SimpleDataModel target, Language currentSystemLanguage){
 		this(source, target);
 		this.currentSystemLanguage = currentSystemLanguage;
+	}
+	
+	/**
+	 * 
+	 * @param source the source data model to update.  The conservation area property of this data model must be set.
+	 * @param target the target data model (this data model is not modified)
+	 * @param l the locale for system messages (null uses the default locale)
+	 */
+	public DataModelMergeAndUpdater(SimpleDataModel source, SimpleDataModel target, Locale l){
+		this(source, target);
+		this.locale = l;
+	}
+	
+	private String getMessage(I18NMessages message) {
+		return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(message, locale);
 	}
 	
 	/**
@@ -81,11 +115,11 @@ public class DataModelMergeAndUpdater {
 	 */
 	public List<String> merge(IProgressMonitor monitor) throws Exception{
 		warnings = new ArrayList<String>();
-		monitor.beginTask(Messages.DataModelMergeAndUpdater_TaskName, targetDm.getAttributes().size() + targetDm.getCategories().size() +1);
+		monitor.beginTask(getMessage(I18NMessages.MERGE_TASKNAME), targetDm.getAttributes().size() + targetDm.getCategories().size() +1);
 		
 		mergeAttributes(monitor);
 	
-		monitor.subTask(Messages.DataModelMergeAndUpdater_CategoriesTask);
+		monitor.subTask(getMessage(I18NMessages.MERGE_CAT_TASKNAME));
 		for (Category targetCategory : targetDm.getCategories()){
 			boolean found = false;
 			for (Category sourceCategory : sourceDm.getCategories()){
@@ -131,7 +165,7 @@ public class DataModelMergeAndUpdater {
 				if (!found){
 					Attribute newSourceAttribute = findAttributeInSource(targetAttribute.getAttribute().getKeyId());
 					if (newSourceAttribute == null){
-						warnings.add(MessageFormat.format(Messages.DataModelMergeAndUpdater_AttributeNotFound, targetAttribute.getAttribute().getKeyId(),source.getName())); 
+						warnings.add(MessageFormat.format(getMessage(I18NMessages.ATT_NOT_FOUND), targetAttribute.getAttribute().getKeyId(),source.getName())); 
 					}else{
 						CategoryAttribute newSourceCa = new CategoryAttribute(source, newSourceAttribute);
 						source.getAttributes().add(newSourceCa);
@@ -189,7 +223,7 @@ public class DataModelMergeAndUpdater {
 	}
 		
 	private void mergeAttributes(IProgressMonitor monitor){
-		monitor.subTask(Messages.DataModelMergeAndUpdater_AttributesTask);
+		monitor.subTask(getMessage(I18NMessages.MERGE_ATT_TASKNAME));
 		for(Attribute targetAttribute : targetDm.getAttributes()){
 			boolean found = false;
 			for(Attribute sourceAttribute : sourceDm.getAttributes()){
@@ -217,7 +251,7 @@ public class DataModelMergeAndUpdater {
 		if (!source.getKeyId().equals(target.getKeyId())) return;
 		
 		if (!source.getType().equals(target.getType())){
-			warnings.add(MessageFormat.format(Messages.DataModelMergeAndUpdater_AttributeTypeError, source.getKeyId(), source.getType().name(), target.getType().name()));
+			warnings.add(MessageFormat.format(getMessage(I18NMessages.ATT_TYPE_MISMATCH), source.getKeyId(), source.getType().name(), target.getType().name()));
 			return;
 		}
 		mergeNames(source, target);

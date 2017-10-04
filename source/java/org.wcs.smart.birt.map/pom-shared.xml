@@ -46,5 +46,12 @@
 	    		<version>2.9.3</version>
 		</dependency>
 		
+		<dependency>
+    		<groupId>org.eclipse.scout.sdk.deps</groupId>
+    		<artifactId>org.eclipse.ui.workbench</artifactId>
+    		<version>3.108.0.v20160602-1232</version>
+    		<scope>provided</scope>
+		</dependency>
+		
 	</dependencies>	
 </project>

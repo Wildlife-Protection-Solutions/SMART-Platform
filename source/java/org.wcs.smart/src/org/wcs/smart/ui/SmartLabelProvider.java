@@ -30,6 +30,8 @@ import javax.persistence.Transient;
 import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
+import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
@@ -37,6 +39,8 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelValidator;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -49,7 +53,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartLabelProvider implements ICoreLabelProvider {
 
-	
 	public static final String BOOLEAN_TRUE_LABEL = Messages.Attribute_BooleanAttribute_True_Label;
 	public static final String BOOLEAN_FALSE_LABEL = Messages.Attribute_BooleanAttribute_False_Label;
 	public static final String AGENCY_NAME = Messages.Agency_AgencyName;
@@ -117,6 +120,27 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(CA_POINTOFCONTACT_KEY)) return Messages.SmartLabelProvider_pointofcontactcolumnname;
 		if (value.equals(CA_COUNTRY_KEY)) return Messages.SmartLabelProvider_countrycolumnname;
 		if (value.equals(CA_OWNER_KEY)) return Messages.SmartLabelProvider_ownercolumnname;
+		
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_NOT_FOUND)) return Messages.SmartLabelProvider_MergeDmAttNotFound;
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_TYPE_MISMATCH)) return Messages.SmartLabelProvider_MergeDmTypeMismatch;
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_ATT_TASKNAME)) return Messages.SmartLabelProvider_MergeDmProcessingAtt;
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_CAT_TASKNAME)) return Messages.SmartLabelProvider_MergeDmProcessingCats;
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_TASKNAME)) return Messages.SmartLabelProvider_MergeDmProcessingDms;
+		
+		if (value.equals(DataModelXmlToSimpleDataModelConverter.I18NMessages.ATTRIBUTE_NOT_FOUND_ERROR)) return Messages.SmartLabelProvider_AttributeNotFound;
+		if (value.equals(DataModelXmlToSimpleDataModelConverter.I18NMessages.ATTRIBUTE_TYPE_NOT_SUPPORTED)) return Messages.SmartLabelProvider_AttributeTypeNotFound;
+		
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_INVALID_CHARS)) return Messages.DataModel_Error_Key_InvalidCharacters;
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_KEYWORD)) return Messages.DataModel_KeywordKeyError;
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_NOT_UNIQUE)) return Messages.DataModel_Error_Key_NotUnique;
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_REQUIRED)) return Messages.DataModel_Error_Key_NotEmpty;
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_TO_LONG)) return Messages.DataModel_Error_Key_ToLong;
+		if (value.equals(SimpleDataModel.I18nMessages.NAME_INVALID)) return Messages.SmartLabelProvider_DmNameRequired;
+		if (value.equals(SimpleDataModel.I18nMessages.NAME_REQUIRED)) return  Messages.DataModel_NameRequired;
+		
+		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_KEY)) return Messages.XmlDataModelValidator_InvalidKey;
+		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_NAME)) return Messages.XmlDataModelValidator_InvalidName;
+				
 		return null;
 	}
 

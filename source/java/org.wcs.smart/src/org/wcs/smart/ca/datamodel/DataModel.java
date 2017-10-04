@@ -23,9 +23,11 @@ package org.wcs.smart.ca.datamodel;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.persistence.criteria.CriteriaQuery;
@@ -46,20 +48,16 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
 
 
 /**
- * Conservation area data model.
+ * Extension of a simple data model to support Desktop specific features.
  * @author Emily
  * @since 1.0.0
  */
-public class DataModel {
+public class DataModel extends SimpleDataModel{
 	
-	private ConservationArea ca;	//the conservation area of the data model
-	private List<Category> categories;	//the root categories for the data model
-	private List<Attribute> attributes; // all attributes associated with datamodel	
-	
+		
 	private static List<Aggregation> aggregations; //set of valid aggregations
 	
 	
@@ -71,16 +69,11 @@ public class DataModel {
 	 * @param rootCategories
 	 */
 	public DataModel(ConservationArea ca, List<Category> rootCategories, List<Attribute> attributes){
-		this.ca = ca;
-		this.categories = new ArrayList<Category>();
-		this.categories.addAll(rootCategories);
-		
-		this.attributes = new ArrayList<Attribute>();
-		this.attributes.addAll(attributes);
+		super(ca, rootCategories, attributes);
 	}
 	
 	private DataModel(){
-		
+		super(null, Collections.emptyList(), Collections.emptyList());
 	}
 	
 	public static Aggregation getAggregation(String key){
@@ -131,28 +124,7 @@ public class DataModel {
 		}
 		return aggregations;
 	}
-	/**
-	 * 
-	 * @return conservation area associated with data model
-	 */
-	public ConservationArea getConservationArea(){
-		return this.ca;
-	}
-	/**
-	 * 
-	 * @param ca conservation area associated with the data model
-	 */
-	public void setConservationArea(ConservationArea ca){
-		this.ca = ca;
-	}
 	
-	/**
-	 * 
-	 * @return list of root categories
-	 */
-	public List<Category> getCategories(){
-		return this.categories;
-	}
 	
 	/**
 	 * 
@@ -403,16 +375,7 @@ public class DataModel {
 			}
 		}
 	}
-	
-	/**
-	 * 
-	 * @return all attributes associated with any category
-	 * in the data model.
-	 */
-	public List<Attribute> getAttributes(){
-		return this.attributes;
-	}
-	
+		
 	/**
 	 * Validates a data model object name
 	 * <p>Names must not be empty, less than DmObject.MAX_NAME_LENGTH characters</p>
@@ -423,17 +386,7 @@ public class DataModel {
 	 * @return <code>null</code> if the name is valid otherwise a string description of the error
 	 */
 	public static String validateName(String name, Language l){
-		if (!SmartUtils.isSimpleString(name.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, DmObject.MAX_NAME_LENGTH,0)){
-			return MessageFormat.format(
-					Messages.NameKeyComposite_Error_InvalidName,
-					new Object[]{l.getDisplayName(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc});
-
-		}
-		if (l.isDefault() && name.trim().length() == 0){
-			return Messages.DataModel_NameRequired;
-		}
-		
-		return null;
+		return SimpleDataModel.validateName(name,  l,  Locale.getDefault());
 	}
 	
 	/**

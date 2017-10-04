@@ -44,7 +44,7 @@ import org.wcs.smart.observation.query.model.columns.ObservationAttributeQueryCo
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
@@ -64,7 +64,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet implements IObservationPagedQueryResultSet, IPagedImageResultSet{
+public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet implements IObservationPagedQueryResultSet, IDesktopPagedImageResultSet{
 	
 	private String queryTempTable;
 

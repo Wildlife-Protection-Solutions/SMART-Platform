@@ -29,6 +29,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -156,7 +158,7 @@ public class ImportAttributeProcessor {
 			return false;
 		}
 		
-		defaultLangCode = DataModelXmlToSmartConverter.checkLanguage(xmlDataModel.getLanguages().getLanguages(), attribute.getConservationArea());
+		defaultLangCode = DataModelXmlToSmartConverter.checkLanguage(xmlDataModel.getLanguages().getLanguages().stream().map(m->m.getCode()).collect(Collectors.toSet()), attribute.getConservationArea());
 		if (defaultLangCode == null){
 			return false;
 		}
@@ -342,7 +344,7 @@ public class ImportAttributeProcessor {
 		defaultLangCode = null;
 		
 		try{
-			xmlDataModel = XmlSmartDataModelManager.readDataModel(in);
+			xmlDataModel = XmlSmartDataModelManager.readDataModel(in, Locale.getDefault());
 		}finally{
 			in.close();
 		}
