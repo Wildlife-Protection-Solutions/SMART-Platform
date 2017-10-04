@@ -39,14 +39,14 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.hql.spi.QueryTranslator;
 import org.hibernate.hql.spi.QueryTranslatorFactory;
 import org.hibernate.jdbc.Work;
+import org.hibernate.query.Query;
+import org.postgresql.PGConnection;
 import org.postgresql.copy.CopyManager;
-import org.postgresql.core.BaseConnection;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 
@@ -231,8 +231,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 				newQuery = newQuery + query.substring(query.toUpperCase().indexOf(" FROM ")); //$NON-NLS-1$
 				
 				String sql = ("COPY (" + newQuery + ") TO STDOUT WITH (FORMAT CSV, ENCODING 'utf-8', HEADER false, QUOTE '\"', FORCE_QUOTE *)"); //$NON-NLS-1$ //$NON-NLS-2$
-				CopyManager copy = new CopyManager((BaseConnection) ((javax.sql.PooledConnection)connection).getConnection());
-				
+				CopyManager copy = connection.unwrap(PGConnection.class).getCopyAPI();
 				
 				try(BufferedWriter out = Files.newBufferedWriter(outputFile, Charset.forName("UTF-8"))){ //$NON-NLS-1$
 					copy.copyOut(sql, out);

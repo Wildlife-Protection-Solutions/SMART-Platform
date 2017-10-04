@@ -1,8 +1,13 @@
 var CAURL = "../api/conservationarea";
+var DATA_CAURL = "../api/conservationarea/withdataonly"
 var DOWNLOADCA = false;
 
 /* configure events on html elements */
 window.onload = function(){
+	
+	document.querySelector("#calist").onclick=function(){showTab("calist");}
+	document.querySelector("#dmmanager").onclick=function(){showTab("dmmanager");}
+	showTab("calist");
 	
 	//add new ca
 	var newbtn =document.querySelector("#btnNewCa");
@@ -26,6 +31,39 @@ window.onload = function(){
 	for (var i = 0; i < elements.length; i ++){
 		elements[i].onclick=showcainfo;
 	}
+	
+	document.querySelector("#selectNoneDmCa").onclick=function(){selectDmCa(false); return false;};
+	document.querySelector("#selectAllDmCa").onclick=function(){selectDmCa(true); return false;};
+	
+	document.querySelector("#btnMergeDm").onclick=function(){submitDmUpdate(); return false;};
+	
+	refreshDmCaList();
+}
+
+function selectDmCa(state){
+	var elements = document.querySelectorAll("#dm_calist > label > input");
+	for (var i = 0; i < elements.length; i ++){
+		elements[i].checked = state;
+	}
+}
+
+
+function showTab(name){
+	var tab = "#"+name;
+	
+	var tabElement = document.querySelector(tab);
+	
+	var allTabs = tabElement.parentElement.querySelectorAll(".tab");
+	for( var i=0; i < allTabs.length; i++ ) {
+		if (allTabs[i].parentElement == tabElement.parentElement){
+			allTabs[i].classList.remove("tabselected");
+			document.querySelector("#" + allTabs[i].id+"_body").style.display="none";
+		}
+	 }
+	
+	var tabBody = "#"+name + "_body";
+	tabElement.classList.add("tabselected");
+	document.querySelector(tabBody).style.display="block";
 }
 
 function clearAndShowNewCaDialog(){
@@ -291,6 +329,22 @@ function refreshCaList(){
  	oReq.onload = createCaTable;
  	oReq.open("Get", CAURL + '/?includeSpatialBoundaries=false', true);
  	oReq.send();
+ 	
+ 	refreshDmCaList();
+}
+
+function refreshDmCaList(){
+ 	//refresh table in data model editor page
+ 	var dmcalist = document.getElementById("dm_calist");
+ 	if (dmcalist == null) return;
+ 	while(dmcalist.hasChildNodes()){
+ 		dmcalist.removeChild(dmcalist.lastChild);
+ 	}
+ 	
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createDmCaTable;
+ 	oReq.open("Get", DATA_CAURL + '/?permission=admin,caadmin,updateca', true);
+ 	oReq.send();
 }
 
 function createCaTable(){
@@ -356,4 +410,80 @@ function createCaTable(){
  		deleteicon.href="";
  		row.childNodes[4].appendChild(deleteicon);
  	}
+}
+
+function createDmCaTable(){
+ 	//repeat for data model manager page
+ 	var dmcalist = document.getElementById("dm_calist");
+ 	if (dmcalist == null) return;
+ 	
+ 	var cas = JSON.parse(this.responseText);
+ 	for (var i = 0; i < cas.length; i ++){
+ 		var calbl = document.createElement("label");
+ 		calbl.className="block";
+ 		
+ 		var checkbox = document.createElement("input");
+ 		checkbox.type="checkbox";
+ 		checkbox.value=cas[i].uuid;
+ 		
+ 		calbl.appendChild(checkbox);
+ 		dmcalist.appendChild(calbl);
+ 		
+ 		calbl.innerHTML = calbl.innerHTML + cas[i].label;
+ 	}
+}
+
+function submitDmUpdate(){
+	hideInfo();
+	
+	var dmcalist = document.getElementById("dm_calist");
+ 	if (dmcalist == null) return;
+ 	
+ 	var file = document.getElementById('dmfile').files[0];
+	if (file == null){
+		alert(i18n("ca.datamodelrequired"));
+		return false;
+	}
+	
+ 	var checkedItems = document.querySelectorAll("#dm_calist > label > input:checked ")
+ 	var cas = [];
+ 	for (var i = 0; i < checkedItems.length; i ++){
+ 		cas[i] = checkedItems[i].value;
+ 	}
+ 	if (cas.length == 0){
+		alert(i18n("ca.datamodelcarequired"));
+		return false;
+	}
+ 	
+ 	displayInfo(i18n("ca.datamodelprocessing"));
+ 	//Upload the actual file now
+    var xhr = new XMLHttpRequest();
+    var fd = new FormData();
+    xhr.open("POST", "../api/ca/datamodel", true);
+    xhr.setRequestHeader("enctype", "multipart/form-data;charset=UTF-8");
+    fd.append("dm_file", file);
+    fd.append("conservation_areas", cas);
+    xhr.onload = mergeDmComplete;
+    xhr.send(fd);
+}
+
+function mergeDmComplete(){
+	if (this.status != 200) {
+		var msg = i18n("ca.datamodelmergeerror")
+		if (this.status == 401){
+			msg += " " + i18n("ca.datamodelmergeerrorunauthorized");
+		}
+		displayError(parseError(msg , this.responseText));
+		return;
+	}else{
+		var warnings = JSON.parse(this.responseText);
+		msg = i18n("ca.datamodelmergecomplete");	
+		if (warnings.length > 0){
+			msg += i18n("ca.datamodelmergewarn") + "<br>";
+			for (var i = 0; i < warnings.length; i ++){
+				msg += warnings[i] + "<br>";
+			}
+		}
+		displayInfo(msg);
+	}
 }

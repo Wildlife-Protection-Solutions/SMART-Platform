@@ -26,7 +26,11 @@ import java.util.Locale;
 
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
+import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelValidator;
 
 /**
  * The SMART label provide must provide implementations for:
@@ -84,6 +88,28 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		
 		if (value.equals(EMPLOYEE_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.EmployeeTableName", l); //$NON-NLS-1$
 		if (value.equals(STATION_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.StationsTableName", l); //$NON-NLS-1$
+		
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_NOT_FOUND)) return Messages.getString("SmartLabelProvider.MergeDmAttributeNotFound", l); //$NON-NLS-1$
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.ATT_TYPE_MISMATCH)) return Messages.getString("SmartLabelProvider.MergeDmTypeDifference",l ); //$NON-NLS-1$
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_ATT_TASKNAME)) return Messages.getString("SmartLabelProvider.MergeDmAttributesProgress", l); //$NON-NLS-1$
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_CAT_TASKNAME)) return Messages.getString("SmartLabelProvider.MergeDmCategoriesProgress", l); //$NON-NLS-1$
+		if (value.equals(DataModelMergeAndUpdater.I18NMessages.MERGE_TASKNAME)) return Messages.getString("SmartLabelProvider.MergeDmProgress", l); //$NON-NLS-1$
+		
+				
+		if (value.equals(DataModelXmlToSimpleDataModelConverter.I18NMessages.ATTRIBUTE_NOT_FOUND_ERROR)) return Messages.getString("SmartLabelProvider.DmXmlAttributeNotFound", l); //$NON-NLS-1$
+		if (value.equals(DataModelXmlToSimpleDataModelConverter.I18NMessages.ATTRIBUTE_TYPE_NOT_SUPPORTED)) return Messages.getString("SmartLabelProvider.DmXmlAttributeTypeNotSupported", l); //$NON-NLS-1$
+		
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_INVALID_CHARS)) return Messages.getString("SmartLabelProvider.DmValidateInvalidChars", l); //$NON-NLS-1$
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_KEYWORD)) return Messages.getString("SmartLabelProvider.DmValidateCannotContainKeyword", l); //$NON-NLS-1$
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_NOT_UNIQUE)) return Messages.getString("SmartLabelProvider.DmValidateKeyNotUnique", l); //$NON-NLS-1$
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_REQUIRED)) return Messages.getString("SmartLabelProvider.DmValidateKeyRequired", l); //$NON-NLS-1$
+		if (value.equals(SimpleDataModel.I18nMessages.KEY_TO_LONG)) return Messages.getString("SmartLabelProvider.DmValidateKeyToLong", l); //$NON-NLS-1$
+		if (value.equals(SimpleDataModel.I18nMessages.NAME_INVALID)) return Messages.getString("SmartLabelProvider.DmValidateInvalidName", l); //$NON-NLS-1$
+		if (value.equals(SimpleDataModel.I18nMessages.NAME_REQUIRED)) return Messages.getString("SmartLabelProvider.DmValidateNameRequired", l); //$NON-NLS-1$
+		
+		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_KEY)) return Messages.getString("SmartLabelProvider.XmlDmValidatorInvalidKey", l); //$NON-NLS-1$
+		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_NAME)) return Messages.getString("SmartLabelProvider.XmlDmValidatorInvalidName", l); //$NON-NLS-1$
+		
 		return null;
 	}
 	

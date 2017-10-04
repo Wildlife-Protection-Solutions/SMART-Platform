@@ -17,9 +17,15 @@
 	<%@include file="header.jsp" %>
 	<%@include file="menu.jsp" %>
 	<div id="main">
-		<div class="pageheader"><fmt:message key="ca.pageheader"/></div>
-		<p class="infomessage"><fmt:message key="ca.pageinfo"/></p>
+		<div class="tabheader pageheader">
+  			<a id="calist" class="tab "><fmt:message key="ca.pageheader"/></a>
+  			<a id="dmmanager" class="tab "><fmt:message key="ca.dmpageheader"/></a>
+  		</div>
+ 	
 		<div><div id="message" class="msgsection"></div></div>
+		
+<div id="calist_body" class="tabbody">
+<p class="infomessage"><fmt:message key="ca.pageinfo"/></p>
 		<div class="top-spacer"  style="margin-left: -20px" >
   			<div class="catable table-cell smart-table">
   				<div class="table-row smart-table-header">
@@ -50,6 +56,31 @@
 			<div><button id="btnNewCa" class="block button top-spacer"><fmt:message key="ca.createnew"/></button></div>
 		</c:if>
 	</div>
+	
+	<div id="dmmanager_body" class="tabbody">
+		<p class="infomessage"><fmt:message key="ca.dmlabelheader"/></p>
+		<div class="top-spacer"  style="" >
+		
+			<label class="block top-spacer"><fmt:message key="ca.dmfilefield"/></label>
+			<input id="dmfile" type="file" name="file" class="formtext block" />
+			
+			<label class="block top-spacer"><fmt:message key="ca.dmcafield"/></label>
+			<div class = warn-icon style="float:left"></div>
+			<label class="small" ><fmt:message key="ca.dmcawarn"/></label>
+			<div id="dm_calist" style="border:1px solid #BBC6F5; height: 150px; overflow-y:scroll">
+					<c:forEach var="ca" items="${cas}" varStatus="count">
+						<label class="block"><input type="checkbox" value="${ca.getUuid()}"/>${ca.getLabel()}</label>
+					</c:forEach>
+			</div>
+			<div><a href="" id="selectAllDmCa"><fmt:message key="ca.dmcaall"/></a>&nbsp;&nbsp;&nbsp;<a href="" id="selectNoneDmCa"><fmt:message key="ca.dmcanone"/></a></div>
+			
+			<div><button id="btnMergeDm" class="block button top-spacer"><fmt:message key="ca.dmmergebtn"/></button></div>
+			
+		</div>
+	</div>
+	
+	</div>
+	
 	
 	<%@include file="footer.jsp" %>
 

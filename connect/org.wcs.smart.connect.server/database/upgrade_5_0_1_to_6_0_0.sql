@@ -1130,7 +1130,7 @@ RETURN ROW; END$$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION connect.trg_dm_cat_att_map() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
  	INSERT INTO connect.change_log 
  		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'category_uuid', ROW.category_uuid, null, null, null, a.CA_UUID 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, 'category_uuid', ROW.category_uuid, null, a.CA_UUID 
  		FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$ LANGUAGE 'plpgsql'; 
 
