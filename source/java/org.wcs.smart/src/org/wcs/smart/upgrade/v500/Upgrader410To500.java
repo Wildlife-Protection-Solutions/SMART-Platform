@@ -51,7 +51,7 @@ public class Upgrader410To500 implements IDatabaseUpgrader {
 
 		String[] sql = new String[] {
 				"ALTER TABLE smart.employee ADD COLUMN usertemp VARCHAR(5000)", //$NON-NLS-1$
-				"UPDATE smart.employee set usertemp = case when smartuserlevel = 0 THEN 'ADMIN' when smartuserlevel = 1 THEN 'MANAGER' WHEN smartuserlevel = 2  THEN 'ANALYST' when smartuserlevel=3 THEN 'DATAENTRY' ELSE null END", //$NON-NLS-1$
+				"UPDATE smart.employee set usertemp = case when smartuserlevel = 0 THEN 'ADMIN' when smartuserlevel = 1 THEN 'DATAENTRY' WHEN smartuserlevel = 2  THEN 'ANALYST' when smartuserlevel=3 THEN 'MANAGER' ELSE null END", //$NON-NLS-1$
 				"ALTER TABLE smart.employee DROP COLUMN smartuserlevel", //$NON-NLS-1$
 				"ALTER TABLE smart.employee ADD COLUMN smartuserlevel VARCHAR(5000)", //$NON-NLS-1$
 				"UPDATE smart.employee SET smartuserlevel = usertemp", //$NON-NLS-1$
