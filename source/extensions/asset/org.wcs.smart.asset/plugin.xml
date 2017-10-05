@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.hibernate.libs.mapping">
+      <class
+            ca_property="conservationArea"
+            class="org.wcs.smart.asset.model.Asset"
+            supportsCcaa="false">
+      </class>
+   </extension>
+
+</plugin>
