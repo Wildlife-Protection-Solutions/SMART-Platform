@@ -19,14 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.dialogs;
+package org.wcs.smart.asset.ui.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -62,25 +60,19 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.geotools.referencing.CRS;
-import org.locationtech.udig.project.ui.ApplicationGIS;
-import org.locationtech.udig.project.ui.internal.MapPart;
-import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
+import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.model.AssetAttributeValue;
+import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
+import org.wcs.smart.asset.model.AssetStationAttributeValue;
+import org.wcs.smart.asset.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.common.control.OnOffButton;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.i2.model.IntelEntityAttributeValue;
-import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
-import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelRecordAttributeValue;
-import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
-import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
@@ -98,7 +90,7 @@ public class AttributeFieldEditor {
 
 	private static final String SELELECTION_KEY = "sel"; //$NON-NLS-1$
 	
-	private IntelAttribute attribute;
+	private AssetAttribute attribute;
 	
 	private Composite parent;
 	private Text txtValue;
@@ -113,7 +105,6 @@ public class AttributeFieldEditor {
 	private Button btnChOnOff;
 	private ControlDecoration cd;
 	
-	private boolean isMulti;
 	private String warnMessage;
 	private String name = null;
 	private CoordinateReferenceSystem crs = GeometryUtils.SMART_CRS;
@@ -126,8 +117,8 @@ public class AttributeFieldEditor {
 	 * @param parent
 	 * @param attribute
 	 */
-	public AttributeFieldEditor(Composite parent, IntelAttribute attribute) {
-		this(parent, attribute, false, null);
+	public AttributeFieldEditor(Composite parent, AssetAttribute attribute) {
+		this(parent, attribute, null);
 	}
 	
 	/**
@@ -137,10 +128,10 @@ public class AttributeFieldEditor {
 	 * @param name field name or null if attribute name to be used
 	 * @param multiSelect - if multiple list items can be selected; only valid for list attributes
 	 */
-	public AttributeFieldEditor(Composite parent, IntelAttribute attribute, Boolean multiSelect, String name) {
+	public AttributeFieldEditor(Composite parent, AssetAttribute attribute, String name) {
 		this.parent = parent;
 		this.attribute = attribute;
-		this.isMulti = multiSelect == null ? false : multiSelect;
+		
 		if (name == null){
 			this.name = attribute.getName();
 		}else{
@@ -158,7 +149,7 @@ public class AttributeFieldEditor {
 						crs= parsed;
 					}
 				}catch (Exception ex){
-					Intelligence2PlugIn.log(ex.getMessage(), ex);
+					AssetPlugIn.log(ex.getMessage(), ex);
 				}
 			}
 			
@@ -209,7 +200,7 @@ public class AttributeFieldEditor {
 					Double.parseDouble(txtValue.getText());
 				}
 			}catch(Exception ex){
-				msg = Messages.AttributeFieldEditor_InvalidNumber;
+				msg = "Unable to parse number from text";
 			}
 		}
 		if (attribute.getType() == AttributeType.POSITION){
@@ -223,7 +214,7 @@ public class AttributeFieldEditor {
 					y = Double.parseDouble(txtValue2.getText());
 				}
 			}catch(Exception ex){
-				msg = Messages.AttributeFieldEditor_InvalidCoordinate;
+				msg = "Unable to parse coordinate values from text";
 			}
 			//try to reproject to database crs
 			if (x != null && y != null){
@@ -232,7 +223,7 @@ public class AttributeFieldEditor {
 					try{
 						ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 					}catch (Exception ex){
-						msg = Messages.AttributeFieldEditor_ReprojectionError;
+						msg = "Unable to reproject position attribute to database projection";
 					}
 				}
 			}
@@ -264,7 +255,7 @@ public class AttributeFieldEditor {
 		validate();
 	}
 	
-	public IntelAttribute getAttribute(){
+	public AssetAttribute getAttribute(){
 		return this.attribute;
 	}
 	public void addSelectionListener(SelectionListener listener){
@@ -289,14 +280,8 @@ public class AttributeFieldEditor {
 		return txtMulti; 
 	}
 	
-	/**
-	 * returns true if the value is set; false if not set and should be removed
-	 * from attribute list.
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public boolean updateValue(IntelEntityRelationshipAttributeValue value){
+	
+	public boolean updateValue(AssetAttributeValue value){
 		boolean add = false;
 		if (attribute.getType() == AttributeType.BOOLEAN){
 			if (((OnOffButton)btnOnOff).isEnabled()){
@@ -313,93 +298,12 @@ public class AttributeFieldEditor {
 				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
-			if (isMulti) throw new IllegalStateException(Messages.AttributeFieldEditor_MultiSelectNotSupportedRelationships);
 			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
 			if (!selection.isEmpty()){
 				Object item = selection.getFirstElement();
-				if (item instanceof IntelAttributeListItem){
+				if (item instanceof AssetAttributeListItem){
 					add = true;
-					value.setAttributeListItem((IntelAttributeListItem) item);
-				}
-			}
-		}else if (attribute.getType() == AttributeType.NUMERIC){
-			try{
-				String dvalue = ((Text)txtValue).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue(d);
-					add = true;
-				}
-			}catch (Exception ex){
-				//
-			}
-		}else if (attribute.getType() == AttributeType.POSITION){
-			Double[] values = parsePositionValues();
-			if (values == null){
-				add = false;
-			}else{
-				value.setNumberValue(values[0]);
-				value.setNumberValue2(values[1]);
-				add = true;
-			}
-			
-		}else if (attribute.getType() == AttributeType.TEXT){
-			String svalue = txtMulti.getText();
-			if (!svalue.trim().isEmpty()){
-				value.setStringValue(svalue.trim());
-				add = true;
-			}
-		}
-		return add;
-	}
-	
-	public boolean updateValue(IntelRecordAttributeValue value){
-		boolean add = false;
-		if (attribute.getType() == AttributeType.BOOLEAN){
-			if (((OnOffButton)btnOnOff).isEnabled()){
-				add = true;
-				if (((OnOffButton)btnOnOff).getSelection()){
-					value.setNumberValue(1d);
-				}else{
-					value.setNumberValue(0d);
-				}
-			}
-		}else if (attribute.getType() == AttributeType.DATE){
-			if (((DateTime)dtDateTime).getEnabled()){
-				add = true;
-				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
-			}
-		}else if (attribute.getType() == AttributeType.LIST){
-			if (value.getAttributeListItems() == null){
-				value.setAttributeListItems(new ArrayList<>());
-			}
-			ArrayList<IntelRecordAttributeValueList> listValues = new ArrayList<IntelRecordAttributeValueList>();
-			
-			Collection<?> objects = Collections.emptyList();
-			if (!isMulti){
-				if (!cmbViewer.getSelection().isEmpty()){
-					objects = Collections.singletonList(  ((IStructuredSelection)((ComboViewer)cmbViewer).getSelection()).getFirstElement() );
-				}
-			}else{
-				objects = cmbMultiSelect.getCheckObjects();
-			}
-			for (Object item : objects) {					
-				if (item instanceof IntelAttributeListItem){
-					IntelRecordAttributeValueList list = new IntelRecordAttributeValueList();
-					list.getId().setElementUuid(((IntelAttributeListItem) item).getUuid());
-					list.getId().setValue(value);
-					listValues.add(list);
-					add = true;
-				}
-			}
-			List<IntelRecordAttributeValueList> delete = new ArrayList<IntelRecordAttributeValueList>();
-			for (IntelRecordAttributeValueList existing : value.getAttributeListItems()){
-				if (!listValues.contains(existing)) delete.add(existing);
-			}
-			value.getAttributeListItems().removeAll(delete);
-			for (IntelRecordAttributeValueList newItem: listValues){
-				if (!value.getAttributeListItems().contains(newItem)){
-					value.getAttributeListItems().add(newItem);
+					value.setAttributeListItem((AssetAttributeListItem) item);
 				}
 			}
 		}else if (attribute.getType() == AttributeType.NUMERIC){
@@ -441,11 +345,9 @@ public class AttributeFieldEditor {
 		}
 		return add;
 	}
-	
 
 	
-	
-	public void initControl(IntelEntityRelationshipAttributeValue value){
+	public void initControl(AssetStationAttributeValue value){
 		if (attribute.getType() == AttributeType.TEXT){
 			txtValue.setText(txtMulti.getText());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
@@ -481,7 +383,7 @@ public class AttributeFieldEditor {
 	 * @param value
 	 * @return
 	 */
-	public boolean updateValue(IntelEntityAttributeValue value){
+	public boolean updateValue(AssetDeploymentAttributeValue value){
 		boolean add = false;
 		if (attribute.getType() == AttributeType.BOOLEAN){
 			if (((OnOffButton)btnOnOff).isEnabled()){
@@ -498,13 +400,12 @@ public class AttributeFieldEditor {
 				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
-			if (isMulti) throw new IllegalStateException(Messages.AttributeFieldEditor_MultiSelectNotSupportedAttributes);
 			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
 			if (!selection.isEmpty()){
 				Object item = selection.getFirstElement();
-				if (item instanceof IntelAttributeListItem){
+				if (item instanceof AssetAttributeListItem){
 					add = true;
-					value.setAttributeListItem((IntelAttributeListItem) item);
+					value.setAttributeListItem((AssetAttributeListItem) item);
 				}
 			}
 		}else if (attribute.getType() == AttributeType.NUMERIC){
@@ -537,7 +438,69 @@ public class AttributeFieldEditor {
 		return add;
 	}
 	
-	public void initControl(IntelEntityAttributeValue value){
+	/**
+	 * returns true if the value is set; false if not set and should be removed
+	 * from attribute list.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public boolean updateValue(AssetStationAttributeValue value){
+		boolean add = false;
+		if (attribute.getType() == AttributeType.BOOLEAN){
+			if (((OnOffButton)btnOnOff).isEnabled()){
+				add = true;
+				if (((OnOffButton)btnOnOff).getSelection()){
+					value.setNumberValue(1d);
+				}else{
+					value.setNumberValue(0d);
+				}
+			}
+		}else if (attribute.getType() == AttributeType.DATE){
+			if (((DateTime)dtDateTime).getEnabled()){
+				add = true;
+				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
+			}
+		}else if (attribute.getType() == AttributeType.LIST){
+			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
+			if (!selection.isEmpty()){
+				Object item = selection.getFirstElement();
+				if (item instanceof AssetAttributeListItem){
+					add = true;
+					value.setAttributeListItem((AssetAttributeListItem) item);
+				}
+			}
+		}else if (attribute.getType() == AttributeType.NUMERIC){
+			try{
+				String dvalue = ((Text)txtValue).getText();
+				if (!dvalue.trim().isEmpty()){
+					Double d = Double.parseDouble(dvalue);
+					value.setNumberValue(d);
+					add = true;
+				}
+			}catch (Exception ex){
+				//
+			}
+		}else if (attribute.getType() == AttributeType.POSITION){
+			Double[] values = parsePositionValues();
+			if (values == null){
+				add = false;
+			}else{
+				value.setNumberValue(values[0]);
+				value.setNumberValue2(values[1]);
+				add = true;
+			}
+		}else if (attribute.getType() == AttributeType.TEXT){
+			String svalue = txtMulti.getText();
+			if (!svalue.trim().isEmpty()){
+				value.setStringValue(svalue.trim());
+				add = true;
+			}
+		}
+		return add;
+	}
+	
+	public void initControl(AssetAttributeValue value){
 		if (attribute.getType() == AttributeType.TEXT){
 			txtMulti.setText(value.getStringValue());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
@@ -567,7 +530,7 @@ public class AttributeFieldEditor {
 		}
 	}
 	
-	public void initControl(IntelRecordAttributeValue value){
+	public void initControl(AssetDeploymentAttributeValue value){
 		if ( value.getAttribute() == null ) return;
 		if (attribute.getType() == AttributeType.TEXT){
 			txtMulti.setText(value.getStringValue());
@@ -576,43 +539,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.POSITION){
 			initPositionValues(value.getNumberValue(), value.getNumberValue2());
 		}else if (attribute.getType() ==  AttributeType.LIST){
-			List<Object> selectedObjects = new ArrayList<>();
-			if (value.getAttributeListItems() != null){
-				for (IntelRecordAttributeValueList i : value.getAttributeListItems()){
-					if (value.getAttribute().getAttribute() != null){
-						IntelAttributeListItem temp = new IntelAttributeListItem();
-						temp.setUuid(i.getId().getElementUuid());
-						selectedObjects.add(temp);
-					}
-					if (value.getAttribute().getEntityType() != null){
-						IntelEntityType temp = new IntelEntityType();
-						temp.setUuid(i.getId().getElementUuid());
-						selectedObjects.add(temp);
-					}
-				}
-			}
-			
-			Collection<?> items = null;
-			if (isMulti){
-				items = cmbMultiSelect.getInput();
-			}else{
-				items = (Collection<?>)cmbViewer.getInput();
-			}
-			
-			List<Object> selectedObjs = new ArrayList<Object>();
-			for (Object x : selectedObjects){
-				for (Object y : items){
-					if (x.equals(y)){
-						selectedObjs.add(y);
-						break;
-					}
-				}
-			}
-			if (isMulti){
-				cmbMultiSelect.setValue(selectedObjs);
-			}else{
-				cmbViewer.setSelection(new StructuredSelection(selectedObjs));
-			}
+			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			if(value.getDateValue() == null){
 				btnChDateTime.setSelection(false);
@@ -656,7 +583,7 @@ public class AttributeFieldEditor {
 				txtValue.setText(String.valueOf(viewCoordinate.x));
 				txtValue2.setText(String.valueOf(viewCoordinate.y));
 			} catch (Exception e) {
-				Intelligence2PlugIn.displayLog(Messages.AttributeFieldEditor_ReprojectionError2, e);
+				AssetPlugIn.displayLog("Unable to reproject position attribute to view projection.", e);
 				txtValue.setText(String.valueOf(value1));
 				txtValue2.setText(String.valueOf(value2));
 			}
@@ -691,7 +618,7 @@ public class AttributeFieldEditor {
 				Coordinate c = ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 				return new Double[]{c.x, c.y};
 			}catch (Exception ex){
-				Intelligence2PlugIn.displayLog(Messages.AttributeFieldEditor_ReprojectionError3, ex);
+				AssetPlugIn.displayLog("Unable to reproject position attribute to database projection", ex);
 				return new Double[]{x,y};
 			}
 		}
@@ -724,28 +651,24 @@ public class AttributeFieldEditor {
 				}
 			});
 		}else if (attribute.getType() ==  AttributeType.LIST){
-			if (!isMulti){
-				cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
-				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-				cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
-				List<Object> items = new ArrayList<Object>();
-				items.add(""); //$NON-NLS-1$
-				items.addAll(attribute.getAttributeList());
-				cmbViewer.setInput(items);
-				cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-					@Override
-					public void selectionChanged(SelectionChangedEvent event) {
-						modified();
-					}
-				});
-				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-				((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
-				
-				cd = createDecoration(cmbViewer.getControl());
-			}else{
-				CheckBoxDropDown control = createMultiSelectWidget(parent);
-				cd = createDecoration(control);
-			}
+			cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
+			cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
+			List<Object> items = new ArrayList<Object>();
+			items.add(""); //$NON-NLS-1$
+			items.addAll(attribute.getAttributeList());
+			cmbViewer.setInput(items);
+			cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					modified();
+				}
+			});
+			cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
+			
+			cd = createDecoration(cmbViewer.getControl());
+
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			Composite t = new Composite(parent, SWT.NONE);
 			t.setLayout(new GridLayout(2, false));
@@ -850,10 +773,8 @@ public class AttributeFieldEditor {
 				});
 			}
 
-			
-			
 			Hyperlink link = new Hyperlink(c, SWT.NONE);
-			link.setText(Messages.AttributeFieldEditor_maplink);
+			link.setText("map...");
 			link.setUnderlined(true);
 			link.setForeground(link.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
 			link.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -876,27 +797,27 @@ public class AttributeFieldEditor {
 	}
 	
 	private void selectOnMap(Shell parent){
-		
-		SelectPointMapDialog md = new SelectPointMapDialog(parent);
-		Double[] position = parsePositionValues();
-		if (position != null){
-			md.setInitPoint(position[0], position[1]);
-		}
-		
-		MapPart currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
-		IAction lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
-		try{
-			if (md.open() == SelectPointMapDialog.OK){
-				if (md.getPoint() != null){
-					double x = md.getPoint().getX();
-					double y = md.getPoint().getY();
-					initPositionValues(x, y);
-				}
-			}
-		}finally{
-			ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
-			lastToolAction.run();
-		}
+		//TODO:
+//		SelectPointMapDialog md = new SelectPointMapDialog(parent);
+//		Double[] position = parsePositionValues();
+//		if (position != null){
+//			md.setInitPoint(position[0], position[1]);
+//		}
+//		
+//		MapPart currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
+//		IAction lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
+//		try{
+//			if (md.open() == SelectPointMapDialog.OK){
+//				if (md.getPoint() != null){
+//					double x = md.getPoint().getX();
+//					double y = md.getPoint().getY();
+//					initPositionValues(x, y);
+//				}
+//			}
+//		}finally{
+//			ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
+//			lastToolAction.run();
+//		}
 	}
 	
 	private CheckBoxDropDown createMultiSelectWidget(Composite parent){

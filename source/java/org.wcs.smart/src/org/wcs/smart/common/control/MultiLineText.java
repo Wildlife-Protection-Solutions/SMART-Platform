@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui;
+package org.wcs.smart.common.control;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;

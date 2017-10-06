@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.dialogs;
+package org.wcs.smart.asset.ui.config;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -66,30 +67,31 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetEvents;
+import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.AssetTypeManager;
+import org.wcs.smart.asset.model.AssetType;
+import org.wcs.smart.asset.ui.AssetTypeLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.RelationshipTypeManager;
-import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelRelationshipGroup;
-import org.wcs.smart.i2.model.IntelRelationshipType;
-import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
 
 /**
- * Dialog for listing entity types.
+ * Dialog for listing asset types.
  * @author Emily
  *
  */
-public class RelationshipGroupListDialog extends TitleAreaDialog {
+public class AssetTypeListDialog extends TitleAreaDialog {
 
+	@Inject
+	private IEventBroker broker;
 	@Inject
 	private IEclipseContext context;
 	
-	private TableViewer cmbGroups;
-	private List<IntelRelationshipGroup> groups = null;
+	private TableViewer cmbTypes;
+	private List<AssetType> types = null;
 	private NamedItemViewerFilter filter;
 	private IStructuredSelection currentSelection;
 	
@@ -100,28 +102,32 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 	private Button btnNew;
 	private Button btnEdit;
 	private Button btnDelete;
-	
-	private Job loadGroups = new Job("load relationships groups"){ //$NON-NLS-1$
+	 
+	private Job loadTypes = new Job("load asset types"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			groups = null;
+			types = null;
 			try(Session session = HibernateManager.openSession()){
-				groups = RelationshipTypeManager.INSTANCE.getRelationshipGroups(session, SmartDB.getCurrentConservationArea());
+				types = AssetTypeManager.INSTANCE.getAssetTypes(session, SmartDB.getCurrentConservationArea());
+				for (AssetType t : types){
+					t.getName();
+				}
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					cmbGroups.setInput(groups);
-					cmbGroups.setSelection(currentSelection);
+					if (cmbTypes.getControl().isDisposed()) return;
+					cmbTypes.setInput(types);
+					cmbTypes.setSelection(currentSelection);
 				}
 			});
 			return Status.OK_STATUS;
 		}
 		
 	};
-	public RelationshipGroupListDialog(Shell parentShell) {
+	public AssetTypeListDialog(Shell parentShell) {
 		super(parentShell);
 	}
 
@@ -146,36 +152,35 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 				filter.setFilterString(typeFilter.getPatternFilter());
 			}
 		});
-		
 		Label l = new Label(parent, SWT.NONE);
 		l.setVisible(false);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		cmbGroups = new TableViewer(parent);
-		cmbGroups.setContentProvider(ArrayContentProvider.getInstance());
-		cmbGroups.setLabelProvider(new RelationshipGroupLabelProvider());
-		cmbGroups.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		cmbGroups.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		cmbGroups.getControl().setFocus();
-		cmbGroups.addDoubleClickListener(new IDoubleClickListener() {
+		cmbTypes = new TableViewer(parent);
+		cmbTypes.setContentProvider(ArrayContentProvider.getInstance());
+		cmbTypes.setLabelProvider(new AssetTypeLabelProvider());
+		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbTypes.getControl().setFocus();
+		cmbTypes.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				edit();
 			}
 		});
-		cmbGroups.addSelectionChangedListener(new ISelectionChangedListener() {
+		cmbTypes.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				btnEdit.setEnabled(!cmbGroups.getSelection().isEmpty());
-				btnDelete.setEnabled(!cmbGroups.getSelection().isEmpty());
-				mnuEdit.setEnabled(!cmbGroups.getSelection().isEmpty());
-				mnuDelete.setEnabled(!cmbGroups.getSelection().isEmpty());
+				btnEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
+				btnDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
+				mnuEdit.setEnabled(!cmbTypes.getSelection().isEmpty());
+				mnuDelete.setEnabled(!cmbTypes.getSelection().isEmpty());
 			}
 		});
 		
-		filter = new NamedItemViewerFilter(cmbGroups);
-		cmbGroups.setFilters(new ViewerFilter[]{filter});
+		filter = new NamedItemViewerFilter(cmbTypes);
+		cmbTypes.setFilters(new ViewerFilter[]{filter});
 		
 		Composite buttonPanel = new Composite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
@@ -210,8 +215,8 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Menu menu = new Menu(cmbGroups.getControl());
-		cmbGroups.getControl().setMenu(menu);
+		Menu menu = new Menu(cmbTypes.getControl());
+		cmbTypes.getControl().setMenu(menu);
 
 		mnuAdd = new MenuItem(menu, SWT.DEFAULT);
 		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
@@ -250,12 +255,12 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		
 		
-		setTitle(Messages.RelationshipGroupListDialog_Title);
-		getShell().setText(Messages.RelationshipGroupListDialog_Title);
-		setMessage(Messages.RelationshipGroupListDialog_Message);
+		setTitle("Asset Type");
+		getShell().setText("Asset Type");
+		setMessage("Manage the asset types in the system.");
 		
-		loadGroups.setSystem(true);
-		loadGroups.schedule();
+		loadTypes.setSystem(true);
+		loadTypes.schedule();
 		
 		return parent;
 	}
@@ -265,44 +270,75 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
 	
-	private void openGroupDialog(IntelRelationshipGroup group){
-		RelationshipGroupDialog ed = new RelationshipGroupDialog(getShell(), group);
-		ContextInjectionFactory.inject(ed, context);
-		ed.open();
+	private void add(){
+		AssetType type = new AssetType();
+		type.setConservationArea(SmartDB.getCurrentConservationArea());
+		type.setAssetAttributes(new ArrayList<>());
+		type.setAssetDeploymentAttributes(new ArrayList<>());
+		openDialog(type);
 		refresh();
 	}
 	
-	private void add(){
-		IntelRelationshipGroup group = new IntelRelationshipGroup();
-		group.setConservationArea(SmartDB.getCurrentConservationArea());
-		group.setRelationshipTypes(new ArrayList<IntelRelationshipType>());
-		openGroupDialog(group);
+	private void openDialog(AssetType type){
+		IEclipseContext ctx = context.createChild();
+		ctx.set(AssetType.class, type);
+		ctx.set(Shell.class, getShell());
+		AssetTypeDialog ed = ContextInjectionFactory.make(AssetTypeDialog.class, ctx);
+		ed.open();
 	}
 	
 	private void edit(){
-		Object x = ((IStructuredSelection)cmbGroups.getSelection()).getFirstElement();
-		if (x instanceof IntelRelationshipGroup){
-			IntelRelationshipGroup type = (IntelRelationshipGroup)x;
-			openGroupDialog(type);
+		Object x = ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
+		if (x instanceof AssetType){
+			AssetType type = (AssetType)x;
+			
+			//TODO:
+			//before we edit the entity type ensure that all editors with this type are not dirty
+//			List<EntityEditor> toSave = new ArrayList<EntityEditor>();
+//			StringBuilder sb= new StringBuilder();
+//			for (MPart part : context.get(EPartService.class).getParts()){
+//				if (E3Utils.isCompatibilityEditor(part)){
+//					Object src = E3Utils.getSourceObject(part); 
+//					if ( src instanceof EntityEditor 
+//							&& ((EntityEditor)src).isDirty()
+//							&& ((EntityEditor)src).getEntity().getEntityType().equals(type)){
+//						toSave.add((EntityEditor) src);
+//						sb.append(((EntityEditor)src).getEntity().getIdAttributeAsText());
+//						sb.append(", "); //$NON-NLS-1$
+//					}
+//				}
+//			}
+//			if (!toSave.isEmpty()){
+//				if (MessageDialog.openQuestion(getShell(), Messages.EntityTypeListDialog_EditTypeTitle, 
+//						MessageFormat.format(Messages.EntityTypeListDialog_EditTypeMsg, type.getName(), sb.substring(0, sb.length()-2)))){
+//					for (EntityEditor e : toSave){
+//						e.doSave(new NullProgressMonitor());
+//					}
+//				}else{
+//					return;  //cannot edit
+//				}
+//			}
+			openDialog(type);
+			refresh();
 		}
 	}
 	
 	private void delete(){
-		List<IntelRelationshipGroup> toDelete = new ArrayList<IntelRelationshipGroup>();
+		List<AssetType> toDelete = new ArrayList<AssetType>();
 		StringBuilder sb = new StringBuilder();
 		
-		for (Iterator<?> iterator = ((IStructuredSelection)cmbGroups.getSelection()).iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)cmbTypes.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
-			if (x instanceof IntelRelationshipGroup){
-				toDelete.add((IntelRelationshipGroup)x);
-				sb.append(((IntelRelationshipGroup) x).getName());
+			if (x instanceof AssetType){
+				toDelete.add((AssetType)x);
+				sb.append(((AssetType) x).getName());
 				sb.append(", "); //$NON-NLS-1$
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openConfirm(getShell(), Messages.RelationshipGroupListDialog_ConfirmDeleteTitle, MessageFormat.format(Messages.RelationshipGroupListDialog_ConfirmDeleteMes, sb.toString()))){
+		if (!MessageDialog.openConfirm(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the following asset types?  All assets, deployments and other references will also be removed.  This action cannot be undone.\n\n {0}", sb.toString()))){
 			return;
 		}
 		
@@ -313,36 +349,44 @@ public class RelationshipGroupListDialog extends TitleAreaDialog {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 
-					monitor.beginTask(Messages.RelationshipGroupListDialog_DeleteTaskName, toDelete.size());
+					monitor.beginTask("Deleting asset types", toDelete.size());
+					List<AssetType> deleted = new ArrayList<AssetType>();
 					try(Session s = HibernateManager.openSession()){
-						for (IntelRelationshipGroup t : toDelete){
+
+						for (AssetType t : toDelete){
 							monitor.subTask(t.getName());
 							s.beginTransaction();
 							try{
-								RelationshipTypeManager.INSTANCE.deleteRelationshipGroup(t, s);
+								AssetTypeManager.INSTANCE.deleteAssetType(t, s);
 								s.getTransaction().commit();
+								deleted.add(t);
 							}catch(Exception ex){
 								s.getTransaction().rollback();
-								Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.RelationshipGroupListDialog_DeleteError1, t.getName(), ex.getMessage()), ex);
+								AssetPlugIn.displayLog(MessageFormat.format("Unable to delete Asset Type {0}. {1}", t.getName(), ex.getMessage()), ex);
 							}
 							monitor.worked(1);
 						}
-					}	
+					}
 					monitor.done();
-					
+					for (AssetType d : deleted){
+						broker.send(AssetEvents.ASSETTYPE_DELETE, d);
+					}
+					 
 				}
 			});
 		} catch (Exception e) {
-			Intelligence2PlugIn.displayLog(Messages.RelationshipGroupListDialog_DeleteError2 +e.getMessage(), e);
+			AssetPlugIn.displayLog("Error deleting asset types: " +e.getMessage(), e);
 		}
 		
 		refresh();
 	}
 	
 	private void refresh(){
-		currentSelection = (IStructuredSelection) cmbGroups.getSelection();
-		cmbGroups.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		loadGroups.schedule(0);
+		if (cmbTypes.getControl().isDisposed()) return;
+		
+		currentSelection = (IStructuredSelection) cmbTypes.getSelection();
+		cmbTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		loadTypes.schedule(0);
 	}
 	
 	@Override

@@ -22,9 +22,11 @@
 package org.wcs.smart.asset.model;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -35,6 +37,8 @@ import org.wcs.smart.ca.UuidItem;
  * 
  * @author egouge
  */
+@Table
+@Entity(name="smart.asset_module_settings")
 public class AssetModuleSettings extends UuidItem {
 
 	private ConservationArea conservationArea;
@@ -73,8 +77,8 @@ public class AssetModuleSettings extends UuidItem {
 	 * 
 	 * @return key
 	 */
-	@Column(name="key")
-	public String getKey() {
+	@Column(name="keyid")
+	public String getKeyId() {
 		return this.key;
 	}
 	
@@ -84,7 +88,7 @@ public class AssetModuleSettings extends UuidItem {
 	 * @param key
 	 *            key
 	 */
-	public void setKey(String key) {
+	public void setKeyId(String key) {
 		this.key = key;
 	}
 

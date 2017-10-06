@@ -3,10 +3,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: SMART Asset Management PlugIn
 Bundle-SymbolicName: org.wcs.smart.asset;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: org.wcs.smart.asset.model.AssetPlugIn
+Bundle-Activator: org.wcs.smart.asset.AssetPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.wcs.smart;bundle-version="6.0.0",
- org.wcs.smart.observation;bundle-version="6.0.0"
+ org.wcs.smart.observation;bundle-version="6.0.0",
+ org.wcs.smart.p2;bundle-version="6.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
+Export-Package: org.wcs.smart.asset.model

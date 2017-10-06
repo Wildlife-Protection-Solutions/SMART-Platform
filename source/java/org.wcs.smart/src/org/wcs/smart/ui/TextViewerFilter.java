@@ -19,44 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui;
+package org.wcs.smart.ui;
 
-import java.util.regex.Pattern;
-
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.wcs.smart.ui.TextViewerFilter;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 /**
- * Viewer filter that filters based on the values returned by one or more
- * label providers.  If any one of the label provides matches the text, the value
- * of true is returned.
+ * Abstract viewer filter that filters based on a simple string.
+ * 
+ * @author Emily
+ *
  */
-public class TableColumnViewerFilter extends TextViewerFilter {
-
-	private ColumnLabelProvider[] columns;
+public abstract class TextViewerFilter extends ViewerFilter {
 	
-	public TableColumnViewerFilter(Viewer viewer, ColumnLabelProvider column){
-		super(viewer);
-		this.columns = new ColumnLabelProvider[]{column};
+	protected String filter;
+	protected Viewer viewer;
+	
+	public TextViewerFilter(Viewer viewer){
+		this.viewer = viewer;
 	}
 	
-	public TableColumnViewerFilter(Viewer viewer, ColumnLabelProvider... column){
-		super(viewer);
-		this.columns = column;
+	public void setFilterString(String filter){
+		this.filter = filter;
+		viewer.refresh();
 	}
 	
-	@Override
-	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (filter == null || filter.length() == 0) {
-			return true;
-		}
-		String search = ".*" + Pattern.quote(filter.toLowerCase()) + ".*"; //$NON-NLS-1$ //$NON-NLS-2$
-		for (ColumnLabelProvider col : columns){
-			String text = col.getText(element);
-			if (text != null && text.toLowerCase().matches(search)) return true;
-		}
-		return false;
-	}
-
 }

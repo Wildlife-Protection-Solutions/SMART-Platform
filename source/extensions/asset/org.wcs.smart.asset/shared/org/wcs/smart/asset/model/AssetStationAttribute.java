@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.asset.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -37,8 +39,13 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="smrat.asset_station_attribute")
-public class AssetStationAttribute {
-
+public class AssetStationAttribute implements Serializable{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private AssetAttribute attribute;
 	private int seqOrder;
 
@@ -47,7 +54,7 @@ public class AssetStationAttribute {
 	 */
 	public AssetStationAttribute() {
 	}
-
+	
 	/**
 	 * Get the asset_attribute.
 	 * 
@@ -56,7 +63,7 @@ public class AssetStationAttribute {
 	@Id
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="attribute_uuid", referencedColumnName="uuid")
-	public AssetAttribute getAttributeAssetAttribute() {
+	public AssetAttribute getAttribute() {
 		return this.attribute;
 	}
 
@@ -67,7 +74,7 @@ public class AssetStationAttribute {
 	 * @param attributeAssetAttribute
 	 *            asset_attribute
 	 */
-	public void setAttributeAssetAttribute(AssetAttribute attributeAssetAttribute) {
+	public void setAttribute(AssetAttribute attributeAssetAttribute) {
 		this.attribute = attributeAssetAttribute;
 	}
 
@@ -92,25 +99,25 @@ public class AssetStationAttribute {
 		this.seqOrder = seqOrder;
 	}
 
-
-
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public int hashCode() {
-		if (attribute == null) return super.hashCode();
-		return attribute.hashCode();
+	public boolean equals(Object other){
+		if (other != null && other instanceof AssetStationAttribute){
+			AssetStationAttribute s = (AssetStationAttribute)other;
+			if (s.getAttribute() == null && this.getAttribute() == null){
+				return this == s;
+			}else if (s.getAttribute() != null && this.getAttribute() != null){
+				return s.getAttribute().equals(this.getAttribute());
+			}
+		}
+		return false;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (attribute == null) return false;
-		return attribute.equals(obj);
-
+	
+	
+	public int hashCode(){
+		if (getAttribute() != null){
+			return getAttribute().hashCode();
+		}
+		return super.hashCode();
 	}
 
 }

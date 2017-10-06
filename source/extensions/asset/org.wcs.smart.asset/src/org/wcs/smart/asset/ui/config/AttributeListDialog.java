@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.dialogs;
+package org.wcs.smart.asset.ui.config;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -63,15 +63,15 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.AttributeManager;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.ui.AttributeLabelProvider;
+import org.wcs.smart.asset.ui.LoadAttributesJob;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.AttributeManager;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -88,7 +88,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 	private IEclipseContext context;
 	
 	private TableViewer cmbTypes;
-	private List<IntelAttribute> types = null;
+	private List<AssetAttribute> types = null;
 	private NamedItemViewerFilter filter;
 	
 	private IStructuredSelection currentSelection = null;
@@ -101,7 +101,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 	private MenuItem mnuNew;
 	private MenuItem mnuDelete;
 	
-	private Job loadTypes = new LoadAttributesJob(){
+	private Job loadTypes = new LoadAttributesJob() {
 		@Override
 		public void afterLoad() {
 			types = attributes;
@@ -242,9 +242,9 @@ public class AttributeListDialog extends TitleAreaDialog {
 		mnuDelete.setEnabled(false);
 		mnuNew.setEnabled(true);
 		
-		setTitle(Messages.AttributeListDialog_Title);
-		getShell().setText(Messages.AttributeListDialog_Title);
-		setMessage(Messages.AttributeListDialog_Message);
+		setTitle("Asset Attributes");
+		getShell().setText("Asset Attributes");
+		setMessage("Manage attributes used by the asset system");
 		
 		loadTypes.setSystem(true);
 		loadTypes.schedule();
@@ -269,9 +269,9 @@ public class AttributeListDialog extends TitleAreaDialog {
 	}
 	
 	private void add(){
-		IntelAttribute newAttribute = new IntelAttribute();
+		AssetAttribute newAttribute = new AssetAttribute();
 		newAttribute.setConservationArea(SmartDB.getCurrentConservationArea());
-		newAttribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
+		newAttribute.setAttributeList(new ArrayList<AssetAttributeListItem>());
 		
 		AttributeDialog.showAttributeDialog(getShell(), newAttribute, context);		
 		refresh();
@@ -280,8 +280,8 @@ public class AttributeListDialog extends TitleAreaDialog {
 	private void edit(){
 		IStructuredSelection items = (IStructuredSelection)cmbTypes.getSelection();
 		Object first = items.getFirstElement();
-		if (first instanceof IntelAttribute){
-			IntelAttribute editAttribute = (IntelAttribute) first;
+		if (first instanceof AssetAttribute){
+			AssetAttribute editAttribute = (AssetAttribute) first;
 			AttributeDialog.showAttributeDialog(getShell(), editAttribute, context);
 			refresh();
 		}
@@ -289,14 +289,14 @@ public class AttributeListDialog extends TitleAreaDialog {
 	
 	private void delete(){
 		IStructuredSelection items = (IStructuredSelection)cmbTypes.getSelection();
-		List<IntelAttribute> toDelete = new ArrayList<IntelAttribute>();
+		List<AssetAttribute> toDelete = new ArrayList<AssetAttribute>();
 		
 		StringBuilder sb = new StringBuilder();
 		for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
-			if (x instanceof IntelAttribute){
-				toDelete.add((IntelAttribute) x);
-				sb.append(((IntelAttribute)x).getName());
+			if (x instanceof AssetAttribute){
+				toDelete.add((AssetAttribute) x);
+				sb.append(((AssetAttribute)x).getName());
 				sb.append(", "); //$NON-NLS-1$
 			}
 		}
@@ -305,7 +305,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 		sb.deleteCharAt(sb.length()-1);
 		sb.deleteCharAt(sb.length()-1);
 		
-		if (!MessageDialog.openConfirm(getShell(), Messages.AttributeListDialog_DeleteDialogTitle, MessageFormat.format(Messages.AttributeListDialog_deleteDialogMsg, toDelete.size(), sb.toString()))) return;
+		if (!MessageDialog.openConfirm(getShell(), "Delete Attributes", MessageFormat.format("Are you sure you want to delete the following {0} attributes? This action cannot be undone. {1}", toDelete.size(), sb.toString()))) return;
 	
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
@@ -318,7 +318,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 					try(Session s = HibernateManager.openSession()){
 						s.beginTransaction();
 						try {
-							for (IntelAttribute a : toDelete){
+							for (AssetAttribute a : toDelete){
 								try {
 									AttributeManager.INSTANCE.deleteAttribute(a, s);
 								}catch(Exception ex){
@@ -330,7 +330,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 								Display.getDefault().syncExec(new Runnable(){
 									@Override
 									public void run() {
-										WarningDialog wd = new WarningDialog(getShell(), Messages.AttributeListDialog_DeleteDialogTitle, Messages.AttributeListDialog_DeleteErrorMsg, warnings);
+										WarningDialog wd = new WarningDialog(getShell(), "Delete Attributes", "The following attributes could not be removed: ", warnings);
 										wd.open();		
 									}
 									
@@ -339,13 +339,13 @@ public class AttributeListDialog extends TitleAreaDialog {
 							}
 						}catch (Exception ex){
 							s.getTransaction().rollback();
-							Intelligence2PlugIn.displayLog(Messages.AttributeListDialog_DeleteError + ex.getMessage(), ex);
+							AssetPlugIn.displayLog("Could not delete attributes. " + ex.getMessage(), ex);
 						}
 					}			
 				}
 			});
 		}catch(Exception ex){
-			Intelligence2PlugIn.displayLog(Messages.AttributeListDialog_DeleteError + ex.getMessage(), ex);
+			AssetPlugIn.displayLog("Could not delete attributes. "  + ex.getMessage(), ex);
 			
 		}
 		refresh();

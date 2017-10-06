@@ -213,6 +213,7 @@ public class AttachmentPropertiesDialog {
 			}
 		}catch (Exception ex){
 			//eat this for whatever reason we cannot read image metadata 
+			ex.printStackTrace();
 		}
 		
 		treeViewer.setInput(properties);

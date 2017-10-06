@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.dialogs;
+package org.wcs.smart.asset.ui;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,11 +52,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.ui.config.AttributeDialog;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelAttribute;
-import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.ui.NamedItemViewerFilter;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
@@ -74,7 +72,7 @@ public class SelectAttributeDialog extends TitleAreaDialog{
 	private CheckboxTableViewer attributeList;
 	private NamedItemViewerFilter filter;
 		
-	private List<IntelAttribute> selection = null;
+	private List<AssetAttribute> selection = null;
 	private String message;
 	
 	private Job loadAttributes = new LoadAttributesJob(){
@@ -100,15 +98,15 @@ public class SelectAttributeDialog extends TitleAreaDialog{
 		return new Point(p.x,(int)(p.y*1.4));
 	}
 
-	public List<IntelAttribute> getSelectedAttributes(){
+	public List<AssetAttribute> getSelectedAttributes(){
 		return this.selection;
 	}
 	
-	protected void okPressed(IntelAttribute newAttribute) {
-		selection = new ArrayList<IntelAttribute>();
+	protected void okPressed(AssetAttribute newAttribute) {
+		selection = new ArrayList<AssetAttribute>();
 		for (Object lselection : attributeList.getCheckedElements()){
-			if (lselection instanceof IntelAttribute){
-				selection.add((IntelAttribute)lselection);
+			if (lselection instanceof AssetAttribute){
+				selection.add((AssetAttribute)lselection);
 			}
 		}
 		selection.add(newAttribute);
@@ -117,10 +115,10 @@ public class SelectAttributeDialog extends TitleAreaDialog{
 	
 	
 	protected void okPressed() {
-		selection = new ArrayList<IntelAttribute>();
+		selection = new ArrayList<AssetAttribute>();
 		for (Object lselection : attributeList.getCheckedElements()){
-			if (lselection instanceof IntelAttribute){
-				selection.add((IntelAttribute)lselection);
+			if (lselection instanceof AssetAttribute){
+				selection.add((AssetAttribute)lselection);
 			}
 		}
 		super.okPressed();
@@ -193,19 +191,19 @@ public class SelectAttributeDialog extends TitleAreaDialog{
 			}
 		});
 		Button btnNew = new Button(parent, SWT.PUSH);
-		btnNew.setText(Messages.SelectAttributeDialog_NewAttributeBtn);
+		btnNew.setText("Create New Attribute");
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IntelAttribute newAttribute = newAttribute();
+				AssetAttribute newAttribute = newAttribute();
 				if (newAttribute != null){
 					okPressed(newAttribute);
 				}
 			}
 		});
-		setTitle(Messages.SelectAttributeDialog_Title);
-		getShell().setText(Messages.SelectAttributeDialog_Title);
+		setTitle("Select Attributes");
+		getShell().setText("Select Attributes");
 		setMessage(message);
 		
 		loadAttributes.setSystem(true);
@@ -214,17 +212,16 @@ public class SelectAttributeDialog extends TitleAreaDialog{
 		return parent;
 	}
 	
-	private IntelAttribute newAttribute(){
-		IntelAttribute attribute = new IntelAttribute();
+	private AssetAttribute newAttribute(){
+		AssetAttribute attribute = new AssetAttribute();
 		attribute.setConservationArea(SmartDB.getCurrentConservationArea());
-		attribute.setAttributeList(new ArrayList<IntelAttributeListItem>());
+		attribute.setAttributeList(new ArrayList<>());
 		
 		AttributeDialog.showAttributeDialog(getShell(), attribute, context);
 		if (attribute.getUuid() != null){
 			return attribute;
 		}
 		return null;
-		
 	}
 	
 	

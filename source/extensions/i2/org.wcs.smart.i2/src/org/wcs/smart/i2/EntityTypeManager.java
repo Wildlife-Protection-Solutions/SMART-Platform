@@ -42,6 +42,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
  *
  */
 public enum EntityTypeManager {
+	
 	INSTANCE;
 	
 	private EntityTypeManager(){

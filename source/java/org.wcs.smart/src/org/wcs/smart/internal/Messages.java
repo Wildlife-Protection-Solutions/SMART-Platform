@@ -818,6 +818,11 @@ public class Messages extends NLS {
 	public static String HibernateManager_Error_Dialog_Title;
 	public static String HibernateManager_Error_LoadingDataModel;
 	public static String HibernateManager_Error_ValidatingUserId;
+	public static String IconComposite_AllFilesOp;
+	public static String IconComposite_CouldNotReadDb;
+	public static String IconComposite_CouldNotReadFile;
+	public static String IconComposite_ImagesLbl;
+	public static String IconComposite_SelectFile;
 	public static String ImportAttributeDialog_AddButtonTooltip;
 	public static String ImportAttributeDialog_ChangeSourceLabel;
 	public static String ImportAttributeDialog_ClearWarning;
@@ -943,6 +948,7 @@ public class Messages extends NLS {
 	public static String NameKeyComposite_Key_Label;
 	public static String NameKeyComposite_LanguageLabel;
 	public static String NameKeyComposite_Name_Label;
+	public static String NameKeyDialog_DialogTitle;
 	public static String PlugInConfigurationExporter_ExportingVersions;
 	public static String ProgressAreaComposite_CancelledMessage;
 	public static String ProgressAreaComposite_StoppingMessage;

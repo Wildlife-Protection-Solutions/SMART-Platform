@@ -24,7 +24,6 @@ package org.wcs.smart.asset.model;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -43,12 +42,9 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name="smart.asset_type_attribute")
-public class AssetTypeAttribute {
+public class AssetTypeAttribute extends AbstractAssetTypeAttributeMapping{
 	
 	private AssetTypeAttributePk id = new AssetTypeAttributePk();	
-	
-	private int order;
-	
 	
 	public AssetTypeAttribute(){		
 	}
@@ -62,33 +58,26 @@ public class AssetTypeAttribute {
 	}
 	
 	@Transient
+	@Override
 	public AssetType getAssetType() {
 		return id.getAssetType();
 	}
 
+	@Override
 	public void setAssetType(AssetType entity) {
 		id.setAssetType(entity);
 	}
 	
 	@Transient
+	@Override
 	public AssetAttribute getAttribute() {
 		return id.getAttribute();
 	}
 
+	@Override
 	public void setAttribute(AssetAttribute attribute) {
 		id.setAttribute(attribute);
 	}
-	
-
-	@Column(name="seq_order")
-	public int getOrder(){
-		return this.order;
-	}
-	
-	public void setOrder(int order){
-		this.order = order;
-	}
-
 	
 	/**
 	 * @param o

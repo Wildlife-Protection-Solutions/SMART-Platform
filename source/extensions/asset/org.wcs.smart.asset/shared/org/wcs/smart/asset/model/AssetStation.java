@@ -26,10 +26,12 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -42,6 +44,8 @@ import org.wcs.smart.ca.UuidItem;
  * 
  * @author egouge
  */
+@Entity
+@Table(name="smart.asset_station")
 public class AssetStation extends UuidItem {
 
 	private ConservationArea conservationArea;

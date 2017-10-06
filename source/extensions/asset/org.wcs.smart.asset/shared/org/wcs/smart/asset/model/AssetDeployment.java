@@ -27,11 +27,13 @@ import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
 
@@ -41,6 +43,8 @@ import org.wcs.smart.ca.UuidItem;
  * 
  * @author egouge
  */
+@Entity
+@Table(name="smart.asset_deployment")
 public class AssetDeployment extends UuidItem {
 
 	private Asset asset;
@@ -170,7 +174,7 @@ public class AssetDeployment extends UuidItem {
 	 * @return The set of asset_deployment_attribute_value
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.assetDeployment", orphanRemoval = true, cascade={CascadeType.ALL})
-	public List<AssetDeploymentAttributeValue> getAssetValues() {
+	public List<AssetDeploymentAttributeValue> getAttributeValues() {
 		return this.attributes;
 	}
 	

@@ -1,0 +1,89 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.asset.ui;
+
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.model.AssetTypeAttribute;
+import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
+
+/**
+ * Label provider for intelligence attributes
+ * 
+ * @author Emily
+ *
+ */
+public class AttributeLabelProvider extends LabelProvider {
+	
+	
+	public String getText(Object element){
+		if (element instanceof AssetAttribute){
+			return ((AssetAttribute) element).getName();
+		}else if (element instanceof AssetTypeAttribute){
+			return getText(((AssetTypeAttribute)element).getAttribute());
+		}else if (element instanceof AssetTypeDeploymentAttribute){
+			return getText(((AssetTypeDeploymentAttribute)element).getAttribute());
+		}
+		return super.getText(element);
+	}
+	
+	public Image getImage(Object element){
+		if (element instanceof AssetAttribute){
+			AssetAttribute a = (AssetAttribute)element;
+			return getImage(a.getType());
+		}else if (element instanceof AssetTypeAttribute){
+			return getImage(((AssetTypeAttribute)element).getAttribute().getType());
+		}else if (element instanceof AssetTypeDeploymentAttribute){
+			return getImage(((AssetTypeDeploymentAttribute)element).getAttribute().getType());
+		}
+		return super.getImage(element);
+	}
+	
+	public static Image getImage(AssetAttribute.AttributeType type){
+		String key = null;
+		switch(type){
+		case BOOLEAN:
+			key = SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON;
+			break;
+		case DATE:
+			key = SmartPlugIn.ATTRIBUTE_DATE_ICON;
+			break;
+		case LIST:
+			key = SmartPlugIn.ATTRIBUTE_LIST_ICON;
+			break;
+		case NUMERIC:
+			key = SmartPlugIn.ATTRIBUTE_NUMBER_ICON;
+			break;
+		case TEXT:
+			key = SmartPlugIn.ATTRIBUTE_TEXT_ICON;
+			break;
+		case POSITION:
+			key = SmartPlugIn.ATTRIBUTE_LOCATION_ICON;
+			break;
+			
+		}
+		if (key == null) return null;
+		return SmartPlugIn.getDefault().getImageRegistry().get(key);
+	}
+}

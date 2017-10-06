@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.asset.model;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,7 +33,9 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
@@ -100,7 +105,15 @@ public class AssetType extends NamedKeyItem{
 	public void setIcon(byte[] icon) {
 		this.icon = icon;
 	}
-
+	
+	@Transient
+	public BufferedImage getIconAsImage() throws Exception{
+		if (getIcon() == null) return null;
+		try(ByteArrayInputStream in = new ByteArrayInputStream(getIcon())){
+			return ImageIO.read(in);
+		}
+	}
+	
 	/**
 	 * Get the incident_cutoff.
 	 * This will be used to group files/images into a single incident.  All data that occurs
@@ -141,7 +154,7 @@ public class AssetType extends NamedKeyItem{
 	 * @param assetSet
 	 *            The set of asset
 	 */
-	public void setAssetSet(List<Asset> assets) {
+	public void setAssets(List<Asset> assets) {
 		this.assets = assets;
 	}
 
@@ -154,6 +167,7 @@ public class AssetType extends NamedKeyItem{
 	 * @return The set of asset_type_attribute
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="id.assetType",orphanRemoval=true, cascade= {CascadeType.ALL})
+	@OrderBy("seq_order asc")
 	public List<AssetTypeAttribute> getAssetAttributes() {
 		return this.assetAttributes;
 	}
@@ -178,6 +192,7 @@ public class AssetType extends NamedKeyItem{
 	 * @return The set of asset_type_deployment_attribute
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="id.assetType",orphanRemoval=true, cascade= {CascadeType.ALL})
+	@OrderBy("seq_order asc")
 	public List<AssetTypeDeploymentAttribute> getAssetDeploymentAttributes() {
 		return this.deploymentAttributes;
 	}

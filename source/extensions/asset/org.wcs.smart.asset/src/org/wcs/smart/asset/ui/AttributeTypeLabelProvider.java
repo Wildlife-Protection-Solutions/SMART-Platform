@@ -19,29 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui;
+package org.wcs.smart.asset.ui;
 
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
+import java.util.Locale;
+
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.asset.model.AssetAttribute;
 
 /**
- * Abstract viewer filter that filters based on a simple string.
- * 
+ * Label provider for attribute types
  * @author Emily
  *
  */
-public abstract class TextViewerFilter extends ViewerFilter {
+public class AttributeTypeLabelProvider extends LabelProvider {
 	
-	protected String filter;
-	protected Viewer viewer;
-	
-	public TextViewerFilter(Viewer viewer){
-		this.viewer = viewer;
+	public String getText(Object element){
+		if (element instanceof AssetAttribute.AttributeType){
+			return ((AssetAttribute.AttributeType) element).getGuiName(Locale.getDefault());
+		}
+		return super.getText(element);
 	}
 	
-	public void setFilterString(String filter){
-		this.filter = filter;
-		viewer.refresh();
+	public Image getImage(Object element){
+		if (element instanceof AssetAttribute.AttributeType){
+			AssetAttribute.AttributeType a = (AssetAttribute.AttributeType)element;
+			return AttributeLabelProvider.getImage(a);
+		}
+		return super.getImage(element);
 	}
-	
 }
