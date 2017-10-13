@@ -31,9 +31,13 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.ServletContext;
+import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
@@ -291,5 +295,44 @@ public class HibernateManager {
 	public static SharedLink getSharedLink(Session s, UUID uuid) {
 		return QueryFactory.buildQuery(s, SharedLink.class, "uuid", uuid).uniqueResult(); //$NON-NLS-1$
 	}
+
+	/**
+	* Returns all desktop user accounts
+	*/
+	public static List<Employee> getDesktopUsers(Session s) {
+		return s.createQuery("select e.smartUserId, c.name, c.uuid from Employee e join e.conservationArea c where e.smartUserId != '' AND c.uuid != '00000000-0000-0000-0000-000000000000' and e.endEmploymentDate = null"). list( );
+	}
+
+	/**
+	* Returns all desktop user accounts with that username, could be in multiple CAs
+	*/
+	public static List<Employee> getDesktopUser(Session s, String username) {
+		return s.createQuery("select e.smartUserId, c.name, c.uuid from Employee e join e.conservationArea c where e.smartUserId = '" + username + "' and e.endEmploymentDate = null").list();
+	}
 	
+	/**
+	* Returns the desktop user accounts with that username in the CA, if it isn't deactivated already.
+	*/
+	public static Employee getDesktopUserInCa(Session s, String username, String cauuid) {
+		//return (Employee) s.createQuery("from Employee e join e.conservationArea c where e.smartUserId = '" + username + "' AND c.uuid = '" + cauuid + "' and e.endEmploymentDate = null").uniqueResult();
+		UUID uuid = UUID.fromString(cauuid);
+		ConservationArea ca = (ConservationArea) QueryFactory.buildQuery(s, ConservationArea.class, "uuid", uuid).uniqueResult(); //$NON-NLS-1$
+		Object[] params = new Object[2];
+		Object[] one = new Object[2];
+		Object[] two = new Object[2];
+		one[0] ="smartUserId";
+		one[1] =username;
+		two[0] ="ca";
+		two[1] = ca;
+
+		params[0] = one;
+		params[1] = two;
+
+		return QueryFactory.buildQuery(s, Employee.class, params).uniqueResult(); //$NON-NLS-1$ 
+	}
+
+	public static ConservationArea getConservationArea(Session s, UUID caUuid) {
+		return (ConservationArea) s.createQuery("from ConservationArea where uuid = '" + caUuid + "'").uniqueResult();
+	}
+
 }

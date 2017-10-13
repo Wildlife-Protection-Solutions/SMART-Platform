@@ -20,6 +20,7 @@
 	<div class="tabheader pageheader">
   		<a id="users" class="tab "><fmt:message key="users.usertitle"/></a>
   		<a id="userroles" class="tab "><fmt:message key="users.roletitle"/></a>
+  		<a id="desktopusers" class="tab "><fmt:message key="users.desktoptitle"/></a>
   	</div>
   	<div>
     	<div id="message" class="msgsection"></div>
@@ -133,6 +134,46 @@
 
 	</div>
 	</div>
+	
+	
+	
+	<!--  Desktop Users tab section  -->
+	<div id="desktopusers_body" class="tabbody">
+	<p class="infomessage"><fmt:message key="users.desktopmessage"/></p>
+	<div>
+    	<div id="desktopmessage" class="msgsection"></div>
+    	<div id="desktoperror" class="errorsection"></div>
+    	<button class="block button top-spacer" id="btnNewDesktopUser"><fmt:message key="users.newdesktopuserbutton"/></button>
+  	</div>
+  
+	<div class="top-spacer"  style="margin-left: -20px" >
+  		<div id="deskptopuserstable" class="table-cell smart-table">
+  			<div class="table-row smart-table-header">
+				<div class="table-cell smart-table-cell"><fmt:message key="users.desktopuserlabel"/></div>
+				<div class="table-cell smart-table-cell"><fmt:message key="users.desktopuserCAlabel"/></div>
+				<div class="table-cell smart-table-cell"></div>
+				<div class="table-cell smart-table-cell"></div>
+			</div>
+  		</div>
+
+		<div id="desktopuserdetails" style="width:100%;" class="table-cell border-section">
+			<div class="pageheader"><fmt:message key="users.destkopuserdetails"/></div>
+			<div id="desktopdetailinner">
+				<div id="desktopinfodefaults">
+				</div>
+				
+				<div class="desktoppermissions">
+				</div>
+				
+				<div class="desktoppassword">
+				</div>
+			</div>
+		</div>
+
+	</div>
+	</div>
+	
+	
 </div>
 <%@include file="footer.jsp" %>
 
@@ -185,5 +226,112 @@
     </div>
   </form>
   </div>
+  
+  <div id="newDesktopUserDialog" style="display: none;" class="dialog">
+  <div class="dialog-title"><fmt:message key="users.newdialogtitle"/></div>
+  <div id="dialogerror" class="errorsection"></div>
+  <div><fmt:message key="users.newdesktopmessage"/></div>
+  <form id="newdesktopuserform" >
+    <label class="block top-spacer"><fmt:message key="users.newusernamelabel"/></label>
+    <input type="text" name="dusername" class="formtext block" />
+    <label class="block top-spacer"><fmt:message key="users.calabel"/></label>
+    <select name="dca">
+    	<c:forEach var="ca" items="${dataCas}" varStatus="count">
+     		<c:if test="${ca.getUuid() != '00000000-0000-0000-0000-000000000000'}">
+					<option value="${ca.getUuid()}"> ${ca.getLabel()} </option>
+			</c:if>
+		</c:forEach>
+    </select>
+    
+    <label class="block top-spacer"><fmt:message key="users.newpass1"/></label>
+    <input type="password" name="dpassword1" class="formtext table-row"/>
+    
+    <label class="block top-spacer"><fmt:message key="users.newpass2"/></label>
+    <input type="password" name="dpassword2" class="formtext table-row"/>
+    
+    <label class="block top-spacer"><fmt:message key="users.idlabel"/></label>
+    <input type="text" name="id" class="formtext table-row"/>
+    
+    <label class="block top-spacer"><fmt:message key="users.givenName"/></label>
+    <input type="text" name="givenName" class="formtext table-row"/>
+    
+    <label class="block top-spacer"><fmt:message key="users.familyName"/></label>
+    <input type="text" name="familyName" class="formtext table-row"/>
+
+    <label class="block top-spacer"><fmt:message key="users.userLevel"/></label>
+    <select name="userLevel">
+		<option value="ADMIN"><fmt:message key="users.ADMIN"/></option>
+		<option value="DATA_ENTRY"><fmt:message key="users.DATA_ENTRY"/></option>
+		<option value="ANALYST"><fmt:message key="users.ANALYST"/></option>
+		<option value="MANAGER"><fmt:message key="users.MANAGER"/></option>
+    </select>
+
+	<label class="block top-spacer"><fmt:message key="users.gender"/></label>
+    <select name="gender">
+		<option value="M"><fmt:message key="users.genderm"/></option>
+		<option value="F"><fmt:message key="users.genderf"/></option>
+	</select>
+    
+    <div class="block top-spacer" style="text-align:right">
+     <input class="button" type="submit" value="<fmt:message key="users.newuserbutton"/>" />
+     <input class="button" type="button" id="canceldesktopnewuser" value="<fmt:message key="users.cancel"/>" />
+    </div>
+  </form>
+  </div>
+  
+  
+  
+<div id="editDesktopUserDialog" style="display: none;" class="dialog">
+  <div class="dialog-title"><fmt:message key="users.newdialogtitle"/></div>
+  <div id="dialogerror" class="errorsection"></div>
+  <div><fmt:message key="users.neweditmessage"/></div>
+  <form id="editdesktopuserform" >
+    <label class="block top-spacer"><fmt:message key="users.newusernamelabel"/></label>
+    <input type="text" name="edit_dusername" class="formtext block" />
+    <label class="block top-spacer"><fmt:message key="users.calabel"/></label>
+    <select name="edit_dca">
+    	<c:forEach var="ca" items="${dataCas}" varStatus="count">
+     		<c:if test="${ca.getUuid() != '00000000-0000-0000-0000-000000000000'}">
+					<option value="${ca.getUuid()}"> ${ca.getLabel()} </option>
+			</c:if>
+		</c:forEach>
+    </select>
+    
+    <label class="block top-spacer"><fmt:message key="users.newpass1"/></label>
+    <input type="password" name="edit_dpassword1" class="formtext table-row"/>
+    
+    <label class="block top-spacer"><fmt:message key="users.newpass2"/></label>
+    <input type="password" name="edit_dpassword2" class="formtext table-row"/>
+    
+    <label class="block top-spacer"><fmt:message key="users.idlabel"/></label>
+    <input type="text" name="edit_id" class="formtext table-row"/>
+    
+    <label class="block top-spacer"><fmt:message key="users.givenName"/></label>
+    <input type="text" name="edit_givenName" class="formtext table-row"/>
+    
+    <label class="block top-spacer"><fmt:message key="users.familyName"/></label>
+    <input type="text" name="edit_familyName" class="formtext table-row"/>
+
+    <label class="block top-spacer"><fmt:message key="users.userLevel"/></label>
+    <select name="edit_userLevel">
+		<option value="ADMIN"><fmt:message key="users.ADMIN"/></option>
+		<option value="DATA_ENTRY"><fmt:message key="users.DATA_ENTRY"/></option>
+		<option value="ANALYST"><fmt:message key="users.ANALYST"/></option>
+		<option value="MANAGER"><fmt:message key="users.MANAGER"/></option>
+    </select>
+
+	<label class="block top-spacer"><fmt:message key="users.gender"/></label>
+    <select name="edit_gender">
+		<option value="M"><fmt:message key="users.genderm"/></option>
+		<option value="F"><fmt:message key="users.genderf"/></option>
+	</select>
+    
+    <div class="block top-spacer" style="text-align:right">
+     <input class="button" type="submit" value="<fmt:message key="users.edituserbutton"/>" />
+     <input class="button" type="button" id="canceldesktopedituser" value="<fmt:message key="users.cancel"/>" />
+    </div>
+  </form>
+  </div>
+  
 </body>
 </html>

@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -33,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
@@ -56,6 +58,8 @@ public class UsersServlet extends HttpServlet{
 		
 		List<SmartUser> users = null;
 		List<SmartUser> inactiveUsers = null;
+		List<ConservationAreaInfo> cas = null;
+		List<ConservationAreaInfo> dataCas = new ArrayList<ConservationAreaInfo>();
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		
@@ -65,6 +69,13 @@ public class UsersServlet extends HttpServlet{
 				return;
 			}
 			users = HibernateManager.getActiveUsers(session);
+			cas = HibernateManager.getConservationAreaInfos(session);
+			
+			for(ConservationAreaInfo ca : cas){
+				if(ca.getStatus() == ConservationAreaInfo.Status.DATA){
+					dataCas.add(ca);
+				}
+			}
 			inactiveUsers = (List<SmartUser>) HibernateManager.getInactiveUsers(session);
 		}finally{
 			session.getTransaction().rollback();
@@ -72,6 +83,9 @@ public class UsersServlet extends HttpServlet{
 		
 		request.setAttribute("users", users); //$NON-NLS-1$
 		request.setAttribute("inactiveusers", inactiveUsers); //$NON-NLS-1$
+		
+		request.setAttribute("cas", cas); //$NON-NLS-1$
+		request.setAttribute("dataCas", dataCas); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/users.jsp").forward(request, response); //$NON-NLS-1$
 		
