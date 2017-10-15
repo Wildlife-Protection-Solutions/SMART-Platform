@@ -671,7 +671,7 @@ public class MissionTracksComposite extends TracksComposite {
 	}
 
 	@Override
-	protected void addTrackLayers(MapViewer viewer) {
+	protected void addLayers(MapViewer viewer) {
 		//add track layer
 		try{
 			List<IResolve> resolves = CatalogPlugin.getDefault().getLocalCatalog().find(MissionServiceExtension.createURUL(dialog.getMissionDay().getMission()), null);
