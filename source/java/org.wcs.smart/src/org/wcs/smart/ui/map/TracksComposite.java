@@ -273,7 +273,7 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		
 		lv.setMap(mapViewer.getMap());
 		
-		addTrackLayers(mapViewer);
+		addLayers(mapViewer);
 		
 		ID tmp = new ID(MapGraphicService.SERVICE_ID, "legend"); //$NON-NLS-1$
 		IGeoResource resource = CatalogPlugin.getDefault().getLocalCatalog().getById(IGeoResource.class, tmp, null);
@@ -285,7 +285,7 @@ public abstract class TracksComposite extends Composite implements MapPart {
 
 	protected abstract void createTableViewerColumns(TableViewer trackTableViewer, TableColumnLayout layout);
 
-	protected abstract void addTrackLayers(MapViewer viewer);
+	protected abstract void addLayers(MapViewer viewer);
 
 	protected String getMapName() {
 		return "Tracks";
