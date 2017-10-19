@@ -273,36 +273,45 @@ public class GeometryUtils {
 	 */
 	private static double computeHours(Polygon p, LineString ls){
 		double value = 0;
-		if (p.contains(ls)){
-			value = ls.getCoordinateN(ls.getNumPoints() - 1).z - ls.getCoordinateN(0).z;
-		}else if (!p.intersects(ls)){
-			return 0;	//nothing
+		if (ls.getLength() == 0){
+			//0 length linestrings are not valid in JTS and intersection function does not always computer
+			//correctly so we specifically check here the linestring point
+			//see tickets 2243 & 1933
+			if (p.intersects(GeometryFactoryProvider.getFactory().createPoint(ls.getCoordinate()))){
+				value = ls.getCoordinateN(ls.getNumPoints() - 1).z - ls.getCoordinateN(0).z;
+			}
 		}else{
-			PreparedGeometry pg = PreparedGeometryFactory.prepare(p);	
+			if (p.intersects(ls)){
+				value = ls.getCoordinateN(ls.getNumPoints() - 1).z - ls.getCoordinateN(0).z;
+			}else if (!p.intersects(ls)){
+				return 0;	//nothing
+			}else{
+				PreparedGeometry pg = PreparedGeometryFactory.prepare(p);	
 			
-			Coordinate[] c = ls.getCoordinates();
-			for (int i = 0; i < c.length-1; i ++){
-				Coordinate c1 = c[i];
-				Coordinate c2 = c[i+1];
-				
-				if (!p.getEnvelopeInternal().intersects(new Envelope(c1, c2))){
-					//outside envelop
-					continue;
-				}
-				LineString temp = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[]{c1, c2});
-				if (pg.containsProperly(temp)){
-					//entirely contained within
-					value += (c2.z - c1.z);
-				}else if (pg.intersects(temp)){
-					double time = c2.z - c1.z;
-					double l1 = c2.distance(c1);
-					if (l1 == 0){
-						//the points are the same and intersect the polygon to include the entire length of time
-						value += time;
-					}else{
-						//compute the intersection
-						double l2 = pg.getGeometry().intersection(temp).getLength();
-						value += time * (l2 / l1);
+				Coordinate[] c = ls.getCoordinates();
+				for (int i = 0; i < c.length-1; i ++){
+					Coordinate c1 = c[i];
+					Coordinate c2 = c[i+1];
+					
+					if (!p.getEnvelopeInternal().intersects(new Envelope(c1, c2))){
+						//outside envelop
+						continue;
+					}
+					LineString temp = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[]{c1, c2});
+					if (pg.containsProperly(temp)){
+						//entirely contained within
+						value += (c2.z - c1.z);
+					}else if (pg.intersects(temp)){
+						double time = c2.z - c1.z;
+						double l1 = c2.distance(c1);
+						if (l1 == 0){
+							//the points are the same and intersect the polygon to include the entire length of time
+							value += time;
+						}else{
+							//compute the intersection
+							double l2 = pg.getGeometry().intersection(temp).getLength();
+							value += time * (l2 / l1);
+						}
 					}
 				}
 			}
