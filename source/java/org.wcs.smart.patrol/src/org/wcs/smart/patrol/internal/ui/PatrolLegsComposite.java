@@ -489,10 +489,9 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		ArrayList<PatrolLeg> allLegs = new ArrayList<PatrolLeg>();
 		allLegs.addAll(legs);
-		session.flush();
+		if (session.getTransaction().isActive()) session.flush();
 		
 		//if the user used the "split into a new patrol" option, don't delete the points we are going to move
-		session.flush();
 		for(Patrol p2 : newPatrols){
 			//put all the waypoints into our 'moved' hash so they don't get deleted when we delete the leg from the old patrol
 			for(PatrolLeg pl : p2.getLegs()){
@@ -503,8 +502,6 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				}
 			}
 		}
-		session.flush();
-		
 		
 		for (Iterator<PatrolLeg> iterator = allLegs.iterator(); iterator.hasNext();) {
 			PatrolLeg updatedLeg = (PatrolLeg) iterator.next();
@@ -525,7 +522,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 							m.setId(null);
 						}
 						existing.getMembers().clear();
-						session.flush();
+						if (session.getTransaction().isActive()) session.flush();
 						
 						//replace with new members
 						for (PatrolLegMember newmember : updatedLeg.getMembers()) {
@@ -559,7 +556,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				}}
 			}
 		}
-		session.flush();
+		if (session.getTransaction().isActive()) session.flush();
 		
 		//legs no longer used; these must be removed
 		for (PatrolLeg toRemove: currentLegs){
@@ -594,7 +591,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					}
 				}
 			}
-			session.flush();
+			if (session.getTransaction().isActive()) session.flush();
 			
 			
 			//if we made brand new patrols, save them and copy any plan and intel links there were
@@ -621,7 +618,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				lblNewPatrol.setText(Messages.PatrolLegsComposite_2);
 			}
 		}
-		session.flush();
+		if (session.getTransaction().isActive()) session.flush();
 		return true;
 			
 	}
