@@ -43,6 +43,19 @@ import org.wcs.smart.dataentry.model.xml.generated.ObjectFactory;
  */
 public class CmXmlManager {
 
+	/**
+	 * The source of name labels in the configurable model export.  It may be the data model
+	 * in which case we don't want to import the name or the CM in which case we want to import
+	 * the name.  
+	 * 
+	 * @author Emily
+	 *
+	 */
+	public static enum NAME_SOURCE{
+		DM,
+		CM
+	}
+	
 	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.dataentry.model.xml.generated"; //$NON-NLS-1$
 	
 	/**

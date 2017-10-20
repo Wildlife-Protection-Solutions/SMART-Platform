@@ -11,6 +11,11 @@
                label="%command.cybertracker.survey.export.label1"
                style="push">
          </command>
+         <command
+               commandId="org.wcs.smart.cybertracker.survey.export.package"
+               label="Export Survey Package"
+               style="push">
+         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -54,12 +59,20 @@
             id="org.wcs.smart.cybertracker.survey.export"
             name="%command.cybertracker.survey.export.name">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.survey.export.package"
+            name="Export Survey Package">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="org.wcs.smart.cybertracker.survey.handler.SurveyCTExportHandler$SurveyCTExportHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.survey.export">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.survey.handler.ExportSurveyCtPackageHandler$ExportSurveyCtPackageHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.survey.export.package">
       </handler>
    </extension>
    <extension

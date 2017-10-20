@@ -11,6 +11,11 @@
                label="%command.cybertracker.patrol.export.label1"
                style="push">
          </command>
+         <command
+               commandId="org.wcs.smart.cybertracker.patrol.export.package"
+               label="Export Patrol Package"
+               style="push">
+         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -54,12 +59,20 @@
             id="org.wcs.smart.cybertracker.patrol.export"
             name="%command.cybertracker.patrol.export.name">
       </command>
+      <command
+            id="org.wcs.smart.cybertracker.patrol.export.package"
+            name="Export Patrol Package">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="org.wcs.smart.cybertracker.patrol.handler.PatrolCTExportHandler$PatrolCTExportHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.patrol.export">
+      </handler>
+      <handler
+            class="org.wcs.smart.cybertracker.patrol.handler.ExportPatrolCtPackageHandler$ExportPatrolCtPackageHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.patrol.export.package">
       </handler>
    </extension>
    <extension

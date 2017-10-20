@@ -555,6 +555,8 @@ public class CmXmlToSmartImporter {
 			if (hkey != null) {
 				filters[2] = cb.equal(from.get("hkey"), hkey); //$NON-NLS-1$
 			}
+			cq.where(cb.and(filters));
+			
 			List<Category> lst = session.createQuery(cq).list();
 			if (lst.size() > 0) {
 				c = lst.get(0);
@@ -722,6 +724,9 @@ public class CmXmlToSmartImporter {
 	 */
 	private void updateNames(NamedItem dmobject, List<NameType> names){
 		for (NameType nameType : names) {
+			//we don't want to import names whose source was the data model;
+			//in this case we just want to use the datamodel names so we skip these
+			if (nameType.getSource() != null && nameType.getSource().equals(CmXmlManager.NAME_SOURCE.DM.name())) continue;
 			String code = nameType.getLanguageCode();
 			String value = nameType.getValue();
 			

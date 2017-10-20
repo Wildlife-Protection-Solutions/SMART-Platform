@@ -24,6 +24,7 @@ package org.wcs.smart.dataentry.model.xml;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -79,7 +80,7 @@ public class CmSmartToXmlConverter {
 				
 				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessLanguages);
 				HashMap<String, Language> llookup = processLanguages(cm, xml);
-				setNames(xml.getName(), cm.getNames(), llookup);
+				setNames(xml.getName(), cm.getNames(), null, llookup);
 				if (cm.getDisplayMode() != null) {
 					xml.setDisplayMode(cm.getDisplayMode().name());
 				}
@@ -122,7 +123,7 @@ public class CmSmartToXmlConverter {
 		List<CmAttributeConfig> configs = QueryFactory.buildQuery(session, CmAttributeConfig.class, "model", cm).list(); //$NON-NLS-1$
 		for (CmAttributeConfig config : configs) {
 			CmAttributeConfigType xmlConfig = new CmAttributeConfigType();
-			setNames(xmlConfig.getName(), config.getNames(), llookup);
+			setNames(xmlConfig.getName(), config.getNames(), null, llookup);
 			xmlConfig.setId(config.getUuid().toString());
 			xmlConfig.setIsDefault(config.isDefault());
 			if (config.getDisplayMode() != null) {
@@ -142,7 +143,7 @@ public class CmSmartToXmlConverter {
 		if(monitor.isCanceled()) return;
 		for (CmAttributeTreeNode cmNode : cmList) {
 			TreeNodeType xmlNode = new TreeNodeType();
-			setNames(xmlNode.getName(), cmNode.getNames(), llookup);
+			setNames(xmlNode.getName(), cmNode.getNames(), cmNode.getDmTreeNode().getNames(), llookup);
 			xmlNode.setIsActive(cmNode.getIsActive());
 			if (cmNode.getDmTreeNode() == null){
 				xmlNode.setKeyRef(null);
@@ -167,7 +168,7 @@ public class CmSmartToXmlConverter {
 		if(monitor.isCanceled()) return;
 		for (CmAttributeListItem cmNode : cmList) {
 			ListItemType xmlNode = new ListItemType();
-			setNames(xmlNode.getName(), cmNode.getNames(), llookup);
+			setNames(xmlNode.getName(), cmNode.getNames(), cmNode.getListItem().getNames(), llookup);
 			xmlNode.setIsActive(cmNode.getIsActive());
 			if (cmNode.getListItem() == null){
 				xmlNode.setKeyRef(null);
@@ -198,7 +199,7 @@ public class CmSmartToXmlConverter {
 
 		monitor.subTask(MessageFormat.format(Messages.CmSmartToXmlConverter_ProcessingNode, node.getName()));
 		NodeType nt = new NodeType();
-		setNames(nt.getName(), node.getNames(), llookup);
+		setNames(nt.getName(), node.getNames(), null, llookup);
 		if (node.getCategory() != null) {
 			nt.setCategoryKey(node.getCategory().getKeyId());
 			nt.setCategoryHkey(node.getCategory().getHkey());
@@ -214,7 +215,7 @@ public class CmSmartToXmlConverter {
 		if (node.getCmAttributes() != null){
 			for (CmAttribute ca : node.getCmAttributes()) {
 				AttributeType at = new AttributeType();
-				setNames(at.getName(), ca.getNames(), llookup);
+				setNames(at.getName(), ca.getNames(), null, llookup);
 				at.setAttributeKey(ca.getAttribute().getKeyId());
 				for (CmAttributeOption option : ca.getCmAttributeOptions().values()) {
 					AttributeOptionType aot = new AttributeOptionType();
@@ -249,6 +250,7 @@ public class CmSmartToXmlConverter {
 				}
 				at.setId(ca.getUuid().toString()); //this will allow to reference this item in extradata
 				at.setConfigId(ca.getConfig() != null ? ca.getConfig().getUuid().toString() : null);
+				at.setType(ca.getAttribute().getType().name());
 				nt.getAttribute().add(at);
 			}
 		}
@@ -269,22 +271,56 @@ public class CmSmartToXmlConverter {
 		for (Language ll : cm.getConservationArea().getLanguages()) {
 			LanguageType lt = new LanguageType();
 			lt.setCode(ll.getCode());
+			lt.setIsDefault(ll.equals(cm.getConservationArea().getDefaultLanguage()));
 			llt.getLanguage().add(lt);
 			lookup.put(UuidUtils.uuidToString(ll.getUuid()), ll);
 		}	
 		return lookup;
 	}
 	
-	private static void setNames(List<NameType> list, Set<Label> names, HashMap<String, Language> llookup){
-		if (names == null){
-			return;
+	private static void setNames(List<NameType> list, Set<Label> elementNames, Set<Label> srcElementNames, HashMap<String, Language> llookup){
+//		if (names == null){
+//			return;
+//		}
+		Set<Language> allLangs = new HashSet<>();
+		if (elementNames != null) {
+			elementNames.forEach(l -> allLangs.add(l.getLanguage()));
 		}
-		for (Label lbl: names){
-			NameType nt = new NameType();
-			nt.setValue(lbl.getValue());
-			nt.setLanguageCode(llookup.get(UuidUtils.uuidToString(lbl.getLanguage().getUuid())).getCode());
-			list.add(nt);
+		if (srcElementNames != null) {
+			srcElementNames.forEach(l -> allLangs.add(l.getLanguage()));
 		}
+		
+		for (Language l : allLangs) {
+			Label elementName = null;
+			for (Label ll : elementNames) {
+				if (ll.getLanguage().equals(l)) { elementName = ll; break; }
+			}
+			if (elementName != null) {
+				NameType nt = new NameType();
+				nt.setValue(elementName.getValue());
+				nt.setLanguageCode(llookup.get(UuidUtils.uuidToString(elementName.getLanguage().getUuid())).getCode());
+				nt.setSource(CmXmlManager.NAME_SOURCE.CM.name());
+				list.add(nt);
+				continue;
+			}
+			
+			for (Label ll : srcElementNames) {
+				if (ll.getLanguage().equals(l)) { elementName = ll; break; }
+			}
+			if (elementName != null) {
+				NameType nt = new NameType();
+				nt.setValue(elementName.getValue());
+				nt.setLanguageCode(llookup.get(UuidUtils.uuidToString(elementName.getLanguage().getUuid())).getCode());
+				nt.setSource(CmXmlManager.NAME_SOURCE.DM.name());
+				list.add(nt);
+			}
+		}
+//		for (Label lbl: names){
+//			NameType nt = new NameType();
+//			nt.setValue(lbl.getValue());
+//			nt.setLanguageCode(llookup.get(UuidUtils.uuidToString(lbl.getLanguage().getUuid())).getCode());
+//			list.add(nt);
+//		}
 	}
 
 	private static String getImageFileRef(IImageAssociatedObject obj) {
