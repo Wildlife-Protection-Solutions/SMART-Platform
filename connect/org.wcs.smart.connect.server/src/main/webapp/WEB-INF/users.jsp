@@ -7,7 +7,9 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/userssharedfunctions.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/users.js"></script>
+
 
 <title><fmt:message key="users.pagetitle"/></title>
 </head>
@@ -147,7 +149,7 @@
   	</div>
   
 	<div class="top-spacer"  style="margin-left: -20px" >
-  		<div id="deskptopuserstable" class="table-cell smart-table">
+  		<div id="deskptopuserstable" class="table-cell smart-table" style="width:50%">
   			<div class="table-row smart-table-header">
 				<div class="table-cell smart-table-cell"><fmt:message key="users.desktopuserlabel"/></div>
 				<div class="table-cell smart-table-cell"><fmt:message key="users.desktopuserCAlabel"/></div>
@@ -235,13 +237,14 @@
     <label class="block top-spacer"><fmt:message key="users.newusernamelabel"/></label>
     <input type="text" name="dusername" class="formtext block" />
     <label class="block top-spacer"><fmt:message key="users.calabel"/></label>
-    <select name="dca">
+    <select name="dca" multiple>
     	<c:forEach var="ca" items="${dataCas}" varStatus="count">
      		<c:if test="${ca.getUuid() != '00000000-0000-0000-0000-000000000000'}">
 					<option value="${ca.getUuid()}"> ${ca.getLabel()} </option>
 			</c:if>
 		</c:forEach>
     </select>
+    
     
     <label class="block top-spacer"><fmt:message key="users.newpass1"/></label>
     <input type="password" name="dpassword1" class="formtext table-row"/>
@@ -288,13 +291,14 @@
   <form id="editdesktopuserform" >
     <label class="block top-spacer"><fmt:message key="users.newusernamelabel"/></label>
     <input type="text" name="edit_dusername" class="formtext block" />
+    <input type="hidden" name="existing_username"/>
+    
+    
     <label class="block top-spacer"><fmt:message key="users.calabel"/></label>
-    <select name="edit_dca">
-    	<c:forEach var="ca" items="${dataCas}" varStatus="count">
-     		<c:if test="${ca.getUuid() != '00000000-0000-0000-0000-000000000000'}">
-					<option value="${ca.getUuid()}"> ${ca.getLabel()} </option>
-			</c:if>
-		</c:forEach>
+    <input type="text" disabled name="edit_ca_label">
+    <input type="hidden" name="edit_dca">
+    
+    <select id="edit_multi_dca" name="edit_multi_dca" multiple disabled style="display:none">
     </select>
     
     <label class="block top-spacer"><fmt:message key="users.newpass1"/></label>
@@ -332,6 +336,9 @@
     </div>
   </form>
   </div>
+  
+  
+  
   
 </body>
 </html>

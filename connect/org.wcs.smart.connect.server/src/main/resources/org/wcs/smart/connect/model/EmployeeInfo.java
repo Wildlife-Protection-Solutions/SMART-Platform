@@ -1,11 +1,13 @@
 package org.wcs.smart.connect.model;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class EmployeeInfo {
 	private UUID uuid;
 	private UUID caUuid;
+	
+	private String caLabel;
 	
 	private String id;
 	private String givenName;
@@ -15,10 +17,22 @@ public class EmployeeInfo {
 	private String smartUserId;
 	private String smartPassword;
 	private String userLevelKey;
+	private ArrayList<SimpleConservationAreaList> allCasUserIsIn;
 	
+	
+	public EmployeeInfo(String smartUserId, String caLabel, UUID caUuid) {
+		setCaLabel(caLabel);
+		setSmartUserId(smartUserId);
+		setCaUuid(caUuid);
+	}
+
+	public EmployeeInfo() {
+	}
+
 	public UUID getUuid() {
 		return uuid;
 	}
+	
 	public void setUuid(UUID uuid) {
 		this.uuid = uuid;
 	}
@@ -70,6 +84,20 @@ public class EmployeeInfo {
 	}
 	public void setUserLevelKey(String userLevelKey) {
 		this.userLevelKey = userLevelKey;
+	}
+	public String getCaLabel() {
+		return caLabel;
+	}
+	public void setCaLabel(String caLabel) {
+		this.caLabel = caLabel;
+	}
+
+	public ArrayList<SimpleConservationAreaList> getAllCasUserIsIn() {
+		return allCasUserIsIn;
+	}
+
+	public void setAllCasUserIsIn(ArrayList<SimpleConservationAreaList> allCasUserIsIn) {
+		this.allCasUserIsIn = allCasUserIsIn;
 	}
 	
 }

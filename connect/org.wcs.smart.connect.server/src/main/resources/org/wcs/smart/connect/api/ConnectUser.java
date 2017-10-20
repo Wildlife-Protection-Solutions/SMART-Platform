@@ -94,7 +94,7 @@ public class ConnectUser extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
+			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName());
 		}finally{
 			s.getTransaction().commit();
 		}

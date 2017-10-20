@@ -70,7 +70,6 @@ import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
 import org.wcs.smart.er.query.model.ISurveyQueryColumnProvider;
-import org.wcs.smart.i2.IIntelObservationQueryEngine;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.incident.IIncidentLabelProvider;
 import org.wcs.smart.intelligence.IIntelligenceLabelProvider;
@@ -139,7 +138,7 @@ public class SmartContextListener implements ServletContextListener{
 		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.i2.IIntelligenceLabelProvider.class, new AdvancedLabelProviderImpl());
 		
-		SmartContext.INSTANCE.setClass(IIntelObservationQueryEngine.class, new IntelObservationQueryEngine());
+//		SmartContext.INSTANCE.setClass(IIntelObservationQueryEngine.class, new IntelObservationQueryEngine());
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new IntelConnectionFactory());
 		
 		SmartContext.INSTANCE.setClass(UUIDBinaryType.class, PostgresUUIDType.INSTANCE);

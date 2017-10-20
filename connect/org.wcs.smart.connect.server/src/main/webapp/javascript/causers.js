@@ -2,14 +2,22 @@ var USER_URL = "../api/connectuser/";
 var INACTIVE_USER_URL = "../api/connectuser/getinactive/";
 var ACTIVATE_USER_URL  = "../api/connectuser/activate/";
 var PRIVILEGE_URL = "../api/privileges";
+var DESKTOP_USER_URL = "../api/desktopuser/";
 
 var allActions = null;
+var error = "";
 
 /* configure events on html elements */
 window.onload = function(){
 
 	refreshUsers();
 	refreshInactiveUsers();
+	
+	refreshDesktopUsers(); //request and show the desktop user info
+	
+	document.querySelector("#users").onclick=function(){showTab("users");}
+	document.querySelector("#desktopusers").onclick=function(){showTab("desktopusers");}
+	showTab("users");
 	
 	//setup onclicks for showing user info
 	var elements = document.querySelectorAll(".smartuser");
@@ -22,9 +30,42 @@ window.onload = function(){
 	document.querySelector("#btnNewUser").onclick=clearAndShowNewUserDialog;
 	document.querySelector("#cancelnewuser").onclick = function(){closeDialog('newUserDialog');};
 	document.querySelector("#newuserform").onsubmit = createNewUser;
+	
+	//new desktop user dialog
+	document.querySelector("#btnNewDesktopUser").onclick=showNewDesktopUserDialogSpecial;
+	document.querySelector("#canceldesktopnewuser").onclick = function(){closeDialog('newDesktopUserDialog');};
+	document.querySelector("#newdesktopuserform").onsubmit = createNewDesktopUser;
+	
+	//edit desktop dialog
+	document.querySelector("#canceldesktopedituser").onclick = function(){closeDialog('editDesktopUserDialog');};
+	document.querySelector("#editdesktopuserform").onsubmit = editDesktopUserSubmit;
+
 }
 
 
+function showNewDesktopUserDialogSpecial(){
+	
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = setUuidsForNewUser;
+ 	oReq.open("Get", DESKTOP_USER_URL + "caUuidsAllowed/", true);
+ 	oReq.send();
+	
+	
+}
+function setUuidsForNewUser(){
+	var all = JSON.parse(this.responseText);
+	select = document.querySelector("select[name=dca]");	
+    for(i = select.options.length - 1 ; i >= 0 ; i--){
+    	select.remove(i);
+    }
+	for(i=0; i < all.length; i++){
+		var option = document.createElement("option");
+		option.value = all[i].uuid; 
+		option.text = all[i].name;
+		select.add(option)
+	}
+	showNewDesktopUserDialog();
+}
 
 
 /* reload users table */
@@ -74,7 +115,7 @@ function createUserTable(){
  	var users = JSON.parse(this.responseText);
  	for (var i = 0; i < users.length; i ++){
  		var row = tableCreateRow(parent, 
- 				[users[i].username, users[i].email, null, null], 
+ 				[users[i].username, users[i].email], 
  				"userrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.dataset.username = users[i].username;
  		row.onclick = showUserInfo;
@@ -129,28 +170,71 @@ function createInactiveUserTable(){
  	var users = JSON.parse(this.responseText);
  	for (var i = 0; i < users.length; i ++){
  		var row = tableCreateRow(parent, 
- 				[users[i].username, users[i].email, null, null], 
+ 				[users[i].username, users[i].email], 
  				"inactiveuserrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.dataset.username = users[i].username;
 // 		row.onclick = showUserInfo; //not for inactive users
  	
- 		var activateicon = document.createElement("a");
- 		activateicon.className="activateuser run-icon";
- 		activateicon.title="Activate User";
- 		activateicon.dataset.username = users[i].username;
- 		activateicon.onclick = activateUser;
- 		activateicon.href="";
- 		row.childNodes[2].appendChild(activateicon);
- 		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
- 		deleteicon.title="delete user";
- 		deleteicon.dataset.username = users[i].username;
- 		deleteicon.onclick = deleteUser;
- 		deleteicon.href="";
- 		row.childNodes[3].appendChild(deleteicon);
+// 		var activateicon = document.createElement("a");
+// 		activateicon.className="activateuser run-icon";
+// 		activateicon.title="Activate User";
+// 		activateicon.dataset.username = users[i].username;
+// 		activateicon.onclick = activateUser;
+// 		activateicon.href="";
+// 		row.childNodes[2].appendChild(activateicon);
+// 		
+// 		var deleteicon = document.createElement("a");
+// 		deleteicon.className="delete-icon";
+// 		deleteicon.title="delete user";
+// 		deleteicon.dataset.username = users[i].username;
+// 		deleteicon.onclick = deleteUser;
+// 		deleteicon.href="";
+// 		row.childNodes[3].appendChild(deleteicon);
  		
  	}
+}
+/* activate user */
+function activateUser(){
+	var username = this.dataset.username;
+	hideInfo();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = userActivated;
+	oReq.smartuser=username;
+	oReq.open("PUT", ACTIVATE_USER_URL + encodeURIComponent(username), true);
+	oReq.send();
+	return false;	
+}
+/* Deactivate user */
+function deactivateUser(){
+	var username = this.dataset.username;
+	
+	displayConfirmDialog(i18n("users.deactivateuser"), i18n("users.deactivatewarning") + username +"?  "  , function(){
+		hideInfo();
+	
+		var oReq = new XMLHttpRequest();
+		oReq.onload = userDeactivated;
+		oReq.smartuser=username;
+		oReq.open("DELETE", ACTIVATE_USER_URL + encodeURIComponent(username), true);
+		oReq.send();
+	});
+	return false;	
+}
+
+/* delete user */
+function deleteUser(){
+	var username = this.dataset.username;
+	var ok = window.confirm(i18n("users.confirmdeleteuser") + username + "?");
+	if (!ok) return false;
+	
+	hideInfo();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = userDeleted;
+	oReq.smartuser=username;
+	oReq.open("DELETE", USER_URL + encodeURIComponent(username), true);
+	oReq.send();
+	return false;	
 }
 
 function clearUserInfo(){
@@ -420,6 +504,34 @@ function addAction(username){
 	oReq.send();
 }
 
+
+//callback for activate user  
+function userActivated() {
+	if (this.status == 200) {
+		displayInfo(this.smartuser + i18n("users.useractivated"));
+	} else {
+		displayError(parseError(i18n("users.useractivationerror") + this.smartuser, this.responseText));
+	}
+	refreshUsers();
+	refreshInactiveUsers();
+}
+
+//callback for deactivate user  
+function userDeactivated() {
+	if (this.status == 200) {
+		displayInfo(this.smartuser + i18n("users.userdeactivated"));
+	} else {
+		displayError(parseError(i18n("users.userdeactivationerror") + this.smartuser, this.responseText));
+	}
+	refreshUsers();
+	refreshInactiveUsers();
+	
+	//if you deactivated the logged in user; refresh page to auto logout
+	var currentUser = document.querySelector("#userlogin");
+	if (currentUser != null && currentUser.dataset.username != null && this.smartuser === currentUser.dataset.username){
+		location.reload(true);
+	} 
+}
 
 
 //callback for creating user 

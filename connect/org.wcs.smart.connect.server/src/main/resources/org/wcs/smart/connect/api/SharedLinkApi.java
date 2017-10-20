@@ -107,7 +107,7 @@ public class SharedLinkApi extends HttpServlet{
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
+			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName());
 		}finally{
 			s.getTransaction().commit();
 		}
@@ -129,7 +129,7 @@ public class SharedLinkApi extends HttpServlet{
 		s.beginTransaction();
 		try{
 			
-			if(SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY)){
+			if(SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName())){
 				//only return links from the CA(s) they are CaAdmin users for
 				List<SmartUserAction> list = QueryFactory.buildQuery(s, SmartUserAction.class, 
 						new Object[] {"username", request.getUserPrincipal().getName()}, //$NON-NLS-1$

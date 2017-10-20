@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,7 +48,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
-import org.mindrot.jbcrypt.BCrypt;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.SmartUserLevel;
 import org.wcs.smart.connect.SmartUtils;
@@ -56,12 +57,11 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.EmployeeInfo;
+import org.wcs.smart.connect.model.SimpleConservationAreaList;
 import org.wcs.smart.connect.model.SmartUser;
-import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.hibernate.QueryFactory;
 
 
 /**
@@ -98,7 +98,7 @@ public class DesktopUser extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY);
+			return SecurityManager.INSTANCE.isCaAdmin(s, request.getUserPrincipal().getName());
 		}finally{
 			s.getTransaction().commit();
 		}
@@ -114,17 +114,31 @@ public class DesktopUser extends HttpServlet {
 	 */
 	@GET
     @Path("")
-    public List<Employee> getUsers(){
-		if(!isCaAdminUser()){
+    public List<EmployeeInfo> getUsers(){
+		ArrayList<UUID> uuidCaAdminIn = null; 
+		
+		boolean isCaAdmin = isCaAdminUser();
+		if(!isCaAdmin){
 			isAdminUser();//throws an exception if invalid user.
 		}
 		
-		//TODO check for CA-admins and get CAs they are allowed to access then return employees in those only.
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return (ArrayList<Employee>) HibernateManager.getDesktopUsers(s);
-			//return new ArrayList<Employee>();
+			ArrayList<EmployeeInfo> authorizedEmployees = new ArrayList<EmployeeInfo>(); 
+			ArrayList<EmployeeInfo> allEmployees = (ArrayList<EmployeeInfo>) HibernateManager.getDesktopUsers(s);
+		
+			if(isCaAdmin){
+				uuidCaAdminIn = SecurityManager.INSTANCE.listOfUuidsIsCaAdminOf(s, request.getUserPrincipal().getName() );
+				for(EmployeeInfo e: allEmployees){
+					if(uuidCaAdminIn.contains(e.getCaUuid())){
+						authorizedEmployees.add(e);
+					}
+				}
+			}else{//admin return all of them
+				return allEmployees;
+			}
+			return authorizedEmployees;
 		}catch(Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, ex); //$NON-NLS-1$	
@@ -174,64 +188,35 @@ public class DesktopUser extends HttpServlet {
 	}
 
 	/**
-	 * Gets a user's details, could be in more than one CA
+	 * Gets the details of a single from a particular CA, including a list of allother CAs this user also exists in (this list is restricted if the requesting user is only a CaAdmin, to the CAs they can adminsitrate)
 	 * <p>URL: ../server/api/desktopuser/{username}
 	 * <p>Call Type: GET
 	 * 
-	 * @param username	provided in the URL, the username of the requested user.
-	 * 
-	 * @return Returns a List of all the user for each CAs they are in, just the smartuserId, CA Name and CaUuid is returned 
+	 * @return Returns a JSON EmployeeInfo object of the requested user 
 	 */
 	
 	@GET
     @Path("/{username}")
-    public List<Employee> getUser(@PathParam("username") String username, @QueryParam("cauuid") String cauuid){
-		Boolean validate = false;
-
-		if(!isCaAdminUser()){
-			isAdminUser();//throws an exception if invalid user.
-		}
-		
-		//TODO return user to CA-admins only if allowed to access that employees
-		
-		Session s = HibernateManager.getSession(context);
-		s.beginTransaction();
-		try{
-			List<Employee> e = HibernateManager.getDesktopUser(s, username);
-			return e;
-		}catch (Exception ex){
-			logger.log(Level.WARNING, ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.NOT_FOUND);
-		}finally{
-			s.getTransaction().commit();
-		}
-	}
-
-	
-	/**
-	 * Gets a user's details in a particular CA
-	 * <p>URL: ../server/api/desktopuser/ca/{username}
-	 * <p>Call Type: GET
-	 * 
-	 * @param username	provided in the URL, the username of the requested user.
-	 * @param cauuid  the uuid of the requested ca.
-	 * 
-	 * @return Returns a user for the CAyou specified 
-	 */
-	
-	@GET
-    @Path("/ca/{username}")
     public EmployeeInfo getUserInCa(@PathParam("username") String username, @QueryParam("cauuid") String cauuid){
-		if(!isCaAdminUser()){
+		boolean isCaAdmin = isCaAdminUser();
+		if(!isCaAdmin){
 			isAdminUser();//throws an exception if invalid user.
 		}
 		
-		//TODO return user to CA-admins only if allowed to access that employees
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
 			Employee e = HibernateManager.getDesktopUserInCa(s, username, cauuid);
+			//check if this is a caAdmin they are allowed to do stuff in this CA
+			if(isCaAdmin){
+				ArrayList<UUID> uuidCaAdminIn = SecurityManager.INSTANCE.listOfUuidsIsCaAdminOf(s, request.getUserPrincipal().getName() );
+				if(!uuidCaAdminIn.contains(e.getConservationArea().getUuid())){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have access to this CA."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+			}
+			
 			EmployeeInfo i = new EmployeeInfo();
 			i.setCaUuid(e.getConservationArea().getUuid());
 			i.setSmartUserId(e.getSmartUserId());
@@ -240,6 +225,21 @@ public class DesktopUser extends HttpServlet {
 			i.setGender(e.getGender());
 			i.setId(e.getId());
 			i.setUserLevelKey(e.getSmartUserLevelKeys());
+			i.setCaLabel(e.getConservationArea().getName());
+
+			ArrayList<SimpleConservationAreaList> authorizedCas = new ArrayList<SimpleConservationAreaList>();
+			ArrayList<SimpleConservationAreaList> allCas = HibernateManager.getDesktopUserAllCas(s, username);
+			if(isCaAdmin){
+				ArrayList<UUID> uuidCaAdminIn = SecurityManager.INSTANCE.listOfUuidsIsCaAdminOf(s, request.getUserPrincipal().getName() );
+				for(SimpleConservationAreaList a: allCas){
+					if(uuidCaAdminIn.contains(a.getUuid())){
+						authorizedCas.add(a);
+					}
+				}			
+			}else{
+				authorizedCas = allCas;
+			}
+			i.setAllCasUserIsIn(authorizedCas);
 			
 			return i;
 		}catch (Exception ex){
@@ -267,9 +267,8 @@ public class DesktopUser extends HttpServlet {
     public EmployeeInfo addUser(@PathParam("username") String user, 
     		EmployeeInfo newUser) {
 
-		if(isCaAdminUser()){
-			//you are allowed
-		}else{
+		boolean isCaAdmin = isCaAdminUser();
+		if(!isCaAdmin){
 			isAdminUser();//throws an exception if you are not allowed still. 
 		};
 		
@@ -292,6 +291,13 @@ public class DesktopUser extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CaAdminAccountAction.KEY, newUser.getCaUuid()) 
+					&& !SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY) 
+					){
+				logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to add to this CA."); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+			}
+			
 			e.setConservationArea(HibernateManager.getConservationArea(s, newUser.getCaUuid()));
 			e.setId(newUser.getId());
 			e.setFamilyName(newUser.getFamilyName());
@@ -343,42 +349,51 @@ public class DesktopUser extends HttpServlet {
 	 */
     @PUT
     @Path("/{username}")
-    public SmartUser updateUser(
-    		@PathParam("username") String olduser,
-    		SmartUser newUser) {
+    public EmployeeInfo updateUser(
+    		@PathParam("username") String olduser, @QueryParam("cauuid") String cauuid,
+    		EmployeeInfo newUser) {
     	
+    	boolean isCaAdmin = isCaAdminUser();
+
     	//if you are editing yourself, skip validation for admin-level user
     	if( !request.getUserPrincipal().getName().equals(olduser)){
-   			isAdminUser();//throws an exception if not an Admin
+    		if(!isCaAdmin){
+    			isAdminUser();//throws an exception if invalid user.
+    		}
     	}
     	
-    	if (newUser.getUsername() != null){
-    		newUser.setUsername(newUser.getUsername().trim());
-    		String err = validateUserName(newUser.getUsername(), SmartUtils.getRequestLocale(request));
+    	if (newUser.getSmartUserId() != null){
+    		newUser.setSmartUserId(newUser.getSmartUserId().trim());
+    		String err = validateUserName(newUser.getSmartUserId(), SmartUtils.getRequestLocale(request));
     		if (err != null){
     			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
     		}
     	}
-		if (newUser.getPassword() != null){
-			if (newUser.getOldpassword() == null){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.PasswordNotProvided", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			}
-			
-			String err = validatePassword(newUser.getPassword(), SmartUtils.getRequestLocale(request));
-			if (err != null){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
-			}
-		}
 		
-    	SmartUser toUpdate = null;
+    	Employee toUpdate = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			toUpdate = QueryFactory.buildQuery(s, SmartUser.class, "username", olduser).uniqueResult(); //$NON-NLS-1$
-			if (newUser.getPassword() != null){
-				if (!BCrypt.checkpw(newUser.getOldpassword(), toUpdate.getPassword())){
-					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.InvalidPassword", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
+			toUpdate = HibernateManager.getDesktopUserInCa(s, olduser, cauuid);
+			
+			
+			//check if this is a caAdmin they are allowed to do stuff in this CA
+			if(isCaAdmin){
+				ArrayList<UUID> uuidCaAdminIn = SecurityManager.INSTANCE.listOfUuidsIsCaAdminOf(s, request.getUserPrincipal().getName() );
+				if(!uuidCaAdminIn.contains(toUpdate.getConservationArea().getUuid())){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have access to edit this CA."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 				}
+			}
+			
+			if (newUser.getSmartPassword() != null && newUser.getSmartPassword() != ""){
+				
+				String err = validatePassword(newUser.getSmartPassword(), SmartUtils.getRequestLocale(request));
+				if (err != null){
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
+				}
+
+				toUpdate.setSmartPassword(BcryptCredentialHandler.hashPassword(newUser.getSmartPassword()));
 			}
 
 			if (toUpdate == null){
@@ -386,35 +401,27 @@ public class DesktopUser extends HttpServlet {
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotFound", SmartUtils.getRequestLocale(request)), olduser)); //$NON-NLS-1$
 			}
 			
-			if (newUser.getUsername() != null && !olduser.equals(newUser.getUsername())){
+			if (newUser.getSmartUserId() != null && !olduser.equals(newUser.getSmartUserId())){
 				//ensure new username is unique
-				Long userCnt = QueryFactory.buildCountQuery(s, SmartUser.class, new Object[] {"username", newUser.getUsername()}); //$NON-NLS-1$
-				if (userCnt > 0){
+				Employee existingUser = HibernateManager.getDesktopUserInCa(s, newUser.getSmartUserId(), cauuid);
+				if (existingUser != null){
 					throw new SmartConnectException(
 							Response.Status.BAD_REQUEST,
-							MessageFormat.format(Messages.getString("ConnectUser.UserNotUnique", SmartUtils.getRequestLocale(request)), newUser.getUsername())); //$NON-NLS-1$
+							MessageFormat.format(Messages.getString("ConnectUser.UserNotUnique", SmartUtils.getRequestLocale(request)), newUser.getSmartUserId())); //$NON-NLS-1$
 				}
-				toUpdate.setUsername(newUser.getUsername());
+				toUpdate.setSmartUserId(newUser.getSmartUserId());
 			}
+			toUpdate.setConservationArea(HibernateManager.getConservationArea(s, newUser.getCaUuid()));
+			toUpdate.setId(newUser.getId());
+			toUpdate.setFamilyName(newUser.getFamilyName());
+			toUpdate.setGivenName(newUser.getGivenName());
+			toUpdate.setGender(newUser.getGender());
+			toUpdate.setDateCreated(new Date());
+			toUpdate.setStartEmploymentDate(new Date());
+			ArrayList<SmartUserLevel> level = new ArrayList<SmartUserLevel>();
+			level.add(new SmartUserLevel(newUser.getUserLevelKey()));
+			toUpdate.setSmartUserLevel(level);
 			
-			if (newUser.getPassword() != null){
-				//hash password
-				toUpdate.setPassword(BcryptCredentialHandler.hashPassword(newUser.getPassword()));	
-			}
-			
-			if (newUser.getEmail() != null){
-				toUpdate.setEmail(newUser.getEmail());
-			}
-			
-			if (newUser.getResetDatetime() != null){
-				toUpdate.setResetDatetime(newUser.getResetDatetime());
-			}
-			if (newUser.getResetId() != null){
-				toUpdate.setResetId(newUser.getResetId());
-			}
-			if(newUser.getHomeCaUuid() != null){
-				toUpdate.setHomeCaUuid(newUser.getHomeCaUuid());
-			}
 			s.update(toUpdate);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
@@ -427,7 +434,7 @@ public class DesktopUser extends HttpServlet {
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
 		}
-		return toUpdate;
+		return newUser;
     }
  
     
@@ -445,7 +452,10 @@ public class DesktopUser extends HttpServlet {
     		@PathParam("username") String username,
     		@QueryParam("caUuid") String caUuid) {
 
-    	isAdminUser();
+    	boolean isCaAdmin = isCaAdminUser();
+		if(!isCaAdmin){
+			isAdminUser();//throws an exception if invalid user.
+		}
     	Employee toDelete = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -455,6 +465,16 @@ public class DesktopUser extends HttpServlet {
 				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotFound", SmartUtils.getRequestLocale(request)), username)); //$NON-NLS-1$
 			}
+			
+			//check if this is a caAdmin they are allowed to do stuff in this CA
+			if(isCaAdmin){
+				ArrayList<UUID> uuidCaAdminIn = SecurityManager.INSTANCE.listOfUuidsIsCaAdminOf(s, request.getUserPrincipal().getName() );
+				if(!uuidCaAdminIn.contains(toDelete.getConservationArea().getUuid())){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have access to this CA."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+			}
+			
 			
 			toDelete.setEndEmploymentDate(new Date()); //setting an end date deactivates the user.
 			s.save(toDelete);
@@ -475,11 +495,44 @@ public class DesktopUser extends HttpServlet {
 		}finally{
 		}
 		EmployeeInfo d = new EmployeeInfo();
+		d.setCaLabel(toDelete.getConservationArea().getName());
 		d.setCaUuid(toDelete.getConservationArea().getUuid());
 		d.setSmartUserId(toDelete.getSmartUserId());
 		return d;
     }
  
+    /**
+	 * Get all Ca UUIDs the CaAdmin is allowed to access
+	 * <p>URL: ../server/api/desktopuser/caUuidsAllowed/
+	 * <p>Call Type: GET
+	 * 
+	 * @return Returns a JSON Array of Employee objects for all users
+	 * 
+	 */
+	@GET
+    @Path("/caUuidsAllowed/")
+    public ArrayList<SimpleConservationAreaList> getCaUuids(){
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			ArrayList<SimpleConservationAreaList> results = new ArrayList<SimpleConservationAreaList>();
+			ArrayList<UUID> uuids = SecurityManager.INSTANCE.listOfUuidsIsCaAdminOf(s, request.getUserPrincipal().getName() );
+			for(UUID id : uuids){
+				ConservationArea name = HibernateManager.getConservationArea(s, id);
+				results.add(new SimpleConservationAreaList(name.getName(), id));
+			}
+			return results;
+		}catch(Exception ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, ex); //$NON-NLS-1$	
+		}finally{
+			s.getTransaction().commit();
+		}
+
+	
+	}
+    
     /**
      * Validates usernames
      * @param username String of the username
@@ -510,3 +563,5 @@ public class DesktopUser extends HttpServlet {
     	return null;
     }
 }
+
+
