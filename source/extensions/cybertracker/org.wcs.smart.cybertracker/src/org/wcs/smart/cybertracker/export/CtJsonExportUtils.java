@@ -93,7 +93,7 @@ public class CtJsonExportUtils {
 		for (ProfileOptionID option : ProfileOptionID.values()) {
 			CyberTrackerPropertiesProfileOption opValue = profile.getOptions().get(option);
 			if (opValue == null) continue;
-			if (opValue.getBooleanValue() != null) {
+			if (isBoolean(option)) {
 				profileObj.put(option.name(), opValue.getBooleanValue());
 			}else if (opValue.getDoubleValue() != null) {
 				profileObj.put(option.name(), opValue.getDoubleValue());
@@ -104,6 +104,57 @@ public class CtJsonExportUtils {
 			}
 		}
 		return profileObj.toJSONString();
+	}
+	
+	/**
+	 * Identify which options are boolean as boolean options
+	 * appear the same as integer options in the database.
+	 * 
+	 * @param option
+	 * @return
+	 */
+	private static boolean isBoolean(ProfileOptionID option) {
+		switch(option){
+		
+		case USE_TITLE_BAR:
+		case USE_LARGE_TITLES:
+		case USE_LARGE_TABS:
+		case LARGE_SCROLL_BARS:
+		case AUTO_NEXT:
+		case SHOW_EDIT:
+		case SHOW_GPS:
+		case KIOSK_MODE:	
+		case CAN_PAUSE:
+		case SIMPLE_CAMERA:
+		case DISABLE_EDITING:
+		case USE_SD_CARD:
+		case TEST_TIME:
+		case RESET_ON_NEXT:
+		case RESET_ON_SYNC:
+		case USE_MAP_ON_SKIP:
+		case USE_GPS_TIME:
+		case MANUAL_GPS:
+		case ALLOW_SKIP_MANUAL_GPS:
+		case LOCK100:
+			return true;
+			
+		case APP_NAME:
+		case DILUTION_OF_PRECISION:
+		case EXIT_PIN:
+		case FIELD_MAP_FILENAME:
+		case GPS_TIME_ZONE:
+		case MAX_PHOTO_COUNT:
+		case PROJECTION:
+		case SIGHTING_ACCURACY:
+		case SIGHTING_FIX_COUNT:
+		case SKIP_BUTTON_TIMEOUT:
+		case TRACK_ACCURACY:
+		case UTM_ZONE:
+		case WAYPOINT_TIMER:
+			return false;
+		}
+		
+		return false;
 	}
 	
 	/**
