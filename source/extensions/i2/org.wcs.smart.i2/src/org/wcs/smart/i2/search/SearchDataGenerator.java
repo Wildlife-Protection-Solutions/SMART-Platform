@@ -579,6 +579,7 @@ public class SearchDataGenerator {
 			record.setConservationArea(SmartDB.getCurrentConservationArea());		
 			record.setEntities(new ArrayList<IntelEntityRecord>());
 			record.setLocations(new ArrayList<IntelLocation>());
+			record.setPrimaryDate(new Date());
 			
 			IntelRecordSource src = sources.get(random.nextInt(sources.size() - 1));
 			record.setRecordSource(src);
@@ -616,7 +617,7 @@ public class SearchDataGenerator {
 			record.setTitle("Generated Record " + df.format(i+1 + cnt));
 			
 			
-			int descTitle = (int)Math.round(Math.random() * 10000);
+			int descTitle = (int)Math.round(Math.random() * 1000);
 			if (descTitle == 0) descTitle = 1;
 			StringBuilder desc = new StringBuilder();
 			for (int j = 0; j < descTitle; j ++){
@@ -629,7 +630,7 @@ public class SearchDataGenerator {
 			record.setDescription(v.toString());
 			
 			
-			int numEntities = (int)Math.round(Math.random() * 20);
+			int numEntities = (int)Math.round(Math.random() * 5);
 			Set<IntelEntity> used = new HashSet<IntelEntity>();
 			int j = 0;
 			while( j < numEntities && used.size() < entities.size()){
@@ -660,7 +661,7 @@ public class SearchDataGenerator {
 					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 					.list();
 			
-			for (int lcnt = 0; lcnt < 20; lcnt ++){
+			for (int lcnt = 0; lcnt < 5; lcnt ++){
 				IntelLocation loc = new IntelLocation();
 				loc.setRecord(record);
 				

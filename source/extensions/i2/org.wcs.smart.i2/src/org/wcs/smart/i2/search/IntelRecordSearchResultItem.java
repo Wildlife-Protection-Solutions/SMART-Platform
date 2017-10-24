@@ -38,29 +38,18 @@ public class IntelRecordSearchResultItem {
 	private UUID record;
 	private IntelRecordSource recordSource;
 	private IntelRecord.Status status;
-	
-	private String localMatch;
-	int[][] matchRanges;
+
 	/**
 	 * Creates a new result item with entity
 	 * @param entity
 	 * @param matchedString
 	 * @param rate
 	 */
-	public IntelRecordSearchResultItem(UUID record, IntelRecordSource recordSource, String title, IntelRecord.Status status, String localMatch, int[][] matchRanges) {
+	public IntelRecordSearchResultItem(UUID record, IntelRecordSource recordSource, String title, IntelRecord.Status status) {
 		this.title = title;
 		this.record = record;
 		this.recordSource = recordSource;
 		this.status = status;
-		this.localMatch = localMatch;
-		this.matchRanges = matchRanges;
-	}
-	
-	public int[][] getMatchRanges(){
-		return this.matchRanges;
-	}
-	public String getLocalMatch(){
-		return this.localMatch;
 	}
 	
 	/**

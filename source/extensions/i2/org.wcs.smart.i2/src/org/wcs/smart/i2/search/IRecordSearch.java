@@ -29,7 +29,7 @@ public interface IRecordSearch {
 	/**
 	 * Maximum number of results returned in an entity search
 	 */
-	public static final int MAX_RESULT_CNT = 50;
+	public static final int MAX_RESULT_CNT = 1_000_000;
 	
 	/**
 	 * Perform the search

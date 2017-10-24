@@ -109,47 +109,13 @@ public class BasicRecordSearch implements IRecordSearch{
 		}
 		List<?> items = query.list();
 		List<IntelRecordSearchResultItem> resultItems = new ArrayList<>();
-		
-		Pattern narrativePattern = null;
-		if (narrativeSearch != null){
-			narrativePattern = Pattern.compile(narrativeSearch.toLowerCase());
-		}
-		
+				
 		for (Object it : items){
 			Object[] i = (Object[])it;
 			UUID uuid = (UUID)i[0];
 			String title = (String) i[1];
 			UUID src = (UUID)i[2];
-			String narrative = (String)i[4];
-			
-			StringBuilder localMatch = new StringBuilder();
-			
-			List<int[]> matchRanges = new ArrayList<>();
-			if (narrativePattern != null){
-				Matcher m = narrativePattern.matcher(narrative.toLowerCase());
-				while(m.find()){
-					int sIndex = m.start();
-					int eIndex = m.end();
-					int offset = 150;
-					
-					int start = sIndex - offset; 
-					if (start < 0) start = 0;
-					int rangeStart = sIndex - start;
-					
-					int end = eIndex + offset;
-					if (end > narrative.length()) end = narrative.length();
-					
-					
-					rangeStart = rangeStart + 3 + localMatch.length();
-					int rangeEnd = rangeStart + (eIndex - sIndex);
-					
-					matchRanges.add(new int[]{rangeStart, rangeEnd});
-					localMatch.append("..." + narrative.substring(start, end) + "..."); //$NON-NLS-1$ //$NON-NLS-2$
-					localMatch.append("\n\n"); //$NON-NLS-1$
-				}
-			}
-			
-			resultItems.add(new IntelRecordSearchResultItem(uuid, src == null ? null : session.get(IntelRecordSource.class, src), title, (IntelRecord.Status)i[3], localMatch.length() == 0 ? null : localMatch.toString(), matchRanges.toArray(new int[matchRanges.size()][2])));
+			resultItems.add(new IntelRecordSearchResultItem(uuid, src == null ? null : session.get(IntelRecordSource.class, src), title, (IntelRecord.Status)i[3]));
 		}
 		
 		IntelRecordResult results = new IntelRecordResult(cnt, resultItems, System.nanoTime() - startTime);

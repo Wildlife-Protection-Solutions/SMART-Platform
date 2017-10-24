@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -75,9 +77,12 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.search.BasicRecordSearch;
 import org.wcs.smart.i2.search.IntelRecordResult;
@@ -112,6 +117,8 @@ public class BasicRecordSearchPanel extends Composite {
 	private Label searchCount;
 	private Label searchTime;
 	
+	private Pattern narrativePattern = null;
+	
 	private IEclipseContext context;
 	
 	public BasicRecordSearchPanel(Composite parent, FormToolkit toolkit, IEclipseContext context) {
@@ -135,7 +142,6 @@ public class BasicRecordSearchPanel extends Composite {
 		createSearchResults(this);
 		
 		refreshSource();
-		
 	}
 	
 	private void createSearchPart(Composite parent,FormToolkit toolkit){
@@ -288,40 +294,17 @@ public class BasicRecordSearchPanel extends Composite {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object x = ((IStructuredSelection)event.getSelection()).getFirstElement();
-				String value = null;
-				int[][] ranges = null;
+				
 				if (x != null && x instanceof IntelRecordSearchResultItem){
-					value = ((IntelRecordSearchResultItem)x).getLocalMatch();
-					ranges = ((IntelRecordSearchResultItem)x).getMatchRanges();
+					searchJobRecordUuid = ((IntelRecordSearchResultItem)x).getRecordUuid();
+					hightlightSearchResults.setSystem(true);
+					hightlightSearchResults.cancel();
+					hightlightSearchResults.schedule();
 					
-				}
-				if(value != null){
-					txtMatchString.setText( value );
-					if (ranges != null){
-						StyleRange[] styles = new StyleRange[ranges.length];
-						int index = 0;
-						for (int[] range : ranges){
-							StyleRange r = new StyleRange(range[0], range[1] - range[0], getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION_TEXT), getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
-							r.fontStyle = SWT.BOLD;
-							styles[index++] = r;
-						}
-						txtMatchString.setStyleRanges(styles);
-					}
-					
-					if (!txtMatchString.isVisible()){
-						((GridData)txtMatchString.getLayoutData()).heightHint = (int)(tblResults.getControl().getBounds().height / 3.0);
-						txtMatchString.getParent().layout(true, true);
-						txtMatchString.setVisible(true);
-					}
-				}else{
-					txtMatchString.setText(""); //$NON-NLS-1$
-					txtMatchString.setStyleRange(null);
-					((GridData)txtMatchString.getLayoutData()).heightHint = 0;
-					txtMatchString.getParent().layout(true, true);
-					txtMatchString.setVisible(false);
 				}
 			}
 		});
+		
 		tblResults.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelRecordSelectionTransfer.getTransfer()}, new DragSourceAdapter(){
 			private ISelection getSelection(){
 				List<RecordEditorInput> selection = new ArrayList<>();
@@ -476,7 +459,12 @@ public class BasicRecordSearchPanel extends Composite {
 		if (selection instanceof IntelRecordSource) source = (IntelRecordSource)selection;
 		
 		final BasicRecordSearch search = new BasicRecordSearch(source, narrative, title);
-	
+		
+		narrativePattern = null;
+		if (narrative != null && !narrative.isEmpty()){
+			narrativePattern = Pattern.compile(narrative);
+		}
+		
 		Job searchJob = new Job(Messages.BasicRecordSearchPanel_SearchJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -499,6 +487,123 @@ public class BasicRecordSearchPanel extends Composite {
 	
 	public void refreshSource(){
 		cmbSource.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		refreshSourcesJob.setSystem(true);
+		refreshSourcesJob.schedule();
 	}
 
+	private Job refreshSourcesJob = new Job("refresh source list") { //$NON-NLS-1$
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			List<Object> srcs = new ArrayList<>();
+			try(Session session = HibernateManager.openSession()){
+				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList()); //$NON-NLS-1$
+				srcs.forEach(e->((IntelRecordSource)e).getName());
+			}
+			srcs.add(0, ""); //$NON-NLS-1$
+			Display.getDefault().syncExec(()->{
+				cmbSource.setInput(srcs);
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
+		
+	/*
+	 * Highlight search results
+	 */
+	private UUID searchJobRecordUuid;
+	private Job hightlightSearchResults = new Job("highlight search results") { //$NON-NLS-1$
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			
+			UUID uuid = searchJobRecordUuid;
+			if (uuid == null || narrativePattern == null) {
+				clearAndHide();
+				return Status.OK_STATUS;
+			}
+			
+			String narrative = null;
+			try(Session session = HibernateManager.openSession()){
+				IntelRecord record = session.get(IntelRecord.class, uuid);
+				if (record != null) {
+					narrative = record.getDescription();
+				}
+			}
+			if (narrative == null || monitor.isCanceled()) {
+				clearAndHide();
+				return Status.OK_STATUS;
+			}
+			
+			//perform match
+			StringBuilder localMatch = new StringBuilder();
+			List<int[]> matchRanges = new ArrayList<>();
+			if (narrativePattern != null){
+				Matcher m = narrativePattern.matcher(narrative.toLowerCase());
+				while(m.find()){
+					if (monitor.isCanceled()) {
+						return Status.CANCEL_STATUS;
+					}
+					int sIndex = m.start();
+					int eIndex = m.end();
+					int offset = 150;
+					
+					int start = sIndex - offset; 
+					if (start < 0) start = 0;
+					int rangeStart = sIndex - start;
+					
+					int end = eIndex + offset;
+					if (end > narrative.length()) end = narrative.length();
+					
+					
+					rangeStart = rangeStart + 3 + localMatch.length();
+					int rangeEnd = rangeStart + (eIndex - sIndex);
+					
+					matchRanges.add(new int[]{rangeStart, rangeEnd});
+					localMatch.append("..." + narrative.substring(start, end) + "..."); //$NON-NLS-1$ //$NON-NLS-2$
+					localMatch.append("\n\n"); //$NON-NLS-1$
+				}
+			}
+			
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			
+			Display.getDefault().syncExec(()->{
+				if (monitor.isCanceled()) return ;				
+				if(localMatch.length() > 0){
+					String value = localMatch.toString();
+					txtMatchString.setText( value );
+					if (matchRanges != null){
+						StyleRange[] styles = new StyleRange[matchRanges.size()];
+						int index = 0;
+						for (int[] range : matchRanges){
+							StyleRange r = new StyleRange(range[0], range[1] - range[0], getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION_TEXT), getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
+							r.fontStyle = SWT.BOLD;
+							styles[index++] = r;
+						}
+						txtMatchString.setStyleRanges(styles);
+					}
+					
+					if (!txtMatchString.isVisible()){
+						((GridData)txtMatchString.getLayoutData()).heightHint = (int)(tblResults.getControl().getBounds().height / 3.0);
+						txtMatchString.getParent().layout(true, true);
+						txtMatchString.setVisible(true);
+					}
+				}else{
+					clearAndHide();
+				}
+			});
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;			
+			return Status.OK_STATUS;
+		}
+		
+		private void clearAndHide() {
+			Display.getDefault().syncExec(()->{
+				txtMatchString.setText(""); //$NON-NLS-1$
+				txtMatchString.setStyleRange(null);
+				((GridData)txtMatchString.getLayoutData()).heightHint = 0;
+				txtMatchString.getParent().layout(true, true);
+				txtMatchString.setVisible(false);
+			});
+		}
+	};
 }
