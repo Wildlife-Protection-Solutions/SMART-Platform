@@ -255,7 +255,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 					DateFilter.ALL,
 					DateFilter.CUSTOM
 		};
-		DateFilterComposite.DateFilter initialDateFilter = DateFilter.LAST_1_YEARS;
+		DateFilterComposite.DateFilter initialDateFilter = DateFilter.ALL;
 		dateFilter = new Date[]{initialDateFilter.getStartDate(), initialDateFilter.getEndDate()};
 		dateComp = new DateFilterDropDownComposite(mapArea, defaultFilters, initialDateFilter);
         dateComp.setBounds(0, 0, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);

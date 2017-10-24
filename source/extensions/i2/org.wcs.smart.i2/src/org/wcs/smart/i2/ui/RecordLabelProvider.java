@@ -63,6 +63,7 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 			case STATUS:
 				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(record.getStatus(), Locale.getDefault());
 			case SOURCE:
+				if (record.getRecordSource() == null) return ""; //$NON-NLS-1$
 				return record.getRecordSource().getName();
 			case TITLE:
 				return record.getTitle();
