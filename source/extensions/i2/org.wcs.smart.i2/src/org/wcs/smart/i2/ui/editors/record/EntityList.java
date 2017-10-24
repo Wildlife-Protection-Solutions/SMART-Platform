@@ -216,7 +216,6 @@ public class EntityList extends Composite {
 		Menu mnuEntities = new Menu(parent);
 		
 		mnuEntities.addMenuListener(new MenuListener() {
-			
 			@Override
 			public void menuShown(MenuEvent e) {
 				if (!listParent.getEditor().getEditMode()){
@@ -241,19 +240,24 @@ public class EntityList extends Composite {
 							}
 						});
 					}
-					if (mnuRelationship == null || mnuRelationship.isDisposed()){
-						if (IntelSecurityManager.INSTANCE.canEditEntity()) {
-							mnuRelationship = new MenuItem(mnuEntities, SWT.CASCADE, 0);
-							mnuRelationship.setText(Messages.EntityList_NewRelMenuItem);
+					if (mnuRelationship != null) {
+						mnuRelationship.dispose();
+						mnuRelationship = null;
+					}
+					if (IntelSecurityManager.INSTANCE.canEditEntity()) {
+						if (!getCurrentSelection().isEmpty()){
 							
-							if (!getCurrentSelection().isEmpty()){
+							final IntelEntity srcEntity = getCurrentSelection().get(0);
+							List<IntelEntity> targets = listParent.getEditor().getRecord().getEntities()
+								.stream()
+								.map(ie->ie.getEntity())
+								.collect(Collectors.toList());
+							targets.remove(srcEntity);
+							
+							if (!targets.isEmpty()) {
+								mnuRelationship = new MenuItem(mnuEntities, SWT.CASCADE, 0);
+								mnuRelationship.setText(Messages.EntityList_NewRelMenuItem);
 								
-								final IntelEntity srcEntity = getCurrentSelection().get(0);
-								List<IntelEntity> targets = listParent.getEditor().getRecord().getEntities()
-									.stream()
-									.map(ie->ie.getEntity())
-									.collect(Collectors.toList());
-								targets.remove(srcEntity);
 								Menu mm = new Menu(mnuRelationship);
 								mnuRelationship.setMenu(mm);
 								
