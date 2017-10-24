@@ -47,7 +47,10 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 		DATE_CREATED,
 		LAST_MODIFIED,
 		TITLE,
-		TITLE_CREATED;
+		TITLE_CREATED,
+		STATUS,
+		SOURCE,
+		PRIMARY_DATE;
 		
 		public String getLabel(IntelRecord record){
 			switch(this){
@@ -55,6 +58,12 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 				return DateFormat.getDateInstance().format(record.getDateCreated());
 			case LAST_MODIFIED:
 				return DateFormat.getDateInstance().format(record.getDateModified());
+			case PRIMARY_DATE:
+				return DateFormat.getDateInstance().format(record.getPrimaryDate());
+			case STATUS:
+				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(record.getStatus(), Locale.getDefault());
+			case SOURCE:
+				return record.getRecordSource().getName();
 			case TITLE:
 				return record.getTitle();
 			case TITLE_CREATED:

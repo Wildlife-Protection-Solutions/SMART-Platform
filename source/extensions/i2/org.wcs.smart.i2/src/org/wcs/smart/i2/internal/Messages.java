@@ -201,6 +201,7 @@ public class Messages extends NLS {
 	public static String EntityEditor_PdfErrorTitle;
 	public static String EntityEditor_PropertiesMnuItem;
 	public static String EntityEditor_printtooltip;
+	public static String EntityEditor_RecordDatefieldName;
 	public static String EntityEditor_RecordSrcLabel;
 	public static String EntityEditor_RecordSrcLabel2;
 	public static String EntityEditor_RecordsTitle;
@@ -222,6 +223,8 @@ public class Messages extends NLS {
 	public static String EntityEditor_SearchAttachMnu;
 	public static String EntityEditor_SetPrimaryImageMenu;
 	public static String EntityEditor_ShortNameColumnLabel;
+	public static String EntityEditor_SourceColumnLabel;
+	public static String EntityEditor_StatusColumnLabel;
 	public static String EntityEditor_savetooltip;
 	public static String EntityEditor_TypeLabel;
 	public static String EntityEditorMapComposite_CommentColumnName;

@@ -379,7 +379,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 				}
 			}
-			
+			Collections.sort(records, (a,b)-> -1*a.getPrimaryDate().compareTo(b.getPrimaryDate()));
 			
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
@@ -1516,19 +1516,19 @@ public class EntityEditor extends EditorPart implements MapPart{
 		tblRecords.getTable().setHeaderVisible(true);
 		tblRecords.getTable().setLinesVisible(true);
 		
-		String[] columns = new String[]{Messages.EntityEditor_ShortNameColumnLabel, Messages.EntityEditor_DateRecColumnLabel, Messages.EntityEditor_DateModColumnLabel};
+		String[] columns = new String[]{Messages.EntityEditor_ShortNameColumnLabel, Messages.EntityEditor_RecordDatefieldName, Messages.EntityEditor_SourceColumnLabel, Messages.EntityEditor_StatusColumnLabel};
 		ColumnLabelProvider[] lbls = new ColumnLabelProvider[]{
 				new RecordLabelProvider(RecordLabelProvider.RecordField.TITLE),
-				new RecordLabelProvider(RecordLabelProvider.RecordField.DATE_CREATED),
-				new RecordLabelProvider(RecordLabelProvider.RecordField.LAST_MODIFIED)
+				new RecordLabelProvider(RecordLabelProvider.RecordField.PRIMARY_DATE),
+				new RecordLabelProvider(RecordLabelProvider.RecordField.SOURCE),
+				new RecordLabelProvider(RecordLabelProvider.RecordField.STATUS),
 		};
-		int[] width = new int[]{400, 100, 100};
+		int[] width = new int[]{400, 100, 100, 100};
 		tblRecords.getTable().setData(TBLRECORD_LBLPROVIDER_KEY, lbls[0]);
 		for (int i = 0; i < columns.length; i ++){
 			TableViewerColumn col = new TableViewerColumn(tblRecords, SWT.NONE);
 			col.setLabelProvider(lbls[i]);
 			col.getColumn().setText(columns[i]);
-			
 			col.getColumn().setWidth(width[i]);
 		}
 		tblRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});

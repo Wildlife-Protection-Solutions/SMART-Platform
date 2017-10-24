@@ -235,7 +235,7 @@ public class RecordDetailsShell extends SmartShellDialog{
 				if (sbEntities.length() > 0) sbEntities.delete(sbEntities.length() - 2, sbEntities.length());
 			}
 			final String name1 = name;
-			final String narr1 = narr;
+			final String narr1 = narr == null ? "" : narr; //$NON-NLS-1$
 			final Date dCreated1 = dCreated;
 			final Date dModified1 = dModified;
 			Display.getDefault().syncExec(new Runnable(){
