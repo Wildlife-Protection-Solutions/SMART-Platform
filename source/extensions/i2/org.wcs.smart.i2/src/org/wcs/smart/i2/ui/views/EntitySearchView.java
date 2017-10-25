@@ -97,7 +97,6 @@ import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.search.BasicEntitySearch;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.search.IntelSearchResult;
-import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.search.LoadSavedSearches;
 import org.wcs.smart.i2.search.SearchProxy;
 import org.wcs.smart.i2.security.IntelSecurityManager;
@@ -118,7 +117,8 @@ import org.wcs.smart.ui.properties.FilterComposite;
 public class EntitySearchView {
 
 	/**
-	 * context location of entity search results
+	 * Context location of entity search results.  This will return the list currently
+	 * displayed in the view; NOT ALL the search results.  It returns List<IntelEntity>.
 	 */
 	public static final String ENTITY_SEARCH_RESULTS_KEY = "org.wcs.smart.i2.entity.search"; //$NON-NLS-1$
 	
@@ -187,12 +187,11 @@ public class EntitySearchView {
 		}
 		
 		@Override
-		public void afterSearch(IntelSearchResult entities, IProgressMonitor monitor) {
+		public void afterSearch(IntelSearchResult searchResult, IProgressMonitor monitor) {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					context.getParent().set(ENTITY_SEARCH_RESULTS_KEY, entities);
-					entityList.setEntities(entities);
+					entityList.setEntities(searchResult);
 				}
 			});
 			
@@ -216,7 +215,7 @@ public class EntitySearchView {
 		super();
 	}
 
-	public List<IntelSearchResultItem> getEntities(){
+	public List<IntelEntity> getEntities(){
 		return this.entityList.getEntities();
 	}
 	

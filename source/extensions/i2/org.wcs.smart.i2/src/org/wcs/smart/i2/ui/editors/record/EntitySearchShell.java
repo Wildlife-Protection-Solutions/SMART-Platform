@@ -105,9 +105,9 @@ public class EntitySearchShell extends SmartShellDialog {
 		tblEntityList.setLabelProvider(new EntityTypeLabelProvider(){
 			@Override
 			public String getText(Object element){
-				if (element instanceof IntelSearchResultItem){
-					IntelSearchResultItem item = (IntelSearchResultItem)element;
-					return MessageFormat.format("{0} ({1})", item.getEntity().getIdAttributeAsText(), item.getFormattedRating()); //$NON-NLS-1$
+				if (element instanceof InternalSearchResult){
+					InternalSearchResult item = (InternalSearchResult)element;
+					return MessageFormat.format("{0} ({1})", item.entity.getIdAttributeAsText(), item.rating); //$NON-NLS-1$
 					
 				}
 				return super.getText(element);
@@ -116,7 +116,7 @@ public class EntitySearchShell extends SmartShellDialog {
 			@Override
 			public Image getImage(Object element){
 				if (element instanceof IntelSearchResultItem){
-					return super.getImage(((IntelSearchResultItem) element).getEntity().getEntityType());
+					return super.getImage(((InternalSearchResult) element).entity.getEntityType());
 				}
 				return null;
 			}
@@ -152,6 +152,8 @@ public class EntitySearchShell extends SmartShellDialog {
 		
 		if (x instanceof IntelEntity){
 			entity = (IntelEntity) x;
+		}else if (x instanceof InternalSearchResult) {
+			entity = ((InternalSearchResult)x).entity;
 		}else if (x instanceof IAdaptable){
 			entity = (IntelEntity) ((IAdaptable)x).getAdapter(IntelEntity.class);
 		}
@@ -172,10 +174,20 @@ public class EntitySearchShell extends SmartShellDialog {
 			});
 		
 			
-			List<IntelSearchResultItem> entities = new ArrayList<IntelSearchResultItem>();
+			List<InternalSearchResult> entities = new ArrayList<InternalSearchResult>();
 			try(Session s = HibernateManager.openSession()){
-				BasicEntitySearch search = new BasicEntitySearch(searchText[0], 50, SmartDB.getCurrentConservationArea());
-				entities.addAll(search.doSearch(s, Locale.getDefault(), new NullProgressMonitor()).getResults());
+				BasicEntitySearch search = new BasicEntitySearch(searchText[0], SmartDB.getCurrentConservationArea(), 50);
+				search.doSearch(s, Locale.getDefault(), new NullProgressMonitor()).getAllResults().forEach(result->{
+					InternalSearchResult r = new InternalSearchResult();
+					IntelEntity ei = s.get(IntelEntity.class, result.getEntityUuid());
+					r.rating = result.getFormattedRating();
+					if (ei != null) {
+						ei.getIdAttributeAsText();
+						ei.getEntityType().getName();
+						r.entity = ei;
+					}
+					entities.add(r);
+				});
 			}
 			Display.getDefault().syncExec(() -> {
 				if (tblEntityList.getTable().isDisposed()) return;
@@ -192,5 +204,9 @@ public class EntitySearchShell extends SmartShellDialog {
 		
 	};
 	
+	private class InternalSearchResult{
+		public IntelEntity entity;
+		public String rating;
+	}
 
 }

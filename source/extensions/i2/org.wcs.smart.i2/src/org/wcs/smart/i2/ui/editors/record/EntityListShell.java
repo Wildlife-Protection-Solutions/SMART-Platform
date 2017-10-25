@@ -54,8 +54,6 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.search.IntelSearchResult;
-import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
@@ -92,6 +90,7 @@ public class EntityListShell extends SmartShellDialog {
 		this.editor = editor;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void createContents(Composite parent){
 		Composite owner = new Composite(parent, SWT.NONE);
@@ -142,17 +141,12 @@ public class EntityListShell extends SmartShellDialog {
 		});
 		
 		
-		List<IntelSearchResultItem> entities = null;
-		if (editor.getContext() != null && editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY) != null){
-			entities = ((IntelSearchResult) editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY)).getResults();
-		}else{
-			entities = new ArrayList<>();
-		}
 		List<Object> allItems = new ArrayList<Object>();
 		allItems.add(ALL_ENTITIES);
 		if (IntelSecurityManager.INSTANCE.canCreateEntity()) allItems.add(NEW_ENTITY);
-		if (entities != null){
-			entities.forEach(a -> allItems.add(a.getEntity()));
+		
+		if (editor.getContext() != null && editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY) != null){
+			allItems.addAll((List<IntelEntity>) editor.getContext().get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY));
 		}
 		
 		tblSearchEntityList.setInput(allItems);	

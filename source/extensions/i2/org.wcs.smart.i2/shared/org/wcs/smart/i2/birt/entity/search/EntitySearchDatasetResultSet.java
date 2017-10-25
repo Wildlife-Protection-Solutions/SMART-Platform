@@ -144,7 +144,7 @@ public class EntitySearchDatasetResultSet implements IResultSet {
 	 * @return
 	 */
 	private Object getCurrentItem(int colIndex) {
-		UUID uuid = result.getAllResults().get(m_currentRowId);
+		UUID uuid = result.getAllResults().get(m_currentRowId).getEntityUuid();
 		IntelEntity i = connection.getSession().get(IntelEntity.class, uuid);
 		if (i == null) {
 			return null;

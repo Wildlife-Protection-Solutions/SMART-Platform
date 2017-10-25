@@ -230,6 +230,7 @@ public class EntitySearchPanel implements IDefinitionPanel {
 		}
 		width = Math.max(width, currx);
 		dropTargetContent.setSize(width, curry + height);
+		dropTarget.setMinSize(width, curry+height);
 		dropTarget.redraw();
 	}
 
@@ -285,14 +286,17 @@ public class EntitySearchPanel implements IDefinitionPanel {
 		layout.marginHeight = 0;
 		mainComposite.setLayout(layout);
 		
-		dropTarget = new ScrolledComposite(mainComposite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.NONE);
+		dropTarget = new ScrolledComposite(mainComposite, SWT.H_SCROLL | SWT.V_SCROLL);
 		dropTarget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		dropTarget.addListener(SWT.Resize, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				orderElements();
-			}
-		});		
+		((GridData)dropTarget.getLayoutData()).heightHint = 20;
+		dropTarget.setExpandHorizontal(true);
+		dropTarget.setExpandVertical(true);
+//		dropTarget.addListener(SWT.Resize, new Listener() {
+//			@Override
+//			public void handleEvent(Event event) {
+//				orderElements();
+//			}
+//		});		
 		
 		dropTargetContent = new Composite(dropTarget, SWT.NONE);
 		dropTargetContent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
@@ -412,10 +416,7 @@ public class EntitySearchPanel implements IDefinitionPanel {
 				}
 			}
 		});
-	
-		dropTarget.setSize(dropTarget.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		dropTargetContent.setSize(dropTarget.computeSize(SWT.DEFAULT,
-				SWT.DEFAULT));
+		dropTarget.setMinSize(dropTargetContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		//create proxy item
 		proxy = new ProxyItem();

@@ -24,56 +24,41 @@ package org.wcs.smart.i2.search;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
-import org.eclipse.core.runtime.IAdaptable;
-import org.wcs.smart.i2.model.IntelEntity;
-
 /**
  * An individual search result item. Includes the entity,
  * the attribute string matched and the match rating.
  * @author Emily
  *
  */
-public class IntelSearchResultItem implements IAdaptable {
+public class IntelSearchResultItem {
 	
 	private static final DecimalFormat DFORMAT = new DecimalFormat("0.000"); //$NON-NLS-1$
 	
-	private String matchedString;
 	private UUID entityUuid;
-	private IntelEntity entity;
 	private Double matchRate;
+	private String matchString;
 
 	/**
 	 * Creates a new result item with entity
+	 * 
 	 * @param entity
-	 * @param matchedString
 	 * @param rate
 	 */
-	public IntelSearchResultItem(UUID entity, String matchedString, double rate, IntelEntity entityObj) {
-		this(entity, matchedString, rate);
-		setEntity(entityObj);
+	public IntelSearchResultItem(UUID entity, double rate) {
+		this(entity, rate, null);
 	}
 	
 	/**
-	 * Creates a new result item
+	 * Creates a new result item with entity
+	 * 
 	 * @param entity
-	 * @param matchedString
 	 * @param rate
+	 * @param match the string matched, may be null if not applicable
 	 */
-	public IntelSearchResultItem(UUID entity, String matchedString, double rate) {
-		setResult(entity, matchedString, rate);
-	}
-	
-	/**
-	 * Updates the result item values 
-	 * @param entity
-	 * @param matchedString
-	 * @param rate
-	 */
-	public void setResult(UUID entity, String matchedString, double rate){
-		this.matchedString = matchedString;
+	public IntelSearchResultItem(UUID entity, double rate, String match) {
 		this.entityUuid = entity;
 		this.matchRate = rate;
-		this.entity = null;
+		this.matchString = match;
 	}
 	
 	/**
@@ -100,36 +85,14 @@ public class IntelSearchResultItem implements IAdaptable {
 	public String getFormattedRating(){
 		return DFORMAT.format(getRating());
 	}
-	/**
-	 * The string matched
-	 * @return
-	 */
-	public String getMatchString(){
-		return this.matchedString;
-	}
 	
 	/**
 	 * 
-	 * @return the entity object matched; 
-	 * this will only return a value if setEntity(IntelEntity) has been called
+	 * @return the string that was matched if applicable.  will return null
+	 * if not applicable
 	 */
-	public IntelEntity getEntity(){
-		return this.entity;
-	}
-	
-	/**
-	 * Sets the intelligence entity associated with the search result item
-	 *  
-	 * @param entity
-	 */
-	public void setEntity(IntelEntity entity){
-		this.entity = entity;
+	public String getMatchedString() {
+		return this.matchString;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T getAdapter(Class<T> adapter) {
-		if (adapter == IntelEntity.class && entity != null) return (T)entity;
-		return null;
-	}
 }

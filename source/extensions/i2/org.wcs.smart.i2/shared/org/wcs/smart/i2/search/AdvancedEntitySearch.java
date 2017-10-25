@@ -84,14 +84,17 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		String[] bits = searchString.split(SEPARATOR);
 		if (!bits[0].equals(Type.ADVANCED.key)) return null;
 		
-		int maxCnt = Integer.parseInt(bits[1]);
+		//old form included max search result
+		//new form does not include this
 		String ss = ""; //$NON-NLS-1$
-		if (bits.length >= 3){
+		if (bits.length == 3) {
 			ss = bits[2];
+		}else if (bits.length == 2) {
+			ss = bits[1];
 		}
+		
 		AdvancedEntitySearch search = new AdvancedEntitySearch(cas);
 		search.searchString = ss;
-		search.maxResultCnt = maxCnt;
 		return search;
 	}
 	
@@ -128,19 +131,15 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			c.where(from.get("conservationArea").in(cas)); //$NON-NLS-1$
 			Query<IntelEntity> q = session.createQuery(c);
 			List<IntelSearchResultItem> items = new ArrayList<>(maxResultCnt);
-			List<UUID> allResults = new ArrayList<>();
 			try(ScrollableResults scroll = q.scroll()){
 				while(scroll.next()) {
 					IntelEntity entity = (IntelEntity) scroll.get()[0];
-					if (items.size() < maxResultCnt) {
-						items.add(new IntelSearchResultItem(entity.getUuid(), null, 1, lazyLoadEntity(entity, session)));		
-					}
-					allResults.add(entity.getUuid());
+					items.add(new IntelSearchResultItem(entity.getUuid(), 1));		
 				}
 			}
 			
 			Long done = System.nanoTime();
-			IntelSearchResult results = new IntelSearchResult(allResults, items, (done - now)); 
+			IntelSearchResult results = new IntelSearchResult(items, (done - now)); 
 			return results;
 		}else{
 			Long now = System.nanoTime();
@@ -154,17 +153,13 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				List<?> uuids = q.list();
 				int totalCount = uuids.size();
 				List<IntelSearchResultItem> items = new ArrayList<>(Math.min(totalCount, maxResultCnt));
-				List<UUID> allUuids = new ArrayList<>();
 				for (int i = 0; i < uuids.size(); i ++){
 					UUID uuid = (UUID) uuids.get(i);
-					if (items.size() < maxResultCnt) {
-						items.add(new IntelSearchResultItem(uuid, null, 1, lazyLoadEntity((IntelEntity)session.get(IntelEntity.class, uuid), session)));
-					}
-					allUuids.add(uuid);
+					items.add(new IntelSearchResultItem(uuid, 1));
 				}
 				
 				Long done = System.nanoTime();
-				IntelSearchResult results = new IntelSearchResult(allUuids, items, (done - now));
+				IntelSearchResult results = new IntelSearchResult(items, (done - now));
 				return results;
 			}catch (Exception ex){
 				throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.RUN_ERROR, locale), ex.getMessage()), ex);
@@ -176,8 +171,6 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	public String serialize() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Type.ADVANCED.key);
-		sb.append(SEPARATOR);
-		sb.append(maxResultCnt);
 		sb.append(SEPARATOR);
 		sb.append(searchString);
 		

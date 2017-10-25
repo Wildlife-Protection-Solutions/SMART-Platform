@@ -1265,7 +1265,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				EntityRelationshipListShell shell = new EntityRelationshipListShell(getSite().getShell(), entity){
+				EntityRelationshipListShell shell = new EntityRelationshipListShell(getSite().getShell(), entity, context){
 					protected void doEvent(){
 						if (getRelationshipType() != null){
 							addRelationship(getRelationshipType(), getTargetEntity());
@@ -1273,7 +1273,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 						}
 					}
 				};
-				
 				int x = btnAddRelationship.getLocation().x + btnAddRelationship.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 				int y =  btnAddRelationship.getLocation().y;
 				shell.open(btnAddRelationship.toDisplay(x,y));

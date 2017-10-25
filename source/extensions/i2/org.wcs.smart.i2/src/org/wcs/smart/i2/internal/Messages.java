@@ -360,6 +360,8 @@ public class Messages extends NLS {
 	public static String EntitySearchResultTable_ExportMenu;
 	public static String EntitySearchResultTable_ExportMenuItem2;
 	public static String EntitySearchResultTable_ExportToXML;
+	public static String EntitySearchResultTable_GoToFirstResultItem;
+	public static String EntitySearchResultTable_GotoLastResultItem;
 	public static String EntitySearchResultTable_LargeOp;
 	public static String EntitySearchResultTable_MediumOp;
 	public static String EntitySearchResultTable_OpenItem;
@@ -367,6 +369,7 @@ public class Messages extends NLS {
 	public static String EntitySearchResultTable_PrintMenuItem;
 	public static String EntitySearchResultTable_RatingLabel;
 	public static String EntitySearchResultTable_RefreshError;
+	public static String EntitySearchResultTable_ResultsLabel;
 	public static String EntitySearchResultTable_SaveRequiredMsg;
 	public static String EntitySearchResultTable_SearchError;
 	public static String EntitySearchResultTable_SearchingLabel;

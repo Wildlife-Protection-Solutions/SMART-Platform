@@ -21,10 +21,11 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -39,15 +40,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
-import org.wcs.smart.i2.ui.views.EntitySearchView.EntitySearchViewWrapper;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -65,23 +63,27 @@ public abstract class EntityRelationshipListShell extends SmartShellDialog {
 	
 	private TableViewer types;
 	
-	private List<? extends Object> entityOptions = null;
+	private List<Object> entityOptions = null;
+	private IEclipseContext context;
 	
-	public EntityRelationshipListShell(Shell owner, IntelEntity srcEntity, List<IntelEntity> entityOptions){
+	public EntityRelationshipListShell(Shell owner, IntelEntity srcEntity, List<IntelEntity> entityOptions, IEclipseContext context){
 		super(owner);
+		this.context = context;
 		this.srcEntity = srcEntity;
-		this.entityOptions = entityOptions;
+		this.entityOptions = new ArrayList<>();
+		if (entityOptions != null) entityOptions.forEach(o->this.entityOptions.add(o));
 	}
 	
-	public EntityRelationshipListShell(Shell owner, IntelEntity srcEntity){
-		this(owner, srcEntity, null);
+	public EntityRelationshipListShell(Shell owner, IntelEntity srcEntity, IEclipseContext context){
+		this(owner, srcEntity, null, context);
 		entityOptions = Collections.singletonList(Messages.EntityRelationshipListShell_NoEntitiesFound);
 		
-		IViewPart vpart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(EntitySearchView.ID);
-		if (vpart != null){
-			EntitySearchView view = ((EntitySearchViewWrapper)vpart).getComponent();
-			if (view != null){
-				entityOptions = view.getEntities().stream().map(e->e.getEntity()).collect(Collectors.toList());
+		if (this.context != null) {
+			@SuppressWarnings("unchecked")
+			List<IntelEntity> entities = (List<IntelEntity>)context.get(EntitySearchView.ENTITY_SEARCH_RESULTS_KEY);
+			if (entities != null) {
+				entityOptions = new ArrayList<>();
+				entities.forEach(e->entityOptions.add(e));
 			}
 		}
 	}

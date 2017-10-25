@@ -28,7 +28,6 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.i2.model.IntelEntity;
 
 /**
  * Intelligence search interface 
@@ -52,9 +51,9 @@ public interface IIntelEntitySearch {
 	public static final String SEPARATOR = ";"; //$NON-NLS-1$
 	
 	/**
-	 * Maximum number of results returned in an entity search
+	 * Maximum number of results returned in an entity search.
 	 */
-	public static final int MAX_RESULT_CNT = 50;
+	public static final int MAX_RESULT_CNT = 1_000_000;
 	
 	/**
 	 * Perform the search
@@ -72,32 +71,7 @@ public interface IIntelEntitySearch {
 	 */
 	public String serialize();
 
-	
-	/**
-	 * Loads necessary fields from entity for query results returning the
-	 * same entity object for convienence
-	 * 
-	 * @param it
-	 * @param session
-	 * @return
-	 */
-	public default IntelEntity lazyLoadEntity(IntelEntity it, Session session){
-		it.getIdAttributeAsText();
-		it.getEntityType();
-		it.getEntityType().getIcon();
-		if (it.getPrimaryAttachment() != null){
-			try {
-				it.getPrimaryAttachment().getCopyFromLocation();
-				it.getPrimaryAttachment().computeFileLocation(session);
-			} catch (Exception e) {
-//				Intelligence2PlugIn.log("Unable to compute attachment location", e); //$NON-NLS-1$
-				//TODO: log this
-				e.printStackTrace();
-			}
-		}
-		return it;
-	}
-	
+
 	/**
 	 * Parses the search string into a basic or advanced entity search, searching the 
 	 * given conservation area.

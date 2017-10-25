@@ -55,10 +55,8 @@ public enum SearchManager {
 	private static final DoubleMetaphone DOUBLE_METAPHONE = new DoubleMetaphone();
 	private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+"); //$NON-NLS-1$
 		
-	public List<IntelSearchResultItem> fuzzySearch(String searchFor, List<String> typeKeys, Collection<ConservationArea> conservationAreas, Session session){
+	public List<IntelSearchResultItem> fuzzySearch(String searchFor, List<String> typeKeys, Collection<ConservationArea> conservationAreas, int maxResults, Session session){
 		
-		Map<UUID, IntelSearchResultItem> results = new HashMap<>();
-
 		List<String> metas = new ArrayList<String>();
 		SPLIT_PATTERN.splitAsStream(searchFor).forEach(w -> {
 			String s = DOUBLE_METAPHONE.doubleMetaphone(w,false);
@@ -125,10 +123,12 @@ public enum SearchManager {
 			q.setParameter("m" + i, metas.get(i)); //$NON-NLS-1$
 		}
 		q.setParameter("ml", "%" + searchFor + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		q.setMaxResults(maxResults);
 		List<?> items = q.list();
 		
 		ParsedString searchString = new ParsedString(searchFor);
 		//search through each row and compute a rating value
+		Map<UUID, IntelSearchResultItem> results = new HashMap<>();
 		for (Object rr : items){
 			Object[] row = (Object[])rr;
 			String fullstring = (String)row[0];
@@ -147,17 +147,16 @@ public enum SearchManager {
 			
 			IntelSearchResultItem r = results.get(uuid);
 			if (r == null ){
-				results.put(uuid, new IntelSearchResultItem(uuid, fullstring, value));
+				results.put(uuid, new IntelSearchResultItem(uuid, value, fullstring));
 			}else{
 				if (value > r.getRating()){
-					r.setResult(uuid, fullstring, value);
+					results.put(uuid, new IntelSearchResultItem(uuid, value, fullstring));
 				}
 			}
 		}
 		
 		//sort
-		ArrayList<IntelSearchResultItem> sorted = new ArrayList<IntelSearchResultItem>(
-				results.values());
+		ArrayList<IntelSearchResultItem> sorted = new ArrayList<IntelSearchResultItem>(results.values());
 		sorted.sort((a, b) -> -1 * Double.compare(a.getRating(), b.getRating()));
 		return sorted;
 	}
