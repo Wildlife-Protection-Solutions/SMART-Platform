@@ -168,9 +168,10 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 			
 			//create the column headers from the csv file
 			Path file = ((ImportRecordCsvWizard)getWizard()).getImportConfiguration().getFile();
+			char delim = ((ImportRecordCsvWizard)getWizard()).getImportConfiguration().getDelimiter();
 			lastFile = file;
 			String[] headers = null;
-			try(CSVReader reader = new CSVReader(Files.newBufferedReader(file))){
+			try(CSVReader reader = new CSVReader(Files.newBufferedReader(file), delim)){
 				headers = reader.readNext();
 			}catch (Exception ex){
 				Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.AttributeMappingWizardPage1_FileReadError, file.toString(), ex.getMessage()), ex);

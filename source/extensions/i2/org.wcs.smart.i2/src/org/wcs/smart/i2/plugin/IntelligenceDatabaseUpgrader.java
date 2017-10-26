@@ -78,6 +78,9 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 	public static final void upgrade(String currentVersion, Session session){
 		if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_1)){
 			upgradeV1toV2(session);
+			upgradeV2toV3(session);
+		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_2)){
+			upgradeV2toV3(session);
 		}
 	}
 	
@@ -101,7 +104,9 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		for (String s : sql){
 			session.createNativeQuery(s).executeUpdate();
 		}
-		
+	}
+	
+	private static void upgradeV2toV3(Session session) {
 		//convert "INTEL_DATA_ENTRY" to "INTEL_RECORD_VIEW,INTEL_RECORD_EDIT,INTEL_RECORD_CREATE,INTEL_ENTITY_VIEW"
 		List<?> employees = session.createNativeQuery("select uuid, smartuserlevel from smart.employee where smartuserlevel is not null").list(); //$NON-NLS-1$
 		for (Object e : employees) {
@@ -138,8 +143,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			}
 		}
 		
-		
-		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_2, session);
+		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_3, session);
 	}
 	
 }

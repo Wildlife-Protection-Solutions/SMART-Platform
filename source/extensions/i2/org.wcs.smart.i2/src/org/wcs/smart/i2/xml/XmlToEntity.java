@@ -316,8 +316,12 @@ public class XmlToEntity {
 				IntelEntityRecord newRecord = new IntelEntityRecord();
 				newRecord.setEntity(newEntity);
 				newRecord.setRecord(record);
-				newEntity.getIntelligenceRecords().add(newRecord);
-				recordMapping.put(xmlRecord.getRecordKey(), record);
+				if (!newEntity.getIntelligenceRecords().contains(newRecord)){
+					//record mapping is done based on titles; titles may be dpulicated
+					//which may cause multiple mapping here 
+					newEntity.getIntelligenceRecords().add(newRecord);
+					recordMapping.put(xmlRecord.getRecordKey(), record);
+				}
 			}
 			
 			newEntity.setLocations(new ArrayList<>());
@@ -340,7 +344,9 @@ public class XmlToEntity {
 				IntelEntityLocation entityLocation = new IntelEntityLocation();
 				entityLocation.setEntity(newEntity);
 				entityLocation.setLocation(recordLocation);
-				newEntity.getLocations().add(entityLocation);
+				//we match based on id's but there is not requirement for unique ids so this may cause duplicates here;
+				//instead we do our best and try to match it
+				if (!newEntity.getLocations().contains(entityLocation))newEntity.getLocations().add(entityLocation);
 			}
 			newEntities.add(newEntity);
 		}

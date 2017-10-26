@@ -447,7 +447,7 @@ public class AttributeFieldEditor {
 	
 	public void initControl(IntelEntityRelationshipAttributeValue value){
 		if (attribute.getType() == AttributeType.TEXT){
-			txtValue.setText(txtMulti.getText());
+			txtMulti.setText(value.getStringValue());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			txtValue.setText(String.valueOf(value.getNumberValue()));
 		}else if (attribute.getType() ==  AttributeType.LIST){

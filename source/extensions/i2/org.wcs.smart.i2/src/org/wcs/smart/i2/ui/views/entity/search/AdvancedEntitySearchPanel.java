@@ -273,7 +273,9 @@ public class AdvancedEntitySearchPanel extends Composite {
 						if (ia.getType() == IntelAttribute.AttributeType.TEXT){
 							String[] queryParts = p.split(" "); //$NON-NLS-1$
 							Operator op = Operator.parse(queryParts[1]);
-							String value = SharedUtils.stripQuotes(queryParts[2]);
+							int startIndex = p.indexOf(queryParts[2], queryParts[0].length());
+							String strValue = p.substring(startIndex).trim();
+							String value = SharedUtils.stripQuotes(strValue);
 							((TextBoxDropItem)di).setInitialValue(op, value);
 						}else if (ia.getType() == IntelAttribute.AttributeType.NUMERIC){
 							String[] queryParts = p.split(" "); //$NON-NLS-1$

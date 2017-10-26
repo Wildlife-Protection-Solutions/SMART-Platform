@@ -31,6 +31,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -112,6 +113,7 @@ public class IntelEntityType extends NamedKeyItem {
 	 * @return icon
 	 */
 	@Column(name="icon")
+	@Lob
 	public byte[] getIcon() {
 		return this.icon;
 	}

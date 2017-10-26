@@ -48,7 +48,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	//Version of Data Structures required for current implementation
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_2; //the latest db version of tables
+	public static final String DB_VERSION_3 = "3.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_3; //the latest db version of tables
 	
 	
 	public static final String ICON_ATTRIBUTE_GROUP = "org.wcs.smart.i2.icon.attribute.group"; //$NON-NLS-1$

@@ -237,7 +237,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					String attributeKey = bits[2];
 					sb.append(" ( at_" + attributeKey + ".keyId = '" + attributeKey + "' AND LOWER(a_" + attributeKey + ".stringValue) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					
-					String value = SharedUtils.stripQuotes(qbits[2]).toLowerCase();
+					int startIndex = t.indexOf(qbits[2], qbits[0].length());
+					String strValue = t.substring(startIndex).trim();
+					String value = SharedUtils.stripQuotes(strValue).toLowerCase();
 					if (qbits[1].equalsIgnoreCase(Operator.STR_EQUALS.getKey())){
 						sb.append(" = "); //$NON-NLS-1$
 					}else if (qbits[1].equalsIgnoreCase(Operator.STR_CONTAINS.getKey())){

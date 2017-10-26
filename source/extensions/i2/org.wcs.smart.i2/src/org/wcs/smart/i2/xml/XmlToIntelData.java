@@ -218,14 +218,16 @@ public class XmlToIntelData {
 			if (e.getBirtTemplate() != null) {
 				Path src = rootPath.resolve(e.getBirtTemplate());
 				Path trg = IntelReportManager.INSTANCE.getEntityTemplate(e);
-				try {
-					if (!Files.exists(trg.getParent())) {
-						Files.createDirectories(trg.getParent());
+				if(Files.exists(src)) {
+					try {
+						if (!Files.exists(trg.getParent())) {
+							Files.createDirectories(trg.getParent());
+						}
+						Files.copy(src, trg, StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e1) {
+						copyErrors.add(MessageFormat.format(Messages.XmlToIntelData_EntityCopyError, e.getName()));
+						Intelligence2PlugIn.log(e1.getMessage(), e1);
 					}
-					Files.copy(src, trg, StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException e1) {
-					copyErrors.add(MessageFormat.format(Messages.XmlToIntelData_EntityCopyError, e.getName()));
-					Intelligence2PlugIn.log(e1.getMessage(), e1);
 				}
 			}
 		});

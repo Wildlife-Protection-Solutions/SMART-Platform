@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -433,6 +434,10 @@ public class ExportModelElementsDialog extends TitleAreaDialog{
 				sources.forEach(a->a.getName());
 				
 				cas = QueryFactory.buildQuery(s,  ConservationArea.class).list();
+				for (Iterator<ConservationArea> iterator = cas.iterator(); iterator.hasNext();) {
+					ConservationArea conservationArea = iterator.next();
+					if (conservationArea.getIsCcaa()) iterator.remove();
+				}
 				cas.remove(SmartDB.getCurrentConservationArea());
 				ConservationArea ccaa = null;
 				for (ConservationArea c : cas) {
