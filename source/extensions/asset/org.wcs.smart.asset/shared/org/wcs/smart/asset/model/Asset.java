@@ -33,8 +33,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Model class of asset. These represent the individual asset units (cameras, drones, etc.). 
@@ -49,7 +52,8 @@ public class Asset extends UuidItem {
 	
 	public enum Status{
 		ACTIVE,
-		INACTIVE
+		INACTIVE,
+		RETIRED;
 	}
 	
 	private String id;
@@ -169,7 +173,8 @@ public class Asset extends UuidItem {
 
 
 	/**
-	 * Get the status value
+	 * Get the status value;  will returned
+	 * cached value if applicable. 
 	 * 
 	 * @return status
 	 */
@@ -181,8 +186,36 @@ public class Asset extends UuidItem {
 		return this.status;
 	}
 	
+	/**
+	 * Get the status value; recomputing from database
+	 * 
+	 * @return status
+	 */
+	@Transient
+	public Status getStatus(boolean refresh) {
+		if (this.status == null || refresh) {
+			computeStatus();
+		}
+		return this.status;
+	}
+	
 	private void computeStatus() {
-		//TODO:
-		//identifies the asset is currently active (out in the field) or inactive (not being used).
+		if (getUuid() == null) {
+			status = Status.INACTIVE;
+			return;
+		}else if (getIsRetired()) {
+			status = Status.RETIRED;
+			return;
+		}
+		try(Session s = HibernateManager.openSession()){
+			Long activeDeployments = QueryFactory.buildCountQuery(s, AssetDeployment.class, 
+					new Object[] {"asset", this}, //$NON-NLS-1$
+					new Object[] {"endDate", null}); //$NON-NLS-1$
+			if (activeDeployments == 0) {
+				status = Status.INACTIVE;
+			}else {
+				status = Status.ACTIVE;
+			}
+		}
 	}
 }

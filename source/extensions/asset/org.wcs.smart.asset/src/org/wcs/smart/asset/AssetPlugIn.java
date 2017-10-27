@@ -3,6 +3,7 @@ package org.wcs.smart.asset;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -22,6 +23,10 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	
 	// The shared instance
 	private static AssetPlugIn plugin;
+	
+	public static final String ICON_STATUS_ACTIVE = "org.wcs.smart.asset.status.active";
+	public static final String ICON_STATUS_INACTIVE = "org.wcs.smart.asset.status.inactive";
+	public static final String ICON_STATUS_RETIRED = "org.wcs.smart.asset.status.retired";
 	
 	/**
 	 * The constructor
@@ -79,4 +84,13 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		});
 		
 	}	
+	
+	@Override
+	protected void initializeImageRegistry(ImageRegistry reg) {
+		super.initializeImageRegistry(reg);
+		
+		reg.put(ICON_STATUS_ACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_active.png")); //$NON-NLS-1$);
+		reg.put(ICON_STATUS_INACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_inactive.png")); //$NON-NLS-1$);
+		reg.put(ICON_STATUS_RETIRED, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_retired.png")); //$NON-NLS-1$);
+	}
 }

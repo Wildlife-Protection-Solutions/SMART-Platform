@@ -275,6 +275,7 @@ public class AssetTypeListDialog extends TitleAreaDialog {
 		type.setConservationArea(SmartDB.getCurrentConservationArea());
 		type.setAssetAttributes(new ArrayList<>());
 		type.setAssetDeploymentAttributes(new ArrayList<>());
+		type.setIncidentCutoff(60);
 		openDialog(type);
 		refresh();
 	}

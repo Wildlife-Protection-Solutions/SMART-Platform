@@ -66,7 +66,7 @@ public abstract class AbstractAssetAttributeValue {
 		this.stringValue = stringValue;
 	}
 	
-	@Column(name="double_value")
+	@Column(name="double_value1")
 	public Double getNumberValue(){
 		return this.doubleValue;
 	}

@@ -24,7 +24,7 @@ package org.wcs.smart.asset;
 public class AssetEvents {
 
 	/**
-	 * Payload for asset events can be a single asset or a collection of assets
+	 * Payload for asset events is a collection of assets
 	 */
 	public static final String ASSET_ALL = "ASSET/*"; //$NON-NLS-1$
 	public static final String ASSET_NEW = "ASSET/NEW"; //$NON-NLS-1$

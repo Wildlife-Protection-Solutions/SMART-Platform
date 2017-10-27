@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2017 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,6 +32,11 @@ import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetType;
 
+/**
+ * Label provider for assetType objects
+ * @author Emily
+ *
+ */
 public class AssetTypeLabelProvider extends LabelProvider{
 	
 	private HashMap<AssetType, Image> images = new HashMap<>();

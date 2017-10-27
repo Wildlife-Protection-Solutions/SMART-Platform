@@ -19,12 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.ui.config;
+package org.wcs.smart.asset.ui;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -60,15 +60,15 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.geotools.referencing.CRS;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.model.AbstractAssetAttributeValue;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
-import org.wcs.smart.asset.model.AssetAttributeValue;
-import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
-import org.wcs.smart.asset.model.AssetStationAttributeValue;
-import org.wcs.smart.asset.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.common.control.OnOffButton;
@@ -99,7 +99,6 @@ public class AttributeFieldEditor {
 	private Label lblProj;
 	private OnOffButton btnOnOff;
 	private ComboViewer cmbViewer;
-	private CheckBoxDropDown cmbMultiSelect;
 	private DateTime dtDateTime;
 	private Button btnChDateTime;
 	private Button btnChOnOff;
@@ -110,6 +109,7 @@ public class AttributeFieldEditor {
 	private CoordinateReferenceSystem crs = GeometryUtils.SMART_CRS;
 	private String crsLabel = null;
 	
+	private boolean fireListeners = true;
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
 	
 	/**
@@ -131,7 +131,6 @@ public class AttributeFieldEditor {
 	public AttributeFieldEditor(Composite parent, AssetAttribute attribute, String name) {
 		this.parent = parent;
 		this.attribute = attribute;
-		
 		if (name == null){
 			this.name = attribute.getName();
 		}else{
@@ -200,7 +199,7 @@ public class AttributeFieldEditor {
 					Double.parseDouble(txtValue.getText());
 				}
 			}catch(Exception ex){
-				msg = "Unable to parse number from text";
+				msg = "Invalid numeric value";
 			}
 		}
 		if (attribute.getType() == AttributeType.POSITION){
@@ -214,7 +213,7 @@ public class AttributeFieldEditor {
 					y = Double.parseDouble(txtValue2.getText());
 				}
 			}catch(Exception ex){
-				msg = "Unable to parse coordinate values from text";
+				msg ="Invalid numeric value for position location";
 			}
 			//try to reproject to database crs
 			if (x != null && y != null){
@@ -223,7 +222,7 @@ public class AttributeFieldEditor {
 					try{
 						ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 					}catch (Exception ex){
-						msg = "Unable to reproject position attribute to database projection";
+						msg = "Projection error - invalid position coordinates";
 					}
 				}
 			}
@@ -258,14 +257,32 @@ public class AttributeFieldEditor {
 	public AssetAttribute getAttribute(){
 		return this.attribute;
 	}
+	
+	/**
+	 * adds a listener for changes to the field
+	 * @param listener
+	 */
 	public void addSelectionListener(SelectionListener listener){
 		listeners.add(listener);
 	}
+	
+	/**
+	 * removes the change listener
+	 * @param listener
+	 */
 	public void removeSelectionListener(SelectionListener listener){
 		listeners.remove(listener);
 	}
 	
+	/**
+	 * enables or disabled change listeners
+	 * @param isEnabled
+	 */
+	public void enableChangeListeners(boolean isEnabled) {
+		fireListeners = isEnabled;
+	}
 	private void modified(){
+		if (!fireListeners) return;
 		for (SelectionListener l : listeners){
 			l.widgetSelected(null);
 		}
@@ -280,8 +297,14 @@ public class AttributeFieldEditor {
 		return txtMulti; 
 	}
 	
-	
-	public boolean updateValue(AssetAttributeValue value){
+	/**
+	 * returns true if the value is set; false if not set and should be removed
+	 * from attribute list.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public boolean updateValue(AbstractAssetAttributeValue value){
 		boolean add = false;
 		if (attribute.getType() == AttributeType.BOOLEAN){
 			if (((OnOffButton)btnOnOff).isEnabled()){
@@ -312,15 +335,6 @@ public class AttributeFieldEditor {
 				if (!dvalue.trim().isEmpty()){
 					Double d = Double.parseDouble(dvalue);
 					value.setNumberValue(d);
-					add = true;
-				}
-			}catch (Exception ex){
-			}
-			try{
-				String dvalue = ((Text)txtValue2).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue2(d);
 					add = true;
 				}
 			}catch (Exception ex){
@@ -345,192 +359,9 @@ public class AttributeFieldEditor {
 		}
 		return add;
 	}
-
 	
-	public void initControl(AssetStationAttributeValue value){
-		if (attribute.getType() == AttributeType.TEXT){
-			txtValue.setText(txtMulti.getText());
-		}else if (attribute.getType() == AttributeType.NUMERIC){
-			txtValue.setText(String.valueOf(value.getNumberValue()));
-		}else if (attribute.getType() ==  AttributeType.LIST){
-			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
-		}else if (attribute.getType() ==  AttributeType.DATE){
-			if(value.getDateValue() == null){
-				btnChDateTime.setSelection(false);
-				dtDateTime.setEnabled(false);
-			}else{
-				btnChDateTime.setSelection(true);
-				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
-				dtDateTime.setEnabled(true);
-			}
-		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
-			if (value.getNumberValue() == null){
-				btnChOnOff.setSelection(false);
-				btnOnOff.setEnabled(false);
-			}else{
-				btnChOnOff.setSelection(true);
-				btnOnOff.setSelection(value.getNumberValue() >= 0.5);
-				btnOnOff.setEnabled(true);
-			}
-		}else if (attribute.getType() == AttributeType.POSITION){
-			initPositionValues(value.getNumberValue(), value.getNumberValue2());
-		}
-	}
-	/**
-	 * returns true if the value is set; false if not set and should be removed
-	 * from attribute list.
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public boolean updateValue(AssetDeploymentAttributeValue value){
-		boolean add = false;
-		if (attribute.getType() == AttributeType.BOOLEAN){
-			if (((OnOffButton)btnOnOff).isEnabled()){
-				add = true;
-				if (((OnOffButton)btnOnOff).getSelection()){
-					value.setNumberValue(1d);
-				}else{
-					value.setNumberValue(0d);
-				}
-			}
-		}else if (attribute.getType() == AttributeType.DATE){
-			if (((DateTime)dtDateTime).getEnabled()){
-				add = true;
-				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
-			}
-		}else if (attribute.getType() == AttributeType.LIST){
-			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
-			if (!selection.isEmpty()){
-				Object item = selection.getFirstElement();
-				if (item instanceof AssetAttributeListItem){
-					add = true;
-					value.setAttributeListItem((AssetAttributeListItem) item);
-				}
-			}
-		}else if (attribute.getType() == AttributeType.NUMERIC){
-			try{
-				String dvalue = ((Text)txtValue).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue(d);
-					add = true;
-				}
-			}catch (Exception ex){
-				//
-			}
-		}else if (attribute.getType() == AttributeType.POSITION){
-			Double[] values = parsePositionValues();
-			if (values == null){
-				add = false;
-			}else{
-				value.setNumberValue(values[0]);
-				value.setNumberValue2(values[1]);
-				add = true;
-			}
-		}else if (attribute.getType() == AttributeType.TEXT){
-			String svalue = txtMulti.getText();
-			if (!svalue.trim().isEmpty()){
-				value.setStringValue(svalue.trim());
-				add = true;
-			}
-		}
-		return add;
-	}
 	
-	/**
-	 * returns true if the value is set; false if not set and should be removed
-	 * from attribute list.
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public boolean updateValue(AssetStationAttributeValue value){
-		boolean add = false;
-		if (attribute.getType() == AttributeType.BOOLEAN){
-			if (((OnOffButton)btnOnOff).isEnabled()){
-				add = true;
-				if (((OnOffButton)btnOnOff).getSelection()){
-					value.setNumberValue(1d);
-				}else{
-					value.setNumberValue(0d);
-				}
-			}
-		}else if (attribute.getType() == AttributeType.DATE){
-			if (((DateTime)dtDateTime).getEnabled()){
-				add = true;
-				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
-			}
-		}else if (attribute.getType() == AttributeType.LIST){
-			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
-			if (!selection.isEmpty()){
-				Object item = selection.getFirstElement();
-				if (item instanceof AssetAttributeListItem){
-					add = true;
-					value.setAttributeListItem((AssetAttributeListItem) item);
-				}
-			}
-		}else if (attribute.getType() == AttributeType.NUMERIC){
-			try{
-				String dvalue = ((Text)txtValue).getText();
-				if (!dvalue.trim().isEmpty()){
-					Double d = Double.parseDouble(dvalue);
-					value.setNumberValue(d);
-					add = true;
-				}
-			}catch (Exception ex){
-				//
-			}
-		}else if (attribute.getType() == AttributeType.POSITION){
-			Double[] values = parsePositionValues();
-			if (values == null){
-				add = false;
-			}else{
-				value.setNumberValue(values[0]);
-				value.setNumberValue2(values[1]);
-				add = true;
-			}
-		}else if (attribute.getType() == AttributeType.TEXT){
-			String svalue = txtMulti.getText();
-			if (!svalue.trim().isEmpty()){
-				value.setStringValue(svalue.trim());
-				add = true;
-			}
-		}
-		return add;
-	}
-	
-	public void initControl(AssetAttributeValue value){
-		if (attribute.getType() == AttributeType.TEXT){
-			txtMulti.setText(value.getStringValue());
-		}else if (attribute.getType() == AttributeType.NUMERIC){
-			txtValue.setText(String.valueOf(value.getNumberValue()));
-		}else if (attribute.getType() == AttributeType.POSITION){
-			initPositionValues(value.getNumberValue(), value.getNumberValue2());
-		}else if (attribute.getType() ==  AttributeType.LIST){
-			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
-		}else if (attribute.getType() ==  AttributeType.DATE){
-			if(value.getDateValue() == null){
-				btnChDateTime.setSelection(false);
-				dtDateTime.setEnabled(false);
-			}else{
-				btnChDateTime.setSelection(true);
-				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
-				dtDateTime.setEnabled(true);
-			}
-		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
-			if (value.getNumberValue() == null){
-				btnChOnOff.setSelection(false);
-				btnOnOff.setEnabled(false);
-			}else{
-				btnChOnOff.setSelection(true);
-				btnOnOff.setSelection(value.getNumberValue() >= 0.5);
-				btnOnOff.setEnabled(true);
-			}
-		}
-	}
-	
-	public void initControl(AssetDeploymentAttributeValue value){
+	public void initControl(AbstractAssetAttributeValue value){
 		if ( value.getAttribute() == null ) return;
 		if (attribute.getType() == AttributeType.TEXT){
 			txtMulti.setText(value.getStringValue());
@@ -540,6 +371,7 @@ public class AttributeFieldEditor {
 			initPositionValues(value.getNumberValue(), value.getNumberValue2());
 		}else if (attribute.getType() ==  AttributeType.LIST){
 			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
+
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			if(value.getDateValue() == null){
 				btnChDateTime.setSelection(false);
@@ -558,6 +390,26 @@ public class AttributeFieldEditor {
 				btnOnOff.setSelection(value.getNumberValue() >= 0.5);
 				btnOnOff.setEnabled(true);
 			}
+		}
+	}
+		
+	public void setEnabled(boolean enabled){
+		fireListeners = enabled;
+		if (attribute.getType() == AttributeType.TEXT){
+			txtMulti.setEnabled(enabled);
+		}else if (attribute.getType() == AttributeType.NUMERIC){
+			txtValue.setEnabled(enabled);
+		}else if (attribute.getType() == AttributeType.POSITION){
+			txtValue.setEnabled(enabled);
+			txtValue2.setEnabled(enabled);
+		}else if (attribute.getType() ==  AttributeType.LIST){
+			cmbViewer.getControl().setEnabled(enabled);
+		}else if (attribute.getType() ==  AttributeType.DATE){
+			btnChDateTime.setEnabled(enabled);
+			dtDateTime.setEnabled(enabled);
+		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
+			btnChOnOff.setEnabled(enabled);
+			btnOnOff.setEnabled(enabled);
 		}
 	}
 	
@@ -583,7 +435,7 @@ public class AttributeFieldEditor {
 				txtValue.setText(String.valueOf(viewCoordinate.x));
 				txtValue2.setText(String.valueOf(viewCoordinate.y));
 			} catch (Exception e) {
-				AssetPlugIn.displayLog("Unable to reproject position attribute to view projection.", e);
+				AssetPlugIn.displayLog("Error reprojecting positiong attribute", e);
 				txtValue.setText(String.valueOf(value1));
 				txtValue2.setText(String.valueOf(value2));
 			}
@@ -618,7 +470,7 @@ public class AttributeFieldEditor {
 				Coordinate c = ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 				return new Double[]{c.x, c.y};
 			}catch (Exception ex){
-				AssetPlugIn.displayLog("Unable to reproject position attribute to database projection", ex);
+				AssetPlugIn.displayLog("Error reprojecting position attribute", ex);
 				return new Double[]{x,y};
 			}
 		}
@@ -651,6 +503,7 @@ public class AttributeFieldEditor {
 				}
 			});
 		}else if (attribute.getType() ==  AttributeType.LIST){
+			
 			cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 			cmbViewer.setLabelProvider(new AttributeListItemLabelProvider());
@@ -667,8 +520,7 @@ public class AttributeFieldEditor {
 			cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
 			
-			cd = createDecoration(cmbViewer.getControl());
-
+			cd = createDecoration(cmbViewer.getControl());			
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			Composite t = new Composite(parent, SWT.NONE);
 			t.setLayout(new GridLayout(2, false));
@@ -705,12 +557,7 @@ public class AttributeFieldEditor {
 			btnChOnOff.setSelection(false);
 			
 			btnOnOff = new OnOffButton(t, SWT.TOGGLE);
-			btnOnOff.addSelectionListener(new SelectionAdapter(){
-				@Override
-				public void widgetSelected(SelectionEvent e){
-					modified();
-				}
-			});
+			btnOnOff.addModifyListener(evt->modified());
 			btnChOnOff.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e){
@@ -773,6 +620,8 @@ public class AttributeFieldEditor {
 				});
 			}
 
+			
+			
 			Hyperlink link = new Hyperlink(c, SWT.NONE);
 			link.setText("map...");
 			link.setUnderlined(true);
@@ -797,54 +646,30 @@ public class AttributeFieldEditor {
 	}
 	
 	private void selectOnMap(Shell parent){
-		//TODO:
-//		SelectPointMapDialog md = new SelectPointMapDialog(parent);
-//		Double[] position = parsePositionValues();
-//		if (position != null){
-//			md.setInitPoint(position[0], position[1]);
-//		}
-//		
-//		MapPart currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
-//		IAction lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
-//		try{
-//			if (md.open() == SelectPointMapDialog.OK){
-//				if (md.getPoint() != null){
-//					double x = md.getPoint().getX();
-//					double y = md.getPoint().getY();
-//					initPositionValues(x, y);
-//				}
-//			}
-//		}finally{
-//			ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
-//			lastToolAction.run();
-//		}
+		
+		SelectPointMapDialog md = new SelectPointMapDialog(parent);
+		Double[] position = parsePositionValues();
+		if (position != null){
+			md.setInitPoint(position[0], position[1]);
+		}
+		
+		MapPart currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
+		IAction lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
+		try{
+			if (md.open() == SelectPointMapDialog.OK){
+				if (md.getPoint() != null){
+					double x = md.getPoint().getX();
+					double y = md.getPoint().getY();
+					initPositionValues(x, y);
+				}
+			}
+		}finally{
+			ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
+			lastToolAction.run();
+		}
 	}
 	
-	private CheckBoxDropDown createMultiSelectWidget(Composite parent){
-		cmbMultiSelect = new CheckBoxDropDown(parent){
-			@Override
-			protected String getTextLabel(Collection<?> objects){
-				String value = super.getTextLabel(objects);
-				if (!objects.isEmpty()){
-					value = "(" + objects.size() + ") " + value; //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				return value;
-			}
-		};
-		cmbMultiSelect.setContentProvider(ArrayContentProvider.getInstance());
-		cmbMultiSelect.setLabelProvider(new AttributeListItemLabelProvider());
-		cmbMultiSelect.setInput(attribute.getAttributeList());
-		cmbMultiSelect.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				modified();
-			}
-		});
-		cmbMultiSelect.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		((GridData)cmbMultiSelect.getLayoutData()).widthHint = 100;
-		
-		return cmbMultiSelect;
-	}
+	
 	/*
 	 * Creates a control decoration for a wizard page field.
 	 */

@@ -73,6 +73,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -111,15 +112,8 @@ public class AssetTypeDialog extends TitleAreaDialog {
 	private TableViewer treeAttributes;
 	private TableViewer treeDeployAttributes;
 	
-//	private MenuItem editItem;
-//	private MenuItem deleteItem;
-//	private MenuItem addItem;
-//	
-//	private Button btnAdd;
-//	private Button btnDelete;
-//	private Button btnEdit;
-//	private Button btnMoveUp;
-//	private Button btnMoveDown;
+	private Text txtCutoffTime;
+	private ControlDecoration cutoffcd;
 		
 	private List<AbstractAssetTypeAttributeMapping> assetAttributeList = new ArrayList<>();
 	private List<AbstractAssetTypeAttributeMapping> assetDeploymentList = new ArrayList<>();
@@ -257,6 +251,8 @@ public class AssetTypeDialog extends TitleAreaDialog {
 		if (nameKeyInfo.validate()){
 			isError = true;
 		}
+		if (cutoffcd.isVisible()) isError = true;
+		
 		getButton(IDialogConstants.OK_ID).setEnabled(!isError);
 	}
 	
@@ -293,6 +289,36 @@ public class AssetTypeDialog extends TitleAreaDialog {
 			}
 		});
 	
+		l = new Label(parent, SWT.NONE);
+		l.setText("Incident Cutoff:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		l.setToolTipText("Used to group files into single incidents. All data imported within the time frame will be grouped into a single incident.");
+		
+		txtCutoffTime = new Text(parent, SWT.BORDER);
+		txtCutoffTime.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtCutoffTime.setText("60");
+		txtCutoffTime.addListener(SWT.Modify, e->{
+			try {
+				int value = Integer.parseInt(txtCutoffTime.getText());
+				if (value < 0) {
+					throw new Exception("cutoff time must be greater than 0 seconds");
+				}
+				type.setIncidentCutoff(value);
+				cutoffcd.hide();
+			}catch (Exception ex) {
+				cutoffcd.show();
+				cutoffcd.setDescriptionText(ex.getMessage());
+			}
+			
+			modified();
+		});
+		cutoffcd = createDecoration(txtCutoffTime);
+		cutoffcd.hide();
+		
+		l = new Label(parent, SWT.NONE);
+		l.setText("seconds");
+		
+		
 		l = new Label(parent, SWT.NONE);
 		l.setText("Asset Attributes:");
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
@@ -683,6 +709,7 @@ public class AssetTypeDialog extends TitleAreaDialog {
 						if (type.getIcon() != null){
 							icon.setImage(type.getIcon());
 						}
+						txtCutoffTime.setText(String.valueOf(type.getIncidentCutoff()));
 						assetAttributeList.addAll(type.getAssetAttributes());
 						treeAttributes.setInput(assetAttributeList);
 						

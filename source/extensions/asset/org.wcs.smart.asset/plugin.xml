@@ -78,6 +78,21 @@
             class="org.wcs.smart.asset.model.AssetExifMetadataMapping"
             supportsCcaa="false">
       </class>
+      <class
+            ca_property=".station.conservationArea"
+            class="org.wcs.smart.asset.model.AssetStationLocation"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".id.stationLocation.station.conservationArea"
+            class="org.wcs.smart.asset.model.AssetStationLocationAttributeValue"
+            supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".stationLocation.station.conservationArea"
+            class="org.wcs.smart.asset.model.AssetStationLocationHistoryRecord"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">
@@ -134,6 +149,41 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="org.wcs.smart.asset.toolbar">
+            <command
+                  commandId="org.eclipse.ui.file.save">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activePartId">
+                     <equals
+                           value="org.wcs.smart.asset.ui.views.asset">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file?before=org.eclipse.ui.file.export">
+         <command
+               commandId="org.eclipse.ui.file.save">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activePartId">
+                  <equals
+                        value="org.wcs.smart.asset.ui.views.asset">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -167,6 +217,42 @@
             advisor="org.wcs.smart.asset.DeleteIntelAttributeListItemAdvisor"
             class="org.wcs.smart.asset.model.AssetAttributeListItem">
       </DeleteAdvisor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.wcs.smart.observation.FieldDataPerspective">
+         <view
+               closeable="false"
+               id="org.wcs.smart.asset.views.asset"
+               minimized="false"
+               moveable="true"
+               ratio="0.6"
+               relationship="stack"
+               relative="org.wcs.smart.fielddata.datafolder"
+               showTitle="true"
+               standalone="true"
+               visible="true">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.wcs.smart.asset.ui.views.asset.AssetListView$AssetListViewWrapper"
+            id="org.wcs.smart.asset.views.asset"
+            name="Assets"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.asset.ui.views.asset.AssetEditor"
+            default="false"
+            id="org.wcs.smart.asset.ui.views.asset"
+            name="Asset Editor">
+      </editor>
    </extension>
 
 </plugin>

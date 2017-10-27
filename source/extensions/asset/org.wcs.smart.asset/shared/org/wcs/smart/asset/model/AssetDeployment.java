@@ -48,7 +48,7 @@ import org.wcs.smart.ca.UuidItem;
 public class AssetDeployment extends UuidItem {
 
 	private Asset asset;
-	private AssetStation station;
+	private AssetStationLocation location;
 
 	private Date startDate;
 	private Date endDate;
@@ -87,21 +87,21 @@ public class AssetDeployment extends UuidItem {
 	/**
 	 * Get the asset station
 	 * 
-	 * @return station
+	 * @return location
 	 */
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="station_uuid", referencedColumnName="uuid")
-	public AssetStation getStation() {
-		return this.station;
+	@JoinColumn(name="station_location_uuid", referencedColumnName="uuid")
+	public AssetStationLocation getStationLocation() {
+		return this.location;
 	}
 
 	/**
 	 * Set the asset station.
 	 * 
-	 * @param station
+	 * @param location
 	 */
-	public void setStation(AssetStation station) {
-		this.station = station;
+	public void setStationLocation(AssetStationLocation location) {
+		this.location = location;
 	}
 
 
