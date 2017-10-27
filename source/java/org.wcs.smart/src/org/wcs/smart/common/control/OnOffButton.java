@@ -60,7 +60,8 @@ public class OnOffButton extends Canvas{
 	private int hpadding = 12;
 	private int vpadding = 6;
 	
-    private final List<SelectionListener> selectionlisteners = new ArrayList<SelectionListener>();
+    private final List<SelectionListener> selectionlisteners = new ArrayList<>();
+    private final List<Listener> modifyListeners = new ArrayList<>();
     
 	public OnOffButton(Composite parent, int style) {
 		super(parent, style | SWT.DOUBLE_BUFFERED);
@@ -131,12 +132,26 @@ public class OnOffButton extends Canvas{
 		addListener(SWT.Traverse, listener);
 	}
 	
+	/**
+	 * These are fired before the state is updated and can
+	 * set the event.doit value to false to 
+	 * cancel the state updatine 
+	 * @param listener
+	 */
 	public void addSelectionListener(SelectionListener listener){
 		selectionlisteners.add(listener);
 	}
 	
 	public void reomveSelectionListener(SelectionListener listener){
 		selectionlisteners.remove(listener);
+	}
+	
+	/**
+	 * Fired after the state has been modified.
+	 * @param l
+	 */
+	public void addModifyListener(Listener l) {
+		modifyListeners.add(l);
 	}
 	
 	public void setEnabled(boolean enabled){
@@ -171,6 +186,17 @@ public class OnOffButton extends Canvas{
 		if (doit){
 			state = newState;
 			refresh();
+			
+			final Event event = new Event();
+			event.button = e.button;
+	        event.display = this.getDisplay();
+	        event.item = null;
+	        event.widget = this;
+	        event.data = null;
+	        event.time = e.time;
+	        event.x = e.x;
+	        event.y = e.y;
+	        modifyListeners.forEach(l->l.handleEvent(event));
 		}
 	}
 	private void refresh(){
