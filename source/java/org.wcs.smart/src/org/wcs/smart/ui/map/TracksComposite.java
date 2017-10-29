@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.ui.map;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -74,6 +76,8 @@ import org.wcs.smart.util.GeometryUtils;
  */
 public abstract class TracksComposite extends Composite implements MapPart {
 
+	private List<ITracksCompositeListener> changeListeners = new ArrayList<>();
+	
 	private TableViewer trackViewer;
 	private MapViewer mapViewer;
 	private MapToolComposite toolComp;
@@ -365,6 +369,16 @@ public abstract class TracksComposite extends Composite implements MapPart {
 
 	protected abstract void zoomTrack();
 
+	public void addChangeListener(ITracksCompositeListener listener){
+		changeListeners.add(listener);
+	}
+	
+	protected void fireChangeListeners() {
+		for (ITracksCompositeListener listener: changeListeners) {
+			listener.compositeModified();
+		}
+	}
+	
 	protected void clearMessage(){
 		infoImage.setImage(null);
 		infoLabel.setText(""); //$NON-NLS-1$
@@ -418,4 +432,7 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		return null;
 	}
 
+	public static interface ITracksCompositeListener {
+		public void compositeModified();
+	}
 }
