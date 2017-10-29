@@ -32,16 +32,16 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.map.TracksComposite.ITracksCompositeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -82,7 +82,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 				setMessage(Messages.MissionTrackEditDialog_Message);
 	
 				cmp = new MissionTracksComposite(comp, this);
-				cmp.addChangeListener(new ISurveyListener() {
+				cmp.addChangeListener(new ITracksCompositeListener() {
 					@Override
 					public void compositeModified() {
 						if (getButton(IDialogConstants.OK_ID) == null) return;

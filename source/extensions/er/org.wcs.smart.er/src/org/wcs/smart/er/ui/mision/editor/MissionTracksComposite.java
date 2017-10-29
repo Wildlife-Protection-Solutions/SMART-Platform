@@ -75,7 +75,6 @@ import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitServiceExtension;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
 import org.wcs.smart.er.ui.mision.udig.MissionDataSource;
 import org.wcs.smart.er.ui.mision.udig.MissionGeoResource;
@@ -106,7 +105,6 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class MissionTracksComposite extends TracksComposite {
 
-	private List<ISurveyListener> changeListeners = new ArrayList<ISurveyListener>();
 	private FilterFactory ff = CommonFactoryFinder.getFilterFactory();
 	
 	private MissionTrackEditDialog dialog;
@@ -144,11 +142,11 @@ public class MissionTracksComposite extends TracksComposite {
 		});
 		return tblInput;
 	}
+
 	
 	public void updateInput() {
 		getTrackViewer().setInput(buildTrackInput());
 	}
-
 
 	protected String getMapName() {
 		return Messages.TracksComposite_MapName;
@@ -178,16 +176,6 @@ public class MissionTracksComposite extends TracksComposite {
 				SelectCommand sc = new SelectCommand(l, ff.or(allFilters));
 				getMap().sendCommandASync(sc);
 			}
-		}
-	}
-	
-	public void addChangeListener(ISurveyListener listener){
-		changeListeners.add(listener);
-	}
-	
-	protected void fireChangeListeners() {
-		for (ISurveyListener listener: changeListeners) {
-			listener.compositeModified();
 		}
 	}
 	
