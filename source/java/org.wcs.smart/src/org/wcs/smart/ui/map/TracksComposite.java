@@ -64,6 +64,7 @@ import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.SetBasemapTool;
 import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.util.GeometryUtils;
@@ -120,7 +121,7 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		TabItem  tracksTabItem = new TabItem(tabFolder, SWT.NONE);
-		tracksTabItem.setText("Tracks");
+		tracksTabItem.setText(Messages.TracksComposite_Tracks);
 		
 		Composite tableCompOuter = new Composite(tabFolder, SWT.NONE);
 		gl = new GridLayout();
@@ -132,8 +133,8 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		ToolBar bar = new ToolBar(tableCompOuter, SWT.HORIZONTAL);
 		
 		ToolItem importItem = new ToolItem(bar, SWT.PUSH);
-		importItem.setText("import");
-		importItem.setToolTipText("import tracks");
+		importItem.setText(Messages.TracksComposite_Import);
+		importItem.setToolTipText(Messages.TracksComposite_Import_Tooltip);
 		importItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_TRACK_ICON));
 		importItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -143,8 +144,8 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		});
 		
 		editItem = new ToolItem(bar, SWT.PUSH);
-		editItem.setText("edit");
-		editItem.setToolTipText("edit track points");
+		editItem.setText(Messages.TracksComposite_Edit);
+		editItem.setToolTipText(Messages.TracksComposite_Edit_Tooltip);
 		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_TRACK_ICON));
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -155,8 +156,8 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		editItem.setEnabled(false);
 		
 		splitItem = new ToolItem(bar, SWT.RADIO);
-		splitItem.setText("split");
-		splitItem.setToolTipText("split track into multiple segments");
+		splitItem.setText(Messages.TracksComposite_Split);
+		splitItem.setToolTipText(Messages.TracksComposite_Split_Tooltip);
 		splitItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SPLIT_TRACK_ICON));
 		splitItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -167,8 +168,8 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		splitItem.setEnabled(false);
 		
 		mergeItem = new ToolItem(bar, SWT.PUSH);
-		mergeItem.setText("merge");
-		mergeItem.setToolTipText("merge selected tracks into single track");
+		mergeItem.setText(Messages.TracksComposite_Merge);
+		mergeItem.setToolTipText(Messages.TracksComposite_Merge_Tooltip);
 		mergeItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MERGE_TRACK_ICON));
 		mergeItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -179,8 +180,8 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		mergeItem.setEnabled(false);
 		
 		deleteItem = new ToolItem(bar, SWT.PUSH);
-		deleteItem.setText("delete");
-		deleteItem.setToolTipText("delete track");
+		deleteItem.setText(Messages.TracksComposite_Delete);
+		deleteItem.setToolTipText(Messages.TracksComposite_Delete_Tooltip);
 		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		deleteItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -211,7 +212,7 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		MenuManager mgr = new MenuManager();
 		Menu menu = mgr.createContextMenu(trackViewer.getTable());
 		trackViewer.getTable().setMenu(menu);
-		mgr.add(new Action("zoom to", 
+		mgr.add(new Action(Messages.TracksComposite_ZoomTo, 
 				SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ZOOM_TRACK_ICON)) {
 			@Override
 			public void run(){
@@ -219,21 +220,21 @@ public abstract class TracksComposite extends Composite implements MapPart {
 			}
 		});
 		mgr.add(new Separator());
-		mgr.add(new Action("edit", 
+		mgr.add(new Action(Messages.TracksComposite_Edit, 
 				SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.EDIT_TRACK_ICON)) {
 			@Override
 			public void run(){
 				editTrack();
 			}
 		});
-		mgr.add(new Action("merge", 
+		mgr.add(new Action(Messages.TracksComposite_Merge, 
 				SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.MERGE_TRACK_ICON)) {
 			@Override
 			public void run(){
 				mergeTrack();
 			}
 		}); 
-		mgr.add(new Action("delete", 
+		mgr.add(new Action(Messages.TracksComposite_Delete, 
 				SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DELETE_ICON)) {
 			@Override
 			public void run(){
@@ -244,7 +245,7 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		createTableViewerColumns(trackViewer, layout);
 		
 		TabItem  layerListTabItem = new TabItem(tabFolder, SWT.NONE);
-		layerListTabItem.setText("Map Layers");
+		layerListTabItem.setText(Messages.TracksComposite_MapLayers);
 		
 		Composite layersTab = new Composite(tabFolder, SWT.NONE);
 		gl = new GridLayout();
@@ -292,7 +293,7 @@ public abstract class TracksComposite extends Composite implements MapPart {
 	protected abstract void addLayers(MapViewer viewer);
 
 	protected String getMapName() {
-		return "Tracks";
+		return Messages.TracksComposite_MapName;
 	}
 
 	private void setupMap(Composite parent){
