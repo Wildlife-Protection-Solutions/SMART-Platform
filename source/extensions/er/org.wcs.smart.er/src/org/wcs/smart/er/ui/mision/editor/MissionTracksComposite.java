@@ -155,7 +155,9 @@ public class MissionTracksComposite extends TracksComposite {
 	}
 	
 	protected void updateMapSelection(){
-		 if (trackLayers == null) return;
+		super.updateMapSelection();
+
+		if (trackLayers == null) return;
 		//update map language
 		IStructuredSelection selection = (IStructuredSelection) getTrackViewer().getSelection();
 		
@@ -177,8 +179,6 @@ public class MissionTracksComposite extends TracksComposite {
 				getMap().sendCommandASync(sc);
 			}
 		}
-		
-		super.updateMapSelection();
 	}
 	
 	public void addChangeListener(ISurveyListener listener){
