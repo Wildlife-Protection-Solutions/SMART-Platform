@@ -222,7 +222,11 @@ public class SmartDB {
 				return DbUser.ADMIN;
 			}
 		}
+		//multiple users - give admin account permission
+		//see ticket #2256
+		if (user.getSmartUserLevels().size() != 1) return DbUser.ADMIN;
 		
+		//single user level - pick correct db user
 		if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.ADMIN)){
 			return DbUser.ADMIN;
 		}else if (UserLevelManager.INSTANCE.supportsUser(user, UserLevelManager.MANAGER)){
