@@ -192,7 +192,6 @@ public enum RecordImportEngine {
 				//record date
 				Integer primaryDateColumn = config.getMappedColumn(Column.PRIMARY_DATE);
 				if (primaryDateColumn != null && !data[primaryDateColumn].trim().isEmpty()){
-					record.setComment(data[primaryDateColumn].trim());
 					try{
 						record.setPrimaryDate( Date.from(LocalDate.parse(data[primaryDateColumn], dateFormatter).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
 					}catch (Exception ex){

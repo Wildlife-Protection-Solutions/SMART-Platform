@@ -38,7 +38,9 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -203,16 +205,19 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 		});
 		cmbFormat.setInput(Format.values());
 		cmbFormat.setSelection(new StructuredSelection(Format.CSV));
-
+		cmbFormat.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				fixOutputFileExtension();
+			}
+		});
+		
 		Label l = new Label(mainSection, SWT.RADIO);
 		l.setText(Messages.ExportEntityXmlDialog_FileLabel);
 
 		txtOutputFile = new Text(mainSection, SWT.BORDER);
 		txtOutputFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		String initDir = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_DIR_KEY);
-		if (initDir != null) {
-			txtOutputFile.setText(initDir);
-		}
+		
 		Button btnBrowse = new Button(mainSection, SWT.NONE);
 		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -228,8 +233,10 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 			}
 			dialog.setText(Messages.ExportEntityXmlDialog_FileDialogTitle);
 			String file = dialog.open();
-			if (file != null)
+			if (file != null){
 				txtOutputFile.setText(file);
+				fixOutputFileExtension();
+			}
 		});
 		
 		l = new Label(mainSection, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -273,12 +280,32 @@ public class ExportEntityToFileDialog extends TitleAreaDialog {
 			optionsComposite.layout();
 		});
 
+		/* initialize fields */
+		String initDir = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_DIR_KEY);
+		if (initDir != null) {
+			txtOutputFile.setText(initDir);
+		}
+		cmbFormat.setSelection(new StructuredSelection(Format.CSV));
+		
 		setTitle(Messages.ExportEntityXmlDialog_Title);
 		setMessage(MessageFormat.format(Messages.ExportEntityXmlDialog_Message, entityUuids.size()));
 		getShell().setText(Messages.ExportEntityXmlDialog_ShellTitle);
 		return parent;
 	}
 
+	private void fixOutputFileExtension(){
+		if (txtOutputFile.getText().isEmpty()) return;
+		String ext = getFormat().extension;
+		if (!txtOutputFile.getText().endsWith("." + ext)){ //$NON-NLS-1$
+			int lastIndex = txtOutputFile.getText().lastIndexOf("."); //$NON-NLS-1$
+			if (lastIndex <= 0){
+				txtOutputFile.setText(txtOutputFile.getText() + "." + ext); //$NON-NLS-1$
+			}else{
+				txtOutputFile.setText(txtOutputFile.getText().substring(0, lastIndex+1) + ext);
+			}
+		}
+	}
+	
 	@Override
 	public void createButtonsForButtonBar(Composite parent) {
 		super.createButtonsForButtonBar(parent);

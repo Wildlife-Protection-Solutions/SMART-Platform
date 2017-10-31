@@ -123,6 +123,7 @@ public class EntitySearchView {
 	public static final String ENTITY_SEARCH_RESULTS_KEY = "org.wcs.smart.i2.entity.search"; //$NON-NLS-1$
 	
 	public static final String ID = "org.wcs.smart.i2.view.entitysearch"; //$NON-NLS-1$
+	private static final String BASIC_ALLTYPES_OP = Messages.EntitySearchView_AllTypesOption;
 	
 	private static final int searchDelay = 500;
 	
@@ -493,13 +494,14 @@ public class EntitySearchView {
 		if (search.getSearchString() != null ){
 			txtSearch.setText(search.getSearchString());
 			List<Object> types = (List<Object>) cmbEntityType.getInput();
-			List<IntelEntityType> selections = new ArrayList<>();
+			List<Object> selections = new ArrayList<>();
 			if (search.getEntityTypes() != null){
 				for (Object t : types){
 					if (t instanceof IntelEntityType && search.getEntityTypes().contains(((IntelEntityType)t).getKeyId()))
 						selections.add((IntelEntityType)t);
 				}
 			}
+			if (selections.isEmpty()) selections.add(BASIC_ALLTYPES_OP);
 			cmbEntityType.setSelection(new StructuredSelection(selections));
 		}
 	}
@@ -703,7 +705,7 @@ public class EntitySearchView {
 					types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(session, SmartDB.getCurrentConservationArea()));
 				}
 				
-				types.add(0, Messages.EntitySearchView_AllTypesOption);
+				types.add(0, BASIC_ALLTYPES_OP);
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {

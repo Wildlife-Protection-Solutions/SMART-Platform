@@ -92,6 +92,7 @@ public class Messages extends NLS {
 	public static String AttributeMappingWizardPage_MappingLabel;
 	public static String AttributeMappingWizardPage_MappingMsg;
 	public static String AttributeMappingWizardPage_Message;
+	public static String AttributeMappingWizardPage_RecordDateMappingRequired;
 	public static String AttributeMappingWizardPage1_Message;
 	public static String AttributeMappingWizardPage1_RecordAttributes;
 	public static String AttributeMappingWizardPage1_SourceSpecificAttributes;

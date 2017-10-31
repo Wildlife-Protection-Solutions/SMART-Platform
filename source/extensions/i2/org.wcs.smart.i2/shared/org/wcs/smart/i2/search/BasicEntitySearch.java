@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.search;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -65,6 +66,9 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	
 	public static BasicEntitySearch parse(String queryString, Collection<ConservationArea> cas){
 		String[] bits = queryString.split(SEPARATOR);
+		if (queryString.endsWith(SEPARATOR)) {
+			bits = Arrays.copyOf(bits, bits.length+1);
+		}
 		if (!bits[0].equals(Type.BASIC.key)) return null; //not a basic search
 		
 		
@@ -74,10 +78,10 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 		String[] types = null;
 		if (bits.length == 4) {
 			searchString = bits[2];
-			types = bits[3].split(ENTITY_TYPE_SEP);
+			types = bits[3] == null ? null : bits[3].split(ENTITY_TYPE_SEP);
 		}else if (bits.length == 3) {
 			searchString = bits[1];
-			types = bits[2].split(ENTITY_TYPE_SEP);
+			types = bits[2] == null ? null : bits[2].split(ENTITY_TYPE_SEP);
 		}
 		
 		BasicEntitySearch search = new BasicEntitySearch(searchString, cas);

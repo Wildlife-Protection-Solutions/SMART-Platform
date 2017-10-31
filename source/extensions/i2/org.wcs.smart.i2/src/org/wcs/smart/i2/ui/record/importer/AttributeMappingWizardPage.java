@@ -90,16 +90,28 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 	public boolean isPageComplete() {
 		setErrorMessage(null);
 		if (mappings == null) return super.isPageComplete();
+		boolean hasTitle = false;
+		boolean hasDate = false;
 		for (ComboViewer c : mappings){
 			if (!c.getSelection().isEmpty()){
 				Object x = ((StructuredSelection)c.getSelection()).getFirstElement();
 				if (x.equals(RecordImportConfig.Column.TITLE)){
-					return super.isPageComplete();
+					hasTitle = true;
+				}else if (x.equals(RecordImportConfig.Column.PRIMARY_DATE)){
+					hasDate = true;
 				}
 			}
+			if (hasTitle && hasDate) break;
 		}
-		setErrorMessage(Messages.AttributeMappingWizardPage1_TitleMappingRequired);
-		return false;
+		if (!hasTitle){
+			setErrorMessage(Messages.AttributeMappingWizardPage1_TitleMappingRequired);
+			return false;
+		}
+		if (!hasDate){
+			setErrorMessage(Messages.AttributeMappingWizardPage_RecordDateMappingRequired); 
+			return false;
+		}
+		return super.isPageComplete();
 	}
 
 	@Override

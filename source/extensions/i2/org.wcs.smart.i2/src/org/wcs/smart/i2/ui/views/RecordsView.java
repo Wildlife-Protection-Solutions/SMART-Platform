@@ -285,7 +285,7 @@ public class RecordsView {
 	 				width += trailingImage.getBounds().width;
 	 				height = trailingImage.getBounds().height;
 	 			}
-	 			width += event.gc.stringExtent(txt).x + 1;
+	 			width += event.gc.stringExtent(txt).x + 15;
 	 			height = Math.max(height,  event.gc.stringExtent(txt).y);
 	 			event.width = width;
 	 			event.height = height;

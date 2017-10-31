@@ -239,17 +239,23 @@ public class AttributeFieldEditor {
 		}
 		
 		if (msg != null){
-			cd.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_ERROR));
-			cd.setDescriptionText(msg);
-			cd.show();
+			if (cd.getControl() != null || !cd.getControl().isDisposed()){
+				cd.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_ERROR));
+				cd.setDescriptionText(msg);
+				cd.show();
+			}
 			return false;
 		}else if (warnMessage != null){
-			cd.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
-			cd.setDescriptionText(warnMessage);
-			cd.show();
+			if (cd.getControl() != null || !cd.getControl().isDisposed()){
+				cd.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
+				cd.setDescriptionText(warnMessage);
+				cd.show();
+			}
 			return true;
 		}else{
-			cd.hide();
+			if (cd.getControl() != null || !cd.getControl().isDisposed()){
+				cd.hide();
+			}
 			return true;
 		}	
 	}
