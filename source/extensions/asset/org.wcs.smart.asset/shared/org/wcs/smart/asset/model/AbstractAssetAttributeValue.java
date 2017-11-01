@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.asset.model;
 
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.FetchType;
@@ -30,8 +32,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -133,4 +141,40 @@ public abstract class AbstractAssetAttributeValue {
 	 */
 	@Transient
 	public abstract AssetAttribute getAttribute();
+	
+	
+	@Transient
+	public String getAttributeValueAsString(Locale l, CoordinateReferenceSystem crs){
+		if(getAttribute() != null){
+			AttributeType type = getAttribute().getType();
+			switch(type){
+			case BOOLEAN:
+				if (getNumberValue() > 0.5){
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l);
+				}else{
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);
+				}
+			case DATE:
+				return DateFormat.getDateInstance().format(getDateValue());
+			case LIST:
+				return getAttributeListItem().getName();
+			case NUMERIC:
+				return String.valueOf(getNumberValue());
+			case TEXT:
+				return getStringValue();
+			case POSITION:
+				if (crs == null || crs == GeometryUtils.SMART_CRS || CRS.equalsIgnoreMetadata(crs, GeometryUtils.SMART_CRS)){
+					return "POINT( " + getNumberValue() +" " + getNumberValue2() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}else{
+					try{
+						Coordinate c = ReprojectUtils.reproject(getNumberValue(), getNumberValue2(), GeometryUtils.SMART_CRS, crs);
+						return "POINT( " + c.x + " " + c.y + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}catch (Exception ex){
+						return "ERROR: " + ex.getMessage(); //$NON-NLS-1$
+					}
+				}
+			}
+		}
+		return null;
+	}
 }

@@ -38,7 +38,7 @@ import javax.persistence.Table;
  * @author egouge
  */
 @Entity
-@Table(name="smrat.asset_station_attribute")
+@Table(name="smart.asset_station_attribute")
 public class AssetStationAttribute implements Serializable{
 	
 	/**

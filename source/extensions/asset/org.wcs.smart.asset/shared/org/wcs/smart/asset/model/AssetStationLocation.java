@@ -66,7 +66,7 @@ public class AssetStationLocation extends UuidItem {
 	 * @return conservation_area
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="asset_station_uuid", referencedColumnName="uuid")
+	@JoinColumn(name="station_uuid", referencedColumnName="uuid")
 	public AssetStation getStation() {
 		return this.station;
 	}

@@ -21,77 +21,70 @@
  */
 package org.wcs.smart.asset.ui;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
+import java.util.Date;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.util.SmartUtils;
 
 /**
- * A dialog to collect a comment
+ * A dialog to collect a comment and associated date time
  * @author Emily
  *
  */
-public class CommentDialog extends TitleAreaDialog {
+public class DateCommentDialog extends CommentDialog {
 
-	protected Text txtComment;
-	protected String comment;
+	protected DateTime dtDate;
+	protected DateTime dtTime;
 	
-	private String title;
-	private String message;
+	protected Date selectedDateTime;
 	
-	public CommentDialog(Shell parentShell, String title, String message) {
-		super(parentShell);
-		this.title = title;
-		this.message = message;
+	public DateCommentDialog(Shell parentShell, String title, String message) {
+		super(parentShell, title, message);
 	}
 
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+	public void setValues(Date dateTime, String comment) {
+		this.selectedDateTime = dateTime;
+		this.comment = comment;
 	}
 	
-	@Override
 	public void okPressed() {
-		this.comment = txtComment.getText();
+		this.selectedDateTime = SmartUtils.combineDateTime(SmartUtils.getDate(dtDate), SmartUtils.getTime(dtTime));
 		super.okPressed();
 	}
 	
-	public String getComment() {
-		return this.comment;
-	}
-	
-	protected Control createDialogArea(Composite parent) {
-		parent = (Composite)super.createDialogArea(parent);
-		createMessageContent(parent);
-		
-		
-		setTitle(title);
-		setMessage(message);
-		getShell().setText(title);
-		
-		return parent;
-	}
-	
-	protected void createMessageContent(Composite parent) {
-		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new GridLayout());
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)main.getLayout()).marginWidth = 0;
-		((GridLayout)main.getLayout()).marginHeight = 0;
-		
-		txtComment = new Text(main, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP );
-		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	public Date getSelectedDateTime() {
+		return this.selectedDateTime;
 	}
 	
 	@Override
-	public boolean isResizable() {
-		return true;
+	protected void createMessageContent(Composite parent) {
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout(3, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	
+		
+		Label l = new Label(main, SWT.NONE);
+		l.setText("Record Date:");
+	
+		dtDate = new DateTime(main, SWT.DATE | SWT.DROP_DOWN);
+		dtTime = new DateTime(main, SWT.TIME | SWT.DROP_DOWN);
+		if (selectedDateTime == null) selectedDateTime = new Date();
+		SmartUtils.initDateDateTimeWidget(dtDate, selectedDateTime);
+		SmartUtils.initDateDateTimeWidget(dtTime, selectedDateTime);
+		
+		l = new Label(main, SWT.NONE);
+		l.setText("Comment:");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		txtComment = new Text(main, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP | SWT.BORDER);
+		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		if (this.comment != null) txtComment.setText(this.comment);
 	}
 }

@@ -1,5 +1,6 @@
 package org.wcs.smart.asset.ui.views.asset;
 
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -9,20 +10,30 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
@@ -42,6 +53,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -59,15 +73,21 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.Asset.Status;
 import org.wcs.smart.asset.model.AssetAttributeValue;
+import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetHistoryRecord;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.model.AssetTypeAttribute;
+import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.ui.AttributeFieldEditor;
 import org.wcs.smart.asset.ui.CommentDialog;
+import org.wcs.smart.asset.ui.DateCommentDialog;
 import org.wcs.smart.asset.ui.IdFieldHeader;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -100,15 +120,18 @@ public class AssetEditor extends EditorPart {
 	private Label lblAssetType;
 	private List<AttributeFieldEditor> attributeEditors = null;
 	
-	private TableViewer tblHistory;
+	
+	private TableViewer tblEvents;
 	
 	private List<AssetHistoryRecord> activeHistoryRecords;
 	private List<AssetHistoryRecord> toDeleteHistoryRecords;
+
+	private AssetDeploymentPage deploymentPage;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		boolean isNew = asset.getUuid() == null;
-		try(Session s = HibernateManager.openSession()){
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			try {
 				s.beginTransaction();
 				s.saveOrUpdate(asset);
@@ -116,10 +139,30 @@ public class AssetEditor extends EditorPart {
 				if (activeHistoryRecords != null) activeHistoryRecords.forEach(r->s.saveOrUpdate(r));
 				if (toDeleteHistoryRecords != null) toDeleteHistoryRecords.forEach(r->s.delete(r));
 				
+				if (deploymentPage != null) {
+					deploymentPage.getModifiedDeployments().forEach(r->s.saveOrUpdate(r));
+				
+					for (AssetDeployment deploy : deploymentPage.getDeletedDeployments()) {
+						//delete deployment & all associated waypoints/observations
+						AssetDeployment d = s.get(AssetDeployment.class, deploy.getUuid());
+						for (AssetWaypoint aw : d.getAssetWaypoints()) {
+							s.delete(aw.getWaypoint());
+							s.delete(aw);
+						}
+						s.delete(d);
+					}
+				}
+				
 				s.getTransaction().commit();
 				
 				((AssetEditorInput)getEditorInput()).setAssetUuid(asset.getUuid());
 				setDirty(false);
+				
+				toDeleteHistoryRecords.clear();
+				if (deploymentPage != null) {
+					deploymentPage.getDeletedDeployments().clear();
+					deploymentPage.getModifiedDeployments().clear();
+				}
 			}catch (Exception ex) {
 				s.getTransaction().rollback();
 				AssetPlugIn.displayLog(
@@ -130,7 +173,10 @@ public class AssetEditor extends EditorPart {
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put(UIEvents.EventTags.ELEMENT, parentContext.get(MPart.class));
 		data.put(IEventBroker.DATA, Collections.singletonList(asset));
-		parentContext.get(IEventBroker.class).post(isNew? AssetEvents.ASSET_NEW : AssetEvents.ASSET_MODIFIED, data);		
+		parentContext.get(IEventBroker.class).post(isNew? AssetEvents.ASSET_NEW : AssetEvents.ASSET_MODIFIED, data);	
+		
+		refreshStatus();
+		if (deploymentPage != null) deploymentPage.refreshSummaryStatistics();
 	}
 
 	@Override
@@ -156,6 +202,7 @@ public class AssetEditor extends EditorPart {
 		
 		initializeAttributePanel(asset);
 	}
+	
 	private void initData() {
 		AssetEditorInput in = (AssetEditorInput) super.getEditorInput();
 		
@@ -206,7 +253,8 @@ public class AssetEditor extends EditorPart {
 			setTitleImage(img);
 			
 			initializeAttributePanel(asset);
-			initializeHistoryPanel(asset);
+			initializeEventsPanel(asset);
+			if (deploymentPage != null) deploymentPage.initializePanel(asset); 
 			
 		}catch (Exception ex) {
 			AssetPlugIn.displayLog(ex.getMessage(), ex);
@@ -276,6 +324,13 @@ public class AssetEditor extends EditorPart {
 		});
 	}
 	
+	/**
+	 * Gets the asset; may return null if asset not yet loaded
+	 * @return
+	 */
+	public Asset getAsset() {
+		return this.asset;
+	}
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
@@ -360,7 +415,7 @@ public class AssetEditor extends EditorPart {
 				sectionBody.layout(true);					
 			}
 		});
-		Hyperlink lnkEvents = toolkit.createHyperlink(headerSection, "Event Histoary", SWT.NONE);
+		Hyperlink lnkEvents = toolkit.createHyperlink(headerSection, "Event History", SWT.NONE);
 		lnkEvents.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -380,9 +435,24 @@ public class AssetEditor extends EditorPart {
 		initData();
 	}
 	
+	private Composite createDeploymentsSection(Composite parent) {
+		Composite panel = toolkit.createComposite(parent, SWT.NONE);
+		panel.setLayout(new GridLayout());
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
+		
+		deploymentPage = new AssetDeploymentPage(this);
+		ContextInjectionFactory.inject(deploymentPage, parentContext);
+		deploymentPage.createDeploymentsSection(panel,  toolkit);
+		
+		return panel;
+		
+	}
 	private Composite createCurrentSection(Composite parent) {
 		Composite panel = toolkit.createComposite(parent);
 		panel.setLayout(new GridLayout());
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.createLabel(panel, "CURRENT SECTION");
 		return panel;
 	}
@@ -392,33 +462,24 @@ public class AssetEditor extends EditorPart {
 	
 	private Composite createDetailsSection(Composite parent) {
 		
-		Composite panel = toolkit.createComposite(parent, SWT.BORDER);
+		Composite panel = toolkit.createComposite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout());
-		panel.setLayoutData(new GridLayout());
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
 		
-		ScrolledComposite attributes = new ScrolledComposite(panel,  SWT.V_SCROLL);
-		attributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		attributes.setExpandHorizontal(true);
-		attributes.setExpandVertical(true);
+		Composite toppanel = toolkit.createComposite(panel, SWT.BORDER);
+		toppanel.setLayout(new GridLayout(3, false));
+		toppanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.adapt(attributes);
-		Composite attributePanel = toolkit.createComposite(attributes);
-		attributes.setContent(attributePanel);
-		attributePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label l = toolkit.createLabel(toppanel, "State: ");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		attributePanel.setLayout(new GridLayout(2, false));
+		lblRetiredState = toolkit.createLabel(toppanel, "");
+		lblRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label l = toolkit.createLabel(attributePanel, "Is Retired?");
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		Composite retiredPanel = toolkit.createComposite(attributePanel);
-		retiredPanel.setLayout(new GridLayout(2, false));
-		retiredPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)retiredPanel.getLayout()).marginWidth = 0;
-		((GridLayout)retiredPanel.getLayout()).marginHeight = 0;
-		lblRetiredState = toolkit.createLabel(retiredPanel, "");
-		changeRetiredState = toolkit.createHyperlink(retiredPanel, "", SWT.NONE);
-		
+		changeRetiredState = toolkit.createHyperlink(toppanel, "", SWT.NONE);
+		changeRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		changeRetiredState.addHyperlinkListener(new HyperlinkAdapter() {			
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -447,6 +508,33 @@ public class AssetEditor extends EditorPart {
 				setDirty(true);
 			}
 		});
+		
+		Composite attributeComp = toolkit.createComposite(panel, SWT.BORDER);
+		attributeComp.setLayout(new GridLayout());
+		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		l = toolkit.createLabel(attributeComp, "Attributes");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		FontData fd = l.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		fd.setHeight(fd.getHeight() + 1);
+		Font boldFont = new Font(l.getDisplay(), fd);
+		l.setFont(boldFont);
+		l.addListener(SWT.Dispose,  e-> boldFont.dispose());
+		
+		ScrolledComposite attributes = new ScrolledComposite(attributeComp,  SWT.V_SCROLL);
+		attributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		attributes.setExpandHorizontal(true);
+		attributes.setExpandVertical(true);
+		
+		toolkit.adapt(attributes);
+		Composite attributePanel = toolkit.createComposite(attributes);
+		attributes.setContent(attributePanel);
+		attributePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		attributePanel.setLayout(new GridLayout(2, false));
+		
+		
 		
 		attributeEditors = new ArrayList<>();
 		for (AssetTypeAttribute attribute : asset.getAssetType().getAssetAttributes()) {
@@ -493,7 +581,7 @@ public class AssetEditor extends EditorPart {
 	
 	private void initializeAttributePanel(Asset asset) {
 		if (lblRetiredState != null) {
-			lblRetiredState.setText(asset.getIsRetired() ? "YES" : "NO");
+			lblRetiredState.setText(asset.getIsRetired() ? "Retired" : asset.getStatus().name()); //TODO: get status label
 		}
 		if (changeRetiredState != null) {
 			if (asset.getIsRetired()) {
@@ -521,26 +609,45 @@ public class AssetEditor extends EditorPart {
 		}
 	}
 	
-	private Composite createDeploymentsSection(Composite parent) {
-		Composite panel = toolkit.createComposite(parent);
-		panel.setLayout(new GridLayout());
-		toolkit.createLabel(panel, "DEPLOYMENTS SECTION");
-		return panel;
-	}
+	
+	
 	
 	
 	private Composite createHistorySection(Composite parent) {
-		Composite panel = toolkit.createComposite(parent, SWT.BORDER);
+		
+		Composite panel = toolkit.createComposite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout());
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
 		
-		tblHistory = new TableViewer(panel, SWT.BORDER | SWT.FULL_SELECTION);
-		tblHistory.setContentProvider(ArrayContentProvider.getInstance());
-		tblHistory.setInput(new String[] {DialogConstants.LOADING_TEXT});
-		tblHistory.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tblHistory.getTable().setHeaderVisible(true);
-		tblHistory.getTable().setLinesVisible(true);
+		ToolBar historyToolbar = new ToolBar(panel, SWT.FLAT | SWT.HORIZONTAL);
+		historyToolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
-		TableViewerColumn col = new TableViewerColumn(tblHistory, SWT.NONE);
+		ToolItem deleteItem = new ToolItem(historyToolbar,SWT.PUSH);
+		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		deleteItem.setToolTipText("delete selected history records");
+		deleteItem.addListener(SWT.Selection, e->deleteHistoryRecords());
+		deleteItem.setEnabled(false);
+		
+		ToolItem editItem = new ToolItem(historyToolbar,SWT.PUSH);
+		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		editItem.setToolTipText("edit selected history record");
+		editItem.addListener(SWT.Selection, e->editHistoryRecord());
+		editItem.setEnabled(false);
+
+		ToolItem addItem = new ToolItem(historyToolbar,SWT.PUSH);
+		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addItem.setToolTipText("create a new history record");
+		addItem.addListener(SWT.Selection, e->addHistoryRecord());
+		
+		tblEvents = new TableViewer(panel, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		tblEvents.setContentProvider(ArrayContentProvider.getInstance());
+		tblEvents.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		tblEvents.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblEvents.getTable().setHeaderVisible(true);
+		tblEvents.getTable().setLinesVisible(true);
+		
+		TableViewerColumn col = new TableViewerColumn(tblEvents, SWT.NONE);
 		col.getColumn().setText("Date");
 		col.getColumn().setWidth(150);
 		col.getColumn().setResizable(true);
@@ -551,7 +658,17 @@ public class AssetEditor extends EditorPart {
 				return super.getText(element);
 			}
 		});
-		TableViewerColumn col2 = new TableViewerColumn(tblHistory, SWT.NONE);
+		col.getColumn().addListener(SWT.Selection, e->{
+			if (col.getColumn().equals(tblEvents.getTable().getSortColumn())) {
+				int dir = tblEvents.getTable().getSortDirection();
+				tblEvents.getTable().setSortDirection(dir == SWT.UP ? SWT.DOWN : SWT.UP);
+			}else {
+				tblEvents.getTable().setSortColumn(col.getColumn());
+			}
+			tblEvents.refresh();
+		});
+		
+		TableViewerColumn col2 = new TableViewerColumn(tblEvents, SWT.NONE);
 		col2.getColumn().setText("Comment");
 		col2.getColumn().setWidth(150);
 		col2.getColumn().setResizable(true);
@@ -562,15 +679,45 @@ public class AssetEditor extends EditorPart {
 				return super.getText(element);
 			}
 		});
-		col2.getColumn().setWidth(tblHistory.getControl().getSize().x - col.getColumn().getWidth());
-		tblHistory.getControl().addListener(SWT.Resize, e->col2.getColumn().setWidth(tblHistory.getControl().getSize().x - col.getColumn().getWidth()));
+		col2.getColumn().setWidth(tblEvents.getControl().getSize().x - col.getColumn().getWidth());
+		col2.getColumn().addListener(SWT.Selection, e->{
+			if (col2.getColumn().equals(tblEvents.getTable().getSortColumn())) {
+				int dir = tblEvents.getTable().getSortDirection();
+				tblEvents.getTable().setSortDirection(dir == SWT.UP ? SWT.DOWN : SWT.UP);
+			}else {
+				tblEvents.getTable().setSortColumn(col2.getColumn());
+			}
+			tblEvents.refresh();
+		});
 		
-		Menu mnu = new Menu(tblHistory.getControl());
+		tblEvents.getControl().addListener(SWT.Resize, e->col2.getColumn().setWidth(tblEvents.getControl().getSize().x - col.getColumn().getWidth()));
+		
+		tblEvents.getTable().setSortDirection(SWT.DOWN);
+		tblEvents.getTable().setSortColumn(col.getColumn());
+		tblEvents.setComparator(new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				if (e1 instanceof AssetHistoryRecord && e2 instanceof AssetHistoryRecord) {
+					if (tblEvents.getTable().getSortColumn() == col.getColumn()) {
+						return (tblEvents.getTable().getSortDirection() == SWT.UP ? 1 : -1) * ((AssetHistoryRecord)e1).getDate().compareTo(((AssetHistoryRecord)e2).getDate());
+					}else if (tblEvents.getTable().getSortColumn() == col2.getColumn()){
+						return (tblEvents.getTable().getSortDirection() == SWT.UP ? 1 : -1) * Collator.getInstance().compare( ((AssetHistoryRecord)e1).getComment(), ((AssetHistoryRecord)e2).getComment());
+					}
+				}
+				return super.compare(viewer, e1, e2);
+			}
+		});
+		Menu mnu = new Menu(tblEvents.getControl());
 		
 		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
 		mnuAdd.setText("New ...");
 		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		mnuAdd.addListener(SWT.Selection, e->addHistoryRecord());
+		
+		MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
+		mnuEdit.setText("Edit ...");
+		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		mnuEdit.addListener(SWT.Selection, e->editHistoryRecord());
 		
 		MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
 		mnuDelete.setText("Delete ...");
@@ -580,50 +727,86 @@ public class AssetEditor extends EditorPart {
 		mnu.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {
-				mnuDelete.setEnabled(!tblHistory.getSelection().isEmpty());
+				mnuDelete.setEnabled(!tblEvents.getSelection().isEmpty());
+				mnuEdit.setEnabled(!tblEvents.getSelection().isEmpty());
 			}
 			
 			@Override
 			public void menuHidden(MenuEvent e) {}
 		});
-		tblHistory.getControl().setMenu(mnu);
+		tblEvents.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				deleteItem.setEnabled(!tblEvents.getSelection().isEmpty());
+				editItem.setEnabled(!tblEvents.getSelection().isEmpty());
+			}
+		});
+		tblEvents.getControl().setMenu(mnu);
 		
 		
-		initializeHistoryPanel(asset);
+		initializeEventsPanel(asset);
 		return panel;
 	}
+	
+	
 	private void addHistoryRecord() {
-		CommentDialog dialog = new CommentDialog(getSite().getShell(), "Asset History Record", "Enter comment for asset history record");
+		DateCommentDialog dialog = new DateCommentDialog(getSite().getShell(), "New Asset History Record",
+				"Enter the details for the new asset history record");
 		if (dialog.open() != CommentDialog.OK) return;
 		
 		AssetHistoryRecord record = new AssetHistoryRecord();
-		record.setDate(new Date());
+		record.setDate(dialog.getSelectedDateTime());
 		record.setAsset(asset);
 		record.setComment(dialog.getComment());
 		activeHistoryRecords.add(record);
 		setDirty(true);
-		tblHistory.refresh();	
+		tblEvents.refresh();	
+	}
+	
+	private void editHistoryRecord() {
+		Object x = ((IStructuredSelection)tblEvents.getSelection()).getFirstElement();
+		if (!(x instanceof AssetHistoryRecord)) return;
+		AssetHistoryRecord toEdit = (AssetHistoryRecord)x;
+		
+		DateCommentDialog dialog = new DateCommentDialog(getSite().getShell(), "New Asset History Record",
+				"Enter the details for the new asset history record");
+		dialog.setValues(toEdit.getDate(), toEdit.getComment());
+		
+		if (dialog.open() != CommentDialog.OK) return;
+		
+		toEdit.setDate(dialog.getSelectedDateTime());
+		toEdit.setComment(dialog.getComment());
+		
+		setDirty(true);
+		tblEvents.refresh();	
 	}
 	
 	private void deleteHistoryRecords() {
-		if (tblHistory == null) return;
-		boolean modified = false;
-		for (Iterator<?> iterator = ((IStructuredSelection)tblHistory.getSelection()).iterator(); iterator.hasNext();) {
+		if (tblEvents == null) return;
+		List<AssetHistoryRecord> toDelete = new ArrayList<>();
+		for (Iterator<?> iterator = ((IStructuredSelection)tblEvents.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
 			if (x instanceof AssetHistoryRecord) {
-				activeHistoryRecords.remove(x);
-				toDeleteHistoryRecords.add((AssetHistoryRecord) x);
-				modified = true;
+				toDelete.add((AssetHistoryRecord)x);			
 			}
 		}
-		if (modified) {
-			setDirty(true);
-			tblHistory.refresh();
+		if (toDelete.isEmpty()) return;
+		
+		if (!MessageDialog.openQuestion(getSite().getShell(), "Delete Records", 
+				MessageFormat.format("Are you sure you want to delete the {0} selected asset history records?", toDelete.size()))){
+			return;
 		}
 		
+		toDelete.forEach(x->{
+			activeHistoryRecords.remove(x);
+			toDeleteHistoryRecords.add((AssetHistoryRecord) x);
+		});
+		setDirty(true);
+		tblEvents.refresh();
 	}
-	private void initializeHistoryPanel(Asset asset) {
-		if (tblHistory == null) return;
+	
+	private void initializeEventsPanel(Asset asset) {
+		if (tblEvents == null) return;
 		Job j = new Job("load history records") {
 
 			@Override
@@ -633,7 +816,7 @@ public class AssetEditor extends EditorPart {
 							QueryFactory.buildQuery(s, AssetHistoryRecord.class, "asset", asset).list()); //$NON-NLS-1$
 				}
 				Display.getDefault().syncExec(()->{
-					tblHistory.setInput(activeHistoryRecords);
+					tblEvents.setInput(activeHistoryRecords);
 				});
 				return org.eclipse.core.runtime.Status.OK_STATUS;
 			}
@@ -641,7 +824,6 @@ public class AssetEditor extends EditorPart {
 		j.setSystem(true);
 		j.schedule();
 	}
-	
 	
 	
 	@Override

@@ -1,0 +1,443 @@
+package org.wcs.smart.asset.ui.views.asset;
+
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.asset.AssetEvents;
+import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
+import org.wcs.smart.asset.ui.AttributeFieldEditor;
+import org.wcs.smart.asset.ui.StationDialog;
+import org.wcs.smart.asset.ui.StationLocationDialog;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
+
+public class AssetDeploymentDialog extends TitleAreaDialog{
+
+	private static final String NEW_STATION = "<Create New Station...>";
+	private static final String NEW_LOCATION = "<Create New Station Location...>";
+	private static final String NO_OP = "";
+	
+	private AssetDeployment toUpdate;
+	
+	private ComboViewer cmbStation;
+	private ComboViewer cmbLocation;
+	private DateTime dtStartDate;
+	private DateTime dtEndDate;
+	private DateTime dtStartTime;
+	private DateTime dtEndTime;
+	
+	private Button chEndDate;
+	
+	@Inject
+	private IEclipseContext context;
+	private List<AssetDeployment> allDeployments;
+	private List<AttributeFieldEditor> attributeFields;
+	
+	public AssetDeploymentDialog(Shell parentShell, AssetDeployment toUpdate, List<AssetDeployment> allDeployments) {
+		super(parentShell);
+		this.toUpdate = toUpdate;
+		this.allDeployments = allDeployments;
+	}
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create OK and Cancel buttons by default
+		Button okBtn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		
+		okBtn.setEnabled(false);
+	}
+	
+	@Override
+	public void okPressed() {
+		Object location = ((IStructuredSelection)cmbLocation.getSelection()).getFirstElement();
+		toUpdate.setStationLocation((AssetStationLocation)location);
+		toUpdate.setStartDate(SmartUtils.combineDateTime(SmartUtils.getDate(dtStartDate), SmartUtils.getTime(dtStartTime)));
+		if (chEndDate.getSelection()) {
+			toUpdate.setEndDate(SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime)));
+		}else {
+			toUpdate.setEndDate(null);
+		}
+		
+		//TODO:
+		for (AttributeFieldEditor editor : attributeFields) {
+//			boolean add = editor.updateValue(value);
+			
+		}
+		super.okPressed();
+	}
+	
+	
+	private void validate() {
+		Button btnOk = getButton(IDialogConstants.OK_ID);
+		btnOk.setEnabled(false);
+		setErrorMessage(null);
+		
+		for (AttributeFieldEditor editor : attributeFields) {
+			if (!editor.isValid()) return;
+		}
+		
+		Object station = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
+		if (station == null || !(station instanceof AssetStation)) {
+			setErrorMessage("A valid station must be selected");
+			return;
+		}
+		
+		Object location = ((IStructuredSelection)cmbLocation.getSelection()).getFirstElement();
+		if (!cmbLocation.getControl().isEnabled() || location == null || !(location instanceof AssetStationLocation)) {
+			setErrorMessage("A valid location must be selected");
+			return;
+		}
+		
+		boolean found = false;
+		for (AssetStationLocation l : ((AssetStation)station).getLocations()) {
+			if (l.equals(location)) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			setErrorMessage("The selected location is not associated with the selected station.");
+			return;
+		}
+		
+		boolean overlaps = false;
+		long start = SmartUtils.combineDateTime(SmartUtils.getDate(dtStartDate), SmartUtils.getTime(dtStartTime)).getTime();
+		long end = (new Date()).getTime();
+		if (chEndDate.getSelection()) end = SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime)).getTime();
+		if (start > end ) {
+			setErrorMessage("Start date cannot be after the end date");
+			return;
+		}
+		long now = (new Date()).getTime();
+		for (AssetDeployment deploy : allDeployments) {
+			if (deploy.equals(toUpdate)) continue;
+				
+			long starttest = deploy.getStartDate().getTime();
+			long endtest = now;
+			if (deploy.getEndDate() != null) endtest = deploy.getEndDate().getTime();
+			
+			if (!(endtest < start || starttest > end)) {
+				overlaps = true;
+			}
+			if (!chEndDate.getSelection() && deploy.getEndDate() == null) {
+				overlaps = true;
+			}
+			if (overlaps) break;
+		
+		}
+		if (overlaps) {
+			setErrorMessage("These dates overlap with an existing deployment for this asset.");
+			return;
+		}
+		
+		btnOk.setEnabled(true);
+	}
+	
+	protected Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
+		
+		Composite form = new Composite(parent, SWT.NONE);
+		form.setLayout(new GridLayout(2, false));
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label l = new Label(form, SWT.NONE);
+		l.setText(AssetDeploymentTableColumn.FixedColumn.STATION.guiName + ":");
+		
+		cmbStation = new ComboViewer(form, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbStation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbStation.setContentProvider(ArrayContentProvider.getInstance());
+		cmbStation.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof AssetStation) return ((AssetStation)element).getId();
+				return super.getText(element);
+			}
+		});
+		cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		cmbStation.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
+				if (x instanceof AssetStation) {
+					updateLocationOptions((AssetStation)x, null);
+				}else if ( x == NEW_STATION) {
+					createNewStation();
+				}
+				validate();
+			}
+		});
+		l = new Label(form, SWT.NONE);
+		l.setText(AssetDeploymentTableColumn.FixedColumn.LOCATION.guiName + ":");
+		
+		cmbLocation = new ComboViewer(form, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbLocation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbLocation.setContentProvider(ArrayContentProvider.getInstance());
+		cmbLocation.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof AssetStationLocation) return ((AssetStationLocation)element).getId();
+				return super.getText(element);
+			}
+		});
+		cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		cmbLocation.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)cmbLocation.getSelection()).getFirstElement();
+				if ( x == NEW_LOCATION ) {
+					createNewStationLocation();
+				}
+				validate();
+			}
+		});
+		
+		l = new Label(form, SWT.NONE);
+		l.setText(AssetDeploymentTableColumn.FixedColumn.START_DATE.guiName + ":");
+		
+		Composite compstart = new Composite(form, SWT.NONE);
+		compstart.setLayout(new GridLayout(2, false));
+		((GridLayout)compstart.getLayout()).marginWidth = 0;
+		((GridLayout)compstart.getLayout()).marginHeight = 0;
+		
+		dtStartDate = new DateTime(compstart,  SWT.DATE | SWT.DROP_DOWN | SWT.MEDIUM);
+		dtStartTime = new DateTime(compstart, SWT.TIME | SWT.MEDIUM);
+		dtStartDate.addListener(SWT.Selection, e->validate());
+		dtStartTime.addListener(SWT.Selection, e->validate());
+		if (toUpdate.getStartDate() != null) {
+			SmartUtils.initDateDateTimeWidget(dtStartDate, toUpdate.getStartDate());
+			SmartUtils.initTimeDateTimeWidget(dtStartTime, toUpdate.getStartDate());
+		}
+		
+		l = new Label(form, SWT.NONE);
+		l.setText(AssetDeploymentTableColumn.FixedColumn.END_DATE.guiName + ":");
+		
+		Composite compEndDate = new Composite(form, SWT.NONE);
+		compEndDate.setLayout(new GridLayout(3, false));
+		((GridLayout)compEndDate.getLayout()).marginWidth = 0;
+		((GridLayout)compEndDate.getLayout()).marginHeight = 0;
+		
+		chEndDate = new Button(compEndDate, SWT.CHECK);
+		chEndDate.setSelection(false);
+		
+		dtEndDate = new DateTime(compEndDate,  SWT.DATE | SWT.DROP_DOWN | SWT.MEDIUM);
+		dtEndDate.setEnabled(false);
+		dtEndTime = new DateTime(compEndDate, SWT.TIME | SWT.MEDIUM);
+		dtEndTime.setEnabled(false);
+		
+		dtEndDate.addListener(SWT.Selection, e->validate());
+		dtEndTime.addListener(SWT.Selection, e->validate());
+		
+		chEndDate.addListener(SWT.Selection, e->{
+			dtEndDate.setEnabled(chEndDate.getSelection());
+			dtEndTime.setEnabled(chEndDate.getSelection());
+			validate();
+		});
+		
+		
+		if (toUpdate.getEndDate() != null) {
+			SmartUtils.initDateDateTimeWidget(dtEndDate, toUpdate.getEndDate());
+			SmartUtils.initTimeDateTimeWidget(dtEndTime, toUpdate.getEndDate());
+
+			dtEndDate.setEnabled(true);
+			dtEndTime.setEnabled(true);
+			chEndDate.setSelection(true);
+		}
+		
+
+		attributeFields = new ArrayList<>();
+		List<AssetTypeDeploymentAttribute> attributes;
+		try(Session session = HibernateManager.openSession()){
+			Asset asset = session.get(Asset.class,toUpdate.getAsset().getUuid());
+			attributes = QueryFactory.buildQuery(session, AssetTypeDeploymentAttribute.class, "id.assetType", asset.getAssetType()).list();
+			attributes.forEach(a->{
+				a.getAttribute().getName();
+				if (a.getAttribute().getAttributeList() != null) a.getAttribute().getAttributeList().forEach(li -> li.getName());
+			});
+		}
+		if (!attributes.isEmpty()) {
+			l = new Label(form, SWT.SEPARATOR | SWT.HORIZONTAL);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			
+			ScrolledComposite scroll = new ScrolledComposite(form, SWT.V_SCROLL);
+			scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+			
+			Composite attributeComp = new Composite(scroll, SWT.NONE);
+			attributeComp.setLayout(new GridLayout(2, false));
+			scroll.setContent(attributeComp);
+			scroll.setExpandHorizontal(true);
+			scroll.setExpandVertical(true);
+			
+			for (AssetTypeDeploymentAttribute attribute : attributes) {
+				AttributeFieldEditor editor = new AttributeFieldEditor(attributeComp, attribute.getAttribute());
+				//TODO: intivalid
+				if (editor.getTextAttributeControl() != null) editor.getTextAttributeControl().addListener(SWT.Resize, e->scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
+				attributeFields.add(editor);
+				editor.addSelectionListener(new SelectionListener() {
+					
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						validate();
+					}
+					
+					@Override
+					public void widgetDefaultSelected(SelectionEvent e) {}
+				});
+			}
+			
+			scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		}
+		
+		
+		
+		loadStations(toUpdate.getStationLocation() != null ? toUpdate.getStationLocation().getStation() : null, toUpdate.getStationLocation());
+		
+		setTitle("Asset Deployment Record");
+		setMessage("Configure asset deployment record properties");
+		getShell().setText("Asset Deployment Record");
+		
+		return parent;
+	}
+	
+	private void createNewStation() {
+		AssetStation station = new AssetStation();
+		station.setConservationArea(SmartDB.getCurrentConservationArea());
+		station.setLocations(new ArrayList<>());
+		
+		StationDialog dialog = new StationDialog(getShell(), station);
+		ContextInjectionFactory.inject(dialog, context);
+		dialog.open();
+		//if station has been saved, then lets reload the stations
+		if (station.getUuid() != null) {
+			loadStations(station, null);
+		}
+	}
+	
+	private void createNewStationLocation() {
+		Object x = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
+		if (!(x instanceof AssetStation)) return;
+		
+		AssetStation station = (AssetStation)x;
+		
+		AssetStationLocation location = new AssetStationLocation();
+		location.setStation(station);
+		
+		StationLocationDialog dialog = new StationLocationDialog(getShell(), location);
+		ContextInjectionFactory.inject(dialog, context);
+		dialog.open();
+		//if station has been saved, then lets reload the stations
+		if (location.getUuid() != null) {
+			loadStations(station, location);
+		}
+	}
+	
+	private void updateLocationOptions(AssetStation station, AssetStationLocation toSelect) {
+		List<Object> locationOptions = new ArrayList<>();
+		locationOptions.add(NO_OP);
+		locationOptions.add(NEW_LOCATION);
+		
+		if (station != null) {
+			locationOptions.addAll(station.getLocations());
+		}
+		cmbLocation.setInput(locationOptions);
+		
+		if (toSelect != null && locationOptions.contains(toSelect)) {
+			cmbLocation.setSelection(new StructuredSelection(toSelect));
+		}else {
+			cmbLocation.setSelection(new StructuredSelection(NO_OP));
+		}
+		cmbLocation.getControl().setEnabled(station != null);
+	}
+	
+	private void loadStations(AssetStation toSelect, AssetStationLocation locationToSelection) {
+		Job j = new Job("loading stations") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<Object> stations = new ArrayList<>();
+				stations.add(NO_OP);
+				stations.add(NEW_STATION);
+				try(Session session = HibernateManager.openSession()){
+					List<AssetStation> assetStations = (QueryFactory.buildQuery(session, AssetStation.class,
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				
+					for (AssetStation s : assetStations) {
+						if (s.getLocations() != null) {
+							s.getLocations().forEach( loc -> loc.getId() );
+						}
+					}
+					assetStations.sort((a,b)->Collator.getInstance().compare(a.getId(), b.getId()));
+					stations.addAll(assetStations);
+				}
+				Display.getDefault().syncExec(()->{
+					cmbStation.setInput(stations);
+					AssetStation item = null;
+					if (toSelect != null) {
+						for (Object x : stations) {
+							if (x.equals(toSelect)) {
+								item = (AssetStation) x;
+								break;
+							}
+						}
+						cmbStation.setSelection(new StructuredSelection(item));
+					}
+					updateLocationOptions(item, locationToSelection);
+				});
+				
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.setSystem(true);
+		j.schedule();
+	}
+
+	
+	@Override
+	public boolean isResizable() {
+		return true;
+	}
+}

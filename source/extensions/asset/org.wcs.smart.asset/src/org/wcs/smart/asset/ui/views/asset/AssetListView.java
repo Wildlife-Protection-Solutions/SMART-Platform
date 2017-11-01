@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,21 +38,31 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -59,6 +70,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -66,9 +80,13 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
+import org.wcs.smart.asset.AssetUtils;
+import org.wcs.smart.asset.StationManager;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.ui.AssetLabelProvider;
+import org.wcs.smart.asset.ui.StationDialog;
 import org.wcs.smart.asset.ui.handler.NewAssetHandler;
 import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -89,13 +107,14 @@ public class AssetListView {
 	private Composite stationComposite;
 	
 	private TreeViewer lstAssets;
-	private TreeViewer lstStations;
+	private TableViewer lstStations;
 	private FormToolkit toolkit;
 	
 	public AssetListView() {
 		super();
 	}
 	
+	private Composite toolbarHeaderComposite;
 	
 	@PostConstruct
 	public void createPartControl(final Composite parent) {
@@ -104,13 +123,20 @@ public class AssetListView {
 		Composite main = toolkit.createComposite(parent);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		//((GridLayout)main.getLayout()).marginWidth = 0;
+		//((GridLayout)main.getLayout()).marginHeight = 0;
 		
 		Composite header = toolkit.createComposite(main);
-		header.setLayout(new GridLayout(2, false));
+		header.setLayout(new GridLayout(3, false));
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
 		
-		Composite content = toolkit.createComposite(main, SWT.BORDER);
+				
+		Composite content = toolkit.createComposite(main, SWT.NONE);
 		content.setLayout(new StackLayout());
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		
 		Hyperlink hlAssets = toolkit.createHyperlink(header, "Assets", SWT.NONE);
 		hlAssets.addHyperlinkListener(new HyperlinkAdapter() {
@@ -122,8 +148,13 @@ public class AssetListView {
 				if (assetComposite == null) assetComposite = createAssetsPanel(content);
 				((StackLayout)content.getLayout()).topControl = assetComposite;
 				content.layout(true);
+				
+				for (Control c : toolbarHeaderComposite.getChildren()) c.dispose();
+				createAssetToolbar(toolbarHeaderComposite);
+				toolbarHeaderComposite.layout(true);
 			}
 		});
+		
 		Hyperlink hlStations = toolkit.createHyperlink(header, "Stations", SWT.NONE);
 		hlStations.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -134,20 +165,34 @@ public class AssetListView {
 				if (stationComposite == null) stationComposite = createStationsPanel(content);
 				((StackLayout)content.getLayout()).topControl = stationComposite;
 				content.layout(true);
+				
+				for (Control c : toolbarHeaderComposite.getChildren()) c.dispose();
+				createStationsToolbar(toolbarHeaderComposite);
+				toolbarHeaderComposite.layout(true);
 			}
 		});
+		
+		
+		toolbarHeaderComposite = toolkit.createComposite(header, SWT.NONE);
+		toolbarHeaderComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		toolbarHeaderComposite.setLayout(new GridLayout());
+		((GridLayout)toolbarHeaderComposite.getLayout()).marginWidth = 0;
+		((GridLayout)toolbarHeaderComposite.getLayout()).marginHeight = 0;
+		
 		
 		//create asset panel
 		if (assetComposite == null) assetComposite = createAssetsPanel(content);
 		((StackLayout)content.getLayout()).topControl = assetComposite;
 		content.layout(true);
+		createAssetToolbar(toolbarHeaderComposite);
 	}
 
 	private Composite createAssetsPanel(Composite parent) {
 		Composite assetPanel = toolkit.createComposite(parent);
 		assetPanel.setLayout(new GridLayout());
-		toolkit.createLabel(assetPanel, "ASSEt PANEL");
-
+		((GridLayout)assetPanel.getLayout()).marginWidth = 0;
+		((GridLayout)assetPanel.getLayout()).marginHeight = 0;
+		
 		lstAssets = new TreeViewer(assetPanel, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		toolkit.adapt(lstAssets.getControl(), true, true);
 		lstAssets.setLabelProvider(new AssetLabelProvider());
@@ -170,12 +215,97 @@ public class AssetListView {
 		loadAssets();
 		
 		return assetPanel;
-		
 	}
+	
+	private void createAssetToolbar(Composite parent) {
+		ToolBar toolbar =new ToolBar(parent, SWT.FLAT);
+		ToolItem addAsset = new ToolItem(toolbar, SWT.PUSH);
+		addAsset.setToolTipText("create a new asset");
+		addAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addAsset.addListener(SWT.Selection, e->createNewAsset(null));
+		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+	}
+	
+	
+	private void createStationsToolbar(Composite parent) {
+		ToolBar toolbar =new ToolBar(parent, SWT.FLAT);
+		
+		ToolItem deleteStation = new ToolItem(toolbar, SWT.PUSH);
+		deleteStation.setToolTipText("delete the selected station and all related data");
+		deleteStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		deleteStation.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//confirm password
+				Object s = ((IStructuredSelection)lstStations.getSelection()).getFirstElement();
+				if (!(s instanceof AssetStation)) return;
+				
+				if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Station", 
+						MessageFormat.format("Are you sure you want to delete the station {0}?  All data (images, waypoints, observations) will also be deleted", ((AssetStation)s).getId()))){
+					return;
+				}
+				
+				if (!AssetUtils.confirmPassword(context.get(Shell.class), "Delete Station", "Confirm your password to delete the station and associated data.")) {
+					return;
+				}
+
+				StationManager.INSTANCE.deleteStation((AssetStation)s, context.get(IEventBroker.class));
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) { }
+		});
+		
+		ToolItem addStation = new ToolItem(toolbar, SWT.PUSH);
+		addStation.setToolTipText("create a new station");
+		addStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		addStation.addListener(SWT.Selection, e->{
+			AssetStation newStation = new AssetStation();
+			newStation.setConservationArea(SmartDB.getCurrentConservationArea());
+			
+			StationDialog dialog = new StationDialog(context.get(Shell.class), newStation);
+			ContextInjectionFactory.inject(dialog, context);
+			dialog.open();
+		});
+		
+		lstStations.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				deleteStation.setEnabled(!lstStations.getSelection().isEmpty());
+			}
+		});
+		
+		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+	}
+	
+	
 	private Composite createStationsPanel(Composite parent) {
 		Composite stationsPanel = toolkit.createComposite(parent);
 		stationsPanel.setLayout(new GridLayout());
-		toolkit.createLabel(stationsPanel, "STATION PANEL");
+		((GridLayout)stationsPanel.getLayout()).marginWidth = 0;
+		((GridLayout)stationsPanel.getLayout()).marginHeight = 0;
+		
+		lstStations = new TableViewer(stationsPanel, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL );
+		toolkit.adapt(lstStations.getControl(), true, true);
+		lstStations.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof AssetStation) return ((AssetStation) element).getId();
+				return super.getText(element);
+			}
+		});
+		lstStations.setContentProvider(ArrayContentProvider.getInstance());
+		lstStations.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		lstStations.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstStations.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				//TODO:
+			}
+		});
+		
+		loadStations();
+		
 		return stationsPanel;
 	}
 	
@@ -247,13 +377,21 @@ public class AssetListView {
 					addAssetType.setText(menuItems.get(i).getName());
 					addAssetType.setData(menuItems.get(i).getUuid());
 					final UUID assetTypeUuid = menuItems.get(i).getUuid();
-					addAssetType.addListener(SWT.Selection, evt->(new NewAssetHandler()).execute(assetTypeUuid));
+					addAssetType.addListener(SWT.Selection, evt->createNewAsset(assetTypeUuid));
 				}
 			}
 			
 			@Override
 			public void menuHidden(MenuEvent e) {}
 		});
+	}
+	
+	/**
+	 * Creates new asset of specific type; can be null if type is not selected
+	 * @param assetTypeUuid asset type or null if unknown
+	 */
+	private void createNewAsset(UUID assetTypeUuid) {
+		(new NewAssetHandler()).execute(assetTypeUuid);
 	}
 	
 	@Optional
@@ -267,6 +405,12 @@ public class AssetListView {
 	@Inject
 	public void assetsModified(@UIEventTopic(AssetEvents.ASSET_ALL) Object payLoad) {
 		loadAssets(250);
+	}
+	
+	@Optional
+	@Inject
+	public void stationsModified(@UIEventTopic(AssetEvents.ASSETSTATION_ALL) Object payLoad) {
+		loadStations(250);
 	}
 	
 	@Focus
@@ -288,12 +432,23 @@ public class AssetListView {
 		loadAssets(0);
 	}
 	private void loadAssets(int delay) {
-		loadAssetType.cancel();
-		loadAssetType.setSystem(true);
-		loadAssetType.schedule(delay);
+		loadAssetsJob.cancel();
+		loadAssetsJob.setSystem(true);
+		loadAssetsJob.schedule(delay);
 	}
 
-	private Job loadAssetType = new Job("loading assets") {
+
+	private void loadStations() {
+		loadStations(0);
+	}
+	private void loadStations(int delay) {
+		loadStationsJob.cancel();
+		loadStationsJob.setSystem(true);
+		loadStationsJob.schedule(delay);
+	}
+
+	
+	private Job loadAssetsJob = new Job("loading assets") {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -317,6 +472,32 @@ public class AssetListView {
 		}
 		
 	};
+	
+	private Job loadStationsJob = new Job("loading stations") {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			List<AssetStation> stations = new ArrayList<>();
+			try(Session session = HibernateManager.openSession()){
+				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()} 
+//TODO: add this back with filter						new Object[] {"isRetired", false})
+						).list());	
+				stations.forEach(a->{a.getUuid().equals(null); a.getId();});
+			}
+			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
+			
+			Display.getDefault().syncExec(()->{
+				if (lstStations != null && !lstStations.getControl().isDisposed()){
+					lstStations.setInput(stations);
+//					lstStations.expandAll();
+				}
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
+	
 	private class AssetTypeContentProvider implements ITreeContentProvider{
 
 		private HashMap<AssetType, List<Asset>> mapping = new HashMap<>();

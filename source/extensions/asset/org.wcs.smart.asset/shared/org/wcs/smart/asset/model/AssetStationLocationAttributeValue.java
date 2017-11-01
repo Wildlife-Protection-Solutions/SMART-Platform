@@ -62,7 +62,7 @@ public class AssetStationLocationAttributeValue extends AbstractAssetAttributeVa
 	public AssetStationLocation getStationLocation(){
 		return id.getStationLocation();
 	}
-	public void setStation(AssetStationLocation location){
+	public void setStationLocation(AssetStationLocation location){
 		id.setStationLocation(location);
 	}
 	

@@ -147,6 +147,11 @@
                   label="Asset Types..."
                   style="push">
             </command>
+            <command
+                  commandId="org.wcs.smart.asset.command.stationproperties.show"
+                  label="Station Properties..."
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -195,6 +200,10 @@
             id="org.wcs.smart.asset.command.assettype.show"
             name="Asset Types">
       </command>
+      <command
+            id="org.wcs.smart.asset.command.stationproperties.show"
+            name="Station Properties">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -205,6 +214,10 @@
       <handler
             class="org.wcs.smart.asset.ui.handler.ShowAssetTypeDialogHandler$ShowAssetTypeDialogHandlerWrapper"
             commandId="org.wcs.smart.asset.command.assettype.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.asset.ui.handler.StationPropertyHandler$StationPropertyHandlerWrapper"
+            commandId="org.wcs.smart.asset.command.stationproperties.show">
       </handler>
    </extension>
    <extension

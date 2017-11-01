@@ -48,12 +48,15 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.asset_station")
 public class AssetStation extends UuidItem {
 
+	public static final int MAX_LENGTH = 128;
+			
 	private ConservationArea conservationArea;
 	private String id;
 	private Double x;
 	private Double y;
 
 	private List<AssetStationAttributeValue> attributes;
+	private List<AssetStationLocation> locations;
 
 	/**
 	 * Constructor.
@@ -163,4 +166,25 @@ public class AssetStation extends UuidItem {
 		this.attributes = attributes;
 	}
 
+
+	/**
+	 * Get the set of the locations associated with the station.
+	 * 
+	 * @return 
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="station", orphanRemoval=true, cascade= {CascadeType.ALL})
+	public List<AssetStationLocation> getLocations() {
+		return this.locations;
+	}
+
+
+	/**
+	 * Set the set of the locations associated with the station
+	 * 
+	 * @param locations
+	 */
+	public void setLocations(List<AssetStationLocation> locations) {
+		this.locations = locations;
+	}
+	
 }

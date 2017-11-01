@@ -157,7 +157,7 @@ public class NewAssetHandler {
 		protected Control createDialogArea(Composite parent) {
 			Composite c = (Composite) super.createDialogArea(parent);
 			
-			lstAssets = new TableViewer(c, SWT.READ_ONLY);
+			lstAssets = new TableViewer(c, SWT.READ_ONLY | SWT.BORDER);
 			lstAssets.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			lstAssets.setContentProvider(ArrayContentProvider.getInstance());
 			lstAssets.setLabelProvider(new AssetTypeLabelProvider());
@@ -217,6 +217,11 @@ public class NewAssetHandler {
 			}
 			
 		};
+		
+		@Override
+		public boolean isResizable() {
+			return true;
+		}
 
 	}
 }

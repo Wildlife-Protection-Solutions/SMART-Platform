@@ -1,0 +1,376 @@
+package org.wcs.smart.asset.ui;
+
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.Query;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.model.AssetStationAttribute;
+import org.wcs.smart.asset.ui.config.AttributeDialog;
+import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.common.control.WarningDialog;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.DialogConstants;
+
+/**
+ * Dialog for managing attributes collected for each station.
+ * 
+ * @author Emily
+ *
+ */
+public class StationPropertiesDialog extends TitleAreaDialog {
+
+	private TableViewer tblAttribute;
+	
+	private List<AssetStationAttribute> attributes;
+	private List<AssetStationAttribute> deletedAttributes;
+	
+	@Inject
+	private IEclipseContext context;
+	
+	public StationPropertiesDialog(Shell parentShell) {
+		super(parentShell);
+	}
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create OK and Cancel buttons by default
+		Button okBtn = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
+		
+		okBtn.setEnabled(false);
+	}
+	
+	@Override
+	public void okPressed() {
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				for (AssetStationAttribute toDelete : deletedAttributes) {
+					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute";
+					Query q = session.createQuery(deleteQuery);
+					q.setParameter("attribute", toDelete.getAttribute());
+					q.executeUpdate();
+				}
+				int index = 0;
+				for (AssetStationAttribute toUpdate : attributes) {
+					toUpdate.setOrder(index++);
+					session.saveOrUpdate(toUpdate);
+				}
+				session.getTransaction().commit();
+			}catch(Exception ex) {
+				AssetPlugIn.displayLog("Unable to save changes to asset station attributes: " + ex.getMessage(), ex);
+				return;
+			}
+		}
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+	}
+	
+	private void modified() {
+		Button btnOk = getButton(IDialogConstants.OK_ID);
+		btnOk.setEnabled(true);
+	}
+	
+	protected Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
+		
+		Composite core = new Composite(parent, SWT.NONE);
+		core.setLayout(new GridLayout(2, false));
+		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Label l = new Label(core, SWT.NONE);
+		l.setText("Attributes:");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		
+		tblAttribute = new TableViewer(core, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
+		tblAttribute.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblAttribute.setContentProvider(ArrayContentProvider.getInstance());
+		tblAttribute.setLabelProvider(new AttributeLabelProvider());
+		tblAttribute.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		
+		Composite buttonPanel = new Composite(core, SWT.NONE);
+		buttonPanel.setLayout(new GridLayout());
+		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
+		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
+		
+		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
+		btnAdd.setText((DialogConstants.ADD_BUTTON_TEXT));
+		btnAdd.addListener(SWT.Selection, a->addAttribute());
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
+		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		btnEdit.addListener(SWT.Selection, a->editAttribute());
+		btnEdit.setEnabled(false);
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.addListener(SWT.Selection, a->removeAttributes());
+		btnDelete.setEnabled(false);
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		l = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Button btnMoveUp = new Button(buttonPanel, SWT.PUSH);
+		btnMoveUp.setText("Move Up");
+		btnMoveUp.addListener(SWT.Selection, a->moveAttribute(SWT.DOWN));
+		btnMoveUp.setEnabled(false);
+		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Button btnMoveDown = new Button(buttonPanel, SWT.PUSH);
+		btnMoveDown.setText("Move Down");
+		btnMoveDown.addListener(SWT.Selection, a->moveAttribute(SWT.UP));
+		btnMoveDown.setEnabled(false);
+		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Menu mnu = new Menu(tblAttribute.getControl());
+		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
+		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		mnuAdd.addListener(SWT.Selection, e->addAttribute());
+		
+		MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
+		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		mnuEdit.addListener(SWT.Selection, e->editAttribute());
+		
+		MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
+		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		mnuDelete.addListener(SWT.Selection, e->removeAttributes());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem mnuUp = new MenuItem(mnu, SWT.PUSH);
+		mnuUp.setText("Move Up");
+		mnuUp.addListener(SWT.Selection, e->moveAttribute(SWT.DOWN));
+		
+		MenuItem mnuDown = new MenuItem(mnu, SWT.PUSH);
+		mnuDown.setText("Move Down");
+		mnuDown.addListener(SWT.Selection, e->moveAttribute(SWT.UP));
+		
+		mnu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				boolean hasSelection = !((IStructuredSelection)tblAttribute.getSelection()).isEmpty();
+				mnuEdit.setEnabled(hasSelection);
+				mnuDelete.setEnabled(hasSelection);
+				mnuUp.setEnabled(hasSelection);
+				mnuDown.setEnabled(hasSelection);
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {}
+		});
+		tblAttribute.getControl().setMenu(mnu);
+		
+		tblAttribute.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				boolean hasSelection = !((IStructuredSelection)tblAttribute.getSelection()).isEmpty();
+				btnEdit.setEnabled(hasSelection);
+				btnDelete.setEnabled(hasSelection);
+				btnMoveUp.setEnabled(hasSelection);
+				btnMoveDown.setEnabled(hasSelection);
+				
+			}
+		});
+		
+		initTable();
+		
+		setTitle("Station Attributes");
+		setMessage("Configure attributes to collect about each station");
+		getShell().setText("Station Attributes");
+		
+		return parent;
+	}
+	
+	private void initTable() {
+		deletedAttributes = new ArrayList<>();
+		Job j = new Job("loading station properties") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				List<AssetStationAttribute> items = new ArrayList<>();
+				try(Session session = HibernateManager.openSession()){
+					String hsql = "FROM AssetStationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
+					Query q = session.createQuery(hsql);
+					q.setParameter("ca",  SmartDB.getCurrentConservationArea());
+					items.addAll(q.getResultList());
+					items.forEach(a->{
+						a.getAttribute().getName();
+					});
+				}
+				Display.getDefault().syncExec(()->{
+					attributes = items;
+					tblAttribute.setInput(attributes);
+				});
+				
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.setSystem(true);
+		j.schedule();
+	}
+	
+	@Override
+	public boolean isResizable() {
+		return true;
+	}
+	
+	private void moveAttribute(int direction){
+		for (Iterator<?> iterator = ((IStructuredSelection) tblAttribute.getSelection()).iterator(); iterator.hasNext();) {
+			Object toMove = iterator.next();
+			if (toMove instanceof AssetStationAttribute){			
+				int index = attributes.indexOf(toMove);
+				if (direction == SWT.UP){
+					index ++;
+					if(index >= attributes.size()){
+						index = attributes.size() - 1;
+					}
+				}else if (direction == SWT.DOWN){
+					index --;
+					if(index < 0) index = 0;
+				}
+				attributes.remove(toMove);
+				attributes.add(index, (AssetStationAttribute)toMove);
+			}
+		}
+		modified();
+		tblAttribute.refresh();
+	}
+	
+	private void addAttribute( ){
+		SelectAttributeDialog dialog = new SelectAttributeDialog(getShell(), "Add attributes for stations");
+		ContextInjectionFactory.inject(dialog, context);
+		if (dialog.open() == Window.OK){
+			for (AssetAttribute ia : dialog.getSelectedAttributes()){
+				AssetStationAttribute a  = new AssetStationAttribute();
+				a.setAttribute(ia);
+				if (!attributes.contains(a)) attributes.add(a);//TODO: fix this
+			}
+			
+			tblAttribute.refresh();
+			modified();
+		}
+	}
+	
+	private void editAttribute( ){
+		Object x = ((IStructuredSelection)tblAttribute.getSelection()).getFirstElement();
+		if (x instanceof AssetStationAttribute){
+			AssetStationAttribute attribute = (AssetStationAttribute)x;
+			AttributeDialog.showAttributeDialog(getShell(), attribute.getAttribute(), context); 
+			//refresh
+			tblAttribute.refresh();
+			modified();
+		}
+	}
+
+	
+	private void removeAttributes(  ){
+		IStructuredSelection items = (IStructuredSelection)tblAttribute.getSelection();
+		final List<AssetStationAttribute> toDelete = new ArrayList<>();
+		
+		for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();
+			if (x instanceof AssetStationAttribute){
+				toDelete.add((AssetStationAttribute)x);
+			}
+		}
+		
+		final List<String> warnings = new ArrayList<String>();
+		final List<AssetStationAttribute> aToDelete = new ArrayList<>();
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true, false, new IRunnableWithProgress(){
+	
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					try(Session session = HibernateManager.openSession()){
+
+						for (AssetStationAttribute x : toDelete){
+							try{
+								//TODO:
+								DeleteManager.canDelete(x, session);
+								aToDelete.add(x);
+							}catch (Exception ex){
+								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", x.getAttribute().getName(), ex.getMessage()));
+							}
+						}
+					}
+				}
+				
+			});
+		}catch (Exception ex){
+			AssetPlugIn.log(ex.getMessage(), ex);
+			warnings.add(ex.getMessage());
+		}
+		if(!warnings.isEmpty()){
+			WarningDialog wd = new WarningDialog(getShell(), "Warnings", "Cannot remove selected attributes.", warnings);
+			wd.open();
+		}
+		
+		if (aToDelete.size() > 0 ){
+			StringBuilder sb = new StringBuilder();
+			for (AssetStationAttribute d: aToDelete){
+				sb.append(d.getAttribute().getName());
+				sb.append(", "); //$NON-NLS-1$
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.deleteCharAt(sb.length() - 1);
+			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? All station attribute values will also be removed.", sb.toString()))){
+				attributes.removeAll(aToDelete);
+				deletedAttributes.removeAll(aToDelete);
+			}
+		}
+		
+		tblAttribute.refresh();
+		modified();
+	}
+	
+}
