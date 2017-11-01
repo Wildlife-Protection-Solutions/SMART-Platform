@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.SmartRole;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -198,7 +199,7 @@ public enum SecurityManager {
 	}
 
 	//is the user is CaAdmin of any CA?
-	public boolean isCaAdmin(Session s, String username, String key) {
+	public boolean isCaAdmin(Session s, String username) {
 		if (!isActive(s, username)) return false;		
 		Long count = QueryFactory.buildCountQuery(s, SmartUserAction.class, 
 				new Object[] {"action", CaAdminAccountAction.KEY}, //$NON-NLS-1$
@@ -207,5 +208,18 @@ public enum SecurityManager {
 			return true;
 		}
 		return false;
+	}
+	
+	//is the user is CaAdmin of any CA?
+	public ArrayList<UUID> listOfUuidsIsCaAdminOf(Session s, String username) {
+		if (!isActive(s, username)) return null;
+		ArrayList<UUID> uuids = new ArrayList<UUID>();
+		Object[] one = new Object[]{"action",CaAdminAccountAction.KEY};
+		Object[] two = new Object[]{"username", username};
+		List<SmartUserAction> actions = QueryFactory.buildQuery(s, SmartUserAction.class, one, two ).list();  //$NON-NLS-1$
+		for(SmartUserAction a : actions){
+			uuids.add(a.getResource());
+		}
+		return uuids;
 	}
 }
