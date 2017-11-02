@@ -99,6 +99,7 @@ public class QaRoutineParameter extends UuidItem{
 	 * @return value
 	 */
 	@Column(name="byte_value")
+	@Lob
 	public byte[] getByteValue() {
 		return this.byteValue;
 	}
