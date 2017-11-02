@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html style="height: 100%;">
 <head>
 
 <%@include file="includes.jsp" %>
@@ -98,16 +98,11 @@
 <%@include file="header.jsp" %>
 <%@include file="menu.jsp" %>
 
-<div id= "main">
+<div id="main">
   <div>
     <div id="message" class="msgsection"></div>
   </div>
-  <article id="tabs" class="tabs">
-	<section id="tab1" class="">
 		<div id="map"></div>
-		<div id="spacer"></div>
-		
-	</section>
 	
 	
 	<div id="filter-controls">
@@ -178,19 +173,25 @@
 			</p> 
 		</form>
 
-	</div>
-  </article>
- 	<div id="buttons">
- 		<a href='javascript:refreshAlerts()'><div class="button mapbutton" style="float:left"><fmt:message key="alert.refresh" /></div></a>
- 		<a href='javascript:buttonCreateAlert()'><div class="button mapbutton" style="float:left"><fmt:message key="alert.createalert" /></div></a>
- 		<a href='javascript:buttonManageAlerts()'><div class="button mapbutton" style="float:left"><fmt:message key="alert.managealerts" /></div></a>
- 		
- 	</div>
- 	<div id="map-info-box" class="link_small">
-		<fmt:message key="alert.lastupdated"/>
-	</div>
-	<div id="tab3text" class="link_small" style="float:right">0</div>
-	<div class="link_small" style="float:right"><fmt:message key="alert.alertsshown" /></div>
+	 </div>
+	
+	<div style="display:flex; flex-flow:row nowrap">
+	  <div id="buttons" style="justify-content: flex-start;display:flex; flex-flow: row nowrap; padding:5px;">
+ 		<div><a style="text-decoration:none" href='javascript:refreshAlerts()'><div class="button mapbutton"><fmt:message key="alert.refresh" /></div></a></div> 
+ 		<div><a style="text-decoration:none" href='javascript:buttonCreateAlert()'><div class="button mapbutton"><fmt:message key="alert.createalert" /></div></a> </div>
+ 		<div><a style="text-decoration:none"  href='javascript:buttonManageAlerts()'><div class="button mapbutton"><fmt:message key="alert.managealerts" /></div></a></div> 
+ 	 </div>
+ 	  
+ 	  <div style="justify-content: flex-end;display:flex;flex-flow: column nowrap; flex-grow:100">
+	 	<div>
+	 		<div id="map-info-box" class="link_small">
+			<fmt:message key="alert.lastupdated"/>
+			</div>
+			<div id="numberofalerts" class="link_small" style="float:right">0</div>
+			<div class="link_small" style="float:right"><fmt:message key="alert.alertsshown" /></div>
+		</div>
+	  </div>
+	 </div>
   
 </div>
 

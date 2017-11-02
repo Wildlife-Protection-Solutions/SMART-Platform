@@ -260,70 +260,7 @@ function showError(error) {
    	document.getElementById("long").value = i18n("alert.unabletodetectlocation");
 }
 
-function settab(tab){
-	remove_all_tab_classes();
-	switch(tab){
-		case 2:
-			document.getElementById("map-info-box").style.display = "none";
-			document.getElementById("filter-controls").style.display = "none";
-			
-			document.getElementById("tab2").style.zIndex = 2;
-			document.getElementById('tab2').className += "selectedTab";
-			document.getElementById('tab2text').className += "selectedTab";
 
-			document.getElementById('tab1').className += "unselectedTab";
-			document.getElementById('tab1text').className += "unselectedTab";
-			document.getElementById('tab3').className += "unselectedTab";
-			document.getElementById('tab3text').className += "unselectedTab";
-			break;
-		case 3:
-			document.getElementById("map-info-box").style.display = "block";
-			document.getElementById("filter-controls").style.display = "block";
-			
-			document.getElementById("tab3").style.zIndex = 2;
-			document.getElementById("tab3").className += "selectedTab";
-			document.getElementById("tab3text").className += "selectedTab";
-			
-			document.getElementById('tab1').className += "unselectedTab";
-			document.getElementById('tab1text').className += "unselectedTab";
-			document.getElementById('tab2').className += "unselectedTab";
-			document.getElementById('tab2text').className += "unselectedTab";
-			break;
-		default:
-			document.getElementById("map-info-box").style.display = "block";
-			document.getElementById("filter-controls").style.display = "block";
-			
-			document.getElementById("tab1").style.zIndex = 2;
-			document.getElementById('tab1').className += "selectedTab";
-			document.getElementById('tab1text').className += "selectedTab";
-			
-			document.getElementById('tab2').className += "unselectedTab";
-			document.getElementById('tab2text').className += "unselectedTab";
-			document.getElementById('tab3').className += "unselectedTab";
-			document.getElementById('tab3text').className += "unselectedTab";
-	}
-}
-
-function remove_all_tab_classes(){
-	remove_class("tab1", "unselectedTab");
-	remove_class("tab2", "unselectedTab");
-	remove_class("tab3", "unselectedTab");
-	remove_class("tab1text", "unselectedTab");
-	remove_class("tab2text", "unselectedTab");
-	remove_class("tab3text", "unselectedTab");
-	remove_class("tab1", "selectedTab");	
-	remove_class("tab2", "selectedTab");
-	remove_class("tab3", "selectedTab");
-	remove_class("tab1text", "selectedTab");
-	remove_class("tab2text", "selectedTab");
-	remove_class("tab3text", "selectedTab");
-
-	
-	document.getElementById("tab1").style.zIndex = 0;
-	document.getElementById("tab2").style.zIndex = 0
-	document.getElementById("tab3").style.zIndex = 0
-
-}
 
 function remove_class(id, classname){
 //	var regex = new RegExp("(?:^|\s)" + classname + "(?!\S)", "g");
@@ -463,8 +400,8 @@ function createAlertTable(){
 
 
 		}else{
-			var str = document.getElementById("tab3text").innerHTML;
-			document.getElementById("tab3text").innerHTML = alerts.length/2 ;
+			var str = document.getElementById("numberofalerts").innerHTML;
+			document.getElementById("numberofalerts").innerHTML = alerts.length/2 ;
 		 	for (var i = 0; i < alerts.length; i ++){
 		 		if(alerts[i].geometry.type == "LineString"){
 		 			continue; //This is a track feature, ignore it for drawing the table of alerts.
@@ -827,7 +764,8 @@ function updateRealtimeLayer(updatedUrl){
         var month = now.getMonth() + 1;
         if(minutes <10) minutes = "0" + minutes;
         if(seconds<10) seconds = "0" + seconds;
-        document.getElementById("map-info-box").innerHTML = i18n("alert.lastupdated") + now.getDate() + "/" + month + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds + "  <a href='javascript:refreshAlerts()'>" + i18n("alert.updatenow") + "</a>";
+        document.getElementById("map-info-box").innerHTML = i18n("alert.lastupdated") + now.getDate() + "/" + month + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds;
+//        + "  <a href='javascript:refreshAlerts()'>" + i18n("alert.updatenow") + "</a>"
     });
     
     realtime.addTo(map);

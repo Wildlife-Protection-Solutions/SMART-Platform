@@ -5,7 +5,7 @@
 		<span id="userlogin" data-username="${pageContext.request.userPrincipal.name}">
 			${pageContext.request.userPrincipal.name}
 		</span> |
-		<input type="submit" value="<fmt:message key="header.logout"/>" class="linkButton"/>
+		<input type="submit" value="<fmt:message key="header.logout"/>" class="button"/>
 		</form>
 	</div>
 </c:if>

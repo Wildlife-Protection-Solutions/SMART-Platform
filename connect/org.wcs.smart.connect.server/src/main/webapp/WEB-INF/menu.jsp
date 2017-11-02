@@ -2,7 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<div id="verticalmenu" class="verticalmenu" style="display:table-cell">
+<div id="verticalmenu" class="verticalmenu" style="display:table-cell;width:24px;">
  <div style="display:flex;flex-flow:column nowrap">
 
 
