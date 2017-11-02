@@ -4,6 +4,7 @@ var DOWNLOADCA = false;
 
 /* configure events on html elements */
 window.onload = function(){
+	menuCheckOnload();
 	
 	document.querySelector("#calist").onclick=function(){showTab("calist");}
 	document.querySelector("#dmmanager").onclick=function(){showTab("dmmanager");}

@@ -15,8 +15,7 @@
 <body style="${style_bodycss}">
 	<%@include file="header.jsp" %>
 	<%@include file="menu.jsp" %>
-	<div id= "main">
-	<div id="pageheader" class="pageheader"><span id="dashboardtitle"><fmt:message key="dashboardbeta.title"/></span>
+	<div id= "main"><div id="pageheader" class="pageheader"><span id="dashboardtitle"><fmt:message key="dashboardbeta.title"/></span>
 	</div>
 	
 	<div style="padding-top: 5px">

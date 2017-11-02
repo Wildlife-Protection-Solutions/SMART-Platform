@@ -4,6 +4,7 @@ var UserURL = "../api/connectuser/iscurrentuseradmin";
 
 /* configure events on html elements */
 window.onload = function(){
+	menuCheckOnload();
 	updateLinkList();
 	
 	document.querySelector("#updateUserQuicklinkForm").onsubmit = submitUserUpdatedQuicklink;

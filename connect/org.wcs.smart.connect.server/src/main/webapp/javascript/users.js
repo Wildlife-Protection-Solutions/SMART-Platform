@@ -10,6 +10,7 @@ var error = "";
 
 /* configure events on html elements */
 window.onload = function(){
+	menuCheckOnload();
 	
 	document.querySelector("#roletab").onclick=function(){showTab("roletab");}
 	document.querySelector("#actiontab").onclick=function(){showTab("actiontab");}

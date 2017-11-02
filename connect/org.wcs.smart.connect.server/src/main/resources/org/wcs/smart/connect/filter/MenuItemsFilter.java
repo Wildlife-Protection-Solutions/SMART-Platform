@@ -53,28 +53,30 @@ import org.wcs.smart.connect.security.SecurityManager;
 public class MenuItemsFilter implements Filter {
 
 	private enum Page{
-		HOME("MenuItemsFilter.HomePageLabel", ConnectRESTApplication.SERVLET_PATH + "home", null), //$NON-NLS-1$ //$NON-NLS-2$
-		DASHBOARDBETA("MenuItemsFilter.DashboardBetaLabel", ConnectRESTApplication.SERVLET_PATH + "dashboardbeta", null), //$NON-NLS-1$ //$NON-NLS-2$
-		ACCOUNT("MenuItemsFilter.MyAccountLabel", ConnectRESTApplication.SERVLET_PATH + "myaccount", null), //$NON-NLS-1$ //$NON-NLS-2$
-		CA("MenuItemsFilter.CaLabel", ConnectRESTApplication.SERVLET_PATH + "ca", null), //$NON-NLS-1$ //$NON-NLS-2$
-		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY), //$NON-NLS-1$ //$NON-NLS-2$
-		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null), //$NON-NLS-1$ //$NON-NLS-2$
-		REPORT("MenuItemsFilter.ReportLabel", ConnectRESTApplication.SERVLET_PATH + "report", null),  //$NON-NLS-1$ //$NON-NLS-2$
-		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", CaAdminAccountAction.KEY),  //$NON-NLS-1$ //$NON-NLS-2$
-		SHAREDLINKSADMIN("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", AdminAccountAction.KEY),  //$NON-NLS-1$ //$NON-NLS-2$
-		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY), //$NON-NLS-1$ //$NON-NLS-2$
-		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
-		CAUSERS("MenuItemsFilter.CaAccountsLabel", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
-		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY);   //$NON-NLS-1$//$NON-NLS-2$
+		HOME("MenuItemsFilter.HomePageLabel", ConnectRESTApplication.SERVLET_PATH + "home", null, "house.png"), //$NON-NLS-1$ //$NON-NLS-2$
+		DASHBOARDBETA("MenuItemsFilter.DashboardBetaLabel", ConnectRESTApplication.SERVLET_PATH + "dashboardbeta", null, "dashboard.png"), //$NON-NLS-1$ //$NON-NLS-2$
+		ACCOUNT("MenuItemsFilter.MyAccountLabel", ConnectRESTApplication.SERVLET_PATH + "myaccount", null, "myaccount.png"), //$NON-NLS-1$ //$NON-NLS-2$
+		CA("MenuItemsFilter.CaLabel", ConnectRESTApplication.SERVLET_PATH + "ca", null, "calist.png"), //$NON-NLS-1$ //$NON-NLS-2$
+		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY, "alert.png"), //$NON-NLS-1$ //$NON-NLS-2$
+		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null, "query.png"), //$NON-NLS-1$ //$NON-NLS-2$
+		REPORT("MenuItemsFilter.ReportLabel", ConnectRESTApplication.SERVLET_PATH + "report", null, "reports.png"),  //$NON-NLS-1$ //$NON-NLS-2$
+		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", CaAdminAccountAction.KEY, "settings.png"),  //$NON-NLS-1$ //$NON-NLS-2$
+		SHAREDLINKSADMIN("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", AdminAccountAction.KEY, "share.png"),  //$NON-NLS-1$ //$NON-NLS-2$
+		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY, "dataq.png"), //$NON-NLS-1$ //$NON-NLS-2$
+		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$
+		CAUSERS("MenuItemsFilter.CaAccountsLabel", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$
+		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY, "settings.png");   //$NON-NLS-1$//$NON-NLS-2$
 		
 		String nameKey;
 		String url;
 		String actionKey;
+		String imageFileName;
 		
-		Page(String nameKey, String url, String actionKey){
+		Page(String nameKey, String url, String actionKey, String imageFileName){
 			this.nameKey = nameKey;
 			this.url = url;
 			this.actionKey = actionKey;
+			this.imageFileName = imageFileName;
 		}
 	}
     /**
@@ -111,7 +113,7 @@ public class MenuItemsFilter implements Filter {
 				menuItems.add( new String[]{
 					Messages.getString(p.nameKey, l),
 					pathprefix + p.url,
-					styleAll});
+					styleAll, p.imageFileName});
 		}
 		}finally{
 			s.getTransaction().commit();

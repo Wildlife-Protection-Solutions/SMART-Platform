@@ -9,7 +9,7 @@ html {
 
 body {
 	margin: 0px;
-	background-color: lightsteelblue;
+	background-color: white;
 }
 
 p{
@@ -163,8 +163,6 @@ h2{
 #core{
 	display:table;
 	width: 100%;
-	border-spacing: 20px 0px;
-	margin-left: -20px;
 }
 
 #main {
@@ -178,7 +176,7 @@ h2{
 }
 
 .menuitem{
-	padding: 5px;
+	padding: 1px;
 	white-space:nowrap;
 	cursor: pointer; 
 	display: block;
@@ -201,7 +199,6 @@ h2{
 
 .verticalmenu {
     padding: 10px 10px;
-    min-width:150px;
     border-radius: 3px;
     background: rgb(255, 255, 255); /* the fallback without opacity*/
     background: rgba(255, 255, 255, 0.5);
@@ -474,7 +471,7 @@ div.caSelector {
 }
 
 .white{
-	background-color: white
+	background-color: #fefefe
 }
 
 .date-input{

@@ -335,6 +335,9 @@ background-color: lightsteelblue
      		</div>
     	</form>
   </div>
+<br><br>Icon Credits:<br>
+<div>Hamburger menu by <a href="https://www.iconfinder.com/icons/134216/hamburger_lines_menu_icon">Timothy Miller</a> under <a href="https://creativecommons.org/licenses/by-sa/3.0/legalcode">creative commons SA-3.0 license</a>, no changes were made.</div>
+<div>Other menu icons made by <a href="https://www.flaticon.com/authors/gregor-cresnar" title="Gregor Cresnar">Gregor Cresnar</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 
 </body>
 </html>

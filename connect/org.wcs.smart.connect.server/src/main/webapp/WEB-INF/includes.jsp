@@ -23,3 +23,77 @@
 </c:forEach>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n.js"></script>
 
+
+<script type="text/javascript">
+var menuOpen = true;
+//have to call this in each page since I can't overwrite the onload function (again) and the menu doesn't exist yet if you just run it right here.
+
+function menuCheckOnload(){
+	var menuState = readCookie("smartMenuState");
+	if(menuState == "hidden"){
+		var items = document.getElementsByClassName("textMenu");
+		for (i = 0; i < items.length; i++) {
+	    	items[i].style.display = "none";
+		}
+		menuOpen = false;
+		document.getElementById("verticalmenu").style.minWidth = "0px";
+	}else{
+		var items = document.getElementsByClassName("textMenu");
+		for (i = 0; i < items.length; i++) {
+	    	items[i].style.display = "inline-block";
+		}
+		menuOpen = true;
+		document.getElementById("verticalmenu").style.minWidth = "180px";
+	}
+}
+
+function hamburgerMenu(){
+	var newState = true;
+	if(menuOpen==true){
+		writeCookie("smartMenuState","hidden",7);
+		newState = "none";
+		menuOpen = false;
+		document.getElementById("verticalmenu").style.minWidth = "0px";
+	}else{
+		writeCookie("smartMenuState","",7);
+		newState = "inline-block";
+		menuOpen = true;
+		document.getElementById("verticalmenu").style.minWidth = "180px";
+	}
+	
+	var items = document.getElementsByClassName("textMenu");
+	for (i = 0; i < items.length; i++) {
+	    items[i].style.display = newState;
+	}
+
+}
+
+
+function writeCookie(name,value,days) {
+    var date, expires;
+    if (days) {
+        date = new Date();
+        date.setTime(date.getTime()+(days*24*60*60*1000));
+        expires = "; expires=" + date.toGMTString();
+            }else{
+        expires = "";
+    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function readCookie(name) {
+    var i, c, ca, nameEQ = name + "=";
+    ca = document.cookie.split(';');
+    for(i=0;i < ca.length;i++) {
+        c = ca[i];
+        while (c.charAt(0)==' ') {
+            c = c.substring(1,c.length);
+        }
+        if (c.indexOf(nameEQ) == 0) {
+            return c.substring(nameEQ.length,c.length);
+        }
+    }
+    return '';
+}
+</script>
+

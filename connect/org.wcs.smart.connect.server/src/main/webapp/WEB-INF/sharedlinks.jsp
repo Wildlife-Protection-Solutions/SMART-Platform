@@ -49,7 +49,7 @@
 
 
 
-<div class="top-spacer" style="margin-left: -20px"> 
+<div class="top-spacer"> 
   <div id="linktable" class="linktable table-cell smart-table">
   	<div class="table-row smart-table-header">
 		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.url" /></div>

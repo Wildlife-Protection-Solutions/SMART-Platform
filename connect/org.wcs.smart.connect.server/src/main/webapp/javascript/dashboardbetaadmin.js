@@ -7,6 +7,8 @@ var picker1, picker2, picker3, picker4;
 
 /* configure events on html elements */
 window.onload = function(){
+	menuCheckOnload();
+	
 	getAllReports();
 	
 	var url = window.location.href;

@@ -69,7 +69,7 @@
 <input type="checkbox" id="qhideexe" checked onchange="searchChanged()"><fmt:message key="query.hidenonexecutable"/>
 </div>
 
-<div class="top-spacer"  style="margin-left: -20px" >
+<div class="top-spacer">
   <div id="querytable" class="catable table-cell smart-table">
   	<div class="table-row smart-table-header">
 		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('conservationArea')"><fmt:message key="query.conservationarea" /></a></div>

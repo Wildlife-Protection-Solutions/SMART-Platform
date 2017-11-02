@@ -18,7 +18,7 @@ var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb
 
 /* configure events on html elements */
 window.onload = function(){
-	
+	menuCheckOnload();
 	//add new style   ---  
 	document.getElementById("btnNewStyleConfiguration").onclick=clearAndShowNewStyleDialog;
 	if(numStyles > 0){
@@ -442,12 +442,10 @@ function createTypeTable(){
  		var markerColor = i18n("settings." + types[i].markerColor);
 
  		var spin = types[i].spin;
- 		
 
- 		//not using fillColor for now, maybe we want more options in future.
  		var row = tableCreateRowTDs(parent,
  				[label, color, opacity, markerIcon, markerColor, spin, null], 
- 				"white typerow");
+ 				"smart-table-rowoff typerow");
  		row.id = "typerow" + i;
  		row.dataset.uuid = types[i].uuid;
  	
@@ -456,12 +454,6 @@ function createTypeTable(){
  			row.childNodes[1].style.color = "#ffffff";
  			row.childNodes[2].style.color = "#ffffff";
  		}
-// 		row.childNodes[2].style.backgroundColor = fillColor;
-// 		row.childNodes[2].style.opacity = opacity;
-// 		if(fillColor == "000000"){
-// 			row.childNodes[2].style.color = "#ffffff";
-// 			row.childNodes[3].style.color = "#ffffff";
-// 		}
  		row.childNodes[2].style.backgroundColor = color;
  		row.childNodes[2].style.opacity = opacity;
  		
@@ -509,7 +501,6 @@ function showCurrentType() {
 	
 	form.type_label.value = r.label;
 	form.type_color.value = r.color;
-//	form.type_fillcolor.value = r.fillColor;
 	form.type_opacity.value = r.opacity;
 	form.type_markerIcon.value = r.markerIcon;
 	form.type_markerColor.value = r.markerColor;
@@ -525,7 +516,6 @@ function showCurrentType() {
 	document.getElementById("exampleIcon").className = "fa fa-" + r.markerIcon;
 	
 	document.getElementById("type_color").style.backgroundColor = '#' + r.color;
-//	document.getElementById("type_fillcolor").style.backgroundColor ='#' + r.fillColor;
 	
 	document.getElementById("updateTypeButton").classList.remove("hide");
 	document.getElementById("updateTypeButton").classList.add("show");
@@ -573,7 +563,6 @@ function createNewType(){
 	}
 	
 	var typeColor = document.querySelector("input[name=type_color]").value;
-//	var typeFillColor = document.querySelector("input[name=type_fillcolor]").value;
 	var typeOpacity = document.querySelector("input[name=type_opacity]").value;
 	var markerIcon = document.querySelector("select[name=type_markerIcon]").value;
 	var markerColor = document.querySelector("select[name=type_markerColor]").value;
@@ -592,7 +581,6 @@ function createNewType(){
 	var jsonData = {
 		"label" : typeLabel,
 		"color" : typeColor,
-//		"fillColor" : typeFillColor,
 		"opacity" : typeOpacity,
 		"markerIcon" : markerIcon,
 		"customIcon" : customIcon,
@@ -629,7 +617,6 @@ function submitUpdateType(){
 		
 	var typeLabel = document.querySelector("input[name=type_label]").value;
 	var typeColor = document.querySelector("input[name=type_color]").value;
-//	var typeFillColor = document.querySelector("input[name=type_fillcolor]").value;
 	var typeOpacity = document.querySelector("input[name=type_opacity]").value;
 	var markerIcon = document.querySelector("select[name=type_markerIcon]").value;
 	var override = document.getElementById("iconOveride").value
@@ -650,7 +637,6 @@ function submitUpdateType(){
 	var jsonData = {
 		"label" : typeLabel,
 		"color" : typeColor,
-//		"fillColor" : typeFillColor,
 		"opacity" : typeOpacity,
 		"markerIcon" : markerIcon,
 		"markerColor" : markerColor,

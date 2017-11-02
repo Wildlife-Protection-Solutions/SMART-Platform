@@ -4,6 +4,8 @@ var CAURL = "../api/conservationarea/withdataonly/";
 
 /* configure events on html elements */
 window.onload = function(){
+	menuCheckOnload();
+	
 	document.getElementById("close").onclick = function(){
 		closeDialog('SharedLinksDialog');
 	};

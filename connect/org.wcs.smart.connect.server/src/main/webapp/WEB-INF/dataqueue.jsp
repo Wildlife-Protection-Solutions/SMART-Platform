@@ -25,7 +25,7 @@
 		<div class="top-spacer link_small" >
 			<fmt:message key="dataqueue.lastupdated"/><span id="lastUpdateTime"></span><a id="refreshnow" style="padding-left:3px" href="#"><fmt:message key="dataqueue.refresh"/></a>
 		</div>
-		<div  style="margin-left: -20px" >
+		<div>
 			<div id="fileTable" class="catable table-cell smart-table">
 			  	<div class="table-row smart-table-header">
 			  		<div class="table-cell smart-table-cell"></div>

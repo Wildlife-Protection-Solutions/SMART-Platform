@@ -13,6 +13,7 @@ var deletetimer;
 
 
 window.onload = function(){
+	menuCheckOnload();
 	
 	//Hide header/footer and menu if mobile parameter is set:
 	if(mobile == "true"){

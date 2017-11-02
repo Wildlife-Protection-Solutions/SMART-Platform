@@ -5,6 +5,7 @@ var links = {};
 
 /* configure events on html elements */
 window.onload = function(){
+	menuCheckOnload();
 	refreshLinkList();
 	
 	document.getElementById("opentokendialog").onclick = function(){

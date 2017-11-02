@@ -26,7 +26,7 @@
 		
 <div id="calist_body" class="tabbody">
 <p class="infomessage"><fmt:message key="ca.pageinfo"/></p>
-		<div class="top-spacer"  style="margin-left: -20px" >
+		<div class="top-spacer" >
   			<div class="catable table-cell smart-table">
   				<div class="table-row smart-table-header">
 					<div class="table-cell smart-table-cell"><fmt:message key="ca.labelheader"/></div>

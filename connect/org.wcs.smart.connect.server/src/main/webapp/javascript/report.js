@@ -15,6 +15,7 @@ var parameterNames = new Array();
 
 /* configure events on html elements */
 window.onload = function(){
+	menuCheckOnload();
 
 	document.getElementById('textsearch').value = search;
 	getCaList();
