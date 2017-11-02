@@ -653,7 +653,10 @@ public class AttributeFieldEditor {
 			md.setInitPoint(position[0], position[1]);
 		}
 		
-		MapPart currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
+		MapPart currentPart = null;
+		try {
+			currentPart = ApplicationGIS.getToolManager().getActiveTool().getContext().getViewportPane().getMapEditor();
+		}catch (NullPointerException ex) {}
 		IAction lastToolAction = ((ToolManager)ApplicationGIS.getToolManager()).getActiveToolProxy().getAction();
 		try{
 			if (md.open() == SelectPointMapDialog.OK){
@@ -665,7 +668,7 @@ public class AttributeFieldEditor {
 			}
 		}finally{
 			ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
-			lastToolAction.run();
+			if (currentPart != null) lastToolAction.run();
 		}
 	}
 	

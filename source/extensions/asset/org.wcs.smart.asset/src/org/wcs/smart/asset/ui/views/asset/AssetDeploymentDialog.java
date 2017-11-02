@@ -42,6 +42,7 @@ import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
@@ -102,9 +103,25 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 			toUpdate.setEndDate(null);
 		}
 		
-		//TODO:
+		if (toUpdate.getAttributeValues() == null) toUpdate.setAttributeValues(new ArrayList<>());
 		for (AttributeFieldEditor editor : attributeFields) {
-//			boolean add = editor.updateValue(value);
+			AssetDeploymentAttributeValue attributeToUpdate = null;
+			for (AssetDeploymentAttributeValue value : toUpdate.getAttributeValues()) {
+				if (value.getAttribute().equals(editor.getAttribute())) {
+					attributeToUpdate = value;
+					break;
+				}
+			}
+			if (attributeToUpdate == null) {
+				attributeToUpdate = new AssetDeploymentAttributeValue();
+				attributeToUpdate.setAttribute(editor.getAttribute());
+				attributeToUpdate.setAssetDeployment(toUpdate);
+				toUpdate.getAttributeValues().add(attributeToUpdate);
+			}
+			boolean add = editor.updateValue(attributeToUpdate);
+			if (!add) {
+				toUpdate.getAttributeValues().remove(attributeToUpdate);
+			}
 			
 		}
 		super.okPressed();
@@ -113,6 +130,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 	
 	private void validate() {
 		Button btnOk = getButton(IDialogConstants.OK_ID);
+		if (btnOk == null) return;
 		btnOk.setEnabled(false);
 		setErrorMessage(null);
 		
@@ -326,6 +344,14 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 					@Override
 					public void widgetDefaultSelected(SelectionEvent e) {}
 				});
+				if (toUpdate.getAttributeValues() != null) {
+					for (AssetDeploymentAttributeValue value : toUpdate.getAttributeValues()) {
+						if (value.getAttribute().equals(attribute.getAttribute())) {
+							editor.initControl(value);
+							break;
+						}
+					}
+				}
 			}
 			
 			scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));

@@ -111,6 +111,9 @@ public class AssetEditor extends EditorPart {
 	
 	private FormToolkit toolkit;
 	private Form pageForm;
+
+	private Label lblRetiredState = null;
+	private Hyperlink changeRetiredState = null;
 	
 	private Label lblStatus;
 	private Label lblStatusImage;
@@ -120,13 +123,13 @@ public class AssetEditor extends EditorPart {
 	private Label lblAssetType;
 	private List<AttributeFieldEditor> attributeEditors = null;
 	
-	
 	private TableViewer tblEvents;
 	
 	private List<AssetHistoryRecord> activeHistoryRecords;
 	private List<AssetHistoryRecord> toDeleteHistoryRecords;
 
 	private AssetDeploymentPage deploymentPage;
+	private AssetCurrentPage currentPage;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -199,8 +202,19 @@ public class AssetEditor extends EditorPart {
 	private void refreshStatus() {
 		lblStatus.setText(asset.getStatus(true).name()); //TODO: gui name for status
 		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(asset));
+		lblStatus.getParent().layout(true);
 		
 		initializeAttributePanel(asset);
+		
+		if (currentPage != null) {
+			AssetDeployment activeDeployment = null;
+			try(Session session = HibernateManager.openSession()){
+				activeDeployment = QueryFactory.buildQuery(session, AssetDeployment.class, 
+					new Object[] {"asset", asset},
+					new Object[] {"endDate", null}).uniqueResult();
+			}
+			currentPage.initializePanel(activeDeployment);
+		}
 	}
 	
 	private void initData() {
@@ -255,6 +269,11 @@ public class AssetEditor extends EditorPart {
 			initializeAttributePanel(asset);
 			initializeEventsPanel(asset);
 			if (deploymentPage != null) deploymentPage.initializePanel(asset); 
+			
+			AssetDeployment activeDeployment = QueryFactory.buildQuery(session, AssetDeployment.class, 
+					new Object[] {"asset", asset},
+					new Object[] {"endDate", null}).uniqueResult();
+			if (currentPage != null) currentPage.initializePanel(activeDeployment);
 			
 		}catch (Exception ex) {
 			AssetPlugIn.displayLog(ex.getMessage(), ex);
@@ -426,7 +445,7 @@ public class AssetEditor extends EditorPart {
 		});
 		
 		//create initial panel
-		createCurrentSection(sectionBody);
+		currentPanel = createCurrentSection(sectionBody);
 		((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
 		sectionBody.layout(true);	
 		
@@ -453,13 +472,16 @@ public class AssetEditor extends EditorPart {
 		Composite panel = toolkit.createComposite(parent);
 		panel.setLayout(new GridLayout());
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		toolkit.createLabel(panel, "CURRENT SECTION");
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
+		
+		currentPage = new AssetCurrentPage(this);
+		ContextInjectionFactory.inject(currentPage, parentContext);
+		currentPage.createSummarySection(panel, toolkit);
+		
 		return panel;
 	}
 
-	private Label lblRetiredState = null;
-	private Hyperlink changeRetiredState = null;
-	
 	private Composite createDetailsSection(Composite parent) {
 		
 		Composite panel = toolkit.createComposite(parent, SWT.NONE);

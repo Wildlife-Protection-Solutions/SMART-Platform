@@ -1,5 +1,6 @@
 package org.wcs.smart.asset.ui.views.asset;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,6 +29,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.graphics.Font;
@@ -35,6 +38,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
@@ -49,10 +53,11 @@ import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
+import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 public class AssetDeploymentPage {
 
@@ -68,6 +73,10 @@ public class AssetDeploymentPage {
 	private List<AssetDeployment> allDeployments;
 	
 	private AssetEditor parentEditor;
+
+	private ScrolledComposite scrollDetails;
+	private Composite detailsPane;
+	private List<AssetTypeDeploymentAttribute> allDeploymentAttributes;
 	
 	public AssetDeploymentPage(AssetEditor parent) {
 		this.parentEditor = parent;
@@ -109,7 +118,7 @@ public class AssetDeploymentPage {
 		IAssetSummary[] summaryValues = new IAssetSummary[] {TimeInFieldAssetSummary.INSTANCE, IncidentAssetSummary.INSTANCE};
 		assetSummaryValues = new HashMap<>();
 		for (IAssetSummary s : summaryValues) {
-			Label sl = toolkit.createLabel(summaryPanel, s.getSummaryName());
+			toolkit.createLabel(summaryPanel, s.getSummaryName());
 			
 			Label sv = toolkit.createLabel(summaryPanel, "");
 			sv.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -119,22 +128,31 @@ public class AssetDeploymentPage {
 		}
 		
 		Composite historyPanel = toolkit.createComposite(panel, SWT.BORDER);
-		historyPanel.setLayout(new GridLayout(2, false));
+		historyPanel.setLayout(new GridLayout());
 		historyPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)historyPanel.getLayout()).marginWidth = 0;
+		((GridLayout)historyPanel.getLayout()).marginHeight = 0;
 		
-		l = toolkit.createLabel(historyPanel, "Asset Deployments");
+		Composite headerPanel = toolkit.createComposite(historyPanel, SWT.NONE);
+		headerPanel.setLayout(new GridLayout(2, false));
+		headerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)headerPanel.getLayout()).marginHeight = 0;
+		((GridLayout)headerPanel.getLayout()).marginTop = 5;
+
+		
+		l = toolkit.createLabel(headerPanel, "Asset Deployments");
 		fd = l.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight() + 1);
 		fd.setStyle(SWT.BOLD);
 		Font boldFont1 = new Font(l.getDisplay(), fd);
 		l.setFont(boldFont1);
 		l.addListener(SWT.Dispose, e->boldFont1.dispose());
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		ToolItem itemDelete = null;
 		ToolItem itemEdit = null;
 		if (!parentEditor.getAsset().getIsRetired()) {
-			ToolBar toolbar = new ToolBar(historyPanel, SWT.FLAT);
+			ToolBar toolbar = new ToolBar(headerPanel, SWT.FLAT);
 			toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			
 			itemDelete = new ToolItem(toolbar, SWT.PUSH);
@@ -156,8 +174,15 @@ public class AssetDeploymentPage {
 			
 		}
 		
-		tblDeployments = new TableViewer(historyPanel, SWT.FULL_SELECTION | SWT.MULTI);
-		tblDeployments.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		SashForm bodyPanel = new SashForm(historyPanel, SWT.HORIZONTAL);
+//		bodyPanel.setLayout(new GridLayout(2, false));
+		bodyPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+//		((GridLayout)bodyPanel.getLayout()).marginHeight = 0;
+//		((GridLayout)bodyPanel.getLayout()).marginBottom = 5;
+		
+		tblDeployments = new TableViewer(bodyPanel, SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER);
+		tblDeployments.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblDeployments.setContentProvider(ArrayContentProvider.getInstance());
 		tblDeployments.getTable().setHeaderVisible(true);
 		tblDeployments.getTable().setLinesVisible(true);
@@ -184,19 +209,19 @@ public class AssetDeploymentPage {
 			Menu mnuDeployments = new Menu(tblDeployments.getControl());
 			
 			MenuItem mnuAdd = new MenuItem(mnuDeployments, SWT.PUSH);
-			mnuAdd.setText("New Deployment...");
+			mnuAdd.setText("New");
 			mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			mnuAdd.addListener(SWT.Selection, e-> addDeployment());
 					
 			MenuItem mnuEdit = new MenuItem(mnuDeployments, SWT.PUSH);
 			mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			mnuEdit.addListener(SWT.Selection, e-> editSelectedDeployments());
-			mnuEdit.setText("Edit Deployment...");
+			mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 			
 			MenuItem mnuDelete = new MenuItem(mnuDeployments, SWT.PUSH);
 			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			mnuDelete.addListener(SWT.Selection, e->deleteSelectedDeployments());
-			mnuDelete.setText("Delete Deployments...");
+			mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			
 			tblDeployments.getControl().setMenu(mnuDeployments);
 			
@@ -212,12 +237,86 @@ public class AssetDeploymentPage {
 			});
 		}
 		
+		Composite detailsPaneOuter = new Composite(bodyPanel, SWT.BORDER);
+		detailsPaneOuter.setLayout(new GridLayout());
+		detailsPaneOuter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+		//((GridData)detailsPaneOuter.getLayoutData()).widthHint = 200;
+		bodyPanel.setWeights(new int[] {70,30});
+		
+		scrollDetails = new ScrolledComposite(detailsPaneOuter, SWT.V_SCROLL | SWT.H_SCROLL);
+		toolkit.adapt(scrollDetails);
+		
+		scrollDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		scrollDetails.setExpandHorizontal(true);
+		scrollDetails.setExpandVertical(true);
+		detailsPane = toolkit.createComposite(scrollDetails, SWT.NONE);
+		scrollDetails.setContent(detailsPane);
+		
+		detailsPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblDeployments.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)tblDeployments.getSelection()).getFirstElement();
+				if (x instanceof AssetDeployment) {
+					updateDetailsPane((AssetDeployment)x, toolkit);
+				}
+			}
+		});
 		initializePanel(parentEditor.getAsset());
 		refreshSummaryStatistics();
 		
 		return panel;
 	}
+	
+	private void updateDetailsPane(AssetDeployment deployment, FormToolkit toolkit) {
+		if (detailsPane == null) return;
+		
+		for (Control c : detailsPane.getChildren()) c.dispose();
+		
+		detailsPane.setLayout(new GridLayout(2, false));
+		
+		Label l = toolkit.createLabel(detailsPane, MessageFormat.format("{0} ({1})", deployment.getStationLocation().getId(), deployment.getStationLocation().getStation().getId()));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Composite dateDetails = toolkit.createComposite(detailsPane);
+		dateDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		dateDetails.setLayout(new GridLayout(3, false));
+		
+		l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(deployment.getStartDate()) + "\n" + DateFormat.getTimeInstance().format(deployment.getStartDate()));
+		l = toolkit.createLabel(dateDetails, "   -   ");
+		if (deployment.getEndDate() == null) {
+			l = toolkit.createLabel(dateDetails, "Current");
+		}else {
+			l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(deployment.getEndDate()) + "\n" + DateFormat.getTimeInstance().format(deployment.getEndDate()));
+		}
 
+		l = toolkit.createLabel(detailsPane, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		if (allDeploymentAttributes != null) {
+			for (AssetTypeDeploymentAttribute a : allDeploymentAttributes) {
+				l = toolkit.createLabel(detailsPane, a.getAttribute().getName() + ":");
+				l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+				AssetDeploymentAttributeValue value = null;
+				for (AssetDeploymentAttributeValue v : deployment.getAttributeValues()) {
+					if (v.getAttribute().equals(a.getAttribute())) {
+						value = v;
+						break;
+					}
+				}
+				if (value != null) {
+					toolkit.createLabel(detailsPane, value.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS));
+				}else {
+					toolkit.createLabel(detailsPane, "");
+				}
+			}
+		}
+		detailsPane.layout(true);
+		
+		scrollDetails.setMinSize(detailsPane.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+	}
+	
+	
 	public void initializePanel(Asset asset) {
 		loadHistoryDataJob.setSystem(true);
 		loadHistoryDataJob.schedule();
@@ -334,6 +433,7 @@ public class AssetDeploymentPage {
 			List<AssetDeploymentTableColumn> tableColumns = new ArrayList<>();
 			allDeployments = new ArrayList<>();
 			Asset asset = parentEditor.getAsset();
+			allDeploymentAttributes = new ArrayList<>();
 			
 			try(Session s = HibernateManager.openSession()){
 				
@@ -353,6 +453,8 @@ public class AssetDeploymentPage {
 					}
 				});
 				
+				allDeploymentAttributes.addAll(QueryFactory.buildQuery(s, AssetTypeDeploymentAttribute.class, "id.assetType", asset.getAssetType()).list());
+				allDeploymentAttributes.forEach(e->e.getAttribute().getUuid());
 			}
 			//sort data
 			allDeployments.sort((a,b)->{
