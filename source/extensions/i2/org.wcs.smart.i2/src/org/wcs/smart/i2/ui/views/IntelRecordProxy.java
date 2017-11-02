@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 
@@ -33,7 +34,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
  * @author Emily
  *
  */
-public class IntelRecordProxy {
+public class IntelRecordProxy implements IAdaptable{
 
 	private UUID uuid;
 	private String title;
@@ -106,6 +107,16 @@ public class IntelRecordProxy {
 	public int hashCode(){
 		if (uuid != null) return uuid.hashCode();
 		return super.hashCode();
+	}
+
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if (adapter.equals(IntelRecord.class)) {
+			IntelRecord r = new IntelRecord();
+			r.setUuid(getUuid());
+			return (T)r;
+		}
+		return null;
 	}
 
 }
