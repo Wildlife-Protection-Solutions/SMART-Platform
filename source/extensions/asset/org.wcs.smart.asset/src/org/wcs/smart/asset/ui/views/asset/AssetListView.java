@@ -95,11 +95,16 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
-
+/**
+ * Lists all assets and stations
+ * 
+ * @author Emily
+ *
+ */
 public class AssetListView {
+	
 	public static final String ID = "org.wcs.smart.asset.ui.view.assets"; //$NON-NLS-1$
 	
-
 	@Inject
 	private IEclipseContext context;
 	

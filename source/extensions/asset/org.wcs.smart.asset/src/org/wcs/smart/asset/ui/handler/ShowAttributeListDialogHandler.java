@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.asset.ui.config.AttributeListDialog;
 
 /**
- * Open dialog handler
+ * Open the asset attribute list dialog.
  * 
  * @author Emily
  *

@@ -62,6 +62,7 @@ import org.wcs.smart.util.UuidUtils;
 
 /**
  * New asset handler
+ * 
  * @author Emily
  *
  */

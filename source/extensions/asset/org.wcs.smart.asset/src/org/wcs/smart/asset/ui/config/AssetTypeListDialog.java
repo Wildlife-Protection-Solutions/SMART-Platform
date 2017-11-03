@@ -358,6 +358,8 @@ public class AssetTypeListDialog extends TitleAreaDialog {
 							monitor.subTask(t.getName());
 							s.beginTransaction();
 							try{
+								//validate delete - this will throw an exception if cannot delete
+								AssetTypeManager.INSTANCE.canDelete(t, s);
 								AssetTypeManager.INSTANCE.deleteAssetType(t, s);
 								s.getTransaction().commit();
 								deleted.add(t);

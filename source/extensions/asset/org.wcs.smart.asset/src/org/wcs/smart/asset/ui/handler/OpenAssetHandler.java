@@ -36,19 +36,18 @@ import org.wcs.smart.asset.ui.views.asset.AssetEditorInput;
  * @author Emily
  *
  */
-public class OpenAssetHandler {
-	
-		public void openAsset(AssetEditorInput input){
-			try {			
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, AssetEditor.ID);
-			} catch (PartInitException e) {
-				AssetPlugIn.displayLog(MessageFormat.format("Error opening asset editor: {0}", e.getMessage()), e);
-			}
-		}
-		
-		public void openAsset(Asset asset){
-			AssetEditorInput input = new AssetEditorInput(asset.getUuid(),  asset.getId());
-			openAsset(input);
+public class OpenAssetHandler {	
+	public void openAsset(AssetEditorInput input){
+		try {			
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, AssetEditor.ID);
+		} catch (PartInitException e) {
+			AssetPlugIn.displayLog(MessageFormat.format("Error opening asset editor: {0}", e.getMessage()), e);
 		}
 	}
+	
+	public void openAsset(Asset asset){
+		AssetEditorInput input = new AssetEditorInput(asset.getUuid(),  asset.getId());
+		openAsset(input);
+	}
+}
 

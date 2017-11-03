@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.asset.ui.config.AssetTypeListDialog;
 
 /**
- * Open dialog handler
+ * Open list of asset types dialog handler
  * 
  * @author Emily
  *

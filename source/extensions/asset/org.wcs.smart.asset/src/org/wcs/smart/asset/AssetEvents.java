@@ -21,6 +21,12 @@
  */
 package org.wcs.smart.asset;
 
+/**
+ * Asset module events
+ * 
+ * @author Emily
+ *
+ */
 public class AssetEvents {
 
 	/**

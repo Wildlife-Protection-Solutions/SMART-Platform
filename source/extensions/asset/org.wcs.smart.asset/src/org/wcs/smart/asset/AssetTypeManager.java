@@ -34,6 +34,12 @@ import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 
+/**
+ * Tools for managing asset types
+ * 
+ * @author Emily
+ *
+ */
 public enum AssetTypeManager {
 	
 	INSTANCE;
@@ -59,6 +65,12 @@ public enum AssetTypeManager {
 		return types;
 	}
 	
+	/**
+	 * Validates if the given asset type can be deleted
+	 * @param type
+	 * @param session
+	 * @throws Exception
+	 */
 	public void canDelete(AssetType type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){
 			throw new Exception("Unknown error occurs while deleting asset type.");

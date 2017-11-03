@@ -27,10 +27,12 @@ import org.wcs.smart.ca.advisors.DeleteManager;
 
 /**
  * Tools for managing intelligence attributes
+ * 
  * @author Emily
  *
  */
 public enum AttributeManager {
+	
 	INSTANCE;
 	
 	private AttributeManager(){

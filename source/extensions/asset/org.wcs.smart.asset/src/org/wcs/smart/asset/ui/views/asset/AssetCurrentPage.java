@@ -1,11 +1,29 @@
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.asset;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.Color;
 import java.awt.Point;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.awt.Rectangle;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,12 +32,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -32,7 +50,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -40,20 +57,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.ProjectFactory;
-import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
-import org.locationtech.udig.project.internal.render.impl.ViewportModelImpl;
-import org.locationtech.udig.project.render.displayAdapter.IMapDisplay;
 import org.locationtech.udig.project.ui.ApplicationGIS;
-import org.locationtech.udig.project.ui.ApplicationGIS.DrawMapParameter;
-import org.locationtech.udig.project.ui.BoundsStrategy;
-import org.locationtech.udig.project.ui.SelectionStyle;
-import org.locationtech.udig.project.ui.internal.NextGenRenderManager;
-import org.locationtech.udig.project.ui.wizard.export.image.GeotiffImageExportFormat;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
+import org.locationtech.udig.project.ui.viewers.MapViewer;
+import org.locationtech.udig.ui.graphics.ViewportGraphics;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.engine.DeploymentStatisticsEngine;
 import org.wcs.smart.asset.engine.DeploymentStatisticsEngine.Statistic;
@@ -63,16 +73,30 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
+import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+
+/**
+ * Current asset page in the asset editor.
+ * 
+ * @author Emily
+ *
+ */
 public class AssetCurrentPage {
 
+	private static int LOCATION_RADIUS = 5;
+	private static int STATION_RADIUS = 10;
+	
 	@Inject
 	private IEclipseContext parentContext;
 	private AssetEditor parentEditor;
 	
 	private Composite mainControl;
 	private Composite mapComposite;
+	private MapViewer mapViewer;
 	
 	private AssetDeployment currentDeployment = null;
 	private FormToolkit toolkit;
@@ -87,9 +111,8 @@ public class AssetCurrentPage {
 	
 	private SashForm currentForm;
 
-	private Image mapImage;
-	private IMap mapMap;
-
+	private UUID deployUuid = null;
+	
 	public AssetCurrentPage(AssetEditor parent) {
 		this.parentEditor = parent;
 	}
@@ -100,13 +123,15 @@ public class AssetCurrentPage {
 		mainControl = toolkit.createComposite(parent, SWT.NONE);
 		mainControl.setLayout(new GridLayout());
 		mainControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		((GridLayout)mainControl.getLayout()).marginWidth = 0;
+		((GridLayout)mainControl.getLayout()).marginHeight = 0;
 		
 		return mainControl;
 	}
 	
 	
 	public void initializePanel(AssetDeployment activeDeployment) {
+		this.deployUuid = activeDeployment == null ? null : activeDeployment.getUuid();
 		if (this.currentDeployment == null && activeDeployment == null) {
 			createNotActivePanel();
 			return;
@@ -119,11 +144,13 @@ public class AssetCurrentPage {
 		if (currentForm == null || currentForm.isDisposed()) {
 			createDeploymentPanel();
 		}
-		this.currentDeployment = activeDeployment;
 		initializeDeploymentPanel();
 		return;
 	}
 	
+	public MapViewer getMapViewer() {
+		return this.mapViewer;
+	}
 	
 	private void createDeploymentPanel() {
 		if (mainControl == null) return;
@@ -201,22 +228,47 @@ public class AssetCurrentPage {
 		lblStatLocation= toolkit.createLabel(mapPart, "");
 		
 		mapComposite = toolkit.createComposite(mapPart, SWT.BORDER);
-		mapComposite.setLayout(new GridLayout());
 		mapComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+		Composite toolComposite = toolkit.createComposite(mapComposite, SWT.NONE);
+		toolComposite.setLayout(new GridLayout());
+		((GridLayout)toolComposite.getLayout()).marginWidth = 2;
+		((GridLayout)toolComposite.getLayout()).marginHeight = 2;
+
+		MapToolComposite tools = new MapToolComposite(new String[] {MapToolComposite.UDIG_PAN_ID, MapToolComposite.UDIG_ZOOM_ID});
+		tools.selectTool(MapToolComposite.UDIG_PAN_ID);
+		tools.createComposite(toolComposite);
 		
-		mapComposite.addListener(SWT.Paint, e->{
-			if (mapImage != null && !mapImage.isDisposed()) e.gc.drawImage(mapImage, 0, 0);
-		});
-		mapComposite.addListener(SWT.Dispose, e->{
-			if (mapImage != null && !mapImage.isDisposed()) {
-				mapImage.dispose();
-				mapImage = null;
+		mapViewer = new MapViewer(mapComposite, SWT.SINGLE | SWT.DOUBLE_BUFFERED);
+		mapViewer.setMap(ProjectFactory.eINSTANCE.createMap());
+		mapViewer.init(parentEditor);
+		LoadDefaultLayersJob basemap = new LoadDefaultLayersJob(mapViewer.getMap(), false);
+		basemap.schedule();
+		
+		mapViewer.getViewport().addDrawCommand(
+			new AbstractDrawCommand() {
+				@Override
+				public void run(IProgressMonitor monitor) throws Exception {
+					drawStationLocations(graphics, getMap());
+				}
+				
+				@Override
+				public Rectangle getValidArea() {
+					//TODO;
+					return null;
+				}
 			}
-		});
-		mapComposite.addListener(SWT.Resize, e->createAndRenderMap(currentDeployment));
-	
+		);
+		mapViewer.getViewport().enableDrawCommands(true);
 		
-		toolkit.createLabel(mapComposite, "MAP HERE");
+		
+		mapComposite.addListener(SWT.Resize, e->{
+			mapViewer.getControl().setBounds(0, 0, mapComposite.getSize().x, mapComposite.getSize().y);
+			org.eclipse.swt.graphics.Point size = toolComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			toolComposite.setBounds(mapComposite.getSize().x - size.x, 0, size.x, size.y);
+		});
+		
+		ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
 		
 		bottomPart = toolkit.createComposite(mainPart, SWT.BORDER);
 		bottomPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -239,105 +291,36 @@ public class AssetCurrentPage {
 		mainControl.layout(true);
 	}
 	
-	private void createAndRenderMap(AssetDeployment deploy) {
-		if (deploy == null)  return;
-		createMapJob.schedule(100);
+	private void refreshMap() {
+		if (mapViewer != null) mapViewer.getRenderManager().refresh(null);
 	}
 	
-	
-	Job createMapJob = new Job("create map job") {
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			AssetDeployment deploy = currentDeployment;
-			if (deploy == null) return Status.OK_STATUS;
-			final Point size = new Point();
-			Display.getDefault().syncExec(()->{
-				size.x = mapComposite.getSize().x;
-				size.y = mapComposite.getSize().y;
-			});
-			if (mapMap == null) {
-				mapMap = ProjectFactory.eINSTANCE.createMap();
-				LoadDefaultLayersJob basemap = new LoadDefaultLayersJob(mapMap);
-				basemap.schedule();
-				try {
-					basemap.join();
-				}catch (Exception ex) {
-					//TODO:
-				}
-
-                ((org.locationtech.udig.project.internal.Map)mapMap).setRenderManagerInternal(new NextGenRenderManager());
-                ((RenderManagerImpl)mapMap.getRenderManager()).setMapDisplay(new IMapDisplay() {
-					
-					@Override
-					public int getWidth() {
-						return size.x;
-					}
-					
-					@Override
-					public int getHeight() {
-						return size.y;
-					}
-					
-					@Override
-					public Dimension getDisplaySize() {
-						return new Dimension(getWidth(), getHeight());
-					}
-					
-					@Override
-					public int getDPI() {
-						return 70;
-					}
-				});
-				((ViewportModelImpl)mapMap.getViewportModel()).zoomToExtent();
-			}
-			
-			BufferedImage image = new BufferedImage(size.x, size.y, BufferedImage.TYPE_INT_RGB);
-			Graphics2D g = image.createGraphics();
-			try {
-				double offset = 0.2;
-				BoundsStrategy zoomTo = new BoundsStrategy(new ReferencedEnvelope(
-						deploy.getStationLocation().getX() - offset, deploy.getStationLocation().getX() + offset,
-						deploy.getStationLocation().getY() - offset, deploy.getStationLocation().getY() + offset,
-						SmartDB.DATABASE_CRS));
-				
-				DrawMapParameter drawMapParameter = new DrawMapParameter(g,
-						new java.awt.Dimension(size.x, size.y), mapMap,
-						zoomTo,
-						90,SelectionStyle.IGNORE,
-						new NullProgressMonitor());
-
-				ApplicationGIS.drawMap(drawMapParameter);
-			}catch (Exception ex) {
-				ex.printStackTrace();
-				//TODO:
-			} finally {
-				g.dispose();
-			}
-			
-			Display.getDefault().syncExec(()->{
-				if (mapImage != null && !mapImage.isDisposed()) mapImage.dispose();
-				mapImage = AWTSWTImageUtils.convertToSWTImage(image);
-				mapComposite.redraw();
-			});
-			
-			return Status.OK_STATUS;
-		}
+	private void drawStationLocations(ViewportGraphics graphics, IMap map) {
+		AssetDeployment deploy = currentDeployment;
+		if (deploy == null) return;
+		Point pnt = map.getViewportModel().worldToPixel(new Coordinate(deploy.getStationLocation().getX(), deploy.getStationLocation().getY()));
+		graphics.setColor(Color.RED);
+		graphics.drawRect(pnt.x-STATION_RADIUS, pnt.y - STATION_RADIUS, STATION_RADIUS*2, STATION_RADIUS*2);
 		
-	};
-	
+		pnt = map.getViewportModel().worldToPixel(new Coordinate(deploy.getStationLocation().getStation().getX(), deploy.getStationLocation().getStation().getY()));
+		graphics.setColor(Color.BLUE);
+		graphics.setBackground(Color.BLUE);
+		graphics.fillOval(pnt.x-LOCATION_RADIUS, pnt.y-LOCATION_RADIUS, LOCATION_RADIUS*2, LOCATION_RADIUS*2);
+		graphics.drawOval(pnt.x-LOCATION_RADIUS, pnt.y-LOCATION_RADIUS, LOCATION_RADIUS*2, LOCATION_RADIUS*2);
+	}
+
 	private Job computeSummaryStatisticsJob = new Job("compute statistics for current deployment") {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			AssetDeployment deploy = currentDeployment;
-			if (deploy == null) {
+			if (deployUuid == null) {
 				//TODO: 
 				return Status.OK_STATUS;
 			}
-			
+
+			AssetDeployment deploy = null;
 			try(Session session = HibernateManager.openSession()){
-				deploy = session.get(AssetDeployment.class, deploy.getUuid());
+				deploy = session.get(AssetDeployment.class, deployUuid);
 				if (deploy == null) return Status.OK_STATUS;//todo
 				deploy.getAsset().getAssetType().getUuid();
 				deploy.getAttributeValues().forEach(e->{
@@ -484,10 +467,16 @@ public class AssetCurrentPage {
 				mainControl.layout(true, true);
 			});
 			
-			createAndRenderMap(deploy);
+			//TODO: crs
+			getMapViewer().getMap().getViewportModelInternal().zoomToBox(
+					new Envelope(currentDeployment.getStationLocation().getX() - 0.3, currentDeployment.getStationLocation().getX() + 0.3,
+							currentDeployment.getStationLocation().getY() - 0.3, currentDeployment.getStationLocation().getY() + 0.3)
+					);
+			refreshMap();
 			return Status.OK_STATUS;
 		}
 		
 	};
+
 	
 }

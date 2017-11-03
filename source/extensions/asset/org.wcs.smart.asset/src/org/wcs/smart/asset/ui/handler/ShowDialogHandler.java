@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.asset.AssetPlugIn;
 
 /**
- * Open dialog handler
+ * Handler that opens the specified dialog.
  * 
  * @author Emily
  *

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.text.Collator;
@@ -10,9 +31,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -22,7 +40,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
-import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -33,7 +51,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
@@ -49,17 +66,18 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
@@ -67,18 +85,19 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.Asset.Status;
 import org.wcs.smart.asset.model.AssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
-import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetHistoryRecord;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.model.AssetTypeAttribute;
@@ -93,7 +112,13 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-public class AssetEditor extends EditorPart {
+/**
+ * Asset Editor
+ * 
+ * @author Emily
+ *
+ */
+public class AssetEditor extends EditorPart  implements MapPart{
 
 	public static final String ID = "org.wcs.smart.asset.ui.views.asset"; //$NON-NLS-1$
 	
@@ -208,10 +233,12 @@ public class AssetEditor extends EditorPart {
 		
 		if (currentPage != null) {
 			AssetDeployment activeDeployment = null;
-			try(Session session = HibernateManager.openSession()){
-				activeDeployment = QueryFactory.buildQuery(session, AssetDeployment.class, 
-					new Object[] {"asset", asset},
-					new Object[] {"endDate", null}).uniqueResult();
+			if (asset.getUuid() != null) {
+				try(Session session = HibernateManager.openSession()){
+					activeDeployment = QueryFactory.buildQuery(session, AssetDeployment.class, 
+						new Object[] {"asset.uuid", asset.getUuid()},
+						new Object[] {"endDate", null}).uniqueResult();
+				}
 			}
 			currentPage.initializePanel(activeDeployment);
 		}
@@ -233,6 +260,7 @@ public class AssetEditor extends EditorPart {
 					asset.setAttributeValues(new ArrayList<>());
 					asset.setIsRetired(false);
 					asset.setId("AssetId");
+					setDirty(true);
 				}
 			}else {
 				asset = session.get(Asset.class, in.getAssetUuid());
@@ -270,9 +298,12 @@ public class AssetEditor extends EditorPart {
 			initializeEventsPanel(asset);
 			if (deploymentPage != null) deploymentPage.initializePanel(asset); 
 			
-			AssetDeployment activeDeployment = QueryFactory.buildQuery(session, AssetDeployment.class, 
+			AssetDeployment activeDeployment = null;
+			if (asset.getUuid() != null) {
+				activeDeployment = QueryFactory.buildQuery(session, AssetDeployment.class, 
 					new Object[] {"asset", asset},
 					new Object[] {"endDate", null}).uniqueResult();
+			}
 			if (currentPage != null) currentPage.initializePanel(activeDeployment);
 			
 		}catch (Exception ex) {
@@ -350,6 +381,7 @@ public class AssetEditor extends EditorPart {
 	public Asset getAsset() {
 		return this.asset;
 	}
+		
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
@@ -400,47 +432,78 @@ public class AssetEditor extends EditorPart {
 				
 		Composite headerSection = toolkit.createComposite(body);
 		headerSection.setLayout(new GridLayout(4, false));
-		((GridLayout)headerSection.getLayout()).marginWidth = 0;
-		((GridLayout)headerSection.getLayout()).marginHeight = 0;
+		((GridLayout)headerSection.getLayout()).marginWidth = 2;
+		((GridLayout)headerSection.getLayout()).marginHeight = 2;
+		headerSection.setBackground( toolkit.getColors().getColor(IFormColors.TB_BG) );
+		headerSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		fd = headerSection.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		Font boldFont = new Font(headerSection.getDisplay(), fd);
+		headerSection.addListener(SWT.Dispose, e->boldFont.dispose());
+		
+		Font normalFont = headerSection.getFont();
 		
 		Composite sectionBody = toolkit.createComposite(body);
 		sectionBody.setLayout(new StackLayout());
 		sectionBody.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Hyperlink lnkCurrent = toolkit.createHyperlink(headerSection, "Current Status", SWT.NONE);
+		lnkCurrent.setBackground(headerSection.getBackground());
+		
+		Hyperlink lnkDetails = toolkit.createHyperlink(headerSection, "Details", SWT.NONE);
+		lnkDetails.setBackground(headerSection.getBackground());
+	
+		Hyperlink lnkDeployments = toolkit.createHyperlink(headerSection, "Deployment History", SWT.NONE);
+		lnkDeployments.setBackground(headerSection.getBackground());
+		
+		Hyperlink lnkEvents = toolkit.createHyperlink(headerSection, "Event History", SWT.NONE);
+		lnkEvents.setBackground(headerSection.getBackground());
+		
+		Hyperlink[] allLinks = new Hyperlink[] {lnkCurrent, lnkDetails, lnkDeployments, lnkEvents};
+		
 		lnkCurrent.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
-				sectionBody.layout(true);			
+				sectionBody.layout(true);
+				for (Hyperlink l : allLinks) l.setFont(normalFont);
+				lnkCurrent.setFont(boldFont);
+				headerSection.layout();
 			}
 		});
-		Hyperlink lnkDetails = toolkit.createHyperlink(headerSection, "Details", SWT.NONE);
 		lnkDetails.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				if (detailsPanel == null) detailsPanel = createDetailsSection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = detailsPanel;
-				sectionBody.layout(true);				
+				sectionBody.layout(true);	
+				for (Hyperlink l : allLinks) l.setFont(normalFont);
+				lnkDetails.setFont(boldFont);
+				headerSection.layout();
 			}
 		});
-		Hyperlink lnkDeployments = toolkit.createHyperlink(headerSection, "Deployment History", SWT.NONE);
 		lnkDeployments.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				if (deploymentPanel == null) deploymentPanel = createDeploymentsSection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = deploymentPanel;
-				sectionBody.layout(true);					
+				sectionBody.layout(true);	
+				for (Hyperlink l : allLinks) l.setFont(normalFont);
+				lnkDeployments.setFont(boldFont);
+				headerSection.layout();
 			}
 		});
-		Hyperlink lnkEvents = toolkit.createHyperlink(headerSection, "Event History", SWT.NONE);
 		lnkEvents.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				if (eventsPanel == null) eventsPanel = createHistorySection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = eventsPanel;
-				sectionBody.layout(true);					
+				sectionBody.layout(true);	
+				for (Hyperlink l : allLinks) l.setFont(normalFont);
+				lnkEvents.setFont(boldFont);
+				headerSection.layout();
 			}
 		});
 		
@@ -448,6 +511,7 @@ public class AssetEditor extends EditorPart {
 		currentPanel = createCurrentSection(sectionBody);
 		((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
 		sectionBody.layout(true);	
+		lnkCurrent.setFont(boldFont);
 		
 		createEventHandlers();
 		
@@ -833,9 +897,11 @@ public class AssetEditor extends EditorPart {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				try(Session s = HibernateManager.openSession()){
-					activeHistoryRecords.addAll(
-							QueryFactory.buildQuery(s, AssetHistoryRecord.class, "asset", asset).list()); //$NON-NLS-1$
+				if (asset.getUuid() != null) {
+					try(Session s = HibernateManager.openSession()){
+						activeHistoryRecords.addAll(
+								QueryFactory.buildQuery(s, AssetHistoryRecord.class, "asset", asset).list()); //$NON-NLS-1$
+					}
 				}
 				Display.getDefault().syncExec(()->{
 					tblEvents.setInput(activeHistoryRecords);
@@ -862,4 +928,33 @@ public class AssetEditor extends EditorPart {
 		super.dispose();
 	}
 
+
+	@Override
+	public org.locationtech.udig.project.internal.Map getMap() {
+		if (currentPage == null || currentPage.getMapViewer() == null) return ApplicationGIS.NO_MAP;
+		return currentPage.getMapViewer().getMap();
+	}
+
+	@Override
+	public void openContextMenu() {
+		if (currentPage == null) return;
+		currentPage.getMapViewer().openContextMenu();
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+		if (currentPage == null) return;
+		currentPage.getMapViewer().setFont(textArea);
+	}
+
+	@Override
+	public void setSelectionProvider(IMapEditorSelectionProvider selectionProvider) {
+		if (currentPage == null) return;
+		currentPage.getMapViewer().setSelectionProvider(selectionProvider);
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return ((IEditorSite)getSite()).getActionBars().getStatusLineManager();
+	}
 }

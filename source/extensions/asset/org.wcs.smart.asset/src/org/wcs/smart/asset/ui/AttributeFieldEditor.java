@@ -63,6 +63,7 @@ import org.geotools.referencing.CRS;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
+import org.locationtech.udig.project.ui.render.displayAdapter.ViewportPane;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AbstractAssetAttributeValue;
@@ -73,7 +74,6 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.common.control.OnOffButton;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
@@ -111,6 +111,9 @@ public class AttributeFieldEditor {
 	
 	private boolean fireListeners = true;
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
+	private boolean isEnabled = true;
+	
+	private Hyperlink mapLink;
 	
 	/**
 	 * Assumption is the parent layout is a 2 column grid layout
@@ -379,7 +382,7 @@ public class AttributeFieldEditor {
 			}else{
 				btnChDateTime.setSelection(true);
 				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
-				dtDateTime.setEnabled(true);
+				if (isEnabled) dtDateTime.setEnabled(true);
 			}
 		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
 			if (value.getNumberValue() == null){
@@ -388,13 +391,14 @@ public class AttributeFieldEditor {
 			}else{
 				btnChOnOff.setSelection(true);
 				btnOnOff.setSelection(value.getNumberValue() >= 0.5);
-				btnOnOff.setEnabled(true);
+				if (isEnabled) btnOnOff.setEnabled(true);
 			}
 		}
 	}
 		
 	public void setEnabled(boolean enabled){
 		fireListeners = enabled;
+		this.isEnabled = enabled;
 		if (attribute.getType() == AttributeType.TEXT){
 			txtMulti.setEnabled(enabled);
 		}else if (attribute.getType() == AttributeType.NUMERIC){
@@ -402,6 +406,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.POSITION){
 			txtValue.setEnabled(enabled);
 			txtValue2.setEnabled(enabled);
+			mapLink.setEnabled(enabled);
 		}else if (attribute.getType() ==  AttributeType.LIST){
 			cmbViewer.getControl().setEnabled(enabled);
 		}else if (attribute.getType() ==  AttributeType.DATE){
@@ -542,7 +547,7 @@ public class AttributeFieldEditor {
 			btnChDateTime.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e){
-					dtDateTime.setEnabled(btnChDateTime.getSelection());
+					if (isEnabled) dtDateTime.setEnabled(btnChDateTime.getSelection());
 					modified();
 				}
 			});
@@ -622,15 +627,15 @@ public class AttributeFieldEditor {
 
 			
 			
-			Hyperlink link = new Hyperlink(c, SWT.NONE);
-			link.setText("map...");
-			link.setUnderlined(true);
-			link.setForeground(link.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
-			link.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			link.addHyperlinkListener(new HyperlinkAdapter() {
+			mapLink = new Hyperlink(c, SWT.NONE);
+			mapLink.setText("map...");
+			mapLink.setUnderlined(true);
+			mapLink.setForeground(mapLink.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND));
+			mapLink.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			mapLink.addHyperlinkListener(new HyperlinkAdapter() {
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					selectOnMap(link.getShell());
+					selectOnMap(mapLink.getShell());
 				}
 			});
 			
@@ -667,8 +672,13 @@ public class AttributeFieldEditor {
 				}
 			}
 		}finally{
-			ApplicationGIS.getToolManager().setCurrentEditor(currentPart);
-			if (currentPart != null) lastToolAction.run();
+			MapPart nextPart = null;
+			if (currentPart != null && currentPart.getMap() !=  null && currentPart.getMap().getRenderManager() != null && currentPart.getMap().getRenderManager().getMapDisplay() != null  && 
+					!((ViewportPane)currentPart.getMap().getRenderManager().getMapDisplay()).isDisposed()) {
+				nextPart = currentPart;
+			}
+			ApplicationGIS.getToolManager().setCurrentEditor(nextPart);
+			if (nextPart != null) lastToolAction.run();
 		}
 	}
 	

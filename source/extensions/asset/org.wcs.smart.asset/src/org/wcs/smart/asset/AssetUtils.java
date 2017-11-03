@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset;
 
 import java.text.MessageFormat;
@@ -9,41 +30,39 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
+/**
+ * Utilties for the asset plugin
+ * 
+ * @author Emily
+ *
+ */
 public class AssetUtils {
 
-	public static final void main (String[] args) {
-	
-		int days = 3;
-		int hours = 14;
-		int minutes = 4;
-		double seconds = 2.3;
-		
-		double millisecond = seconds * 1000 + minutes * 60 * 1000 + hours * 60 * 60 * 1000 + days * 24 * 60 * 60 * 1000;
-		System.out.println(formatTime(millisecond));
-	}
-	
-	
+	/**
+	 * Formats the given time in seconds into days and hours.  (2 days 6.54 hours)
+	 * @param timeInSeconds
+	 * @return
+	 */
 	public static String formatTime(double timeInSeconds) {
 		int days = (int) Math.floor( timeInSeconds / 86_400.0 );
-		double remainder = timeInSeconds - days * 86_400.0;
 		
+		double remainder = timeInSeconds - days * 86_400.0;
 		double hours = remainder / 3_600.0;
 		
-//		int hours = (int)Math.floor( remainder / 3_600_000.0 );
-//		remainder = remainder - hours * 3_600_000;
-//				
-//		int minutes =  (int)Math.floor( remainder / 60_000.0);
-//		remainder = remainder - minutes* 60_000;
-//		
-//		int seconds =  (int)Math.floor( remainder / 1000.0);
 		if (timeInSeconds == 0) return "0 days";
-//		return MessageFormat.format("{0} days {1}:{2}:{3}", days, hours, minutes, seconds);
 		return MessageFormat.format("{0} days {1,number,#.##} hours", days, hours);
 	}
 	
 	
+	/**
+	 * Reconfirms the curernt users password.
+	 * @param shell
+	 * @param title
+	 * @param message
+	 * @return
+	 */
 	public static boolean confirmPassword(Shell shell, String title, String message) {
-		InputDialog confirm = new InputDialog(shell, title, message, "", null){ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		InputDialog confirm = new InputDialog(shell, title, message, "", null){ //$NON-NLS-1$
 					
 			@Override
 			protected void okPressed() {

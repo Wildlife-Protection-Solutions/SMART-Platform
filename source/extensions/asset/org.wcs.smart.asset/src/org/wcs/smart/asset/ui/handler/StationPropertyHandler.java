@@ -31,11 +31,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.asset.ui.StationPropertiesDialog;
 
 /**
- * Open asset handler 
+ * Open the station properties dialog.  
  * 
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class StationPropertyHandler extends ShowDialogHandler {
 
 	public StationPropertyHandler(){
