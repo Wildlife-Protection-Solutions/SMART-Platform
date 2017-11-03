@@ -26,9 +26,8 @@ import java.util.Collections;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
-import org.wcs.smart.asset.model.AssetStation;
-import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -39,71 +38,67 @@ import org.wcs.smart.hibernate.QueryFactory;
  * @author Emily
  *
  */
-public enum StationManager {
+public enum AssetManager {
 
 	INSTANCE;
 	
-	private StationManager(){
+	private AssetManager(){
 		
 	}
 	
 	/**
-	 * Deletes the station and all data associated with the station. This will delete
+	 * Deletes the asset and all data associated with the asset. This will delete
 	 * waypoints so the provided session should be opened with the AttachmentInterceptor
 	 * 
 	 * @param type
 	 * @param session
 	 * @throws Exception
 	 */
-	public void deleteStation(AssetStation station, IEventBroker broker){
+	public void deleteAsset(Asset asset, IEventBroker broker){
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
-				deleteStation(station, session);
+				deleteAsset(asset, session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				AssetPlugIn.displayLog("Unable to delete station: " + ex.getMessage(), ex);
+				AssetPlugIn.displayLog("Unable to delete asset: " + ex.getMessage(), ex);
 				session.getTransaction().rollback();
 				return;
 			}
 		}
-		//TODO: we may want to fire asset changed listeners here
-		//if an asset deployment is deleted to refresh other views
-		broker.post(AssetEvents.ASSETSTATION_DELETE, Collections.singletonList(station));
+		broker.post(AssetEvents.ASSET_DELETE, Collections.singletonList(asset));
 	}
 	
 	/**
-	 * Deletes the station and all data associated with the station. This will delete
+	 * Deletes the asset and all data associated with the station. This will delete
 	 * waypoints so the provided session should be opened with the AttachmentInterceptor
 	 * 
 	 * @param type
 	 * @param session
 	 * @throws Exception
 	 */
-	private void deleteStation(AssetStation station, Session session) throws Exception{
+	private void deleteAsset(Asset asset, Session session) throws Exception{
 		//delete all data associated with the station
 		
-		station = session.get(AssetStation.class,  station.getUuid());
-		if (station == null) return;
+		asset = session.get(Asset.class,  asset.getUuid());
+		if (asset== null) return;
 		
-		if (station.getLocations() != null) {
-			for (AssetStationLocation loc : station.getLocations() ) {
-				try(ScrollableResults scroll = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"stationLocation", loc}).scroll()){
-					while(scroll.next()) {
-						AssetDeployment d  = (AssetDeployment)scroll.get(0);
-						for (AssetWaypoint w : d.getAssetWaypoints()) {
-							session.delete(w.getWaypoint());
-							session.delete(w);
-						}
-						session.delete(d);
-					}
-					
+		//remove all deployments
+		try(ScrollableResults scroll = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"asset", asset}).scroll()){
+			while(scroll.next()) {
+				AssetDeployment d = (AssetDeployment) scroll.get(0);
+				
+				for (AssetWaypoint aw : d.getAssetWaypoints()) {
+					session.delete(aw.getWaypoint());
+					session.delete(aw);
 				}
-				session.flush();
+				session.delete(d);
 			}
 		}
 		
-		session.delete(station);
+		//delete the asset
+		session.delete(asset);
+		
 	}
 	
 }

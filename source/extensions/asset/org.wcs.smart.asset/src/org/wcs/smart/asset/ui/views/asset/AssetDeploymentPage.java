@@ -364,9 +364,11 @@ public class AssetDeploymentPage {
 		if (dialog.open() == Window.OK) {
 			modifiedDeployments.add(newDeployment);
 			allDeployments.add(newDeployment);
+			sortDeployments();
 			tblDeployments.refresh();
 			parentEditor.setDirty(true);
 			refreshSummaryStatistics();
+			
 		}
 		
 	}
@@ -415,9 +417,19 @@ public class AssetDeploymentPage {
 		if (dialog.open() == Window.OK) {
 			modifiedDeployments.add(toUpdate);
 			parentEditor.setDirty(true);
+			sortDeployments();
 			tblDeployments.refresh();
 			refreshSummaryStatistics();
+			
 		}
+	}
+	
+	private void sortDeployments() {
+		allDeployments.sort((a,b)->{
+			if (a.getEndDate() == null) return -1;
+			if (b.getEndDate() == null) return 1;
+			return b.getStartDate().compareTo(a.getStartDate());
+		});
 	}
 	
 	private Job refreshSummaryStatsJob = new Job("loading asset history data)") {
@@ -487,11 +499,8 @@ public class AssetDeploymentPage {
 				allDeploymentAttributes.forEach(e->e.getAttribute().getUuid());
 			}
 			//sort data
-			allDeployments.sort((a,b)->{
-				if (a.getEndDate() == null) return -1;
-				if (b.getEndDate() == null) return 1;
-				return b.getStartDate().compareTo(a.getStartDate());
-			});
+			sortDeployments();
+			
 			//update ui
 			Display.getDefault().syncExec(()->{
 				for(TableColumn tc : tblDeployments.getTable().getColumns()) tc.dispose();

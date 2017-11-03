@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.model;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -54,6 +55,18 @@ public class Asset extends UuidItem {
 		ACTIVE,
 		INACTIVE,
 		RETIRED;
+		
+		public String getGuiName(Locale l) {
+			switch(this) {
+			case ACTIVE:
+				return "Active";
+			case INACTIVE:
+				return "Inactive";
+			case RETIRED:
+				return "Retired";
+			}
+			return "";
+		}
 	}
 	
 	private String id;

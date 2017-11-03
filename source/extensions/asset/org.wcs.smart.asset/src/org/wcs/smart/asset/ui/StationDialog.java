@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.ui;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +55,7 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -130,12 +132,25 @@ public class StationDialog extends TitleAreaDialog{
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
+				
+				List<AssetStation> items = QueryFactory.buildQuery(s, AssetStation.class, 
+						new Object[] {"conservationArea", toUpdate.getConservationArea()},
+						new Object[] {"id", toUpdate.getId()}).list();
+				for (AssetStation i : items) {
+					if (!i.equals(toUpdate)) {
+						MessageDialog.openError(getShell(), "Duplicate ID", 
+								MessageFormat.format("A station with the id ''{0}'' already exists.  You cannot duplicate Station IDs.  Please use a different ID and try again.", toUpdate.getId()));
+						return;
+					}
+				}
+				
 				s.saveOrUpdate(toUpdate);
 				s.getTransaction().commit();
 				
 			}catch(Exception ex) {
 				AssetPlugIn.displayLog("Unable to save changes to station: " + ex.getMessage(), ex);
 				s.getTransaction().rollback();
+				if (isNew) toUpdate.setUuid(null);
 				return;
 			}
 		}
@@ -153,7 +168,16 @@ public class StationDialog extends TitleAreaDialog{
 			return false;
 		}
 		
-		//check duplicate station id
+		if (!locationEditor.isValid()) {
+			setErrorMessage("A valid location for the station is required");
+			return false;
+		}
+		AssetStationAttributeValue tmp = new AssetStationAttributeValue();
+		locationEditor.updateValue(tmp);
+		if (tmp.getNumberValue() == null || tmp.getNumberValue2() == null) {
+			setErrorMessage("A location for the station is required");
+			return false;
+		}
 		
 		if (attributeEditors != null) {
 			boolean ok = true;
@@ -179,7 +203,7 @@ public class StationDialog extends TitleAreaDialog{
 		
 		Label l = new Label(form, SWT.NONE);
 		l.setText("ID:");
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		txtStation = new Text(form, SWT.BORDER);
 		txtStation.setTextLimit(AssetStation.MAX_LENGTH);
@@ -191,7 +215,17 @@ public class StationDialog extends TitleAreaDialog{
 		tmp.setName("Position");
 		tmp.setType(AttributeType.POSITION);
 		
+		SelectionListener validateListener = new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				validate();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		};
+		
 		locationEditor = new AttributeFieldEditor(form, tmp);
+		locationEditor.addSelectionListener(validateListener);
 		//TODO:
 		//locationEditor.initControl(value);
 		
@@ -226,14 +260,7 @@ public class StationDialog extends TitleAreaDialog{
 			attributeEditors.add(editor);
 
 			if (editor.getTextAttributeControl() != null) editor.getTextAttributeControl().addListener(SWT.Resize, e-> scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-			editor.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					validate();
-				}
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {}
-			});
+			editor.addSelectionListener(validateListener);
 			
 			//TODO:
 			//editor.initControl(value);

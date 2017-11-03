@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -68,7 +69,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
@@ -85,6 +88,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
@@ -106,6 +110,7 @@ import org.wcs.smart.asset.ui.AttributeFieldEditor;
 import org.wcs.smart.asset.ui.CommentDialog;
 import org.wcs.smart.asset.ui.DateCommentDialog;
 import org.wcs.smart.asset.ui.IdFieldHeader;
+import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -118,7 +123,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class AssetEditor extends EditorPart  implements MapPart{
+public class AssetEditor extends EditorPart implements MapPart {
 
 	public static final String ID = "org.wcs.smart.asset.ui.views.asset"; //$NON-NLS-1$
 	
@@ -155,12 +160,31 @@ public class AssetEditor extends EditorPart  implements MapPart{
 
 	private AssetDeploymentPage deploymentPage;
 	private AssetCurrentPage currentPage;
+	private Composite sectionBody;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		boolean isNew = asset.getUuid() == null;
 		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			try {
+				String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca ";
+				if (!isNew) {
+					query += " AND uuid != :uuid";
+				}
+				Query<?> q = s.createQuery(query)
+				.setParameter("id", asset.getId().toLowerCase())
+				.setParameter("ca", asset.getConservationArea());
+				if (!isNew) {
+					q.setParameter("uuid", asset.getUuid());
+				}
+				Long cnt = (Long) q.uniqueResult();
+				if (cnt > 0) {
+					MessageDialog.openError(getSite().getShell(), "Save Asset", 
+						MessageFormat.format("The id ''{0}'' is already used by another asset in the system. You cannot duplicate Asset IDs.  Change the asset id and try again.", asset.getId())
+							);
+					return;
+				}
+				
 				s.beginTransaction();
 				s.saveOrUpdate(asset);
 				
@@ -225,7 +249,7 @@ public class AssetEditor extends EditorPart  implements MapPart{
 	}
 	
 	private void refreshStatus() {
-		lblStatus.setText(asset.getStatus(true).name()); //TODO: gui name for status
+		lblStatus.setText(asset.getStatus(true).getGuiName(Locale.getDefault()));
 		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(asset));
 		lblStatus.getParent().layout(true);
 		
@@ -419,7 +443,12 @@ public class AssetEditor extends EditorPart  implements MapPart{
 		});
 		lblId.setFont(headerFont);
 		lblId.addListener(SWT.Selection, e->{
-			//TODO: validate id
+			String text = e.text.trim();
+			if (text.isEmpty() || text.length() > Asset.ID_MAX_LENGTH) {
+				MessageDialog.openWarning(getSite().getShell(), "Asset ID", MessageFormat.format("Invalid asset id.  ID must be between {0} and {1} charaters", 1, Asset.ID_MAX_LENGTH));
+				lblId.setText(asset.getId());
+				return;
+			}
 			asset.setId(e.text);
 			setPartName(e.text);
 			setDirty(true);
@@ -430,91 +459,39 @@ public class AssetEditor extends EditorPart  implements MapPart{
 		toolkit.createLabel(headerComp, "-");
 		lblAssetType = toolkit.createLabel(headerComp, "");
 				
-		Composite headerSection = toolkit.createComposite(body);
-		headerSection.setLayout(new GridLayout(4, false));
-		((GridLayout)headerSection.getLayout()).marginWidth = 2;
-		((GridLayout)headerSection.getLayout()).marginHeight = 2;
-		headerSection.setBackground( toolkit.getColors().getColor(IFormColors.TB_BG) );
+		
+		String headers[] = new String[] {"Current Status", "Details", "Deployment History", "Event History"};
+		Listener[] actions = new Listener[] {
+			event->{
+				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
+				((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
+				sectionBody.layout(true);},
+			event->{
+				if (detailsPanel == null) detailsPanel = createDetailsSection(sectionBody);
+				((StackLayout)sectionBody.getLayout()).topControl = detailsPanel;
+				sectionBody.layout(true);},
+			event->{
+				if (deploymentPanel == null) deploymentPanel = createDeploymentsSection(sectionBody);
+				((StackLayout)sectionBody.getLayout()).topControl = deploymentPanel;
+				sectionBody.layout(true);},
+			event->{
+				if (eventsPanel == null) eventsPanel = createHistorySection(sectionBody);
+				((StackLayout)sectionBody.getLayout()).topControl = eventsPanel;
+				sectionBody.layout(true);},
+				
+		};
+		
+		SectionHeader headerSection = new SectionHeader(body, SWT.NONE, headers, actions, toolkit);
 		headerSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		fd = headerSection.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		Font boldFont = new Font(headerSection.getDisplay(), fd);
-		headerSection.addListener(SWT.Dispose, e->boldFont.dispose());
-		
-		Font normalFont = headerSection.getFont();
-		
-		Composite sectionBody = toolkit.createComposite(body);
+		sectionBody = toolkit.createComposite(body);
 		sectionBody.setLayout(new StackLayout());
 		sectionBody.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Hyperlink lnkCurrent = toolkit.createHyperlink(headerSection, "Current Status", SWT.NONE);
-		lnkCurrent.setBackground(headerSection.getBackground());
-		
-		Hyperlink lnkDetails = toolkit.createHyperlink(headerSection, "Details", SWT.NONE);
-		lnkDetails.setBackground(headerSection.getBackground());
-	
-		Hyperlink lnkDeployments = toolkit.createHyperlink(headerSection, "Deployment History", SWT.NONE);
-		lnkDeployments.setBackground(headerSection.getBackground());
-		
-		Hyperlink lnkEvents = toolkit.createHyperlink(headerSection, "Event History", SWT.NONE);
-		lnkEvents.setBackground(headerSection.getBackground());
-		
-		Hyperlink[] allLinks = new Hyperlink[] {lnkCurrent, lnkDetails, lnkDeployments, lnkEvents};
-		
-		lnkCurrent.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
-				((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
-				sectionBody.layout(true);
-				for (Hyperlink l : allLinks) l.setFont(normalFont);
-				lnkCurrent.setFont(boldFont);
-				headerSection.layout();
-			}
-		});
-		lnkDetails.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (detailsPanel == null) detailsPanel = createDetailsSection(sectionBody);
-				((StackLayout)sectionBody.getLayout()).topControl = detailsPanel;
-				sectionBody.layout(true);	
-				for (Hyperlink l : allLinks) l.setFont(normalFont);
-				lnkDetails.setFont(boldFont);
-				headerSection.layout();
-			}
-		});
-		lnkDeployments.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (deploymentPanel == null) deploymentPanel = createDeploymentsSection(sectionBody);
-				((StackLayout)sectionBody.getLayout()).topControl = deploymentPanel;
-				sectionBody.layout(true);	
-				for (Hyperlink l : allLinks) l.setFont(normalFont);
-				lnkDeployments.setFont(boldFont);
-				headerSection.layout();
-			}
-		});
-		lnkEvents.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (eventsPanel == null) eventsPanel = createHistorySection(sectionBody);
-				((StackLayout)sectionBody.getLayout()).topControl = eventsPanel;
-				sectionBody.layout(true);	
-				for (Hyperlink l : allLinks) l.setFont(normalFont);
-				lnkEvents.setFont(boldFont);
-				headerSection.layout();
-			}
-		});
-		
 		//create initial panel
-		currentPanel = createCurrentSection(sectionBody);
-		((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
-		sectionBody.layout(true);	
-		lnkCurrent.setFont(boldFont);
+		headerSection.selectPanel(0);
 		
 		createEventHandlers();
-		
 		initData();
 	}
 	
@@ -667,7 +644,7 @@ public class AssetEditor extends EditorPart  implements MapPart{
 	
 	private void initializeAttributePanel(Asset asset) {
 		if (lblRetiredState != null) {
-			lblRetiredState.setText(asset.getIsRetired() ? "Retired" : asset.getStatus().name()); //TODO: get status label
+			lblRetiredState.setText(asset.getStatus().getGuiName(Locale.getDefault()));
 		}
 		if (changeRetiredState != null) {
 			if (asset.getIsRetired()) {

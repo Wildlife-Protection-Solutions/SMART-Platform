@@ -182,9 +182,14 @@
                   checkEnabled="false">
                <with
                      variable="activePartId">
-                  <equals
-                        value="org.wcs.smart.asset.ui.views.asset">
-                  </equals>
+                  <or>
+                     <equals
+                           value="org.wcs.smart.asset.ui.views.asset">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.asset.ui.views.station">
+                     </equals>
+                  </or>
                </with>
             </visibleWhen>
          </command>
@@ -265,6 +270,12 @@
             default="false"
             id="org.wcs.smart.asset.ui.views.asset"
             name="Asset Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.asset.ui.views.station.StationEditor"
+            default="false"
+            id="org.wcs.smart.asset.ui.views.station"
+            name="Station Editor">
       </editor>
    </extension>
 

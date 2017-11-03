@@ -172,7 +172,7 @@ public class IdFieldHeader extends Composite {
 	private boolean validateName(String name){
 		if (name.length() > MAX_NAME_LENGTH){
 			MessageDialog.openError(getShell(), "Invalid Identifier",
-					MessageFormat.format("Identifier must be few then {0} characters.", new Object[]{MAX_NAME_LENGTH}));
+					MessageFormat.format("Identifier must be fewer then {0} characters.", new Object[]{MAX_NAME_LENGTH}));
 			return false;
 		}
 		return true;
