@@ -22,7 +22,7 @@
 	
   	<div id="quicklinklist" style="display:none"> 
   	<div style="padding-top: 15px">
-  		<div style="display:block; margin-bottom:10px; text-decoration: underline"><p><fmt:message key="quicklinks.my"/></p></div>
+  		<div style="display:block; margin-bottom:10px;"><p><fmt:message key="quicklinks.my"/></p></div>
   		<div style="display:block; border-spacing:0px">
   		<div id ="myquicklinklist" class="table-cell smart-table" >
   			<div class="table-row smart-table-header">
@@ -38,7 +38,7 @@
 	
 	
 		<form id="newquicklink" name="newquicklink" style="display:none">
-		<div style="display:block; margin-bottom:5px; margin-top:20px; text-decoration: underline"><p><fmt:message key="quicklinks.new"/></p></div>
+		<div style="display:block; margin-bottom:5px; margin-top:20px;"><p><fmt:message key="quicklinks.new"/></p></div>
 		<div class="table-cell smart-table" style="display:block">
 			<div class="table-row">
 				<div class="table-cell smart-table-cell"><fmt:message key="quicklinks.url"/></div>
@@ -56,8 +56,8 @@
 		<p id="addfromadmin" style="display:none"><select id="admin-selectlist" name="admin-selectlist" class="uielement"></select> <button onClick="addFromAdminList(); return false;" class="button" > <fmt:message key="quicklinks.addtolist"/></button></p>
 		</form>
 		
-		<p id="managemylinks" style="font-size: 0.9em"><br><a href="javascript:manageMylinks();"><fmt:message key="quicklinks.managemylinks"/></a></p>
-		<p id="manageall" style="display:none; font-size:0.9em;padding-top:10px" ><a href="javascript:manageQuicklinks();"><fmt:message key="quicklinks.managealllinks"/></a></p>
+		<p id="managemylinks" style="font-size: 0.9em"><br><a class="button" href="javascript:manageMylinks();"><fmt:message key="quicklinks.managemylinks"/></a></p>
+		<p id="manageall" style="display:none; padding-top:10px" ><a class="button" href="javascript:manageQuicklinks();"><fmt:message key="quicklinks.managealllinks"/></a></p>
 	
 	</div>
 <%@include file="footer.jsp" %>

@@ -1,5 +1,6 @@
 html {
-  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+/*   font-family: "Open Sans", Helvetica, Arial, sans-serif; */
   font-size: 0.8em;
 }
 
@@ -55,6 +56,7 @@ h2{
 	background-color: white;	
 	padding: 4px;
 	color: #3A4469;
+	text-decoration:none;
 }
 
 .button:hover{
@@ -65,7 +67,8 @@ h2{
 
 .mapbutton{
 	min-width:6em;
-	text-align: center;	
+	text-align: center;
+	margin:5px;	
 }
 
 #mainheader{
@@ -73,7 +76,8 @@ h2{
 	padding: 10px 5px 10px 5px;
 	text-align: center;
 	color: black;
-	font-family: 'Allerta', Helvetica, Arial, sans-serif;
+/* 	font-family: 'Allerta', Helvetica, Arial, sans-serif; */
+	font-weight: 500;
 	font-size: 40px;
 }
 .pageheader{
@@ -128,12 +132,15 @@ h2{
 	color: #3A4469;
 }
 .smart-table-header{
-	background-color:  #E6E9F0;	
+/* 	background-color:  #E6E9F0;	 */
+ 	background-color:  white;	 
 	font-weight: bold;
 	color: #3A4469;
+	text-decoration:none;
 }
 .smart-table{
-	border-spacing: 1px;
+	border-spacing: 0px;
+	border-top: 1px solid #eceeef;
 }
 .smart-table-cell{
 	padding: 4px;
@@ -142,7 +149,8 @@ h2{
 	background-color: #FFFFFF;
 }
 .smart-table-rowoff{
-	background-color: #EEEEEE;
+/* 	background-color: #EEEEEE; */
+	background-color: rgba(0,0,0,.05)
 }
 
 .smart-table-selectedrow{

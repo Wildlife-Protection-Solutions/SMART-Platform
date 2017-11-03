@@ -114,11 +114,12 @@
     <label class="block top-spacer"><fmt:message key="myaccount.email"/>:</label>
     <input type="text" name="email" class="block formtext" value="${email}"/>
     <div class="block infotext"><fmt:message key="myaccount.emailinfo"/></div>
-    <a class="block top-spacer" href="javascript:displayDialog('passwordDialog', 'main');"><fmt:message key="myaccount.changepassword"/></a>
-    <input class="block button top-spacer" style="min-width: 100px" type="submit" value="<fmt:message key="myaccount.save"/>" id="submit" />
-    
+    <a class="button" style="font-size:0.8em" href="javascript:displayDialog('passwordDialog', 'main');"><fmt:message key="myaccount.changepassword"/></a>
+    <p><br></p>
+    <p><input class="block button top-spacer" style="min-width: 100px" type="submit" value="<fmt:message key="myaccount.save"/>" id="submit" />
+    </p>
     <!-- 
-    <p><bR></p>
+    <p><br></p>
     <p><h2>Alternate Access to Your Account:</h2><button class="button" onClick="displayDialogCenter('SharedLinksDialog');return false;">Create a Token</button>Tokens can be used for programmatic access using your account credentials, treat a token like your password and keep it secure!
      -->
   </form>

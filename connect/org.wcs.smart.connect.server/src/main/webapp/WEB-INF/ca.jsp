@@ -36,7 +36,7 @@
 					<div class="table-cell smart-table-cell"></div>
 				</div>
 				<c:forEach var="ca" items="${cas}" varStatus="count">
-					<div data-cauuid ="${ca.getUuid()}" class="carow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
+					<div data-cauuid ="${ca.getUuid()}" class="carow table-row ${count.index % 2 == 1 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 						<div class="table-cell smart-table-cell">${ca.getLabel()}</div>
 						<div class="table-cell smart-table-cell">${ca.getStatus()}</div>
 						<div class="table-cell smart-table-cell"><a href="" class="info-icon" id="infoca" data-cauuid = "${ca.getUuid()}" title="<fmt:message key="ca.details"/>"></a></div>

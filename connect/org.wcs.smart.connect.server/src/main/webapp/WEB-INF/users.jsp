@@ -34,7 +34,7 @@
     	<button class="block button top-spacer" id="btnNewUser"><fmt:message key="users.createnewbutton"/></button>
   	</div>
   
-	<div class="top-spacer"  style="margin-left: -20px" >
+	<div class="top-spacer" >
 
 		<div class="user-tables-wrapper user-tables-float">
   		<div id="usertable" class="user-tables-float table-cell smart-table">
@@ -45,7 +45,7 @@
 				<div class="table-cell smart-table-cell"></div>
 			</div>
 			<c:forEach var="user" items="${users}" varStatus="count">
-			<div data-username ="${user.getUsername()}" class="smartuser userrow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
+			<div data-username ="${user.getUsername()}" class="smartuser userrow table-row ${count.index % 2 == 1 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 				<div class="table-cell smart-table-cell">${user.getUsername()}</div>
 				<div class="table-cell smart-table-cell">${user.getEmail()}</div>
 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" data-email="${user.getEmail()}" title="<fmt:message key="users.editusertooltip"/>" class="edituser update-icon"></a></div>
@@ -65,7 +65,7 @@
 				<div class="table-cell smart-table-cell"></div>
 			</div>
 			<c:forEach var="user" items="${inactiveusers}" varStatus="count">
-			<div data-username ="${user.getUsername()}" class="smartinactiveuser inactiveuserrow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
+			<div data-username ="${user.getUsername()}" class="smartinactiveuser inactiveuserrow table-row ${count.index % 2 == 1 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
 				<div class="table-cell smart-table-cell">${user.getUsername()}</div>
 				<div class="table-cell smart-table-cell">${user.getEmail()}</div>
 				<div class="table-cell smart-table-cell "><a href="" data-username = "${user.getUsername()}" title="<fmt:message key="users.activateusertooltip"/>" class="activateuser run-icon"></a></div>
@@ -112,7 +112,7 @@
     	<button class="block button top-spacer" id="btnNewRole"><fmt:message key="users.newrolebutton"/></button>
   	</div>
   
-	<div class="top-spacer"  style="margin-left: -20px" >
+	<div class="top-spacer" >
   		<div id="allroletable" class="table-cell smart-table">
   			<div class="table-row smart-table-header">
 				<div class="table-cell smart-table-cell"><fmt:message key="users.rolelabel"/></div>
@@ -148,7 +148,7 @@
     	<button class="block button top-spacer" id="btnNewDesktopUser"><fmt:message key="users.newdesktopuserbutton"/></button>
   	</div>
   
-	<div class="top-spacer"  style="margin-left: -20px" >
+	<div class="top-spacer"   >
   		<div id="deskptopuserstable" class="table-cell smart-table" style="width:50%">
   			<div class="table-row smart-table-header">
 				<div class="table-cell smart-table-cell"><fmt:message key="users.desktopuserlabel"/></div>

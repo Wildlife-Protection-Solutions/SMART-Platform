@@ -120,7 +120,7 @@ function createLinkTable(){
  		var date = new Date(links[i].expiresAt);
  		var row = tableCreateRow(parent,
  				[null, links[i].url, links[i].allowedIp, links[i].ownerUsername, date.toString() , null], 
- 				"linkrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 				"linkrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.uuid = links[i].uuid;
 
@@ -131,6 +131,7 @@ function createLinkTable(){
  		}else{
 	 		var aTag1 = document.createElement('a');
 	 		aTag1.setAttribute('href',openlink);
+	 		aTag1.setAttribute('style', "text-decoration:none");
 	 		aTag1.setAttribute('target',"_blank");
 	 		aTag1.innerHTML = resolve(openlink);
 	 		aTag1.title="Open Link in New Tab"

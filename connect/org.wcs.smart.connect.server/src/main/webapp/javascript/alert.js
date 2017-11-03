@@ -411,7 +411,7 @@ function createAlertTable(){
 
 		 		var row = tableCreateRowTDs(parent,
 		 				[alerts[i].properties.type, alerts[i].properties.caname, date , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
-		 				"alertrow " + (i % 4 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+		 				"alertrow " + ((i/2) % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "alertRow" + i;
 		 		row.dataset.uuid = alerts[i].properties.uuid;
 		 		row.dataset.alertdate = alerts[i].properties.date;

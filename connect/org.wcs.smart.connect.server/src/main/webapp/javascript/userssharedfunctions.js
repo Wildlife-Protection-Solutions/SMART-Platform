@@ -65,7 +65,7 @@ function createDesktopUserTable(){
  	for (var i = 0; i < users.length; i ++){
  		var row = tableCreateRow(parent, 
  				[users[i].smartUserId, users[i].caLabel, null, null], 
- 				"desktopuserrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 				"desktopuserrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.dataset.username = users[i].smartUserId;
  		row.dataset.cauuid = users[i].caUuid;
  		row.onclick = showDesktopUserInfo;

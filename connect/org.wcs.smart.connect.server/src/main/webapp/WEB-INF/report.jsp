@@ -45,9 +45,9 @@
 <div class="top-spacer">
   <div id="reporttable" class="catable table-cell smart-table">
   	<div class="table-row smart-table-header">
-		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('conservationArea')"><fmt:message key="report.conservationarea" /></a></div>
-		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('id')"><fmt:message key="report.id" /></a></div>
-		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('name')"><fmt:message key="report.name" /></a></div>
+		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('conservationArea')"><fmt:message key="report.conservationarea" /></a></div>
+		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('id')"><fmt:message key="report.id" /></a></div>
+		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')"><fmt:message key="report.name" /></a></div>
 		
 
 		<div class="table-cell smart-table-cell"></div>

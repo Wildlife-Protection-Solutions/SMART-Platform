@@ -34,7 +34,7 @@
 	<div class="block settings-header"><fmt:message key="settings.layerheader" /></div>
 	<button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
 	
-	<table id="layertable"  class="top-spacer" style="width:100%">
+	<table id="layertable"  class="top-spacer smart-table" style="width:100%">
 		<tr class="table-row smart-table-header"><th><fmt:message key="settings.layerorder" /></th><th><fmt:message key="settings.layername" /></th><th><fmt:message key="settings.type" /></th><th><fmt:message key="settings.onbydefault" /></th><th><fmt:message key="settings.mapboxid" /></th><th><fmt:message key="settings.layerlist" /></th><th><fmt:message key="settings.token" /></th><th><fmt:message key="actions" /></th>
 		</tr>
 	</table>
@@ -45,7 +45,7 @@
 	<div class="block settings-header"><fmt:message key="settings.styleheader" /></div> 
 	<button class="button top-spacer" id="btnNewType"><fmt:message key="settings.addnewstyle" /></button>
 	
-	<table id="typetable" class="top-spacer">
+	<table id="typetable" class="top-spacer smart-table">
 		<tr class="table-type-row smart-table-header"><th><fmt:message key="settings.alerttype" /></th>
 				<th><fmt:message key="settings.outlinecolor" /></th>
 				<th><fmt:message key="settings.opacity" /></th>
@@ -61,7 +61,7 @@
 	<div class="block settings-header"><fmt:message key="settings.defaultsheader" />
 	</div>
 	<form class="top-spacer" id="filter-form" name="filter-form" onsubmit="return false;">
-	<table id="defaultstable" class="top-spacer" style="width:100%">
+	<table id="defaultstable" class="top-spacer smart-table" style="width:100%">
 		<tr class="table-defaults-row smart-table-header">
 			<th>
 				
@@ -141,7 +141,7 @@
 <div class="overflow settingsTable">
 	<div class="block settings-header"><fmt:message key="settings.styleconfigurationheader" /></div>
 	<button class="button top-spacer" id="btnNewStyleConfiguration"><fmt:message key="settings.addnewstyleconfiguration" /></button>
-	<table id="styletable" class="top-spacer">
+	<table id="styletable" class="top-spacer smart-table">
   	<tr class="table-row smart-table-header">
 			<th class="table-cell smart-table-cell">Server Name</th>
 			<th class="table-cell smart-table-cell">Footer Text</th>

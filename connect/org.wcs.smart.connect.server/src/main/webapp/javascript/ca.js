@@ -373,7 +373,7 @@ function createCaTable(){
  	for (var i = 0; i < cas.length; i ++){
  		var row = tableCreateRow(parent, 
  				[cas[i].label, cas[i].status, null, null, null], 
- 				"carow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 				"carow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.cauuid = cas[i].uuid;
  		

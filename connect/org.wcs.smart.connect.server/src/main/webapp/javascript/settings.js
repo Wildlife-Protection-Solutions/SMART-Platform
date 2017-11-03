@@ -19,6 +19,7 @@ var iconOptionsLabels = ["ambulance","asterisk","battery low","binoculars","bomb
 /* configure events on html elements */
 window.onload = function(){
 	menuCheckOnload();
+
 	//add new style   ---  
 	document.getElementById("btnNewStyleConfiguration").onclick=clearAndShowNewStyleDialog;
 	if(numStyles > 0){
@@ -78,13 +79,15 @@ window.onload = function(){
 	document.getElementById("updateTypeButton").addEventListener("click", submitUpdateType);
 //	document.getElementById("btnResetDefaults").addEventListener("click", refreshDefaults);
 	document.getElementById("btnUpdateDefaults").addEventListener("click", saveDefaults);
-	
+
 	//Layer table and actions
 	refreshLayers();
-	refreshTypes();
+
 	refreshStyleConfiguration();
 	loadIconOptions();
 	refreshDefaults();
+	
+	setTimeout(refreshTypes, 50); //i don't know why but this table wasn't drawing properly 1 in 10 times without a delay, the delay seems to fix it.
 }
 
 
@@ -201,7 +204,7 @@ function createLayerTable(){
  		}
  		var row = tableCreateRowTDs(parent,
  				[layers[i].layerOrder, layers[i].layerName, typeText , active, layers[i].mapboxId, layers[i].wmsLayerList, null, null], 
- 				"layerrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 				"layerrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.id = "layerRow" + i;
  		row.dataset.uuid = layers[i].uuid;
 
@@ -445,7 +448,8 @@ function createTypeTable(){
 
  		var row = tableCreateRowTDs(parent,
  				[label, color, opacity, markerIcon, markerColor, spin, null], 
- 				"smart-table-rowoff typerow");
+ 				"layerrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		
  		row.id = "typerow" + i;
  		row.dataset.uuid = types[i].uuid;
  	

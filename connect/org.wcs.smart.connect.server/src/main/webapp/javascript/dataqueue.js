@@ -189,7 +189,7 @@ function createFileTable(){
 
 		 		var row = tableCreateRow(parent,
 		 				[null, ca, name, type , status, lastModified, uploadedDate, uploadedBy, null], 
-		 				"filerow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+		 				"filerow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "fileRow" + i;
 		 		row.dataset.uuid = uuid;
 		 		row.dataset.status = status;

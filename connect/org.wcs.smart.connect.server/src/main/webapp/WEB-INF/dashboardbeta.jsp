@@ -90,14 +90,14 @@
     	</div>
     	</div>
   	</div>
-  	<div id="configuration" style="border-top: 1px solid; padding-top:5px">
+  	<div id="configuration" style="border-top: 1px solid; padding-top:8px">
   		<form>
   			
-  			<p id="adminoptions" style="display:none">
-  				<a class="dashboard-alluser" href="" onClick="setDashboardDefaultToSelectedDashboard(); return false;"><fmt:message key="dashboardbeta.saveasdefaultdashboard"/></a>
-  				<a class="dashboard-adminonly" href="" onClick="editDashboard(); return false;"><fmt:message key="dashboardbeta.editdashboard"/></a> 
-	  			<a class="dashboard-adminonly" href="" onClick="deleteDashboard(); return false;" ><fmt:message key="dashboardbeta.deletedashboard"/></a>
-	  			<a class="dashboard-adminonly" href="" onClick="createNewDashboard(); return false;" ><fmt:message key="dashboardbeta.createdashboard"/></a> 
+  			<p id="adminoptions" style="display:none;padding:5px">
+  				<a class="dashboard-alluser button" href="" onClick="setDashboardDefaultToSelectedDashboard(); return false;"><fmt:message key="dashboardbeta.saveasdefaultdashboard"/></a>
+  				<a class="dashboard-adminonly button" href="" onClick="editDashboard(); return false;"><fmt:message key="dashboardbeta.editdashboard"/></a> 
+	  			<a class="dashboard-adminonly button" href="" onClick="deleteDashboard(); return false;" ><fmt:message key="dashboardbeta.deletedashboard"/></a>
+	  			<a class="dashboard-adminonly button" href="" onClick="createNewDashboard(); return false;" ><fmt:message key="dashboardbeta.createdashboard"/></a> 
   			</p>
   		</form>
   	</div>

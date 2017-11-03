@@ -67,7 +67,7 @@ function writeLinkList(){
  		//update user table
  		var row = tableCreateRow(parent, 
 					[null, link.order + "", null], 
-					"linkrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+					"linkrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 	
  		row.dataset.linkuuid = link.uuid;
  		row.dataset.linkurl = link.url;
@@ -351,7 +351,7 @@ function redrawManageAllTable(links){
  		
  		var row = tableCreateRow(tablediv,
  				[null, timeConverter(link.createdOn), link.adminCreated + "", null], 
- 				"quicklinkrow smart-table-rowon " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 				"quicklinkrow smart-table-rowon " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.uuid = link.uuid;
  		row.dataset.url = link.url;

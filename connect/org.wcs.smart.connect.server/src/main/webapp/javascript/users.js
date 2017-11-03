@@ -221,7 +221,7 @@ function setUserPrivileges(){
 		}else if (privis[i].type.toUpperCase() == "ROLE"){
 			var row = tableCreateRow(roleTable, 
 					[privis[i].name, ""], 
-					 (roleCnt % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+					 (roleCnt % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 			roleCnt++;
 			var deleteicon = document.createElement("a");
 			deleteicon.className="delete-icon";
@@ -305,7 +305,7 @@ function setRoleDetails(){
 		if (privis[i].type.toUpperCase() == "ACTION"){
 			var row = tableCreateRow(actionTable, 
 					[privis[i].name, privis[i].resourceName, ""], 
-					 (actionCnt % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+					 (actionCnt % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 			actionCnt++;
 			var deleteicon = document.createElement("a");
 			deleteicon.className="delete-icon";
@@ -474,7 +474,7 @@ function createUserTable(){
  	for (var i = 0; i < users.length; i ++){
  		var row = tableCreateRow(parent, 
  				[users[i].username, users[i].email, null, null], 
- 				"userrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 				"userrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.dataset.username = users[i].username;
  		row.onclick = showUserInfo;
  	
@@ -545,7 +545,7 @@ function createInactiveUserTable(){
  	for (var i = 0; i < users.length; i ++){
  		var row = tableCreateRow(parent, 
  				[users[i].username, users[i].email, null, null], 
- 				"inactiveuserrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 				"inactiveuserrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.dataset.username = users[i].username;
 // 		row.onclick = showUserInfo; //not for inactive users
  	
@@ -597,7 +597,7 @@ function createRoleTable(){
  	for (var i = 0; i < allRoles.length; i ++){
  		var row = tableCreateRow(parent, 
  				[allRoles[i].name, null, null], 
- 				"rolerow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 				"rolerow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.dataset.roleid = allRoles[i].key;
  		row.onclick = showRoleInfo;
  	
