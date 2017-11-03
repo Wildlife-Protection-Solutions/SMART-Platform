@@ -99,11 +99,21 @@ public class QueryFactory {
 		c.select(cb.count(root));
 		if (parameters != null) {
 			if (parameters.length == 1) {
-				c.where(cb.equal(getRoot(root, ((String)parameters[0][0])), parameters[0][1]));
+				if (parameters[0][1] == null) {
+					c.where(cb.isNull(getRoot(root, ((String)parameters[0][0]))));
+				} else {
+					c.where(cb.equal(getRoot(root, ((String)parameters[0][0])), parameters[0][1]));
+				}
+				
+				
 			}else {
 				Predicate[] p = new Predicate[parameters.length];
 				for (int i = 0; i < parameters.length; i ++) {
-					p[i] = cb.equal(getRoot(root, ((String)parameters[i][0])), parameters[i][1]);
+					if (parameters[i][1] == null) {
+						p[i] = cb.isNull(getRoot(root, ((String)parameters[i][0])));
+					} else {
+						p[i] = cb.equal(getRoot(root, ((String)parameters[i][0])), parameters[i][1]);
+					}
 				}
 				c.where(p);
 			}
