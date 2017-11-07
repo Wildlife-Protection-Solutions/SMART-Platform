@@ -39,6 +39,7 @@ import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -182,8 +183,10 @@ public class PlanTargetEngine {
         Point point = fact.createPoint(c);
         
 		for(Track t : getAllTracks(plan, session) ){
-			if(GeometryUtils.distanceInMeters(t.getLineString(), point) <= distanceForCompletion ){
-				return true;
+			for (LineString ls : t.getLineStrings()) {
+				if(GeometryUtils.distanceInMeters(ls, point) <= distanceForCompletion ){
+					return true;
+				}
 			}
 		}
 		
