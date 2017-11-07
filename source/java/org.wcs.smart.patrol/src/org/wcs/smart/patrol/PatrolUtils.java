@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -99,7 +100,7 @@ public class PatrolUtils {
 		}
 		LineString track = TrackUtil.convertToLineString(coordinates, Track.ZTIMEZONE);
 		Track t = new Track();
-		t.setLineString(track);
+		t.setLineStrings(Arrays.asList(track));
 		return t;
 	}
 	

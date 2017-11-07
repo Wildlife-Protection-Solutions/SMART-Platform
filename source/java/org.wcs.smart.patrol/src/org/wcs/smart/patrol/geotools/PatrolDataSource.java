@@ -41,6 +41,7 @@ public class PatrolDataSource extends AbstractDataStore{
 
 	public static final String WAYPOINT_TYPE = "Waypoint"; //$NON-NLS-1$
 	public static final String TRACK_TYPE = "Track"; //$NON-NLS-1$
+	public static final String TRACK_PART_TYPE = "TrackPart"; //$NON-NLS-1$
 	
 	private Patrol patrol;
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
@@ -67,7 +68,7 @@ public class PatrolDataSource extends AbstractDataStore{
 	 */
 	@Override
 	public String[] getTypeNames()  {
-		return new String[]{WAYPOINT_TYPE, TRACK_TYPE};
+		return new String[]{WAYPOINT_TYPE, TRACK_TYPE, TRACK_PART_TYPE};
 	}
 	/* (non-Javadoc)
 	 * @see org.geotools.data.AbstractDataStore#getFeatureReader(java.lang.String)
@@ -91,6 +92,8 @@ public class PatrolDataSource extends AbstractDataStore{
 					type = PatrolFeatureFactory.createWaypointSchema();
 				} else if (typeName.equals(TRACK_TYPE)) {
 					type = PatrolFeatureFactory.createTrackSchema();
+				} else if (typeName.equals(TRACK_PART_TYPE)) {
+					type = PatrolFeatureFactory.createTrackPartSchema();
 				}
 			}catch(SchemaException ex){
 				throw new IOException(Messages.PatrolDataSource_Error_CouldNoGenerateSchema + ex.getLocalizedMessage(), ex);

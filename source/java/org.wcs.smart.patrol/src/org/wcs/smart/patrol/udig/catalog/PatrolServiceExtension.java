@@ -29,6 +29,8 @@ import java.util.Map;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Udig service extension for smart conservation area 
@@ -88,6 +90,12 @@ public class PatrolServiceExtension implements ServiceExtension {
 		return params;
 	}
 
+	public static URL createURL(Patrol patrol){
+		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+		params.put(PATROL_UUID_KEY, UuidUtils.uuidToString(patrol.getUuid()));
+		return createURL(params);
+	}
+	
 	/**
 	 * Converts parameters into smart service url.
 	 * 

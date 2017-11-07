@@ -115,7 +115,6 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
-import org.wcs.smart.patrol.ui.PatrolTrackPointDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
@@ -502,9 +501,8 @@ public class PatrolLegDayInputComposite {
 		viewTrackPoints.setEnabled(false);
 		viewTrackPoints.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
-				//showImportWizard();
-				PatrolTrackPointDialog tpd = new PatrolTrackPointDialog(viewTrackPoints.getShell(), patrolLegDate.getTrack(), editor.getPatrolEditor().canEdit() == null);
-				tpd.open();
+				PatrolTrackEditDialog td = new PatrolTrackEditDialog(viewTrackPoints.getShell(), patrolLegDate, editor.getPatrolEditor().canEdit() == null);
+				td.open();
 				ApplicationGIS.getToolManager().setCurrentEditor(editor.getPatrolEditor());
 			}
 		});

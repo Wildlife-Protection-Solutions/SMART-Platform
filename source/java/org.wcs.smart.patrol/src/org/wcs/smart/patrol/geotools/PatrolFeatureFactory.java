@@ -32,6 +32,7 @@ import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.model.TrackPart;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -47,11 +48,17 @@ public class PatrolFeatureFactory {
 	}
 	
 	public static SimpleFeatureType createTrackSchema() throws SchemaException{
-		String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String"; //$NON-NLS-1$
+		String spec = "the_geom:MultiLineString:srid=4326,fid:String,distance:Double,day:Date,leg:String"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.TRACK_TYPE, spec);
 		return type;
 	}
 	
+	public static SimpleFeatureType createTrackPartSchema() throws SchemaException{
+		String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String,uid:String"; //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.TRACK_PART_TYPE, spec);
+		return type;
+	}
+
 	public static SimpleFeature getWaypointAsFeature(SimpleFeatureType ftype, PatrolWaypoint waypoint){
 		//String spec = "geom:Point:srid=4326,fid:String,id:integer,date:Date,time:Time,comment:String";
 		Object data[] = new Object[7];
@@ -71,11 +78,11 @@ public class PatrolFeatureFactory {
 	}
 	
 	public static SimpleFeature getTrackAsFeature(SimpleFeatureType ftype, Track track){
-		//String spec = "geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String";
+		//String spec = "the_geom:MultiLineString:srid=4326,fid:String,distance:Double,day:Date,leg:String";
 		String fid = ftype.getName() + "." + TRACK_DT_FORMAT.format(track.getPatrolLegDay().getDate()) + "." + track.getPatrolLegDay().getPatrolLeg().getId();  //$NON-NLS-1$ //$NON-NLS-2$
 		Object data[] = new Object[5];
 		try{
-			data[0] = track.getLineString();
+			data[0] = track.getGeometry();
 		}catch (Exception ex){
 			SmartPatrolPlugIn.log(ex.getMessage(), ex);
 		}
@@ -83,6 +90,25 @@ public class PatrolFeatureFactory {
 		data[2] = track.getDistance();
 		data[3] = track.getPatrolLegDay().getDate();
 		data[4] = track.getPatrolLegDay().getPatrolLeg().getId();
+		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
+	}
+
+	public static SimpleFeature getTrackPartAsFeature(SimpleFeatureType ftype, TrackPart trackPart){
+		//String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String,uid:String";
+		Track track = trackPart.getTrack();
+		String fid = ftype.getName() + "." + TRACK_DT_FORMAT.format(track.getPatrolLegDay().getDate()) + "." + track.getPatrolLegDay().getPatrolLeg().getId();  //$NON-NLS-1$ //$NON-NLS-2$
+		Object data[] = new Object[6];
+		try{
+			data[0] = trackPart.getLineString();
+		}catch (Exception ex){
+			SmartPatrolPlugIn.log(ex.getMessage(), ex);
+		}
+		data[1] = fid;
+		data[2] = track.getDistance();
+		data[3] = track.getPatrolLegDay().getDate();
+		data[4] = track.getPatrolLegDay().getPatrolLeg().getId();
+		data[5] = trackPart.getUid();
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}

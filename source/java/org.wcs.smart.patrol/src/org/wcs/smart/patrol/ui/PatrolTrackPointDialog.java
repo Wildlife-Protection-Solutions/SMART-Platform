@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.ui;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -44,26 +46,32 @@ import com.vividsolutions.jts.geom.LineString;
  * @since 3.0.0
  */
 public class PatrolTrackPointDialog extends TrackPointDialog {
-
-	private Track track;
-	private Track editTrack;	//copy of track for editing
 	
+	private Track track;
+
+	private int lsIndex;
+	private LineString lineString; //lineString for editing
+	
+	public PatrolTrackPointDialog(Shell parentShell, Track t, boolean canEdit) {
+		this(parentShell, t, 0, canEdit);
+	}
+
 	/**
 	 * @param parentShell parent shell
 	 * @param t the track to display
+	 * @param lsIndex index of a linestring to edit
 	 * @param canEdit if the track can be editted
 	 */
-	public PatrolTrackPointDialog(Shell parentShell, Track t, boolean canEdit) {
+	public PatrolTrackPointDialog(Shell parentShell, Track t, int lsIndex, boolean canEdit) {
 		super(parentShell, canEdit);
 		this.track = t;
+		this.lsIndex = lsIndex;
 		
-		editTrack = new Track();
 		try{
-			editTrack.setLineString(t.getLineString());
+			lineString = track.getLineStrings().get(lsIndex);
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
 		}
-		editTrack.setUuid(track.getUuid());
 	}
 
 	@Override
@@ -73,22 +81,17 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 
 	@Override
 	protected UUID getEditTrackUUid() {
-		return editTrack.getUuid();
+		return track.getUuid();
 	}
 
 	@Override
 	public LineString getEditTrackLineString() {
-		try{
-			return editTrack.getLineString();
-		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
-			return null;
-		}
+		return lineString;
 	}
 
 	@Override
 	protected void setEditTrackLineString(LineString ls) {
-		editTrack.setLineString(ls);
+		lineString = ls;
 	}
 
 	@Override
@@ -97,23 +100,29 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
 	protected void okPressed(){
-		Patrol p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
-		PatrolLegDay pld = track.getPatrolLegDay();
 		try{
 			//save then close
-			if (editTrack.getLineString() == null){
+			List<LineString> lineStrings = new ArrayList<>(track.getLineStrings());
+			if (lineString != null) {
+				lineStrings.set(lsIndex, lineString);
+			} else {
+				lineStrings.remove(lsIndex);
+			}
+			if (lineStrings.isEmpty()) {
 				//delete track
 				track.getPatrolLegDay().setTrack(null);
 				track.setPatrolLegDay(null);
-			}else{
-				track.setLineString(editTrack.getLineString());
+			} else {
+				track.setLineStrings(lineStrings);
 			}
 		}catch (Exception ex){
 			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
 			return;
 		}
 		//save and fire
-		SavePatrolPartJob saveJob = new SavePatrolPartJob(p,pld); 		
+		PatrolLegDay pld = track.getPatrolLegDay();
+		Patrol p = pld.getPatrolLeg().getPatrol();
+		SavePatrolPartJob saveJob = new SavePatrolPartJob(p, pld); 		
 		saveJob.schedule();
 		try{
 			saveJob.join();

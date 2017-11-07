@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.persistence.Basic;
@@ -34,9 +37,12 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
@@ -55,7 +61,10 @@ public class Track extends UuidItem {
 	private byte[] geom;
 	private Float distance;
 	private PatrolLegDay patrolLegDay;
-	private LineString ls;
+
+	private Geometry geometry;
+	private List<LineString> lsList;
+	private List<TrackPart> trackParts;
 	
 	public Track(){
 		
@@ -90,31 +99,70 @@ public class Track extends UuidItem {
 	}
 	
 	@Transient
-	public LineString getLineString() throws ParseException{
-		if (this.ls == null && geom != null){
+	public Geometry getGeometry() throws ParseException {
+		if (this.geometry == null && geom != null){
 			WKBReader reader = new WKBReader();
-			this.ls = (LineString)reader.read(geom);
+			geometry = reader.read(geom);
 		}
-		return this.ls;
+		return geometry;
 	}
+
+	@Transient
+	public List<TrackPart> getTrackParts() throws ParseException {
+		if (trackParts == null) {
+			trackParts = new ArrayList<>();
+			List<LineString> lsLst = getLineStrings();
+			for (int i = 0; i < lsLst.size(); i++) {
+				trackParts.add(new TrackPart(this, lsLst.get(i), i));
+			}
+		}
+		return Collections.unmodifiableList(trackParts);
+	}
+	
+	@Transient
+	public List<LineString> getLineStrings() throws ParseException {
+		if (lsList == null) {
+			lsList = new ArrayList<>();
+			Geometry gmt = getGeometry();
+			if (gmt instanceof MultiLineString) {
+				MultiLineString mls = (MultiLineString) gmt;
+				for (int i = 0; i < mls.getNumGeometries(); i++) {
+					Geometry g = mls.getGeometryN(i);
+					if (g instanceof LineString) {
+						lsList.add((LineString)g);
+					}
+				}
+			} else if (gmt instanceof LineString) {
+				lsList.add((LineString)gmt);
+			}
+		}
+		return Collections.unmodifiableList(lsList);
+	}
+	
 	/**
-	 * Sets the linestring.  Also updates the distance field.  Linestring
-	 * must be in EPSG:4326
+	 * Sets the linestring array. Also updates the distance field. Linestring must be in EPSG:4326
 	 * 
-	 * @param ls new linestring
+	 * @param lsArray new linestring array
 	 */
-	public void setLineString(LineString ls){
-		if (ls == null){
-			this.ls = null;
-			this.distance = 0.0f;
+	@Transient
+	public void setLineStrings(List<LineString> ls){
+		lsList = null;
+		trackParts = null;
+		this.distance = 0.0f;
+		if (ls == null || ls.isEmpty()) {
+			this.geometry = null;
 			this.geom = null;
 			return;
 		}
-		this.distance = (float)(GeometryUtils.distanceInMeters(ls) / 1000.0);
+
+		for (LineString lineString : ls) {
+			this.distance += (float)(GeometryUtils.distanceInMeters(lineString) / 1000.0);
+		}
 		
 		WKBWriter writer = new WKBWriter(3);
-		this.geom = writer.write(ls);
-		this.ls = ls;
+		geometry = new MultiLineString(ls.toArray(new LineString[ls.size()]), GeometryFactoryProvider.getFactory());
+		this.geom = writer.write(geometry);
 	}
+
 	
 }

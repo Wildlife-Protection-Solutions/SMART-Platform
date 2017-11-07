@@ -25,6 +25,7 @@ package org.wcs.smart.patrol.internal.ui;
 import java.sql.Time;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -438,7 +439,7 @@ public class MergePatrolLegDialog extends TitleAreaDialog{
 		LineString ls = geomFact.createLineString(orderedPoints);
 		
 		Track newTrack = new Track();
-		newTrack.setLineString(ls);
+		newTrack.setLineStrings(Arrays.asList(ls));
 		newTrack.setDistance((float) ls.getLength());
 		WKBWriter writer = new WKBWriter();
 		newTrack.setGeom(writer.write(ls));

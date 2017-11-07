@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui.importwp;
 import java.sql.Time;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -399,7 +400,7 @@ public class PatrolGPSDataImport {
 		if (coordinates.size() == 1) return null; //throw new RuntimeException("Multiple points required to generate a track.  Only a single point found."); 
 		LineString track = ObservationGPSDataImport.convertToLineString(coordinates, Track.ZTIMEZONE);
 		Track t = new Track();
-		t.setLineString(track);
+		t.setLineStrings(Arrays.asList(track));
 		return t;
 	}
 	
