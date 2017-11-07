@@ -132,16 +132,7 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		//========links========
 		ToolBar bar = new ToolBar(tableCompOuter, SWT.HORIZONTAL);
 		
-		ToolItem importItem = new ToolItem(bar, SWT.PUSH);
-		importItem.setText(Messages.TracksComposite_Import);
-		importItem.setToolTipText(Messages.TracksComposite_Import_Tooltip);
-		importItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_TRACK_ICON));
-		importItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				importTracks();	
-			}
-		});
+		addImportToolbarItem(bar);
 		
 		editItem = new ToolItem(bar, SWT.PUSH);
 		editItem.setText(Messages.TracksComposite_Edit);
@@ -356,6 +347,19 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		splitItem.setEnabled(isSelected);
 		deleteItem.setEnabled(isSelected);
 		mergeItem.setEnabled(isSelected);
+	}
+
+	protected void addImportToolbarItem(ToolBar bar) {
+		ToolItem importItem = new ToolItem(bar, SWT.PUSH);
+		importItem.setText(Messages.TracksComposite_Import);
+		importItem.setToolTipText(Messages.TracksComposite_Import_Tooltip);
+		importItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_TRACK_ICON));
+		importItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				importTracks();	
+			}
+		});
 	}
 	
 	protected abstract void importTracks();
