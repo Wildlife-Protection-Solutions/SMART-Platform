@@ -27,6 +27,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -675,8 +676,15 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			pld.setTrack(patrolTrack);
 		}
 		
-		LineString ll = JsonTrackUtils.addPointToTrack(pld.getTrack().getLineString(), pnt, time);
-		pld.getTrack().setLineString(ll);
+		List<LineString> lineStrings = pld.getTrack().getLineStrings();
+		if (!lineStrings.isEmpty()) {
+			LineString ll = JsonTrackUtils.addPointToTrack(lineStrings.get(lineStrings.size()-1), pnt, time);
+			lineStrings.set(lineStrings.size()-1, ll);
+			pld.getTrack().setLineStrings(lineStrings);
+		} else {
+			LineString ll = JsonTrackUtils.addPointToTrack(null, pnt, time);
+			pld.getTrack().setLineStrings(Arrays.asList(ll));
+		}
 	}
 	
 	public static final void addPointToTrack(PatrolLeg leg, Coordinate pnt, Date time, Session session) throws Exception{

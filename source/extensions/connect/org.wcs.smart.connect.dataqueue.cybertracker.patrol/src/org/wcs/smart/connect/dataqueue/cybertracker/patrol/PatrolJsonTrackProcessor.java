@@ -25,6 +25,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -130,8 +131,16 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 						t.setPatrolLegDay(pld);
 					}
 					
-					LineString newLs = JsonTrackUtils.addPointToTrack(t.getLineString(), new Coordinate(x,y), dt);
-					t.setLineString(newLs);
+					List<LineString> lineStrings = t.getLineStrings();
+					if (!lineStrings.isEmpty()) {
+						LineString newLs = JsonTrackUtils.addPointToTrack(lineStrings.get(lineStrings.size()-1), new Coordinate(x,y), dt);
+						lineStrings.set(lineStrings.size()-1, newLs);
+						t.setLineStrings(lineStrings);
+					} else {
+						LineString newLs = JsonTrackUtils.addPointToTrack(null, new Coordinate(x,y), dt);
+						t.setLineStrings(Arrays.asList(newLs));
+					}
+
 					processed.add(feature);
 					
 					if (pld.getPatrolLeg().getPatrol().getUuid() != null) modifiedPatrols.add(pld.getPatrolLeg().getPatrol());
