@@ -206,15 +206,16 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 				
 		//go through the track computing the speed between any two points
 		try{
-			LineString ls = track.getLineString();
-			Coordinate[] c = ls.getCoordinates();	
-			for (int i = 1; i < c.length; i ++){
-				Coordinate previous = c[i-1];
-				Coordinate current = c[i];
-				double speed = computeSpeed(previous,  current, maxSpeed);
-				if  (speed > maxSpeed){
-					String message = MessageFormat.format(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_TrackSpeedExceeded, task.getLocale()), DISTANCE_FORMATTER.format(speed), maxSpeed, current.x, current.y);
-					return createError(task, session, x, ls, message);
+			for (LineString ls : track.getLineStrings()) {
+				Coordinate[] c = ls.getCoordinates();	
+				for (int i = 1; i < c.length; i ++){
+					Coordinate previous = c[i-1];
+					Coordinate current = c[i];
+					double speed = computeSpeed(previous,  current, maxSpeed);
+					if  (speed > maxSpeed){
+						String message = MessageFormat.format(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_TrackSpeedExceeded, task.getLocale()), DISTANCE_FORMATTER.format(speed), maxSpeed, current.x, current.y);
+						return createError(task, session, x, ls, message);
+					}
 				}
 			}
 		}catch (Exception ex){

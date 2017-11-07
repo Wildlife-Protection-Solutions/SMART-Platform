@@ -86,7 +86,7 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 					if ((pld.getDate().equals(endDate) || pld.getDate().before(endDate)) && (pld.getDate().equals(startDate)  || pld.getDate().after(startDate))){
 						Track t = pld.getTrack();
 						try{
-							if (t != null && t.getLineString() != null){
+							if (t != null && t.getGeometry() != null){
 								tracks.add(new TrackLocationData(t));
 							}
 						}catch (Exception ex){

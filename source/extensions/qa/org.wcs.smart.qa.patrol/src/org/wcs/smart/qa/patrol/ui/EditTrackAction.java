@@ -76,13 +76,14 @@ public class EditTrackAction  implements IQaAction {
 		
 		LineString ls = null;
 		try{
-			ls = track.getLineString();
+			ls = track.getLineStrings().get(0); //FIXME: QQQQQ this is not correct!!!
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
 			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_ParseError);
 			return false;
 		}
 
+		//TODO: QQQQQ new way of track and track editor!!!
 		PatrolTrackPointDialog dialog = new PatrolTrackPointDialog(Display.getDefault().getActiveShell(), track, true);
 		dialog.open();
 		if (!ls.equalsExact(dialog.getEditTrackLineString())){

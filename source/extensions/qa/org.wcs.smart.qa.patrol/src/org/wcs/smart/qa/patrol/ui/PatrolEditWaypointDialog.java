@@ -184,7 +184,7 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 			
 			//create a layer for the track
 			try{
-				if (patrolTrack != null && patrolTrack.getLineString() != null){
+				if (patrolTrack != null && patrolTrack.getGeometry() != null){
 					SimpleFeatureType schema = PatrolFeatureFactory.createTrackSchema();
 					SimpleFeature feature = PatrolFeatureFactory.getTrackAsFeature(schema, patrolTrack);
 					

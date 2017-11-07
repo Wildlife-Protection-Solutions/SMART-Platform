@@ -49,7 +49,7 @@ public class TrackLocationData implements ILocationRoutineData {
 	@Override
 	public Geometry getGeometry() {
 		try {
-			return track.getLineString();
+			return track.getGeometry();
 		} catch (ParseException e) {
 			Logger.getLogger(TrackLocationData.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			return null;
