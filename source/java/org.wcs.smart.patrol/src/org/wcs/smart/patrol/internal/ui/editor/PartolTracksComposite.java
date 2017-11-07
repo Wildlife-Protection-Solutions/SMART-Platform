@@ -22,7 +22,6 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,17 +31,15 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.styling.FeatureTypeStyle;
@@ -65,11 +62,8 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
-import org.wcs.smart.patrol.internal.ui.importwp.PatrolImportGpsDataWizard;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.TrackPart;
@@ -249,26 +243,15 @@ public class PartolTracksComposite extends TracksComposite {
 			}
 		}
 	}
+
+	@Override
+	protected void addImportToolbarItem(ToolBar bar) {
+		//nothing
+	}
 	
 	@Override
 	protected void importTracks() {
-		final PatrolImportGpsDataWizard wizard = new PatrolImportGpsDataWizard(patrolLegDay, GPSDataImport.ImportType.TRACK);		
-
-		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try {
-			pmd.run(false, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName("LOAD_WIZARD_PROGRESS_MSG");
-					WizardDialog dialog = new WizardDialog(getShell(), wizard);
-					monitor.setTaskName("Messages.MissionDayComposite_DisplayingWizard");
-					dialog.open();
-					refresh(false);
-				}
-			});
-		} catch (Exception ex) {
-			SmartPatrolPlugIn.displayLog("Messages.PatrolLegDayInputComposite_ErrorImportTracksWizard" + ex.getLocalizedMessage(), ex);
-		}
+		//nothing
 	}
 
 	@Override
