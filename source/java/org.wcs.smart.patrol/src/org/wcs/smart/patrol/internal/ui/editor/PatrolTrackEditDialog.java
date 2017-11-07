@@ -36,7 +36,9 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.map.TracksComposite.ITracksCompositeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -54,17 +56,38 @@ public class PatrolTrackEditDialog extends TitleAreaDialog {
 	private PartolTracksComposite cmp;
 	private boolean canEdit;
 
+	private Track trackBackup;
+	
 	public PatrolTrackEditDialog(Shell shell, PatrolLegDay patrolLegDay, boolean canEdit) {
 		super(shell);
 		this.patrolLegDay = patrolLegDay;
 		this.canEdit = canEdit;
-//		editTrack = new Track();
-//		try{
-//			editTrack.setLineString(t.getLineString());
-//		}catch (Exception ex){
-//			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
-//		}
-//		editTrack.setUuid(track.getUuid());
+		trackBackup = backupTrack(patrolLegDay);
+	}
+
+	private Track backupTrack(PatrolLegDay patrolLegDay) {
+		if (patrolLegDay.getTrack() == null) {
+			return null;
+		}
+		try {
+			Track t = new Track();
+			t.setLineStrings(patrolLegDay.getTrack().getLineStrings());
+			return t;
+		} catch (Exception ex) {
+			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+		}
+		return null;
+	}
+
+	private void restoreTrack(PatrolLegDay patrolLegDay, Track track) {
+		if (track == null) {
+			return;
+		}
+		try{
+			patrolLegDay.getTrack().setLineStrings(track.getLineStrings());
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+		}
 	}
 
 	@Override
@@ -117,16 +140,21 @@ public class PatrolTrackEditDialog extends TitleAreaDialog {
 					null, 
 					"There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
 			int ret = md.open();
-			if (ret == 2) {
-				//cancel
-				return false;
-			}else if (ret == 0){
-				//yes
+			switch (ret) {
+			case 0: //yes
 				if (!saveChanges()){
 					return false;
 				}else{
 					setReturnCode(IDialogConstants.OK_ID);
 				}
+				break;
+			case 1: //no
+				restoreTrack(patrolLegDay, trackBackup);
+				break;
+			case 2: //cancel
+				return false;
+			default: //should never happen
+				return false;
 			}
 		}
 		return super.close();
@@ -139,12 +167,14 @@ public class PatrolTrackEditDialog extends TitleAreaDialog {
 			
 				session.saveOrUpdate(patrolLegDay);
 				session.getTransaction().commit();
+				
 			} catch (Exception ex) {
 				SmartPlugIn.displayLog("Error saving changes.  Please close dialog and try again." + "\n\n" + ex.getMessage(), ex);
 				return false;
 			}
 		}
 
+		trackBackup = backupTrack(patrolLegDay);
 		isChanged = false;
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, patrolLegDay);

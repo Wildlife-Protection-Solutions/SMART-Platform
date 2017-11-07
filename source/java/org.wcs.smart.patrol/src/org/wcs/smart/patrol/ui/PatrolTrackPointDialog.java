@@ -27,11 +27,10 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.map.TrackPointDialog;
 
@@ -74,6 +73,14 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 		}
 	}
 
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create OK and Cancel buttons by default
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
+		Button btn = createButton(parent, IDialogConstants.OK_ID, "Apply", true);
+		btn.setEnabled(false);
+	}
+	
 	@Override
 	protected TimeZone getTrackZTimezone() {
 		return Track.ZTIMEZONE;
@@ -119,19 +126,8 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
 			return;
 		}
-		//save and fire
-		PatrolLegDay pld = track.getPatrolLegDay();
-		Patrol p = pld.getPatrolLeg().getPatrol();
-		SavePatrolPartJob saveJob = new SavePatrolPartJob(p, pld); 		
-		saveJob.schedule();
-		try{
-			saveJob.join();
-			PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_TRACKS, pld);
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			setModified(false);
-		}catch (InterruptedException ex){
-			throw new IllegalStateException("Save Job Interrupted", ex); //$NON-NLS-1$
-		}
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		setModified(false);
 	}
 	
 }

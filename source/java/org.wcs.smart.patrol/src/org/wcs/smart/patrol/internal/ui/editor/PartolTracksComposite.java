@@ -461,7 +461,7 @@ public class PartolTracksComposite extends TracksComposite {
 			}
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
 			selectLastTool();
-			refresh(false);
+			refresh(true);
 		}
 	}
 
