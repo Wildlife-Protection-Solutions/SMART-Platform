@@ -56,6 +56,7 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.selection.SelectCommand;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -81,6 +82,7 @@ import org.wcs.smart.ui.map.tool.SplitTrackTool;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPoint;
@@ -457,7 +459,7 @@ public class PartolTracksComposite extends TracksComposite {
 					SmartPlugIn.displayLog("Selected track part do not belong to current track.", null);
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog("Messages.TracksComposite_CouldNotParseLinestring", ex);
+				SmartPlugIn.displayLog("Could not parse linestring.", ex);
 			}
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
 			selectLastTool();
@@ -467,7 +469,25 @@ public class PartolTracksComposite extends TracksComposite {
 
 	@Override
 	protected void zoomTrack() {
-		// TODO ZZZZZZ implement
+		IStructuredSelection sel = (IStructuredSelection) getTrackViewer().getSelection();
+		Envelope env = null;
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			TrackPart track = (TrackPart) iterator.next();
+			try{
+				if (env == null){
+					env = track.getLineString().getEnvelopeInternal();
+				}else{
+					env.expandToInclude(track.getLineString().getEnvelopeInternal());
+				}
+			}catch (Exception ex){
+				SmartPlugIn.displayLog("Could not parse linestring.", ex);
+			}
+			
+		}
+		if (env != null){
+			SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, GeometryUtils.SMART_CRS);
+			getMap().sendCommandASync(bbox);
+		}
 	}
 
 	private Style buildTrackStyle(){
