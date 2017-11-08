@@ -96,12 +96,10 @@ public class PartolTracksComposite extends TracksComposite {
 	private PatrolService patrolService = null;
 	
 	private PatrolLegDay patrolLegDay;
-	private boolean canEdit;
 
 	public PartolTracksComposite(Composite parent, PatrolLegDay patrolLegDay, boolean canEdit) {
-		super(parent);
+		super(parent, canEdit);
 		this.patrolLegDay = patrolLegDay;
-		this.canEdit = canEdit;
 		createControls();
 		updateInput();
 	}
@@ -431,13 +429,15 @@ public class PartolTracksComposite extends TracksComposite {
 	@Override
 	protected void editTrack() {
 		IStructuredSelection sel = (IStructuredSelection) getTrackViewer().getSelection();
+		boolean changed = false;
 		if (sel != null && !sel.isEmpty()) {
 			LineString ls = ((TrackPart) sel.getFirstElement()).getLineString();
 			try{
 				int index = patrolLegDay.getTrack().getLineStrings().indexOf(ls);
 				if (index >= 0) {
-					PatrolTrackPointDialog tpd = new PatrolTrackPointDialog(getShell(), patrolLegDay.getTrack(), index, canEdit);
+					PatrolTrackPointDialog tpd = new PatrolTrackPointDialog(getShell(), patrolLegDay.getTrack(), index, isEditAllowed());
 					tpd.open();
+					changed = !ls.equalsExact(patrolLegDay.getTrack().getLineStrings().get(index));
 				} else {
 					SmartPlugIn.displayLog("Selected track part do not belong to current track.", null);
 				}
@@ -446,7 +446,7 @@ public class PartolTracksComposite extends TracksComposite {
 			}
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
 			selectLastTool();
-			refresh(true);
+			refresh(changed);
 		}
 	}
 
