@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.qa.patrol.ui;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,7 +32,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.ui.PatrolTrackPointDialog;
+import org.wcs.smart.patrol.ui.PatrolTrackEditDialog;
 import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
@@ -73,25 +74,43 @@ public class EditTrackAction  implements IQaAction {
 			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_NotFoundDialogMsg);
 			return true;
 		}
-		
-		LineString ls = null;
+
+		List<LineString> lsList = Collections.emptyList();
 		try{
-			ls = track.getLineStrings().get(0); //FIXME: QQQQQ this is not correct!!!
+			lsList = track.getLineStrings();
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
 			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_ParseError);
 			return false;
 		}
 
-		//TODO: QQQQQ new way of track and track editor!!!
-		PatrolTrackPointDialog dialog = new PatrolTrackPointDialog(Display.getDefault().getActiveShell(), track, true);
+		PatrolTrackEditDialog dialog = new PatrolTrackEditDialog(Display.getDefault().getActiveShell(), track.getPatrolLegDay(), true);
 		dialog.open();
-		if (!ls.equalsExact(dialog.getEditTrackLineString())){
-			item.setStatus(Status.FIXED);
-			item.setFixMessage(Messages.EditTrackAction_ModifiedMsg);
-			item.setGeometryObject(dialog.getEditTrackLineString());			
-			PatrolEventManager.getInstance().patrolSaved(p, true);
-			return true;
+
+		try{
+			Track editTrack = track.getPatrolLegDay().getTrack();
+			List<LineString> editList = editTrack.getLineStrings();
+			boolean isSame = editList != null && lsList.size() == editList.size();
+			if (isSame) {
+				for (int i = 0; i < lsList.size(); i++) {
+					if (!lsList.get(i).equals(editList.get(i))) {
+						isSame = false;
+						break;
+					}
+				}
+			}
+
+			if (!isSame){
+				item.setStatus(Status.FIXED);
+				item.setFixMessage(Messages.EditTrackAction_ModifiedMsg);
+				item.setGeometryObject(editTrack.getGeometry());			
+				PatrolEventManager.getInstance().patrolSaved(p, true);
+				return true;
+			}
+		}catch (Exception ex){
+			QaPlugIn.log(ex.getMessage(), ex);
+			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_ParseError);
+			return false;
 		}
 		return false;
 	}
