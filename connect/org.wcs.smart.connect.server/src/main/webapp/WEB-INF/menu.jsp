@@ -6,13 +6,13 @@
  <div style="display:flex;flex-flow:column nowrap">
 
 
-<div style="height:28px"><a href="javascript:hamburgerMenu()"><img height="24" width="24" src="../css/images/hamburger.png"></a>
+<div style="height:24px;padding:3px;"><a href="javascript:hamburgerMenu()"><img height="24" width="24" src="../css/images/hamburger.png"></a>
 </div>
 
 <c:forEach var="item" items="${menuitems}">
- 	<div style="display=flex;flex-flow:row nowrap;height:28px;align-items: center">
- 		<a href="${item[1]}" "><img title="${item[0]}" height="24" width="24" src="../css/images/${item[3]}"/></a>
-		<div class="textMenu" style="display:none;vertical-align:super"><a href="${item[1]}" class="${item[2]}">${item[0]}</a></div>
+ 	<div style="display:flex;flex-flow:row nowrap;height:24px;align-items: center" class="${item[2]}" onclick="window.location='${item[1]}'">
+ 		<img title="${item[0]}" height="24" width="24" src="../css/images/${item[3]}"/>
+		<div class="textMenu" style="display:none;vertical-align:super">${item[0]}</div>
 	</div>
  </c:forEach>
 

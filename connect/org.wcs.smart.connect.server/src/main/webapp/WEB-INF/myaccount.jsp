@@ -114,7 +114,8 @@
     <label class="block top-spacer"><fmt:message key="myaccount.email"/>:</label>
     <input type="text" name="email" class="block formtext" value="${email}"/>
     <div class="block infotext"><fmt:message key="myaccount.emailinfo"/></div>
-    <a class="button" style="font-size:0.8em" href="javascript:displayDialog('passwordDialog', 'main');"><fmt:message key="myaccount.changepassword"/></a>
+    <p><br></p>
+    <p><a class="button top-spacer" style="font-size:0.8em" href="javascript:displayDialog('passwordDialog', 'main');"><fmt:message key="myaccount.changepassword"/></a></p>
     <p><br></p>
     <p><input class="block button top-spacer" style="min-width: 100px" type="submit" value="<fmt:message key="myaccount.save"/>" id="submit" />
     </p>

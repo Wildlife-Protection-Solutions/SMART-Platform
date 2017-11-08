@@ -186,10 +186,8 @@ th{
     height:100%;
 }
 
-
-
 .menuitem{
-	padding: 1px;
+	padding: 3px;
 	white-space:nowrap;
 	cursor: pointer; 
 	display: block;
@@ -198,15 +196,21 @@ th{
 	color: black;
 }
 
+.textMenu{
+	margin-left:8px;
+	padding: 0px;
+	margin-top:-2px;
+}
+
 .menuitem-active{
-	border-radius: 3px;
-	background-color: #324A73;
+	border-radius: 1px;
+	background-color: #5286A8;
 	color: white;
 }
 
 .menuitem:hover{
 	background-color: #72A6C8;
-	border-radius: 3px;
+	border-radius: 1px;
 	color: white;
 }
 
@@ -627,4 +631,7 @@ div.caSelector {
   	cursor: pointer;
   	float: right;
 }
-	
+
+#typetable{
+	width:100%;
+}
