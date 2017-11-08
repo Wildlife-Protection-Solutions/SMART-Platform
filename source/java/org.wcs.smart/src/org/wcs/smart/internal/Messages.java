@@ -1206,6 +1206,8 @@ public class Messages extends NLS {
 	public static String TracksComposite_Split;
 	public static String TracksComposite_Split_Tooltip;
 	public static String TracksComposite_Tracks;
+	public static String TracksComposite_View;
+	public static String TracksComposite_View_Tooltip;
 	public static String TracksComposite_ZoomTo;
 	public static String TranslateNamesHandler_Error_TranslatingName;
 	public static String TranslateSimpleListItemDialog_DialogMessage;

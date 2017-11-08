@@ -90,9 +90,16 @@ public abstract class TracksComposite extends Composite implements MapPart {
 	
 	private Label infoLabel;
 	private Label infoImage;
+
+	private boolean canEdit;
 	
 	public TracksComposite(Composite parent) {
+		this(parent, true);
+	}
+
+	public TracksComposite(Composite parent, boolean canEdit) {
 		super(parent, SWT.NONE);
+		this.canEdit = canEdit;
 	}
 
 	@Override
@@ -135,8 +142,8 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		addImportToolbarItem(bar);
 		
 		editItem = new ToolItem(bar, SWT.PUSH);
-		editItem.setText(Messages.TracksComposite_Edit);
-		editItem.setToolTipText(Messages.TracksComposite_Edit_Tooltip);
+		editItem.setText(canEdit ? Messages.TracksComposite_Edit : Messages.TracksComposite_View);
+		editItem.setToolTipText(canEdit ? Messages.TracksComposite_Edit_Tooltip : Messages.TracksComposite_View_Tooltip);
 		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_TRACK_ICON));
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -145,42 +152,44 @@ public abstract class TracksComposite extends Composite implements MapPart {
 			}
 		});
 		editItem.setEnabled(false);
-		
-		splitItem = new ToolItem(bar, SWT.RADIO);
-		splitItem.setText(Messages.TracksComposite_Split);
-		splitItem.setToolTipText(Messages.TracksComposite_Split_Tooltip);
-		splitItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SPLIT_TRACK_ICON));
-		splitItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				splitTrack(splitItem);
-			}
-		});
-		splitItem.setEnabled(false);
-		
-		mergeItem = new ToolItem(bar, SWT.PUSH);
-		mergeItem.setText(Messages.TracksComposite_Merge);
-		mergeItem.setToolTipText(Messages.TracksComposite_Merge_Tooltip);
-		mergeItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MERGE_TRACK_ICON));
-		mergeItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				mergeTrack();
-			}
-		});
-		mergeItem.setEnabled(false);
-		
-		deleteItem = new ToolItem(bar, SWT.PUSH);
-		deleteItem.setText(Messages.TracksComposite_Delete);
-		deleteItem.setToolTipText(Messages.TracksComposite_Delete_Tooltip);
-		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteTrack();
-			}
-		});
-		deleteItem.setEnabled(false);
+
+		if (canEdit) {
+			splitItem = new ToolItem(bar, SWT.RADIO);
+			splitItem.setText(Messages.TracksComposite_Split);
+			splitItem.setToolTipText(Messages.TracksComposite_Split_Tooltip);
+			splitItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SPLIT_TRACK_ICON));
+			splitItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					splitTrack(splitItem);
+				}
+			});
+			splitItem.setEnabled(false);
+			
+			mergeItem = new ToolItem(bar, SWT.PUSH);
+			mergeItem.setText(Messages.TracksComposite_Merge);
+			mergeItem.setToolTipText(Messages.TracksComposite_Merge_Tooltip);
+			mergeItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MERGE_TRACK_ICON));
+			mergeItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					mergeTrack();
+				}
+			});
+			mergeItem.setEnabled(false);
+			
+			deleteItem = new ToolItem(bar, SWT.PUSH);
+			deleteItem.setText(Messages.TracksComposite_Delete);
+			deleteItem.setToolTipText(Messages.TracksComposite_Delete_Tooltip);
+			deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			deleteItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					deleteTrack();
+				}
+			});
+			deleteItem.setEnabled(false);
+		}
 		
 		Composite tableComp = new Composite(tableCompOuter, SWT.BORDER);
 		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -210,28 +219,30 @@ public abstract class TracksComposite extends Composite implements MapPart {
 				zoomTrack();
 			}
 		});
-		mgr.add(new Separator());
-		mgr.add(new Action(Messages.TracksComposite_Edit, 
-				SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.EDIT_TRACK_ICON)) {
-			@Override
-			public void run(){
-				editTrack();
-			}
-		});
-		mgr.add(new Action(Messages.TracksComposite_Merge, 
-				SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.MERGE_TRACK_ICON)) {
-			@Override
-			public void run(){
-				mergeTrack();
-			}
-		}); 
-		mgr.add(new Action(Messages.TracksComposite_Delete, 
-				SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DELETE_ICON)) {
-			@Override
-			public void run(){
-				deleteTrack();
-			}
-		}); 
+		if (canEdit) {
+			mgr.add(new Separator());
+			mgr.add(new Action(Messages.TracksComposite_Edit, 
+					SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.EDIT_TRACK_ICON)) {
+				@Override
+				public void run(){
+					editTrack();
+				}
+			});
+			mgr.add(new Action(Messages.TracksComposite_Merge, 
+					SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.MERGE_TRACK_ICON)) {
+				@Override
+				public void run(){
+					mergeTrack();
+				}
+			}); 
+			mgr.add(new Action(Messages.TracksComposite_Delete, 
+					SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DELETE_ICON)) {
+				@Override
+				public void run(){
+					deleteTrack();
+				}
+			}); 
+		}
 		
 		createTableViewerColumns(trackViewer, layout);
 		
@@ -343,10 +354,10 @@ public abstract class TracksComposite extends Composite implements MapPart {
 		IStructuredSelection selection = (IStructuredSelection) trackViewer.getSelection();
 		
 		boolean isSelected = !selection.isEmpty();
-		editItem.setEnabled(isSelected);
-		splitItem.setEnabled(isSelected);
-		deleteItem.setEnabled(isSelected);
-		mergeItem.setEnabled(isSelected);
+		if (editItem != null)   editItem.setEnabled(isSelected);
+		if (splitItem != null)  splitItem.setEnabled(isSelected);
+		if (deleteItem != null) deleteItem.setEnabled(isSelected);
+		if (mergeItem != null)  mergeItem.setEnabled(isSelected);
 	}
 
 	protected void addImportToolbarItem(ToolBar bar) {
@@ -361,7 +372,11 @@ public abstract class TracksComposite extends Composite implements MapPart {
 			}
 		});
 	}
-	
+
+	protected final boolean isEditAllowed() {
+		return canEdit;
+	}
+
 	protected abstract void importTracks();
 	
 	protected abstract void mergeTrack();
