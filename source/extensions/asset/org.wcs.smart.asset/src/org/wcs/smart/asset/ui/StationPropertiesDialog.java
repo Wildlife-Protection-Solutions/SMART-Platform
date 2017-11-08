@@ -65,6 +65,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStationAttribute;
+import org.wcs.smart.asset.model.AssetStationLocationAttribute;
 import org.wcs.smart.asset.ui.config.AttributeDialog;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.WarningDialog;
@@ -80,10 +81,17 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class StationPropertiesDialog extends TitleAreaDialog {
 
-	private TableViewer tblAttribute;
+	private TableViewer tblStationAttribute;
+	private TableViewer tblLocationAttribute;
 	
-	private List<AssetStationAttribute> attributes;
-	private List<AssetStationAttribute> deletedAttributes;
+	private List<AssetStationAttribute> stationAttributes;
+	private List<AssetStationAttribute> deletedStationAttributes;
+	
+	
+	private List<AssetStationLocationAttribute> locationAttributes;
+	private List<AssetStationLocationAttribute> deletedLocationAttributes;
+	
+	private enum Type{STATION, LOCATION};
 	
 	@Inject
 	private IEclipseContext context;
@@ -106,14 +114,28 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				for (AssetStationAttribute toDelete : deletedAttributes) {
-					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute";
+				//location attributes
+				for (AssetStationLocationAttribute toDelete : deletedLocationAttributes) {
+					String deleteQuery = "DELETE FROM AssetStationLocationAttributeValue WHERE id.attribute = :attribute";
 					Query q = session.createQuery(deleteQuery);
 					q.setParameter("attribute", toDelete.getAttribute());
 					q.executeUpdate();
 				}
 				int index = 0;
-				for (AssetStationAttribute toUpdate : attributes) {
+				for (AssetStationLocationAttribute toUpdate : locationAttributes) {
+					toUpdate.setOrder(index++);
+					session.saveOrUpdate(toUpdate);
+				}
+				
+				//station attributes
+				for (AssetStationAttribute toDelete : deletedStationAttributes) {
+					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute";
+					Query q = session.createQuery(deleteQuery);
+					q.setParameter("attribute", toDelete.getAttribute());
+					q.executeUpdate();
+				}
+				index = 0;
+				for (AssetStationAttribute toUpdate : stationAttributes) {
 					toUpdate.setOrder(index++);
 					session.saveOrUpdate(toUpdate);
 				}
@@ -138,35 +160,50 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 		core.setLayout(new GridLayout(2, false));
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label l = new Label(core, SWT.NONE);
-		l.setText("Attributes:");
+		tblStationAttribute = createTableSection(core, Type.STATION);
+		tblLocationAttribute = createTableSection(core, Type.LOCATION);
+		
+		initTable();
+		
+		setTitle("Station Properties");
+		setMessage("Configure attributes to collect about stations and station locations");
+		getShell().setText("Station Properties");
+		
+		return parent;
+	}
+	
+	private TableViewer createTableSection(Composite parent, Type type) {
+		Label l = new Label(parent, SWT.NONE);
+		if (type == Type.STATION) l.setText("Station Attributes:");
+		if (type == Type.LOCATION) l.setText("Station Location Attributes:");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		
-		tblAttribute = new TableViewer(core, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
+		TableViewer tblAttribute = new TableViewer(parent, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
 		tblAttribute.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblAttribute.setContentProvider(ArrayContentProvider.getInstance());
 		tblAttribute.setLabelProvider(new AttributeLabelProvider());
 		tblAttribute.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		
-		Composite buttonPanel = new Composite(core, SWT.NONE);
+		Composite buttonPanel = new Composite(parent, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
+		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
 		
 		Button btnAdd = new Button(buttonPanel, SWT.PUSH);
 		btnAdd.setText((DialogConstants.ADD_BUTTON_TEXT));
-		btnAdd.addListener(SWT.Selection, a->addAttribute());
+		btnAdd.addListener(SWT.Selection, a->addAttribute(type));
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.addListener(SWT.Selection, a->editAttribute());
+		btnEdit.addListener(SWT.Selection, a->editAttribute(type));
 		btnEdit.setEnabled(false);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.addListener(SWT.Selection, a->removeAttributes());
+		btnDelete.addListener(SWT.Selection, a->removeAttributes(type));
 		btnDelete.setEnabled(false);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
@@ -175,13 +212,13 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 		
 		Button btnMoveUp = new Button(buttonPanel, SWT.PUSH);
 		btnMoveUp.setText("Move Up");
-		btnMoveUp.addListener(SWT.Selection, a->moveAttribute(SWT.DOWN));
+		btnMoveUp.addListener(SWT.Selection, a->moveAttribute(type, SWT.DOWN));
 		btnMoveUp.setEnabled(false);
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Button btnMoveDown = new Button(buttonPanel, SWT.PUSH);
 		btnMoveDown.setText("Move Down");
-		btnMoveDown.addListener(SWT.Selection, a->moveAttribute(SWT.UP));
+		btnMoveDown.addListener(SWT.Selection, a->moveAttribute(type, SWT.UP));
 		btnMoveDown.setEnabled(false);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
@@ -189,27 +226,27 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
 		mnuAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		mnuAdd.addListener(SWT.Selection, e->addAttribute());
+		mnuAdd.addListener(SWT.Selection, e->addAttribute(type));
 		
 		MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
 		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		mnuEdit.addListener(SWT.Selection, e->editAttribute());
+		mnuEdit.addListener(SWT.Selection, e->editAttribute(type));
 		
 		MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
 		mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		mnuDelete.addListener(SWT.Selection, e->removeAttributes());
+		mnuDelete.addListener(SWT.Selection, e->removeAttributes(type));
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem mnuUp = new MenuItem(mnu, SWT.PUSH);
 		mnuUp.setText("Move Up");
-		mnuUp.addListener(SWT.Selection, e->moveAttribute(SWT.DOWN));
+		mnuUp.addListener(SWT.Selection, e->moveAttribute(type, SWT.DOWN));
 		
 		MenuItem mnuDown = new MenuItem(mnu, SWT.PUSH);
 		mnuDown.setText("Move Down");
-		mnuDown.addListener(SWT.Selection, e->moveAttribute(SWT.UP));
+		mnuDown.addListener(SWT.Selection, e->moveAttribute(type, SWT.UP));
 		
 		mnu.addMenuListener(new MenuListener() {
 			
@@ -239,23 +276,18 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 				
 			}
 		});
-		
-		initTable();
-		
-		setTitle("Station Attributes");
-		setMessage("Configure attributes to collect about each station");
-		getShell().setText("Station Attributes");
-		
-		return parent;
+		return tblAttribute;
 	}
 	
 	private void initTable() {
-		deletedAttributes = new ArrayList<>();
+		deletedStationAttributes = new ArrayList<>();
+		deletedLocationAttributes = new ArrayList<>();
 		Job j = new Job("loading station properties") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<AssetStationAttribute> items = new ArrayList<>();
+				List<AssetStationLocationAttribute> locationitems = new ArrayList<>();
 				try(Session session = HibernateManager.openSession()){
 					String hsql = "FROM AssetStationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
 					Query q = session.createQuery(hsql);
@@ -264,10 +296,20 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 					items.forEach(a->{
 						a.getAttribute().getName();
 					});
+					
+					hsql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
+					q = session.createQuery(hsql);
+					q.setParameter("ca",  SmartDB.getCurrentConservationArea());
+					locationitems.addAll(q.getResultList());
+					locationitems.forEach(a->a.getAttribute().getName());
 				}
+				stationAttributes = items;
+				locationAttributes = locationitems;
+				
 				Display.getDefault().syncExec(()->{
-					attributes = items;
-					tblAttribute.setInput(attributes);
+					tblStationAttribute.setInput(stationAttributes);
+					tblLocationAttribute.setInput(locationAttributes);
+					
 				});
 				
 				return Status.OK_STATUS;
@@ -283,57 +325,92 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	private void moveAttribute(int direction){
-		for (Iterator<?> iterator = ((IStructuredSelection) tblAttribute.getSelection()).iterator(); iterator.hasNext();) {
+	private void moveAttribute(Type type, int direction){
+		TableViewer tblViewer = null;
+		List attributes = null;
+		if (type == Type.STATION) {
+			tblViewer = tblStationAttribute;
+			attributes = stationAttributes;
+		}else if (type == Type.LOCATION) {
+			tblViewer = tblLocationAttribute;
+			attributes = locationAttributes;
+		}
+		
+		for (Iterator<?> iterator = ((IStructuredSelection) tblViewer.getSelection()).iterator(); iterator.hasNext();) {
 			Object toMove = iterator.next();
-			if (toMove instanceof AssetStationAttribute){			
-				int index = attributes.indexOf(toMove);
-				if (direction == SWT.UP){
-					index ++;
-					if(index >= attributes.size()){
-						index = attributes.size() - 1;
-					}
-				}else if (direction == SWT.DOWN){
-					index --;
-					if(index < 0) index = 0;
+		
+			int index = attributes.indexOf(toMove);
+			if (direction == SWT.UP){
+				index ++;
+				if(index >= attributes.size()){
+					index = attributes.size() - 1;
 				}
-				attributes.remove(toMove);
-				attributes.add(index, (AssetStationAttribute)toMove);
+			}else if (direction == SWT.DOWN){
+				index --;
+				if(index < 0) index = 0;
 			}
+			attributes.remove(toMove);
+			attributes.add(index, toMove);
 		}
 		modified();
-		tblAttribute.refresh();
+		tblViewer.refresh();
 	}
 	
-	private void addAttribute( ){
+	private void addAttribute( Type type ){
 		SelectAttributeDialog dialog = new SelectAttributeDialog(getShell(), "Add attributes for stations");
 		ContextInjectionFactory.inject(dialog, context);
 		if (dialog.open() == Window.OK){
 			for (AssetAttribute ia : dialog.getSelectedAttributes()){
-				AssetStationAttribute a  = new AssetStationAttribute();
-				a.setAttribute(ia);
-				if (!attributes.contains(a)) attributes.add(a);//TODO: fix this
+				if (type == Type.STATION) {
+					AssetStationAttribute a  = new AssetStationAttribute();
+					a.setAttribute(ia);
+					if (!stationAttributes.contains(a)) stationAttributes.add(a);
+				}else if (type == Type.LOCATION) {
+					AssetStationLocationAttribute a  = new AssetStationLocationAttribute();
+					a.setAttribute(ia);
+					if (!locationAttributes.contains(a)) locationAttributes.add(a);
+				}
 			}
-			
-			tblAttribute.refresh();
+			if (type == Type.STATION)
+				tblStationAttribute.refresh();
+			else if (type == Type.LOCATION) {
+				tblLocationAttribute.refresh();
+			}
 			modified();
 		}
 	}
 	
-	private void editAttribute( ){
-		Object x = ((IStructuredSelection)tblAttribute.getSelection()).getFirstElement();
-		if (x instanceof AssetStationAttribute){
-			AssetStationAttribute attribute = (AssetStationAttribute)x;
-			AttributeDialog.showAttributeDialog(getShell(), attribute.getAttribute(), context); 
-			//refresh
-			tblAttribute.refresh();
-			modified();
+	private void editAttribute( Type type ){
+		TableViewer viewer = null;
+		if (type == Type.STATION) {
+			viewer = tblStationAttribute;
+		}else if (type == Type.LOCATION) {
+			viewer = tblLocationAttribute;
 		}
+		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		if (x == null) return;
+		
+		AssetAttribute a = null;
+		if (x instanceof AssetStationAttribute){
+			a = ((AssetStationAttribute)x).getAttribute();
+		}else if (x instanceof AssetStationLocationAttribute) {
+			a = ((AssetStationLocationAttribute)x).getAttribute();
+		}
+		if (a == null) return;
+		
+		AttributeDialog.showAttributeDialog(getShell(), a, context); 
+		//refresh
+		viewer.refresh();
+		modified();
 	}
 
+	private void removeAttributes( Type type ){
+		if (type == Type.STATION) removeStationAttributes();
+		if (type == Type.LOCATION) removeLocationAttributes();
+	}
 	
-	private void removeAttributes(  ){
-		IStructuredSelection items = (IStructuredSelection)tblAttribute.getSelection();
+	private void removeStationAttributes( ){
+		IStructuredSelection items = (IStructuredSelection)tblStationAttribute.getSelection();
 		final List<AssetStationAttribute> toDelete = new ArrayList<>();
 		
 		for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
@@ -385,12 +462,74 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
 			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? All station attribute values will also be removed.", sb.toString()))){
-				attributes.removeAll(aToDelete);
-				deletedAttributes.removeAll(aToDelete);
+				stationAttributes.removeAll(aToDelete);
+				deletedStationAttributes.removeAll(aToDelete);
 			}
 		}
 		
-		tblAttribute.refresh();
+		tblStationAttribute.refresh();
+		modified();
+	}
+	
+	private void removeLocationAttributes(  ){
+		IStructuredSelection items = (IStructuredSelection)tblLocationAttribute.getSelection();
+		final List<AssetStationLocationAttribute> toDelete = new ArrayList<>();
+		
+		for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
+			Object x = (Object) iterator.next();
+			if (x instanceof AssetStationLocationAttribute){
+				toDelete.add((AssetStationLocationAttribute)x);
+			}
+		}
+		
+		final List<String> warnings = new ArrayList<String>();
+		final List<AssetStationLocationAttribute> aToDelete = new ArrayList<>();
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true, false, new IRunnableWithProgress(){
+	
+				@Override
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					try(Session session = HibernateManager.openSession()){
+
+						for (AssetStationLocationAttribute x : toDelete){
+							try{
+								//TODO:
+								DeleteManager.canDelete(x, session);
+								aToDelete.add(x);
+							}catch (Exception ex){
+								warnings.add(MessageFormat.format("The attribute {0} cannot be removed. {1}", x.getAttribute().getName(), ex.getMessage()));
+							}
+						}
+					}
+				}
+				
+			});
+		}catch (Exception ex){
+			AssetPlugIn.log(ex.getMessage(), ex);
+			warnings.add(ex.getMessage());
+		}
+		if(!warnings.isEmpty()){
+			WarningDialog wd = new WarningDialog(getShell(), "Warnings", "Cannot remove selected attributes.", warnings);
+			wd.open();
+		}
+		
+		if (aToDelete.size() > 0 ){
+			StringBuilder sb = new StringBuilder();
+			for (AssetStationLocationAttribute d: aToDelete){
+				sb.append(d.getAttribute().getName());
+				sb.append(", "); //$NON-NLS-1$
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.deleteCharAt(sb.length() - 1);
+			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? All station location attribute values will also be removed.", sb.toString()))){
+				locationAttributes.removeAll(aToDelete);
+				deletedLocationAttributes.removeAll(aToDelete);
+			}
+		}
+		
+		tblLocationAttribute.refresh();
 		modified();
 	}
 	

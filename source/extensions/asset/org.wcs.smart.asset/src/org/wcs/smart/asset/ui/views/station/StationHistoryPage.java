@@ -11,17 +11,25 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -37,6 +45,7 @@ public class StationHistoryPage {
 	}
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {
+		toolkit.createLabel(parent, "All Asset Deployments at this Station");
 		tblDeployments = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
 		tblDeployments.getTable().setHeaderVisible(true);
 		tblDeployments.getTable().setLinesVisible(true);
@@ -47,6 +56,34 @@ public class StationHistoryPage {
 		}
 		tblDeployments.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		tblDeployments.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		tblDeployments.addDoubleClickListener(e->gotoAsset());
+		
+		Menu mnu = new Menu(tblDeployments.getTable());
+		
+		MenuItem mnuOpenAsset = new MenuItem(mnu, SWT.PUSH);
+		mnuOpenAsset.setText("Goto Asset...");
+		mnuOpenAsset.addListener(SWT.Selection, e->gotoAsset());
+		
+		mnu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				mnuOpenAsset.setEnabled(!tblDeployments.getSelection().isEmpty());
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) { }
+		});
+		
+		tblDeployments.getTable().setMenu(mnu);
+		
+	}
+	
+	private void gotoAsset() {
+		Object item = ((IStructuredSelection)tblDeployments.getSelection()).getFirstElement();
+		if (item instanceof AssetDeployment) {
+			(new OpenAssetHandler()).openAsset(((AssetDeployment) item).getAsset());
+		}
 	}
 	
 	private void createColumn(Column c) {
@@ -60,7 +97,7 @@ public class StationHistoryPage {
 			}
 		});
 	}
-	
+		
 	public void initialize(AssetStation station) {
 		Job j = new Job("load history records") {
 

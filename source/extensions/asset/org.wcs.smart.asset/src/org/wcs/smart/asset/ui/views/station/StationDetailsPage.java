@@ -18,9 +18,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
+import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
+import org.wcs.smart.asset.model.AssetExifMetadataMapping.AssetField;
 import org.wcs.smart.asset.ui.AttributeFieldEditor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -31,16 +34,29 @@ import com.vividsolutions.jts.geom.Coordinate;
 
 public class StationDetailsPage {
 
+	private static final String STATION_KEY = "STATION";
+
 	private StationEditor parentEditor;
 	
-	private Label lblPosition;
+//	private Label lblPosition;
 	private List<AttributeFieldEditor> fieldEditors;
 	
 	private Composite attributePanel;
 	private FormToolkit toolkit;
 	
+	private AssetStationAttributeValue tmpLocationAttribute;
+	private AttributeFieldEditor locFieldEditor;
+	
+	private boolean isInitializing = false;
+	
 	public StationDetailsPage(StationEditor editor) {
 		this.parentEditor = editor;
+		
+		AssetAttribute tmp = new AssetAttribute();
+		tmp.setType(AttributeType.POSITION);
+		tmp.setName("Position");
+		tmpLocationAttribute = new AssetStationAttributeValue();
+		tmpLocationAttribute.setAttribute(tmp);
 	}
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {
@@ -56,17 +72,29 @@ public class StationDetailsPage {
 		toppanel.setLayout(new GridLayout(3, false));
 		toppanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label l = toolkit.createLabel(toppanel, "Position: ");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
-		lblPosition = toolkit.createLabel(toppanel, "");
-		lblPosition.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+		locFieldEditor = new AttributeFieldEditor(toppanel, tmpLocationAttribute.getAttribute());
+		locFieldEditor.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (!locFieldEditor.isValid()) return;
+				if (isInitializing) return;
+				if (locFieldEditor.updateValue(tmpLocationAttribute)) {
+					AssetStation station = (AssetStation) attributePanel.getData(STATION_KEY);
+					if (station != null) {
+						station.setX(tmpLocationAttribute.getNumberValue());
+						station.setY(tmpLocationAttribute.getNumberValue2());
+					}
+				}
+				parentEditor.setDirty(true);
+				
+			}
+		});
+
 		Composite attributeComp = toolkit.createComposite(panel, SWT.BORDER);
 		attributeComp.setLayout(new GridLayout());
 		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		l = toolkit.createLabel(attributeComp, "Attributes");
+		Label l = toolkit.createLabel(attributeComp, "Attributes");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -88,22 +116,17 @@ public class StationDetailsPage {
 	}
 	
 	public void initializeAttributes(AssetStation station) {
+
+		tmpLocationAttribute.setNumberValue(station.getX());
+		tmpLocationAttribute.setNumberValue2(station.getY());
 		
-		String pnt = MessageFormat.format("POINT({0} {1})", station.getX(), station.getY());
-		
-		//TODO: crs
-//		if (crs == null || crs == GeometryUtils.SMART_CRS || CRS.equalsIgnoreMetadata(crs, GeometryUtils.SMART_CRS)){
-//			return "POINT( " + getNumberValue() +" " + getNumberValue2() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//		}else{
-//			try{
-//				Coordinate c = ReprojectUtils.reproject(getNumberValue(), getNumberValue2(), GeometryUtils.SMART_CRS, crs);
-//				return "POINT( " + c.x + " " + c.y + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//			}catch (Exception ex){
-//				return "ERROR: " + ex.getMessage(); //$NON-NLS-1$
-//			}
-//		}
-		
-		lblPosition.setText(pnt);
+		try {
+			isInitializing = true;
+			locFieldEditor.initControl(tmpLocationAttribute);
+			attributePanel.setData(STATION_KEY, station);
+		}finally {
+			isInitializing = false;
+		}
 		
 		for (Control c : attributePanel.getChildren()) c.dispose();
 		fieldEditors = new ArrayList<>();

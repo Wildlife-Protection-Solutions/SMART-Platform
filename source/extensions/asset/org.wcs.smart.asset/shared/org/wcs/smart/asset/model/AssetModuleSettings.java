@@ -41,6 +41,27 @@ import org.wcs.smart.ca.UuidItem;
 @Entity(name="smart.asset_module_settings")
 public class AssetModuleSettings extends UuidItem {
 
+	/**
+	 * Value to be stored in meters
+	 * 
+	 * The maximum distance between an station location and the station 
+	 * position for the asset deployment to be associated with that station
+	 */
+	public static final String STATION_BUFFER_KEY = "station_buffer";
+	
+	/**
+	 * Value to be stored in meters
+	 * 
+	 * The maximum distance between an asset deployment location and the location
+	 * position for the asset deployment to be associated with that station location
+	 */
+	public static final String LOCATION_BUFFER_KEY = "location_buffer";
+	
+	
+	public static final int STATION_BUFFER_DEFAULT_VALUE = 50;
+	public static final int LOCATION_BUFFER_DEFAULT_VALUE = 5;
+
+	
 	private ConservationArea conservationArea;
 	private String key;
 	private String value;

@@ -34,6 +34,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -43,14 +45,17 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetStationLocationAttribute;
 import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -142,6 +147,8 @@ public class StationLocationDialog extends TitleAreaDialog{
 	
 	private boolean validate() {
 		Button btnOk = getButton(IDialogConstants.OK_ID);
+		if(btnOk == null) return false;
+		
 		btnOk.setEnabled(false);
 		setErrorMessage(null);
 		
@@ -193,7 +200,6 @@ public class StationLocationDialog extends TitleAreaDialog{
 		tmp.setType(AttributeType.POSITION);
 		
 		locationEditor = new AttributeFieldEditor(form, tmp);
-		//TODO:
 		if (toUpdate.getX() != null) {
 			AssetStationLocationAttributeValue value = new AssetStationLocationAttributeValue();
 			value.setAttribute(tmp);
@@ -220,44 +226,46 @@ public class StationLocationDialog extends TitleAreaDialog{
 		scroll.setContent(attributeComp);
 		attributeComp.setLayout(new GridLayout(2, false));
 		
-//		List<AssetStationLocationAttribute> attributes = new ArrayList<>();
+		List<AssetStationLocationAttribute> attributes = new ArrayList<>();
 		//TODO:
-//		try(Session session = HibernateManager.openSession()){
-//			String hql = "FROM AssetStationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
-//			Query query = session.createQuery(hql);
-//			query.setParameter("ca",  SmartDB.getCurrentConservationArea());
-//			attributes.addAll(query.getResultList());
-//			attributes.forEach(a->{
-//				a.getAttribute().getName();
-//				if (a.getAttribute().getAttributeList() != null) {
-//					a.getAttribute().getAttributeList().forEach(li -> li.getName());
-//				}
-//			});
-//		}
+		try(Session session = HibernateManager.openSession()){
+			String hql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
+			Query query = session.createQuery(hql);
+			query.setParameter("ca",  SmartDB.getCurrentConservationArea());
+			attributes.addAll(query.getResultList());
+			attributes.forEach(a->{
+				a.getAttribute().getName();
+				if (a.getAttribute().getAttributeList() != null) {
+					a.getAttribute().getAttributeList().forEach(li -> li.getName());
+				}
+			});
+		}
 		attributeEditors = new ArrayList<>();
-//		for (AssetStationAttribute stationattribute : attributes) {
-//			AttributeFieldEditor editor = new AttributeFieldEditor(attributeComp, stationattribute.getAttribute());
-//			attributeEditors.add(editor);
-//
-//			if (editor.getTextAttributeControl() != null) editor.getTextAttributeControl().addListener(SWT.Resize, e-> scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-//			editor.addSelectionListener(new SelectionListener() {
-//				@Override
-//				public void widgetSelected(SelectionEvent e) {
-//					validate();
-//				}
-//				@Override
-//				public void widgetDefaultSelected(SelectionEvent e) {}
-//			});
-//			
-//			//TODO:
-//			//editor.initControl(value);
-//
-//		}
+		for (AssetStationLocationAttribute stationattribute : attributes) {
+			AttributeFieldEditor editor = new AttributeFieldEditor(attributeComp, stationattribute.getAttribute());
+			attributeEditors.add(editor);
+
+			if (editor.getTextAttributeControl() != null) editor.getTextAttributeControl().addListener(SWT.Resize, e-> scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
+			editor.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					validate();
+				}
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {}
+			});
+			
+			if (toUpdate.getAttributeValues() != null) {
+				for (AssetStationLocationAttributeValue v : toUpdate.getAttributeValues()) {
+					if (v.getAttribute().equals(stationattribute.getAttribute())) editor.initControl(v);
+				}
+			}
+		}
 		scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		setTitle("Station Properties");
-		setMessage("Configure the station and associated properties");
-		getShell().setText("Station Properties");
+		setTitle("Station Location Attributes");
+		setMessage("Configure the station location and associated attributes");
+		getShell().setText("Station Location Attributes");
 		
 		
 		return parent;

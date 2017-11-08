@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.text.DateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,19 +57,28 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
+import org.locationtech.udig.project.internal.command.navigation.ZoomCommand;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
+import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.engine.DeploymentStatisticsEngine;
 import org.wcs.smart.asset.engine.DeploymentStatisticsEngine.Statistic;
 import org.wcs.smart.asset.model.AbstractAssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.ui.handler.OpenStationHandler;
+import org.wcs.smart.asset.ui.map.StationLocationDrawCommand;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -87,6 +97,7 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class AssetCurrentPage {
 
+	private static final String HL_UUID_KEY = "uuid";
 	private static int LOCATION_RADIUS = 5;
 	private static int STATION_RADIUS = 10;
 	
@@ -103,7 +114,7 @@ public class AssetCurrentPage {
 	
 	private TableViewer tblCnts;
 	
-	private Label lblStatStation;
+	private Hyperlink lblStatStation;
 	private Label lblStatLocation;
 	
 	private Composite statDetailsSection;
@@ -112,6 +123,7 @@ public class AssetCurrentPage {
 	private SashForm currentForm;
 
 	private UUID deployUuid = null;
+	private StationLocationDrawCommand drawCommand;
 	
 	public AssetCurrentPage(AssetEditor parent) {
 		this.parentEditor = parent;
@@ -222,7 +234,18 @@ public class AssetCurrentPage {
 		mapPart.setLayout(new GridLayout(2, false));
 		
 		toolkit.createLabel(mapPart, "Station:");
-		lblStatStation = toolkit.createLabel(mapPart, "");
+		lblStatStation = toolkit.createHyperlink(mapPart, "", SWT.NONE);
+		lblStatStation.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				UUID uuid = (UUID) lblStatStation.getData(HL_UUID_KEY);
+				if (uuid != null) {
+					AssetStation temp = new AssetStation();
+					temp.setUuid(uuid);
+					(new OpenStationHandler()).openStation(temp);
+				}
+			}
+		});
 		
 		toolkit.createLabel(mapPart, "Location:");
 		lblStatLocation= toolkit.createLabel(mapPart, "");
@@ -245,22 +268,9 @@ public class AssetCurrentPage {
 		LoadDefaultLayersJob basemap = new LoadDefaultLayersJob(mapViewer.getMap(), false);
 		basemap.schedule();
 		
-		mapViewer.getViewport().addDrawCommand(
-			new AbstractDrawCommand() {
-				@Override
-				public void run(IProgressMonitor monitor) throws Exception {
-					drawStationLocations(graphics, getMap());
-				}
-				
-				@Override
-				public Rectangle getValidArea() {
-					//TODO;
-					return null;
-				}
-			}
-		);
+		drawCommand = new StationLocationDrawCommand();
+		mapViewer.getViewport().addDrawCommand(drawCommand);
 		mapViewer.getViewport().enableDrawCommands(true);
-		
 		
 		mapComposite.addListener(SWT.Resize, e->{
 			mapViewer.getControl().setBounds(0, 0, mapComposite.getSize().x, mapComposite.getSize().y);
@@ -289,24 +299,6 @@ public class AssetCurrentPage {
 		for (Control c : mainControl.getChildren()) c.dispose();
 		toolkit.createLabel(mainControl, "This asset is not currently active");
 		mainControl.layout(true);
-	}
-	
-	private void refreshMap() {
-		if (mapViewer != null) mapViewer.getRenderManager().refresh(null);
-	}
-	
-	private void drawStationLocations(ViewportGraphics graphics, IMap map) {
-		AssetDeployment deploy = currentDeployment;
-		if (deploy == null) return;
-		Point pnt = map.getViewportModel().worldToPixel(new Coordinate(deploy.getStationLocation().getX(), deploy.getStationLocation().getY()));
-		graphics.setColor(Color.RED);
-		graphics.drawRect(pnt.x-STATION_RADIUS, pnt.y - STATION_RADIUS, STATION_RADIUS*2, STATION_RADIUS*2);
-		
-		pnt = map.getViewportModel().worldToPixel(new Coordinate(deploy.getStationLocation().getStation().getX(), deploy.getStationLocation().getStation().getY()));
-		graphics.setColor(Color.BLUE);
-		graphics.setBackground(Color.BLUE);
-		graphics.fillOval(pnt.x-LOCATION_RADIUS, pnt.y-LOCATION_RADIUS, LOCATION_RADIUS*2, LOCATION_RADIUS*2);
-		graphics.drawOval(pnt.x-LOCATION_RADIUS, pnt.y-LOCATION_RADIUS, LOCATION_RADIUS*2, LOCATION_RADIUS*2);
 	}
 
 	private Job computeSummaryStatisticsJob = new Job("compute statistics for current deployment") {
@@ -341,6 +333,10 @@ public class AssetCurrentPage {
 				});
 				
 				currentDeployment = deploy;
+				
+				double stationBuffer = AssetHibernateManager.getStationBuffer(session, SmartDB.getCurrentConservationArea());
+				double locationBuffer = AssetHibernateManager.getStationLocationBuffer(session, SmartDB.getCurrentConservationArea());
+				drawCommand.setBuffers(stationBuffer, locationBuffer);
 			}
 			
 			final Map<Statistic, Object> stats = new HashMap<>();
@@ -386,6 +382,7 @@ public class AssetCurrentPage {
 				for (Control c : bottomPart.getChildren()) c.dispose();
 				
 				lblStatStation.setText(thisdeploy.getStationLocation().getStation().getId());
+				lblStatStation.setData(HL_UUID_KEY, thisdeploy.getStationLocation().getStation().getUuid());
 				lblStatLocation.setText(thisdeploy.getStationLocation().getId());
 				lblStatLocation.getParent().layout(true);
 				
@@ -466,13 +463,12 @@ public class AssetCurrentPage {
 
 				mainControl.layout(true, true);
 			});
+
+			drawCommand.setStations(Collections.singleton(currentDeployment.getStationLocation().getStation()));
+			drawCommand.setLocations(Collections.singleton(currentDeployment.getStationLocation()));
+			SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(drawCommand.getBounds());
+			getMapViewer().getMap().executeSyncWithoutUndo(cmd);
 			
-			//TODO: crs
-			getMapViewer().getMap().getViewportModelInternal().zoomToBox(
-					new Envelope(currentDeployment.getStationLocation().getX() - 0.3, currentDeployment.getStationLocation().getX() + 0.3,
-							currentDeployment.getStationLocation().getY() - 0.3, currentDeployment.getStationLocation().getY() + 0.3)
-					);
-			refreshMap();
 			return Status.OK_STATUS;
 		}
 		

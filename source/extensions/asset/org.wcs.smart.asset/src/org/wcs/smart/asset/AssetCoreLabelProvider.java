@@ -34,7 +34,11 @@ import org.wcs.smart.asset.model.Asset;
 public class AssetCoreLabelProvider {
 
 	public static Image getStatusImage(Asset asset) {
-		switch(asset.getStatus()) {
+		return getStatusImage(asset.getStatus());
+	}
+	
+	public static Image getStatusImage(Asset.Status status) {
+		switch(status) {
 		case ACTIVE:
 			return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATUS_ACTIVE);
 		case INACTIVE:

@@ -111,6 +111,7 @@ public class AddAssetJob extends Job {
 				"CREATE TABLE smart.asset_station_location_history ( uuid char(16) for bit data NOT NULL, station_location_uuid char(16) for bit data NOT NULL, date timestamp NOT NULL, comment LONG VARCHAR, PRIMARY KEY (uuid) )",
 				"CREATE TABLE smart.asset_station_location ( uuid char(16) for bit data NOT NULL, station_uuid char(16) for bit data NOT NULL, id varchar(128) NOT NULL, x double NOT NULL, y double NOT NULL, PRIMARY KEY (uuid) )",
 				"alter table smart.asset_station_location add constraint asset_snlc_id_ca_unq UNIQUE(id, station_uuid)",
+				"CREATE TABLE smart.asset_station_location_attribute ( attribute_uuid char(16) for bit data NOT NULL, seq_order integer NOT NULL, PRIMARY KEY (attribute_uuid) )",
 				"CREATE TABLE smart.asset_station_location_attribute_value ( station_location_uuid char(16) for bit data NOT NULL, attribute_uuid char(16) for bit data NOT NULL, string_value varchar(1024), list_item_uuid char(16) for bit data, double_value1 double, double_value2 double, PRIMARY KEY (station_location_uuid, attribute_uuid) )",
 				
 				// Create Foreign Keys
@@ -126,6 +127,7 @@ public class AddAssetJob extends Job {
 				"ALTER TABLE smart.asset_attribute_value ADD CONSTRAINT asset_attvalue_attuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_deployment_attribute_value ADD CONSTRAINT asset_dplattvalue_attuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_station_attribute ADD CONSTRAINT asset_stn_attuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.asset_station_location_attribute ADD CONSTRAINT asset_stn_loc_attuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_station_attribute_value ADD CONSTRAINT asset_stn_attvalue_attuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_type_attribute ADD CONSTRAINT assettypeatt_attuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_type_deployment_attribute ADD CONSTRAINT assettypedpl_attuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) DEFERRABLE INITIALLY IMMEDIATE",

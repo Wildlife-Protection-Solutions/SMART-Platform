@@ -25,6 +25,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
@@ -68,6 +69,8 @@ public class StationEditor extends EditorPart implements MapPart {
 	private StationLocationPage locationsPage;
 	private StationDetailsPage detailsPage;
 	private StationHistoryPage historyPage;
+	
+	private Object lastMapPage;
 	
 	private boolean isDirty;
 	
@@ -165,6 +168,7 @@ public class StationEditor extends EditorPart implements MapPart {
 				}
 			}else {
 				station = session.get(AssetStation.class, in.getStationUuid());
+				station.equals(null);
 			}
 			
 			if (station == null) {
@@ -209,7 +213,7 @@ public class StationEditor extends EditorPart implements MapPart {
 	}
 	
 	private void initializeCurrentPage(AssetStation station) {
-//		if (currentPage != null) currentPage.init(station);
+		if (currentPage != null) currentPage.initializePanel(station);
 	}
 	
 	private void initializeDetailsPage(AssetStation station) {
@@ -217,11 +221,11 @@ public class StationEditor extends EditorPart implements MapPart {
 	}
 	
 	private void initializeHistoryPage(AssetStation station) {
-//		if (historyPage != null) historyPage.init(station);
+		if (historyPage != null) historyPage.initialize(station);
 	}
 	
 	private void initializeLocationsPage(AssetStation station) {
-//		if (locationsPage != null) locationsPage.init(station);
+		if (locationsPage != null) locationsPage.initialize(station);
 	}
 	
 	public void setDirty(boolean isDirty) {
@@ -336,13 +340,19 @@ public class StationEditor extends EditorPart implements MapPart {
 			setDirty(true);
 		});
 
-		
-		
 		String headers[] = new String[] {"Current Status", "Details", "Locations", "History"};
 		Listener[] actions = new Listener[] {
 			event->{
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
+				lastMapPage = currentPanel;
+				if (currentPage.getMapViewer() == null) {
+					ApplicationGIS.getToolManager().setCurrentEditor(null);
+				}else {
+					//force refresh of map editor so tools work
+					ApplicationGIS.getToolManager().setCurrentEditor(null);
+					ApplicationGIS.getToolManager().setCurrentEditor(this);
+				}
 				sectionBody.layout(true);},
 			event->{
 				if (detailsPanel == null) detailsPanel = createDetailsSection(sectionBody);
@@ -351,6 +361,10 @@ public class StationEditor extends EditorPart implements MapPart {
 			event->{
 				if (locationsPanel == null) locationsPanel = createLocationsSection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = locationsPanel;
+				lastMapPage = locationsPanel;
+				//force refresh of map editor so tools work
+				ApplicationGIS.getToolManager().setCurrentEditor(null);
+				ApplicationGIS.getToolManager().setCurrentEditor(this);
 				sectionBody.layout(true);},
 			event->{
 				if (historyPanel == null) historyPanel = createHistorySection(sectionBody);
@@ -384,6 +398,7 @@ public class StationEditor extends EditorPart implements MapPart {
 		ContextInjectionFactory.inject(locationsPage, parentContext);
 		locationsPage.createControl(panel,  toolkit);
 		
+		initializeLocationsPage(station);
 		return panel;
 		
 	}
@@ -427,7 +442,8 @@ public class StationEditor extends EditorPart implements MapPart {
 		ContextInjectionFactory.inject(historyPage, parentContext);
 		historyPage.createControl(panel, toolkit);
 		
-		historyPage.initialize(station);
+		initializeHistoryPage(station);
+
 		return panel;
 	}
 	
@@ -449,30 +465,31 @@ public class StationEditor extends EditorPart implements MapPart {
 
 	@Override
 	public org.locationtech.udig.project.internal.Map getMap() {
+		if (lastMapPage == locationsPanel) {
+			if (locationsPage == null || locationsPage.getMapViewer() == null) return ApplicationGIS.NO_MAP;
+			return locationsPage.getMapViewer().getMap();
+		}else if (lastMapPage == currentPanel) {
+			if (currentPage == null || currentPage.getMapViewer() == null) return ApplicationGIS.NO_MAP;
+			return currentPage.getMapViewer().getMap();
+		}
 		return ApplicationGIS.NO_MAP;
-//		if (currentPage == null || currentPage.getMapViewer() == null) return ApplicationGIS.NO_MAP;
-//		return currentPage.getMapViewer().getMap();
 	}
 
 	@Override
 	public void openContextMenu() {
+		//do nothing
 		return;
-//		if (currentPage == null) return;
-//		currentPage.getMapViewer().openContextMenu();
 	}
 
 	@Override
 	public void setFont(Control textArea) {
-		return;
-//		if (currentPage == null) return;
-//		currentPage.getMapViewer().setFont(textArea);
+		//do nothing
 	}
 
 	@Override
 	public void setSelectionProvider(IMapEditorSelectionProvider selectionProvider) {
-		return;
-//		if (currentPage == null) return;
-//		currentPage.getMapViewer().setSelectionProvider(selectionProvider);
+		//do nothing
+			
 	}
 
 	@Override

@@ -30,6 +30,7 @@ import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -101,5 +102,51 @@ public class AssetHibernateManager {
 			return java.sql.Types.VARCHAR;
 		};
 		return -1;
+	}
+	
+	/**
+	 * Return the current value for the station buffer.
+	 * 
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	public static double getStationBuffer(Session session, ConservationArea ca) {
+		AssetModuleSettings setting = QueryFactory.buildQuery(session, AssetModuleSettings.class, 
+				new Object[]{"conservationArea", ca},
+				new Object[] {"keyId", AssetModuleSettings.STATION_BUFFER_KEY}).uniqueResult();
+		if (setting == null) {
+			return AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE;
+		}
+		try {
+			Double d = Double.valueOf(setting.getValue());
+			return d;
+		}catch (Exception ex) {
+			//TODO: log this
+		}
+		return AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE;
+	}
+	
+	/**
+	 * Return the current value for the station location buffer.
+	 * 
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	public static double getStationLocationBuffer(Session session, ConservationArea ca) {
+		AssetModuleSettings setting = QueryFactory.buildQuery(session, AssetModuleSettings.class, 
+				new Object[]{"conservationArea", ca},
+				new Object[] {"keyId", AssetModuleSettings.LOCATION_BUFFER_KEY}).uniqueResult();
+		if (setting == null) {
+			return AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE;
+		}
+		try {
+			Double d = Double.valueOf(setting.getValue());
+			return d;
+		}catch (Exception ex) {
+			//TODO: log this
+		}
+		return AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE;
 	}
 }

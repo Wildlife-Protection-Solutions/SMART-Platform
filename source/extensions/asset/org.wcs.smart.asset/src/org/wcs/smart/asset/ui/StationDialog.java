@@ -54,6 +54,7 @@ import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
+import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -226,6 +227,14 @@ public class StationDialog extends TitleAreaDialog{
 		
 		locationEditor = new AttributeFieldEditor(form, tmp);
 		locationEditor.addSelectionListener(validateListener);
+		if (toUpdate.getX() != null) {
+			AssetStationAttributeValue value = new AssetStationAttributeValue();
+			value.setAttribute(tmp);
+			value.setNumberValue(toUpdate.getX());
+			value.setNumberValue2(toUpdate.getY());
+			locationEditor.initControl(value);
+		}
+		
 		//TODO:
 		//locationEditor.initControl(value);
 		
@@ -262,15 +271,18 @@ public class StationDialog extends TitleAreaDialog{
 			if (editor.getTextAttributeControl() != null) editor.getTextAttributeControl().addListener(SWT.Resize, e-> scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 			editor.addSelectionListener(validateListener);
 			
-			//TODO:
-			//editor.initControl(value);
+			if (toUpdate.getAttributeValues() != null) {
+				for (AssetStationAttributeValue v : toUpdate.getAttributeValues()) {
+					if (v.getAttribute().equals(stationattribute.getAttribute())) editor.initControl(v);
+				}
+			}
 
 		}
 		scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		setTitle("Station Properties");
-		setMessage("Configure the station and associated properties");
-		getShell().setText("Station Properties");
+		setTitle("Station Attributes");
+		setMessage("Configure the station and associated attributes");
+		getShell().setText("Station Attributes");
 		
 		return parent;
 	}
