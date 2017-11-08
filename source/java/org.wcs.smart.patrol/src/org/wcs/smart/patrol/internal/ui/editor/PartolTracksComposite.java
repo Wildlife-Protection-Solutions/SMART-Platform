@@ -64,6 +64,7 @@ import org.opengis.filter.FilterFactory;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.geotools.PatrolDataSource;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.TrackPart;
@@ -129,7 +130,7 @@ public class PartolTracksComposite extends TracksComposite {
 				return tblInput;
 			}
 		} catch (ParseException e) {
-			SmartPlugIn.displayLog("Unable to parse geometry assiciated with a track.", e);
+			SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error, e);
 		}
 		return new ArrayList<>();
 	}
@@ -142,12 +143,12 @@ public class PartolTracksComposite extends TracksComposite {
 			public String getText(Object element) {
 				if (getTrackViewer().getInput() instanceof List) {
 					List<?> input = (List<?>) getTrackViewer().getInput();
-					return "Part " + (input.indexOf(element) + 1);
+					return MessageFormat.format(Messages.PartolTracksComposite_TrackPartLabel, (input.indexOf(element) + 1));
 				}
 				return super.getText(element);
 			}
 		});
-		columnId.getColumn().setText("Track Part");
+		columnId.getColumn().setText(Messages.PartolTracksComposite_TrackPart);
 		columnId.getColumn().setResizable(true);
 		columnId.getColumn().setMoveable(false);
 		layout.setColumnData(columnId.getColumn(), new ColumnWeightData(50));
@@ -193,7 +194,7 @@ public class PartolTracksComposite extends TracksComposite {
 			}
 			
 		}catch (Exception ex){
-			SmartPlugIn.displayLog("Error configuring map." + "\n\n" + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(Messages.PartolTracksComposite_MapConfig_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	}
 
@@ -236,7 +237,7 @@ public class PartolTracksComposite extends TracksComposite {
 			try {
 				patrolService.refresh(patrolLegDay.getPatrolLeg().getPatrol(), null);
 			} catch (IOException e) {
-				setError("TracksComposite_MapError" + e.getMessage());
+				setError(Messages.PartolTracksComposite_MarRefresh_Error + e.getMessage());
 				SmartPlugIn.log(e.getMessage(), e);
 			}
 		}
@@ -303,8 +304,8 @@ public class PartolTracksComposite extends TracksComposite {
 			patrolLegDay.getTrack().setLineStrings(newLsList);
 		
 			refresh(true);
-		}catch (Exception ex){
-			SmartPlugIn.displayLog("Could not parse linestring.", ex);
+		}catch (ParseException ex){
+			SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error, ex);
 		}
 	}
 
@@ -336,20 +337,13 @@ public class PartolTracksComposite extends TracksComposite {
 					}
 					
 					if (trackToSplit != null){
-						LineString ls1 = null;
-						try{
-							ls1 = trackToSplit;
-						}catch (Exception ex){
-							setError("Could not parse linestring.");
-							return;
-						}
-						
+						LineString ls1 = trackToSplit;
 						LineString ls2 = GeometryFactoryProvider.getFactory().createLineString(new Coordinate[]{points.get(0), points.get(1)});
 						
 						Point intersection = null;
 						Geometry g = ls1.intersection(ls2);
 						if (g == null){
-							setError("Line does not intersect track.");
+							setError(Messages.PartolTracksComposite_NoLineIntercection_Error);
 							return;
 						}else if (g instanceof Point){
 							intersection = (Point)g;
@@ -357,13 +351,13 @@ public class PartolTracksComposite extends TracksComposite {
 							intersection = (Point)((MultiPoint)g).getGeometryN(0);
 						}
 						if (intersection == null){
-							setError("No intersection point found.");
+							setError(Messages.PartolTracksComposite_NoIntercectionPoint_Error);
 							return;
 						}
 						LineString[] newLs = GeometryUtils.splitSimple(ls1, new Coordinate(intersection.getX(), intersection.getY()));
 
 						if (newLs == null || newLs.length != 2){
-							setError("Could not split tracks.");
+							setError(Messages.PartolTracksComposite_Split_Error);
 							return;
 						}
 
@@ -375,7 +369,7 @@ public class PartolTracksComposite extends TracksComposite {
 							}
 							patrolLegDay.getTrack().setLineStrings(newLsList);
 						} catch (ParseException e) {
-							setError("Failed to assign new tracks after split.");
+							setError(Messages.PartolTracksComposite_SplitAssign_Error);
 							return;
 						}
 						
@@ -388,7 +382,7 @@ public class PartolTracksComposite extends TracksComposite {
 					
 				}
 			});
-			setInfo("Draw a line across the selected track where you want it to split.");
+			setInfo(Messages.PartolTracksComposite_SplitToolInfo);
 			ApplicationGIS.getToolManager().getToolAction(SplitTrackTool.ID, SplitTrackTool.CATEGORY_ID).run();	
 		}
 	}
@@ -408,7 +402,7 @@ public class PartolTracksComposite extends TracksComposite {
 			return;
 		}
 		
-		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected tracks?  This cannot be undone.", new Object[]{toDelete.size()}))){
+		if (!MessageDialog.openQuestion(getShell(), Messages.PartolTracksComposite_ConfirmDelete_Title, MessageFormat.format(Messages.PartolTracksComposite_ConfirmDelete_Message, new Object[]{toDelete.size()}))){
 			return;
 		}
 		
@@ -421,7 +415,7 @@ public class PartolTracksComposite extends TracksComposite {
 			}
 			patrolLegDay.getTrack().setLineStrings(lsList);
 		} catch (ParseException e) {
-			SmartPlugIn.displayLog(e.getMessage(), e);
+			SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error, e);
 		}
 		refresh(true);
 	}
@@ -439,10 +433,10 @@ public class PartolTracksComposite extends TracksComposite {
 					tpd.open();
 					changed = !ls.equalsExact(patrolLegDay.getTrack().getLineStrings().get(index));
 				} else {
-					SmartPlugIn.displayLog("Selected track part do not belong to current track.", null);
+					SmartPlugIn.displayLog(Messages.PartolTracksComposite_PartNotInTrack_Error, null);
 				}
-			}catch (Exception ex){
-				SmartPlugIn.displayLog("Could not parse linestring.", ex);
+			} catch (ParseException e) {
+				SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error, e);
 			}
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
 			selectLastTool();
@@ -456,16 +450,11 @@ public class PartolTracksComposite extends TracksComposite {
 		Envelope env = null;
 		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 			TrackPart track = (TrackPart) iterator.next();
-			try{
-				if (env == null){
-					env = track.getLineString().getEnvelopeInternal();
-				}else{
-					env.expandToInclude(track.getLineString().getEnvelopeInternal());
-				}
-			}catch (Exception ex){
-				SmartPlugIn.displayLog("Could not parse linestring.", ex);
+			if (env == null){
+				env = track.getLineString().getEnvelopeInternal();
+			}else{
+				env.expandToInclude(track.getLineString().getEnvelopeInternal());
 			}
-			
 		}
 		if (env != null){
 			SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, GeometryUtils.SMART_CRS);
@@ -498,13 +487,13 @@ public class PartolTracksComposite extends TracksComposite {
 		otherRule.symbolizers().add(otherSym);
 		otherRule.setIsElseFilter(true);
 		otherRule.setFilter(filter);
-		otherRule.setName("Other Days Legs");
+		otherRule.setName(Messages.PartolTracksComposite_Legend_OtherDays);
 		
 		Rule todayRule = sf.createRule();
 		todayRule.symbolizers().add(todaySym);
 		todayRule.setIsElseFilter(false);
 		todayRule.setFilter(filter);
-		todayRule.setName("Current Day Leg");
+		todayRule.setName(Messages.PartolTracksComposite_Legend_CurrentDay);
 
 		FeatureTypeStyle fts = sf.createFeatureTypeStyle();
 		fts.rules().add(todayRule);

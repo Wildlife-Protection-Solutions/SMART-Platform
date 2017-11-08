@@ -37,6 +37,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editor.PartolTracksComposite;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
@@ -99,10 +100,10 @@ public class PatrolTrackEditDialog extends TitleAreaDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				String title = MessageFormat.format("Track {0}", DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrolLegDay.getDate()));
+				String title = MessageFormat.format(Messages.PatrolTrackEditDialog_Title, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrolLegDay.getDate()));
 				setTitle(title);
 				getShell().setText(title);
-				setMessage("Edit track for current patrol day leg");
+				setMessage(Messages.PatrolTrackEditDialog_Message);
 	
 				cmp = new PartolTracksComposite(comp, patrolLegDay, canEdit);
 				cmp.addChangeListener(new ITracksCompositeListener() {
@@ -137,9 +138,9 @@ public class PatrolTrackEditDialog extends TitleAreaDialog {
 	public boolean close() {
 		if (isChanged) {
 			MessageDialog md = new MessageDialog(getShell(), 
-					"Edit Patrol Track", 
+					Messages.PatrolTrackEditDialog_ConfirmCloseDialog_Title, 
 					null, 
-					"There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+					Messages.PatrolTrackEditDialog_ConfirmCloseDialog_Message, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
 			int ret = md.open();
 			switch (ret) {
 			case 0: //yes
@@ -170,7 +171,7 @@ public class PatrolTrackEditDialog extends TitleAreaDialog {
 				session.getTransaction().commit();
 				
 			} catch (Exception ex) {
-				SmartPlugIn.displayLog("Error saving changes.  Please close dialog and try again." + "\n\n" + ex.getMessage(), ex);
+				SmartPlugIn.displayLog(Messages.PatrolTrackEditDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				return false;
 			}
 		}

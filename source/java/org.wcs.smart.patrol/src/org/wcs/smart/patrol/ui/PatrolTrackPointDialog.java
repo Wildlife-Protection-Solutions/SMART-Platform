@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.map.TrackPointDialog;
 
@@ -77,7 +78,7 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
-		Button btn = createButton(parent, IDialogConstants.OK_ID, "Apply", true);
+		Button btn = createButton(parent, IDialogConstants.OK_ID, Messages.PatrolTrackPointDialog_Button_Apply, true);
 		btn.setEnabled(false);
 	}
 	
