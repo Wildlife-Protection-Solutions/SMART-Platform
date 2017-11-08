@@ -11,7 +11,7 @@
 
 <c:forEach var="item" items="${menuitems}">
  	<div style="display=flex;flex-flow:row nowrap;height:28px;align-items: center">
- 		<a href="${item[1]}" "><img height="24" width="24" src="../css/images/${item[3]}"/></a>
+ 		<a href="${item[1]}" "><img title="${item[0]}" height="24" width="24" src="../css/images/${item[3]}"/></a>
 		<div class="textMenu" style="display:none;vertical-align:super"><a href="${item[1]}" class="${item[2]}">${item[0]}</a></div>
 	</div>
  </c:forEach>
