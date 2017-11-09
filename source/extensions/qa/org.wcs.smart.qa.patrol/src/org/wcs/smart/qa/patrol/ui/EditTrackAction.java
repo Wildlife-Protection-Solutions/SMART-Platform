@@ -65,6 +65,11 @@ public class EditTrackAction  implements IQaAction {
 				track.getPatrolLegDay().equals(null);
 				track.getPatrolLegDay().getTracks().size();
 				track.getGeom().equals(null);
+				
+				//we need to load all tracks for all days as the editor
+				//displays all tracks
+				track.getPatrolLegDay().getPatrolLeg().getPatrol()
+					.getLegs().forEach(e->e.getPatrolLegDays().forEach(d->d.getTracks().size()));
 			}
 		}
 		
