@@ -32,9 +32,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.hibernate.Session;
+import org.wcs.smart.asset.model.Asset.Status;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Model class for asset station. An asset station represents a location
@@ -57,6 +62,14 @@ public class AssetStation extends UuidItem {
 
 	private List<AssetStationAttributeValue> attributes;
 	private List<AssetStationLocation> locations;
+	
+	/*
+	 * Status is computed on demand - it is based on the
+	 * number of active asset deployments at the
+	 * station
+	 */
+	@Transient
+	private Status status;
 
 	/**
 	 * Constructor.
@@ -187,4 +200,48 @@ public class AssetStation extends UuidItem {
 		this.locations = locations;
 	}
 	
+	
+	/**
+	 * Get the status value;  will returned
+	 * cached value if applicable. 
+	 * 
+	 * @return status
+	 */
+	@Transient
+	public Status getStatus() {
+		if (this.status == null) {
+			computeStatus();
+		}
+		return this.status;
+	}
+	
+	/**
+	 * Get the status value; recomputing from database
+	 * 
+	 * @return status
+	 */
+	@Transient
+	public Status getStatus(boolean refresh) {
+		if (this.status == null || refresh) {
+			computeStatus();
+		}
+		return this.status;
+	}
+	
+	private void computeStatus() {
+		if (getUuid() == null) {
+			status = Status.INACTIVE;
+			return;
+		}
+		
+		try(Session s = HibernateManager.openSession()){
+			String query = "SELECT count(*) FROM AssetDeployment d join d.id.stationLocation c WHERE d.endDate is null and c.station = :station";
+			Long activeDeployments = (Long) s.createQuery(query).setParameter("station",  this).uniqueResult();
+			if (activeDeployments == 0) {
+				status = Status.INACTIVE;
+			}else {
+				status = Status.ACTIVE;
+			}
+		}
+	}
 }

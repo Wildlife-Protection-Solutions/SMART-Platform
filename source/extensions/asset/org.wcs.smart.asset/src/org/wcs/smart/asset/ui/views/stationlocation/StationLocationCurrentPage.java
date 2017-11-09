@@ -1,4 +1,4 @@
-package org.wcs.smart.asset.ui.views.station;
+package org.wcs.smart.asset.ui.views.stationlocation;
 
 import java.text.Collator;
 import java.text.DateFormat;
@@ -54,11 +54,11 @@ import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-public class StationCurrentPage {
+public class StationLocationCurrentPage {
 
 	@Inject
 	private IEclipseContext parentContext;
-	private StationEditor parentEditor;
+	private StationLocationEditor parentEditor;
 	
 	private Composite mainControl;
 	private Composite mapComposite;
@@ -76,7 +76,7 @@ public class StationCurrentPage {
 	private  Label lblNumIncidents;
 	private Label lblNumUnTagged;
 	
-	public StationCurrentPage(StationEditor parent) {
+	public StationLocationCurrentPage(StationLocationEditor parent) {
 		this.parentEditor = parent;
 	}
 	
@@ -93,7 +93,7 @@ public class StationCurrentPage {
 	}
 	
 	
-	public void initializePanel(AssetStation station) {
+	public void initializePanel(AssetStationLocation station) {
 		initializePanelJob.schedule();
 	}
 	
@@ -104,8 +104,8 @@ public class StationCurrentPage {
 			drawCommand = new StationLocationDrawCommand();
 			final List<AssetDeployment> currentDeployments = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
-				String hql = "SELECT d FROM AssetDeployment d join d.stationLocation l WHERE l.station = :station and d.endDate is null";
-				currentDeployments.addAll( s.createQuery(hql).setParameter("station",  parentEditor.getAssetStation()).list() );
+				String hql = "SELECT d FROM AssetDeployment d WHERE d.stationLocation = :location and d.endDate is null";
+				currentDeployments.addAll( s.createQuery(hql).setParameter("location",  parentEditor.getAssetStationLocation()).list() );
 				currentDeployments.forEach(d->{
 					d.getAsset().getId();
 					d.getAsset().getAssetType().getName();
@@ -210,7 +210,6 @@ public class StationCurrentPage {
 		
 		topLeftRight.setWeights(new int[] {60,40});
 		
-		
 		mapComposite = toolkit.createComposite(mapPart, SWT.BORDER);
 		mapComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
@@ -297,7 +296,7 @@ public class StationCurrentPage {
 		}
 		tblAssetDeployments.setInput(currentDeployments);
 		
-		drawCommand.setStations(Collections.singleton(parentEditor.getAssetStation()));
+		drawCommand.setStations(Collections.singleton(parentEditor.getAssetStationLocation().getStation()));
 		drawCommand.setLocations(locations);
 		SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(drawCommand.getBounds());
 		getMapViewer().getMap().executeSyncWithoutUndo(cmd);
@@ -316,7 +315,7 @@ public class StationCurrentPage {
 	private void createNotActivePanel() {
 		if (mainControl == null) return;
 		for (Control c : mainControl.getChildren()) c.dispose();
-		toolkit.createLabel(mainControl, "This station has no active assets deployed to it at this time.");
+		toolkit.createLabel(mainControl, "This station location has no active assets deployed to it at this time.");
 		mainControl.layout(true);
 		
 		ApplicationGIS.getToolManager().setCurrentEditor(null);
@@ -334,9 +333,7 @@ public class StationCurrentPage {
 			toCompute.add(StatisticsEngine.Statistic.NUMBER_INCIDENTS);
 			toCompute.add(StatisticsEngine.Statistic.NUMBER_UNTAGGED);
 			
-			stats.putAll(StatisticsEngine.INSTANCE.computeActiveStatistics(toCompute, parentEditor.getAssetStation()));
-//			
-//			final AssetDeployment thisdeploy = deploy;
+			stats.putAll(StatisticsEngine.INSTANCE.computeActiveStatistics(toCompute, parentEditor.getAssetStationLocation()));
 			Display.getDefault().syncExec(()->{
 				
 				Object v = stats.get(StatisticsEngine.Statistic.INCIDENTS_PER_CAT);

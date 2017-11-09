@@ -24,9 +24,11 @@ package org.wcs.smart.asset.ui.views.asset;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -61,6 +63,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -75,19 +78,24 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.StationManager;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.ui.AssetLabelProvider;
 import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.asset.ui.StationDialog;
+import org.wcs.smart.asset.ui.StationLocationDialog;
 import org.wcs.smart.asset.ui.handler.DeleteAssetHandler;
+import org.wcs.smart.asset.ui.handler.ImportDataHandler;
 import org.wcs.smart.asset.ui.handler.NewAssetHandler;
 import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
+import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -112,7 +120,7 @@ public class AssetListView {
 	private Composite content;
 	
 	private TreeViewer lstAssets;
-	private TableViewer lstStations;
+	private TreeViewer lstStations;
 	private FormToolkit toolkit;
 	
 	
@@ -192,7 +200,7 @@ public class AssetListView {
 		lstAssets = new TreeViewer(assetPanel, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		toolkit.adapt(lstAssets.getControl(), true, true);
 		lstAssets.setLabelProvider(new AssetLabelProvider());
-		lstAssets.setContentProvider(new AssetTypeContentProvider());
+		lstAssets.setContentProvider(new MappingContentProvider<AssetType, Asset>((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase())));
 		lstAssets.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		lstAssets.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAssets.addDoubleClickListener(new IDoubleClickListener() {
@@ -212,6 +220,13 @@ public class AssetListView {
 	private void createAssetToolbar(Composite parent) {
 		ToolBar toolbar =new ToolBar(parent, SWT.FLAT);
 		
+		ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
+		importData.setToolTipText("import asset data");
+		importData.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_GO));
+		importData.addListener(SWT.Selection, e->importData());
+		
+		new ToolItem(toolbar, SWT.SEPARATOR);
+		
 		ToolItem deleteAsset = new ToolItem(toolbar, SWT.PUSH);
 		deleteAsset.setToolTipText("delete selected assets");
 		deleteAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -228,6 +243,13 @@ public class AssetListView {
 	
 	private void createStationsToolbar(Composite parent) {
 		ToolBar toolbar =new ToolBar(parent, SWT.FLAT);
+		
+		ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
+		importData.setToolTipText("import asset data");
+		importData.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_GO));
+		importData.addListener(SWT.Selection, e->importData());
+		
+		new ToolItem(toolbar, SWT.SEPARATOR);
 		
 		ToolItem deleteStation = new ToolItem(toolbar, SWT.PUSH);
 		deleteStation.setToolTipText("delete the selected station and all related data");
@@ -250,6 +272,9 @@ public class AssetListView {
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 	}
 	
+	private void importData() {
+		(new ImportDataHandler()).execute();
+	}
 	
 	private Composite createStationsPanel(Composite parent) {
 		Composite stationsPanel = toolkit.createComposite(parent);
@@ -257,16 +282,10 @@ public class AssetListView {
 		((GridLayout)stationsPanel.getLayout()).marginWidth = 0;
 		((GridLayout)stationsPanel.getLayout()).marginHeight = 0;
 		
-		lstStations = new TableViewer(stationsPanel, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL );
+		lstStations = new TreeViewer(stationsPanel, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL );
 		toolkit.adapt(lstStations.getControl(), true, true);
-		lstStations.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof AssetStation) return ((AssetStation) element).getId();
-				return super.getText(element);
-			}
-		});
-		lstStations.setContentProvider(ArrayContentProvider.getInstance());
+		lstStations.setLabelProvider(new AssetLabelProvider());
+		lstStations.setContentProvider(new MappingContentProvider<AssetStation, AssetStationLocation>((a,b)->Collator.getInstance().compare(a.getId().toLowerCase(), b.getId().toLowerCase())));
 		lstStations.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		lstStations.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstStations.addDoubleClickListener(new IDoubleClickListener() {
@@ -365,10 +384,22 @@ public class AssetListView {
 		Menu mnu = new Menu(control);
 		control.setMenu(mnu);
 		
-		MenuItem addStation = new MenuItem(mnu, SWT.CASCADE);
-		addStation.setText(DialogConstants.ADD_BUTTON_TEXT);
-		addStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		addStation.addListener(SWT.Selection, e->createNewStation());
+		MenuItem newItem = new MenuItem(mnu, SWT.CASCADE);
+		newItem.setText("New ...");
+		newItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		
+		
+		Menu addMenu = new Menu(newItem);
+		newItem.setMenu(addMenu);
+		
+		MenuItem newStation= new MenuItem(addMenu, SWT.PUSH);
+		newStation.setText("Station");
+		newStation.addListener(SWT.Selection, e->createNewStation());
+		
+		MenuItem newLocation= new MenuItem(addMenu, SWT.PUSH);
+		newLocation.setText("Station Location");
+		newLocation.addListener(SWT.Selection, e->createNewStationLocation());
+		
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
@@ -406,7 +437,7 @@ public class AssetListView {
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object station = (Object) iterator.next();
 			if (station instanceof AssetStation) (new OpenStationHandler()).openStation((AssetStation)station);
-			
+			if (station instanceof AssetStationLocation) (new OpenStationLocationHandler()).openStationLocation(((AssetStationLocation)station));
 		}
 	}
 	
@@ -415,6 +446,20 @@ public class AssetListView {
 		newStation.setConservationArea(SmartDB.getCurrentConservationArea());
 		
 		StationDialog dialog = new StationDialog(context.get(Shell.class), newStation);
+		ContextInjectionFactory.inject(dialog, context);
+		dialog.open();
+	}
+	
+	private void createNewStationLocation() {
+		AssetStationLocation newLocation = new AssetStationLocation();	
+		Object selection = ((IStructuredSelection)lstStations.getSelection()).getFirstElement();
+		if (selection instanceof AssetStation) {
+			newLocation.setStation((AssetStation)selection);
+		}else if (selection instanceof AssetStationLocation) {
+			newLocation.setStation(((AssetStationLocation)selection).getStation());
+		}
+		
+		StationLocationDialog dialog = new StationLocationDialog(context.get(Shell.class), newLocation);
 		ContextInjectionFactory.inject(dialog, context);
 		dialog.open();
 	}
@@ -514,9 +559,18 @@ public class AssetListView {
 			}
 			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
+			HashMap<AssetType, List<Asset>> mappings = new HashMap<>();
+			assets.forEach(a->{
+				List<Asset> list = mappings.get(a.getAssetType());
+				if (list == null) {
+					list = new ArrayList<>();
+					mappings.put(a.getAssetType(), list);
+				}
+				list.add(a);
+			});
 			Display.getDefault().syncExec(()->{
 				if (lstAssets != null && !lstAssets.getControl().isDisposed()){
-					lstAssets.setInput(assets);
+					lstAssets.setInput(mappings);
 					lstAssets.expandAll();
 				}
 			});
@@ -536,13 +590,15 @@ public class AssetListView {
 //TODO: add this back with filter						new Object[] {"isRetired", false})
 						).list());	
 				stations.forEach(a->{a.getUuid().equals(null); a.getId();});
+				stations.forEach(a->a.getLocations().forEach(l->l.getId()));
 			}
 			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
-			
+			HashMap<AssetStation, List<AssetStationLocation>> mappings = new HashMap<>();
+			stations.forEach(s->mappings.put(s, s.getLocations()));				
 			Display.getDefault().syncExec(()->{
 				if (lstStations != null && !lstStations.getControl().isDisposed()){
-					lstStations.setInput(stations);
-//					lstStations.expandAll();
+					lstStations.setInput(mappings);
+					lstStations.expandAll();
 					lstStations.refresh();
 				}
 			});
@@ -551,58 +607,48 @@ public class AssetListView {
 		
 	};
 	
-	private class AssetTypeContentProvider implements ITreeContentProvider{
+	private class MappingContentProvider<T,V> implements ITreeContentProvider{
 
-		private HashMap<AssetType, List<Asset>> mapping = new HashMap<>();
+		private HashMap<T, List<V>> mapping = new HashMap<>();
+		
+		private Comparator<T> sorter;
+		
+		public MappingContentProvider(Comparator<T> keySorter) {
+			this.sorter = keySorter;
+		}
 		
 		@Override
 		public Object[] getElements(Object inputElement) {
-			List<AssetType> types = new ArrayList<>(mapping.keySet());
-			types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			List<T> types = new ArrayList<>(mapping.keySet());
+			types.sort(sorter);
 			return types.toArray();
 		}
 
 		@Override
 		public Object[] getChildren(Object parentElement) {
-			if (parentElement instanceof Asset) return null;
-			if (parentElement instanceof AssetType) return mapping.get((AssetType)parentElement).toArray();
-			return null;
+			return mapping.get(parentElement).toArray();
 		}
 
 		@Override
 		public Object getParent(Object element) {
-			if (element instanceof AssetType) return null;
-			if (element instanceof Asset) return ((Asset)element).getAssetType();
+			for (Entry<T,List<V>> kid : mapping.entrySet()) {
+				if (kid.getValue().contains(element)) return kid.getKey();
+			}
 			return null;
 		}
 
 		@Override
 		public boolean hasChildren(Object element) {
-			if (element instanceof AssetType) return true;
+			if (mapping.containsKey(element)) return true;
 			return false;
 		}
 		
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			mapping = new HashMap<>();
-			if (newInput instanceof List<?>) {
-				((List<?>)newInput).forEach(item->{
-					if (item instanceof Asset) {
-						Asset e = (Asset)item;
-					
-						List<Asset> assets = mapping.get(e.getAssetType());
-						if (assets == null) {
-							assets = new ArrayList<>();
-							mapping.put(e.getAssetType(), assets);
-						}
-						assets.add(e);
-					}
-				});
-				for (List<Asset> items : mapping.values()) {
-					items.sort((a,b)->Collator.getInstance().compare(a.getId(), b.getId()));
-				}
+			if (newInput instanceof HashMap) {
+				mapping = (HashMap<T, List<V>>) newInput;
 			}
 		}
 	}
-
 }

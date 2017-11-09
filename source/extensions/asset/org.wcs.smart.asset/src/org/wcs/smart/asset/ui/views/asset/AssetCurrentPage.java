@@ -72,8 +72,8 @@ import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetUtils;
-import org.wcs.smart.asset.engine.DeploymentStatisticsEngine;
-import org.wcs.smart.asset.engine.DeploymentStatisticsEngine.Statistic;
+import org.wcs.smart.asset.engine.StatisticsEngine;
+import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
 import org.wcs.smart.asset.model.AbstractAssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
@@ -342,16 +342,16 @@ public class AssetCurrentPage {
 			final Map<Statistic, Object> stats = new HashMap<>();
 			
 			Set<Statistic> toCompute = new HashSet<>();
-			toCompute.add(DeploymentStatisticsEngine.Statistic.INCIDENTS_PER_CAT);
-			toCompute.add(DeploymentStatisticsEngine.Statistic.NUMBER_INCIDENTS);
-			toCompute.add(DeploymentStatisticsEngine.Statistic.NUMBER_UNTAGGED);
+			toCompute.add(StatisticsEngine.Statistic.INCIDENTS_PER_CAT);
+			toCompute.add(StatisticsEngine.Statistic.NUMBER_INCIDENTS);
+			toCompute.add(StatisticsEngine.Statistic.NUMBER_UNTAGGED);
 			
-			stats.putAll(DeploymentStatisticsEngine.INSTANCE.computeStatistics(toCompute, deploy));
+			stats.putAll(StatisticsEngine.INSTANCE.computeStatistics(toCompute, deploy));
 			
 			final AssetDeployment thisdeploy = deploy;
 			Display.getDefault().syncExec(()->{
 				
-				Object v = stats.get(DeploymentStatisticsEngine.Statistic.NUMBER_INCIDENTS);
+				Object v = stats.get(StatisticsEngine.Statistic.NUMBER_INCIDENTS);
 				String numIncidents = "";
 				if (v != null) {
 					if (v instanceof Long) {
@@ -361,7 +361,7 @@ public class AssetCurrentPage {
 					}
 				}
 				
-				v = stats.get(DeploymentStatisticsEngine.Statistic.NUMBER_UNTAGGED);
+				v = stats.get(StatisticsEngine.Statistic.NUMBER_UNTAGGED);
 				String untagged = "";
 				if (v != null) {
 					if (v instanceof Long) {
@@ -371,7 +371,7 @@ public class AssetCurrentPage {
 					}
 				}
 				
-				v = stats.get(DeploymentStatisticsEngine.Statistic.INCIDENTS_PER_CAT);
+				v = stats.get(StatisticsEngine.Statistic.INCIDENTS_PER_CAT);
 				if (v != null) {
 					tblCnts.setInput(v);
 				}else {

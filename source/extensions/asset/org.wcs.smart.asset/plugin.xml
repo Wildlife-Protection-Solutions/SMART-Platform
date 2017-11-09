@@ -170,9 +170,20 @@
                      checkEnabled="false">
                   <with
                         variable="activePartId">
-                     <equals
-                           value="org.wcs.smart.asset.ui.views.asset">
-                     </equals>
+                     <or>
+                        <equals
+                              value="org.wcs.smart.asset.ui.views.asset">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.asset.ui.views.station">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.asset.ui.views.station">
+                        </equals>
+                        <equals
+                              value="org.wcs.smart.asset.ui.views.stationlocation">
+                        </equals>
+                     </or>
                   </with>
                </visibleWhen>
             </command>
@@ -193,6 +204,12 @@
                      </equals>
                      <equals
                            value="org.wcs.smart.asset.ui.views.station">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.asset.ui.views.station">
+                     </equals>
+                     <equals
+                           value="org.wcs.smart.asset.ui.views.stationlocation">
                      </equals>
                   </or>
                </with>
@@ -281,6 +298,18 @@
             default="false"
             id="org.wcs.smart.asset.ui.views.station"
             name="Station Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.asset.ui.views.stationlocation.StationLocationEditor"
+            default="false"
+            id="org.wcs.smart.asset.ui.views.stationlocation"
+            name="Station Location Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.asset.ui.views.data.DataImporterView"
+            default="false"
+            id="org.wcs.smart.asset.ui.views.data.importer"
+            name="Data Importer View">
       </editor>
    </extension>
 

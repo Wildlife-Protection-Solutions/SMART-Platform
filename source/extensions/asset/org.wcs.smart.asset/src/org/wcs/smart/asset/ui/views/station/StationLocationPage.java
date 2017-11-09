@@ -63,6 +63,7 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationAttribute;
 import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.ui.StationLocationDialog;
+import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
 import org.wcs.smart.asset.ui.map.StationLocationDrawCommand;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -237,8 +238,7 @@ public class StationLocationPage {
 		AssetStationLocationProxy proxy = getTableSelection();
 		if (proxy == null) return;
 	
-		//TODO:
-		
+		(new OpenStationLocationHandler()).openStationLocation(proxy.data);		
 	}
 	
 	private void editLocationDetails() {

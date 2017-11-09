@@ -1,0 +1,291 @@
+package org.wcs.smart.asset.ui.views.data;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
+import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.ui.AssetLabelProvider;
+import org.wcs.smart.asset.ui.AssetTypeLabelProvider;
+import org.wcs.smart.asset.ui.StationDialog;
+import org.wcs.smart.asset.ui.StationLocationDialog;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
+
+public class StationAssetSelectionDialog extends TitleAreaDialog{
+
+	public static final String CREATE_STATION = "<Create New Station...>";
+	public static final String CREATE_LOCATION = "<Create New Station Location...>";
+			
+	@Inject
+	private IEclipseContext context;
+	
+	public enum Type{
+		ASSET,
+		LOCATION,
+		ASSET_LOCATION,
+		DATE;
+	}
+	
+	private TableComboViewer cmbAsset = null;
+	private ComboViewer cmbStation = null;
+	private ComboViewer cmbLocation = null;
+	private DateTime dtDate = null;
+	private DateTime dtTime = null;
+	
+	private Type type;
+	
+	private AssetStationLocation selectedLocation;
+	private Asset selectedAsset;
+	private Date selectedDate;
+	
+	public StationAssetSelectionDialog(Shell parentShell, Type type) {
+		super(parentShell);
+		this.type = type;
+	}
+	
+	public Asset getSelectedAsset() {
+		return this.selectedAsset;
+	}
+	
+	public AssetStationLocation getSelectedLocation() {
+		return this.selectedLocation;
+	}
+	
+	public Date getSelectedDate() {
+		return this.selectedDate;
+	}
+	
+	@Override
+	protected void okPressed() {
+		if (cmbAsset != null) {
+			Object x = ((IStructuredSelection)cmbAsset.getSelection()).getFirstElement();
+			if (x instanceof Asset) {
+				selectedAsset = (Asset) x;
+			}else {
+				return;
+			}
+		}
+		
+		if (cmbLocation != null) {
+			Object x = ((IStructuredSelection)cmbLocation.getSelection()).getFirstElement();
+			if (x instanceof AssetStationLocation) {
+				selectedLocation = (AssetStationLocation) x;
+			}else {
+				return;
+			}
+		}
+		if (dtDate != null) {
+			selectedDate = SmartUtils.combineDateTime(SmartUtils.getDate(dtDate), SmartUtils.getTime(dtTime));
+		}
+		// TODO Auto-generated method stub
+		super.okPressed();
+	}
+
+	
+	@Override
+	protected Control createDialogArea(Composite parent) {
+		parent = (Composite)super.createDialogArea(parent);
+		
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout(2, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		if (type == Type.ASSET || type == Type.ASSET_LOCATION) {
+			Label l = new Label(main, SWT.NONE);
+			l.setText("Asset:");
+			
+			cmbAsset = new TableComboViewer(main, SWT.DROP_DOWN | SWT.BORDER);
+			cmbAsset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			cmbAsset.setContentProvider(ArrayContentProvider.getInstance());
+			cmbAsset.setLabelProvider(new LabelProvider() {
+				AssetTypeLabelProvider p2 = new AssetTypeLabelProvider();
+				@Override
+				public void dispose() {
+					super.dispose();
+					p2.dispose();
+				}
+				
+				@Override
+				public String getText(Object element) {
+					if (element instanceof Asset) return ((Asset)element).getId();
+					return super.getText(element);
+				}
+				
+				@Override
+				public Image getImage(Object element) {
+					if (element instanceof Asset) {
+						return p2.getImage( ((Asset)element).getAssetType() );
+					}
+					return super.getImage(element);
+				}
+			});
+			
+			
+			cmbAsset.setInput(new String[] {DialogConstants.LOADING_TEXT});
+			
+			loadAssets.setSystem(true);
+			loadAssets.schedule();
+		}
+		if (type == Type.LOCATION || type == Type.ASSET_LOCATION) {
+			Label l = new Label(main, SWT.NONE);
+			l.setText("Station:");
+			
+			cmbStation = new ComboViewer(main, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+			cmbStation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			cmbStation.setContentProvider(ArrayContentProvider.getInstance());
+			cmbStation.setLabelProvider(new AssetLabelProvider());
+			cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+			
+			l = new Label(main, SWT.NONE);
+			l.setText("Station Location:");
+			
+			cmbLocation = new ComboViewer(main, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+			cmbLocation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			cmbLocation.setContentProvider(ArrayContentProvider.getInstance());
+			cmbLocation.setLabelProvider(new AssetLabelProvider());
+			cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+			
+			cmbStation.addSelectionChangedListener(e->{
+				Object x = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
+				if (x instanceof AssetStation) {
+					List<Object> kids = new ArrayList<>();
+					kids.addAll(((AssetStation)x).getLocations());
+					kids.add(CREATE_LOCATION);
+					cmbLocation.setInput(kids);
+				}else if (x == CREATE_STATION) {
+					AssetStation newStation = new AssetStation();
+					newStation.setConservationArea(SmartDB.getCurrentConservationArea());
+					
+					StationDialog dialog = new StationDialog(getShell(), newStation);
+					ContextInjectionFactory.inject(dialog, context);
+					dialog.open();
+					
+					cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+					cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+					loadStations.schedule();
+				}
+			});
+			
+			cmbLocation.addSelectionChangedListener(e->{
+				Object y = ((IStructuredSelection)cmbLocation.getSelection()).getFirstElement();
+				if (y == CREATE_LOCATION) {
+				
+					Object x = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
+					if (x instanceof AssetStation) {
+						AssetStation station = (AssetStation)x;
+						
+						AssetStationLocation newLocation = new AssetStationLocation();
+						newLocation.setStation(station);
+								
+						StationLocationDialog dialog = new StationLocationDialog(getShell(), newLocation);
+						ContextInjectionFactory.inject(dialog, context);
+						dialog.open();
+						
+						cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+						cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+						loadStations.schedule();
+					}
+				}
+			});
+			
+			loadStations.setSystem(true);
+			loadStations.schedule();
+		}
+		
+		if (type == Type.DATE) {
+			Label l = new Label(main, SWT.NONE);
+			l.setText("Date/Time:");
+			
+			Composite c = new Composite(main,  SWT.NONE);
+			c.setLayout(new GridLayout(2, false));
+			((GridLayout)c.getLayout()).marginWidth = 0;
+			((GridLayout)c.getLayout()).marginHeight = 0;
+			
+			dtDate = new DateTime(c, SWT.DATE | SWT.DROP_DOWN | SWT.CALENDAR);
+			dtTime = new DateTime(c, SWT.TIME);
+		}
+		return parent;
+	}
+	
+	
+	@Override
+	public boolean isResizable() {
+		return false;
+	}
+	
+	Job loadAssets = new Job("loading assets") {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			List<Asset> assets = new ArrayList<>();
+			try(Session session = HibernateManager.openSession()){
+				assets.addAll(QueryFactory.buildQuery(session, Asset.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
+						new Object[] {"isRetired", false}
+				).list());
+				assets.forEach(a->a.getAssetType().getName());
+			}
+			 
+			Display.getDefault().syncExec(()->{
+				cmbAsset.setInput(assets);
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
+	
+	Job loadStations = new Job("loading stations") {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			List<AssetStation> stations = new ArrayList<>();
+			try(Session session = HibernateManager.openSession()){
+				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}				
+				).list());
+				stations.forEach(a->a.getLocations().forEach(l->l.getId()));
+			}
+			List<Object> input = new ArrayList<>();
+			input.addAll(stations);
+			input.add(CREATE_STATION);
+			Display.getDefault().syncExec(()->{
+				cmbStation.setInput(input);
+				if (!stations.isEmpty()) cmbStation.setSelection(new StructuredSelection(stations.get(0)));
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
+}

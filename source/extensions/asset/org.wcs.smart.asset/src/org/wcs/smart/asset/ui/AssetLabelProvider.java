@@ -25,6 +25,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
 
 /**
@@ -42,6 +44,8 @@ public class AssetLabelProvider extends LabelProvider{
 	public String getText(Object element) {
 		if (element instanceof AssetType) return typeProvider.getText(element);
 		if (element instanceof Asset) return ((Asset)element).getId();
+		if (element instanceof AssetStation) return ((AssetStation)element).getId();
+		if (element instanceof AssetStationLocation) return ((AssetStationLocation)element).getId();
 		return super.getText(element);
 	}
 	
@@ -50,6 +54,12 @@ public class AssetLabelProvider extends LabelProvider{
 		if (element instanceof AssetType) return typeProvider.getImage(element);
 		if (element instanceof Asset) {
 			return AssetCoreLabelProvider.getStatusImage((Asset)element);
+		}
+		if (element instanceof AssetStation) {
+			return AssetCoreLabelProvider.getStatusImage(((AssetStation)element).getStatus());
+		}
+		if (element instanceof AssetStationLocation) {
+			return AssetCoreLabelProvider.getStatusImage(((AssetStationLocation)element).getStatus());
 		}
 		return super.getImage(element);
 	}

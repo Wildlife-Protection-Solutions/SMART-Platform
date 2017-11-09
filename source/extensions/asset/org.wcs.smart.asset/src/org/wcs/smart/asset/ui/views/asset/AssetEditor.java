@@ -460,7 +460,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		lblAssetType = toolkit.createLabel(headerComp, "");
 				
 		
-		String headers[] = new String[] {"Current Status", "Details", "Deployment History", "Event History"};
+		String headers[] = new String[] {"Current Status", "Properties", "Deployments", "History"};
 		Listener[] actions = new Listener[] {
 			event->{
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);

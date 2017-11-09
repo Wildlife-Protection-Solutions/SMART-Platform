@@ -39,7 +39,7 @@ public class AssetEvents {
 	
 
 	/**
-	 * Payload for asset type events can be a single asset types or a collection of asset types
+	 * Payload for asset type events are a collection of asset types
 	 */
 	public static final String ASSETTYPE_ALL = "ASSETTYPE/*"; //$NON-NLS-1$
 	public static final String ASSETTYPE_NEW = "ASSETTYPE/NEW"; //$NON-NLS-1$
@@ -47,7 +47,7 @@ public class AssetEvents {
 	public static final String ASSETTYPE_MODIFIED = "ASSETTYPE/UPDATED"; //$NON-NLS-1$
 	
 	/**
-	 * Payload for asset stations events can be a single asset station or a collection of asset stations
+	 * Payload for asset stations are a collection of asset stations
 	 */
 	public static final String ASSETSTATION_ALL = "ASSETSTATION/*"; //$NON-NLS-1$
 	public static final String ASSETSTATION_NEW = "ASSETSTATION/NEW"; //$NON-NLS-1$
@@ -55,7 +55,15 @@ public class AssetEvents {
 	public static final String ASSETSTATION_MODIFIED = "ASSETSTATION/UPDATED"; //$NON-NLS-1$
 	
 	/**
-	 * Payload for asset deployment events can be a single asset deployment or a collection of asset deployments
+	 * Payload for asset stations location are collection of asset station location
+	 */
+	public static final String ASSETSTATIONLOCATION_ALL = "ASSETSTATIONLOCATION/*"; //$NON-NLS-1$
+	public static final String ASSETSTATIONLOCATION_NEW = "ASSETSTATIONLOCATION/NEW"; //$NON-NLS-1$
+	public static final String ASSETSTATIONLOCATION_DELETE = "ASSETSTATIONLOCATION/DELETE"; //$NON-NLS-1$
+	public static final String ASSETSTATIONLOCATION_MODIFIED = "ASSETSTATIONLOCATION/UPDATED"; //$NON-NLS-1$
+	
+	/**
+	 * Payload for asset deployment events is collection of asset deployments
 	 */
 	public static final String ASSETDEPLOYMENT_ALL = "ASSETDEPLOYMENT/*"; //$NON-NLS-1$
 	public static final String ASSETDEPLOYMENT_NEW = "ASSETDEPLOYMENT/NEW"; //$NON-NLS-1$
