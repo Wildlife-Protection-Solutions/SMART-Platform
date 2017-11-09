@@ -33,13 +33,13 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Udig service extension for smart conservation area 
- * Area layers.
+ * Udig service extension for SMART patrol layers
  * 
  * @author Emily
  * @since 1.0.0
  */
 public class PatrolServiceExtension implements ServiceExtension {
+	
     public static final String KEY = "org.wcs.smart.udig.catalog.smartService"; //$NON-NLS-1$
    
     /**
@@ -49,20 +49,18 @@ public class PatrolServiceExtension implements ServiceExtension {
     
     /*
      *URLS for smart services are of the form
-     *smart://smartdb/CAUUID#TYPE
+     *"smart://smartdb/patrol/<PATROLUUID>
      */
 	
     @Override
 	public IService createService(URL id, Map<String, Serializable> params) {
         if (params == null)
             return null;
-            
         //check for the property service key
         if (params.containsKey(PATROL_UUID_KEY) && params.get(PATROL_UUID_KEY) instanceof String) {
             //found it, create the service handle
-        	return  new PatrolService(params);
+        	return new PatrolService(params);
         }
-        
 		return null;
 	}
 
@@ -73,7 +71,9 @@ public class PatrolServiceExtension implements ServiceExtension {
 	}
 	
 	public static Map<String, Serializable> createParamsFromUrl(URL url){
-		/* determine conservation area */
+		//not a valid url
+		if (!url.toExternalForm().toLowerCase().startsWith("smart://smartdb/patrol/")) return null; //$NON-NLS-1$
+
 		String uuid = url.getPath();
 		if (uuid == null){
 			return null;
@@ -83,7 +83,7 @@ public class PatrolServiceExtension implements ServiceExtension {
 			pos = 0;
 		}
 		
-		uuid = uuid.substring(pos);
+		uuid = uuid.substring(pos+1);
 		
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(PATROL_UUID_KEY, uuid);

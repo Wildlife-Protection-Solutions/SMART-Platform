@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.io.IOException;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +31,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -50,8 +54,6 @@ import org.geotools.styling.Style;
 import org.geotools.styling.StyleFactory;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IResolve;
-import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
@@ -103,6 +105,11 @@ public class PartolTracksComposite extends TracksComposite {
 		this.patrolLegDay = patrolLegDay;
 		createControls();
 		updateInput();
+		
+		addListener(SWT.Dispose, e->{
+			//clean up
+			if (patrolService != null) CatalogPlugin.getDefault().getLocalCatalog().remove(patrolService);
+		});
 	}
 
 	public void updateInput() {
@@ -156,46 +163,58 @@ public class PartolTracksComposite extends TracksComposite {
 
 	@Override
 	protected void addLayers(MapViewer viewer) {
-		//add track layer
-		try{
-			List<IResolve> resolves = CatalogPlugin.getDefault().getLocalCatalog().find(PatrolServiceExtension.createURL(patrolLegDay.getPatrolLeg().getPatrol()), null);
-			for (IResolve r : resolves){
-				IService service = r.resolve(IService.class, null);
-				if (service != null && service instanceof PatrolService){
-					patrolService = (PatrolService) service;		
-					break;
-				}
-			}
-
-			if (patrolService != null){
-				List<IGeoResource> newLayers = new ArrayList<IGeoResource>();
-
-				@SuppressWarnings("unchecked")
-				List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(null);
-				for (IGeoResource layer : layers) {
-					if (((PatrolGeoResource) layer).getType() == PatrolDataSource.TRACK_PART_TYPE) {
-						newLayers.add(layer);
+		//this needs to be done in a job otherwise aquiring service from catalog plugin will fail
+		Job j = new Job("creating map layers") { //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				//add track layer
+				try{
+					URL serviceURL = PatrolServiceExtension.createURL(patrolLegDay.getPatrolLeg().getPatrol());
+					if (patrolService == null) {
+						patrolService = (PatrolService) CatalogPlugin.getDefault().getLocalCatalog().acquire(serviceURL, null);
 					}
-				}
-				patrolService.refresh(patrolLegDay.getPatrolLeg().getPatrol(), null);
-				AddLayersCommand command = new AddLayersCommand(newLayers, 0){
-					@Override
-					public void run( IProgressMonitor monitor ) throws Exception {
-						super.run(monitor);
-						PartolTracksComposite.this.trackLayers = getLayers();
-						
-						//add track style
-						for (Layer trackLayer : PartolTracksComposite.this.trackLayers){
-							trackLayer.getStyleBlackboard().put(SLDContent.ID, PartolTracksComposite.this.buildTrackStyle());
+
+					if (patrolService != null){
+						List<IGeoResource> newLayers = new ArrayList<IGeoResource>();
+
+						@SuppressWarnings("unchecked")
+						List<IGeoResource> layers = (List<IGeoResource>) patrolService.resources(null);
+						for (IGeoResource layer : layers) {
+							if (((PatrolGeoResource) layer).getType() == PatrolDataSource.TRACK_PART_TYPE) {
+								newLayers.add(layer);
+							}
 						}
+						//refresh only track layers here; 
+						//if we refresh all then the QA track editor plugin 
+						//fails as this refreshes the waypoint layers as well as the track
+						//layers and for that case the waypoints have not been loaded by hibernate
+						//and an lazy loading exception occurs 
+						patrolService.refresh(patrolLegDay.getPatrolLeg().getPatrol(), null, PatrolDataSource.TRACK_PART_TYPE, PatrolDataSource.TRACK_TYPE);
+
+						AddLayersCommand command = new AddLayersCommand(newLayers){
+							@Override
+							public void run( IProgressMonitor monitor ) throws Exception {
+								super.run(monitor);
+								PartolTracksComposite.this.trackLayers = getLayers();
+								
+								//add track style
+								for (Layer trackLayer : PartolTracksComposite.this.trackLayers){
+									trackLayer.getStyleBlackboard().put(SLDContent.ID, PartolTracksComposite.this.buildTrackStyle());
+								}
+							}
+						};
+						getMapViewer().getMap().sendCommandASync(command);
 					}
-				};
-				getMapViewer().getMap().sendCommandASync(command);
+					
+				}catch (Exception ex){
+					SmartPlugIn.displayLog(Messages.PartolTracksComposite_MapConfig_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+				}
+				return Status.OK_STATUS;
 			}
-			
-		}catch (Exception ex){
-			SmartPlugIn.displayLog(Messages.PartolTracksComposite_MapConfig_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-		}
+		};
+		j.setSystem(true);
+		j.schedule();
+		
 	}
 
 	protected void updateMapSelection(){
@@ -235,7 +254,7 @@ public class PartolTracksComposite extends TracksComposite {
 		getMapViewer().getMap().getRenderManager().refresh(null);
 		if (patrolService != null){
 			try {
-				patrolService.refresh(patrolLegDay.getPatrolLeg().getPatrol(), null);
+				patrolService.refresh(patrolLegDay.getPatrolLeg().getPatrol(), null, PatrolDataSource.TRACK_PART_TYPE, PatrolDataSource.TRACK_TYPE);
 			} catch (IOException e) {
 				setError(Messages.PartolTracksComposite_MarRefresh_Error + e.getMessage());
 				SmartPlugIn.log(e.getMessage(), e);
@@ -469,7 +488,7 @@ public class PartolTracksComposite extends TracksComposite {
 		Stroke otherDays = sf.createStroke(ff.literal("#0080FF"),  //$NON-NLS-1$
 				ff.literal(1.0), 
 				null, null, null, 
-				new float[]{15,1},
+				null,
 				null, null, null);
 		
 		Stroke toDay = sf.createStroke(ff.literal("#0080FF"), ff.literal(3.0)); //$NON-NLS-1$

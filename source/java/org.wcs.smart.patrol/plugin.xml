@@ -1045,5 +1045,12 @@
             directory="patrol">
       </FilestoreDirectory>
    </extension>
-
+   <extension
+         point="org.locationtech.udig.catalog.ServiceExtension">
+      <service
+            class="org.wcs.smart.patrol.udig.catalog.PatrolServiceExtension"
+            id="org.wcs.smart.patrol.service"
+            name="SMART Patrol Service Extension">
+      </service>
+   </extension>
 </plugin>

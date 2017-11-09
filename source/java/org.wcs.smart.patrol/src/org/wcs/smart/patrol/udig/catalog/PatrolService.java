@@ -43,11 +43,8 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * A udig service for smart
- * conservation area "area" data.
- * 
- * Service exists for a conservation area.  Each
- * area type is a separate georesource.
+ * A udig service for a SMART Patrol.  Includes resources
+ * for the patrol waypoints, tracks, and track parts.
  * 
  * @author Emily
  * @since 1.0.0
@@ -95,12 +92,25 @@ public class PatrolService extends IService {
 	 * @throws IOException
 	 */
 	
-	public void refresh(Patrol patrol, IProgressMonitor monitor) throws IOException{
+	public void refresh(Patrol patrol, IProgressMonitor monitor, String... dataTypes) throws IOException{
 		this.patrol = patrol;
-		this.ds.updatePatrol(patrol);
+		if (this.ds != null) this.ds.updatePatrol(patrol);
 		
 		for (IGeoResource member : resources(monitor)){
-			((PatrolGeoResourceInfo)member.getInfo(monitor)).computeBounds((PatrolGeoResource)member, monitor);
+			boolean refresh = dataTypes == null || dataTypes.length == 0 ? true : false;
+			if (!refresh) {
+				String mType = ((PatrolGeoResource)member).getType();
+				
+				for (String dt: dataTypes) {
+					if (dt.equals(mType)) {
+						refresh = true;
+						break;
+					}
+				}
+			}
+			if (refresh) {
+				((PatrolGeoResourceInfo)member.getInfo(monitor)).computeBounds((PatrolGeoResource)member, monitor);
+			}
 		}
 	}	
 	
