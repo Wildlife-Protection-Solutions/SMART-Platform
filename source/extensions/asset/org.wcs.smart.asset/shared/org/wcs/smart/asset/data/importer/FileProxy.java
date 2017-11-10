@@ -68,26 +68,42 @@ public class FileProxy {
 		this.imageDate = imageDate;
 	}
 	
+	/**
+	 * Updates the associated asset, clears the existing linked deployment
+	 * 
+	 * @param asset
+	 */
 	public void setAsset(Asset asset) {
 		this.asset = asset;
+		this.deployment = null;
 	}
 	
+	/**
+	 * Updates the associated location & station; clears the existing linked deployment
+	 * @param location
+	 */
 	public void setStationLocation(AssetStationLocation location) {
 		this.location = location;
+		this.station = location.getStation();
+		this.deployment = null;
 	}
 	
 	public Asset getAsset() {
 		return this.asset;
 	}
+	
 	public AssetDeployment getDeployment() {
 		return this.deployment;
 	}
+	
 	public AssetStation getStation() {
 		return this.station;
 	}
+	
 	public AssetStationLocation getStationLocation() {
 		return this.location;
 	}
+	
 	public Date getImageDate() {
 		return this.imageDate;
 	}
@@ -97,6 +113,8 @@ public class FileProxy {
 		if (getAsset() == null) return false;
 		if (getImageDate() == null) return false;
 		if (getDeployment() == null) return false;
+		if (getX() == null) return false;
+		if (getY() == null) return false;
 		return true;
 	}
 	
@@ -107,6 +125,7 @@ public class FileProxy {
 		if (getStation() == null) return "No station found";
 		if (getStationLocation() == null) return "No station location found";
 		if (getDeployment() == null) return "No depoyment found";
+		if (getX() == null || getY() == null) return "No position found";
 		return "";
 	}
 	
@@ -120,6 +139,15 @@ public class FileProxy {
 			this.deployment = deploy;
 			this.location = deploy.getStationLocation();
 			this.station = deploy.getStationLocation().getStation();
+			
+			//ensure lazily loaded required fields
+			location.getId();
+			station.getId();
+			
+			if (this.x == null || this.y == null) {
+				x = location.getX();
+				y = location.getY();
+			}
 		}
 	}
 	
@@ -183,7 +211,7 @@ public class FileProxy {
 				matching.setX(x);
 				matching.setY(y);
 				matching.setConservationArea(ca);
-				matching.setId("GENERATE ID");
+				matching.setId("**NEW STATION **"); //when we save we need to generate valid station ids
 				matching.setLocations(new ArrayList<>());
 						
 			}
@@ -192,6 +220,7 @@ public class FileProxy {
 		return null;
 		
 	}
+	
 	
 	private AssetDeployment findDeployment(AssetStation station, Session session) {
 		AssetStationLocation matching = null;
@@ -221,12 +250,11 @@ public class FileProxy {
 			matching = new AssetStationLocation();
 			matching.setStation(station);
 			matching.setAttributeValues(new ArrayList<>());
-			matching.setId("GNEERATE IDTODO:");
+			matching.setId("** NEW LOCATION **"); //TODO: when we save we need to generate valid id
 			matching.setX(x);
 			matching.setX(y);
 			station.getLocations().add(matching);
 		}
-		
 		return findDeployment(matching, session);
 	}
 

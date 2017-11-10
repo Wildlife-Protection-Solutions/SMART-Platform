@@ -49,6 +49,10 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public static final String ICON_STATUS_INACTIVE = "org.wcs.smart.asset.status.inactive";
 	public static final String ICON_STATUS_RETIRED = "org.wcs.smart.asset.status.retired";
 	
+	public static final String ICON_IMPORT_COMPLETE = "org.wcs.smart.asset.import.complete";
+	public static final String ICON_IMPORT_INCOMPLETE = "org.wcs.smart.asset.import.incomplete";
+	public static final String ICON_IMPORT = "org.wcs.smart.asset.import";
+	
 	/**
 	 * The constructor
 	 */
@@ -113,5 +117,9 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		reg.put(ICON_STATUS_ACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_active.png")); //$NON-NLS-1$);
 		reg.put(ICON_STATUS_INACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_inactive.png")); //$NON-NLS-1$);
 		reg.put(ICON_STATUS_RETIRED, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_retired.png")); //$NON-NLS-1$);
+		
+		reg.put(ICON_IMPORT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import.png")); //$NON-NLS-1$);
+		reg.put(ICON_IMPORT_COMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_complete.png")); //$NON-NLS-1$);
+		reg.put(ICON_IMPORT_INCOMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_incomplete.png")); //$NON-NLS-1$);
 	}
 }

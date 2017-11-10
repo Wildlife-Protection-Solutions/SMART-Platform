@@ -3,6 +3,7 @@ package org.wcs.smart.asset.data.importer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.HashMap;
 
 import org.wcs.smart.ca.ConservationArea;
 
@@ -11,13 +12,13 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.lang.GeoLocation;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
 import com.drew.metadata.exif.GpsDirectory;
 
 public class FileMetadataReader {
 
 	
 	public static FileProxy readFile(Path file, ConservationArea ca) throws Exception {
-		
 		//at a minimum lets read the lat/long
 		FileProxy fileInfo = new FileProxy(file, ca);
 		readExifMetadata(file, fileInfo);
@@ -36,7 +37,30 @@ public class FileMetadataReader {
 				fileInfo.setImageDate(dateTime);
 			}			
 		}
-
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @return  null indicates some error reading file; empty hash map
+	 * indicates not exif metadata found
+	 */
+	public static HashMap<String, String> readExifMetadata(Path file){
+		HashMap<String, String> results = new HashMap<>();
+		
+		try {
+			Metadata metadata = ImageMetadataReader.readMetadata(file.toFile());
+			
+			for (Directory directory : metadata.getDirectories()) {
+				for (Tag g : directory.getTags()) {
+					results.put(directory.getName() + "." + g.getTagName(), g.getDescription());
+				}
+			}
+			return results;
+		}catch (Exception ex) {
+			//TODO: error
+			return null;
+		}
 	}
 }
 

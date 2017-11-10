@@ -80,6 +80,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
+import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.StationManager;
 import org.wcs.smart.asset.model.Asset;
@@ -222,7 +223,7 @@ public class AssetListView {
 		
 		ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
 		importData.setToolTipText("import asset data");
-		importData.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_GO));
+		importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
 		importData.addListener(SWT.Selection, e->importData());
 		
 		new ToolItem(toolbar, SWT.SEPARATOR);
@@ -246,7 +247,7 @@ public class AssetListView {
 		
 		ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
 		importData.setToolTipText("import asset data");
-		importData.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_GO));
+		importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
 		importData.addListener(SWT.Selection, e->importData());
 		
 		new ToolItem(toolbar, SWT.SEPARATOR);

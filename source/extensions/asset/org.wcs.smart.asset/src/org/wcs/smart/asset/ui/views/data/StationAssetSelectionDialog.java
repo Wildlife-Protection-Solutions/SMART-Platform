@@ -12,13 +12,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -43,7 +43,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
-public class StationAssetSelectionDialog extends TitleAreaDialog{
+public class StationAssetSelectionDialog extends Dialog{
 
 	public static final String CREATE_STATION = "<Create New Station...>";
 	public static final String CREATE_LOCATION = "<Create New Station Location...>";
@@ -54,11 +54,10 @@ public class StationAssetSelectionDialog extends TitleAreaDialog{
 	public enum Type{
 		ASSET,
 		LOCATION,
-		ASSET_LOCATION,
 		DATE;
 	}
 	
-	private TableComboViewer cmbAsset = null;
+	private TableViewer cmbAsset = null;
 	private ComboViewer cmbStation = null;
 	private ComboViewer cmbLocation = null;
 	private DateTime dtDate = null;
@@ -122,12 +121,12 @@ public class StationAssetSelectionDialog extends TitleAreaDialog{
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		if (type == Type.ASSET || type == Type.ASSET_LOCATION) {
-			Label l = new Label(main, SWT.NONE);
-			l.setText("Asset:");
+		if (type == Type.ASSET ) {
+			cmbAsset = new TableViewer(main, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+			cmbAsset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+			((GridData)cmbAsset.getControl().getLayoutData()).heightHint = 100;
+			((GridData)cmbAsset.getControl().getLayoutData()).widthHint = 300;
 			
-			cmbAsset = new TableComboViewer(main, SWT.DROP_DOWN | SWT.BORDER);
-			cmbAsset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			cmbAsset.setContentProvider(ArrayContentProvider.getInstance());
 			cmbAsset.setLabelProvider(new LabelProvider() {
 				AssetTypeLabelProvider p2 = new AssetTypeLabelProvider();
@@ -151,19 +150,22 @@ public class StationAssetSelectionDialog extends TitleAreaDialog{
 					return super.getImage(element);
 				}
 			});
-			
+			cmbAsset.addDoubleClickListener(e->okPressed());
 			
 			cmbAsset.setInput(new String[] {DialogConstants.LOADING_TEXT});
 			
 			loadAssets.setSystem(true);
 			loadAssets.schedule();
+			
+			getShell().setText("Select Asset");
 		}
-		if (type == Type.LOCATION || type == Type.ASSET_LOCATION) {
+		if (type == Type.LOCATION ) {
 			Label l = new Label(main, SWT.NONE);
 			l.setText("Station:");
 			
 			cmbStation = new ComboViewer(main, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 			cmbStation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			((GridData)cmbStation.getControl().getLayoutData()).widthHint = 300;
 			cmbStation.setContentProvider(ArrayContentProvider.getInstance());
 			cmbStation.setLabelProvider(new AssetLabelProvider());
 			cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
@@ -222,6 +224,8 @@ public class StationAssetSelectionDialog extends TitleAreaDialog{
 			
 			loadStations.setSystem(true);
 			loadStations.schedule();
+			
+			getShell().setText("Select Location");
 		}
 		
 		if (type == Type.DATE) {
@@ -233,16 +237,17 @@ public class StationAssetSelectionDialog extends TitleAreaDialog{
 			((GridLayout)c.getLayout()).marginWidth = 0;
 			((GridLayout)c.getLayout()).marginHeight = 0;
 			
-			dtDate = new DateTime(c, SWT.DATE | SWT.DROP_DOWN | SWT.CALENDAR);
+			dtDate = new DateTime(c, SWT.DATE | SWT.DROP_DOWN | SWT.CALENDAR | SWT.LONG);
 			dtTime = new DateTime(c, SWT.TIME);
+			
+			getShell().setText("Select Date");
 		}
 		return parent;
 	}
 	
-	
 	@Override
 	public boolean isResizable() {
-		return false;
+		return true;
 	}
 	
 	Job loadAssets = new Job("loading assets") {
@@ -260,6 +265,7 @@ public class StationAssetSelectionDialog extends TitleAreaDialog{
 			 
 			Display.getDefault().syncExec(()->{
 				cmbAsset.setInput(assets);
+				if (!assets.isEmpty()) cmbAsset.setSelection(new StructuredSelection(assets.get(0)));
 			});
 			return Status.OK_STATUS;
 		}
@@ -275,6 +281,7 @@ public class StationAssetSelectionDialog extends TitleAreaDialog{
 				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}				
 				).list());
+				stations.forEach(s->s.getId());
 				stations.forEach(a->a.getLocations().forEach(l->l.getId()));
 			}
 			List<Object> input = new ArrayList<>();

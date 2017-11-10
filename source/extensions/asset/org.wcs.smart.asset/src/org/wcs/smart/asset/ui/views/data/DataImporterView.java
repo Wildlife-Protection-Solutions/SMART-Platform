@@ -3,8 +3,11 @@ package org.wcs.smart.asset.ui.views.data;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -47,8 +50,12 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.data.importer.FileProcessor;
 import org.wcs.smart.asset.data.importer.FileProxy;
+import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -68,8 +75,14 @@ public class DataImporterView extends EditorPart{
 	private TableViewer tblResults;
 	
 	private Composite fileDetailsComposite;
-	
+
+	private Composite statusSection;
+
 	private IEclipseContext context;
+	private Label fileCnt;
+	
+	private List<Asset> selectedAssets = new ArrayList<>();
+	private List<AssetStationLocation> selectedLocations = new ArrayList<>();
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -94,7 +107,7 @@ public class DataImporterView extends EditorPart{
 		return isDirty;
 	}
 	
-	public void setDirty(boolean dirty) {
+	public void setDirty(boolean isDirty) {
 		boolean fire = isDirty != this.isDirty;
 		this.isDirty = isDirty;
 		if (fire) firePropertyChange(IEditorPart.PROP_DIRTY);
@@ -121,7 +134,8 @@ public class DataImporterView extends EditorPart{
 		((GridLayout)main.getLayout()).marginWidth = 0;
 		((GridLayout)main.getLayout()).marginHeight = 0;
 		
-		toolkit.createLabel(main, "Number of Files: " + processor.getFiles().size());
+		fileCnt = toolkit.createLabel(main, "");
+		fileCnt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		details = toolkit.createComposite(main);
 		details.setLayout(new GridLayout());
@@ -129,7 +143,12 @@ public class DataImporterView extends EditorPart{
 		((GridLayout)details.getLayout()).marginWidth = 0;
 		((GridLayout)details.getLayout()).marginHeight = 0;
 		
+		updateFileCount();
 		createProcessComposite(false);
+	}
+	
+	private void updateFileCount() {
+		fileCnt.setText(MessageFormat.format("Number of Files: {0}",processor.getFiles().size()));
 	}
 	
 	private void createProcessComposite(boolean isCancelled) {
@@ -146,9 +165,39 @@ public class DataImporterView extends EditorPart{
 		setDirty(false);
 	}
 
+	private void updateStatus() {
+		boolean isValid = processor.isValid();
+		Boolean lastState = ((Boolean)statusSection.getData("LAST_STATUS"));
+		//status not changed
+		if ( lastState != null && lastState == isValid ) return;
+		
+		for (Control c : statusSection.getChildren()) c.dispose();
+		
+		if (isValid) {
+			Button btnSave = toolkit.createButton(statusSection, "Load", SWT.PUSH);
+			Label l = toolkit.createLabel(statusSection, "Data processed and ready for loading");
+			l.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
+		}else {
+			Label statusImage = toolkit.createLabel(statusSection, "");
+			statusImage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
+			
+			Label statusMsg = toolkit.createLabel(statusSection, "Data processing not complete.  You must ensure row in the table below are complete before you can continue.");
+			statusMsg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		}
+		statusSection.getParent().layout(true);
+		statusSection.setData("LAST_STATUS", isValid);
+	}
+	
 	private void createFileSummary() {
 		for (Control c : details.getChildren()) c.dispose();
 		
+		// status section
+		statusSection = toolkit.createComposite(details, SWT.BORDER);
+		statusSection.setLayout(new GridLayout(2, false));
+		statusSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
+		//main section
 		SashForm sash = new SashForm(details, SWT.HORIZONTAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -166,13 +215,8 @@ public class DataImporterView extends EditorPart{
 			TableViewerColumn column = new TableViewerColumn(tblResults, SWT.NONE);
 			column.getColumn().setResizable(true);
 			column.getColumn().setText(c.guiName);
-			column.getColumn().setWidth(100);
-			column.setLabelProvider(new ColumnLabelProvider() {
-				public String getText(Object element) {
-					if (element instanceof FileProxy) return c.getValue((FileProxy)element);
-					return super.getText(element);
-				}
-			});
+			column.getColumn().setWidth(c.getWidth());
+			column.setLabelProvider(c.getLabelProvider());
 		}
 		tblResults.setContentProvider(ArrayContentProvider.getInstance());
 		tblResults.setInput(processor.getFileDetails());
@@ -197,31 +241,84 @@ public class DataImporterView extends EditorPart{
 		Menu mnu = new Menu(tblResults.getControl());
 		tblResults.getControl().setMenu(mnu);
 		
-		MenuItem mnuSetData = new MenuItem(mnu, SWT.PUSH);
-		mnuSetData.setText("Edit Asset && Location Settings");
-		mnuSetData.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		mnuSetData.addListener(SWT.Selection, e->editAssetLocation());
+		MenuItem mnuSetAsset = new MenuItem(mnu, SWT.CASCADE);
+		mnuSetAsset.setText("Set Asset ...");
+		Menu assetMenu = new Menu(mnuSetAsset);
+		mnuSetAsset.setMenu(assetMenu);
+		assetMenu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				// TODO Auto-generated method stub
+				for (MenuItem mi : assetMenu.getItems()) mi.dispose();
+				for(Asset a : selectedAssets) {
+					MenuItem otherAsset = new MenuItem(assetMenu, SWT.PUSH);
+					otherAsset.setText(a.getId());
+					otherAsset.addListener(SWT.Selection, evt->setAsset(a));
+				}
+				if (!selectedAssets.isEmpty()) new MenuItem(assetMenu, SWT.SEPARATOR);
+				
+				MenuItem otherAsset = new MenuItem(assetMenu, SWT.PUSH);
+				otherAsset.setText("Other Asset....");
+				otherAsset.addListener(SWT.Selection, evt->setAsset(null));
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+		});
+
+		MenuItem mnuSetLocation = new MenuItem(mnu, SWT.CASCADE);
+		mnuSetLocation.setText("Set Station/Location ...");
+		Menu locationMenu = new Menu(mnuSetAsset);
+		mnuSetLocation.setMenu(locationMenu);
+		locationMenu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				// TODO Auto-generated method stub
+				for (MenuItem mi : locationMenu.getItems()) mi.dispose();
+				for(AssetStationLocation a : selectedLocations) {
+					MenuItem otherAsset = new MenuItem(locationMenu, SWT.PUSH);
+					otherAsset.setText(MessageFormat.format("{0} [{1}]", a.getId(),a.getStation().getId()));
+					otherAsset.addListener(SWT.Selection, evt->setLocation(a));
+				}
+				if (!selectedLocations.isEmpty()) new MenuItem(locationMenu, SWT.SEPARATOR);
+				
+				MenuItem otherAsset = new MenuItem(locationMenu, SWT.PUSH);
+				otherAsset.setText("Other Location....");
+				otherAsset.addListener(SWT.Selection, evt->setLocation(null));
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+		});
+		
 		
 		MenuItem mnuSetDate = new MenuItem(mnu, SWT.PUSH);
-		mnuSetDate.setText("Update Date/Time");
-		mnuSetDate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		mnuSetDate.addListener(SWT.Selection, e->editDate());
+		mnuSetDate.setText("Set Date/Time...");
+		mnuSetDate.addListener(SWT.Selection, e->setDateTime());
+		
+		MenuItem mnuRemoveFile = new MenuItem(mnu, SWT.PUSH);
+		mnuRemoveFile.setText("Remove File");
+		mnuRemoveFile.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		mnuRemoveFile.addListener(SWT.Selection, e->removeFile());
 		
 		mnu.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {
-				mnuSetData.setEnabled(!tblResults.getSelection().isEmpty());
+				mnuSetAsset.setEnabled(!tblResults.getSelection().isEmpty());
+				mnuSetLocation.setEnabled(!tblResults.getSelection().isEmpty());
 				mnuSetDate.setEnabled(!tblResults.getSelection().isEmpty());
+				mnuRemoveFile.setEnabled(!tblResults.getSelection().isEmpty());
 
 			}
 			
 			@Override
 			public void menuHidden(MenuEvent e) {}
 		});
-		
-		
-		
-		
+				
 		Composite rightPart = toolkit.createComposite(sash, SWT.NONE);
 		rightPart.setLayout(new GridLayout());
 		((GridLayout)rightPart.getLayout()).marginWidth = 0;
@@ -231,6 +328,7 @@ public class DataImporterView extends EditorPart{
 		sash.setWeights(new int[] {7,3});
 		details.layout(true);
 		
+		updateStatus();
 	}
 	
 	private List<FileProxy> getSelection(){
@@ -244,33 +342,76 @@ public class DataImporterView extends EditorPart{
 		}
 		return proxies;
 	}
-	private void editAssetLocation() {
+	
+	/**
+	 * Updates the selected objects to the given asset.  If asset is null user
+	 * will be prompted to pick and asset
+	 * @param asset
+	 */
+	private void setAsset( Asset asset ) {
 		List<FileProxy> proxies = getSelection();
 		int cnt = 0;
 		for (FileProxy p : proxies) {
-			if (p.getAsset() != null || p.getStationLocation() != null) {
-				cnt ++;
-			}
+			if (p.getAsset() != null)cnt ++;
 		}
 		if (cnt > 0) {
 			boolean n = MessageDialog.openQuestion(getSite().getShell(), "Warning", 
-				MessageFormat.format("{0} of the {1} selected files already have assets or station locations associated with them.  These dates will be replaced with new selected values.  Are you sure you want to continue?", cnt, proxies.size()));
+				MessageFormat.format("{0} of the {1} selected files already have assets associated with them.  These will be overwritten.  Are you sure you want to continue?", cnt, proxies.size()));
 			if (!n) return;
 		}
 		
-		StationAssetSelectionDialog dialog = new StationAssetSelectionDialog(getSite().getShell(), Type.ASSET_LOCATION);
-		ContextInjectionFactory.inject(dialog, context);
-		if (dialog.open() == StationAssetSelectionDialog.CANCEL) return;
-		
-		IStructuredSelection selection = (IStructuredSelection) tblResults.getSelection();
+		if (asset == null) {
+			StationAssetSelectionDialog dialog = new StationAssetSelectionDialog(getSite().getShell(), Type.ASSET);
+			ContextInjectionFactory.inject(dialog, context);
+			if (dialog.open() == StationAssetSelectionDialog.CANCEL) return;
+			asset = dialog.getSelectedAsset();
+		}
+		addToQueue(selectedAssets, asset);
+		final Asset newAsset = asset;
 		proxies.forEach(proxy->{
-				proxy.setAsset(dialog.getSelectedAsset());
-				proxy.setStationLocation(dialog.getSelectedLocation());
+				proxy.setAsset(newAsset);
 		});
 		refreshProxies(proxies);
 	}
 	
-	private void editDate() {
+	private <T> void addToQueue(List<T> items, T item) {
+		if (items.contains(item)) return;
+		items.add(0, item);
+		while(items.size() > 5) items.remove(items.size() - 1);
+	}
+	
+	/**
+	 * Updates the selected objects to the given station location .  If the location is null the user
+	 * will be prompted to pick the location
+	 * 
+	 * @param location
+	 */
+	private void setLocation( AssetStationLocation location ) {
+		List<FileProxy> proxies = getSelection();
+		int cnt = 0;
+		for (FileProxy p : proxies) {
+			if (p.getStationLocation() != null) cnt++;
+		}
+		if (cnt > 0) {
+			boolean n = MessageDialog.openQuestion(getSite().getShell(), "Warning", 
+				MessageFormat.format("{0} of the {1} selected files already have station locations associated with them.  These will be replaced overwritten if you process.  Are you sure you want to continue?", cnt, proxies.size()));
+			if (!n) return;
+		}
+		if (location == null) {
+			StationAssetSelectionDialog dialog = new StationAssetSelectionDialog(getSite().getShell(), Type.LOCATION);
+			ContextInjectionFactory.inject(dialog, context);
+			if (dialog.open() == StationAssetSelectionDialog.CANCEL) return;
+			location = dialog.getSelectedLocation();
+		}
+		final AssetStationLocation newLocation = location;
+		addToQueue(selectedLocations, newLocation);
+		proxies.forEach(proxy->{
+				proxy.setStationLocation(newLocation);
+		});
+		refreshProxies(proxies);
+	}
+	
+	private void setDateTime() {
 		List<FileProxy> proxies = getSelection();
 		int cnt = 0;
 		for (FileProxy p : proxies) {
@@ -292,6 +433,16 @@ public class DataImporterView extends EditorPart{
 		refreshProxies(proxies);
 	}
 	
+	private void removeFile() {
+		boolean n = MessageDialog.openQuestion(getSite().getShell(), "Warning", 
+			"Are you sure you want to remove the selected file?  When removed, the files and associated observations will not be imported into SMART.");
+		if (!n) return;
+		
+		List<FileProxy> files = getSelection();
+		files.forEach(f->processor.removeFile(f));
+		refreshProxies(Collections.emptyList());
+	}
+	
 	private void refreshProxies(final List<FileProxy> proxies) {
 		Job refreshJob = new Job("refresh table") {
 
@@ -300,12 +451,17 @@ public class DataImporterView extends EditorPart{
 				try(Session session = HibernateManager.openSession()){
 					proxies.forEach(p->p.updateAssetDeployment(session));
 				}
-				Display.getDefault().syncExec(()->tblResults.refresh());
+				Display.getDefault().syncExec(()->{
+					tblResults.refresh();
+					updateStatus();
+					updateFileDetils();
+					updateFileCount();
+				});
 				return Status.OK_STATUS;
 			}
-			
 		};
 		refreshJob.schedule();
+		
 	}
 	
 	private void updateFileDetils() {
@@ -359,31 +515,80 @@ public class DataImporterView extends EditorPart{
 		l = toolkit.createLabel(scrollComp, "", SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
+		//TODO: fix this
+		Job j2 = new Job("read exif metadata") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				HashMap<String, String> exif = FileMetadataReader.readExifMetadata(proxy.getFile());
+				
+				Display.getDefault().syncExec(()->{
+					if (scrollComp.isDisposed()) return;
+					if (exif == null) {
+						Label l = toolkit.createLabel(scrollComp, "Error Reading EXIF Metadata");
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+						return;
+					}
+					for (Entry<String,String> item : exif.entrySet()) {
+						Label l = toolkit.createLabel(scrollComp, item.getKey());
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+						
+						l = toolkit.createLabel(scrollComp, item.getValue());
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					}
+					
+					scroll.setMinSize(scrollComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+				});
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j2.schedule();
 		Canvas c = new Canvas(detailsSash,SWT.BORDER);
-		try {
-			Image img = new Image(c.getDisplay(), proxy.getFile().toString());
-			c.addListener(SWT.Dispose, e->img.dispose());
+		Job j = new Job("loading image job") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {			
+				try {
+					Image img = new Image(c.getDisplay(), proxy.getFile().toString());
+					Display.getDefault().syncExec(()->{
+						if (c.isDisposed()) {
+							img.dispose();
+							return;
+						}
+						c.addListener(SWT.Dispose, e->img.dispose());
+						c.setData("IMAGE", img);
+						c.redraw();
+					});
+				}catch (Exception ex) {
+					//invalid format TODO:
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		j.setSystem(true);
+		j.schedule();
+			
+		c.addListener(SWT.Paint, e->{
+			Image img = (Image)c.getData("IMAGE");
+			if (img == null) return;
 			
 			Rectangle bounds = img.getBounds();
-			c.addListener(SWT.Paint, e->{
-				Rectangle cbounds = c.getBounds();	
-				// scale image
-				int x = 0, y = 0, width = 0, height = 0;
-				if (cbounds.width > cbounds.height) {
-					height = cbounds.height;
-					width = bounds.width * height / bounds.height;
-					x = (cbounds.width - width) / 2;
-				} else {
-					width = cbounds.width;
-					height = bounds.height * width / bounds.width;
-					y = (cbounds.height - height) / 2;
-				}
-				e.gc.drawImage(img, 0, 0, img.getBounds().width, img.getBounds().height, x, y, width, height);
-			});
-		}catch (Exception ex) {
-			//TODO:
-			ex.printStackTrace();
-		}
+			Rectangle cbounds = c.getBounds();	
+			// scale image
+			int x = 0, y = 0, width = 0, height = 0;
+			if (cbounds.width > cbounds.height) {
+				height = cbounds.height;
+				width = bounds.width * height / bounds.height;
+				x = (cbounds.width - width) / 2;
+			} else {
+				width = cbounds.width;
+				height = bounds.height * width / bounds.width;
+				y = (cbounds.height - height) / 2;
+			}
+			e.gc.drawImage(img, 0, 0, img.getBounds().width, img.getBounds().height, x, y, width, height);
+		});
+		
 		int[] weights = (int[])fileDetailsComposite.getData("SASHWEIGHTS");
 		if (weights != null) { 
 			detailsSash.setWeights(weights);
@@ -435,7 +640,7 @@ public class DataImporterView extends EditorPart{
 	
 	private enum ResultsColumn{
 		STATUS("Status"),
-		ERROR("Error"),
+//		ERROR("Error"),
 		FILE("File"),
 		DATE("Date"),
 		ASSET("Asset"),
@@ -455,8 +660,8 @@ public class DataImporterView extends EditorPart{
 				return proxy.getAsset() == null ? "" : proxy.getAsset().getId();
 			case DATE:
 				return proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate());
-			case ERROR:
-				return proxy.getProcessingException() == null ? "" : proxy.getProcessingException().getMessage();
+//			case ERROR:
+//				return proxy.getProcessingException() == null ? "" : proxy.getProcessingException().getMessage();
 			case FILE:
 				return proxy.getFile().getFileName().toString();
 			case LOCATION:
@@ -469,6 +674,38 @@ public class DataImporterView extends EditorPart{
 				return proxy.isValid() ? "COMPLETE" : "INCOMPLETE";			
 			}
 			return "";
+		}
+		
+		public ColumnLabelProvider getLabelProvider() {
+			if (this == STATUS) {
+				return new ColumnLabelProvider() {
+					@Override
+					public Image getImage(Object element) {
+						if (element instanceof FileProxy) {
+							if (((FileProxy) element).isValid()) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_COMPLETE);
+							return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_INCOMPLETE);
+						}
+						return null;
+					}
+					@Override
+					public String getText(Object element) {
+						if (element instanceof FileProxy) return getValue((FileProxy)element);
+						return super.getText(element);
+					}
+				};	
+			}
+				
+			return new ColumnLabelProvider() {
+				public String getText(Object element) {
+					if (element instanceof FileProxy) return getValue((FileProxy)element);
+					return super.getText(element);
+				}
+			};
+		}
+		
+		public int getWidth() {
+			if (this == STATUS) return 22;
+			return 100;
 		}
 	}
 }

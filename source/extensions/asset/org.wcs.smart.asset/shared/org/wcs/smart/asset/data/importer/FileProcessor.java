@@ -43,8 +43,10 @@ public class FileProcessor {
 			}
 			fileDetails.put(file,  proxy);
 		}catch (Exception ex) {
+			ex.printStackTrace();
+			//TODO: process exception
 			FileProxy p = new FileProxy(file, ca);
-			p.setProcessingException(ex);
+//			p.setProcessingException(ex);
 			fileDetails.put(file,  p);
 		}
 	}
@@ -61,9 +63,9 @@ public class FileProcessor {
 		return fileDetails.values();
 	}
 	
-	public void ignoreFile(Path file) {
-		files.remove(file);
-		fileDetails.remove(file);
+	public void removeFile(FileProxy file) {
+		files.remove(file.getFile());
+		fileDetails.remove(file.getFile());
 	}
 	
 	
