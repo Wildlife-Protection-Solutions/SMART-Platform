@@ -23,7 +23,7 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
-import org.wcs.smart.asset.model.AssetExifMetadataMapping.AssetField;
+import org.wcs.smart.asset.model.AssetMetadataMapping.AssetField;
 import org.wcs.smart.asset.ui.AttributeFieldEditor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;

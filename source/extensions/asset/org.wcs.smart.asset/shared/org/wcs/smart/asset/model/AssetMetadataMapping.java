@@ -8,7 +8,11 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.wcs.smart.asset.model.mapping.IMetadataField;
+import org.wcs.smart.asset.model.mapping.XmpMetadataField;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -22,20 +26,28 @@ import org.wcs.smart.ca.datamodel.Category;
  * @version $Id$
  */
 @Entity
-@Table(name="smart.asset_exif_metadata_mapping")
-public class AssetExifMetadataMapping extends UuidItem {
+@Table(name="smart.asset_metadata_mapping")
+public class AssetMetadataMapping extends UuidItem {
 
 	public enum AssetField{
-		ID
+		ASSET_ID,
+		STATION_ID,
+		LOCATION_ID
 	}
 	
-	private AssetType assetType;
+	public enum MetadataType{
+		EXIF,
+		XMP
+	}
 	
-	private String metadataTag;
-	private String metadataValue;
-	private String metadataNamesapce;
+	private ConservationArea conservationArea;
+	
+	private String mappingstring;
+	private MetadataType type;
+	private int order;
 	
 	private AssetField mappedAssetField;
+	
 	private Category mappedCategory;
 	private Attribute mappedAttribute;
 	private AttributeListItem mappedListItem;
@@ -45,90 +57,90 @@ public class AssetExifMetadataMapping extends UuidItem {
 	/**
 	 * Constructor.
 	 */
-	public AssetExifMetadataMapping() {
+	public AssetMetadataMapping() {
 	}
 
 	/**
-	 * Get the asset_uuid.
+	 * Get the conservation_area.
 	 * 
-	 * @return asset_uuid
+	 * @return conservation_area
 	 */
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="asset_type_uuid", referencedColumnName="uuid")
-	public AssetType getAssetType() {
-		return this.assetType;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea() {
+		return this.conservationArea;
 	}
 	
 	/**
-	 * Set the asset_uuid.
+	 * Set the conservation_area.
 	 * 
-	 * @param assetUuid
+	 * @param ca
+	 *            conservation_area
 	 */
-	public void setAssetType(AssetType assetType) {
-		this.assetType = assetType;
+	public void setConservationArea(ConservationArea ca) {
+		this.conservationArea = ca;
 	}
 
 
 	/**
-	 * Get the tag.
+	 * Get the metadata type
 	 * 
 	 * @return tag
 	 */
-	@Column(name="metadata_tag")
-	public String getMetadataTag() {
-		return this.metadataTag;
+	@Column(name="metadata_type")
+	@Enumerated(EnumType.STRING)
+	public MetadataType getMetadataType() {
+		return this.type;
 	}
 
 	/**
-	 * Set the tag.
+	 * Set the metadata type
 	 * 
 	 * @param tag
 	 */
-	public void setMetadataTag(String tag) {
-		this.metadataTag = tag;
+	public void setMetadataType(MetadataType type) {
+		this.type = type;
 	}
 
 	/**
-	 * Get the metadata value; this is optional used
-	 * for list and tree items
+	 * Set the metadata mapping key.
 	 * 
-	 * @return tag
 	 */
-	@Column(name="metadata_value")
-	public String getMetadataValue() {
-		return this.metadataValue;
+	@Column(name="metadata_key")
+	public String getMetadataKey() {
+		return this.mappingstring;
 	}
 
 	/**
-	 * Set the tag.
 	 * 
-	 * @param tag
 	 */
-	public void setMetadataValue(String metadataValue) {
-		this.metadataValue = metadataValue;
+	public void setMetadataKey(String mappingstring) {
+		this.mappingstring = mappingstring;
+	}
+	
+	@Transient
+	public void setMetadataKey(IMetadataField<?> field) {
+		this.mappingstring = field.asString();
+		this.mField = field;
+	}
+	
+	/**
+	 * The order the matedata mapping swill be searched
+	 * 
+	 */
+	@Column(name="search_order")
+	public int getSearchOrder() {
+		return this.order;
+	}
+
+	/**
+	 * 
+	 */
+	public void setSearchOrder(int order) {
+		this.order = order;
 	}
 	
 
-	/**
-	 * Tag namespace; specific to xmp metadata
-	 * 
-	 * @return tag
-	 */
-	@Column(name="metadata_ns")
-	public String getMetadataNamespace() {
-		return this.metadataNamesapce;
-	}
-
-	/**
-	 * Set the tag namespace.
-	 * 
-	 * @param tag
-	 */
-	public void setMetadataNamespace(String metadataNamesapce) {
-		this.metadataNamesapce = metadataNamesapce;
-	}
-	
-	
 	/**
 	 * Get the asset_field this tag is mapped to
 	 * 
@@ -173,7 +185,7 @@ public class AssetExifMetadataMapping extends UuidItem {
 	
 
 	/**
-	 * Get the data model attribute this tag is mapped to
+	 * Get the data model attribute this tag is mapped to.
 	 * 
 	 */
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -230,4 +242,17 @@ public class AssetExifMetadataMapping extends UuidItem {
 		this.mappedTreeNode = treeNode;
 	}
 	
+	
+	private IMetadataField<?> mField = null;;
+	@Transient
+	public IMetadataField<?> getMetadataField() {
+		if (mField != null) return mField; 
+		switch (getMetadataType()){
+		case EXIF:
+			return XmpMetadataField.parseMapping(getMetadataKey());
+		case XMP:
+			break;
+		}
+		return null;
+	}
 }

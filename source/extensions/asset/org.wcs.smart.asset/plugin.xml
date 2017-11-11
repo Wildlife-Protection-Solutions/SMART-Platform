@@ -75,7 +75,7 @@
       </class>
       <class
             ca_property=".assetType.conservationArea"
-            class="org.wcs.smart.asset.model.AssetExifMetadataMapping"
+            class="org.wcs.smart.asset.model.AssetMetadataMapping"
             supportsCcaa="false">
       </class>
       <class
@@ -157,6 +157,11 @@
                   label="Station Properties..."
                   style="push">
             </command>
+            <command
+                  commandId="org.wcs.smart.asset.command.metadata.mapping.open"
+                  label="Metadata Mappings..."
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -231,6 +236,10 @@
             id="org.wcs.smart.asset.command.stationproperties.show"
             name="Station Properties">
       </command>
+      <command
+            id="org.wcs.smart.asset.command.metadata.mapping.open"
+            name="Metadata Mapping">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -245,6 +254,10 @@
       <handler
             class="org.wcs.smart.asset.ui.handler.StationPropertyHandler$StationPropertyHandlerWrapper"
             commandId="org.wcs.smart.asset.command.stationproperties.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.asset.ui.handler.OpenMappingDialogHandler$OpenMappingDialogHandlerWrapper"
+            commandId="org.wcs.smart.asset.command.metadata.mapping.open">
       </handler>
    </extension>
    <extension

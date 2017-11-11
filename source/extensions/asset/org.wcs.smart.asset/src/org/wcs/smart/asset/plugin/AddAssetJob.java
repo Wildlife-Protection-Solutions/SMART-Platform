@@ -107,7 +107,7 @@ public class AddAssetJob extends Job {
 				"CREATE TABLE smart.asset_type_attribute ( asset_type_uuid char(16) for bit data NOT NULL, attribute_uuid char(16) for bit data NOT NULL, seq_order integer NOT NULL, PRIMARY KEY (asset_type_uuid, attribute_uuid) )",
 				"CREATE TABLE smart.asset_type_deployment_attribute ( asset_type_uuid char(16) for bit data NOT NULL, attribute_uuid char(16) for bit data NOT NULL, seq_order integer NOT NULL, PRIMARY KEY (asset_type_uuid, attribute_uuid) )",
 				"CREATE TABLE smart.asset_waypoint ( wp_uuid char(16) for bit data NOT NULL, asset_deployment_uuid char(16) for bit data NOT NULL, PRIMARY KEY (wp_uuid, asset_deployment_uuid) )",
-				"CREATE TABLE smart.asset_exif_metadata_mapping ( uuid char(16) for bit data not null, asset_type_uuid char(16) for bit data NOT NULL, metadata_tag varchar(512), metadata_value varchar(512), metadata_ns varchar(512), asset_field varchar(32), category_uuid char(16) for bit data, attribute_uuid char(16) for bit data, attribute_list_item_uuid char(16) for bit data, attribute_tree_node_uuid char(16) for bit data, PRIMARY KEY (uuid))",
+				"CREATE TABLE smart.asset_metadata_mapping ( uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null,metadata_type varchar(16) not null, metadata_key varchar(32672) not null, search_order integer not null, asset_field varchar(32), category_uuid char(16) for bit data,attribute_uuid char(16) for bit data, attribute_list_item_uuid char(16) for bit data, attribute_tree_node_uuid char(16) for bit data,  PRIMARY KEY (uuid))",
 				"CREATE TABLE smart.asset_station_location_history ( uuid char(16) for bit data NOT NULL, station_location_uuid char(16) for bit data NOT NULL, date timestamp NOT NULL, comment LONG VARCHAR, PRIMARY KEY (uuid) )",
 				"CREATE TABLE smart.asset_station_location ( uuid char(16) for bit data NOT NULL, station_uuid char(16) for bit data NOT NULL, id varchar(128) NOT NULL, x double NOT NULL, y double NOT NULL, PRIMARY KEY (uuid) )",
 				"alter table smart.asset_station_location add constraint asset_snlc_id_ca_unq UNIQUE(id, station_uuid)",
@@ -145,13 +145,13 @@ public class AddAssetJob extends Job {
 				"ALTER TABLE smart.asset_attribute ADD CONSTRAINT assetatt_ca_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_module_settings ADD CONSTRAINT assetmodset_ca_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_type ADD CONSTRAINT assettype_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.asset_exif_metadata_mapping ADD CONSTRAINT assetexif_type_uuid_fk FOREIGN KEY (asset_type_uuid) REFERENCES smart.asset_type (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_waypoint ADD CONSTRAINT wp_asset_wpuuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_deployment ADD CONSTRAINT assetdepl_assetuuid_fk FOREIGN KEY (asset_uuid) REFERENCES smart.asset (uuid) DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.asset_exif_metadata_mapping ADD CONSTRAINT assetexif_type_categoryuuid_fk FOREIGN KEY (category_uuid) REFERENCES smart.dm_category (uuid) DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.asset_exif_metadata_mapping ADD CONSTRAINT assetexif_type_attributeuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.dm_attribute (uuid) DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.asset_exif_metadata_mapping ADD CONSTRAINT assetexif_type_attlistitemuuid_fk FOREIGN KEY (attribute_list_item_uuid) REFERENCES smart.dm_attribute_list (uuid) DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.asset_exif_metadata_mapping ADD CONSTRAINT assetexif_type_atttreenodeuuid_fk FOREIGN KEY (attribute_tree_node_uuid) REFERENCES smart.dm_attribute_tree (uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.asset_metadata_mapping ADD CONSTRAINT assetmapping_type_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.asset_metadata_mapping ADD CONSTRAINT assetmapping_type_categoryuuid_fk FOREIGN KEY (category_uuid) REFERENCES smart.dm_category (uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.asset_metadata_mapping ADD CONSTRAINT assetmapping_type_attributeuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.dm_attribute (uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.asset_metadata_mapping ADD CONSTRAINT assetmapping_type_attlistitemuuid_fk FOREIGN KEY (attribute_list_item_uuid) REFERENCES smart.dm_attribute_list (uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.asset_metadata_mapping ADD CONSTRAINT assetmapping_type_atttreenodeuuid_fk FOREIGN KEY (attribute_tree_node_uuid) REFERENCES smart.dm_attribute_tree (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 		};
 		
 		session.doWork(new Work(){

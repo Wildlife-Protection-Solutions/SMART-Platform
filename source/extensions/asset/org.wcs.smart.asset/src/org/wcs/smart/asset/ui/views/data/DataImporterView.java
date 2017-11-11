@@ -24,8 +24,12 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -42,6 +46,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
@@ -75,14 +80,19 @@ public class DataImporterView extends EditorPart{
 	private TableViewer tblResults;
 	
 	private Composite fileDetailsComposite;
-
+	private TableViewer tblExif; 
+	private Label lblDetailsFileName; 
+	private Label lblDetailsStatus ;
+	private Canvas imageCanvas;
 	private Composite statusSection;
-
+	private Composite proxyDetailsComp; 
 	private IEclipseContext context;
 	private Label fileCnt;
 	
 	private List<Asset> selectedAssets = new ArrayList<>();
 	private List<AssetStationLocation> selectedLocations = new ArrayList<>();
+	
+	private boolean wasProcessed = false;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -220,7 +230,7 @@ public class DataImporterView extends EditorPart{
 		}
 		tblResults.setContentProvider(ArrayContentProvider.getInstance());
 		tblResults.setInput(processor.getFileDetails());
-		tblResults.addSelectionChangedListener(e->updateFileDetils());
+		tblResults.addSelectionChangedListener(e->updateFileDetails());
 		
 		Hyperlink reprocess = toolkit.createHyperlink(leftPart, "Reprocess files", SWT.NONE);
 		reprocess.addHyperlinkListener(new IHyperlinkListener() {
@@ -323,12 +333,183 @@ public class DataImporterView extends EditorPart{
 		rightPart.setLayout(new GridLayout());
 		((GridLayout)rightPart.getLayout()).marginWidth = 0;
 		((GridLayout)rightPart.getLayout()).marginHeight = 0;
+		
 		fileDetailsComposite = toolkit.createComposite(rightPart, SWT.BORDER);
 		fileDetailsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		sash.setWeights(new int[] {7,3});
+		fileDetailsComposite.setLayout(new GridLayout());
+		
+		sash.setWeights(new int[] {7,4});
 		details.layout(true);
 		
+		createDetailsComposite();
 		updateStatus();
+	}
+	
+	
+	private void createDetailsComposite() {
+		Composite top = toolkit.createComposite(fileDetailsComposite);
+		top.setLayout(new GridLayout(2, false));
+		((GridLayout)top.getLayout()).marginWidth = 0;
+		((GridLayout)top.getLayout()).marginHeight = 0;
+		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lblDetailsStatus = toolkit.createLabel(top, "");
+		lblDetailsFileName = toolkit.createLabel(top, "");
+		lblDetailsFileName .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		SashForm detailsSash = new SashForm(fileDetailsComposite, SWT.VERTICAL);
+		detailsSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite infoComposite = toolkit.createComposite(detailsSash, SWT.NONE);
+		infoComposite.setLayout(new GridLayout());
+		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)infoComposite.getLayout()).marginWidth = 0;
+		((GridLayout)infoComposite.getLayout()).marginHeight = 0;
+		
+		Composite header = toolkit.createComposite(infoComposite);
+		header.setLayout(new GridLayout(3, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
+		
+		
+		Hyperlink lnkDetails = toolkit.createHyperlink(header, "Details", SWT.NONE);
+		Hyperlink lnkExif = toolkit.createHyperlink(header, "EXIF Metadata", SWT.NONE);
+		Hyperlink lnkXmp = toolkit.createHyperlink(header, "XMP Metadata", SWT.NONE);
+		
+		Composite stackComposite = toolkit.createComposite(infoComposite, SWT.BORDER);
+		stackComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		stackComposite.setLayout(new StackLayout());
+		
+		proxyDetailsComp = toolkit.createComposite(stackComposite);
+		proxyDetailsComp.setLayout(new GridLayout());
+		((GridLayout)proxyDetailsComp.getLayout()).marginWidth = 0;
+		((GridLayout)proxyDetailsComp.getLayout()).marginHeight = 0;
+		
+		Composite exifMetadataComp = toolkit.createComposite(stackComposite);
+		exifMetadataComp.setLayout(new GridLayout());
+		((GridLayout)exifMetadataComp.getLayout()).marginWidth = 0;
+		((GridLayout)exifMetadataComp.getLayout()).marginHeight = 0;
+		
+		tblExif = new TableViewer(exifMetadataComp, SWT.FULL_SELECTION);
+		tblExif.getTable().setLinesVisible(false);
+		tblExif.getTable().setHeaderVisible(true);
+		tblExif.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblExif.setContentProvider(ArrayContentProvider.getInstance());
+		
+		Color bgColor = new Color(tblExif.getControl().getDisplay(), 160,185,224);
+		tblExif.getControl().addListener(SWT.Dispose, e->bgColor.dispose());
+		
+		TableViewerColumn colTag = new TableViewerColumn(tblExif, SWT.NONE);
+		colTag.getColumn().setText("Tag");
+		colTag.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof String[]) return ((String[])element)[0];
+				if (element instanceof String) return (String)element;
+				return "";
+			}
+			@Override
+			public Color getBackground(Object element) {
+				if (element instanceof String) return bgColor;
+				return null;
+			}
+		});
+		
+		
+		TableViewerColumn colTagValue = new TableViewerColumn(tblExif, SWT.NONE);
+		colTagValue.getColumn().setText("Value");
+		colTagValue.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof String[]) return ((String[])element)[1];
+				return "";
+			}
+			@Override
+			public Color getBackground(Object element) {
+				if (element instanceof String) return bgColor;
+				return null;
+			}
+		});
+		
+		Composite lnkComp = toolkit.createComposite(stackComposite);
+		lnkComp.setLayout(new GridLayout());
+		
+		
+		FontData fd = lnkDetails.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		Font boldFont = new Font(lnkDetails.getDisplay(), fd);
+		Font normalFont = lnkDetails.getFont(); 
+		lnkDetails.addListener(SWT.Dispose, e->boldFont.dispose());
+		
+		
+		lnkDetails.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				((StackLayout)stackComposite.getLayout()).topControl = proxyDetailsComp;
+				stackComposite.layout();
+				lnkDetails.setFont(boldFont);
+				lnkExif.setFont(normalFont);
+				lnkXmp.setFont(normalFont);
+				header.layout();
+			}
+		});
+		lnkExif.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				((StackLayout)stackComposite.getLayout()).topControl = exifMetadataComp;
+				stackComposite.layout();
+				lnkDetails.setFont(normalFont);
+				lnkExif.setFont(boldFont);
+				lnkXmp.setFont(normalFont);
+				header.layout();
+			}
+		});
+		lnkXmp.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				((StackLayout)stackComposite.getLayout()).topControl = lnkComp;
+				stackComposite.layout();
+				lnkDetails.setFont(normalFont);
+				lnkExif.setFont(normalFont);
+				lnkXmp.setFont(boldFont);
+				header.layout();
+			}
+		});
+		((StackLayout)stackComposite.getLayout()).topControl = proxyDetailsComp;
+		lnkDetails.setFont(boldFont);
+		
+		imageCanvas = new Canvas(detailsSash,SWT.BORDER);
+		imageCanvas.addListener(SWT.Paint, e->{
+			Image img = (Image)imageCanvas.getData("IMAGE");
+			if (img == null) return;
+			
+			Rectangle bounds = img.getBounds();
+			Rectangle cbounds = imageCanvas.getBounds();	
+			// scale image
+			int x = 0, y = 0, width = 0, height = 0;
+			if (cbounds.width > cbounds.height) {
+				height = cbounds.height;
+				width = bounds.width * height / bounds.height;
+				x = (cbounds.width - width) / 2;
+			} else {
+				width = cbounds.width;
+				height = bounds.height * width / bounds.width;
+				y = (cbounds.height - height) / 2;
+			}
+			e.gc.drawImage(img, 0, 0, img.getBounds().width, img.getBounds().height, x, y, width, height);
+		});
+		imageCanvas.addListener(SWT.Dispose, e->{
+			Image img = (Image)imageCanvas.getData("IMAGE");
+			if (img != null && img.isDisposed()) img.dispose();
+		});
+		
+		detailsSash.setWeights(new int[] {3,2});
+		
+		fileDetailsComposite.layout(true);
+		
+
+		int cwidth = (tblExif.getTable().getBounds().width - 20)/2;
+		colTag.getColumn().setWidth(cwidth);
+		colTagValue.getColumn().setWidth(cwidth);
 	}
 	
 	private List<FileProxy> getSelection(){
@@ -454,7 +635,7 @@ public class DataImporterView extends EditorPart{
 				Display.getDefault().syncExec(()->{
 					tblResults.refresh();
 					updateStatus();
-					updateFileDetils();
+					updateFileDetails();
 					updateFileCount();
 				});
 				return Status.OK_STATUS;
@@ -464,142 +645,112 @@ public class DataImporterView extends EditorPart{
 		
 	}
 	
-	private void updateFileDetils() {
-		for (Control c : fileDetailsComposite.getChildren()) c.dispose();
-		
-		fileDetailsComposite.setLayout(new GridLayout());
-		
+	private void updateFileDetails() {
 		Object selection = ((IStructuredSelection)tblResults.getSelection()).getFirstElement();
-		
 		if (selection == null) return;
 		if (!(selection instanceof FileProxy)) return;
+		
 		FileProxy proxy = (FileProxy)selection;
 		
-		Label l = toolkit.createLabel(fileDetailsComposite, proxy.getFile().getFileName().toString());
-		toolkit.createLabel(fileDetailsComposite, "Status: " + (proxy.isValid() ? "COMPLETE" : "INCOMPLETE"));
+		lblDetailsFileName.setText(proxy.getFile().getFileName().toString());
+		lblDetailsStatus.setImage( AssetPlugIn.getDefault().getImageRegistry().get(  proxy.isValid() ? AssetPlugIn.ICON_IMPORT_COMPLETE : AssetPlugIn.ICON_IMPORT_INCOMPLETE));
+		if (!proxy.isValid()) lblDetailsStatus.setToolTipText(proxy.validMessage());
 		
-		SashForm detailsSash = new SashForm(fileDetailsComposite, SWT.VERTICAL);
-		detailsSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		detailsSash.addDisposeListener(e->fileDetailsComposite.setData("SASHWEIGHTS", detailsSash.getWeights()));
-		ScrolledComposite scroll = new ScrolledComposite(detailsSash, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		if (proxyDetailsComp.isDisposed()) return;
+		for (Control c : proxyDetailsComp.getChildren()) c.dispose();
+		
+		ScrolledComposite scroll = new ScrolledComposite(proxyDetailsComp, SWT.V_SCROLL | SWT.H_SCROLL);
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
 		toolkit.adapt(scroll);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite bits = toolkit.createComposite(scroll);
+		scroll.setContent(bits);
+		bits.setLayout(new GridLayout(2, false));
+		bits.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Label l = toolkit.createLabel(bits, "Status Details:");
+		l = toolkit.createLabel(bits, proxy.validMessage());
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		l = toolkit.createLabel(bits, "Date/Time:");
+		l = toolkit.createLabel(bits, proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate()) );
+		
+		l = toolkit.createLabel(bits, "Asset:");
+		l = toolkit.createLabel(bits, proxy.getAsset() == null ? "" : proxy.getAsset().getId() );
+		
+		l = toolkit.createLabel(bits, "Station:");
+		l = toolkit.createLabel(bits, proxy.getStation() == null ? "" : proxy.getStation().getId() );
+		
+		l = toolkit.createLabel(bits, "Station Location:");
+		l = toolkit.createLabel(bits, proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId() );
+		
+		l = toolkit.createLabel(bits, "Longitude:");
+		l = toolkit.createLabel(bits, proxy.getX() == null ? "" : String.valueOf(proxy.getX()) );
+		
+		l = toolkit.createLabel(bits, "Latitude:");
+		l = toolkit.createLabel(bits, proxy.getY() == null ? "" : String.valueOf(proxy.getY()) );
+		
+		scroll.setMinSize(bits.computeSize(SWT.DEFAULT,  SWT.DEFAULT));
+		proxyDetailsComp.layout(true);
+		
+		tblExif.setInput(null);
 
-		
-		Composite scrollComp = toolkit.createComposite(scroll);
-		scroll.setContent(scrollComp);
-		scrollComp.setLayout(new GridLayout(2, false));
-		
-		toolkit.createLabel(scrollComp, "Status Details:");
-		toolkit.createLabel(scrollComp, proxy.validMessage());
-		
-		toolkit.createLabel(scrollComp, "Date/Time:");
-		toolkit.createLabel(scrollComp, proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate()));
-		
-		toolkit.createLabel(scrollComp, "Asset:");
-		toolkit.createLabel(scrollComp, proxy.getAsset() == null ? "" : proxy.getAsset().getId());
-		
-		toolkit.createLabel(scrollComp, "Station:");
-		toolkit.createLabel(scrollComp, proxy.getStation() == null ? "" : proxy.getStation().getId());
-		
-		toolkit.createLabel(scrollComp, "Station Location:");
-		toolkit.createLabel(scrollComp, proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId());
-		
-		toolkit.createLabel(scrollComp, "Longitude:");
-		toolkit.createLabel(scrollComp, proxy.getX() == null ? "" : String.valueOf(proxy.getX()));
-		toolkit.createLabel(scrollComp, "Latitiude:");
-		toolkit.createLabel(scrollComp, proxy.getY() == null ? "" : String.valueOf(proxy.getY()));
-		
-		l = toolkit.createLabel(scrollComp, "", SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		//TODO: fix this
 		Job j2 = new Job("read exif metadata") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				HashMap<String, String> exif = FileMetadataReader.readExifMetadata(proxy.getFile());
+				HashMap<String, List<String[]>> exif = FileMetadataReader.readExifMetadata(proxy.getFile());
 				
 				Display.getDefault().syncExec(()->{
-					if (scrollComp.isDisposed()) return;
+					if (tblExif.getTable().isDisposed()) return;
 					if (exif == null) {
-						Label l = toolkit.createLabel(scrollComp, "Error Reading EXIF Metadata");
-						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+						tblExif.setInput(new String[] {"Error Reading EXIF Metadata"});
 						return;
 					}
-					for (Entry<String,String> item : exif.entrySet()) {
-						Label l = toolkit.createLabel(scrollComp, item.getKey());
-						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-						
-						l = toolkit.createLabel(scrollComp, item.getValue());
-						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					List<Object> values = new ArrayList<>();
+					for (Entry<String,List<String[]>> item : exif.entrySet()) {
+						values.add(item.getKey());
+						values.addAll(item.getValue());
 					}
-					
-					scroll.setMinSize(scrollComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
+					tblExif.setInput(values);
 				});
 				return Status.OK_STATUS;
 			}
 			
 		};
 		j2.schedule();
-		Canvas c = new Canvas(detailsSash,SWT.BORDER);
+		
 		Job j = new Job("loading image job") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {			
 				try {
-					Image img = new Image(c.getDisplay(), proxy.getFile().toString());
+					Image img = new Image(imageCanvas.getDisplay(), proxy.getFile().toString());
 					Display.getDefault().syncExec(()->{
-						if (c.isDisposed()) {
+						if (imageCanvas.isDisposed()) {
 							img.dispose();
 							return;
 						}
-						c.addListener(SWT.Dispose, e->img.dispose());
-						c.setData("IMAGE", img);
-						c.redraw();
+						Image lastImage = (Image) imageCanvas.getData("IMAGE");
+						if (lastImage != null && !lastImage.isDisposed()) lastImage.dispose();
+						
+						imageCanvas.setData("IMAGE", img);
+						imageCanvas.redraw();
 					});
 				}catch (Exception ex) {
 					//invalid format TODO:
+					ex.printStackTrace();
 				}
 				return Status.OK_STATUS;
 			}
 		};
 		j.setSystem(true);
 		j.schedule();
-			
-		c.addListener(SWT.Paint, e->{
-			Image img = (Image)c.getData("IMAGE");
-			if (img == null) return;
-			
-			Rectangle bounds = img.getBounds();
-			Rectangle cbounds = c.getBounds();	
-			// scale image
-			int x = 0, y = 0, width = 0, height = 0;
-			if (cbounds.width > cbounds.height) {
-				height = cbounds.height;
-				width = bounds.width * height / bounds.height;
-				x = (cbounds.width - width) / 2;
-			} else {
-				width = cbounds.width;
-				height = bounds.height * width / bounds.width;
-				y = (cbounds.height - height) / 2;
-			}
-			e.gc.drawImage(img, 0, 0, img.getBounds().width, img.getBounds().height, x, y, width, height);
-		});
-		
-		int[] weights = (int[])fileDetailsComposite.getData("SASHWEIGHTS");
-		if (weights != null) { 
-			detailsSash.setWeights(weights);
-		}else {
-			detailsSash.setWeights(new int[] {3,2});
-		}
 		
 		fileDetailsComposite.layout(true);
-		scroll.setMinSize(scrollComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
-	private boolean wasProcessed = false;
+	
 	
 	private void processFiles() {
 		if (wasProcessed) {

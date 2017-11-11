@@ -2,8 +2,10 @@ package org.wcs.smart.asset.data.importer;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.wcs.smart.ca.ConservationArea;
 
@@ -45,22 +47,44 @@ public class FileMetadataReader {
 	 * @return  null indicates some error reading file; empty hash map
 	 * indicates not exif metadata found
 	 */
-	public static HashMap<String, String> readExifMetadata(Path file){
-		HashMap<String, String> results = new HashMap<>();
+	public static HashMap<String, List<String[]>> readExifMetadata(Path file){
+		HashMap<String, List<String[]>> results = new HashMap<>();
 		
 		try {
 			Metadata metadata = ImageMetadataReader.readMetadata(file.toFile());
-			
 			for (Directory directory : metadata.getDirectories()) {
+				List<String[]> tags = new ArrayList<>();
 				for (Tag g : directory.getTags()) {
-					results.put(directory.getName() + "." + g.getTagName(), g.getDescription());
+					tags.add(new String[] {g.getTagName(), g.getDescription()});
 				}
+				results.put(directory.getName(), tags);
 			}
 			return results;
 		}catch (Exception ex) {
 			//TODO: error
 			return null;
 		}
+	}
+	
+	public static Metadata readMetadata(Path file) {
+		try {
+			ImageMetadataReader.readMetadata(file.toFile());
+		}catch (Exception ex) {
+			//TODO:
+		}
+		return null;
+	}
+	
+	
+	public static String findValue(Metadata metadata, String directoryName, String tagName) {
+		if (metadata == null) return null;
+		for (Directory directory : metadata.getDirectories()) {
+			if (!directory.getName().equalsIgnoreCase(directoryName)) continue;
+			for (Tag g : directory.getTags()) {
+				if (g.getTagName().equalsIgnoreCase(tagName)) return g.getDescription();
+			}
+		}
+		return null;
 	}
 }
 
