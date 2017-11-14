@@ -10,7 +10,7 @@
 </div>
 
 <c:forEach var="item" items="${menuitems}">
- 	<div style="display:flex;flex-flow:row nowrap;height:24px;align-items: center" class="${item[2]}" onclick="window.location='${item[1]}'">
+ 	<div style="" class="${item[2]}" onclick="window.location='${item[1]}'">
  		<img title="${item[0]}" height="24" width="24" src="../css/images/${item[3]}"/>
 		<div class="textMenu" style="display:none;vertical-align:super">${item[0]}</div>
 	</div>
