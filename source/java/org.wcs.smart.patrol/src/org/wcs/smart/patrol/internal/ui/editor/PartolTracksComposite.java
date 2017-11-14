@@ -189,7 +189,7 @@ public class PartolTracksComposite extends TracksComposite {
 						//fails as this refreshes the waypoint layers as well as the track
 						//layers and for that case the waypoints have not been loaded by hibernate
 						//and an lazy loading exception occurs 
-						patrolService.refresh(patrolLegDay.getPatrolLeg().getPatrol(), null, PatrolDataSource.TRACK_PART_TYPE, PatrolDataSource.TRACK_TYPE);
+						patrolService.refresh(patrolLegDay.getPatrolLeg().getPatrol(), null, PatrolDataSource.TRACK_PART_TYPE);
 
 						AddLayersCommand command = new AddLayersCommand(newLayers){
 							@Override
@@ -254,7 +254,7 @@ public class PartolTracksComposite extends TracksComposite {
 		getMapViewer().getMap().getRenderManager().refresh(null);
 		if (patrolService != null){
 			try {
-				patrolService.refresh(patrolLegDay.getPatrolLeg().getPatrol(), null, PatrolDataSource.TRACK_PART_TYPE, PatrolDataSource.TRACK_TYPE);
+				patrolService.refresh(patrolLegDay.getPatrolLeg().getPatrol(), null, PatrolDataSource.TRACK_PART_TYPE);
 			} catch (IOException e) {
 				setError(Messages.PartolTracksComposite_MarRefresh_Error + e.getMessage());
 				SmartPlugIn.log(e.getMessage(), e);

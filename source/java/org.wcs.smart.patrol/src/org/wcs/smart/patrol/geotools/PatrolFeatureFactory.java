@@ -47,12 +47,6 @@ public class PatrolFeatureFactory {
 		return type;
 	}
 	
-	public static SimpleFeatureType createTrackSchema() throws SchemaException{
-		String spec = "the_geom:MultiLineString:srid=4326,fid:String,distance:Double,day:Date,leg:String"; //$NON-NLS-1$
-		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.TRACK_TYPE, spec);
-		return type;
-	}
-	
 	public static SimpleFeatureType createTrackPartSchema() throws SchemaException{
 		String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String,uid:String"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.TRACK_PART_TYPE, spec);
