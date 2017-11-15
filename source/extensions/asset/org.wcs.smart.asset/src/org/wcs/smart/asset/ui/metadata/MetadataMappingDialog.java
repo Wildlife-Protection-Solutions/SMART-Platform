@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
+import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -110,6 +111,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		
 		TableViewerColumn colType = new TableViewerColumn(tblMappings, SWT.NONE);
 		colType.getColumn().setText("Type");
+		colType.getColumn().setWidth(50);
 		colType.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -122,6 +124,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		
 		TableViewerColumn colMetadata = new TableViewerColumn(tblMappings, SWT.NONE);
 		colMetadata.getColumn().setText("Metadata");
+		colMetadata.getColumn().setWidth(250);
 		colMetadata.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -138,25 +141,26 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		
 		TableViewerColumn colMapTo = new TableViewerColumn(tblMappings, SWT.NONE);
 		colMapTo.getColumn().setText("Mapped To");
+		colMapTo.getColumn().setWidth(250);
 		colMapTo.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof AssetMetadataMapping) {
 					AssetMetadataMapping mm = (AssetMetadataMapping)element;
-					if (mm.getMappedAssetField() != null) return mm.getMappedAssetField().name();
+					if (mm.getMappedAssetProperty() != null) return mm.getMappedAssetProperty().name();
 					StringBuilder sb = new StringBuilder();
-					
+					if ( ((XmpMetadataField)mm.getMetadataField() ).getTagValue() != null) sb.append( ((XmpMetadataField)mm.getMetadataField() ).getTagValue()  + ": ");
 					if (mm.getMappedListItem() != null) sb.append(mm.getMappedListItem().getName());
 					if (mm.getMappedTreeNode() != null) sb.append(mm.getMappedTreeNode().getName());
 					
 					if (mm.getMappedAttribute() != null) {
-						if (sb.length() == 0) sb.append(" - ");
-						sb.append(mm.getMappedAttribute());
+						if (sb.length() != 0) sb.append(" (" + mm.getMappedAttribute().getName() + ")");
+						else sb.append(mm.getMappedAttribute().getName());
 					}
 					
 					if (mm.getMappedCategory() != null) {
-						if (sb.length() == 0) sb.append(" - ");
-						sb.append(mm.getMappedCategory().getFullCategoryName());
+						if (sb.length() != 0) sb.append(" [" + mm.getMappedCategory().getFullCategoryName() + "]");
+						else sb.append(mm.getMappedCategory().getFullCategoryName());
 					}
 					
 					return sb.toString();
@@ -169,12 +173,14 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		
 		Composite buttonPanel = new Composite(cmp, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout());
-		
+		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
+		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
+		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, true));
 
 		Button btnNew = createButton(buttonPanel, DialogConstants.ADD_BUTTON_TEXT, ()->addMapping());
 		Button btnEdit = createButton(buttonPanel, DialogConstants.EDIT_BUTTON_TEXT, ()->editMapping());
 		Button btnDelete = createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT, ()->deleteMappings());
-		Label l = new Label(cmp, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label l = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Button btnMoveUp = createButton(buttonPanel, "Move Up", ()->moveUp());
 		Button btnMoveDown = createButton(buttonPanel, "Move Down", ()->moveDown());
@@ -219,8 +225,10 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		
 		int width = cmp.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		width = width / tblMappings.getTable().getColumnCount();
+		int cnt = 0;
 		for (TableColumn c : tblMappings.getTable().getColumns()) {
-			c.setWidth(width);
+			if (cnt != 0) c.setWidth(width);
+			cnt ++;
 		}
 		
 		loadMappings.schedule();
@@ -264,7 +272,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		NewMappingDialog dialog = new NewMappingDialog(getShell());
 		if (dialog.open() != NewMappingDialog.OK) return null;
 		
-		mappings.add(dialog.getMapping());
+		mappings.addAll(dialog.getMappings());
 		
 		tblMappings.refresh();
 		modified();
@@ -290,12 +298,12 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 	}
 	
 	private Void moveUp() {
-		moveMapping(-1);
+		moveMapping(SWT.DOWN);
 		return null;
 	}
 	
 	private Void moveDown() {
-		moveMapping(1);
+		moveMapping(SWT.UP);
 		return null;
 		
 	}
@@ -344,7 +352,14 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetMetadataMapping> items = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				items.addAll(QueryFactory.buildQuery(session, AssetMetadataMapping.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());	
+				items.addAll(QueryFactory.buildQuery(session, AssetMetadataMapping.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				
+				items.forEach(i->{
+					if (i.getMappedAttribute() != null) i.getMappedAttribute().getName();
+					if (i.getMappedCategory() != null) i.getMappedCategory().getFullCategoryName();
+					if (i.getMappedListItem() != null) i.getMappedListItem().getName();
+					if (i.getMappedTreeNode() != null) i.getMappedTreeNode().getName();
+				});
 			}
 			
 			mappings = items;

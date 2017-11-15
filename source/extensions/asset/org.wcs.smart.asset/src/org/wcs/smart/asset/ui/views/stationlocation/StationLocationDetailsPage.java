@@ -26,7 +26,7 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationAttribute;
 import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
-import org.wcs.smart.asset.model.AssetMetadataMapping.AssetField;
+import org.wcs.smart.asset.model.AssetMetadataMapping.AssetProperty;
 import org.wcs.smart.asset.ui.AttributeFieldEditor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;

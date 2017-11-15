@@ -29,7 +29,7 @@ import org.wcs.smart.ca.datamodel.Category;
 @Table(name="smart.asset_metadata_mapping")
 public class AssetMetadataMapping extends UuidItem {
 
-	public enum AssetField{
+	public enum AssetProperty{
 		ASSET_ID,
 		STATION_ID,
 		LOCATION_ID
@@ -46,13 +46,12 @@ public class AssetMetadataMapping extends UuidItem {
 	private MetadataType type;
 	private int order;
 	
-	private AssetField mappedAssetField;
+	private AssetProperty mappedAssetProperty;
 	
 	private Category mappedCategory;
 	private Attribute mappedAttribute;
 	private AttributeListItem mappedListItem;
 	private AttributeTreeNode mappedTreeNode;
-
 	
 	/**
 	 * Constructor.
@@ -148,18 +147,18 @@ public class AssetMetadataMapping extends UuidItem {
 	 */
 	@Enumerated(value=EnumType.STRING)
 	@Column(name="asset_field")
-	public AssetField getMappedAssetField() {
-		return this.mappedAssetField;
+	public AssetProperty getMappedAssetProperty() {
+		return this.mappedAssetProperty;
 	}
 	
 	/**
 	 * Set the asset_field.
 	 * 
-	 * @param assetField
+	 * @param assetProperty
 	 *            asset_field
 	 */
-	public void setMappedAssetField(AssetField assetField) {
-		this.mappedAssetField = assetField;
+	public void setMappedAssetProperty(AssetProperty assetProperty) {
+		this.mappedAssetProperty = assetProperty;
 	}
 
 

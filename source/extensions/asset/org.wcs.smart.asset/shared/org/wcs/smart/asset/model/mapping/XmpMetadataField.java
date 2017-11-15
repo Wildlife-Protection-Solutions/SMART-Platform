@@ -11,10 +11,22 @@ public class XmpMetadataField implements IMetadataField<Metadata>{
 
 	private String directory;
 	private String tag;
+	private String tagValue;
+	
+	
+	public XmpMetadataField(String directoryName, String tagName, String tagValue) {
+		this(directoryName, tagName);
+		this.tagValue = tagValue.trim().isEmpty() ? null : tagValue;
+	}
 	
 	public XmpMetadataField(String directoryName, String tagName) {
 		this.directory = directoryName;
 		this.tag = tagName;
+		this.tagValue = null;
+	}
+	
+	public String getTagValue() {
+		return this.tagValue;
 	}
 	
 	@Override
@@ -24,7 +36,7 @@ public class XmpMetadataField implements IMetadataField<Metadata>{
 
 	@Override
 	public String asString() {
-		return directory + "|" + tag;
+		return directory + "|" + tag + "|" +  (tagValue == null? "" : tagValue);
 	}
 
 	@Override
@@ -40,7 +52,8 @@ public class XmpMetadataField implements IMetadataField<Metadata>{
 	
 	public static XmpMetadataField parseMapping(String mappingString) {
 		String[] bits = mappingString.split("\\|");
-		if (bits.length != 2) return null; //TODO: throw an exception
-		return new XmpMetadataField(bits[0], bits[1]);
+		if (bits.length == 2) return new XmpMetadataField(bits[0], bits[1]);
+		if (bits.length == 3) return new XmpMetadataField(bits[0], bits[1], bits[2]);
+		return null; //TODO: throw an exception
 	}
 }
