@@ -26,14 +26,18 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+import com.drew.metadata.Directory;
+import com.drew.metadata.Tag;
+
 public class ExifTagSelector extends Dialog {
 
 	private TableViewer metadata;
-	private HashMap<String, List<String[]>> exif;
+	private HashMap<Directory, List<Tag>> exif;
 	
-	private String[] selection;
+	private Tag tag;
+	private Directory dir;
 	
-	public ExifTagSelector(Shell parent, HashMap<String, List<String[]>> exifMetadata) {
+	public ExifTagSelector(Shell parent, HashMap<Directory, List<Tag>> exifMetadata) {
 		super(parent);
 		this.exif = exifMetadata;
 	}
@@ -44,14 +48,19 @@ public class ExifTagSelector extends Dialog {
 		btnOk.setEnabled(false);
 	}
 	
-	public String[] getDirectoryTag() {
-		return selection;
+	public Tag getDirectoryTag() {
+		return tag;
+	}
+	
+	public Directory getDirectory() {
+		return dir;
 	}
 	
 	protected void okPressed() {
 		Object data = metadata.getStructuredSelection().getFirstElement();
-		if (data instanceof String[]) {
-			selection = new String[] {((String[])data)[2], ((String[])data)[0]};
+		if (data instanceof Object[]) {
+			tag = (Tag) ((Object[])data)[1];
+			dir = (Directory) ((Object[])data)[2];
 			super.okPressed();
 		}
 	}
@@ -59,7 +68,7 @@ public class ExifTagSelector extends Dialog {
 	private void validate() {
 		boolean ok = false;
 		if (!metadata.getSelection().isEmpty()) {
-			ok = metadata.getStructuredSelection().getFirstElement() instanceof String[];
+			ok = metadata.getStructuredSelection().getFirstElement() instanceof Object[];
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(ok);
 	}
@@ -99,7 +108,7 @@ public class ExifTagSelector extends Dialog {
 		colTag.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof String[]) return ((String[])element)[0];
+				if (element instanceof Object[]) return (String) ((Object[])element)[0];
 				if (element instanceof String) return (String)element;
 				return "";
 			}
@@ -116,7 +125,7 @@ public class ExifTagSelector extends Dialog {
 		colTagValue.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof String[]) return ((String[])element)[1];
+				if (element instanceof Object[]) return ((Tag) ((Object[])element)[1]).getDescription();
 				return "";
 			}
 			@Override
@@ -127,10 +136,10 @@ public class ExifTagSelector extends Dialog {
 		});
 		
 		List<Object> values = new ArrayList<>();
-		for (Entry<String,List<String[]>> item : exif.entrySet()) {
-			values.add(item.getKey());
-			for (String[] i : item.getValue()) {
-				values.add(new String[] {i[0], i[1], item.getKey()});
+		for (Entry<Directory,List<Tag>> item : exif.entrySet()) {
+			values.add(item.getKey().getName());
+			for (Tag i : item.getValue()) {
+				values.add(new Object[] {i.getTagName(), i, item.getKey() });
 			}
 		}
 		metadata.setInput(values);

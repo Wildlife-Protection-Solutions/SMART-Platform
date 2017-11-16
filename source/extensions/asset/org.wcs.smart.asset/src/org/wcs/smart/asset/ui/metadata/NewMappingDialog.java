@@ -175,8 +175,8 @@ public class NewMappingDialog extends TitleAreaDialog {
 		});
 		cmbType.setInput(AssetMetadataMapping.MetadataType.values());
 		
-		l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+//		l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+//		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Composite stackPanel = new Composite(main, SWT.BORDER);
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -201,6 +201,10 @@ public class NewMappingDialog extends TitleAreaDialog {
 			}
 		});
 		cmbType.setSelection(new StructuredSelection(AssetMetadataMapping.MetadataType.EXIF));
+		
+		setTitle("Asset Metadata Mapping");
+		getShell().setText("Asset Metadata Mapping");
+		setMessage("Configure file metadata mappings.");
 		return parent;
 	}
 	

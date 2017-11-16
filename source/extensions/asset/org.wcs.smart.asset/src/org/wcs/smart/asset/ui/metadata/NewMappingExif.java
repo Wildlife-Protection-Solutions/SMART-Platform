@@ -24,11 +24,14 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -39,26 +42,31 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
-import org.wcs.smart.asset.model.mapping.XmpMetadataField;
+import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.TreeDropDown;
 
+import com.drew.metadata.Directory;
+import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifImageDirectory;
 import com.drew.metadata.exif.ExifInteropDirectory;
@@ -71,9 +79,9 @@ public class NewMappingExif {
 	private NewMappingDialog dialog;
 	
 	private Text txtExifTag;
-	private ComboViewer cmbExifDirectory;
-	private ComboViewer cmbExifMappingField;
+	private Text txtExifTagTxt;
 	
+	private ComboViewer cmbExifMappingField;
 	private TableViewer tblExifValueMapping;
 	
 	private Button btnExifMulti;
@@ -84,6 +92,7 @@ public class NewMappingExif {
 	public NewMappingExif(NewMappingDialog dialog) {
 		this.dialog = dialog;
 		exifTagValueMappings = new ArrayList<>();
+		
 	}
 
 	private void modified() {
@@ -92,30 +101,46 @@ public class NewMappingExif {
 	
 	public String validate() {
 		String message = null;
-		String directory = cmbExifDirectory.getCombo().getText().trim();
-		if (directory.isEmpty()) {
-			message = "EXIF directory field cannot be empty";
-		}
+//		String directory = cmbExifDirectory.getCombo().getText().trim();
+//		if (directory.isEmpty()) {
+//			message = "EXIF directory field cannot be empty";
+//		}
 		String tag = txtExifTag.getText().trim();
 		if (tag.isEmpty()) {
-			message ="EXIF tag field cannot be empty";
+			return "EXIF tag field cannot be empty";
 		}
+		try {
+			Integer tagNum = Integer.parseInt(tag);
+		}catch (Exception ex) {
+			return "EXIF tag is not valid (must be a number)";
+		}
+		
 		if (btnExifSingle.getSelection()) {
 			Object mappedTo = cmbExifMappingField.getStructuredSelection().getFirstElement();
 			if (!(mappedTo instanceof AssetMetadataMapping.AssetProperty)) {
 				message = "EXIF mapping to value must be selected";
 			}
+		}else if (btnExifMulti.getSelection()) {
+			if (exifTagValueMappings.isEmpty()) {
+				message = "At least one data model element must be mapped.";
+			}
+			for (ExifValueMapping mapping : exifTagValueMappings) {
+				if (mapping.category == null && mapping.attribute == null && mapping.listItem == null && mapping.treeNode == null) 
+					message = "Mapped data model element must be selected";
+			}
 		}
 		return message;
 	}
+	
+	
 	public List<AssetMetadataMapping> getMappings() {
-		
+		Integer tagNum = Integer.parseInt(txtExifTag.getText());
 		
 		if (btnExifSingle.getSelection()) {
 			Object x = cmbExifMappingField.getStructuredSelection().getFirstElement();
-			
+			//TODO:
 			if (x instanceof AssetMetadataMapping.AssetProperty) {
-				XmpMetadataField field = new XmpMetadataField(cmbExifDirectory.getCombo().getText().trim(), txtExifTag.getText().trim());
+				ExifMetadataField field = new ExifMetadataField(tagNum);
 				AssetMetadataMapping map = new AssetMetadataMapping();
 				map.setConservationArea(SmartDB.getCurrentConservationArea());
 				map.setMetadataType(AssetMetadataMapping.MetadataType.EXIF);
@@ -123,16 +148,11 @@ public class NewMappingExif {
 				map.setMetadataKey(field);
 				return Collections.singletonList(map);
 			}
-//			newMapping.setMappedAttribute(attribute);
-//			newMapping.setMappedCategory(category);
-//			newMapping.setMappedListItem(listItem);
-//			newMapping.setMappedTreeNode(treeNode);
 		}else if (btnExifMulti.getSelection()) {
 			List<AssetMetadataMapping> mappings = new ArrayList<>();
 			
 			for (ExifValueMapping m : exifTagValueMappings) {
-				XmpMetadataField field = new XmpMetadataField(cmbExifDirectory.getCombo().getText().trim(), txtExifTag.getText().trim(), m.tagValue);
-				
+				ExifMetadataField field = new ExifMetadataField(tagNum, m.tagValue);
 				AssetMetadataMapping map = new AssetMetadataMapping();
 				map.setConservationArea(SmartDB.getCurrentConservationArea());
 				map.setMetadataType(AssetMetadataMapping.MetadataType.EXIF);
@@ -152,26 +172,40 @@ public class NewMappingExif {
 		Composite panel = new Composite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout(2, false));
 		
+//		Label l = new Label(panel, SWT.NONE);
+//		l.setText("EXIF Directory:");
+//		
+//		cmbExifDirectory = new ComboViewer(panel, SWT.DROP_DOWN | SWT.READ_ONLY);
+//		cmbExifDirectory.setLabelProvider(new LabelProvider() {
+//			@Override
+//			public String getText(Object element) {
+//				if (element instanceof Directory) return ((Directory) element).getName();
+//				return super.getText(element);
+//			}
+//		});
+//		cmbExifDirectory.setContentProvider(ArrayContentProvider.getInstance());
+//		cmbExifDirectory.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//		cmbExifDirectory.setInput(exifDirectories);
+//		cmbExifDirectory.getControl().addListener(SWT.Modify, e->modified());
+//		cmbExifDirectory.getControl().addListener(SWT.Selection, e->modified());
+		
 		Label l = new Label(panel, SWT.NONE);
-		l.setText("EXIF Directory:");
-		
-		cmbExifDirectory = new ComboViewer(panel, SWT.DROP_DOWN);
-		cmbExifDirectory.setLabelProvider(new LabelProvider());
-		cmbExifDirectory.setContentProvider(ArrayContentProvider.getInstance());
-		cmbExifDirectory.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbExifDirectory.setInput(getDirectoryNames());
-		cmbExifDirectory.getControl().addListener(SWT.Modify, e->modified());
-		cmbExifDirectory.getControl().addListener(SWT.Selection, e->modified());
-		
-		l = new Label(panel, SWT.NONE);
-		l.setText("EXIF Tag:");
+		l.setText("EXIF Tag (Hex):");
 		
 		txtExifTag = new Text(panel, SWT.BORDER);
 		txtExifTag.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtExifTag.addListener(SWT.Modify, e->modified());
 		
+		l = new Label(panel, SWT.NONE);
+		l.setText("EXIF Tag Name):");
+		
+		txtExifTagTxt = new Text(panel, SWT.BORDER);
+		txtExifTagTxt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtExifTagTxt.setEnabled(false);
+		
+		
 		Link linkSelectFromFile = new Link(panel, SWT.NONE);
-		linkSelectFromFile.setText("<a>" + "Select Directory/Tag From File ..." + "</a>");
+		linkSelectFromFile.setText("<a>" + "Select Tag From File ..." + "</a>");
 		linkSelectFromFile.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
 		linkSelectFromFile.addListener(SWT.Selection, e -> selectExifTagFromFile());
 		
@@ -179,6 +213,7 @@ public class NewMappingExif {
 		btnExifSingle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		btnExifSingle.setText("Single Mapping");
 		btnExifSingle.setText("Map tag to field");
+		btnExifSingle.addListener(SWT.Selection, e->dialog.modified());
 		
 		cmbExifMappingField = new ComboViewer(panel, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbExifMappingField.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -199,13 +234,14 @@ public class NewMappingExif {
 		btnExifMulti.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		btnExifMulti.setText("Map to data model");
 		btnExifMulti.setToolTipText("Map individual tag values to specific data model elements");
-
+		btnExifMulti.addListener(SWT.Selection, e->dialog.modified());
+		
 		Composite valuePart = new Composite(panel, SWT.NONE);
 		valuePart.setLayout(new GridLayout(2, false));
 		valuePart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		l = new Label(valuePart, SWT.WRAP);
-		l.setText("** for numeric, text, boolean, and date attributes leave the tag value blank, the value will be interpretted as the observation value");
+		l.setText("For numeric, text, boolean, and date attributes leave the tag value blank, the value will be interpretted as the observation value.");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)l.getLayoutData()).horizontalIndent = 30;
 		((GridData)l.getLayoutData()).widthHint = 200;
@@ -246,6 +282,7 @@ public class NewMappingExif {
 				if (element instanceof ExifValueMapping) {
 					((ExifValueMapping)element).tagValue = (String)value;
 					tblExifValueMapping.refresh();
+					dialog.modified();
 				}
 			}
 			
@@ -302,6 +339,28 @@ public class NewMappingExif {
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnRemove.setEnabled(false);
 		
+		Menu mm = new Menu(tblExifValueMapping.getTable());
+		
+		MenuItem miAdd = new MenuItem(mm, SWT.PUSH);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addListener(SWT.Selection, e->addTagMapping());
+		
+		MenuItem miDelete = new MenuItem(mm, SWT.PUSH);
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addListener(SWT.Selection, e->removeExifValueMappings());
+		
+		tblExifValueMapping.getControl().setMenu(mm);
+		mm.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				miDelete.setEnabled(!tblExifValueMapping.getSelection().isEmpty());
+			}
+			@Override
+			public void menuHidden(MenuEvent e) { }
+		});
+		
 		Listener listener = e->{
 			cmbExifMappingField.getControl().setEnabled(btnExifSingle.getSelection());
 			tblExifValueMapping.getControl().setEnabled(!btnExifSingle.getSelection());
@@ -321,6 +380,7 @@ public class NewMappingExif {
 		mm.tagValue = "< TAG >";
 		exifTagValueMappings.add(mm);
 		tblExifValueMapping.refresh();
+		dialog.modified();
 	}
 
 	private void removeExifValueMappings() {
@@ -331,6 +391,7 @@ public class NewMappingExif {
 		}
 		this.exifTagValueMappings.removeAll(toDelete);
 		tblExifValueMapping.refresh();
+		dialog.modified();
 	}
 	
 	private void selectExifTagFromFile() {
@@ -344,7 +405,7 @@ public class NewMappingExif {
 			return;
 		}
 		
-		HashMap<String, List<String[]>> tags = FileMetadataReader.readExifMetadata(p);
+		HashMap<Directory, List<Tag>> tags = FileMetadataReader.readExifMetadata(p);
 		if (tags == null ||  tags.isEmpty()) {
 			MessageDialog.openError(dialog.getShell(), "Metadata Error", MessageFormat.format("Could not read exif metadata from file {0}.", p.toString()));
 			return;
@@ -352,22 +413,24 @@ public class NewMappingExif {
 				
 		ExifTagSelector selectorDialog = new ExifTagSelector(dialog.getShell(), tags);
 		if (selectorDialog.open() != ExifTagSelector.OK) return;
-		txtExifTag.setText(selectorDialog.getDirectoryTag()[1]);
-		cmbExifDirectory.getCombo().setText(selectorDialog.getDirectoryTag()[0]);
-		modified();
 		
+		txtExifTag.setData(selectorDialog.getDirectoryTag());
+		txtExifTag.setText(String.valueOf(selectorDialog.getDirectoryTag().getTagType()));
+		txtExifTagTxt.setText(selectorDialog.getDirectoryTag().getTagName() + " [" + selectorDialog.getDirectory().getName() + "]");
+		
+		modified();
 	}
 	
 
-	private static String[] getDirectoryNames() {
+	private static Directory[] getDirectories() {
 		//TODO: we could add more here
-		return new String[] {
-				(new GpsDirectory()).getName(),
-				new ExifIFD0Directory().getName(),
-				new ExifImageDirectory().getName(),
-				new ExifInteropDirectory().getName(),
-				new ExifSubIFDDirectory().getName(),
-				new ExifThumbnailDirectory().getName()	
+		return new Directory[] {
+				new GpsDirectory(),
+				new ExifIFD0Directory(),
+				new ExifImageDirectory(),
+				new ExifInteropDirectory(),
+				new ExifSubIFDDirectory(),
+				new ExifThumbnailDirectory()	
 		};
 	}
 	
@@ -465,7 +528,14 @@ public class NewMappingExif {
 		@Override
 		protected void setValue(Object element, Object value) {
 			if (value == null) return;
-			if (element instanceof ExifValueMapping) {
+			if (element instanceof ExifValueMapping && (
+					value instanceof Category ||
+					value instanceof Attribute ||
+					value instanceof CategoryAttribute ||
+					value instanceof AttributeListItem ||
+					value instanceof AttributeTreeNode ||
+					value instanceof ListNodeWrapper ||
+					value instanceof TreeNodeWrapper)) {
 				ExifValueMapping mm = (ExifValueMapping)element;
 				mm.attribute = null;
 				mm.listItem = null;
@@ -474,6 +544,8 @@ public class NewMappingExif {
 				
 				if (value instanceof Category) {
 					mm.category = (Category) value;
+				}else if (value instanceof Attribute) {
+					mm.attribute= (Attribute) value;
 				}else if (value instanceof CategoryAttribute) {
 					mm.category = ((CategoryAttribute)value).getCategory();
 					mm.attribute = ((CategoryAttribute)value).getAttribute();
@@ -493,6 +565,7 @@ public class NewMappingExif {
 					mm.treeNode = ((TreeNodeWrapper) value).node;
 				}
 				tblExifValueMapping.refresh();
+				dialog.modified();
 			}
 		}
 	}

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,15 +57,28 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.data.importer.ActionableWarning;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.data.importer.FileProcessor;
 import org.wcs.smart.asset.data.importer.FileProxy;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+
+import com.drew.metadata.Directory;
+import com.drew.metadata.Tag;
 
 public class DataImporterView extends EditorPart{
 
@@ -104,6 +118,104 @@ public class DataImporterView extends EditorPart{
 	public void doSaveAs() {
 	}
 
+	
+	private void save(List<FileProxy> items) {
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
+			session.beginTransaction();
+			try {
+			
+				for (FileProxy p : items) {
+					if (p.getStation().getUuid() == null) {
+						p.getStation().setId(generateStationId(session));
+						if (p.getStation().getX() == null) p.getStation().setX(p.getX());
+						if (p.getStation().getY() == null) p.getStation().setX(p.getY());
+						
+						if (p.getStationLocation().getUuid() == null ) {
+							p.getStationLocation().setId(generateLocationId(p.getStation(), session));
+							if (p.getStationLocation().getX() == null) p.getStationLocation().setX(p.getX());
+							if (p.getStationLocation().getY() == null) p.getStationLocation().setY(p.getY());
+							
+						}
+					}
+					
+					
+					session.saveOrUpdate(p.getStation());
+					session.flush();
+					
+					Waypoint wp = new Waypoint();
+					wp.setConservationArea(SmartDB.getCurrentConservationArea());
+					wp.setDateTime(p.getImageDate());
+					wp.setId(1);
+					wp.setSourceId(AssetWaypointSource.KEY);
+					wp.setX(p.getX());
+					wp.setY(p.getY());
+					wp.setAttachments(new ArrayList<>());
+					WaypointAttachment wa = new WaypointAttachment();
+					wa.setWaypoint(wp);
+					wa.setCopyFromLocation(p.getFile().toFile());
+					wa.setFilename(p.getFile().getFileName().toString());
+					wp.getAttachments().add(wa);
+					wp.setObservations(new ArrayList<>());
+					
+					for (WaypointObservation wo : p.getObservations()) {
+						wo.setWaypoint(wp);
+						wp.getObservations().add(wo);
+					}
+					
+					session.save(wp);
+					
+					AssetWaypoint aw = new AssetWaypoint();
+					aw.setAssetDeployment(p.getDeployment());
+					if (p.getDeployment().getAssetWaypoints() == null) p.getDeployment().setAssetWaypoints(new ArrayList<>());
+					p.getDeployment().getAssetWaypoints().add(aw);
+					
+					session.save(aw);
+					session.saveOrUpdate(p.getDeployment());
+					session.flush();
+				}
+				
+			}catch (Exception ex){
+				session.getTransaction().rollback();
+				AssetPlugIn.displayLog("Error saving items: {0}" + ex.getMessage(), ex);
+				return;
+			}
+		}
+		items.forEach(e->processor.removeFile(e));
+		
+		tblResults.refresh();
+		//TODO: fire events
+	}
+	
+	private String generateStationId(Session session) {
+		int cnt = 1;
+		while(true) {
+			String id = "Station " + cnt;
+			String query =  "SELECT count(*) FROM AssetStation where LOWER(id) = :id AND conservationArea = :ca ";
+			Long stncnt = (Long) session.createQuery(query)
+				.setParameter("id",  id.toLowerCase())
+				.setParameter("ca", SmartDB.getCurrentConservationArea())
+				.uniqueResult();
+			
+			if (stncnt == 0) return id;
+			cnt++;
+		}
+	}
+	
+	private String generateLocationId(AssetStation station, Session session) {
+		int cnt = 1;
+		while(true) {
+			String id = station.getId() + " - " + cnt;
+			String query =  "SELECT count(*) FROM AssetStationLocation where LOWER(id) = :id AND station.conservationArea = :ca ";
+			Long stncnt = (Long) session.createQuery(query)
+				.setParameter("id",  id.toLowerCase())
+				.setParameter("ca", SmartDB.getCurrentConservationArea())
+				.uniqueResult();
+			
+			if (stncnt == 0) return id;
+			cnt++;
+		}
+	}
+	
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		setInput(input);
@@ -310,6 +422,23 @@ public class DataImporterView extends EditorPart{
 		mnuSetDate.setText("Set Date/Time...");
 		mnuSetDate.addListener(SWT.Selection, e->setDateTime());
 		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem mnuSaveFile = new MenuItem(mnu, SWT.PUSH);
+		mnuSaveFile.setText("Save");
+		mnuSaveFile.addListener(SWT.Selection, e->{
+			List<FileProxy> toSave = new ArrayList<>();
+			for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object x = (FileProxy) iterator.next();
+				if (x instanceof FileProxy) {
+					toSave.add((FileProxy) x);
+				}
+			}
+			save(toSave);
+		});
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
 		MenuItem mnuRemoveFile = new MenuItem(mnu, SWT.PUSH);
 		mnuRemoveFile.setText("Remove File");
 		mnuRemoveFile.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -322,7 +451,19 @@ public class DataImporterView extends EditorPart{
 				mnuSetLocation.setEnabled(!tblResults.getSelection().isEmpty());
 				mnuSetDate.setEnabled(!tblResults.getSelection().isEmpty());
 				mnuRemoveFile.setEnabled(!tblResults.getSelection().isEmpty());
-
+				
+				//only save if all items are valid
+				boolean ok = true;
+				for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
+					Object x = (FileProxy) iterator.next();
+					if (x instanceof FileProxy) {
+						if (!((FileProxy) x).isValid()) {
+							ok = false;
+							break;
+						}
+					}
+				}
+				mnuSaveFile.setEnabled(ok);
 			}
 			
 			@Override
@@ -667,30 +808,82 @@ public class DataImporterView extends EditorPart{
 		
 		Composite bits = toolkit.createComposite(scroll);
 		scroll.setContent(bits);
-		bits.setLayout(new GridLayout(2, false));
+		bits.setLayout(new GridLayout());
 		bits.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label l = toolkit.createLabel(bits, "Status Details:");
-		l = toolkit.createLabel(bits, proxy.validMessage());
+		FontData fd = bits.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		Font boldFont = new Font(bits.getDisplay(), fd);
+		bits.addListener(SWT.Dispose, e->boldFont.dispose());
+		
+		Composite fileSection = toolkit.createComposite(bits);
+		fileSection.setLayout(new GridLayout(2, false));
+		fileSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label l = toolkit.createLabel(fileSection, "Summary");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		l.setFont(boldFont);
+		
+		if (!proxy.isValid()) {
+			l = toolkit.createLabel(fileSection, "Status Details:");
+			l = toolkit.createLabel(fileSection, proxy.validMessage());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		}
+		
+		l = toolkit.createLabel(fileSection, "Date/Time:");
+		l = toolkit.createLabel(fileSection, proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate()) );
+		
+		l = toolkit.createLabel(fileSection, "Asset:");
+		l = toolkit.createLabel(fileSection, proxy.getAsset() == null ? "" : proxy.getAsset().getId() );
+		
+		l = toolkit.createLabel(fileSection, "Station:");
+		l = toolkit.createLabel(fileSection, proxy.getStation() == null ? "" : proxy.getStation().getId() );
+		
+		l = toolkit.createLabel(fileSection, "Station Location:");
+		l = toolkit.createLabel(fileSection, proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId() );
+		
+		l = toolkit.createLabel(fileSection, "Longitude:");
+		l = toolkit.createLabel(fileSection, proxy.getX() == null ? "" : String.valueOf(proxy.getX()) );
+		
+		l = toolkit.createLabel(fileSection, "Latitude:");
+		l = toolkit.createLabel(fileSection, proxy.getY() == null ? "" : String.valueOf(proxy.getY()) );
+		
+		Composite obsSection = toolkit.createComposite(bits);
+		obsSection.setLayout(new GridLayout(2, false));
+		obsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		l = toolkit.createLabel(obsSection, "Observations");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		l.setFont(boldFont);
+		
+		for (WaypointObservation wo : proxy.getObservations()) {
+			l = toolkit.createLabel(obsSection, wo.getCategory().getFullCategoryName());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			
+			for (WaypointObservationAttribute a : wo.getAttributes()) {
+				l = toolkit.createLabel(obsSection, a.getAttribute().getName() + ":");
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				((GridData)l.getLayoutData()).horizontalIndent = 10;
+				
+				l = toolkit.createLabel(obsSection, a.getAttributeValueAsString(Locale.getDefault()));
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			}
+		}
+		
+		Composite warnSection = toolkit.createComposite(bits);
+		warnSection.setLayout(new GridLayout());
+		warnSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		l = toolkit.createLabel(warnSection, "Processing Warnings");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		l.setFont(boldFont);
 		
-		l = toolkit.createLabel(bits, "Date/Time:");
-		l = toolkit.createLabel(bits, proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate()) );
-		
-		l = toolkit.createLabel(bits, "Asset:");
-		l = toolkit.createLabel(bits, proxy.getAsset() == null ? "" : proxy.getAsset().getId() );
-		
-		l = toolkit.createLabel(bits, "Station:");
-		l = toolkit.createLabel(bits, proxy.getStation() == null ? "" : proxy.getStation().getId() );
-		
-		l = toolkit.createLabel(bits, "Station Location:");
-		l = toolkit.createLabel(bits, proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId() );
-		
-		l = toolkit.createLabel(bits, "Longitude:");
-		l = toolkit.createLabel(bits, proxy.getX() == null ? "" : String.valueOf(proxy.getX()) );
-		
-		l = toolkit.createLabel(bits, "Latitude:");
-		l = toolkit.createLabel(bits, proxy.getY() == null ? "" : String.valueOf(proxy.getY()) );
+		for (ActionableWarning aw : proxy.getWarnings()) {
+			l = toolkit.createLabel(warnSection, aw.getMessage());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).horizontalIndent = 10;
+			
+		}
 		
 		scroll.setMinSize(bits.computeSize(SWT.DEFAULT,  SWT.DEFAULT));
 		proxyDetailsComp.layout(true);
@@ -701,7 +894,7 @@ public class DataImporterView extends EditorPart{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				HashMap<String, List<String[]>> exif = FileMetadataReader.readExifMetadata(proxy.getFile());
+				HashMap<Directory, List<Tag>> exif = FileMetadataReader.readExifMetadata(proxy.getFile());
 				
 				Display.getDefault().syncExec(()->{
 					if (tblExif.getTable().isDisposed()) return;
@@ -710,9 +903,11 @@ public class DataImporterView extends EditorPart{
 						return;
 					}
 					List<Object> values = new ArrayList<>();
-					for (Entry<String,List<String[]>> item : exif.entrySet()) {
-						values.add(item.getKey());
-						values.addAll(item.getValue());
+					for (Entry<Directory, List<Tag>> item : exif.entrySet()) {
+						values.add(item.getKey().getName());
+						for (Tag t : item.getValue()) {
+							values.add(new String[] {t.getTagName(), t.getDescription()});
+						}
 					}
 					tblExif.setInput(values);
 				});

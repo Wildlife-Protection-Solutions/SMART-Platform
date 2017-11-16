@@ -26,7 +26,7 @@ public interface IMetadataField<T> {
 	 * @return the value represented as a string; null
 	 * if an error occurs of value not found
 	 */
-	public String findValue(T file);
+	public Object findValue(T file);
 	
 	public AssetMetadataMapping.MetadataType getType();
 }

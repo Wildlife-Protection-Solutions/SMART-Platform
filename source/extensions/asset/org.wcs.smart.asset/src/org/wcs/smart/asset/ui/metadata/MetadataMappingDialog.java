@@ -37,7 +37,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
-import org.wcs.smart.asset.model.mapping.XmpMetadataField;
+import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -65,6 +65,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 				mappingsToDelete.forEach(m->{
 					if (m.getUuid() != null) session.delete(m);
 				});
+				for (int i = 0; i < mappings.size(); i ++) mappings.get(i).setSearchOrder(i);
 				mappings.forEach(m->session.saveOrUpdate(m));
 				session.getTransaction().commit();
 				
@@ -149,7 +150,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 					AssetMetadataMapping mm = (AssetMetadataMapping)element;
 					if (mm.getMappedAssetProperty() != null) return mm.getMappedAssetProperty().name();
 					StringBuilder sb = new StringBuilder();
-					if ( ((XmpMetadataField)mm.getMetadataField() ).getTagValue() != null) sb.append( ((XmpMetadataField)mm.getMetadataField() ).getTagValue()  + ": ");
+					if ( ((ExifMetadataField)mm.getMetadataField() ).getTagValue() != null) sb.append( ((ExifMetadataField)mm.getMetadataField() ).getTagValue()  + ": ");
 					if (mm.getMappedListItem() != null) sb.append(mm.getMappedListItem().getName());
 					if (mm.getMappedTreeNode() != null) sb.append(mm.getMappedTreeNode().getName());
 					
@@ -361,7 +362,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 					if (i.getMappedTreeNode() != null) i.getMappedTreeNode().getName();
 				});
 			}
-			
+			items.sort((a,b)->a.getSearchOrder().compareTo(b.getSearchOrder()));
 			mappings = items;
 			Display.getDefault().syncExec(()->{
 				if (tblMappings.getControl().isDisposed()) return;

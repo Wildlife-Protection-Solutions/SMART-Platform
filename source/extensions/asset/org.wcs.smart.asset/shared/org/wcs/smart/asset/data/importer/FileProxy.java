@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.geotools.geometry.jts.JTS;
@@ -16,6 +17,7 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.WaypointObservation;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -35,9 +37,48 @@ public class FileProxy {
 	
 	private Exception processingException;
 	
+	private List<ActionableWarning> warnings;
+	
+	private HashMap<String, Object> dataCache = new HashMap<>();
+	
+	private List<WaypointObservation> rawObservations = new ArrayList<>();
+	private List<WaypointObservation> observations = new ArrayList<>();
+	
 	public FileProxy(Path file, ConservationArea ca) {
 		this.file = file;
 		this.ca = ca;
+		warnings = new ArrayList<>();
+	}
+	
+	public void setObservations(List<WaypointObservation> observations) {
+		this.observations = observations;
+	}
+	
+	public List<ActionableWarning> getWarnings(){
+		return this.warnings;
+	}
+	
+	public List<WaypointObservation> getObservations(){
+		return this.observations;
+	}
+	
+	public void addRawObservation(WaypointObservation wo) {
+		this.rawObservations.add(wo);
+	}
+	
+	public List<WaypointObservation> getRawObservations(){
+		return this.rawObservations;
+	}
+	
+	public void addWarning(ActionableWarning warning) {
+		this.warnings.add(warning);
+	}
+	
+	public void putData(String key, Object value) {
+		dataCache.put(key, value);
+	}
+	public Object getData(String key) {
+		return dataCache.get(key);
 	}
 	
 	public void setPosition(Double x, Double y) {
@@ -85,6 +126,18 @@ public class FileProxy {
 	public void setStationLocation(AssetStationLocation location) {
 		this.location = location;
 		this.station = location.getStation();
+		this.deployment = null;
+	}
+	
+	/**
+	 * Will only update the station if the station location is null
+	 * @param location
+	 */
+	public void setStation(AssetStation station) {
+		if (this.location != null) return;
+		
+		this.location = null;
+		this.station = station;
 		this.deployment = null;
 	}
 	

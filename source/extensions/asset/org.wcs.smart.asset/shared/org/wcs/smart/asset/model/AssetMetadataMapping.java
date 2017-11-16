@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.asset.model.mapping.IMetadataField;
-import org.wcs.smart.asset.model.mapping.XmpMetadataField;
+import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -44,7 +44,7 @@ public class AssetMetadataMapping extends UuidItem {
 	
 	private String mappingstring;
 	private MetadataType type;
-	private int order;
+	private Integer order;
 	
 	private AssetProperty mappedAssetProperty;
 	
@@ -128,14 +128,14 @@ public class AssetMetadataMapping extends UuidItem {
 	 * 
 	 */
 	@Column(name="search_order")
-	public int getSearchOrder() {
+	public Integer getSearchOrder() {
 		return this.order;
 	}
 
 	/**
 	 * 
 	 */
-	public void setSearchOrder(int order) {
+	public void setSearchOrder(Integer order) {
 		this.order = order;
 	}
 	
@@ -242,13 +242,13 @@ public class AssetMetadataMapping extends UuidItem {
 	}
 	
 	
-	private IMetadataField<?> mField = null;;
+	private IMetadataField<?> mField = null;
 	@Transient
 	public IMetadataField<?> getMetadataField() {
 		if (mField != null) return mField; 
 		switch (getMetadataType()){
 		case EXIF:
-			return XmpMetadataField.parseMapping(getMetadataKey());
+			return ExifMetadataField.parseMapping(getMetadataKey());
 		case XMP:
 			break;
 		}

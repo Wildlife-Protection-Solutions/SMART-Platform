@@ -47,17 +47,18 @@ public class FileMetadataReader {
 	 * @return  null indicates some error reading file; empty hash map
 	 * indicates not exif metadata found
 	 */
-	public static HashMap<String, List<String[]>> readExifMetadata(Path file){
-		HashMap<String, List<String[]>> results = new HashMap<>();
+	public static HashMap<Directory, List<Tag>> readExifMetadata(Path file){
+		HashMap<Directory, List<Tag>> results = new HashMap<>();
 		
 		try {
 			Metadata metadata = ImageMetadataReader.readMetadata(file.toFile());
 			for (Directory directory : metadata.getDirectories()) {
-				List<String[]> tags = new ArrayList<>();
+				List<Tag> tags = new ArrayList<>();
 				for (Tag g : directory.getTags()) {
-					tags.add(new String[] {g.getTagName(), g.getDescription()});
+//					tags.add(new String[] {g.getTagName(), g.getDescription()});
+					tags.add(g);
 				}
-				results.put(directory.getName(), tags);
+				results.put(directory, tags);
 			}
 			return results;
 		}catch (Exception ex) {
@@ -68,20 +69,28 @@ public class FileMetadataReader {
 	
 	public static Metadata readMetadata(Path file) {
 		try {
-			ImageMetadataReader.readMetadata(file.toFile());
+			return ImageMetadataReader.readMetadata(file.toFile());
 		}catch (Exception ex) {
+			ex.printStackTrace();
 			//TODO:
 		}
 		return null;
 	}
 	
 	
-	public static String findValue(Metadata metadata, String directoryName, String tagName) {
+	/**
+	 * 
+	 * @param metadata
+	 * @param directoryName directory name is optional; if null all directories will be searched
+	 * @param tagType
+	 * @return
+	 */
+	public static Directory findDirectory(Metadata metadata, String directoryName, int tagType) {
 		if (metadata == null) return null;
 		for (Directory directory : metadata.getDirectories()) {
-			if (!directory.getName().equalsIgnoreCase(directoryName)) continue;
+			if (directoryName != null && !directory.getName().equals(directoryName)) continue;
 			for (Tag g : directory.getTags()) {
-				if (g.getTagName().equalsIgnoreCase(tagName)) return g.getDescription();
+				if (g.getTagType() == tagType) return directory;
 			}
 		}
 		return null;
