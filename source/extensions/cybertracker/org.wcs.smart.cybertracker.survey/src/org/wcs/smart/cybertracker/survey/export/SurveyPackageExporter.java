@@ -81,7 +81,7 @@ public enum SurveyPackageExporter {
 	 */
 	public void exportPackage(SurveyDesign design, CyberTrackerPropertiesProfile profile, Path exportFile, IProgressMonitor monitor) throws Exception{
 		
-		SubMonitor sub = SubMonitor.convert(monitor, Messages.SurveyPackageExporter_TaskName, 5);
+		SubMonitor sub = SubMonitor.convert(monitor, Messages.SurveyPackageExporter_TaskName, 6);
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
@@ -121,6 +121,10 @@ public enum SurveyPackageExporter {
 				profileToJson(session.get(CyberTrackerPropertiesProfile.class, profile.getUuid()), profileFile);
 				toIncludeInZip.add(profileFile.toFile());
 				
+				sub.split(1);
+				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
+				writeProjectFile(modelToExport, projectFile);
+				toIncludeInZip.add(projectFile.toFile());
 				
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
 			}
@@ -147,14 +151,17 @@ public enum SurveyPackageExporter {
 		
 		JSONArray metadataScreens = new JSONArray();
 		
-		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(MissionScreenOptionMeta.COMMENT), CtJsonExportUtils.JSON_COMMENT_METADATA_KEY, session, ca)); 
+		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(MissionScreenOptionMeta.COMMENT), CtJsonExportUtils.JSON_COMMENT_METADATA_KEY, Messages.SurveyPackageExporter_CommentPageLabel, session, ca)); 
 		metadataScreens.add(CtJsonExportUtils.convertEmployees(options.get(MissionScreenOptionMeta.MEMBERS), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(MissionScreenOptionMeta.LEADER), CtJsonExportUtils.JSON_LEADER_METADATA_KEY, session, ca)); 
+		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(MissionScreenOptionMeta.LEADER), CtJsonExportUtils.JSON_LEADER_METADATA_KEY, Messages.SurveyPackageExporter_LeaderPageLabel, session, ca)); 
 				
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
 			fw.write(metadataScreens.toJSONString());
 		}
 	}
 
+	private void writeProjectFile(ConfigurableModel cm, Path outputFile) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, outputFile);
+	}
 	
 }

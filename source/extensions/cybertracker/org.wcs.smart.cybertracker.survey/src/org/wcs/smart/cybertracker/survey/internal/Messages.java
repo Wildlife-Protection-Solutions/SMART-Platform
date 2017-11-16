@@ -79,6 +79,8 @@ public class Messages extends NLS {
 	public static String SurveyCTPackageDialog_ShellTitle;
 	public static String SurveyCTPackageDialog_ZipFileLbl;
 	public static String SurveyJsonUtils_MemberNotFound;
+	public static String SurveyPackageExporter_CommentPageLabel;
+	public static String SurveyPackageExporter_LeaderPageLabel;
 	public static String SurveyPackageExporter_TaskName;
 	public static String SurveyScreensUtil_BeginSurvey;
 	public static String SurveyScreensUtil_Comments;
