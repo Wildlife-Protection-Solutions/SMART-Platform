@@ -50,6 +50,8 @@ public class Messages extends NLS {
 	public static String CreateNewProfileOpDialog_Template;
 	public static String CreateNewProfileOpDialog_Title;
 	public static String CtDatabaseUpgrader_UpgradeTask;
+	public static String CtJsonExportUtils_EmployeePageLabel;
+	public static String CtJsonExportUtils_SmartCtSource;
 	public static String CTPatrolTableContainer_CyberTrackerFiles;
 	public static String CTPatrolTableContainer_DeleteWarn_Message;
 	public static String CTPatrolTableContainer_DeleteWarn_Title;

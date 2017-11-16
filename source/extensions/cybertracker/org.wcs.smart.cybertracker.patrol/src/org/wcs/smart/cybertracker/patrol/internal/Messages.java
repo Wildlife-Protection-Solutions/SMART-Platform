@@ -109,7 +109,16 @@ public class Messages extends NLS {
 	public static String PatrolLegImporter_MetaWarning_Team;
 	public static String PatrolLegImporter_Warn_TimeGap_End;
 	public static String PatrolLegImporter_Warn_TimeGap_Start;
+	public static String PatrolPackageExporter_ArmedPageLabel;
+	public static String PatrolPackageExporter_CommentPageLabel;
+	public static String PatrolPackageExporter_LeaderPageLabel;
+	public static String PatrolPackageExporter_MandatePageLabel;
+	public static String PatrolPackageExporter_ObjectivePageLabel;
+	public static String PatrolPackageExporter_PilotPageLabel;
+	public static String PatrolPackageExporter_StationFieldKey;
 	public static String PatrolPackageExporter_TaskName;
+	public static String PatrolPackageExporter_TeamPageLabel;
+	public static String PatrolPackageExporter_TransportTypePageLabel;
 	public static String PatrolScreens_Begin;
 	public static String PatrolScreens_Begin_Title;
 	public static String PatrolScreens_Comments;

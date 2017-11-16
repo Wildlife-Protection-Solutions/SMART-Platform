@@ -21,6 +21,12 @@
  */
 package org.wcs.smart.cybertracker.export;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -30,6 +36,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
@@ -82,6 +89,35 @@ public class CtJsonExportUtils {
 	public static final String JSON_OPTION_PROP_KEY = "options"; //$NON-NLS-1$
 	
 	/**
+	 * JSON options key for representing the part list options
+	 */
+	public static final String JSON_OPTION_PARENT_KEY = "parent"; //$NON-NLS-1$
+	
+	/**
+	 * JSON options key for representing the option name
+	 */
+	public static final String JSON_OPTION_LABEL_KEY = "label"; //$NON-NLS-1$
+	
+	/**
+	 * JSON options property key that identifies the type
+	 */
+	public static final String JSON_OPTION_TYPE_KEY = "type"; //$NON-NLS-1$
+	
+	/**
+	 * Option field types
+	 * @author Emily
+	 *
+	 */
+	public static enum Type{
+		BOOLEAN,
+		TEXT,
+		SINGLE_CHOICE,
+		MULTI_CHOICE
+	}
+	
+	public static final String PROJECT_FILE = "project.json"; //$NON-NLS-1$
+	
+	/**
 	 * Convert cybertracker properties profile to JSON string.
 	 * 
 	 * @param profile
@@ -104,6 +140,19 @@ public class CtJsonExportUtils {
 			}
 		}
 		return profileObj.toJSONString();
+	}
+
+	public static void writeProjectJson(String projectName, String cmFile, Path outputFile) throws IOException {
+		JSONObject projectJSON = new JSONObject();
+		projectJSON.put("projectName",projectName); //$NON-NLS-1$
+		projectJSON.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
+		projectJSON.put("source",Messages.CtJsonExportUtils_SmartCtSource); //$NON-NLS-1$
+		projectJSON.put("definition",cmFile); //$NON-NLS-1$
+		projectJSON.put("creation_date",new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
+			fw.write(projectJSON.toJSONString());
+		}
 	}
 	
 	/**
@@ -166,8 +215,10 @@ public class CtJsonExportUtils {
 	 * @param ca
 	 * @return
 	 */
-	public static JSONObject convertStringOp(ScreenOption screenOption, String opKey, Session session, ConservationArea ca) {
+	public static JSONObject convertStringOp(ScreenOption screenOption, String opKey, String opLabel, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
+		objective.put(JSON_OPTION_TYPE_KEY, Type.TEXT.name());
+		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
 		if (screenOption != null) {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible() && screenOption.getStringValue() != null) {
@@ -193,7 +244,8 @@ public class CtJsonExportUtils {
 	
 	public static JSONObject convertEmployees(ScreenOption screenOption, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
-		
+		optionType.put(JSON_OPTION_TYPE_KEY, Type.MULTI_CHOICE.name());
+		optionType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_EmployeePageLabel);
 		if (screenOption != null) {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible()) {
@@ -226,8 +278,11 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
-	public static JSONObject convertLeaderPilot(ScreenOption screenOption, String opKey, Session session, ConservationArea ca) {
+	public static JSONObject convertLeaderPilot(ScreenOption screenOption, String opKey, String opLabel, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
+		objective.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
+		objective.put(JSON_OPTION_PARENT_KEY, JSON_EMPLOYEE_METADATA_KEY);
+		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
 		if (screenOption != null) {
 			objective.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible() && screenOption.getUuidValue() != null) {
@@ -242,9 +297,10 @@ public class CtJsonExportUtils {
 		return objectiveOp;
 	}
 	
-	public static JSONObject convertKeyOptions(ScreenOption screenOption, Class<? extends NamedKeyItem> clazz, String screenKey, Session session, ConservationArea ca) {
+	public static JSONObject convertKeyOptions(ScreenOption screenOption, Class<? extends NamedKeyItem> clazz, String screenKey, String opLabel, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
-		
+		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
+		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);
 		if (screenOption != null) {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, screenOption.isVisible());
 			if (!screenOption.isVisible()) {
