@@ -9,7 +9,8 @@ var error = "";
 
 /* configure events on html elements */
 window.onload = function(){
-
+	menuCheckOnload();
+	
 	refreshUsers();
 	refreshInactiveUsers();
 	

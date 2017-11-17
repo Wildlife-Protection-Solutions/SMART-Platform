@@ -166,9 +166,10 @@ public enum SecurityManager {
 		
 		//check if they have permission from a role
 		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
-		queryString += "WHERE a.role = role AND a.action = :adminAction AND r.id.username = '" + username + "'"; //$NON-NLS-1$
+		queryString += "WHERE a.role = role AND a.action = :adminAction AND r.id.username = :username"; //$NON-NLS-1$
 		Query<?> q= s.createQuery(queryString);
 		q.setParameter("adminAction", action); //$NON-NLS-1$
+		q.setParameter("username", username); //$NON-NLS-1$
 		Long roleCnt = (Long) q.uniqueResult();
 		
 		Long adminCnt = (long) 0;

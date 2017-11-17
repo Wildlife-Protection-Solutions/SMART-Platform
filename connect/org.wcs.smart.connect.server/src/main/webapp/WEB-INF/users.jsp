@@ -36,7 +36,7 @@
   
 	<div class="top-spacer" >
 
-		<div class="user-tables-wrapper user-tables-float">
+
   		<div id="usertable" class="user-tables-float table-cell smart-table">
   			<div class="table-row smart-table-header">
 				<div class="table-cell smart-table-cell"><fmt:message key="users.userlabel"/></div>
@@ -73,7 +73,7 @@
 			</div>
 			</c:forEach>  
   		</div>
-  		</div>
+
 
 
 		<div id="userdetails" style="width:100%;" class="table-cell border-section">

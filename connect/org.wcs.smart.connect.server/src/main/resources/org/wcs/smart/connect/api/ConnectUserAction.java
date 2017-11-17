@@ -108,6 +108,16 @@ public class ConnectUserAction extends HttpServlet {
 		}
 	}
 	
+	private boolean isAdmin(){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			return SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY);
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+	
 	private boolean isCaAdminUser(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -143,11 +153,16 @@ public class ConnectUserAction extends HttpServlet {
     @Path("/actions")
     public List<SmartActionsProxy> getActions(){
 		boolean restricted = false;
-		if(!isCaAdminUser()){
-			validateAdmin();
-		}else{
+		if( isAdmin() ){
+			//do nothing, they are allowed
+		}else if(isCaAdminUser()){
 			restricted = true;
+		}else{
+			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 		}
+
+		
 		Session s = HibernateManager.getSession(context, request.getLocale());
 		s.beginTransaction();
 		try{
@@ -242,16 +257,13 @@ public class ConnectUserAction extends HttpServlet {
     @Path("/user/{username}")
     public List<SmartUserPermissionProxy> getUserPrivileges(@PathParam("username") String username){
 		boolean restricted = false;
-		try{
-			//admin users can access everything
-			validateAdmin();
-		}catch (SmartConnectException e){
-			//maybe a ca admin user and has limited access
-			if (isCaAdminUser()){
-				restricted = true;
-			}else{
-				throw e;
-			}
+		if( isAdmin() ){
+			//do nothing, they are allowed
+		}else if(isCaAdminUser()){
+			restricted = true;
+		}else{
+			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 		}
 		
 		Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
@@ -334,10 +346,13 @@ public class ConnectUserAction extends HttpServlet {
     		@PathParam("resource") String resource){
 		boolean restricted;
 		restricted = false;
-		if(!isCaAdminUser()){
-			validateAdmin();
-		}else{
+		if( isAdmin() ){
+			//do nothing, they are allowed
+		}else if(isCaAdminUser()){
 			restricted = true;
+		}else{
+			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 		}
 
 		Session s = HibernateManager.getSession(context);
@@ -589,10 +604,13 @@ public class ConnectUserAction extends HttpServlet {
     		@PathParam("action") String actionKey,
     		@PathParam("resource") String resourceKey){
 		boolean restricted = false;
-		if(!isCaAdminUser()){
-			validateAdmin();
-		}else{
+		if( isAdmin() ){
+			//do nothing, they are allowed
+		}else if(isCaAdminUser()){
 			restricted = true;
+		}else{
+			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 		}
 
 		

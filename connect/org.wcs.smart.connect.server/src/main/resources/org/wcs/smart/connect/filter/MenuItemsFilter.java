@@ -60,7 +60,7 @@ public class MenuItemsFilter implements Filter {
 		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY, "alert.png"), //$NON-NLS-1$ //$NON-NLS-2$
 		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null, "query.png"), //$NON-NLS-1$ //$NON-NLS-2$
 		REPORT("MenuItemsFilter.ReportLabel", ConnectRESTApplication.SERVLET_PATH + "report", null, "reports.png"),  //$NON-NLS-1$ //$NON-NLS-2$
-		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", CaAdminAccountAction.KEY, "settings.png"),  //$NON-NLS-1$ //$NON-NLS-2$
+		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", CaAdminAccountAction.KEY, "share.png"),  //$NON-NLS-1$ //$NON-NLS-2$
 		SHAREDLINKSADMIN("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", AdminAccountAction.KEY, "share.png"),  //$NON-NLS-1$ //$NON-NLS-2$
 		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY, "dataq.png"), //$NON-NLS-1$ //$NON-NLS-2$
 		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$
