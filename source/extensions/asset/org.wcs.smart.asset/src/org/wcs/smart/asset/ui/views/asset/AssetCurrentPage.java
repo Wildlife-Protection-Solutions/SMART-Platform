@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.asset.ui.views.asset;
 
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -61,15 +58,12 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
-import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import org.locationtech.udig.project.internal.command.navigation.ZoomCommand;
 import org.locationtech.udig.project.ui.ApplicationGIS;
-import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
-import org.locationtech.udig.ui.graphics.ViewportGraphics;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.engine.StatisticsEngine;
@@ -77,7 +71,9 @@ import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
 import org.wcs.smart.asset.model.AbstractAssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
+import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
 import org.wcs.smart.asset.ui.map.StationLocationDrawCommand;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -85,9 +81,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Current asset page in the asset editor.
@@ -115,7 +108,7 @@ public class AssetCurrentPage {
 	private TableViewer tblCnts;
 	
 	private Hyperlink lblStatStation;
-	private Label lblStatLocation;
+	private Hyperlink lblStatLocation;
 	
 	private Composite statDetailsSection;
 	private Composite bottomPart;
@@ -248,7 +241,18 @@ public class AssetCurrentPage {
 		});
 		
 		toolkit.createLabel(mapPart, "Location:");
-		lblStatLocation= toolkit.createLabel(mapPart, "");
+		lblStatLocation = toolkit.createHyperlink(mapPart, "", SWT.NONE);
+		lblStatLocation.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				UUID uuid = (UUID) lblStatLocation.getData(HL_UUID_KEY);
+				if (uuid != null) {
+					AssetStationLocation temp = new AssetStationLocation();
+					temp.setUuid(uuid);
+					(new OpenStationLocationHandler()).openStationLocation(temp);
+				}
+			}
+		});
 		
 		mapComposite = toolkit.createComposite(mapPart, SWT.BORDER);
 		mapComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -265,7 +269,17 @@ public class AssetCurrentPage {
 		mapViewer = new MapViewer(mapComposite, SWT.SINGLE | SWT.DOUBLE_BUFFERED);
 		mapViewer.setMap(ProjectFactory.eINSTANCE.createMap());
 		mapViewer.init(parentEditor);
-		LoadDefaultLayersJob basemap = new LoadDefaultLayersJob(mapViewer.getMap(), false);
+		
+		LoadDefaultLayersJob basemap = new LoadDefaultLayersJob(mapViewer.getMap(), false) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus s = super.run(monitor);
+				
+				SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(drawCommand.getBounds());
+				getMapViewer().getMap().executeSyncWithoutUndo(cmd);
+				return s;
+			}
+		};
 		basemap.schedule();
 		
 		drawCommand = new StationLocationDrawCommand();
@@ -385,6 +399,7 @@ public class AssetCurrentPage {
 				lblStatStation.setData(HL_UUID_KEY, thisdeploy.getStationLocation().getStation().getUuid());
 				lblStatLocation.setText(thisdeploy.getStationLocation().getId());
 				lblStatLocation.getParent().layout(true);
+				lblStatLocation.setData(HL_UUID_KEY, thisdeploy.getStationLocation().getUuid());
 				
 				Label ll = toolkit.createLabel(statDetailsSection, "Start Date:");
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));

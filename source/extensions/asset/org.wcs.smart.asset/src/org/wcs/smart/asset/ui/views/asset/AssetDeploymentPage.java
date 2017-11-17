@@ -391,12 +391,12 @@ public class AssetDeploymentPage {
 		}
 		
 		//confirm password
-		if (!AssetUtils.confirmPassword(parentEditor.getSite().getShell(), "Delete Asset Deployment", "Confirm your password to delete the selected history records.")) {
+		if (!AssetUtils.confirmPassword(parentEditor.getSite().getShell(), "Delete Asset Deployment", "Confirm your password to delete the selected deployment records.")) {
 			return;
 		}
 		
 		toDelete.forEach(x->{
-			//currentDeployments.remove(x);
+			allDeployments.remove(x);
 			toDeleteDeployments.add((AssetDeployment) x);
 		});
 		parentEditor.setDirty(true);

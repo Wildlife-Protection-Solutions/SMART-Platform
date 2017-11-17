@@ -74,7 +74,7 @@ public class StationLocationDrawCommand extends AbstractDrawCommand{
 	
 	public void setLocationSelection(Collection<AssetStationLocation> selection) {
 		selectedLocations.clear();
-		selectedLocations.addAll(selection);
+		if (selection != null) selectedLocations.addAll(selection);
 	}
 	
 	@Override
@@ -97,18 +97,21 @@ public class StationLocationDrawCommand extends AbstractDrawCommand{
 		Double ymax = null;
 		
 		
-		
-		for (AssetStation s : stationsToDraw) {
-			if (xmin == null || s.getX() < xmin) xmin = s.getX();
-			if (ymin == null || s.getY() < ymin) ymin = s.getY();
-			if (xmax == null || s.getX() > xmax) xmax = s.getX();
-			if (ymax == null || s.getY() > ymax) ymax = s.getY();
+		if (stationsToDraw != null) {
+			for (AssetStation s : stationsToDraw) {
+				if (xmin == null || s.getX() < xmin) xmin = s.getX();
+				if (ymin == null || s.getY() < ymin) ymin = s.getY();
+				if (xmax == null || s.getX() > xmax) xmax = s.getX();
+				if (ymax == null || s.getY() > ymax) ymax = s.getY();
+			}
 		}
-		for (AssetStationLocation s : locationsToDraw) {
-			if (xmin == null || s.getX() < xmin) xmin = s.getX();
-			if (ymin == null || s.getY() < ymin) ymin = s.getY();
-			if (xmax == null || s.getX() > xmax) xmax = s.getX();
-			if (ymax == null || s.getY() > ymax) ymax = s.getY();
+		if (locationsToDraw != null) {
+			for (AssetStationLocation s : locationsToDraw) {
+				if (xmin == null || s.getX() < xmin) xmin = s.getX();
+				if (ymin == null || s.getY() < ymin) ymin = s.getY();
+				if (xmax == null || s.getX() > xmax) xmax = s.getX();
+				if (ymax == null || s.getY() > ymax) ymax = s.getY();
+			}
 		}
 		
 		

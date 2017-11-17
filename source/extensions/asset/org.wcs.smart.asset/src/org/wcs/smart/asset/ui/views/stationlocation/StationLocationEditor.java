@@ -170,7 +170,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 				}
 			}else {
 				stationlocation = session.get(AssetStationLocation.class, in.getStationLocationUuid());
-				stationlocation.equals(null);
+				if (stationlocation != null) stationlocation.equals(null);
 			}
 			
 			if (stationlocation == null) {

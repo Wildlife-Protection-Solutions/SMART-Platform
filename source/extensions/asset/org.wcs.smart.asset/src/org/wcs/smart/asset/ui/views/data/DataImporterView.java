@@ -3,12 +3,16 @@ package org.wcs.smart.asset.ui.views.data;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -16,6 +20,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -56,12 +61,14 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.ActionableWarning;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.data.importer.FileProcessor;
 import org.wcs.smart.asset.data.importer.FileProxy;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
@@ -70,7 +77,6 @@ import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -120,26 +126,33 @@ public class DataImporterView extends EditorPart{
 
 	
 	private void save(List<FileProxy> items) {
+		Set<AssetStation> modifiedStations = new HashSet<>();
+		Set<Asset> modifiedAssets = new HashSet<>();
+		
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
-			
+				int i = 0; 
 				for (FileProxy p : items) {
-					if (p.getStation().getUuid() == null) {
+					System.out.println(i + " / " + items.size());
+					i++;
+					
+					boolean isNewStation = p.getStation().getUuid() == null;
+					boolean isNewLocation = p.getStationLocation().getUuid() == null;
+					
+					if (isNewStation) {
 						p.getStation().setId(generateStationId(session));
 						if (p.getStation().getX() == null) p.getStation().setX(p.getX());
-						if (p.getStation().getY() == null) p.getStation().setX(p.getY());
-						
-						if (p.getStationLocation().getUuid() == null ) {
-							p.getStationLocation().setId(generateLocationId(p.getStation(), session));
-							if (p.getStationLocation().getX() == null) p.getStationLocation().setX(p.getX());
-							if (p.getStationLocation().getY() == null) p.getStationLocation().setY(p.getY());
-							
-						}
+						if (p.getStation().getY() == null) p.getStation().setY(p.getY());
+						session.save(p.getStation());
 					}
 					
-					
-					session.saveOrUpdate(p.getStation());
+					if (isNewLocation) {
+						p.getStationLocation().setId(generateLocationId(p.getStation(), session));
+						if (p.getStationLocation().getX() == null) p.getStationLocation().setX(p.getX());
+						if (p.getStationLocation().getY() == null) p.getStationLocation().setY(p.getY());
+						session.save(p.getStationLocation());
+					}
 					session.flush();
 					
 					Waypoint wp = new Waypoint();
@@ -150,6 +163,7 @@ public class DataImporterView extends EditorPart{
 					wp.setX(p.getX());
 					wp.setY(p.getY());
 					wp.setAttachments(new ArrayList<>());
+					
 					WaypointAttachment wa = new WaypointAttachment();
 					wa.setWaypoint(wp);
 					wa.setCopyFromLocation(p.getFile().toFile());
@@ -163,17 +177,36 @@ public class DataImporterView extends EditorPart{
 					}
 					
 					session.save(wp);
+					session.flush();
+					
+					AssetDeployment d = processor.findAssetDeployment(wp, p.getAsset(), p.getStationLocation(), session);
+					if (d.getUuid() == null) {
+						session.save(d);
+					}
+					session.flush();
 					
 					AssetWaypoint aw = new AssetWaypoint();
-					aw.setAssetDeployment(p.getDeployment());
-					if (p.getDeployment().getAssetWaypoints() == null) p.getDeployment().setAssetWaypoints(new ArrayList<>());
-					p.getDeployment().getAssetWaypoints().add(aw);
-					
+					aw.setWaypoint(wp);
+					aw.setAssetDeployment(d);
+					if (d.getAssetWaypoints() == null) d.setAssetWaypoints(new ArrayList<>());
+					d.getAssetWaypoints().add(aw);
 					session.save(aw);
-					session.saveOrUpdate(p.getDeployment());
+					
+					//TODO: verify we do not have overlapping deployments
+					if (d.getEndDate() == null) {
+						//ensure we have no other deployments that also have no end date
+					}else {
+						//ensure there are no other deployments whose start date is before this end date
+					}
+					
+					//ensure there are no other deployments whose end date is before this start date
+					
 					session.flush();
+					
+					modifiedStations.add(p.getStation());
+					modifiedAssets.add(d.getAsset());
 				}
-				
+				session.getTransaction().commit();
 			}catch (Exception ex){
 				session.getTransaction().rollback();
 				AssetPlugIn.displayLog("Error saving items: {0}" + ex.getMessage(), ex);
@@ -182,8 +215,13 @@ public class DataImporterView extends EditorPart{
 		}
 		items.forEach(e->processor.removeFile(e));
 		
-		tblResults.refresh();
-		//TODO: fire events
+		//clear deployments & recompute deployments and refresh table
+		processor.getFileDetails().forEach(e->e.setAsset(e.getAsset()));
+		refreshProxies(processor.getFileDetails());
+
+		//fire events
+		context.get(IEventBroker.class).post(AssetEvents.ASSET_MODIFIED, modifiedAssets);
+		context.get(IEventBroker.class).post(AssetEvents.ASSETSTATION_MODIFIED, modifiedStations);
 	}
 	
 	private String generateStationId(Session session) {
@@ -765,14 +803,14 @@ public class DataImporterView extends EditorPart{
 		refreshProxies(Collections.emptyList());
 	}
 	
-	private void refreshProxies(final List<FileProxy> proxies) {
+	private void refreshProxies(final Collection<FileProxy> proxies) {
 		Job refreshJob = new Job("refresh table") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				try(Session session = HibernateManager.openSession()){
-					proxies.forEach(p->p.updateAssetDeployment(session));
-				}
+//				try(Session session = HibernateManager.openSession()){
+//					proxies.forEach(p->p.updateAssetDeployment(session, processor.getFileDetails()));
+//				}
 				Display.getDefault().syncExec(()->{
 					tblResults.refresh();
 					updateStatus();

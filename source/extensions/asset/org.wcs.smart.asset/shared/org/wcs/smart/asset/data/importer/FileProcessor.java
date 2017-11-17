@@ -12,9 +12,11 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
@@ -25,6 +27,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
@@ -61,7 +64,7 @@ public class FileProcessor {
 			FileProxy proxy = FileMetadataReader.readFile(file, ca);
 			try(Session session = HibernateManager.openSession()){
 				processMetadata(proxy, session);
-				proxy.updateAssetDeployment(session);
+				proxy.updateStationLocation(session, fileDetails.values());
 			}
 			fileDetails.put(file,  proxy);
 		}catch (Exception ex) {
@@ -212,7 +215,12 @@ public class FileProcessor {
 			}
 		}
 		p.setObservations(allObservations);
-		for (WaypointObservation wo : allObservations) wo.getCategory().getFullCategoryName();
+		for (WaypointObservation wo : allObservations) {
+			wo.getCategory().getFullCategoryName();
+			for (WaypointObservationAttribute a : wo.getAttributes()) {
+				a.setObservation(wo);
+			}
+		}
 	}
 	
 	private boolean containsAttribute(WaypointObservation wo, Attribute a) {
@@ -462,5 +470,124 @@ public class FileProcessor {
 			//in a different mapping
 			p.addWarning(new ActionableWarning(MessageFormat.format("No station found for id ''{0}''", id)));
 		}
+	}
+		
+
+	//TODO: if track is set we probably don't want to be merge deployments; each
+	//time out should probably be a deployments but we can deal with that when we
+	//get to processing videos
+	public AssetDeployment findAssetDeployment(Waypoint wp, Asset asset, AssetStationLocation location, Session session) {
+		
+		//1.  Find a deployment for the asset that is between the start and end date of the waypoint
+		String hql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :date1 and (endDate is null or endDate>=:date2)";
+		List<AssetDeployment> matchingDeployment = session.createQuery(hql)
+			.setParameter("date1", wp.getDateTime())
+			.setParameter("date2",  wp.getDateTime())
+			.setParameter("asset", asset)
+			.list();
+		
+		if (matchingDeployment.size() > 1) {
+			throw new IllegalStateException(MessageFormat.format("Multiple deployments at the same time for asset {0}. This state is not valid", asset.getId() ));
+		}
+		
+		if (matchingDeployment.size() == 1) {
+			AssetDeployment matchedDeployment = matchingDeployment.get(0);
+			//if station location matches; this is fine we can merge with previous deployment
+			if (matchedDeployment.getStationLocation().equals(location)) return matchedDeployment;
+			
+			//here the station location does not match so this camera has been deployed to a different location
+			if (matchedDeployment.getEndDate() == null) {
+				//we can update this deployment
+				//set the end date to the last waypoint date we have
+				Date endDate = null;
+				for (AssetWaypoint aw : matchedDeployment.getAssetWaypoints()) {
+					if (endDate == null || aw.getWaypoint().getDateTime().after(endDate)) endDate = aw.getWaypoint().getDateTime();
+				}
+				if (endDate == null) {
+					//deployment had not waypoints the best we can do is take the current time and subtract a minute
+					endDate = new Date(wp.getDateTime().getTime() - 60_000);
+				}
+				matchedDeployment.setEndDate(endDate);
+				
+				//create a new deployment & return it
+				return createNewDeployment(asset, wp.getDateTime(), location);
+			
+			}else {
+				throw new IllegalStateException(MessageFormat.format("Multiple deployments at the same time for asset {0}. This state is not valid - we cannot continue", asset.getId() ));
+			}
+			
+		} else {
+			//not deployments that contained the wp date were found
+			//search for previous and next and see if we can expand one of them
+			hql = "FROM AssetDeployment WHERE asset = :asset";
+			List<AssetDeployment> allDeployments = session.createQuery(hql).setParameter("asset", asset).list();
+			
+			AssetDeployment prev = null;
+			AssetDeployment next = null;
+			
+			for (AssetDeployment d : allDeployments) {
+				if (d.getEndDate() != null && d.getEndDate().before(wp.getDateTime())) {
+					if (prev == null) {
+						prev = d;
+					}else if (d.getEndDate().after(prev.getEndDate())) {
+						prev = d;
+					}
+				}
+				if (d.getStartDate().after(wp.getDateTime())) {
+					if (next == null) {
+						next = d;
+					}else if (d.getStartDate().before(next.getStartDate())) {
+						next = d;
+					}
+				}
+			}
+			
+			if (prev == null && next == null) {
+				return createNewDeployment(asset, wp.getDateTime(), location);
+			}
+			if (prev != null && prev.getStationLocation().equals(location) && next != null && next.getStationLocation().equals(location)) {
+				//both prev and next are candidates, pick the closer one and extend it
+				if (wp.getDateTime().getTime() - prev.getEndDate().getTime() > next.getStartDate().getTime() - wp.getDateTime().getTime()) {
+					//pick next
+					next.setStartDate(wp.getDateTime());
+					return next;
+				}else {
+					//pick prev
+					prev.setEndDate(wp.getDateTime());
+					return prev;
+				}
+			}
+			if (prev != null && prev.getStationLocation().equals(location)) {
+				//only previous is a candidate
+				prev.setEndDate(wp.getDateTime());
+				return prev;
+			}
+			if (next != null && next.getStationLocation().equals(location)) {
+				//only next is candidate
+				next.setStartDate(wp.getDateTime());
+				return next;
+			}
+			if (next != null) {
+				//create a new with an end date of next start time
+				AssetDeployment d = createNewDeployment(asset, wp.getDateTime(), location);
+				d.setEndDate(next.getStartDate());
+				return d;
+			}else {
+				//create a new one with no end date
+				return createNewDeployment(asset, wp.getDateTime(), location);
+			}
+			
+		}
+	}
+	
+	private AssetDeployment createNewDeployment(Asset asset, Date startDate, AssetStationLocation location) {
+		AssetDeployment newDeployment = new AssetDeployment();
+		newDeployment.setAsset(asset);
+		newDeployment.setAssetWaypoints(new ArrayList<>());
+		newDeployment.setAttributeValues(new ArrayList<>());
+		newDeployment.setStartDate(startDate);
+		newDeployment.setEndDate(null);
+		newDeployment.setStationLocation(location);
+		return newDeployment;
 	}
 }

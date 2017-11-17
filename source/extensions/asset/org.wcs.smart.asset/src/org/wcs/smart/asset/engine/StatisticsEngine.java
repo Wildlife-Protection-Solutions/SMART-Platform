@@ -38,6 +38,7 @@ import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Engine for compting asset deployment statistics.
@@ -132,8 +133,8 @@ public enum StatisticsEngine {
 		
 		for (Object item : data) {
 			Object[] items = (Object[])item;
-			UUID categoryUuid = (UUID)items[0];
-			Long cnt = (Long) items[1];
+			UUID categoryUuid = UuidUtils.byteToUUID((byte[])items[0]);
+			Integer cnt = (Integer) items[1];
 			
 			Category c = session.get(Category.class, categoryUuid);
 			
@@ -143,11 +144,11 @@ public enum StatisticsEngine {
 				if (value != null) {
 					value += cnt;
 				}else {
-					value = cnt;
+					value = cnt.longValue();
 				}
 				cnts.put(cc, value);
 				cc = cc.getParent();
-				cc.getParent().getFullCategoryName();
+				if (cc != null) cc.getFullCategoryName();
 			}
 		}
 		List<Category> allCategories = new ArrayList<>();
@@ -235,8 +236,8 @@ public enum StatisticsEngine {
 		
 		for (Object item : data) {
 			Object[] items = (Object[])item;
-			UUID categoryUuid = (UUID)items[0];
-			Long cnt = (Long) items[1];
+			UUID categoryUuid = UuidUtils.byteToUUID((byte[])items[0]);
+			Integer cnt = (Integer) items[1];
 			
 			Category c = session.get(Category.class, categoryUuid);
 			
@@ -246,11 +247,11 @@ public enum StatisticsEngine {
 				if (value != null) {
 					value += cnt;
 				}else {
-					value = cnt;
+					value = cnt.longValue();
 				}
 				cnts.put(cc, value);
 				cc = cc.getParent();
-				cc.getParent().getFullCategoryName();
+				if (cc != null) cc.getFullCategoryName();
 			}
 		}
 		List<Category> allCategories = new ArrayList<>();
@@ -337,8 +338,8 @@ public enum StatisticsEngine {
 		
 		for (Object item : data) {
 			Object[] items = (Object[])item;
-			UUID categoryUuid = (UUID)items[0];
-			Long cnt = (Long) items[1];
+			UUID categoryUuid = UuidUtils.byteToUUID((byte[])items[0]);
+			Integer cnt = (Integer) items[1];
 			
 			Category c = session.get(Category.class, categoryUuid);
 			
@@ -348,11 +349,11 @@ public enum StatisticsEngine {
 				if (value != null) {
 					value += cnt;
 				}else {
-					value = cnt;
+					value = cnt.longValue();
 				}
 				cnts.put(cc, value);
 				cc = cc.getParent();
-				cc.getParent().getFullCategoryName();
+				if (cc != null) cc.getFullCategoryName();
 			}
 		}
 		List<Category> allCategories = new ArrayList<>();

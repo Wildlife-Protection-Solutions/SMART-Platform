@@ -69,7 +69,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
@@ -80,7 +79,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
@@ -115,6 +113,7 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -194,13 +193,18 @@ public class AssetEditor extends EditorPart implements MapPart {
 				if (deploymentPage != null) {
 					deploymentPage.getModifiedDeployments().forEach(r->s.saveOrUpdate(r));
 				
+					s.flush();
 					for (AssetDeployment deploy : deploymentPage.getDeletedDeployments()) {
 						//delete deployment & all associated waypoints/observations
 						AssetDeployment d = s.get(AssetDeployment.class, deploy.getUuid());
-						for (AssetWaypoint aw : d.getAssetWaypoints()) {
-							s.delete(aw.getWaypoint());
+						List<AssetWaypoint> dd = new ArrayList<>(d.getAssetWaypoints());
+						d.getAssetWaypoints().clear();
+						for (AssetWaypoint aw : dd) {
+							Waypoint w = aw.getWaypoint();
 							s.delete(aw);
+							s.delete(w);
 						}
+						s.flush();
 						s.delete(d);
 					}
 				}
@@ -307,8 +311,6 @@ public class AssetEditor extends EditorPart implements MapPart {
 				}
 			});
 			
-			refreshStatus();
-			
 			lblAssetType.setText(asset.getAssetType().getName());
 			Image img = AWTSWTImageUtils.convertToSWTImage(asset.getAssetType().getIconAsImage());
 			lblAssetTypeImage.setImage(img);
@@ -328,7 +330,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 					new Object[] {"asset", asset},
 					new Object[] {"endDate", null}).uniqueResult();
 			}
-			if (currentPage != null) currentPage.initializePanel(activeDeployment);
+			//updating the currentPAge is covered by the refreshStatus
+			refreshStatus();
 			
 		}catch (Exception ex) {
 			AssetPlugIn.displayLog(ex.getMessage(), ex);

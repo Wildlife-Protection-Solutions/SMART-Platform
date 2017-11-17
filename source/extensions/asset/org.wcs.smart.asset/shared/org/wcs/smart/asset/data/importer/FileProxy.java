@@ -3,6 +3,7 @@ package org.wcs.smart.asset.data.importer;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,7 @@ public class FileProxy {
 	private Date imageDate;
 	private Double x;
 	private Double y;
-	private AssetDeployment deployment;
+//	private AssetDeployment deployment;
 	private Asset asset;
 	private AssetStation station;
 	private AssetStationLocation location;
@@ -116,7 +117,7 @@ public class FileProxy {
 	 */
 	public void setAsset(Asset asset) {
 		this.asset = asset;
-		this.deployment = null;
+//		this.deployment = null;
 	}
 	
 	/**
@@ -126,7 +127,12 @@ public class FileProxy {
 	public void setStationLocation(AssetStationLocation location) {
 		this.location = location;
 		this.station = location.getStation();
-		this.deployment = null;
+		
+		if (this.x == null || this.y == null) {
+			x = location.getX();
+			y = location.getY();
+		}
+//		this.deployment = null;
 	}
 	
 	/**
@@ -138,17 +144,17 @@ public class FileProxy {
 		
 		this.location = null;
 		this.station = station;
-		this.deployment = null;
+//		this.deployment = null;
 	}
 	
 	public Asset getAsset() {
 		return this.asset;
 	}
 	
-	public AssetDeployment getDeployment() {
-		return this.deployment;
-	}
-	
+//	public AssetDeployment getDeployment() {
+//		return this.deployment;
+//	}
+//	
 	public AssetStation getStation() {
 		return this.station;
 	}
@@ -165,7 +171,9 @@ public class FileProxy {
 		if (processingException != null) return false;
 		if (getAsset() == null) return false;
 		if (getImageDate() == null) return false;
-		if (getDeployment() == null) return false;
+//		if (getDeployment() == null) return false;
+		if (this.location == null) return false;
+		if (this.station == null) return false;
 		if (getX() == null) return false;
 		if (getY() == null) return false;
 		return true;
@@ -177,55 +185,47 @@ public class FileProxy {
 		if (getImageDate() == null) return "No date found";
 		if (getStation() == null) return "No station found";
 		if (getStationLocation() == null) return "No station location found";
-		if (getDeployment() == null) return "No depoyment found";
+//		if (getDeployment() == null) return "No depoyment found";
 		if (getX() == null || getY() == null) return "No position found";
 		return "";
 	}
 	
 	
-	public void updateAssetDeployment(Session session) {
-		AssetDeployment deploy = findAssetDepolyment(session);
-		if (deploy == null) {
-			this.deployment = null;
-		}else {
-			if (!deploy.getAsset().equals(asset)) throw new IllegalStateException("Asset Deployment found does not match asset identified in the file");
-			this.deployment = deploy;
-			this.location = deploy.getStationLocation();
-			this.station = deploy.getStationLocation().getStation();
-			
-			//ensure lazily loaded required fields
+	public void updateStationLocation(Session session, Collection<FileProxy> allFiles) {
+		updateStationLocationInternal(session, allFiles);
+		
+		//ensure lazily loaded required fields
+		if (location != null) {
 			location.getId();
-			station.getId();
-			
 			if (this.x == null || this.y == null) {
 				x = location.getX();
 				y = location.getY();
 			}
 		}
+		if (station != null) station.getId();
 	}
 	
 	
-	private AssetDeployment findAssetDepolyment(Session session) {
-		//an asset is required in all cases
-		if (asset == null) return null;
-		
-		//if we have an asset deployment we are done
-		if (deployment != null) return deployment;
-		
-		//if we have a location; then lets search for a deployment
-		//at this location
-		if (location != null) {
-			return findDeployment(location, session);
+	private void updateStationLocationInternal(Session session, Collection<FileProxy> allFiles) {
+		if (station != null && location != null) {
+			if (!location.getStation().equals(station)) {
+				//TODO: we have a problem
+				station = location.getStation();
+			}
+			return; //nothing to do
 		}
-		
-		//if we have a station; but no location we need to 
-		//find or create a location then find or create a deployment
-		
-		//we need an x&y to find a location
+		if (location != null && station == null) {
+			this.station = location.getStation();
+			return;
+		}
+
+		//we have a station & x,y to find location 
 		if (station != null && x != null && y != null) {
-			return findDeployment(station, session);
+			updateStationLocation(station, session);
+			return;
 		}else if (station != null) {
 			//we have a station but no position
+			return;
 		}
 		
 		//if all we have is a position we first search for a station
@@ -236,6 +236,12 @@ public class FileProxy {
 			List<AssetStation> stations = QueryFactory.buildQuery(session, AssetStation.class, 
 					new Object[] {"conservationArea", ca}).list();
 			
+			//add any other "new" stations to this search as well
+			for (FileProxy p : allFiles) {
+				if (!p.equals(this) && p.getStation() != null && !stations.contains(p.getStation())) {
+					stations.add(p.getStation());
+				}
+			}
 			AssetStation matching = null;
 			Coordinate imagePosition = new Coordinate(x,y);
 			Double bestDistance = null;
@@ -264,18 +270,16 @@ public class FileProxy {
 				matching.setX(x);
 				matching.setY(y);
 				matching.setConservationArea(ca);
-				matching.setId("**NEW STATION **"); //when we save we need to generate valid station ids
+				matching.setId("** NEW STATION **"); //when we save we need to generate valid station ids
 				matching.setLocations(new ArrayList<>());
-						
 			}
-			return findDeployment(matching, session);
+			this.station = matching;
+			updateStationLocation(matching, session);
 		}
-		return null;
-		
 	}
 	
 	
-	private AssetDeployment findDeployment(AssetStation station, Session session) {
+	private void updateStationLocation(AssetStation station, Session session) {
 		AssetStationLocation matching = null;
 		Coordinate imagePosition = new Coordinate(x,y);
 		Double bestDistance = null;
@@ -305,38 +309,10 @@ public class FileProxy {
 			matching.setAttributeValues(new ArrayList<>());
 			matching.setId("** NEW LOCATION **"); //TODO: when we save we need to generate valid id
 			matching.setX(x);
-			matching.setX(y);
+			matching.setY(y);
 			station.getLocations().add(matching);
 		}
-		return findDeployment(matching, session);
+		this.location = matching;
 	}
 
-		
-	private AssetDeployment findDeployment(AssetStationLocation location, Session session) {
-		List<AssetDeployment> currentDeployments = new ArrayList<>();
-		if (location.getUuid() != null) {
-			currentDeployments = QueryFactory.buildQuery(session, AssetDeployment.class, 
-				new Object[] {"asset", asset},
-				new Object[] {"stationLocation", location},
-				new Object[] {"endDate", null}).list();
-		}
-		
-		if (currentDeployments.size() > 1) {
-			//this is an error 
-			throw new IllegalStateException(MessageFormat.format("Multiple deployments active for asset {0}. This state is not valid", asset.getId() ));
-		}else if (currentDeployments.size() == 1) {
-			return currentDeployments.get(0);
-		}else {
-			//we need to create a new deployments
-			//TODO: we need to configure the start date correctly
-			AssetDeployment newDeployment = new AssetDeployment();
-			newDeployment.setAsset(asset);
-			newDeployment.setAssetWaypoints(new ArrayList<>());
-			newDeployment.setAttributeValues(new ArrayList<>());
-			newDeployment.setStartDate(new Date());
-			newDeployment.setEndDate(null);
-			newDeployment.setStationLocation(location);
-			return newDeployment;
-		}
-	}
 }

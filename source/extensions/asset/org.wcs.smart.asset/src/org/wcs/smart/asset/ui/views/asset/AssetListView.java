@@ -479,18 +479,29 @@ public class AssetListView {
 	private void deleteStations() {
 		//confirm password
 		Object s = ((IStructuredSelection)lstStations.getSelection()).getFirstElement();
-		if (!(s instanceof AssetStation)) return;
+		if (s instanceof AssetStation) {
 		
-		if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Station", 
-				MessageFormat.format("Are you sure you want to delete the station {0}?  All data (images, waypoints, observations) will also be deleted", ((AssetStation)s).getId()))){
+			if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Station", 
+					MessageFormat.format("Are you sure you want to delete the station {0}?  All data (images, waypoints, observations) will also be deleted", ((AssetStation)s).getId()))){
+				return;
+			}
+		}else if (s instanceof AssetStationLocation) {
+			if (!MessageDialog.openQuestion(context.get(Shell.class), "Delete Station Location", 
+					MessageFormat.format("Are you sure you want to delete the station location {0}?  All data (images, waypoints, observations) will also be deleted", ((AssetStationLocation)s).getId()))){
+				return;
+			}
+		}else {
 			return;
 		}
 		
-		if (!AssetUtils.confirmPassword(context.get(Shell.class), "Delete Station", "Confirm your password to delete the station and associated data.")) {
+		if (!AssetUtils.confirmPassword(context.get(Shell.class), "Delete", "Confirm your password to delete the station or location and associated data.")) {
 			return;
 		}
-
-		StationManager.INSTANCE.deleteStation((AssetStation)s, context.get(IEventBroker.class));
+		if (s instanceof AssetStation) {
+			StationManager.INSTANCE.deleteStation((AssetStation)s, context.get(IEventBroker.class));
+		}else if (s instanceof AssetStationLocation) {
+			StationManager.INSTANCE.deleteStationLocation((AssetStationLocation)s, context.get(IEventBroker.class));
+		}
 	}
 	
 	@Optional
@@ -508,6 +519,12 @@ public class AssetListView {
 	@Optional
 	@Inject
 	public void stationsModified(@UIEventTopic(AssetEvents.ASSETSTATION_ALL) Object payLoad) {
+		loadStations(250);
+	}
+	
+	@Optional
+	@Inject
+	public void stationlocationModified(@UIEventTopic(AssetEvents.ASSETSTATIONLOCATION_ALL) Object payLoad) {
 		loadStations(250);
 	}
 	

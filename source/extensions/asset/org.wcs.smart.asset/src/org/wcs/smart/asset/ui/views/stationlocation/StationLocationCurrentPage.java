@@ -225,7 +225,16 @@ public class StationLocationCurrentPage {
 		mapViewer = new MapViewer(mapComposite, SWT.SINGLE | SWT.DOUBLE_BUFFERED);
 		mapViewer.setMap(ProjectFactory.eINSTANCE.createMap());
 		mapViewer.init(parentEditor);
-		LoadDefaultLayersJob basemap = new LoadDefaultLayersJob(mapViewer.getMap(), false);
+		LoadDefaultLayersJob basemap = new LoadDefaultLayersJob(mapViewer.getMap(), false) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus s = super.run(monitor);
+				
+				SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(drawCommand.getBounds());
+				getMapViewer().getMap().executeSyncWithoutUndo(cmd);
+				return s;
+			}
+		};
 		basemap.schedule();
 		
 		

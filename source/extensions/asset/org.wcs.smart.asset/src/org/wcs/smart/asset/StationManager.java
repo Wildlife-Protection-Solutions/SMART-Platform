@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.asset;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.ScrollableResults;
@@ -72,6 +74,32 @@ public enum StationManager {
 		broker.post(AssetEvents.ASSETSTATION_DELETE, Collections.singletonList(station));
 	}
 	
+
+	/**
+	 * Deletes the station location and all data associated with the station location. This will delete
+	 * waypoints so the provided session should be opened with the AttachmentInterceptor
+	 * 
+	 * @param type
+	 * @param session
+	 * @throws Exception
+	 */
+	public void deleteStationLocation(AssetStationLocation location, IEventBroker broker){
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
+			session.beginTransaction();
+			try {
+				deleteStationLocation(location, session);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				AssetPlugIn.displayLog("Unable to delete station location: " + ex.getMessage(), ex);
+				session.getTransaction().rollback();
+				return;
+			}
+		}
+		//TODO: we may want to fire asset changed listeners here
+		//if an asset deployment is deleted to refresh other views
+		broker.post(AssetEvents.ASSETSTATIONLOCATION_DELETE, Collections.singletonList(location));
+	}
+	
 	/**
 	 * Deletes the station and all data associated with the station. This will delete
 	 * waypoints so the provided session should be opened with the AttachmentInterceptor
@@ -88,22 +116,46 @@ public enum StationManager {
 		
 		if (station.getLocations() != null) {
 			for (AssetStationLocation loc : station.getLocations() ) {
-				try(ScrollableResults scroll = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"stationLocation", loc}).scroll()){
-					while(scroll.next()) {
-						AssetDeployment d  = (AssetDeployment)scroll.get(0);
-						for (AssetWaypoint w : d.getAssetWaypoints()) {
-							session.delete(w.getWaypoint());
-							session.delete(w);
-						}
-						session.delete(d);
-					}
-					
-				}
-				session.flush();
+				deleteLocationWaypoints(session, loc);
 			}
 		}
 		
 		session.delete(station);
 	}
 	
+	/**
+	 * Deletes the station location and all data associated with the station location. This will delete
+	 * waypoints so the provided session should be opened with the AttachmentInterceptor
+	 * 
+	 * @param type
+	 * @param session
+	 * @throws Exception
+	 */
+	private void deleteStationLocation(AssetStationLocation location, Session session) throws Exception{
+		//delete all data associated with the station
+		
+		location = session.get(AssetStationLocation.class,  location.getUuid());
+		if (location == null) return;
+		
+		deleteLocationWaypoints(session, location);
+		
+		session.flush();
+		session.delete(location);
+	}
+	
+	private void deleteLocationWaypoints(Session session, AssetStationLocation location) {
+		try(ScrollableResults scroll = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"stationLocation", location}).scroll()){
+			while(scroll.next()) {
+				AssetDeployment d  = (AssetDeployment)scroll.get(0);
+				List<AssetWaypoint> dd = new ArrayList<>(d.getAssetWaypoints());
+				d.getAssetWaypoints().clear();
+				for (AssetWaypoint w : dd) {
+					session.delete(w);
+					session.delete(w.getWaypoint());
+				}
+				session.delete(d);
+				session.flush();
+			}
+		}
+	}
 }
