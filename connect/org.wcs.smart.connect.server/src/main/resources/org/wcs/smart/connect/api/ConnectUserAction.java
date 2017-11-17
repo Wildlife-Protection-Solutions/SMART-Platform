@@ -123,7 +123,7 @@ public class ConnectUserAction extends HttpServlet {
 		ArrayList<UUID> items = new ArrayList<UUID>();
 		List<SmartUserAction> actions = QueryFactory.buildQuery(s, SmartUserAction.class, "username", request.getUserPrincipal().getName()).list(); //$NON-NLS-1$
 		for (SmartUserAction a : actions){
-			if(a.getAction().equals(CaAdminAccountAction.KEY)){
+			if(a.getAction().equals(CaAdminAccountAction.KEY) && a.getResource() != null){
 				items.add(a.getResource());	
 			}
 		}

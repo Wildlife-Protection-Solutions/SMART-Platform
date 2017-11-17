@@ -136,7 +136,8 @@ public enum SecurityManager {
 	}
 	
 	/**
-	 * 
+	 * check whether there is at least one resource this user can access to
+	 * OR associated with a role with access to at least one, so we can show the menu/button/etc if they have at least partial access and hide it otherwise.  
 	 */
 	public boolean canAccessAtLeastOneResouce(Session s, String username, String action){
 		//ensure the user is active
@@ -161,7 +162,26 @@ public enum SecurityManager {
 		}
 		c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
 		Long cnt = s.createQuery(c).uniqueResult();
-		if (cnt == 0){
+		
+		
+		//check if they have permission from a role
+		String queryString = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
+		queryString += "WHERE a.role = role AND a.action = :adminAction AND r.id.username = '" + username + "'"; //$NON-NLS-1$
+		Query<?> q= s.createQuery(queryString);
+		q.setParameter("adminAction", action); //$NON-NLS-1$
+		Long roleCnt = (Long) q.uniqueResult();
+		
+		Long adminCnt = (long) 0;
+		if(!action.equals(AdminAccountAction.KEY) && !action.equals(CaAdminAccountAction.KEY) ){ //if we are asking specifically about admin or caAdmin users (probably the menu filter) don't add this, or else it will return true for admin and caAdmin regardless
+			String queryString2 = "SELECT count(*) FROM SmartUserRole r join r.id.role as role, SmartRoleAction a  "; //$NON-NLS-1$
+			queryString2 += "WHERE a.role = role AND a.action = :adminAction AND r.id.username = :username"; //$NON-NLS-1$
+			Query<?> q2= s.createQuery(queryString2);
+			q2.setParameter("adminAction", AdminAccountAction.KEY); //$NON-NLS-1$
+			q2.setParameter("username", username); //$NON-NLS-1$
+			adminCnt = (Long) q2.uniqueResult();
+		}
+		
+		if (cnt == 0 && roleCnt == 0 && adminCnt == 0){
 			return false;
 		}else{
 			return true;
