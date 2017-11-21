@@ -282,6 +282,7 @@ public class TreeDropDown{
 	 * Hides the dialog
 	 */
 	public void hide(){
+		if (main == null || main.isDisposed()) return;
 		main.setVisible(false);
 	}
 	
