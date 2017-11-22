@@ -21,16 +21,9 @@ public class ImportDataHandler {
 	
 	public void execute() {
 		
-		FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.MULTI | SWT.OPEN);
-		if (fd.open() == null) return;
 		
 		
-		List<Path> paths = new ArrayList<>();
-		for (String file : fd.getFileNames()) {
-			paths.add(Paths.get(fd.getFilterPath(), file));
-		}
-		
-		DataImporterInput input = new DataImporterInput(paths);
+		DataImporterInput input = new DataImporterInput();
 		
 		try {			
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, DataImporterView.ID);

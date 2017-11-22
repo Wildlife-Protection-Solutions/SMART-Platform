@@ -132,6 +132,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 	private Composite detailsPanel;
 	private Composite deploymentPanel;
 	private Composite eventsPanel;
+	private Composite dataPanel;
 	
 	private boolean isDirty;
 	
@@ -159,6 +160,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 
 	private AssetDeploymentPage deploymentPage;
 	private AssetCurrentPage currentPage;
+	private AssetDataPage dataPage;
 	private Composite sectionBody;
 	
 	@Override
@@ -463,7 +465,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		lblAssetType = toolkit.createLabel(headerComp, "");
 				
 		
-		String headers[] = new String[] {"Current Status", "Properties", "Deployments", "History"};
+		String headers[] = new String[] {"Current Status", "Properties", "Deployments", "Data", "History"};
 		Listener[] actions = new Listener[] {
 			event->{
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
@@ -476,6 +478,10 @@ public class AssetEditor extends EditorPart implements MapPart {
 			event->{
 				if (deploymentPanel == null) deploymentPanel = createDeploymentsSection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = deploymentPanel;
+				sectionBody.layout(true);},
+			event->{
+				if (dataPanel == null) dataPanel = createDataSection(sectionBody);
+				((StackLayout)sectionBody.getLayout()).topControl = dataPanel;
 				sectionBody.layout(true);},
 			event->{
 				if (eventsPanel == null) eventsPanel = createHistorySection(sectionBody);
@@ -512,6 +518,20 @@ public class AssetEditor extends EditorPart implements MapPart {
 		return panel;
 		
 	}
+	private Composite createDataSection(Composite parent) {
+		Composite panel = toolkit.createComposite(parent);
+		panel.setLayout(new GridLayout());
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
+		
+		dataPage = new AssetDataPage(this);
+		ContextInjectionFactory.inject(dataPage, parentContext);
+		dataPage.createDataSection(panel, toolkit);
+		
+		return panel;
+	}
+	
 	private Composite createCurrentSection(Composite parent) {
 		Composite panel = toolkit.createComposite(parent);
 		panel.setLayout(new GridLayout());

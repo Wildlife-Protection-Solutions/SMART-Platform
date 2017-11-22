@@ -42,9 +42,18 @@ public class FileProcessor {
 	
 	private ConservationArea ca;
 	
-	public FileProcessor(ConservationArea ca, List<Path> files) {
+	public FileProcessor(ConservationArea ca) {
 		this.ca = ca;
-		this.files = files;
+		this.files = new ArrayList<>();
+		fileDetails = new HashMap<>();
+	}
+	
+	public boolean addFile(Path toAdd) {
+		if (!files.contains(toAdd)) {
+			files.add(toAdd);
+			return true;
+		}
+		return false;
 	}
 	
 	public void processFiles(IProgressMonitor monitor) {
@@ -53,13 +62,13 @@ public class FileProcessor {
 		monitor.beginTask("Processing Asset Files", files.size());
 		files.forEach(f->{
 			monitor.subTask(f.toString());
-			processFile(f, ca);	
+			processFile(f);	
 			monitor.worked(1);
 			if (monitor.isCanceled()) return;
 		});
 	}
 	
-	public void processFile(Path file, ConservationArea ca) {
+	public void processFile(Path file) {
 		try {
 			FileProxy proxy = FileMetadataReader.readFile(file, ca);
 			try(Session session = HibernateManager.openSession()){

@@ -91,9 +91,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class AssetCurrentPage {
 
 	private static final String HL_UUID_KEY = "uuid";
-	private static int LOCATION_RADIUS = 5;
-	private static int STATION_RADIUS = 10;
-	
+
 	@Inject
 	private IEclipseContext parentContext;
 	private AssetEditor parentEditor;

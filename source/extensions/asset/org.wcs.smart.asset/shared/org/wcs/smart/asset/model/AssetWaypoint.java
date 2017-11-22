@@ -90,7 +90,7 @@ public class AssetWaypoint {
 	}
 	
 	@Embeddable
-	private static class AssetWaypointPk implements Serializable{
+	public static class AssetWaypointPk implements Serializable{
 		/**
 		 * 
 		 */

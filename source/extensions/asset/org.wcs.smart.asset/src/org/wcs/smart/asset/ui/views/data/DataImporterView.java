@@ -1,11 +1,13 @@
 package org.wcs.smart.asset.ui.views.data;
 
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,6 +24,8 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -45,19 +49,25 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.internal.SharedImages;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -104,20 +114,19 @@ public class DataImporterView extends EditorPart{
 	private Label lblDetailsFileName; 
 	private Label lblDetailsStatus ;
 	private Canvas imageCanvas;
-	private Composite statusSection;
 	private Composite proxyDetailsComp; 
 	private IEclipseContext context;
 	private Label fileCnt;
 	
+	private ToolItem itemSaveAll;
+	private ToolItem itemSave;
+	private ToolItem itemDelete;
+	
 	private List<Asset> selectedAssets = new ArrayList<>();
 	private List<AssetStationLocation> selectedLocations = new ArrayList<>();
-	
-	private boolean wasProcessed = false;
-	
+		
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		
-		
 	}
 
 	@Override
@@ -125,103 +134,124 @@ public class DataImporterView extends EditorPart{
 	}
 
 	
-	private void save(List<FileProxy> items) {
+	private void save(Collection<FileProxy> toSave) {
 		Set<AssetStation> modifiedStations = new HashSet<>();
 		Set<Asset> modifiedAssets = new HashSet<>();
 		
-		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
-			session.beginTransaction();
-			try {
-				int i = 0; 
-				for (FileProxy p : items) {
-					System.out.println(i + " / " + items.size());
-					i++;
-					
-					boolean isNewStation = p.getStation().getUuid() == null;
-					boolean isNewLocation = p.getStationLocation().getUuid() == null;
-					
-					if (isNewStation) {
-						p.getStation().setId(generateStationId(session));
-						if (p.getStation().getX() == null) p.getStation().setX(p.getX());
-						if (p.getStation().getY() == null) p.getStation().setY(p.getY());
-						session.save(p.getStation());
-					}
-					
-					if (isNewLocation) {
-						p.getStationLocation().setId(generateLocationId(p.getStation(), session));
-						if (p.getStationLocation().getX() == null) p.getStationLocation().setX(p.getX());
-						if (p.getStationLocation().getY() == null) p.getStationLocation().setY(p.getY());
-						session.save(p.getStationLocation());
-					}
-					session.flush();
-					
-					Waypoint wp = new Waypoint();
-					wp.setConservationArea(SmartDB.getCurrentConservationArea());
-					wp.setDateTime(p.getImageDate());
-					wp.setId(1);
-					wp.setSourceId(AssetWaypointSource.KEY);
-					wp.setX(p.getX());
-					wp.setY(p.getY());
-					wp.setAttachments(new ArrayList<>());
-					
-					WaypointAttachment wa = new WaypointAttachment();
-					wa.setWaypoint(wp);
-					wa.setCopyFromLocation(p.getFile().toFile());
-					wa.setFilename(p.getFile().getFileName().toString());
-					wp.getAttachments().add(wa);
-					wp.setObservations(new ArrayList<>());
-					
-					for (WaypointObservation wo : p.getObservations()) {
-						wo.setWaypoint(wp);
-						wp.getObservations().add(wo);
-					}
-					
-					session.save(wp);
-					session.flush();
-					
-					AssetDeployment d = processor.findAssetDeployment(wp, p.getAsset(), p.getStationLocation(), session);
-					if (d.getUuid() == null) {
-						session.save(d);
-					}
-					session.flush();
-					
-					AssetWaypoint aw = new AssetWaypoint();
-					aw.setWaypoint(wp);
-					aw.setAssetDeployment(d);
-					if (d.getAssetWaypoints() == null) d.setAssetWaypoints(new ArrayList<>());
-					d.getAssetWaypoints().add(aw);
-					session.save(aw);
-					
-					//TODO: verify we do not have overlapping deployments
-					if (d.getEndDate() == null) {
-						//ensure we have no other deployments that also have no end date
-					}else {
-						//ensure there are no other deployments whose start date is before this end date
-					}
-					
-					//ensure there are no other deployments whose end date is before this start date
-					
-					session.flush();
-					
-					modifiedStations.add(p.getStation());
-					modifiedAssets.add(d.getAsset());
-				}
-				session.getTransaction().commit();
-			}catch (Exception ex){
-				session.getTransaction().rollback();
-				AssetPlugIn.displayLog("Error saving items: {0}" + ex.getMessage(), ex);
-				return;
-			}
+		//cannot save if not valid
+		for (FileProxy p : toSave) {
+			if (!p.isValid()) return;
 		}
-		items.forEach(e->processor.removeFile(e));
 		
-		//clear deployments & recompute deployments and refresh table
-		processor.getFileDetails().forEach(e->e.setAsset(e.getAsset()));
-		refreshProxies(processor.getFileDetails());
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
+		try {
+		pmd.run(true, false,  new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				monitor.beginTask("Importing files", toSave.size() + 1);
+				List<FileProxy> items = new ArrayList<FileProxy>(toSave);
+				try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
+					session.beginTransaction();
+					try {
+						for (FileProxy p : items) {
+							monitor.subTask(p.getFile().toString());
+							boolean isNewStation = p.getStation().getUuid() == null;
+							boolean isNewLocation = p.getStationLocation().getUuid() == null;
+							
+							if (isNewStation) {
+								p.getStation().setId(generateStationId(session));
+								if (p.getStation().getX() == null) p.getStation().setX(p.getX());
+								if (p.getStation().getY() == null) p.getStation().setY(p.getY());
+								session.save(p.getStation());
+							}
+							
+							if (isNewLocation) {
+								p.getStationLocation().setId(generateLocationId(p.getStation(), session));
+								if (p.getStationLocation().getX() == null) p.getStationLocation().setX(p.getX());
+								if (p.getStationLocation().getY() == null) p.getStationLocation().setY(p.getY());
+								session.save(p.getStationLocation());
+							}
+							session.flush();
+							
+							Waypoint wp = new Waypoint();
+							wp.setConservationArea(SmartDB.getCurrentConservationArea());
+							wp.setDateTime(p.getImageDate());
+							wp.setId(1);
+							wp.setSourceId(AssetWaypointSource.KEY);
+							wp.setX(p.getX());
+							wp.setY(p.getY());
+							wp.setAttachments(new ArrayList<>());
+							
+							WaypointAttachment wa = new WaypointAttachment();
+							wa.setWaypoint(wp);
+							wa.setCopyFromLocation(p.getFile().toFile());
+							wa.setFilename(p.getFile().getFileName().toString());
+							wp.getAttachments().add(wa);
+							wp.setObservations(new ArrayList<>());
+							
+							for (WaypointObservation wo : p.getObservations()) {
+								wo.setWaypoint(wp);
+								wp.getObservations().add(wo);
+							}
+							
+							session.save(wp);
+							session.flush();
+							
+							AssetDeployment d = processor.findAssetDeployment(wp, p.getAsset(), p.getStationLocation(), session);
+							if (d.getUuid() == null) {
+								session.save(d);
+							}
+							session.flush();
+							
+							AssetWaypoint aw = new AssetWaypoint();
+							aw.setWaypoint(wp);
+							aw.setAssetDeployment(d);
+							if (d.getAssetWaypoints() == null) d.setAssetWaypoints(new ArrayList<>());
+							d.getAssetWaypoints().add(aw);
+							session.save(aw);
+							
+							//TODO: verify we do not have overlapping deployments
+							if (d.getEndDate() == null) {
+								//ensure we have no other deployments that also have no end date
+							}else {
+								//ensure there are no other deployments whose start date is before this end date
+							}
+							
+							//ensure there are no other deployments whose end date is before this start date
+							
+							session.flush();
+							
+							modifiedStations.add(p.getStation());
+							modifiedAssets.add(d.getAsset());
+							monitor.worked(1);
+						}
+						monitor.subTask("Saving to database...");
+						session.getTransaction().commit();
+					}catch (Exception ex){
+						session.getTransaction().rollback();
+						AssetPlugIn.displayLog("Error saving asset files: {0}" + ex.getMessage(), ex);
+						return;
+					}
+				}
+				
+				monitor.subTask("Updating UI...");
+				items.forEach(e->processor.removeFile(e));
+				Display.getDefault().syncExec(()->{
+					//clear deployments & recompute deployments and refresh table
+					refreshProxies();
 
-		//fire events
-		context.get(IEventBroker.class).post(AssetEvents.ASSET_MODIFIED, modifiedAssets);
-		context.get(IEventBroker.class).post(AssetEvents.ASSETSTATION_MODIFIED, modifiedStations);
+					//fire events
+					context.get(IEventBroker.class).post(AssetEvents.ASSET_MODIFIED, modifiedAssets);
+					context.get(IEventBroker.class).post(AssetEvents.ASSETSTATION_MODIFIED, modifiedStations);
+				});
+				monitor.worked(1);
+			}
+		});
+		}catch (Exception ex) {
+			AssetPlugIn.displayLog("Error importing asset files: " + ex.getMessage(), ex);
+		}
+	
 	}
 	
 	private String generateStationId(Session session) {
@@ -259,7 +289,7 @@ public class DataImporterView extends EditorPart{
 		setInput(input);
 		setSite(site);
 		context = (IEclipseContext) getSite().getService(IEclipseContext.class);
-		processor = new FileProcessor(SmartDB.getCurrentConservationArea(), ((DataImporterInput)input).getFiles());
+		processor = new FileProcessor(SmartDB.getCurrentConservationArea());
 	}
 
 	@Override
@@ -294,8 +324,56 @@ public class DataImporterView extends EditorPart{
 		((GridLayout)main.getLayout()).marginWidth = 0;
 		((GridLayout)main.getLayout()).marginHeight = 0;
 		
-		fileCnt = toolkit.createLabel(main, "");
-		fileCnt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Composite topPart = new Composite(main, SWT.NONE);
+		topPart.setLayout(new GridLayout(2, false));
+		topPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)topPart.getLayout()).marginWidth = 0;
+		((GridLayout)topPart.getLayout()).marginHeight = 0;
+		
+		ToolBar tb = new ToolBar(topPart, SWT.FLAT);
+		toolkit.adapt(tb);
+		
+		ToolItem itemAdd = new ToolItem(tb, SWT.PUSH);
+		itemAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		itemAdd.setToolTipText("Add files to import");
+		itemAdd.addListener(SWT.Selection, e->{
+			FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.MULTI | SWT.OPEN);
+			if (fd.open() == null) return;
+			List<Path> paths = new ArrayList<>();
+			for (String file : fd.getFileNames()) {
+				Path temp = Paths.get(fd.getFilterPath(), file);
+				if (processor.addFile(temp)) {
+					paths.add(temp);
+				}
+			}
+			processFiles(paths);
+		});
+		itemDelete = new ToolItem(tb, SWT.PUSH);
+		itemDelete.setEnabled(false);
+		itemDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		itemDelete.setToolTipText("Remove file from import list");
+		itemDelete.addListener(SWT.Selection,e->{
+			removeFile();
+		});
+		
+		new ToolItem(tb,  SWT.SEPARATOR);
+		
+		itemSaveAll = new ToolItem(tb, SWT.PUSH);
+		itemSaveAll.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEALL_EDIT));
+		itemSaveAll.setToolTipText("Save all files to the database");
+		itemSaveAll.setEnabled(false);
+		itemSaveAll.addListener(SWT.Selection, e->save(processor.getFileDetails()));
+		
+		itemSave = new ToolItem(tb, SWT.PUSH);
+		itemSave.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		itemSave.setToolTipText("Save selected files to the database");
+		itemSave.setEnabled(false);
+		itemSave.addListener(SWT.Selection, e->save(getSelection()));
+		
+		new ToolItem(tb,  SWT.SEPARATOR);
+		
+		fileCnt = toolkit.createLabel(topPart, "");
+		fileCnt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		details = toolkit.createComposite(main);
 		details.setLayout(new GridLayout());
@@ -304,58 +382,25 @@ public class DataImporterView extends EditorPart{
 		((GridLayout)details.getLayout()).marginHeight = 0;
 		
 		updateFileCount();
-		createProcessComposite(false);
 	}
 	
 	private void updateFileCount() {
 		fileCnt.setText(MessageFormat.format("Number of Files: {0}",processor.getFiles().size()));
 	}
-	
-	private void createProcessComposite(boolean isCancelled) {
-		for (Control c : details.getChildren()) c.dispose();
-		
-		if (isCancelled) {
-			toolkit.createLabel(details, "Processing cancelled");
-		}
-		
-		Button btnProcessFiles = toolkit.createButton(details, "Process Files",  SWT.PUSH);
-		btnProcessFiles.addListener(SWT.Selection, e->processFiles());
-		details.layout(true);
-		
-		setDirty(false);
-	}
 
 	private void updateStatus() {
 		boolean isValid = processor.isValid();
-		Boolean lastState = ((Boolean)statusSection.getData("LAST_STATUS"));
-		//status not changed
-		if ( lastState != null && lastState == isValid ) return;
-		
-		for (Control c : statusSection.getChildren()) c.dispose();
-		
-		if (isValid) {
-			Button btnSave = toolkit.createButton(statusSection, "Load", SWT.PUSH);
-			Label l = toolkit.createLabel(statusSection, "Data processed and ready for loading");
-			l.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
+		if (isValid && !processor.getFiles().isEmpty()) {
+			itemSaveAll.setEnabled(true);
+			itemSaveAll.setToolTipText("Save all files to database");
 		}else {
-			Label statusImage = toolkit.createLabel(statusSection, "");
-			statusImage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
-			
-			Label statusMsg = toolkit.createLabel(statusSection, "Data processing not complete.  You must ensure row in the table below are complete before you can continue.");
-			statusMsg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			itemSaveAll.setEnabled(false);
+			itemSaveAll.setToolTipText("Data processing not complete.  You must ensure all rows in the table below are complete before you can save all");
 		}
-		statusSection.getParent().layout(true);
-		statusSection.setData("LAST_STATUS", isValid);
 	}
 	
 	private void createFileSummary() {
 		for (Control c : details.getChildren()) c.dispose();
-		
-		// status section
-		statusSection = toolkit.createComposite(details, SWT.BORDER);
-		statusSection.setLayout(new GridLayout(2, false));
-		statusSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
 		
 		//main section
 		SashForm sash = new SashForm(details, SWT.HORIZONTAL);
@@ -381,23 +426,7 @@ public class DataImporterView extends EditorPart{
 		tblResults.setContentProvider(ArrayContentProvider.getInstance());
 		tblResults.setInput(processor.getFileDetails());
 		tblResults.addSelectionChangedListener(e->updateFileDetails());
-		
-		Hyperlink reprocess = toolkit.createHyperlink(leftPart, "Reprocess files", SWT.NONE);
-		reprocess.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-			}
 			
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				processFiles();
-			}
-		});
-		
 		Menu mnu = new Menu(tblResults.getControl());
 		tblResults.getControl().setMenu(mnu);
 		
@@ -659,7 +688,7 @@ public class DataImporterView extends EditorPart{
 		imageCanvas = new Canvas(detailsSash,SWT.BORDER);
 		imageCanvas.addListener(SWT.Paint, e->{
 			Image img = (Image)imageCanvas.getData("IMAGE");
-			if (img == null) return;
+			if (img == null || img.isDisposed()) return;
 			
 			Rectangle bounds = img.getBounds();
 			Rectangle cbounds = imageCanvas.getBounds();	
@@ -731,7 +760,7 @@ public class DataImporterView extends EditorPart{
 		proxies.forEach(proxy->{
 				proxy.setAsset(newAsset);
 		});
-		refreshProxies(proxies);
+		refreshProxies();
 	}
 	
 	private <T> void addToQueue(List<T> items, T item) {
@@ -768,7 +797,7 @@ public class DataImporterView extends EditorPart{
 		proxies.forEach(proxy->{
 				proxy.setStationLocation(newLocation);
 		});
-		refreshProxies(proxies);
+		refreshProxies();
 	}
 	
 	private void setDateTime() {
@@ -790,7 +819,7 @@ public class DataImporterView extends EditorPart{
 		if (dialog.open() == StationAssetSelectionDialog.CANCEL) return;
 		
 		proxies.forEach(p->p.setImageDate(dialog.getSelectedDate()));
-		refreshProxies(proxies);
+		refreshProxies();
 	}
 	
 	private void removeFile() {
@@ -800,43 +829,56 @@ public class DataImporterView extends EditorPart{
 		
 		List<FileProxy> files = getSelection();
 		files.forEach(f->processor.removeFile(f));
-		refreshProxies(Collections.emptyList());
+		refreshProxies();
 	}
 	
-	private void refreshProxies(final Collection<FileProxy> proxies) {
-		Job refreshJob = new Job("refresh table") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-//				try(Session session = HibernateManager.openSession()){
-//					proxies.forEach(p->p.updateAssetDeployment(session, processor.getFileDetails()));
-//				}
-				Display.getDefault().syncExec(()->{
-					tblResults.refresh();
-					updateStatus();
-					updateFileDetails();
-					updateFileCount();
-				});
-				return Status.OK_STATUS;
-			}
-		};
-		refreshJob.schedule();
+	private void refreshProxies() {
+		tblResults.refresh();
+		updateStatus();
+		updateFileDetails();
+		updateFileCount();
 		
+		updateFileDetails();
 	}
 	
 	private void updateFileDetails() {
-		Object selection = ((IStructuredSelection)tblResults.getSelection()).getFirstElement();
-		if (selection == null) return;
-		if (!(selection instanceof FileProxy)) return;
+		itemDelete.setEnabled(!tblResults.getSelection().isEmpty());
+		
+		boolean canSave = !tblResults.getStructuredSelection().isEmpty();
+		for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
+			Object item = (Object) iterator.next();
+			if (item instanceof FileProxy && !((FileProxy) item).isValid()) {
+				canSave = false;
+			}
+		}
+		itemSave.setEnabled(canSave);
+		
+		//clear existing
+		if (proxyDetailsComp.isDisposed()) return;
+		for (Control c : proxyDetailsComp.getChildren()) c.dispose();
+		tblExif.setInput(null);
+		
+		Image lastImage = (Image) imageCanvas.getData("IMAGE");
+		if (lastImage != null && !lastImage.isDisposed()) lastImage.dispose();
+		imageCanvas.redraw();
+				
+		Object selection = tblResults.getStructuredSelection().getFirstElement();
+		if (selection == null) {
+			lblDetailsFileName.setText( "" );
+			lblDetailsStatus.setImage( null );
+			return;
+		}
+		if (!(selection instanceof FileProxy)) {
+			lblDetailsFileName.setText( "" );
+			lblDetailsStatus.setImage( null );
+			return;
+		}
 		
 		FileProxy proxy = (FileProxy)selection;
 		
 		lblDetailsFileName.setText(proxy.getFile().getFileName().toString());
 		lblDetailsStatus.setImage( AssetPlugIn.getDefault().getImageRegistry().get(  proxy.isValid() ? AssetPlugIn.ICON_IMPORT_COMPLETE : AssetPlugIn.ICON_IMPORT_INCOMPLETE));
 		if (!proxy.isValid()) lblDetailsStatus.setToolTipText(proxy.validMessage());
-		
-		if (proxyDetailsComp.isDisposed()) return;
-		for (Control c : proxyDetailsComp.getChildren()) c.dispose();
 		
 		ScrolledComposite scroll = new ScrolledComposite(proxyDetailsComp, SWT.V_SCROLL | SWT.H_SCROLL);
 		scroll.setExpandHorizontal(true);
@@ -926,7 +968,7 @@ public class DataImporterView extends EditorPart{
 		scroll.setMinSize(bits.computeSize(SWT.DEFAULT,  SWT.DEFAULT));
 		proxyDetailsComp.layout(true);
 		
-		tblExif.setInput(null);
+		
 
 		Job j2 = new Job("read exif metadata") {
 
@@ -983,31 +1025,29 @@ public class DataImporterView extends EditorPart{
 		
 		fileDetailsComposite.layout(true);
 	}
-	
-	
-	private void processFiles() {
-		if (wasProcessed) {
-			//TODO: validate with user
-		}
-		wasProcessed = true;
+		
+	private void processFiles(List<Path> files) {
 		for (Control c : details.getChildren()) c.dispose();
 		
 		ProgressAreaComposite progressComp = new ProgressAreaComposite(details);
 		final IProgressMonitor pmonitor = progressComp.createProgressMonitor();
 		details.layout(true);
-		
 		Job processingJob = new Job("processing asset files") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				
-				processor.processFiles(pmonitor);
-				if (monitor.isCanceled()) {
-					Display.getDefault().syncExec(()->{createProcessComposite(true);});
+				pmonitor.beginTask("Processing new files", files.size());
+				for (Path f : files) {
+					pmonitor.subTask(f.toString());
+					processor.processFile(f);
+					pmonitor.worked(1);
+				}
+				if (pmonitor.isCanceled()) {
+//					Display.getDefault().syncExec(()->{createProcessComposite(true);});
+					//TODO: cancelled
 					return Status.CANCEL_STATUS;
 				}
 				Display.getDefault().syncExec(()->{createFileSummary();});
-
 				return Status.OK_STATUS;
 			}
 			

@@ -9,14 +9,7 @@ import org.eclipse.ui.IPersistableElement;
 
 public class DataImporterInput implements IEditorInput{
 
-	private List<Path> files;
-	
-	public DataImporterInput(List<Path> files) {
-		this.files = files;
-	}
-	
-	public List<Path> getFiles(){
-		return this.files;
+	public DataImporterInput() {
 	}
 	
 	@Override
@@ -47,6 +40,12 @@ public class DataImporterInput implements IEditorInput{
 	@Override
 	public String getToolTipText() {
 		return null;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other.getClass() == getClass()) return true;
+		return false;
 	}
 
 }
