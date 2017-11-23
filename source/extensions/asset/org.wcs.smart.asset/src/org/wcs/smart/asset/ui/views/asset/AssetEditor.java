@@ -326,13 +326,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 			initializeEventsPanel(asset);
 			if (deploymentPage != null) deploymentPage.initializePanel(asset); 
 			
-			AssetDeployment activeDeployment = null;
-			if (asset.getUuid() != null) {
-				activeDeployment = QueryFactory.buildQuery(session, AssetDeployment.class, 
-					new Object[] {"asset", asset},
-					new Object[] {"endDate", null}).uniqueResult();
-			}
-			//updating the currentPAge is covered by the refreshStatus
+			//updating the currentPage is covered by the refreshStatus
 			refreshStatus();
 			
 		}catch (Exception ex) {

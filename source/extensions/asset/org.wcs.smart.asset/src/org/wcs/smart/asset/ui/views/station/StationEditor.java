@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -41,6 +42,7 @@ import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.EventHandler;
+import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.Asset;
@@ -64,11 +66,13 @@ public class StationEditor extends EditorPart implements MapPart {
 	private Composite locationsPanel;
 	private Composite detailsPanel;
 	private Composite historyPanel;
+	private Composite dataPanel;
 	
 	private StationCurrentPage currentPage;
 	private StationLocationPage locationsPage;
 	private StationDetailsPage detailsPage;
 	private StationHistoryPage historyPage;
+	private StationDataPage dataPage;
 	
 	private Object lastMapPage;
 	
@@ -81,6 +85,9 @@ public class StationEditor extends EditorPart implements MapPart {
 	private Form pageForm;
 	
 	private IdFieldHeader lblId;
+	
+	private Label lblStatus;
+	private Label lblStatusImage;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -133,6 +140,12 @@ public class StationEditor extends EditorPart implements MapPart {
 	@Override
 	public void doSaveAs() {
 		
+	}
+	
+	private void refreshStatus() {
+		lblStatus.setText(station.getStatus().getGuiName(Locale.getDefault()));
+		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(station.getStatus()));
+		lblStatus.getParent().layout(true);
 	}
 
 	@Override
@@ -195,8 +208,9 @@ public class StationEditor extends EditorPart implements MapPart {
 			initializeDetailsPage(station);
 			initializeHistoryPage(station);
 			initializeLocationsPage(station);
+			initializeDataPage(station);
 			
-				
+			refreshStatus();
 		}catch (Exception ex) {
 			AssetPlugIn.displayLog(ex.getMessage(), ex);
 		}
@@ -206,6 +220,10 @@ public class StationEditor extends EditorPart implements MapPart {
 	@Override
 	public boolean isDirty() {
 		return isDirty;
+	}
+	
+	private void initializeDataPage(AssetStation station) {
+		if (dataPage != null) dataPage.initializePanel();
 	}
 	
 	private void initializeCurrentPage(AssetStation station) {
@@ -306,7 +324,7 @@ public class StationEditor extends EditorPart implements MapPart {
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite headerComp = toolkit.createComposite(body);
-		headerComp.setLayout(new GridLayout(1, false));
+		headerComp.setLayout(new GridLayout(3, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)headerComp.getLayout()).marginWidth = 0;
 		((GridLayout)headerComp.getLayout()).marginHeight = 0;
@@ -336,7 +354,10 @@ public class StationEditor extends EditorPart implements MapPart {
 			setDirty(true);
 		});
 
-		String headers[] = new String[] {"Current Status", "Station Locations", "Properties", "History"};
+		lblStatusImage = toolkit.createLabel(headerComp, "");
+		lblStatus = toolkit.createLabel(headerComp, "");
+		
+		String headers[] = new String[] {"Current Status", "Data", "Station Locations", "Properties", "History"};
 		Listener[] actions = new Listener[] {
 			event->{
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
@@ -349,6 +370,10 @@ public class StationEditor extends EditorPart implements MapPart {
 					ApplicationGIS.getToolManager().setCurrentEditor(null);
 					ApplicationGIS.getToolManager().setCurrentEditor(this);
 				}
+				sectionBody.layout(true);},
+			event->{
+				if (dataPanel == null) dataPanel = createDataSection(sectionBody);
+				((StackLayout)sectionBody.getLayout()).topControl = dataPanel;
 				sectionBody.layout(true);},
 			event->{
 				if (locationsPanel == null) locationsPanel = createLocationsSection(sectionBody);
@@ -412,6 +437,20 @@ public class StationEditor extends EditorPart implements MapPart {
 		return panel;
 	}
 
+	private Composite createDataSection(Composite parent) {
+		Composite panel = toolkit.createComposite(parent);
+		panel.setLayout(new GridLayout());
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
+		
+		dataPage = new StationDataPage(this);
+		ContextInjectionFactory.inject(dataPage, parentContext);
+		dataPage.createDataSection(panel, toolkit);
+		
+		return panel;
+	}
+	
 	private Composite createDetailsSection(Composite parent) {
 		Composite panel = toolkit.createComposite(parent);
 		panel.setLayout(new GridLayout());

@@ -3,13 +3,10 @@ package org.wcs.smart.asset.data.importer;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
@@ -37,81 +34,93 @@ import com.drew.metadata.Metadata;
 
 public class FileProcessor {
 
-	private List<Path> files;
-	private HashMap<Path, FileProxy> fileDetails;
-	
+	private List<FileProxy> files;	
 	private ConservationArea ca;
 	
 	public FileProcessor(ConservationArea ca) {
 		this.ca = ca;
 		this.files = new ArrayList<>();
-		fileDetails = new HashMap<>();
 	}
 	
-	public boolean addFile(Path toAdd) {
-		if (!files.contains(toAdd)) {
-			files.add(toAdd);
-			return true;
+	public void addFile(Path file) {
+		for (FileProxy p : files) {
+			if (p.getFile().equals(file)) return;
+			//file already exists return null
 		}
-		return false;
-	}
-	
-	public void processFiles(IProgressMonitor monitor) {
-		fileDetails = new HashMap<>();
-	
-		monitor.beginTask("Processing Asset Files", files.size());
-		files.forEach(f->{
-			monitor.subTask(f.toString());
-			processFile(f);	
-			monitor.worked(1);
-			if (monitor.isCanceled()) return;
-		});
-	}
-	
-	public void processFile(Path file) {
+		List<FileProxy> addedProxies = new ArrayList<>();
 		try {
 			FileProxy proxy = FileMetadataReader.readFile(file, ca);
 			try(Session session = HibernateManager.openSession()){
 				processMetadata(proxy, session);
-				proxy.updateStationLocation(session, fileDetails.values());
+				proxy.updateStationLocation(session, files);
 			}
-			fileDetails.put(file,  proxy);
+			files.add(proxy);
+			addedProxies.add(proxy);
 		}catch (Exception ex) {
 			ex.printStackTrace();
 			//TODO: process exception
 			FileProxy p = new FileProxy(file, ca);
-//			p.setProcessingException(ex);
-			fileDetails.put(file,  p);
+			files.add(p);
+		}
+		addedProxies.forEach(p->computeRelations(p));
+		computeWaypoints();
+		
+		//sort on waypoint id
+		files.sort((a,b)->{
+			if (a.getWaypoint() == null && b.getWaypoint() == null) return 0;
+			if (a.getWaypoint() == null) return -1;
+			if (b.getWaypoint() == null) return 1;
+			return a.getWaypoint().compareTo(b.getWaypoint());
+		});
+	}
+	
+	public void update() {
+		files.forEach(p->p.getRelations().clear());
+		files.forEach(p->computeRelations(p));
+		computeWaypoints();
+
+		//sort on waypoint id
+		files.sort((a,b)->{
+			if (a.getWaypoint() == null && b.getWaypoint() == null) return 0;
+			if (a.getWaypoint() == null) return -1;
+			if (b.getWaypoint() == null) return 1;
+			return a.getWaypoint().compareTo(b.getWaypoint());
+		});
+	}
+	
+	private void computeWaypoints() {
+		files.forEach(p->p.setWaypoint(null));
+		int wpCnt = 1;
+		for (FileProxy p : files) {
+			if (p.setWaypoint(wpCnt)) {
+				wpCnt ++;
+			}
 		}
 	}
 	
-	public FileProxy getFileDetails(Path file) {
-		return fileDetails.get(file);
-	}
-	
-	public List<Path> getFiles() {
-		return this.files;
-	}
-	
-	public Collection<FileProxy> getFileDetails() {
-		return fileDetails.values();
+	/**
+	 * file details sorted by date
+	 * @return
+	 */
+	public List<FileProxy> getFileDetails() {
+		return files;
 	}
 	
 	public void removeFile(FileProxy file) {
-		files.remove(file.getFile());
-		fileDetails.remove(file.getFile());
+		files.remove(file);
+		
+		for (FileProxy relation : file.getRelations()) {
+			relation.getRelations().remove(file);
+		}
 	}
 	
 	
 	public boolean isValid() {
-		if (fileDetails.size() != files.size()) return false;
-		
-		for (FileProxy proxy : fileDetails.values()) {
+		for (FileProxy proxy : files) {
 			if (!proxy.isValid()) return false;
 		}
 		return true;
 	}
-	
 	
 	public void processMetadata(FileProxy p, Session session) throws Exception {
 		List<AssetMetadataMapping> mappings = QueryFactory.buildQuery(session, AssetMetadataMapping.class,
@@ -142,6 +151,25 @@ public class FileProcessor {
 		//process observations
 		mergeObservations(p);
 	}
+	
+	private void computeRelations(FileProxy fp) {
+		if (fp.getAsset() == null) return;
+		int seconds = fp.getAsset().getAssetType().getIncidentCutoff();
+		//find all other files at the same location with the same asset and merge them
+
+		
+		for (FileProxy file : files) {
+			file.setWaypoint(null);
+			if (fp == file) continue;
+			if (file.getAsset() != null && file.getAsset().equals(fp.getAsset()) &&
+					file.getStationLocation() != null && file.getStationLocation().equals(fp.getStationLocation()) &&
+					file.getImageDate() != null && fp.getImageDate() != null && Math.abs(file.getImageDate().getTime() - fp.getImageDate().getTime()) < seconds * 1000)
+				{
+				fp.addRelation(file);
+			}
+		}
+	}
+	
 	
 	private void mergeObservations(FileProxy p) {
 		List<WaypointObservation> allObservations = new ArrayList<>(p.getRawObservations());
@@ -428,6 +456,7 @@ public class FileProcessor {
 				.setParameter("id", id.toUpperCase())
 				.uniqueResult();
 		if (asset != null) {
+			asset.getAssetType().getIncidentCutoff();
 			p.setAsset(asset);
 			return;
 		}else {

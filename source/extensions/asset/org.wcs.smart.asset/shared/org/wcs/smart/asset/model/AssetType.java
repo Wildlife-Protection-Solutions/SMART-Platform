@@ -120,6 +120,8 @@ public class AssetType extends NamedKeyItem{
 	 *  within the time frame will be grouped into a single incident 
 	 *  instead of creating multiple incidents.
 	 * 
+	 * Value is stored in seconds.
+	 * 
 	 * @return incident_cutoff
 	 */
 	@Column(name="incident_cutoff")

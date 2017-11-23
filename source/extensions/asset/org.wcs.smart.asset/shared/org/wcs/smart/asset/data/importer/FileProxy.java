@@ -1,18 +1,18 @@
 package org.wcs.smart.asset.data.importer;
 
+
 import java.nio.file.Path;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Color;
 import org.geotools.geometry.jts.JTS;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.model.Asset;
-import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.ca.ConservationArea;
@@ -29,7 +29,6 @@ public class FileProxy {
 	private Date imageDate;
 	private Double x;
 	private Double y;
-//	private AssetDeployment deployment;
 	private Asset asset;
 	private AssetStation station;
 	private AssetStationLocation location;
@@ -45,11 +44,48 @@ public class FileProxy {
 	private List<WaypointObservation> rawObservations = new ArrayList<>();
 	private List<WaypointObservation> observations = new ArrayList<>();
 	
+	private List<FileProxy> relations = new ArrayList<>();
+	
+	private Integer waypoint;
+	
 	public FileProxy(Path file, ConservationArea ca) {
 		this.file = file;
 		this.ca = ca;
 		warnings = new ArrayList<>();
 	}
+	
+	public Integer getWaypoint() {
+		return this.waypoint;
+	}
+	public boolean setWaypoint(Integer newWaypoint) {
+		if (newWaypoint == null) {
+			this.waypoint = null;
+			return true;
+		}
+		if (!isValid()) {
+			this.waypoint = null;
+			return false;
+		}
+		if (this.waypoint != null) return false;
+		this.waypoint = newWaypoint;
+		relations.forEach(c->c.setWaypoint(newWaypoint));
+		return true;
+	}
+	
+	public void addRelation(FileProxy fp) {
+		if (!this.relations.contains(fp)) this.relations.add(fp);
+		if (!fp.getRelations().contains(this)) fp.getRelations().add(this);
+	}
+	
+	public void removeRelation(FileProxy fp) {
+		this.relations.remove(fp);
+		fp.getRelations().remove(this);
+	}
+	
+	public List<FileProxy> getRelations() {
+		return this.relations;
+	}
+	
 	
 	public void setObservations(List<WaypointObservation> observations) {
 		this.observations = observations;

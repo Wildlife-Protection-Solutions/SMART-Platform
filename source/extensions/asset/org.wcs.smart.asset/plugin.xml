@@ -293,6 +293,7 @@
          point="org.eclipse.ui.views">
       <view
             class="org.wcs.smart.asset.ui.views.asset.AssetListView$AssetListViewWrapper"
+            icon="images/icons/obj16/asset.png"
             id="org.wcs.smart.asset.views.asset"
             name="Assets"
             restorable="true">
@@ -309,21 +310,35 @@
       <editor
             class="org.wcs.smart.asset.ui.views.station.StationEditor"
             default="false"
+            icon="images/icons/obj16/station.png"
             id="org.wcs.smart.asset.ui.views.station"
             name="Station Editor">
       </editor>
       <editor
             class="org.wcs.smart.asset.ui.views.stationlocation.StationLocationEditor"
             default="false"
+            icon="images/icons/obj16/location.png"
             id="org.wcs.smart.asset.ui.views.stationlocation"
             name="Station Location Editor">
       </editor>
       <editor
             class="org.wcs.smart.asset.ui.views.data.DataImporterView"
             default="false"
+            icon="images/icons/obj16/import.png"
             id="org.wcs.smart.asset.ui.views.data.importer"
             name="Data Importer View">
       </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.asset.command.stationproperties.show"
+            icon="images/icons/obj16/station.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.asset.command.assettype.show"
+            icon="images/icons/obj16/asset.png">
+      </image>
    </extension>
 
 </plugin>

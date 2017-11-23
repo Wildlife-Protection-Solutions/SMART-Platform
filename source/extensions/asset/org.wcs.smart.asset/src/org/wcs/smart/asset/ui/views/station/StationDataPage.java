@@ -1,4 +1,4 @@
-package org.wcs.smart.asset.ui.views.asset;
+package org.wcs.smart.asset.ui.views.station;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -52,9 +52,9 @@ import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 
-public class AssetDataPage {
+public class StationDataPage {
 
-	private AssetEditor parentEditor;
+	private StationEditor parentEditor;
 	
 	private FormToolkit toolkit;
 	private Composite mainControl;
@@ -70,7 +70,7 @@ public class AssetDataPage {
 	int pageSize = 50;
 	private List<AssetWaypoint.AssetWaypointPk> dataWaypoints = null;
 	
-	public AssetDataPage(AssetEditor parent) {
+	public StationDataPage(StationEditor parent) {
 		this.parentEditor = parent;
 		settings = DataDisplaySettings.getSettings();
 	}
@@ -287,7 +287,7 @@ public class AssetDataPage {
 				dataWaypoints = new ArrayList<>();
 				startIndex = 0;
 				try(Session session = HibernateManager.openSession()){
-					String query = "FROM AssetWaypoint WHERE id.assetDeployment.asset = :asset ";
+					String query = "FROM AssetWaypoint WHERE id.assetDeployment.stationLocation.station = :station ";
 					if (startDate != null) {
 						query += " and id.waypoint.dateTime >= :startDate ";
 					}
@@ -298,7 +298,7 @@ public class AssetDataPage {
 					Query q = session.createQuery(query);
 					if (startDate != null) q.setParameter("startDate",  startDate);
 					if (endDate != null) q.setParameter("endDate", endDate);
-					q.setParameter("asset", parentEditor.getAsset());
+					q.setParameter("station", parentEditor.getAssetStation());
 					for (Object x : q.list()) {
 						dataWaypoints.add(((AssetWaypoint)x).getId());
 					}
@@ -333,7 +333,7 @@ public class AssetDataPage {
 			outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 			Composite top = toolkit.createComposite(outer, SWT.NONE);
-			top.setLayout(new GridLayout(3, true));
+			top.setLayout(new GridLayout(2, true));
 			top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 			Color dayHeaderColor = new Color(top.getDisplay(), 200, 200, 200);
@@ -344,8 +344,7 @@ public class AssetDataPage {
 			l.setBackground(dayHeaderColor);
 			l = toolkit.createLabel(top, MessageFormat.format("Location: {0}", aw.getAssetDeployment().getStationLocation().getId()));
 			l.setBackground(dayHeaderColor);
-			l = toolkit.createLabel(top, MessageFormat.format("Station: {0}", aw.getAssetDeployment().getStationLocation().getStation().getId()));
-			l.setBackground(dayHeaderColor);
+			
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			Composite info = toolkit.createComposite(outer);

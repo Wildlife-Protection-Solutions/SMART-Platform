@@ -7,13 +7,13 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -44,7 +44,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -63,11 +62,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.eclipse.ui.internal.SharedImages;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -124,6 +121,8 @@ public class DataImporterView extends EditorPart{
 	
 	private List<Asset> selectedAssets = new ArrayList<>();
 	private List<AssetStationLocation> selectedLocations = new ArrayList<>();
+	
+	private Color[] rowColors;
 		
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -151,10 +150,13 @@ public class DataImporterView extends EditorPart{
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				monitor.beginTask("Importing files", toSave.size() + 1);
 				List<FileProxy> items = new ArrayList<FileProxy>(toSave);
+				List<FileProxy> toProcess = new ArrayList<FileProxy>(items);
 				try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 					session.beginTransaction();
 					try {
-						for (FileProxy p : items) {
+						while(toProcess.size() > 0) {
+							FileProxy p = toProcess.remove(0);
+							
 							monitor.subTask(p.getFile().toString());
 							boolean isNewStation = p.getStation().getUuid() == null;
 							boolean isNewLocation = p.getStationLocation().getUuid() == null;
@@ -177,7 +179,7 @@ public class DataImporterView extends EditorPart{
 							Waypoint wp = new Waypoint();
 							wp.setConservationArea(SmartDB.getCurrentConservationArea());
 							wp.setDateTime(p.getImageDate());
-							wp.setId(1);
+							wp.setId(1); //TODO:
 							wp.setSourceId(AssetWaypointSource.KEY);
 							wp.setX(p.getX());
 							wp.setY(p.getY());
@@ -195,6 +197,24 @@ public class DataImporterView extends EditorPart{
 								wp.getObservations().add(wo);
 							}
 							
+							//add relations
+							for (FileProxy pp : p.getRelations()) {
+								if (!items.contains(pp)) items.add(pp);
+								toProcess.remove(pp);
+								wa = new WaypointAttachment();
+								wa.setWaypoint(wp);
+								wa.setCopyFromLocation(pp.getFile().toFile());
+								wa.setFilename(pp.getFile().getFileName().toString());
+								wp.getAttachments().add(wa);
+								
+								for (WaypointObservation nextobs : pp.getObservations()) {
+									//todo check for duplicate
+									if (!containsObservation(nextobs, wp.getObservations())) {
+										nextobs.setWaypoint(wp);
+										wp.getObservations().add(nextobs);
+									}
+								}
+							}
 							session.save(wp);
 							session.flush();
 							
@@ -254,6 +274,50 @@ public class DataImporterView extends EditorPart{
 	
 	}
 	
+	private boolean containsObservation(WaypointObservation obs, List<WaypointObservation> all) {
+		for (WaypointObservation wo : all) {
+			if (!wo.getCategory().equals(obs.getCategory())) continue;
+			
+			if (wo.getAttributes().size() != obs.getAttributes().size()) continue;
+			
+			boolean ok = true;
+			for (WaypointObservationAttribute a : wo.getAttributes()) {
+				WaypointObservationAttribute matching = null;
+				for (WaypointObservationAttribute aa : obs.getAttributes()) {
+					if (aa.getAttribute().equals(a.getAttribute())){
+						matching = aa;
+						break;
+					}
+				}
+				if (matching == null) {
+					ok = false;
+					break;
+				}
+				switch(a.getAttribute().getType()) {
+					case BOOLEAN:
+					case NUMERIC:
+						ok = Objects.equals(a.getNumberValue(), matching.getNumberValue());
+						break;
+					case DATE:
+					case TEXT:
+						ok = Objects.equals(a.getStringValue(), matching.getStringValue());
+						break;
+					case LIST:
+						ok = Objects.equals(a.getAttributeListItem(), matching.getAttributeListItem());
+						break;
+					case TREE:
+						ok = Objects.equals(a.getAttributeTreeNode(), matching.getAttributeTreeNode());
+						break;				
+				}
+				if (!ok) break;
+			}
+			if (ok) return true;
+		}
+		return false;
+	}
+	
+	
+	
 	private String generateStationId(Session session) {
 		int cnt = 1;
 		while(true) {
@@ -310,6 +374,12 @@ public class DataImporterView extends EditorPart{
 
 	@Override
 	public void createPartControl(Composite parent) {
+		
+		rowColors = new Color[] {
+				new Color(parent.getDisplay(), 255, 212, 212),
+				new Color(parent.getDisplay(), 255, 255, 212)
+		};
+		
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		Form mainform = toolkit.createForm(parent);
@@ -342,9 +412,7 @@ public class DataImporterView extends EditorPart{
 			List<Path> paths = new ArrayList<>();
 			for (String file : fd.getFileNames()) {
 				Path temp = Paths.get(fd.getFilterPath(), file);
-				if (processor.addFile(temp)) {
-					paths.add(temp);
-				}
+				paths.add(temp);
 			}
 			processFiles(paths);
 		});
@@ -385,12 +453,12 @@ public class DataImporterView extends EditorPart{
 	}
 	
 	private void updateFileCount() {
-		fileCnt.setText(MessageFormat.format("Number of Files: {0}",processor.getFiles().size()));
+		fileCnt.setText(MessageFormat.format("Number of Files: {0}",processor.getFileDetails().size()));
 	}
 
 	private void updateStatus() {
 		boolean isValid = processor.isValid();
-		if (isValid && !processor.getFiles().isEmpty()) {
+		if (isValid && !processor.getFileDetails().isEmpty()) {
 			itemSaveAll.setEnabled(true);
 			itemSaveAll.setToolTipText("Save all files to database");
 		}else {
@@ -421,12 +489,13 @@ public class DataImporterView extends EditorPart{
 			column.getColumn().setResizable(true);
 			column.getColumn().setText(c.guiName);
 			column.getColumn().setWidth(c.getWidth());
-			column.setLabelProvider(c.getLabelProvider());
+			column.setLabelProvider(c.getLabelProvider(rowColors));
 		}
 		tblResults.setContentProvider(ArrayContentProvider.getInstance());
 		tblResults.setInput(processor.getFileDetails());
 		tblResults.addSelectionChangedListener(e->updateFileDetails());
-			
+		tblResults.refresh();
+		
 		Menu mnu = new Menu(tblResults.getControl());
 		tblResults.getControl().setMenu(mnu);
 		
@@ -833,11 +902,11 @@ public class DataImporterView extends EditorPart{
 	}
 	
 	private void refreshProxies() {
+		processor.update();
 		tblResults.refresh();
 		updateStatus();
 		updateFileDetails();
 		updateFileCount();
-		
 		updateFileDetails();
 	}
 	
@@ -1039,7 +1108,7 @@ public class DataImporterView extends EditorPart{
 				pmonitor.beginTask("Processing new files", files.size());
 				for (Path f : files) {
 					pmonitor.subTask(f.toString());
-					processor.processFile(f);
+					processor.addFile(f);
 					pmonitor.worked(1);
 				}
 				if (pmonitor.isCanceled()) {
@@ -1064,13 +1133,12 @@ public class DataImporterView extends EditorPart{
 	
 	private enum ResultsColumn{
 		STATUS("Status"),
-//		ERROR("Error"),
 		FILE("File"),
 		DATE("Date"),
 		ASSET("Asset"),
 		LOCATION("Station Location"),
 		STATION("Station"),
-		OBSERVATIONS("Observation");
+		WAYPOINT("Waypoint");
 		
 		public String guiName;
 		
@@ -1084,14 +1152,13 @@ public class DataImporterView extends EditorPart{
 				return proxy.getAsset() == null ? "" : proxy.getAsset().getId();
 			case DATE:
 				return proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate());
-//			case ERROR:
-//				return proxy.getProcessingException() == null ? "" : proxy.getProcessingException().getMessage();
 			case FILE:
 				return proxy.getFile().getFileName().toString();
 			case LOCATION:
 				return proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId();
-			case OBSERVATIONS:
-				return "TODO";
+			case WAYPOINT:
+				if (proxy.getWaypoint() == null) return "";
+				return proxy.getWaypoint().toString();
 			case STATION:
 				return proxy.getStation() == null ? "" : proxy.getStation().getId();
 			case STATUS:
@@ -1100,7 +1167,7 @@ public class DataImporterView extends EditorPart{
 			return "";
 		}
 		
-		public ColumnLabelProvider getLabelProvider() {
+		public ColumnLabelProvider getLabelProvider(Color[] rowColors) {
 			if (this == STATUS) {
 				return new ColumnLabelProvider() {
 					@Override
@@ -1123,6 +1190,17 @@ public class DataImporterView extends EditorPart{
 				public String getText(Object element) {
 					if (element instanceof FileProxy) return getValue((FileProxy)element);
 					return super.getText(element);
+				}
+				
+				@Override
+				public Color getBackground(Object element) {
+					if (element instanceof FileProxy){
+						if (((FileProxy) element).getWaypoint() == null) return null;
+						int colorIndex = ((FileProxy) element).getWaypoint() % rowColors.length;
+//						return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_RED);
+						return rowColors[colorIndex];
+					}
+					return null;
 				}
 			};
 		}
