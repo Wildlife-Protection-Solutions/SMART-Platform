@@ -130,6 +130,12 @@ public class Messages extends NLS {
 	public static String AttachmentComposite_Error_FileNotFound;
 	public static String AttachmentComposite_Button_Open;
 	public static String AttachmentInterceptor_Error_CannotCopyFile;
+	public static String AttachmentPropertiesDialog_DialogTitle;
+	public static String AttachmentPropertiesDialog_Error;
+	public static String AttachmentPropertiesDialog_FileNameLabel;
+	public static String AttachmentPropertiesDialog_PathSection;
+	public static String AttachmentPropertiesDialog_PropertyColumnName;
+	public static String AttachmentPropertiesDialog_ValueColumnName;
 	public static String Attribute_BooleanAttribute_False_Label;
 	public static String Attribute_BooleanAttribute_True_Label;
 	public static String AttributeDMAdvisor_Error_AttributeReferenced2;
