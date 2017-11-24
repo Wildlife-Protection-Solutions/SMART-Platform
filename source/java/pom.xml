@@ -290,6 +290,8 @@
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.independentincident</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.independentincident.feature</module>
 				<module>../extensions/connect/org.wcs.smart.connect.dataqueue.patrol</module>  
+				<module>../extensions/i2/org.wcs.smart.connect.dataqueue.i2</module>  
+				<module>../extensions/i2/org.wcs.smart.connect.dataqueue.i2.feature</module>  
 			</modules>
 		</profile>
 		<profile>
