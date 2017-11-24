@@ -60,7 +60,7 @@ import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.FileLocationParser;
-import org.wcs.smart.i2.ui.dialogs.AttachmentPropertiesDialog;
+import org.wcs.smart.i2.ui.IntelAttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.editors.AttachmentTable;
 import org.wcs.smart.i2.ui.editors.IMenuCreator;
 import org.wcs.smart.i2.ui.handler.OpenAttachmentViewHandler;
@@ -397,7 +397,7 @@ public class AttachmentListComposite extends Composite{
 						@Override
 						public void widgetSelected(SelectionEvent e) {
 							if (!attachmentTable.getSelection().isEmpty()){
-								(new AttachmentPropertiesDialog(getShell(), attachmentTable.getSelection().get(0))).open();
+								(new IntelAttachmentPropertiesDialog(getShell(), attachmentTable.getSelection().get(0))).open();
 							}
 						}
 					});

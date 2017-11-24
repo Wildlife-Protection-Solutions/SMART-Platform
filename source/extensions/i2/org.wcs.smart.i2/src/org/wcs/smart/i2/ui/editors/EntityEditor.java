@@ -169,13 +169,13 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
+import org.wcs.smart.i2.ui.IntelAttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.SectionTabHeader;
-import org.wcs.smart.i2.ui.dialogs.AttachmentPropertiesDialog;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.dialogs.RelationshipSelectorDialog;
@@ -1743,7 +1743,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						@Override
 						public void widgetSelected(SelectionEvent e) {
 							if (!attachmentTable.getSelection().isEmpty()){
-								AttachmentPropertiesDialog dialog = new AttachmentPropertiesDialog(getSite().getShell(), attachmentTable.getSelection().get(0));
+								IntelAttachmentPropertiesDialog dialog = new IntelAttachmentPropertiesDialog(getSite().getShell(), attachmentTable.getSelection().get(0));
 								dialog.open();
 							}
 						}
