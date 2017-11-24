@@ -14,14 +14,6 @@
       [Enter License Description here.]
    </license>
 
-   <includes
-         id="org.wcs.smart.connect.dataqueue.feature"
-         version="0.0.0"/>
-
-   <includes
-         id="org.wcs.smart.connect.feature"
-         version="0.0.0"/>
-
    <plugin
          id="org.wcs.smart.connect.dataqueue.cybertracker"
          download-size="0"
