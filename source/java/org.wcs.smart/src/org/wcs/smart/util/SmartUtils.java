@@ -683,7 +683,7 @@ public class SmartUtils {
 		return new Color(display, blend(new RGB(255, 255, 255), display.getSystemColor(SWT.COLOR_LIST_SELECTION).getRGB(), 75));
 	}
 
-	private static RGB blend(RGB c1, RGB c2, int ratio) {
+	public static RGB blend(RGB c1, RGB c2, int ratio) {
 		int r = blend(c1.red, c2.red, ratio);
 		int g = blend(c1.green, c2.green, ratio);
 		int b = blend(c1.blue, c2.blue, ratio);

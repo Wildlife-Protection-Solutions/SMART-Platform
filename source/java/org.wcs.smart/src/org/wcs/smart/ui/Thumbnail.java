@@ -156,6 +156,7 @@ public class Thumbnail {
 			image.dispose();
 			image = null;
 		}
+		loadImageDataJob.cancel();
 	}
 	
 	/**
