@@ -1,7 +1,9 @@
-package org.wcs.smart.asset.ui.views.station;
+package org.wcs.smart.asset.ui.views.asset;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -14,41 +16,32 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
-import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
-import org.wcs.smart.asset.model.AssetStation;
-import org.wcs.smart.asset.model.AssetStationAttribute;
-import org.wcs.smart.asset.model.AssetStationAttributeValue;
+import org.wcs.smart.asset.model.AssetAttributeValue;
+import org.wcs.smart.asset.model.AssetHistoryRecord;
+import org.wcs.smart.asset.model.AssetTypeAttribute;
 import org.wcs.smart.asset.ui.AttributeFieldEditor;
+import org.wcs.smart.asset.ui.CommentDialog;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
-public class StationDetailsPage {
+public class AssetPropertyPage {
 
-	private static final String STATION_KEY = "STATION";
-
-	private StationEditor parentEditor;
+	private AssetEditor parentEditor;
 	
 	private List<AttributeFieldEditor> fieldEditors;
-	
 	private Composite attributePanel;
 	private FormToolkit toolkit;
+	private Label lblRetiredState;
+	private Hyperlink changeRetiredState;
 	
-	private AssetStationAttributeValue tmpLocationAttribute;
-	private AttributeFieldEditor locFieldEditor;
-	
-	private boolean isInitializing = false;
-	
-	public StationDetailsPage(StationEditor editor) {
+	public AssetPropertyPage(AssetEditor editor) {
 		this.parentEditor = editor;
-		
-		AssetAttribute tmp = new AssetAttribute();
-		tmp.setType(AttributeType.POSITION);
-		tmp.setName("Position");
-		tmpLocationAttribute = new AssetStationAttributeValue();
-		tmpLocationAttribute.setAttribute(tmp);
 	}
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {
@@ -64,29 +57,48 @@ public class StationDetailsPage {
 		toppanel.setLayout(new GridLayout(3, false));
 		toppanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		locFieldEditor = new AttributeFieldEditor(toppanel, tmpLocationAttribute.getAttribute());
-		locFieldEditor.addSelectionListener(new SelectionAdapter() {
+		Label l = toolkit.createLabel(toppanel, "State: ");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		lblRetiredState = toolkit.createLabel(toppanel, "");
+		lblRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		changeRetiredState = toolkit.createHyperlink(toppanel, "", SWT.NONE);
+		changeRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		changeRetiredState.addHyperlinkListener(new HyperlinkAdapter() {			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (!locFieldEditor.isValid()) return;
-				if (isInitializing) return;
-				if (locFieldEditor.updateValue(tmpLocationAttribute)) {
-					AssetStation station = (AssetStation) attributePanel.getData(STATION_KEY);
-					if (station != null) {
-						station.setX(tmpLocationAttribute.getNumberValue());
-						station.setY(tmpLocationAttribute.getNumberValue2());
-					}
+			public void linkActivated(HyperlinkEvent e) {
+				if (parentEditor.getAsset() == null) return;
+				Asset asset = parentEditor.getAsset();
+				String action;
+				String msg;
+				if (!asset.getIsRetired()) {
+					action = "Asset Retired - ";
+					msg = "Enter a comment related to the retirement";
+				}else {
+					action = "Asset Unretired - ";
+					msg = "Enter a comment related to unretirement of asset";
 				}
-				parentEditor.setDirty(true);
+				CommentDialog dialog = new CommentDialog(parentEditor.getSite().getShell(), "Asset History Comment", msg);
 				
+				if (dialog.open() != CommentDialog.OK) return;
+				
+				AssetHistoryRecord historyRecord = new AssetHistoryRecord();
+				historyRecord.setAsset(asset);
+				historyRecord.setComment(action + dialog.getComment());
+				historyRecord.setDate(new Date());
+				parentEditor.addActiveHistoryRecord(historyRecord);
+				asset.setIsRetired(!asset.getIsRetired());
+				parentEditor.refreshStatus();
+				parentEditor.setDirty(true);
 			}
 		});
-
+		
 		Composite attributeComp = toolkit.createComposite(panel, SWT.BORDER);
 		attributeComp.setLayout(new GridLayout());
 		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Label l = toolkit.createLabel(attributeComp, "Attributes");
+		l = toolkit.createLabel(attributeComp, "Attributes");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -94,29 +106,32 @@ public class StationDetailsPage {
 		Font boldFont = new Font(l.getDisplay(), fd);
 		l.setFont(boldFont);
 		l.addListener(SWT.Dispose,  e-> boldFont.dispose());
-
+		
 		attributePanel = toolkit.createComposite(attributeComp);
 		attributePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		attributePanel.setLayout(new GridLayout());
 		((GridLayout)attributePanel.getLayout()).marginWidth = 0;
 		((GridLayout)attributePanel.getLayout()).marginHeight = 0;
+		
+		initializeAttributes(parentEditor.getAsset());
 	}
 	
-	public void initializeAttributes(AssetStation station) {
-
-		tmpLocationAttribute.setNumberValue(station.getX());
-		tmpLocationAttribute.setNumberValue2(station.getY());
-		
-		try {
-			isInitializing = true;
-			locFieldEditor.initControl(tmpLocationAttribute);
-			attributePanel.setData(STATION_KEY, station);
-		}finally {
-			isInitializing = false;
-		}
+	public void initializeAttributes(Asset asset) {
 		
 		for (Control c : attributePanel.getChildren()) c.dispose();
 		fieldEditors = new ArrayList<>();
+		
+		if (lblRetiredState != null) {
+			lblRetiredState.setText(asset.getStatus().getGuiName(Locale.getDefault()));
+		}
+		if (changeRetiredState != null) {
+			if (asset.getIsRetired()) {
+				changeRetiredState.setText("unretire asset");
+			}else {
+				changeRetiredState.setText("retire asset");
+			}
+			changeRetiredState.getParent().layout(true);
+		}
 		
 		ScrolledComposite scroll = new ScrolledComposite(attributePanel, SWT.V_SCROLL);
 		scroll.setExpandVertical(true);
@@ -128,37 +143,36 @@ public class StationDetailsPage {
 		attributes.setLayout(new GridLayout(2, false));
 		scroll.setContent(attributes);
 		
-		List<AssetStationAttribute> stationAttributes = new ArrayList<>();
+		List<AssetAttribute> assetAttributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			stationAttributes.addAll(
-					session.createQuery("FROM AssetStationAttribute WHERE attribute.conservationArea = :ca")
-					.setParameter("ca",  SmartDB.getCurrentConservationArea())
-					.list());
-			stationAttributes.forEach(ss->{
-				ss.getAttribute().getName();
-				if (ss.getAttribute().getAttributeList() != null) ss.getAttribute().getAttributeList().forEach(li->li.getName());
-			});
+			List<AssetTypeAttribute> aa = session.createQuery("FROM AssetTypeAttribute WHERE id.assetType = :type", AssetTypeAttribute.class)
+						.setParameter("type", asset.getAssetType())
+						.list();
+			for (AssetTypeAttribute a : aa) {
+				a.getAttribute().getName();
+				if (a.getAttribute().getAttributeList() != null) a.getAttribute().getAttributeList().forEach(e->e.getName());
+				assetAttributes.add(a.getAttribute());
+			}
 		}
 		
-		for (AssetStationAttribute attribute : stationAttributes) {
-			
-			AttributeFieldEditor editor = new AttributeFieldEditor(attributes, attribute.getAttribute());
+		for (AssetAttribute attribute : assetAttributes) {
+			AttributeFieldEditor editor = new AttributeFieldEditor(attributes, attribute);
 			editor.adapt(toolkit);
 			fieldEditors.add(editor);
 			if (editor.getTextAttributeControl() != null) {
 				editor.getTextAttributeControl().addListener(SWT.Resize, e-> scroll.setMinSize(attributes.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 			}
 			
-			for (AssetStationAttributeValue v : station.getAttributeValues()) {
-				if (v.getAttribute().equals(attribute.getAttribute())) editor.initControl(v);
+			for (AssetAttributeValue v : asset.getAttributeValues()) {
+				if (v.getAttribute().equals(attribute)) editor.initControl(v);
 			}
 			
 			editor.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					if (!editor.isValid()) return;
-					AssetStationAttributeValue toUpdate = null;
-					for (AssetStationAttributeValue v : station.getAttributeValues()) {
+					AssetAttributeValue toUpdate = null;
+					for (AssetAttributeValue v : asset.getAttributeValues()) {
 						if (v.getAttribute().equals(editor.getAttribute())) {
 							toUpdate = v;
 							break;
@@ -167,14 +181,14 @@ public class StationDetailsPage {
 					boolean isNew = false;
 					if (toUpdate == null) {
 						isNew = true;
-						toUpdate = new AssetStationAttributeValue();
-						toUpdate.setStation(station);
+						toUpdate = new AssetAttributeValue();
+						toUpdate.setAsset(asset);
 						toUpdate.setAttribute(editor.getAttribute());
 					}
 					if (editor.updateValue(toUpdate)) {
-						if (isNew) station.getAttributeValues().add(toUpdate);
+						if (isNew) asset.getAttributeValues().add(toUpdate);
 					}else {
-						if (!isNew) station.getAttributeValues().remove(toUpdate);
+						if (!isNew) asset.getAttributeValues().remove(toUpdate);
 					}
 					parentEditor.setDirty(true);
 					

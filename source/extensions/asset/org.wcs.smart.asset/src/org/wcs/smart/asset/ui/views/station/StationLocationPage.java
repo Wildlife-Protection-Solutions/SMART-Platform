@@ -1,14 +1,9 @@
 package org.wcs.smart.asset.ui.views.station;
 
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -40,18 +35,10 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.GeodeticCalculator;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.hibernate.Session;
-import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import org.locationtech.udig.project.ui.ApplicationGIS;
-import org.locationtech.udig.project.ui.ApplicationGIS.DrawMapParameter;
-import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
-import org.locationtech.udig.ui.graphics.ViewportGraphics;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetHibernateManager;
@@ -71,10 +58,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class StationLocationPage {
 
@@ -129,7 +112,7 @@ public class StationLocationPage {
 		((GridLayout)bottomPanel.getLayout()).marginHeight = 0;
 		createMapPanel(bottomPanel);
 		
-		topBottom.setWeights(new int[] {1,1});
+		topBottom.setWeights(new int[] {1,3});
 		topPanel.setWeights(new int[] {3,2});
 	}
 	
@@ -187,7 +170,7 @@ public class StationLocationPage {
 	
 	private void createMapPanel(Composite parent) {
 
-		mapComposite = toolkit.createComposite(parent, SWT.BORDER);
+		mapComposite = toolkit.createComposite(parent, SWT.NONE);
 		mapComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite toolComposite = toolkit.createComposite(mapComposite, SWT.NONE);
@@ -202,7 +185,16 @@ public class StationLocationPage {
 		mapViewer = new MapViewer(mapComposite, SWT.SINGLE | SWT.DOUBLE_BUFFERED);
 		mapViewer.setMap(ProjectFactory.eINSTANCE.createMap());
 		mapViewer.init(parentEditor);
-		LoadDefaultLayersJob basemap = new LoadDefaultLayersJob(mapViewer.getMap(), false);
+		LoadDefaultLayersJob basemap = new LoadDefaultLayersJob(mapViewer.getMap(), false) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus s = super.run(monitor);
+				
+				SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(drawCommand.getBounds());
+				getMapViewer().getMap().executeSyncWithoutUndo(cmd);
+				return s;
+			}
+		};
 		basemap.schedule();
 		
 		drawCommand = new StationLocationDrawCommand(0, 0);
@@ -344,6 +336,10 @@ public class StationLocationPage {
 				Display.getDefault().syncExec(()->{
 					if (tblLocations.getTable().isDisposed()) return;
 					tblLocations.setInput(locationData);
+					for (TableColumn c : tblLocations.getTable().getColumns()) {
+						c.pack();
+						c.setWidth(c.getWidth() + 20);
+					}
 				});
 				
 				return Status.OK_STATUS;

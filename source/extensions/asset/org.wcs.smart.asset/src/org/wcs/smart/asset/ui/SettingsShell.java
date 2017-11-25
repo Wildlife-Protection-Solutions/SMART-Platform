@@ -59,24 +59,27 @@ public class SettingsShell  {
 		opSmall.setText("Small");
 		opSmall.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)opSmall.getLayoutData()).horizontalIndent = indent;
-		opSmall.addListener(SWT.Selection, e->{
+		opSmall.addListener(SWT.MouseUp, e->{
 			settings.setIconsSize(IconSize.SMALL);
+			close();
 		});
 		
 		Button opMedium = new Button(c, SWT.RADIO);
 		opMedium.setText("Medium");
 		opMedium.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)opMedium.getLayoutData()).horizontalIndent = indent;
-		opMedium.addListener(SWT.Selection, e->{
+		opMedium.addListener(SWT.MouseUp, e->{
 			settings.setIconsSize(IconSize.MEDIUM);
+			close();
 		});
 		
 		Button opLarge = new Button(c, SWT.RADIO);
 		opLarge.setText("Large");
 		opLarge.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)opLarge.getLayoutData()).horizontalIndent = indent;
-		opLarge.addListener(SWT.Selection, e->{
+		opLarge.addListener(SWT.MouseUp, e->{
 			settings.setIconsSize(IconSize.LARGE);
+			close();
 		});
 		
 		switch(settings.getIconSize()) {
@@ -102,16 +105,18 @@ public class SettingsShell  {
 		opHide.setText("Show");
 		opHide.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)opHide.getLayoutData()).horizontalIndent = indent;
-		opHide.addListener(SWT.Selection, e->{
+		opHide.addListener(SWT.MouseUp, e->{
 			settings.setDisplayType(DisplayType.OBS_AND_IMAGES);
+			close();
 		});
 		
 		Button opShow = new Button(c, SWT.RADIO);
 		opShow.setText("Hide");
 		opShow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)opShow.getLayoutData()).horizontalIndent = indent;
-		opShow.addListener(SWT.Selection, e->{
+		opShow.addListener(SWT.MouseUp, e->{
 			settings.setDisplayType(DisplayType.IMAGES_ONLY);
+			close();
 		});
 		
 		switch(settings.getDisplayType()) {
@@ -145,5 +150,9 @@ public class SettingsShell  {
 		shell.setLocation(p2.x - shell.getSize().x + relative.getBounds().width, p2.y + relative.getSize().y);
 		shell.open();
 		shell.addListener(SWT.Deactivate, evt->{shell.dispose();});
+	}
+	
+	private void close() {
+		shell.dispose();
 	}
 }

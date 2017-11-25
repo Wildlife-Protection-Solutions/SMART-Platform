@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.asset.ui;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -369,7 +371,8 @@ public class AttributeFieldEditor {
 		if (attribute.getType() == AttributeType.TEXT){
 			txtMulti.setText(value.getStringValue());
 		}else if (attribute.getType() == AttributeType.NUMERIC){
-			txtValue.setText(String.valueOf(value.getNumberValue()));
+			DecimalFormat dm = new DecimalFormat("#.##");
+			txtValue.setText(dm.format(value.getNumberValue()));
 		}else if (attribute.getType() == AttributeType.POSITION){
 			initPositionValues(value.getNumberValue(), value.getNumberValue2());
 		}else if (attribute.getType() ==  AttributeType.LIST){

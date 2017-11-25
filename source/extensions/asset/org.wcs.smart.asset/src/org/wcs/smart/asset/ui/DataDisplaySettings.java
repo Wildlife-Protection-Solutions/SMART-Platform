@@ -5,9 +5,9 @@ import org.wcs.smart.asset.AssetPlugIn;
 public class DataDisplaySettings {
 
 	public enum IconSize{
-		SMALL(50),
-		MEDIUM(100),
-		LARGE(200);
+		SMALL(150),
+		MEDIUM(250),
+		LARGE(350);
 		
 		int size;
 		

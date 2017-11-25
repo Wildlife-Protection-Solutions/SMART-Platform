@@ -48,22 +48,18 @@ import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -78,7 +74,6 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetUtils;
@@ -150,7 +145,7 @@ public class AssetListView {
 				new Listener[] {
 						e->{
 							//TODO: remove me 
-							if (assetComposite != null) { assetComposite.dispose(); assetComposite = null; }
+							//if (assetComposite != null) { assetComposite.dispose(); assetComposite = null; }
 							
 							if (assetComposite == null) assetComposite = createAssetsPanel(content);
 							((StackLayout)content.getLayout()).topControl = assetComposite;
@@ -162,7 +157,7 @@ public class AssetListView {
 						},
 						e->{
 							//TODO: remove me
-							if (stationComposite != null) { stationComposite.dispose(); stationComposite = null; }
+							//if (stationComposite != null) { stationComposite.dispose(); stationComposite = null; }
 							
 							if (stationComposite == null) stationComposite = createStationsPanel(content);
 							((StackLayout)content.getLayout()).topControl = stationComposite;
@@ -449,6 +444,9 @@ public class AssetListView {
 		StationDialog dialog = new StationDialog(context.get(Shell.class), newStation);
 		ContextInjectionFactory.inject(dialog, context);
 		dialog.open();
+		if (newStation.getUuid() != null) {
+			(new OpenStationHandler()).openStation(newStation);
+		}
 	}
 	
 	private void createNewStationLocation() {
@@ -463,6 +461,9 @@ public class AssetListView {
 		StationLocationDialog dialog = new StationLocationDialog(context.get(Shell.class), newLocation);
 		ContextInjectionFactory.inject(dialog, context);
 		dialog.open();
+		if (newLocation.getUuid() != null) {
+			(new OpenStationLocationHandler()).openStationLocation(newLocation);
+		}
 	}
 	
 	private void deleteAssets() {

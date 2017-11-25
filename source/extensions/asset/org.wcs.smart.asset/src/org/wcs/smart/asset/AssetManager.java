@@ -87,12 +87,12 @@ public enum AssetManager {
 		try(ScrollableResults scroll = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"asset", asset}).scroll()){
 			while(scroll.next()) {
 				AssetDeployment d = (AssetDeployment) scroll.get(0);
-				
 				for (AssetWaypoint aw : d.getAssetWaypoints()) {
-					session.delete(aw.getWaypoint());
 					session.delete(aw);
+					session.delete(aw.getWaypoint());
 				}
 				session.delete(d);
+				session.flush();
 			}
 		}
 		

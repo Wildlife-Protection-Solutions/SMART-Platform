@@ -78,6 +78,8 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPropertyListener;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -161,6 +163,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 	private AssetDeploymentPage deploymentPage;
 	private AssetCurrentPage currentPage;
 	private AssetDataPage dataPage;
+	private AssetPropertyPage detailsPage;
+	
 	private Composite sectionBody;
 	
 	@Override
@@ -249,12 +253,18 @@ public class AssetEditor extends EditorPart implements MapPart {
 		parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
 	}
 	
+	public void addActiveHistoryRecord(AssetHistoryRecord record) {
+		this.activeHistoryRecords.add(record);
+		if (tblEvents != null) tblEvents.refresh();
+		setDirty(true);
+	}
+	
 	private void subscribeToEvent(String eventTopic, EventHandler handler){
 		parentContext.get(IEventBroker.class).subscribe(eventTopic, handler);
 		handlers.add(handler);
 	}
 	
-	private void refreshStatus() {
+	public void refreshStatus() {
 		lblStatus.setText(asset.getStatus(true).getGuiName(Locale.getDefault()));
 		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(asset));
 		lblStatus.getParent().layout(true);
@@ -275,64 +285,12 @@ public class AssetEditor extends EditorPart implements MapPart {
 	}
 	
 	private void initData() {
-		AssetEditorInput in = (AssetEditorInput) super.getEditorInput();
-		
-		activeHistoryRecords = new ArrayList<>();
-		toDeleteHistoryRecords = new ArrayList<>();
-		
-		try(Session session = HibernateManager.openSession()){
-			if (in.getAssetUuid() == null) {
-				if (in.getAssetTypeUuid() != null) {
-					AssetType type = session.get(AssetType.class, in.getAssetTypeUuid());
-					asset = new Asset();
-					asset.setConservationArea(SmartDB.getCurrentConservationArea());
-					asset.setAssetType(type);
-					asset.setAttributeValues(new ArrayList<>());
-					asset.setIsRetired(false);
-					asset.setId("AssetId");
-					setDirty(true);
-				}
-			}else {
-				asset = session.get(Asset.class, in.getAssetUuid());
-			}
-			
-			if (asset == null) {
-				throw new Exception("Asset not found; could not initialize element controls");
-			}
-			if (asset.getAttributeValues() == null) {
-				asset.setAttributeValues(new ArrayList<>());
-			}else {
-				asset.getAttributeValues().forEach(a->{
-					if (a.getAttributeListItem() != null) a.getAttributeListItem().getName();
-				});
-			}
-			asset.getAssetType().getAssetAttributes().forEach(a->{
-				a.getAttribute().getName();
-				if (a.getAttribute().getAttributeList() != null) {
-					a.getAttribute().getAttributeList().forEach(l->l.getName());
-				}
-			});
-			
-			lblAssetType.setText(asset.getAssetType().getName());
-			Image img = AWTSWTImageUtils.convertToSWTImage(asset.getAssetType().getIconAsImage());
-			lblAssetTypeImage.setImage(img);
-			lblAssetTypeImage.addListener(SWT.Dispose, e->img.dispose());
-			lblId.setText(asset.getId());
-			
-			setPartName(asset.getId());
-			setTitleImage(img);
-			
-			initializeAttributePanel(asset);
-			initializeEventsPanel(asset);
-			if (deploymentPage != null) deploymentPage.initializePanel(asset); 
-			
-			//updating the currentPage is covered by the refreshStatus
-			refreshStatus();
-			
-		}catch (Exception ex) {
-			AssetPlugIn.displayLog(ex.getMessage(), ex);
+		if (isDirty()) {
+			if (!MessageDialog.openQuestion(getSite().getShell(), "Refresh", "This station has unsaved changes.  By refreshing this page, these changes will be lost.  Are you sure you want to continue?")) return;
 		}
 		
+		refreshJob.setSystem(true);
+		refreshJob.schedule();
 	}
 
 	@Override
@@ -383,18 +341,27 @@ public class AssetEditor extends EditorPart implements MapPart {
 					}
 				}
 				
-				if (validate) {
-					if (isDirty) {
-						if (!MessageDialog.openQuestion(getSite().getShell(), "Asset Modified", 
-								"This asset was modified by another part of the system.  Do you want to reload the page and loose any local changes?  By not reloading your risk overwriting other changes made outside this page." )) {
-							return;
-						}
-					}
-					//reload
-					initData();
-				}
+				if (validate) validateAndRefresh();
 			}
 		});
+		
+		subscribeToEvent(AssetEvents.ASSETDATA, (event)->{
+			if (parentContext.get(MPart.class) == event.getProperty(UIEvents.EventTags.ELEMENT)) return;
+			//refresh data page
+			initData();
+		});
+	}
+	
+	private void validateAndRefresh() {
+		if (isDirty) {
+			if (!MessageDialog.openQuestion(getSite().getShell(), "Asset Modified", 
+					"This asset was modified by another part of the system.  Do you want to reload the page and loose any local changes?  By not reloading your risk overwriting other changes made outside this page." )) {
+				return;
+			}
+		}
+		//reload
+		initData();
+		
 	}
 	
 	/**
@@ -422,7 +389,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite headerComp = toolkit.createComposite(body);
-		headerComp.setLayout(new GridLayout(6, false));
+		headerComp.setLayout(new GridLayout(7, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)headerComp.getLayout()).marginWidth = 0;
 		((GridLayout)headerComp.getLayout()).marginHeight = 0;
@@ -458,12 +425,38 @@ public class AssetEditor extends EditorPart implements MapPart {
 		toolkit.createLabel(headerComp, "-");
 		lblAssetType = toolkit.createLabel(headerComp, "");
 				
+		ToolBar tbRefresh = new ToolBar(headerComp, SWT.FLAT);
+		new ToolItem(tbRefresh, SWT.SEPARATOR);
 		
-		String headers[] = new String[] {"Current Status", "Properties", "Deployments", "Data", "History"};
+		ToolItem refreshItem = new ToolItem(tbRefresh,SWT.PUSH);
+		refreshItem.setToolTipText("Refresh station location");
+		refreshItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		refreshItem.addListener(SWT.Selection, e->initData());
+		
+		ToolItem saveItem = new ToolItem(tbRefresh, SWT.PUSH);
+		saveItem.setToolTipText("Save changes");
+		saveItem.setImage(getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		saveItem.setEnabled(false);
+		saveItem.addListener(SWT.Selection, e->getSite().getPage().saveEditor(this, false));
+		addPropertyListener(new IPropertyListener() {
+			@Override
+			public void propertyChanged(Object source, int propId) {
+				if (propId == IEditorPart.PROP_DIRTY) {
+					saveItem.setEnabled(isDirty);
+				}
+			}
+		});
+		
+		
+		String headers[] = new String[] {"Current Status", "Data", "Properties", "Deployments", "History"};
 		Listener[] actions = new Listener[] {
 			event->{
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
+				sectionBody.layout(true);},
+			event->{
+				if (dataPanel == null) dataPanel = createDataSection(sectionBody);
+				((StackLayout)sectionBody.getLayout()).topControl = dataPanel;
 				sectionBody.layout(true);},
 			event->{
 				if (detailsPanel == null) detailsPanel = createDetailsSection(sectionBody);
@@ -474,14 +467,9 @@ public class AssetEditor extends EditorPart implements MapPart {
 				((StackLayout)sectionBody.getLayout()).topControl = deploymentPanel;
 				sectionBody.layout(true);},
 			event->{
-				if (dataPanel == null) dataPanel = createDataSection(sectionBody);
-				((StackLayout)sectionBody.getLayout()).topControl = dataPanel;
-				sectionBody.layout(true);},
-			event->{
 				if (eventsPanel == null) eventsPanel = createHistorySection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = eventsPanel;
 				sectionBody.layout(true);},
-				
 		};
 		
 		SectionHeader headerSection = new SectionHeader(body, SWT.NONE, headers, actions, toolkit);
@@ -541,157 +529,23 @@ public class AssetEditor extends EditorPart implements MapPart {
 	}
 
 	private Composite createDetailsSection(Composite parent) {
-		
 		Composite panel = toolkit.createComposite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout());
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)panel.getLayout()).marginWidth = 0;
 		((GridLayout)panel.getLayout()).marginHeight = 0;
 		
-		Composite toppanel = toolkit.createComposite(panel, SWT.BORDER);
-		toppanel.setLayout(new GridLayout(3, false));
-		toppanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		detailsPage = new AssetPropertyPage(this);
+		ContextInjectionFactory.inject(detailsPage, parentContext);
+		detailsPage.createControl(panel, toolkit);
 		
-		Label l = toolkit.createLabel(toppanel, "State: ");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
-		lblRetiredState = toolkit.createLabel(toppanel, "");
-		lblRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		changeRetiredState = toolkit.createHyperlink(toppanel, "", SWT.NONE);
-		changeRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		changeRetiredState.addHyperlinkListener(new HyperlinkAdapter() {			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (asset == null) return;
-				
-				String action;
-				String msg;
-				if (!asset.getIsRetired()) {
-					action = "Asset Retired - ";
-					msg = "Enter a comment related to the retirement";
-				}else {
-					action = "Asset Unretired - ";
-					msg = "Enter a comment related to unretirement of asset";
-				}
-				CommentDialog dialog = new CommentDialog(getSite().getShell(), "Asset History Comment", msg);
-				
-				if (dialog.open() != CommentDialog.OK) return;
-				
-				AssetHistoryRecord historyRecord = new AssetHistoryRecord();
-				historyRecord.setAsset(asset);
-				historyRecord.setComment(action + dialog.getComment());
-				historyRecord.setDate(new Date());
-				activeHistoryRecords.add(historyRecord);
-				asset.setIsRetired(!asset.getIsRetired());
-				refreshStatus();
-				setDirty(true);
-			}
-		});
-		
-		Composite attributeComp = toolkit.createComposite(panel, SWT.BORDER);
-		attributeComp.setLayout(new GridLayout());
-		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		l = toolkit.createLabel(attributeComp, "Attributes");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		FontData fd = l.getFont().getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		fd.setHeight(fd.getHeight() + 1);
-		Font boldFont = new Font(l.getDisplay(), fd);
-		l.setFont(boldFont);
-		l.addListener(SWT.Dispose,  e-> boldFont.dispose());
-		
-		ScrolledComposite attributes = new ScrolledComposite(attributeComp,  SWT.V_SCROLL);
-		attributes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		attributes.setExpandHorizontal(true);
-		attributes.setExpandVertical(true);
-		
-		toolkit.adapt(attributes);
-		Composite attributePanel = toolkit.createComposite(attributes);
-		attributes.setContent(attributePanel);
-		attributePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		attributePanel.setLayout(new GridLayout(2, false));
-		
-		
-		
-		attributeEditors = new ArrayList<>();
-		for (AssetTypeAttribute attribute : asset.getAssetType().getAssetAttributes()) {
-			AttributeFieldEditor editor = new AttributeFieldEditor(attributePanel, attribute.getAttribute());
-			editor.adapt(toolkit);
-			attributeEditors.add(editor);
-			if (editor.getTextAttributeControl() != null) {
-				editor.getTextAttributeControl().addListener(SWT.Resize, e-> attributes.setMinSize(attributePanel.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-			}
-			editor.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					if (!editor.isValid()) return;
-					AssetAttributeValue toUpdate = null;
-					for (AssetAttributeValue v : asset.getAttributeValues()) {
-						if (v.getAttribute().equals(editor.getAttribute())) {
-							toUpdate = v;
-							break;
-						}
-					}
-					boolean isNew = false;
-					if (toUpdate == null) {
-						isNew = true;
-						toUpdate = new AssetAttributeValue();
-						toUpdate.setAsset(asset);
-						toUpdate.setAttribute(editor.getAttribute());
-					}
-					if (editor.updateValue(toUpdate)) {
-						if (isNew) asset.getAttributeValues().add(toUpdate);
-					}else {
-						if (!isNew) asset.getAttributeValues().remove(toUpdate);
-					}
-					setDirty(true);
-					
-				}
-			});
-		}
-		attributes.setMinSize(attributePanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
-		initializeAttributePanel(asset);
 		return panel;
 	}
 	
 	
 	private void initializeAttributePanel(Asset asset) {
-		if (lblRetiredState != null) {
-			lblRetiredState.setText(asset.getStatus().getGuiName(Locale.getDefault()));
-		}
-		if (changeRetiredState != null) {
-			if (asset.getIsRetired()) {
-				changeRetiredState.setText("unretire asset");
-			}else {
-				changeRetiredState.setText("retire asset");
-			}
-			changeRetiredState.getParent().layout(true);
-		}
-		if (attributeEditors != null) {
-			attributeEditors.forEach(field ->{
-				field.setEnabled(asset.getStatus() != Status.RETIRED);
-				for (AssetAttributeValue v : asset.getAttributeValues()) {
-					if (v.getAttribute().equals(field.getAttribute())) {
-						field.enableChangeListeners(false);
-						try {
-							field.initControl(v);
-						}finally {
-							field.enableChangeListeners(true);
-						}
-						break;
-					}
-				}
-			});
-		}
+		if (detailsPage != null) detailsPage.initializeAttributes(asset);
 	}
-	
-	
-	
-	
 	
 	private Composite createHistorySection(Composite parent) {
 		
@@ -838,9 +692,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		record.setDate(dialog.getSelectedDateTime());
 		record.setAsset(asset);
 		record.setComment(dialog.getComment());
-		activeHistoryRecords.add(record);
-		setDirty(true);
-		tblEvents.refresh();	
+		addActiveHistoryRecord(record);
 	}
 	
 	private void editHistoryRecord() {
@@ -951,4 +803,78 @@ public class AssetEditor extends EditorPart implements MapPart {
 	public IStatusLineManager getStatusLineManager() {
 		return ((IEditorSite)getSite()).getActionBars().getStatusLineManager();
 	}
+	
+	
+	private Job refreshJob = new Job("refresh asset data") {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			AssetEditorInput in = (AssetEditorInput) AssetEditor.this.getEditorInput();
+			
+			activeHistoryRecords = new ArrayList<>();
+			toDeleteHistoryRecords = new ArrayList<>();
+			
+			try(Session session = HibernateManager.openSession()){
+				//load asset data
+				if (in.getAssetUuid() == null) {
+					if (in.getAssetTypeUuid() != null) {
+						AssetType type = session.get(AssetType.class, in.getAssetTypeUuid());
+						asset = new Asset();
+						asset.setConservationArea(SmartDB.getCurrentConservationArea());
+						asset.setAssetType(type);
+						asset.setAttributeValues(new ArrayList<>());
+						asset.setIsRetired(false);
+						asset.setId("AssetId");
+						setDirty(true);
+					}
+				}else {
+					asset = session.get(Asset.class, in.getAssetUuid());
+				}
+				
+				if (asset == null) {
+					throw new Exception("Asset not found; could not initialize element controls");
+				}
+				if (asset.getAttributeValues() == null) asset.setAttributeValues(new ArrayList<>());
+				
+				asset.getAttributeValues().forEach(a->{
+					if (a.getAttributeListItem() != null) a.getAttributeListItem().getName();
+				});
+				
+				asset.getAssetType().getAssetAttributes().forEach(a->{
+					a.getAttribute().getName();
+					if (a.getAttribute().getAttributeList() != null) {
+						a.getAttribute().getAttributeList().forEach(l->l.getName());
+					}
+				});
+				
+				//update ui
+				Display.getDefault().syncExec(()->{
+					lblAssetType.setText(asset.getAssetType().getName());
+					try {
+						Image img = AWTSWTImageUtils.convertToSWTImage(asset.getAssetType().getIconAsImage());
+						lblAssetTypeImage.setImage(img);
+						lblAssetTypeImage.addListener(SWT.Dispose, e->img.dispose());
+						setTitleImage(img);
+					}catch (Exception ex) {
+						//no image
+					}
+					
+					lblId.setText(asset.getId());
+					setPartName(asset.getId());
+					
+					initializeAttributePanel(asset);
+					initializeEventsPanel(asset);
+					if (deploymentPage != null) deploymentPage.initializePanel(asset); 
+					
+					//updating the currentPage is covered by the refreshStatus
+					refreshStatus();
+					setDirty(false);
+				});
+			}catch (Exception ex) {
+				AssetPlugIn.displayLog(ex.getMessage(), ex);
+			}
+			return org.eclipse.core.runtime.Status.OK_STATUS;
+		}
+		
+	};
 }

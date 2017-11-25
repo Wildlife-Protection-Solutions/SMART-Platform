@@ -26,6 +26,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -37,8 +39,10 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.ui.AttachmentTable;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
 import org.wcs.smart.asset.ui.SettingsShell;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -48,6 +52,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
+import org.wcs.smart.ui.AttachmentPropertiesDialog;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -150,7 +155,7 @@ public class AssetDataPage {
 		scrollComp.addListener(SWT.Resize, e->{
 			Integer w = (Integer)scrollComp.getData("MAX_WIDTH");
 			if (w == null) return;
-			scrollComp.setMinSize(dataComposite.computeSize(w, SWT.DEFAULT));	
+			scrollComp.setMinSize(dataComposite.computeSize(Math.max(w, scrollComp.getBounds().width- scrollComp.getVerticalBar().getSize().x), SWT.DEFAULT));	
 		});
 		reloadData();
 		return mainControl;
@@ -367,35 +372,41 @@ public class AssetDataPage {
 					}	
 				}
 			}
-			
 			maxWidth = Math.max(maxWidth, outer.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
 			
-			Composite thumbnailComp = toolkit.createComposite(info);
-			thumbnailComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			thumbnailComp.setLayout(new RowLayout());
-			((RowLayout)thumbnailComp.getLayout()).wrap = true;
-			
+			List<ISmartAttachment> allAttachments = new ArrayList<>();		
 			if (aw.getWaypoint().getAttachments() != null) {
 				for (WaypointAttachment wa : aw.getWaypoint().getAttachments()) {
-					Thumbnail t = new Thumbnail(wa, settings.getIconSize().getSize(), true);
-					Composite c = t.createThumbnail(thumbnailComp);
-					c.setSize(100, 100);
-					c.setLayoutData(new RowData(settings.getIconSize().getSize(), settings.getIconSize().getSize()));
+					allAttachments.add(wa);
 				}
 			}
 			if (aw.getWaypoint().getObservations() != null) {
 				for (WaypointObservation wo : aw.getWaypoint().getObservations()) {
 					if (wo.getAttachments() != null) {
 						for (ObservationAttachment a : wo.getAttachments()) {
-							Thumbnail t = new Thumbnail(a, settings.getIconSize().getSize(), true);
-							Composite c = t.createThumbnail(thumbnailComp);
-							c.setSize(100, 100);
-							c.setLayoutData(new RowData(settings.getIconSize().getSize(), settings.getIconSize().getSize()));
+							allAttachments.add(a);
 						}
 					}
 				}
 			}
-			//TODO: observation attachments
+			AttachmentTable.IMenuCreator creator = new AttachmentTable.IMenuCreator() {
+				
+				@Override
+				public Menu createMenu(AttachmentTable parent) {
+					Menu imgMenu = new Menu(parent);
+					
+					MenuItem itemProp = new MenuItem(imgMenu, SWT.CASCADE);
+					itemProp.setText("Properties");
+					itemProp.addListener(SWT.Selection, e->{
+						AttachmentPropertiesDialog d = new AttachmentPropertiesDialog(parentEditor.getSite().getShell(), parent.getSelection().get(0));
+						d.open();
+					});
+					
+					return imgMenu;
+				}
+			};
+			AttachmentTable t = new AttachmentTable(info, toolkit, creator, allAttachments, settings.getIconSize().getSize());
+			t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 			Hyperlink link = toolkit.createHyperlink(outer, "Edit...", SWT.NONE);
 			link.addHyperlinkListener(new HyperlinkAdapter() {
@@ -410,7 +421,7 @@ public class AssetDataPage {
 		createNavigationControl(dataComposite);
 		dataComposite.layout(true);
 		scrollComp.setData("MAX_WIDTH", maxWidth);
-		scrollComp.setMinSize(dataComposite.computeSize(maxWidth, SWT.DEFAULT));		
+		scrollComp.setMinSize(dataComposite.computeSize(Math.max(maxWidth, scrollComp.getBounds().width - scrollComp.getVerticalBar().getSize().x), SWT.DEFAULT));		
 		scrollComp.setOrigin(0, 0);
 	}
 

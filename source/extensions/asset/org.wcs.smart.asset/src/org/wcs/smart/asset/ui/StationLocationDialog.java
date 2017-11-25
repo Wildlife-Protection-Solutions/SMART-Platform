@@ -85,7 +85,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
 		Button okBtn = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		
 		okBtn.setEnabled(false);
 		validate();
@@ -142,7 +142,8 @@ public class StationLocationDialog extends TitleAreaDialog{
 			}
 		}
 		context.get(IEventBroker.class).post(AssetEvents.ASSETSTATION_MODIFIED, Collections.singletonList(toUpdate.getStation()));
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
+
+		super.okPressed();
 	}
 	
 	private boolean validate() {

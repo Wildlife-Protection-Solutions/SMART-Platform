@@ -1,10 +1,13 @@
 package org.wcs.smart.asset.ui.views.data;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,6 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+
+import javax.persistence.Transient;
+
 import java.util.Objects;
 import java.util.Set;
 
@@ -82,6 +88,8 @@ import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.common.attachment.AttachmentUtil;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -94,6 +102,8 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.Tag;
 
 public class DataImporterView extends EditorPart{
+
+	private static final String ACTION_MENU_DATA_KEY = "ACTION";
 
 	public static final String ID = "org.wcs.smart.asset.ui.views.data.importer";
 	
@@ -141,6 +151,8 @@ public class DataImporterView extends EditorPart{
 		for (FileProxy p : toSave) {
 			if (!p.isValid()) return;
 		}
+		
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
 		try {
@@ -222,6 +234,10 @@ public class DataImporterView extends EditorPart{
 							if (d.getUuid() == null) {
 								session.save(d);
 							}
+							int wpcnt = d.getAssetWaypoints().size() + 1;
+//							String wpid = d.getStationLocation().getId() + "_" + df.format(wp.getDateTime()) + "_" + wpcnt;
+							wp.setId(wpcnt);
+							
 							session.flush();
 							
 							AssetWaypoint aw = new AssetWaypoint();
@@ -250,7 +266,7 @@ public class DataImporterView extends EditorPart{
 						session.getTransaction().commit();
 					}catch (Exception ex){
 						session.getTransaction().rollback();
-						AssetPlugIn.displayLog("Error saving asset files: {0}" + ex.getMessage(), ex);
+						AssetPlugIn.displayLog(MessageFormat.format("Error saving asset files: {0}", ex.getMessage()), ex);
 						return;
 					}
 				}
@@ -600,6 +616,34 @@ public class DataImporterView extends EditorPart{
 					}
 				}
 				mnuSaveFile.setEnabled(ok);
+				
+				for (MenuItem i : mnu.getItems()) {
+					Boolean x = (Boolean)i.getData(ACTION_MENU_DATA_KEY) ;
+					if (x != null && x) i.dispose();
+				}
+				
+				if (tblResults.getStructuredSelection().size() == 1) {
+					FileProxy proxy = (FileProxy)tblResults.getStructuredSelection().getFirstElement();
+					int sep = 0;
+					for (ActionableWarning aw : proxy.getWarnings()) {
+						ImportAction ia = ActionManager.findAction(aw, context);
+						if (ia == null) continue;
+						MenuItem mi = new MenuItem(mnu, SWT.PUSH, 0);
+						mi.setText(ia.getMenuLabel());
+						mi.setData(ACTION_MENU_DATA_KEY, true);
+						mi.addListener(SWT.Selection, er->{
+							if (ia.preformAction(processor, proxy)) {
+								refreshProxies();
+							}
+						});
+						sep ++;
+					}
+					if (sep>0) {
+						MenuItem mi = new MenuItem(mnu, SWT.SEPARATOR, sep);
+						mi.setData(ACTION_MENU_DATA_KEY, true);
+					}
+					
+				}
 			}
 			
 			@Override
@@ -778,7 +822,11 @@ public class DataImporterView extends EditorPart{
 			Image img = (Image)imageCanvas.getData("IMAGE");
 			if (img != null && img.isDisposed()) img.dispose();
 		});
-		
+		imageCanvas.addListener(SWT.MouseDoubleClick, e->{
+			final Path p = (Path)imageCanvas.getData("IMAGE_FILE");
+			if (p == null) return;
+			AttachmentUtil.launch(p.toFile());
+		});
 		detailsSash.setWeights(new int[] {3,2});
 		
 		fileDetailsComposite.layout(true);
@@ -1080,6 +1128,7 @@ public class DataImporterView extends EditorPart{
 						if (lastImage != null && !lastImage.isDisposed()) lastImage.dispose();
 						
 						imageCanvas.setData("IMAGE", img);
+						imageCanvas.setData("IMAGE_FILE", proxy.getFile());
 						imageCanvas.redraw();
 					});
 				}catch (Exception ex) {
@@ -1138,7 +1187,7 @@ public class DataImporterView extends EditorPart{
 		ASSET("Asset"),
 		LOCATION("Station Location"),
 		STATION("Station"),
-		WAYPOINT("Waypoint");
+		WAYPOINT("Incident Group");
 		
 		public String guiName;
 		

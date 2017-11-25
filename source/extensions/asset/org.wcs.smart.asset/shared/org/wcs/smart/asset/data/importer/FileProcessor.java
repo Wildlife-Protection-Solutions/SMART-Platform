@@ -460,7 +460,7 @@ public class FileProcessor {
 			p.setAsset(asset);
 			return;
 		}else {
-			p.addWarning(new ActionableWarning(MessageFormat.format("No asset found with id ''{0}''", id)));
+			p.addWarning(new NewAssetWarning(MessageFormat.format("No asset found with id ''{0}''", id), id));
 			//TODO: no asset found add a warning to the proxy and continue....we might find
 			//the asset in a different mapping
 		}

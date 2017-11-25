@@ -23,22 +23,33 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.engine.StatisticsEngine;
 import org.wcs.smart.asset.model.AssetAttribute;
@@ -46,6 +57,10 @@ import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.ui.AssetTypeLabelProvider;
+import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
+import org.wcs.smart.asset.ui.handler.OpenStationHandler;
+import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
 import org.wcs.smart.asset.ui.map.StationLocationDrawCommand;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -73,7 +88,7 @@ public class StationCurrentPage {
 	
 	private StationLocationDrawCommand drawCommand;
 	
-	private  Label lblNumIncidents;
+	private Label lblNumIncidents;
 	private Label lblNumUnTagged;
 	
 	public StationCurrentPage(StationEditor parent) {
@@ -158,7 +173,7 @@ public class StationCurrentPage {
 		l.addListener(SWT.Dispose, e->boldFont.dispose());
 		l.setFont(boldFont);
 		
-		l = toolkit.createLabel(topLeft, MessageFormat.format("Number of Assets Currently Deployed: {0}",currentDeployments.size()));
+		l = toolkit.createLabel(topLeft, MessageFormat.format("Number of Deployed Assets: {0}", currentDeployments.size()));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		lblNumIncidents = toolkit.createLabel(topLeft, DialogConstants.LOADING_TEXT);
@@ -166,6 +181,9 @@ public class StationCurrentPage {
 		
 		lblNumUnTagged = toolkit.createLabel(topLeft, DialogConstants.LOADING_TEXT);
 		lblNumUnTagged.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		l = toolkit.createLabel(topLeft, "", SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		tblCnts = new TableViewer(topLeft, SWT.FULL_SELECTION);
 		tblCnts.getTable().setHeaderVisible(true);
@@ -272,15 +290,40 @@ public class StationCurrentPage {
 			tc.getColumn().setText(c.guiName);
 			tc.getColumn().setToolTipText(c.guiName);
 			tc.getColumn().setWidth( 100 );
-			tc.setLabelProvider(new ColumnLabelProvider() {
-				@Override
-				public String getText(Object element) {
-					if (element instanceof AssetDeployment) {
-						return c.getText((AssetDeployment) element);
+			if (c == Column.ASSET_TYPE) {
+				tc.setLabelProvider(new ColumnLabelProvider() {
+					AssetTypeLabelProvider type = new AssetTypeLabelProvider();
+					@Override
+					public String getText(Object element) {
+						if (element instanceof AssetDeployment) {
+							return c.getText((AssetDeployment) element);
+						}
+						return super.getText(element);
 					}
-					return super.getText(element);
-				}
-			});
+					@Override
+					public void dispose() {
+						type.dispose();
+						super.dispose();
+					}
+					@Override
+					public Image getImage(Object element) {
+						if (element instanceof AssetDeployment) {
+							return type.getImage(((AssetDeployment) element).getAsset().getAssetType());
+						}
+						return null;
+					}
+				});
+			}else {
+				tc.setLabelProvider(new ColumnLabelProvider() {
+					@Override
+					public String getText(Object element) {
+						if (element instanceof AssetDeployment) {
+							return c.getText((AssetDeployment) element);
+						}
+						return super.getText(element);
+					}
+				});
+			}
 		}
 		List<AssetAttribute> sortedColumns = new ArrayList<>();
 		sortedColumns.addAll(attributeColumns);
@@ -304,8 +347,62 @@ public class StationCurrentPage {
 				}
 			});
 		}
-		tblAssetDeployments.setInput(currentDeployments);
 		
+		tblAssetDeployments.setInput(currentDeployments);
+		for (TableColumn c : tblAssetDeployments.getTable().getColumns()) {
+			c.pack();
+			c.setWidth(c.getWidth() + 20);
+		}
+		
+		tblAssetDeployments.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				ViewerCell cell = tblAssetDeployments.getCell(new Point(event.x, event.y));
+				if (cell == null) return;
+				int colIndex = cell.getColumnIndex();
+				if (colIndex == Column.ASSET_ID.ordinal()){
+					AssetDeployment d = (AssetDeployment) cell.getElement();
+					(new OpenAssetHandler()).openAsset(d.getAsset());
+				}else if (colIndex == Column.LOCATION.ordinal()) {
+					AssetDeployment d = (AssetDeployment) cell.getElement();
+					(new OpenStationLocationHandler()).openStationLocation(d.getStationLocation());
+				}
+			}
+					
+		});
+		
+		Menu mnu = new Menu(tblAssetDeployments.getTable());
+		tblAssetDeployments.getTable().setMenu(mnu);
+		mnu.addMenuListener(new MenuListener() {
+
+			@Override
+			public void menuHidden(MenuEvent e) {
+				
+			}
+
+			@Override
+			public void menuShown(MenuEvent e) {
+				for (MenuItem mi : mnu.getItems()) mi.dispose();
+				
+				Object x = tblAssetDeployments.getStructuredSelection().getFirstElement();
+				if (!(x instanceof AssetDeployment)) return;
+				
+				AssetDeployment d = (AssetDeployment)x;
+				MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
+				miAdd.setText(MessageFormat.format("Goto {0}", d.getAsset().getId()));
+				miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
+				miAdd.addListener(SWT.Selection, e1->{
+					(new OpenAssetHandler()).openAsset(d.getAsset());
+				});
+				
+				MenuItem miAdd2 = new MenuItem(mnu, SWT.PUSH);
+				miAdd2.setText(MessageFormat.format("Goto {0}", d.getStationLocation().getId()));
+				miAdd2.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
+				miAdd2.addListener(SWT.Selection, e2->{
+					(new OpenStationLocationHandler()).openStationLocation(d.getStationLocation());
+				});
+			}
+		});
 		drawCommand.setStations(Collections.singleton(parentEditor.getAssetStation()));
 		drawCommand.setLocations(locations);
 		SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(drawCommand.getBounds());
@@ -385,7 +482,6 @@ public class StationCurrentPage {
 	private enum Column{
 		ASSET_TYPE ("Asset Type"),
 		ASSET_ID ("Asset ID"),
-		STATION ("Station"),
 		LOCATION ("Location"),
 		START_DATE("Start Date");
 		
@@ -405,9 +501,6 @@ public class StationCurrentPage {
 				return element.getStationLocation().getId();
 			case START_DATE:
 				return DateFormat.getDateTimeInstance().format(element.getStartDate());
-			case STATION:
-				return element.getStationLocation().getStation().getId();
-				
 			}
 			return null;
 		}

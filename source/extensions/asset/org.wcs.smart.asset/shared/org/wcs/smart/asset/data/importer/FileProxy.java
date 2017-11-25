@@ -153,7 +153,6 @@ public class FileProxy {
 	 */
 	public void setAsset(Asset asset) {
 		this.asset = asset;
-//		this.deployment = null;
 	}
 	
 	/**
@@ -168,7 +167,6 @@ public class FileProxy {
 			x = location.getX();
 			y = location.getY();
 		}
-//		this.deployment = null;
 	}
 	
 	/**

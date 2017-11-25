@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.stationlocation;
 
 import java.text.MessageFormat;
@@ -6,8 +27,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -28,9 +53,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPropertyListener;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -41,18 +70,25 @@ import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.EventHandler;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.IdFieldHeader;
 import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 
+/**
+ * Station location editor.
+ * 
+ * @author Emily
+ *
+ */
 public class StationLocationEditor extends EditorPart implements MapPart {
 
 	public static final String ID = "org.wcs.smart.asset.ui.views.stationlocation"; //$NON-NLS-1$
@@ -129,10 +165,6 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		data.put(IEventBroker.DATA, Collections.singletonList(stationlocation));
 		parentContext.get(IEventBroker.class).post(isNew ? AssetEvents.ASSETSTATIONLOCATION_NEW : AssetEvents.ASSETSTATIONLOCATION_MODIFIED, data);	
 		
-//		if (currentPage != null) currentPage.refresh();
-//		if (detailsPage != null) detailsPage.refresh();
-//		if (historyPage != null) historyPage.refresh();
-//		if (detailsPage != null) detailsPage.refresh();
 	}
 
 	@Override
@@ -152,54 +184,18 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		handlers.add(handler);
 	}
 	
+	private void refreshStatus() {
+		lblStatus.setText(stationlocation.getStatus().getGuiName(Locale.getDefault()));
+		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(stationlocation.getStatus()));
+		lblStatus.getParent().layout(true);
+	}
+	
 	private void initData() {
-		StationLocationEditorInput in = (StationLocationEditorInput) super.getEditorInput();
-		
-		try(Session session = HibernateManager.openSession()){
-			if (in.getStationLocationUuid() == null) {
-				//this should probably never happy
-				if (in.getStationLocationUuid() != null) {
-					stationlocation = new AssetStationLocation();
-					//TODO: find station
-//					stationlocation.setConservationArea(SmartDB.getCurrentConservationArea());
-					
-					stationlocation.setAttributeValues(new ArrayList<>());
-					stationlocation.setId("Station Location ID");
-					
-					setDirty(true);
-				}
-			}else {
-				stationlocation = session.get(AssetStationLocation.class, in.getStationLocationUuid());
-				if (stationlocation != null) stationlocation.equals(null);
-			}
-			
-			if (stationlocation == null) {
-				throw new Exception("Station Location not found; could not initialize element controls");
-			}
-			if (stationlocation.getAttributeValues() == null) {
-				stationlocation.setAttributeValues(new ArrayList<>());
-			}else {
-				stationlocation.getAttributeValues().forEach(a->{
-					if (a.getAttributeListItem() != null) a.getAttributeListItem().getName();
-				});
-			}
-			
-			stationlocation.getStation().getId();
-			stationlocation.getStation().getUuid().equals(null);
-			
-			lblId.setText(stationlocation.getId());
-			setPartName(stationlocation.getId());
-			//setTitleImage(img);
-			
-			initializeCurrentPage(stationlocation);
-			initializeDetailsPage(stationlocation);
-			initializeHistoryPage(stationlocation);
-			
-				
-		}catch (Exception ex) {
-			AssetPlugIn.displayLog(ex.getMessage(), ex);
+		if (isDirty()) {
+			if (!MessageDialog.openQuestion(getSite().getShell(), "Refresh", "This location has unsaved changes.  By refreshing this page, these changes will be lost.  Are you sure you want to continue?")) return;
 		}
-		
+		refreshJob.setSystem(true);
+		refreshJob.schedule();
 	}
 
 	@Override
@@ -238,12 +234,40 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		//on delete close editor
 		handlers = new ArrayList<>();
 		
+		subscribeToEvent(AssetEvents.ASSETDEPLOYMENT_ALL, (event)->{
+			Object data = event.getProperty(IEventBroker.DATA);
+			if (data != null){
+				boolean refresh = false;
+				Collection<AssetDeployment> items = (Collection<AssetDeployment>)data;
+				for (AssetDeployment loc : items){
+					if (loc.getStationLocation().equals(stationlocation)) {
+						refresh = true;
+						break;
+					}
+				}
+				if (refresh) validateAndRefresh();
+			}
+		});
+		
 		subscribeToEvent(AssetEvents.ASSETSTATIONLOCATION_DELETE, (event)->{
 			Object data = event.getProperty(IEventBroker.DATA);
 			if (data != null){
 				Collection<AssetStationLocation> items = (Collection<AssetStationLocation>)data;
 				for (AssetStationLocation loc : items){
 					if (loc.equals(stationlocation)) forceCloseEditor();
+				}
+			}
+		});
+		
+		subscribeToEvent(AssetEvents.ASSETSTATION_DELETE, (event)->{
+			Object data = event.getProperty(IEventBroker.DATA);
+			if (data != null){
+				Collection<AssetStation> items = (Collection<AssetStation>)data;
+				for (AssetStation loc : items){
+					if (loc.equals(stationlocation.getStation())) {
+						forceCloseEditor();
+						return;
+					}
 				}
 			}
 		});
@@ -261,21 +285,21 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 						break;
 					}
 				}
-				
-				if (validate) {
-					if (isDirty) {
-						if (!MessageDialog.openQuestion(getSite().getShell(), "Station Location Modified", 
-								"This station location was modified by another part of the system.  Do you want to reload the page and loose any local changes?  By not reloading your risk overwriting other changes made outside this page." )) {
-							return;
-						}
-					}
-					//reload
-					initData();
-				}
+				if (validate) validateAndRefresh();
 			}
 		});
 	}
 	
+	private void validateAndRefresh() {
+		if (isDirty) {
+			if (!MessageDialog.openQuestion(getSite().getShell(), "Station Location Modified", 
+					"This station location was modified by another part of the system.  Do you want to reload the page and loose any local changes?  By not reloading your risk overwriting other changes made outside this page." )) {
+				return;
+			}
+		}
+		//reload
+		initData();
+	}
 	/**
 	 * Gets the asset station; may return null if the station not yet loaded
 	 * @return
@@ -301,10 +325,13 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite headerComp = toolkit.createComposite(body);
-		headerComp.setLayout(new GridLayout(1, false));
+		headerComp.setLayout(new GridLayout(5, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)headerComp.getLayout()).marginWidth = 0;
 		((GridLayout)headerComp.getLayout()).marginHeight = 0;
+		
+		Label icon = toolkit.createLabel(headerComp, "");
+		icon.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION_LOCATION));
 		
 		lblId = new IdFieldHeader(headerComp, toolkit, pageForm.getFont(), pageForm.getForeground());
 		lblId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -331,6 +358,32 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 			setDirty(true);
 		});
 
+		lblStatusImage = toolkit.createLabel(headerComp, "");
+		lblStatus = toolkit.createLabel(headerComp, "");
+		
+		ToolBar tbRefresh = new ToolBar(headerComp, SWT.FLAT);
+		new ToolItem(tbRefresh, SWT.SEPARATOR);
+		ToolItem refreshItem = new ToolItem(tbRefresh,SWT.PUSH);
+		refreshItem.setToolTipText("Refresh station location");
+		refreshItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		refreshItem.addListener(SWT.Selection, e->initData());
+		
+		ToolItem saveItem = new ToolItem(tbRefresh, SWT.PUSH);
+		saveItem.setToolTipText("Save changes");
+		saveItem.setImage(getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		saveItem.setEnabled(false);
+		saveItem.addListener(SWT.Selection, e->getSite().getPage().saveEditor(this, false));
+		addPropertyListener(new IPropertyListener() {
+			
+			@Override
+			public void propertyChanged(Object source, int propId) {
+				if (propId == IEditorPart.PROP_DIRTY) {
+					saveItem.setEnabled(isDirty);
+				}
+			}
+		});
+		
+		
 		String headers[] = new String[] {"Current Status", "Properties", "History"};
 		Listener[] actions = new Listener[] {
 			event->{
@@ -451,4 +504,49 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		return ((IEditorSite)getSite()).getActionBars().getStatusLineManager();
 	}
 
+	
+	Job refreshJob = new Job("refresh location data") {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			StationLocationEditorInput in = ((StationLocationEditorInput)StationLocationEditor.this.getEditorInput());
+			try(Session session = HibernateManager.openSession()){
+				//load station location data from database
+				if (in.getStationLocationUuid() == null) {
+					//this should never happen
+					throw new IllegalStateException("Station location does not exist");
+				}else {
+					stationlocation = session.get(AssetStationLocation.class, in.getStationLocationUuid());
+					if (stationlocation != null) stationlocation.equals(null);
+				}
+				
+				if (stationlocation == null) {
+					throw new Exception("Station Location not found; could not initialize element controls");
+				}
+				if (stationlocation.getAttributeValues() == null) stationlocation.setAttributeValues(new ArrayList<>());
+				
+				stationlocation.getAttributeValues().forEach(a->{
+					if (a.getAttributeListItem() != null) a.getAttributeListItem().getName();
+				});
+				stationlocation.getStation().getId();
+				stationlocation.getStation().getUuid().equals(null);
+				
+				Display.getDefault().syncExec(()->{
+					//update uid
+					lblId.setText(stationlocation.getId());
+					setPartName(stationlocation.getId());
+
+					initializeCurrentPage(stationlocation);
+					initializeDetailsPage(stationlocation);
+					initializeHistoryPage(stationlocation);
+					
+					refreshStatus();
+					setDirty(false);
+				});
+			}catch (Exception ex) {
+				AssetPlugIn.displayLog(ex.getMessage(), ex);
+			}
+			return Status.OK_STATUS;
+		}
+	};
 }

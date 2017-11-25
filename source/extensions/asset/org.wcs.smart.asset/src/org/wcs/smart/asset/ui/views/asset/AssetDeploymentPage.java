@@ -41,13 +41,12 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -56,12 +55,15 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
@@ -75,6 +77,8 @@ import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
+import org.wcs.smart.asset.ui.handler.OpenStationHandler;
+import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -213,6 +217,25 @@ public class AssetDeploymentPage {
 		tblDeployments.getTable().setHeaderVisible(true);
 		tblDeployments.getTable().setLinesVisible(true);
 		
+		tblDeployments.getTable().addListener(SWT.MouseDoubleClick, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				ViewerCell cell = tblDeployments.getCell(new Point(event.x, event.y));
+				if (cell == null) return;
+				int colIndex = cell.getColumnIndex();
+				if (colIndex == AssetDeploymentTableColumn.FixedColumn.STATION.ordinal()){
+					AssetDeployment d = (AssetDeployment) cell.getElement();
+					(new OpenStationHandler()).openStation(d.getStationLocation().getStation());
+				}else if (colIndex == AssetDeploymentTableColumn.FixedColumn.LOCATION.ordinal()){
+					AssetDeployment d = (AssetDeployment) cell.getElement();
+					(new OpenStationLocationHandler()).openStationLocation(d.getStationLocation());
+				}else {
+					if (!parentEditor.getAsset().getIsRetired()) editSelectedDeployments();
+				}
+			}
+					
+		});
+		
 		if (!parentEditor.getAsset().getIsRetired()) {
 			final ToolItem fitemDelete = itemDelete;
 			final ToolItem fitemEdit = itemEdit;
@@ -221,14 +244,6 @@ public class AssetDeploymentPage {
 				public void selectionChanged(SelectionChangedEvent event) {
 					fitemDelete.setEnabled(!tblDeployments.getSelection().isEmpty());
 					fitemEdit.setEnabled(!tblDeployments.getSelection().isEmpty());
-				}
-			});
-			
-			tblDeployments.addDoubleClickListener(new IDoubleClickListener() {
-				
-				@Override
-				public void doubleClick(DoubleClickEvent event) {
-					editSelectedDeployments();
 				}
 			});
 			
@@ -507,12 +522,13 @@ public class AssetDeploymentPage {
 				for (AssetDeploymentTableColumn column : tableColumns) {
 					TableViewerColumn c = new TableViewerColumn(tblDeployments, SWT.NONE);
 					c.getColumn().setText(column.getColumnName());
-					c.getColumn().setWidth(125);
 					c.setLabelProvider(column);
-					
 				}
 				tblDeployments.setInput(allDeployments);
-				
+				for (TableColumn c : tblDeployments.getTable().getColumns()) {
+					c.pack();
+					c.setWidth(c.getWidth() + 20);
+				}
 				
 			});
 			return org.eclipse.core.runtime.Status.OK_STATUS;

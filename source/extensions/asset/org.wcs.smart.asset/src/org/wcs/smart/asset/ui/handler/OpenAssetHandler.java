@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.ui.handler;
 
 import java.text.MessageFormat;
+import java.util.UUID;
 
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -47,6 +48,11 @@ public class OpenAssetHandler {
 	
 	public void openAsset(Asset asset){
 		AssetEditorInput input = new AssetEditorInput(asset.getUuid(),  asset.getId());
+		openAsset(input);
+	}
+	
+	public void openAsset(UUID assetUuid){
+		AssetEditorInput input = new AssetEditorInput(assetUuid, null);
 		openAsset(input);
 	}
 }

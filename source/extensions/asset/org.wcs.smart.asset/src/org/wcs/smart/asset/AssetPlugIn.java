@@ -55,6 +55,9 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	
 	public static final String ICON_SETTINGS = "org.wcs.smart.asset.settings";
 	
+	public static final String ICON_STATION = "org.wcs.smart.asset.station";
+	public static final String ICON_STATION_LOCATION = "org.wcs.smart.asset.station.location";
+	
 	/**
 	 * The constructor
 	 */
@@ -125,5 +128,8 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		reg.put(ICON_IMPORT_INCOMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_incomplete.png")); //$NON-NLS-1$);
 		
 		reg.put(ICON_SETTINGS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/settings.png")); //$NON-NLS-1$);
+		
+		reg.put(ICON_STATION, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station.png")); //$NON-NLS-1$);
+		reg.put(ICON_STATION_LOCATION, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/location.png")); //$NON-NLS-1$);
 	}
 }

@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.asset.ui.handler;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +34,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -50,7 +55,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.osgi.service.prefs.BackingStoreException;
+import org.wcs.smart.asset.AssetEvents;
+import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.ui.AssetTypeLabelProvider;
 import org.wcs.smart.asset.ui.views.asset.AssetEditorInput;
@@ -126,6 +135,47 @@ public class NewAssetHandler {
 		(new OpenAssetHandler()).openAsset(in);
 	}
 	
+	
+	public Asset createAndSave(String assetId, IEventBroker broker) {
+		SelectAssetTypeDialog dialog = new SelectAssetTypeDialog(Display.getDefault().getActiveShell());
+		if (dialog.open() != Window.OK) return null;
+		
+		AssetType type = dialog.getAssetType();
+		Asset newAsset = null;
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				//ensure asset id doesn't already exist
+				String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca ";
+				Query<?> q = session.createQuery(query)
+				.setParameter("id", assetId.toLowerCase())
+				.setParameter("ca", SmartDB.getCurrentConservationArea());
+				Long cnt = (Long)q.uniqueResult();
+				if (cnt != 0) {
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Duplicate Asset ID", MessageFormat.format("Asset with id {0} already exists in the system.  Cannot duplicate asset id", assetId));
+					return null;
+				}
+				
+				newAsset = new Asset();
+				newAsset.setAssetType(type);
+				newAsset.setId(assetId);
+				newAsset.setConservationArea(SmartDB.getCurrentConservationArea());
+				newAsset.setAttributeValues(new ArrayList<>());
+				newAsset.setIsRetired(false);
+				
+				session.save(newAsset);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.displayLog("Unable to create new asset: " + ex.getMessage(), ex);
+				return null;
+			}
+		}
+		
+		//todo fire event
+		broker.post(AssetEvents.ASSET_NEW, Collections.singleton(newAsset));
+		return newAsset;
+	}
 	
 	/**
 	 * Dialog for selecting type of asset to create
