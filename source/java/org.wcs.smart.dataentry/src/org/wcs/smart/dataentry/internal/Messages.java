@@ -12,6 +12,7 @@ public class Messages extends NLS {
 	public static String AbstractInfoComposite_DisplayMode;
 	public static String AbstractInfoComposite_DisplayName;
 	public static String AbstractInfoComposite_DmLoadingTaskName;
+	public static String AbstractInfoComposite_EmptyNameNotAllowed;
 	public static String AbstractInfoComposite_ErrorDialogTitle;
 	public static String AbstractInfoComposite_InvalidNameMessage;
 	public static String AbstractInfoComposite_NewGroupDefaultName;

@@ -100,8 +100,9 @@ public class TranslateNameComposite extends Composite {
 			public void focusLost(FocusEvent e) {
 				if (!isInnerChange() && item != null) {
 					boolean changed = false;
-					if (text.getText().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
-						MessageDialog.openError(getShell(), Messages.AbstractInfoComposite_ErrorDialogTitle, MessageFormat.format(Messages.AbstractInfoComposite_InvalidNameMessage, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
+					String error = validateDisplayName(text.getText());
+					if (error != null) {
+						MessageDialog.openError(getShell(), Messages.AbstractInfoComposite_ErrorDialogTitle, error);
 						text.setText(item.getName());
 					}else{
 						changed = !text.getText().equals(item.getName());
@@ -114,7 +115,6 @@ public class TranslateNameComposite extends Composite {
 						handleChanged();
 					}
 				}
-				
 			}
 			
 			@Override
@@ -125,8 +125,9 @@ public class TranslateNameComposite extends Composite {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (!isInnerChange() && item != null) {
-					if (text.getText().length() > org.wcs.smart.ca.Label.MAX_LENGTH){
-						cd.setDescriptionText(MessageFormat.format(Messages.AbstractInfoComposite_InvalidNameMessage, new Object[]{org.wcs.smart.ca.Label.MAX_LENGTH}));
+					String error = validateDisplayName(text.getText());
+					if (error != null) {
+						cd.setDescriptionText(error);
 						cd.show();
 					}else{
 						cd.hide();
@@ -151,6 +152,16 @@ public class TranslateNameComposite extends Composite {
 				}
 			}
 		});
+	}
+
+	private String validateDisplayName(String name) {
+		if (name.length() > org.wcs.smart.ca.Label.MAX_LENGTH) {
+			return MessageFormat.format(Messages.AbstractInfoComposite_InvalidNameMessage, org.wcs.smart.ca.Label.MAX_LENGTH);
+		}
+		if (name.trim().isEmpty()) {
+			return Messages.AbstractInfoComposite_EmptyNameNotAllowed;
+		}
+		return null;
 	}
 	
 	protected boolean isInnerChange() {
