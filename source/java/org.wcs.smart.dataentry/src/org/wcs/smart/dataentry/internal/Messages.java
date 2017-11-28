@@ -177,6 +177,8 @@ public class Messages extends NLS {
 	public static String EditTreeDialog_DeleteTooltip;
 	public static String EditTreeDialog_DisplayMode;
 	public static String EditTreeDialog_EnableTooltip;
+	public static String EditTreeDialog_ErrorDialogTitle;
+	public static String EditTreeDialog_GroupEmptyNameError;
 	public static String EditTreeDialog_Image;
 	public static String EditTreeDialog_Message;
 	public static String EditTreeDialog_NewGroup;

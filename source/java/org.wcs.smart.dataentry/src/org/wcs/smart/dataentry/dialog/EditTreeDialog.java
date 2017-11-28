@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -471,7 +472,13 @@ public class EditTreeDialog extends TitleAreaDialog {
 						for (Iterator<Label> iterator = cmNode.getNames().iterator(); iterator.hasNext();) {
 							Label l = iterator.next();
 							if (l.getLanguage().equals(lang)){
-								iterator.remove();
+								if (!lang.isDefault() || cmNode.getDmTreeNode() != null) {
+									//we can remove label for non-default language of for non-group items
+									iterator.remove();
+								} else {
+									//we try to remove default name for group which is not allowed
+									MessageDialog.openError(getShell(), Messages.EditTreeDialog_ErrorDialogTitle, Messages.EditTreeDialog_GroupEmptyNameError);
+								}
 							}
 						}
 					}
