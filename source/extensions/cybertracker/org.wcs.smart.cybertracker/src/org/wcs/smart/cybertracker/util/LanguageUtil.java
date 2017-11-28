@@ -7,6 +7,9 @@ import org.wcs.smart.hibernate.SmartDB;
 public class LanguageUtil {
 
 	public static String getName(NamedItem i, Language language) {
+		if (i == null) {
+			return ""; //$NON-NLS-1$
+		}
 		if (language == null) {
 			return i.getName();
 		} else {
