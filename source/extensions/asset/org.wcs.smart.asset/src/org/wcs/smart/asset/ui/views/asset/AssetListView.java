@@ -587,6 +587,7 @@ public class AssetListView {
 				}
 				list.add(a);
 			});
+			for (List<Asset> allassets : mappings.values()) allassets.sort((a,b)->Collator.getInstance().compare(a.getId(), b.getId()));
 			Display.getDefault().syncExec(()->{
 				if (lstAssets != null && !lstAssets.getControl().isDisposed()){
 					lstAssets.setInput(mappings);
@@ -613,7 +614,8 @@ public class AssetListView {
 			}
 			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
 			HashMap<AssetStation, List<AssetStationLocation>> mappings = new HashMap<>();
-			stations.forEach(s->mappings.put(s, s.getLocations()));				
+			stations.forEach(s->mappings.put(s, s.getLocations()));			
+			for (List<AssetStationLocation> allassets : mappings.values()) allassets.sort((a,b)->Collator.getInstance().compare(a.getId(), b.getId()));
 			Display.getDefault().syncExec(()->{
 				if (lstStations != null && !lstStations.getControl().isDisposed()){
 					lstStations.setInput(mappings);

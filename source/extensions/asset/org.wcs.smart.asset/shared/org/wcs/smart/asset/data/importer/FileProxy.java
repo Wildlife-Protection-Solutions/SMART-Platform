@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.swt.graphics.Color;
 import org.geotools.geometry.jts.JTS;
@@ -44,7 +46,8 @@ public class FileProxy {
 	private List<WaypointObservation> rawObservations = new ArrayList<>();
 	private List<WaypointObservation> observations = new ArrayList<>();
 	
-	private List<FileProxy> relations = new ArrayList<>();
+	private Set<FileProxy> relations = new HashSet<>();
+	private Set<FileProxy> fixedRelations = null;
 	
 	private Integer waypoint;
 	
@@ -68,21 +71,89 @@ public class FileProxy {
 		}
 		if (this.waypoint != null) return false;
 		this.waypoint = newWaypoint;
+		if (fixedRelations != null) {
+			fixedRelations.forEach(c->c.setWaypoint(newWaypoint));
+			return true;
+		}
 		relations.forEach(c->c.setWaypoint(newWaypoint));
 		return true;
 	}
 	
+	/**
+	 * Configures if this file is part of a user defined group.
+	 * 
+	 * Set to null to remove this as a fixed relation.  When setting to
+	 * null it will remove this item from all fixed relations references.
+	 * 
+	 * Set to new collection to defined fixed relation, removing any existing
+	 * relations.
+	 * 
+	 * @param relations
+	 */
+	public void setFixedRelations(Collection<FileProxy> relations) {
+		if (relations == null) {
+			if (fixedRelations != null) {
+				for (FileProxy f : fixedRelations)  f.fixedRelations.remove(this);
+			}
+			this.fixedRelations = null;
+			return;
+		}
+		
+		this.fixedRelations = new HashSet<>();
+		fixedRelations.addAll(relations);
+		fixedRelations.remove(this);
+		for (FileProxy p : this.relations) {
+			p.getRelations().remove(this);
+			if (p.fixedRelations != null) p.fixedRelations.add(this);
+		}
+		this.relations.clear();
+	}
+	
+	/**
+	 * If this is part of a user defined group.
+	 * @return
+	 */
+	public boolean isFixed() {
+		return this.fixedRelations != null;
+	}
+	
+	/**
+	 * Add a relation to this proxy.  If this proxy is part of a 
+	 * fixed relation this will not add it.  Otherwise it will add both 
+	 * parts of the relation.  If the fp to add relation is also fixed it will also 
+	 * not get added
+	 * 
+	 * @param fp
+	 */
 	public void addRelation(FileProxy fp) {
-		if (!this.relations.contains(fp)) this.relations.add(fp);
-		if (!fp.getRelations().contains(this)) fp.getRelations().add(this);
+		if (this.fixedRelations != null)  return; //this is a fixed relation don't add me
+		if (fp.fixedRelations != null) return; //fp is also fixed we should not be configuring relation
+
+		for (FileProxy p : fp.relations) {
+			p.relations.add(this);
+			this.relations.add(p);
+		}
+		for (FileProxy p : this.relations) {
+			p.relations.add(fp);
+			fp.relations.add(p);	
+		}
+
+		this.relations.add(fp);
+		fp.relations.add(this);
+		
+		//remove myself from all relations
+		if (relations.contains(this)) relations.remove(this);
+		for (FileProxy p : relations) {
+			if (p.relations.contains(p)) p.relations.remove(p);
+		}
 	}
 	
 	public void removeRelation(FileProxy fp) {
 		this.relations.remove(fp);
-		fp.getRelations().remove(this);
+		fp.relations.remove(this);
 	}
 	
-	public List<FileProxy> getRelations() {
+	public Set<FileProxy> getRelations() {
 		return this.relations;
 	}
 	
@@ -178,17 +249,12 @@ public class FileProxy {
 		
 		this.location = null;
 		this.station = station;
-//		this.deployment = null;
 	}
 	
 	public Asset getAsset() {
 		return this.asset;
 	}
 	
-//	public AssetDeployment getDeployment() {
-//		return this.deployment;
-//	}
-//	
 	public AssetStation getStation() {
 		return this.station;
 	}
@@ -205,7 +271,6 @@ public class FileProxy {
 		if (processingException != null) return false;
 		if (getAsset() == null) return false;
 		if (getImageDate() == null) return false;
-//		if (getDeployment() == null) return false;
 		if (this.location == null) return false;
 		if (this.station == null) return false;
 		if (getX() == null) return false;
@@ -219,7 +284,6 @@ public class FileProxy {
 		if (getImageDate() == null) return "No date found";
 		if (getStation() == null) return "No station found";
 		if (getStationLocation() == null) return "No station location found";
-//		if (getDeployment() == null) return "No depoyment found";
 		if (getX() == null || getY() == null) return "No position found";
 		return "";
 	}
@@ -349,4 +413,5 @@ public class FileProxy {
 		this.location = matching;
 	}
 
+	
 }

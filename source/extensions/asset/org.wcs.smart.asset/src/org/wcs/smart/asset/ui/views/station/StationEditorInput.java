@@ -29,7 +29,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
 /**
- * Editor input for asset editor
+ * Editor input for station editor
  * 
  * @author Emily
  *

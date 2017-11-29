@@ -1,13 +1,11 @@
 package org.wcs.smart.asset.ui.views.data;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,9 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
-
-import javax.persistence.Transient;
-
 import java.util.Objects;
 import java.util.Set;
 
@@ -58,6 +53,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
@@ -89,7 +85,6 @@ import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.AttachmentUtil;
-import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -132,6 +127,9 @@ public class DataImporterView extends EditorPart{
 	private List<Asset> selectedAssets = new ArrayList<>();
 	private List<AssetStationLocation> selectedLocations = new ArrayList<>();
 	
+	private Composite singleSelectDetails;
+	private Composite multiSelectDetails;
+	
 	private Color[] rowColors;
 		
 	@Override
@@ -151,9 +149,7 @@ public class DataImporterView extends EditorPart{
 		for (FileProxy p : toSave) {
 			if (!p.isValid()) return;
 		}
-		
-		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-		
+				
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
 		try {
 		pmd.run(true, false,  new IRunnableWithProgress() {
@@ -205,10 +201,12 @@ public class DataImporterView extends EditorPart{
 							wp.setObservations(new ArrayList<>());
 							
 							for (WaypointObservation wo : p.getObservations()) {
-								wo.setWaypoint(wp);
-								wp.getObservations().add(wo);
+								WaypointObservation clone = wo.clone(session);
+								clone.setWaypoint(wp);
+								wp.getObservations().add(clone);
 							}
 							
+							//TODO: FIXED RELATIONS
 							//add relations
 							for (FileProxy pp : p.getRelations()) {
 								if (!items.contains(pp)) items.add(pp);
@@ -222,11 +220,13 @@ public class DataImporterView extends EditorPart{
 								for (WaypointObservation nextobs : pp.getObservations()) {
 									//todo check for duplicate
 									if (!containsObservation(nextobs, wp.getObservations())) {
-										nextobs.setWaypoint(wp);
-										wp.getObservations().add(nextobs);
+										WaypointObservation clone = nextobs.clone(session);
+										clone.setWaypoint(wp);
+										wp.getObservations().add(clone);
 									}
 								}
 							}
+							
 							session.save(wp);
 							session.flush();
 							
@@ -392,7 +392,7 @@ public class DataImporterView extends EditorPart{
 	public void createPartControl(Composite parent) {
 		
 		rowColors = new Color[] {
-				new Color(parent.getDisplay(), 255, 212, 212),
+				new Color(parent.getDisplay(), 255, 212, 127),
 				new Color(parent.getDisplay(), 255, 255, 212)
 		};
 		
@@ -505,11 +505,17 @@ public class DataImporterView extends EditorPart{
 			column.getColumn().setResizable(true);
 			column.getColumn().setText(c.guiName);
 			column.getColumn().setWidth(c.getWidth());
+			if (c == ResultsColumn.WAYPOINT) {
+				column.getColumn().setToolTipText("* indicates user defined group");
+			}
 			column.setLabelProvider(c.getLabelProvider(rowColors));
 		}
 		tblResults.setContentProvider(ArrayContentProvider.getInstance());
 		tblResults.setInput(processor.getFileDetails());
 		tblResults.addSelectionChangedListener(e->updateFileDetails());
+		TableColumn dateColumn = tblResults.getTable().getColumn(ResultsColumn.DATE.ordinal());
+		dateColumn.pack();
+//		dateColumn.setWidth(dateColumn.getWidth() + 20);
 		tblResults.refresh();
 		
 		Menu mnu = new Menu(tblResults.getControl());
@@ -576,6 +582,16 @@ public class DataImporterView extends EditorPart{
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
+		MenuItem mnuGroup = new MenuItem(mnu, SWT.PUSH);
+		mnuGroup.setText("Create Custom Incident Group...");
+		mnuGroup.addListener(SWT.Selection, e->groupSelected());
+		
+		MenuItem mnuRemoveGroup = new MenuItem(mnu, SWT.PUSH);
+		mnuRemoveGroup.setText("Remove Custom Incident Group...");
+		mnuRemoveGroup.addListener(SWT.Selection, e->ungroupSelected());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
 		MenuItem mnuSaveFile = new MenuItem(mnu, SWT.PUSH);
 		mnuSaveFile.setText("Save");
 		mnuSaveFile.addListener(SWT.Selection, e->{
@@ -603,19 +619,19 @@ public class DataImporterView extends EditorPart{
 				mnuSetLocation.setEnabled(!tblResults.getSelection().isEmpty());
 				mnuSetDate.setEnabled(!tblResults.getSelection().isEmpty());
 				mnuRemoveFile.setEnabled(!tblResults.getSelection().isEmpty());
-				
+				mnuGroup.setEnabled(!tblResults.getSelection().isEmpty());
 				//only save if all items are valid
 				boolean ok = true;
+				boolean canUngroup = false;
 				for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
 					Object x = (FileProxy) iterator.next();
 					if (x instanceof FileProxy) {
-						if (!((FileProxy) x).isValid()) {
-							ok = false;
-							break;
-						}
+						if (!((FileProxy) x).isValid()) ok = false;
+						if (((FileProxy) x).isFixed()) canUngroup = true;
 					}
 				}
 				mnuSaveFile.setEnabled(ok);
+				mnuRemoveGroup.setEnabled(canUngroup);
 				
 				for (MenuItem i : mnu.getItems()) {
 					Boolean x = (Boolean)i.getData(ACTION_MENU_DATA_KEY) ;
@@ -657,7 +673,7 @@ public class DataImporterView extends EditorPart{
 		
 		fileDetailsComposite = toolkit.createComposite(rightPart, SWT.BORDER);
 		fileDetailsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		fileDetailsComposite.setLayout(new GridLayout());
+		fileDetailsComposite.setLayout(new StackLayout());
 		
 		sash.setWeights(new int[] {7,4});
 		details.layout(true);
@@ -668,7 +684,15 @@ public class DataImporterView extends EditorPart{
 	
 	
 	private void createDetailsComposite() {
-		Composite top = toolkit.createComposite(fileDetailsComposite);
+		singleSelectDetails = toolkit.createComposite(fileDetailsComposite);
+		singleSelectDetails.setLayout(new GridLayout());
+		
+		multiSelectDetails = toolkit.createComposite(fileDetailsComposite);
+		multiSelectDetails.setLayout(new GridLayout());
+		
+		((StackLayout)fileDetailsComposite.getLayout()).topControl = singleSelectDetails;
+		
+		Composite top = toolkit.createComposite(singleSelectDetails);
 		top.setLayout(new GridLayout(2, false));
 		((GridLayout)top.getLayout()).marginWidth = 0;
 		((GridLayout)top.getLayout()).marginHeight = 0;
@@ -677,7 +701,7 @@ public class DataImporterView extends EditorPart{
 		lblDetailsFileName = toolkit.createLabel(top, "");
 		lblDetailsFileName .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		SashForm detailsSash = new SashForm(fileDetailsComposite, SWT.VERTICAL);
+		SashForm detailsSash = new SashForm(singleSelectDetails, SWT.VERTICAL);
 		detailsSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite infoComposite = toolkit.createComposite(detailsSash, SWT.NONE);
@@ -917,6 +941,23 @@ public class DataImporterView extends EditorPart{
 		refreshProxies();
 	}
 	
+	private void ungroupSelected() {
+		for (FileProxy p : getSelection()) {
+			p.setFixedRelations(null);
+		}
+		refreshProxies();
+	}
+	
+	private void groupSelected() {
+		List<FileProxy> proxies = getSelection();
+		
+		for (FileProxy p : proxies) {
+			p.setFixedRelations(proxies);
+		}
+		refreshProxies();
+	}
+	
+	
 	private void setDateTime() {
 		List<FileProxy> proxies = getSelection();
 		int cnt = 0;
@@ -979,12 +1020,137 @@ public class DataImporterView extends EditorPart{
 		if (lastImage != null && !lastImage.isDisposed()) lastImage.dispose();
 		imageCanvas.redraw();
 				
-		Object selection = tblResults.getStructuredSelection().getFirstElement();
-		if (selection == null) {
+		for (Control c : multiSelectDetails.getChildren()) c.dispose();
+		
+		if (tblResults.getStructuredSelection() == null || tblResults.getStructuredSelection().isEmpty()) {
 			lblDetailsFileName.setText( "" );
 			lblDetailsStatus.setImage( null );
 			return;
 		}
+		
+		if (tblResults.getStructuredSelection().size() > 1) {
+			ScrolledComposite sc = new ScrolledComposite(multiSelectDetails, SWT.V_SCROLL);
+			Composite details = toolkit.createComposite(sc);
+			sc.setContent(details);
+			sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			int cnt = 0;
+			int size = sc.computeSize(SWT.DEFAULT, SWT.DEFAULT).x - sc.getVerticalBar().getSize().x;
+			
+			for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
+				Object item = iterator.next();
+				if (!(item instanceof FileProxy)) continue;
+				FileProxy proxy = (FileProxy)item;
+				
+				Canvas canvas = new Canvas(details, SWT.BORDER);
+				toolkit.adapt(canvas);
+				
+				if (proxy.getWaypoint() != null) {
+					int colorIndex = proxy.getWaypoint() % rowColors.length;
+					canvas.setBackground(rowColors[colorIndex]);
+				}
+				canvas.setBounds(0, (cnt+2)*size, size, size);
+				cnt++;
+				
+				canvas.setData("IMAGE_PROXY", proxy);
+				canvas.addListener(SWT.Paint, e->{
+					if (canvas.isDisposed()) return;
+					Image img = (Image)canvas.getData("IMAGE");
+					if (img == null || img.isDisposed()) return;
+					// scale image
+					Rectangle cbounds = canvas.getBounds();	
+					Rectangle bounds = img.getBounds();
+					int x = 0, y = 0, width = 0, height = 0;
+					if (cbounds.width > cbounds.height) {
+						height = cbounds.height;
+						width = bounds.width * height / bounds.height;
+						x = (cbounds.width - width) / 2;
+					} else {
+						width = cbounds.width;
+						height = bounds.height * width / bounds.width;
+						y = (cbounds.height - height) / 2;
+					}
+					e.gc.drawImage(img, 0, 0, img.getBounds().width, img.getBounds().height, x, y, width, height);
+				});
+				String tooltip = proxy.getFile().getFileName().toString();
+				if (proxy.getWaypoint() != null) {
+					tooltip += "\n" + "Incident Group: " + proxy.getWaypoint();
+				}
+				canvas.setToolTipText(tooltip);
+				canvas.addListener(SWT.Dispose, e->{
+					Image img = (Image)canvas.getData("IMAGE");
+					if (img != null && img.isDisposed()) img.dispose();
+				});
+				canvas.addListener(SWT.MouseDoubleClick, e->{
+					final Path p = (Path)canvas.getData("IMAGE_FILE");
+					if (p == null) return;
+					AttachmentUtil.launch(p.toFile());
+				});
+				
+				
+			}
+			details.setSize(size, cnt*size);
+			sc.addListener(SWT.Resize, e->{
+				int size2 = sc.getBounds().width - sc.getVerticalBar().getSize().x;
+				int cnt2 = 0;
+				for (Control c : details.getChildren()) {
+					c.setBounds(0, cnt2 * (size2 + 2), size2, size2);
+					cnt2++;
+				}				
+				details.setSize(size2, cnt2*(size2+2));
+				sc.setMinSize(size2, cnt2 * (size2+2));
+				sc.layout(true);
+				details.layout(true);
+			});
+			
+			//only load and display images
+			//in the viewing range so we don't run
+			//out of memory 
+			Job refresimage = new Job("refresh images") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Display.getDefault().syncExec(()->{
+						if (sc.isDisposed()) return;
+						int min = Math.abs(details.getLocation().y);
+						int max = min + sc.getBounds().height;
+						for (Control c : details.getChildren()) {
+							Image img = (Image) c.getData("IMAGE");
+							int y = c.getLocation().y;
+							int y2 = c.getLocation().y + c.getBounds().height;
+							
+							if ((y > min && y < max) || (y2>min && y2 < max)) {
+								if (img != null) continue;	
+								FileProxy proxy = (FileProxy)c.getData("IMAGE_PROXY");
+								LoadImageJob imgjob = new LoadImageJob((Canvas)c);
+								imgjob.setSystem(true);
+								imgjob.schedule();
+								
+							}else {
+								if (img != null) {
+									img.dispose();
+									c.setData("IMAGE", null);
+								}
+							}
+						}
+					});
+					
+					return Status.OK_STATUS;
+				}
+				
+			};
+			sc.getVerticalBar().addListener(SWT.Selection, e->refresimage.schedule(200));
+			((StackLayout)fileDetailsComposite.getLayout()).topControl = multiSelectDetails;
+			
+			fileDetailsComposite.layout(true);
+			multiSelectDetails.layout(true);
+			refresimage.schedule();
+			return;
+		}
+		
+		((StackLayout)fileDetailsComposite.getLayout()).topControl = singleSelectDetails;
+		fileDetailsComposite.layout();
+		Object selection = tblResults.getStructuredSelection().getFirstElement();
 		if (!(selection instanceof FileProxy)) {
 			lblDetailsFileName.setText( "" );
 			lblDetailsStatus.setImage( null );
@@ -1114,32 +1280,10 @@ public class DataImporterView extends EditorPart{
 		};
 		j2.schedule();
 		
-		Job j = new Job("loading image job") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {			
-				try {
-					Image img = new Image(imageCanvas.getDisplay(), proxy.getFile().toString());
-					Display.getDefault().syncExec(()->{
-						if (imageCanvas.isDisposed()) {
-							img.dispose();
-							return;
-						}
-						Image lastImage = (Image) imageCanvas.getData("IMAGE");
-						if (lastImage != null && !lastImage.isDisposed()) lastImage.dispose();
-						
-						imageCanvas.setData("IMAGE", img);
-						imageCanvas.setData("IMAGE_FILE", proxy.getFile());
-						imageCanvas.redraw();
-					});
-				}catch (Exception ex) {
-					//invalid format TODO:
-					ex.printStackTrace();
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		j.setSystem(true);
-		j.schedule();
+		imageCanvas.setData("IMAGE_PROXY", proxy);
+		LoadImageJob imgLoader = new LoadImageJob(imageCanvas);
+		imgLoader.setSystem(true);
+		imgLoader.schedule();
 		
 		fileDetailsComposite.layout(true);
 	}
@@ -1207,7 +1351,7 @@ public class DataImporterView extends EditorPart{
 				return proxy.getStationLocation() == null ? "" : proxy.getStationLocation().getId();
 			case WAYPOINT:
 				if (proxy.getWaypoint() == null) return "";
-				return proxy.getWaypoint().toString();
+				return proxy.getWaypoint().toString() + (proxy.isFixed() ? "*" : "");
 			case STATION:
 				return proxy.getStation() == null ? "" : proxy.getStation().getId();
 			case STATUS:
@@ -1217,25 +1361,16 @@ public class DataImporterView extends EditorPart{
 		}
 		
 		public ColumnLabelProvider getLabelProvider(Color[] rowColors) {
-			if (this == STATUS) {
-				return new ColumnLabelProvider() {
-					@Override
-					public Image getImage(Object element) {
-						if (element instanceof FileProxy) {
-							if (((FileProxy) element).isValid()) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_COMPLETE);
-							return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_INCOMPLETE);
-						}
-						return null;
-					}
-					@Override
-					public String getText(Object element) {
-						if (element instanceof FileProxy) return getValue((FileProxy)element);
-						return super.getText(element);
-					}
-				};	
-			}
-				
 			return new ColumnLabelProvider() {
+				@Override
+				public Image getImage(Object element) {
+					if (ResultsColumn.this == STATUS && element instanceof FileProxy) {
+						if (((FileProxy) element).isValid()) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_COMPLETE);
+						return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_INCOMPLETE);
+					}
+					return null;
+				}
+				@Override
 				public String getText(Object element) {
 					if (element instanceof FileProxy) return getValue((FileProxy)element);
 					return super.getText(element);
@@ -1246,7 +1381,6 @@ public class DataImporterView extends EditorPart{
 					if (element instanceof FileProxy){
 						if (((FileProxy) element).getWaypoint() == null) return null;
 						int colorIndex = ((FileProxy) element).getWaypoint() % rowColors.length;
-//						return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_RED);
 						return rowColors[colorIndex];
 					}
 					return null;
@@ -1258,5 +1392,43 @@ public class DataImporterView extends EditorPart{
 			if (this == STATUS) return 22;
 			return 100;
 		}
+	}
+	
+	private class LoadImageJob extends Job {
+		
+		Canvas toUpdate = null;
+		FileProxy proxy = null;
+		public LoadImageJob(Canvas toUpdate) {
+			super("loading image job");
+			this.toUpdate = toUpdate;
+		}
+
+		protected IStatus run(IProgressMonitor monitor) {
+			
+			try {
+				Display.getDefault().syncExec(()->{
+					proxy = (FileProxy) toUpdate.getData("IMAGE_PROXY");
+					Image lastImage = (Image) toUpdate.getData("IMAGE");
+					if (lastImage != null && !lastImage.isDisposed()) lastImage.dispose();
+					toUpdate.setData("IMAGE", null);
+				});
+				if (proxy == null) return Status.OK_STATUS;
+				
+				Image img = new Image(toUpdate.getDisplay(), proxy.getFile().toString());
+				Display.getDefault().syncExec(()->{
+					if (toUpdate.isDisposed()) {
+						img.dispose();
+						return;
+					}
+					toUpdate.setData("IMAGE", img);
+					toUpdate.redraw();
+				});
+			}catch (Exception ex) {
+				//invalid format TODO:
+				ex.printStackTrace();
+			}
+			return Status.OK_STATUS;
+		}
+		
 	}
 }
