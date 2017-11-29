@@ -1391,6 +1391,7 @@ CREATE  TRIGGER trg_connect_account_after AFTER INSERT ON connect.change_log  FO
 
 
 ALTER TABLE smart.connect_data_queue DROP CONSTRAINT type_chk;
+ALTER TABLE connect.data_queue drop constraint type_chk;
 update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.connect.dataqueue';
 
 update smart.employee set smartuserlevel =  replace(smartuserlevel, 'INTEL_DATA_ENTRY', 'INTEL_RECORD_CREATE,INTEL_RECORD_VIEW,INTEL_RECORD_EDIT,INTEL_ENTITY_VIEW,INTEL_QUERY_ALL') where smartuserlevel is not null and smartuserlevel like '%INTEL_DATA_ENTRY%';
