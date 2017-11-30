@@ -236,16 +236,16 @@ function deleteUserQuicklink(){
 
 function updateUserQuicklink(){
 	displayDialog('updateUserQuicklinkDialog', 'main');
-	document.querySelector("input[name=update-uuid]").value = this.parentElement.parentElement.getAttribute('data-linkuuid');
-	document.querySelector("input[name=update-label]").value = this.parentElement.parentElement.getAttribute('data-linklabel');
-	document.querySelector("input[name=update-order]").value = this.parentElement.parentElement.getAttribute('data-linkorder');
+	document.querySelector("input[name=update-uuid]").value = this.parentElement.parentElement.getAttribute('data-linkuuid').trim();
+	document.querySelector("input[name=update-label]").value = this.parentElement.parentElement.getAttribute('data-linklabel').trim();
+	document.querySelector("input[name=update-order]").value = this.parentElement.parentElement.getAttribute('data-linkorder').trim();
 	return false;
 }
 
 function updateQuicklink(){
-	displayDialog('updateQuicklinkDialog', this.parentElement.parentElement.parentElement.id);
-	document.querySelector("input[name=update-qluuid]").value = this.parentElement.parentElement.getAttribute('data-uuid');
-	document.querySelector("input[name=update-url]").value = this.parentElement.parentElement.getAttribute('data-url');
+	displayDialog('updateQuicklinkDialog', this.parentElement.parentElement.parentElement.id).trim();
+	document.querySelector("input[name=update-qluuid]").value = this.parentElement.parentElement.getAttribute('data-uuid').trim();
+	document.querySelector("input[name=update-url]").value = this.parentElement.parentElement.getAttribute('data-url').trim();
 	
 	return false;
 }
