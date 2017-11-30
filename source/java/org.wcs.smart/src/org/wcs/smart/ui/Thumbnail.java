@@ -262,6 +262,17 @@ public class Thumbnail {
 	 * @param parent
 	 */
 	public Composite createThumbnail(Composite parent, int style){
+		return createThumbnail(parent, 0, style);
+	}
+	
+	/**
+	 * Creates the thumbnail widget with given style using the given offset.  The 
+	 * offset is the number of pixel to offset the image from the edge 
+	 * of the composite 
+	 * 
+	 * @param parent
+	 */
+	public Composite createThumbnail(Composite parent, int offset, int style ){
 		thumbnailComposite = new Composite(parent, style);
 		thumbnailComposite.setLocation(0,0);
 		thumbnailComposite.setSize(thumbnailSize, thumbnailSize);
@@ -285,7 +296,7 @@ public class Thumbnail {
 						break;
 					case SWT.Paint: {
 						if (image != null){
-							e.gc.drawImage(image, 0,0);
+							e.gc.drawImage(image, offset, offset);
 						}else{
 							List<String> toDraw = new ArrayList<String>();
 							
