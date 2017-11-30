@@ -39,7 +39,6 @@ import org.wcs.smart.asset.model.Asset.Status;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Model class for asset station. An asset station represents a location
@@ -235,8 +234,8 @@ public class AssetStation extends UuidItem {
 		}
 		
 		try(Session s = HibernateManager.openSession()){
-			String query = "SELECT count(*) FROM AssetDeployment d join d.id.stationLocation c WHERE d.endDate is null and c.station = :station";
-			Long activeDeployments = (Long) s.createQuery(query).setParameter("station",  this).uniqueResult();
+			String query = "SELECT count(*) FROM AssetDeployment d join d.id.stationLocation c WHERE d.endDate is null and c.station = :station"; //$NON-NLS-1$
+			Long activeDeployments = (Long) s.createQuery(query).setParameter("station",  this).uniqueResult(); //$NON-NLS-1$
 			if (activeDeployments == 0) {
 				status = Status.INACTIVE;
 			}else {

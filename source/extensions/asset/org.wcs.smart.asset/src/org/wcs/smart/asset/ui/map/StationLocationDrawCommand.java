@@ -4,10 +4,8 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -43,11 +41,21 @@ public class StationLocationDrawCommand extends AbstractDrawCommand{
 		this(0,0);
 	}
 		
+	/**
+	 * Buffers in meters 
+	 * @param stationBuffer
+	 * @param locationBuffer
+	 */
 	public StationLocationDrawCommand(double stationBuffer, double locationBuffer) {
 		this.stationBuffer = stationBuffer;
 		this.locationBuffer = locationBuffer;
 	}
 	
+	/**
+	 * Buffers in meters
+	 * @param stationBuffer
+	 * @param locationBuffer
+	 */
 	public void setBuffers(double stationBuffer, double locationBuffer) {
 		this.stationBuffer = stationBuffer;
 		this.locationBuffer = locationBuffer;

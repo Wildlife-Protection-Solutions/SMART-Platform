@@ -423,7 +423,7 @@ public class StationDataPage {
 					MenuItem itemProp = new MenuItem(imgMenu, SWT.CASCADE);
 					itemProp.setText("Properties");
 					itemProp.addListener(SWT.Selection, e->{
-						AttachmentPropertiesDialog d = new AttachmentPropertiesDialog(parentEditor.getSite().getShell(), parent.getSelection().get(0));
+						AttachmentPropertiesDialog d = new AttachmentPropertiesDialog(parentEditor.getSite().getShell(), (ISmartAttachment) parent.getSelection().getFirstElement());
 						d.open();
 					});
 					

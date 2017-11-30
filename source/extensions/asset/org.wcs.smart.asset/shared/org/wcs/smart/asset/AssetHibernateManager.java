@@ -113,8 +113,8 @@ public class AssetHibernateManager {
 	 */
 	public static double getStationBuffer(Session session, ConservationArea ca) {
 		AssetModuleSettings setting = QueryFactory.buildQuery(session, AssetModuleSettings.class, 
-				new Object[]{"conservationArea", ca},
-				new Object[] {"keyId", AssetModuleSettings.STATION_BUFFER_KEY}).uniqueResult();
+				new Object[]{"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"keyId", AssetModuleSettings.STATION_BUFFER_KEY}).uniqueResult(); //$NON-NLS-1$
 		if (setting == null) {
 			return AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE;
 		}
@@ -136,8 +136,8 @@ public class AssetHibernateManager {
 	 */
 	public static double getStationLocationBuffer(Session session, ConservationArea ca) {
 		AssetModuleSettings setting = QueryFactory.buildQuery(session, AssetModuleSettings.class, 
-				new Object[]{"conservationArea", ca},
-				new Object[] {"keyId", AssetModuleSettings.LOCATION_BUFFER_KEY}).uniqueResult();
+				new Object[]{"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"keyId", AssetModuleSettings.LOCATION_BUFFER_KEY}).uniqueResult(); //$NON-NLS-1$
 		if (setting == null) {
 			return AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE;
 		}

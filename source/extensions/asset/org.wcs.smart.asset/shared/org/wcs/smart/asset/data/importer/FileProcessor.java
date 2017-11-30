@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.data.importer;
 
 import java.nio.file.Path;
@@ -6,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
@@ -32,8 +54,18 @@ import com.drew.lang.Rational;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 
+/**
+ * Asset file process or processing a collection of files.
+ * 
+ * @author Emily
+ *
+ */
 public class FileProcessor {
 
+	private static final String EXIF_METADATA_KEY = "EXIF_METADATA"; //$NON-NLS-1$
+
+	public AtomicInteger NewObjectCounter = new AtomicInteger();
+	
 	private List<FileProxy> files;	
 	private ConservationArea ca;
 	
@@ -52,25 +84,25 @@ public class FileProcessor {
 			FileProxy proxy = FileMetadataReader.readFile(file, ca);
 			try(Session session = HibernateManager.openSession()){
 				processMetadata(proxy, session);
-				proxy.updateStationLocation(session, files);
+				proxy.updateStationLocation(session, this);
 			}
 			files.add(proxy);
 			addedProxies.add(proxy);
 		}catch (Exception ex) {
 			ex.printStackTrace();
-			//TODO: process exception
 			FileProxy p = new FileProxy(file, ca);
 			files.add(p);
+			p.addWarning(new ActionableWarning("Could not parse metadata from file: " + ex.getMessage()));
 		}
 		addedProxies.forEach(p->computeRelations(p));
 		computeWaypoints();
 		
 		//sort on waypoint id
 		files.sort((a,b)->{
-			if (a.getWaypoint() == null && b.getWaypoint() == null) return 0;
-			if (a.getWaypoint() == null) return -1;
-			if (b.getWaypoint() == null) return 1;
-			return a.getWaypoint().compareTo(b.getWaypoint());
+			if (a.getIncidentGroup() == null && b.getIncidentGroup() == null) return 0;
+			if (a.getIncidentGroup() == null) return -1;
+			if (b.getIncidentGroup() == null) return 1;
+			return a.getIncidentGroup().compareTo(b.getIncidentGroup());
 		});
 	}
 	
@@ -81,18 +113,18 @@ public class FileProcessor {
 
 		//sort on waypoint id
 		files.sort((a,b)->{
-			if (a.getWaypoint() == null && b.getWaypoint() == null) return 0;
-			if (a.getWaypoint() == null) return -1;
-			if (b.getWaypoint() == null) return 1;
-			return a.getWaypoint().compareTo(b.getWaypoint());
+			if (a.getIncidentGroup() == null && b.getIncidentGroup() == null) return 0;
+			if (a.getIncidentGroup() == null) return -1;
+			if (b.getIncidentGroup() == null) return 1;
+			return a.getIncidentGroup().compareTo(b.getIncidentGroup());
 		});
 	}
 	
 	private void computeWaypoints() {
-		files.forEach(p->p.setWaypoint(null));
+		files.forEach(p->p.setIncidentGroup(null));
 		int wpCnt = 1;
 		for (FileProxy p : files) {
-			if (p.setWaypoint(wpCnt)) {
+			if (p.setIncidentGroup(wpCnt)) {
 				wpCnt ++;
 			}
 		}
@@ -159,7 +191,7 @@ public class FileProcessor {
 
 		
 		for (FileProxy file : files) {
-			file.setWaypoint(null);
+			file.setIncidentGroup(null);
 			if (fp == file) continue;
 			if (file.getAsset() != null && file.getAsset().equals(fp.getAsset()) &&
 					file.getStationLocation() != null && file.getStationLocation().equals(fp.getStationLocation()) &&
@@ -275,17 +307,16 @@ public class FileProcessor {
 	}
 	
 	private void processMetadata(FileProxy p, AssetMetadataMapping mapping, Session session) throws Exception {
-		Metadata fileMetadata = (Metadata) p.getData("EXIF_METADATA");
+		Metadata fileMetadata = (Metadata) p.getData(EXIF_METADATA_KEY);
 		if (fileMetadata == null) {
 			fileMetadata = FileMetadataReader.readMetadata(p.getFile());
-			p.putData("EXIF_METADATA",  fileMetadata);
+			p.putData(EXIF_METADATA_KEY,  fileMetadata);
 		}
 		
 		ExifMetadataField field = (ExifMetadataField) mapping.getMetadataField();
 		if (field == null){
-			
-			Exception ex =  new Exception(MessageFormat.format("Could not parse mapping: {0}", mapping.getMetadataKey()));
-			ex.printStackTrace();
+			//Exception ex =  new Exception(MessageFormat.format("Could not parse mapping: {0}", mapping.getMetadataKey()));
+			//ex.printStackTrace();
 			return;
 		}
 
@@ -293,9 +324,7 @@ public class FileProcessor {
 		if (tag == null) return; //tag not found
 		
 		if (mapping.getMappedAssetProperty() != null) {
-			
-			String tagvalue= tag.getString(field.getTagType());
-			
+			String tagvalue= tag.getString(field.getTagType());			
 			switch(mapping.getMappedAssetProperty()) {
 			case ASSET_ID:
 				if (p.getAsset() != null) return;	//we already have an asset from another mapping; do not try again
@@ -312,7 +341,6 @@ public class FileProcessor {
 			}
 		} else {
 			//we are mapping categories/attributes
-			if (tag == null) return;  //tag not found; so we cannot make any observations from this
 			if (mapping.getMappedAttribute() == null && mapping.getMappedCategory() != null) {
 				//mapping a category but no attribute
 				boolean add = false;
@@ -450,10 +478,10 @@ public class FileProcessor {
 	
 	private void findAsset(FileProxy p, String id, Session session) {
 		//search the database for the given asset id
-		String hql = "FROM Asset WHERE conservationArea = :ca and upper(id) = :id";
+		String hql = "FROM Asset WHERE conservationArea = :ca and upper(id) = :id"; //$NON-NLS-1$
 		Asset asset = (Asset) session.createQuery(hql)
-				.setParameter("ca", ca)
-				.setParameter("id", id.toUpperCase())
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameter("id", id.toUpperCase()) //$NON-NLS-1$
 				.uniqueResult();
 		if (asset != null) {
 			asset.getAssetType().getIncidentCutoff();
@@ -461,29 +489,23 @@ public class FileProcessor {
 			return;
 		}else {
 			p.addWarning(new NewAssetWarning(MessageFormat.format("No asset found with id ''{0}''", id), id));
-			//TODO: no asset found add a warning to the proxy and continue....we might find
-			//the asset in a different mapping
 		}
 	}
 	
 	private void findLocation(FileProxy p, String id, Session session) {
 		//search the database for the given asset id
-		
-		String hql = "FROM AssetStationLocation WHERE station.conservationArea = :ca and upper(id) = :id";
+		String hql = "FROM AssetStationLocation WHERE station.conservationArea = :ca and upper(id) = :id"; //$NON-NLS-1$
 		AssetStationLocation location = (AssetStationLocation) session.createQuery(hql)
-				.setParameter("ca", ca)
-				.setParameter("id", id.toUpperCase())
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameter("id", id.toUpperCase()) //$NON-NLS-1$
 				.uniqueResult();
 		if (location != null) {
 			if (p.getStation() != null && p.getStation() != location.getStation()) {
-				//TODO: we need a warning; station is going to be overwritted by location
-				p.addWarning(new ActionableWarning(MessageFormat.format("Station location {1} is not associated with the station {0} found for the file.  The station location attribute will take precidence.", p.getStation().getId(), location.getId())) );
+				p.addWarning(new ActionableWarning(MessageFormat.format("Station location {1} is not associated with the station {0} found for the file.  The station location will take precidence and the station overwritten.", p.getStation().getId(), location.getId())) );
 			}
 			p.setStationLocation(location);
 			return;
 		}else {
-			//TODO: no location found add a warning to the proxy and continue....we might find
-			//in a different mapping
 			p.addWarning(new ActionableWarning(MessageFormat.format("No station location found with id ''{0}''", id)));
 		}
 	}
@@ -491,21 +513,18 @@ public class FileProcessor {
 	private void findStation(FileProxy p, String id, Session session) {
 		//search the database for the given asset id
 		
-		String hql = "FROM AssetStation WHERE conservationArea = :ca and upper(id) = :id";
+		String hql = "FROM AssetStation WHERE conservationArea = :ca and upper(id) = :id"; //$NON-NLS-1$
 		AssetStation station = (AssetStation) session.createQuery(hql)
-				.setParameter("ca", ca)
-				.setParameter("id", id.toUpperCase())
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.setParameter("id", id.toUpperCase()) //$NON-NLS-1$
 				.uniqueResult();
 		if (station != null) {
 			if (p.getStationLocation() != null && p.getStationLocation().getStation() != station) {
-				//TODO: warning and do not overwrite;
 				return;
 			}
 			p.setStation(station);
 			return;
 		}else {
-			//TODO: no station found add a warning to the proxy and continue....we might find
-			//in a different mapping
 			p.addWarning(new ActionableWarning(MessageFormat.format("No station found for id ''{0}''", id)));
 		}
 	}
@@ -517,11 +536,11 @@ public class FileProcessor {
 	public AssetDeployment findAssetDeployment(Waypoint wp, Asset asset, AssetStationLocation location, Session session) {
 		
 		//1.  Find a deployment for the asset that is between the start and end date of the waypoint
-		String hql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :date1 and (endDate is null or endDate>=:date2)";
-		List<AssetDeployment> matchingDeployment = session.createQuery(hql)
-			.setParameter("date1", wp.getDateTime())
-			.setParameter("date2",  wp.getDateTime())
-			.setParameter("asset", asset)
+		String hql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :date1 and (endDate is null or endDate>=:date2)"; //$NON-NLS-1$
+		List<AssetDeployment> matchingDeployment = session.createQuery(hql, AssetDeployment.class)
+			.setParameter("date1", wp.getDateTime()) //$NON-NLS-1$
+			.setParameter("date2",  wp.getDateTime()) //$NON-NLS-1$
+			.setParameter("asset", asset) //$NON-NLS-1$
 			.list();
 		
 		if (matchingDeployment.size() > 1) {
@@ -557,8 +576,8 @@ public class FileProcessor {
 		} else {
 			//not deployments that contained the wp date were found
 			//search for previous and next and see if we can expand one of them
-			hql = "FROM AssetDeployment WHERE asset = :asset";
-			List<AssetDeployment> allDeployments = session.createQuery(hql).setParameter("asset", asset).list();
+			hql = "FROM AssetDeployment WHERE asset = :asset"; //$NON-NLS-1$
+			List<AssetDeployment> allDeployments = session.createQuery(hql, AssetDeployment.class).setParameter("asset", asset).list(); //$NON-NLS-1$
 			
 			AssetDeployment prev = null;
 			AssetDeployment next = null;

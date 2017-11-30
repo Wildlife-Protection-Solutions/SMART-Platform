@@ -1,7 +1,29 @@
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.data.importer;
 
 
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -10,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.swt.graphics.Color;
 import org.geotools.geometry.jts.JTS;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetHibernateManager;
@@ -18,13 +39,20 @@ import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-public class FileProxy {
+/**
+ * Wrapper around asset file to track details computed
+ * about files.
+ * @author Emily
+ *
+ */
+public class FileProxy extends ISmartAttachment{
 
 	private Path file;
 	
@@ -37,45 +65,73 @@ public class FileProxy {
 	
 	private ConservationArea ca;
 	
-	private Exception processingException;
-	
 	private List<ActionableWarning> warnings;
 	
+	//map for caching processing data
 	private HashMap<String, Object> dataCache = new HashMap<>();
-	
+	//raw observations in the metadata file
 	private List<WaypointObservation> rawObservations = new ArrayList<>();
+	//cleaned observation (combined where they can be combined etc).
 	private List<WaypointObservation> observations = new ArrayList<>();
-	
+	//all related files that are computed automatically (this will form a single waypoint)
 	private Set<FileProxy> relations = new HashSet<>();
+	//user defined relations - files can have either auto
+	//defined (relations) or fixedRelations but not both
 	private Set<FileProxy> fixedRelations = null;
+	//all relations will have the same group - this is number for displaying to the user
+	private Integer incidentGroup;
 	
-	private Integer waypoint;
-	
+	/**
+	 * New file proxy
+	 * @param file the file
+	 * @param ca the conservation area
+	 */
 	public FileProxy(Path file, ConservationArea ca) {
+		super.attachmentFile = file.toFile();
+		super.setFilename(file.getFileName().toString());
 		this.file = file;
 		this.ca = ca;
 		warnings = new ArrayList<>();
 	}
 	
-	public Integer getWaypoint() {
-		return this.waypoint;
+	/**
+	 * Gets the incident group 
+	 * 
+	 * @return
+	 */
+	public Integer getIncidentGroup() {
+		return this.incidentGroup;
 	}
-	public boolean setWaypoint(Integer newWaypoint) {
-		if (newWaypoint == null) {
-			this.waypoint = null;
+	
+	/**
+	 * Sets the incident group.  If the incident group is already set
+	 * for this file, this will not update it and return false.  Otherwise
+	 * it will update the group for this proxy and all related proxies, then
+	 * return true.  If the proxy is not valid then this will not
+	 * set the group and false will be returned.
+	 * 
+	 * If group is null, the incident group for this proxy will be updated to null,
+	 * but relations will not be updated.
+	 * 
+	 * @param group
+	 * @return
+	 */
+	public boolean setIncidentGroup(Integer group) {
+		if (group == null) {
+			this.incidentGroup = null;
 			return true;
 		}
 		if (!isValid()) {
-			this.waypoint = null;
+			this.incidentGroup = null;
 			return false;
 		}
-		if (this.waypoint != null) return false;
-		this.waypoint = newWaypoint;
+		if (this.incidentGroup != null) return false;
+		this.incidentGroup = group;
 		if (fixedRelations != null) {
-			fixedRelations.forEach(c->c.setWaypoint(newWaypoint));
+			fixedRelations.forEach(c->c.setIncidentGroup(group));
 			return true;
 		}
-		relations.forEach(c->c.setWaypoint(newWaypoint));
+		relations.forEach(c->c.setIncidentGroup(group));
 		return true;
 	}
 	
@@ -148,77 +204,136 @@ public class FileProxy {
 		}
 	}
 	
-	public void removeRelation(FileProxy fp) {
-		this.relations.remove(fp);
-		fp.relations.remove(this);
-	}
-	
+	/**
+	 * Get all related proxies.
+	 * 
+	 * @return
+	 */
 	public Set<FileProxy> getRelations() {
 		return this.relations;
 	}
 	
+	/**
+	 * Get the fixed (use defined) related proxies.  Will be null
+	 * if not defined.
+	 * @return
+	 */
+	public Set<FileProxy> getFixedRelations() {
+		return this.fixedRelations;
+	}
 	
+	/**
+	 * Sets the cleaned up observation associated with the proxy
+	 * @param observations
+	 */
 	public void setObservations(List<WaypointObservation> observations) {
 		this.observations = observations;
 	}
 	
-	public List<ActionableWarning> getWarnings(){
-		return this.warnings;
-	}
-	
+	/**
+	 * Get the cleaned up observations associated with 
+	 * this proxy.
+	 *   
+	 * @return
+	 */
 	public List<WaypointObservation> getObservations(){
 		return this.observations;
 	}
 	
+	/**
+	 * 
+	 * @return list of warnings generated during processing
+	 */
+	public List<ActionableWarning> getWarnings(){
+		return this.warnings;
+	}
+	
+	/**
+	 * Add a raw observation.  This is parsed directly
+	 * from metadata and metadata mappings.
+	 * @param wo
+	 */
 	public void addRawObservation(WaypointObservation wo) {
 		this.rawObservations.add(wo);
 	}
 	
+	/**
+	 * Gets all raw observations.
+	 * @return
+	 */
 	public List<WaypointObservation> getRawObservations(){
 		return this.rawObservations;
 	}
 	
+	/**
+	 * Add a warning
+	 * @param warning
+	 */
 	public void addWarning(ActionableWarning warning) {
 		this.warnings.add(warning);
 	}
 	
+	/**
+	 * For storing user data
+	 * @param key
+	 * @param value
+	 */
 	public void putData(String key, Object value) {
 		dataCache.put(key, value);
 	}
+	/**
+	 * Gets associated user data
+	 * @param key
+	 * @return
+	 */
 	public Object getData(String key) {
 		return dataCache.get(key);
 	}
 	
+	/**
+	 * Sets the position associated with the file
+	 * @param x
+	 * @param y
+	 */
 	public void setPosition(Double x, Double y) {
 		this.x = x;
 		this.y = y;
 	}
 	
+	/**
+	 * Get the x location 
+	 * @return
+	 */
 	public Double getX() {
 		return this.x;
 	}
 	
+	/**
+	 * Get the y location
+	 * @return
+	 */
 	public Double getY() {
 		return this.y;
 	}
 	
+	/**
+	 * Get the file name
+	 * @return
+	 */
 	public Path getFile() {
 		return this.file;
 	}
 	
-	public Exception getProcessingException() {
-		return this.processingException;
-	}
-	
-	public void setProcessingException(Exception ex) {
-		this.processingException = ex;
-	}
+	/**
+	 * Get the image date
+	 * @param imageDate
+	 */
 	public void setImageDate(Date imageDate) {
 		this.imageDate = imageDate;
 	}
 	
 	/**
-	 * Updates the associated asset, clears the existing linked deployment
+	 * Updates the associated asset
 	 * 
 	 * @param asset
 	 */
@@ -227,7 +342,10 @@ public class FileProxy {
 	}
 	
 	/**
-	 * Updates the associated location & station; clears the existing linked deployment
+	 * Updates the associated location & station.  If
+	 * no (x,y) is defined for the file, this will
+	 * update the (x,y) to the location position. 
+	 * 
 	 * @param location
 	 */
 	public void setStationLocation(AssetStationLocation location) {
@@ -241,7 +359,9 @@ public class FileProxy {
 	}
 	
 	/**
-	 * Will only update the station if the station location is null
+	 * Updates the station and sets the location to null, if
+	 * the location is null to begin with.
+	 * 
 	 * @param location
 	 */
 	public void setStation(AssetStation station) {
@@ -251,24 +371,43 @@ public class FileProxy {
 		this.station = station;
 	}
 	
+	/**
+	 * Gets the asset
+	 * @return
+	 */
 	public Asset getAsset() {
 		return this.asset;
 	}
 	
+	/**
+	 * Get the asset station
+	 * @return
+	 */
 	public AssetStation getStation() {
 		return this.station;
 	}
 	
+	/**
+	 * Get the asset station location
+	 * @return
+	 */
 	public AssetStationLocation getStationLocation() {
 		return this.location;
 	}
 	
+	/**
+	 * Get the image date
+	 * @return
+	 */
 	public Date getImageDate() {
 		return this.imageDate;
 	}
 	
+	/**
+	 * Determines if all required information has been provided, for the file to be loaded.
+	 * @return
+	 */
 	public boolean isValid() {
-		if (processingException != null) return false;
 		if (getAsset() == null) return false;
 		if (getImageDate() == null) return false;
 		if (this.location == null) return false;
@@ -278,8 +417,11 @@ public class FileProxy {
 		return true;
 	}
 	
+	/**
+	 * If not valid, returns a message identifying the missing data
+	 * @return
+	 */
 	public String validMessage() {
-		if (processingException != null) return processingException.getMessage();
 		if (getAsset() == null) return "No Assest found";
 		if (getImageDate() == null) return "No date found";
 		if (getStation() == null) return "No station found";
@@ -288,9 +430,20 @@ public class FileProxy {
 		return "";
 	}
 	
+	/**
+	 * Computes the location/station for the proxy item.
+	 * 
+	 * allFiles is provided to ensure that only a single new station is 
+	 * created in the case where multiple files at the same location 
+	 * are imported. 
+	 * 
+	 * @param session 
+	 * @param allFiles all other files also processing
+	 * 
+	 */
 	
-	public void updateStationLocation(Session session, Collection<FileProxy> allFiles) {
-		updateStationLocationInternal(session, allFiles);
+	public void updateStationLocation(Session session, FileProcessor processor) {
+		updateStationLocationInternal(session, processor);
 		
 		//ensure lazily loaded required fields
 		if (location != null) {
@@ -303,11 +456,13 @@ public class FileProxy {
 		if (station != null) station.getId();
 	}
 	
-	
-	private void updateStationLocationInternal(Session session, Collection<FileProxy> allFiles) {
+	/*
+	 * Updates the station location
+	 */
+	private void updateStationLocationInternal(Session session, FileProcessor processor) {
 		if (station != null && location != null) {
 			if (!location.getStation().equals(station)) {
-				//TODO: we have a problem
+				//update station to correct location value
 				station = location.getStation();
 			}
 			return; //nothing to do
@@ -319,7 +474,7 @@ public class FileProxy {
 
 		//we have a station & x,y to find location 
 		if (station != null && x != null && y != null) {
-			updateStationLocation(station, session);
+			updateStationLocation(station, session, processor);
 			return;
 		}else if (station != null) {
 			//we have a station but no position
@@ -332,10 +487,10 @@ public class FileProxy {
 		if (x != null && y != null) {
 			//find a station
 			List<AssetStation> stations = QueryFactory.buildQuery(session, AssetStation.class, 
-					new Object[] {"conservationArea", ca}).list();
+					new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 			
 			//add any other "new" stations to this search as well
-			for (FileProxy p : allFiles) {
+			for (FileProxy p : processor.getFileDetails()) {
 				if (!p.equals(this) && p.getStation() != null && !stations.contains(p.getStation())) {
 					stations.add(p.getStation());
 				}
@@ -351,13 +506,11 @@ public class FileProxy {
 						matching = s;
 					}
 				}catch (Exception ex) {
-					//TODO:
 					ex.printStackTrace();
 				}
 			}
 			
 			double stnBufferM = AssetHibernateManager.getStationBuffer(session, ca);
-			//TODO: distance needs to be checked in meters
 			if (bestDistance == null || bestDistance > stnBufferM) {
 				//this is not within buffer of current locations so we need to create a new one
 				matching = null;
@@ -368,16 +521,17 @@ public class FileProxy {
 				matching.setX(x);
 				matching.setY(y);
 				matching.setConservationArea(ca);
-				matching.setId("** NEW STATION **"); //when we save we need to generate valid station ids
+				//when we save we need to generate valid station ids
+				matching.setId(MessageFormat.format("** NEW STATION {0} **", processor.NewObjectCounter.getAndIncrement())); 
 				matching.setLocations(new ArrayList<>());
 			}
 			this.station = matching;
-			updateStationLocation(matching, session);
+			updateStationLocation(matching, session, processor);
 		}
 	}
 	
 	
-	private void updateStationLocation(AssetStation station, Session session) {
+	private void updateStationLocation(AssetStation station, Session session, FileProcessor processor) {
 		AssetStationLocation matching = null;
 		Coordinate imagePosition = new Coordinate(x,y);
 		Double bestDistance = null;
@@ -389,13 +543,11 @@ public class FileProxy {
 					matching = location;
 				}
 			}catch (Exception ex) {
-				//TODO:
 				ex.printStackTrace();
 			}
 		}
 		
 		double stnBufferM = AssetHibernateManager.getStationLocationBuffer(session, ca);
-		//TODO: distance needs to be checked in meters
 		if (bestDistance == null || bestDistance > stnBufferM) {
 			//this is not within buffer of current locations so we need to create a new one
 			matching = null;
@@ -405,12 +557,19 @@ public class FileProxy {
 			matching = new AssetStationLocation();
 			matching.setStation(station);
 			matching.setAttributeValues(new ArrayList<>());
-			matching.setId("** NEW LOCATION **"); //TODO: when we save we need to generate valid id
+			//when we save we set a valid id
+			matching.setId(MessageFormat.format("** NEW LOCATION {0} **", processor.NewObjectCounter.getAndIncrement())); 
 			matching.setX(x);
 			matching.setY(y);
 			station.getLocations().add(matching);
 		}
 		this.location = matching;
+	}
+
+	@Override
+	protected String getDatastoreFolderPath(Session session) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	

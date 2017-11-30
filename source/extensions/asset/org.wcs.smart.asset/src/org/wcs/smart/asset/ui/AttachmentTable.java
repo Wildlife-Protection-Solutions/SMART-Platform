@@ -24,6 +24,7 @@ package org.wcs.smart.asset.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -50,7 +51,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class AttachmentTable extends Composite {
 
-	private List<ISmartAttachment> attachments;
+	private List<? extends ISmartAttachment> attachments;
 	private FormToolkit toolkit;
 	
 	private List<ThumbInfo> thumbs;
@@ -59,19 +60,24 @@ public class AttachmentTable extends Composite {
 	
 	private Color selectionColor = null;
 	private Color mouseOverColor = null;
-	private Color backgroundColor = null;
 	private Color selectionBorderColor = null;
 	
 	private int thumbSize;
+	private int marginSize;
 	
-	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<ISmartAttachment> files, int thumbSize){
-		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize);
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize){
+		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize,0);
 	}
 	
-	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, int style, List<ISmartAttachment> files, int thumbSize){
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize, int marginSize){
+		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize, marginSize);
+	}
+	
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, int style, List<? extends ISmartAttachment> files, int thumbSize, int marginSize){
 		super(parent, style);
 		this.thumbSize = thumbSize;
 		this.toolkit = toolkit;
+		this.marginSize = marginSize;
 		toolkit.adapt(this);
 		
 		setLayout(new RowLayout());
@@ -104,12 +110,18 @@ public class AttachmentTable extends Composite {
 		
 		this.attachments = files;
 		createThumbnails();
+		addListener(SWT.MouseUp, e->clearSelection());
 	}
 
+	//TODO: perhaps instead of re-creating all thumbnails we can
+	//reuse them
+	public void refresh() {
+		for (Control c : getChildren()) c.dispose();
+		createThumbnails();
+		layout(true);
+	}
 	
 	private void createThumbnails() {
-		addListener(SWT.MouseUp, e->clearSelection());
-		
 		thumbs = new ArrayList<ThumbInfo>();
 		for (ISmartAttachment a : attachments){
 			thumbs.add(new ThumbInfo(a));
@@ -121,9 +133,10 @@ public class AttachmentTable extends Composite {
 		
 		for (ThumbInfo t : thumbs){
 
-			Composite thumbNameComp = t.thumb.createThumbnail(AttachmentTable.this, SWT.NONE);
+			Composite thumbNameComp = t.thumb.createThumbnail(AttachmentTable.this, marginSize, SWT.NONE);
 			thumbNameComp.setSize(thumbSize, thumbSize);
-			thumbNameComp.setLayoutData(new RowData(thumbSize,thumbSize));
+			thumbNameComp.setLayoutData(new RowData(thumbSize + marginSize * 2,thumbSize + marginSize * 2 ));
+			colorThumb(thumbNameComp, t.file);
 			
 			if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu);
 			thumbNameComp.setToolTipText(t.tooltip);
@@ -135,19 +148,23 @@ public class AttachmentTable extends Composite {
 					thumbNameComp.setMenu(null);
 				}
 			});
-			t.thumbGui = thumbNameComp;
+			t.setThumbGui(thumbNameComp);
+			t.thumb.getImage();
 
 			cascadeAdd(thumbNameComp,t, SWT.MouseEnter,SWT.MouseExit, SWT.MouseDown, SWT.MouseUp, SWT.MouseMove, SWT.Paint);
 		}
 	}
 	
+	protected void colorThumb(Composite composite, ISmartAttachment file) {
+		
+	}
 	
-	public List<ISmartAttachment> getSelection(){
+	public StructuredSelection getSelection(){
 		List<ISmartAttachment> sel = new ArrayList<ISmartAttachment>();
 		for (ThumbInfo t : thumbs){
 			if (t.isSelected) sel.add((ISmartAttachment) t.file);
 		}
-		return sel;
+		return new StructuredSelection(sel);
 	}
 
 		
@@ -157,7 +174,7 @@ public class AttachmentTable extends Composite {
 			c.isSelected = false;
 			c.colorAll();
 		}
-		}
+	}
 		
 	private class ThumbInfo implements Listener{
 	
@@ -167,7 +184,8 @@ public class AttachmentTable extends Composite {
 		Thumbnail thumb;
 		String tooltip;
 		Composite thumbGui;
-			
+		Color backgroundColor;
+		
 		boolean isSelected;
 		boolean mouseOver;
 		int index;
@@ -177,12 +195,13 @@ public class AttachmentTable extends Composite {
 			tooltip = file.getFilename();
 			thumb = new Thumbnail(file, thumbSize, true);
 		}
-			
+		
+		public void setThumbGui(Composite thumb) {
+			this.thumbGui = thumb;
+			this.backgroundColor = thumbGui.getBackground();
+		}
 			
 		private void colorAll(){
-			if (backgroundColor == null){
-				backgroundColor = thumbGui.getBackground();
-			}
 			Color color = null;
 			if(isSelected){
 				color = selectionColor;
@@ -272,6 +291,9 @@ public class AttachmentTable extends Composite {
 				isSelected = true;
 			}
 			colorAll();
+			for (Listener l : AttachmentTable.this.getListeners(SWT.Selection)) {
+				l.handleEvent(event);
+			}
 		}
 	}
 	

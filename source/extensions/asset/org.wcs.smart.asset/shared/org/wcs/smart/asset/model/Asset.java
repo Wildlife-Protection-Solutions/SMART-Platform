@@ -76,9 +76,6 @@ public class Asset extends UuidItem {
 
 	private List<AssetAttributeValue> assetAttributes;
 	private ConservationArea conservationArea;
-
-	/** The set of asset_deployment. */
-	//private Set<AssetDeployment> assetDeploymentSet;
 	
 
 	/**

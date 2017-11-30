@@ -53,6 +53,10 @@ public class AssetMetadataMapping extends UuidItem {
 	private AttributeListItem mappedListItem;
 	private AttributeTreeNode mappedTreeNode;
 	
+	//parsed metadata mapping
+	@Transient
+	private IMetadataField mField = null;
+	
 	/**
 	 * Constructor.
 	 */
@@ -118,7 +122,7 @@ public class AssetMetadataMapping extends UuidItem {
 	}
 	
 	@Transient
-	public void setMetadataKey(IMetadataField<?> field) {
+	public void setMetadataKey(IMetadataField field) {
 		this.mappingstring = field.asString();
 		this.mField = field;
 	}
@@ -242,9 +246,8 @@ public class AssetMetadataMapping extends UuidItem {
 	}
 	
 	
-	private IMetadataField<?> mField = null;
 	@Transient
-	public IMetadataField<?> getMetadataField() {
+	public IMetadataField getMetadataField() {
 		if (mField != null) return mField; 
 		switch (getMetadataType()){
 		case EXIF:

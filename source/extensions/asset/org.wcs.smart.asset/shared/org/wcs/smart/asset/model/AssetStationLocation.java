@@ -207,8 +207,8 @@ public class AssetStationLocation extends UuidItem {
 		}
 		
 		try(Session s = HibernateManager.openSession()){
-			String query = "SELECT count(*) FROM AssetDeployment d WHERE d.endDate is null and d.id.stationLocation = :location";
-			Long activeDeployments = (Long) s.createQuery(query).setParameter("location",  this).uniqueResult();
+			String query = "SELECT count(*) FROM AssetDeployment d WHERE d.endDate is null and d.id.stationLocation = :location"; //$NON-NLS-1$
+			Long activeDeployments = (Long) s.createQuery(query).setParameter("location",  this).uniqueResult(); //$NON-NLS-1$
 			if (activeDeployments == 0) {
 				status = Status.INACTIVE;
 			}else {
