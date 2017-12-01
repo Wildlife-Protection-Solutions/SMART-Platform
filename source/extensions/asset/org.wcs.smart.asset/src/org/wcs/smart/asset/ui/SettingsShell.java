@@ -55,45 +55,18 @@ public class SettingsShell  {
 		
 		int indent = 10;
 		
-		Button opSmall = new Button(c, SWT.RADIO);
-		opSmall.setText("Small");
-		opSmall.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)opSmall.getLayoutData()).horizontalIndent = indent;
-		opSmall.addListener(SWT.MouseUp, e->{
-			settings.setIconsSize(IconSize.SMALL);
-			close();
-		});
-		
-		Button opMedium = new Button(c, SWT.RADIO);
-		opMedium.setText("Medium");
-		opMedium.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)opMedium.getLayoutData()).horizontalIndent = indent;
-		opMedium.addListener(SWT.MouseUp, e->{
-			settings.setIconsSize(IconSize.MEDIUM);
-			close();
-		});
-		
-		Button opLarge = new Button(c, SWT.RADIO);
-		opLarge.setText("Large");
-		opLarge.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)opLarge.getLayoutData()).horizontalIndent = indent;
-		opLarge.addListener(SWT.MouseUp, e->{
-			settings.setIconsSize(IconSize.LARGE);
-			close();
-		});
-		
-		switch(settings.getIconSize()) {
-			case LARGE:
-				opLarge.setSelection(true);
-				break;
-			case MEDIUM:
-				opMedium.setSelection(true);
-				break;
-			case SMALL:
-				opSmall.setSelection(true);
-				break;
+		for (DataDisplaySettings.IconSize iconSize : DataDisplaySettings.IconSize.values()) {
+			Button opSmall = new Button(c, SWT.RADIO);
+			opSmall.setText(iconSize.getOptionName());
+			opSmall.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			((GridData)opSmall.getLayoutData()).horizontalIndent = indent;
+			opSmall.addListener(SWT.MouseUp, e->{
+				settings.setIconsSize(iconSize);
+				close();
+			});
+			opSmall.setSelection(settings.getIconSize() == iconSize);
 		}
-		
+
 		c = new Composite(outer, SWT.NONE);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

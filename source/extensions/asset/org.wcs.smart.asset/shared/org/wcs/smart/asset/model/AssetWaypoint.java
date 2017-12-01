@@ -25,9 +25,12 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -47,8 +50,24 @@ import org.wcs.smart.observation.model.Waypoint;
 @Table(name="smart.asset_waypoint")
 public class AssetWaypoint {
 	
+	public enum State{
+		DIRTY,
+		OK
+	}
+	
 	private AssetWaypointPk id = new AssetWaypointPk();
-
+	
+	private State state;
+	
+	@Column(name="state")
+	@Enumerated(value=EnumType.ORDINAL)
+	public State getState() {
+		return this.state;
+	}
+	
+	public void setState(State state) {
+		this.state = state;
+	}
 	
 	@EmbeddedId
 	public AssetWaypointPk getId(){

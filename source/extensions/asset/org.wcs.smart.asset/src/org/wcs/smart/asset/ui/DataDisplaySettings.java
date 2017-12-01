@@ -5,18 +5,24 @@ import org.wcs.smart.asset.AssetPlugIn;
 public class DataDisplaySettings {
 
 	public enum IconSize{
-		SMALL(150),
-		MEDIUM(250),
-		LARGE(350);
+		SMALL(150, "Small"),
+		MEDIUM(250, "Medium"),
+		LARGE(350, "Large");
 		
 		int size;
+		String optionName;
 		
-		IconSize(int size){
+		IconSize(int size, String optionName){
 			this.size = size;
+			this.optionName = optionName;
 		}
 		
 		public int getSize() {
 			return this.size;
+		}
+		
+		public String getOptionName() {
+			return this.optionName;
 		}
 	}
 	

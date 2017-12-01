@@ -96,6 +96,10 @@ public enum AssetManager {
 			}
 		}
 		
+		//delete history records
+		String hql = "DELETE FROM AssetHistoryRecord WHERE asset = :asset";
+		session.createQuery(hql).setParameter("asset", asset).executeUpdate();
+		
 		//delete the asset
 		session.delete(asset);
 		

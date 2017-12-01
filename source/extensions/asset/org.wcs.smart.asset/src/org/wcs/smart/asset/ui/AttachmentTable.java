@@ -34,6 +34,7 @@ import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
@@ -110,15 +111,59 @@ public class AttachmentTable extends Composite {
 		
 		this.attachments = files;
 		createThumbnails();
-		addListener(SWT.MouseUp, e->clearSelection());
+		addListener(SWT.MouseUp, e->{
+			clearSelection();
+			fireSelectionEvents(e);
+		});
 	}
 
-	//TODO: perhaps instead of re-creating all thumbnails we can
-	//reuse them
-	public void refresh() {
+	public void setThumbnailSize(int size) {
+		this.thumbSize = size;
 		for (Control c : getChildren()) c.dispose();
 		createThumbnails();
-		layout(true);
+		layout(true, true);
+	}
+	
+	/**
+	 * refreshes/reorders thumbnails reusing if possible
+	 */
+	public void refresh() {
+		ArrayList<ThumbInfo> old = new ArrayList<ThumbInfo>(thumbs);
+		thumbs = new ArrayList<ThumbInfo>();
+		for (ISmartAttachment a : attachments) {
+			ThumbInfo found = null;
+			for (ThumbInfo o : old) {
+				if (o.file.equals(a)) {
+					found = o;
+				}
+			}
+			if (found != null) {
+				thumbs.add(found);
+				old.remove(found);
+			}else {
+				thumbs.add(new ThumbInfo(a));
+			}
+		}
+		
+		for (ThumbInfo o : old) o.thumbGui.dispose();
+		
+		for (int i = 0; i < thumbs.size(); i ++) {
+			ThumbInfo ti = thumbs.get(i);
+			if (ti.thumbGui == null) {
+				createThumbnail(ti);
+			}
+			colorThumb(ti.thumbGui, ti.file);
+			ti.backgroundColor = ti.thumbGui.getBackground();
+			if (i == 0) {
+				ti.thumbGui.moveAbove(null);
+			}else {
+				ti.thumbGui.moveBelow(thumbs.get(i-1).thumbGui);
+			}
+			ti.index = i;			
+		}
+		layout(true, true);
+		
+		
 	}
 	
 	private void createThumbnails() {
@@ -132,31 +177,40 @@ public class AttachmentTable extends Composite {
 		}
 		
 		for (ThumbInfo t : thumbs){
-
-			Composite thumbNameComp = t.thumb.createThumbnail(AttachmentTable.this, marginSize, SWT.NONE);
-			thumbNameComp.setSize(thumbSize, thumbSize);
-			thumbNameComp.setLayoutData(new RowData(thumbSize + marginSize * 2,thumbSize + marginSize * 2 ));
-			colorThumb(thumbNameComp, t.file);
-			
-			if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu);
-			thumbNameComp.setToolTipText(t.tooltip);
-			thumbNameComp.setData(t);
-			thumbNameComp.addDisposeListener(new DisposeListener() {
-				
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					thumbNameComp.setMenu(null);
-				}
-			});
-			t.setThumbGui(thumbNameComp);
-			t.thumb.getImage();
-
-			cascadeAdd(thumbNameComp,t, SWT.MouseEnter,SWT.MouseExit, SWT.MouseDown, SWT.MouseUp, SWT.MouseMove, SWT.Paint);
+			createThumbnail(t);
+		
 		}
 	}
 	
+	private void createThumbnail(ThumbInfo t) {
+		Composite thumbNameComp = t.thumb.createThumbnail(AttachmentTable.this, marginSize, SWT.NONE);
+		thumbNameComp.setSize(thumbSize, thumbSize);
+		thumbNameComp.setLayoutData(new RowData(thumbSize + marginSize * 2,thumbSize + marginSize * 2 ));
+		colorThumb(thumbNameComp, t.file);
+		
+		if (thumbMenu != null) thumbNameComp.setMenu(thumbMenu);
+		thumbNameComp.setToolTipText(t.tooltip);
+		thumbNameComp.setData(t);
+		thumbNameComp.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				thumbNameComp.setMenu(null);
+			}
+		});
+		t.setThumbGui(thumbNameComp);
+//		t.thumb.getImage();
+
+		cascadeAdd(thumbNameComp,t, SWT.MouseEnter,SWT.MouseExit, SWT.MouseDown, SWT.MouseUp, SWT.MouseMove, SWT.Paint);
+	}
 	protected void colorThumb(Composite composite, ISmartAttachment file) {
 		
+	}
+	
+	private void fireSelectionEvents(Event event) {
+		for (Listener l : AttachmentTable.this.getListeners(SWT.Selection)) {
+			l.handleEvent(event);
+		}
 	}
 	
 	public StructuredSelection getSelection(){
@@ -291,9 +345,7 @@ public class AttachmentTable extends Composite {
 				isSelected = true;
 			}
 			colorAll();
-			for (Listener l : AttachmentTable.this.getListeners(SWT.Selection)) {
-				l.handleEvent(event);
-			}
+			fireSelectionEvents(event);
 		}
 	}
 	
