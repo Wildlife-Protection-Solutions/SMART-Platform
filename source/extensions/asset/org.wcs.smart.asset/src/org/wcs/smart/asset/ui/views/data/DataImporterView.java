@@ -57,6 +57,7 @@ public class DataImporterView extends EditorPart{
 	private FormToolkit toolkit;
 	
 	private DataImportPage importPage;
+	private DataReviewPage reviewPage;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -140,6 +141,7 @@ public class DataImporterView extends EditorPart{
 		//zeroMargins(body);
 		
 		importPage = new DataImportPage(this, toolkit);
+		reviewPage = new DataReviewPage(this, toolkit);
 		
 		lnkImport.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -173,9 +175,7 @@ public class DataImporterView extends EditorPart{
 	}
 	
 	private void createReview(Composite body) {
-		Composite c = toolkit.createComposite(body);
-		c.setLayout(new GridLayout());
-		toolkit.createLabel(c, "REVIEW SECTION");
+		reviewPage.createControl(body);
 	}
 	
 	
