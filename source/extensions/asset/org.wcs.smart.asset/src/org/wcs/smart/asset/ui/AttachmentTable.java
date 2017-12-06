@@ -30,12 +30,14 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -108,6 +110,7 @@ public class AttachmentTable extends Composite {
 			}
 		});
 		if (thumbsMenu != null) thumbMenu = thumbsMenu.createMenu(this);
+		this.setMenu(thumbMenu);
 		
 		this.attachments = files;
 		createThumbnails();
@@ -162,8 +165,6 @@ public class AttachmentTable extends Composite {
 			ti.index = i;			
 		}
 		layout(true, true);
-		
-		
 	}
 	
 	private void createThumbnails() {
@@ -178,10 +179,9 @@ public class AttachmentTable extends Composite {
 		
 		for (ThumbInfo t : thumbs){
 			createThumbnail(t);
-		
 		}
 	}
-	
+
 	private void createThumbnail(ThumbInfo t) {
 		Composite thumbNameComp = t.thumb.createThumbnail(AttachmentTable.this, marginSize, SWT.NONE);
 		thumbNameComp.setSize(thumbSize, thumbSize);

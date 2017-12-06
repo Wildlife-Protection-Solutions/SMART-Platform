@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.asset.ui.views.data;
 
+import java.util.List;
+import java.util.Objects;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.SWT;
@@ -40,6 +43,8 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
 /**
  * Asset data importer view
@@ -191,5 +196,45 @@ public class DataImporterView extends EditorPart{
 	}
 	
 	
-	
+	static boolean containsObservation(WaypointObservation obs, List<WaypointObservation> all) {
+		for (WaypointObservation wo : all) {
+			if (!wo.getCategory().equals(obs.getCategory())) continue;
+			
+			if (wo.getAttributes().size() != obs.getAttributes().size()) continue;
+			
+			boolean ok = true;
+			for (WaypointObservationAttribute a : wo.getAttributes()) {
+				WaypointObservationAttribute matching = null;
+				for (WaypointObservationAttribute aa : obs.getAttributes()) {
+					if (aa.getAttribute().equals(a.getAttribute())){
+						matching = aa;
+						break;
+					}
+				}
+				if (matching == null) {
+					ok = false;
+					break;
+				}
+				switch(a.getAttribute().getType()) {
+					case BOOLEAN:
+					case NUMERIC:
+						ok = Objects.equals(a.getNumberValue(), matching.getNumberValue());
+						break;
+					case DATE:
+					case TEXT:
+						ok = Objects.equals(a.getStringValue(), matching.getStringValue());
+						break;
+					case LIST:
+						ok = Objects.equals(a.getAttributeListItem(), matching.getAttributeListItem());
+						break;
+					case TREE:
+						ok = Objects.equals(a.getAttributeTreeNode(), matching.getAttributeTreeNode());
+						break;				
+				}
+				if (!ok) break;
+			}
+			if (ok) return true;
+		}
+		return false;
+	}
 }

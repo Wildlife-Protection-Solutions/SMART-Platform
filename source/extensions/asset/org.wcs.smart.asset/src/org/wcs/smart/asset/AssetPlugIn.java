@@ -48,6 +48,7 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public static final String ICON_STATUS_ACTIVE = "org.wcs.smart.asset.status.active";
 	public static final String ICON_STATUS_INACTIVE = "org.wcs.smart.asset.status.inactive";
 	public static final String ICON_STATUS_RETIRED = "org.wcs.smart.asset.status.retired";
+	public static final String ICON_VALIDATE = "org.wcs.smart.asset.validate";
 	
 	public static final String ICON_IMPORT_COMPLETE = "org.wcs.smart.asset.import.complete";
 	public static final String ICON_IMPORT_INCOMPLETE = "org.wcs.smart.asset.import.incomplete";
@@ -131,5 +132,7 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		
 		reg.put(ICON_STATION, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station.png")); //$NON-NLS-1$);
 		reg.put(ICON_STATION_LOCATION, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/location.png")); //$NON-NLS-1$);
+		
+		reg.put(ICON_VALIDATE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/validate.png")); //$NON-NLS-1$);
 	}
 }

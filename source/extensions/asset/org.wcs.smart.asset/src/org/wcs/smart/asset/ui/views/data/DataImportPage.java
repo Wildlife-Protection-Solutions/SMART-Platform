@@ -282,7 +282,7 @@ public class DataImportPage {
 								wp.getAttachments().add(wa);
 								
 								for (WaypointObservation nextobs : pp.getObservations()) {
-									if (!containsObservation(nextobs, wp.getObservations())) {
+									if (!DataImporterView.containsObservation(nextobs, wp.getObservations())) {
 										WaypointObservation clone = nextobs.clone(session);
 										clone.setWaypoint(wp);
 										wp.getObservations().add(clone);
@@ -359,47 +359,7 @@ public class DataImportPage {
 	
 	}
 	
-	private boolean containsObservation(WaypointObservation obs, List<WaypointObservation> all) {
-		for (WaypointObservation wo : all) {
-			if (!wo.getCategory().equals(obs.getCategory())) continue;
-			
-			if (wo.getAttributes().size() != obs.getAttributes().size()) continue;
-			
-			boolean ok = true;
-			for (WaypointObservationAttribute a : wo.getAttributes()) {
-				WaypointObservationAttribute matching = null;
-				for (WaypointObservationAttribute aa : obs.getAttributes()) {
-					if (aa.getAttribute().equals(a.getAttribute())){
-						matching = aa;
-						break;
-					}
-				}
-				if (matching == null) {
-					ok = false;
-					break;
-				}
-				switch(a.getAttribute().getType()) {
-					case BOOLEAN:
-					case NUMERIC:
-						ok = Objects.equals(a.getNumberValue(), matching.getNumberValue());
-						break;
-					case DATE:
-					case TEXT:
-						ok = Objects.equals(a.getStringValue(), matching.getStringValue());
-						break;
-					case LIST:
-						ok = Objects.equals(a.getAttributeListItem(), matching.getAttributeListItem());
-						break;
-					case TREE:
-						ok = Objects.equals(a.getAttributeTreeNode(), matching.getAttributeTreeNode());
-						break;				
-				}
-				if (!ok) break;
-			}
-			if (ok) return true;
-		}
-		return false;
-	}
+	
 	
 	
 	

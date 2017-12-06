@@ -38,6 +38,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.wcs.smart.observation.model.Waypoint;
 
 /**
@@ -48,7 +49,7 @@ import org.wcs.smart.observation.model.Waypoint;
  */
 @Entity
 @Table(name="smart.asset_waypoint")
-public class AssetWaypoint {
+public class AssetWaypoint implements IAdaptable{
 	
 	public enum State{
 		DIRTY,
@@ -108,6 +109,12 @@ public class AssetWaypoint {
 		return this.id.hashCode();
 	}
 	
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if (adapter.equals(Waypoint.class)) return (T) id.getWaypoint();
+		return null;
+	}
+	
 	@Embeddable
 	public static class AssetWaypointPk implements Serializable{
 		/**
@@ -153,4 +160,6 @@ public class AssetWaypoint {
 			return Objects.hash(deployment, wp);
 		}
 	}
+
+
 }
