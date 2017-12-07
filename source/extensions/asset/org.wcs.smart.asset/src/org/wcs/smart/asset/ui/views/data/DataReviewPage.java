@@ -29,11 +29,15 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -41,6 +45,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -72,9 +77,14 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypoint.State;
+import org.wcs.smart.asset.model.AssetWaypointAttachment;
 import org.wcs.smart.asset.ui.AttachmentTable;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
@@ -85,6 +95,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.ui.AttachmentPropertiesDialog;
+import org.wcs.smart.ui.AttachmentPropertiesDialog.Entry;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
@@ -161,7 +172,7 @@ public class DataReviewPage {
 		return main;
 	}
 	
-	private void resizeScroll() {
+	void resizeScroll() {
 		int width = scroll.getBounds().width;
 		if (rows != null) rows.forEach(a->a.resize(width, iconSize));
 		scroll.setMinSize(details.computeSize(scroll.getBounds().width - scroll.getVerticalBar().getSize().x, SWT.DEFAULT));
@@ -175,7 +186,7 @@ public class DataReviewPage {
 		mnuOk.setText("Validate Selection");
 		mnuOk.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE));
 		mnuOk.addListener(SWT.Selection, e->{
-			List<AssetWaypoint> toClear = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
+			List<WaypointMapping> toClear = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
 			markValidated(toClear);
 		});
 		
@@ -183,9 +194,9 @@ public class DataReviewPage {
 
 		MenuItem mnuOkAll = new MenuItem(mnuHeader, SWT.PUSH);
 		mnuOkAll.setText("Validate All");
-		mnuOkAll.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE));
+		mnuOkAll.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE_ALL));
 		mnuOkAll.addListener(SWT.Selection, e->{
-			List<AssetWaypoint> toClear = rows.stream().map(i->i.waypoint).collect(Collectors.toList());
+			List<WaypointMapping> toClear = rows.stream().map(i->i.waypoint).collect(Collectors.toList());
 			markValidated(toClear);
 			loadWaypointsJob.schedule();
 		});
@@ -195,8 +206,9 @@ public class DataReviewPage {
 		
 		MenuItem mnuMerge = new MenuItem(mnuHeader, SWT.PUSH);
 		mnuMerge.setText("Merge Incidents ");
+		mnuMerge.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_MERGE));
 		mnuMerge.addListener(SWT.Selection, e->{
-			List<AssetWaypoint> toMerge = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
+			List<WaypointMapping> toMerge = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
 			mergeItems(toMerge);
 			loadWaypointsJob.schedule();
 		});
@@ -204,7 +216,7 @@ public class DataReviewPage {
 		mnuDelete.setText("Delete Incidents");
 		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		mnuDelete.addListener(SWT.Selection, e->{
-			List<AssetWaypoint> toClear = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
+			List<WaypointMapping> toClear = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
 			deleteItems(toClear);
 		});
 		
@@ -224,11 +236,18 @@ public class DataReviewPage {
 		control.setMenu(mnuHeader);
 	}
 	
-	private void createWidgetPanel(List<AssetWaypoint> waypoints) {
-		rows = new ArrayList<>();
+	private void createWidgetPanel(List<WaypointMapping> waypoints) {
 		for (Control c : details.getChildren()) c.dispose();
+		rows = new ArrayList<>();
+		
+		if (waypointsToReview.size() == 0) {
+			toolkit.createLabel(details, "Nothing to validate.");
+			details.layout();
+			return;
+		}
+		
 		createPageControl(details, true);
-		for (AssetWaypoint aw : waypoints) {
+		for (WaypointMapping aw : waypoints) {
 			RowItem item = new RowItem(aw);
 			item.createControl(details);
 			rows.add(item);
@@ -238,18 +257,20 @@ public class DataReviewPage {
 		resizeScroll();
 	}
 	
-	private AssetWaypoint newIncident(AssetWaypoint aw, List<WaypointAttachment> attachments) {
+	private WaypointMapping newIncident(WaypointMapping aw, List<WaypointAttachment> attachments) {
 		if (attachments.size() == 0) return null;
 		if (!MessageDialog.openQuestion(view.getSite().getShell(), "Create New Incident", MessageFormat.format("Are you sure you want to move the {0} selected files to a new incident? ", attachments.size()))) return null;
 	
-		AssetWaypoint clonedAw = null;
+		WaypointMapping clonedMapping = null;
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
-		
-				Waypoint cloneWp = aw.getWaypoint().clone(session);
+				//clone waypoint
+				Waypoint cloneWp = aw.wp.clone(session);
 				cloneWp.setAttachments(new ArrayList<>());
 				
+				//clone attachments and associate deployments
+				Map<AssetDeployment, AssetWaypoint> newDeployments = new HashMap<>(); 
 				for (WaypointAttachment sp : attachments) {
 					WaypointAttachment att = new WaypointAttachment();
 					// copy file to temp location so it won't be deleted out from under us
@@ -261,27 +282,64 @@ public class DataReviewPage {
 					att.setFilename(sp.getFilename());
 					att.setWaypoint(cloneWp);
 					cloneWp.getAttachments().add(att);
+					
+					for (AssetWaypoint oldlink : aw.aw) {
+						for (AssetWaypointAttachment attachlink : oldlink.getAttachments()) {
+							if (attachlink.getWaypointAttachment().equals(sp)) {
+								AssetWaypoint newlink = newDeployments.get(oldlink.getAssetDeployment());
+								if (newlink == null) {
+									newlink = new AssetWaypoint();
+									newlink.setAssetDeployment(oldlink.getAssetDeployment());
+									newlink.setState(State.DIRTY);
+									newlink.setAttachments(new HashSet<>());
+									newlink.setWaypoint(cloneWp);
+									newDeployments.put(oldlink.getAssetDeployment(), newlink);
+								}
+								
+								AssetWaypointAttachment newattachlink = new AssetWaypointAttachment();
+								newattachlink.setWaypointAttachment(att);
+								newattachlink.setAssetWaypoint(newlink);
+								newlink.getAttachments().add(newattachlink);
+								
+								oldlink.getAttachments().remove(attachlink);
+								break;
+							}
+						}
+					}
+					
 				}
-				
-				aw.getWaypoint().getAttachments().removeAll(attachments);
+				aw.aw.forEach(a->session.saveOrUpdate(a));
+				aw.wp.getAttachments().removeAll(attachments);
 				for(WaypointAttachment wa : attachments) session.delete(wa);
 				
-				clonedAw = new AssetWaypoint();
-				clonedAw.setWaypoint(cloneWp);
-				clonedAw.setAssetDeployment(aw.getAssetDeployment());
-				clonedAw.setState(State.DIRTY);
-				
 				session.save(cloneWp);
-				session.saveOrUpdate(aw);
-				session.save(clonedAw);
+				if (newDeployments.isEmpty()) {
+					throw new Exception("New waypoint would not have any links to assets. Every asset related waypoint must link to at least one asset.");
+				}
+				for (AssetWaypoint newWp : newDeployments.values()) session.save(newWp);
+				
+				List<AssetWaypoint> toDelete = new ArrayList<>();
+				for (AssetWaypoint oldlink : aw.aw) {
+					if (oldlink.getAttachments().isEmpty()) {
+						session.delete(oldlink);
+						toDelete.add(oldlink);
+					}
+				}
+				aw.aw.removeAll(toDelete);
+				if (aw.aw.isEmpty()) {
+					throw new Exception("Original waypoint would no longer have any links to assets. Every asset related waypoint must link to at least one asset.");
+				}
+
+				clonedMapping = new WaypointMapping(cloneWp, newDeployments.values());
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				AssetPlugIn.displayLog("Error saving changes.  You should close and reopen the window before continuing: " + ex.getMessage(), ex);
 				session.getTransaction().rollback();
+				return null;
 			}
 		}
-		return clonedAw; 
+		return clonedMapping; 
 		
 		
 	}
@@ -289,11 +347,12 @@ public class DataReviewPage {
 	
 	private void createPageControl(Composite parent, boolean includePageSize) {
 		int from = startIndex;
+		if (waypointsToReview.isEmpty()) from = -1;
 		int to = Math.min(startIndex + pageSize,  waypointsToReview.size());
 		
 		int cols = 1;
 		if (includePageSize) cols ++;
-		if (!(from == 0 && to == waypointsToReview.size())) cols += 3;
+		if (!(from <= 0 && to == waypointsToReview.size())) cols += 3;
 				
 		Composite part = toolkit.createComposite(parent);
 		part.setLayout(new GridLayout(cols, false));
@@ -302,8 +361,7 @@ public class DataReviewPage {
 		((GridLayout)part.getLayout()).marginHeight = 0;
 		
 		toolkit.createLabel(part, MessageFormat.format("Displaying {0} to {1} of {2}", from+1, to, waypointsToReview.size()));
-		
-		if (!(from == 0 && to == waypointsToReview.size())) {
+		if (!(from <= 0 && to == waypointsToReview.size())) {
 			Hyperlink prev = toolkit.createHyperlink(part, "<", SWT.NONE);
 			if(from == 0) prev.setEnabled(false);
 			prev.addHyperlinkListener(new HyperlinkAdapter() {
@@ -437,24 +495,27 @@ public class DataReviewPage {
 	private Job loadPage = new Job("load waypoint page") {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			List<AssetWaypoint> waypoints = new ArrayList<>();
+			List<WaypointMapping> waypoints = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				for(int i = startIndex; i < Math.min(startIndex + pageSize,  waypointsToReview.size()); i ++) {
 					
-					AssetWaypoint aw = session.createQuery("FROM AssetWaypoint WHERE id.waypoint.uuid = :uuid", AssetWaypoint.class)
-							.setParameter("uuid", waypointsToReview.get(i))
-							.uniqueResult();
-					if (aw == null) continue;
+					Waypoint wp = session.get(Waypoint.class, waypointsToReview.get(i));
+					if (wp == null) continue;
 					
-					if (aw.getWaypoint().getAttachments() != null) {
-						aw.getWaypoint().getAttachments().forEach(a->{try {
+					List<AssetWaypoint> aws = session.createQuery("FROM AssetWaypoint WHERE id.waypoint.uuid = :uuid", AssetWaypoint.class)
+							.setParameter("uuid", waypointsToReview.get(i))
+							.list();
+							
+					
+					if (wp.getAttachments() != null) {
+						wp.getAttachments().forEach(a->{try {
 							a.computeFileLocation(session);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}});
 					}
-					if (aw.getWaypoint().getObservations() != null) {
-						aw.getWaypoint().getObservations().forEach(e->{
+					if (wp.getObservations() != null) {
+						wp.getObservations().forEach(e->{
 							e.getCategory().getFullCategoryName();	
 							if (e.getAttachments() != null) e.getAttachments().forEach(a->{try {
 								a.computeFileLocation(session);
@@ -470,11 +531,14 @@ public class DataReviewPage {
 							}
 						} );
 					}
-					aw.getAssetDeployment().getAsset().getId();
-					aw.getAssetDeployment().getAsset().getAssetType();
-					aw.getAssetDeployment().getStationLocation().getId();
-					aw.getAssetDeployment().getStationLocation().getStation().getId();
-					waypoints.add(aw);
+					aws.forEach(aw->{
+						aw.getAssetDeployment().getAsset().getId();
+						aw.getAssetDeployment().getAsset().getAssetType();
+						aw.getAssetDeployment().getStationLocation().getId();
+						aw.getAssetDeployment().getStationLocation().getStation().getId();
+						aw.getAttachments().forEach(a->a.getWaypointAttachment());
+					});
+					waypoints.add(new WaypointMapping(wp, aws));
 				}
 			}
 			Display.getDefault().syncExec(()->{createWidgetPanel(waypoints);});
@@ -493,13 +557,14 @@ public class DataReviewPage {
 			});
 			waypointsToReview = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				List<AssetWaypoint> aw = session.createQuery("FROM AssetWaypoint WHERE state = :state AND id.waypoint.conservationArea = :ca ORDER BY id.waypoint.dateTime")
+				List<Object> aw = session.createQuery("SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE state = :state AND id.waypoint.conservationArea = :ca ORDER BY id.waypoint.dateTime")
 				.setParameter("state", AssetWaypoint.State.DIRTY)
 				.setParameter("ca", SmartDB.getCurrentConservationArea())
 				.list();
 				
-				for (AssetWaypoint w: aw) waypointsToReview.add(w.getWaypoint().getUuid());
-				
+				for (Object o : aw) {
+					waypointsToReview.add((UUID)((Object[])o)[0]);
+				}				
 			}
 			loadPage.schedule();
 			return Status.OK_STATUS;
@@ -509,13 +574,15 @@ public class DataReviewPage {
 	
 	
 	
-	private void markValidated(Collection<AssetWaypoint> tovalidate) {
+	private void markValidated(Collection<WaypointMapping> tovalidate) {
 		try (Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				for (AssetWaypoint aw : tovalidate) {
-					aw.setState(AssetWaypoint.State.OK);
-					session.saveOrUpdate(aw);
+				for (WaypointMapping aw : tovalidate) {
+					aw.aw.forEach(assetWaypoint ->{
+						assetWaypoint.setState(AssetWaypoint.State.OK);
+						session.saveOrUpdate(assetWaypoint);
+					});
 				}
 				session.getTransaction().commit();
 			}catch(Exception ex){
@@ -535,7 +602,7 @@ public class DataReviewPage {
 		resizeScroll();
 	}
 	
-	private void deleteItems(Collection<AssetWaypoint> todelete) {
+	private void deleteItems(Collection<WaypointMapping> todelete) {
 		if (todelete.isEmpty()) return;
 		if (todelete.size() == 1) {
 			if (!MessageDialog.openQuestion(view.getSite().getShell(), "Delete", "Are you sure you want to delete this waypoint?  This action cannot be undone.")) return;
@@ -545,14 +612,32 @@ public class DataReviewPage {
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
-				for (AssetWaypoint aw : todelete) {
-					session.delete(aw);
-					session.delete(aw.getWaypoint());
+				for (WaypointMapping aw : todelete) {
+					//delete waypoint links
+					aw.aw.forEach(assetWaypoint->{
+						assetWaypoint = session.get(AssetWaypoint.class, assetWaypoint.getUuid());
+						assetWaypoint.getAttachments().forEach(a->session.delete(a));
+						assetWaypoint.getAttachments().clear();
+						session.flush();
+						
+						session.delete(assetWaypoint);
+						session.flush();
+						AssetDeployment d = (AssetDeployment)session.get(AssetDeployment.class, assetWaypoint.getAssetDeployment().getUuid());
+						//delete deployment if there are no more images in it
+						if (d.getAssetWaypoints().size() == 0) {
+							d.getAssetWaypoints().clear();
+							session.delete(d);
+						}
+					});
+					
+					//delete waypoint
+					session.delete(session.get(Waypoint.class, aw.wp.getUuid()));
 				}
 				session.getTransaction().commit();
 			}catch(Exception ex){
 				AssetPlugIn.displayLog("Error occurred saving changes. You should reload the page before continuing: " +ex.getMessage(), ex);
 				session.getTransaction().rollback();
+				return;
 			}
 		}
 		
@@ -565,50 +650,94 @@ public class DataReviewPage {
 		}
 		rows.removeAll(toRemove);
 		resizeScroll();
+		
+		view.getContext().get(IEventBroker.class).post(AssetEvents.ASSETDATA, null);
 	}
 	
-	private void mergeItems(List<AssetWaypoint> tomerge) {
+	private void mergeItems(List<WaypointMapping> tomerge) {
 		if (tomerge.isEmpty() || tomerge.size() < 2) return;
 		
 		if (!MessageDialog.openQuestion(view.getSite().getShell(), "Delete", MessageFormat.format("Are you sure you want to merge the {0} selected waypoints into a single incident?  This action cannot be undone.", tomerge.size()))) return;
 		
-		AssetWaypoint core = tomerge.get(0);
+		WaypointMapping core = tomerge.get(0);
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
+				List<AssetWaypointAttachment> toSave = new ArrayList<>();
+				
 				for (int i = 1; i < tomerge.size(); i ++) {
 				
-					AssetWaypoint from = tomerge.get(i);
+					WaypointMapping from = tomerge.get(i);
 					//copy over attachments
-					if (from.getWaypoint().getAttachments() != null) {
-						for (WaypointAttachment sp : from.getWaypoint().getAttachments()) {
-							WaypointAttachment att = new WaypointAttachment();
-							// copy file to temp location so it won't be deleted out from under us
-							File tmpLocation = File.createTempFile("smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
-							tmpLocation.deleteOnExit();
-							sp.computeFileLocation(session);
-							FileUtils.copyFile(sp.getAttachmentFile(), tmpLocation);
-							att.setCopyFromLocation(tmpLocation);
-							att.setFilename(sp.getFilename());
-							att.setWaypoint(core.getWaypoint());
-							core.getWaypoint().getAttachments().add(att);
+					for (AssetWaypoint fromaw : from.aw) {
+						
+						AssetWaypoint toAssetWaypoint = null;
+						for (AssetWaypoint aw : core.aw) {
+							if (aw.getAssetDeployment().equals(fromaw.getAssetDeployment())) {
+								toAssetWaypoint = aw;
+							}
 						}
-					}
-					//copy over observations
-					if (from.getWaypoint().getObservations() != null) {
-						for (WaypointObservation wo : from.getWaypoint().getObservations()) {
-							if (!DataImporterView.containsObservation(wo, core.getWaypoint().getObservations())) {
-								WaypointObservation woClone = wo.clone(session);
-								core.getWaypoint().getObservations().add(woClone);
-								woClone.setWaypoint(core.getWaypoint());
+						if (toAssetWaypoint == null) {
+							toAssetWaypoint = new AssetWaypoint();
+							toAssetWaypoint.setAssetDeployment(fromaw.getAssetDeployment());
+							toAssetWaypoint.setAttachments(new HashSet<>());
+							toAssetWaypoint.setState(State.DIRTY);
+							toAssetWaypoint.setWaypoint(core.wp);
+							core.aw.add(toAssetWaypoint);
+							
+							//TODO: i think we need to check the asset deployment time range here and make
+							//sure it includes the incident date/time..
+						}
+						session.saveOrUpdate(toAssetWaypoint);
+
+						
+						if (fromaw.getAttachments() != null) {
+							for (AssetWaypointAttachment fromattachment : fromaw.getAttachments()) {
+								
+								//create a new waypoint
+								WaypointAttachment source = fromattachment.getWaypointAttachment();
+								
+								WaypointAttachment att = new WaypointAttachment();
+								// copy file to temp location so it won't be deleted out from under us
+								File tmpLocation = File.createTempFile("smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
+								tmpLocation.deleteOnExit();
+								source.computeFileLocation(session);
+								FileUtils.copyFile(source.getAttachmentFile(), tmpLocation);
+								att.setCopyFromLocation(tmpLocation);
+								att.setFilename(source.getFilename());
+								att.setWaypoint(core.wp);
+								core.wp.getAttachments().add(att);
+								
+								AssetWaypointAttachment newAttachment = new AssetWaypointAttachment();
+								newAttachment.setAssetWaypoint(toAssetWaypoint);
+								newAttachment.setWaypointAttachment(att);
+								toAssetWaypoint.getAttachments().add(newAttachment);
+								
 							}
 						}
 					}
-					session.delete(from);
-					session.delete(from.getWaypoint());
+					//copy over observations
+					if (from.wp.getObservations() != null) {
+						for (WaypointObservation wo : from.wp.getObservations()) {
+							if (!DataImporterView.containsObservation(wo, core.wp.getObservations())) {
+								WaypointObservation woClone = wo.clone(session);
+								core.wp.getObservations().add(woClone);
+								woClone.setWaypoint(core.wp);
+							}
+						}
+					}
+
+					for (AssetWaypoint aw : from.aw) {
+						aw.getAttachments().forEach(a->session.delete(a));
+						aw.getAttachments().clear();
+						session.delete(aw);
+					}
+					session.delete(from.wp);
+					
 				}
 				
-				session.saveOrUpdate(core.getWaypoint());
+				session.saveOrUpdate(core.wp);
+				toSave.forEach(a->session.save(a));
 				session.getTransaction().commit();
 			}catch(Exception ex){
 				AssetPlugIn.displayLog("Error occurred saving changes. You should reload the page before continuing: " +ex.getMessage(), ex);
@@ -665,26 +794,32 @@ public class DataReviewPage {
 				item.setSelected(newSelection);
 			}
 		}	
-		List<AssetWaypoint> selection = rows.stream().filter(e->e.isSelected).map(e->e.waypoint).collect(Collectors.toList());
+		List<Waypoint> selection = rows.stream().filter(e->e.isSelected).map(e->{ return e.waypoint.wp; }).collect(Collectors.toList());
 		view.getContext().get(ESelectionService.class).setSelection(new StructuredSelection(selection));
 		lastSelection = index;
+		
 	}
 	
 	static void colorControl(Control control, Color color) {
 		forEachChild(control, e->{
-			e.setBackground(color);
-			e.redraw();
+			Boolean c = (Boolean) e.getData("COLOR");
+			if (c == null || c) {
+				e.setBackground(color);
+				e.redraw();
+				return true;
+			}
+			return false;
 		});
 	}
 	
-	static void forEachChild( Control control, Consumer<Control> consumer) {
-		consumer.accept(control);
+	static void forEachChild( Control control, Predicate<Control> consumer) {
+		if (!consumer.test(control)) return;
 		if (!(control instanceof Composite)) return;
 		List<Control> kids = new ArrayList<>();
 		for (Control c : ((Composite)control).getChildren()) kids.add(c);
 		while(!kids.isEmpty()) {
 			Control c = kids.remove(0);
-			consumer.accept(c);
+			if (!consumer.test(c)) continue;
 			if (c instanceof Composite) {
 				for (Control c3 : ((Composite)c).getChildren()) {
 					kids.add(c3);
@@ -693,7 +828,8 @@ public class DataReviewPage {
 		}
 	}
 	private class RowItem{
-		private AssetWaypoint waypoint;
+		
+		private WaypointMapping waypoint;
 		private AttachmentTable tt;
 		
 		private int fileCnt = 0;
@@ -708,7 +844,7 @@ public class DataReviewPage {
 		
 		private Color bgColor = null;
 		
-		public RowItem(AssetWaypoint waypoint) {
+		public RowItem(WaypointMapping waypoint) {
 			this.waypoint = waypoint;
 		}
 		
@@ -727,8 +863,6 @@ public class DataReviewPage {
 		}
 		
 		public void createControl(Composite parent) {
-			AssetWaypoint aw = this.waypoint;
-			
 			Listener clickListener = e->{
 				switch(e.type) {
 				case SWT.MouseUp:
@@ -775,18 +909,28 @@ public class DataReviewPage {
 			header.setBackground(headerColor);
 			
 			StringBuilder sb = new StringBuilder();
-			sb.append(DateFormat.getDateTimeInstance().format(aw.getWaypoint().getDateTime()));
+			sb.append(DateFormat.getDateTimeInstance().format(waypoint.wp.getDateTime()));
 //			sb.append(" (");
 //			sb.append(aw.getWaypoint().getId());
 //			sb.append(") ");
 			
+			Set<Asset> assets = waypoint.aw.stream().map(e->e.getAssetDeployment().getAsset()).collect(Collectors.toSet());
+			Set<AssetStationLocation> locations= waypoint.aw.stream().map(e->e.getAssetDeployment().getStationLocation()).collect(Collectors.toSet());
 			sb.append("      ");
-			sb.append(aw.getAssetDeployment().getStationLocation().getStation().getId());
-			sb.append(" (");
-			sb.append(aw.getAssetDeployment().getStationLocation().getId());
-			sb.append(")");
+			for (AssetStationLocation l : locations) {
+				sb.append(l.getId());
+				sb.append(" (");
+				sb.append(l.getStation().getId());
+				sb.append(")");
+			}
+			
 			sb.append("      ");
-			sb.append(aw.getAssetDeployment().getAsset().getId());
+			for (Asset a : assets) {
+				sb.append(a.getId());
+				sb.append(", ");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.deleteCharAt(sb.length() - 1);
 			
 			
 			headerLabel = toolkit.createLabel(header, sb.toString());
@@ -828,11 +972,11 @@ public class DataReviewPage {
 			
 			
 			List<ISmartAttachment> files = new ArrayList<>();
-			if (aw.getWaypoint().getAttachments() != null) {
-				aw.getWaypoint().getAttachments().forEach(a->files.add(a));
+			if (waypoint.wp.getAttachments() != null) {
+				waypoint.wp.getAttachments().forEach(a->files.add(a));
 			}
-			if (aw.getWaypoint().getObservations() != null) {
-				aw.getWaypoint().getObservations().forEach(o->{
+			if (waypoint.wp.getObservations() != null) {
+				waypoint.wp.getObservations().forEach(o->{
 					if (o.getAttachments() != null) {
 						o.getAttachments().forEach(a->files.add(a));
 					}
@@ -846,7 +990,6 @@ public class DataReviewPage {
 					Menu mnu = new Menu(parent);
 					
 					MenuItem createIncident = new MenuItem(mnu, SWT.PUSH);
-//					createIncident.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 					createIncident.setText("Extract as New Incident...");
 					createIncident.addListener(SWT.Selection, e->{
 						IStructuredSelection items = tt.getSelection();
@@ -856,15 +999,8 @@ public class DataReviewPage {
 							if (attachment instanceof WaypointAttachment) toMove.add((WaypointAttachment) attachment);
 						}
 							
-						AssetWaypoint newWaypoint = newIncident(waypoint, toMove);
+						WaypointMapping newWaypoint = newIncident(waypoint, toMove);
 						if (newWaypoint == null) return;
-
-						//remove attachments from current row item
-//						files.removeAll(toMove);
-//						tt.refresh();
-//						//create a new row item
-//						
-//						DataReviewPage.this.resizeScroll();
 						//refresh entire view as we now have a new incident
 						loadWaypointsJob.schedule();
 					});
@@ -876,13 +1012,14 @@ public class DataReviewPage {
 					removeImg.addListener(SWT.Selection, e->{
 						IStructuredSelection items = tt.getSelection();
 						//TODO: verify delete with user
+						//TODO: remove deployment link
 						try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 							session.beginTransaction();
 							try {
 								for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
 									Object attachment = iterator.next();
 									if (attachment instanceof ISmartAttachment) {
-										waypoint.getWaypoint().getAttachments().remove(attachment);
+										waypoint.wp.getAttachments().remove(attachment);
 										session.delete(attachment);
 										files.remove(attachment);
 									}
@@ -909,9 +1046,10 @@ public class DataReviewPage {
 						for (String s : fd.getFileNames()) {
 							Path p = Paths.get(path,s);
 						
+							//TODO: add deployment link
 							WaypointAttachment wa = new WaypointAttachment();
 							wa.setCopyFromLocation(p.toFile());
-							wa.setWaypoint(waypoint.getWaypoint());
+							wa.setWaypoint(waypoint.wp);
 							wa.setFilename(s);
 							toAdd.add(wa);
 							
@@ -920,7 +1058,7 @@ public class DataReviewPage {
 							session.beginTransaction();
 							try {
 								for (WaypointAttachment wa : toAdd) {
-									waypoint.getWaypoint().getAttachments().add(wa);
+									waypoint.wp.getAttachments().add(wa);
 									session.save(wa);
 									wa.computeFileLocation(session);
 								}
@@ -942,7 +1080,20 @@ public class DataReviewPage {
 					properties.addListener(SWT.Selection, e->{
 						Object x = tt.getSelection().getFirstElement();
 						if (x instanceof WaypointAttachment) {
-							(new AttachmentPropertiesDialog(parent.getShell(), (WaypointAttachment)x)).open();
+							AttachmentPropertiesDialog dialog = new AttachmentPropertiesDialog(parent.getShell(), (WaypointAttachment)x) {
+								protected List<Entry> findAdditionalDetails(ISmartAttachment attachment) {
+									for (AssetWaypoint aw : waypoint.aw) {
+										for (AssetWaypointAttachment attach: aw.getAttachments()) {
+											if (attach.getWaypointAttachment().equals(x)) {
+												return Collections.singletonList(new AttachmentPropertiesDialog.Entry("Asset", aw.getAssetDeployment().getAsset().getId()));
+											}
+										}
+									}
+									return Collections.emptyList();
+								}
+							};
+							dialog.open();
+
 						}
 					});
 					
@@ -969,20 +1120,29 @@ public class DataReviewPage {
 			((GridData)tt.getLayoutData()).widthHint = iconSize.getSize()*2+20;
 			fileCnt = files.size();
 			
-			Composite detailsPart = toolkit.createComposite(wppart, SWT.NONE);
-			detailsPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			detailsPart.setLayout(new GridLayout());
-			((GridLayout)detailsPart.getLayout()).verticalSpacing = 0;
-
+			Composite spacer = toolkit.createComposite(wppart);
+			spacer.setLayout(new GridLayout());
+			spacer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			((GridLayout)spacer.getLayout()).marginWidth = 0;
+			((GridLayout)spacer.getLayout()).marginHeight = 3;
 			
-			if (aw.getWaypoint().getObservations() != null) {
-				new WaypointAttributeTable(detailsPart, toolkit, waypoint.getWaypoint(), DataReviewPage.this);
+			Composite detailsPart = toolkit.createComposite(spacer, SWT.NONE);
+			detailsPart.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			detailsPart.setLayout(new GridLayout());
+			((GridLayout)detailsPart.getLayout()).verticalSpacing = 1;
+			((GridLayout)detailsPart.getLayout()).marginWidth = 1;
+			((GridLayout)detailsPart.getLayout()).marginHeight = 1;
+			detailsPart.setData("COLOR", false);
+			
+			if (waypoint.wp.getObservations() != null) {
+				new WaypointAttributeTable(detailsPart, toolkit, waypoint.wp, DataReviewPage.this);
 			}
 
 			forEachChild(header, e->{
 				e.addListener(SWT.MouseUp, clickListener);
 				e.addListener(SWT.MouseEnter, clickListener);
 				e.addListener(SWT.MouseExit, clickListener);
+				return true;
 			});
 			
 			item.addListener(SWT.MouseUp, clickListener);
@@ -1004,7 +1164,7 @@ public class DataReviewPage {
 				((GridData)tt.getLayoutData()).widthHint = w3;
 			}else {
 				int numItems = (int)Math.floor(w2 / (iconSize.getSize() + 5 ));
-				numItems = Math.min(waypoint.getWaypoint().getAttachments() == null || waypoint.getWaypoint().getAttachments().isEmpty()? 1 : waypoint.getWaypoint().getAttachments().size(), numItems);
+				numItems = Math.min(waypoint.wp.getAttachments() == null || waypoint.wp.getAttachments().isEmpty()? 1 : waypoint.wp.getAttachments().size(), numItems);
 				setting = Math.min(numItems * (iconSize.getSize() + 5 ), w2);
 				
 			}
@@ -1013,6 +1173,16 @@ public class DataReviewPage {
 			tt.getParent().layout(true);
 				
 			
+		}
+	}
+	
+	private class WaypointMapping{
+		Waypoint wp;
+		Collection<AssetWaypoint> aw;
+		
+		public WaypointMapping(Waypoint wp, Collection<AssetWaypoint> aw) {
+			this.wp = wp;
+			this.aw = aw;
 		}
 	}
 }

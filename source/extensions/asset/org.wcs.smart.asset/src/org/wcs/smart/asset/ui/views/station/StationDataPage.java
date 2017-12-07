@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -59,7 +61,9 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetWaypointMapping;
 import org.wcs.smart.asset.ui.AttachmentTable;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
 import org.wcs.smart.asset.ui.SettingsShell;
@@ -69,6 +73,7 @@ import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -98,7 +103,7 @@ public class StationDataPage {
 	
 	int startIndex = 0;
 	int pageSize = 50;
-	private List<AssetWaypoint.AssetWaypointPk> dataWaypoints = null;
+	private List<UUID> waypointUuids = null;
 	
 	public StationDataPage(StationEditor parent) {
 		this.parentEditor = parent;
@@ -193,9 +198,9 @@ public class StationDataPage {
 	
 	
 	private void  createNavigationControl(Composite parent) {
-		if (dataWaypoints == null || dataWaypoints.size() == 0) return;
+		if (waypointUuids == null || waypointUuids.size() == 0) return;
 		int from = startIndex;
-		int to = Math.min(startIndex + pageSize,  dataWaypoints.size());
+		int to = Math.min(startIndex + pageSize,  waypointUuids.size());
 		
 		Composite part = toolkit.createComposite(parent);
 		part.setLayout(new GridLayout(4, false));
@@ -203,9 +208,9 @@ public class StationDataPage {
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
 		
-		toolkit.createLabel(part, MessageFormat.format("Displaying {0} to {1} of {2}", from+1, to, dataWaypoints.size()));
+		toolkit.createLabel(part, MessageFormat.format("Displaying {0} to {1} of {2}", from+1, to, waypointUuids.size()));
 		
-		if (from == 0 && to == dataWaypoints.size()) return;
+		if (from == 0 && to == waypointUuids.size()) return;
 			
 		Hyperlink prev = toolkit.createHyperlink(part, "<", SWT.NONE);
 		if(from == 0) prev.setEnabled(false);
@@ -246,7 +251,7 @@ public class StationDataPage {
 			l2.addListener(SWT.MouseEnter, evt->l2.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION)));
 			l2.addListener(SWT.MouseExit, evt->l2.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND)));
 			l2.addListener(SWT.MouseUp, evt->{
-				startIndex = (int)((dataWaypoints.size() / pageSize) * pageSize); 
+				startIndex = (int)((waypointUuids.size() / pageSize) * pageSize); 
 				updateUiJob.schedule();
 				shell.close();
 				shell.dispose();
@@ -266,11 +271,11 @@ public class StationDataPage {
 			((GridLayout)core.getLayout()).marginHeight = 0;
 			((GridLayout)core.getLayout()).verticalSpacing = 1;
 			src.setContent(core);
-			for (int i = 0; i < dataWaypoints.size(); i += pageSize) {
+			for (int i = 0; i < waypointUuids.size(); i += pageSize) {
 				final int ii = i;
 				Label l3 = new Label(core, SWT.NONE);
 				l3.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-				l3.setText(MessageFormat.format("{0}-{1}", (i+1), Math.min(i+pageSize, dataWaypoints.size()))); //$NON-NLS-1$
+				l3.setText(MessageFormat.format("{0}-{1}", (i+1), Math.min(i+pageSize, waypointUuids.size()))); //$NON-NLS-1$
 				l3.addListener(SWT.MouseEnter, evt->l3.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION)));
 				l3.addListener(SWT.MouseExit, evt->l3.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND)));
 				l3.addListener(SWT.MouseUp, evt->{startIndex = ii; updateUiJob.schedule();shell.close();shell.dispose();});
@@ -290,12 +295,12 @@ public class StationDataPage {
 		});
 		
 		Hyperlink next = toolkit.createHyperlink(part, ">", SWT.NONE);
-		if (to == dataWaypoints.size()) next.setEnabled(false);
+		if (to == waypointUuids.size()) next.setEnabled(false);
 		next.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				startIndex = startIndex + pageSize;
-				if (startIndex > dataWaypoints.size()) startIndex = dataWaypoints.size();
+				if (startIndex > waypointUuids.size()) startIndex = waypointUuids.size();
 				updateUiJob.schedule();
 			}
 		});
@@ -314,10 +319,10 @@ public class StationDataPage {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				dataWaypoints = new ArrayList<>();
+				waypointUuids = new ArrayList<>();
 				startIndex = 0;
 				try(Session session = HibernateManager.openSession()){
-					String query = "FROM AssetWaypoint WHERE id.assetDeployment.stationLocation.station = :station ";
+					String query = "SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE id.assetDeployment.stationLocation.station = :station ";
 					if (startDate != null) {
 						query += " and id.waypoint.dateTime >= :startDate ";
 					}
@@ -330,7 +335,7 @@ public class StationDataPage {
 					if (endDate != null) q.setParameter("endDate", endDate);
 					q.setParameter("station", parentEditor.getAssetStation());
 					for (Object x : q.list()) {
-						dataWaypoints.add(((AssetWaypoint)x).getId());
+						waypointUuids.add( (UUID)((Object[])x)[0]);  
 					}
 				}
 				updateUiJob.schedule();
@@ -341,11 +346,11 @@ public class StationDataPage {
 		loadData.schedule();
 	}
 
-	private void createDataPanel(List<AssetWaypoint> waypoints) {
+	private void createDataPanel(List<AssetWaypointMapping> waypoints) {
 		for (Control c : dataComposite.getChildren()) c.dispose();
 
 		if (waypoints == null) {
-			waypoints = (List<AssetWaypoint>) dataComposite.getData("WP_DATA");
+			waypoints = (List<AssetWaypointMapping>) dataComposite.getData("WP_DATA");
 		}else {
 			dataComposite.setData("WP_DATA", waypoints);
 		}
@@ -357,7 +362,7 @@ public class StationDataPage {
 		}
 		
 		int maxWidth = 0;
-		for(AssetWaypoint aw : waypoints) {
+		for(AssetWaypointMapping aw : waypoints) {
 			Composite outer = toolkit.createComposite(dataComposite, SWT.BORDER);
 			outer.setLayout(new GridLayout());
 			outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -372,9 +377,19 @@ public class StationDataPage {
 				
 			Label l = toolkit.createLabel(top, MessageFormat.format("{0}", DateFormat.getDateTimeInstance().format(aw.getWaypoint().getDateTime())));
 			l.setBackground(dayHeaderColor);
-			l = toolkit.createLabel(top, MessageFormat.format("Location: {0}", aw.getAssetDeployment().getStationLocation().getId()));
+			
+			StringBuilder sb = new StringBuilder();
+			for (AssetStationLocation loc : aw.getAssetLinks().stream().map(e->e.getAssetDeployment().getStationLocation()).collect(Collectors.toSet())) {
+				sb.append(loc.getId());
+				sb.append(", ");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			sb.deleteCharAt(sb.length() - 1);
+			
+			l = toolkit.createLabel(top, MessageFormat.format("Location: {0}", sb.toString()));
 			l.setBackground(dayHeaderColor);
 			
+			//TODO: add asset ids
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			Composite info = toolkit.createComposite(outer);
@@ -466,23 +481,24 @@ public class StationDataPage {
 				dataComposite.layout(true);
 			});
 			
-			List<AssetWaypoint> waypoints = new ArrayList<>();
-			if (dataWaypoints != null) {
-				int to = Math.min(startIndex + pageSize , dataWaypoints.size());
+			List<AssetWaypointMapping> waypoints = new ArrayList<>();
+			if (waypointUuids != null) {
+				int to = Math.min(startIndex + pageSize , waypointUuids.size());
 				try(Session session = HibernateManager.openSession()){
 					for (int i = startIndex; i < to; i ++) {
-						AssetWaypoint aw = (AssetWaypoint)QueryFactory.buildQuery(session, AssetWaypoint.class, 
-								new Object[] {"id.waypoint", dataWaypoints.get(i).getWaypoint()},
-								new Object[] {"id.assetDeployment", dataWaypoints.get(i).getAssetDeployment()})
-						.uniqueResult();
-						if (aw == null) continue;
-						waypoints.add(aw);
-						aw.getAssetDeployment().getStationLocation().getStation().getId();
+						Waypoint waypoint = (Waypoint)session.get(Waypoint.class, waypointUuids.get(i));
+						List<AssetWaypoint> links = session.createQuery("FROM AssetWaypoint WHERE id.waypoint = :waypoint")
+								.setParameter("waypoint", waypoint)
+								.list();
+						
+						if (waypoint == null) continue;
+						waypoints.add(new AssetWaypointMapping(waypoint, links));
 					}
 					
 					waypoints.forEach(w->{
-						w.getAssetDeployment().getStationLocation().getStation().getId();
-						w.getAssetDeployment().getStationLocation().getId();
+						w.getAssetLinks().forEach(l->l.getAssetDeployment().getStationLocation().getStation().getId());
+						w.getAssetLinks().forEach(l->l.getAssetDeployment().getStationLocation().getId());
+
 						if (w.getWaypoint().getObservations() != null) {
 							w.getWaypoint().getObservations().forEach(e->{
 								e.getCategory().getFullCategoryName();
@@ -530,4 +546,5 @@ public class StationDataPage {
 		}
 		
 	};
+	
 }

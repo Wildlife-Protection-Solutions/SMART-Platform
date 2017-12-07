@@ -179,6 +179,8 @@ public class FileProxy extends ISmartAttachment{
 	 * parts of the relation.  If the fp to add relation is also fixed it will also 
 	 * not get added
 	 * 
+	 * Relations will no contain itself.
+	 * 
 	 * @param fp
 	 */
 	public void addRelation(FileProxy fp) {

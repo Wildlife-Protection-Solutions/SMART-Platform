@@ -529,6 +529,13 @@ public class AssetListView {
 		loadStations(250);
 	}
 	
+	@Optional
+	@Inject
+	public void dataModified(@UIEventTopic(AssetEvents.ASSETDATA) Object payLoad) {
+		loadStations(250);
+		loadAssets(250);
+	}
+	
 	@Focus
 	public void setFocus() {
 	}

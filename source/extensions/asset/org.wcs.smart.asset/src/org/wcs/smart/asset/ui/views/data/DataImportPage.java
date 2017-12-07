@@ -6,10 +6,12 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,8 +52,9 @@ import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetWaypointAttachment;
 import org.wcs.smart.asset.model.AssetWaypointSource;
-import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;	
+import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -59,7 +62,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
 public class DataImportPage {
 
@@ -96,8 +98,6 @@ public class DataImportPage {
 	
 	public void createPage(Composite parent) {
 		rowColors = new Color[] {
-//				new Color(parent.getDisplay(), 255, 212, 127),
-//				new Color(parent.getDisplay(), 255, 255, 170)
 				new Color(parent.getDisplay(), 179, 225, 210),
 				new Color(parent.getDisplay(), 255, 200, 170),
 				new Color(parent.getDisplay(), 200, 200, 230),
@@ -129,7 +129,7 @@ public class DataImportPage {
 		toolkit.adapt(tb);
 		
 		ToolItem itemAdd = new ToolItem(tb, SWT.PUSH);
-		itemAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		itemAdd.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_FILE));
 		itemAdd.setToolTipText("Add files to import");
 		itemAdd.addListener(SWT.Selection, e->{
 			FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.MULTI | SWT.OPEN);
@@ -179,8 +179,6 @@ public class DataImportPage {
 	}
 	
 	void save(Collection<FileProxy> toSave) {
-		Set<AssetStation> modifiedStations = new HashSet<>();
-		Set<Asset> modifiedAssets = new HashSet<>();
 		
 		//cannot save if not valid
 		for (FileProxy p : toSave) {
@@ -255,12 +253,18 @@ public class DataImportPage {
 							wp.setY(p.getY());
 							wp.setAttachments(new ArrayList<>());
 							
+							Map<Asset, List<WaypointAttachment>> assetAttachmentLink = new HashMap<>();
+							
 							WaypointAttachment wa = new WaypointAttachment();
 							wa.setWaypoint(wp);
 							wa.setCopyFromLocation(p.getFile().toFile());
 							wa.setFilename(p.getFile().getFileName().toString());
 							wp.getAttachments().add(wa);
 							wp.setObservations(new ArrayList<>());
+							wp.setId(0);
+							
+							
+							assetAttachmentLink.put(p.getAsset(), new ArrayList<>(Collections.singleton(wa)));
 							
 							for (WaypointObservation wo : p.getObservations()) {
 								WaypointObservation clone = wo.clone(session);
@@ -270,6 +274,8 @@ public class DataImportPage {
 							
 							//add relations
 							List<FileProxy> relations = new ArrayList<>();
+							Set<Asset> assets = new HashSet<>();
+							assets.add(p.getAsset());
 							relations.addAll(p.getRelations());
 							if (p.getFixedRelations() != null) relations.addAll(p.getFixedRelations());							
 							for (FileProxy pp : relations) {
@@ -288,43 +294,58 @@ public class DataImportPage {
 										wp.getObservations().add(clone);
 									}
 								}
+								
+								List<WaypointAttachment> links = assetAttachmentLink.get(pp.getAsset());
+								if (links == null) {
+									links = new ArrayList<>();
+									assetAttachmentLink.put(pp.getAsset(), links);
+								}
+								links.add(wa);
+								
+								assets.add(pp.getAsset());
 							}
 							
 							session.save(wp);
 							session.flush();
 							
-							AssetDeployment d = processor.findAssetDeployment(wp, p.getAsset(), p.getStationLocation(), session);
-							if (d.getUuid() == null) {
-								session.save(d);
+							for (Asset asset : assets) {
+								AssetDeployment d = processor.findAssetDeployment(wp, asset, p.getStationLocation(), session);
+								if (d.getUuid() == null) {
+									session.save(d);
+									session.flush();
+								}
+								int wpcnt = d.getAssetWaypoints().size() + 1;
+								wp.setId(Math.max(wpcnt, wp.getId()));
+							
+								//link waypoint to deployment
+								AssetWaypoint aw = new AssetWaypoint();
+								aw.setState(AssetWaypoint.State.DIRTY);
+								aw.setWaypoint(wp);
+								aw.setAssetDeployment(d);
+								aw.setAttachments(new HashSet<>());
+								if (d.getAssetWaypoints() == null) d.setAssetWaypoints(new ArrayList<>());
+								d.getAssetWaypoints().add(aw);
+								session.save(aw);
+								
+								//link files to deployment
+								List<WaypointAttachment> files = assetAttachmentLink.get(asset);
+								for(WaypointAttachment f : files) {
+									AssetWaypointAttachment link = new AssetWaypointAttachment();
+									link.setWaypointAttachment(f);
+									link.setAssetWaypoint(aw);
+									aw.getAttachments().add(link);
+								}
+								
+								//TODO: verify we do not have overlapping deployments
+								//ensure there are no other deployments whose end date is before this start date
+								if (d.getEndDate() == null) {
+									//ensure we have no other deployments that also have no end date
+								}else {
+									//ensure there are no other deployments whose start date is before this end date
+								}
+							
 								session.flush();
 							}
-							int wpcnt = d.getAssetWaypoints().size() + 1;
-//							String wpid = d.getStationLocation().getId() + "_" + df.format(wp.getDateTime()) + "_" + wpcnt;
-							wp.setId(wpcnt);
-							
-							session.flush();
-							
-							AssetWaypoint aw = new AssetWaypoint();
-							aw.setState(AssetWaypoint.State.DIRTY);
-							aw.setWaypoint(wp);
-							aw.setAssetDeployment(d);
-							if (d.getAssetWaypoints() == null) d.setAssetWaypoints(new ArrayList<>());
-							d.getAssetWaypoints().add(aw);
-							session.save(aw);
-							
-							//TODO: verify we do not have overlapping deployments
-							if (d.getEndDate() == null) {
-								//ensure we have no other deployments that also have no end date
-							}else {
-								//ensure there are no other deployments whose start date is before this end date
-							}
-							
-							//ensure there are no other deployments whose end date is before this start date
-							
-							session.flush();
-							
-							modifiedStations.add(p.getStation());
-							modifiedAssets.add(d.getAsset());
 							monitor.worked(1);
 						}
 						monitor.subTask("Saving to database...");
@@ -337,14 +358,13 @@ public class DataImportPage {
 				}
 				
 				monitor.subTask("Updating UI...");
-				items.forEach(e->processor.removeFile(e));
+				
+				items.forEach(e->processor.removeFile(e));				
 				Display.getDefault().syncExec(()->{
 					//clear deployments & recompute deployments and refresh table
 					refreshProxies();
-
 					//fire events
-					view.getContext().get(IEventBroker.class).post(AssetEvents.ASSET_MODIFIED, modifiedAssets);
-					view.getContext().get(IEventBroker.class).post(AssetEvents.ASSETSTATION_MODIFIED, modifiedStations);
+					view.getContext().get(IEventBroker.class).post(AssetEvents.ASSETDATA, null);
 				});
 				monitor.worked(1);
 			}
@@ -352,10 +372,6 @@ public class DataImportPage {
 		}catch (Exception ex) {
 			AssetPlugIn.displayLog("Error importing asset files: " + ex.getMessage(), ex);
 		}
-		
-//		if (processor.getFileDetails().isEmpty() && deletedItems.isEmpty()) {
-//			setDirty(false);
-//		}
 	
 	}
 	

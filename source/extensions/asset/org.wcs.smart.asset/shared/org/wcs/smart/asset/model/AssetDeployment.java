@@ -194,7 +194,7 @@ public class AssetDeployment extends UuidItem {
 	 * 
 	 * @return The set of asset_waypoint
 	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.assetDeployment", orphanRemoval = true, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="assetDeployment", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<AssetWaypoint> getAssetWaypoints() {
 		return this.waypoints;
 	}

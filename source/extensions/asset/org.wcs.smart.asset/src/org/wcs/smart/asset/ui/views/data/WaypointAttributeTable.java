@@ -77,6 +77,7 @@ public class WaypointAttributeTable {
 			
 		}
 		parent.layout(true, true);
+		page.resizeScroll();
 	}
 	
 	private int lastSelection;
@@ -323,6 +324,7 @@ public class WaypointAttributeTable {
 				e.addListener(SWT.MouseExit, clickListener);
 				e.addListener(SWT.MouseUp, clickListener);
 				e.addListener(SWT.MouseDoubleClick, clickListener);
+				return true;
 			});
 			
 			

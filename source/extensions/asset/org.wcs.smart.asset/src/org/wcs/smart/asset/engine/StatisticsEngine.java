@@ -113,11 +113,11 @@ public enum StatisticsEngine {
 	}
 	
 	private Long computeNumberOfIncidents(Session session, AssetDeployment deployment) {
-		return QueryFactory.buildCountQuery(session, AssetWaypoint.class, new Object[] {"id.assetDeployment", deployment});
+		return QueryFactory.buildCountQuery(session, AssetWaypoint.class, new Object[] {"assetDeployment", deployment});
 	}
 	
 	private Long computeNumberOfUnTagged(Session session, AssetDeployment deployment) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.waypoint w WHERE aw.id.assetDeployment=:deployment AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)";
+		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.waypoint w WHERE aw.assetDeployment=:deployment AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservation)";
 		Query<?> query = session.createQuery(hql).setParameter("deployment",  deployment);
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;

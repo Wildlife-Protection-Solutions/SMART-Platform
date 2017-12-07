@@ -49,6 +49,7 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public static final String ICON_STATUS_INACTIVE = "org.wcs.smart.asset.status.inactive";
 	public static final String ICON_STATUS_RETIRED = "org.wcs.smart.asset.status.retired";
 	public static final String ICON_VALIDATE = "org.wcs.smart.asset.validate";
+	public static final String ICON_VALIDATE_ALL = "org.wcs.smart.asset.validateall";
 	
 	public static final String ICON_IMPORT_COMPLETE = "org.wcs.smart.asset.import.complete";
 	public static final String ICON_IMPORT_INCOMPLETE = "org.wcs.smart.asset.import.incomplete";
@@ -58,6 +59,9 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	
 	public static final String ICON_STATION = "org.wcs.smart.asset.station";
 	public static final String ICON_STATION_LOCATION = "org.wcs.smart.asset.station.location";
+	
+	public static final String ICON_MERGE = "org.wcs.smart.asset.merge";
+	public static final String ICON_IMPORT_FILE = "org.wcs.smart.asset.import.file";
 	
 	/**
 	 * The constructor
@@ -123,16 +127,15 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		reg.put(ICON_STATUS_ACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_active.png")); //$NON-NLS-1$);
 		reg.put(ICON_STATUS_INACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_inactive.png")); //$NON-NLS-1$);
 		reg.put(ICON_STATUS_RETIRED, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/status_retired.png")); //$NON-NLS-1$);
-		
 		reg.put(ICON_IMPORT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import.png")); //$NON-NLS-1$);
 		reg.put(ICON_IMPORT_COMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_complete.png")); //$NON-NLS-1$);
 		reg.put(ICON_IMPORT_INCOMPLETE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_incomplete.png")); //$NON-NLS-1$);
-		
 		reg.put(ICON_SETTINGS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/settings.png")); //$NON-NLS-1$);
-		
 		reg.put(ICON_STATION, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station.png")); //$NON-NLS-1$);
 		reg.put(ICON_STATION_LOCATION, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/location.png")); //$NON-NLS-1$);
-		
 		reg.put(ICON_VALIDATE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/validate.png")); //$NON-NLS-1$);
+		reg.put(ICON_VALIDATE_ALL, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/validate_all.png")); //$NON-NLS-1$);
+		reg.put(ICON_MERGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/merge.png")); //$NON-NLS-1$);
+		reg.put(ICON_IMPORT_FILE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_file.png")); //$NON-NLS-1$);
 	}
 }

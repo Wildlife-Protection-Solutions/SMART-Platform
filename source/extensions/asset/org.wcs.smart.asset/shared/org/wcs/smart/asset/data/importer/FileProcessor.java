@@ -193,7 +193,7 @@ public class FileProcessor {
 		for (FileProxy file : files) {
 			file.setIncidentGroup(null);
 			if (fp == file) continue;
-			if (file.getAsset() != null && file.getAsset().equals(fp.getAsset()) &&
+			if (file.getAsset() != null && // && file.getAsset().equals(fp.getAsset())
 					file.getStationLocation() != null && file.getStationLocation().equals(fp.getStationLocation()) &&
 					file.getImageDate() != null && fp.getImageDate() != null && Math.abs(file.getImageDate().getTime() - fp.getImageDate().getTime()) < seconds * 1000)
 				{

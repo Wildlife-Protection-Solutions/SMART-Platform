@@ -70,5 +70,8 @@ public class AssetEvents {
 	public static final String ASSETDEPLOYMENT_DELETE = "ASSETDEPLOYMENT/DELETE"; //$NON-NLS-1$
 	public static final String ASSETDEPLOYMENT_MODIFIED = "ASSETDEPLOYMENT/UPDATED"; //$NON-NLS-1$
 	
+	/**
+	 * when asset data has modified (waypoints, links etc) payload is null
+	 */
 	public static final String ASSETDATA = "ASSETDATA"; //$NON-NLS-1$
 }
