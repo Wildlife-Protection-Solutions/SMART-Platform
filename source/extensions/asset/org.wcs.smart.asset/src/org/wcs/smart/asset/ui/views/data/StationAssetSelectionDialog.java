@@ -96,9 +96,16 @@ public class StationAssetSelectionDialog extends Dialog{
 	private Asset selectedAsset;
 	private Date selectedDate;
 	
+	private AssetStation definedStation = null;
+	
 	public StationAssetSelectionDialog(Shell parentShell, Type type) {
+		this(parentShell, type, null);
+	}
+	
+	public StationAssetSelectionDialog(Shell parentShell, Type type, AssetStation station) {
 		super(parentShell);
 		this.type = type;
+		this.definedStation = station;
 	}
 	
 	public Asset getSelectedAsset() {
@@ -195,6 +202,7 @@ public class StationAssetSelectionDialog extends Dialog{
 			cmbStation.setContentProvider(ArrayContentProvider.getInstance());
 			cmbStation.setLabelProvider(new AssetLabelProvider());
 			cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+			if (definedStation != null) cmbStation.getControl().setEnabled(false);
 			
 			l = new Label(main, SWT.NONE);
 			l.setText("Station Location:");
@@ -315,7 +323,15 @@ public class StationAssetSelectionDialog extends Dialog{
 			input.add(CREATE_STATION);
 			Display.getDefault().syncExec(()->{
 				cmbStation.setInput(input);
-				if (!stations.isEmpty()) cmbStation.setSelection(new StructuredSelection(stations.get(0)));
+				if (definedStation != null) {
+					if (input.contains(definedStation)) {
+						cmbStation.setSelection(new StructuredSelection(definedStation));
+					}else {
+						cmbStation.setSelection(null);
+					}
+				}else {
+					if (!stations.isEmpty()) cmbStation.setSelection(new StructuredSelection(stations.get(0)));
+				}
 			});
 			return Status.OK_STATUS;
 		}

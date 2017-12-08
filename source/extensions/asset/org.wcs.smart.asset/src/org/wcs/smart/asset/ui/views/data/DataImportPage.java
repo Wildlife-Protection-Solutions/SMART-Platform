@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.data;
 
 import java.lang.reflect.InvocationTargetException;
@@ -13,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -45,6 +67,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.data.importer.FileProcessor;
 import org.wcs.smart.asset.data.importer.FileProxy;
 import org.wcs.smart.asset.model.Asset;
@@ -55,6 +78,7 @@ import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointAttachment;
 import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -62,9 +86,20 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Data import page for data importer view
+ * 
+ * @author Emily
+ *
+ */
 public class DataImportPage {
 
+	private static final String SEP_CHAR = ",";
+	private static final String STATIONLOCATION_LIST_KEY = "org.wcs.smart.asset.ui.views.data.stations";
+	private static final String ASSET_LIST_KEY = "org.wcs.smart.asset.ui.views.data.assets";
+	
 	private DataImporterView view;
 	
 	private Composite details; 
@@ -93,6 +128,8 @@ public class DataImportPage {
 		
 		processor = new FileProcessor(SmartDB.getCurrentConservationArea());
 		deletedItems = new ArrayList<>();
+		
+		loadLists();
 	}
 	
 	
@@ -130,7 +167,7 @@ public class DataImportPage {
 		
 		ToolItem itemAdd = new ToolItem(tb, SWT.PUSH);
 		itemAdd.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT_FILE));
-		itemAdd.setToolTipText("Add files to import");
+		itemAdd.setToolTipText("select files to import");
 		itemAdd.addListener(SWT.Selection, e->{
 			FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.MULTI | SWT.OPEN);
 			if (fd.open() == null) return;
@@ -156,7 +193,7 @@ public class DataImportPage {
 		itemSaveAll.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEALL_EDIT));
 		itemSaveAll.setToolTipText("Save all files to the database");
 		itemSaveAll.setEnabled(false);
-		itemSaveAll.addListener(SWT.Selection, e->save(processor.getFileDetails()));
+		itemSaveAll.addListener(SWT.Selection, e->save(processor.getFiles()));
 		
 		itemSave = new ToolItem(tb, SWT.PUSH);
 		itemSave.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
@@ -288,7 +325,7 @@ public class DataImportPage {
 								wp.getAttachments().add(wa);
 								
 								for (WaypointObservation nextobs : pp.getObservations()) {
-									if (!DataImporterView.containsObservation(nextobs, wp.getObservations())) {
+									if (!AssetUtils.containsObservation(nextobs, wp.getObservations())) {
 										WaypointObservation clone = nextobs.clone(session);
 										clone.setWaypoint(wp);
 										wp.getObservations().add(clone);
@@ -365,6 +402,7 @@ public class DataImportPage {
 					refreshProxies();
 					//fire events
 					view.getContext().get(IEventBroker.class).post(AssetEvents.ASSETDATA, null);
+					if (view.reviewPage != null) view.reviewPage.refresh();
 				});
 				monitor.worked(1);
 			}
@@ -374,10 +412,6 @@ public class DataImportPage {
 		}
 	
 	}
-	
-	
-	
-	
 	
 	private String generateStationId(Session session) {
 		int cnt = 1;
@@ -410,12 +444,12 @@ public class DataImportPage {
 	}
 	
 	private void updateFileCount() {
-		fileCnt.setText(MessageFormat.format("Number of Files: {0}",processor.getFileDetails().size()));
+		fileCnt.setText(MessageFormat.format("Number of Files: {0}",processor.getFiles().size()));
 	}
 
 	private void updateStatus() {
 		boolean isValid = processor.isValid();
-		if (isValid && !processor.getFileDetails().isEmpty()) {
+		if (isValid && !processor.getFiles().isEmpty()) {
 			itemSaveAll.setEnabled(true);
 			itemSaveAll.setToolTipText("Save all files to database");
 		}else {
@@ -521,7 +555,7 @@ public class DataImportPage {
 			if (dialog.open() == StationAssetSelectionDialog.CANCEL) return;
 			asset = dialog.getSelectedAsset();
 		}
-		addToQueue(selectedAssets, asset);
+		addToQueue(selectedAssets, asset, ASSET_LIST_KEY);
 		final Asset newAsset = asset;
 		proxies.forEach(proxy->{
 				proxy.setAsset(newAsset);
@@ -529,10 +563,18 @@ public class DataImportPage {
 		refreshProxies();
 	}
 	
-	private <T> void addToQueue(List<T> items, T item) {
+	private <T extends UuidItem> void addToQueue(List<T> items, T item, String key) {
 		if (items.contains(item)) return;
 		items.add(0, item);
 		while(items.size() > 5) items.remove(items.size() - 1);
+		if (key == null) return;
+		
+		StringBuilder sb = new StringBuilder();
+		for (UuidItem j : items) {
+			sb.append(UuidUtils.uuidToString(j.getUuid()));
+			sb.append(SEP_CHAR);
+		}
+		AssetPlugIn.getDefault().getPreferenceStore().putValue(key, sb.toString());
 	}
 	
 	/**
@@ -559,7 +601,7 @@ public class DataImportPage {
 			location = dialog.getSelectedLocation();
 		}
 		final AssetStationLocation newLocation = location;
-		addToQueue(selectedLocations, newLocation);
+		addToQueue(selectedLocations, newLocation, STATIONLOCATION_LIST_KEY);
 		proxies.forEach(proxy->{
 				proxy.setStationLocation(newLocation);
 		});
@@ -621,13 +663,6 @@ public class DataImportPage {
 	}
 	
 	void removeFiles() {
-//		boolean n = MessageDialog.openQuestion(getSite().getShell(), "Warning", 
-//			"Are you sure you want to remove the selected file?  When removed, the files and associated observations will not be imported into SMART.");
-//		if (!n) return;
-//		
-//		List<FileProxy> files = getSelection();
-//		files.forEach(f->processor.removeFile(f));
-//		refreshProxies();
 		List<FileProxy> files = getSelection();
 		for (FileProxy file : files) {
 			processor.removeFile(file);
@@ -683,6 +718,60 @@ public class DataImportPage {
 			
 		};
 		processingJob.schedule();
-//		setDirty(true);
+	}
+	
+	/*
+	 * load assets and stations location from
+	 * preference store
+	 */
+	private void loadLists() {
+		Job j = new Job("initialize history") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try(Session session = HibernateManager.openSession()){
+					String assets = AssetPlugIn.getDefault().getPreferenceStore().getString(ASSET_LIST_KEY);
+					if (assets != null && !assets.isEmpty()) {
+						String[] uuids = assets.split(SEP_CHAR);
+						for (int i = uuids.length-1; i >= 0 ; i --) {
+							try {
+								if (uuids[i].isEmpty()) continue;
+								UUID uuid = UuidUtils.stringToUuid(uuids[i]);
+								Asset a = session.get(Asset.class, uuid);
+								
+								if (a != null) {
+									a.getId();
+									a.getAssetType().getIncidentCutoff();
+									addToQueue(selectedAssets, a, null);
+								}
+							}catch (Exception ex) {
+								
+							}
+						}
+					}
+					
+					String locations = AssetPlugIn.getDefault().getPreferenceStore().getString(STATIONLOCATION_LIST_KEY);
+					if (locations != null && !locations.isEmpty()) {
+						String[] uuids = locations.split(SEP_CHAR);
+						for (int i = uuids.length-1; i >= 0 ; i --) {
+							try {
+								if (uuids[i].isEmpty()) continue;
+								UUID uuid = UuidUtils.stringToUuid(uuids[i]);
+								AssetStationLocation a = session.get(AssetStationLocation.class, uuid);
+								if (a != null) {
+									a.getId();
+									a.getStation().getId();
+									addToQueue(selectedLocations, a, null);
+								}
+							}catch (Exception ex) {
+								
+							}
+						}
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		j.schedule();
 	}
 }

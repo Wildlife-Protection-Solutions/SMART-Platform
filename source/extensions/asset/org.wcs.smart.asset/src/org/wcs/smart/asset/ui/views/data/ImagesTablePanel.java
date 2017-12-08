@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.asset.ui.views.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MenuEvent;
@@ -38,9 +41,15 @@ import org.wcs.smart.asset.ui.DataDisplaySettings;
 import org.wcs.smart.asset.ui.DataDisplaySettings.IconSize;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 
+/**
+ * Table of images imported grouped by incident.
+ * 
+ * @author Emily
+ *
+ */
 public class ImagesTablePanel {
 	
-	public static final String ICON_SIZE_PREF = DataImporterView.ID + ".iconsize";
+	public static final String ICON_SIZE_PREF = DataImporterView.ID + ".iconsize"; //$NON-NLS-1$
 
 	private AttachmentTable tblResultsImg;
 	private ScrolledComposite scroll;
@@ -65,7 +74,6 @@ public class ImagesTablePanel {
 		AssetPlugIn.getDefault().getPreferenceStore().setValue(ICON_SIZE_PREF, size.name());
 		tblResultsImg.setThumbnailSize(size.getSize());
 		scroll.setMinSize(tblResultsImg.computeSize(scroll.getBounds().width, SWT.DEFAULT));
-		
 	}
 	
 	private void createComposite(Composite parent, FormToolkit toolkit) {
@@ -127,14 +135,12 @@ public class ImagesTablePanel {
 			}
 		};
 		
-		tblResultsImg = new AttachmentTable(scroll, toolkit, menuCreator, view.getProcessor().getFileDetails(), iconSize, 10) {
+		tblResultsImg = new AttachmentTable(scroll, toolkit, menuCreator, view.getProcessor().getFiles(), iconSize, 10) {
 			protected void colorThumb(Composite composite, ISmartAttachment file) {
 				FileProxy proxy = (FileProxy)file;
 				if (proxy.getIncidentGroup() == null) return;
 				int colorIndex = proxy.getIncidentGroup() % view.getRowColors().length;
 				composite.setBackground(view.getRowColors()[colorIndex]);
-				
-				
 			}
 		};
 		

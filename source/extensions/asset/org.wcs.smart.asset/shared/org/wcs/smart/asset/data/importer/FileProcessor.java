@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
@@ -134,7 +135,7 @@ public class FileProcessor {
 	 * file details sorted by date
 	 * @return
 	 */
-	public List<FileProxy> getFileDetails() {
+	public List<FileProxy> getFiles() {
 		return files;
 	}
 	
@@ -193,9 +194,14 @@ public class FileProcessor {
 		for (FileProxy file : files) {
 			file.setIncidentGroup(null);
 			if (fp == file) continue;
+			
+			//they can be joined if they are assocated with the same station
+			//within the incident cut-off time
+			//they do not have to be at the same location within the station
 			if (file.getAsset() != null && // && file.getAsset().equals(fp.getAsset())
-					file.getStationLocation() != null && file.getStationLocation().equals(fp.getStationLocation()) &&
-					file.getImageDate() != null && fp.getImageDate() != null && Math.abs(file.getImageDate().getTime() - fp.getImageDate().getTime()) < seconds * 1000)
+					(fp.getStationLocation() != null && file.getStationLocation() != null && file.getStationLocation().getStation().equals(fp.getStationLocation().getStation())) &&
+					file.getImageDate() != null && fp.getImageDate() != null 
+					&& Math.abs(file.getImageDate().getTime() - fp.getImageDate().getTime()) < seconds * 1000)
 				{
 				fp.addRelation(file);
 			}
@@ -533,7 +539,7 @@ public class FileProcessor {
 	//TODO: if track is set we probably don't want to be merge deployments; each
 	//time out should probably be a deployments but we can deal with that when we
 	//get to processing videos
-	public AssetDeployment findAssetDeployment(Waypoint wp, Asset asset, AssetStationLocation location, Session session) {
+	public static AssetDeployment findAssetDeployment(Waypoint wp, Asset asset, AssetStationLocation location, Session session) {
 		
 		//1.  Find a deployment for the asset that is between the start and end date of the waypoint
 		String hql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :date1 and (endDate is null or endDate>=:date2)"; //$NON-NLS-1$
@@ -637,7 +643,7 @@ public class FileProcessor {
 		}
 	}
 	
-	private AssetDeployment createNewDeployment(Asset asset, Date startDate, AssetStationLocation location) {
+	private static AssetDeployment createNewDeployment(Asset asset, Date startDate, AssetStationLocation location) {
 		AssetDeployment newDeployment = new AssetDeployment();
 		newDeployment.setAsset(asset);
 		newDeployment.setAssetWaypoints(new ArrayList<>());

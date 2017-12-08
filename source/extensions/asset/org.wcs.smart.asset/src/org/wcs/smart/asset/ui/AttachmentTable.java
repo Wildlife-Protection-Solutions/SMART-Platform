@@ -119,6 +119,10 @@ public class AttachmentTable extends Composite {
 			fireSelectionEvents(e);
 		});
 	}
+	
+	public List<? extends ISmartAttachment> getAttachments(){
+		return this.attachments;
+	}
 
 	public void setThumbnailSize(int size) {
 		this.thumbSize = size;

@@ -22,6 +22,8 @@
 package org.wcs.smart.asset;
 
 import java.text.MessageFormat;
+import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
@@ -29,6 +31,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
 /**
  * Utilties for the asset plugin
@@ -83,5 +87,56 @@ public class AssetUtils {
 			return false;
 		}
 		return true;
+	}
+	
+	
+	/**
+	 * Returns true if the obs matches one of the observations
+	 * in the all array.  Matches requires the category to be the same
+	 * and all the attributes to be identical.
+	 * @param obs
+	 * @param all
+	 * @return
+	 */
+	public static boolean containsObservation(WaypointObservation obs, List<WaypointObservation> all) {
+		for (WaypointObservation wo : all) {
+			if (!wo.getCategory().equals(obs.getCategory())) continue;
+			
+			if (wo.getAttributes().size() != obs.getAttributes().size()) continue;
+			
+			boolean ok = true;
+			for (WaypointObservationAttribute a : wo.getAttributes()) {
+				WaypointObservationAttribute matching = null;
+				for (WaypointObservationAttribute aa : obs.getAttributes()) {
+					if (aa.getAttribute().equals(a.getAttribute())){
+						matching = aa;
+						break;
+					}
+				}
+				if (matching == null) {
+					ok = false;
+					break;
+				}
+				switch(a.getAttribute().getType()) {
+					case BOOLEAN:
+					case NUMERIC:
+						ok = Objects.equals(a.getNumberValue(), matching.getNumberValue());
+						break;
+					case DATE:
+					case TEXT:
+						ok = Objects.equals(a.getStringValue(), matching.getStringValue());
+						break;
+					case LIST:
+						ok = Objects.equals(a.getAttributeListItem(), matching.getAttributeListItem());
+						break;
+					case TREE:
+						ok = Objects.equals(a.getAttributeTreeNode(), matching.getAttributeTreeNode());
+						break;				
+				}
+				if (!ok) break;
+			}
+			if (ok) return true;
+		}
+		return false;
 	}
 }

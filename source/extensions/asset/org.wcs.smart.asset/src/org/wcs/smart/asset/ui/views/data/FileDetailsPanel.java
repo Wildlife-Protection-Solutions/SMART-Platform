@@ -69,6 +69,13 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Tag;
 
+/**
+ * Panel for displaying details of selected file or multiple
+ * images depending on selection
+ * 
+ * @author Emily
+ *
+ */
 public class FileDetailsPanel {
 
 	private static final String IMAGE_DATAKEY = "IMAGE"; //$NON-NLS-1$
@@ -84,7 +91,6 @@ public class FileDetailsPanel {
 	private Canvas imageCanvas;
 	private Composite proxyDetailsComp; 
 	 
-	
 	private DataImportPage view;
 	private FormToolkit toolkit;
 	
@@ -95,7 +101,7 @@ public class FileDetailsPanel {
 	}
 	
 	private void createDetailsComposite(Composite parent, FormToolkit toolkit) {
-		fileDetailsComposite = toolkit.createComposite(parent, SWT.BORDER);
+		fileDetailsComposite = toolkit.createComposite(parent, SWT.NONE);
 		fileDetailsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		fileDetailsComposite.setLayout(new StackLayout());
 		
@@ -200,7 +206,7 @@ public class FileDetailsPanel {
 		Font normalFont = lnkDetails.getFont(); 
 		lnkDetails.addListener(SWT.Dispose, e->boldFont.dispose());
 		
-		
+		lblDetailsFileName.setFont(boldFont);
 		lnkDetails.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -276,6 +282,11 @@ public class FileDetailsPanel {
 		colTagValue.getColumn().setWidth(cwidth);
 	}
 	
+	/**
+	 * Update the panel based on the provided selection
+	 * 
+	 * @param selection
+	 */
 	void updateFileDetails(IStructuredSelection selection) {	
 		//clear existing
 		if (proxyDetailsComp.isDisposed()) return;
@@ -377,7 +388,6 @@ public class FileDetailsPanel {
 							
 							if ((y > min && y < max) || (y2>min && y2 < max)) {
 								if (img != null) continue;	
-								FileProxy proxy = (FileProxy)c.getData(IMAGE_PROXY_DATAKEY);
 								LoadImageJob imgjob = new LoadImageJob((Canvas)c);
 								imgjob.setSystem(true);
 								imgjob.schedule();
@@ -432,6 +442,7 @@ public class FileDetailsPanel {
 		lblDetailsFileName.setText(proxy.getFile().getFileName().toString());
 		lblDetailsStatus.setImage( AssetPlugIn.getDefault().getImageRegistry().get(  proxy.isValid() ? AssetPlugIn.ICON_IMPORT_COMPLETE : AssetPlugIn.ICON_IMPORT_INCOMPLETE));
 		if (!proxy.isValid()) lblDetailsStatus.setToolTipText(proxy.validMessage());
+		lblDetailsStatus.getParent().layout();
 		
 		ScrolledComposite scroll = new ScrolledComposite(proxyDetailsComp, SWT.V_SCROLL | SWT.H_SCROLL);
 		scroll.setExpandHorizontal(true);
@@ -562,6 +573,7 @@ public class FileDetailsPanel {
 		
 		Canvas toUpdate = null;
 		FileProxy proxy = null;
+		
 		public LoadImageJob(Canvas toUpdate) {
 			super("loading image job");
 			this.toUpdate = toUpdate;

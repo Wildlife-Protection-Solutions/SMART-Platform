@@ -61,6 +61,12 @@ import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
 
+/**
+ * Part of the data import page that displays the various parts 
+ * 
+ * @author Emily
+ *
+ */
 public class ResultsPanel {
 
 	private static final String ACTION_MENU_DATA_KEY = "ACTION"; //$NON-NLS-1$
@@ -167,11 +173,12 @@ public class ResultsPanel {
 			column.setLabelProvider(c.getLabelProvider(view.getRowColors()));
 		}
 		tblResults.setContentProvider(ArrayContentProvider.getInstance());
-		tblResults.setInput(view.getProcessor().getFileDetails());
+		tblResults.setInput(view.getProcessor().getFiles());
 		tblResults.addSelectionChangedListener(e -> detailsPanel.updateFileDetails(tblResults.getStructuredSelection()));
 
 		TableColumn dateColumn = tblResults.getTable().getColumn(ResultsColumn.DATE.ordinal());
 		dateColumn.pack();
+		if (dateColumn.getWidth() < ResultsColumn.DATE.getWidth()) dateColumn.setWidth(ResultsColumn.DATE.getWidth());
 		tblResults.refresh();
 
 		Menu mnu = new Menu(tblResults.getControl());
@@ -277,6 +284,7 @@ public class ResultsPanel {
 				mnuSetDate.setEnabled(!tblResults.getSelection().isEmpty());
 				mnuRemoveFile.setEnabled(!tblResults.getSelection().isEmpty());
 				mnuGroup.setEnabled(!tblResults.getSelection().isEmpty());
+				mnuSaveFile.setEnabled(!tblResults.getSelection().isEmpty());
 				// only save if all items are valid
 				boolean ok = true;
 				boolean canUngroup = false;
@@ -289,8 +297,8 @@ public class ResultsPanel {
 							canUngroup = true;
 					}
 				}
-				mnuSaveFile.setEnabled(ok);
-				mnuGroup.setEnabled(ok);
+				if (mnuSaveFile.isEnabled()) mnuSaveFile.setEnabled(ok);
+				if (mnuGroup.isEnabled()) mnuGroup.setEnabled(ok);
 				mnuRemoveGroup.setEnabled(ok && canUngroup);
 
 				for (MenuItem i : mnu.getItems()) {

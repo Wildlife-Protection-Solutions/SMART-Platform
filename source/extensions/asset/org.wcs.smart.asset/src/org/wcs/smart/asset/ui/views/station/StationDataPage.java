@@ -30,10 +30,13 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -60,6 +63,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
@@ -67,6 +71,8 @@ import org.wcs.smart.asset.model.AssetWaypointMapping;
 import org.wcs.smart.asset.ui.AttachmentTable;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
 import org.wcs.smart.asset.ui.SettingsShell;
+import org.wcs.smart.asset.ui.data.AssetDataPanel;
+import org.wcs.smart.asset.ui.views.asset.AssetDataPage;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
@@ -89,29 +95,28 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class StationDataPage {
 
+	@Inject
+	private IEclipseContext context;
+	
 	private StationEditor parentEditor;
 	
-	private FormToolkit toolkit;
+	private AssetDataPanel dataPanel;
 	private Composite mainControl;
-	private Composite headerComp;
 	private DateFilterDropDownComposite dateFilter;
-	
-	private ScrolledComposite scrollComp;
-	private Composite dataComposite;
-	
-	private DataDisplaySettings settings;
-	
-	int startIndex = 0;
-	int pageSize = 50;
-	private List<UUID> waypointUuids = null;
 	
 	public StationDataPage(StationEditor parent) {
 		this.parentEditor = parent;
-		settings = DataDisplaySettings.getSettings();
+
 	}
 	
 	public Composite createDataSection(Composite parent, FormToolkit toolkit) {
-		this.toolkit = toolkit;
+		
+		dataPanel = new AssetDataPanel(toolkit, false, context) {
+			@Override
+			public void loadWaypoints() {
+				reloadData();
+			}
+		};
 		
 		mainControl = toolkit.createComposite(parent, SWT.NONE);
 		mainControl.setLayout(new GridLayout());
@@ -146,48 +151,32 @@ public class StationDataPage {
 		ToolBar tb = new ToolBar(filterSection, SWT.FLAT);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
-		ToolItem itemSettings = new ToolItem(tb, SWT.PUSH);
-		itemSettings.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_SETTINGS));
-		itemSettings.setToolTipText("Configure table settings");
-		itemSettings.addListener(SWT.Selection, e->{
-			SettingsShell settingDialog = new SettingsShell(tb.getDisplay());
-			settingDialog.show(tb);
-			settingDialog.getShell().addListener(SWT.Dispose, evt->{
-				DataDisplaySettings newSettings = settingDialog.getSettings();
-				if (newSettings.getDisplayType() != this.settings.getDisplayType() || 
-						newSettings.getIconSize() != this.settings.getIconSize()) {
-					this.settings = newSettings;
-					createDataPanel(null);
-				}
-				
-			});
-		});
+		//enable/disable editing button based on user permission
+		ToolItem itemEdit = new ToolItem(tb, SWT.CHECK);
+		itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		itemEdit.setToolTipText("enable edit mode");
+		itemEdit.addListener(SWT.Selection, e->dataPanel.setEditable(itemEdit.getSelection()));
 		
-		headerComp = new Composite(mainControl, SWT.NONE);
-		headerComp.setLayout(new GridLayout());
-		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)headerComp.getLayout()).marginWidth = 0;
-		((GridLayout)headerComp.getLayout()).marginHeight = 0;
+//		ToolItem itemSettings = new ToolItem(tb, SWT.PUSH);
+//		itemSettings.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_SETTINGS));
+//		itemSettings.setToolTipText("Configure table settings");
+//		itemSettings.addListener(SWT.Selection, e->{
+//			SettingsShell settingDialog = new SettingsShell(tb.getDisplay());
+//			settingDialog.show(tb);
+//			settingDialog.getShell().addListener(SWT.Dispose, evt->{
+//				DataDisplaySettings newSettings = settingDialog.getSettings();
+//				if (newSettings.getDisplayType() != this.settings.getDisplayType() || 
+//						newSettings.getIconSize() != this.settings.getIconSize()) {
+//					this.settings = newSettings;
+//					createDataPanel(null);
+//				}
+//				
+//			});
+//		});
 		
-		scrollComp = new ScrolledComposite(mainControl, SWT.V_SCROLL | SWT.H_SCROLL);
-		scrollComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		scrollComp.setLayout(new GridLayout());
-		scrollComp.setExpandHorizontal(true);
-		scrollComp.setExpandVertical(true);
 		
-		dataComposite = toolkit.createComposite(scrollComp, SWT.NONE);
-		dataComposite.setLayout(new GridLayout());
-		dataComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)dataComposite.getLayout()).marginWidth = 0;
-		((GridLayout)dataComposite.getLayout()).marginHeight = 0;
+		dataPanel.createControl(mainControl);
 		
-		scrollComp.setContent(dataComposite);
-		scrollComp.addListener(SWT.Resize, e->{
-			Integer w = (Integer)scrollComp.getData("MAX_WIDTH");
-			if (w == null) return;
-			scrollComp.setMinSize(dataComposite.computeSize(Math.max(w, scrollComp.getBounds().width- scrollComp.getVerticalBar().getSize().x), SWT.DEFAULT));
-		});
-		reloadData();
 		return mainControl;
 	}
 	
@@ -197,130 +186,15 @@ public class StationDataPage {
 	}
 	
 	
-	private void  createNavigationControl(Composite parent) {
-		if (waypointUuids == null || waypointUuids.size() == 0) return;
-		int from = startIndex;
-		int to = Math.min(startIndex + pageSize,  waypointUuids.size());
-		
-		Composite part = toolkit.createComposite(parent);
-		part.setLayout(new GridLayout(4, false));
-		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
-		((GridLayout)part.getLayout()).marginWidth = 0;
-		((GridLayout)part.getLayout()).marginHeight = 0;
-		
-		toolkit.createLabel(part, MessageFormat.format("Displaying {0} to {1} of {2}", from+1, to, waypointUuids.size()));
-		
-		if (from == 0 && to == waypointUuids.size()) return;
-			
-		Hyperlink prev = toolkit.createHyperlink(part, "<", SWT.NONE);
-		if(from == 0) prev.setEnabled(false);
-		prev.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				startIndex = startIndex - pageSize;
-				if (startIndex < 0) startIndex = 0;
-				updateUiJob.schedule();
-			}
-		});
-		Hyperlink more = toolkit.createHyperlink(part, "...",  SWT.NONE);
-		more.addListener(SWT.MouseDown, e->{
-			Shell shell = new Shell(more.getShell(), SWT.NO_TRIM | SWT.ON_TOP );
-			shell.setLayout(new GridLayout());
-			((GridLayout)shell.getLayout()).marginWidth = 0;
-			((GridLayout)shell.getLayout()).marginHeight = 0;
-			
-			Composite c = new Composite(shell, SWT.BORDER);
-			c.setLayout(new GridLayout());
-			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			c.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			((GridLayout)c.getLayout()).marginHeight = 1;
-			((GridLayout)c.getLayout()).marginWidth = 1;
-			((GridLayout)c.getLayout()).verticalSpacing = 1;
-			
-			Label l = new Label(c, SWT.NONE);
-			l.setText("First");
-			l.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			l.addListener(SWT.MouseEnter, evt->l.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION)));
-			l.addListener(SWT.MouseExit, evt->l.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND)));
-			l.addListener(SWT.MouseUp, evt->{startIndex = 0; updateUiJob.schedule();shell.close();shell.dispose();});
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			
-			Label l2 = new Label(c, SWT.NONE);
-			l2.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			l2.setText("Last");
-			l2.addListener(SWT.MouseEnter, evt->l2.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION)));
-			l2.addListener(SWT.MouseExit, evt->l2.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND)));
-			l2.addListener(SWT.MouseUp, evt->{
-				startIndex = (int)((waypointUuids.size() / pageSize) * pageSize); 
-				updateUiJob.schedule();
-				shell.close();
-				shell.dispose();
-			});
-			l2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			
-			ScrolledComposite src = new ScrolledComposite(c,  SWT.V_SCROLL | SWT.READ_ONLY);
-			src.setExpandHorizontal(true);
-			src.setExpandVertical(true);
-			src.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			src.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-
-			Composite core = new Composite(src, SWT.NONE);
-			core.setLayout(new GridLayout());
-			core.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-			((GridLayout)core.getLayout()).marginWidth = 0;
-			((GridLayout)core.getLayout()).marginHeight = 0;
-			((GridLayout)core.getLayout()).verticalSpacing = 1;
-			src.setContent(core);
-			for (int i = 0; i < waypointUuids.size(); i += pageSize) {
-				final int ii = i;
-				Label l3 = new Label(core, SWT.NONE);
-				l3.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-				l3.setText(MessageFormat.format("{0}-{1}", (i+1), Math.min(i+pageSize, waypointUuids.size()))); //$NON-NLS-1$
-				l3.addListener(SWT.MouseEnter, evt->l3.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION)));
-				l3.addListener(SWT.MouseExit, evt->l3.setBackground(shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND)));
-				l3.addListener(SWT.MouseUp, evt->{startIndex = ii; updateUiJob.schedule();shell.close();shell.dispose();});
-				l3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			}
-			src.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-			
-			shell.pack();
-			shell.setSize(150,  150);
-			shell.layout(true);
-			more.getParent().getParent().layout(true);
-			Point p2 = more.toDisplay(more.getLocation());
-			shell.setLocation(p2.x-150, p2.y + more.getSize().y);
-			shell.open();
-			shell.addListener(SWT.Deactivate, evt->{shell.dispose();});
-			
-		});
-		
-		Hyperlink next = toolkit.createHyperlink(part, ">", SWT.NONE);
-		if (to == waypointUuids.size()) next.setEnabled(false);
-		next.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				startIndex = startIndex + pageSize;
-				if (startIndex > waypointUuids.size()) startIndex = waypointUuids.size();
-				updateUiJob.schedule();
-			}
-		});
-	}
-	
-	
 	public void reloadData() {
 		final Date startDate = dateFilter.getDateFilter().getStartDate();
 		final Date endDate = dateFilter.getDateFilter().getEndDate();
-		
-		for (Control c : dataComposite.getChildren()) c.dispose();
-		toolkit.createLabel(dataComposite, DialogConstants.LOADING_TEXT);
-		dataComposite.layout(true);
-		
-		Job loadData = new Job("load data") {
 
+		Job loadData = new Job("load data") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				waypointUuids = new ArrayList<>();
-				startIndex = 0;
+				List<UUID> waypointUuids = new ArrayList<>();
+				
 				try(Session session = HibernateManager.openSession()){
 					String query = "SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE id.assetDeployment.stationLocation.station = :station ";
 					if (startDate != null) {
@@ -338,7 +212,7 @@ public class StationDataPage {
 						waypointUuids.add( (UUID)((Object[])x)[0]);  
 					}
 				}
-				updateUiJob.schedule();
+				dataPanel.setWaypoints(waypointUuids);
 				return Status.OK_STATUS;
 			}
 			
@@ -346,205 +220,5 @@ public class StationDataPage {
 		loadData.schedule();
 	}
 
-	private void createDataPanel(List<AssetWaypointMapping> waypoints) {
-		for (Control c : dataComposite.getChildren()) c.dispose();
-
-		if (waypoints == null) {
-			waypoints = (List<AssetWaypointMapping>) dataComposite.getData("WP_DATA");
-		}else {
-			dataComposite.setData("WP_DATA", waypoints);
-		}
-		
-		if (waypoints == null || waypoints.isEmpty()) {
-			toolkit.createLabel(dataComposite, "No Data");
-			dataComposite.layout(true);
-			return;
-		}
-		
-		int maxWidth = 0;
-		for(AssetWaypointMapping aw : waypoints) {
-			Composite outer = toolkit.createComposite(dataComposite, SWT.BORDER);
-			outer.setLayout(new GridLayout());
-			outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-			Composite top = toolkit.createComposite(outer, SWT.NONE);
-			top.setLayout(new GridLayout(2, true));
-			top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				
-			Color dayHeaderColor = new Color(top.getDisplay(), 200, 200, 200);
-			top.addListener(SWT.Dispose, e->dayHeaderColor.dispose());
-			top.setBackground(dayHeaderColor);
-				
-			Label l = toolkit.createLabel(top, MessageFormat.format("{0}", DateFormat.getDateTimeInstance().format(aw.getWaypoint().getDateTime())));
-			l.setBackground(dayHeaderColor);
-			
-			StringBuilder sb = new StringBuilder();
-			for (AssetStationLocation loc : aw.getAssetLinks().stream().map(e->e.getAssetDeployment().getStationLocation()).collect(Collectors.toSet())) {
-				sb.append(loc.getId());
-				sb.append(", ");
-			}
-			sb.deleteCharAt(sb.length() - 1);
-			sb.deleteCharAt(sb.length() - 1);
-			
-			l = toolkit.createLabel(top, MessageFormat.format("Location: {0}", sb.toString()));
-			l.setBackground(dayHeaderColor);
-			
-			//TODO: add asset ids
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			
-			Composite info = toolkit.createComposite(outer);
-			info.setLayout(new GridLayout());
-			info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				
-			if (settings.getDisplayType() == DataDisplaySettings.DisplayType.OBS_AND_IMAGES) {
-				Composite obsComp = toolkit.createComposite(info);
-				obsComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				obsComp.setLayout(new GridLayout());
-					
-				for (WaypointObservation wo : aw.getWaypoint().getObservations()) {
-					l = toolkit.createLabel(obsComp, wo.getCategory().getFullCategoryName());
-						
-					for (WaypointObservationAttribute woa : wo.getAttributes()) {
-						l = toolkit.createLabel(obsComp, woa.getAttribute().getName() + ": " + woa.getAttributeValueAsString(Locale.getDefault()));
-						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-						((GridData)l.getLayoutData()).horizontalIndent = 20;
-					}	
-				}
-			}
-			
-			maxWidth = Math.max(maxWidth, outer.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
-
-			List<ISmartAttachment> allAttachments = new ArrayList<>();		
-			if (aw.getWaypoint().getAttachments() != null) {
-				for (WaypointAttachment wa : aw.getWaypoint().getAttachments()) {
-					allAttachments.add(wa);
-				}
-			}
-			if (aw.getWaypoint().getObservations() != null) {
-				for (WaypointObservation wo : aw.getWaypoint().getObservations()) {
-					if (wo.getAttachments() != null) {
-						for (ObservationAttachment a : wo.getAttachments()) {
-							allAttachments.add(a);
-						}
-					}
-				}
-			}
-			AttachmentTable.IMenuCreator creator = new AttachmentTable.IMenuCreator() {
-				
-				@Override
-				public Menu createMenu(AttachmentTable parent) {
-					Menu imgMenu = new Menu(parent);
-					
-					MenuItem itemProp = new MenuItem(imgMenu, SWT.CASCADE);
-					itemProp.setText("Properties");
-					itemProp.addListener(SWT.Selection, e->{
-						AttachmentPropertiesDialog d = new AttachmentPropertiesDialog(parentEditor.getSite().getShell(), (ISmartAttachment) parent.getSelection().getFirstElement());
-						d.open();
-					});
-					
-					return imgMenu;
-				}
-			};
-			AttachmentTable t = new AttachmentTable(info, toolkit, creator, allAttachments, settings.getIconSize().getSize());
-			t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-							
-			Hyperlink link = toolkit.createHyperlink(outer, "Edit...", SWT.NONE);
-			link.addHyperlinkListener(new HyperlinkAdapter() {
-				@Override
-				public void linkActivated(HyperlinkEvent e) {
-					ObservationWizard wizard = new ObservationWizard(aw.getWaypoint(),null);
-					WizardDialog dialog = new WizardDialog(dataComposite.getShell(), wizard);
-					dialog.open();
-				}
-			});
-		}
-		createNavigationControl(dataComposite);
-		dataComposite.layout(true);
-		scrollComp.setData("MAX_WIDTH", maxWidth);
-		scrollComp.setMinSize(dataComposite.computeSize(Math.max(maxWidth, scrollComp.getBounds().width - scrollComp.getVerticalBar().getSize().x), SWT.DEFAULT));			
-		scrollComp.setOrigin(0, 0);
-	}
-
-			
-	Job updateUiJob = new Job("update ui") {
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Display.getDefault().syncExec(()->{
-				for (Control c : headerComp.getChildren()) c.dispose();
-				createNavigationControl(headerComp);
-				headerComp.getParent().layout(true);
-				headerComp.layout(true);
-				
-				for (Control c : dataComposite.getChildren()) c.dispose();
-				toolkit.createLabel(dataComposite, DialogConstants.LOADING_TEXT);
-				dataComposite.layout(true);
-			});
-			
-			List<AssetWaypointMapping> waypoints = new ArrayList<>();
-			if (waypointUuids != null) {
-				int to = Math.min(startIndex + pageSize , waypointUuids.size());
-				try(Session session = HibernateManager.openSession()){
-					for (int i = startIndex; i < to; i ++) {
-						Waypoint waypoint = (Waypoint)session.get(Waypoint.class, waypointUuids.get(i));
-						List<AssetWaypoint> links = session.createQuery("FROM AssetWaypoint WHERE id.waypoint = :waypoint")
-								.setParameter("waypoint", waypoint)
-								.list();
-						
-						if (waypoint == null) continue;
-						waypoints.add(new AssetWaypointMapping(waypoint, links));
-					}
-					
-					waypoints.forEach(w->{
-						w.getAssetLinks().forEach(l->l.getAssetDeployment().getStationLocation().getStation().getId());
-						w.getAssetLinks().forEach(l->l.getAssetDeployment().getStationLocation().getId());
-
-						if (w.getWaypoint().getObservations() != null) {
-							w.getWaypoint().getObservations().forEach(e->{
-								e.getCategory().getFullCategoryName();
-								if (e.getAttributes() != null) {
-									e.getAttributes().forEach(wa->{
-										wa.getAttributeValueAsString(Locale.getDefault());
-										wa.getAttribute().getName();
-									});
-								}
-								
-							});
-							for (WaypointObservation o : w.getWaypoint().getObservations()) {
-								if (o.getAttachments() != null) {
-									for (ObservationAttachment a : o.getAttachments()) {
-										try {
-											a.computeFileLocation(session);
-										}catch (Exception ex) {
-											ex.printStackTrace();
-											//TODO:
-										}
-									}
-								}
-							}
-						}
-						if (w.getWaypoint().getAttachments() != null) {
-							for (WaypointAttachment a : w.getWaypoint().getAttachments()) {
-								try {
-									a.computeFileLocation(session);
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
-						}
-						
-					});
-					
-				}
-			}
-			
-			Display.getDefault().syncExec(()->{
-				createDataPanel(waypoints);
-			});
-			return Status.OK_STATUS;
-		}
-		
-	};
 	
 }

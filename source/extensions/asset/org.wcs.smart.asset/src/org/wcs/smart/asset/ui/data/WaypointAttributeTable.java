@@ -1,4 +1,25 @@
-package org.wcs.smart.asset.ui.views.data;
+/*
+ * Copyright (C) 2017 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.asset.ui.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,32 +52,50 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
-
+/**
+ * Manages a collection of waypoint observations, displaying them
+ * to the user and allowing the user to modify them.
+ * 
+ * @author Emily
+ *
+ */
 public class WaypointAttributeTable {
 
 	private Waypoint waypoint;
 	
 	private Composite parent;
 	private FormToolkit toolkit;
-	private DataReviewPage page;
+	private AssetDataPanel page;
 	
 	private List<RowItem> rows;
+	private int lastSelection;
 	
-	public WaypointAttributeTable(Composite parent, FormToolkit toolkit, Waypoint waypoint, DataReviewPage page) {
+	private Color selectionColor = null;
+	private Color mouseOverColor = null;
+	
+	public WaypointAttributeTable(Composite parent, FormToolkit toolkit, Waypoint waypoint, AssetDataPanel page) {
 		this.waypoint = waypoint;
 		this.parent = parent;
 		this.toolkit = toolkit;
 		this.page = page;
+	
+		selectionColor = page.selectionColor;
+		mouseOverColor = page.mouseOverColor;
 		
 		createComposite();
 	}
 	
+	/**
+	 * recreates the table 
+	 */
 	public void refresh() {
 		createComposite();
+		page.resizeScroll();
 	}
 	
 	private void createComposite() {
 		for (Control c : parent.getChildren()) c.dispose();
+		
 		rows = new ArrayList<>();
 		if (waypoint.getObservations() != null && !waypoint.getObservations().isEmpty()) {
 			for (WaypointObservation obs : waypoint.getObservations()) {
@@ -65,7 +104,7 @@ public class WaypointAttributeTable {
 				rows.add(item);
 			}
 			
-		}else {
+		}else if (page.isEdit()){
 			Composite placeholder = toolkit.createComposite(parent);
 			placeholder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			placeholder.addListener(SWT.MouseUp, event->{
@@ -77,10 +116,9 @@ public class WaypointAttributeTable {
 			
 		}
 		parent.layout(true, true);
-		page.resizeScroll();
 	}
 	
-	private int lastSelection;
+	
 	private void processMouseClickEvent(RowItem item, Event event) {
 		int index = rows.indexOf(item);
 
@@ -125,6 +163,7 @@ public class WaypointAttributeTable {
 	}
 	
 	private void modifyObservation(WaypointObservation wo) {
+		if (!page.isEdit()) return;
 		ObservationDialog dialog = new ObservationDialog(parent.getShell(), wo);
 		if (dialog.open() == Window.OK) {
 			try(Session session = HibernateManager.openSession()){
@@ -142,6 +181,7 @@ public class WaypointAttributeTable {
 	}
 	
 	private void addObservation() {
+		if (!page.isEdit()) return;
 		ObservationDialog dialog = new ObservationDialog(parent.getShell(), waypoint);
 		if (dialog.open() == Window.OK) {
 			try(Session session = HibernateManager.openSession()){
@@ -159,12 +199,12 @@ public class WaypointAttributeTable {
 	}
 	
 	private void deleteObservation(Collection<WaypointObservation> wos) {
+		if (!page.isEdit()) return;
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				session.saveOrUpdate(waypoint);
 				wos.forEach(wo->waypoint.getObservations().remove(wo));
-				//wo.setWaypoint(null);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -175,6 +215,7 @@ public class WaypointAttributeTable {
 	}
 	
 	private void createMenu(Control control) {
+		if (!page.isEdit()) return;
 		List<WaypointObservation> selected = new ArrayList<>();
 		for (RowItem item : rows) {
 			if (item.isSelected) selected.add(item.observation);
@@ -203,14 +244,13 @@ public class WaypointAttributeTable {
 	}
 	
 	private class RowItem{
+		
 		private WaypointObservation observation;
 		
 		private boolean isSelected = false;
 		private boolean isMouseOver = false;
 		
 		private Composite outerPart;
-		
-		
 		private Color bgColor = null;
 		
 		public RowItem(WaypointObservation observation) {
@@ -222,11 +262,9 @@ public class WaypointAttributeTable {
 			
 			this.isSelected = isSelected;
 			if (isSelected) {
-				DataReviewPage.colorControl(outerPart, page.selectionColor);
-//				DataReviewPage.colorControl(wppart, page.mouseOverColor);
+				AssetDataPanel.colorControl(outerPart, selectionColor);
 			}else {
-//				DataReviewPage.colorControl(outerPart, page.headerColor);
-				DataReviewPage.colorControl(outerPart, bgColor);
+				AssetDataPanel.colorControl(outerPart, bgColor);
 			}
 			outerPart.redraw();
 		}
@@ -242,13 +280,13 @@ public class WaypointAttributeTable {
 					processMouseClickEvent(RowItem.this, e);
 				case SWT.MouseEnter:
 					this.isMouseOver = true;
-					if (!isSelected) DataReviewPage.colorControl(outerPart, page.mouseOverColor);
+					if (!isSelected) AssetDataPanel.colorControl(outerPart, mouseOverColor);
 					outerPart.redraw();
 					break;
 				case SWT.MouseExit:
 					this.isMouseOver = false;
-					if (isSelected) DataReviewPage.colorControl(outerPart, page.selectionColor);
-					else DataReviewPage.colorControl(outerPart, bgColor);
+					if (isSelected) AssetDataPanel.colorControl(outerPart, selectionColor);
+					else AssetDataPanel.colorControl(outerPart, bgColor);
 					outerPart.redraw();
 					break;
 				case SWT.MouseDoubleClick:
@@ -264,21 +302,6 @@ public class WaypointAttributeTable {
 			((GridLayout)outerPart.getLayout()).marginHeight = 2;
 			((GridLayout)outerPart.getLayout()).verticalSpacing = 0;
 			bgColor = outerPart.getBackground();
-			
-			outerPart.addPaintListener(e->{
-				if (isMouseOver) {
-					e.gc.setLineWidth(2);
-					e.gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE));
-				}else if (isSelected) {
-					e.gc.setLineWidth(2);
-					e.gc.setForeground(page.selectionColor);
-				}else {
-					e.gc.setLineWidth(2);
-					e.gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BORDER));
-				}
-//				e.gc.drawRectangle(0, 0, outerPart.getBounds().width,outerPart.getBounds().height);
-				
-			});	
 			
 			Composite c = toolkit.createComposite(outerPart, SWT.NONE);
 			c.setLayout(new GridLayout(2, false));
@@ -297,39 +320,55 @@ public class WaypointAttributeTable {
 					ll = toolkit.createLabel(c, a.getAttribute().getName() + ":");
 					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 					((GridData)ll.getLayoutData()).horizontalIndent = 20;
+					
 					ll = toolkit.createLabel(c, a.getAttributeValueAsString(Locale.getDefault()));
 					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					
 				}
-				
 			}
-			
-			ToolBar toolbar = new ToolBar(outerPart, SWT.VERTICAL | SWT.FLAT);
-			toolkit.adapt(toolbar);
-			toolbar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-			
-			ToolItem btnEdit = new ToolItem(toolbar, SWT.PUSH);
-			btnEdit.setToolTipText("modify observations");
-			btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-			btnEdit.addListener(SWT.Selection, e->modifyObservation(observation));
-			
-			ToolItem btnDelete = new ToolItem(toolbar, SWT.PUSH);
-			btnDelete.setToolTipText("delete observation");
-			btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-			btnDelete.addListener(SWT.Selection, e->deleteObservation(Collections.singleton(observation)));
-			
-			
-			DataReviewPage.forEachChild(outerPart, e->{
-				e.addListener(SWT.MouseEnter, clickListener);
-				e.addListener(SWT.MouseExit, clickListener);
-				e.addListener(SWT.MouseUp, clickListener);
-				e.addListener(SWT.MouseDoubleClick, clickListener);
-				return true;
-			});
-			
 			
 			Label l = toolkit.createLabel(parent, "", SWT.SEPARATOR | SWT.HORIZONTAL);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			if (page.isEdit()) {
+				outerPart.addPaintListener(e->{
+					if (isMouseOver) {
+						e.gc.setLineWidth(2);
+						e.gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE));
+					}else if (isSelected) {
+						e.gc.setLineWidth(2);
+						e.gc.setForeground(selectionColor);
+					}else {
+						e.gc.setLineWidth(2);
+						e.gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BORDER));
+					}
+				});	
+			
+				ToolBar toolbar = new ToolBar(outerPart, SWT.VERTICAL | SWT.FLAT);
+				toolkit.adapt(toolbar);
+				toolbar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+				
+				ToolItem btnEdit = new ToolItem(toolbar, SWT.PUSH);
+				btnEdit.setToolTipText("modify observations");
+				btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+				btnEdit.addListener(SWT.Selection, e->modifyObservation(observation));
+				
+				ToolItem btnDelete = new ToolItem(toolbar, SWT.PUSH);
+				btnDelete.setToolTipText("delete observation");
+				btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+				btnDelete.addListener(SWT.Selection, e->deleteObservation(Collections.singleton(observation)));
+				
+				
+				AssetDataPanel.forEachChild(outerPart, e->{
+					e.addListener(SWT.MouseEnter, clickListener);
+					e.addListener(SWT.MouseExit, clickListener);
+					e.addListener(SWT.MouseUp, clickListener);
+					e.addListener(SWT.MouseDoubleClick, clickListener);
+					return true;
+				});
+			}
+			
+
 			
 		}
 	}

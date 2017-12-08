@@ -62,7 +62,7 @@ public class NewAssetAction implements ImportAction {
 		selectedItem.getWarnings().remove(warning);
 		
 		//lets see if we can find other items that also have this same warning
-		for (FileProxy other : processor.getFileDetails()) {
+		for (FileProxy other : processor.getFiles()) {
 			if (other.getAsset() != null) continue;
 			for (Iterator<ActionableWarning> iterator = other.getWarnings().iterator(); iterator.hasNext();) {
 				ActionableWarning aw = iterator.next();

@@ -492,7 +492,7 @@ public class FileProxy extends ISmartAttachment{
 					new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 			
 			//add any other "new" stations to this search as well
-			for (FileProxy p : processor.getFileDetails()) {
+			for (FileProxy p : processor.getFiles()) {
 				if (!p.equals(this) && p.getStation() != null && !stations.contains(p.getStation())) {
 					stations.add(p.getStation());
 				}

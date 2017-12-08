@@ -176,6 +176,7 @@ public class StationEditor extends EditorPart implements MapPart {
 		lblStatus.getParent().layout(true);
 	}
 
+	
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		super.setInput(input);
@@ -471,6 +472,7 @@ public class StationEditor extends EditorPart implements MapPart {
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)panel.getLayout()).marginWidth = 0;
 		((GridLayout)panel.getLayout()).marginHeight = 0;
+		
 		
 		dataPage = new StationDataPage(this);
 		ContextInjectionFactory.inject(dataPage, parentContext);
