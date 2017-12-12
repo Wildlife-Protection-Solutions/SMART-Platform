@@ -144,7 +144,6 @@ public class ReportParameterDialog extends TitleAreaDialog {
 					String value = sdf.format((Date)type.getValue());
 					dialogSettings.put(type.getKey(), value);
 				}else{
-					System.out.println("put: " + type.getKey() + " : " + type.getValue().toString());
 					dialogSettings.put(type.getKey(), type.getValue().toString());
 				}
 			}
