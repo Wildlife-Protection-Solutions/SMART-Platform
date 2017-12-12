@@ -178,7 +178,9 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private void doEventLoop() {
 		Shell splash = getSplash();
 		while (fAuthenticated == false) {
+			if (splash.isDisposed()) handleButtonCancelWidgetSelected();
 			if (splash.getDisplay().readAndDispatch() == false) {
+				if (splash.isDisposed()) handleButtonCancelWidgetSelected();
 				splash.getDisplay().sleep();
 			}
 		}
@@ -246,7 +248,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 */
 	private void handleButtonCancelWidgetSelected() {
 		// Abort the loading of the RCP application
-		getSplash().getDisplay().close();
+		if (!getSplash().isDisposed()) getSplash().getDisplay().close();
 		try {
 			HibernateManager.endSessionFactory(false, true);
 		} catch (Exception e) {
