@@ -52,7 +52,7 @@ import org.wcs.smart.report.internal.Messages;
  */
 public class ReportParameterDialog extends TitleAreaDialog {
 	
-	public static String SIMPLE_DATE_FORMAT = "yyyy-MM-dd G hh:mm:ss z";  //$NON-NLS-1$
+	public static String SIMPLE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";  //$NON-NLS-1$
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.report.parameters"); //$NON-NLS-1$
 	
 	private List<IBirtParameterComponent> params = new ArrayList<IBirtParameterComponent>();
@@ -144,6 +144,7 @@ public class ReportParameterDialog extends TitleAreaDialog {
 					String value = sdf.format((Date)type.getValue());
 					dialogSettings.put(type.getKey(), value);
 				}else{
+					System.out.println("put: " + type.getKey() + " : " + type.getValue().toString());
 					dialogSettings.put(type.getKey(), type.getValue().toString());
 				}
 			}

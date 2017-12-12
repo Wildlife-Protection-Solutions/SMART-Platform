@@ -47,6 +47,7 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 	public final static INumberValidator INTEGER_VALIDATOR = new INumberValidator() {
 		@Override
 		public Object validate(String text) throws Exception {
+			if (text.length() == 0) return true;
 			return Integer.parseInt(text);
 		}
 	};
@@ -58,6 +59,7 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 
 		@Override
 		public Object validate(String text) throws Exception {
+			if (text.length() == 0) return true;
 			return  Float.parseFloat(text);
 		}
 	};
@@ -69,12 +71,12 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 
 		@Override
 		public Object validate(String text) throws Exception {
+			if (text.length() == 0) return true;
 			return Double.parseDouble(text);
 	}};
 				
 	private Text inputValue = null;
 	private INumberValidator validator;
-	private String defaultValue;
 	
 	/**
 	 * @param name parameter name
@@ -82,18 +84,14 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 	 * @param validator validator
 	 */
 	public NumberParameterComponent(String name, String displayText, INumberValidator validator, Object defaultValue) {
-		super(name, displayText);
+		super(name, displayText, defaultValue);
 		this.validator = validator;
-		this.defaultValue = defaultValue == null ? "" : defaultValue.toString(); //$NON-NLS-1$
 	}
 
 	@Override
 	public Composite createComposite(Composite parent, IDialogSettings settings) {
-		String x = settings.get(getParameterName());
-		if (x != null){
-			this.defaultValue = x;
-		}
-		
+		Object initValue = super.getInitializeValue(settings);
+
 		Composite param = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
 		gl.marginWidth = gl.marginHeight = gl.horizontalSpacing = gl.verticalSpacing = 0;
@@ -116,8 +114,8 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 	
 			}});
 		inputValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		if (defaultValue != null){
-			inputValue.setText(defaultValue.toString());
+		if (initValue != null){
+			inputValue.setText(initValue.toString());
 		}
 		
 		return param;

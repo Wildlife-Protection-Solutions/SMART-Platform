@@ -47,19 +47,14 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	private int dFormat = -1;
 	private int tFormat = -1;
 	
-	private Date defaultValue;
-	
 	/**
 	 * 
 	 * @param name parameter name
 	 * @param displayText parameter display text
 	 */
 	public DateParameterComponent(String name, String displayText, boolean includeDate, boolean includeTime, Object defaultValue){
-		super(name, displayText);
+		super(name, displayText, defaultValue);
 		
-		if (defaultValue != null && defaultValue instanceof Date){
-			this.defaultValue = (Date) defaultValue;
-		}
 		if (includeDate){
 			dFormat = SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE;
 		}
@@ -74,11 +69,12 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	@Override
 	public Composite createComposite(Composite parent, IDialogSettings settings) {
 		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
-		String x = settings.get(getParameterName());
-		if (x != null){
-			
+		Object initValue = super.getInitializeValue(settings);
+		
+		Date initDate = null;
+		if (initValue != null) {
 			try{
-				this.defaultValue = sdf.parse(x);
+				initDate = sdf.parse(initValue.toString());
 			}catch (Exception ex){
 				//eat me
 			}
@@ -97,16 +93,16 @@ public class DateParameterComponent extends AbstractBirtParameter {
 		if (dFormat != -1){
 			datePicker = new DateTime(param, dFormat);
 			datePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			if (this.defaultValue != null){
-				SmartUtils.initDateDateTimeWidget(datePicker, defaultValue);
+			if (initDate != null){
+				SmartUtils.initDateDateTimeWidget(datePicker, initDate);
 			}
 			
 		}
 		if (tFormat != -1){
 			timePicker = new DateTime(param, tFormat);
 			timePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			if (this.defaultValue != null){
-				SmartUtils.initTimeDateTimeWidget(timePicker, defaultValue);
+			if (initDate != null){
+				SmartUtils.initTimeDateTimeWidget(timePicker, initDate);
 			}
 		}
 		return param;

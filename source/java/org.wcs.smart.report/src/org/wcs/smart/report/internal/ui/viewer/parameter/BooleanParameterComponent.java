@@ -36,18 +36,12 @@ import org.wcs.smart.report.internal.Messages;
  */
 public class BooleanParameterComponent extends AbstractBirtParameter{
 
-				
-	private Boolean defaultValue;
 	/**
 	 * @param name
 	 * @param displayText
 	 */
 	public BooleanParameterComponent(String name, String displayText, Object defaultValue) {
-		super(name, displayText);
-		if (defaultValue != null && defaultValue instanceof Boolean){
-			this.defaultValue = (Boolean) defaultValue;	
-		}
-		
+		super(name, displayText, defaultValue != null ? Boolean.valueOf(defaultValue.toString()) : null);
 	}
 
 	private Button btnFalse;
@@ -55,11 +49,7 @@ public class BooleanParameterComponent extends AbstractBirtParameter{
 	
 	@Override
 	public Composite createComposite(Composite parent, IDialogSettings settings) {
-		
-		String x = settings.get(getParameterName());
-		if (x != null){
-			defaultValue = Boolean.valueOf(x); 
-		}
+		Object initValue = super.getInitializeValue(settings);
 		
 		Composite param = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(3, false);
@@ -75,9 +65,9 @@ public class BooleanParameterComponent extends AbstractBirtParameter{
 		btnFalse = new Button(param, SWT.RADIO);
 		btnFalse.setText(Messages.BooleanParameterComponent_False_Label);
 		
-		if (defaultValue != null ){
-			btnTrue.setSelection(  (Boolean)defaultValue );
-			btnFalse.setSelection(  !(Boolean)defaultValue );
+		if (initValue != null && initValue instanceof Boolean){
+			btnTrue.setSelection(  (Boolean)initValue );
+			btnFalse.setSelection(  !(Boolean)initValue );
 		}else{
 			btnTrue.setSelection(true);
 		}

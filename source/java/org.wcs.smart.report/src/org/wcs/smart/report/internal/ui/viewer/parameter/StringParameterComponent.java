@@ -35,24 +35,16 @@ import org.eclipse.swt.widgets.Text;
  * @since 1.0.0
  */
 public class StringParameterComponent extends AbstractBirtParameter{
-
-				
+			
 	private Text inputValue = null;
-	private Object defaultValue = null;
 	
 	public StringParameterComponent(String name, String displayText, Object defaultValue) {
-		super(name, displayText);
-		if (defaultValue != null){
-			this.defaultValue = defaultValue.toString();
-		}
+		super(name, displayText, defaultValue);
 	}
 
 	@Override
 	public Composite createComposite(Composite parent, IDialogSettings settings) {
-		String x = settings.get(getParameterName());
-		if (x != null){
-			this.defaultValue = x;
-		}
+		Object initValue = super.getInitializeValue(settings);
 		
 		Composite param = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(2, false);
@@ -64,8 +56,8 @@ public class StringParameterComponent extends AbstractBirtParameter{
 		
 		inputValue = new Text(param, SWT.SINGLE | SWT.BORDER);
 		inputValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		if (this.defaultValue != null){
-			inputValue.setText(this.defaultValue.toString());
+		if (initValue != null){
+			inputValue.setText(initValue.toString());
 		}
 		return param;
 	}

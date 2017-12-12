@@ -37,15 +37,31 @@ public abstract class AbstractBirtParameter implements IBirtParameterComponent {
 
 	private String paramName = null;
 	private String displayText = null;
-	
+	protected Object defaultValue = null;
 	/**
 	 * Creates anew parameter element
 	 * @param name the parameter name
 	 * @param displayText the parameter display text
 	 */
-	public AbstractBirtParameter(String name, String displayText){
+	public AbstractBirtParameter(String name, String displayText, Object defaultValue){
 		this.paramName = name;
 		this.displayText = displayText;
+		this.defaultValue = defaultValue;
+	}
+	
+	/**
+	 * Gets the parameter value to initialize the display with.  If a default
+	 * value has been provided in the parameter, this will return the
+	 * default value, otherwise it will look in the settings
+	 * for a setting with the key as the parameter name and return 
+	 * that.  If none found null is returned. 
+	 * @return
+	 */
+	protected Object getInitializeValue(IDialogSettings settings) {
+		if (this.defaultValue != null) return this.defaultValue;
+		String x = settings.get(getParameterName());
+		if (x != null) return x;
+		return null;
 	}
 	
 	/**
