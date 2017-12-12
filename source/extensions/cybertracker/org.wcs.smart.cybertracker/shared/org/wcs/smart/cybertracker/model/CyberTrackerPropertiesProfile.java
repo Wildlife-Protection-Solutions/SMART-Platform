@@ -89,6 +89,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		100,
 		200,
 		300,
+		350,
 		400,
 		450,
 		500,
