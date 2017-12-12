@@ -195,7 +195,7 @@ public enum EntityReportGenerator {
 					if (paramDesign.getParameterDefinitions().size() > 0) {
 						for (ParameterDefinition param : paramDesign.getParameterDefinitions()) {
 							//will be linked automatically below
-							param.setDefaultScalarValue(Messages.EntityReportGenerator_LinkToReportParameter);
+							param.setDefaultScalarValue(Messages.EntityReportGenerator_LinkToReportParameter1);
 						}
 					}
 				}

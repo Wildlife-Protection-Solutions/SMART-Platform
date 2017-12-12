@@ -168,7 +168,7 @@ public enum RecordReportGenerator {
 					if (paramDesign.getParameterDefinitions().size() > 0) {
 						for (ParameterDefinition param : paramDesign.getParameterDefinitions()) {
 							//will be linked automatically below
-							param.setDefaultScalarValue(Messages.RecordReportGenerator_LinkMessage);
+							param.setDefaultScalarValue(Messages.RecordReportGenerator_LinkMessage1);
 						}
 					}
 				}

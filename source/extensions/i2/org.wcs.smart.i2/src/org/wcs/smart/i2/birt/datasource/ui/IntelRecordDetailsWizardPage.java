@@ -240,7 +240,7 @@ public class IntelRecordDetailsWizardPage extends DataSetWizardPage {
 
 			for (ParameterDefinition param : paramDesign
 					.getParameterDefinitions()) {
-				param.setDefaultScalarValue(Messages.IntelRecordDetailsWizardPage_LinkParameters);
+				param.setDefaultScalarValue(Messages.IntelRecordDetailsWizardPage_LinkParameters1);
 			}
 		}
 	}

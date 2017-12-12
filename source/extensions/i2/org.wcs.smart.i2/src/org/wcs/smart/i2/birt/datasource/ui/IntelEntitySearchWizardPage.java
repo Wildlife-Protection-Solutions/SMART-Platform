@@ -433,7 +433,7 @@ public class IntelEntitySearchWizardPage extends DataSetWizardPage {
 
 			for (ParameterDefinition param : paramDesign
 					.getParameterDefinitions()) {
-				param.setDefaultScalarValue(Messages.IntelQueryWizardPage_linktoreport);
+				param.setDefaultScalarValue(Messages.IntelQueryWizardPage_linktoreport1);
 			}
 		}
 	}

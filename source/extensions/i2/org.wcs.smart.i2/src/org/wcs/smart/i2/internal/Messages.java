@@ -5,7 +5,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.i2.internal.messages"; //$NON-NLS-1$
 	public static String AbstractIntelEntityTypeListWizardPage_EntityTypeRequired;
-	public static String AbstractIntelEntityTypeListWizardPage_LinkParameter;
+	public static String AbstractIntelEntityTypeListWizardPage_LinkParameter1;
 	public static String AbstractIntelEntityTypeListWizardPage_unauthorized;
 	public static String AddIntelligenceJob_InstallError;
 	public static String AddIntelligenceJob_JobName;
@@ -338,7 +338,7 @@ public class Messages extends NLS {
 	public static String EntityReportGenerator_AttachmentHeader;
 	public static String EntityReportGenerator_AttributeHeader;
 	public static String EntityReportGenerator_IntelligenceDataSourceName1;
-	public static String EntityReportGenerator_LinkToReportParameter;
+	public static String EntityReportGenerator_LinkToReportParameter1;
 	public static String EntityReportGenerator_LocationHeader;
 	public static String EntityReportGenerator_OfLabel;
 	public static String EntityReportGenerator_RecordHeader;
@@ -811,7 +811,7 @@ public class Messages extends NLS {
 	public static String IntelQueryEditor_TabSectionsLabel;
 	public static String IntelQueryNameLabel_ErrorMsg;
 	public static String IntelQueryNameLabel_ErrorTitle;
-	public static String IntelQueryWizardPage_linktoreport;
+	public static String IntelQueryWizardPage_linktoreport1;
 	public static String IntelQueryWizardPage_message;
 	public static String IntelQueryWizardPage_queryRequired;
 	public static String IntelQueryWizardPage_unauthorized;
@@ -820,7 +820,7 @@ public class Messages extends NLS {
 	public static String IntelRecordAttributesWizardPage_Name;
 	public static String IntelRecordAttributesWizardPage_NotConfigurable;
 	public static String IntelRecordAttributesWizardPage_unauthorized;
-	public static String IntelRecordDetailsWizardPage_LinkParameters;
+	public static String IntelRecordDetailsWizardPage_LinkParameters1;
 	public static String IntelRecordDetailsWizardPage_message;
 	public static String IntelRecordDetailsWizardPage_Name;
 	public static String IntelRecordDetailsWizardPage_NoConfOptions;
@@ -1094,7 +1094,7 @@ public class Messages extends NLS {
 	public static String RecordReportGenerator_CreatedLabel;
 	public static String RecordReportGenerator_EntitiesLabel;
 	public static String RecordReportGenerator_IntelDatasourceName;
-	public static String RecordReportGenerator_LinkMessage;
+	public static String RecordReportGenerator_LinkMessage1;
 	public static String RecordReportGenerator_LocationsHeader;
 	public static String RecordReportGenerator_ModifiedLabel;
 	public static String RecordReportGenerator_NarrativeLabel;
