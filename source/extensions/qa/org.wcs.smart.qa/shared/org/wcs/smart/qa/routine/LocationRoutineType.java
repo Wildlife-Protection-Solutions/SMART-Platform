@@ -54,6 +54,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
@@ -239,7 +241,17 @@ public class LocationRoutineType implements IQaRoutineType {
 						
 				}else if (wp.getType() == Type.LINESTRING){
 					if (mergedPolygon == null)  mergedPolygon = g.union();
-					if (!mergedPolygon.contains(wp.getGeometry())){
+					boolean isInside = false;
+					//0 length tracks are invalid; check here for zero length tracks
+					//and do specific pnp check
+					if (wp.getGeometry() instanceof LineString && ((LineString)wp.getGeometry()).getLength() == 0) {
+						isInside = mergedPolygon.contains(GeometryFactoryProvider.getFactory().createPoint(  wp.getGeometry().getCoordinate() ));
+					}else if (wp.getGeometry() instanceof MultiLineString  && ((MultiLineString)wp.getGeometry()).getLength() == 0) {
+						isInside = mergedPolygon.contains(GeometryFactoryProvider.getFactory().createPoint(  wp.getGeometry().getCoordinate() ));
+					}else {
+						isInside = mergedPolygon.contains(wp.getGeometry());
+					}
+					if (!isInside){
 						double distance = g.distance(wp.getGeometry());
 						QaError error = new QaError();
 						error.setDataProviderId(task.getDataProvider().getId());
