@@ -199,7 +199,7 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 					//if leg has been modified we need to update the days
 					List<PatrolLegDay> toDelete = new ArrayList<PatrolLegDay>();
 					for (PatrolLegDay pld : pl.getPatrolLegDays()){
-						if (!pld.getDate().before(startDate) && !pld.getDate().after(endDate)){
+						if (pld.getDate().before(startDate) || pld.getDate().after(endDate)){
 							//delete me
 							toDelete.add(pld);
 						}
