@@ -114,6 +114,7 @@ import org.opengis.geometry.Envelope;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.udig.SmartDistanceTool;
 import org.wcs.smart.ui.map.tool.PanTool;
 import org.wcs.smart.ui.map.tool.TrackPointSelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -600,6 +601,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 				MapToolComposite.UDIG_ZOOM_ID,
 				MapToolComposite.UDIG_ZOOM_IN_ID,
 				MapToolComposite.UDIG_ZOOM_OUT_ID,
+				SmartDistanceTool.ID,
 				TrackPointSelectionTool.ID};
 		if (!canEdit){
 			thisTools = new String[] {
@@ -607,7 +609,8 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 					MapToolComposite.UDIG_PAN_ID,
 					MapToolComposite.UDIG_ZOOM_ID,
 					MapToolComposite.UDIG_ZOOM_IN_ID,
-					MapToolComposite.UDIG_ZOOM_OUT_ID};
+					MapToolComposite.UDIG_ZOOM_OUT_ID,
+					SmartDistanceTool.ID};
 		}
 
 		MapToolComposite tools = new MapToolComposite(thisTools);

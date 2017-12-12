@@ -33,6 +33,8 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -63,9 +65,11 @@ import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
+import org.locationtech.udig.tool.info.DistanceTool;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.SetBasemapTool;
+import org.wcs.smart.udig.SmartDistanceTool;
 import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.util.GeometryUtils;
 
@@ -228,6 +232,12 @@ public abstract class TracksComposite extends Composite implements MapPart {
 					editTrack();
 				}
 			});
+			trackViewer.addDoubleClickListener(new IDoubleClickListener() {
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					editTrack();
+				}
+			});
 			mgr.add(new Action(Messages.TracksComposite_Merge, 
 					SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.MERGE_TRACK_ICON)) {
 				@Override
@@ -340,7 +350,8 @@ public abstract class TracksComposite extends Composite implements MapPart {
 				MapToolComposite.UDIG_ZOOM_ID,
 				MapToolComposite.UDIG_ZOOM_IN_ID,
 				MapToolComposite.UDIG_ZOOM_OUT_ID,
-				ClearSelectionTool.ID};
+				ClearSelectionTool.ID,
+				SmartDistanceTool.ID};
 
 		toolComp = new MapToolComposite(thisTools);
 		toolComp.createComposite(mapComp);
