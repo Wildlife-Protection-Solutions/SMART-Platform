@@ -206,7 +206,8 @@ public class AttributeFieldEditor {
 		if (attribute.getType() == AttributeType.NUMERIC){
 			try{
 				if (!txtValue.getText().trim().isEmpty()){
-					Double.parseDouble(txtValue.getText());
+					Double d = Double.parseDouble(txtValue.getText());
+					if (d.isInfinite() || d.isNaN()) msg = Messages.AttributeFieldEditor_InvalidNumber;
 				}
 			}catch(Exception ex){
 				msg = Messages.AttributeFieldEditor_InvalidNumber;
@@ -714,6 +715,7 @@ public class AttributeFieldEditor {
 			txtMulti = new MultiLineText(parent);
 			txtMulti.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtMulti.getLayoutData()).widthHint = 100;
+			txtMulti.setTextLimit(IntelAttribute.MAX_TEXT_LENGTH);
 			txtMulti.addListener(SWT.Modify, (e)->modified());
 			cd = createDecoration(txtMulti);
 			
