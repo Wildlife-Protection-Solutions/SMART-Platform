@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
 import org.wcs.smart.patrol.model.Patrol;
@@ -163,10 +164,11 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 	}
 
 	private void updatePatrol(Date startDate, Date endDate){
+		Patrol patrol = null;
 		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
 			session.beginTransaction();
 			try{
-				Patrol patrol = (Patrol) session.get(Patrol.class, input.getUuid());
+				patrol = (Patrol) session.get(Patrol.class, input.getUuid());
 				patrol.setStartDate(startDate);
 				patrol.setEndDate(endDate);
 				
@@ -256,8 +258,10 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 				try{
 					session.getTransaction().rollback();
 				}catch (Exception ex1){}
+				return;
 			}
 		}
+		PatrolEventManager.getInstance().patrolSaved(patrol, true);
 		
 	}
 }
