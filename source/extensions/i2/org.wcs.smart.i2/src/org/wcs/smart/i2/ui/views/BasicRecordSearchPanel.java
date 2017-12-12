@@ -216,6 +216,8 @@ public class BasicRecordSearchPanel extends Composite {
 		Composite results = new Composite(parent, SWT.NONE);
 		results.setLayout(new GridLayout());
 		results.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)parent.getLayout()).marginHeight = 0;
+		((GridLayout)parent.getLayout()).marginWidth = 0;
 		
 		searchCount = new Label(results, SWT.NONE);
 		searchCount.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -240,7 +242,6 @@ public class BasicRecordSearchPanel extends Composite {
 			public Image getImage(Object element) { return null; };
 		});
 		
-		tblResults.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
 			tblResults.setInput(new String[] {Messages.BasicRecordSearchPanel_unauthorized});
 		}
@@ -256,7 +257,7 @@ public class BasicRecordSearchPanel extends Composite {
 	 				width += trailingImage.getBounds().width;
 	 				height = trailingImage.getBounds().height;
 	 			}
-	 			width += event.gc.stringExtent(txt).x + 1;
+	 			width += event.gc.stringExtent(txt).x + 15;// + 20;
 	 			height = Math.max(height,  event.gc.stringExtent(txt).y);
 	 			event.width = width;
 	 			event.height = height;
