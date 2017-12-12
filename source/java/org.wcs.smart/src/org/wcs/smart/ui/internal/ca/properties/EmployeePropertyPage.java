@@ -69,6 +69,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
@@ -93,6 +95,7 @@ import org.wcs.smart.ui.internal.ca.EmployeeDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.FilterComposite;
+
 
 /**
  * Dialog for managing conservation area
@@ -178,6 +181,14 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	}
 
 	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		// create OK and Cancel buttons by default
+		createButton(parent, IDialogConstants.CLOSE_ID,IDialogConstants.CLOSE_LABEL, false);
+		getButton(IDialogConstants.CLOSE_ID).setFocus();	
+		super.setReturnCode(IDialogConstants.CLOSE_ID);
+	}
+	
+	@Override
 	public Composite createContent(Composite parent) {
 		container = new Composite(parent, SWT.NULL);
 		container.setLayout(new GridLayout(2, false));
@@ -208,6 +219,29 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			}
 		});
 		
+		Menu mnu = new Menu(tblEmployee.getControl());
+		
+		MenuItem mnuNew = new MenuItem(mnu, SWT.PUSH);
+		mnuNew.setText(Messages.EmployeePropertyPage_CreateNew_Button);
+		mnuNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		mnuNew.addListener(SWT.Selection, e->createNewEmployee());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+				
+		MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
+		mnuEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		mnuEdit.addListener(SWT.Selection, e->editEmployee());
+		
+		MenuItem mnuDelete = null;
+		if (PermissionManager.INSTANCE.canDelete(Employee.class)){
+			mnuDelete = new MenuItem(mnu, SWT.PUSH);
+			mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			mnuDelete.addListener(SWT.Selection, e->deleteEmployees());
+		}
+		tblEmployee.getControl().setMenu(mnu);
+				
 		final Button chActive = new Button(container, SWT.CHECK);
 		chActive.setText(Messages.EmployeePropertyPage_Op_IncludeInActive);
 		chActive.setSelection(false);
@@ -261,12 +295,14 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			btnDelete.setEnabled(false);
 		}
 		
+		MenuItem fMnuDelete = mnuDelete;
 		tblEmployee.addSelectionChangedListener(new ISelectionChangedListener() {
-			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				btnEdit.setEnabled( !tblEmployee.getSelection().isEmpty() );
+				mnuEdit.setEnabled( !tblEmployee.getSelection().isEmpty() );
 				if (btnDelete != null) btnDelete.setEnabled( !tblEmployee.getSelection().isEmpty() );
+				if (fMnuDelete != null) fMnuDelete.setEnabled( !tblEmployee.getSelection().isEmpty() ); 
 			}
 		});
 		
