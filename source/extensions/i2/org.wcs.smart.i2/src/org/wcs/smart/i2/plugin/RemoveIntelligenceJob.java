@@ -96,9 +96,9 @@ public class RemoveIntelligenceJob extends Job {
 		
 		return Status.OK_STATUS;
 	}
-
+	
+	@SuppressWarnings("nls")
 	private void uninstall(Session s){
-		@SuppressWarnings("nls")
 		String[] sql = new String[]{
 				"DROP TABLE smart.i_entity_location",
 				"DROP TABLE smart.i_observation_attribute",
@@ -134,10 +134,27 @@ public class RemoveIntelligenceJob extends Job {
 				
 				"DROP FUNCTION smart.metaphoneContains",
 		};
+		
+		String[] namedClasses = new String[] {
+			"smart.i_attribute",
+			"smart.i_attribute_list_item",
+			"smart.i_entity_search",
+			"smart.i_entity_type",
+			"smart.i_entity_type_attribute_group",
+			"smart.i_record_obs_query",
+			"smart.i_recordsource",
+			"smart.i_recordsource_attribute",
+			"smart.i_relationship_group",
+			"smart.i_relationship_type",
+			"smart.i_working_set"};
+		
 		s.doWork(new Work(){
 
 			@Override
 			public void execute(Connection connection) throws SQLException {
+				for (String item : namedClasses) {
+					connection.createStatement().execute("DELETE FROM smart.i18n_label WHERE element_uuid in (SELECT uuid FROM " + item + ")");
+				}
 				for (String s : sql){
 					connection.createStatement().execute(s);
 				}
