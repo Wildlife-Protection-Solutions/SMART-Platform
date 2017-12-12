@@ -187,7 +187,7 @@ public class QueryView {
 		
 		Composite tabPart = toolkit.createComposite(parent, SWT.NONE);
 		tabPart.setLayout(new StackLayout());
-		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));	
 		
 		Composite queryList = createQueryList(tabPart, toolkit);
 		Composite filterList = createFilterComposite(tabPart, toolkit);
@@ -315,12 +315,23 @@ public class QueryView {
 		addToQuery.addListener(SWT.Selection, event->addFilterSelectionToQuery());
 		filterTree.getTree().setMenu(mnu);
 		
+		mnu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {		
+				addToQuery.setEnabled(getActiveQueryEditor() != null && !getSelectedDropItems().isEmpty());
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+		});
+		
 		refreshJob = new LoadFilterOptions(filterTree);
 		
 		return part;
 	}
 	
-	private void addFilterSelectionToQuery(){
+	private IntelQueryEditor getActiveQueryEditor() {
 		IntelQueryEditor addTo = null;
 		EPartService pService = context.get(EPartService.class);
 		for (MPart part : context.get(EPartService.class).getParts()){
@@ -332,17 +343,28 @@ public class QueryView {
 				}
 			}
 		}
-		if (addTo == null) return; //no query open
+		return addTo;
+	}
+	
+	private List<DropItem[]> getSelectedDropItems() {
+		List<DropItem[]> items = new ArrayList<>();
 		IStructuredSelection selection = (IStructuredSelection) filterTree.getSelection();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object element = (Object) iterator.next();
 			if (element instanceof FilterTreeItem){
 				DropItem[] di = ((FilterTreeItem) element).asDropItem();
 				if (di == null) continue;
-				addTo.addDropItems(di);
-				
+				items.add(di);
 			}
-			
+		}
+		return items;
+	}
+	
+	private void addFilterSelectionToQuery(){
+		IntelQueryEditor addTo = getActiveQueryEditor();
+		if (addTo == null) return; //no query open
+		for (DropItem[] di : getSelectedDropItems()) {
+			addTo.addDropItems(di);
 		}
 	}
 	
