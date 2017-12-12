@@ -89,8 +89,6 @@ public class MultiLineText extends Composite implements Listener{
 		text.addListener(SWT.Modify, scrollBarListener);
 		text.setBounds(0, 0, super.getBounds().width - offset, super.getBounds().height - offset);
 		
-		
-		
 		addListener(SWT.Resize, e->{
 			text.setBounds(0, 0, super.getBounds().width - offset, super.getBounds().height - offset);
 			move.setBounds(super.getBounds().width - imagewidth - offset, super.getBounds().height - imagewidth - offset, imagewidth, imagewidth);
@@ -101,6 +99,16 @@ public class MultiLineText extends Composite implements Listener{
 		Rectangle r = super.getBounds();
 		r.height = minSize + offset + 2;
 		super.setBounds(r);
+	}
+	
+	/**
+	 * Sets the maximum number of characters that
+	 * can be placed in the text box.
+	 * 
+	 * @param limit
+	 */
+	public void setTextLimit(int limit) {
+		text.setTextLimit(limit);
 	}
 	
 	@Override
