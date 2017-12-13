@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.filter.text.ecql.ECQL;
+import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IResolve;
@@ -52,6 +53,7 @@ import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
@@ -224,6 +226,19 @@ public class RestoreMapSettings {
 	private Map updateMap(Map map, MapRegister savedMap) {
 		map.setColorPalette(savedMap.getColorPalette());
 		map.setColourScheme(savedMap.getColourScheme());
+		
+		//configure map CRS
+		try {
+			if (savedMap.getCrsWkt() != null) {
+				CoordinateReferenceSystem crs = CRS.parseWKT(savedMap.getCrsWkt());
+				if (!CRS.equalsIgnoreMetadata(crs, map.getViewportModel().getCRS())) {
+					ChangeCRSCommand command = new ChangeCRSCommand(crs);
+					map.sendCommandSync(command);
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		return map;
 	}
 	
