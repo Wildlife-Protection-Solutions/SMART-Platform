@@ -322,6 +322,7 @@ public class AttributeListDialog extends TitleAreaDialog {
 								try {
 									AttributeManager.INSTANCE.deleteAttribute(a, s);
 								}catch(Exception ex){
+									AssetPlugIn.log(ex.getMessage(), ex);
 									warnings.add(a.getName() + ": " + ex.getMessage()); //$NON-NLS-1$
 								}
 							}

@@ -120,6 +120,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 					Query q = session.createQuery(deleteQuery);
 					q.setParameter("attribute", toDelete.getAttribute());
 					q.executeUpdate();
+					session.delete(toDelete);
 				}
 				int index = 0;
 				for (AssetStationLocationAttribute toUpdate : locationAttributes) {
@@ -133,6 +134,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 					Query q = session.createQuery(deleteQuery);
 					q.setParameter("attribute", toDelete.getAttribute());
 					q.executeUpdate();
+					session.delete(toDelete);
 				}
 				index = 0;
 				for (AssetStationAttribute toUpdate : stationAttributes) {
@@ -463,7 +465,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 			sb.deleteCharAt(sb.length() - 1);
 			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? All station attribute values will also be removed.", sb.toString()))){
 				stationAttributes.removeAll(aToDelete);
-				deletedStationAttributes.removeAll(aToDelete);
+				deletedStationAttributes.addAll(aToDelete);
 			}
 		}
 		
@@ -525,7 +527,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 			sb.deleteCharAt(sb.length() - 1);
 			if (MessageDialog.openConfirm(getShell(), "Remove Attributes", MessageFormat.format("Are you sure you want to delete the attributes {0}? All station location attribute values will also be removed.", sb.toString()))){
 				locationAttributes.removeAll(aToDelete);
-				deletedLocationAttributes.removeAll(aToDelete);
+				deletedLocationAttributes.addAll(aToDelete);
 			}
 		}
 		

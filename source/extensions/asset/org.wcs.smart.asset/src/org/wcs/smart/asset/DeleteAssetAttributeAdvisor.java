@@ -78,7 +78,7 @@ public class DeleteAssetAttributeAdvisor implements IDeleteAdvisor {
 			return sb.toString();
 		}
 		
-		List<AssetStationAttribute> stations = QueryFactory.buildQuery(session, AssetStationAttribute.class, "id.attribute", attribute).list(); //$NON-NLS-1$
+		List<AssetStationAttribute> stations = QueryFactory.buildQuery(session, AssetStationAttribute.class, "attribute", attribute).list(); //$NON-NLS-1$
 		if (!stations.isEmpty()){
 			StringBuilder sb = new StringBuilder();
 			sb.append("This asset is referenced by asset stations and must be removed before the attribute can be deleted.");

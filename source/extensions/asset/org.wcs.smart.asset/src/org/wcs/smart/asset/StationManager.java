@@ -139,6 +139,9 @@ public enum StationManager {
 		
 		deleteLocationWaypoints(session, location);
 		
+		session.createQuery("DELETE FROM AssetStationLocationHistoryRecord WHERE stationLocation = :location")
+			.setParameter("location", location)
+			.executeUpdate();
 		session.flush();
 		session.delete(location);
 	}
