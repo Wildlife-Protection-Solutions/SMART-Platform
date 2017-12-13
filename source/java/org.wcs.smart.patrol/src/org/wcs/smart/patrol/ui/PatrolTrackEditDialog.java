@@ -166,7 +166,10 @@ public class PatrolTrackEditDialog extends TitleAreaDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-			
+				if (patrolLegDay.getTrack().getGeom() == null) {
+					session.delete(patrolLegDay.getTrack());
+					patrolLegDay.setTrack(null);
+				}
 				session.saveOrUpdate(patrolLegDay);
 				session.getTransaction().commit();
 				
