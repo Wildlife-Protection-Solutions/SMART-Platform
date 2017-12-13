@@ -222,7 +222,7 @@ public class RecordButtonToolbar extends Composite{
 		
 		if (IntelSecurityManager.INSTANCE.canEditRecord()){
 			editItem.setSelection(recordEditor.getEditMode());
-			editItem.setEnabled(recordEditor.getEditMode());	
+			editItem.setEnabled(true);	
 		}else{
 			editItem.setSelection(false);
 			editItem.setEnabled(false);
