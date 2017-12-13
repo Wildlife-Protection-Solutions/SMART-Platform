@@ -89,7 +89,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 		filters.add(from.get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$
 		if (index >= 0 && parameters.get(index) != null){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
-			filters.add(cb.equal(from.get("record.uuid"), recordUuid)); //$NON-NLS-1$
+			filters.add(cb.equal(from.get("record").get("uuid"), recordUuid)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		results = connection.getSession().createQuery(c).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);

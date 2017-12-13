@@ -95,6 +95,7 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 				return record.getRecordSource().getName();
 			case SOURCE_ICON:
 				if (record.getRecordSource() == null) return null;
+				if (record.getRecordSource().getIcon() == null) return null;
 				return new Blob(record.getRecordSource().getIcon());			
 			default:
 				break;
