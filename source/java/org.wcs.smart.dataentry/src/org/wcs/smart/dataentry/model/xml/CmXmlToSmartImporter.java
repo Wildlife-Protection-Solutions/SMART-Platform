@@ -631,6 +631,7 @@ public class CmXmlToSmartImporter {
 			if (hkey != null) {
 				filters[2] = cb.equal(from.get("hkey"), hkey); //$NON-NLS-1$
 			}
+			cq.where(cb.and(filters));
 			
 			List<AttributeTreeNode> lst = session.createQuery(cq).list();
 			if (lst.size() > 0) {
