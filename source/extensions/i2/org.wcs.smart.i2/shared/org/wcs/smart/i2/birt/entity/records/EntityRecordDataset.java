@@ -230,7 +230,7 @@ public class EntityRecordDataset  implements IQuery {
 	@Override
 	public void setObject(String parameterName, Object value)
 			throws OdaException {
-		for (int i =0; i < pMetadata.getParameterCount(); i ++){
+		for (int i = 1; i <= getParameterMetaData().getParameterCount(); i ++){
 			if (pMetadata.getParameterName(i).equals(parameterName)){
 				setObject(i, value);
 				break;

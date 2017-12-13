@@ -421,9 +421,9 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 
 		if (paramDesign.getParameterDefinitions().size() > 0) {
 
-			for (ParameterDefinition param : paramDesign
-					.getParameterDefinitions()) {
+			for (ParameterDefinition param : paramDesign.getParameterDefinitions()) {
 				param.setDefaultScalarValue(Messages.AbstractIntelEntityTypeListWizardPage_LinkParameter1);
+				
 			}
 		}
 	}

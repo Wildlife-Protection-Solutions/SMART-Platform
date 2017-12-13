@@ -99,7 +99,7 @@ public class RecordMetadata implements IDataSetMetaData {
 
 	@Override
 	public boolean supportsNamedParameters() throws OdaException {
-		return false;
+		return true;
 	}
 
 	@Override
