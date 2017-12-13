@@ -46,6 +46,7 @@ import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -62,7 +63,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
+public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerbyWaypointEngine {
 
 	private String queryDataTable;
 	private Session session;
@@ -148,11 +149,14 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 		return result;
 	}
 	
-	public void updateResultCount(Session s, DerbyPagedWaypointResult results){
+	@Override
+	public void updateResultCount(Session s, IUpdateableResultSet result){
+		//setting result size
+		DerbyPagedWaypointResult results = (DerbyPagedWaypointResult)result;
+		
 		//setting result size
 		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
 		results.setItemCount(count);
-		
 	}
 
 	/**

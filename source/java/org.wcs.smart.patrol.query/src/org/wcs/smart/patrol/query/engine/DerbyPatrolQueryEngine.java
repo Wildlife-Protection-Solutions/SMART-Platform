@@ -162,4 +162,5 @@ public abstract class DerbyPatrolQueryEngine extends AbstractQueryEngine impleme
 	 * @throws SQLException
 	 */
 	public abstract void dropTables(Connection c) throws SQLException;
+
 }

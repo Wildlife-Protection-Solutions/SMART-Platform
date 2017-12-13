@@ -57,6 +57,7 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -75,7 +76,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
+public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements IDerbyWaypointEngine {
 
 	private String queryDataTable;
 	private int categoryCount;
@@ -191,8 +192,11 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		return result;
 	}
 
-	public void updateResultCount(Session s, DerbyPagedObservationResult results){
+	@Override
+	public void updateResultCount(Session s, IUpdateableResultSet result){
 		//setting result size
+		DerbyPagedObservationResult results = (DerbyPagedObservationResult)result;
+		
 		Integer count = (Integer) s.createNativeQuery("select count(*) from " + queryDataTable).uniqueResult(); //$NON-NLS-1$
 		results.setItemCount(count);
 		

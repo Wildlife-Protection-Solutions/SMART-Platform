@@ -436,7 +436,9 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 				queryUpdate.setParameter("uuid", waypointUuid); //$NON-NLS-1$
 				queryUpdate.executeUpdate();
 					
-				((DerbyWaypointEngine) engine).updateResultCount(s, this);
+				if (engine instanceof IDerbyWaypointEngine) {
+					((IDerbyWaypointEngine) engine).updateResultCount(s, this);
+				}
 				
 				s.getTransaction().commit();
 				
