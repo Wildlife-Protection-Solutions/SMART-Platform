@@ -363,7 +363,7 @@ public class EntitySearchView {
 		delete.addListener(SWT.Selection, (event)->deleteSavedSearch());
 		delete.setToolTipText(Messages.EntitySearchView_DeleteTooltip);
 		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		delete.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		delete.setEnabled(IntelSecurityManager.INSTANCE.canEditEntity());
 		
 		ToolItem rename = new ToolItem(tb, SWT.PUSH);
 		rename.addListener(SWT.Selection, (event)->{

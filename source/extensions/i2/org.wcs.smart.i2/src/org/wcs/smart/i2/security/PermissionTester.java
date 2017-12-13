@@ -48,7 +48,8 @@ public class PermissionTester extends PropertyTester {
 					IntelEditRecordUserLevel.INSTANCE,
 					IntelReadOnlyUserLevel.INSTANCE,
 					IntelViewEntityUserLevel.INSTANCE,
-					IntelViewRecordsUserLevel.INSTANCE
+					IntelViewRecordsUserLevel.INSTANCE,
+					IntelQueryAllUserLevel.INSTANCE
 			};
 			for (SmartUserLevel l : intelUserLevels) {
 				if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), l)) return true;

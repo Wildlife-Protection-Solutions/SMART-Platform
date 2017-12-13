@@ -411,16 +411,19 @@ public class WorkingSetView {
 			}
 		});
 		
-		MenuItem delete = new MenuItem(menu, SWT.PUSH);
-		delete.setText(Messages.WorkingSetView_RemoveLabel);
-		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		delete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				removeSelection();
-			}
-		});
-		
+		MenuItem delete = null;
+		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()) {
+			delete = new MenuItem(menu, SWT.PUSH);
+			delete.setText(Messages.WorkingSetView_RemoveLabel);
+			delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			delete.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					removeSelection();
+				}
+			});
+		}
+		MenuItem fdelete = delete;
 		menu.addMenuListener(new MenuAdapter() {
 			@Override
 			public void menuShown(MenuEvent e) {
@@ -433,7 +436,7 @@ public class WorkingSetView {
 						break;
 					}
 				}
-				delete.setEnabled(enabled);
+				if (fdelete != null) fdelete.setEnabled(enabled);
 				open.setEnabled(enabled);
 			}
 		});
@@ -461,7 +464,7 @@ public class WorkingSetView {
 	}
 	
 	private void addDropListener(Composite parent){
-		
+		if (!IntelSecurityManager.INSTANCE.canEditWorkingSet()) return;
 		DropTarget dropTarget = new DropTarget(parent, DND.DROP_LINK);
 		dropTarget.setTransfer(new Transfer[]{IntelEntitySelectionTransfer.getTransfer(), IntelRecordSelectionTransfer.getTransfer(), IntelQuerySelectionTransfer.getTransfer()});
 		dropTarget.addDropListener(new DropTargetListener() {		

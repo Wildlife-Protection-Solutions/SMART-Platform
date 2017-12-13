@@ -65,8 +65,6 @@ public class IntelDataAnalysisPerspective implements IPerspectiveFactory {
 		if (IntelSecurityManager.INSTANCE.canViewQueries()){
 			rightFolder.addView(QueryView.ID);
 			layout.getViewLayout(QueryView.ID).setCloseable(false);
-//			rightFolder.addView(QueryFilterView.ID);
-//			layout.getViewLayout(QueryFilterView.ID).setCloseable(false);
 		}
 		rightFolder.addView(LayersView.ID);
 		

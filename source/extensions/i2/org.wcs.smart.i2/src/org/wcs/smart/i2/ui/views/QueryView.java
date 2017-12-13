@@ -298,33 +298,37 @@ public class QueryView {
 		filterTree = new TreeViewer(treePart, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
 		filterTree.setLabelProvider(new FilterTreeLabelProvider());
 		filterTree.setContentProvider(new FilterTreeContentProvider());
-		filterTree.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				addFilterSelectionToQuery();
-			}
-		});
+
 		treePart.addListener(SWT.Resize, e->{
 			filterTree.getTree().setBounds(0,0,treePart.getBounds().width, treePart.getBounds().height);
 		});
 
-		Menu mnu = new Menu(filterTree.getTree());
-		MenuItem addToQuery = new MenuItem(mnu,SWT.PUSH);
-		addToQuery.setText(Messages.QueryView_AddToQueryBtn);
-		addToQuery.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		addToQuery.addListener(SWT.Selection, event->addFilterSelectionToQuery());
-		filterTree.getTree().setMenu(mnu);
-		
-		mnu.addMenuListener(new MenuListener() {
-			@Override
-			public void menuShown(MenuEvent e) {		
-				addToQuery.setEnabled(getActiveQueryEditor() != null && !getSelectedDropItems().isEmpty());
-			}
+		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+			filterTree.addDoubleClickListener(new IDoubleClickListener() {
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					addFilterSelectionToQuery();
+				}
+			});
 			
-			@Override
-			public void menuHidden(MenuEvent e) {
-			}
-		});
+			Menu mnu = new Menu(filterTree.getTree());
+			MenuItem addToQuery = new MenuItem(mnu,SWT.PUSH);
+			addToQuery.setText(Messages.QueryView_AddToQueryBtn);
+			addToQuery.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			addToQuery.addListener(SWT.Selection, event->addFilterSelectionToQuery());
+			filterTree.getTree().setMenu(mnu);
+			
+			mnu.addMenuListener(new MenuListener() {
+				@Override
+				public void menuShown(MenuEvent e) {		
+					addToQuery.setEnabled(getActiveQueryEditor() != null && !getSelectedDropItems().isEmpty());
+				}
+				
+				@Override
+				public void menuHidden(MenuEvent e) {
+				}
+			});
+		}
 		
 		refreshJob = new LoadFilterOptions(filterTree);
 		

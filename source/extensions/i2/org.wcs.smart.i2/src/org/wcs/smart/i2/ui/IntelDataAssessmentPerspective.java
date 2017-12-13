@@ -61,20 +61,12 @@ public class IntelDataAssessmentPerspective implements IPerspectiveFactory {
 			layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
 		}
 		
-		
 		if (IntelSecurityManager.INSTANCE.canViewEntities() || 
 				IntelSecurityManager.INSTANCE.canEditEntity()) {
 			right.addView(EntitySearchView.ID);
 			right.addView(LayersView.ID);
 			layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
 		}
-		
-		
-		
-		
-		
-		
-		
 				
 	}
 }
