@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.qa.internal.messages"; //$NON-NLS-1$
+	public static String AutomatedResultsEditor_AutoResultsEditor;
 	public static String AutomatedResultsEditor_CleanMsg;
 	public static String AutomatedResultsEditor_CleanTitle;
 	public static String AutomatedResultsEditor_ConfirmDelete;
@@ -58,6 +59,7 @@ public class Messages extends NLS {
 	public static String ManualResultsEditor_RoutinecolumnName;
 	public static String ManualResultsEditor_SelectAllLabel;
 	public static String ManualResultsEditor_ValidateButton;
+	public static String ManualResultsEditor_ValidationEditorName;
 	public static String ManualResultsEditor_ValidationErrorMsg;
 	public static String NewAutoValidationHandler_DisplayError;
 	public static String NewManualValidationHandler_DisplayError;

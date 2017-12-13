@@ -154,7 +154,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		
 		@Override
 		public String getName() {
-			return null;
+			return Messages.ManualResultsEditor_ValidationEditorName;
 		}
 		
 		@Override

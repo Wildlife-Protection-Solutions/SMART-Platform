@@ -91,7 +91,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		
 		@Override
 		public String getName() {
-			return null;
+			return Messages.AutomatedResultsEditor_AutoResultsEditor;
 		}
 		
 		@Override
