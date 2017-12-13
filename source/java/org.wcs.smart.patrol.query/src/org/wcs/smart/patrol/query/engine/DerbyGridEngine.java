@@ -69,10 +69,10 @@ import org.wcs.smart.patrol.query.engine.grids.PatrolDayCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolExistsCellMerger;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition;
+import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition.ZeroFilterOption;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
-import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition.ZeroFilterOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AddCellMerger;
@@ -100,7 +100,7 @@ import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBReader;
 
 public class DerbyGridEngine extends DerbyPatrolQueryEngine{
@@ -658,7 +658,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				}
 				if (bytes != null){
 					WKBReader reader = new WKBReader();
-					LineString ls = (LineString) reader.read(bytes);
+					Geometry ls = reader.read(bytes);
 					if (data != null){
 						if (data.length == 1){
 							ls.setUserData(data[0]);		
@@ -667,7 +667,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 						}
 					}
 					try{
-						engine.rasterizeLinestring(ls);
+						engine.rasterizeTrack(ls);
 					}catch (Exception ex){
 						PatrolQueryPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
 						throw ex;
@@ -730,9 +730,9 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
 				if (bytes != null){
 					WKBReader reader = new WKBReader();
-					LineString ls = (LineString) reader.read(bytes);
+					Geometry ls = reader.read(bytes);
 					try{
-						engine.rasterizeLinestring(ls);
+						engine.rasterizeTrack(ls);
 					}catch (Exception ex){
 						PatrolQueryPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
 						throw ex;

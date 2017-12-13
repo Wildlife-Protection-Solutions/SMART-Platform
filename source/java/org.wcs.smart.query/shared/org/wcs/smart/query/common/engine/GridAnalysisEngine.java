@@ -39,7 +39,9 @@ import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geomgraph.Edge;
 import com.vividsolutions.jts.geomgraph.index.SegmentIntersector;
 import com.vividsolutions.jts.geomgraph.index.SimpleMCSweepLineIntersector;
@@ -94,14 +96,24 @@ public class GridAnalysisEngine<T> {
 	}
 
 	/**
-	 * Rasterizes the given linestring merging
-	 * the results to any previous rasterized linestrings
-	 * using the provided cell merger.
-	 * 
-	 * @param ls rasterizes the linestring 
-	 * @throws TransformException 
-	 * @throws MismatchedDimensionException 
+	 * Rasterizes a track geometry that can either be a linestring or multilinestring.
+	 * The results are merged with previous rasterized geometries using the provided
+	 * cell merger.
+	 * If any other type of geometry is supplied this function does nothing.
+	 * @param ls geometry to rasterize
+	 * @throws Exception
 	 */
+	public void rasterizeTrack(Geometry ls) throws Exception {
+		if (ls instanceof LineString) rasterizeLinestring((LineString)ls);
+		if (ls instanceof MultiLineString) rasterizeLinestring((MultiLineString)ls);
+	}
+	
+	private void rasterizeLinestring(MultiLineString ls) throws Exception {
+		for (int i = 0 ; i < ls.getNumGeometries(); i ++) {
+			rasterizeLinestring( (LineString)ls.getGeometryN(i) );
+		}
+	}
+	
 	/*
 	 * The way rasterization is performed:
 	 * 1. find the bbox of the linestring
@@ -114,7 +126,7 @@ public class GridAnalysisEngine<T> {
 	 * a single cell -> find the cell these line within and process
 	 * 
 	 */
-	public void rasterizeLinestring(LineString ls) throws Exception {
+	private void rasterizeLinestring(LineString ls) throws Exception {
 		LineString orig = ls;
 		if (transform != null){
 			ls = (LineString)JTS.transform(ls, transform);
