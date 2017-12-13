@@ -484,7 +484,7 @@ public enum RecordImportEngine {
 				MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), Messages.RecordImportEngine_DuplicateTitle, null, 
 						 MessageFormat.format(Messages.RecordImportEngine_MultiRecordsExist, cnt, title),
 						MessageDialog.QUESTION, 0, new String[] {DialogConstants.SAVE_TEXT, Messages.RecordImportEngine_SkipBtn});
-				if (md.open() == 1) {
+				if (md.open() == 0) {
 					r[0] = 1;
 					return;
 				}
