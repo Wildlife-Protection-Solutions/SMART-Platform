@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.nio.file.Path;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -276,12 +277,18 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		try(Session session = HibernateManager.openSession()){
 			Transaction tx = session.beginTransaction();
 			try{
-				caComposite.updateConservationArea(ca);
+				Path iconFile = caComposite.updateConservationArea(ca);
+				
 				Language def= ca.getDefaultLanguage();
 				ca.getLanguages().clear();
 				ca.getLanguages().add(def);
 				ca.getLanguages().addAll(languages);
 				session.saveOrUpdate(ca);
+				
+				session.flush();
+				
+				ca.setLogo(iconFile);
+				
 				tx.commit();
 				
 				// update the cached settings
@@ -295,7 +302,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 				SmartWorkbenchWindowAdvisor.updateWorkbenchWindowTitle();
 	
 				return true;
-			}catch (RuntimeException ex){
+			}catch (Exception ex){
 				tx.rollback();
 				SmartPlugIn.displayLog(Messages.CaPropertyPage_Error_SavingChanages + ex.getLocalizedMessage(), ex);
 			}

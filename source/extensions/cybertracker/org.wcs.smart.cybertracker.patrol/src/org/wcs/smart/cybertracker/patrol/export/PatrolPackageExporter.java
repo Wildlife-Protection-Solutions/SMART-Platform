@@ -61,10 +61,15 @@ import org.wcs.smart.util.ZipUtil;
 
 /**
  * Patrol Cybertracker package exporter. This exports the following details into
- * a single zip file for use with Cybertracker. Included are: configurable model
- * xml (cm_model.xml), configurable model image files, cybertracker
- * configuration options (ct_profile.json), and the patrol metadata options
- * (patrol_metadata.json). This may be expanded in the future to include mapping
+ * a single zip file for use with Cybertracker. Included are: 
+ * configurable model xml (cm_model.xml), 
+ * configurable model image files, 
+ * cybertracker configuration options (ct_profile.json)
+ * the patrol metadata options (patrol_metadata.json).
+ * the conservation area logo 
+ * 
+ * 
+ * This may be expanded in the future to include mapping
  * data or other data useful for Cybertracker.
  */
 public enum PatrolPackageExporter {
@@ -138,6 +143,11 @@ public enum PatrolPackageExporter {
 					toIncludeInZip.addAll(Arrays.asList(dataFolder.listFiles()));
 				}
 				
+				//include ca logo
+				Path logo = cm.getConservationArea().getLogo();
+				if (logo != null && Files.exists(logo)) {
+					toIncludeInZip.add(logo.toFile());
+				}
 				
 				sub.split(1);
 				Path metadataFile = tempDir.resolve(PATROL_METADATA_FILE);
@@ -151,10 +161,11 @@ public enum PatrolPackageExporter {
 				
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(cm, projectFile);
+				writeProjectFile(cm, logo, projectFile);
 				toIncludeInZip.add(projectFile.toFile());
 				
 				
+
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
 			}
 		}finally {
@@ -167,8 +178,8 @@ public enum PatrolPackageExporter {
 		}
 	}
 	
-	private void writeProjectFile(ConfigurableModel cm, Path outputFile) throws IOException {
-		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, outputFile);
+	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path outputFile) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, outputFile);
 	}
 	
 	private void profileToJson(CyberTrackerPropertiesProfile profile, Path outputFile) throws IOException {

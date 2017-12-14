@@ -22,6 +22,11 @@
 package org.wcs.smart.ca;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +57,11 @@ public class ConservationArea extends UuidItem {
 
 	public static final UUID MULTIPLE_CA = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR);
 
+	/**
+	 * Folder for storing Conservation Area Icon
+	 */
+	public static final String ICON_FOLDER_NAME = "ca_icon"; //$NON-NLS-1$
+	
 	/**
 	 * Maximum conservation area id length
 	 */
@@ -224,6 +234,60 @@ public class ConservationArea extends UuidItem {
 	@Transient
 	public String getFileDataStoreLocation(){
 		return SmartContext.INSTANCE.getFilestoreLocation() + File.separator + UuidUtils.getDirectoryPath(getUuid());
+	}
+	
+	/**
+	 * Sets the icon associated with the Conservation Area.
+	 * 
+	 * Ensure the ca has a valid uuid before calling this function.  To
+	 * clear the icon call using null for newfile.
+	 * 
+	 * @param newFile
+	 * @throws IOException
+	 */
+	@Transient
+	public void setLogo(Path newFile) throws IOException {
+		if (getUuid() == null) throw new IllegalStateException("Cannot set the Conservation Area icon until the unique identifier has been provided."); //$NON-NLS-1$
+		Path iconFolder = Paths.get(getFileDataStoreLocation(), ICON_FOLDER_NAME);
+		
+		Path currentFile = getLogo();
+		if (currentFile == null && newFile == null) return;
+		if (currentFile != null && currentFile.equals(newFile)) return;
+		
+		//delete all files in the icon folder (there should old be one)
+		if (Files.exists(iconFolder)) {
+			try(DirectoryStream<Path> stream = Files.newDirectoryStream(iconFolder)){
+				for (Path p : stream) {
+					if (!Files.isDirectory(p))Files.delete(p);
+				}
+			}
+		}else {
+			Files.createDirectory(iconFolder);
+		}
+		
+		if (newFile != null) {
+			Files.copy(newFile, Paths.get(getFileDataStoreLocation(), ICON_FOLDER_NAME, newFile.getFileName().toString()));
+		}
+	}
+	
+	/**
+	 * Gets the icon associated with the conservation area or null if none specified 
+	 * @return
+	 * @throws IOException
+	 */
+	@Transient
+	public Path getLogo() throws IOException {
+		if (getUuid() == null) return null;
+		Path iconFolder = Paths.get(getFileDataStoreLocation(), ICON_FOLDER_NAME);
+		if (!Files.exists(iconFolder)) return null;
+		
+		//there should only ever be one icon here; lets return it if found
+		try(DirectoryStream<Path> stream = Files.newDirectoryStream(iconFolder)){
+			for (Path p : stream) {
+				return p;
+			}
+		}
+		return null;
 	}
 	
 }

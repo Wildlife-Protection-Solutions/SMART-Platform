@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.ui.internal.ca;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,12 +32,17 @@ import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -49,6 +57,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CaInfoComposite extends Composite {
 
+	private static final String FILE_KEY = "FILE"; //$NON-NLS-1$
+	private static final String IMAGE_KEY = "IMAGE"; //$NON-NLS-1$
 	private Text txtIdentifier;
 	private Text txtName;
 	private Text txtDescription;
@@ -57,6 +67,8 @@ public class CaInfoComposite extends Composite {
 	private Text txtPointOfContact;
 	private Text txtCountry;
 	private Text txtOwner;
+	
+	private Canvas cIcon;
 	
 	private ControlDecoration cdIdentifier;
 	private ControlDecoration cdName;
@@ -200,9 +212,96 @@ public class CaInfoComposite extends Composite {
 		txtOwner.setTextLimit(ConservationArea.MAX_OWNER_LENGTH);
 		txtOwner.addKeyListener(changeListener);
 
+		Label lblLogo = new Label(this, SWT.NONE);
+		lblLogo.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		lblLogo.setText(Messages.CaInfoComposite_LogoLabel);
+		lblLogo.setToolTipText(Messages.CaInfoComposite_LogoTooltip);
+		
+		Composite iconComp = new Composite(this, SWT.NONE);
+		iconComp.setLayout(new GridLayout(3, false));
+		((GridLayout)iconComp.getLayout()).marginWidth = 0;
+		((GridLayout)iconComp.getLayout()).marginHeight = 0;
+		iconComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)iconComp.getLayoutData()).horizontalIndent = indent;
+		
+		cIcon = new Canvas(iconComp, SWT.BORDER);
+		cIcon.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		cIcon.addListener(SWT.Dispose, e->{
+			Image img = (Image) cIcon.getData(IMAGE_KEY);
+			if (img != null) img.dispose();
+		});
+		
+		cIcon.addListener(SWT.Paint, e->{
+			Image img = (Image) cIcon.getData(IMAGE_KEY);
+			Path file = (Path)cIcon.getData(FILE_KEY);
+			if (img == null && file != null) {
+				try {
+					img = new Image(cIcon.getDisplay(), file.toString());
+					cIcon.setData(IMAGE_KEY,  img);
+				}catch (Exception ex) {
+					
+				}
+				
+			}
+			
+			if (img != null) {
+				e.gc.setBackground(cIcon.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				e.gc.fillRectangle(0, 0, cIcon.getBounds().width, cIcon.getBounds().height);
+				e.gc.drawImage(img, 0, 0, img.getBounds().width, img.getBounds().height, 0,0,cIcon.getBounds().width-1, cIcon.getBounds().height-1);
+			}else if (file != null) {
+				
+				e.gc.setBackground(cIcon.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				e.gc.fillRectangle(0, 0, cIcon.getBounds().width, cIcon.getBounds().height);
+				
+				e.gc.drawLine(0, 0, cIcon.getBounds().width, cIcon.getBounds().height);
+				e.gc.drawLine(cIcon.getBounds().width, 0, 0, cIcon.getBounds().height);
+				e.gc.drawText(Messages.CaInfoComposite_Format, 10, 5);
+				e.gc.drawText(Messages.CaInfoComposite_Not, 10, e.gc.textExtent(Messages.CaInfoComposite_Format).y + 10);
+				e.gc.drawText(Messages.CaInfoComposite_Supported, 10, e.gc.textExtent(Messages.CaInfoComposite_Format).y*2 + 15);
+			}else {
+				e.gc.drawText(Messages.CaInfoComposite_NotSet, 10, 0);
+			}
+		});
+		
+		
+		Button btnBrowse = new Button(iconComp, SWT.PUSH);
+		btnBrowse.setText("..."); //$NON-NLS-1$
+		btnBrowse.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+		btnBrowse.setToolTipText(Messages.CaInfoComposite_SelectFileTooltip);
+		btnBrowse.addListener(SWT.Selection, e->{
+			FileDialog fd = new FileDialog(iconComp.getShell(), SWT.OPEN);
+			fd.setText(Messages.CaInfoComposite_FileDialogTitle);
+			fd.setFilterNames(new String[] {Messages.CaInfoComposite_SVGFile, Messages.CaInfoComposite_AllFiles});
+			fd.setFilterExtensions(new String[] {"*.svg", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+			String file = fd.open();
+			if (file == null) return;
+			
+			Path p = Paths.get(file);
+			if (!Files.exists(p)) return;
+			
+			cIcon.setData(FILE_KEY, p);
+			Image img = (Image) cIcon.getData(IMAGE_KEY);
+			if (img != null) img.dispose();
+			cIcon.setData(IMAGE_KEY, null);
+			cIcon.redraw();
+			fireChangeListeners();
+		});
+		
+		Button btnClear = new Button(iconComp, SWT.PUSH);
+		btnClear.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+		btnClear.setText(Messages.CaInfoComposite_clearButton);
+		btnBrowse.setToolTipText(Messages.CaInfoComposite_clearTooltip);
+		btnClear.addListener(SWT.Selection, e->{
+			Image img = (Image) cIcon.getData(IMAGE_KEY);
+			if (img != null) img.dispose();
+			cIcon.setData(IMAGE_KEY, null);
+			cIcon.setData(FILE_KEY, null);
+			cIcon.redraw();
+			fireChangeListeners();
+		});
+		
 		cdIdentifier = createDecoration(txtIdentifier);
 		cdName= createDecoration(txtName);
-		
 		
 		if (defaults != null){
 			updateValues(defaults);
@@ -236,6 +335,14 @@ public class CaInfoComposite extends Composite {
 		txtPointOfContact.setText(ca.getPointOfContact() != null ? ca.getPointOfContact() : ""); //$NON-NLS-1$
 		txtCountry.setText(ca.getCountry() != null ? ca.getCountry() : ""); //$NON-NLS-1$
 		txtOwner.setText(ca.getOwner() != null ? ca.getOwner() : ""); //$NON-NLS-1$
+		try {
+			Path iconFile = ca.getLogo();
+			if (iconFile != null) {
+				cIcon.setData(FILE_KEY, iconFile);
+			}
+		}catch (Exception ex) {
+			SmartPlugIn.displayError(ex.getMessage(), ex);
+		}
 		validate();
 	}
 	
@@ -298,7 +405,13 @@ public class CaInfoComposite extends Composite {
 		
 	}
 	
-	public void updateConservationArea(ConservationArea ca) {
+	/**
+	 * Updates the conservation area object and returns the
+	 * path to the CA icon; null if not image provided
+	 * @param ca
+	 * @return
+	 */
+	public Path updateConservationArea(ConservationArea ca) {
 		ca.setId(getIdentifier().trim());
 		ca.setName(getCaName().trim());
 		ca.setDescription(getDescription().trim());
@@ -307,6 +420,8 @@ public class CaInfoComposite extends Composite {
 		ca.setPointOfContact(txtPointOfContact.getText().trim());
 		ca.setCountry(txtCountry.getText().trim());
 		ca.setOwner(txtOwner.getText().trim());
+		
+		return (Path) cIcon.getData(FILE_KEY);
 	}
 	
 	/*

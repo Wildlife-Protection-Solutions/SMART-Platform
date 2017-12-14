@@ -110,6 +110,11 @@ public enum SurveyPackageExporter {
 					toIncludeInZip.addAll(Arrays.asList(dataFolder.listFiles()));
 				}
 				
+				//include ca logo
+				Path logo = design.getConservationArea().getLogo();
+				if (logo != null && Files.exists(logo)) {
+					toIncludeInZip.add(logo.toFile());
+				}
 				
 				sub.split(1);
 				Path metadataFile = tempDir.resolve(PATROL_METADATA_FILE);
@@ -123,7 +128,7 @@ public enum SurveyPackageExporter {
 				
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(modelToExport, projectFile);
+				writeProjectFile(modelToExport, logo, projectFile);
 				toIncludeInZip.add(projectFile.toFile());
 				
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
@@ -160,8 +165,8 @@ public enum SurveyPackageExporter {
 		}
 	}
 
-	private void writeProjectFile(ConfigurableModel cm, Path outputFile) throws IOException {
-		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, outputFile);
+	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path outputFile) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, outputFile);
 	}
 	
 }
