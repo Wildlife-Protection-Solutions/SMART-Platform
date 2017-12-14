@@ -46,6 +46,7 @@ import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.patrol.ILabelProvider;
 import org.wcs.smart.qa.patrol.ILabelProvider.Key;
 import org.wcs.smart.qa.routine.LocationRoutineType;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Data provider for providing patrol track data.
@@ -83,7 +84,7 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 		for (Patrol p : patrols){
 			for (PatrolLeg pl : p.getLegs()){
 				for (PatrolLegDay pld : pl.getPatrolLegDays()){
-					if ((pld.getDate().equals(endDate) || pld.getDate().before(endDate)) && (pld.getDate().equals(startDate)  || pld.getDate().after(startDate))){
+					if ((SharedUtils.isSameDate(pld.getDate(),endDate) || pld.getDate().before(endDate)) && (SharedUtils.isSameDate(pld.getDate(), startDate)  || pld.getDate().after(startDate))){
 						Track t = pld.getTrack();
 						try{
 							if (t != null && t.getGeometry() != null){

@@ -31,8 +31,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -41,6 +41,7 @@ import org.wcs.smart.qa.er.ILabelProvider.Key;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.routine.LocationRoutineType;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Data provider for providing patrol track data.
@@ -74,7 +75,7 @@ public class ErTrackDataProvider extends IQaDataProvider {
 		
 		for (Mission m: missions){
 			for (MissionDay md : m.getMissionDays()){
-				if ((md.getDate().equals(endDate) || md.getDate().before(endDate)) && (md.getDate().equals(startDate)  || md.getDate().after(startDate))){
+				if ((SharedUtils.isSameDate(md.getDate(), endDate) || md.getDate().before(endDate)) && (SharedUtils.isSameDate(md.getDate(), startDate)  || md.getDate().after(startDate))){
 					for (MissionTrack t : md.getTracks()){
 						try{
 							if (t != null && t.getLineString() != null){
