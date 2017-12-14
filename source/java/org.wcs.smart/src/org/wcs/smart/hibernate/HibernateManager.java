@@ -22,6 +22,7 @@
 package org.wcs.smart.hibernate;
 
 
+import java.nio.file.Path;
 import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -524,7 +525,7 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param newCa
 	 * @throws Exception
 	 */
-	public static void saveNewConservationArea(ConservationArea newCa) throws Exception{
+	public static void saveNewConservationArea(ConservationArea newCa, Path logoFile) throws Exception{
 		
 		/* need to login as admin user to create CA */
 		HibernateManager.endSessionFactory(true);
@@ -560,6 +561,10 @@ public class HibernateManager extends SmartHibernateManager{
 				for (ICaCreateHandler handler : extensions) {
 					handler.afterCreate(newCa, s);
 				}
+				
+				s.flush();
+				
+				newCa.setLogo(logoFile);
 				
 				s.getTransaction().commit();
 			} catch (Exception ex) {

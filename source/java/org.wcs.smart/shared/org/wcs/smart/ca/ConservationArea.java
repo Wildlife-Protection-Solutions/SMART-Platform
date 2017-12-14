@@ -237,10 +237,12 @@ public class ConservationArea extends UuidItem {
 	}
 	
 	/**
-	 * Sets the icon associated with the Conservation Area.
+	 * Sets the logo associated with the Conservation Area; this will overwrite the existing
+	 * logo so should only be called from within the database transaction
+	 * that updates the Conservation Area
 	 * 
-	 * Ensure the ca has a valid uuid before calling this function.  To
-	 * clear the icon call using null for newfile.
+	 * Ensure the Conservation Area has a valid UUID before calling this function.  
+	 * To clear the icon call with null value for newFile.
 	 * 
 	 * @param newFile
 	 * @throws IOException
@@ -262,7 +264,7 @@ public class ConservationArea extends UuidItem {
 				}
 			}
 		}else {
-			Files.createDirectory(iconFolder);
+			Files.createDirectories(iconFolder);
 		}
 		
 		if (newFile != null) {

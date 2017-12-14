@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.create;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -59,6 +60,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 	private CaInfoComposite composite = null;
 	
 	private ComboViewer lstViewer ;
+	private Path logoFile;
 	
 	/**
 	 * Create the wizard.
@@ -140,12 +142,19 @@ public class CaWizard_CaDef extends CaWizardPage  {
 	}
 
 	/**
+	 * Return the logo file selected
+	 * @return
+	 */
+	public Path getLogoFile() {
+		return logoFile;
+	}
+	/**
 	 * Updates the conservation area with the information from this wizard page.
 	 * 
 	 * @param ca Conservation Area object to update
 	 */
 	public void updateConservationArea(ConservationArea ca) {
-		composite.updateConservationArea(ca);
+		logoFile = composite.updateConservationArea(ca);
 		
 		if (lstViewer.getControl().isEnabled()){
 			Language lang = new Language();

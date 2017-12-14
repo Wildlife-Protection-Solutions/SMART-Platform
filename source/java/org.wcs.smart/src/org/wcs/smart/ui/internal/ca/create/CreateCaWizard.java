@@ -52,6 +52,8 @@ public class CreateCaWizard extends Wizard implements IPageChangingListener {
 		
 	private ConservationArea newCa = null;
 	private CaWizardTemplatePage templatePage = null;
+	private CaWizard_CaDef caDefPage = null;
+	
 	/**
 	 * Creates a new wizard.
 	 */
@@ -65,11 +67,11 @@ public class CreateCaWizard extends Wizard implements IPageChangingListener {
 		templatePage = new CaWizardTemplatePage();
 		super.addPage(templatePage);
 		
-		CaWizardPage page = new CaWizard_CaDef();
-		super.addPage(page);
+		caDefPage = new CaWizard_CaDef();
+		super.addPage(caDefPage);
 		
-		page = new CaWizard_UserDef();
-		super.addPage(page);
+		CaWizard_UserDef page2 = new CaWizard_UserDef();
+		super.addPage(page2);
 		
 		((WizardDialog)getContainer()).addPageChangingListener(this);
 	}
@@ -94,10 +96,10 @@ public class CreateCaWizard extends Wizard implements IPageChangingListener {
 			}
 		}
 		
-		ConservationArea templateCa =templatePage.getTemplateCa();
+		ConservationArea templateCa = templatePage.getTemplateCa();
 		if (templateCa == null){
 			try{
-				HibernateManager.saveNewConservationArea(newCa);
+				HibernateManager.saveNewConservationArea(newCa, caDefPage.getLogoFile());
 				completedOK = true;
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.CreateCaWizard_Error_CreateCaError + ex.getLocalizedMessage(), ex);
