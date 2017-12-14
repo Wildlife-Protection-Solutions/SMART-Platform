@@ -21,8 +21,24 @@
                   visible="false">
             </separator>
             <separator
+                  name="org.wcs.smart.cybertracker.separator3"
+                  visible="true">
+            </separator>
+            <separator
+                  name="org.wcs.smart.cybertracker.patrolpackagesep"
+                  visible="false">
+            </separator>
+            <separator
+                  name="org.wcs.smart.cybertracker.surveypackagesep"
+                  visible="false">
+            </separator>
+            <separator
                   name="org.wcs.smart.cybertracker.exportseparator"
                   visible="false">
+            </separator>
+            <separator
+                  name="org.wcs.smart.cybertracker.separator2"
+                  visible="true">
             </separator>
             <command
                   commandId="org.wcs.smart.cybertracker.import"
@@ -35,7 +51,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.cybertracker.properties"
-                  label="%cybertracker.properties.command.label"
+                  label="CyberTracker Properties"
                   style="push">
             </command>
             <command

@@ -84,6 +84,9 @@ public class Messages extends NLS {
 	public static String PatrolCTPackageDialog_FileExistsMsg;
 	public static String PatrolCTPackageDialog_FileLbl;
 	public static String PatrolCTPackageDialog_FileRequired;
+	public static String PatrolCTPackageDialog_MapDirectoryDialogTitle;
+	public static String PatrolCTPackageDialog_MapDirectoryLabel;
+	public static String PatrolCTPackageDialog_MapDirectoryTooltip;
 	public static String PatrolCTPackageDialog_ProfileLoadError;
 	public static String PatrolCTPackageDialog_ProfileRequired;
 	public static String PatrolCTPackageDialog_ShellMsg;

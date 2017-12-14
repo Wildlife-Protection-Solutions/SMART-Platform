@@ -51,6 +51,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -84,13 +85,15 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 	private static final String LAST_FILE_KEY = "SurveyCTPackageDialog.file"; //$NON-NLS-1$
 	private static final String LAST_DESIGN_KEY = "SurveyCTPackageDialog.cm"; //$NON-NLS-1$
 	private static final String LAST_PROFILE_KEY ="SurveyCTPackageDialog.profile"; //$NON-NLS-1$
+	private static final String LAST_MAPDIR_KEY ="SurveyCTPackageDialog.mapdir"; //$NON-NLS-1$
 	
 	private ComboViewer designViewer;
 	private ComboViewer profileViewer;
 	private Text txtOutputFile;
+	private Text txtMapDirectory;
 	
 	private CyberTrackerPropertiesProfile selectedProfile = null;
-	private String selectedFile = null;
+	
 	private SurveyDesign selectedDesign = null;
 	
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
@@ -100,9 +103,11 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 	}
 
     public void okPressed() {
-    	this.selectedFile = txtOutputFile.getText();
+    	String selectedFile = txtOutputFile.getText();
+    	String selectedMapDirectory = txtMapDirectory.getText();
     	
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_FILE_KEY, selectedFile);
+    	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_MAPDIR_KEY, selectedMapDirectory);
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_DESIGN_KEY, UuidUtils.uuidToString(selectedDesign.getUuid()));
     	CyberTrackerPlugIn.getDefault().getPreferenceStore().setValue(LAST_PROFILE_KEY, UuidUtils.uuidToString(selectedProfile.getUuid()));
     	
@@ -124,6 +129,11 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 			}
 		}
 		
+		Path mapDirectory = null;
+		if (selectedMapDirectory != null && !selectedMapDirectory.trim().isEmpty()) {
+			mapDirectory = Paths.get(selectedMapDirectory);
+		}
+		final Path fMapDirectory = mapDirectory;
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, true, new IRunnableWithProgress() {
@@ -131,7 +141,7 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						SurveyPackageExporter.INSTANCE.exportPackage(selectedDesign, selectedProfile, exportFile, monitor);
+						SurveyPackageExporter.INSTANCE.exportPackage(selectedDesign, selectedProfile, fMapDirectory, exportFile, monitor);
 						Display.getDefault().syncExec(()->{
 							MessageDialog.openInformation(getShell(), Messages.SurveyCTPackageDialog_ExportDoneTitle, MessageFormat.format(Messages.SurveyCTPackageDialog_ExportDoneMessage,exportFile.toString()));	
 						});
@@ -270,6 +280,27 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 			}
 		});
 		
+		Label mapFileDir = new Label(main, SWT.NONE);
+		mapFileDir.setText(Messages.SurveyCTPackageDialog_MapDirectoryLabel);
+		mapFileDir.setToolTipText(Messages.SurveyCTPackageDialog_MapDirectoryTooltip);
+		
+		txtMapDirectory = new Text(main, SWT.BORDER);
+		txtMapDirectory.setText(""); //$NON-NLS-1$
+		txtMapDirectory.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtMapDirectory.addListener(SWT.Modify, e->validate());
+		
+		Button btnBrowse2 = new Button(main, SWT.PUSH);
+		btnBrowse2.setText("..."); //$NON-NLS-1$
+		btnBrowse2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnBrowse2.addListener(SWT.Selection, e->{
+			DirectoryDialog fd = new DirectoryDialog(getShell());
+			fd.setFilterPath(txtMapDirectory.getText());
+			fd.setText(Messages.SurveyCTPackageDialog_SelectDirectoryText);
+			String dir = fd.open();
+			if (dir == null) return;
+			txtMapDirectory.setText(dir);
+		});
+		
 		setTitle(Messages.SurveyCTPackageDialog_ShellTitle);
 		setMessage(Messages.SurveyCTPackageDialog_ShellMsg);
 		super.getShell().setText(Messages.SurveyCTPackageDialog_ShellTitle);
@@ -308,6 +339,8 @@ public class SurveyCTPackageDialog extends TitleAreaDialog {
 		String text = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_FILE_KEY);
 		if (text != null) txtOutputFile.setText(text);
 		
+		String mapdir = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_MAPDIR_KEY);
+		if (mapdir != null) txtMapDirectory.setText(mapdir);
 		
     	final String lastDesignUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_DESIGN_KEY);
     	final String lastProfileUuid = CyberTrackerPlugIn.getDefault().getPreferenceStore().getString(LAST_PROFILE_KEY);

@@ -11,6 +11,10 @@
                label="%command.cybertracker.survey.export.label1"
                style="push">
          </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.surveypackagesep">
          <command
                commandId="org.wcs.smart.cybertracker.survey.export.package"
                label="Export Survey Package"

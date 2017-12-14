@@ -43,14 +43,18 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -66,6 +70,7 @@ import org.wcs.smart.cybertracker.model.ProjectionFormat;
  */
 public class CyberTrackerPropertiesComposite extends Composite {
 	
+	private static final String COLOR_KEY = "COLOR"; //$NON-NLS-1$
 	private List<IPropsChangeListener> listeners = new ArrayList<IPropsChangeListener>();
 	private boolean isPopulating = false;
 
@@ -108,6 +113,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private Text txtFileName;
     private Button btnLock100;
     private Button btnUseMapOnSkip;
+    
+    private Label[] btnThemeColors;
     
     private ComboViewer cbProjection;
     private Text txtUtmZome;
@@ -156,6 +163,9 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		TabItem fieldmapTab = new TabItem (tabFolder, SWT.NONE);
 		fieldmapTab.setText (Messages.CyberTrackerPropertiesDialog_2);
 		
+		TabItem themeTab = new TabItem (tabFolder, SWT.NONE);
+		themeTab.setText (Messages.CyberTrackerPropertiesComposite_ThemeTabName);
+		
 		ScrolledComposite generalScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
 		generalScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		generalScroll.setShowFocusedControl(true);
@@ -192,10 +202,24 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		fieldmapContainer.setLayout(new GridLayout(2, false));
 		mapScroll.setContent(fieldmapContainer);
 		
+		
+		ScrolledComposite themeScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
+		themeScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		themeScroll.setShowFocusedControl(true);
+		themeScroll.setExpandHorizontal(true);
+		themeScroll.setExpandVertical(true);
+		
+		Composite themeContainer = new Composite(themeScroll, SWT.None);
+		themeContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
+		themeContainer.setLayout(new GridLayout());
+		themeScroll.setContent(themeContainer);
+		
 		generalTab.setControl(generalScroll);
 		gpsTab.setControl(gpsScroll);
 		fieldmapTab.setControl(mapScroll);
+		themeTab.setControl(themeScroll);
 		
+		createThemeTab(themeContainer);
 		
 		Label lblUseTitleBar = new Label(generalContainer, SWT.NONE);
 		lblUseTitleBar.setText(Messages.CyberTrackerPropertiesDialog_3);
@@ -901,11 +925,71 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		
 		
 		
-		generalScroll.setMinSize(generalScroll.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		mapScroll.setMinSize(mapScroll.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		gpsScroll.setMinSize(gpsScroll.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		generalScroll.setMinSize(generalContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		mapScroll.setMinSize(fieldmapContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		gpsScroll.setMinSize(gpsContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		themeScroll.setMinSize(themeContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
+	private void disposeColor(Label label) {
+		Color c = (Color) label.getData(COLOR_KEY);
+		if (c != null) {
+			c.dispose();
+		}
+		label.setData(COLOR_KEY, null);
+	}
+	
+	private void createThemeTab(Composite parent) {
+		Composite part = new Composite(parent, SWT.NONE);
+		part.setLayout(new GridLayout(4, false));
+		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		btnThemeColors = new Label[4];
+		for (int i = 1; i <= 4; i ++) {
+			Label l = new Label(part, SWT.NONE);
+			l.setText(MessageFormat.format(Messages.CyberTrackerPropertiesComposite_ColorLabel, i));
+		
+			Label colorLabel = new Label(part, SWT.NONE);
+			colorLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)colorLabel.getLayoutData()).widthHint = 30;
+			colorLabel.addListener(SWT.Dispose, e->disposeColor(colorLabel));		
+			
+			colorLabel.addListener(SWT.Paint, e->{
+				if (colorLabel.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, colorLabel.getBounds().width-1, colorLabel.getBounds().height-1);
+			});
+			
+			Button btnColor = new Button(part, SWT.PUSH);
+			btnColor.setText("..."); //$NON-NLS-1$
+			
+			Button btnClear = new Button(part, SWT.PUSH);
+			btnClear.setText(Messages.CyberTrackerPropertiesComposite_ClearButton);
+			btnClear.addListener(SWT.Selection, e->{
+				disposeColor(colorLabel);
+				colorLabel.setBackground(null);
+				changesMade();
+			});
+			
+			Listener changeColor = e->{
+				ColorDialog cd = new ColorDialog(parent.getShell());
+				cd.setRGB(colorLabel.getBackground().getRGB());
+				cd.setText(Messages.CyberTrackerPropertiesComposite_ColorSelectionDialogTitle);
+				RGB rgb = cd.open();
+				if (rgb == null) return;
+				
+				disposeColor(colorLabel);
+				Color newColor = new Color(parent.getDisplay(), rgb);
+				colorLabel.setData(COLOR_KEY, newColor);
+				colorLabel.setBackground(newColor);
+				changesMade();
+			};
+			
+			btnColor.addListener(SWT.Selection, changeColor);
+			colorLabel.addListener(SWT.MouseDoubleClick, changeColor);
+			
+			btnThemeColors[i-1] = colorLabel;
+		}
+		
+	}
 	public void addPropsChangeListener(IPropsChangeListener pcl) {
 		listeners.add(pcl);
 	}
@@ -957,6 +1041,16 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		btnAllowSkipManual.setSelection(ctProperties.isAllowSkipManualGps());
 		txtFileName.setText(ctProperties.getFieldMapFilename());
 		btnLock100.setSelection(ctProperties.isLock100());
+		
+		for (int i = 1; i <= 4; i ++) {
+			java.awt.Color r = ctProperties.getThemeColor(i);
+			if (r != null) {
+				Color c = new Color(getDisplay(), r.getRed(), r.getGreen(), r.getBlue());
+				btnThemeColors[i-1].setData(COLOR_KEY, c);
+				btnThemeColors[i-1].setBackground(c);
+			}
+			
+		}
 		isPopulating = false;
 	}
 
@@ -1003,6 +1097,15 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		ctProperties.setFieldMapFilename(txtFileName.getText());
 		ctProperties.setLock100(btnLock100.getSelection());
 		ctProperties.setUseMapOnSkip(btnUseMapOnSkip.getSelection());
+		
+		for (int i = 1; i <= 4; i ++) {
+			Color c = (Color) btnThemeColors[i-1].getData(COLOR_KEY);
+			if (c != null) {
+				ctProperties.setThemeColor(i, new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue()));
+			}else {
+				ctProperties.setThemeColor(i, null);
+			}
+		}
 		
 		return true;
 	}

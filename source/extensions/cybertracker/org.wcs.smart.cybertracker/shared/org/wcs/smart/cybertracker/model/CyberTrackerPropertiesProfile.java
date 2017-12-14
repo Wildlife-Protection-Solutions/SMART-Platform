@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.model;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -224,7 +225,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	private int getIntValue(ProfileOptionID optionId, int defaultValue) {
 		Map<ProfileOptionID, CyberTrackerPropertiesProfileOption> map = getOptions();
 		CyberTrackerPropertiesProfileOption option = map.get(optionId);
-		return (option != null) ? option.getIntegerValue() : defaultValue;
+		return (option != null && option.getIntegerValue() != null) ? option.getIntegerValue() : defaultValue;
 	}
 	
 	
@@ -514,4 +515,53 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public void setDilutionOfPrecision(int dop) {
 		getOption(ProfileOptionID.DILUTION_OF_PRECISION).setIntegerValue(dop);
 	}
+	
+	
+	
+	/**
+	 * 
+	 * @param index one based index: values 1-4 for color theme index
+	 * @return null if not set; otherwise color
+	 */
+	@Transient
+	public Color getThemeColor(int index) {
+		Integer color = -1;
+		switch(index) {
+		case 1: color = getIntValue(ProfileOptionID.THEME_COLOR_1, -1); break;
+		case 2: color = getIntValue(ProfileOptionID.THEME_COLOR_2, -1); break;
+		case 3: color = getIntValue(ProfileOptionID.THEME_COLOR_3, -1); break;
+		case 4: color = getIntValue(ProfileOptionID.THEME_COLOR_4, -1); break;
+		}
+		if (color == -1) return null;
+		return new Color(color);
+	}
+	
+	@Transient
+	/**
+	 * Sets the theme color 
+	 * @param index color index one-based (1-4)
+	 * @param color new color or null to clear setting
+	 */
+	public void setThemeColor(int index, Color color) {
+		Integer value = null;
+		if (color != null) {
+			value = color.getRGB();
+		}
+		switch(index) {
+		case 1:
+			getOption(ProfileOptionID.THEME_COLOR_1).setIntegerValue(value);
+			break;
+		case 2:
+			getOption(ProfileOptionID.THEME_COLOR_2).setIntegerValue(value);
+			break;
+		case 3:
+			getOption(ProfileOptionID.THEME_COLOR_3).setIntegerValue(value);
+			break;
+		case 4:
+			getOption(ProfileOptionID.THEME_COLOR_4).setIntegerValue(value);
+			break;
+		}
+		
+	}
+	
 }

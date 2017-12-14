@@ -54,11 +54,14 @@ import org.wcs.smart.util.ZipUtil;
 
 /**
  * Survey Cybertracker package exporter. This exports the following details into
- * a single zip file for use with Cybertracker. Included are: configurable model
- * xml (cm_model.xml), configurable model image files, cybertracker
- * configuration options (ct_profile.json), and the mission metadata options
- * (survey_metadata.json). This may be expanded in the future to include mapping
- * data or other data useful for Cybertracker.
+ * a single zip file for use with Cybertracker. Included are: 
+ * configurable model xml (cm_model.xml), 
+ * configurable model image files, 
+ * cybertracker configuration options (ct_profile.json)
+ * the patrol metadata options (patrol_metadata.json).
+ * the conservation area logo 
+ * directory with map files to use in the ct application (selected by user on export)
+ * 
  */
 public enum SurveyPackageExporter {
 
@@ -79,9 +82,9 @@ public enum SurveyPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(SurveyDesign design, CyberTrackerPropertiesProfile profile, Path exportFile, IProgressMonitor monitor) throws Exception{
+	public void exportPackage(SurveyDesign design, CyberTrackerPropertiesProfile profile, Path mapDirectory, Path exportFile, IProgressMonitor monitor) throws Exception{
 		
-		SubMonitor sub = SubMonitor.convert(monitor, Messages.SurveyPackageExporter_TaskName, 6);
+		SubMonitor sub = SubMonitor.convert(monitor, Messages.SurveyPackageExporter_TaskName, 7);
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
@@ -127,8 +130,16 @@ public enum SurveyPackageExporter {
 				toIncludeInZip.add(profileFile.toFile());
 				
 				sub.split(1);
+				//copy map files
+				Path mapfiles = null;
+				if (mapDirectory != null) {
+					mapfiles = CtJsonExportUtils.copyMapFiles(mapDirectory, tempDir);
+					if (mapfiles != null) toIncludeInZip.add(mapfiles.toFile());
+				}
+				
+				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
-				writeProjectFile(modelToExport, logo, projectFile);
+				writeProjectFile(modelToExport, logo, mapfiles, projectFile);
 				toIncludeInZip.add(projectFile.toFile());
 				
 				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
@@ -165,8 +176,8 @@ public enum SurveyPackageExporter {
 		}
 	}
 
-	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path outputFile) throws IOException {
-		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, outputFile);
+	private void writeProjectFile(ConfigurableModel cm, Path logoFile, Path mapFileDir, Path outputFile) throws IOException {
+		CtJsonExportUtils.writeProjectJson(cm.getName(), CM_MODEL_FILE, logoFile, mapFileDir, outputFile);
 	}
 	
 }

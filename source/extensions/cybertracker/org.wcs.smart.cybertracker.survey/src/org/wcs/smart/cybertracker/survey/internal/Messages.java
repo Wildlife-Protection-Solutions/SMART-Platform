@@ -70,11 +70,14 @@ public class Messages extends NLS {
 	public static String SurveyCTPackageDialog_FileDialogTitle;
 	public static String SurveyCTPackageDialog_FileLabel;
 	public static String SurveyCTPackageDialog_FileRequired;
+	public static String SurveyCTPackageDialog_MapDirectoryLabel;
+	public static String SurveyCTPackageDialog_MapDirectoryTooltip;
 	public static String SurveyCTPackageDialog_OverwriteError;
 	public static String SurveyCTPackageDialog_OverwriteQuestion;
 	public static String SurveyCTPackageDialog_ProfileLabel;
 	public static String SurveyCTPackageDialog_ProfileLoadError;
 	public static String SurveyCTPackageDialog_ProfileRequired;
+	public static String SurveyCTPackageDialog_SelectDirectoryText;
 	public static String SurveyCTPackageDialog_ShellMsg;
 	public static String SurveyCTPackageDialog_ShellTitle;
 	public static String SurveyCTPackageDialog_ZipFileLbl;

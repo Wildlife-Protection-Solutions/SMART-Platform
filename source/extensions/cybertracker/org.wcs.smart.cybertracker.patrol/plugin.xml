@@ -11,6 +11,10 @@
                label="%command.cybertracker.patrol.export.label1"
                style="push">
          </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.patrolpackagesep">
          <command
                commandId="org.wcs.smart.cybertracker.patrol.export.package"
                label="Export Patrol Package"

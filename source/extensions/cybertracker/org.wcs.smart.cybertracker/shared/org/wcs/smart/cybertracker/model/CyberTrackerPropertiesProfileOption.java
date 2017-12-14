@@ -85,7 +85,12 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		SHOW_EDIT,
 		SHOW_GPS,
 		MAX_PHOTO_COUNT,
-		DILUTION_OF_PRECISION;
+		DILUTION_OF_PRECISION,
+		
+		THEME_COLOR_1,
+		THEME_COLOR_2,
+		THEME_COLOR_3,
+		THEME_COLOR_4,
 	}
 
 	private CyberTrackerPropertiesProfile profile;

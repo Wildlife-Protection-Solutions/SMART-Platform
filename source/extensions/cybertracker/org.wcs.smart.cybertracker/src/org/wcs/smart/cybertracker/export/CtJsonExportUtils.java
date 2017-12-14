@@ -23,8 +23,11 @@ package org.wcs.smart.cybertracker.export;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -103,6 +106,12 @@ public class CtJsonExportUtils {
 	 */
 	public static final String JSON_OPTION_TYPE_KEY = "type"; //$NON-NLS-1$
 	
+	
+	/**
+	 * JSON options property key that identifies the type
+	 */
+	public static final String MAP_FILE_DIRECTORY_NAME = "map"; //$NON-NLS-1$
+	
 	/**
 	 * Option field types
 	 * @author Emily
@@ -142,7 +151,7 @@ public class CtJsonExportUtils {
 		return profileObj.toJSONString();
 	}
 
-	public static void writeProjectJson(String projectName, String cmFile, Path logoFile, Path outputFile) throws IOException {
+	public static void writeProjectJson(String projectName, String cmFile, Path logoFile, Path mapFilesDir, Path outputFile) throws IOException {
 		JSONObject projectJSON = new JSONObject();
 		projectJSON.put("projectName",projectName); //$NON-NLS-1$
 		projectJSON.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -150,10 +159,35 @@ public class CtJsonExportUtils {
 		projectJSON.put("definition",cmFile); //$NON-NLS-1$
 		projectJSON.put("creation_date",new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("logo", (logoFile == null || !Files.exists(logoFile)) ? null : logoFile.getFileName().toString()); //$NON-NLS-1$
+		projectJSON.put("mapfiles", (mapFilesDir == null ) ? null : mapFilesDir.getFileName().toString()); //$NON-NLS-1$
 		
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
 			fw.write(projectJSON.toJSONString());
 		}
+	}
+	
+	public static Path copyMapFiles(Path srcDirectory, Path targetDir) throws IOException {
+		if (srcDirectory == null) return null;
+		if (!Files.exists(srcDirectory)) return null;
+		
+		Path targetDirectory = targetDir.resolve(MAP_FILE_DIRECTORY_NAME);
+		Files.createDirectories(targetDirectory);
+		
+		//copy over all map files
+		Files.walkFileTree(srcDirectory, new SimpleFileVisitor<Path>() {
+			 @Override
+			    public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
+			        Files.createDirectories(targetDirectory.resolve(srcDirectory.relativize(dir)));
+			        return FileVisitResult.CONTINUE;
+			    }
+
+			    @Override
+			    public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+			    	Files.copy(file, targetDirectory.resolve(srcDirectory.relativize(file)));
+			    	return FileVisitResult.CONTINUE;
+			    }
+		});
+		return targetDirectory;
 	}
 	
 	/**
@@ -201,7 +235,14 @@ public class CtJsonExportUtils {
 		case TRACK_ACCURACY:
 		case UTM_ZONE:
 		case WAYPOINT_TIMER:
+		case THEME_COLOR_1:
+		case THEME_COLOR_2:
+		case THEME_COLOR_3:
+		case THEME_COLOR_4:
 			return false;
+		
+		default:
+			break;
 		}
 		
 		return false;
