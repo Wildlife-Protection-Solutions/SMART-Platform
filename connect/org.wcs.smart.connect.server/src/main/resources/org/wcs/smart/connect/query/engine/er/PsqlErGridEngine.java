@@ -100,7 +100,7 @@ import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBReader;
 
 public class PsqlErGridEngine extends AbstractQueryEngine{
@@ -616,11 +616,11 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 				byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
 				if (bytes != null){
 					WKBReader reader = new WKBReader();
-					LineString ls = (LineString) reader.read(bytes);
+					Geometry g = reader.read(bytes);
 					try{
-						engine.rasterizeLinestring(ls);
+						engine.rasterizeTrack(g);
 					}catch (Exception ex){
-						logger.log(Level.SEVERE, "Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
+						logger.log(Level.SEVERE, "Error rasterizing linestring: " + g.toText(), ex); //$NON-NLS-1$
 						throw ex;
 					}
 				}
@@ -826,18 +826,18 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 					}
 					
 					WKBReader reader = new WKBReader();
-					LineString ls = (LineString) reader.read(bytes);
+					Geometry g = reader.read(bytes);
 					if (data != null){
 						if (data.length == 1){
-							ls.setUserData(data[0]);		
+							g.setUserData(data[0]);		
 						}else{
-							ls.setUserData(data);
+							g.setUserData(data);
 						}
 					}
 					try{
-						engine.rasterizeLinestring(ls);
+						engine.rasterizeTrack(g);
 					}catch (Exception ex){
-						logger.log(Level.SEVERE, "Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
+						logger.log(Level.SEVERE, "Error rasterizing linestring: " + g.toText(), ex); //$NON-NLS-1$
 						throw ex;
 					}
 				}
