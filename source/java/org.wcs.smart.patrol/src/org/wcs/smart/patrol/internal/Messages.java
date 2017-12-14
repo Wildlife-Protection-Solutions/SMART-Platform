@@ -61,6 +61,8 @@ public class Messages extends NLS {
 	public static String EditPatrolDatesDialog_SaveError;
 	public static String EditPatrolDatesDialog_ShellTitle;
 	public static String EditPatrolDatesDialog_Title;
+	public static String EditPatrolDatesDialog_VerifyDeleteMsg;
+	public static String EditPatrolDatesDialog_VerifyDeleteTitle;
 	public static String EditPatrolItemDialog_Error_CouldNoSaveChanges;
 	public static String EditPatrolItemDialog_Error_DialotTitle;
 	public static String EditPatrolLegDialog_AddEmployees_ToolTip;

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.ui;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -33,6 +34,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -44,8 +46,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.DateComposite;
@@ -146,6 +150,7 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 		Date startDate = dateComp.getStartDate();
 		Date endDate = dateComp.getEndDate();
 		
+		boolean[] cont = new boolean[] {false};
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -153,19 +158,44 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					updatePatrol(startDate, endDate);
+					cont[0] = updatePatrol(startDate, endDate);
 				}
 			});
 		}catch (Exception ex){
 			SmartPlugIn.displayLog(Messages.EditPatrolDatesDialog_SaveError + ex.getMessage(), ex);
 			return;
 		}
-		super.okPressed();
+		if (cont[0]) super.okPressed();
 	}
 
-	private void updatePatrol(Date startDate, Date endDate){
+	/*
+	 * counter for the number of waypoints delete
+	 */
+	private int waypointDeleteCnt = 0;
+	
+	private boolean updatePatrol(Date startDate, Date endDate){
 		Patrol patrol = null;
-		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+		
+		waypointDeleteCnt = 0;
+		
+		WaypointAttachmentInterceptor interceptor = new WaypointAttachmentInterceptor() {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			 public void onDelete(Object entity,
+			            Serializable id,
+			            Object[] state,
+			            String[] propertyNames,
+			            Type[] types) {
+				 super.onDelete(entity, id, state, propertyNames, types);
+				 if (entity instanceof Waypoint) {
+					 waypointDeleteCnt++;
+				 }
+			 }			
+		};
+		
+		try(Session session = HibernateManager.openSession(interceptor)){
+			
 			session.beginTransaction();
 			try{
 				patrol = (Patrol) session.get(Patrol.class, input.getUuid());
@@ -216,6 +246,7 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 							}
 						}
 						session.delete(pld);
+						
 					}
 				}
 				
@@ -252,16 +283,30 @@ public class EditPatrolDatesDialog extends TitleAreaDialog{
 					//ideally here we make sure there are legs for day etc.
 					//but for now we'll leave this up to the user.
 				}
+				session.flush();
+				
+				if (waypointDeleteCnt > 0) {
+					final boolean[] cont = new boolean[] {true};
+					Display.getDefault().syncExec(()->{
+						if (!MessageDialog.openConfirm(getShell(), Messages.EditPatrolDatesDialog_VerifyDeleteTitle, MessageFormat.format(Messages.EditPatrolDatesDialog_VerifyDeleteMsg, waypointDeleteCnt))){
+							cont[0] = false;
+						}
+					});
+					if (!cont[0]) {
+						session.getTransaction().rollback();
+						return false;
+					}
+				}
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.EditPatrolDatesDialog_SaveError + ex.getMessage(), ex);
 				try{
 					session.getTransaction().rollback();
 				}catch (Exception ex1){}
-				return;
+				return false;
 			}
 		}
 		PatrolEventManager.getInstance().patrolSaved(patrol, true);
-		
+		return true;
 	}
 }
