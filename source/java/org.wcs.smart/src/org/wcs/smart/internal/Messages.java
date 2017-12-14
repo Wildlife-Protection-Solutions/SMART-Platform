@@ -292,14 +292,14 @@ public class Messages extends NLS {
 	public static String CaInfoComposite_Error_NoId;
 	public static String CaInfoComposite_Error_NoName;
 	public static String CaInfoComposite_FileDialogTitle;
-	public static String CaInfoComposite_Format;
+	public static String CaInfoComposite_NoPreview;
 	public static String CaInfoComposite_Id_tooltip;
 	public static String CaInfoComposite_IdLabel;
 	public static String CaInfoComposite_LogoLabel;
 	public static String CaInfoComposite_LogoTooltip;
 	public static String CaInfoComposite_Name_Tooltip;
 	public static String CaInfoComposite_NameLabel;
-	public static String CaInfoComposite_Not;
+	public static String CaInfoComposite_NoPreview2;
 	public static String CaInfoComposite_NotSet;
 	public static String CaInfoComposite_Organization_Tooltip;
 	public static String CaInfoComposite_OrganizationLabel;
@@ -308,7 +308,6 @@ public class Messages extends NLS {
 	public static String CaInfoComposite_PointOfContact_Tooltip;
 	public static String CaInfoComposite_PointOfContactLabel;
 	public static String CaInfoComposite_SelectFileTooltip;
-	public static String CaInfoComposite_Supported;
 	public static String CaInfoComposite_SVGFile;
 	public static String CaPropertyPage_ConfirmDialogMessage;
 	public static String CaPropertyPage_ConfirmDialogTitle;

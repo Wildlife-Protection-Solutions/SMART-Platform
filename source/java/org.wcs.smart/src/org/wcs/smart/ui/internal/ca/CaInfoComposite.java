@@ -255,9 +255,9 @@ public class CaInfoComposite extends Composite {
 				
 				e.gc.drawLine(0, 0, cIcon.getBounds().width, cIcon.getBounds().height);
 				e.gc.drawLine(cIcon.getBounds().width, 0, 0, cIcon.getBounds().height);
-				e.gc.drawText(Messages.CaInfoComposite_Format, 10, 5);
-				e.gc.drawText(Messages.CaInfoComposite_Not, 10, e.gc.textExtent(Messages.CaInfoComposite_Format).y + 10);
-				e.gc.drawText(Messages.CaInfoComposite_Supported, 10, e.gc.textExtent(Messages.CaInfoComposite_Format).y*2 + 15);
+				e.gc.drawText(Messages.CaInfoComposite_NoPreview, 2, 5);
+				e.gc.drawText(Messages.CaInfoComposite_NoPreview2, 2, e.gc.textExtent(Messages.CaInfoComposite_NoPreview).y + 10);
+//				e.gc.drawText(Messages.CaInfoComposite_Supported, 10, e.gc.textExtent(Messages.CaInfoComposite_NoPreview).y*2 + 15);
 			}else {
 				e.gc.drawText(Messages.CaInfoComposite_NotSet, 10, 0);
 			}
