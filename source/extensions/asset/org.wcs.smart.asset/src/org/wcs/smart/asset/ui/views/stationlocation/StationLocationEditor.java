@@ -100,11 +100,13 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 	private Composite currentPanel;
 	private Composite detailsPanel;
 	private Composite historyPanel;
+	private Composite dataPanel;
 	
 	private StationLocationCurrentPage currentPage;
 	private StationLocationDetailsPage detailsPage;
 	private StationLocationEventPage historyPage;
-		
+	private StationLocationDataPage dataPage;
+	
 	private boolean isDirty;
 	
 	private IEclipseContext parentContext;
@@ -201,6 +203,10 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 	@Override
 	public boolean isDirty() {
 		return isDirty;
+	}
+	
+	private void initializeDataPage(AssetStationLocation location) {
+		if (dataPage != null) dataPage.initializePanel();
 	}
 	
 	private void initializeCurrentPage(AssetStationLocation location) {
@@ -384,11 +390,15 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		});
 		
 		
-		String headers[] = new String[] {"Current Status", "Properties", "History"};
+		String headers[] = new String[] {"Current Status", "Data", "Properties", "History"};
 		Listener[] actions = new Listener[] {
 			event->{
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
+				sectionBody.layout(true);},
+			event->{
+				if (dataPanel == null) dataPanel = createDataSection(sectionBody);
+				((StackLayout)sectionBody.getLayout()).topControl = dataPanel;
 				sectionBody.layout(true);},
 			event->{
 				if (detailsPanel == null) detailsPanel = createDetailsSection(sectionBody);
@@ -460,6 +470,20 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		return panel;
 	}
 	
+	private Composite createDataSection(Composite parent) {
+		Composite panel = toolkit.createComposite(parent);
+		panel.setLayout(new GridLayout());
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)panel.getLayout()).marginWidth = 0;
+		((GridLayout)panel.getLayout()).marginHeight = 0;
+		
+		
+		dataPage = new StationLocationDataPage(this);
+		ContextInjectionFactory.inject(dataPage, parentContext);
+		dataPage.createDataSection(panel, toolkit);
+		
+		return panel;
+	}
 	
 	@Override
 	public void setFocus() {
@@ -539,6 +563,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 					initializeCurrentPage(stationlocation);
 					initializeDetailsPage(stationlocation);
 					initializeHistoryPage(stationlocation);
+					initializeDataPage(stationlocation);
 					
 					refreshStatus();
 					setDirty(false);

@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -85,7 +86,8 @@ public class FileDetailsPanel {
 	private Composite singleSelectDetails;
 	private Composite multiSelectDetails;
 	
-	private TableViewer tblExif; 
+	private TableViewer tblExif;
+	private TableViewer tblXmp; 
 	private Label lblDetailsFileName; 
 	private Label lblDetailsStatus ;
 	private Canvas imageCanvas;
@@ -196,9 +198,9 @@ public class FileDetailsPanel {
 			}
 		});
 		
-		Composite lnkComp = toolkit.createComposite(stackComposite);
-		lnkComp.setLayout(new GridLayout());
-		
+		Composite xmpComp = toolkit.createComposite(stackComposite);
+		xmpComp.setLayout(new GridLayout());
+		createXmpComposite(xmpComp);
 		
 		FontData fd = lnkDetails.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
@@ -232,7 +234,7 @@ public class FileDetailsPanel {
 		lnkXmp.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout)stackComposite.getLayout()).topControl = lnkComp;
+				((StackLayout)stackComposite.getLayout()).topControl = xmpComp;
 				stackComposite.layout();
 				lnkDetails.setFont(normalFont);
 				lnkExif.setFont(normalFont);
@@ -274,12 +276,61 @@ public class FileDetailsPanel {
 		});
 		detailsSash.setWeights(new int[] {3,2});
 		
-		fileDetailsComposite.layout(true);
-		
+		fileDetailsComposite.layout(true);	
 
-		int cwidth = (tblExif.getTable().getBounds().width - 20)/2;
-		colTag.getColumn().setWidth(cwidth);
-		colTagValue.getColumn().setWidth(cwidth);
+		//TODO: see if I can sort this out better
+		int width = fileDetailsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).x ;
+		Table[] tables = new Table[] {tblExif.getTable(), tblXmp.getTable()};
+		for (Table t : tables) {
+			int cwidth = (width - 20)/t.getColumnCount();
+			for (int i = 0; i < t.getColumnCount(); i ++) {
+				t.getColumn(i).setWidth(cwidth);
+			}
+		}
+
+	}
+	
+	private void createXmpComposite(Composite parent) {
+		tblXmp = new TableViewer(parent, SWT.FULL_SELECTION);
+		tblXmp.getTable().setLinesVisible(false);
+		tblXmp.getTable().setHeaderVisible(true);
+		tblXmp.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblXmp.setContentProvider(ArrayContentProvider.getInstance());
+		
+		Color bgColor = new Color(tblXmp.getControl().getDisplay(), 160,185,224);
+		tblXmp.getControl().addListener(SWT.Dispose, e->bgColor.dispose());
+		
+		TableViewerColumn colTag = new TableViewerColumn(tblXmp, SWT.NONE);
+		colTag.getColumn().setText("Path");
+		colTag.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof String[]) return ((String[])element)[0];
+				if (element instanceof String) return (String)element;
+				return "";
+			}
+			@Override
+			public Color getBackground(Object element) {
+				if (element instanceof String) return bgColor;
+				return null;
+			}
+		});
+		
+		
+		TableViewerColumn colTagValue = new TableViewerColumn(tblXmp, SWT.NONE);
+		colTagValue.getColumn().setText("Value");
+		colTagValue.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof String[]) return ((String[])element)[1];
+				return "";
+			}
+			@Override
+			public Color getBackground(Object element) {
+				if (element instanceof String) return bgColor;
+				return null;
+			}
+		});
 	}
 	
 	/**
@@ -292,7 +343,7 @@ public class FileDetailsPanel {
 		if (proxyDetailsComp.isDisposed()) return;
 		for (Control c : proxyDetailsComp.getChildren()) c.dispose();
 		tblExif.setInput(null);
-		
+		tblXmp.setInput(null);
 		Image lastImage = (Image) imageCanvas.getData(IMAGE_DATAKEY);
 		if (lastImage != null && !lastImage.isDisposed()) lastImage.dispose();
 		imageCanvas.redraw();
@@ -534,26 +585,40 @@ public class FileDetailsPanel {
 		
 		
 
-		Job j2 = new Job("read exif metadata") {
+		Job j2 = new Job("read image metadata") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				HashMap<Directory, List<Tag>> exif = FileMetadataReader.readExifMetadata(proxy.getFile());
+				List<String[]> xmp = null;
+				try {
+					xmp = FileMetadataReader.readXmpMetadata(proxy.getFile());	
+				}catch (Exception ex) {
+					AssetPlugIn.log(ex.getMessage(),  ex);
+					xmp = null;
+				}
 				
+				List<String[]> fxmp = xmp;
 				Display.getDefault().syncExec(()->{
-					if (tblExif.getTable().isDisposed()) return;
+					if (tblExif.getTable().isDisposed() || tblXmp.getTable().isDisposed()) return;
 					if (exif == null) {
 						tblExif.setInput(new String[] {"Error Reading EXIF Metadata"});
-						return;
-					}
-					List<Object> values = new ArrayList<>();
-					for (Entry<Directory, List<Tag>> item : exif.entrySet()) {
-						values.add(item.getKey().getName());
-						for (Tag t : item.getValue()) {
-							values.add(new String[] {t.getTagName(), t.getDescription()});
+					}else {
+						List<Object> values = new ArrayList<>();
+						for (Entry<Directory, List<Tag>> item : exif.entrySet()) {
+							values.add(item.getKey().getName());
+							for (Tag t : item.getValue()) {
+								values.add(new String[] {t.getTagName(), t.getDescription()});
+							}
 						}
+						tblExif.setInput(values);
 					}
-					tblExif.setInput(values);
+					if (fxmp == null) {
+						tblXmp.setInput(new String[] {"Error Reading XMP Metadata"});
+					}else {
+						tblXmp.setInput(fxmp);
+					}
+					
 				});
 				return Status.OK_STATUS;
 			}

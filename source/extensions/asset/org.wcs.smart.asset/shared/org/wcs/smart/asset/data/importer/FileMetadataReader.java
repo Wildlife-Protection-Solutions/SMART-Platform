@@ -5,10 +5,14 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.wcs.smart.ca.ConservationArea;
 
+import com.adobe.xmp.XMPIterator;
+import com.adobe.xmp.XMPMeta;
+import com.adobe.xmp.properties.XMPPropertyInfo;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.lang.GeoLocation;
@@ -16,6 +20,7 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.GpsDirectory;
+import com.drew.metadata.xmp.XmpDirectory;
 
 public class FileMetadataReader {
 
@@ -41,6 +46,21 @@ public class FileMetadataReader {
 		}
 	}
 	
+	public static List<String[]> readXmpMetadata(Path file) throws Exception{
+		List<String[]> xmpMetadata = new ArrayList<>();
+		Metadata metadata = ImageMetadataReader.readMetadata(file.toFile());
+		XmpDirectory xmp = metadata.getFirstDirectoryOfType(XmpDirectory.class);
+		if (xmp != null) {
+			XMPMeta meta = xmp.getXMPMeta();
+			XMPIterator i = meta.iterator();
+			while(i.hasNext()) {
+				XMPPropertyInfo info = (XMPPropertyInfo)i.next();
+				if (info.getPath() != null && !info.getPath().isEmpty())
+					xmpMetadata.add(new String[] {info.getPath(), info.getValue()});
+			}
+		}
+		return xmpMetadata;
+	}
 	/**
 	 * 
 	 * @param file

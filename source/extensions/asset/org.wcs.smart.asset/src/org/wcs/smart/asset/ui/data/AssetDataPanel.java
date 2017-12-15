@@ -94,6 +94,7 @@ import org.wcs.smart.asset.model.AssetWaypointAttachment;
 import org.wcs.smart.asset.model.AssetWaypointMapping;
 import org.wcs.smart.asset.ui.AttachmentTable;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
+import org.wcs.smart.asset.ui.EditWaypointDialog;
 import org.wcs.smart.asset.ui.SettingsShell;
 import org.wcs.smart.asset.ui.views.data.DataImporterView;
 import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog;
@@ -296,6 +297,13 @@ public abstract class AssetDataPanel {
 		
 		if (!MessageDialog.openQuestion(details.getShell(), "Create New Incident", MessageFormat.format("Are you sure you want to move the {0} selected files to a new incident? ", attachments.size()))) return null;
 	
+		Waypoint dtWaypoint = new Waypoint();
+		dtWaypoint.setDateTime(aw.getWaypoint().getDateTime());
+		
+		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), dtWaypoint, false);
+		if (dialog.open() != Window.OK) return null;
+		
+		
 		AssetWaypointMapping clonedMapping = null;
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
@@ -303,6 +311,7 @@ public abstract class AssetDataPanel {
 				//clone waypoint
 				Waypoint cloneWp = aw.getWaypoint().clone(session);
 				cloneWp.setAttachments(new ArrayList<>());
+				cloneWp.setDateTime(dtWaypoint.getDateTime());
 				
 				//clone attachments and associate deployments
 				Map<AssetDeployment, AssetWaypoint> newDeployments = new HashMap<>(); 
@@ -640,6 +649,30 @@ public abstract class AssetDataPanel {
 		resizeScroll();
 	}
 	
+	private void editWaypoint(AssetWaypointMapping toedit) {
+		//modify the waypoint datetime and/or ID
+		if (!isEdit) return;
+		if (toedit == null) return;
+		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), toedit.getWaypoint());
+		if (dialog.open() == EditWaypointDialog.OK) {
+			try(Session s = HibernateManager.openSession()){
+				s.beginTransaction();
+				try {
+					s.saveOrUpdate(toedit.getWaypoint());
+					s.getTransaction().commit();
+				}catch(Exception ex) {
+					AssetPlugIn.displayLog("Unable to save changes to waypoint.  Page should be reloaded before continuing. " + ex.getMessage(), ex);
+					s.getTransaction().rollback();
+					return;
+				}
+			}
+			for (RowItem i : rows) {
+				if (i.waypoint.equals(toedit)) i.populateHeaderLabel();
+			}
+			fireEvent();
+		}
+	}
+	
 	private void deleteWaypoints(Collection<AssetWaypointMapping> todelete) {
 		if (!isEdit) return;
 		if (todelete.isEmpty()) return;
@@ -719,12 +752,18 @@ public abstract class AssetDataPanel {
 			
 		if (!MessageDialog.openQuestion(details.getShell(), "Merge", MessageFormat.format("Are you sure you want to merge the {0} selected waypoints into a single incident?  This action cannot be undone.", tomerge.size()))) return false;
 		
+		Waypoint dtWaypoint = new Waypoint();
+		dtWaypoint.setDateTime(tomerge.get(0).getWaypoint().getDateTime());
+		
+		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), dtWaypoint, false);
+		if (dialog.open() != Window.OK) return false;
+		
 		AssetWaypointMapping core = tomerge.get(0);
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
 				List<AssetWaypointAttachment> toSave = new ArrayList<>();
-				
+				core.getWaypoint().setDateTime(dtWaypoint.getDateTime());
 				for (int i = 1; i < tomerge.size(); i ++) {
 				
 					AssetWaypointMapping from = tomerge.get(i);
@@ -1169,6 +1208,13 @@ public abstract class AssetDataPanel {
 			if (isEdit) {
 				ToolBar tb = new ToolBar(header, SWT.FLAT);
 				tb.setBackground(header.getBackground());
+				
+				ToolItem itemEdit = new ToolItem(tb, SWT.PUSH);
+				itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+				itemEdit.setToolTipText("modify waypoint date/time or id");
+				itemEdit.addListener(SWT.Selection, e->{
+					editWaypoint(waypoint);
+				});
 				
 				ToolItem itemDelete = new ToolItem(tb, SWT.PUSH);
 				itemDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
