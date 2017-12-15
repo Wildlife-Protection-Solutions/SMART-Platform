@@ -673,8 +673,12 @@ public class ObservationFilterProcessor {
 			query.setParameter("value", filter.getNumberValue()); //$NON-NLS-1$
 			break;
 		case TEXT:
-			logString(filter.getStringValue());
-			query.setParameter("value", filter.getStringValue()); //$NON-NLS-1$
+			String value = filter.getStringValue();
+			if (filter.getOperator() == Operator.STR_CONTAINS || filter.getOperator() == Operator.STR_NOTCONTAINS) {
+				value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			logString(value);
+			query.setParameter("value", value); //$NON-NLS-1$
 			break;
 		default:
 			break;
