@@ -125,6 +125,7 @@ public class AttachmentTable extends Composite {
 	}
 
 	public void setThumbnailSize(int size) {
+		if (isDisposed()) return;
 		this.thumbSize = size;
 		for (Control c : getChildren()) c.dispose();
 		createThumbnails();

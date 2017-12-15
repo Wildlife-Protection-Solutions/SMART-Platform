@@ -21,14 +21,10 @@
  */
 package org.wcs.smart.asset.ui.views.station;
 
-import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -39,54 +35,20 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.model.AssetStationLocation;
-import org.wcs.smart.asset.model.AssetWaypoint;
-import org.wcs.smart.asset.model.AssetWaypointMapping;
-import org.wcs.smart.asset.ui.AttachmentTable;
-import org.wcs.smart.asset.ui.DataDisplaySettings;
-import org.wcs.smart.asset.ui.SettingsShell;
 import org.wcs.smart.asset.ui.data.AssetDataPanel;
-import org.wcs.smart.asset.ui.views.asset.AssetDataPage;
-import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.observation.model.ObservationAttachment;
-import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointAttachment;
-import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.observation.ui.input.ObservationWizard;
-import org.wcs.smart.ui.AttachmentPropertiesDialog;
-import org.wcs.smart.ui.Thumbnail;
-import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Station editor data page
@@ -111,7 +73,7 @@ public class StationDataPage {
 	
 	public Composite createDataSection(Composite parent, FormToolkit toolkit) {
 		
-		dataPanel = new AssetDataPanel(toolkit, false, context) {
+		dataPanel = new AssetDataPanel(toolkit, false, false, context) {
 			@Override
 			public void loadWaypoints() {
 				reloadData();

@@ -179,9 +179,6 @@ public class AssetListView {
 		content = toolkit.createComposite(main, SWT.NONE);
 		content.setLayout(new StackLayout());
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		
-		
 		
 		//create asset panel
 		header.selectPanel(0);

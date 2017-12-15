@@ -169,6 +169,18 @@ public class WaypointAttributeTable {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
 				try {
+					Waypoint toEdit = session.get(Waypoint.class, wo.getWaypoint().getUuid());
+					List<WaypointObservation> observations = toEdit.getObservations();
+					observations.forEach(e->e.getUuid().equals(null));
+					
+					session.evict(toEdit);
+					
+					for (WaypointObservation o : observations) {
+						if (!wo.getWaypoint().getObservations().contains(o)) {
+							session.delete(o);
+						}
+					}
+					session.flush();
 					session.saveOrUpdate(wo.getWaypoint());
 					session.getTransaction().commit();
 				}catch (Exception ex) {

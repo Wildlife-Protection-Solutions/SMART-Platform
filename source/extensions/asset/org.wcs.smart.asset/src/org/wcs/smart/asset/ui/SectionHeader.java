@@ -20,6 +20,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 
 public class SectionHeader extends Composite{
 
+	private static final String EVENT_KEY = "EVENT";
 	private FormToolkit toolkit;
 	private List<Hyperlink> links;
 	
@@ -43,11 +44,9 @@ public class SectionHeader extends Composite{
 		fd.setStyle(SWT.BOLD);
 		boldFont = new Font(getDisplay(), fd);
 		addListener(SWT.Dispose, e->boldFont.dispose());
-		
 		normalFont = getFont();
 		
 		links = new ArrayList<>();
-		
 		for (int i = 0; i < headers.length; i ++) {
 			links.add(createHyperlink(headers[i], actions[i]));
 		}
@@ -55,10 +54,11 @@ public class SectionHeader extends Composite{
 	}
 	
 	public void selectPanel(int index) {
-		((IHyperlinkListener)links.get(index).getData("EVENT")).linkActivated(new HyperlinkEvent(links.get(index), null, "", 0));
+		((IHyperlinkListener)links.get(index).getData(EVENT_KEY)).linkActivated(new HyperlinkEvent(links.get(index), null, "", 0));
 	}
 
 	private Hyperlink createHyperlink(String text, Listener action) {
+		
 		Hyperlink lnkEvents = toolkit.createHyperlink(this, text, SWT.NONE);
 		lnkEvents.setBackground(getBackground());
 		
@@ -73,7 +73,7 @@ public class SectionHeader extends Composite{
 			}
 		};
 		lnkEvents.addHyperlinkListener(listener);
-		lnkEvents.setData("EVENT", listener);
+		lnkEvents.setData(EVENT_KEY, listener);
 		return lnkEvents;
 	}
 }

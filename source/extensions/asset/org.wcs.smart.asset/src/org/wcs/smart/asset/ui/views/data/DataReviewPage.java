@@ -21,26 +21,10 @@
  */
 package org.wcs.smart.asset.ui.views.data;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -48,66 +32,22 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
-import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.MenuEvent;
-import org.eclipse.swt.events.MenuListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.osgi.service.event.EventHandler;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
-import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.AssetUtils;
-import org.wcs.smart.asset.model.Asset;
-import org.wcs.smart.asset.model.AssetDeployment;
-import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
-import org.wcs.smart.asset.model.AssetWaypoint.State;
-import org.wcs.smart.asset.model.AssetWaypointAttachment;
-import org.wcs.smart.asset.ui.AttachmentTable;
-import org.wcs.smart.asset.ui.DataDisplaySettings;
 import org.wcs.smart.asset.ui.data.AssetDataPanel;
-import org.wcs.smart.common.attachment.AttachmentInterceptor;
-import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointAttachment;
-import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.ui.AttachmentPropertiesDialog;
-import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Page for reviewing results
@@ -120,11 +60,11 @@ public class DataReviewPage {
 	private AssetDataPanel panel;
 	private DataImporterView view;
 	private boolean requiresRefresh = false;
-	
+	private FormToolkit toolkit;
 	public DataReviewPage(DataImporterView view, FormToolkit toolkit) {
 		this.view = view;
-		
-		panel = new AssetDataPanel(toolkit, true, view.getContext()) {			
+		this.toolkit = toolkit;
+		panel = new AssetDataPanel(toolkit, true, true, view.getContext()) {			
 			@Override
 			public void loadWaypoints() {
 				loadWaypointsJob.schedule();
@@ -137,6 +77,25 @@ public class DataReviewPage {
 	}
 	
 	public void createControl(Composite parent) {
+		
+		Hyperlink refreshLink = toolkit.createHyperlink(parent, "refresh", SWT.NONE);
+		refreshLink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		refreshLink.setToolTipText("reload invalid items from database");
+		refreshLink.addHyperlinkListener(new IHyperlinkListener() {
+			@Override
+			public void linkExited(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkEntered(HyperlinkEvent e) {
+			}
+			
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				DataReviewPage.this.refresh();
+			}
+		});
+		
 		panel.createControl(parent);
 		
 		EventHandler refreshHandler = event->{

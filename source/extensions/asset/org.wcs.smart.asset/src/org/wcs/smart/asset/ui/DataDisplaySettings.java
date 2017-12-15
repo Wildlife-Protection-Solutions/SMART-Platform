@@ -4,6 +4,9 @@ import org.wcs.smart.asset.AssetPlugIn;
 
 public class DataDisplaySettings {
 
+	private static final String PAGE_SIZE_KEY = "PageSize"; //$NON-NLS-1$
+	private static final String ICON_SIZE_KEY = "IconSize"; //$NON-NLS-1$
+
 	public enum IconSize{
 		SMALL(150, "Small"),
 		MEDIUM(250, "Medium"),
@@ -26,54 +29,69 @@ public class DataDisplaySettings {
 		}
 	}
 	
-	public enum DisplayType{
-		IMAGES_ONLY,
-		OBS_AND_IMAGES
+	public enum PageSize{
+		TEN(10, "10"),
+		TWENTYFIVE(25, "25"),
+		FIFTY(50, "50");
+		
+		int size;
+		String optionName;
+		
+		PageSize(int size, String optionName){
+			this.size = size;
+			this.optionName = optionName;
+		}
+		
+		public int getPageSize() {
+			return this.size;
+		}
+		
+		public String getOptionName() {
+			return this.optionName;
+		}
 	}
 	
 	
-	
-	private IconSize size = IconSize.MEDIUM;
-	private DisplayType data = DisplayType.OBS_AND_IMAGES;
+	private IconSize iconSize = IconSize.MEDIUM;
+	private PageSize pageSize = PageSize.TWENTYFIVE;
 	
 	private DataDisplaySettings() {
 		
 	}
 
-	public void setIconsSize(IconSize size) {
-		this.size = size;
+	public void setIconSize(IconSize size) {
+		this.iconSize = size;
 		save();
 	}
 	
 	public IconSize getIconSize() {
-		return this.size;
+		return this.iconSize;
 	}
 	
-	public void setDisplayType(DisplayType dataType) {
-		this.data = dataType;
+	public void setPageSize(PageSize size) {
+		this.pageSize = size;
 		save();
 	}
 	
-	public DisplayType getDisplayType() {
-		return this.data;
+	public PageSize getPageSize() {
+		return this.pageSize;
 	}
 	
-	
 	private void save() {
-		AssetPlugIn.getDefault().getPreferenceStore().setValue("IconSize", size.name());
-		AssetPlugIn.getDefault().getPreferenceStore().setValue("DisplayType", data.name());
+		AssetPlugIn.getDefault().getPreferenceStore().setValue(ICON_SIZE_KEY, iconSize.name());
+		AssetPlugIn.getDefault().getPreferenceStore().setValue(PAGE_SIZE_KEY, pageSize.name());
 	}
 	
 	private void load() {
-		String v = AssetPlugIn.getDefault().getPreferenceStore().getString("IconSize");
+		String v = AssetPlugIn.getDefault().getPreferenceStore().getString(ICON_SIZE_KEY);
 		try {
-			this.size = IconSize.valueOf(v);
+			this.iconSize = IconSize.valueOf(v);
 		}catch(Exception ex) {
 			
 		}
-		v = AssetPlugIn.getDefault().getPreferenceStore().getString("DisplayType");
+		v = AssetPlugIn.getDefault().getPreferenceStore().getString(PAGE_SIZE_KEY);
 		try {
-			this.data = DisplayType.valueOf(v);
+			this.pageSize = PageSize.valueOf(v);
 		}catch(Exception ex) {
 			
 		}

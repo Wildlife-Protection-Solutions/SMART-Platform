@@ -34,6 +34,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.IFormColors;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
@@ -104,38 +105,42 @@ public class DataImporterView extends EditorPart{
 		mainform.getBody().setLayout(new GridLayout());
 		zeroMargins(mainform.getBody());
 		
-		Composite header = toolkit.createComposite(mainform.getBody());
+		Composite header = toolkit.createComposite(mainform.getBody(), SWT.NONE);
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		header.setLayout(new GridLayout());
-		zeroMargins(header);
-		
-		Composite topPanel = toolkit.createComposite(header);
+		((GridLayout)header.getLayout()).verticalSpacing = 0;
+	
+		Composite topPanel = toolkit.createComposite(header, SWT.NONE);
+		topPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		topPanel.setLayout(new GridLayout(3, false));
-//		zeroMargins(topPanel);
+		((GridLayout)topPanel.getLayout()).marginWidth = 3;
+		((GridLayout)topPanel.getLayout()).marginHeight = 3;
 		
 		FontData fd = mainform.getFont().getFontData()[0];
 		fd.setStyle(SWT.NORMAL);
-		
 		Font normalFont = new Font(topPanel.getDisplay(), fd);
-		
 		fd.setStyle(SWT.BOLD);
 		Font boldFont = new Font(topPanel.getDisplay(), fd);
-		
 		topPanel.addListener(SWT.Dispose, e->{
 			normalFont.dispose();
 			boldFont.dispose();
 		});
 		
+		topPanel.setBackground(toolkit.getColors().getColor(IFormColors.TB_BG) );
+		
 		Hyperlink lnkImport = toolkit.createHyperlink(topPanel, "Import Data Files", SWT.NONE);
 		lnkImport.setFont(normalFont);
+		lnkImport.setBackground(topPanel.getBackground());
 		
 		Hyperlink lnkReview = toolkit.createHyperlink(topPanel, "Review Imported Files", SWT.NONE);
 		lnkReview.setFont(normalFont);
+		lnkReview.setBackground(topPanel.getBackground());
 		
-		Composite body = toolkit.createComposite(header);
+		Composite body = toolkit.createComposite(header, SWT.NONE);
 		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		body.setLayout(new GridLayout());
-		//zeroMargins(body);
+		((GridLayout)body.getLayout()).verticalSpacing = 0;
+		((GridLayout)body.getLayout()).marginWidth = 0;
 		
 		importPage = new DataImportPage(this, toolkit);
 		reviewPage = new DataReviewPage(this, toolkit);

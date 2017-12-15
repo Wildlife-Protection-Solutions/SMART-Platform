@@ -393,6 +393,7 @@ public class ObservationDialog extends Dialog {
 				 editObs = null;
 				 createAttributePanel(c);
 			 }
+			 
 			 observations.remove(x);
 			 observationTable.refresh();
 			 hasChanges = true;

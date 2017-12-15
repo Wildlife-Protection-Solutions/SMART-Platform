@@ -14,8 +14,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.asset.ui.DataDisplaySettings.DisplayType;
-import org.wcs.smart.asset.ui.DataDisplaySettings.IconSize;
 
 public class SettingsShell  {
 
@@ -61,7 +59,7 @@ public class SettingsShell  {
 			opSmall.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			((GridData)opSmall.getLayoutData()).horizontalIndent = indent;
 			opSmall.addListener(SWT.MouseUp, e->{
-				settings.setIconsSize(iconSize);
+				settings.setIconSize(iconSize);
 				close();
 			});
 			opSmall.setSelection(settings.getIconSize() == iconSize);
@@ -72,33 +70,18 @@ public class SettingsShell  {
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		ll = new Label(c, SWT.NONE);
-		ll.setText("Observation Details");
+		ll.setText("Page Size");
 		
-		Button opHide = new Button(c, SWT.RADIO);
-		opHide.setText("Show");
-		opHide.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)opHide.getLayoutData()).horizontalIndent = indent;
-		opHide.addListener(SWT.MouseUp, e->{
-			settings.setDisplayType(DisplayType.OBS_AND_IMAGES);
-			close();
-		});
-		
-		Button opShow = new Button(c, SWT.RADIO);
-		opShow.setText("Hide");
-		opShow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)opShow.getLayoutData()).horizontalIndent = indent;
-		opShow.addListener(SWT.MouseUp, e->{
-			settings.setDisplayType(DisplayType.IMAGES_ONLY);
-			close();
-		});
-		
-		switch(settings.getDisplayType()) {
-			case IMAGES_ONLY:
-				opShow.setSelection(true);
-				break;
-			case OBS_AND_IMAGES:
-				opHide.setSelection(true);
-				break;
+		for (DataDisplaySettings.PageSize pageSize : DataDisplaySettings.PageSize.values()) {
+			Button opSmall = new Button(c, SWT.RADIO);
+			opSmall.setText(pageSize.getOptionName());
+			opSmall.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			((GridData)opSmall.getLayoutData()).horizontalIndent = indent;
+			opSmall.addListener(SWT.MouseUp, e->{
+				settings.setPageSize(pageSize);
+				close();
+			});
+			opSmall.setSelection(settings.getPageSize() == pageSize);
 		}
 		
 		Color backgroundColor = shell.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND);

@@ -94,6 +94,7 @@ import org.wcs.smart.asset.model.AssetWaypointAttachment;
 import org.wcs.smart.asset.model.AssetWaypointMapping;
 import org.wcs.smart.asset.ui.AttachmentTable;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
+import org.wcs.smart.asset.ui.SettingsShell;
 import org.wcs.smart.asset.ui.views.data.DataImporterView;
 import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog;
 import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;
@@ -124,7 +125,6 @@ public abstract class AssetDataPanel {
 	private List<UUID> waypointsToDisplay;
 	
 	private int startIndex = 0;
-	private int pageSize = 25;
 	
 	private ScrolledComposite scroll;
 	private Composite details;
@@ -132,22 +132,23 @@ public abstract class AssetDataPanel {
 	private int lastWpSelection;
 	private List<RowItem> rows;
 	
-	private DataDisplaySettings.IconSize iconSize = DataDisplaySettings.IconSize.SMALL;
+	private DataDisplaySettings displaySettings;
 	
 	Color headerColor = null;
 	Color selectionColor = null;
 	Color mouseOverColor = null;
-
+	Color validatedColor = null;
+	
 	private boolean isEdit = false;
 	
-	public AssetDataPanel(FormToolkit toolkit, IEclipseContext context) {
-		this(toolkit, false, context);
-	}
+	private boolean hideOnValidate = true;
 	
-	public AssetDataPanel(FormToolkit toolkit, boolean isEditable, IEclipseContext context) {
+	public AssetDataPanel(FormToolkit toolkit, boolean isEditable, boolean hideOnValidation, IEclipseContext context) {
 		this.toolkit = toolkit;
 		this.isEdit = isEditable;
 		this.context = context;
+		this.hideOnValidate = hideOnValidation;
+		displaySettings = DataDisplaySettings.getSettings();
 	}
 	
 	public boolean isEdit() {
@@ -163,6 +164,7 @@ public abstract class AssetDataPanel {
 		headerColor = new Color(parent.getDisplay(), 230, 230, 230);
 		selectionColor = SmartUtils.getListSelectedColor(parent.getDisplay());
 		mouseOverColor = SmartUtils.getListHighlightColor(parent.getDisplay());
+		validatedColor = new Color(parent.getDisplay(), 255,255,225);
 		
 		Composite main = toolkit.createComposite(parent);
 		main.setLayout(new GridLayout());
@@ -174,6 +176,7 @@ public abstract class AssetDataPanel {
 			selectionColor.dispose();
 			mouseOverColor.dispose();
 			headerColor.dispose();
+			validatedColor.dispose();
 		});
 		
 		
@@ -202,7 +205,7 @@ public abstract class AssetDataPanel {
 	
 	void resizeScroll() {
 		int width = scroll.getBounds().width;
-		if (rows != null) rows.forEach(a->a.resize(width, iconSize));
+		if (rows != null) rows.forEach(a->a.resize(width, displaySettings.getIconSize()));
 		scroll.setMinSize(details.computeSize(scroll.getBounds().width - scroll.getVerticalBar().getSize().x, SWT.DEFAULT));
 	}
 	
@@ -379,13 +382,14 @@ public abstract class AssetDataPanel {
 		context.get(IEventBroker.class).post(AssetEvents.ASSETDATA, null);
 	}
 	
-	private void createPageControl(Composite parent, boolean includePageSize) {
+	private void createPageControl(Composite parent, boolean includeSettings) {
+		int pageSize = displaySettings.getPageSize().getPageSize();
 		int from = startIndex;
 		if (waypointsToDisplay.isEmpty()) from = -1;
 		int to = Math.min(startIndex + pageSize,  waypointsToDisplay.size());
 		
 		int cols = 1;
-		if (includePageSize) cols ++;
+		if (includeSettings) cols ++;
 		if (!(from <= 0 && to == waypointsToDisplay.size())) cols += 3;
 				
 		Composite part = toolkit.createComposite(parent);
@@ -490,38 +494,37 @@ public abstract class AssetDataPanel {
 			});
 		}
 		
-		if (includePageSize) {
-			DataDisplaySettings.IconSize defaultSize = DataDisplaySettings.IconSize.MEDIUM;
-			try {
-				String iconSizePref = AssetPlugIn.getDefault().getPreferenceStore().getString(ICON_SIZE_PREF);
-				if (iconSizePref != null) {
-					defaultSize = DataDisplaySettings.IconSize.valueOf(iconSizePref);
-				}
-			}catch (Exception ex) {}
-			Composite c = toolkit.createComposite(part);
-			c.setLayout(new GridLayout(2, false));
-			((GridLayout)c.getLayout()).marginWidth = 0;
-			((GridLayout)c.getLayout()).marginHeight = 0;
-			c.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-			Label l = toolkit.createLabel(c, "Icon Size:", SWT.NONE);
-			l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-			Button btnIconSize = new Button(c, SWT.ARROW | SWT.DOWN);
-			btnIconSize.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-			Menu mnuIconSize = new Menu(btnIconSize);
-			for(DataDisplaySettings.IconSize s : DataDisplaySettings.IconSize.values()) {
-				MenuItem item = new MenuItem(mnuIconSize,SWT.RADIO);
-				item.setText(s.getOptionName());
-				item.addListener(SWT.Selection, e->{
-					this.iconSize = s;
-					for (RowItem i : rows) {
-						i.tt.setThumbnailSize(s.getSize());
+		if (includeSettings) {
+			ToolBar tb = new ToolBar(part, SWT.FLAT);
+			tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			toolkit.adapt(tb);
+			
+			ToolItem itemSettings = new ToolItem(tb, SWT.PUSH);
+			itemSettings.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_SETTINGS));
+			itemSettings.setToolTipText("Configure data table settings");
+			itemSettings.addListener(SWT.Selection, e->{
+				SettingsShell settingDialog = new SettingsShell(tb.getDisplay());
+				settingDialog.show(tb);
+				settingDialog.getShell().addListener(SWT.Dispose, evt->{
+					DataDisplaySettings newSettings = settingDialog.getSettings();
+					boolean updateIcon = false;
+					if (newSettings.getIconSize() != this.displaySettings.getIconSize()) {
+						this.displaySettings.setIconSize(newSettings.getIconSize());
+						updateIcon = true;
 					}
-					resizeScroll();
+					if (newSettings.getPageSize() != this.displaySettings.getPageSize()) {
+						this.displaySettings.setPageSize(newSettings.getPageSize());
+						refresh();
+						updateIcon = false;
+					}
+					if (updateIcon) {
+						for (RowItem i : rows) {
+							i.tt.setThumbnailSize(this.displaySettings.getIconSize().getSize());
+						}
+						resizeScroll();
+					}
+					
 				});
-				if (s == defaultSize) item.setSelection(true);
-			}
-			btnIconSize.addListener(SWT.Selection, e->{
-				mnuIconSize.setVisible(true);
 			});
 		}
 	}
@@ -530,6 +533,7 @@ public abstract class AssetDataPanel {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetWaypointMapping> waypoints = new ArrayList<>();
+			final int pageSize = displaySettings.getPageSize().getPageSize();
 			try(Session session = HibernateManager.openSession()){
 				for(int i = startIndex; i < Math.min(startIndex + pageSize,  waypointsToDisplay.size()); i ++) {
 					
@@ -624,14 +628,15 @@ public abstract class AssetDataPanel {
 				return;
 			}
 		}
-		List<RowItem> toRemove = new ArrayList<>();
+//		List<RowItem> toRemove = new ArrayList<>();
 		for (RowItem i : rows) {
 			if (tovalidate.contains(i.waypoint)) {
-				toRemove.add(i);
-				i.item.dispose();
+				//toRemove.add(i);
+				//i.item.dispose();
+				if (hideOnValidate) i.hideAndDisable();
 			}
 		}
-		rows.removeAll(toRemove);
+		//rows.removeAll(toRemove);
 		resizeScroll();
 	}
 	
@@ -846,6 +851,7 @@ public abstract class AssetDataPanel {
 	
 	static void colorControl(Control control, Color color) {
 		forEachChild(control, e->{
+			if (e.isDisposed()) return false;
 			Boolean c = (Boolean) e.getData("COLOR");
 			if (c == null || c) {
 				e.setBackground(color);
@@ -1062,9 +1068,34 @@ public abstract class AssetDataPanel {
 		private Label headerLabel;
 		
 		private Color bgColor = null;
+		private Listener clickListener = null;
 		
 		public RowItem(AssetWaypointMapping waypoint) {
 			this.waypoint = waypoint;
+		}
+		
+		public void hideAndDisable() {
+			for (Control c : item.getChildren()) c.dispose();
+			
+			this.isMouseOver = false;
+			this.isSelected = false;
+			
+			header = toolkit.createComposite(item, SWT.BORDER);
+			header.setLayout(new GridLayout(2, false));
+			header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
+			header.setBackground(validatedColor);
+			
+			headerLabel = toolkit.createLabel(header, "");
+			populateHeaderLabel();
+			headerLabel.setText("**VALIDATED** " + headerLabel.getText());
+			headerLabel.setBackground(header.getBackground());
+			headerLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			
+			if (clickListener != null) {
+				item.removeListener(SWT.MouseUp, clickListener);
+				item.removeListener(SWT.MouseEnter, clickListener);
+				item.removeListener(SWT.MouseExit, clickListener);
+			}
 		}
 		
 		public void setSelected(boolean isSelected) {
@@ -1120,6 +1151,10 @@ public abstract class AssetDataPanel {
 			((GridLayout)item.getLayout()).verticalSpacing = 0;
 			bgColor = item.getBackground();
 			
+			if (!waypoint.hasDirty() && hideOnValidate) {
+				hideAndDisable();
+				return;
+			}
 			header = toolkit.createComposite(item, SWT.NONE);
 			header.setLayout(new GridLayout(2, false));
 			header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
@@ -1174,10 +1209,10 @@ public abstract class AssetDataPanel {
 			}
 			
 			
-			tt = new AttachmentTable(wppart, toolkit, getAttachmentTableMenu(), files, iconSize.getSize());
+			tt = new AttachmentTable(wppart, toolkit, getAttachmentTableMenu(), files, displaySettings.getIconSize().getSize());
 
 			tt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-			((GridData)tt.getLayoutData()).widthHint = iconSize.getSize()*2+20;
+			((GridData)tt.getLayoutData()).widthHint = displaySettings.getIconSize().getSize()*2+20;
 					
 			Composite spacer = toolkit.createComposite(wppart);
 			spacer.setLayout(new GridLayout());
@@ -1198,7 +1233,7 @@ public abstract class AssetDataPanel {
 			}
 
 			if (isEdit) {
-				Listener clickListener = e->{
+				clickListener = e->{
 					switch(e.type) {
 					case SWT.MouseUp:
 						processMouseClickEvent(RowItem.this, e);
@@ -1250,7 +1285,7 @@ public abstract class AssetDataPanel {
 		
 		
 		public void resize(int totalWidth, DataDisplaySettings.IconSize iconSize) {
-			if (tt.isDisposed()) return;
+			if (tt == null || tt.isDisposed()) return;
 			int w1 = iconSize.getSize() * 2 + 20;
 			int w2 = (totalWidth * 1) / 2;
 			int w3 = tt.getAttachments().size()  * ( iconSize.getSize() + 5 );
