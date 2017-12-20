@@ -50,10 +50,14 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 
+import com.adobe.xmp.XMPIterator;
+import com.adobe.xmp.XMPMeta;
+import com.adobe.xmp.properties.XMPPropertyInfo;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
+import com.drew.metadata.xmp.XmpDirectory;
 
 /**
  * Attachment properties dialog;
@@ -200,16 +204,33 @@ public class AttachmentPropertiesDialog {
 		try{
 			Metadata metadata = ImageMetadataReader.readMetadata(attachment.getAttachmentFile());
 			
-			for (Directory directory : metadata.getDirectories()) {
+			List<Directory> dirs = new ArrayList<>();
+			for (Directory directory : metadata.getDirectories()) dirs.add(directory);
+			dirs.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			
+			for (Directory directory : dirs) {
 				String name = directory.getName();
 				List<Entry> details = properties.get(name);
 				if (details == null){
 					details = new ArrayList<AttachmentPropertiesDialog.Entry>();
 					properties.put(name, details);
 				}
-				
-				for (Tag g : directory.getTags()){
-					details.add(new Entry(g.getTagName(), g.getDescription()));
+				if (directory.getClass().equals(XmpDirectory.class)) {
+					XMPMeta meta = ((XmpDirectory)directory).getXMPMeta();
+					try {
+						XMPIterator i = meta.iterator();
+						while(i.hasNext()) {
+							XMPPropertyInfo info = (XMPPropertyInfo)i.next();
+							if (info.getPath() != null && !info.getPath().isEmpty())
+								details.add(new Entry(info.getPath(), info.getValue()));
+						}
+					}catch (Exception ex) {
+						SmartPlugIn.log(ex.getMessage(),  ex);
+					}
+				}else {
+					for (Tag g : directory.getTags()){
+						details.add(new Entry(g.getTagName(), g.getDescription()));
+					}
 				}
 			}
 		}catch (Exception ex){
