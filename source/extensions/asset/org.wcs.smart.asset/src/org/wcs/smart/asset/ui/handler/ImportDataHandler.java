@@ -1,20 +1,12 @@
 package org.wcs.smart.asset.ui.handler;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.ui.views.data.DataImporterInput;
 import org.wcs.smart.asset.ui.views.data.DataImporterView;
-import org.wcs.smart.asset.ui.views.station.StationEditor;
 
 public class ImportDataHandler {
 

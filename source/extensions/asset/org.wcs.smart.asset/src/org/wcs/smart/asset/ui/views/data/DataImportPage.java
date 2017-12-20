@@ -289,6 +289,7 @@ public class DataImportPage {
 							wp.setX(p.getX());
 							wp.setY(p.getY());
 							wp.setAttachments(new ArrayList<>());
+							wp.setComment(p.getWaypointComment());
 							
 							Map<Asset, List<WaypointAttachment>> assetAttachmentLink = new HashMap<>();
 							
@@ -346,7 +347,7 @@ public class DataImportPage {
 							session.flush();
 							
 							for (Asset asset : assets) {
-								AssetDeployment d = processor.findAssetDeployment(wp, asset, p.getStationLocation(), session);
+								AssetDeployment d = FileProcessor.findAssetDeployment(wp, asset, p.getStationLocation(), session);
 								if (d.getUuid() == null) {
 									session.save(d);
 									session.flush();

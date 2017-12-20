@@ -61,7 +61,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -180,21 +179,11 @@ public abstract class AssetDataPanel {
 			validatedColor.dispose();
 		});
 		
-		
-		scroll = new ScrolledComposite(main, SWT.V_SCROLL | SWT.BORDER);
-		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		toolkit.adapt(scroll);
-		scroll.setExpandHorizontal(true);
-		scroll.setExpandVertical(true);
-		details = toolkit.createComposite(scroll, SWT.NONE);
-		scroll.setContent(details);
-		
+		details = toolkit.createComposite(main, SWT.NONE);
 		details.setLayout(new GridLayout());
-		
-		resizeScroll();
-		scroll.addListener(SWT.Resize, e->{
-			resizeScroll();
-		});
+		details.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)details.getLayout()).marginWidth = 0;
+		((GridLayout)details.getLayout()).marginHeight = 0;
 		
 		if (waypointsToDisplay == null) {
 			refresh();
@@ -207,7 +196,7 @@ public abstract class AssetDataPanel {
 	void resizeScroll() {
 		int width = scroll.getBounds().width;
 		if (rows != null) rows.forEach(a->a.resize(width, displaySettings.getIconSize()));
-		scroll.setMinSize(details.computeSize(scroll.getBounds().width - scroll.getVerticalBar().getSize().x, SWT.DEFAULT));
+		scroll.setMinSize(scroll.getChildren()[0].computeSize(scroll.getBounds().width - scroll.getVerticalBar().getSize().x, SWT.DEFAULT));
 	}
 	
 	private void createHeaderMenu(Control control) {
@@ -280,13 +269,28 @@ public abstract class AssetDataPanel {
 			return;
 		}
 		
-		createPageControl(details, true);
+		createPageControl(details, true, true);
+		
+		scroll = new ScrolledComposite(details, SWT.V_SCROLL | SWT.BORDER);
+		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		toolkit.adapt(scroll);
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		
+		Composite scrollDetails = toolkit.createComposite(scroll, SWT.NONE);
+		scrollDetails.setLayout(new GridLayout());
+		scroll.setContent(scrollDetails);
+		resizeScroll();
+		scroll.addListener(SWT.Resize, e->{
+			resizeScroll();
+		});
+		
 		for (AssetWaypointMapping aw : waypoints) {
 			RowItem item = new RowItem(aw);
-			item.createControl(details);
+			item.createControl(scrollDetails);
 			rows.add(item);
 		}
-		createPageControl(details, false);
+		createPageControl(scrollDetails, false, false);
 		details.layout();
 		resizeScroll();
 	}
@@ -299,8 +303,9 @@ public abstract class AssetDataPanel {
 	
 		Waypoint dtWaypoint = new Waypoint();
 		dtWaypoint.setDateTime(aw.getWaypoint().getDateTime());
+		dtWaypoint.setComment(aw.getWaypoint().getComment());
 		
-		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), dtWaypoint, false);
+		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), dtWaypoint, false, true);
 		if (dialog.open() != Window.OK) return null;
 		
 		
@@ -391,14 +396,14 @@ public abstract class AssetDataPanel {
 		context.get(IEventBroker.class).post(AssetEvents.ASSETDATA, null);
 	}
 	
-	private void createPageControl(Composite parent, boolean includeSettings) {
+	private void createPageControl(Composite parent, boolean includeSettings, boolean includeRefresh) {
 		int pageSize = displaySettings.getPageSize().getPageSize();
 		int from = startIndex;
 		if (waypointsToDisplay.isEmpty()) from = -1;
 		int to = Math.min(startIndex + pageSize,  waypointsToDisplay.size());
 		
 		int cols = 1;
-		if (includeSettings) cols ++;
+		if (includeSettings || includeRefresh) cols ++;
 		if (!(from <= 0 && to == waypointsToDisplay.size())) cols += 3;
 				
 		Composite part = toolkit.createComposite(parent);
@@ -503,38 +508,46 @@ public abstract class AssetDataPanel {
 			});
 		}
 		
-		if (includeSettings) {
+		if (includeSettings || includeRefresh) {
 			ToolBar tb = new ToolBar(part, SWT.FLAT);
 			tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			toolkit.adapt(tb);
 			
-			ToolItem itemSettings = new ToolItem(tb, SWT.PUSH);
-			itemSettings.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_SETTINGS));
-			itemSettings.setToolTipText("Configure data table settings");
-			itemSettings.addListener(SWT.Selection, e->{
-				SettingsShell settingDialog = new SettingsShell(tb.getDisplay());
-				settingDialog.show(tb);
-				settingDialog.getShell().addListener(SWT.Dispose, evt->{
-					DataDisplaySettings newSettings = settingDialog.getSettings();
-					boolean updateIcon = false;
-					if (newSettings.getIconSize() != this.displaySettings.getIconSize()) {
-						this.displaySettings.setIconSize(newSettings.getIconSize());
-						updateIcon = true;
-					}
-					if (newSettings.getPageSize() != this.displaySettings.getPageSize()) {
-						this.displaySettings.setPageSize(newSettings.getPageSize());
-						refresh();
-						updateIcon = false;
-					}
-					if (updateIcon) {
-						for (RowItem i : rows) {
-							i.tt.setThumbnailSize(this.displaySettings.getIconSize().getSize());
+			if (includeRefresh) {	
+				ToolItem itemRefresh = new ToolItem(tb, SWT.PUSH);
+				itemRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+				itemRefresh.setToolTipText("reload table");
+				itemRefresh.addListener(SWT.Selection, e->refresh());		
+			}
+			if (includeSettings) {
+				ToolItem itemSettings = new ToolItem(tb, SWT.PUSH);
+				itemSettings.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_SETTINGS));
+				itemSettings.setToolTipText("Configure data table settings");
+				itemSettings.addListener(SWT.Selection, e->{
+					SettingsShell settingDialog = new SettingsShell(tb.getDisplay());
+					settingDialog.show(tb);
+					settingDialog.getShell().addListener(SWT.Dispose, evt->{
+						DataDisplaySettings newSettings = settingDialog.getSettings();
+						boolean updateIcon = false;
+						if (newSettings.getIconSize() != this.displaySettings.getIconSize()) {
+							this.displaySettings.setIconSize(newSettings.getIconSize());
+							updateIcon = true;
 						}
-						resizeScroll();
-					}
-					
+						if (newSettings.getPageSize() != this.displaySettings.getPageSize()) {
+							this.displaySettings.setPageSize(newSettings.getPageSize());
+							refresh();
+							updateIcon = false;
+						}
+						if (updateIcon) {
+							for (RowItem i : rows) {
+								i.tt.setThumbnailSize(this.displaySettings.getIconSize().getSize());
+							}
+							resizeScroll();
+						}
+						
+					});
 				});
-			});
+			}
 		}
 	}
 	
@@ -597,7 +610,7 @@ public abstract class AssetDataPanel {
 			if (details == null || details.isDisposed()) return;
 			for (Control c : details.getChildren()) c.dispose();
 			toolkit.createLabel(details, DialogConstants.LOADING_TEXT);
-			details.layout();
+			details.layout(true);
 		});
 		
 		loadWaypoints();
@@ -637,15 +650,11 @@ public abstract class AssetDataPanel {
 				return;
 			}
 		}
-//		List<RowItem> toRemove = new ArrayList<>();
 		for (RowItem i : rows) {
 			if (tovalidate.contains(i.waypoint)) {
-				//toRemove.add(i);
-				//i.item.dispose();
-				if (hideOnValidate) i.hideAndDisable();
+				if (hideOnValidate) i.hideAndDisable("**VALIDATED**");
 			}
 		}
-		//rows.removeAll(toRemove);
 		resizeScroll();
 	}
 	
@@ -667,9 +676,13 @@ public abstract class AssetDataPanel {
 				}
 			}
 			for (RowItem i : rows) {
-				if (i.waypoint.equals(toedit)) i.populateHeaderLabel();
+				if (i.waypoint.equals(toedit)) {
+					i.populateHeaderLabel();
+					i.refreshComment();
+				}
 			}
 			fireEvent();
+			resizeScroll();
 		}
 	}
 	
@@ -720,16 +733,12 @@ public abstract class AssetDataPanel {
 			}
 		}
 		
-		List<RowItem> toRemove = new ArrayList<>();
 		for (RowItem i : rows) {
 			if (todelete.contains(i.waypoint)) {
-				toRemove.add(i);
-				i.item.dispose();
+				i.hideAndDisable("**DELETED**");
 			}
 		}
-		rows.removeAll(toRemove);
 		resizeScroll();
-		
 		fireEvent();
 	}
 	
@@ -754,8 +763,16 @@ public abstract class AssetDataPanel {
 		
 		Waypoint dtWaypoint = new Waypoint();
 		dtWaypoint.setDateTime(tomerge.get(0).getWaypoint().getDateTime());
+		StringBuilder sb= new StringBuilder();
+		tomerge.forEach(e->{
+			if (e.getWaypoint().getComment() !=  null) {
+				if (sb.length() > 0) sb.append("\n");
+				sb.append(e.getWaypoint().getComment());
+			}
+		});
+		dtWaypoint.setComment(sb.toString());
 		
-		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), dtWaypoint, false);
+		EditWaypointDialog dialog = new EditWaypointDialog(details.getShell(), dtWaypoint, false, true);
 		if (dialog.open() != Window.OK) return false;
 		
 		AssetWaypointMapping core = tomerge.get(0);
@@ -764,6 +781,7 @@ public abstract class AssetDataPanel {
 			try {
 				List<AssetWaypointAttachment> toSave = new ArrayList<>();
 				core.getWaypoint().setDateTime(dtWaypoint.getDateTime());
+				core.getWaypoint().setComment(dtWaypoint.getComment());
 				for (int i = 1; i < tomerge.size(); i ++) {
 				
 					AssetWaypointMapping from = tomerge.get(i);
@@ -1109,11 +1127,18 @@ public abstract class AssetDataPanel {
 		private Color bgColor = null;
 		private Listener clickListener = null;
 		
+		private Label waypointComment;
+		
 		public RowItem(AssetWaypointMapping waypoint) {
 			this.waypoint = waypoint;
 		}
 		
-		public void hideAndDisable() {
+		public void refreshComment() {
+			waypointComment.setText(MessageFormat.format("Waypoint Comment: {0}", waypoint.getWaypoint().getComment() == null ? "" : waypoint.getWaypoint().getComment()));
+			waypointComment.setVisible(waypoint.getWaypoint().getComment() != null);
+		}
+		
+		public void hideAndDisable(String msg) {
 			for (Control c : item.getChildren()) c.dispose();
 			
 			this.isMouseOver = false;
@@ -1126,7 +1151,7 @@ public abstract class AssetDataPanel {
 			
 			headerLabel = toolkit.createLabel(header, "");
 			populateHeaderLabel();
-			headerLabel.setText("**VALIDATED** " + headerLabel.getText());
+			headerLabel.setText(msg + " " + headerLabel.getText());
 			headerLabel.setBackground(header.getBackground());
 			headerLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			
@@ -1191,7 +1216,7 @@ public abstract class AssetDataPanel {
 			bgColor = item.getBackground();
 			
 			if (!waypoint.hasDirty() && hideOnValidate) {
-				hideAndDisable();
+				hideAndDisable("**VALIDATED**");
 				return;
 			}
 			header = toolkit.createComposite(item, SWT.NONE);
@@ -1266,7 +1291,7 @@ public abstract class AssetDataPanel {
 			((GridLayout)spacer.getLayout()).marginWidth = 0;
 			((GridLayout)spacer.getLayout()).marginHeight = 3;
 			
-			Composite detailsPart = toolkit.createComposite(spacer, SWT.NONE);
+			Composite detailsPart = toolkit.createComposite(spacer);
 			detailsPart.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 			detailsPart.setLayout(new GridLayout());
 			((GridLayout)detailsPart.getLayout()).verticalSpacing = 1;
@@ -1274,9 +1299,20 @@ public abstract class AssetDataPanel {
 			((GridLayout)detailsPart.getLayout()).marginHeight = 1;
 			detailsPart.setData("COLOR", false);
 			
-			if (waypoint.getWaypoint().getObservations() != null) {
-				new WaypointAttributeTable(detailsPart, toolkit, waypoint.getWaypoint(), AssetDataPanel.this);
-			}
+			Composite attributes = toolkit.createComposite(detailsPart);
+			attributes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			attributes.setLayout(new GridLayout());
+			((GridLayout)detailsPart.getLayout()).verticalSpacing = 1;
+			((GridLayout)attributes.getLayout()).marginWidth = 0;
+			((GridLayout)attributes.getLayout()).marginHeight = 0;
+
+			new WaypointAttributeTable(attributes, toolkit, waypoint.getWaypoint(), AssetDataPanel.this);
+			
+			waypointComment = toolkit.createLabel(detailsPart, "", SWT.WRAP);
+			refreshComment();
+			waypointComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)waypointComment.getLayoutData()).widthHint = detailsPart.getBounds().width;
+			
 
 			if (isEdit) {
 				clickListener = e->{
@@ -1357,6 +1393,7 @@ public abstract class AssetDataPanel {
 				MenuItem removeImg = null;
 				MenuItem createIncident = null;
 				
+				@SuppressWarnings("unchecked")
 				@Override
 				public Menu createMenu(AttachmentTable parent) {
 					Menu mnu = new Menu(parent);

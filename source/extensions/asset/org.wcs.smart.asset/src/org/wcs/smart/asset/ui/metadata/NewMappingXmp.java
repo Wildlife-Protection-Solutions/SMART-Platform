@@ -6,8 +6,9 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -18,50 +19,42 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
-import org.wcs.smart.asset.model.mapping.ExifMetadataField;
+import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.hibernate.SmartDB;
 
-import com.drew.metadata.Directory;
-import com.drew.metadata.Tag;
+public class NewMappingXmp extends AbstractNewMappingComposite{
 
-public class NewMappingExif extends AbstractNewMappingComposite{
-
-	private Text txtExifTag;
-	private Text txtExifTagTxt;
+	private Text txtXmpPath;
 	
-	public NewMappingExif(NewMappingDialog dialog) {
+	public NewMappingXmp(NewMappingDialog dialog) {
 		super(dialog);
 		
 	}
 	
 	@Override
 	public String validate() {
-		String tag = txtExifTag.getText().trim();
+		String tag = txtXmpPath.getText().trim();
 		if (tag.isEmpty()) {
-			return "EXIF tag field cannot be empty";
+			return "Xmp Path field cannot be empty";
 		}
-		try {
-			Integer.parseInt(tag);
-		}catch (Exception ex) {
-			return "EXIF tag is not valid (must be a number)";
-		}
-		
 		return super.validate();
 	}
 	
+	
+
 	public List<AssetMetadataMapping> getMappings() {
-		Integer tagNum = Integer.parseInt(txtExifTag.getText());
+		String path = txtXmpPath.getText().trim();
 		
 		if (btnExifSingle.getSelection()) {
 			Object x = cmbExifMappingField.getStructuredSelection().getFirstElement();
-			//TODO:
 			if (x instanceof AssetMetadataMapping.AssetProperty) {
-				ExifMetadataField field = new ExifMetadataField(tagNum);
+				XmpMetadataField field = new XmpMetadataField(path);
 				AssetMetadataMapping map = new AssetMetadataMapping();
 				map.setConservationArea(SmartDB.getCurrentConservationArea());
-				map.setMetadataType(AssetMetadataMapping.MetadataType.EXIF);
+				map.setMetadataType(AssetMetadataMapping.MetadataType.XMP);
 				map.setMappedAssetProperty((AssetMetadataMapping.AssetProperty)x);
 				map.setMetadataKey(field);
 				return Collections.singletonList(map);
@@ -70,10 +63,10 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 			List<AssetMetadataMapping> mappings = new ArrayList<>();
 			
 			for (MetadataValueMapping m : exifTagValueMappings) {
-				ExifMetadataField field = new ExifMetadataField(tagNum, m.tagValue);
+				XmpMetadataField field = new XmpMetadataField(path, m.tagValue);
 				AssetMetadataMapping map = new AssetMetadataMapping();
 				map.setConservationArea(SmartDB.getCurrentConservationArea());
-				map.setMetadataType(AssetMetadataMapping.MetadataType.EXIF);
+				map.setMetadataType(AssetMetadataMapping.MetadataType.XMP);
 				map.setMappedAttribute(m.attribute);
 				map.setMappedCategory(m.category);
 				map.setMappedListItem(m.listItem);
@@ -92,32 +85,67 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 		panel.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(panel, SWT.NONE);
-		l.setText("EXIF Tag (Hex):");
+		l.setText("XMP Path:");
+		l.setToolTipText("path seperator is colon (:)");
 		
-		txtExifTag = new Text(panel, SWT.BORDER);
-		txtExifTag.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtExifTag.addListener(SWT.Modify, e->modified());
-		
-		l = new Label(panel, SWT.NONE);
-		l.setText("EXIF Tag Name):");
-		
-		txtExifTagTxt = new Text(panel, SWT.BORDER);
-		txtExifTagTxt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtExifTagTxt.setEnabled(false);
+		txtXmpPath = new Text(panel, SWT.BORDER);
+		txtXmpPath.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtXmpPath.addListener(SWT.Modify, e->modified());
 		
 		Link linkSelectFromFile = new Link(panel, SWT.NONE);
-		linkSelectFromFile.setText("<a>" + "Select Tag From File ..." + "</a>");
+		linkSelectFromFile.setText("<a>" + "Select Path From File ..." + "</a>");
 		linkSelectFromFile.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
-		linkSelectFromFile.addListener(SWT.Selection, e -> selectExifTagFromFile());
+		linkSelectFromFile.addListener(SWT.Selection, e -> selectXmpPathFromFile());
 		
 		Composite p = createMappingPanel(panel);
 		p.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		
+		Link linkaddFromFile = new Link(panel, SWT.NONE);
+		linkaddFromFile.setText("<a>" + "Add All Values found in Files ..." + "</a>");
+		linkaddFromFile.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
+		linkaddFromFile.addListener(SWT.Selection, e -> selectValuesFromFiles());
+		
 		return panel;
 	}
 	
+	private void selectValuesFromFiles() {
+		FileDialog fd = new FileDialog(dialog.getShell(), SWT.OPEN | SWT.MULTI);
+		String f = fd.open();
+		if (f == null) return;
+		String path = txtXmpPath.getText().trim();
+		
+		Path p = Paths.get(f);
+		Set<String> values = new HashSet<>();
+		for (String file : fd.getFileNames()) {
+			Path mfile = p.getParent().resolve(file);
+
+			try {
+				List<String[]> data = FileMetadataReader.readXmpMetadata(mfile);
+				for (String[] i : data) {
+					if (i[1] != null && !i[1].trim().isEmpty()) {
+						if (i[0].equalsIgnoreCase(path)) {
+							values.add(i[1]);
+							
+						}
+					}
+				}
+			}catch (Exception ex) {
+				AssetPlugIn.log(ex.getMessage(), ex);
+			}	
+		}
+		for (String x : values) {
+			MetadataValueMapping mapping = new MetadataValueMapping();
+			mapping.tagValue = x;
+			exifTagValueMappings.add(mapping);
+		}
+		
+		tblExifValueMapping.refresh();		
+		modified();
+	}
 	
 	
-	private void selectExifTagFromFile() {
+	private void selectXmpPathFromFile() {
 		FileDialog fd = new FileDialog(dialog.getShell(), SWT.OPEN);
 		String f = fd.open();
 		if (f == null) return;
@@ -128,18 +156,18 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 			return;
 		}
 		
-		HashMap<Directory, List<Tag>> tags = FileMetadataReader.readExifMetadata(p);
-		if (tags == null ||  tags.isEmpty()) {
-			MessageDialog.openError(dialog.getShell(), "Metadata Error", MessageFormat.format("Could not read exif metadata from file {0}.", p.toString()));
-			return;
+		List<String[]> data = null;
+		try {
+			data = FileMetadataReader.readXmpMetadata(p);
+		}catch (Exception ex) {
+			MessageDialog.openError(dialog.getShell(), "Metadata Error", MessageFormat.format("Could not read xmp metadata from file {0}.", p.toString()));
+			return;	
 		}
-				
-		ExifTagSelector selectorDialog = new ExifTagSelector(dialog.getShell(), tags);
+		
+		XmpTagSelector selectorDialog = new XmpTagSelector(dialog.getShell(), data);
 		if (selectorDialog.open() != ExifTagSelector.OK) return;
 		
-		txtExifTag.setData(selectorDialog.getDirectoryTag());
-		txtExifTag.setText(String.valueOf(selectorDialog.getDirectoryTag().getTagType()));
-		txtExifTagTxt.setText(selectorDialog.getDirectoryTag().getTagName() + " [" + selectorDialog.getDirectory().getName() + "]");
+		txtXmpPath.setText(selectorDialog.getXmpPath());
 		
 		modified();
 	}

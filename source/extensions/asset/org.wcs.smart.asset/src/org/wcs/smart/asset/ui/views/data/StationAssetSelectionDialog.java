@@ -81,6 +81,7 @@ public class StationAssetSelectionDialog extends Dialog{
 	public enum Type{
 		ASSET,
 		LOCATION,
+		STATION,
 		DATE;
 	}
 	
@@ -95,6 +96,7 @@ public class StationAssetSelectionDialog extends Dialog{
 	private AssetStationLocation selectedLocation;
 	private Asset selectedAsset;
 	private Date selectedDate;
+	private AssetStation selectedStation;
 	
 	private AssetStation definedStation = null;
 	
@@ -120,6 +122,10 @@ public class StationAssetSelectionDialog extends Dialog{
 		return this.selectedDate;
 	}
 	
+	public AssetStation getSelectedStation() {
+		return this.selectedStation;
+	}
+	
 	@Override
 	protected void okPressed() {
 		if (cmbAsset != null) {
@@ -135,6 +141,14 @@ public class StationAssetSelectionDialog extends Dialog{
 			Object x = ((IStructuredSelection)cmbLocation.getSelection()).getFirstElement();
 			if (x instanceof AssetStationLocation) {
 				selectedLocation = (AssetStationLocation) x;
+			}else {
+				return;
+			}
+		}
+		if (cmbStation != null) {
+			Object x = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
+			if (x instanceof AssetStation) {
+				selectedStation = (AssetStation) x;
 			}else {
 				return;
 			}
@@ -192,7 +206,7 @@ public class StationAssetSelectionDialog extends Dialog{
 			
 			getShell().setText("Select Asset");
 		}
-		if (type == Type.LOCATION ) {
+		if (type == Type.LOCATION || type == Type.STATION) {
 			Label l = new Label(main, SWT.NONE);
 			l.setText("Station:");
 			
@@ -204,22 +218,15 @@ public class StationAssetSelectionDialog extends Dialog{
 			cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
 			if (definedStation != null) cmbStation.getControl().setEnabled(false);
 			
-			l = new Label(main, SWT.NONE);
-			l.setText("Station Location:");
-			
-			cmbLocation = new ComboViewer(main, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
-			cmbLocation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			cmbLocation.setContentProvider(ArrayContentProvider.getInstance());
-			cmbLocation.setLabelProvider(new AssetLabelProvider());
-			cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
-			
 			cmbStation.addSelectionChangedListener(e->{
 				Object x = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
 				if (x instanceof AssetStation) {
-					List<Object> kids = new ArrayList<>();
-					kids.addAll(((AssetStation)x).getLocations());
-					kids.add(CREATE_LOCATION);
-					cmbLocation.setInput(kids);
+					if (cmbLocation != null) {
+						List<Object> kids = new ArrayList<>();
+						kids.addAll(((AssetStation)x).getLocations());
+						kids.add(CREATE_LOCATION);
+						cmbLocation.setInput(kids);
+					}
 				}else if (x == CREATE_STATION) {
 					AssetStation newStation = new AssetStation();
 					newStation.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -227,34 +234,44 @@ public class StationAssetSelectionDialog extends Dialog{
 					StationDialog dialog = new StationDialog(getShell(), newStation);
 					ContextInjectionFactory.inject(dialog, context);
 					dialog.open();
-					
+					definedStation = newStation;
 					cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
-					cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+					if (cmbLocation != null) cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
 					loadStations.schedule();
 				}
 			});
 			
-			cmbLocation.addSelectionChangedListener(e->{
-				Object y = ((IStructuredSelection)cmbLocation.getSelection()).getFirstElement();
-				if (y == CREATE_LOCATION) {
+			if (type == Type.LOCATION) {
+				l = new Label(main, SWT.NONE);
+				l.setText("Station Location:");
 				
-					Object x = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
-					if (x instanceof AssetStation) {
-						AssetStation station = (AssetStation)x;
-						
-						AssetStationLocation newLocation = new AssetStationLocation();
-						newLocation.setStation(station);
-								
-						StationLocationDialog dialog = new StationLocationDialog(getShell(), newLocation);
-						ContextInjectionFactory.inject(dialog, context);
-						dialog.open();
-						
-						cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
-						cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
-						loadStations.schedule();
+				cmbLocation = new ComboViewer(main, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+				cmbLocation.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				cmbLocation.setContentProvider(ArrayContentProvider.getInstance());
+				cmbLocation.setLabelProvider(new AssetLabelProvider());
+				cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+				cmbLocation.addSelectionChangedListener(e->{
+					Object y = ((IStructuredSelection)cmbLocation.getSelection()).getFirstElement();
+					if (y == CREATE_LOCATION) {
+					
+						Object x = ((IStructuredSelection)cmbStation.getSelection()).getFirstElement();
+						if (x instanceof AssetStation) {
+							AssetStation station = (AssetStation)x;
+							
+							AssetStationLocation newLocation = new AssetStationLocation();
+							newLocation.setStation(station);
+									
+							StationLocationDialog dialog = new StationLocationDialog(getShell(), newLocation);
+							ContextInjectionFactory.inject(dialog, context);
+							dialog.open();
+							
+							cmbStation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+							cmbLocation.setInput(new String[] {DialogConstants.LOADING_TEXT});
+							loadStations.schedule();
+						}
 					}
-				}
-			});
+				});
+			}
 			
 			loadStations.setSystem(true);
 			loadStations.schedule();

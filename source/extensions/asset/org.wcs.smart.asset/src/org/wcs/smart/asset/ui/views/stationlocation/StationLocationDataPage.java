@@ -166,7 +166,7 @@ public class StationLocationDataPage {
 						query += " and id.waypoint.dateTime <= :endDate ";
 					}
 					query += " ORDER BY id.waypoint.dateTime desc ";
-					Query q = session.createQuery(query);
+					Query<?> q = session.createQuery(query);
 					if (startDate != null) q.setParameter("startDate",  startDate);
 					if (endDate != null) q.setParameter("endDate", endDate);
 					q.setParameter("location", parentEditor.getAssetStationLocation());

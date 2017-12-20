@@ -158,7 +158,7 @@ public class StationDetailsPage {
 		List<AssetStationAttribute> stationAttributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
 			stationAttributes.addAll(
-					session.createQuery("FROM AssetStationAttribute WHERE attribute.conservationArea = :ca")
+					session.createQuery("FROM AssetStationAttribute WHERE attribute.conservationArea = :ca", AssetStationAttribute.class)
 					.setParameter("ca",  SmartDB.getCurrentConservationArea())
 					.list());
 			stationAttributes.forEach(ss->{

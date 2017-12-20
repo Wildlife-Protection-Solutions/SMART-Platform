@@ -27,7 +27,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -53,14 +52,11 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
@@ -81,11 +77,8 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -99,14 +92,10 @@ import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.Asset;
-import org.wcs.smart.asset.model.Asset.Status;
-import org.wcs.smart.asset.model.AssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetHistoryRecord;
 import org.wcs.smart.asset.model.AssetType;
-import org.wcs.smart.asset.model.AssetTypeAttribute;
 import org.wcs.smart.asset.model.AssetWaypoint;
-import org.wcs.smart.asset.ui.AttributeFieldEditor;
 import org.wcs.smart.asset.ui.CommentDialog;
 import org.wcs.smart.asset.ui.DateCommentDialog;
 import org.wcs.smart.asset.ui.IdFieldHeader;
@@ -143,9 +132,6 @@ public class AssetEditor extends EditorPart implements MapPart {
 	
 	private FormToolkit toolkit;
 	private Form pageForm;
-
-	private Label lblRetiredState = null;
-	private Hyperlink changeRetiredState = null;
 	
 	private Label lblStatus;
 	private Label lblStatusImage;
@@ -153,7 +139,6 @@ public class AssetEditor extends EditorPart implements MapPart {
 	private IdFieldHeader lblId;
 	private Label lblAssetTypeImage;
 	private Label lblAssetType;
-	private List<AttributeFieldEditor> attributeEditors = null;
 	
 	private TableViewer tblEvents;
 	
@@ -313,6 +298,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(AssetEditor.this, false);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void createEventHandlers() {
 		//on delete close editor
 		handlers = new ArrayList<>();

@@ -25,6 +25,7 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.wcs.smart.asset.data.importer.ActionableWarning;
 import org.wcs.smart.asset.data.importer.NewAssetWarning;
+import org.wcs.smart.asset.data.importer.NewLocationWarning;
 
 /**
  * Import action manager.  Finds the action implementation for a given
@@ -45,6 +46,7 @@ public class ActionManager {
 	public static ImportAction findAction(ActionableWarning warning, IEclipseContext context) {
 		ImportAction importAction = null;
 		if (warning.getClass().equals(NewAssetWarning.class)) importAction = new NewAssetAction((NewAssetWarning) warning);
+		else if (warning.getClass().equals(NewLocationWarning.class)) importAction = new NewLocationAction((NewLocationWarning) warning);
 		
 		if (importAction != null) {
 			ContextInjectionFactory.inject(importAction, context);

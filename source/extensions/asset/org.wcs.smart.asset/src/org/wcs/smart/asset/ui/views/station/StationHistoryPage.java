@@ -32,8 +32,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -62,12 +60,10 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class StationHistoryPage {
 
-	private StationEditor parentEditor;
-	
 	private TableViewer tblDeployments;
 	
 	public StationHistoryPage(StationEditor editor) {
-		this.parentEditor = editor;
+
 	}
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {
@@ -135,7 +131,7 @@ public class StationHistoryPage {
 				
 				try(Session s = HibernateManager.openSession()){
 					deployments.addAll(
-							s.createQuery("SELECT a FROM AssetDeployment a join a.stationLocation b WHERE b.station = :station")
+							s.createQuery("SELECT a FROM AssetDeployment a join a.stationLocation b WHERE b.station = :station", AssetDeployment.class)
 							.setParameter("station", thisStation)
 							.list());
 					deployments.forEach(d->{

@@ -98,6 +98,7 @@ public class AssetWaypoint extends UuidItem implements IAdaptable{
 		this.attachments = attachments;
 	}
 		
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter.equals(Waypoint.class)) return (T) getWaypoint();

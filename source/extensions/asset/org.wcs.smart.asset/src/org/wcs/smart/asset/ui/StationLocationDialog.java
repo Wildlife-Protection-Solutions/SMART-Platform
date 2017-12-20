@@ -68,7 +68,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 
 	private AssetStationLocation toUpdate;
 	
-	private Text txtStation;
+	private Text txtStationLocation;
 	private AttributeFieldEditor locationEditor;
 	
 	private List<AttributeFieldEditor> attributeEditors;
@@ -99,7 +99,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 		}
 		
 		
-		toUpdate.setId(txtStation.getText());
+		toUpdate.setId(txtStationLocation.getText());
 		
 		AssetStationLocationAttributeValue tmp = new AssetStationLocationAttributeValue();
 		locationEditor.updateValue(tmp);
@@ -153,7 +153,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 		btnOk.setEnabled(false);
 		setErrorMessage(null);
 		
-		if (txtStation.getText().isEmpty()) {
+		if (txtStationLocation.getText().isEmpty()) {
 			setErrorMessage("Station ID required");
 			return false;
 		}
@@ -183,18 +183,26 @@ public class StationLocationDialog extends TitleAreaDialog{
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(form, SWT.NONE);
+		l.setText("Station:");
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		
+		l = new Label(form, SWT.NONE);
+		l.setText(toUpdate.getStation().getId());
+		
+		
+		l = new Label(form, SWT.NONE);
 		l.setText("ID:");
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
-		txtStation = new Text(form, SWT.BORDER);
-		txtStation.setTextLimit(AssetStation.MAX_LENGTH);
+		txtStationLocation = new Text(form, SWT.BORDER);
+		txtStationLocation.setTextLimit(AssetStation.MAX_LENGTH);
 		if (toUpdate.getId() != null) {
-			txtStation.setText(toUpdate.getId());
+			txtStationLocation.setText(toUpdate.getId());
 		}else if (toUpdate.getStation() != null){
-			txtStation.setText(toUpdate.getStation().getId() + " - " + "Location " + (toUpdate.getStation().getLocations().size() + 1));
+			txtStationLocation.setText(toUpdate.getStation().getId() + " - " + "Location " + (toUpdate.getStation().getLocations().size() + 1));
 		}
-		txtStation.addListener(SWT.Modify, e->validate());
-		txtStation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtStationLocation.addListener(SWT.Modify, e->validate());
+		txtStationLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		AssetAttribute tmp = new AssetAttribute();
 		tmp.setName("Position");
@@ -231,7 +239,7 @@ public class StationLocationDialog extends TitleAreaDialog{
 		//TODO:
 		try(Session session = HibernateManager.openSession()){
 			String hql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
-			Query query = session.createQuery(hql);
+			Query<AssetStationLocationAttribute> query = session.createQuery(hql, AssetStationLocationAttribute.class);
 			query.setParameter("ca",  SmartDB.getCurrentConservationArea());
 			attributes.addAll(query.getResultList());
 			attributes.forEach(a->{

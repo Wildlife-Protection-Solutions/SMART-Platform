@@ -9,12 +9,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
@@ -38,11 +32,13 @@ import org.wcs.smart.ui.properties.DialogConstants;
 
 public class NewMappingDialog extends TitleAreaDialog {
 
-	private ComboViewer cmbType;
+	private Button btnExif;
+	private Button btnXmp;
 	
 	private List<AssetMetadataMapping> mappings;
 	
-	private NewMappingExif exifPanel; 
+	private NewMappingExif exifPanel;
+	private NewMappingXmp xmpPanel; 
 	
 	private DataModel cachedDm;
 	
@@ -106,33 +102,11 @@ public class NewMappingDialog extends TitleAreaDialog {
 	
 	@Override
 	protected void okPressed() {
-//		newMapping = new AssetMetadataMapping();
-//		newMapping.setConservationArea(SmartDB.getCurrentConservationArea());
-//		newMapping.setMetadataType((MetadataType) cmbType.getStructuredSelection().getFirstElement());
-//		
-		//TODO:
-		if (cmbType.getStructuredSelection().getFirstElement() == (AssetMetadataMapping.MetadataType.EXIF)) {
+		if (btnExif.getSelection()) {
 			mappings = exifPanel.getMappings();
+		}else if (btnXmp.getSelection()) {
+			mappings = xmpPanel.getMappings();
 		}
-		
-//		if (btnExifSingle.getSelection()) {
-//			Object x = cmbExifMappingField.getStructuredSelection().getFirstElement();
-//			if (x instanceof AssetMetadataMapping.AssetField) {
-//				newMapping.setMappedAssetField((AssetMetadataMapping.AssetField)x);
-//			}
-////			newMapping.setMappedAttribute(attribute);
-////			newMapping.setMappedCategory(category);
-////			newMapping.setMappedListItem(listItem);
-////			newMapping.setMappedTreeNode(treeNode);
-//		}
-//		
-//		IMetadataField<?> field = null;
-//		if (newMapping.getMetadataType() == MetadataType.EXIF) {
-//			field = new XmpMetadataField(cmbExifDirectory.getCombo().getText().trim(), txtExifTag.getText().trim());
-//		}else if (newMapping.getMetadataType() == MetadataType.XMP) {
-//			
-//		}
-//		newMapping.setMetadataKey(field);
 		super.okPressed();
 	}
 	
@@ -157,50 +131,42 @@ public class NewMappingDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite header = new Composite(main, SWT.BORDER);
-		header.setLayout(new GridLayout(2, false));
+		header.setLayout(new GridLayout(3, false));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(header, SWT.NONE);
 		l.setText("Metadata Type:");
 		
-		cmbType = new ComboViewer(header, SWT.DROP_DOWN | SWT.READ_ONLY);
-		cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbType.setContentProvider(ArrayContentProvider.getInstance());
-		cmbType.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof AssetMetadataMapping.MetadataType) return ((AssetMetadataMapping.MetadataType) element).name();
-				return super.getText(element);
-			}
-		});
-		cmbType.setInput(AssetMetadataMapping.MetadataType.values());
+		btnExif = new Button(header, SWT.RADIO);
+		btnExif.setText("EXIF");
+		btnExif.setSelection(true);
 		
-//		l = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
-//		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
+		btnXmp = new Button(header, SWT.RADIO);
+		btnXmp.setText("XMP");
+			
 		Composite stackPanel = new Composite(main, SWT.BORDER);
 		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		stackPanel.setLayout(new StackLayout());
 		
 		exifPanel = new NewMappingExif(this);
-		Composite exifPanelComposite = exifPanel.createExifPanel(stackPanel);
+		Composite exifPanelComposite = exifPanel.createPanel(stackPanel);
+		
 		Composite xmpPanel = createXmpPanel(stackPanel);
 		
-		cmbType.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				// TODO Auto-generated method stub
-				AssetMetadataMapping.MetadataType type = (AssetMetadataMapping.MetadataType)cmbType.getStructuredSelection().getFirstElement();
-				if (type == AssetMetadataMapping.MetadataType.XMP) {
-					((StackLayout)stackPanel.getLayout()).topControl = xmpPanel;
-				}else if (type == AssetMetadataMapping.MetadataType.EXIF) {
-					((StackLayout)stackPanel.getLayout()).topControl = exifPanelComposite;
-				}
-				stackPanel.layout();
-			}
+		btnExif.addListener(SWT.Selection, e->{
+			((StackLayout)stackPanel.getLayout()).topControl = exifPanelComposite;
+			stackPanel.layout();
+			modified();
 		});
-		cmbType.setSelection(new StructuredSelection(AssetMetadataMapping.MetadataType.EXIF));
+		btnXmp.addListener(SWT.Selection, e->{
+			((StackLayout)stackPanel.getLayout()).topControl = xmpPanel;
+			stackPanel.layout();
+			modified();
+		});
+		
+		((StackLayout)stackPanel.getLayout()).topControl = exifPanelComposite;
+		stackPanel.layout();
+		modified();
 		
 		setTitle("Asset Metadata Mapping");
 		getShell().setText("Asset Metadata Mapping");
@@ -209,22 +175,17 @@ public class NewMappingDialog extends TitleAreaDialog {
 	}
 	
 	private Composite createXmpPanel(Composite parent) {
-		Composite panel = new Composite(parent, SWT.NONE);
-		panel.setLayout(new GridLayout());
-		Label l = new Label(panel, SWT.NONE);
-		l.setText("TODO:");
-		return panel;
+		xmpPanel = new NewMappingXmp(this);
+		return xmpPanel.createPanel(parent);
 	}
 	
 	
-	
 	public void modified() {
-		//TODO:
 		String message = null;
-		if (cmbType.getStructuredSelection().getFirstElement() == AssetMetadataMapping.MetadataType.EXIF) {
+		if (btnExif.getSelection()) {
 			message = exifPanel.validate();
-		}else if (cmbType.getStructuredSelection().getFirstElement() == AssetMetadataMapping.MetadataType.XMP) {
-			
+		}else if (btnXmp.getSelection()) {
+			message = xmpPanel.validate();
 		}
 		setErrorMessage(message);
 		if (getButton(IDialogConstants.OK_ID) != null) getButton(IDialogConstants.OK_ID).setEnabled(message == null);

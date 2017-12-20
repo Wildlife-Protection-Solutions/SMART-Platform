@@ -238,6 +238,7 @@ public class StationEditor extends EditorPart implements MapPart {
 		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(StationEditor.this, false);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void createEventHandlers() {
 		//on delete close editor
 		handlers = new ArrayList<>();

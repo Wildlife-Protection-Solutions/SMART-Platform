@@ -32,13 +32,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -58,7 +55,6 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
@@ -92,8 +88,6 @@ public class AssetCurrentPage {
 
 	private static final String HL_UUID_KEY = "uuid";
 
-	@Inject
-	private IEclipseContext parentContext;
 	private AssetEditor parentEditor;
 	
 	private Composite mainControl;

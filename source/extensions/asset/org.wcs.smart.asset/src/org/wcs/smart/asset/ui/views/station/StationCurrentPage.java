@@ -33,13 +33,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -80,7 +77,6 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.AssetTypeLabelProvider;
 import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
-import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
 import org.wcs.smart.asset.ui.map.StationLocationDrawCommand;
 import org.wcs.smart.ca.datamodel.Category;
@@ -97,8 +93,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class StationCurrentPage {
 
-	@Inject
-	private IEclipseContext parentContext;
 	private StationEditor parentEditor;
 	
 	private Composite mainControl;
@@ -146,7 +140,7 @@ public class StationCurrentPage {
 			final List<AssetDeployment> currentDeployments = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
 				String hql = "SELECT d FROM AssetDeployment d join d.stationLocation l WHERE l.station = :station and d.endDate is null";
-				currentDeployments.addAll( s.createQuery(hql).setParameter("station",  parentEditor.getAssetStation()).list() );
+				currentDeployments.addAll( s.createQuery(hql, AssetDeployment.class).setParameter("station",  parentEditor.getAssetStation()).list() );
 				currentDeployments.forEach(d->{
 					d.getAsset().getId();
 					d.getAsset().getAssetType().getName();

@@ -33,14 +33,10 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.asset.AssetEvents;
@@ -60,10 +56,9 @@ public class DataReviewPage {
 	private AssetDataPanel panel;
 	private DataImporterView view;
 	private boolean requiresRefresh = false;
-	private FormToolkit toolkit;
+		
 	public DataReviewPage(DataImporterView view, FormToolkit toolkit) {
 		this.view = view;
-		this.toolkit = toolkit;
 		panel = new AssetDataPanel(toolkit, true, true, view.getContext()) {			
 			@Override
 			public void loadWaypoints() {
@@ -78,23 +73,6 @@ public class DataReviewPage {
 	
 	public void createControl(Composite parent) {
 		
-		Hyperlink refreshLink = toolkit.createHyperlink(parent, "refresh", SWT.NONE);
-		refreshLink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		refreshLink.setToolTipText("reload invalid items from database");
-		refreshLink.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-			}
-			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				DataReviewPage.this.refresh();
-			}
-		});
 		
 		panel.createControl(parent);
 		
@@ -154,7 +132,7 @@ public class DataReviewPage {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<UUID> waypointUuids  = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				List<Object> aw = session.createQuery("SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE state = :state AND id.waypoint.conservationArea = :ca ORDER BY id.waypoint.dateTime")
+				List<?> aw = session.createQuery("SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE state = :state AND id.waypoint.conservationArea = :ca ORDER BY id.waypoint.dateTime")
 				.setParameter("state", AssetWaypoint.State.DIRTY)
 				.setParameter("ca", SmartDB.getCurrentConservationArea())
 				.list();

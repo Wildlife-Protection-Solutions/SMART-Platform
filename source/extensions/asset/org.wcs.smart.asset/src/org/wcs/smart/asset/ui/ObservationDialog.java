@@ -343,6 +343,7 @@ public class ObservationDialog extends Dialog {
 		return main;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean confirmSave() {
 		List<IAttributeField<?>> currentFields = (List<IAttributeField<?>>) attributeComposite.getData(IAttributeField.class.getName());
 		if (currentFields != null){

@@ -236,6 +236,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(StationLocationEditor.this, false);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void createEventHandlers() {
 		//on delete close editor
 		handlers = new ArrayList<>();

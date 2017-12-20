@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.asset.ui.views.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.MenuEvent;

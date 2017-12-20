@@ -104,6 +104,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class AssetListView {
 	
 	public static final String ID = "org.wcs.smart.asset.ui.view.assets"; //$NON-NLS-1$
@@ -144,9 +145,6 @@ public class AssetListView {
 				new String[] {"Assets", "Stations"},
 				new Listener[] {
 						e->{
-							//TODO: remove me 
-							//if (assetComposite != null) { assetComposite.dispose(); assetComposite = null; }
-							
 							if (assetComposite == null) assetComposite = createAssetsPanel(content);
 							((StackLayout)content.getLayout()).topControl = assetComposite;
 							content.layout(true);
@@ -156,9 +154,6 @@ public class AssetListView {
 							toolbarHeaderComposite.layout(true);
 						},
 						e->{
-							//TODO: remove me
-							//if (stationComposite != null) { stationComposite.dispose(); stationComposite = null; }
-							
 							if (stationComposite == null) stationComposite = createStationsPanel(content);
 							((StackLayout)content.getLayout()).topControl = stationComposite;
 							content.layout(true);
@@ -291,12 +286,6 @@ public class AssetListView {
 		loadStations();
 		
 		return stationsPanel;
-	}
-	
-	private void refreshView() {
-		//TODO:
-		
-		
 	}
 	
 	private void createAssetMenu(Control control) {
@@ -505,7 +494,8 @@ public class AssetListView {
 	@Optional
 	@Inject
 	private void dbModified(@UIEventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
-		refreshView();
+		loadAssets(250);
+		loadStations(250);
 	}
 	
 	@Optional
@@ -668,6 +658,7 @@ public class AssetListView {
 			return false;
 		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			mapping = new HashMap<>();

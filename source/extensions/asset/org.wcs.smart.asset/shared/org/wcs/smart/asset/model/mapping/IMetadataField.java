@@ -36,7 +36,13 @@ public interface IMetadataField {
 	 * Converts the metadata mapping to a user friendly description
 	 * @return
 	 */
-	public String asUserString();
+	public String keyAsString();
+	
+	/**
+	 * Converts the metadata mapping to a user friendly description
+	 * @return
+	 */
+	public String valueAsString();
 	
 	/**
 	 * Serializes the metadata mapping to a string;

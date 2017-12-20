@@ -27,7 +27,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.asset.ui.config.AttributeListDialog;
 
@@ -45,40 +44,7 @@ public class ShowAttributeListDialogHandler extends ShowDialogHandler {
 	}
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, IEclipseContext context) {
-		EPartService partService = context.get(EPartService.class);
-		//ensure no dirty entity editors
-//		List<EditorPart> dirtyeditors = new ArrayList<>();
-//		StringBuilder sb = new StringBuilder();
-//		for (MPart part : partService.getParts()){
-//			if (part.isDirty()){
-//				Object x = E3Utils.getSourceObject(part);
-//				if (x instanceof EntityEditor || x instanceof RecordEditor){
-//					dirtyeditors.add((EditorPart)x);
-//					sb.append(((EditorPart)x).getEditorInput().getName());
-//					sb.append(", "); //$NON-NLS-1$
-//				}
-//			}
-//		}
-		
-//		if (!dirtyeditors.isEmpty()){
-//			if (!MessageDialog.openQuestion(activeShell, Messages.ShowAttributeListDialogHandler_ConfirmTitle, 
-//					MessageFormat.format(Messages.ShowAttributeListDialogHandler_ConfirmMsg,sb.substring(0, sb.length() - 2)))){
-//				return;
-//			}
-//			for (EditorPart e : dirtyeditors){
-//				e.getSite().getPage().saveEditor(e, false);
-//			}
-//		}
-//		
 		super.execute(activeShell, context);
-//		
-//		//refresh all record editors
-//		for (MPart part : partService.getParts()){
-//			Object x = E3Utils.getSourceObject(part);
-//			if (x instanceof RecordEditor){
-//				((RecordEditor) x).refresh();
-//			}
-//		}
 	}
 	
 	// E3

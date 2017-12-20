@@ -107,12 +107,20 @@ public class ExifMetadataField implements IMetadataField{
 	}
 	
 	@Override
-	public String asUserString() {
+	public String keyAsString() {
 		if (tag == null) {
 			tag = MetadataUtils.findTagName(tagType);
 		}
-		if (tag == null) return MessageFormat.format("Tag: {0}", String.format("0x%04x", tagType));
+		if (tag == null) {
+			return MessageFormat.format("Tag: {0}", String.format("0x%04x", tagType));
+		}
 		return MessageFormat.format("Tag: {0} ({1})", tag.getTagName(), tag.getTagTypeHex());
+	}
+	
+	@Override
+	public String valueAsString() {
+		if (tagValue == null) return "";
+		return tagValue;
 	}
 
 	@Override

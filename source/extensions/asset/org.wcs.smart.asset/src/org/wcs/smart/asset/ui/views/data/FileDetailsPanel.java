@@ -21,13 +21,13 @@
  */
 package org.wcs.smart.asset.ui.views.data;
 
+import java.text.Collator;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -54,7 +54,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -69,6 +69,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
 import com.drew.metadata.Directory;
 import com.drew.metadata.Tag;
+import com.drew.metadata.xmp.XmpDirectory;
 
 /**
  * Panel for displaying details of selected file or multiple
@@ -79,6 +80,7 @@ import com.drew.metadata.Tag;
  */
 public class FileDetailsPanel {
 
+	private static final String LAST_INDEX_KEY = "LAST_INDEX";
 	private static final String IMAGE_DATAKEY = "IMAGE"; //$NON-NLS-1$
 	private static final String IMAGE_PROXY_DATAKEY = "IMAGE_PROXY"; //$NON-NLS-1$
 	
@@ -87,7 +89,7 @@ public class FileDetailsPanel {
 	private Composite multiSelectDetails;
 	
 	private TableViewer tblExif;
-	private TableViewer tblXmp; 
+	
 	private Label lblDetailsFileName; 
 	private Label lblDetailsStatus ;
 	private Canvas imageCanvas;
@@ -140,8 +142,7 @@ public class FileDetailsPanel {
 		
 		
 		Hyperlink lnkDetails = toolkit.createHyperlink(header, "Details", SWT.NONE);
-		Hyperlink lnkExif = toolkit.createHyperlink(header, "EXIF Metadata", SWT.NONE);
-		Hyperlink lnkXmp = toolkit.createHyperlink(header, "XMP Metadata", SWT.NONE);
+		Hyperlink lnkExif = toolkit.createHyperlink(header, "Metadata", SWT.NONE);
 		
 		Composite stackComposite = toolkit.createComposite(infoComposite, SWT.BORDER);
 		stackComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -198,10 +199,6 @@ public class FileDetailsPanel {
 			}
 		});
 		
-		Composite xmpComp = toolkit.createComposite(stackComposite);
-		xmpComp.setLayout(new GridLayout());
-		createXmpComposite(xmpComp);
-		
 		FontData fd = lnkDetails.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
 		Font boldFont = new Font(lnkDetails.getDisplay(), fd);
@@ -216,7 +213,6 @@ public class FileDetailsPanel {
 				stackComposite.layout();
 				lnkDetails.setFont(boldFont);
 				lnkExif.setFont(normalFont);
-				lnkXmp.setFont(normalFont);
 				header.layout();
 			}
 		});
@@ -227,21 +223,10 @@ public class FileDetailsPanel {
 				stackComposite.layout();
 				lnkDetails.setFont(normalFont);
 				lnkExif.setFont(boldFont);
-				lnkXmp.setFont(normalFont);
 				header.layout();
 			}
 		});
-		lnkXmp.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				((StackLayout)stackComposite.getLayout()).topControl = xmpComp;
-				stackComposite.layout();
-				lnkDetails.setFont(normalFont);
-				lnkExif.setFont(normalFont);
-				lnkXmp.setFont(boldFont);
-				header.layout();
-			}
-		});
+
 		((StackLayout)stackComposite.getLayout()).topControl = proxyDetailsComp;
 		lnkDetails.setFont(boldFont);
 		
@@ -277,60 +262,6 @@ public class FileDetailsPanel {
 		detailsSash.setWeights(new int[] {3,2});
 		
 		fileDetailsComposite.layout(true);	
-
-		//TODO: see if I can sort this out better
-		int width = fileDetailsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).x ;
-		Table[] tables = new Table[] {tblExif.getTable(), tblXmp.getTable()};
-		for (Table t : tables) {
-			int cwidth = (width - 20)/t.getColumnCount();
-			for (int i = 0; i < t.getColumnCount(); i ++) {
-				t.getColumn(i).setWidth(cwidth);
-			}
-		}
-
-	}
-	
-	private void createXmpComposite(Composite parent) {
-		tblXmp = new TableViewer(parent, SWT.FULL_SELECTION);
-		tblXmp.getTable().setLinesVisible(false);
-		tblXmp.getTable().setHeaderVisible(true);
-		tblXmp.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tblXmp.setContentProvider(ArrayContentProvider.getInstance());
-		
-		Color bgColor = new Color(tblXmp.getControl().getDisplay(), 160,185,224);
-		tblXmp.getControl().addListener(SWT.Dispose, e->bgColor.dispose());
-		
-		TableViewerColumn colTag = new TableViewerColumn(tblXmp, SWT.NONE);
-		colTag.getColumn().setText("Path");
-		colTag.setLabelProvider(new ColumnLabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof String[]) return ((String[])element)[0];
-				if (element instanceof String) return (String)element;
-				return "";
-			}
-			@Override
-			public Color getBackground(Object element) {
-				if (element instanceof String) return bgColor;
-				return null;
-			}
-		});
-		
-		
-		TableViewerColumn colTagValue = new TableViewerColumn(tblXmp, SWT.NONE);
-		colTagValue.getColumn().setText("Value");
-		colTagValue.setLabelProvider(new ColumnLabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof String[]) return ((String[])element)[1];
-				return "";
-			}
-			@Override
-			public Color getBackground(Object element) {
-				if (element instanceof String) return bgColor;
-				return null;
-			}
-		});
 	}
 	
 	/**
@@ -340,10 +271,21 @@ public class FileDetailsPanel {
 	 */
 	void updateFileDetails(IStructuredSelection selection) {	
 		//clear existing
+		
+		if (selection != null && selection.size() == 1) {
+			Object selected = selection.getFirstElement();
+			Object last = proxyDetailsComp.getData("LAST_SELECTION");
+			if (selected.equals(last)) return;
+			
+			proxyDetailsComp.setData("LAST_SELECTION", selected);
+		}else {
+			proxyDetailsComp.setData("LAST_SELECTION", null);
+		}
+		
 		if (proxyDetailsComp.isDisposed()) return;
 		for (Control c : proxyDetailsComp.getChildren()) c.dispose();
+		tblExif.setData(LAST_INDEX_KEY, tblExif.getTable().getVerticalBar().getSelection());
 		tblExif.setInput(null);
-		tblXmp.setInput(null);
 		Image lastImage = (Image) imageCanvas.getData(IMAGE_DATAKEY);
 		if (lastImage != null && !lastImage.isDisposed()) lastImage.dispose();
 		imageCanvas.redraw();
@@ -358,6 +300,7 @@ public class FileDetailsPanel {
 		
 		if (selection.size() > 1) {
 			//multi select pain
+			
 			ScrolledComposite sc = new ScrolledComposite(multiSelectDetails, SWT.V_SCROLL);
 			Composite details = toolkit.createComposite(sc);
 			sc.setContent(details);
@@ -543,6 +486,9 @@ public class FileDetailsPanel {
 		l = toolkit.createLabel(fileSection, "Latitude:");
 		l = toolkit.createLabel(fileSection, proxy.getY() == null ? "" : String.valueOf(proxy.getY()) );
 		
+		l = toolkit.createLabel(fileSection, "Comment:");
+		l = toolkit.createLabel(fileSection, proxy.getWaypointComment() == null ? "" : String.valueOf(proxy.getWaypointComment()) );
+		
 		Composite obsSection = toolkit.createComposite(bits);
 		obsSection.setLayout(new GridLayout(2, false));
 		obsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -590,35 +536,39 @@ public class FileDetailsPanel {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				HashMap<Directory, List<Tag>> exif = FileMetadataReader.readExifMetadata(proxy.getFile());
-				List<String[]> xmp = null;
-				try {
-					xmp = FileMetadataReader.readXmpMetadata(proxy.getFile());	
-				}catch (Exception ex) {
-					AssetPlugIn.log(ex.getMessage(),  ex);
-					xmp = null;
-				}
-				
-				List<String[]> fxmp = xmp;
-				Display.getDefault().syncExec(()->{
-					if (tblExif.getTable().isDisposed() || tblXmp.getTable().isDisposed()) return;
-					if (exif == null) {
-						tblExif.setInput(new String[] {"Error Reading EXIF Metadata"});
-					}else {
-						List<Object> values = new ArrayList<>();
-						for (Entry<Directory, List<Tag>> item : exif.entrySet()) {
-							values.add(item.getKey().getName());
-							for (Tag t : item.getValue()) {
+				List<Object> values = new ArrayList<>();
+				if (exif != null) {
+					List<Directory> dirs = new ArrayList<>();
+					dirs.addAll(exif.keySet());
+					dirs.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+					for (Directory d : dirs) {
+						values.add(d.getName());
+						if (d.getClass().equals(XmpDirectory.class)) {
+							//get xmp metadata
+							values.addAll(FileMetadataReader.readXmpMetadata((XmpDirectory)d));
+						}else {
+							List<Tag> items = exif.get(d);
+							for (Tag t : items) {
 								values.add(new String[] {t.getTagName(), t.getDescription()});
 							}
 						}
-						tblExif.setInput(values);
 					}
-					if (fxmp == null) {
-						tblXmp.setInput(new String[] {"Error Reading XMP Metadata"});
-					}else {
-						tblXmp.setInput(fxmp);
-					}
+				}
+				
+				Display.getDefault().syncExec(()->{
 					
+					if (exif == null) {
+						tblExif.setInput(new String[] {"Error Reading EXIF Metadata"});
+					}else {
+						int scroll = (int)tblExif.getData(LAST_INDEX_KEY);
+						tblExif.setInput(values);
+						
+						for (TableColumn c : tblExif.getTable().getColumns()) {
+							c.pack();
+							c.setWidth(c.getWidth() + 20);
+						}
+						tblExif.getTable().setTopIndex(scroll);
+					}
 				});
 				return Status.OK_STATUS;
 			}

@@ -81,6 +81,9 @@ public class FileProxy extends ISmartAttachment{
 	//all relations will have the same group - this is number for displaying to the user
 	private Integer incidentGroup;
 	
+	//waypoint comment
+	private String wpComment;
+	
 	/**
 	 * New file proxy
 	 * @param file the file
@@ -575,4 +578,10 @@ public class FileProxy extends ISmartAttachment{
 	}
 
 	
+	public String getWaypointComment() {
+		return this.wpComment;
+	}
+	public void setWaypointComment(String comment) {
+		this.wpComment = comment;
+	}
 }

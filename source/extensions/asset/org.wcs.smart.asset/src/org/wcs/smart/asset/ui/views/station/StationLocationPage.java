@@ -383,7 +383,7 @@ public class StationLocationPage {
 		columns.add(new IdTableColumn());
 		
 		String hql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca";
-		locationAttributes = session.createQuery(hql).setParameter("ca",  SmartDB.getCurrentConservationArea()).list();
+		locationAttributes = session.createQuery(hql, AssetStationLocationAttribute.class).setParameter("ca",  SmartDB.getCurrentConservationArea()).list();
 		for (AssetStationLocationAttribute a : locationAttributes) {
 			a.getAttribute().getName();
 			a.getAttribute().getUuid().equals(null);

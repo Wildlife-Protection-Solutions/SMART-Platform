@@ -1,23 +1,11 @@
 package org.wcs.smart.asset.ui;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
-import javax.inject.Inject;
-import javax.persistence.Query;
-
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -27,18 +15,6 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
-import org.wcs.smart.asset.AssetEvents;
-import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.model.AssetAttribute;
-import org.wcs.smart.asset.model.AssetStation;
-import org.wcs.smart.asset.model.AssetStationAttribute;
-import org.wcs.smart.asset.model.AssetStationAttributeValue;
-import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
-import org.wcs.smart.ca.SmartUserLevel;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
@@ -48,20 +24,24 @@ public class EditWaypointDialog extends TitleAreaDialog{
 	private Waypoint toUpdate;
 	
 	private Text txtId;
+	private Text txtComment;
 	private DateTime dDate;
 	private DateTime dTime;
 		
 	private boolean showId;
+	private boolean showComment;
 	
 	public EditWaypointDialog(Shell parentShell, Waypoint toUpdate) {
-		this(parentShell, toUpdate, true);
+		this(parentShell, toUpdate, true, true);
 	}
 	
-	public EditWaypointDialog(Shell parentShell, Waypoint toUpdate, boolean showId) {
+	public EditWaypointDialog(Shell parentShell, Waypoint toUpdate, boolean showId, boolean showComment) {
 		super(parentShell);
 		this.toUpdate = toUpdate;
 		this.showId = showId;
+		this.showComment = showComment;
 	}
+	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
@@ -79,12 +59,20 @@ public class EditWaypointDialog extends TitleAreaDialog{
 		if (Math.abs(toUpdate.getDateTime().getTime() - newDateTime.getTime()) > 1000 * 60 * 60 * 24) {
 			if (!MessageDialog.openQuestion(getShell(), "Edit", "The new date/time is more than 1 day away from the existing date/time.  Are you sure you want to continue?")) return;
 		}
+		toUpdate.setDateTime(newDateTime);
 		
 		if (showId) {
 			Integer id = Integer.parseInt(txtId.getText().trim());
 			toUpdate.setId(id);
 		}
-		toUpdate.setDateTime(newDateTime);
+		
+		if (showComment) {
+			if (txtComment.getText().trim().isEmpty()) {
+				toUpdate.setComment(null);
+			}else {
+				toUpdate.setComment(txtComment.getText().trim());
+			}
+		}
 		
 		super.okPressed();
 	}
@@ -141,6 +129,20 @@ public class EditWaypointDialog extends TitleAreaDialog{
 		SmartUtils.initTimeDateTimeWidget(dTime, toUpdate.getDateTime());
 		dTime.addListener(SWT.Selection, e->validate());
 		
+		if (showComment) {
+			l = new Label(form, SWT.NONE);
+			l.setText("Comment:");
+			l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			
+			txtComment = new Text(form, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI | SWT.WRAP);
+			txtComment.setText(toUpdate.getComment() == null ? "" : toUpdate.getComment());
+			txtComment.addListener(SWT.Modify,  e->validate());
+			txtComment.setTextLimit(Waypoint.COMMENT_MAX_LENGTH);
+			txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+			((GridData)txtComment.getLayoutData()).widthHint = 120;
+			((GridData)txtComment.getLayoutData()).heightHint = 300;
+			
+		}
 		setTitle("Waypoint Attributes");
 		setMessage("Select the waypoint date/time");
 		getShell().setText("Waypoints Attributes");

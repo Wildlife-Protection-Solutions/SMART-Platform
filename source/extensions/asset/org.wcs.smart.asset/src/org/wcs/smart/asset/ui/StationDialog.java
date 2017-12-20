@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -46,6 +45,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -54,14 +54,13 @@ import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
-import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Dialog to create a new station or edit a station and associated attributes.
+ * Dialog to create a new station and collect required attributes.
  * 
  * @author Emily
  *
@@ -235,10 +234,7 @@ public class StationDialog extends TitleAreaDialog{
 			value.setNumberValue2(toUpdate.getY());
 			locationEditor.initControl(value);
 		}
-		
-		//TODO:
-		//locationEditor.initControl(value);
-		
+				
 		l = new Label(form, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
@@ -254,7 +250,7 @@ public class StationDialog extends TitleAreaDialog{
 		List<AssetStationAttribute> attributes = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
 			String hql = "FROM AssetStationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
-			Query query = session.createQuery(hql);
+			Query<AssetStationAttribute> query = session.createQuery(hql, AssetStationAttribute.class);
 			query.setParameter("ca",  SmartDB.getCurrentConservationArea());
 			attributes.addAll(query.getResultList());
 			attributes.forEach(a->{

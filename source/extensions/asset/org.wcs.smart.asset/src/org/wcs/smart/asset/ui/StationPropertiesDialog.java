@@ -28,7 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -61,11 +60,14 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStationAttribute;
+import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocationAttribute;
+import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.ui.config.AttributeDialog;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.WarningDialog;
@@ -117,7 +119,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 				//location attributes
 				for (AssetStationLocationAttribute toDelete : deletedLocationAttributes) {
 					String deleteQuery = "DELETE FROM AssetStationLocationAttributeValue WHERE id.attribute = :attribute";
-					Query q = session.createQuery(deleteQuery);
+					Query<AssetStationLocationAttributeValue> q = session.createQuery(deleteQuery, AssetStationLocationAttributeValue.class);
 					q.setParameter("attribute", toDelete.getAttribute());
 					q.executeUpdate();
 					session.delete(toDelete);
@@ -131,7 +133,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 				//station attributes
 				for (AssetStationAttribute toDelete : deletedStationAttributes) {
 					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute";
-					Query q = session.createQuery(deleteQuery);
+					Query<AssetStationAttributeValue> q = session.createQuery(deleteQuery, AssetStationAttributeValue.class);
 					q.setParameter("attribute", toDelete.getAttribute());
 					q.executeUpdate();
 					session.delete(toDelete);
@@ -292,7 +294,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 				List<AssetStationLocationAttribute> locationitems = new ArrayList<>();
 				try(Session session = HibernateManager.openSession()){
 					String hsql = "FROM AssetStationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
-					Query q = session.createQuery(hsql);
+					Query<AssetStationAttribute> q = session.createQuery(hsql, AssetStationAttribute.class);
 					q.setParameter("ca",  SmartDB.getCurrentConservationArea());
 					items.addAll(q.getResultList());
 					items.forEach(a->{
@@ -300,9 +302,9 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 					});
 					
 					hsql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
-					q = session.createQuery(hsql);
-					q.setParameter("ca",  SmartDB.getCurrentConservationArea());
-					locationitems.addAll(q.getResultList());
+					Query<AssetStationLocationAttribute> q2 = session.createQuery(hsql, AssetStationLocationAttribute.class);
+					q2.setParameter("ca",  SmartDB.getCurrentConservationArea());
+					locationitems.addAll(q2.getResultList());
 					locationitems.forEach(a->a.getAttribute().getName());
 				}
 				stationAttributes = items;
@@ -327,6 +329,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 		return true;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void moveAttribute(Type type, int direction){
 		TableViewer tblViewer = null;
 		List attributes = null;

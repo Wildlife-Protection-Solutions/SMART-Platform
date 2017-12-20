@@ -37,7 +37,6 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
-import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -124,7 +123,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		});
 		
 		TableViewerColumn colMetadata = new TableViewerColumn(tblMappings, SWT.NONE);
-		colMetadata.getColumn().setText("Metadata");
+		colMetadata.getColumn().setText("File Metadata Key");
 		colMetadata.getColumn().setWidth(250);
 		colMetadata.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -134,14 +133,31 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 					if (mm.getMetadataField() == null) {
 						return "ERROR PARSING METADATA MAPPING";
 					}
-					return mm.getMetadataField().asUserString();
+					return mm.getMetadataField().keyAsString();
+				}
+				return super.getText(element);
+			}
+		});
+		
+		TableViewerColumn colValue = new TableViewerColumn(tblMappings, SWT.NONE);
+		colValue.getColumn().setText("File Metadata Value");
+		colValue.getColumn().setWidth(250);
+		colValue.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof AssetMetadataMapping) {
+					AssetMetadataMapping mm = (AssetMetadataMapping)element;
+					if (mm.getMetadataField() == null) {
+						return "ERROR PARSING METADATA MAPPING";
+					}
+					return mm.getMetadataField().valueAsString();
 				}
 				return super.getText(element);
 			}
 		});
 		
 		TableViewerColumn colMapTo = new TableViewerColumn(tblMappings, SWT.NONE);
-		colMapTo.getColumn().setText("Mapped To");
+		colMapTo.getColumn().setText("SMART Data Model");
 		colMapTo.getColumn().setWidth(250);
 		colMapTo.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -149,8 +165,10 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 				if (element instanceof AssetMetadataMapping) {
 					AssetMetadataMapping mm = (AssetMetadataMapping)element;
 					if (mm.getMappedAssetProperty() != null) return mm.getMappedAssetProperty().name();
+					
 					StringBuilder sb = new StringBuilder();
-					if ( ((ExifMetadataField)mm.getMetadataField() ).getTagValue() != null) sb.append( ((ExifMetadataField)mm.getMetadataField() ).getTagValue()  + ": ");
+//					sb.append(mm.getMetadataField().asUserString() + ": " );
+//					if ( ((ExifMetadataField)mm.getMetadataField() ).getTagValue() != null) sb.append( ((ExifMetadataField)mm.getMetadataField() ).getTagValue()  + ": ");
 					if (mm.getMappedListItem() != null) sb.append(mm.getMappedListItem().getName());
 					if (mm.getMappedTreeNode() != null) sb.append(mm.getMappedTreeNode().getName());
 					

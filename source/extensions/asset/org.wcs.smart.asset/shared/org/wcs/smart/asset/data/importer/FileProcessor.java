@@ -22,11 +22,13 @@
 package org.wcs.smart.asset.data.importer;
 
 import java.nio.file.Path;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hibernate.Session;
@@ -37,6 +39,7 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
+import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -44,7 +47,6 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
@@ -155,7 +157,7 @@ public class FileProcessor {
 		return true;
 	}
 	
-	public void processMetadata(FileProxy p, Session session) throws Exception {
+	private void processMetadata(FileProxy p, Session session) throws Exception {
 		List<AssetMetadataMapping> mappings = QueryFactory.buildQuery(session, AssetMetadataMapping.class,
 				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 		mappings.sort((a,b)->a.getSearchOrder().compareTo(b.getSearchOrder()));
@@ -168,17 +170,7 @@ public class FileProcessor {
 		}
 		//process mappings in order
 		for (AssetMetadataMapping mapping : mappings) {
-			switch(mapping.getMetadataType() ) {
-			case EXIF:
-				processMetadata(p, mapping, session);
-				break;
-			case XMP:
-				//TOOD: implement me
-				break;
-			default:
-				//TOOD: mapping type not supported
-			}
-			
+			processMetadata(p, mapping, session);
 		}
 		
 		//process observations
@@ -252,7 +244,11 @@ public class FileProcessor {
 		for (Iterator<WaypointObservation> iterator = allObservations.iterator(); iterator.hasNext();) {
 			WaypointObservation waypointObservation = (WaypointObservation) iterator.next();
 			if (waypointObservation.getCategory() == null) {
-				p.addWarning(new ActionableWarning("The observation only has attribute mappings.  A category is required."));
+				if (waypointObservation.getAttributes().isEmpty()) {
+					iterator.remove();
+				}else {
+					p.addWarning(new ActionableWarning(MessageFormat.format("No data model category found for mapping of attribute {0} with value: {1}.", waypointObservation.getAttributes().get(0).getAttribute().getName(), waypointObservation.getAttributes().get(0).getAttributeValueAsString(Locale.getDefault()))));
+				}
 				iterator.remove();
 			}
 		}
@@ -318,8 +314,189 @@ public class FileProcessor {
 			fileMetadata = FileMetadataReader.readMetadata(p.getFile());
 			p.putData(EXIF_METADATA_KEY,  fileMetadata);
 		}
+		if (mapping.getMetadataField() instanceof ExifMetadataField) {
+			processMapping((ExifMetadataField) mapping.getMetadataField(), mapping, p, session, fileMetadata);
+		}else if (mapping.getMetadataField() instanceof XmpMetadataField) {
+			processMapping((XmpMetadataField) mapping.getMetadataField(), mapping, p, session, fileMetadata);
+		}
 		
-		ExifMetadataField field = (ExifMetadataField) mapping.getMetadataField();
+		
+	}
+	
+	private void processMapping(XmpMetadataField field, AssetMetadataMapping mapping, FileProxy p, Session session, Metadata fileMetadata ) {
+		if (field == null){
+			//Exception ex =  new Exception(MessageFormat.format("Could not parse mapping: {0}", mapping.getMetadataKey()));
+			//ex.printStackTrace();
+			return;
+		}
+
+		String pathValue = (String) field.findValue(fileMetadata);
+		if (pathValue == null) return; //not value found
+		
+		if (mapping.getMappedAssetProperty() != null) {
+			switch(mapping.getMappedAssetProperty()) {
+			case ASSET_ID:
+				if (p.getAsset() != null) return;	//we already have an asset from another mapping; do not try again
+				findAsset(p, pathValue, session);
+				return;
+			case LOCATION_ID:
+				if (p.getStationLocation() != null) return; //already have a location; do not try again
+				findLocation(p, pathValue, session);
+				return;
+			case STATION_ID:
+				if (p.getStation() != null) return; //already have a station; do not try again
+				findStation(p, pathValue, session);
+				return;
+			case WAYPOINT_COMMENT:
+				//merge comments
+				String comment = pathValue;
+				if (p.getWaypointComment() != null) comment += "\n" + comment;
+				p.setWaypointComment(comment);
+			}
+		} else {
+			//we are mapping categories/attributes
+			if (mapping.getMappedAttribute() == null && mapping.getMappedCategory() != null) {
+				//mapping a category but no attribute
+				boolean add = false;
+				if (field.getValue() == null) {
+					//we only check for existence which is does
+					//so add the category as an observation
+					add = true;
+				} else {
+					//only mapped to this category if the tag value matches the provided value
+					if (field.getValue().trim().equalsIgnoreCase(pathValue.trim())) {
+						add = true;
+					}
+				}
+				if (add) {
+					WaypointObservation wo = new WaypointObservation();
+					wo.setCategory(mapping.getMappedCategory());
+					wo.setAttributes(new ArrayList<>());
+					p.addRawObservation(wo);
+				}
+				
+			}else if (mapping.getMappedAttribute() != null) {
+				//mapping an attribute and maybe a value
+				WaypointObservation wo = new WaypointObservation();
+				if (mapping.getMappedCategory() != null) wo.setCategory(mapping.getMappedCategory());
+				WaypointObservationAttribute woa = new WaypointObservationAttribute();
+				woa.setAttribute(mapping.getMappedAttribute());
+				wo.setAttributes(new ArrayList<>());
+				wo.getAttributes().add(woa);
+				
+				//the tag value identifies the item to map to
+				if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.BOOLEAN) {
+					Boolean value = null;
+					try {
+						value = Boolean.valueOf(pathValue);
+					}catch (Exception ex) {
+						p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse boolean value from {0} for mapping to boolean attribute {1}", pathValue, mapping.getMappedAttribute().getName())));
+						return;
+					}
+					woa.setNumberValue(value == true ? 1.0 : 0);
+				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.DATE) {
+					Date d = null;
+					try {
+						d = DateFormat.getDateInstance(DateFormat.MEDIUM).parse(pathValue);
+					}catch (Exception ex) {
+						d = null;
+					}
+					try {
+						d = DateFormat.getDateInstance(DateFormat.LONG).parse(pathValue);
+					}catch (Exception ex) {
+						d = null;
+					}
+					try {
+						d = DateFormat.getDateInstance(DateFormat.SHORT).parse(pathValue);
+					}catch (Exception ex) {
+						d = null;
+					}
+					if (d == null) {
+						p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse date from the value {0} for mapping to date attribute {1}.  Date format unsupported.", pathValue, mapping.getMappedAttribute().getName())));
+						return;
+					}
+					woa.setDateValue(d);
+				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.LIST) {
+					if (mapping.getMappedListItem() != null) {
+						if (pathValue.equalsIgnoreCase(field.getValue())) {
+							woa.setAttributeListItem(mapping.getMappedListItem());
+						}else {
+							return;
+						}
+					}else {
+						AttributeListItem item = null;
+						for (AttributeListItem i : mapping.getMappedAttribute().getAttributeList()) {
+							if (i.getKeyId().equalsIgnoreCase(pathValue)) {
+								item = i;
+								break;
+							}
+							for (Label l : i.getNames()) {
+								if (l.getValue().equalsIgnoreCase(pathValue)) {
+									item = i;
+									break;
+								}
+							}
+							if (item != null) break;
+						}
+						if (item == null) {
+							p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse attribute list item from the value {0} for mapping to attribute {1}.  No list item with this value found.", pathValue, mapping.getMappedAttribute().getName())));
+							return;
+						}
+						woa.setAttributeListItem(item);
+					}
+					
+				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.TREE) {
+					if (mapping.getMappedTreeNode() != null) {
+						if (pathValue.equalsIgnoreCase(field.getValue())) {
+							woa.setAttributeTreeNode(mapping.getMappedTreeNode());
+						}else {
+							return;
+						}
+					}else {
+						AttributeTreeNode item = null;
+						List<AttributeTreeNode> toSearch = new ArrayList<>();
+						toSearch.addAll(mapping.getMappedAttribute().getTree());
+						while(!toSearch.isEmpty()) {
+							AttributeTreeNode n = toSearch.remove(0);
+							if (n.getKeyId().equalsIgnoreCase(pathValue)) {
+								item = n;
+								break;
+							}
+							for (Label l : n.getNames()) {
+								if (l.getValue().equalsIgnoreCase(pathValue)) {
+									item = n;
+									break;
+								}
+							}
+							if (n.getChildren() != null) toSearch.addAll(n.getChildren());	
+						}
+						if (item == null) {
+							p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse attribute tree node from the value {0} for mapping to attribute {1}.  No tree node with this value found.", pathValue, mapping.getMappedAttribute().getName())));
+							return;
+						}
+						
+						woa.setAttributeTreeNode(item);
+					}
+				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.NUMERIC) {
+					Double numberValue = null;
+					try {
+						numberValue = Double.parseDouble(pathValue);
+					}catch (Exception ex) {
+						p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse number from the value {0} for mapping to attribute {1}",pathValue, mapping.getMappedAttribute().getName())));
+						return;	
+					}
+					
+					woa.setNumberValue(numberValue);	
+				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.TEXT) {
+					woa.setStringValue(pathValue);
+				}
+				
+				p.addRawObservation(wo);
+			}
+		}
+	}
+
+	private void processMapping(ExifMetadataField field, AssetMetadataMapping mapping, FileProxy p, Session session, Metadata fileMetadata ) {
 		if (field == null){
 			//Exception ex =  new Exception(MessageFormat.format("Could not parse mapping: {0}", mapping.getMetadataKey()));
 			//ex.printStackTrace();
@@ -344,6 +521,8 @@ public class FileProcessor {
 				if (p.getStation() != null) return; //already have a station; do not try again
 				findStation(p, tagvalue, session);
 				return;
+			case WAYPOINT_COMMENT:
+				p.setWaypointComment(tagvalue);
 			}
 		} else {
 			//we are mapping categories/attributes
@@ -399,6 +578,8 @@ public class FileProcessor {
 					if (mapping.getMappedListItem() != null) {
 						if (value.equalsIgnoreCase(field.getTagValue())) {
 							woa.setAttributeListItem(mapping.getMappedListItem());
+						}else {
+							return;
 						}
 					}else {
 						AttributeListItem item = null;
@@ -416,7 +597,7 @@ public class FileProcessor {
 							if (item != null) break;
 						}
 						if (item == null) {
-							p.addWarning(new ActionableWarning(MessageFormat.format("Could parse date from the tag {0} for mapping to list attribute.  Not list item with this value found.", tag.getStringValue(field.getTagType()))));
+							p.addWarning(new ActionableWarning(MessageFormat.format("Could not parse the tag {0} for mapping to list attribute.  No list item with this value found.", tag.getStringValue(field.getTagType()))));
 							return;
 						}
 						woa.setAttributeListItem(item);
@@ -427,6 +608,8 @@ public class FileProcessor {
 					if (mapping.getMappedTreeNode() != null) {
 						if (value.equalsIgnoreCase(field.getTagValue())) {
 							woa.setAttributeTreeNode(mapping.getMappedTreeNode());
+						}else {
+							return;
 						}
 					}else {
 						AttributeTreeNode item = null;
@@ -447,7 +630,7 @@ public class FileProcessor {
 							if (n.getChildren() != null) toSearch.addAll(n.getChildren());	
 						}
 						if (item == null) {
-							p.addWarning(new ActionableWarning(MessageFormat.format("Could parse date from the tag {0} for mapping to tree attribute.  Not tree not found that matches the value.", tag.getStringValue(field.getTagType()))));
+							p.addWarning(new ActionableWarning(MessageFormat.format("Could parse the tag {0} for mapping to tree attribute.  No tree not found that matches the value.", tag.getStringValue(field.getTagType()))));
 							return;
 						}
 						
@@ -481,7 +664,6 @@ public class FileProcessor {
 			}
 		}
 	}
-	
 	private void findAsset(FileProxy p, String id, Session session) {
 		//search the database for the given asset id
 		String hql = "FROM Asset WHERE conservationArea = :ca and upper(id) = :id"; //$NON-NLS-1$
@@ -512,7 +694,7 @@ public class FileProcessor {
 			p.setStationLocation(location);
 			return;
 		}else {
-			p.addWarning(new ActionableWarning(MessageFormat.format("No station location found with id ''{0}''", id)));
+			p.addWarning(new NewLocationWarning(MessageFormat.format("No station location found with id ''{0}''", id), id));
 		}
 	}
 	

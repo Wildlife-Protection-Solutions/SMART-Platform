@@ -10,8 +10,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.asset.model.mapping.IMetadataField;
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
+import org.wcs.smart.asset.model.mapping.IMetadataField;
+import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -32,7 +33,8 @@ public class AssetMetadataMapping extends UuidItem {
 	public enum AssetProperty{
 		ASSET_ID,
 		STATION_ID,
-		LOCATION_ID
+		LOCATION_ID,
+		WAYPOINT_COMMENT
 	}
 	
 	public enum MetadataType{
@@ -253,7 +255,7 @@ public class AssetMetadataMapping extends UuidItem {
 		case EXIF:
 			return ExifMetadataField.parseMapping(getMetadataKey());
 		case XMP:
-			break;
+			return XmpMetadataField.parseMapping(getMetadataKey());
 		}
 		return null;
 	}

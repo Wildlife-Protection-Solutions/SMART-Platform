@@ -12,13 +12,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -69,8 +66,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
 
 public class StationLocationCurrentPage {
 
-	@Inject
-	private IEclipseContext parentContext;
 	private StationLocationEditor parentEditor;
 	
 	private Composite mainControl;
@@ -118,7 +113,7 @@ public class StationLocationCurrentPage {
 			final List<AssetDeployment> currentDeployments = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
 				String hql = "SELECT d FROM AssetDeployment d WHERE d.stationLocation = :location and d.endDate is null";
-				currentDeployments.addAll( s.createQuery(hql).setParameter("location",  parentEditor.getAssetStationLocation()).list() );
+				currentDeployments.addAll( s.createQuery(hql, AssetDeployment.class).setParameter("location",  parentEditor.getAssetStationLocation()).list() );
 				currentDeployments.forEach(d->{
 					d.getAsset().getId();
 					d.getAsset().getAssetType().getName();
