@@ -149,13 +149,26 @@
          <menu
                label="Assets">
             <command
-                  commandId="org.wcs.smart.asset.command.attributelist.show"
-                  label="Asset Attributes..."
+                  commandId="org.wcs.smart.observation.perspective.show"
+                  label="View Assets"
                   style="push">
+               <parameter
+                     name="org.wcs.smart.observation.perspective.show.focusview"
+                     value="org.wcs.smart.asset.views.asset">
+               </parameter>
             </command>
+            <separator
+                  name="org.wcs.smart.asset.separator1"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.asset.command.assettype.show"
                   label="Asset Types..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.asset.command.attributelist.show"
+                  label="Asset Attributes..."
                   style="push">
             </command>
             <command
@@ -165,7 +178,26 @@
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.metadata.mapping.open"
-                  label="Metadata Mappings..."
+                  label="File Metadata Mappings..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.asset.command.settings.open"
+                  label="Asset Module Settings..."
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.asset.separator2"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.asset.command.model.xml.export"
+                  label="Export Model Data..."
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.asset.command.model.xml.import"
+                  label="Import Model Data..."
                   style="push">
             </command>
          </menu>
@@ -246,6 +278,18 @@
             id="org.wcs.smart.asset.command.metadata.mapping.open"
             name="Metadata Mapping">
       </command>
+      <command
+            id="org.wcs.smart.asset.command.settings.open"
+            name="Show Asset Settings">
+      </command>
+      <command
+            id="org.wcs.smart.asset.command.model.xml.export"
+            name="Export Model Data...">
+      </command>
+      <command
+            id="org.wcs.smart.asset.command.model.xml.import"
+            name="Import Model Data...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -264,6 +308,18 @@
       <handler
             class="org.wcs.smart.asset.ui.handler.OpenMappingDialogHandler$OpenMappingDialogHandlerWrapper"
             commandId="org.wcs.smart.asset.command.metadata.mapping.open">
+      </handler>
+      <handler
+            class="org.wcs.smart.asset.ui.handler.ShowSettingHandler$ShowSettingHandlerWrapper"
+            commandId="org.wcs.smart.asset.command.settings.open">
+      </handler>
+      <handler
+            class="org.wcs.smart.asset.ui.handler.ExportModelToXmlDialogHandler$ExportModelToXmlDialogHandlerWrapper"
+            commandId="org.wcs.smart.asset.command.model.xml.export">
+      </handler>
+      <handler
+            class="org.wcs.smart.asset.ui.handler.ImportAssetModelFromXmlHandler$ImportAssetModelFromXmlHandlerWrapper"
+            commandId="org.wcs.smart.asset.command.model.xml.import">
       </handler>
    </extension>
    <extension
@@ -345,6 +401,16 @@
             commandId="org.wcs.smart.asset.command.assettype.show"
             icon="images/icons/obj16/asset.png">
       </image>
+   </extension>
+   <extension
+         point="org.wcs.smart.caTemplateCloner">
+      <templateCloner
+            class="org.wcs.smart.asset.ConservationAreaCloner"
+            id="org.wcs.smart.asset.ca.cloner">
+         <require
+               id="org.wcs.smart.conservationAreaCloner">
+         </require>
+      </templateCloner>
    </extension>
 
 </plugin>

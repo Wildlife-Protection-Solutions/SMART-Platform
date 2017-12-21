@@ -119,7 +119,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 				//location attributes
 				for (AssetStationLocationAttribute toDelete : deletedLocationAttributes) {
 					String deleteQuery = "DELETE FROM AssetStationLocationAttributeValue WHERE id.attribute = :attribute";
-					Query<AssetStationLocationAttributeValue> q = session.createQuery(deleteQuery, AssetStationLocationAttributeValue.class);
+					Query<?> q = session.createQuery(deleteQuery);
 					q.setParameter("attribute", toDelete.getAttribute());
 					q.executeUpdate();
 					session.delete(toDelete);
@@ -133,7 +133,7 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 				//station attributes
 				for (AssetStationAttribute toDelete : deletedStationAttributes) {
 					String deleteQuery = "DELETE FROM AssetStationAttributeValue WHERE id.attribute = :attribute";
-					Query<AssetStationAttributeValue> q = session.createQuery(deleteQuery, AssetStationAttributeValue.class);
+					Query<?> q = session.createQuery(deleteQuery);
 					q.setParameter("attribute", toDelete.getAttribute());
 					q.executeUpdate();
 					session.delete(toDelete);

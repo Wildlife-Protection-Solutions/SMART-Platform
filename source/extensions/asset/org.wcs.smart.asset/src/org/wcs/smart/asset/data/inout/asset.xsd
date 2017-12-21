@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/assetconfiguration" xmlns:tns="http://www.example.org/assetconfiguration" elementFormDefault="qualified">
+
+
+    <element name="data" type="tns:AssetData"></element>
+
+    <complexType name="NamedItem">
+    	<attribute name="languageCode" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    	<attribute name="isDefault" type="boolean"></attribute>
+    </complexType>
+
+
+    <complexType name="AttributeListItem">
+    	<sequence>
+    		<element name="names" type="tns:NamedItem"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    </complexType>
+
+
+    <complexType name="Attribute">
+    	<sequence>
+    		<element name="names" type="tns:NamedItem"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="listValues" type="tns:AttributeListItem" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="key" type="string"></attribute>
+    	<attribute name="type" type="tns:AttributeType"></attribute>
+    </complexType>
+
+    <simpleType name="AttributeType">
+    	<restriction base="string">
+    		<enumeration value="NUMERIC"></enumeration>
+    		<enumeration value="TEXT"></enumeration>
+    		<enumeration value="BOOLEAN"></enumeration>
+    		<enumeration value="LIST"></enumeration>
+    		<enumeration value="DATE"></enumeration>
+    		<enumeration value="POSITION"></enumeration>
+    	</restriction>
+    </simpleType>
+    
+    
+
+    <complexType name="AssetType">
+		<sequence>
+			<element name="names" type="tns:NamedItem"
+				maxOccurs="unbounded" minOccurs="1">
+			</element>
+			<element name="attributes" type="tns:AttributeMapping"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+			<element name="deploymentAttributes" type="tns:AttributeMapping"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+			<element name="icon" type="hexBinary" maxOccurs="1" minOccurs="0"></element>
+		</sequence>
+		<attribute name="key" type="string"></attribute>
+    	<attribute name="incidentCutoff" type="int"></attribute>
+
+    </complexType>
+
+    <complexType name="StationAttributes">
+    	<sequence>
+    			<element name="attributes" type="tns:AttributeMapping"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="StationLocationAttributes">
+    	<sequence>
+    			<element name="attributes" type="tns:AttributeMapping"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="AssetModuleSettings">
+    	<sequence>
+    		<element name="key" type="string"></element>
+    		<element name="value" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="MetadataMapping">
+    	<sequence>
+    		<element name="mappingString" type="string"></element>
+    		<element name="assetProperty">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="ASSET_ID"></enumeration>
+    					<enumeration value="STATION_ID"></enumeration>
+    					<enumeration value="LOCATION_ID"></enumeration>
+    					<enumeration value="WAYPOINT_COMMENT"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="categoryKey" type="string"></element>
+    		<element name="attributeKey" type="string"></element>
+    		<element name="attributeListItemKey" type="string"></element>
+    		<element name="attributeTreeNodeKey" type="string"></element>
+    	</sequence>
+    	<attribute name="type">
+    		<simpleType>
+    			<restriction base="string">
+    				<enumeration value="XMP"></enumeration>
+    				<enumeration value="EXIF"></enumeration>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="order" type="int"></attribute>
+    </complexType>
+
+    <complexType name="AssetData">
+    	<sequence>
+	    	<element name="attributes" type="tns:Attribute"
+	   			maxOccurs="unbounded" minOccurs="0">
+	   		</element>
+	   		
+	   		<element name="assetTypes" type="tns:AssetType"
+	   			maxOccurs="unbounded" minOccurs="0">
+	   		</element>
+
+	   		<element name="metadataMappings" type="tns:MetadataMapping"
+	   			maxOccurs="unbounded" minOccurs="0">
+	   		</element>
+	   		
+			<element name="moduleSettings" type="tns:AssetModuleSettings"
+	   			maxOccurs="unbounded" minOccurs="0">
+	   		</element>
+	   		
+	   		<element name="stationAttributes" type="tns:StationAttributes"
+	   			maxOccurs="1" minOccurs="0">
+	   		</element>
+	   		
+	   		<element name="stationLocationAttributes" type="tns:StationLocationAttributes"
+	   			maxOccurs="1" minOccurs="0">
+	   		</element>
+	   		
+   		</sequence>
+    </complexType>
+
+
+    <complexType name="AttributeMapping">
+    	<attribute name="attributeKey" type="string"></attribute>
+    	<attribute name="attributeType" type="string"></attribute>
+    	<attribute name="order" type="int"></attribute>
+    </complexType>
+</schema>

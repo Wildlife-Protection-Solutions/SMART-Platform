@@ -241,7 +241,7 @@ public class StationLocationDrawCommand extends AbstractDrawCommand{
 		for (AssetStationLocation loc : locationsToDraw) {
 				
 			Coordinate location = new Coordinate(loc.getX(),  loc.getY());
-			double radius_ll = findBufferDistance(location.x, location.y, stationBuffer);
+			double radius_ll = findBufferDistance(location.x, location.y, locationBuffer);
 			Coordinate bufferpnt = new Coordinate(location.x + radius_ll, location.y + radius_ll);
 			
 			Point pnt = map.getViewportModel().worldToPixel(reproject(transform, location));
