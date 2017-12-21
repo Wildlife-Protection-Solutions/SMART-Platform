@@ -25,6 +25,8 @@ import java.io.File;
 import java.util.Locale;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.UuidUtils;
@@ -48,9 +50,7 @@ public class AssetWaypointSource implements IWaypointSource{
 
 	@Override
 	public String getName(Locale l) {
-		//TODO:
-		return "ASSET";
-//		return SmartContext.INSTANCE.getClass(IErLabelProvider.class).getLabel(this, l);
+		return SmartContext.INSTANCE.getClass(IAssetLabelProvider.class).getLabel(this, l);
 	}
 
 	@Override

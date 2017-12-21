@@ -236,7 +236,6 @@ public class StationLocationDialog extends TitleAreaDialog{
 		attributeComp.setLayout(new GridLayout(2, false));
 		
 		List<AssetStationLocationAttribute> attributes = new ArrayList<>();
-		//TODO:
 		try(Session session = HibernateManager.openSession()){
 			String hql = "FROM AssetStationLocationAttribute a WHERE a.attribute.conservationArea = :ca ORDER BY a.order";
 			Query<AssetStationLocationAttribute> query = session.createQuery(hql, AssetStationLocationAttribute.class);

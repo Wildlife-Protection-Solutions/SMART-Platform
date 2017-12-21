@@ -125,8 +125,7 @@ public class NewAssetHandler {
 		try {
 			ConfigurationScope.INSTANCE.getNode(NewAssetHandler.NEW_TYPE_OPTIONS_NODE).flush();
 		} catch (BackingStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			AssetPlugIn.log(e.getMessage(), e);
 		}
 		
 		//open editor

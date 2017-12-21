@@ -571,10 +571,12 @@ public class FileProxy extends ISmartAttachment{
 		this.location = matching;
 	}
 
+	/**
+	 * Not valid for FileProxy
+	 */
 	@Override
 	protected String getDatastoreFolderPath(Session session) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.stationlocation;
 
 import java.text.Collator;
@@ -35,6 +56,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationHistoryRecord;
 import org.wcs.smart.asset.ui.CommentDialog;
@@ -42,7 +64,11 @@ import org.wcs.smart.asset.ui.DateCommentDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.ui.properties.DialogConstants;
-
+/**
+ * Station location even page for station location editor
+ * @author Emily
+ *
+ */
 public class StationLocationEventPage {
 
 	private StationLocationEditor parentEditor;
@@ -50,20 +76,11 @@ public class StationLocationEventPage {
 	private TableViewer tblEvents;
 	
 	private List<AssetStationLocationHistoryRecord> activeHistoryRecords;
-	private List<AssetStationLocationHistoryRecord> toDeleteHistoryRecords;
 	
 	public StationLocationEventPage(StationLocationEditor editor) {
 		this.parentEditor = editor;
 	}
 	
-	public void doSave(Session session) {
-		if (activeHistoryRecords != null) activeHistoryRecords.forEach(r->session.saveOrUpdate(r));
-		if (toDeleteHistoryRecords != null) toDeleteHistoryRecords.forEach(r->session.delete(r));
-		
-	}
-	public void afterSaveComplete() {
-		toDeleteHistoryRecords.clear();
-	}
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {
 		Composite panel = toolkit.createComposite(parent, SWT.NONE);
@@ -207,8 +224,18 @@ public class StationLocationEventPage {
 		record.setStationLocation(parentEditor.getAssetStationLocation());
 		record.setComment(dialog.getComment());
 		
+		try (Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				session.saveOrUpdate(record);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.log("Unable to save history record changes.  Close page and retry. " + ex.getMessage(), ex);
+				return;
+			}
+		}
 		activeHistoryRecords.add(record);
-		parentEditor.setDirty(true);
 		tblEvents.refresh();	
 	}
 	
@@ -223,10 +250,19 @@ public class StationLocationEventPage {
 		
 		if (dialog.open() != CommentDialog.OK) return;
 		
-		toEdit.setDate(dialog.getSelectedDateTime());
-		toEdit.setComment(dialog.getComment());
-		
-		parentEditor.setDirty(true);
+		try (Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				toEdit.setDate(dialog.getSelectedDateTime());
+				toEdit.setComment(dialog.getComment());
+				session.saveOrUpdate(toEdit);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.log("Unable to save history record changes.  Close page and retry. " + ex.getMessage(), ex);
+				return;
+			}
+		}
 		tblEvents.refresh();	
 	}
 	
@@ -245,18 +281,25 @@ public class StationLocationEventPage {
 				MessageFormat.format("Are you sure you want to delete the {0} selected station location history records?", toDelete.size()))){
 			return;
 		}
-		
-		toDelete.forEach(x->{
-			activeHistoryRecords.remove(x);
-			toDeleteHistoryRecords.add((AssetStationLocationHistoryRecord) x);
-		});
-		parentEditor.setDirty(true);
+		try (Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				toDelete.forEach(x->{
+					session.delete(x);
+				});
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.log("Unable to save history record changes.  Close page and retry. " + ex.getMessage(), ex);
+				return;
+			}
+		}
+		activeHistoryRecords.removeAll(toDelete);
 		tblEvents.refresh();
 	}
 	
 	public void initialize(AssetStationLocation location) {
 		activeHistoryRecords = new ArrayList<>();
-		toDeleteHistoryRecords = new ArrayList<>();
 		Job j = new Job("load history records") {
 
 			@Override

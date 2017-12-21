@@ -50,11 +50,10 @@ public enum StationManager {
 	}
 	
 	/**
-	 * Deletes the station and all data associated with the station. This will delete
-	 * waypoints so the provided session should be opened with the AttachmentInterceptor
+	 * Deletes the station and all data associated with the station. 
 	 * 
-	 * @param type
-	 * @param session
+	 * @param station the station to delete
+	 * @param broker the event broker for firing events after deletion
 	 * @throws Exception
 	 */
 	public void deleteStation(AssetStation station, IEventBroker broker){
@@ -69,18 +68,16 @@ public enum StationManager {
 				return;
 			}
 		}
-		//TODO: we may want to fire asset changed listeners here
-		//if an asset deployment is deleted to refresh other views
 		broker.post(AssetEvents.ASSETSTATION_DELETE, Collections.singletonList(station));
+		broker.post(AssetEvents.ASSET_ALL, null);
 	}
 	
 
 	/**
-	 * Deletes the station location and all data associated with the station location. This will delete
-	 * waypoints so the provided session should be opened with the AttachmentInterceptor
+	 * Deletes the station location and all data associated with the station location. 
 	 * 
-	 * @param type
-	 * @param session
+	 * @param location the station location to delete
+	 * @param broker event broker for firing events after deleting
 	 * @throws Exception
 	 */
 	public void deleteStationLocation(AssetStationLocation location, IEventBroker broker){
@@ -95,9 +92,8 @@ public enum StationManager {
 				return;
 			}
 		}
-		//TODO: we may want to fire asset changed listeners here
-		//if an asset deployment is deleted to refresh other views
 		broker.post(AssetEvents.ASSETSTATIONLOCATION_DELETE, Collections.singletonList(location));
+		broker.post(AssetEvents.ASSET_ALL, null);
 	}
 	
 	/**

@@ -30,7 +30,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.xmp.XmpDirectory;
 
 /**
- * Exif metadata field mapping
+ * XMP metadata field mapping
  * @author Emily
  *
  */
@@ -136,11 +136,17 @@ public class XmpMetadataField implements IMetadataField{
 	}
 
 	
+	/**
+	 * Converts a mapping string to an XmpMetdataField. Returns null
+	 * if mappingString cannot be parsed.
+	 * @param mappingString
+	 * @return
+	 */
 	public static XmpMetadataField parseMapping(String mappingString) {
-		if (mappingString == null) return null; //TODO: throw an exception
+		if (mappingString == null) return null;
 		String[] bits = mappingString.split("\\|");
 		if (bits.length == 1) return new XmpMetadataField(bits[0]);
 		if (bits.length == 2) return new XmpMetadataField(bits[0], bits[1]);
-		return null; //TODO: throw an exception
+		return null;
 	}
 }

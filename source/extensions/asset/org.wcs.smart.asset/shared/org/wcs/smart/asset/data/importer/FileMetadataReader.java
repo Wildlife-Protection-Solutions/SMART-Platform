@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.data.importer;
 
 import java.io.IOException;
@@ -22,9 +43,20 @@ import com.drew.metadata.Tag;
 import com.drew.metadata.exif.GpsDirectory;
 import com.drew.metadata.xmp.XmpDirectory;
 
+/**
+ * Utilities for reading metadata from varioud images files.
+ * @author Emily
+ *
+ */
 public class FileMetadataReader {
 
-	
+	/**
+	 * Create file proxy from the file for the given conservation area
+	 * @param file
+	 * @param ca
+	 * @return
+	 * @throws Exception
+	 */
 	public static FileProxy readFile(Path file, ConservationArea ca) throws Exception {
 		//at a minimum lets read the lat/long
 		FileProxy fileInfo = new FileProxy(file, ca);
@@ -90,7 +122,7 @@ public class FileMetadataReader {
 	 * 
 	 * @param file
 	 * @return  null indicates some error reading file; empty hash map
-	 * indicates not exif metadata found
+	 * indicates no exif metadata found
 	 */
 	public static HashMap<Directory, List<Tag>> readExifMetadata(Path file){
 		HashMap<Directory, List<Tag>> results = new HashMap<>();
@@ -100,26 +132,19 @@ public class FileMetadataReader {
 			for (Directory directory : metadata.getDirectories()) {
 				List<Tag> tags = new ArrayList<>();
 				for (Tag g : directory.getTags()) {
-//					tags.add(new String[] {g.getTagName(), g.getDescription()});
 					tags.add(g);
 				}
 				results.put(directory, tags);
 			}
 			return results;
 		}catch (Exception ex) {
-			//TODO: error
+			ex.printStackTrace();
 			return null;
 		}
 	}
 	
-	public static Metadata readMetadata(Path file) {
-		try {
-			return ImageMetadataReader.readMetadata(file.toFile());
-		}catch (Exception ex) {
-			ex.printStackTrace();
-			//TODO:
-		}
-		return null;
+	public static Metadata readMetadata(Path file) throws Exception {
+		return ImageMetadataReader.readMetadata(file.toFile());
 	}
 	
 	

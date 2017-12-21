@@ -69,6 +69,7 @@ import org.hibernate.query.Query;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
@@ -120,6 +121,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 	
 	private IdFieldHeader lblId;
 	
+	CoordinateReferenceSystem viewCrs;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -145,13 +147,9 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 				}
 				
 				s.beginTransaction();
-				
-				if (historyPage != null)historyPage.doSave(s);
-				
 				s.saveOrUpdate(stationlocation);
 				s.getTransaction().commit();
 				
-				if (historyPage != null)historyPage.afterSaveComplete();
 				((StationLocationEditorInput)getEditorInput()).setStationLocationUuid(stationlocation.getUuid());
 				setDirty(false);
 				
@@ -318,6 +316,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
+		viewCrs = HibernateManager.getCurrentViewCRS();
 		
 		parent.setLayout(new GridLayout());
 		((GridLayout)parent.getLayout()).marginWidth= 0;

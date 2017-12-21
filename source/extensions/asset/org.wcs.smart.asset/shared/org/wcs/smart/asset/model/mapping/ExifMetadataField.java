@@ -153,12 +153,18 @@ public class ExifMetadataField implements IMetadataField{
 		return MetadataType.EXIF;
 	}
 
-	
+	/**
+	 * Converts a mapping string to a ExifMetadataField.  Null is returned
+	 * if metadata field cannot be parsed from mapping string
+	 * 
+	 * @param mappingString
+	 * @return
+	 */
 	public static ExifMetadataField parseMapping(String mappingString) {
-		if (mappingString == null) return null; //TODO: throw an exception
+		if (mappingString == null) return null; 
 		String[] bits = mappingString.split("\\|");
 		if (bits.length == 1) return new ExifMetadataField(Integer.valueOf(bits[0]));
 		if (bits.length == 2) return new ExifMetadataField(Integer.valueOf(bits[0]), bits[1]);
-		return null; //TODO: throw an exception
+		return null; 
 	}
 }

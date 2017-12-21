@@ -19,27 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.data.importer;
+package org.wcs.smart.asset.ui.views.asset;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.wcs.smart.asset.engine.StatisticsEngine;
+import org.wcs.smart.asset.model.AssetDeployment;
 
 /**
- * Asset not found warning.
+ * Wrapper around asset deployment to track deployment and associated
+ * statistics.
  * 
  * @author Emily
  *
  */
-public class NewAssetWarning extends ActionableWarning{
+class AssetDeploymentWrapper {
 
-	private String assetId;
+	private AssetDeployment deployment;
+	private HashMap<StatisticsEngine.Statistic, Object> statValues;
 	
-	public NewAssetWarning(String message, String assetId) {
-		super(message);
-		this.assetId = assetId;
-	}
-
-	
-	public String getAssetId() {
-		return this.assetId;
+	public AssetDeploymentWrapper(AssetDeployment deployment) {
+		this.deployment = deployment;
 	}
 	
-
+	public AssetDeployment getDeployment() {
+		return deployment;
+	}
+	/**
+	 * 
+	 * @param stat
+	 * @return null if stat not found or not loaded
+	 */
+	public Object getStatistic(StatisticsEngine.Statistic stat) {
+		if (statValues == null) return null;
+		return statValues.get(stat);
+	}
+	
+	public void addStatistic(Map<StatisticsEngine.Statistic, Object> values) {
+		if (statValues == null) statValues = new HashMap<>();
+		statValues.putAll(values);
+	}
 }

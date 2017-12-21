@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.util.ArrayList;
@@ -21,6 +42,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeValue;
@@ -30,6 +52,12 @@ import org.wcs.smart.asset.ui.AttributeFieldEditor;
 import org.wcs.smart.asset.ui.CommentDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 
+/**
+ * Asset attribute page for the asset editor.
+ * 
+ * @author Emily
+ *
+ */
 public class AssetPropertyPage {
 
 	private AssetEditor parentEditor;
@@ -42,6 +70,46 @@ public class AssetPropertyPage {
 	
 	public AssetPropertyPage(AssetEditor editor) {
 		this.parentEditor = editor;
+	}
+	
+	private void retireAsset() {
+		if (parentEditor.getAsset() == null) return;
+		
+		Asset asset = parentEditor.getAsset();
+		String action;
+		String msg;
+		if (!asset.getIsRetired()) {
+			action = "Asset Retired - ";
+			msg = "Enter a comment related to the retirement";
+		}else {
+			action = "Asset Unretired - ";
+			msg = "Enter a comment related to unretirement of asset";
+		}
+		CommentDialog dialog = new CommentDialog(parentEditor.getSite().getShell(), "Asset History Comment", msg);
+		
+		if (dialog.open() != CommentDialog.OK) return;
+		
+		AssetHistoryRecord historyRecord = new AssetHistoryRecord();
+		historyRecord.setAsset(asset);
+		historyRecord.setComment(action + dialog.getComment());
+		historyRecord.setDate(new Date());
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				asset.setIsRetired(!asset.getIsRetired());
+				session.saveOrUpdate(historyRecord);
+				session.saveOrUpdate(asset);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.log("Unable to update asset state.  Please close editor and try again. " + ex.getMessage(),ex);
+				return;
+			}
+			parentEditor.activeHistoryRecords.add(historyRecord);
+			parentEditor.refreshHistoryRecords();
+		}
+		parentEditor.refreshStatus();
 	}
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {
@@ -68,29 +136,7 @@ public class AssetPropertyPage {
 		changeRetiredState.addHyperlinkListener(new HyperlinkAdapter() {			
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				if (parentEditor.getAsset() == null) return;
-				Asset asset = parentEditor.getAsset();
-				String action;
-				String msg;
-				if (!asset.getIsRetired()) {
-					action = "Asset Retired - ";
-					msg = "Enter a comment related to the retirement";
-				}else {
-					action = "Asset Unretired - ";
-					msg = "Enter a comment related to unretirement of asset";
-				}
-				CommentDialog dialog = new CommentDialog(parentEditor.getSite().getShell(), "Asset History Comment", msg);
-				
-				if (dialog.open() != CommentDialog.OK) return;
-				
-				AssetHistoryRecord historyRecord = new AssetHistoryRecord();
-				historyRecord.setAsset(asset);
-				historyRecord.setComment(action + dialog.getComment());
-				historyRecord.setDate(new Date());
-				parentEditor.addActiveHistoryRecord(historyRecord);
-				asset.setIsRetired(!asset.getIsRetired());
-				parentEditor.refreshStatus();
-				parentEditor.setDirty(true);
+				retireAsset();
 			}
 		});
 		

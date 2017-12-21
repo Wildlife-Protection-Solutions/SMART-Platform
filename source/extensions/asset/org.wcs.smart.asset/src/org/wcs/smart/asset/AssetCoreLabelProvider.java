@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.asset;
 
+import java.util.Locale;
+
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.model.AssetWaypointSource;
 
 /**
  * Label provider for core asset items.
@@ -30,8 +34,7 @@ import org.wcs.smart.asset.model.Asset;
  * @author Emily
  *
  */
-//TODO: implement as shared with connect
-public class AssetCoreLabelProvider {
+public class AssetCoreLabelProvider implements IAssetLabelProvider {
 
 	public static Image getStatusImage(Asset asset) {
 		return getStatusImage(asset.getStatus());
@@ -45,6 +48,24 @@ public class AssetCoreLabelProvider {
 			return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATUS_INACTIVE);
 		case RETIRED:
 			return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATUS_RETIRED);
+		}
+		return null;
+	}
+	
+	@Override
+	public String getLabel(Object item, Locale l) {
+		if (item instanceof AssetAttribute.AttributeType) {
+			switch( ((AssetAttribute.AttributeType)item) ) {
+			case BOOLEAN: return "BOOLEAN";
+			case DATE: return "DATE";
+			case LIST: return "LIST";
+			case NUMERIC: return "NUMERIC";
+			case POSITION: return "POSITION";
+			case TEXT: return "TEXT";			
+			}
+		}
+		if (item instanceof AssetWaypointSource) {
+			return "Asset";
 		}
 		return null;
 	}

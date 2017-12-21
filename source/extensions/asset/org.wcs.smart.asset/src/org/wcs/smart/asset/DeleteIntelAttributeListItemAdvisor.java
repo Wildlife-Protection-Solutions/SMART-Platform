@@ -39,7 +39,6 @@ import org.wcs.smart.hibernate.QueryFactory;
 public class DeleteIntelAttributeListItemAdvisor implements IDeleteAdvisor {
 
 	public DeleteIntelAttributeListItemAdvisor() {
-		// TODO Auto-generated constructor stub
 	}
 
 

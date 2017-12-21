@@ -292,33 +292,6 @@ public class AssetTypeListDialog extends TitleAreaDialog {
 		Object x = ((IStructuredSelection)cmbTypes.getSelection()).getFirstElement();
 		if (x instanceof AssetType){
 			AssetType type = (AssetType)x;
-			
-			//TODO:
-			//before we edit the entity type ensure that all editors with this type are not dirty
-//			List<EntityEditor> toSave = new ArrayList<EntityEditor>();
-//			StringBuilder sb= new StringBuilder();
-//			for (MPart part : context.get(EPartService.class).getParts()){
-//				if (E3Utils.isCompatibilityEditor(part)){
-//					Object src = E3Utils.getSourceObject(part); 
-//					if ( src instanceof EntityEditor 
-//							&& ((EntityEditor)src).isDirty()
-//							&& ((EntityEditor)src).getEntity().getEntityType().equals(type)){
-//						toSave.add((EntityEditor) src);
-//						sb.append(((EntityEditor)src).getEntity().getIdAttributeAsText());
-//						sb.append(", "); //$NON-NLS-1$
-//					}
-//				}
-//			}
-//			if (!toSave.isEmpty()){
-//				if (MessageDialog.openQuestion(getShell(), Messages.EntityTypeListDialog_EditTypeTitle, 
-//						MessageFormat.format(Messages.EntityTypeListDialog_EditTypeMsg, type.getName(), sb.substring(0, sb.length()-2)))){
-//					for (EntityEditor e : toSave){
-//						e.doSave(new NullProgressMonitor());
-//					}
-//				}else{
-//					return;  //cannot edit
-//				}
-//			}
 			openDialog(type);
 			refresh();
 		}

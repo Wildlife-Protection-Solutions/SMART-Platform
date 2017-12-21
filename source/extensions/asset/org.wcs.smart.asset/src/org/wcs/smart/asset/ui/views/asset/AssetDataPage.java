@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.util.ArrayList;
@@ -18,18 +39,20 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.ui.data.AssetDataPanel;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 
-
+/**
+ * Data page for asset editor.
+ * 
+ * @author Emily
+ *
+ */
 public class AssetDataPage {
 
 	@Inject
@@ -48,7 +71,7 @@ public class AssetDataPage {
 	
 	public Composite createDataSection(Composite parent, FormToolkit toolkit) {
 		
-		dataPanel = new AssetDataPanel(toolkit, false, false, context) {
+		dataPanel = new AssetDataPanel(toolkit, true, false, false, context) {
 			@Override
 			public void loadWaypoints() {
 				reloadData();
@@ -62,9 +85,9 @@ public class AssetDataPage {
 		((GridLayout)mainControl.getLayout()).marginHeight = 0;
 		
 		
-		Composite filterSection = toolkit.createComposite(mainControl, SWT.NONE);
+		Composite filterSection = toolkit.createComposite(mainControl, SWT.BORDER);
 		filterSection.setLayout(new GridLayout(3, false));
-		((GridLayout)filterSection.getLayout()).marginWidth = 0;
+		//((GridLayout)filterSection.getLayout()).marginWidth = 0;
 		filterSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		toolkit.createLabel(filterSection, "Date Filter:");
 		
@@ -84,16 +107,7 @@ public class AssetDataPage {
 				reloadData();
 			}
 		});
-		
-		ToolBar tb = new ToolBar(filterSection, SWT.FLAT);
-		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		
-		//enable/disable editing button based on user permission
-		ToolItem itemEdit = new ToolItem(tb, SWT.CHECK);
-		itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		itemEdit.setToolTipText("enable edit mode");
-		itemEdit.addListener(SWT.Selection, e->dataPanel.setEditable(itemEdit.getSelection()));
-		
+	
 		dataPanel.createControl(mainControl);
 		
 		return mainControl;

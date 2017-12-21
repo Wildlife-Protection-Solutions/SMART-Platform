@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.metadata;
 
 import java.text.MessageFormat;
@@ -42,8 +63,13 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Dialog that lists all the metadata mappings in the system.
+ * 
+ * @author Emily
+ *
+ */
 public class MetadataMappingDialog extends TitleAreaDialog{
-
 	
 	private TableViewer tblMappings;
 	
@@ -97,7 +123,6 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		parent.setLayout(new GridLayout());
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		
 		Composite cmp = new Composite(parent, SWT.NONE);
 		cmp.setLayout(new GridLayout(2, false));
 		cmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -108,7 +133,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 		tblMappings.setContentProvider(ArrayContentProvider.getInstance());
 		tblMappings.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		tblMappings.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+		((GridData)tblMappings.getTable().getLayoutData()).heightHint = 300;
 		TableViewerColumn colType = new TableViewerColumn(tblMappings, SWT.NONE);
 		colType.getColumn().setText("Type");
 		colType.getColumn().setWidth(50);
@@ -131,7 +156,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 				if (element instanceof AssetMetadataMapping) {
 					AssetMetadataMapping mm = (AssetMetadataMapping)element;
 					if (mm.getMetadataField() == null) {
-						return "ERROR PARSING METADATA MAPPING";
+						return "**Parse Error**";
 					}
 					return mm.getMetadataField().keyAsString();
 				}
@@ -148,7 +173,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 				if (element instanceof AssetMetadataMapping) {
 					AssetMetadataMapping mm = (AssetMetadataMapping)element;
 					if (mm.getMetadataField() == null) {
-						return "ERROR PARSING METADATA MAPPING";
+						return "**Parse Error**";
 					}
 					return mm.getMetadataField().valueAsString();
 				}
@@ -167,8 +192,6 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 					if (mm.getMappedAssetProperty() != null) return mm.getMappedAssetProperty().name();
 					
 					StringBuilder sb = new StringBuilder();
-//					sb.append(mm.getMetadataField().asUserString() + ": " );
-//					if ( ((ExifMetadataField)mm.getMetadataField() ).getTagValue() != null) sb.append( ((ExifMetadataField)mm.getMetadataField() ).getTagValue()  + ": ");
 					if (mm.getMappedListItem() != null) sb.append(mm.getMappedListItem().getName());
 					if (mm.getMappedTreeNode() != null) sb.append(mm.getMappedTreeNode().getName());
 					
@@ -263,8 +286,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 			try {
 				event.call();
 			}catch (Exception ex) {
-				//TODO:
-				ex.printStackTrace();
+				AssetPlugIn.log(ex.getMessage(), ex);
 			}
 		});
 		button.setEnabled(false);
@@ -279,8 +301,7 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 			try {
 				event.call();
 			}catch (Exception ex) {
-				ex.printStackTrace();
-				//TODO:
+				AssetPlugIn.log(ex.getMessage(),  ex);
 			}
 		});
 		button.setEnabled(false);
@@ -358,8 +379,8 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 	
 	public void modified() {
 		getButton(IDialogConstants.OK_ID).setEnabled(true);
-		//TODO:
 	}
+	
 	@Override
 	public boolean isResizable(){
 		return true;

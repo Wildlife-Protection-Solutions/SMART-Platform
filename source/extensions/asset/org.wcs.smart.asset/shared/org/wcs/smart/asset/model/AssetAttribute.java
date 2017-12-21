@@ -35,6 +35,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 
@@ -62,10 +64,7 @@ public class AssetAttribute  extends NamedKeyItem{
 		}
 		
 		public String getGuiName(Locale l){
-//			IIntelligenceLabelProvider provider = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class);
-//			return provider.getLabel(this, l);
-			//TODO:
-			return this.name();
+			return SmartContext.INSTANCE.getClass(IAssetLabelProvider.class).getLabel(this, l);
 		}
 	}
 	

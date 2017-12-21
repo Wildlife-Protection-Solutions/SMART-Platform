@@ -24,6 +24,7 @@ package org.wcs.smart.asset.ui.views.asset;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,6 +37,7 @@ import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -72,11 +74,16 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetUtils;
+import org.wcs.smart.asset.engine.StatisticsEngine;
+import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
+import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -98,9 +105,7 @@ public class AssetDeploymentPage {
 	
 	private Map<IAssetSummary, Label> assetSummaryValues;
 
-	private List<AssetDeployment> modifiedDeployments;
-	private List<AssetDeployment> toDeleteDeployments;
-	private List<AssetDeployment> allDeployments;
+	private List<AssetDeploymentWrapper> allDeployments;
 	
 	private AssetEditor parentEditor;
 
@@ -110,19 +115,7 @@ public class AssetDeploymentPage {
 	
 	public AssetDeploymentPage(AssetEditor parent) {
 		this.parentEditor = parent;
-		modifiedDeployments = new ArrayList<>();
-		toDeleteDeployments = new ArrayList<>();
 	}
-	
-	public List<AssetDeployment> getModifiedDeployments(){
-		return this.modifiedDeployments;
-	}
-	
-	public List<AssetDeployment> getDeletedDeployments(){
-		return this.toDeleteDeployments;
-	}
-	
-	
 	
 	public Composite createDeploymentsSection(Composite parent, FormToolkit toolkit) {
 		
@@ -131,6 +124,8 @@ public class AssetDeploymentPage {
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)panel.getLayout()).marginWidth = 0;
 		((GridLayout)panel.getLayout()).marginHeight = 0;
+		
+		panel.addListener(SWT.Dispose, e->computeDeploymentStats.cancel());
 		
 		Composite summaryPanel = toolkit.createComposite(panel, SWT.BORDER);
 		summaryPanel.setLayout(new GridLayout(2, false));
@@ -224,10 +219,10 @@ public class AssetDeploymentPage {
 				if (cell == null) return;
 				int colIndex = cell.getColumnIndex();
 				if (colIndex == AssetDeploymentTableColumn.FixedColumn.STATION.ordinal()){
-					AssetDeployment d = (AssetDeployment) cell.getElement();
+					AssetDeployment d = ((AssetDeploymentWrapper) cell.getElement()).getDeployment();
 					(new OpenStationHandler()).openStation(d.getStationLocation().getStation());
 				}else if (colIndex == AssetDeploymentTableColumn.FixedColumn.LOCATION.ordinal()){
-					AssetDeployment d = (AssetDeployment) cell.getElement();
+					AssetDeployment d = ((AssetDeploymentWrapper) cell.getElement()).getDeployment();
 					(new OpenStationLocationHandler()).openStationLocation(d.getStationLocation());
 				}else {
 					if (!parentEditor.getAsset().getIsRetired()) editSelectedDeployments();
@@ -298,8 +293,8 @@ public class AssetDeploymentPage {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object x = ((IStructuredSelection)tblDeployments.getSelection()).getFirstElement();
-				if (x instanceof AssetDeployment) {
-					updateDetailsPane((AssetDeployment)x, toolkit);
+				if (x instanceof AssetDeploymentWrapper) {
+					updateDetailsPane(((AssetDeploymentWrapper)x).getDeployment(), toolkit);
 				}
 			}
 		});
@@ -373,29 +368,36 @@ public class AssetDeploymentPage {
 		AssetDeployment newDeployment = new AssetDeployment();
 		newDeployment.setAsset(parentEditor.getAsset());
 		newDeployment.setStartDate(new Date());
-		
+		newDeployment.setAssetWaypoints(new ArrayList<>());
 		AssetDeploymentDialog dialog = new AssetDeploymentDialog(parentEditor.getSite().getShell(), newDeployment, allDeployments);
 		ContextInjectionFactory.inject(dialog, parentContext);
-		if (dialog.open() == Window.OK) {
-			modifiedDeployments.add(newDeployment);
-			allDeployments.add(newDeployment);
-			sortDeployments();
-			tblDeployments.refresh();
-			parentEditor.setDirty(true);
-			refreshSummaryStatistics();
-			
+		if (dialog.open() != Window.OK) return;
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				session.saveOrUpdate(newDeployment);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.displayLog("Unable to save changes to asset deployments.  Close editor and try again. " + ex.getMessage(), ex);
+			}
 		}
+		parentEditor.fireAssetModified(false);
+		allDeployments.add(new AssetDeploymentWrapper(newDeployment));
+		sortDeployments();
+		tblDeployments.refresh();
+		refreshSummaryStatistics();
 		
 	}
 	
 	private void deleteSelectedDeployments() {
-		//TODO:		
 		if (tblDeployments == null) return;
-		List<AssetDeployment> toDelete = new ArrayList<>();
+		List<AssetDeploymentWrapper> toDelete = new ArrayList<>();
 		for (Iterator<?> iterator = ((IStructuredSelection)tblDeployments.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
-			if (x instanceof AssetDeployment) {
-				toDelete.add((AssetDeployment)x);			
+			if (x instanceof AssetDeploymentWrapper) {
+				toDelete.add((AssetDeploymentWrapper)x);			
 			}
 		}
 		if (toDelete.isEmpty()) return;
@@ -410,11 +412,37 @@ public class AssetDeploymentPage {
 			return;
 		}
 		
-		toDelete.forEach(x->{
-			allDeployments.remove(x);
-			toDeleteDeployments.add((AssetDeployment) x);
-		});
-		parentEditor.setDirty(true);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				for (AssetDeploymentWrapper deploy : toDelete) {
+					//delete deployment & all associated waypoints/observations
+					AssetDeployment d = session.get(AssetDeployment.class, deploy.getDeployment().getUuid());
+					List<AssetWaypoint> dd = new ArrayList<>(d.getAssetWaypoints());
+					d.getAssetWaypoints().clear();
+					
+					for (AssetWaypoint aw : dd) {
+						session.delete(aw);
+					}
+					session.flush();
+					
+					//delete any waypoints not associated with asset waypoint
+					session.createQuery("DELETE FROM Waypoint wp where source = :source AND wp not in (SELECT waypoint FROM AssetWaypoint)")
+						.setParameter("source", AssetWaypointSource.KEY)
+						.executeUpdate();
+					
+					session.flush();
+					session.delete(d);
+				}
+				
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.displayLog("Unable to save changes to asset deployments.  Close editor and try again. " + ex.getMessage(), ex);
+			}
+		}
+		parentEditor.fireAssetModified(false);
+		allDeployments.removeAll(toDelete);
 		tblDeployments.refresh();
 		refreshSummaryStatistics();
 		
@@ -424,30 +452,38 @@ public class AssetDeploymentPage {
 		if (tblDeployments == null) return;
 		Object toEdit = ((IStructuredSelection)tblDeployments.getSelection()).getFirstElement();
 		if (toEdit == null) return;
-		if (!(toEdit instanceof AssetDeployment)) return;
+		if (!(toEdit instanceof AssetDeploymentWrapper)) return;
 		
-		AssetDeployment toUpdate = (AssetDeployment)toEdit;
+		AssetDeployment toUpdate = ((AssetDeploymentWrapper)toEdit).getDeployment();
 		AssetDeploymentDialog dialog = new AssetDeploymentDialog(parentEditor.getSite().getShell(), toUpdate, allDeployments);
 		ContextInjectionFactory.inject(dialog, parentContext);
-		if (dialog.open() == Window.OK) {
-			modifiedDeployments.add(toUpdate);
-			parentEditor.setDirty(true);
-			sortDeployments();
-			tblDeployments.refresh();
-			refreshSummaryStatistics();
-			
+		if (dialog.open() != Window.OK) return;
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				session.saveOrUpdate(toUpdate);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.displayLog("Unable to save changes to asset deployments.  Close editor and try again. " + ex.getMessage(), ex);
+			}
 		}
+		parentEditor.fireAssetModified(false);
+		sortDeployments();
+		tblDeployments.refresh();
+		refreshSummaryStatistics();
 	}
 	
 	private void sortDeployments() {
 		allDeployments.sort((a,b)->{
-			if (a.getEndDate() == null) return -1;
-			if (b.getEndDate() == null) return 1;
-			return b.getStartDate().compareTo(a.getStartDate());
+			if (a.getDeployment().getEndDate() == null) return -1;
+			if (b.getDeployment().getEndDate() == null) return 1;
+			return b.getDeployment().getStartDate().compareTo(a.getDeployment().getStartDate());
 		});
 	}
 	
-	private Job refreshSummaryStatsJob = new Job("loading asset history data)") {
+	private Job refreshSummaryStatsJob = new Job("loading asset history data") {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (assetSummaryValues == null) return org.eclipse.core.runtime.Status.OK_STATUS; 
@@ -479,7 +515,7 @@ public class AssetDeploymentPage {
 		}
 	};
 	
-	Job loadHistoryDataJob = new Job("loading asset history data)") {
+	Job loadHistoryDataJob = new Job("loading asset deployment data") {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
@@ -491,20 +527,20 @@ public class AssetDeploymentPage {
 			try(Session s = HibernateManager.openSession()){
 				
 				//compute table columns
-				tableColumns.addAll(AssetDeploymentTableColumn.getTableColumns(asset, s));
+				tableColumns.addAll(AssetDeploymentTableColumn.getTableColumns(asset, parentEditor.currentCrs, s));
 				
 				//TODO: add a date filter to list
 				//get deployment data
 				if (asset.getUuid() != null) {
 					List<AssetDeployment> temp = QueryFactory.buildQuery(s,AssetDeployment.class, 
 							new Object[] {"asset", asset}).list(); //$NON-NLS-1$
-					allDeployments.addAll(temp);
+					temp.forEach(a->allDeployments.add(new AssetDeploymentWrapper(a)));
 				}
 				allDeployments.forEach(d->{
-					d.getStationLocation().getId();
-					d.getStationLocation().getStation().getId();
-					for (AssetDeploymentAttributeValue v : d.getAttributeValues()) {
-						v.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS);//TODO: CRS
+					d.getDeployment().getStationLocation().getId();
+					d.getDeployment().getStationLocation().getStation().getId();
+					for (AssetDeploymentAttributeValue v : d.getDeployment().getAttributeValues()) {
+						v.getAttributeValueAsString(Locale.getDefault(), parentEditor.currentCrs);
 					}
 				});
 				
@@ -531,6 +567,30 @@ public class AssetDeploymentPage {
 				}
 				
 			});
+			computeDeploymentStats.schedule();
+			return org.eclipse.core.runtime.Status.OK_STATUS;
+		}
+	};
+	
+	
+	Job computeDeploymentStats = new Job("compute deployment stats") {
+		
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			if (allDeployments == null) return Status.OK_STATUS;
+			try(Session s = HibernateManager.openSession()){
+				for (AssetDeploymentWrapper d : allDeployments) {
+					
+					Map<Statistic, Object> stats = StatisticsEngine.INSTANCE.computeStatistics(Collections.singleton(StatisticsEngine.Statistic.NUMBER_INCIDENTS), d.getDeployment());
+					d.addStatistic(stats);
+					
+					Display.getDefault().syncExec(()->{
+						if (tblDeployments.getTable().isDisposed()) return;
+						tblDeployments.refresh(d, true);
+					});
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				}
+			}
 			return org.eclipse.core.runtime.Status.OK_STATUS;
 		}
 	};

@@ -86,6 +86,7 @@ import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
@@ -95,7 +96,6 @@ import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetHistoryRecord;
 import org.wcs.smart.asset.model.AssetType;
-import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.ui.CommentDialog;
 import org.wcs.smart.asset.ui.DateCommentDialog;
 import org.wcs.smart.asset.ui.IdFieldHeader;
@@ -104,7 +104,6 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -142,8 +141,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 	
 	private TableViewer tblEvents;
 	
-	private List<AssetHistoryRecord> activeHistoryRecords;
-	private List<AssetHistoryRecord> toDeleteHistoryRecords;
+	List<AssetHistoryRecord> activeHistoryRecords;
+	
 
 	private AssetDeploymentPage deploymentPage;
 	private AssetCurrentPage currentPage;
@@ -151,6 +150,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 	private AssetPropertyPage detailsPage;
 	
 	private Composite sectionBody;
+	
+	CoordinateReferenceSystem currentCrs;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -177,39 +178,10 @@ public class AssetEditor extends EditorPart implements MapPart {
 				
 				s.beginTransaction();
 				s.saveOrUpdate(asset);
-				
-				if (activeHistoryRecords != null) activeHistoryRecords.forEach(r->s.saveOrUpdate(r));
-				if (toDeleteHistoryRecords != null) toDeleteHistoryRecords.forEach(r->s.delete(r));
-				
-				if (deploymentPage != null) {
-					deploymentPage.getModifiedDeployments().forEach(r->s.saveOrUpdate(r));
-				
-					s.flush();
-					for (AssetDeployment deploy : deploymentPage.getDeletedDeployments()) {
-						//delete deployment & all associated waypoints/observations
-						AssetDeployment d = s.get(AssetDeployment.class, deploy.getUuid());
-						List<AssetWaypoint> dd = new ArrayList<>(d.getAssetWaypoints());
-						d.getAssetWaypoints().clear();
-						for (AssetWaypoint aw : dd) {
-							Waypoint w = aw.getWaypoint();
-							s.delete(aw);
-							s.delete(w);
-						}
-						s.flush();
-						s.delete(d);
-					}
-				}
-				
 				s.getTransaction().commit();
 				
 				((AssetEditorInput)getEditorInput()).setAssetUuid(asset.getUuid());
 				setDirty(false);
-				
-				toDeleteHistoryRecords.clear();
-				if (deploymentPage != null) {
-					deploymentPage.getDeletedDeployments().clear();
-					deploymentPage.getModifiedDeployments().clear();
-				}
 			}catch (Exception ex) {
 				s.getTransaction().rollback();
 				AssetPlugIn.displayLog(
@@ -217,15 +189,19 @@ public class AssetEditor extends EditorPart implements MapPart {
 				return;
 			}
 		}
+		fireAssetModified(isNew);
+	}
+
+	public void fireAssetModified(boolean isNew) {
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put(UIEvents.EventTags.ELEMENT, parentContext.get(MPart.class));
 		data.put(IEventBroker.DATA, Collections.singletonList(asset));
-		parentContext.get(IEventBroker.class).post(isNew? AssetEvents.ASSET_NEW : AssetEvents.ASSET_MODIFIED, data);	
+		parentContext.get(IEventBroker.class).post(isNew? AssetEvents.ASSET_NEW : AssetEvents.ASSET_MODIFIED, data);
 		
 		refreshStatus();
 		if (deploymentPage != null) deploymentPage.refreshSummaryStatistics();
 	}
-
+	
 	@Override
 	public void doSaveAs() {
 		
@@ -236,12 +212,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 		super.setInput(input);
 		super.setSite(site);
 		parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
-	}
-	
-	public void addActiveHistoryRecord(AssetHistoryRecord record) {
-		this.activeHistoryRecords.add(record);
-		if (tblEvents != null) tblEvents.refresh();
-		setDirty(true);
+		
+		refreshJob.setSystem(true);
 	}
 	
 	private void subscribeToEvent(String eventTopic, EventHandler handler){
@@ -274,7 +246,6 @@ public class AssetEditor extends EditorPart implements MapPart {
 			if (!MessageDialog.openQuestion(getSite().getShell(), "Refresh", "This station has unsaved changes.  By refreshing this page, these changes will be lost.  Are you sure you want to continue?")) return;
 		}
 		
-		refreshJob.setSystem(true);
 		refreshJob.schedule();
 	}
 
@@ -360,6 +331,9 @@ public class AssetEditor extends EditorPart implements MapPart {
 		
 	@Override
 	public void createPartControl(Composite parent) {
+		
+		currentCrs = HibernateManager.getCurrentViewCRS();
+		
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		parent.setLayout(new GridLayout());
@@ -678,7 +652,24 @@ public class AssetEditor extends EditorPart implements MapPart {
 		record.setDate(dialog.getSelectedDateTime());
 		record.setAsset(asset);
 		record.setComment(dialog.getComment());
-		addActiveHistoryRecord(record);
+		
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				session.saveOrUpdate(record);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.displayLog("Cannot add new history record to asset. Close and re-open editor and try again. " + ex.getMessage(), ex);
+				return;
+			}
+		}
+		activeHistoryRecords.add(record);
+		refreshHistoryRecords();
+	}
+	
+	void refreshHistoryRecords() {
+		if (tblEvents != null) tblEvents.refresh();
 	}
 	
 	private void editHistoryRecord() {
@@ -692,10 +683,20 @@ public class AssetEditor extends EditorPart implements MapPart {
 		
 		if (dialog.open() != CommentDialog.OK) return;
 		
-		toEdit.setDate(dialog.getSelectedDateTime());
-		toEdit.setComment(dialog.getComment());
-		
-		setDirty(true);
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				
+				toEdit.setDate(dialog.getSelectedDateTime());
+				toEdit.setComment(dialog.getComment());
+				session.saveOrUpdate(toEdit);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				AssetPlugIn.displayLog("Cannot save changes to asset record.  Close and re-open editor and try again. " + ex.getMessage(), ex);
+				return;
+			}
+		}
 		tblEvents.refresh();	
 	}
 	
@@ -715,11 +716,20 @@ public class AssetEditor extends EditorPart implements MapPart {
 			return;
 		}
 		
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				toDelete.forEach(e->s.delete(e));
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+				AssetPlugIn.displayLog("Cannot save changes to asset record.  Close and re-open editor and try again. " + ex.getMessage(), ex);
+				return;
+			}
+		}
 		toDelete.forEach(x->{
 			activeHistoryRecords.remove(x);
-			toDeleteHistoryRecords.add((AssetHistoryRecord) x);
 		});
-		setDirty(true);
 		tblEvents.refresh();
 	}
 	
@@ -731,8 +741,10 @@ public class AssetEditor extends EditorPart implements MapPart {
 			protected IStatus run(IProgressMonitor monitor) {
 				if (asset.getUuid() != null) {
 					try(Session s = HibernateManager.openSession()){
-						activeHistoryRecords.addAll(
-								QueryFactory.buildQuery(s, AssetHistoryRecord.class, "asset", asset).list()); //$NON-NLS-1$
+						List<AssetHistoryRecord> records = QueryFactory.buildQuery(s, AssetHistoryRecord.class, "asset", asset).list();
+						records.forEach(r->{
+							if (!activeHistoryRecords.contains(r)) activeHistoryRecords.add(r);
+						});
 					}
 				}
 				Display.getDefault().syncExec(()->{
@@ -798,7 +810,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 			AssetEditorInput in = (AssetEditorInput) AssetEditor.this.getEditorInput();
 			
 			activeHistoryRecords = new ArrayList<>();
-			toDeleteHistoryRecords = new ArrayList<>();
+//			toDeleteHistoryRecords = new ArrayList<>();
 			
 			try(Session session = HibernateManager.openSession()){
 				//load asset data

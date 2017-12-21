@@ -73,8 +73,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Dialog for asset deployments.  For creating new deployments or
- * editing existing deployments.
+ * Dialog for asset deployments.  For creating new deployments.
  * 
  * @author Emily
  *
@@ -98,13 +97,27 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 	
 	@Inject
 	private IEclipseContext context;
-	private List<AssetDeployment> allDeployments;
+	private List<AssetDeploymentWrapper> allDeployments;
 	private List<AttributeFieldEditor> attributeFields;
 	
-	public AssetDeploymentDialog(Shell parentShell, AssetDeployment toUpdate, List<AssetDeployment> allDeployments) {
+	private Long minWaypointDate = null;
+	private Long maxWaypointDate = null;
+	
+	public AssetDeploymentDialog(Shell parentShell, AssetDeployment toUpdate, List<AssetDeploymentWrapper> allDeployments) {
 		super(parentShell);
 		this.toUpdate = toUpdate;
 		this.allDeployments = allDeployments;
+		
+		if (toUpdate.getUuid() != null) {
+			try(Session s = HibernateManager.openSession()){
+				s.saveOrUpdate(toUpdate);
+				toUpdate.getAssetWaypoints().forEach(w->{
+					Long dt = w.getWaypoint().getDateTime().getTime();
+					if (minWaypointDate == null || dt < minWaypointDate) minWaypointDate = dt;
+					if (maxWaypointDate == null || dt > maxWaypointDate) maxWaypointDate = dt;
+				});
+			}
+		}
 	}
 	
 	@Override
@@ -112,7 +125,6 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		// create OK and Cancel buttons by default
 		Button okBtn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-		
 		okBtn.setEnabled(false);
 	}
 	
@@ -189,13 +201,18 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		boolean overlaps = false;
 		long start = SmartUtils.combineDateTime(SmartUtils.getDate(dtStartDate), SmartUtils.getTime(dtStartTime)).getTime();
 		long end = (new Date()).getTime();
-		if (chEndDate.getSelection()) end = SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime)).getTime();
-		if (start > end ) {
-			setErrorMessage("Start date cannot be after the end date");
-			return;
+		if (chEndDate.getSelection()) {
+			end = SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime)).getTime();
+			
+			if (start > end ) {
+				setErrorMessage("Start date cannot be after the end date");
+				return;
+			}
 		}
+		
 		long now = (new Date()).getTime();
-		for (AssetDeployment deploy : allDeployments) {
+		for (AssetDeploymentWrapper deployment : allDeployments) {
+			AssetDeployment deploy = deployment.getDeployment();
 			if (deploy.equals(toUpdate)) continue;
 				
 			long starttest = deploy.getStartDate().getTime();
@@ -216,6 +233,11 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 			return;
 		}
 		
+		//check waypoint are all within deployment date/time
+		if ((minWaypointDate != null && minWaypointDate < start) || (maxWaypointDate != null && chEndDate.getSelection() && maxWaypointDate > end)) {
+			setErrorMessage("At least one waypoint exists outside the start and end date.  Deployment date range must include all incidents associated with the deployment");
+			return;
+		}
 		btnOk.setEnabled(true);
 	}
 	
@@ -358,7 +380,6 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 			
 			for (AssetTypeDeploymentAttribute attribute : attributes) {
 				AttributeFieldEditor editor = new AttributeFieldEditor(attributeComp, attribute.getAttribute());
-				//TODO: intivalid
 				if (editor.getTextAttributeControl() != null) editor.getTextAttributeControl().addListener(SWT.Resize, e->scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 				attributeFields.add(editor);
 				editor.addSelectionListener(new SelectionListener() {

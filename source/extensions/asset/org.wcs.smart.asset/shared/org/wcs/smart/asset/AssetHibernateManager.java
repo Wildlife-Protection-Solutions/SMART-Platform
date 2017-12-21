@@ -122,7 +122,7 @@ public class AssetHibernateManager {
 			Double d = Double.valueOf(setting.getValue());
 			return d;
 		}catch (Exception ex) {
-			//TODO: log this
+			AssetPlugIn.log(ex.getMessage(),  ex);
 		}
 		return AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE;
 	}
@@ -145,7 +145,7 @@ public class AssetHibernateManager {
 			Double d = Double.valueOf(setting.getValue());
 			return d;
 		}catch (Exception ex) {
-			//TODO: log this
+			AssetPlugIn.log(ex.getMessage(),  ex);
 		}
 		return AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE;
 	}

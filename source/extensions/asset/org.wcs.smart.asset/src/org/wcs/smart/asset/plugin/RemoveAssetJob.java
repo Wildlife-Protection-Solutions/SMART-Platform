@@ -73,7 +73,6 @@ public class RemoveAssetJob extends Job {
 
 	private void uninstall(Session session){
 		
-		//TODO: delete asset waypoint data
 		@SuppressWarnings("nls")
 		String[] TABLES = new String[]{
 				"smart.asset_attribute_value",
@@ -83,14 +82,16 @@ public class RemoveAssetJob extends Job {
 				"smart.asset_module_settings",
 				"smart.asset_type_attribute",
 				"smart.asset_type_deployment_attribute",
+				"smart.asset_waypoint_attachment",
 				"smart.asset_waypoint",
 				"smart.asset_deployment",
+				"smart.asset_metadata_mapping",
 				"smart.asset_station_location_history",
 				"smart.asset_station_location_attribute_value",
+				"smart.asset_station_location_attribute",
 				"smart.asset_station_location",
-				"smart.asset_station",
-				"smart.asset_exif_metadata_mapping",
 				"smart.asset_station_attribute",
+				"smart.asset_station",
 				"smart.asset_attribute_list_item",
 				"smart.asset_attribute",
 				"smart.asset",

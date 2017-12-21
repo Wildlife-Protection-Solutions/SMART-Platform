@@ -39,12 +39,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.ui.data.AssetDataPanel;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
@@ -73,7 +70,7 @@ public class StationLocationDataPage {
 	
 	public Composite createDataSection(Composite parent, FormToolkit toolkit) {
 		
-		dataPanel = new AssetDataPanel(toolkit, false, false, context) {
+		dataPanel = new AssetDataPanel(toolkit, true, false, false, context) {
 			@Override
 			public void loadWaypoints() {
 				reloadData();
@@ -87,7 +84,7 @@ public class StationLocationDataPage {
 		((GridLayout)mainControl.getLayout()).marginHeight = 0;
 		
 		
-		Composite filterSection = toolkit.createComposite(mainControl, SWT.NONE);
+		Composite filterSection = toolkit.createComposite(mainControl, SWT.BORDER);
 		filterSection.setLayout(new GridLayout(3, false));
 		((GridLayout)filterSection.getLayout()).marginWidth = 0;
 		filterSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -109,33 +106,6 @@ public class StationLocationDataPage {
 				reloadData();
 			}
 		});
-		
-		ToolBar tb = new ToolBar(filterSection, SWT.FLAT);
-		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		
-		//enable/disable editing button based on user permission
-		ToolItem itemEdit = new ToolItem(tb, SWT.CHECK);
-		itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		itemEdit.setToolTipText("enable edit mode");
-		itemEdit.addListener(SWT.Selection, e->dataPanel.setEditable(itemEdit.getSelection()));
-		
-//		ToolItem itemSettings = new ToolItem(tb, SWT.PUSH);
-//		itemSettings.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_SETTINGS));
-//		itemSettings.setToolTipText("Configure table settings");
-//		itemSettings.addListener(SWT.Selection, e->{
-//			SettingsShell settingDialog = new SettingsShell(tb.getDisplay());
-//			settingDialog.show(tb);
-//			settingDialog.getShell().addListener(SWT.Dispose, evt->{
-//				DataDisplaySettings newSettings = settingDialog.getSettings();
-//				if (newSettings.getDisplayType() != this.settings.getDisplayType() || 
-//						newSettings.getIconSize() != this.settings.getIconSize()) {
-//					this.settings = newSettings;
-//					createDataPanel(null);
-//				}
-//				
-//			});
-//		});
-		
 		
 		dataPanel.createControl(mainControl);
 		

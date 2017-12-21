@@ -373,15 +373,7 @@ public class DataImportPage {
 									link.setAssetWaypoint(aw);
 									aw.getAttachments().add(link);
 								}
-								
-								//TODO: verify we do not have overlapping deployments
-								//ensure there are no other deployments whose end date is before this start date
-								if (d.getEndDate() == null) {
-									//ensure we have no other deployments that also have no end date
-								}else {
-									//ensure there are no other deployments whose start date is before this end date
-								}
-							
+															
 								session.flush();
 							}
 							monitor.worked(1);

@@ -192,7 +192,15 @@ public class AssetCurrentPage {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof Object[]) {
-					return ((Category)((Object[])element)[0]).getFullCategoryName();
+					Category c = ((Category)((Object[])element)[0]);
+					StringBuilder sb = new StringBuilder();
+					sb.append(c.getName());
+					if (c.getParent() != null) {
+						sb.append(" (");
+						sb.append(c.getParent().getFullCategoryName());
+						sb.append(")");
+					}
+					return sb.toString();
 				}
 				return super.getText(element);
 			}
@@ -312,14 +320,13 @@ public class AssetCurrentPage {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (deployUuid == null) {
-				//TODO: 
 				return Status.OK_STATUS;
 			}
 
 			AssetDeployment deploy = null;
 			try(Session session = HibernateManager.openSession()){
 				deploy = session.get(AssetDeployment.class, deployUuid);
-				if (deploy == null) return Status.OK_STATUS;//todo
+				if (deploy == null) return Status.OK_STATUS;
 				deploy.getAsset().getAssetType().getUuid();
 				deploy.getAttributeValues().forEach(e->{
 					e.getAttribute().getName();
@@ -351,6 +358,7 @@ public class AssetCurrentPage {
 			toCompute.add(StatisticsEngine.Statistic.INCIDENTS_PER_CAT);
 			toCompute.add(StatisticsEngine.Statistic.NUMBER_INCIDENTS);
 			toCompute.add(StatisticsEngine.Statistic.NUMBER_UNTAGGED);
+			toCompute.add(StatisticsEngine.Statistic.NUMBER_NOT_VLIDATED);
 			
 			stats.putAll(StatisticsEngine.INSTANCE.computeStatistics(toCompute, deploy));
 			
@@ -374,6 +382,16 @@ public class AssetCurrentPage {
 						untagged = String.valueOf((Long)v);
 					}else if (v instanceof String) {
 						untagged = (String)v;
+					}
+				}
+				
+				v = stats.get(StatisticsEngine.Statistic.NUMBER_NOT_VLIDATED);
+				String notvalidated = "";
+				if (v != null) {
+					if (v instanceof Long) {
+						notvalidated = String.valueOf((Long)v);
+					}else if (v instanceof String) {
+						notvalidated = (String)v;
 					}
 				}
 				
@@ -410,8 +428,13 @@ public class AssetCurrentPage {
 				
 				ll = toolkit.createLabel(statDetailsSection, "Untagged Incidents:");
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+				ll.setToolTipText("Number of incidents with no observations");
 				toolkit.createLabel(statDetailsSection, untagged);
 				
+				ll = toolkit.createLabel(statDetailsSection, "Not Validated:");
+				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+				ll.setToolTipText("Number of incidents that have not been validated");
+				toolkit.createLabel(statDetailsSection, notvalidated);
 				
 				Label sl = toolkit.createLabel(statDetailsSection, "", SWT.SEPARATOR | SWT.HORIZONTAL);
 				sl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -463,7 +486,7 @@ public class AssetCurrentPage {
 					for (AbstractAssetAttributeValue value : attributes) {
 						ll = toolkit.createLabel(deployAtt, value.getAttribute().getName() + ":");
 						ll.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-						toolkit.createLabel(deployAtt, value.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS));//TODO:
+						toolkit.createLabel(deployAtt, value.getAttributeValueAsString(Locale.getDefault(), parentEditor.currentCrs));
 					}
 					scrollDeployment.setMinSize(deployAtt.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 				}

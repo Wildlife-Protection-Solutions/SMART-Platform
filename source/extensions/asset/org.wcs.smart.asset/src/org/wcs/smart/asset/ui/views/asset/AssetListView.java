@@ -120,6 +120,7 @@ public class AssetListView {
 	private TreeViewer lstStations;
 	private FormToolkit toolkit;
 	
+	private boolean includeRetired = false;
 	
 	public AssetListView() {
 		super();
@@ -302,6 +303,18 @@ public class AssetListView {
 		openAsset.setText("Open");
 		openAsset.addListener(SWT.Selection, e->openAsset());
 		
+		MenuItem refresh = new MenuItem(mnu, SWT.PUSH);
+		refresh.setText("Refresh");
+		refresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		refresh.addListener(SWT.Selection, e->loadAssets());
+		
+		MenuItem retired = new MenuItem(mnu, SWT.CHECK);
+		retired.setText("Show Retired Assets");	
+		retired.addListener(SWT.Selection, e->{
+			this.includeRetired = retired.getSelection();
+			loadAssets();
+		});
+		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem deleteAsset = new MenuItem(mnu, SWT.PUSH);
@@ -388,6 +401,11 @@ public class AssetListView {
 		MenuItem openAsset = new MenuItem(mnu, SWT.PUSH);
 		openAsset.setText("Open");
 		openAsset.addListener(SWT.Selection, e->openStation());
+		
+		MenuItem refresh = new MenuItem(mnu, SWT.PUSH);
+		refresh.setText("Refresh");
+		refresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		refresh.addListener(SWT.Selection, e->loadStations());
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
@@ -564,10 +582,18 @@ public class AssetListView {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Asset> assets = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				assets.addAll(QueryFactory.buildQuery(session, Asset.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()} 
-//TODO: add this back with filter						new Object[] {"isRetired", false})
-						).list());	
+				Object[][] filters = null;
+				if (includeRetired){
+					filters = new Object[][] {
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}
+					};
+				}else {
+					filters = new Object[][] {
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
+						new Object[] {"isRetired", false}
+					};
+				}
+				assets.addAll(QueryFactory.buildQuery(session, Asset.class, filters).list()); 
 				assets.forEach(a->{a.getAssetType().getUuid().equals(null); a.getAssetType().getName();});
 			}
 			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
@@ -599,10 +625,7 @@ public class AssetListView {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<AssetStation> stations = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
-				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()} 
-//TODO: add this back with filter						new Object[] {"isRetired", false})
-						).list());	
+				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
 				stations.forEach(a->{a.getUuid().equals(null); a.getId();});
 				stations.forEach(a->a.getLocations().forEach(l->l.getId()));
 			}

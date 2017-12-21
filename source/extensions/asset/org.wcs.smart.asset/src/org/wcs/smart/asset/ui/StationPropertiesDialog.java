@@ -438,7 +438,6 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 
 						for (AssetStationAttribute x : toDelete){
 							try{
-								//TODO:
 								DeleteManager.canDelete(x, session);
 								aToDelete.add(x);
 							}catch (Exception ex){
@@ -500,7 +499,6 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 
 						for (AssetStationLocationAttribute x : toDelete){
 							try{
-								//TODO:
 								DeleteManager.canDelete(x, session);
 								aToDelete.add(x);
 							}catch (Exception ex){

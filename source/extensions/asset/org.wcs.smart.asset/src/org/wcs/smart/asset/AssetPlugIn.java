@@ -28,6 +28,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -76,6 +77,8 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		SmartContext.INSTANCE.setClass(IAssetLabelProvider.class, new AssetCoreLabelProvider());
 	}
 
 	/*

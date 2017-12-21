@@ -30,14 +30,16 @@ import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.asset.AssetUtils;
+import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Asset deployment table columns.
@@ -65,13 +67,16 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 
 	private FixedColumn column;
 	private AssetAttribute attribute;
+	private CoordinateReferenceSystem crs;
 	
-	public AssetDeploymentTableColumn(FixedColumn col) {
+	public AssetDeploymentTableColumn(FixedColumn col, CoordinateReferenceSystem crs) {
 		this.column = col;
+		this.crs = crs;
 	}
 	
-	public AssetDeploymentTableColumn(AssetAttribute attribute) {
+	public AssetDeploymentTableColumn(AssetAttribute attribute, CoordinateReferenceSystem crs) {
 		this.attribute = attribute;
+		this.crs = crs;
 	}
 	
 	public String getColumnName() {
@@ -83,8 +88,8 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 	
 	@Override
 	public String getText(Object element) {
-		if (! (element instanceof AssetDeployment)) return super.getText(element);
-		AssetDeployment deployment = (AssetDeployment) element;
+		if (! (element instanceof AssetDeploymentWrapper)) return super.getText(element);
+		AssetDeployment deployment = ((AssetDeploymentWrapper) element).getDeployment();
 		if (column != null) {
 			switch(column) {
 			case END_DATE:
@@ -93,7 +98,9 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 			case LOCATION:
 				return deployment.getStationLocation().getId();
 			case NUM_INCIDENTS:
-				return "TODO:"; //TODO:
+				Object x = ((AssetDeploymentWrapper)element).getStatistic(Statistic.NUMBER_INCIDENTS);
+				if (x == null) return DialogConstants.LOADING_TEXT;
+				return x.toString();
 			case START_DATE:
 				return DateFormat.getDateTimeInstance().format(deployment.getStartDate());
 			case STATION:
@@ -108,31 +115,27 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 			if (deployment.getAttributeValues() != null) {
 				for (AssetDeploymentAttributeValue v : deployment.getAttributeValues()) {
 					if (v.getAttribute().equals(attribute)) {
-						return v.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS); //TODO: crs provider
+						return v.getAttributeValueAsString(Locale.getDefault(), crs);
 					}
 				}
 			}
 			return "";
 		}
-		return "TODO: this hsould never happen";//TODO:
+		//should never get here
+		return "";
 	}
-	
-//	public int compare(Object v1, Object v2) {
-//		
-//	}
-	
-	
-	public static List<AssetDeploymentTableColumn> getTableColumns(Asset asset, Session session){
+		
+	public static List<AssetDeploymentTableColumn> getTableColumns(Asset asset, CoordinateReferenceSystem crs, Session session){
 		AssetType type = session.get(AssetType.class, asset.getAssetType().getUuid());
 		if (type == null) return Collections.emptyList();
 		
 		 List<AssetDeploymentTableColumn> columns = new ArrayList<>();
 		 for (FixedColumn c : FixedColumn.values()) {
-			 columns.add(new AssetDeploymentTableColumn(c));
+			 columns.add(new AssetDeploymentTableColumn(c, crs));
 		 }
 		 
 		 for(AssetTypeDeploymentAttribute attribute : type.getAssetDeploymentAttributes()) {
-			 columns.add(new AssetDeploymentTableColumn(attribute.getAttribute()));
+			 columns.add(new AssetDeploymentTableColumn(attribute.getAttribute(), crs));
 		 }
 		 return columns;
 	}

@@ -359,7 +359,7 @@ public class StationCurrentPage {
 				public String getText(Object element) {
 					if (element instanceof AssetDeployment) {
 						for (AssetDeploymentAttributeValue v : ((AssetDeployment) element).getAttributeValues()) {
-							if (v.getAttribute().equals(a)) return v.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS);//TODO: crs
+							if (v.getAttribute().equals(a)) return v.getAttributeValueAsString(Locale.getDefault(), parentEditor.viewCrs);
 						}
 						return "";
 					}

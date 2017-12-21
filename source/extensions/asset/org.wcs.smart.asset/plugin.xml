@@ -131,7 +131,8 @@
    <extension
          point="org.wcs.smart.observation.ObservationSource">
       <ObservationSource
-            class="org.wcs.smart.asset.model.AssetWaypointSource">
+            class="org.wcs.smart.asset.model.AssetWaypointSource"
+            ui_provider="org.wcs.smart.asset.ui.AssetWaypointSourceUiProvider">
       </ObservationSource>
    </extension>
    <extension

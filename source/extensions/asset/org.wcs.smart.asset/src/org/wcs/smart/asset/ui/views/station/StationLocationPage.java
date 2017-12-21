@@ -223,14 +223,11 @@ public class StationLocationPage {
 		mapViewer.getViewport().addDrawCommand(drawCommand);
 		mapViewer.getViewport().enableDrawCommands(true);
 		
-		
 		mapComposite.addListener(SWT.Resize, e->{
 			mapViewer.getControl().setBounds(0, 0, mapComposite.getSize().x, mapComposite.getSize().y);
 			org.eclipse.swt.graphics.Point size = toolComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 			toolComposite.setBounds(mapComposite.getSize().x - size.x, 0, size.x, size.y);
 		});
-		
-		//ApplicationGIS.getToolManager().setCurrentEditor(parentEditor);
 	}
 	
 	
@@ -346,13 +343,13 @@ public class StationLocationPage {
 					drawCommand.setBuffers(stationBuffer, locationBuffer);
 				}
 				
-				//TODO: CRS
-				
 				drawCommand.setStations(Collections.singletonList(parentEditor.getAssetStation()));
 				drawCommand.setLocations(locationData.stream().map(e->e.data).collect(Collectors.toSet()));
 				
 				SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(drawCommand.getBounds());
 				getMapViewer().getMap().executeSyncWithoutUndo(cmd);
+				
+				System.out.println(getMapViewer().getMap().getViewportModel().getCRS().toString());
 				
 				Display.getDefault().syncExec(()->{
 					if (tblLocations.getTable().isDisposed()) return;
@@ -464,7 +461,7 @@ public class StationLocationPage {
 			if (element instanceof AssetStationLocationProxy) {
 				AssetStationLocation l = ((AssetStationLocationProxy) element).data;
 				for (AssetStationLocationAttributeValue value : l.getAttributeValues()) {
-					if (value.getAttribute().equals(attribute)) return value.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS); //TODO:
+					if (value.getAttribute().equals(attribute)) return value.getAttributeValueAsString(Locale.getDefault(), parentEditor.viewCrs); 
 				}
 				return "";
 			}

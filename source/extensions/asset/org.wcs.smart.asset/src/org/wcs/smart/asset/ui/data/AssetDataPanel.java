@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -80,6 +81,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
+import org.wcs.smart.asset.AssetManager;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.data.importer.FileProcessor;
@@ -101,6 +103,7 @@ import org.wcs.smart.asset.ui.views.data.StationAssetSelectionDialog.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -140,12 +143,14 @@ public abstract class AssetDataPanel {
 	Color validatedColor = null;
 	
 	private boolean isEdit = false;
+	private boolean isEditable = false;
 	
 	private boolean hideOnValidate = true;
 	
-	public AssetDataPanel(FormToolkit toolkit, boolean isEditable, boolean hideOnValidation, IEclipseContext context) {
+	public AssetDataPanel(FormToolkit toolkit, boolean isEditable, boolean editState, boolean hideOnValidation, IEclipseContext context) {
 		this.toolkit = toolkit;
-		this.isEdit = isEditable;
+		this.isEdit = editState;
+		this.isEditable = isEditable;
 		this.context = context;
 		this.hideOnValidate = hideOnValidation;
 		displaySettings = DataDisplaySettings.getSettings();
@@ -179,7 +184,7 @@ public abstract class AssetDataPanel {
 			validatedColor.dispose();
 		});
 		
-		details = toolkit.createComposite(main, SWT.NONE);
+		details = toolkit.createComposite(main, SWT.BORDER);
 		details.setLayout(new GridLayout());
 		details.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)details.getLayout()).marginWidth = 0;
@@ -271,7 +276,7 @@ public abstract class AssetDataPanel {
 		
 		createPageControl(details, true, true);
 		
-		scroll = new ScrolledComposite(details, SWT.V_SCROLL | SWT.BORDER);
+		scroll = new ScrolledComposite(details, SWT.V_SCROLL );
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		toolkit.adapt(scroll);
 		scroll.setExpandHorizontal(true);
@@ -279,6 +284,9 @@ public abstract class AssetDataPanel {
 		
 		Composite scrollDetails = toolkit.createComposite(scroll, SWT.NONE);
 		scrollDetails.setLayout(new GridLayout());
+		((GridLayout)scrollDetails.getLayout()).marginWidth = 0;
+		((GridLayout)scrollDetails.getLayout()).marginHeight = 0;
+		
 		scroll.setContent(scrollDetails);
 		resizeScroll();
 		scroll.addListener(SWT.Resize, e->{
@@ -380,6 +388,9 @@ public abstract class AssetDataPanel {
 				}
 
 				clonedMapping = new AssetWaypointMapping(cloneWp, newDeployments.values());
+				
+				//validate asset deployments to ensure they include the waypoint date/time
+				validateAndExtend(cloneWp, newDeployments.values(), session);
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
@@ -513,6 +524,15 @@ public abstract class AssetDataPanel {
 			tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			toolkit.adapt(tb);
 			
+			if (isEditable) {
+				//enable/disable editing button based on user permission
+				ToolItem itemEdit = new ToolItem(tb, SWT.CHECK);
+				itemEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+				itemEdit.setToolTipText("enable edit mode");
+				itemEdit.setSelection(isEdit());
+				itemEdit.addListener(SWT.Selection, e->setEditable(itemEdit.getSelection()));
+				
+			}
 			if (includeRefresh) {	
 				ToolItem itemRefresh = new ToolItem(tb, SWT.PUSH);
 				itemRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
@@ -667,6 +687,7 @@ public abstract class AssetDataPanel {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try {
+					validateAndExtend(toedit.getWaypoint(), toedit.getAssetLinks(), s);
 					s.saveOrUpdate(toedit.getWaypoint());
 					s.getTransaction().commit();
 				}catch(Exception ex) {
@@ -742,6 +763,45 @@ public abstract class AssetDataPanel {
 		fireEvent();
 	}
 	
+	/**
+	 * Extends all the deployments in the assetlinks collection
+	 * to include the date/time provided by the waypoint.  Will throw
+	 * an exception of a deployment cannot be extended
+	 * 
+	 * @param wp
+	 * @param assetlinks
+	 */
+	private void validateAndExtend(Waypoint wp, Collection<AssetWaypoint> assetlinks, Session session) throws Exception{
+		Long wpTime = wp.getDateTime().getTime();
+		for (AssetWaypoint fromaw : assetlinks) {
+			
+			boolean check = false;
+			Long deploymentStart = fromaw.getAssetDeployment().getStartDate().getTime();
+			Long deploymentEnd = fromaw.getAssetDeployment().getEndDate().getTime();
+			
+			//we need to extend the asset deployment 
+			if (deploymentStart > wpTime) {
+				deploymentStart = wpTime;
+				fromaw.getAssetDeployment().setStartDate(new Date(deploymentStart));
+				session.saveOrUpdate(fromaw.getAssetDeployment());
+				check = true;
+			}
+			if (deploymentEnd < wpTime) {
+				deploymentEnd = wpTime;
+				fromaw.getAssetDeployment().setEndDate(new Date(deploymentEnd));
+				session.saveOrUpdate(fromaw.getAssetDeployment());
+				check = true;
+			}
+			if (check) {
+				//get all deployments for the asset and make sure they don't override
+				//if we cannot extend the asset deployment we need to throw an exception
+				List<AssetDeployment> allDeployments = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"asset", fromaw.getAssetDeployment().getAsset()}).list();
+				if (AssetManager.INSTANCE.overlaps(fromaw.getAssetDeployment(), allDeployments)) {
+					throw new Exception(MessageFormat.format("Incidents cannot be merged.  Merging would create duplicate asset deployments for asset {0}", fromaw.getAssetDeployment().getAsset().getId()));
+				}
+			}
+		}
+	}
 	private boolean mergeItems(List<AssetWaypointMapping> tomerge) {
 		if (!isEdit) return false;
 		if (tomerge.isEmpty() || tomerge.size() < 2) return false;
@@ -782,9 +842,18 @@ public abstract class AssetDataPanel {
 				List<AssetWaypointAttachment> toSave = new ArrayList<>();
 				core.getWaypoint().setDateTime(dtWaypoint.getDateTime());
 				core.getWaypoint().setComment(dtWaypoint.getComment());
+				session.saveOrUpdate(core.getWaypoint());
+				
+				//validate and extend all deployments associated with the core
+				validateAndExtend(core.getWaypoint(), core.getAssetLinks(), session);
+
 				for (int i = 1; i < tomerge.size(); i ++) {
 				
 					AssetWaypointMapping from = tomerge.get(i);
+
+					//update asset deployment times so we include the waypoint date/time
+					validateAndExtend(core.getWaypoint(), from.getAssetLinks(), session);
+
 					//copy over attachments
 					for (AssetWaypoint fromaw : from.getAssetLinks()) {
 						
@@ -801,9 +870,6 @@ public abstract class AssetDataPanel {
 							toAssetWaypoint.setState(State.DIRTY);
 							toAssetWaypoint.setWaypoint(core.getWaypoint());
 							core.getAssetLinks().add(toAssetWaypoint);
-							
-							//TODO: i think we need to check the asset deployment time range here and make
-							//sure it includes the incident date/time..
 						}
 						session.saveOrUpdate(toAssetWaypoint);
 
@@ -1388,7 +1454,7 @@ public abstract class AssetDataPanel {
 		}
 		
 		public AttachmentTable.IMenuCreator getAttachmentTableMenu(  ){
-			if (!isEdit) return null;
+			
 			return new AttachmentTable.IMenuCreator() {
 				MenuItem removeImg = null;
 				MenuItem createIncident = null;

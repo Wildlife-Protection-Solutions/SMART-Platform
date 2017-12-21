@@ -23,13 +23,20 @@ package org.wcs.smart.asset.ui;
 
 import java.util.UUID;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.ui.handler.OpenStationHandler;
+import org.wcs.smart.asset.ui.views.asset.AssetListView;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
  * Source provider for survey waypoints.
@@ -44,20 +51,26 @@ public class AssetWaypointSourceUiProvider implements
 	public void findAndShow(UUID waypointUuid) {
 		AssetWaypoint pw = null;
 		
+		AssetStation station = null;
 		try(Session s = HibernateManager.openSession()){
-			pw = QueryFactory.buildQuery(s, AssetWaypoint.class, "id.waypoint.uuid", waypointUuid).uniqueResult(); //$NON-NLS-1$
+			pw = QueryFactory.buildQuery(s, AssetWaypoint.class, "waypoint.uuid", waypointUuid).uniqueResult(); //$NON-NLS-1$
 			if (pw == null){
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
 						ERROR_STR, 
 						"Asset waypoint waypoint not found.");
 				return;
 			}
+			
+			station = pw.getAssetDeployment().getStationLocation().getStation();
+			station.getUuid().equals(null);
+			station.getId();
 		}
 		
-		//TODO:
-//		IEclipseContext ctx = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf();
-//		(new ShowFieldDataPerspective()).execute(SurveyDesignListView.ID,ctx.get(MWindow.class));
-//		EditSurveyElementHandler.editMission(ctx.get(Shell.class), pw.getMissionDay().getMission().getUuid(), pw.getMissionDay().getMission().getId(), pw.getWaypoint().getUuid());
+		//TODO: go to correct page
+		IEclipseContext ctx = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf();
+		(new ShowFieldDataPerspective()).execute(AssetListView.ID,ctx.get(MWindow.class));
+		
+		(new OpenStationHandler()).openStation(station);
 	}
 
 }

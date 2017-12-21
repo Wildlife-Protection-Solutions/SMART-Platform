@@ -19,27 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.data.importer;
+package org.wcs.smart.asset;
+
+import org.wcs.smart.ISharedLabelProvider;
 
 /**
- * Asset not found warning.
+ * Asset label provider for labels shared with Connect 
  * 
  * @author Emily
  *
  */
-public class NewAssetWarning extends ActionableWarning{
-
-	private String assetId;
-	
-	public NewAssetWarning(String message, String assetId) {
-		super(message);
-		this.assetId = assetId;
-	}
-
-	
-	public String getAssetId() {
-		return this.assetId;
-	}
-	
+public interface IAssetLabelProvider extends ISharedLabelProvider {
 
 }

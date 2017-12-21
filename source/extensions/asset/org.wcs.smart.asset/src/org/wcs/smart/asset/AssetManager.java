@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.asset;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.ScrollableResults;
@@ -102,7 +104,28 @@ public enum AssetManager {
 		
 		//delete the asset
 		session.delete(asset);
+	}
+	
+	public boolean overlaps(AssetDeployment toValidate, Collection<AssetDeployment> allDeployments) {
+		long now = (new Date()).getTime();
+		long start = toValidate.getStartDate().getTime();
+		Long endTime = toValidate.getEndDate() == null ? null : toValidate.getEndDate().getTime();
 		
+		for (AssetDeployment deploy : allDeployments) {
+			if (deploy.equals(toValidate)) continue;
+			long starttest = deploy.getStartDate().getTime();
+			long endtest = now;
+			if (deploy.getEndDate() != null) endtest = deploy.getEndDate().getTime();
+			
+			
+			if (!(endtest < start || (endTime != null && starttest > endTime))) {
+				return true;
+			}
+			if (endTime == null && deploy.getEndDate() == null) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }
