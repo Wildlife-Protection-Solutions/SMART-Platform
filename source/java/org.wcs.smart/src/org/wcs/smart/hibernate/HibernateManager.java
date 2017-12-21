@@ -76,6 +76,7 @@ import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.I18nUtil;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Hibernate manager to manage database connections.
@@ -916,6 +917,22 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 	}
 
+	/**
+	 * Get the current viewing coordinate reference system for the
+	 * current conservation area. 
+	 * @return
+	 */
+	public static CoordinateReferenceSystem getCurrentViewCRS() {
+		try(Session s = HibernateManager.openSession()) {
+			Projection p = getCurrentViewProjection(s);
+			CoordinateReferenceSystem crs = ReprojectUtils.stringToCrs(p.getDefinition());
+			return crs;
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+			return SmartDB.DATABASE_CRS;
+		}
+	}
+	
 	/**
 	 * Get the current viewing projection for the current Conservation
 	 * Area
