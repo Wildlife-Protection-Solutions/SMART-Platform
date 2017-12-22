@@ -606,7 +606,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		tblRoutines.getControl().setMenu(mnuRoutines);
 		
 		Composite bottomPanel = new Composite(panel, SWT.NONE);
-		bottomPanel.setLayout(new GridLayout(4, false));
+		bottomPanel.setLayout(new GridLayout(5, false));
 		bottomPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)bottomPanel.getLayout()).marginWidth = 0;
 		((GridLayout)bottomPanel.getLayout()).marginHeight = 0;
@@ -631,16 +631,17 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			}
 		});
 		
+		l = toolkit.createLabel(bottomPanel, "", SWT.SEPARATOR | SWT.VERTICAL); //$NON-NLS-1$
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)l.getLayoutData()).heightHint = 10;
 		
 		hlink = toolkit.createHyperlink(bottomPanel, Messages.ManualResultsEditor_refreshLink, SWT.NONE);
-		hlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		hlink.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				loadRoutines();
 			}
 		});
-		hlink.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		
 		tblRoutines.setInput(DialogConstants.LOADING_TEXT);
 
