@@ -110,7 +110,9 @@ public class GridAnalysisEngine<T> {
 	
 	private void rasterizeLinestring(MultiLineString ls) throws Exception {
 		for (int i = 0 ; i < ls.getNumGeometries(); i ++) {
-			rasterizeLinestring( (LineString)ls.getGeometryN(i) );
+			LineString tmp = (LineString)ls.getGeometryN(i);
+			tmp.setUserData(ls.getUserData());
+			rasterizeLinestring( tmp );
 		}
 	}
 	
