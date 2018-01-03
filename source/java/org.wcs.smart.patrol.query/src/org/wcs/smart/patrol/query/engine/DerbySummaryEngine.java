@@ -1186,15 +1186,17 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					fromSql.append(tableNames.get(Area.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
-					fromSql.append(" on smart.trackIntersects("); //$NON-NLS-1$
-					fromSql.append(tablePrefix(Track.class) + ".geometry, "); //$NON-NLS-1$
-					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
-					fromSql.append(")"); //$NON-NLS-1$
-					fromSql.append(" and ");//$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".ca_uuid = x'" + UuidUtils.uuidToString(query.getConservationArea().getUuid()) + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 					fromSql.append(" and ");//$NON-NLS-1$
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(areaPrefix + ".area_type = " + p1);//$NON-NLS-1$
+					fromSql.append(" and "); //$NON-NLS-1$
+					fromSql.append("smart.trackIntersects("); //$NON-NLS-1$
+					fromSql.append(tablePrefix(Track.class) + ".geometry, "); //$NON-NLS-1$
+					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
+					fromSql.append(")"); //$NON-NLS-1$
+					
 					groupBySql.append(key);
 				}
 				
