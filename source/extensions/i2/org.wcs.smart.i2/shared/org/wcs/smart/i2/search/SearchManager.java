@@ -57,6 +57,8 @@ public enum SearchManager {
 		
 	public List<IntelSearchResultItem> fuzzySearch(String searchFor, List<String> typeKeys, Collection<ConservationArea> conservationAreas, int maxResults, Session session){
 		
+		searchFor = searchFor.trim();
+		
 		List<String> metas = new ArrayList<String>();
 		SPLIT_PATTERN.splitAsStream(searchFor).forEach(w -> {
 			String s = DOUBLE_METAPHONE.doubleMetaphone(w,false);
@@ -106,7 +108,7 @@ public enum SearchManager {
 			sql.append(" ) "); //$NON-NLS-1$
 		}else{
 			sql.append(" AND "); //$NON-NLS-1$
-			sql.append(" LOWER(a.string_value like) :ml"); //$NON-NLS-1$
+			sql.append(" LOWER(a.string_value) like :ml"); //$NON-NLS-1$
 		}
 
 		// create the query and parameters
