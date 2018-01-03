@@ -61,6 +61,7 @@ import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PerspectiveAdapter;
+import org.eclipse.ui.internal.PerspectiveListenerList;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
@@ -125,6 +126,20 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	//link text field editors
 	private HashMap<RecordNarrativeView.FieldType, RecordNarrativeView> links = new HashMap<RecordNarrativeView.FieldType, RecordNarrativeView>();
+	
+	
+	private PerspectiveAdapter prespectiveListener = new PerspectiveAdapter() {
+		@Override
+		public void perspectiveActivated(IWorkbenchPage page,
+				IPerspectiveDescriptor perspective) {
+			if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
+				//save and be done with it
+				setEditMode(false);
+			}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
+				setEditMode(true);
+			}
+		}
+	};
 	
 	private Job loadRecordJob = new Job("load intelligence record"){ //$NON-NLS-1$
 
@@ -257,6 +272,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		if (handlers != null){
 			handlers.forEach((h)->event.unsubscribe(h));
 		}
+		getSite().getWorkbenchWindow().removePerspectiveListener(prespectiveListener);
 		super.dispose();
 	}
 	
@@ -463,18 +479,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}
 			});
 			
-			getSite().getWorkbenchWindow().addPerspectiveListener(new PerspectiveAdapter() {
-				@Override
-				public void perspectiveActivated(IWorkbenchPage page,
-						IPerspectiveDescriptor perspective) {
-					if (isDirty && perspective.getId().equals(IntelDataAnalysisPerspective.ID)){
-						//save and be done with it
-						setEditMode(false);
-					}else if (perspective.getId().equals(IntelDataAssessmentPerspective.ID)){
-						setEditMode(true);
-					}
-				}
-			});
+			getSite().getWorkbenchWindow().addPerspectiveListener(prespectiveListener);
 			
 			summaryPage = new RecordSummaryPage(this);
 			int i = addPage(summaryPage, getEditorInput());
