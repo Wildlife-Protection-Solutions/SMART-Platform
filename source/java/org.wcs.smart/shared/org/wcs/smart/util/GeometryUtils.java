@@ -219,27 +219,28 @@ public class GeometryUtils {
 		}
 		try{
 			
-			Geometry ls = wkbreader().read(linestring.getBytes(1, (int)linestring.length()));
-			if (!(ls instanceof LineString)){
-				return 0;
+			Geometry mls = wkbreader().read(linestring.getBytes(1, (int)linestring.length()));
+			if (mls instanceof LineString) {
+				mls = GeometryFactoryProvider.getFactory().createMultiLineString(new LineString[] {(LineString)mls});
 			}
-			Geometry poly = wkbreader().read(geom.getBytes(1, (int)geom.length()));
+			if (!(mls instanceof MultiLineString)) return 0;
 			
-			if (poly instanceof Polygon){
-				double x = computeHours((Polygon)poly, (LineString)ls);
-				return x;
-			}else if (poly instanceof MultiPolygon){
-				double x = computeHours((MultiPolygon)poly, (LineString)ls);
-				return x;
-			}else if (poly instanceof GeometryCollection){
-				double x = computeHours((GeometryCollection)poly, (LineString)ls);
-				return x;
+			Geometry poly = wkbreader().read(geom.getBytes(1, (int)geom.length()));
+			double sum = 0;
+			for (int i = 0; i < ((MultiLineString)mls).getNumGeometries(); i ++) {
+				LineString ls = (LineString)mls.getGeometryN(i);
+				if (poly instanceof Polygon){
+					sum += computeHours((Polygon)poly, (LineString)ls);
+				}else if (poly instanceof MultiPolygon){
+					sum += computeHours((MultiPolygon)poly, (LineString)ls);
+				}else if (poly instanceof GeometryCollection){
+					sum += computeHours((GeometryCollection)poly, (LineString)ls);
+				}
 			}
+			return sum;
 		}catch (Throwable e){
 			throw new RuntimeException(e);
-		}
-		return 0;
-		
+		}		
 	}
 	/*
 	 * support function from computeHours
@@ -484,7 +485,7 @@ public class GeometryUtils {
 	 * @param ls
 	 * @return
 	 * @throws TransformException
-	 */
+	 )*/
 	private static double distanceInMeters(Point closestPoint, Point p) {
 		GeodeticCalculator cal = new GeodeticCalculator();
 		cal.setStartingGeographicPoint(closestPoint.getX(),closestPoint.getY());
