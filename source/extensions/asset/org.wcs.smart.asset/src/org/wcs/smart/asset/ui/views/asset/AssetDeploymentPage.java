@@ -72,6 +72,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -86,9 +87,11 @@ import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -412,7 +415,7 @@ public class AssetDeploymentPage {
 			return;
 		}
 		
-		try(Session session = HibernateManager.openSession()){
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
 				for (AssetDeploymentWrapper deploy : toDelete) {
@@ -427,9 +430,12 @@ public class AssetDeploymentPage {
 					session.flush();
 					
 					//delete any waypoints not associated with asset waypoint
-					session.createQuery("DELETE FROM Waypoint wp where source = :source AND wp not in (SELECT waypoint FROM AssetWaypoint)")
-						.setParameter("source", AssetWaypointSource.KEY)
-						.executeUpdate();
+					try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){
+						while(scroll.next()) {
+							Waypoint wp = (Waypoint)scroll.get(0);
+							session.delete(wp);
+						}
+					}
 					
 					session.flush();
 					session.delete(d);

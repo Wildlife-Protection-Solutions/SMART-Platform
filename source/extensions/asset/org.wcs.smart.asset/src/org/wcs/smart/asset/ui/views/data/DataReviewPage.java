@@ -59,7 +59,7 @@ public class DataReviewPage {
 		
 	public DataReviewPage(DataImporterView view, FormToolkit toolkit) {
 		this.view = view;
-		panel = new AssetDataPanel(toolkit, false, true, true, view.getContext()) {			
+		panel = new AssetDataPanel(toolkit, false, true, true, true, view.getContext()) {			
 			@Override
 			public void loadWaypoints() {
 				loadWaypointsJob.schedule();

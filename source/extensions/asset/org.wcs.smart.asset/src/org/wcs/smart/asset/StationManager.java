@@ -21,20 +21,17 @@
  */
 package org.wcs.smart.asset;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
-import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.observation.model.Waypoint;
 
 /**
  * Tools for managing stations and station locations
@@ -69,7 +66,7 @@ public enum StationManager {
 			}
 		}
 		broker.post(AssetEvents.ASSETSTATION_DELETE, Collections.singletonList(station));
-		broker.post(AssetEvents.ASSET_ALL, null);
+		broker.post(AssetEvents.ASSETDATA, null);
 	}
 	
 
@@ -93,7 +90,7 @@ public enum StationManager {
 			}
 		}
 		broker.post(AssetEvents.ASSETSTATIONLOCATION_DELETE, Collections.singletonList(location));
-		broker.post(AssetEvents.ASSET_ALL, null);
+		broker.post(AssetEvents.ASSETDATA, null);
 	}
 	
 	/**
@@ -115,6 +112,10 @@ public enum StationManager {
 				deleteLocationWaypoints(session, loc);
 			}
 		}
+		
+		session.createQuery("DELETE FROM AssetStationLocationHistoryRecord WHERE stationLocation in (FROM AssetStationLocation where station = :station)")
+		.setParameter("station", station)
+		.executeUpdate();
 		
 		session.delete(station);
 	}
@@ -143,18 +144,27 @@ public enum StationManager {
 	}
 	
 	private void deleteLocationWaypoints(Session session, AssetStationLocation location) {
-		try(ScrollableResults scroll = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"stationLocation", location}).scroll()){
+		
+		String hql = "DELETE FROM AssetWaypointAttachment a where a.id.assetWaypoint in (FROM AssetWaypoint WHERE assetDeployment.stationLocation = :location) ";
+		session.createQuery(hql).setParameter("location",  location).executeUpdate();
+		session.flush();
+		
+		hql = "DELETE FROM AssetWaypoint WHERE assetDeployment in (FROM AssetDeployment WHERE stationLocation = :location ) ";
+		session.createQuery(hql).setParameter("location",  location).executeUpdate();
+		session.flush();
+		
+		//delete any waypoints not associated with asset waypoint
+		try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){
 			while(scroll.next()) {
-				AssetDeployment d  = (AssetDeployment)scroll.get(0);
-				List<AssetWaypoint> dd = new ArrayList<>(d.getAssetWaypoints());
-				d.getAssetWaypoints().clear();
-				for (AssetWaypoint w : dd) {
-					session.delete(w);
-					session.delete(w.getWaypoint());
-				}
-				session.delete(d);
-				session.flush();
+				Waypoint wp = (Waypoint)scroll.get(0);
+				session.delete(wp);
 			}
 		}
+		session.flush();
+		
+		hql = "DELETE FROM AssetDeployment WHERE stationLocation = :location ";
+		session.createQuery(hql).setParameter("location",  location).executeUpdate();
+		session.flush();
+
 	}
 }

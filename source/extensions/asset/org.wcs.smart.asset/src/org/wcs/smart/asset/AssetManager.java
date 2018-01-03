@@ -30,10 +30,11 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
-import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetWaypointAttachment;
+import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.observation.model.Waypoint;
 
 /**
  * Tools for managing stations and station locations
@@ -85,22 +86,45 @@ public enum AssetManager {
 		asset = session.get(Asset.class,  asset.getUuid());
 		if (asset== null) return;
 		
-		//remove all deployments
-		try(ScrollableResults scroll = QueryFactory.buildQuery(session, AssetDeployment.class, new Object[] {"asset", asset}).scroll()){
+		//remove all deployments, waypoints and associated attachment links
+		//remove waypoint attachment
+		//due to circular links in database this 
+		//has been implemented by deleting one attachment at a time - I can forsee this being really slow
+		//TODO: investigate performance
+		try(ScrollableResults scroll = session.createQuery("FROM AssetWaypointAttachment a WHERE a.id.assetWaypoint.assetDeployment.asset = :asset", AssetWaypointAttachment.class).setParameter("asset",  asset).scroll()){
 			while(scroll.next()) {
-				AssetDeployment d = (AssetDeployment) scroll.get(0);
-				for (AssetWaypoint aw : d.getAssetWaypoints()) {
-					session.delete(aw);
-					session.delete(aw.getWaypoint());
-				}
-				session.delete(d);
+				AssetWaypointAttachment attachment = (AssetWaypointAttachment)scroll.get(0);
+				
+				session.delete(attachment);
+				attachment.getWaypointAttachment().getWaypoint().getAttachments().remove(attachment.getWaypointAttachment());
+				session.delete(attachment.getWaypointAttachment());
 				session.flush();
 			}
 		}
 		
+		
+		String hql = "DELETE FROM AssetWaypoint WHERE assetDeployment in (FROM AssetDeployment WHERE asset = :asset ) ";
+		session.createQuery(hql).setParameter("asset",  asset).executeUpdate();
+		session.flush();
+		
+		//delete any waypoints not associated with asset waypoint
+		try (ScrollableResults scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)").setParameter("source", AssetWaypointSource.KEY).scroll()){
+			while(scroll.next()) {
+				Waypoint wp = (Waypoint)scroll.get(0);
+				session.delete(wp);
+			}
+		}
+		session.flush();
+		
+		
+		hql = "DELETE FROM AssetDeployment WHERE asset = :asset";
+		session.createQuery(hql).setParameter("asset",  asset).executeUpdate();
+		session.flush();
+		
 		//delete history records
-		String hql = "DELETE FROM AssetHistoryRecord WHERE asset = :asset";
+		hql = "DELETE FROM AssetHistoryRecord WHERE asset = :asset";
 		session.createQuery(hql).setParameter("asset", asset).executeUpdate();
+		session.flush();
 		
 		//delete the asset
 		session.delete(asset);

@@ -402,7 +402,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 			@Override
 			public void propertyChanged(Object source, int propId) {
 				if (propId == IEditorPart.PROP_DIRTY) {
-					saveItem.setEnabled(isDirty);
+					Display.getDefault().asyncExec(()->saveItem.setEnabled(isDirty));
 				}
 			}
 		});

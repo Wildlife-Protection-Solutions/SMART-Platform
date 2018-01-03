@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.ui.views.asset;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -48,6 +49,8 @@ import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -502,10 +505,24 @@ public class AssetListView {
 		if (!AssetUtils.confirmPassword(context.get(Shell.class), "Delete", "Confirm your password to delete the station or location and associated data.")) {
 			return;
 		}
-		if (s instanceof AssetStation) {
-			StationManager.INSTANCE.deleteStation((AssetStation)s, context.get(IEventBroker.class));
-		}else if (s instanceof AssetStationLocation) {
-			StationManager.INSTANCE.deleteStationLocation((AssetStationLocation)s, context.get(IEventBroker.class));
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(context.get(Shell.class));
+		try {
+			pmd.run(true,  false,  new IRunnableWithProgress() {
+	
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					monitor.beginTask("Deleting selected items.", IProgressMonitor.UNKNOWN);
+					if (s instanceof AssetStation) {
+						StationManager.INSTANCE.deleteStation((AssetStation)s, context.get(IEventBroker.class));
+					}else if (s instanceof AssetStationLocation) {
+						StationManager.INSTANCE.deleteStationLocation((AssetStationLocation)s, context.get(IEventBroker.class));
+					}
+					monitor.done();
+				}
+				
+			});
+		}catch (Exception ex) {
+			AssetPlugIn.displayLog("Error deleting selected item.  Refresh and try again: " + ex.getMessage(), ex);
 		}
 	}
 	

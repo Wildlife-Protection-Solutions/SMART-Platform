@@ -70,7 +70,7 @@ public class StationLocationDataPage {
 	
 	public Composite createDataSection(Composite parent, FormToolkit toolkit) {
 		
-		dataPanel = new AssetDataPanel(toolkit, true, false, false, context) {
+		dataPanel = new AssetDataPanel(toolkit, true, false, false, false, context) {
 			@Override
 			public void loadWaypoints() {
 				reloadData();

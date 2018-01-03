@@ -146,13 +146,15 @@ public abstract class AssetDataPanel {
 	private boolean isEditable = false;
 	
 	private boolean hideOnValidate = true;
+	private boolean canValidate = true;
 	
-	public AssetDataPanel(FormToolkit toolkit, boolean isEditable, boolean editState, boolean hideOnValidation, IEclipseContext context) {
+	public AssetDataPanel(FormToolkit toolkit, boolean isEditable, boolean editState, boolean hideOnValidation, boolean canValidate, IEclipseContext context) {
 		this.toolkit = toolkit;
 		this.isEdit = editState;
 		this.isEditable = isEditable;
 		this.context = context;
 		this.hideOnValidate = hideOnValidation;
+		this.canValidate = canValidate;
 		displaySettings = DataDisplaySettings.getSettings();
 	}
 	
@@ -209,26 +211,29 @@ public abstract class AssetDataPanel {
 		if (control.getMenu() != null && !control.getMenu().isDisposed()) return;
 		Menu mnuHeader = new Menu(details);
 		
-		MenuItem mnuOk = new MenuItem(mnuHeader, SWT.PUSH);
-		mnuOk.setText("Validate Selection");
-		mnuOk.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE));
-		mnuOk.addListener(SWT.Selection, e->{
-			List<AssetWaypointMapping> toClear = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
-			markValidated(toClear);
-		});
+		MenuItem mnuOk = null; 
+		if (canValidate) {
+			mnuOk = new MenuItem(mnuHeader, SWT.PUSH);
+			mnuOk.setText("Validate Selection");
+			mnuOk.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE));
+			mnuOk.addListener(SWT.Selection, e->{
+				List<AssetWaypointMapping> toClear = rows.stream().filter(i->i.isSelected).map(i->i.waypoint).collect(Collectors.toList());
+				markValidated(toClear);
+			});
+			
+			new MenuItem(mnuHeader, SWT.SEPARATOR);
+	
+			MenuItem mnuOkAll = new MenuItem(mnuHeader, SWT.PUSH);
+			mnuOkAll.setText("Validate All");
+			mnuOkAll.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE_ALL));
+			mnuOkAll.addListener(SWT.Selection, e->{
+				List<AssetWaypointMapping> toClear = rows.stream().map(i->i.waypoint).collect(Collectors.toList());
+				markValidated(toClear);
+				refresh();
+			});
 		
-		new MenuItem(mnuHeader, SWT.SEPARATOR);
-
-		MenuItem mnuOkAll = new MenuItem(mnuHeader, SWT.PUSH);
-		mnuOkAll.setText("Validate All");
-		mnuOkAll.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE_ALL));
-		mnuOkAll.addListener(SWT.Selection, e->{
-			List<AssetWaypointMapping> toClear = rows.stream().map(i->i.waypoint).collect(Collectors.toList());
-			markValidated(toClear);
-			refresh();
-		});
-		
-		new MenuItem(mnuHeader, SWT.SEPARATOR);
+			new MenuItem(mnuHeader, SWT.SEPARATOR);
+		}
 		
 		MenuItem mnuMerge = new MenuItem(mnuHeader, SWT.PUSH);
 		mnuMerge.setText("Merge Incidents ");
@@ -246,13 +251,16 @@ public abstract class AssetDataPanel {
 			deleteWaypoints(toClear);
 		});
 		
+		MenuItem fmnuOk = mnuOk;
 		mnuHeader.addMenuListener(new MenuListener() {
 			@Override
 			public void menuShown(MenuEvent e) {
-				long size = rows.stream().filter(i->i.isSelected && i.waypoint.hasDirty()).map(i->i.waypoint).collect(Collectors.counting());
-				mnuOk.setEnabled(size != 0);
-				mnuMerge.setEnabled(size > 1 );
-				mnuDelete.setEnabled(size != 0);
+				long cntNotValidated = rows.stream().filter(i->i.isSelected && i.waypoint.hasDirty()).collect(Collectors.counting());
+				long cntSelected = rows.stream().filter(i->i.isSelected).collect(Collectors.counting());
+				
+				if (fmnuOk != null) fmnuOk.setEnabled(cntNotValidated != 0);
+				mnuMerge.setEnabled(cntSelected > 1 );
+				mnuDelete.setEnabled(cntSelected != 0);
 			}
 			
 			@Override
@@ -777,7 +785,10 @@ public abstract class AssetDataPanel {
 			
 			boolean check = false;
 			Long deploymentStart = fromaw.getAssetDeployment().getStartDate().getTime();
-			Long deploymentEnd = fromaw.getAssetDeployment().getEndDate().getTime();
+			Long deploymentEnd = null;
+			if (fromaw.getAssetDeployment().getEndDate() != null) {
+				deploymentEnd = fromaw.getAssetDeployment().getEndDate().getTime();
+			}
 			
 			//we need to extend the asset deployment 
 			if (deploymentStart > wpTime) {
@@ -786,7 +797,7 @@ public abstract class AssetDataPanel {
 				session.saveOrUpdate(fromaw.getAssetDeployment());
 				check = true;
 			}
-			if (deploymentEnd < wpTime) {
+			if (deploymentEnd != null && deploymentEnd < wpTime) {
 				deploymentEnd = wpTime;
 				fromaw.getAssetDeployment().setEndDate(new Date(deploymentEnd));
 				session.saveOrUpdate(fromaw.getAssetDeployment());
@@ -1052,7 +1063,7 @@ public abstract class AssetDataPanel {
 					}
 				}
 				waypoint.getAssetLinks().removeAll(assetLinksToRemove);
-				if (waypoint.getAssetLinks().isEmpty()) throw new IllegalStateException("Remove these files will remove all links between waypoint and asset. This is not a valid.");
+				if (waypoint.getAssetLinks().isEmpty()) throw new IllegalStateException("Removing the selected files will remove all links between waypoint and asset. This is not a valid.  You must have at least one file associated with the waypoint.");
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
@@ -1315,7 +1326,7 @@ public abstract class AssetDataPanel {
 					
 				});
 				
-				if (waypoint.hasDirty()) {
+				if (waypoint.hasDirty() && canValidate) {
 					ToolItem itemCh = new ToolItem(tb, SWT.PUSH);
 					itemCh.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_VALIDATE));
 					itemCh.setToolTipText("mark as verified");

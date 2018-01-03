@@ -52,6 +52,11 @@ public class AssetWaypointMapping {
 		return this.assetLinks;
 	}
 	
+	/**
+	 * 
+	 * @return true if at least one of the asset waypoints associated with
+	 * the waypoint has not been validated
+	 */
 	public boolean hasDirty() {
 		for (AssetWaypoint wp : assetLinks) {
 			if (wp.getState() == State.DIRTY) return true;
