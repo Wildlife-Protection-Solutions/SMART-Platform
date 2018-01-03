@@ -109,7 +109,7 @@ public class RecordExportJob extends Job {
 		String fileName = record.getTitle() + "." + (new SimpleDateFormat("MMMddyyyy")).format(new Date()); //$NON-NLS-1$ //$NON-NLS-2$
 		fileName = URLUtils.cleanFilename(fileName);
 		Path current = outputFile;
-		outputFile = current.resolve(fileName + Messages.RecordExportJob_5 + format.getFormat());
+		outputFile = current.resolve(fileName + "." + format.getFormat()); //$NON-NLS-1$
 		if (Files.exists(outputFile)){
 			int cnt = 1;
 			while(cnt < 1000){
@@ -118,6 +118,22 @@ public class RecordExportJob extends Job {
 					break;
 				}
 				cnt++;
+			}
+		}
+		
+		//if the file name is long or contains funny characters lets just use the uuid
+		if (!Files.isWritable(outputFile)) {
+			fileName = UuidUtils.uuidToString(record.getUuid()) + "." + (new SimpleDateFormat("MMMddyyyy")).format(new Date()); //$NON-NLS-1$ //$NON-NLS-2$
+			outputFile = current.resolve(fileName + "." + format.getFormat()); //$NON-NLS-1$
+			if (Files.exists(outputFile)) {
+				int cnt = 1;
+				while(cnt < 1000){
+					outputFile = current.resolve(fileName + "." + cnt + "." + format.getFormat()); //$NON-NLS-1$ //$NON-NLS-2$
+					if (!Files.exists(outputFile)){
+						break;
+					}
+					cnt++;
+				}
 			}
 		}
 			
