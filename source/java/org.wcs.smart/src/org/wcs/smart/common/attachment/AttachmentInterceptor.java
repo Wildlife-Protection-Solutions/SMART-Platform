@@ -69,6 +69,14 @@ public class AttachmentInterceptor extends SessionInterceptor {
 				}catch (Exception ex){
 					SmartPlugIn.log("Could not delete file: " + f.toString(), ex); //$NON-NLS-1$
 				}
+				if (f.getParentFile().list().length == 0) {
+					//if there are no more files then we delete the directory too
+					try {
+						f.getParentFile().delete();
+					}catch (Exception ex) {
+						SmartPlugIn.log("Could not delete empty directory: " + f.toString(), ex); //$NON-NLS-1$
+					}
+				}
 			}
 			toDelete.clear();
 		}
