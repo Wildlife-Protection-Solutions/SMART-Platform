@@ -277,7 +277,7 @@ public class StationDialog extends TitleAreaDialog{
 		}
 		scroll.setMinSize(attributeComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		setTitle("Station Attributes");
+		setTitle("New Station");
 		setMessage("Configure the station and associated attributes");
 		getShell().setText("Station Attributes");
 		

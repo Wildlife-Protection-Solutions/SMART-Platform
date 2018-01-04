@@ -169,9 +169,9 @@ public class StationPropertiesDialog extends TitleAreaDialog {
 		
 		initTable();
 		
-		setTitle("Station Properties");
+		setTitle("Station Attributes");
 		setMessage("Configure attributes to collect about stations and station locations");
-		getShell().setText("Station Properties");
+		getShell().setText("Station Attributes");
 		
 		return parent;
 	}

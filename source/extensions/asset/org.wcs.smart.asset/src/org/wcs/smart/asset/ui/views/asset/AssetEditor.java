@@ -863,6 +863,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 					initializeAttributePanel(asset);
 					initializeEventsPanel(asset);
 					if (deploymentPage != null) deploymentPage.initializePanel(asset); 
+					if (dataPage != null) dataPage.reloadData();
 					
 					//updating the currentPage is covered by the refreshStatus
 					refreshStatus();

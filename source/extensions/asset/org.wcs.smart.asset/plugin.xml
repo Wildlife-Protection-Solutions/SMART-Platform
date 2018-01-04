@@ -173,7 +173,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.stationproperties.show"
-                  label="Station Properties..."
+                  label="Station &amp;&amp; Location Attributes..."
                   style="push">
             </command>
             <command
@@ -318,7 +318,7 @@
             commandId="org.wcs.smart.asset.command.model.xml.export">
       </handler>
       <handler
-            class="org.wcs.smart.asset.ui.handler.ImportAssetModelFromXmlHandler$ImportAssetModelFromXmlHandlerWrapper"
+            class="org.wcs.smart.asset.ui.handler.ImportAssetDataHandler$ImportAssetDataHandlerWrapper"
             commandId="org.wcs.smart.asset.command.model.xml.import">
       </handler>
    </extension>
