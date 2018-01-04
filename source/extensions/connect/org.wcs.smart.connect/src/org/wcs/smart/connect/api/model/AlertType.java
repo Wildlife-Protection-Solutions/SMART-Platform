@@ -38,6 +38,7 @@ public class AlertType {
 	private String markerColor;
 	private Boolean spin;
 	private UUID uuid;
+	private String customIcon;
 	
 	public String getLabel() {
 		return label;
@@ -86,6 +87,13 @@ public class AlertType {
 	public void setSpin(Boolean spin) {
 		this.spin = spin;
 	}
+
+	public String getCustomIcon() {
+		return customIcon;
+	}
+	public void setCustomIcon(String customIcon) {
+		this.customIcon = customIcon;
+	}
 	
 	/**
 	 * 
@@ -119,4 +127,6 @@ public class AlertType {
 		}
 		return super.hashCode();
 	}
+	
+
 }
