@@ -25,7 +25,6 @@ window.onload = function(){
 
 	document.getElementById('textsearch').value = search;
 	getCaList();
-	getQueryList();
 
 	
 	document.getElementById("runQueryButton").onclick = function(){
@@ -568,6 +567,9 @@ function setHomeCa(){
 	
 	var users = JSON.parse(this.responseText);
 	parent.value = users.homeCaUuid;
+	
+	
+	getQueryList();
 }
 
 function selectAll(parent){
