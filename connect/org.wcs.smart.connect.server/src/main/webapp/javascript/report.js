@@ -19,7 +19,6 @@ window.onload = function(){
 
 	document.getElementById('textsearch').value = search;
 	getCaList();
-	getReportList();
 
 	
 	document.getElementById("runreportbutton").onclick = function(){
@@ -529,6 +528,9 @@ function setHomeCa(){
 	
 	var users = JSON.parse(this.responseText);
 	parent.value = users.homeCaUuid;
+	
+	
+	getReportList();
 }
 
 
