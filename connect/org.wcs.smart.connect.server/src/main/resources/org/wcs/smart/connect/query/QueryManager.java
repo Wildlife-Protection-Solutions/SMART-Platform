@@ -313,8 +313,8 @@ public enum QueryManager {
 		List<IntelRecordObservationQuery> intelQuery = QueryFactory.buildQuery(session, IntelRecordObservationQuery.class).list();
 		for (IntelRecordObservationQuery q : intelQuery) {
 			QueryProxy qp = new QueryProxy(q.getUuid(), q.getName(), Messages.getString("QueryManager.AdvIntlQueryTypeName", l), //$NON-NLS-1$
-						q.getConservationArea().getName(), 
-						q.getConservationArea().getId(),
+						q.getConservationArea().getId(), 
+						"-",//$NON-NLS-1$
 						true,
 						q.getConservationArea().getUuid(),
 						q.getConservationArea().getIsCcaa(),
