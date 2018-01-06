@@ -109,9 +109,7 @@ public class FileProcessor {
 		});
 	}
 	
-	public void update() {
-		files.forEach(p->p.getRelations().clear());
-		files.forEach(p->computeRelations(p));
+	public void updateWaypointAndSort() {
 		computeWaypoints();
 
 		//sort on waypoint id
@@ -121,6 +119,11 @@ public class FileProcessor {
 			if (b.getIncidentGroup() == null) return 1;
 			return a.getIncidentGroup().compareTo(b.getIncidentGroup());
 		});
+	}
+	public void update() {
+		files.forEach(p->p.getRelations().clear());
+		files.forEach(p->computeRelations(p));
+		updateWaypointAndSort();
 	}
 	
 	private void computeWaypoints() {

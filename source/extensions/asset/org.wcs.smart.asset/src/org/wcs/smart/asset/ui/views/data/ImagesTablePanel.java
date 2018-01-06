@@ -22,22 +22,19 @@
 package org.wcs.smart.asset.ui.views.data;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.MenuEvent;
-import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.FileProxy;
-import org.wcs.smart.asset.ui.AttachmentTable;
 import org.wcs.smart.asset.ui.DataDisplaySettings;
 import org.wcs.smart.asset.ui.DataDisplaySettings.IconSize;
+import org.wcs.smart.asset.ui.ImageGallery;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 /**
  * Table of images imported grouped by incident.
  * 
@@ -48,8 +45,7 @@ public class ImagesTablePanel {
 	
 	public static final String ICON_SIZE_PREF = DataImporterView.ID + ".iconsize"; //$NON-NLS-1$
 
-	private AttachmentTable tblResultsImg;
-	private ScrolledComposite scroll;
+	private ImageGallery tblResultsImg;
 	
 	private DataImportPage view;
 	 
@@ -60,25 +56,18 @@ public class ImagesTablePanel {
 	
 	public void refresh() {
 		tblResultsImg.refresh();
-		scroll.setMinSize(tblResultsImg.computeSize(scroll.getBounds().width, SWT.DEFAULT));
 	}
 	
 	public Control getControl() {
-		return this.scroll;
+		return this.tblResultsImg;
 	}
 	
 	public void setThumbnailSize(IconSize size) {
 		AssetPlugIn.getDefault().getPreferenceStore().setValue(ICON_SIZE_PREF, size.name());
 		tblResultsImg.setThumbnailSize(size.getSize());
-		scroll.setMinSize(tblResultsImg.computeSize(scroll.getBounds().width, SWT.DEFAULT));
 	}
 	
 	private void createComposite(Composite parent, FormToolkit toolkit) {
-		scroll = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.BORDER);
-		scroll.setExpandVertical(true);
-		scroll.setExpandHorizontal(true);
-		toolkit.adapt(scroll);
-		
 		int iconSize = DataDisplaySettings.IconSize.MEDIUM.getSize();
 		try {
 			String iconSizePref = AssetPlugIn.getDefault().getPreferenceStore().getString(ICON_SIZE_PREF);
@@ -90,62 +79,68 @@ public class ImagesTablePanel {
 			//unable to read preference
 		}
 		
-		AttachmentTable.IMenuCreator menuCreator = new AttachmentTable.IMenuCreator() {
+		ImageGallery.IMenuCreator menuCreator = new ImageGallery.IMenuCreator() {
 			@Override
-			public Menu createMenu(AttachmentTable parent) {
-				Menu mnu = new Menu(parent);
+			public ContextMenu createMenu() {
+				ContextMenu mnu = new ContextMenu();
 				
-				MenuItem mnuRemoveFile = new MenuItem(mnu, SWT.PUSH);
+				MenuItem mnuRemoveFile = new MenuItem();
 				mnuRemoveFile.setText("Remove File");
-				mnuRemoveFile.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-				mnuRemoveFile.addListener(SWT.Selection, e->view.removeFiles());
+//				mnuRemoveFile.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+				mnuRemoveFile.setOnAction(e->{view.removeFiles(); e.consume();});
+				mnu.getItems().add(mnuRemoveFile);
 				
-				new MenuItem(mnu, SWT.SEPARATOR);
-				
-				MenuItem mnuGroup = new MenuItem(mnu, SWT.PUSH);
+				mnu.getItems().add(new SeparatorMenuItem());
+								
+				MenuItem mnuGroup = new MenuItem();
 				mnuGroup.setText("Create Custom Incident Group...");
-				mnuGroup.addListener(SWT.Selection, e->view.groupSelected());
+				mnuGroup.setOnAction(e->{view.groupSelected(); e.consume();});
+				mnu.getItems().add(mnuGroup);
 				
-				MenuItem mnuRemoveGroup = new MenuItem(mnu, SWT.PUSH);
+				MenuItem mnuRemoveGroup = new MenuItem();
 				mnuRemoveGroup.setText("Remove Custom Incident Group...");
-				mnuRemoveGroup.addListener(SWT.Selection, e->view.ungroupSelected());
+				mnuRemoveGroup.setOnAction(e->{view.ungroupSelected(); e.consume();});
+				mnu.getItems().add(mnuRemoveGroup);
 				
-				mnu.addMenuListener(new MenuListener() {
-					@Override
-					public void menuShown(MenuEvent e) {
-						boolean canRemove = false;
-						boolean canGroup = true;
-						for (FileProxy fp : view.getSelection()) {
-							if (fp.isValid() && fp.isFixed()) {
-								canRemove = true;
-							}
-							if (!fp.isValid()) canGroup = false;
+				mnu.setOnShowing(e->{
+					boolean canRemove = false;
+					boolean canGroup = true;
+					for (FileProxy fp : view.getSelection()) {
+						if (fp.isValid() && fp.isFixed()) {
+							canRemove = true;
 						}
-						mnuRemoveGroup.setEnabled(canRemove);
-						mnuGroup.setEnabled(canGroup);
+						if (!fp.isValid()) canGroup = false;
 					}
+					mnuRemoveGroup.setDisable(!canRemove);
+					mnuGroup.setDisable(!canGroup);
 					
-					@Override
-					public void menuHidden(MenuEvent e) {}
 				});
 				return mnu;
 			}
 		};
 		
-		tblResultsImg = new AttachmentTable(scroll, toolkit, menuCreator, view.getProcessor().getFiles(), iconSize, 10) {
-			protected void colorThumb(Composite composite, ISmartAttachment file) {
+		tblResultsImg = new ImageGallery(parent, toolkit, menuCreator, view.getProcessor().getFiles(), iconSize, 2)
+		{
+			@Override
+			protected String getThumbColor(ISmartAttachment file) {
 				FileProxy proxy = (FileProxy)file;
-				if (proxy.getIncidentGroup() == null) return;
+				if (proxy.getIncidentGroup() == null) return super.getThumbColor(file);
+				
 				int colorIndex = proxy.getIncidentGroup() % view.getRowColors().length;
-				composite.setBackground(view.getRowColors()[colorIndex]);
+				return toHex(view.getRowColors()[colorIndex]);	
+			}
+			
+			@Override
+			protected String getMouseOverBackground(ISmartAttachment file) {
+				return getThumbColor(file);
+			}
+			
+			@Override
+			protected String getSelectionBackgroundColor(ISmartAttachment file) {
+				return getThumbColor(file);
 			}
 		};
 		
-		tblResultsImg.addListener(SWT.Selection, e->view.setSelection(tblResultsImg.getSelection()));		
-		scroll.setContent(tblResultsImg);
-		scroll.setMinSize(tblResultsImg.computeSize(scroll.getBounds().width, SWT.DEFAULT));
-		scroll.addListener(SWT.Resize, e->{
-			scroll.setMinSize(tblResultsImg.computeSize(scroll.getBounds().width, SWT.DEFAULT));
-		});
+		tblResultsImg.addListener(SWT.Selection, e->view.setSelection(tblResultsImg.getSelection()));
 	}
 }

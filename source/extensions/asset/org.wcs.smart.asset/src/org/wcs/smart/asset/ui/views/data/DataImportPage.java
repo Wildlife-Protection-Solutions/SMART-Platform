@@ -661,7 +661,12 @@ public class DataImportPage {
 			processor.removeFile(file);
 			deletedItems.add(file);
 		}
-		refreshProxies();
+		
+		//if we delete a file I don't think we need to recompute relations
+		processor.updateWaypointAndSort();
+		tblResults.refresh();
+		updateStatus();
+		updateFileCount();
 	}
 	
 	FileProcessor getProcessor() {

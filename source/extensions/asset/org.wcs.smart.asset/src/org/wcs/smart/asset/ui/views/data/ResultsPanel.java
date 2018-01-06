@@ -145,7 +145,9 @@ public class ResultsPanel {
 		for(DataDisplaySettings.IconSize s : DataDisplaySettings.IconSize.values()) {
 			MenuItem item = new MenuItem(mnuIconSize,SWT.RADIO);
 			item.setText(s.getOptionName());
-			item.addListener(SWT.Selection, e->tblResultsImages.setThumbnailSize(s));
+			item.addListener(SWT.Selection, e->{
+				if (item.getSelection()) tblResultsImages.setThumbnailSize(s);	
+			});
 			if (s == defaultSize) item.setSelection(true);
 		}
 		btnIconSize.addListener(SWT.Selection, e->{

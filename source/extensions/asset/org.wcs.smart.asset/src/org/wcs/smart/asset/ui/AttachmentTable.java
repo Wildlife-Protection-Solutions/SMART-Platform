@@ -65,16 +65,19 @@ public class AttachmentTable extends Composite {
 	private int thumbSize;
 	private int marginSize;
 	
-	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize){
-		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize,0);
+	private boolean loadImmediate = true;
+	
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize, boolean loadImmediate){
+		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize,0, loadImmediate);
 	}
 	
-	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize, int marginSize){
-		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize, marginSize);
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize, int marginSize, boolean loadImmediate){
+		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize, marginSize, loadImmediate);
 	}
 	
-	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, int style, List<? extends ISmartAttachment> files, int thumbSize, int marginSize){
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, int style, List<? extends ISmartAttachment> files, int thumbSize, int marginSize, boolean loadImmediate){
 		super(parent, style);
+		this.loadImmediate = loadImmediate;
 		this.thumbSize = thumbSize;
 		this.toolkit = toolkit;
 		this.marginSize = marginSize;
@@ -205,6 +208,7 @@ public class AttachmentTable extends Composite {
 
 		cascadeAdd(thumbNameComp,t, SWT.MouseEnter,SWT.MouseExit, SWT.MouseDown, SWT.MouseUp, SWT.MouseMove, SWT.Paint);
 	}
+	
 	protected void colorThumb(Composite composite, ISmartAttachment file) {
 		
 	}
@@ -249,7 +253,7 @@ public class AttachmentTable extends Composite {
 		public ThumbInfo(ISmartAttachment file){
 			this.file = file;
 			tooltip = file.getFilename();
-			thumb = new Thumbnail(file, thumbSize, true);
+			thumb = new Thumbnail(file, thumbSize, true, loadImmediate);
 		}
 		
 		public void setThumbGui(Composite thumb) {

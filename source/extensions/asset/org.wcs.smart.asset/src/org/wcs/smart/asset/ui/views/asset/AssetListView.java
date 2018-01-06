@@ -74,6 +74,8 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -95,6 +97,7 @@ import org.wcs.smart.asset.ui.handler.NewAssetHandler;
 import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
+import org.wcs.smart.asset.ui.views.map.AssetOverviewMap;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -124,6 +127,8 @@ public class AssetListView {
 	private FormToolkit toolkit;
 	
 	private boolean includeRetired = false;
+	private boolean includeInactiveAssets = true;
+	private boolean includeInactiveStations = true;
 	
 	public AssetListView() {
 		super();
@@ -212,6 +217,11 @@ public class AssetListView {
 	private void createAssetToolbar(Composite parent) {
 		ToolBar toolbar =new ToolBar(parent, SWT.FLAT);
 		
+		ToolItem overviewMap = new ToolItem(toolbar, SWT.PUSH);
+		overviewMap.setToolTipText("view overview map");
+		overviewMap.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+		overviewMap.addListener(SWT.Selection, e->showOverviewMap());
+		
 		ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
 		importData.setToolTipText("import asset data");
 		importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
@@ -232,6 +242,13 @@ public class AssetListView {
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 	}
 	
+	private void showOverviewMap() {
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(AssetOverviewMap.OVERVIEW_MAP_INPUT, AssetOverviewMap.ID);
+		} catch (PartInitException e) {
+			AssetPlugIn.displayLog(e.getMessage(), e);
+		}
+	}
 	
 	private void createStationsToolbar(Composite parent) {
 		ToolBar toolbar =new ToolBar(parent, SWT.FLAT);
@@ -310,6 +327,16 @@ public class AssetListView {
 		refresh.setText("Refresh");
 		refresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		refresh.addListener(SWT.Selection, e->loadAssets());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem inactive = new MenuItem(mnu, SWT.CHECK);
+		inactive.setText("Show Inactive Assets");	
+		inactive.setSelection(this.includeInactiveAssets);
+		inactive.addListener(SWT.Selection, e->{
+			this.includeInactiveAssets = inactive.getSelection();
+			loadAssets();
+		});
 		
 		MenuItem retired = new MenuItem(mnu, SWT.CHECK);
 		retired.setText("Show Retired Assets");	
@@ -409,6 +436,16 @@ public class AssetListView {
 		refresh.setText("Refresh");
 		refresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		refresh.addListener(SWT.Selection, e->loadStations());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem inactive = new MenuItem(mnu, SWT.CHECK);
+		inactive.setText("Show Inactive Stations");	
+		inactive.setSelection(this.includeInactiveStations);
+		inactive.addListener(SWT.Selection, e->{
+			this.includeInactiveStations = inactive.getSelection();
+			loadStations();
+		});
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
@@ -615,6 +652,15 @@ public class AssetListView {
 			}
 			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
+			if (!includeInactiveAssets) {
+				for (Iterator<Asset> iterator = assets.iterator(); iterator.hasNext();) {
+					Asset asset = iterator.next();
+					if (asset.getStatus() == Asset.Status.INACTIVE) {
+						iterator.remove();
+					}
+				}
+			}
+			
 			HashMap<AssetType, List<Asset>> mappings = new HashMap<>();
 			assets.forEach(a->{
 				List<Asset> list = mappings.get(a.getAssetType());
@@ -646,6 +692,15 @@ public class AssetListView {
 				stations.forEach(a->{a.getUuid().equals(null); a.getId();});
 				stations.forEach(a->a.getLocations().forEach(l->l.getId()));
 			}
+			if (!includeInactiveStations) {
+				for (Iterator<AssetStation> iterator = stations.iterator(); iterator.hasNext();) {
+					AssetStation station = iterator.next();
+					if (station.getStatus() == Asset.Status.INACTIVE) {
+						iterator.remove();
+					}
+				}
+			}
+			
 			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
 			HashMap<AssetStation, List<AssetStationLocation>> mappings = new HashMap<>();
 			stations.forEach(s->mappings.put(s, s.getLocations()));			

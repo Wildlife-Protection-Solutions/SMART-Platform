@@ -390,6 +390,12 @@
             id="org.wcs.smart.asset.ui.views.data.importer"
             name="Data Importer View">
       </editor>
+      <editor
+            class="org.wcs.smart.asset.ui.views.map.AssetOverviewMap"
+            default="false"
+            id="org.wcs.smart.asset.overviewmap"
+            name="Asset Overview Map">
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">

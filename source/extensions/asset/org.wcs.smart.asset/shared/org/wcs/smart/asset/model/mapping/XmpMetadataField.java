@@ -115,6 +115,8 @@ public class XmpMetadataField implements IMetadataField{
 		if (!(metadata instanceof Metadata)) return null;
 		try {
 			XmpDirectory xmpDirectory = ((Metadata)metadata).getFirstDirectoryOfType(XmpDirectory.class);
+			if (xmpDirectory == null) return null;
+			if (xmpDirectory.getXMPMeta() == null) return null;
 			XMPIterator itr = xmpDirectory.getXMPMeta().iterator();
 			while(itr.hasNext()) {
 				XMPPropertyInfo info = (XMPPropertyInfo)itr.next();

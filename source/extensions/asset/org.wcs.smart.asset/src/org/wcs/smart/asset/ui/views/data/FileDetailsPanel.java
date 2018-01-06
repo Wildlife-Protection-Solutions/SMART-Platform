@@ -598,6 +598,7 @@ public class FileDetailsPanel {
 			
 			try {
 				Display.getDefault().syncExec(()->{
+					if (toUpdate.isDisposed()) return;
 					proxy = (FileProxy) toUpdate.getData(IMAGE_PROXY_DATAKEY);
 					Image lastImage = (Image) toUpdate.getData(IMAGE_DATAKEY);
 					if (lastImage != null && !lastImage.isDisposed()) lastImage.dispose();

@@ -1357,7 +1357,7 @@ public abstract class AssetDataPanel {
 			}
 			
 			
-			tt = new AttachmentTable(wppart, toolkit, getAttachmentTableMenu(), files, displaySettings.getIconSize().getSize());
+			tt = new AttachmentTable(wppart, toolkit, getAttachmentTableMenu(), files, displaySettings.getIconSize().getSize(), true);
 
 			tt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			((GridData)tt.getLayoutData()).widthHint = displaySettings.getIconSize().getSize()*2+20;
