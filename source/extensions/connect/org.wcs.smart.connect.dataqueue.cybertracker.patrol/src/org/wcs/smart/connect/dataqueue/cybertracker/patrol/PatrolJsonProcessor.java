@@ -676,7 +676,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			pld.setTrack(patrolTrack);
 		}
 		
-		List<LineString> lineStrings = pld.getTrack().getLineStrings();
+		//create a copy of the tracks to modify
+		List<LineString> lineStrings = new ArrayList<>(pld.getTrack().getLineStrings());
 		if (!lineStrings.isEmpty()) {
 			LineString ll = JsonTrackUtils.addPointToTrack(lineStrings.get(lineStrings.size()-1), pnt, time);
 			lineStrings.set(lineStrings.size()-1, ll);
