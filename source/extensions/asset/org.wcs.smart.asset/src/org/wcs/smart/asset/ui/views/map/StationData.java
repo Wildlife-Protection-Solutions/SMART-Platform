@@ -21,6 +21,10 @@ public class StationData {
 	}
 	
 	public Object getData(IOverviewTableColumn column) {
+		return column.getValue(this);
+	}
+	
+	public Object getColumnValue(IOverviewTableColumn column) {
 		return values.get(column);
 	}
 	

@@ -5,47 +5,47 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import org.hibernate.Session;
+import org.json.simple.JSONObject;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.util.UuidUtils;
 
 public class FixedColumn implements IOverviewTableColumn{
 
-	private static IOverviewTableColumn[] columns = null;
-	
-	public static IOverviewTableColumn[] getFixedColumns() {
-		if (columns != null) return columns;
+	public enum Column{
+		ID("Id", IOverviewTableColumn.ColumnType.STRING, true),
+		UUID("UUID", IOverviewTableColumn.ColumnType.STRING, false),
+		STATUS("Current Status", IOverviewTableColumn.ColumnType.STRING, true),
+		STATUS_KEY("Current Status Key", IOverviewTableColumn.ColumnType.STRING, false),
+		ACTIVE_DAYS("Total Active Days", IOverviewTableColumn.ColumnType.INTEGER, true),
+		ASSET_DAYS("Total Asset Days", IOverviewTableColumn.ColumnType.INTEGER, true),
+		INCIDENTS("Total Incidents", IOverviewTableColumn.ColumnType.INTEGER, true);
 		
-		FixedColumn c0 = new FixedColumn(Column.STATUS);
-		FixedColumn c1 = new FixedColumn(Column.ACTIVE_DAYS);
-		FixedColumn c2 = new FixedColumn(Column.ASSET_DAYS);
-		FixedColumn c3 = new FixedColumn(Column.INCIDENTS);
-		CombinedOverviewColumn c4 = new CombinedOverviewColumn(Column.INCIDENTS_PER_DAY.guiName, c3,c2);
+		private String guiName;
+		private IOverviewTableColumn.ColumnType type;
+		public boolean defaultVisibility;
 		
-		columns = new IOverviewTableColumn[] {
-				c0,c1,c2,c3,c4
-		};
-		return columns;
-	}
-		
-	private enum Column{
-		
-		ACTIVE_DAYS("Total Active Days"),
-		ASSET_DAYS("Total Asset Days"),
-		INCIDENTS("Total Incidents"),
-		INCIDENTS_PER_DAY("Total Incident Per Asset Day"),
-		STATUS("Current Status");
-		
-		String guiName;
-		
-		Column(String name){
+		Column(String name, IOverviewTableColumn.ColumnType type, boolean visibility){
 			this.guiName = name;
+			this.type = type;
+			this.defaultVisibility = visibility;
 		}
 	}
 	
 	private Column column;
 	
-	private FixedColumn(Column column) {
+	public FixedColumn(Column column) {
 		this.column = column;
+	}
+	
+	@Override
+	public IOverviewTableColumn.ColumnType getType(){
+		return column.type;
+	}
+	
+	@Override
+	public String getKey() {
+		return column.name().toLowerCase();
 	}
 	
 	@Override
@@ -54,15 +54,22 @@ public class FixedColumn implements IOverviewTableColumn{
 	}
 
 	@Override
-	public String getValue(StationData data) {
+	public Object getValue(StationData data) {
 		if (this.column == Column.STATUS) {
 			if (data.getStation() != null) return data.getStation().getStatus().getGuiName(Locale.getDefault());
 			if (data.getStationLocation() != null) return data.getStationLocation().getStatus().getGuiName(Locale.getDefault());
 			return "unknown";
+		}else if (this.column == Column.STATUS_KEY) {
+			if (data.getStation() != null) return data.getStation().getStatus().name();
+			if (data.getStationLocation() != null) return data.getStationLocation().getStatus().name();
+			return "UNKNOWN";
+		}else if (this.column == Column.ID) {
+			return data.getIdField();
+		}else if (this.column == Column.UUID) {
+			if (data.getStation() != null) return UuidUtils.uuidToString(data.getStation().getUuid());
+			if (data.getStationLocation() != null) return UuidUtils.uuidToString(data.getStationLocation().getUuid());
 		}
-		Object number = data.getData(this);
-		if (number == null) return "0";
-		return String.valueOf(number);
+		return data.getColumnValue(this);
 	}
 	
 	@Override
@@ -91,6 +98,28 @@ public class FixedColumn implements IOverviewTableColumn{
 		}
 		return new HashMap<>();
 		
+	}
+
+	@Override
+	public JSONObject serialize() {
+		JSONObject json = new JSONObject();
+		json.put("type", "fixed");
+		json.put("key", getKey());
+		return json;
+	}
+	
+	public static FixedColumn deserialize(JSONObject json) {
+		if (json.containsKey("type") && json.containsKey("key")) {
+			if (json.get("type").equals("fixed")) {
+				String key = (String)json.get("key");
+				for (Column c : Column.values()) {
+					if (c.name().equalsIgnoreCase(key)) {
+						return new FixedColumn(c);
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 }

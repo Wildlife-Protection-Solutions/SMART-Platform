@@ -57,6 +57,10 @@ public class AssetModuleSettings extends UuidItem {
 	 */
 	public static final String LOCATION_BUFFER_KEY = "location_buffer"; //$NON-NLS-1$
 	
+	/**
+	 * Columns to be included in the overview map
+	 */
+	public static final String OVERVIEW_MAP_COLUMN_KEY = "overview_map_columns"; //$NON-NLS-1$
 	
 	public static final int STATION_BUFFER_DEFAULT_VALUE = 50;
 	public static final int LOCATION_BUFFER_DEFAULT_VALUE = 5;

@@ -65,19 +65,16 @@ public class AttachmentTable extends Composite {
 	private int thumbSize;
 	private int marginSize;
 	
-	private boolean loadImmediate = true;
-	
-	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize, boolean loadImmediate){
-		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize,0, loadImmediate);
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize){
+		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize,0);
 	}
 	
-	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize, int marginSize, boolean loadImmediate){
-		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize, marginSize, loadImmediate);
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, List<? extends ISmartAttachment> files, int thumbSize, int marginSize){
+		this(parent, toolkit, thumbsMenu, SWT.NONE, files, thumbSize, marginSize);
 	}
 	
-	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, int style, List<? extends ISmartAttachment> files, int thumbSize, int marginSize, boolean loadImmediate){
+	public AttachmentTable(Composite parent, FormToolkit toolkit, IMenuCreator thumbsMenu, int style, List<? extends ISmartAttachment> files, int thumbSize, int marginSize){
 		super(parent, style);
-		this.loadImmediate = loadImmediate;
 		this.thumbSize = thumbSize;
 		this.toolkit = toolkit;
 		this.marginSize = marginSize;
@@ -253,7 +250,7 @@ public class AttachmentTable extends Composite {
 		public ThumbInfo(ISmartAttachment file){
 			this.file = file;
 			tooltip = file.getFilename();
-			thumb = new Thumbnail(file, thumbSize, true, loadImmediate);
+			thumb = new Thumbnail(file, thumbSize, true);
 		}
 		
 		public void setThumbGui(Composite thumb) {
