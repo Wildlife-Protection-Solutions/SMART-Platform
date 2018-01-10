@@ -46,7 +46,7 @@ public class SmartBirtTableUtils {
 	/**
 	 * Extension point id
 	 */
-	public static final String REPORT_MAPPING_ID = "org.wcs.smart.data.oda.smart.table"; //$NON-NLS-1$
+	public static final String REPORT_MAPPING_ID = "org.wcs.smart.report.birt.query.smartTable"; //$NON-NLS-1$
 	
 	public SmartBirtTableUtils(){
 		
