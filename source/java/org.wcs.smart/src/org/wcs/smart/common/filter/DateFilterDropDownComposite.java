@@ -74,6 +74,7 @@ public class DateFilterDropDownComposite extends Composite {
 	private DateFilterComposite.DateFilter[] filters;
 	private DateFilter defaultValue;
 	private boolean showDateRangeLabel;
+	private Composite customComp;
 	
 	/**
 	 * create new composite
@@ -150,10 +151,10 @@ public class DateFilterDropDownComposite extends Composite {
 	private void createComponent(){
 		main = new Composite(this, SWT.NONE);
 		
-		int cols = 6;
+		int cols = 4;
 		
 		GridLayout layout = new GridLayout(cols, false);
-		//layout.horizontalSpacing = 0;
+		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
@@ -165,8 +166,6 @@ public class DateFilterDropDownComposite extends Composite {
 		combo.setBackground(combo.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		cmbFilter = new ComboViewer(combo);
 	
-//		cmbFilter = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
-
 		cmbFilter.setContentProvider(ArrayContentProvider.getInstance());
 		cmbFilter.setLabelProvider(new LabelProvider(){
 			@Override
@@ -177,8 +176,44 @@ public class DateFilterDropDownComposite extends Composite {
 				return super.getText(element);
 			}
 		});
+		
+		lbl1 = new Label(main, SWT.NONE);
+		lbl1.setText(Messages.DateFilterDropDownComposite_Between);
+		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridData)lbl1.getLayoutData()).horizontalIndent = 2;
+		
+		customComp = new Composite(main, SWT.NONE);
+		customComp.setLayout(new GridLayout(3, false));
+		((GridLayout)customComp.getLayout()).marginHeight = 0;
+		customComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		
+		
+		
+		dtStart = new DateTime(customComp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.DATE);
+		dtStart.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		Listener validateListener = new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				validate();
+			}};
+		dtStart.addListener(SWT.Selection, validateListener);
+		
+		lbl2 = new Label(customComp, SWT.NONE);
+		lbl2.setText(Messages.DateFilterDropDownComposite_And);
+		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		dtEnd = new DateTime(customComp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
+		dtEnd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		dtEnd.addListener(SWT.Selection, validateListener);
+		
+		cdEndDate = new ControlDecoration(dtEnd, SWT.RIGHT | SWT.TOP);
+		cdEndDate.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cdEndDate.setShowHover(true);
+		cdEndDate.hide();
+		
+		
 		cmbFilter.setInput(filters);
-	
 		cmbFilter.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -189,7 +224,7 @@ public class DateFilterDropDownComposite extends Composite {
 				String ll = filter.getLabel();
 				if (showDateRangeLabel && ll != null){
 					lbl1.setText("[" + ll + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-					((GridData)lbl1.getLayoutData()).widthHint = lbl1.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+					getParent().layout(true);
 				}
 				main.layout(true, true);
 				validate();
@@ -197,32 +232,6 @@ public class DateFilterDropDownComposite extends Composite {
 		});
 		cmbFilter.addSelectionChangedListener(fireListener);
 		
-		lbl1 = new Label(main, SWT.NONE);
-		lbl1.setText(Messages.DateFilterDropDownComposite_Between);
-		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
-		dtStart = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.DATE);
-		dtStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		Listener validateListener = new Listener(){
-			@Override
-			public void handleEvent(Event event) {
-				validate();
-			}};
-		dtStart.addListener(SWT.Selection, validateListener);
-		
-		lbl2 = new Label(main, SWT.NONE);
-		lbl2.setText(Messages.DateFilterDropDownComposite_And);
-		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
-		dtEnd = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
-		dtEnd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		dtEnd.addListener(SWT.Selection, validateListener);
-		
-		cdEndDate = new ControlDecoration(dtEnd, SWT.RIGHT | SWT.TOP);
-		cdEndDate.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		cdEndDate.setShowHover(true);
-		cdEndDate.hide();
 		
 		
 		DateFilterComposite.DateFilter sel = filters[0];
@@ -250,24 +259,14 @@ public class DateFilterDropDownComposite extends Composite {
 	 */
 	private void setCustom(boolean isCustom){
 		if (isCustom){
-			((GridData)dtStart.getLayoutData()).widthHint = dtStart.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-			((GridData)dtEnd.getLayoutData()).widthHint = dtEnd.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-			((GridData)lbl2.getLayoutData()).widthHint = lbl2.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-		}else{
-			((GridData)dtStart.getLayoutData()).widthHint = 0;
-			((GridData)dtEnd.getLayoutData()).widthHint = 0;
-			((GridData)lbl2.getLayoutData()).widthHint = 0;
-		}
-		dtEnd.setVisible(isCustom);
-		dtStart.setVisible(isCustom);
-		lbl2.setVisible(isCustom);
-		
-		if (isCustom){
 			lbl1.setText(Messages.DateFilterDropDownComposite_Between);
+			((GridData)customComp.getLayoutData()).widthHint = customComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		}else{
 			lbl1.setText(""); //$NON-NLS-1$
+			((GridData)customComp.getLayoutData()).widthHint = 0;
 		}
-		((GridData)lbl1.getLayoutData()).widthHint = lbl1.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		customComp.setVisible(isCustom);
+		getParent().layout(true, true);		
 	}
 	
 	/**
