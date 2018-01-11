@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -58,6 +60,8 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
+import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**
@@ -68,7 +72,7 @@ import org.wcs.smart.ui.properties.TreeEditorField;
  */
 public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 
-	private TreeEditorField defaultValueTreeField;
+	private TreeEditorField<AttributeTreeNode> defaultValueTreeField;
 	private TreeViewer attributeTreeViewer;
 	private Button btnDeleteConfig;
 	
@@ -104,13 +108,15 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
 				//default value field
-				defaultValueTreeField.setAttribute(getSourceObject().getAttribute());
+				defaultValueTreeField.setInput(getSourceObject().getAttribute());
 				defaultValueTreeField.clear();
-				defaultValueTreeField.setLanguage(language);
+				((AttributeTreeLabelProvider)defaultValueTreeField.getDropDown().getTreeViewer().getLabelProvider()).setLanguage(language);
+				defaultValueTreeField.getDropDown().getTreeViewer().refresh();
+				
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_DEFAULT_VALUE);
 				if (option != null && option.getUuidValue() != null){
 					AttributeTreeNode defaultNode = (AttributeTreeNode) dialog.getSession().load(AttributeTreeNode.class, option.getUuidValue());
-					defaultValueTreeField.setValue(defaultNode);
+					defaultValueTreeField.setSelectedValue(defaultNode);
 				}
 				
 				CmTreeLabelProvider cmTreeLabelProvider = (CmTreeLabelProvider)attributeTreeViewer.getLabelProvider();
@@ -143,9 +149,10 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		label.setText(Messages.CmAttributeInfoComposite_Option_DefaultValue);
 		label.setToolTipText(Messages.TreeAttributeInfoComposite_deafultValueTooltip);
 		
-		defaultValueTreeField = new TreeEditorField(){
-			public void createComposite(Composite parent) {
-				super.createComposite(parent);
+		defaultValueTreeField = new TreeEditorField<AttributeTreeNode>(){
+			@Override
+			public void createComposite(Composite parent, IContentProvider contentProvider, IBaseLabelProvider labelProvider) {
+				super.createComposite(parent, contentProvider, labelProvider);
 				
 				txtText.addFocusListener(new FocusListener() {
 					@Override
@@ -159,7 +166,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 			}
 		};
 		
-		defaultValueTreeField.createComposite(container);
+		defaultValueTreeField.createComposite(container, new AttributeTreeContentProvider(true, false), new AttributeTreeLabelProvider());
 		
 		getShell().addDisposeListener(new DisposeListener() {
 			@Override
@@ -190,7 +197,7 @@ public class TreeAttributeInfoComposite extends CmAttributeConfInfoComposite {
 				getSourceObject().getCmAttributeOptions().remove(option.getOptionId());
 				option.setCmAttribute(null);
 			}
-			defaultValueTreeField.setValue(null);
+			defaultValueTreeField.setSelectedValue(null);
 		}
 		fireModelChanged();
 	}

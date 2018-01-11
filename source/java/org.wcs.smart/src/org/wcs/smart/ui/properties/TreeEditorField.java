@@ -26,6 +26,8 @@ import java.util.Collection;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -48,14 +50,10 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
-import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 
 /**
- * An attribute tree field editor that displays the
- * attribute tree in a drop down using a text box as a filter.
- * Users can type and select from the list or use a drop down arrow and
+ * An field editor that displays the text box that is used to filter
+ * a drop down tree. Users can type and select from the list or use a drop down arrow and
  * pick from the tree.
  *  
  *  Users must dispose of the editor when they are finished with it.
@@ -63,11 +61,11 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
  * @author Emily
  *
  */
-public class TreeEditorField  {
+public class TreeEditorField<T>  {
 
 	
-	private AttributeTreeNode originalValue;
-	private AttributeTreeNode lastValidSelection = null; //last valid selection; tracked to escape can revert
+	private T originalValue;
+	private T lastValidSelection = null; //last valid selection; tracked to escape can revert
 	
 	protected TreeDropDown tree = null;
 	protected ControlDecoration cd;
@@ -95,8 +93,8 @@ public class TreeEditorField  {
 	};
 	
 	/**
-	 * Creates a new attribute tree field
-	 * @param attribute
+	 * Creates a new tree drop down field
+	 * 
 	 */
 	public TreeEditorField(){
 		listeners = new ArrayList<Listener>();
@@ -104,11 +102,10 @@ public class TreeEditorField  {
 	
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#getValue()
-	 * @return the selected AttributeTreeNode or null if no valid node selected
+	 * Gets the value selected from the tree
 	 */
-	public AttributeTreeNode getValue() {
-		return (AttributeTreeNode) txtText.getData();
+	public T getValue() {
+		return  (T)txtText.getData();
 	}
 
 
@@ -123,7 +120,7 @@ public class TreeEditorField  {
 	/*
 	 * Updates the ui text field with the given selection.
 	 */
-	private void updateSelection(AttributeTreeNode selection){
+	private void updateSelection(T selection){
 		if (selection == null){
 			txtText.setText(""); //$NON-NLS-1$
 			txtText.setData(null);
@@ -143,18 +140,21 @@ public class TreeEditorField  {
 	}
 	
 	/**
-	 * Sets the drop down language
-	 * @param language
+	 * Gets the drop down tree that is used.  Use this to change or update
+	 * the content provider of label providers. 
+	 * @return
 	 */
-	public void setLanguage(Language language){
-		((AttributeTreeLabelProvider)tree.getTreeViewer().getLabelProvider()).setLanguage(language);
-		tree.getTreeViewer().refresh(true);
+	public TreeDropDown getDropDown() {
+		return this.tree;
 	}
 	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#createComposite(org.eclipse.swt.widgets.Composite)
+	 * Creates the control.
+	 * @param parent the parent control
+	 * @param contentProvider the tree content provider
+	 * @param labelProvider the label provider for the tree
 	 */
-	public void createComposite(Composite parent) {
+	public void createComposite(Composite parent, IContentProvider contentProvider, IBaseLabelProvider labelProvider) {
 		focusDisplay = parent.getShell().getDisplay();
 		focusDisplay.addFilter(SWT.FocusIn, focusListener);
 		
@@ -184,8 +184,8 @@ public class TreeEditorField  {
 				super.hide();
 			}
 		};
-		tree.getTreeViewer().setContentProvider(new AttributeTreeContentProvider(true, false));
-		tree.getTreeViewer().setLabelProvider(new AttributeTreeLabelProvider());
+		tree.getTreeViewer().setContentProvider(contentProvider);
+		tree.getTreeViewer().setLabelProvider(labelProvider);
 		
 		tree.getTreeViewer().expandToLevel(2);
 		tree.setFilterTextBox(txtText);
@@ -223,7 +223,7 @@ public class TreeEditorField  {
 					if (tree.isVisible()){
 						//update the selection and hide the tree
 						if (!tree.getSelection().isEmpty()){
-							AttributeTreeNode sel = (AttributeTreeNode) tree.getSelection().iterator().next();
+							T sel = (T) tree.getSelection().iterator().next();
 							updateSelection(sel);
 							tree.hide();
 						}
@@ -278,11 +278,15 @@ public class TreeEditorField  {
 		originalValue = null;
 	}
 	
-	public void setAttribute(Attribute attribute){
-		tree.getTreeViewer().setInput(attribute);
+	/**
+	 * Sets the input for the tree viewer
+	 * @param input
+	 */
+	public void setInput(Object input) {
+		getDropDown().getTreeViewer().setInput(input);
 	}
 	
-	/**
+	/*
 	 * shows the tree
 	 */
 	private void showTree(boolean focus){
@@ -302,11 +306,7 @@ public class TreeEditorField  {
 					}else{
 						//pick first selection
 						Object x = ((IStructuredSelection)selection).getFirstElement();
-						if (x instanceof AttributeTreeNode) {
-							updateSelection((AttributeTreeNode) x);
-						} else {
-							updateSelection(null);										
-						}
+						updateSelection((T) x);
 					}
 					tree.hide();
 				}
@@ -316,8 +316,13 @@ public class TreeEditorField  {
 			}
 		}
 	}
+	
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#validate()
+	 * Validate the selection.  Users should override if they want
+	 * to provide validation.
+	 * Users must update the state of the ControlDecoration in this method
+	 * 
+	 * @return null if item is valid otherwise a string that represents the error message
 	 */
 	public String validate() {
 		cd.hide();
@@ -339,7 +344,7 @@ public class TreeEditorField  {
 	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#isModified()
 	 */
 	public boolean isModified() {
-		AttributeTreeNode current = getValue();
+		T current = getValue();
 		if (current == null && originalValue == null){
 			return false;
 		}else if (current != null && originalValue != null && current.equals(originalValue)){
@@ -349,14 +354,12 @@ public class TreeEditorField  {
 	}
 
 	/**
-	 * @see org.wcs.smart.patrol.internal.ui.observation.field.IAttributeField#setValue(java.lang.Object)
-	 * @param x an <code>AttributeTreeNode</code> object or null if empty
 	 */
-	public void setValue(Object x) {
-		if (x instanceof AttributeTreeNode){
+	public void setSelectedValue(T x) {
+		if (x != null) {
 			txtText.setText(((LabelProvider)tree.getTreeViewer().getLabelProvider()).getText(x));
 			txtText.setData(x);
-			this.originalValue = (AttributeTreeNode)x;
+			this.originalValue = (T) x;
 		}else{
 			txtText.setText(""); //$NON-NLS-1$
 			txtText.setData(null);
@@ -375,7 +378,9 @@ public class TreeEditorField  {
 		txtText.setFocus();
 	}
 
-
+	/**
+	 * Disposes of controls and removes focus listeners
+	 */
 	public void dispose() {
 		if (tree != null ){
 			tree.dispose();

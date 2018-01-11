@@ -31,6 +31,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
+import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 import org.wcs.smart.ui.properties.TreeEditorField;
 import org.wcs.smart.util.SmartUtils;
 
@@ -45,7 +47,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  *
  */
-public class TreeAttributeField extends TreeEditorField implements IAttributeField<AttributeTreeNode> {
+public class TreeAttributeField extends TreeEditorField<AttributeTreeNode> implements IAttributeField<AttributeTreeNode> {
 	
 	private Attribute attribute;
 
@@ -68,9 +70,9 @@ public class TreeAttributeField extends TreeEditorField implements IAttributeFie
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		super.createComposite(parent);
+		super.createComposite(parent, new AttributeTreeContentProvider(true, false),new AttributeTreeLabelProvider());
 		
-		super.setAttribute(this.attribute);
+		super.setInput(this.attribute);
 	}
 
 	/**
@@ -99,6 +101,15 @@ public class TreeAttributeField extends TreeEditorField implements IAttributeFie
 	@Override
 	public Attribute getAttribute() {
 		return this.attribute;
+	}
+
+	@Override
+	public void setValue(Object x) {
+		if (x instanceof AttributeTreeNode) {
+			super.setSelectedValue((AttributeTreeNode) x);
+		}else {
+			super.setSelectedValue(null);
+		}		
 	}
 
 }

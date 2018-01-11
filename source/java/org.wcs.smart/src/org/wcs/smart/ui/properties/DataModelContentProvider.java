@@ -39,8 +39,8 @@ import org.wcs.smart.ca.datamodel.DataModel;
  */
 public class DataModelContentProvider implements ITreeContentProvider {
 
-	private RootNode root = new RootNode();
-	private DataModel model;
+	protected RootNode root = new RootNode();
+	protected DataModel model;
 
 	private boolean onlyCategories = false;
 	private boolean onlyEnabled = false;

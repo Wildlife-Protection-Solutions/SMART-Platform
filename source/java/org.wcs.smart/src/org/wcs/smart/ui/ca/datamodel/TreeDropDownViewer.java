@@ -246,6 +246,7 @@ public class TreeDropDownViewer {
 	 * Fires selection listener
 	 */
 	private void fireSelection(){
+		if (onSelected == null) return;
 		onSelected.selectionChanged(null, attributeTreeViewer.getSelection());
 	}
 	
