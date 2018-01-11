@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.map;
 
 import java.util.Collections;
@@ -10,6 +31,12 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 
+/**
+ * Asset overview column that combines the values of two other columns
+ * 
+ * @author Emily
+ *
+ */
 public class CombinedOverviewColumn implements IOverviewTableColumn{
 
 	private IOverviewTableColumn column1;
@@ -73,6 +100,13 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 		return json;
 	}
 	
+	/**
+	 * Converts a json object to a new CombinedOverviewColumn object.
+	 * 
+	 * @param json
+	 * @param columns the source columns
+	 * @return
+	 */
 	public static CombinedOverviewColumn deserialize(JSONObject json, List<IOverviewTableColumn> columns) {
 		if (json.containsKey("type") && json.containsKey("column1") && json.containsKey("column2")) {
 			if (json.get("type").equals("combined")) {
@@ -94,6 +128,11 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 		return null;
 	}
 	
+	/**
+	 * 
+	 * @param columns
+	 * @return the default combined columns
+	 */
 	public static List<CombinedOverviewColumn> getDefaultColumns(List<IOverviewTableColumn> columns){
 		IOverviewTableColumn c1 = null;
 		IOverviewTableColumn c2 = null;

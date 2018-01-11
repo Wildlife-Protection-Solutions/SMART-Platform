@@ -1,0 +1,263 @@
+ /*=============================================
+SMART Query Engine Language Syntax & Semantic actions 
+=============================================*/
+options
+{
+  LOOKAHEAD= 1;
+
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = false;
+  IGNORE_CASE = false;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  FORCE_LA_CHECK = false;
+}
+
+PARSER_BEGIN(Parser)
+package org.wcs.smart.asset.map.engine.parser;
+
+import java.util.*;
+import org.wcs.smart.asset.map.engine.*;
+
+public class Parser
+{
+
+}
+
+PARSER_END(Parser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\r"
+| "\n"
+}
+
+/*--------- Comments  -----------------*/
+SPECIAL_TOKEN :
+{
+  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >
+| < MULTI_LINE_COMMENT :
+    "/*" (~[ "*" ])* "*"
+    (
+      "*"
+    |
+      (
+        ~[ "*", "/" ] (~[ "*" ])* "*"
+      )
+    )*
+    "/" >
+}
+
+/*--------- Keywords  -----------------*/
+TOKEN [ IGNORE_CASE ] :
+{
+  < K_AND : "and" >
+| < K_OR : "or" >
+}
+
+
+TOKEN :
+{
+ < LESS : "<" >
+| < LESSEQUAL : "<=" >
+| < GREATER : ">" >
+| < GREATEREQUAL : ">=" >
+| < EQUAL : "=" >
+| < NOTEQUAL : "<>" >
+| < OPENPAREN : "(" >
+| < CLOSEPAREN : ")" >
+| < SLASH : "/" >
+| < PLUS : "+" >
+| < MINUS : "-" >
+| < CONTAINS : "contains" >
+| < STREQUALS : "equals" >
+| < BEFORE : "before" >
+| < AFTER : "after" >
+}
+
+TOKEN : /* Numeric Constants */
+{
+  < NUMBER :
+  	(["-","+"])?< FLOAT >
+  | (["-","+"])?< FLOAT >
+    (
+      [ "e", "E" ] ([ "-", "+" ])? < FLOAT >
+    )? 
+    >
+| < #FLOAT :
+    < INTEGER >
+  | < INTEGER > ("." < INTEGER >)?
+  | "." < INTEGER > 
+    >
+| < #INTEGER : (< DIGIT >)+ >
+| < #DIGIT : [ "0"-"9" ] >
+| < #LETTER : [ "a"-"z", "A"-"Z" ] >
+| < #SPECIAL_CHARS : ("." | "_")>
+}
+
+TOKEN : /* Literal Constants */
+{
+  < S_CONST_LITERAL : "true" | "false" >
+ | <FILTER_OPEN : "[">
+ |  <FILTER_CLOSE : "]">
+}
+
+/* Query Filters */
+TOKEN : 
+{
+
+< DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+| < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
+  
+}
+
+
+TOKEN :
+{
+  < QUOTED_STRING :
+    "\""
+    (
+      (~[ "\"", "\\", "\n", "\r" ])
+    | ("\\" ~[ "\n", "\r" ])
+    )*
+    "\"" 
+    >
+}
+
+
+
+/* ------------ Expressions ----------------------*/
+
+IFilter AttributeExpression():
+{
+  
+	IFilter expression;
+}
+{
+	expression = AttributeExpressionInternal()
+	< EOF >
+	 {return expression;}	  
+}
+
+IFilter AttributeExpressionInternal():
+{
+  
+	IFilter expression;
+	IFilter expression2;
+	Operator op;
+}
+{
+		(
+			expression = FilterPart()
+ 			(
+ 	 			op = BooleanOp()
+	  			expression2 = FilterPart()
+				{expression = AttributeExpression.parse(expression, op, expression2);}
+	  		)*
+	  	)
+	  {return expression;}	  
+}
+
+
+IFilter FilterPart():
+{
+  IFilter expression;
+}
+{
+  	(  	
+		expression = BracketExpression()
+		|
+		expression = AttributeFilter()
+	)
+	
+	{return expression;}	   
+}
+
+IFilter BracketExpression():
+{
+  IFilter expression;
+}
+{
+ 	(
+		< OPENPAREN >
+		expression = AttributeExpressionInternal()
+		< CLOSEPAREN >
+	)
+	{return BracketFilter.parse(expression);}	   
+}
+AttributeFilter AttributeFilter():
+{
+	String attributeKey;
+	Operator op;
+	AttributeFilter expression;
+	
+}
+{
+  	< FILTER_OPEN >
+  	attributeKey = AttributeKey()
+  			(		  op = StringOp() | op = NumberOp() 
+		)
+		(		  <DM_KEY> { expression = AttributeFilter.parse(attributeKey, op, token.image); }
+		|
+			<NUMBER> { expression = AttributeFilter.parse(attributeKey, op, Double.parseDouble(token.image)); }
+		|
+			<QUOTED_STRING> { expression = AttributeFilter.parse(attributeKey, op, token.image); }
+		)
+			
+	
+		
+  < FILTER_CLOSE >
+  
+  {
+  return expression;
+  }
+}
+
+String AttributeKey() :
+{}
+{
+  < DM_KEY >
+	{
+  	return token.image;
+	}
+}
+
+Operator NumberOp() :
+{}
+{
+   ( < EQUAL > | < NOTEQUAL >  | < GREATER > | < GREATEREQUAL > | < LESS > | < LESSEQUAL >  )
+  {
+    return Operator.parse(token.image);
+  }
+}
+
+Operator StringOp() :
+{}
+{
+  ( < CONTAINS > | < STREQUALS > )
+  {
+    return Operator.parse(token.image);
+  }
+}
+
+Operator BooleanOp() :
+{}
+{
+  ( < K_AND > | < K_OR> )
+  {
+    return Operator.parse(token.image);
+  }
+}
+

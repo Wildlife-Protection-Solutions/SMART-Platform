@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui.views.map;
 
 import java.util.ArrayList;
@@ -7,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -19,6 +41,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.SashForm;
@@ -36,6 +59,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -95,6 +119,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	private TableViewer summaryTable;
 	private AssetMapColumnConfiguration tableConfiguration;
 	private Composite tableComposite;
+	private AssetStationSummaryService service;
 	
 	private GroupByOption currentGroupByOption = GroupByOption.STATION;
 	/** Creates the map
@@ -182,8 +207,17 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				if (tableConfiguration == null) return;
-				ColumnListDialog dialog = new ColumnListDialog(tablePart.getShell(), tableConfiguration);
-				dialog.open();	
+				
+				AssetMapColumnConfiguration clone = new AssetMapColumnConfiguration();
+				try(Session s = HibernateManager.openSession()){
+					clone.loadColumnConfiguration(s);
+				}
+				
+				ColumnListDialog dialog = new ColumnListDialog(tablePart.getShell(), clone);
+				if (dialog.open() == Window.OK) {
+					//something was changed; we need to reload and recompute column values
+					loadTableJob.schedule();
+				}
 			}
 		});
 				
@@ -196,7 +230,14 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		loadTableJob.schedule();
 	}
 
-	private AssetStationSummaryService service;
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (service != null) {
+			service.dispose(new NullProgressMonitor());
+			CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+		}
+	}
 	
 	private void createTablePart() {
 		for (Control c : tableComposite.getChildren()) c.dispose();
