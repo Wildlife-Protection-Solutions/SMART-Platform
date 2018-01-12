@@ -119,20 +119,22 @@ public class IntelReportEditorManager implements IReportEditorManager{
 						//link parameters
 						PropertyHandle odaDataSetParameterProp = handle.getPropertyHandle(OdaDataSetHandle.PARAMETERS_PROP);
 						List<?> items = odaDataSetParameterProp.getItems();
-						for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
-							OdaDataSetParameter parameter = (OdaDataSetParameter) iterator.next();
-							if (parameter.getName().equals(DataSourceParameter.ENTITY_UUID.getName())) {
-								parameter.setDefaultValue(""); //$NON-NLS-1$
-								parameter.setParamName(parameter.getName());
-							}else if (parameter.getName().equals(DataSourceParameter.START_DATE.getName())) {
-								parameter.setDefaultValue(""); //$NON-NLS-1$
-								parameter.setParamName(parameter.getName());
-							}else if (parameter.getName().equals(DataSourceParameter.END_DATE.getName())) {
-								parameter.setDefaultValue(""); //$NON-NLS-1$
-								parameter.setParamName(parameter.getName());
-							}else if (parameter.getName().equals(DataSourceParameter.RECORD_UUID.getName())) {
-								parameter.setDefaultValue(""); //$NON-NLS-1$
-								parameter.setParamName(parameter.getName());
+						if (items != null) {
+							for (Iterator<?> iterator = items.iterator(); iterator.hasNext();) {
+								OdaDataSetParameter parameter = (OdaDataSetParameter) iterator.next();
+								if (parameter.getName().equals(DataSourceParameter.ENTITY_UUID.getName())) {
+									parameter.setDefaultValue(""); //$NON-NLS-1$
+									parameter.setParamName(parameter.getName());
+								}else if (parameter.getName().equals(DataSourceParameter.START_DATE.getName())) {
+									parameter.setDefaultValue(""); //$NON-NLS-1$
+									parameter.setParamName(parameter.getName());
+								}else if (parameter.getName().equals(DataSourceParameter.END_DATE.getName())) {
+									parameter.setDefaultValue(""); //$NON-NLS-1$
+									parameter.setParamName(parameter.getName());
+								}else if (parameter.getName().equals(DataSourceParameter.RECORD_UUID.getName())) {
+									parameter.setDefaultValue(""); //$NON-NLS-1$
+									parameter.setParamName(parameter.getName());
+								}
 							}
 						}
 
