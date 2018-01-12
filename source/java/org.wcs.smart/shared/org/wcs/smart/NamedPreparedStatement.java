@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.engine;
+package org.wcs.smart;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
