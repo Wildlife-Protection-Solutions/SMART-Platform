@@ -73,47 +73,30 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SharedUtils;
 
+/**
+ * Overview map for asset view
+ * @author Emily
+ *
+ */
 public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 
 	public static final String ID = "org.wcs.smart.asset.overviewmap"; //$NON-NLS-1$
 
-	public static IEditorInput OVERVIEW_MAP_INPUT = new IEditorInput() {
-		
+	public static IEditorInput OVERVIEW_MAP_INPUT = new IEditorInput() {		
 		@Override
-		public <T> T getAdapter(Class<T> adapter) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
+		public <T> T getAdapter(Class<T> adapter) { return null; }
 		@Override
-		public String getToolTipText() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
+		public String getToolTipText() { return null; }
 		@Override
-		public IPersistableElement getPersistable() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
+		public IPersistableElement getPersistable() { return null; }
 		@Override
-		public String getName() {
-			return "Asset Overview Map";
-		}
-		
+		public String getName() { return "Asset Overview Map"; }
 		@Override
-		public ImageDescriptor getImageDescriptor() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
+		public ImageDescriptor getImageDescriptor() { return null; }
 		@Override
-		public boolean exists() {
-			// TODO Auto-generated method stub
-			return false;
-		}
+		public boolean exists() { return false; }
 	};
 	
 	private DateFilterDropDownComposite dateFilters;
@@ -334,12 +317,8 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			
 			Display.getDefault().syncExec(()->{
 				if (summaryTable.getTable().isDisposed()) return;
-				
-				
 				start[0] = dateFilters.getDateFilter().getStartDate();
 				end[0] = dateFilters.getDateFilter().getEndDate();
-				
-				
 				summaryTable.setInput(statEngine.getData());
 			});
 			
@@ -347,41 +326,32 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			if (tableConfiguration.getColumns().isEmpty()) return Status.OK_STATUS;
 			
 			if (service == null) {
-				//TODO: concurrent & cleanup service
 				service = new AssetStationSummaryService(tableConfiguration.getColumns().stream().map(e->e.getColumn()).collect(Collectors.toList()));
 				List<IGeoResource> resources = new ArrayList<>();
 				try {
-					resources.addAll(service.resources(monitor));	
+					resources.addAll(service.resources(monitor));
+					AddLayersCommand addCmd = new AddLayersCommand(resources);
+					getMap().sendCommandASync(addCmd);
+					service.setData(statEngine.getData());
 				}catch (Exception ex) {
-					AssetPlugIn.log(ex.getMessage(), ex);
-					//TODO: display error to user
+					AssetPlugIn.displayLog("Unable to add summary layer to map." + ex.getMessage(), ex);
 				}
-				AddLayersCommand addCmd = new AddLayersCommand(resources);
-				getMap().sendCommandASync(addCmd);
-				service.setData(statEngine.getData());
 			}
 			
 			Date[] dFilters = null;
 			if (start[0] != null) {
 				if (end[0] == null) {
-					//TODO: make this future too?
 					end[0] = new Date();
 				}
-				dFilters = new Date[] {start[0], end[0]};
+				
+				dFilters = new Date[] {
+						SharedUtils.getDatePart(start[0], false),
+						SharedUtils.getDatePart(end[0], true),
+				};
 			}
-					
-			
-			
+		
 			statEngine.computeStatistics(tableConfiguration.getColumns().stream().map(e->e.getColumn()).collect(Collectors.toList()), dFilters, currentGroupByOption);
-			
-//			Display.getDefault().syncExec(()->{
-//				if (summaryTable.getTable().isDisposed()) return;
-//				
-//				summaryTable.setInput(data);
-//				service.setData(data);
-////				tableConfiguration.getColumns().stream().filter(e->e.isVisible()).forEach(e->e.getTableColumn().pack());
-//				getMap().getRenderManager().refresh(null);
-//			});
+
 			return Status.OK_STATUS;
 		}
 		

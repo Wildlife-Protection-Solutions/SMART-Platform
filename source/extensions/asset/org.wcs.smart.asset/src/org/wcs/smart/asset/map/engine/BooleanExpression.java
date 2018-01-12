@@ -21,40 +21,50 @@
  */
 package org.wcs.smart.asset.map.engine;
 
-import java.util.HashMap;
-import java.util.UUID;
-
-import org.hibernate.Session;
-import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
-
 /**
- * Represents a engines for computing column values for the
- * asset overview map summary.
+ * Boolean expression for asset overview map category column filter.  Represented
+ * as two expression and or or'd together.
  * 
  * @author Emily
  *
  */
-public interface IColumnEngine {
+public class BooleanExpression implements IExpression{
 
-	/**
-	 * Compute the statistics values for asset station or station location
-	 * 
-	 * @param toCompute the column value to compute
-	 * 
-	 * @return a map from object to value.  Key should be station or location uuid depending on the group by option.
-	 */
-	public HashMap<UUID, Object> computeValues(IOverviewTableColumn toCompute);
+	public static BooleanExpression parse (IExpression filter1, Operator op, IExpression filter2) {
+		return new BooleanExpression(filter1, op, filter2);
+	}
 	
-	/**
-	 * 
-	 * @param column
-	 * @return true if this engine can process the given column
-	 */
-	public boolean canProcess(IOverviewTableColumn column);
+	private IExpression filter1;
+	private Operator op;
+	private IExpression filter2;
 	
-	/**
-	 * Cleans up resources as required
-	 * @param session
-	 */
-	public default void dispose(Session session) { }
+	public BooleanExpression(IExpression filter1, Operator op, IExpression filter2) {
+		this.filter1 = filter1;
+		this.op = op;
+		this.filter2 = filter2;
+	}
+	
+	public IExpression getFilter1() { 
+		return filter1;
+	}
+
+	public IExpression getFilter2() {
+		return filter2;
+	}
+	
+	public Operator getOperator() {
+		return this.op;
+	}
+	
+	@Override
+	public String toString() {
+		return filter1.toString() + " " + op.operator.sql + " " + filter2.toString();
+	}
+	
+	@Override
+	public void accept(IExpressionVisitor visitor) {
+		filter1.accept(visitor);
+		filter2.accept(visitor);
+		visitor.visit(this);
+	}
 }

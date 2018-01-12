@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.map.engine;
 
 import java.util.ArrayList;
@@ -19,6 +40,13 @@ import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.asset.ui.views.map.StationData;
 import org.wcs.smart.hibernate.HibernateManager;
 
+/**
+ * Column engine for computing values for
+ * the asset overview map table.
+ * 
+ * @author Emily
+ *
+ */
 public class OverviewmapColumnEngine {
 
 	protected List<StationData> data;
@@ -26,63 +54,99 @@ public class OverviewmapColumnEngine {
 	
 	public Set<IOverviewTableColumn> computedColumns;
 	
+	/**
+	 * Creates a new engine
+	 */
 	public OverviewmapColumnEngine() {
 		data = new ArrayList<>();
 		map = new HashMap<>();
 		computedColumns = new HashSet<>();
 	}
 	
+	/**
+	 * Called when new data is available for display.  Subclasses
+	 * should override
+	 */
 	public void refreshData() {
 		
 	}
 	
+	/**
+	 * Called when all data has been computed. Subclasses
+	 * should override
+	 */
 	public void finish() {
 		
 	}
 	
+	/**
+	 * 
+	 * @return all the data computed to date
+	 */
 	public List<StationData> getData(){
 		return this.data;
-	}
-	
-	public boolean isComputed(IOverviewTableColumn column) {
-		return computedColumns.contains(column);
 	}
 	
 	/**
 	 * 
 	 * @param column
+	 * @return true of false if the column has been processed or not
+	 */
+	public boolean isComputed(IOverviewTableColumn column) {
+		return computedColumns.contains(column);
+	}
+	
+	/**
+	 * Clears any existing data and recomputes all values
+	 * @param column the set of columns to process
 	 * @param dFilter may be null if should include all dates
-	 * @param groupBy
-	 * @return
+	 * @param groupBy type of statistic to compute
+	 * 
 	 */
 	public void computeStatistics(List<IOverviewTableColumn> column, Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy) {
+		//clear existing datay
 		data.clear();
 		map.clear();
 		computedColumns.clear();
-		List<IColumnEngine> engines = new ArrayList<>();
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
+			
+			List<IColumnEngine> engines = new ArrayList<>();
+			engines.add(new FixedColumnEngine(dFilter, groupBy, session));
+			engines.add(new CategoryColumnEngine(dFilter, groupBy, session));
+			
 			try {
-				engines.add(new FixedColumnEngine(session, dFilter));
-				engines.add(new CategoryColumnEngine(session, dFilter));
-				
+				//we don't compute combined columns here; do that after
 				List<IOverviewTableColumn> toCompute = new ArrayList<>();
+				List<CombinedOverviewColumn> combinedColumns = new ArrayList<>();
 				for (IOverviewTableColumn c : column) {
-					if (!(c instanceof CombinedOverviewColumn)) {
+					if (c instanceof CombinedOverviewColumn) {
+						combinedColumns.add((CombinedOverviewColumn)c);
+					}else {
 						toCompute.add(c);
 					}
 				}
 				
+				//compute single columns
 				for (IOverviewTableColumn c : toCompute) {
 					for (IColumnEngine e : engines) {
-						
 						if (e.canProcess(c)){
 							processColumn(e, c, groupBy, session);
 						}
 					}
 					computedColumns.add(c);
 				}
+				
+				//dipose engines
+				engines.forEach(e->e.dispose(session));
+				
+				//compute combined columns
+				for (CombinedOverviewColumn c : combinedColumns) {
+					for (StationData d : data) CombinedColumnEngine.computeValue(d, c);
+					refreshData();
+				}
+				
 			}finally {
 				session.getTransaction().rollback();
 			}
@@ -97,7 +161,7 @@ public class OverviewmapColumnEngine {
 	
 	private void processColumn(IColumnEngine engine, IOverviewTableColumn column, IOverviewTableColumn.GroupByOption groupBy, Session session) {
 		try {
-			HashMap<UUID, Object> columnData = engine.computeValues(column, groupBy);
+			HashMap<UUID, Object> columnData = engine.computeValues(column);
 			
 			
 			for (Entry<UUID, Object> entry : columnData.entrySet()) {

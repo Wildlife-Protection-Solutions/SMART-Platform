@@ -140,10 +140,10 @@ TOKEN :
 
 
 /* ------------ Expressions ----------------------*/
-IFilter CombinedExpression():
+IExpression CombinedExpression():
 {
   
-	IFilter expression;
+	IExpression expression;
 }
 {
 	expression = CombinedExpressionPart()
@@ -151,11 +151,11 @@ IFilter CombinedExpression():
 	 {return expression;}	  
 }
 
-IFilter CombinedExpressionPart():
+IExpression CombinedExpressionPart():
 {
   
-	IFilter expression;
-	IFilter expression2;
+	IExpression expression;
+	IExpression expression2;
 	Operator op;
 	
 }
@@ -165,38 +165,38 @@ IFilter CombinedExpressionPart():
 	  (
 			op = MathOp()
 			expression2 = ColumnExpressionPart()
-			{ expression = CombinedFilter.parse(expression, op, expression2); }
+			{ expression = CombinedExpression.parse(expression, op, expression2); }
 		 )*
 	)
 	{return expression;}	  
 }
 
-IFilter ColumnExpressionPart():
+IExpression ColumnExpressionPart():
 {
-  IFilter expression;
+  IExpression expression;
 }
 {
 	( expression = BracketExpression2() | expression = ColumnExpression() )
    {return expression;}	  
 }
 
-IFilter ColumnExpression():
+IExpression ColumnExpression():
 {
-  IFilter expression;
+  IExpression expression;
 }
 {
 	< FILTER_OPEN >
-	< DM_KEY > { expression = ColumnFilter.parse(token.image); }
+	< DM_KEY > { expression = ColumnExpression.parse(token.image); }
 	< FILTER_CLOSE >   {return expression;}	  
 }
 
 
 
 
-IFilter AttributeExpression():
+IExpression AttributeExpression():
 {
   
-	IFilter expression;
+	IExpression expression;
 }
 {
 	expression = AttributeExpressionInternal()
@@ -204,11 +204,11 @@ IFilter AttributeExpression():
 	 {return expression;}	  
 }
 
-IFilter AttributeExpressionInternal():
+IExpression AttributeExpressionInternal():
 {
   
-	IFilter expression;
-	IFilter expression2;
+	IExpression expression;
+	IExpression expression2;
 	Operator op;
 }
 {
@@ -217,16 +217,16 @@ IFilter AttributeExpressionInternal():
  			(
  	 			op = BooleanOp()
 	  			expression2 = FilterPart()
-				{expression = AttributeExpression.parse(expression, op, expression2);}
+				{expression = BooleanExpression.parse(expression, op, expression2);}
 	  		)*
 	  	)
 	  {return expression;}	  
 }
 
 
-IFilter FilterPart():
+IExpression FilterPart():
 {
-  IFilter expression;
+  IExpression expression;
 }
 {
   	(  	
@@ -238,9 +238,9 @@ IFilter FilterPart():
 	{return expression;}	   
 }
 
-IFilter BracketExpression():
+IExpression BracketExpression():
 {
-  IFilter expression;
+  IExpression expression;
 }
 {
  	(
@@ -249,11 +249,11 @@ IFilter BracketExpression():
 		< CLOSEPAREN >
 	)
 	
-	{return BracketFilter.parse(expression);}	   
+	{return BracketExpression.parse(expression);}	   
 }
-IFilter BracketExpression2():
+IExpression BracketExpression2():
 {
-  IFilter expression;
+  IExpression expression;
 }
 {
  	(
@@ -262,26 +262,48 @@ IFilter BracketExpression2():
 		< CLOSEPAREN >
 	)
 	
-	{return BracketFilter.parse(expression);}	   
+	{return BracketExpression.parse(expression);}	   
 }
-AttributeFilter AttributeFilter():
+AttributeExpression AttributeFilter():
 {
 	String attributeKey;
 	Operator op;
-	AttributeFilter expression;
+	AttributeExpression expression;
 	
 }
 {
   	< FILTER_OPEN >
   	attributeKey = AttributeKey()
-  			(		  op = StringOp() | op = NumberOp() 
+  	(
+		(			< EQUAL > { op = Operator.parse(token.image); }	
+		  	(				< DM_KEY > { expression = AttributeExpression.parse(attributeKey, op, token.image); }
+				|
+				< S_CONST_LITERAL > { expression = AttributeExpression.parse(attributeKey, op, token.image); }
+				|
+				< NUMBER > { expression = AttributeExpression.parse(attributeKey, op, Double.parseDouble(token.image)); }
+		 	) 
 		)
-		(		  <DM_KEY> { expression = AttributeFilter.parse(attributeKey, op, token.image); }
 		|
-			<NUMBER> { expression = AttributeFilter.parse(attributeKey, op, Double.parseDouble(token.image)); }
-		|
-			<QUOTED_STRING> { expression = AttributeFilter.parse(attributeKey, op, token.image); }
+		(  			( < NOTEQUAL >  | < GREATER > | < GREATEREQUAL > | < LESS > | < LESSEQUAL >  ) { op = Operator.parse(token.image); }
+			< NUMBER > { expression = AttributeExpression.parse(attributeKey, op, Double.parseDouble(token.image)); }
+		)	
+		|		( 		  < STREQUALS > { op = Operator.parse(token.image); }
+		  (		    < QUOTED_STRING > { expression = AttributeExpression.parse(attributeKey, op, token.image); }
+		  	|
+		  	< DATE_STRING > { expression = AttributeExpression.parse(attributeKey, op, token.image); } 
+		  )
 		)
+		|
+		(
+		  ( < AFTER> | < BEFORE > ) { op = Operator.parse(token.image); }
+		  	< DATE_STRING > { expression = AttributeExpression.parse(attributeKey, op, token.image); } 
+		)
+		|
+		(		  < CONTAINS > { op = Operator.parse(token.image); }
+		  < QUOTED_STRING > { expression = AttributeExpression.parse(attributeKey, op, token.image); }
+		)
+		
+	)
 			
   < FILTER_CLOSE >
   
@@ -299,23 +321,6 @@ String AttributeKey() :
 	}
 }
 
-Operator NumberOp() :
-{}
-{
-   ( < EQUAL > | < NOTEQUAL >  | < GREATER > | < GREATEREQUAL > | < LESS > | < LESSEQUAL >  )
-  {
-    return Operator.parse(token.image);
-  }
-}
-
-Operator StringOp() :
-{}
-{
-  ( < CONTAINS > | < STREQUALS > )
-  {
-    return Operator.parse(token.image);
-  }
-}
 
 Operator BooleanOp() :
 {}
@@ -335,3 +340,5 @@ Operator MathOp():
     return Operator.parse(token.image);
  }
 }
+
+

@@ -27,9 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.json.simple.JSONObject;
-import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.map.engine.CombinedColumnEngine;
-import org.wcs.smart.asset.map.engine.IFilter;
+import org.wcs.smart.asset.map.engine.IExpression;
 import org.wcs.smart.asset.map.engine.parser.Parser;
 
 /**
@@ -51,7 +49,7 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 	private String definition;
 	private String key;
 	
-	private IFilter expression;
+	private IExpression expression;
 	
 	public CombinedOverviewColumn(String name, String formula) {
 		this.name = name;
@@ -77,22 +75,24 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 		return this.definition;
 	}
 	
-	public IFilter getParsedExpression() {
+	/**
+	 * Returns the parsed expression
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public IExpression getParsedExpression() throws Exception{
 		if (expression != null) return expression;
 		try(InputStream is = new ByteArrayInputStream(definition.getBytes())){
 			Parser p = new Parser(is);
 			expression = p.CombinedExpression();
-		}catch (Exception ex) {
-			//TODO: error
-			AssetPlugIn.log(ex.getMessage(), ex);
-			return null;
 		}
 		return expression;
 	}
 	
 	@Override
 	public Object getValue(StationData data) {		
-		return CombinedColumnEngine.computeValue(data, this);
+		return data.getColumnValue(this);
 	}
 
 	@Override

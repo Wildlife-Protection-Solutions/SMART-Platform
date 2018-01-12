@@ -22,48 +22,75 @@
 package org.wcs.smart.asset.map.engine;
 
 /**
- * Attribute expression for asset overview map category column filter.
+ * Attribute filter for asset overview map category column
  * 
  * @author Emily
  *
  */
-public class AttributeExpression implements IFilter{
+public class AttributeExpression implements IExpression{
 
-	public static AttributeExpression parse (IFilter filter1, Operator op, IFilter filter2) {
-		return new AttributeExpression(filter1, op, filter2);
+	public static final String UI_DATE_FORMAT = "YYYY-MM-DD";
+	public static final String JAVA_DATE_FORMAT = "yyyy-MM-dd";
+	
+	public static AttributeExpression parse(String attributeKey, Operator op, String strValue) {
+		return new AttributeExpression(attributeKey, op, strValue);
 	}
 	
-	private IFilter filter1;
+	public static AttributeExpression parse(String attributeKey, Operator op, Double numberValue) {
+		return new AttributeExpression(attributeKey, op, numberValue);
+	}
+	
+	private String attributeKey;
 	private Operator op;
-	private IFilter filter2;
+	private String strValue;
+	private Double numberValue;
 	
-	public AttributeExpression(IFilter filter1, Operator op, IFilter filter2) {
-		this.filter1 = filter1;
+	public AttributeExpression(String attributeKey, Operator op, String strValue) {
+		this.attributeKey = attributeKey;
 		this.op = op;
-		this.filter2 = filter2;
+		this.strValue = strValue;
 	}
 	
-	public IFilter getFilter1() { 
-		return filter1;
+	
+	public AttributeExpression(String attributeKey, Operator op, Double numberValue) {
+		this.attributeKey = attributeKey;
+		this.op = op;
+		this.numberValue = numberValue;
 	}
-
-	public IFilter getFilter2() {
-		return filter2;
+	
+	public String getAttributeKey() {
+		return this.attributeKey;
 	}
 	
 	public Operator getOperator() {
 		return this.op;
 	}
 	
-	@Override
-	public String toString() {
-		return filter1.toString() + " " + op.operator.sql + " " + filter2.toString();
+	public String getStringValue() {
+		return this.strValue;
+	}
+	
+	public Double getNumberValue() {
+		return this.numberValue;
 	}
 	
 	@Override
-	public void accept(IFilterVisitor visitor) {
-		filter1.accept(visitor);
-		filter2.accept(visitor);
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(attributeKey);
+		sb.append(" ");
+		sb.append(op.operator.sql);
+		sb.append(" " );
+		if (strValue != null) {
+			sb.append(strValue);
+		}else if (numberValue != null) {
+			sb.append(numberValue);
+		}
+		return sb.toString();
+	}
+	
+	@Override
+	public void accept(IExpressionVisitor visitor) {
 		visitor.visit(this);
 	}
 }

@@ -21,40 +21,35 @@
  */
 package org.wcs.smart.asset.map.engine;
 
-import java.util.HashMap;
-import java.util.UUID;
-
-import org.hibernate.Session;
-import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
-
 /**
- * Represents a engines for computing column values for the
- * asset overview map summary.
- * 
+ * Simply column filter for combined column queries.  This is
+ * comprised of a key that represents the column.
  * @author Emily
  *
  */
-public interface IColumnEngine {
+public class ColumnExpression implements IExpression{
 
-	/**
-	 * Compute the statistics values for asset station or station location
-	 * 
-	 * @param toCompute the column value to compute
-	 * 
-	 * @return a map from object to value.  Key should be station or location uuid depending on the group by option.
-	 */
-	public HashMap<UUID, Object> computeValues(IOverviewTableColumn toCompute);
+	public static ColumnExpression parse (String key) {
+		return new ColumnExpression(key);
+	}
+
+	private String key;
 	
-	/**
-	 * 
-	 * @param column
-	 * @return true if this engine can process the given column
-	 */
-	public boolean canProcess(IOverviewTableColumn column);
+	public ColumnExpression(String key) {
+		this.key = key;
+	}
 	
-	/**
-	 * Cleans up resources as required
-	 * @param session
-	 */
-	public default void dispose(Session session) { }
+	public String getColumnKey() { 
+		return key;
+	}
+	
+	@Override
+	public String toString() {
+		return key;
+	}
+	
+	@Override
+	public void accept(IExpressionVisitor visitor) {
+		visitor.visit(this);
+	}
 }

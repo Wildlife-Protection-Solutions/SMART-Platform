@@ -23,12 +23,8 @@ package org.wcs.smart.asset.ui.views.map;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.HashMap;
 
-import org.hibernate.Session;
 import org.json.simple.JSONObject;
-import org.wcs.smart.asset.model.AssetStation;
-import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**

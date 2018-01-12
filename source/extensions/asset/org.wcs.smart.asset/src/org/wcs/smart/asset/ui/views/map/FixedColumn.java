@@ -21,15 +21,9 @@
  */
 package org.wcs.smart.asset.ui.views.map;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 
-import org.hibernate.Session;
 import org.json.simple.JSONObject;
-import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
-import org.wcs.smart.asset.model.AssetStation;
-import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.util.UuidUtils;
 
 /**

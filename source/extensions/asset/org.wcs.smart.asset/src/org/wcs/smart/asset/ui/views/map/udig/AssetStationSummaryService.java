@@ -57,17 +57,9 @@ public class AssetStationSummaryService extends IService {
 	public AssetStationSummaryService(List<IOverviewTableColumn> columns) {
 		this.params = new HashMap<>();
 		this.url = AssetStationSummaryServiceExtension.createURL(this.params);
-		
 		this.columns = columns;
 	}
 	
-	public AssetStationSummaryService(Map<String, Serializable> params) {
-		this(Collections.emptyList());
-		this.params = params;
-		this.url = AssetStationSummaryServiceExtension.createURL(this.params);
-		
-		//TODO: load columns
-	}
 	
 	public void setData(List<StationData> data) {
 		this.data = data;

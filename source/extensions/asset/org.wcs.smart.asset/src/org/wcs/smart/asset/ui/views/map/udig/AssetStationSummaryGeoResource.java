@@ -158,7 +158,6 @@ public class AssetStationSummaryGeoResource extends IGeoResource implements IFil
                  return adaptee.cast(fs);
              }
         }
-        //TODO: apply style
         if (adaptee.isAssignableFrom(Style.class)){
         	if (cachedStyle == null){
         		cachedStyle = getDefaultLayerStyle();
@@ -170,15 +169,12 @@ public class AssetStationSummaryGeoResource extends IGeoResource implements IFil
 
     
     public Style getDefaultLayerStyle(){
-		
-    	
-    	StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
     	StyleBuilder builder = new StyleBuilder(sf);
     	FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
-    	
 
     	FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-    	fts.setName("Style 1"); //$NON-NLS-1$
+    	fts.setName("Status Style"); //$NON-NLS-1$
     	
     	// active
     	Color lineColor = new Color(16,104,12);
@@ -233,7 +229,6 @@ public class AssetStationSummaryGeoResource extends IGeoResource implements IFil
     	retiredRule.setName("Retired"); //$NON-NLS-1$
     	retiredRule.symbolizers().add(point);
     	retiredRule.setFilter(ff.equal(ff.property((new FixedColumn(FixedColumn.Column.STATUS_KEY)).getKey()), ff.literal(Asset.Status.RETIRED.name()), false));
-
     	
     	fts.rules().add(activeRule);
     	fts.rules().add(inactiveRule);

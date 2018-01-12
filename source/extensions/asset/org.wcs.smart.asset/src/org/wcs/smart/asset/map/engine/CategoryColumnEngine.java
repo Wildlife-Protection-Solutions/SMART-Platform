@@ -28,24 +28,26 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.NamedPreparedStatement;
+import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.map.engine.parser.Parser;
 import org.wcs.smart.asset.ui.views.map.CategoryOverviewColumn;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -62,14 +64,6 @@ public class CategoryColumnEngine implements IColumnEngine {
 
 	private static AtomicLong tableCnter = new AtomicLong();
 
-	private String waypointFilterTable;
-	
-	private Date[] dFilter;
-	private Session session;
-	
-	private Map<String, String> attributeToColumn;
-	
-	private ConservationArea ca = SmartDB.getCurrentConservationArea();
 	/**
 	 * Creates a temporary query table 
 	 * 
@@ -79,18 +73,45 @@ public class CategoryColumnEngine implements IColumnEngine {
 		return "query_temp_asset_" + tableCnter.incrementAndGet();//$NON-NLS-1$ 
 	}
 	
-	public CategoryColumnEngine(Session session, Date[] dFilter) {
-		this.dFilter = dFilter;
+	private String waypointFilterTable;
+	private Date[] dFilter;
+	private Session session;
+	private Map<String, String> attributeToColumn;
+	private Map<String, Attribute> attributeKeyToAttribute;
+	
+	private ConservationArea ca = SmartDB.getCurrentConservationArea();
+	private IOverviewTableColumn.GroupByOption groupBy;
+	
+	public CategoryColumnEngine(Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, Session session) {
 		attributeToColumn = new HashMap<>();
-		this.session  = session;
+		attributeKeyToAttribute = new HashMap<>();
+		this.dFilter = dFilter;
+		this.session = session;
+		this.groupBy = groupBy;
 	}
 	
+	@Override
 	public boolean canProcess(IOverviewTableColumn column) {
 		return column instanceof CategoryOverviewColumn;
 	}
 	
-	//TODOD: drop temporary table
-	public HashMap<UUID, Object> computeValues(IOverviewTableColumn column, final IOverviewTableColumn.GroupByOption groupBy) {
+	/**
+	 * Cleans up all resources
+	 * @param session
+	 */
+	@Override
+	public void dispose(Session session) {
+		if (waypointFilterTable == null) return;
+		try {
+			session.createNativeQuery("DROP TABLE " + waypointFilterTable).executeUpdate();
+		}catch (Exception ex) {
+			AssetPlugIn.log(ex.getMessage(), ex);
+		}
+	}
+	
+	@Override
+	public HashMap<UUID, Object> computeValues(IOverviewTableColumn column) {
+				
 		CategoryOverviewColumn toCompute = (CategoryOverviewColumn)column;
 		HashMap<UUID, Object> results = new HashMap<>();
 		
@@ -104,7 +125,6 @@ public class CategoryColumnEngine implements IColumnEngine {
 				
 				String c1 = toCompute.getCategoryKey();
 				String c2 = c1.substring(0,  c1.length() -1) + "/";
-				
 				
 				StringBuilder sb = new StringBuilder();
 				sb.append("SELECT uuid, count(*) FROM ( ");
@@ -123,7 +143,11 @@ public class CategoryColumnEngine implements IColumnEngine {
 					sb.append(" JOIN smart.asset_station_location d on d.uuid = c.station_location_uuid ");
 				}
 				sb.append(" WHERE ");
-				sb.append(" c_hkey >= ? AND c_hkey < ? ");
+				sb.append(" c_hkey >= :ckey1 AND c_hkey < :ckey2 ");
+				
+				HashMap<String, Object> namesToValues = new HashMap<>();
+				namesToValues.put(":ckey1", c1);
+				namesToValues.put(":ckey2", c2);
 				
 				Category category = findCategory(toCompute.getCategoryKey());
 				if (category == null) throw new SQLException("No category with key " + toCompute.getCategoryKey() + "found.");
@@ -131,7 +155,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 				
 				if (toCompute.getAttributeFilter() != null && !toCompute.getAttributeFilter().trim().isEmpty()) {
 					//we need to parse the attribute filter
-					IFilter attributeFilter = null;
+					IExpression attributeFilter = null;
 					try(InputStream is = new ByteArrayInputStream(toCompute.getAttributeFilter().getBytes())){
 						Parser parser = new Parser(is);
 						attributeFilter = parser.AttributeExpression();
@@ -140,11 +164,11 @@ public class CategoryColumnEngine implements IColumnEngine {
 					}
 					
 					Set<String> attributeKeys = new HashSet<>();
-					IFilterVisitor visitor = new IFilterVisitor() {
+					IExpressionVisitor visitor = new IExpressionVisitor() {
 						@Override
-						public void visit(IFilter filter) {
-							if (filter instanceof AttributeFilter) {
-								attributeKeys.add(((AttributeFilter) filter).getAttributeKey());
+						public void visit(IExpression filter) {
+							if (filter instanceof AttributeExpression) {
+								attributeKeys.add(((AttributeExpression) filter).getAttributeKey());
 							}
 						}
 					};
@@ -154,32 +178,35 @@ public class CategoryColumnEngine implements IColumnEngine {
 						Attribute attribute = findAttribute(attributeKey);
 						if (attribute == null) throw new SQLException("Could not find a data model attribute with the key " + attributeKey);
 						addAttributeColumn(attribute, connection);
+						attributeKeyToAttribute.put(attribute.getKeyId(), attribute);
 					}
-					
-					String where = asSql(attributeFilter);
-					sb.append(" AND ( ");
-					sb.append(where);
-					sb.append(" ) ");
+					try {
+						String where = asSql(attributeFilter, namesToValues);
+						sb.append(" AND ( ");
+						sb.append(where);
+						sb.append(" ) ");
+					}catch (Exception ex) {
+						throw new SQLException(ex);
+					}
 					
 				}
 				sb.append(" ) foo GROUP BY uuid");
 				
-				log (sb.toString() );
-				log (c1  + ":" + c2);
-				PreparedStatement ps = connection.prepareStatement(sb.toString());
-				ps.setString(1, c1);
-				ps.setString(2, c2);
-				try(ResultSet rs = ps.executeQuery()){
-					while(rs.next()) {
-						UUID uuid = UuidUtils.byteToUUID(rs.getBytes(1));
-						Long cnt = rs.getLong(2);
-						System.out.println(uuid.toString() + ":" + cnt);
-						results.put(uuid, cnt);
+				try(NamedPreparedStatement ps = new NamedPreparedStatement(connection, sb.toString())){
+					log ( sb.toString() );
+					for (Entry<String,Object> parameter : namesToValues.entrySet()) {
+						log( parameter.getKey() + ":" + parameter.getValue().toString() );
+						ps.setObject(parameter.getKey(), parameter.getValue());
+					}
+					try(ResultSet rs = ps.executeQuery()){
+						while(rs.next()) {
+							UUID uuid = UuidUtils.byteToUUID(rs.getBytes(1));
+							Long cnt = rs.getLong(2);
+							results.put(uuid, cnt);
+						}
 					}
 				}
-				
-				connection.setAutoCommit(false);
-				
+				connection.setAutoCommit(false);				
 			}
 			
 		});
@@ -201,23 +228,24 @@ public class CategoryColumnEngine implements IColumnEngine {
 		return a;
 	}
 	
-	private AttributeListItem findAttributeListItem(String key, Attribute attribute) {
-		AttributeListItem a = QueryFactory.buildQuery(session,  AttributeListItem.class, 
-				new Object[] {"conservationArea", ca},
-				new Object[] {"keyId", key},
-				new Object[] {"attribute", attribute}).uniqueResult();
-		return a;
-	}
-	private AttributeTreeNode findAttributeTreeNode(String hkey, Attribute attribute) {
-		AttributeTreeNode a = QueryFactory.buildQuery(session,  AttributeTreeNode.class, 
-				new Object[] {"conservationArea", ca},
-				new Object[] {"hKey", hkey},
-				new Object[] {"attribute", attribute}).uniqueResult();
-		return a;
-	}
+//	private AttributeListItem findAttributeListItem(String key, Attribute attribute) {
+//		AttributeListItem a = QueryFactory.buildQuery(session,  AttributeListItem.class, 
+//				new Object[] {"conservationArea", ca},
+//				new Object[] {"keyId", key},
+//				new Object[] {"attribute", attribute}).uniqueResult();
+//		return a;
+//	}
+//	private AttributeTreeNode findAttributeTreeNode(String hkey, Attribute attribute) {
+//		AttributeTreeNode a = QueryFactory.buildQuery(session,  AttributeTreeNode.class, 
+//				new Object[] {"conservationArea", ca},
+//				new Object[] {"hKey", hkey},
+//				new Object[] {"attribute", attribute}).uniqueResult();
+//		return a;
+//	}
 	
 	private synchronized void addAttributeColumn(Attribute attribute, Connection connection) throws SQLException {
-		if(attributeToColumn.containsKey(attribute)) return; //already exists
+		if(attributeToColumn.containsKey(attribute.getKeyId())) return; //already exists
+		
 		String column = "attribute_" + attributeToColumn.keySet().size();
 		
 		StringBuilder sb = new StringBuilder();
@@ -341,43 +369,139 @@ public class CategoryColumnEngine implements IColumnEngine {
 	
 	
 	
-	private String asSql(BracketFilter filter) {
-		String part1 = asSql(filter.getFilter());
+	private String asSql(BracketExpression filter, HashMap<String, Object> namesToValues) throws Exception{
+		String part1 = asSql(filter.getFilter(), namesToValues);
 		return "( " + part1 + " )";
 	}
 	
-	private String asSql(AttributeExpression filter) {
-		String part1 = asSql(filter.getFilter1());
-		String part2 = asSql(filter.getFilter2());
+	private String asSql(BooleanExpression filter, HashMap<String, Object> namesToValues) throws Exception{
+		String part1 = asSql(filter.getFilter1(), namesToValues);
+		String part2 = asSql(filter.getFilter2(), namesToValues);
 		return part1 + " " + filter.getOperator().operator.sql + " " + part2;
 	}
 	
-	private String asSql(AttributeFilter filter) {
+	private String asSql(AttributeExpression filter, HashMap<String, Object> namesToValues) throws Exception{
 		String columnName = attributeToColumn.get( filter.getAttributeKey() );
+		Attribute attribute = attributeKeyToAttribute.get( filter.getAttributeKey() );
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append(" ( ");
-		sb.append(columnName);
-		sb.append(" ");
-		sb.append(filter.getOperator().operator.sql);
-		sb.append(" ");
-		//TODO: fix this
-		//based on attribut etype - trees need like option
-		if (filter.getStringValue() != null) {
-			sb.append("'" + filter.getStringValue() + "'");
-		}else if (filter.getNumberValue() != null) {
-			sb.append(filter.getNumberValue());
+		
+		switch(attribute.getType()) {
+		case BOOLEAN:
+			Boolean bool = null;
+			try{
+				bool = Boolean.valueOf(filter.getStringValue().toUpperCase());
+			}catch (Exception ex) {}
+			if (bool == null) throw new Exception("Could not parse boolean from '" + filter.getStringValue() + "'.");
+			
+			sb.append(columnName);
+			if (bool) {
+				sb.append(" > 0.5 ");
+			}else {
+				sb.append(" < 0.5 ");
+			}
+			
+			break;
+		case DATE:
+			if (filter.getOperator().operator != Operator.Op.BEFORE && filter.getOperator().operator != Operator.Op.AFTER
+					&& filter.getOperator().operator != Operator.Op.STR_EQUAL) {
+				throw new Exception("Operator " + filter.getOperator().operator.key + " is not supported for date filters.");
+			}
+			Date d = null;
+			try {
+				d = new SimpleDateFormat(AttributeExpression.JAVA_DATE_FORMAT).parse(filter.getStringValue());
+			}catch (Exception ex) {}
+			if (d == null) throw new Exception("Could not parse date '" + filter.getStringValue() + "' - ensure date is in the format YYYY-MM-DD");
+			
+			sb.append("cast(" );
+			sb.append(columnName);
+			sb.append(" as date ) ");
+			sb.append(filter.getOperator().operator.sql);
+			sb.append(" ");
+			
+			String key = ":a" + namesToValues.size();
+			sb.append(key);
+			namesToValues.put(key, filter.getStringValue());
+					
+			break;
+		case LIST:
+			key = ":a" + namesToValues.size();
+			namesToValues.put(key, filter.getStringValue());
+			sb.append(columnName);
+			sb.append(" = ");
+			sb.append(key);
+			break;
+		case NUMERIC:
+			if (filter.getOperator().operator != Operator.Op.LG 
+				&& filter.getOperator().operator != Operator.Op.LGE
+				&& filter.getOperator().operator != Operator.Op.GT
+				&& filter.getOperator().operator != Operator.Op.GTE
+				&& filter.getOperator().operator != Operator.Op.NOTEQ
+				&& filter.getOperator().operator != Operator.Op.EQ) {
+			
+				throw new Exception("Operator " + filter.getOperator().operator.key + " is not supported for number filters.");
+			}
+			
+			key = ":a" + namesToValues.size();
+			
+			sb.append(columnName);
+			sb.append(" ");
+			sb.append(filter.getOperator().operator.sql);
+			sb.append(" ");
+			sb.append(key);
+			namesToValues.put(key, filter.getNumberValue());
+			break;
+		case TEXT:
+			key = ":a" + namesToValues.size();
+			sb.append(columnName);
+			sb.append(" ");
+			if (filter.getOperator().operator == Operator.Op.STR_EQUAL) {
+				sb.append(" = ");
+				sb.append(key);
+				namesToValues.put(key, filter.getStringValue());
+				break;
+			}else if (filter.getOperator().operator == Operator.Op.STR_CONTAINS) {
+				sb.append(" like ");
+				sb.append(key);
+				namesToValues.put(key, "%" + filter.getStringValue() + "%");
+				break;
+			}
+			throw new Exception("Operator " + filter.getOperator().operator.key + " not supported for string attributes. ");
+		case TREE:
+			String key1 = ":a" + namesToValues.size();
+			String key2 = ":a" + (namesToValues.size()+1);
+			String hkey = filter.getStringValue();
+			if (hkey == null) throw new Exception("No tree item provided for attribute tree filter " + attribute.getKeyId());
+			
+			String c1 = hkey;
+			String c2 = c1.substring(0,  c1.length() -1) + "/";
+			sb.append(columnName);
+			sb.append(" ");
+			sb.append(" >= ");
+			sb.append(key1);
+			sb.append(" AND ");
+			sb.append(columnName);
+			sb.append(" <= ");
+			sb.append(key2);
+			
+			namesToValues.put(key1, c1);
+			namesToValues.put(key2, c2);
+			break;
+		
 		}
+		
 		sb.append(" ) ");
 		return sb.toString();
 	}
 	
-	public String asSql(IFilter filter) {
-		if (filter instanceof AttributeFilter) {
-			return asSql((AttributeFilter)filter);
-		}else if (filter instanceof BracketFilter) {
-			return asSql((BracketFilter)filter);
-		}else if (filter instanceof AttributeExpression) {
-			return asSql((AttributeExpression)filter);
+	public String asSql(IExpression filter, HashMap<String, Object> namesToValues) throws Exception{
+		if (filter instanceof AttributeExpression) {
+			return asSql((AttributeExpression)filter, namesToValues);
+		}else if (filter instanceof BracketExpression) {
+			return asSql((BracketExpression)filter, namesToValues);
+		}else if (filter instanceof BooleanExpression) {
+			return asSql((BooleanExpression)filter, namesToValues);
 		}
 		return "";
 	}

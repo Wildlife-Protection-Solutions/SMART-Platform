@@ -117,7 +117,7 @@ public class AssetStationSummaryFeatureSource extends ContentFeatureSource {
 		sb.append("Point:srid=4326,");
 		sb.append("fid:String,");
 		for (IOverviewTableColumn c : columns) {
-			//TODO: use a column key here so it is the same through all languages
+			//key is used so it is the same through all languages or if the user changes the name
 			sb.append(c.getKey());
 			sb.append(":");
 			sb.append(c.getType().geotoolsType);

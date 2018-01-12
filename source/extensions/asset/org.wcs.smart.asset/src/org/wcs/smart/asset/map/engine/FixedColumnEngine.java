@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.map.engine;
 
 import java.util.Date;
@@ -19,14 +40,22 @@ import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Engine for computing the values for fixed columns.
+ * 
+ * @author Emily
+ *
+ */
 public class FixedColumnEngine implements IColumnEngine {
 
-	private Session session;
 	private Date[] dFilter;
+	private IOverviewTableColumn.GroupByOption groupBy;
+	private Session session;
 	
-	public FixedColumnEngine(Session session, Date[] dFilter) {
-		this.session = session;
+	public FixedColumnEngine(Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, Session session) {
 		this.dFilter = dFilter;
+		this.session = session;
+		this.groupBy = groupBy;
 	}
 	
 	
@@ -38,15 +67,17 @@ public class FixedColumnEngine implements IColumnEngine {
 			case ASSET_DAYS:
 			case INCIDENTS:
 				return true;
+			default:
+				return false;
 			}
+			
 		}
 		return false;
 	}
 	
 	@Override
-	public HashMap<UUID, Object> computeValues(IOverviewTableColumn toCompute, GroupByOption groupBy) {
-		FixedColumn c = (FixedColumn) toCompute;
-		
+	public HashMap<UUID, Object> computeValues(IOverviewTableColumn column) {		
+		FixedColumn c = (FixedColumn) column;
 		if (groupBy == GroupByOption.STATION) {
 			switch(c.getColumn()) {
 			case ACTIVE_DAYS:
@@ -55,6 +86,7 @@ public class FixedColumnEngine implements IColumnEngine {
 				return computeAssetDaysPerStation(session, dFilter);
 			case INCIDENTS:
 				return incidentsPerStation(session, dFilter);
+			default:
 			}
 		}else if (groupBy == GroupByOption.LOCATION) {
 			switch(c.getColumn()) {
@@ -64,13 +96,11 @@ public class FixedColumnEngine implements IColumnEngine {
 				return computeAssetDaysPerStationLocation(session, dFilter);
 			case INCIDENTS:
 				return incidentsPerLocation(session, dFilter);
+			default:
 			}
 		}
 		return new HashMap<>();
 	}
-
-
-
 	
 	private HashMap<UUID, Object> computeNumberOfDaysPerStation(Session session, Date[] dFilter){
 		

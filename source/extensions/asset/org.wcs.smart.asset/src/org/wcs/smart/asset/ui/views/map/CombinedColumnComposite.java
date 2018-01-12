@@ -1,60 +1,53 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package org.wcs.smart.asset.ui.views.map;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
-import org.wcs.smart.asset.map.engine.IFilter;
 import org.wcs.smart.asset.map.engine.parser.Parser;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.ColumnType;
-import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.ui.properties.DataModelContentProvider;
-import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.ui.properties.TreeEditorField;
 
+/**
+ * Composite for configuring combined columns for asset overview column
+ * @author Emily
+ *
+ */
 public class CombinedColumnComposite extends Composite {
-	
 
 	private Text txtAttributeFilters;
 	private ListViewer columnOptions;
@@ -86,14 +79,13 @@ public class CombinedColumnComposite extends Composite {
 		return newColumn;
 	}
 	
-	
 	public boolean validate() {
 		String text = txtAttributeFilters.getText().trim();
 		if (!text.isEmpty()) {
 			
 			try(InputStream is = new ByteArrayInputStream(text.getBytes())){
 				Parser parser = new Parser(is);
-				IFilter f = parser.CombinedExpression();
+				parser.CombinedExpression();
 			} catch (Exception e) {
 				e.printStackTrace();
 				dialog.setErrorMessage(e.getMessage());

@@ -22,34 +22,12 @@
 package org.wcs.smart.asset.map.engine;
 
 /**
- * Bracket filter for asset overview map 
+ * Expression visitor 
+ * 
  * @author Emily
  *
  */
-public class BracketFilter implements IFilter{
-	
-	public static BracketFilter parse(IFilter exp) {
-		return new BracketFilter(exp);
-	}
-	
-	private IFilter filter1;
-	
-	public BracketFilter(IFilter exp) {
-		this.filter1 = exp;
-	}
-	
-	public IFilter getFilter() {
-		return this.filter1;
-	}
-	
-	@Override
-	public String toString() {
-		return " ( " + filter1.toString() + " ) ";
-	}
-	
-	@Override
-	public void accept(IFilterVisitor visitor) {
-		filter1.accept(visitor);
-		visitor.visit(this);
-	}
+public interface IExpressionVisitor {
+
+	public void visit(IExpression filter);
 }

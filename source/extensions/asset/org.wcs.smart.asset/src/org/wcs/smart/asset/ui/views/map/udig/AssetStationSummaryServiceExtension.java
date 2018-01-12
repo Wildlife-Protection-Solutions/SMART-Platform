@@ -31,7 +31,8 @@ import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
 
 /**
- * Udig service extension for asset summary statistics
+ * Udig service extension for asset summary statistics. 
+ * This is currently not supported.
  * 
  * @author Emily
  */
@@ -46,7 +47,8 @@ public class AssetStationSummaryServiceExtension implements ServiceExtension {
 	public IService createService(URL id, Map<String, Serializable> params) {
         if (params == null)
             return null;
-       	return  new AssetStationSummaryService(params);
+        throw new UnsupportedOperationException("Not supported");
+//       	return  new AssetStationSummaryService(params);
 	}
 
 	@Override

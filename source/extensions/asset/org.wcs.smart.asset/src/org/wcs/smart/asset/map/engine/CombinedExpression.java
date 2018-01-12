@@ -22,72 +22,48 @@
 package org.wcs.smart.asset.map.engine;
 
 /**
- * Attribute filter for asset overview map category column
- * 
+ * Combined filter for combining the values of multiple columns.
+ * It represents a math expression with supported operators being / * + -
  * @author Emily
  *
  */
-public class AttributeFilter implements IFilter{
+public class CombinedExpression implements IExpression{
 
-	public static AttributeFilter parse(String attributeKey, Operator op, String strValue) {
-		return new AttributeFilter(attributeKey, op, strValue);
+	public static CombinedExpression parse (IExpression filter1, Operator op, IExpression filter2) {
+		return new CombinedExpression(filter1, op, filter2);
 	}
 	
-	public static AttributeFilter parse(String attributeKey, Operator op, Double numberValue) {
-		return new AttributeFilter(attributeKey, op, numberValue);
-	}
-	
-	private String attributeKey;
+	private IExpression filter1;
 	private Operator op;
-	private String strValue;
-	private Double numberValue;
+	private IExpression filter2;
 	
-	public AttributeFilter(String attributeKey, Operator op, String strValue) {
-		this.attributeKey = attributeKey;
+	protected CombinedExpression(IExpression filter1, Operator op, IExpression filter2) {
+		this.filter1 = filter1;
 		this.op = op;
-		this.strValue = strValue;
+		this.filter2 = filter2;
 	}
 	
-	
-	public AttributeFilter(String attributeKey, Operator op, Double numberValue) {
-		this.attributeKey = attributeKey;
-		this.op = op;
-		this.numberValue = numberValue;
+	public IExpression getFilter1() { 
+		return filter1;
 	}
-	
-	public String getAttributeKey() {
-		return this.attributeKey;
+
+	public IExpression getFilter2() {
+		return filter2;
 	}
 	
 	public Operator getOperator() {
 		return this.op;
 	}
 	
-	public String getStringValue() {
-		return this.strValue;
-	}
-	
-	public Double getNumberValue() {
-		return this.numberValue;
-	}
-	
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(attributeKey);
-		sb.append(" ");
-		sb.append(op.operator.sql);
-		sb.append(" " );
-		if (strValue != null) {
-			sb.append(strValue);
-		}else if (numberValue != null) {
-			sb.append(numberValue);
-		}
-		return sb.toString();
+		return filter1.toString() + " " + op.operator.sql + " " + filter2.toString();
 	}
 	
 	@Override
-	public void accept(IFilterVisitor visitor) {
+	public void accept(IExpressionVisitor visitor) {
+		filter1.accept(visitor);
+		filter2.accept(visitor);
 		visitor.visit(this);
 	}
 }

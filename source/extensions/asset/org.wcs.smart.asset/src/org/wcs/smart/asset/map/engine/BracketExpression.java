@@ -21,40 +21,38 @@
  */
 package org.wcs.smart.asset.map.engine;
 
-import java.util.HashMap;
-import java.util.UUID;
-
-import org.hibernate.Session;
-import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
-
 /**
- * Represents a engines for computing column values for the
- * asset overview map summary.
+ * Bracket filter for column in the asset overview map.  Bracket
+ * filter is represented by an open bracket and expression and a closed
+ * bracket.
  * 
  * @author Emily
  *
  */
-public interface IColumnEngine {
-
-	/**
-	 * Compute the statistics values for asset station or station location
-	 * 
-	 * @param toCompute the column value to compute
-	 * 
-	 * @return a map from object to value.  Key should be station or location uuid depending on the group by option.
-	 */
-	public HashMap<UUID, Object> computeValues(IOverviewTableColumn toCompute);
+public class BracketExpression implements IExpression{
 	
-	/**
-	 * 
-	 * @param column
-	 * @return true if this engine can process the given column
-	 */
-	public boolean canProcess(IOverviewTableColumn column);
+	public static BracketExpression parse(IExpression exp) {
+		return new BracketExpression(exp);
+	}
 	
-	/**
-	 * Cleans up resources as required
-	 * @param session
-	 */
-	public default void dispose(Session session) { }
+	private IExpression filter1;
+	
+	public BracketExpression(IExpression exp) {
+		this.filter1 = exp;
+	}
+	
+	public IExpression getFilter() {
+		return this.filter1;
+	}
+	
+	@Override
+	public String toString() {
+		return " ( " + filter1.toString() + " ) ";
+	}
+	
+	@Override
+	public void accept(IExpressionVisitor visitor) {
+		filter1.accept(visitor);
+		visitor.visit(this);
+	}
 }
