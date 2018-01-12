@@ -14,7 +14,12 @@ public class Operator {
 		STR_EQUAL("equals", "="),
 		STR_CONTAINS("contains", "like"),
 		BEFORE("before", "<"),
-		AFTER("after", ">");
+		AFTER("after", ">"),
+		
+		PLUS("+", "+"),
+		MINUS("-", "-"),
+		TIMES("*", "*"),
+		DIVIDE("/", "/");
 		
 		String key;
 		String sql;

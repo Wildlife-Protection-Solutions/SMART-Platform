@@ -1,103 +1,78 @@
-package org.wcs.smart.asset.ui.views.map;
+package org.wcs.smart.asset.map.engine;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.Map.Entry;
 
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.ui.views.map.FixedColumn;
+import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
-public class StatisticComputer {
+public class FixedColumnEngine implements IColumnEngine {
 
-	/**
-	 * 
-	 * @param column
-	 * @param dFilter may be null if should include all dates
-	 * @param groupBy
-	 * @return
-	 */
-	public static List<StationData> computeStatistics(List<IOverviewTableColumn> column, Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy) {
-		try(Session session = HibernateManager.openSession()){
-			
-			List<IOverviewTableColumn> toCompute = new ArrayList<>();
-			for (IOverviewTableColumn c : column) {
-				if (!(c instanceof CombinedOverviewColumn)) {
-					toCompute.add(c);
-				}
-			}
-			
-			List<StationData> data = new ArrayList<>();
-			if (groupBy == GroupByOption.STATION) {
-				data.addAll(computeValuesByStation(toCompute, session, dFilter).values());
-			}
-			if (groupBy == GroupByOption.LOCATION) {
-				data.addAll(computeValuesByStationLocation(toCompute, session, dFilter).values());
-			}
-			//TODO: sort by station id???
-			return data;
-		}
+	private Session session;
+	private Date[] dFilter;
+	
+	public FixedColumnEngine(Session session, Date[] dFilter) {
+		this.session = session;
+		this.dFilter = dFilter;
 	}
 	
-	private static HashMap<AssetStation, StationData> computeValuesByStation(List<IOverviewTableColumn> toCompute, Session session, Date[] dFilter) {
-		HashMap<AssetStation, StationData> results = new HashMap<>();
+	
+	@Override
+	public boolean canProcess(IOverviewTableColumn column) {
+		if (column instanceof FixedColumn) {
+			switch(((FixedColumn) column).getColumn()) {
+			case ACTIVE_DAYS:
+			case ASSET_DAYS:
+			case INCIDENTS:
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public HashMap<UUID, Object> computeValues(IOverviewTableColumn toCompute, GroupByOption groupBy) {
+		FixedColumn c = (FixedColumn) toCompute;
 		
-		for (IOverviewTableColumn c : toCompute) {
-			try {
-				HashMap<AssetStation, Object> columnData = c.computeValuesByStation(session, dFilter);
-				
-				for (AssetStation key : columnData.keySet()) {
-					StationData data = results.get(key);
-					if (data == null) {
-						data = new StationData(key);
-						results.put(key,  data);
-					}
-					data.setData(c, columnData.get(key));
-				}
-			}catch (Exception ex) {
-				//TODO:
-				AssetPlugIn.log(ex.getMessage(), ex);
+		if (groupBy == GroupByOption.STATION) {
+			switch(c.getColumn()) {
+			case ACTIVE_DAYS:
+				return computeNumberOfDaysPerStation(session, dFilter);
+			case ASSET_DAYS:
+				return computeAssetDaysPerStation(session, dFilter);
+			case INCIDENTS:
+				return incidentsPerStation(session, dFilter);
+			}
+		}else if (groupBy == GroupByOption.LOCATION) {
+			switch(c.getColumn()) {
+			case ACTIVE_DAYS:
+				return computeNumberOfDaysPerStationLocation(session, dFilter);
+			case ASSET_DAYS:
+				return computeAssetDaysPerStationLocation(session, dFilter);
+			case INCIDENTS:
+				return incidentsPerLocation(session, dFilter);
 			}
 		}
-		return results;
+		return new HashMap<>();
 	}
+
+
+
 	
-	private static HashMap<AssetStationLocation, StationData> computeValuesByStationLocation(List<IOverviewTableColumn> toCompute, Session session, Date[] dFilter) {
-		HashMap<AssetStationLocation, StationData> results = new HashMap<>();
-		
-		for (IOverviewTableColumn c : toCompute) {
-			try {
-				HashMap<AssetStationLocation, Object> columnData = c.computeValuesByStationLocation(session, dFilter);
-				
-				for (AssetStationLocation key : columnData.keySet()) {
-					StationData data = results.get(key);
-					if (data == null) {
-						data = new StationData(key);
-						results.put(key,  data);
-					}
-					data.setData(c, columnData.get(key));
-				}
-			}catch (Exception ex) {
-				//TODO:
-				AssetPlugIn.log(ex.getMessage(), ex);
-			}
-		}
-		return results;
-	}
-	
-	public static HashMap<AssetStation, Object> computeNumberOfDaysPerStation(Session session, Date[] dFilter){
+	private HashMap<UUID, Object> computeNumberOfDaysPerStation(Session session, Date[] dFilter){
 		
 		Query<AssetDeployment> query = null;
 		if (dFilter != null) {
@@ -118,7 +93,7 @@ public class StatisticComputer {
 				AssetDeployment d = (AssetDeployment) results.get(0);
 				
 				Long startDate = SharedUtils.getDatePart(d.getStartDate(), false).getTime();
-				Long endDate = (new Date()).getTime();
+				Long endDate = SharedUtils.getDatePart(new Date(), false).getTime();
 				if (d.getEndDate() != null) {
 					endDate = SharedUtils.getDatePart(d.getEndDate(), false).getTime();
 				}
@@ -129,7 +104,7 @@ public class StatisticComputer {
 					dates = new HashSet<>();
 					daysPerStation.put(s, dates);
 				}
-				while(startDate < endDate) {
+				while(startDate <= endDate) {
 					if (dFilter == null) {
 						dates.add(startDate);
 					}else if (startDate >= dFilter[0].getTime() && startDate <= dFilter[1].getTime()) {
@@ -140,14 +115,14 @@ public class StatisticComputer {
 			}
 		}
 		
-		HashMap<AssetStation, Object> results = new HashMap<>();
+		HashMap<UUID, Object> results = new HashMap<>();
 		for (Entry<AssetStation, HashSet<Long>> e : daysPerStation.entrySet()) {
-			results.put(e.getKey(), e.getValue().size());
+			results.put(e.getKey().getUuid(), e.getValue().size());
 		}
 		return results;
 	}
 	
-	public static  HashMap<AssetStationLocation, Object> computeNumberOfDaysPerStationLocation(Session session, Date[] dFilter){
+	private  HashMap<UUID, Object> computeNumberOfDaysPerStationLocation(Session session, Date[] dFilter){
 		
 		Query<AssetDeployment> query = null;
 		if (dFilter != null) {
@@ -168,7 +143,7 @@ public class StatisticComputer {
 				AssetDeployment d = (AssetDeployment) results.get(0);
 				
 				Long startDate = SharedUtils.getDatePart(d.getStartDate(), false).getTime();
-				Long endDate = (new Date()).getTime();
+				Long endDate = SharedUtils.getDatePart(new Date(), false).getTime();
 				if (d.getEndDate() != null) {
 					endDate = SharedUtils.getDatePart(d.getEndDate(), false).getTime();
 				}
@@ -179,7 +154,7 @@ public class StatisticComputer {
 					dates = new HashSet<>();
 					daysPerStation.put(s, dates);
 				}
-				while(startDate < endDate) {
+				while(startDate <= endDate) {
 					if (dFilter == null) {
 						dates.add(startDate);
 					}else if (startDate >= dFilter[0].getTime() && startDate <= dFilter[1].getTime()) {
@@ -190,15 +165,15 @@ public class StatisticComputer {
 			}
 		}
 		
-		HashMap<AssetStationLocation, Object> results = new HashMap<>();
+		HashMap<UUID, Object> results = new HashMap<>();
 		for (Entry<AssetStationLocation, HashSet<Long>> e : daysPerStation.entrySet()) {
-			results.put(e.getKey(), e.getValue().size());
+			results.put(e.getKey().getUuid(), e.getValue().size());
 		}
 		return results;
 	}
 	
 	
-	public static HashMap<AssetStation, Object> computeAssetDaysPerStation(Session session, Date[] dFilter){
+	private  HashMap<UUID, Object> computeAssetDaysPerStation(Session session, Date[] dFilter){
 		
 		Query<AssetDeployment> query = null;
 		if (dFilter != null) {
@@ -211,43 +186,44 @@ public class StatisticComputer {
 			query = session.createQuery(hql, AssetDeployment.class);
 		}
 		
-		HashMap<AssetStation, Object> daysCnt = new HashMap<>();
+		HashMap<UUID, Object> daysCnt = new HashMap<>();
 		
 		try(ScrollableResults results = query.scroll()){
 			while(results.next()) {
 				AssetDeployment d = (AssetDeployment) results.get(0);
 				
 				Long startDate = SharedUtils.getDatePart(d.getStartDate(), false).getTime();
-				Long endDate = (new Date()).getTime();
+				Long endDate = SharedUtils.getDatePart(new Date(), false).getTime();
 				if (d.getEndDate() != null) {
 					endDate = SharedUtils.getDatePart(d.getEndDate(), false).getTime();
 				}
 				
 				AssetStation s = d.getStationLocation().getStation();
 				int cnt = 0;
-				while(startDate < endDate) {
+				
+				while(startDate <= endDate) {
 					if (dFilter == null) {
 						cnt++;
 					}else if (startDate >= dFilter[0].getTime() && startDate <= dFilter[1].getTime()) {
 						cnt++;
 					}
-					
 					startDate += 86400000;
 				}
-				Integer days = (Integer) daysCnt.get(s);
+
+				Integer days = (Integer) daysCnt.get(s.getUuid());
 				if (days == null) {
 					days = cnt;
 				}else {
 					days += cnt;
 				}
-				daysCnt.put(s, days);
+				daysCnt.put(s.getUuid(), days);
 				
 			}
 		}
 		return daysCnt;
 	}
 	
-	public static HashMap<AssetStationLocation, Object> computeAssetDaysPerStationLocation(Session session, Date[] dFilter){
+	private HashMap<UUID, Object> computeAssetDaysPerStationLocation(Session session, Date[] dFilter){
 		
 		Query<AssetDeployment> query = null;
 		if (dFilter != null) {
@@ -261,21 +237,21 @@ public class StatisticComputer {
 		}
 		
 		
-		HashMap<AssetStationLocation, Object> daysCnt = new HashMap<>();
+		HashMap<UUID, Object> daysCnt = new HashMap<>();
 		
 		try(ScrollableResults results = query.scroll()){
 			while(results.next()) {
 				AssetDeployment d = (AssetDeployment) results.get(0);
 				
 				Long startDate = SharedUtils.getDatePart(d.getStartDate(), false).getTime();
-				Long endDate = (new Date()).getTime();
+				Long endDate = SharedUtils.getDatePart(new Date(), false).getTime();
 				if (d.getEndDate() != null) {
 					endDate = SharedUtils.getDatePart(d.getEndDate(), false).getTime();
 				}
 				
 				AssetStationLocation s = d.getStationLocation();
 				int cnt = 0;
-				while(startDate < endDate) {
+				while(startDate <= endDate) {
 					if (dFilter == null) {
 						cnt++;
 					}else if (startDate >= dFilter[0].getTime() && startDate <= dFilter[1].getTime()) {
@@ -283,22 +259,22 @@ public class StatisticComputer {
 					}
 					startDate += 86400000;
 				}
-				Integer days = (Integer) daysCnt.get(s);
+				Integer days = (Integer) daysCnt.get(s.getUuid());
 				if (days == null) {
 					days = cnt;
 				}else {
 					days += cnt;
 				}
-				daysCnt.put(s, days);
+				daysCnt.put(s.getUuid(), days);
 				
 			}
 		}
 		return daysCnt;
 	}
 
-	public static HashMap<AssetStation, Object> incidentsPerStation(Session session, Date[] dFilter){
+	private HashMap<UUID, Object> incidentsPerStation(Session session, Date[] dFilter){
 		
-		HashMap<AssetStation, Object> results = new HashMap<>();
+		HashMap<UUID, Object> results = new HashMap<>();
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT uuid, count(wp_uuid) FROM ");
@@ -324,20 +300,17 @@ public class StatisticComputer {
 		for (Object result : qresults) {
 			UUID stationUuid = UuidUtils.byteToUUID( (byte[])((Object[])result)[0] );
 			Integer cnt = (Integer) ((Object[])result)[1];
+			results.put(stationUuid, cnt);
 			
-			AssetStation s = session.get(AssetStation.class, stationUuid);
-			if (s != null) {
-				results.put(s, cnt);
-			}
 		}
 		return results;
 		
 	}
 	
 
-	public static HashMap<AssetStationLocation, Object> incidentsPerLocation(Session session, Date[] dFilter){
+	public static HashMap<UUID, Object> incidentsPerLocation(Session session, Date[] dFilter){
 		
-		HashMap<AssetStationLocation, Object> results = new HashMap<>();
+		HashMap<UUID, Object> results = new HashMap<>();
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT uuid, count(wp_uuid) FROM ");
@@ -362,11 +335,7 @@ public class StatisticComputer {
 		for (Object result : qresults) {
 			UUID locationUuid = UuidUtils.byteToUUID( (byte[])((Object[])result)[0] );
 			Integer cnt = (Integer) ((Object[])result)[1];
-			
-			AssetStationLocation s = session.get(AssetStationLocation.class, locationUuid);
-			if (s != null) {
-				results.put(s, cnt);
-			}
+			results.put(locationUuid, cnt);
 		}
 		return results;
 		

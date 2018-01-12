@@ -70,6 +70,7 @@ public interface IOverviewTableColumn {
 		
 		public String asString(Object value) {
 			if (value == null) return "";
+			if (value instanceof Exception) return "ERROR: " + ((Exception)value).getMessage();
 			switch(this) {
 			case BOOLEAN:
 				if ((Boolean)value) {
@@ -80,7 +81,12 @@ public interface IOverviewTableColumn {
 			case DATE:
 				return DateFormat.getDateInstance().format((Date)value);
 			case INTEGER:
-				return ((Integer)value).toString();
+				if (value instanceof Long) {
+					return ((Long)value).toString();
+				}else if (value instanceof Integer) {
+					return ((Integer)value).toString();
+				}
+				return value.toString();
 			case LONG:
 				return ((Long)value).toString();
 			case NUMBER:
@@ -132,23 +138,7 @@ public interface IOverviewTableColumn {
 	 * @return
 	 */
 	public ColumnType getType();
-	
-	/**
-	 * 
-	 * @param session
-	 * @param dFilter may be null if all dates should be included
-	 * @return
-	 */
-	public HashMap<AssetStation, Object> computeValuesByStation(Session session, Date[] dFilter);
-	
-	/**
-	 * 
-	 * @param session
-	 * @param dFilter may be null if all dates should be included
-	 * @return
-	 */
-	public HashMap<AssetStationLocation, Object> computeValuesByStationLocation(Session session, Date[] dFilter);
-	
+
 	/**
 	 * convert the column to a JSON object that defines the column
 	 * 

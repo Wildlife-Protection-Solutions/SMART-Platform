@@ -41,37 +41,39 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int MINUS = 19;
   /** RegularExpression Id. */
-  int CONTAINS = 20;
+  int TIMES = 20;
   /** RegularExpression Id. */
-  int STREQUALS = 21;
+  int CONTAINS = 21;
   /** RegularExpression Id. */
-  int BEFORE = 22;
+  int STREQUALS = 22;
   /** RegularExpression Id. */
-  int AFTER = 23;
+  int BEFORE = 23;
   /** RegularExpression Id. */
-  int NUMBER = 24;
+  int AFTER = 24;
   /** RegularExpression Id. */
-  int FLOAT = 25;
+  int NUMBER = 25;
   /** RegularExpression Id. */
-  int INTEGER = 26;
+  int FLOAT = 26;
   /** RegularExpression Id. */
-  int DIGIT = 27;
+  int INTEGER = 27;
   /** RegularExpression Id. */
-  int LETTER = 28;
+  int DIGIT = 28;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 29;
+  int LETTER = 29;
   /** RegularExpression Id. */
-  int S_CONST_LITERAL = 30;
+  int SPECIAL_CHARS = 30;
   /** RegularExpression Id. */
-  int FILTER_OPEN = 31;
+  int S_CONST_LITERAL = 31;
   /** RegularExpression Id. */
-  int FILTER_CLOSE = 32;
+  int FILTER_OPEN = 32;
   /** RegularExpression Id. */
-  int DM_KEY = 33;
+  int FILTER_CLOSE = 33;
   /** RegularExpression Id. */
-  int DATE_STRING = 34;
+  int DM_KEY = 34;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 35;
+  int DATE_STRING = 35;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 36;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -98,6 +100,7 @@ public interface ParserConstants {
     "\"/\"",
     "\"+\"",
     "\"-\"",
+    "\"*\"",
     "\"contains\"",
     "\"equals\"",
     "\"before\"",

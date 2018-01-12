@@ -63,6 +63,7 @@ import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.asset.ui.views.map.udig.AssetStationSummaryService;
 import org.wcs.smart.common.filter.DateFilterComposite;
@@ -122,6 +123,26 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	private AssetStationSummaryService service;
 	
 	private GroupByOption currentGroupByOption = GroupByOption.STATION;
+	
+	private OverviewmapColumnEngine statEngine = new OverviewmapColumnEngine() {
+		
+		public void refreshData() { 
+			Display.getDefault().syncExec(()->{
+				if (summaryTable.getTable().isDisposed()) return;
+				summaryTable.refresh();
+			});
+		}
+		
+		public void finish() { 
+			Display.getDefault().syncExec(()->{
+				if (summaryTable.getTable().isDisposed()) return;
+				summaryTable.setInput(getData());
+				summaryTable.refresh();
+				getMap().getRenderManager().refresh(null);
+			});
+		}
+	};
+	
 	/** Creates the map
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -174,6 +195,13 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 				DateFilterComposite.DateFilter.CUSTOM,
 				DateFilterComposite.DateFilter.ALL
 		}, DateFilterComposite.DateFilter.ALL, true);
+		dateFilters.addChangeListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				computeStatisticsJob.schedule(500);
+			}
+		});
+		
 		
 		Composite innerPart = toolkit.createComposite(mapPart, SWT.NONE);
 		innerPart.setLayout(new GridLayout());
@@ -246,7 +274,6 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		summaryTable.getTable().setHeaderVisible(true);
 		summaryTable.getTable().setLinesVisible(true);
 		summaryTable.setContentProvider(ArrayContentProvider.getInstance());
-		summaryTable.setInput(DialogConstants.LOADING_TEXT);
 		summaryTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		for (OverviewTableColumnWrapper column : tableConfiguration.getColumns()) {
@@ -254,8 +281,16 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			tColumn.getColumn().setText(column.getColumn().getName());
 			tColumn.setLabelProvider(new ColumnLabelProvider() {
 				public String getText(Object element) {
-					if (element instanceof StationData) return column.getColumn().getType().asString(column.getColumn().getValue((StationData) element));
-					return super.getText(element);
+					if (statEngine.isComputed(column.getColumn())) {
+						if (element instanceof StationData) {
+							Object value = column.getColumn().getValue((StationData) element);
+						
+							return column.getColumn().getType().asString(value);
+						}
+						return "Error";
+					}else {
+						return DialogConstants.LOADING_TEXT;
+					}
 				}
 			});			
 			column.setUiColumn(tColumn.getColumn());
@@ -299,10 +334,13 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			
 			Display.getDefault().syncExec(()->{
 				if (summaryTable.getTable().isDisposed()) return;
-				summaryTable.setInput(new String[] {DialogConstants.LOADING_TEXT});
+				
 				
 				start[0] = dateFilters.getDateFilter().getStartDate();
 				end[0] = dateFilters.getDateFilter().getEndDate();
+				
+				
+				summaryTable.setInput(statEngine.getData());
 			});
 			
 			
@@ -320,6 +358,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 				}
 				AddLayersCommand addCmd = new AddLayersCommand(resources);
 				getMap().sendCommandASync(addCmd);
+				service.setData(statEngine.getData());
 			}
 			
 			Date[] dFilters = null;
@@ -332,16 +371,17 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			}
 					
 			
-			final List<StationData> data = StatisticComputer.computeStatistics(tableConfiguration.getColumns().stream().map(e->e.getColumn()).collect(Collectors.toList()), dFilters, currentGroupByOption);
 			
-			Display.getDefault().syncExec(()->{
-				if (summaryTable.getTable().isDisposed()) return;
-				
-				summaryTable.setInput(data);
-				service.setData(data);
-				tableConfiguration.getColumns().stream().filter(e->e.isVisible()).forEach(e->e.getTableColumn().pack());
-				getMap().getRenderManager().refresh(null);
-			});
+			statEngine.computeStatistics(tableConfiguration.getColumns().stream().map(e->e.getColumn()).collect(Collectors.toList()), dFilters, currentGroupByOption);
+			
+//			Display.getDefault().syncExec(()->{
+//				if (summaryTable.getTable().isDisposed()) return;
+//				
+//				summaryTable.setInput(data);
+//				service.setData(data);
+////				tableConfiguration.getColumns().stream().filter(e->e.isVisible()).forEach(e->e.getTableColumn().pack());
+//				getMap().getRenderManager().refresh(null);
+//			});
 			return Status.OK_STATUS;
 		}
 		

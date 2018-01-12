@@ -21,54 +21,27 @@
  */
 package org.wcs.smart.asset.ui.views.map;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.hibernate.Session;
-import org.wcs.smart.asset.map.engine.IFilter;
-import org.wcs.smart.asset.map.engine.parser.Parser;
-import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**
  * Dialog for configuring asset over map columns that count incidents based
@@ -79,21 +52,32 @@ import org.wcs.smart.ui.properties.TreeEditorField;
  */
 public class CategoryColumnDialog extends TitleAreaDialog {
 
+	private enum Type{
+		CATEGORY("Category Column"),
+		COMBINED("Combined Column");
+		
+		String name;
+		Type(String name){
+			this.name = name;
+		}
+	}
 	private Text txtName;
 	
-	private Text txtAttributeFilters;
-	private TreeEditorField<Category> field;
-	private TreeViewer attributeOptions;
+	private CategoryColumnComposite categoryOption;
+	private CombinedColumnComposite combinedOption;
 	
-	private CategoryOverviewColumn newColumn = null;
-	private CategoryOverviewColumn toUpdate = null;
+	private IOverviewTableColumn toUpdate;
+	private IOverviewTableColumn newColumn;
 	
+	private Composite stackPanel;
+	private List<IOverviewTableColumn> allColumns;
 	/**
 	 * Creates a new dialog for creating a new columns
 	 * @param parentShell
 	 */
-	public CategoryColumnDialog(Shell parentShell) {
+	public CategoryColumnDialog(Shell parentShell, List<IOverviewTableColumn> allColumns) {
 		super(parentShell);
+		this.allColumns = allColumns;
 	}
 
 	/**
@@ -101,59 +85,73 @@ public class CategoryColumnDialog extends TitleAreaDialog {
 	 * @param parentShell
 	 * @param toUpdate
 	 */
-	public CategoryColumnDialog(Shell parentShell, CategoryOverviewColumn toUpdate) {
+	public CategoryColumnDialog(Shell parentShell, IOverviewTableColumn toUpdate, List<IOverviewTableColumn> allColumns) {
 		super(parentShell);
 		this.toUpdate = toUpdate;
+		this.allColumns = allColumns;
 	}
 	
+	public String getName() {
+		return txtName.getText();
+	}
+	
+	public List<IOverviewTableColumn> getAllColumns(){
+		return this.allColumns;
+	}
 	/**
 	 * 
 	 * @return the new column created; this will return null if we are updating a column
 	 */
-	public CategoryOverviewColumn getNewColumn() {
+	public IOverviewTableColumn getNewColumn() {
 		return newColumn;
+		
 	}
 	
-	private void enableOk(boolean enabled) {
+	public void enableOk(boolean enabled) {
 		Button ok = getButton(IDialogConstants.OK_ID);
 		if (ok != null) ok.setEnabled(enabled);
 	}
 	
-	private boolean validate() {
+	public boolean validate() {
 		if (txtName.getText().trim().isEmpty()) {
 			setErrorMessage("A column name must be provided");
 			enableOk(false);
 			return false;
 		}
-		if (field.getValue() == null) {
-			setErrorMessage("A category must be selected");
+		
+		Control currentPart = getCurrentPanel();
+		if (currentPart == null) {
 			enableOk(false);
 			return false;
 		}
-		
-		String text = txtAttributeFilters.getText().trim();
-		if (!text.isEmpty()) {
-			
-			try(InputStream is = new ByteArrayInputStream(text.getBytes())){
-				Parser parser = new Parser(is);
-				IFilter f = parser.AttributeExpression();
+		if (currentPart == categoryOption) {
+			if (!categoryOption.validate()) {
+				enableOk(false);
+				return false;
+			}
 				
-				System.out.println("OK: " +f.toString());
-			} catch (Exception e) {
-				e.printStackTrace();
-				setErrorMessage(e.getMessage());
+		}
+		if (currentPart == combinedOption) {
+			if (!combinedOption.validate()) {
 				enableOk(false);
 				return false;
 			}
 		}
+		
 		enableOk(true);
 		setErrorMessage(null);
 		return true;
 	}
 	
+	private Control getCurrentPanel() {
+		if (stackPanel == null) return null;
+		return ((StackLayout)stackPanel.getLayout()).topControl;
+	}
 	@Override
 	public void cancelPressed() {
-		newColumn = null;
+		Control currentPart = getCurrentPanel();
+		if (currentPart == categoryOption) categoryOption.cancelPressed();
+		if (currentPart == combinedOption) combinedOption.cancelPressed();
 		super.cancelPressed();
 	}
 	
@@ -161,11 +159,16 @@ public class CategoryColumnDialog extends TitleAreaDialog {
 	public void okPressed() {
 		if (!validate()) return;
 		
-		if (toUpdate == null) {
-			newColumn = new CategoryOverviewColumn(txtName.getText().trim(), field.getValue().getHkey(), txtAttributeFilters.getText());
-		}else {
-			toUpdate.updateValues(txtName.getText().trim(), field.getValue().getHkey(), txtAttributeFilters.getText());
+		Control currentPart = getCurrentPanel();
+		if (currentPart == categoryOption) {
+			categoryOption.okPressed();
+			newColumn = categoryOption.getNewColumn();
 		}
+		if (currentPart == combinedOption) {
+			combinedOption.okPressed();
+			newColumn = combinedOption.getNewColumn();
+		}
+
 		super.okPressed();
 	}
 	
@@ -182,142 +185,77 @@ public class CategoryColumnDialog extends TitleAreaDialog {
 		
 		txtName = new Text(parent, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		if (toUpdate != null) txtName.setText(toUpdate.getName());
 		txtName.addListener(SWT.Modify, e->validate());
-		l = new Label(parent, SWT.NONE);
-		l.setText("Category:");
-		
-		//simple content provider to show loading text
-		IContentProvider provider = new ITreeContentProvider() {
-			@Override
-			public boolean hasChildren(Object element) {
-				return false;
-			}
-			
-			@Override
-			public Object getParent(Object element) {
-				return null;
-			}
-			
-			@Override
-			public Object[] getElements(Object inputElement) {
-				return new String[] {DialogConstants.LOADING_TEXT};
-			}
-			
-			@Override
-			public Object[] getChildren(Object parentElement) {
-				return null;
-			}
-		};
-		
-		field = new TreeEditorField<Category>();
-		field.createComposite(parent, provider, new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof Category) return ((Category) element).getName();
-				return super.getText(element);
-			}
-		});
-		parent.addListener(SWT.Dispose, e->field.dispose());
 		
 		l = new Label(parent, SWT.NONE);
-		l.setText("Attribute Filters:");
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		l.setText("Type:");
 		
-		Composite attributeFilters = new Composite(parent, SWT.NONE);
-		attributeFilters.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		attributeFilters.setLayout(new GridLayout(2, true));
-		
-		txtAttributeFilters = new Text(attributeFilters, SWT.BORDER | SWT.MULTI | SWT.WRAP);
-		txtAttributeFilters.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		txtAttributeFilters.addListener(SWT.Modify, e->validate());
-		
-		attributeOptions = new TreeViewer(attributeFilters, SWT.FULL_SELECTION  | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		attributeOptions.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		attributeOptions.setContentProvider(new ITreeContentProvider() {
-			List<Attribute> attributes = null;
-			
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				attributes = (List<Attribute>) newInput;
-			}
-			
-			@Override
-			public Object[] getElements(Object inputElement) {
-				if (attributes == null) return null;
-				return attributes.toArray();
-			}
-
-			@Override
-			public Object[] getChildren(Object parentElement) {
-				if (parentElement instanceof Attribute) {
-					if (((Attribute) parentElement).getType() == AttributeType.LIST) {
-						return ((Attribute) parentElement).getActiveListItems().toArray(); 
-					}else if (((Attribute) parentElement).getType() == AttributeType.TREE) {
-						return ((Attribute) parentElement).getActiveTreeNodes().toArray();
-					}
-				}else if (parentElement instanceof AttributeTreeNode) {
-					return ((AttributeTreeNode) parentElement).getActiveChildren().toArray();
+		ComboViewer cmbViewer = null;
+		if (toUpdate == null) {
+			cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
+			cmbViewer.setLabelProvider(new LabelProvider() {
+				public String getText(Object element) {
+					return ((Type)element).name;
 				}
-				return null;
+			});
+			cmbViewer.setInput(Type.values());
+		}else {
+			l = new Label(parent, SWT.NONE);
+			if (toUpdate instanceof CategoryOverviewColumn) {
+				l.setText(Type.CATEGORY.name);
+			}else if (toUpdate instanceof CombinedOverviewColumn) {
+				l.setText(Type.COMBINED.name);
 			}
-
-			@Override
-			public Object getParent(Object element) {
-				if (element instanceof Attribute) return null;
-				if (element instanceof AttributeListItem) return ((AttributeListItem)element).getAttribute();
-				if (element instanceof AttributeTreeNode) {
-					if (((AttributeTreeNode) element).getParent() == null) return ((AttributeTreeNode) element).getAttribute();
-					return ((AttributeTreeNode)element).getParent();
-				}
-				return null;
-			}
-
-			@Override
-			public boolean hasChildren(Object element) {
-				if (element instanceof AttributeTreeNode) return !((AttributeTreeNode) element).getActiveChildren().isEmpty();
-				if (element instanceof Attribute) {
-					Attribute a = (Attribute) element;
-					return a.getType() == AttributeType.LIST || a.getType() == AttributeType.TREE;
-				}
-				return false;
-			}
-			
-		});
-		attributeOptions.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof NamedItem) return ((NamedItem) element).getName();
-				return super.getText(element);
-			}
-			@Override
-			public Image getImage(Object element) {
-				if (element instanceof Attribute) return DataModel.getAttributeImage(((Attribute) element).getType());
-				return super.getImage(element);
-			}
-		});
-		attributeOptions.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				addSelection();
-			}
-		});
-		loadDataModel.schedule();
-		
-		field.addSelectionChangedListener(new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				configureAttributePanel();
-				validate();
-			}
-		});
-
-		if (toUpdate != null) {
-			txtName.setText(toUpdate.getName());
-			txtAttributeFilters.setText(toUpdate.getAttributeFilter());
 		}
 		
+		l = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		
+		stackPanel = new Composite(parent, SWT.NONE);
+		stackPanel.setLayout(new StackLayout());
+		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		
+		categoryOption = new CategoryColumnComposite(stackPanel, this, toUpdate instanceof CategoryOverviewColumn ? toUpdate : null);
+		combinedOption = new CombinedColumnComposite(stackPanel, this, toUpdate instanceof CombinedOverviewColumn ? toUpdate : null);
+		
+		((StackLayout)stackPanel.getLayout()).topControl = categoryOption;
+		
+		if (cmbViewer != null) {
+			cmbViewer.setSelection(new StructuredSelection(Type.CATEGORY));
+			final ComboViewer fViewer =cmbViewer;
+			cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					if (fViewer.getStructuredSelection().getFirstElement() == Type.CATEGORY) {
+						((StackLayout)stackPanel.getLayout()).topControl = categoryOption;
+						stackPanel.layout();
+					}else {
+						if (fViewer.getStructuredSelection().getFirstElement() == Type.COMBINED) {
+							((StackLayout)stackPanel.getLayout()).topControl = combinedOption;
+							stackPanel.layout();
+						}
+					}
+					
+				}
+			});
+		}else {
+			if (toUpdate instanceof CategoryOverviewColumn) {
+				((StackLayout)stackPanel.getLayout()).topControl = categoryOption;
+			}else if (toUpdate instanceof CombinedOverviewColumn) {
+				((StackLayout)stackPanel.getLayout()).topControl = combinedOption;
+			}
+			stackPanel.layout();
+		}
+				
 		setTitle("New Summary Column");
 		getShell().setText("Asset Overview Map");
-		setMessage("Create a new summary column filtering on data model elements");
+		setMessage("Create a new summary column ");
 		return parent;
 	}
 	
@@ -335,117 +273,4 @@ public class CategoryColumnDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	private void addSelection() {
-		Object option = attributeOptions.getStructuredSelection().getFirstElement();
-		String part = null;
-		
-		if (option instanceof AttributeListItem) {
-			AttributeListItem item = (AttributeListItem) option;
-			part = "[" + item.getAttribute().getKeyId() + " = " + item.getKeyId() + "]";
-		
-		}else if (option instanceof AttributeTreeNode) {
-			AttributeTreeNode item = (AttributeTreeNode) option;
-			part = "[" + item.getAttribute().getKeyId() + " = " + item.getHkey() + "]";
-		}else if (option instanceof Attribute) {
-			Attribute a = (Attribute)option;
-			if (a.getType() == AttributeType.LIST) return;
-			if (a.getType() == AttributeType.TREE) return;
-			
-			if (a.getType() == AttributeType.BOOLEAN) {
-				part = "[" + a.getKeyId() + " = <TRUE|FALSE>]";
-			}else if (a.getType() == AttributeType.TEXT) {
-				part = "[" + a.getKeyId() + " <equals|contains> \"<VALUE>\"]";
-			}else if (a.getType() == AttributeType.NUMERIC) {
-				part = "[" + a.getKeyId() + " < =|<>|<|>|<=|>= > <VALUE>]";
-			}else if (a.getType() == AttributeType.DATE) {
-				part = "[" + a.getKeyId() + " <equals|before|after> <YYYY-MM-DD>]";
-			}
-		}
-		if (part != null) {
-			if (txtAttributeFilters.getText().isEmpty()) {
-				txtAttributeFilters.setText(part);
-			}else {
-				txtAttributeFilters.setText(txtAttributeFilters.getText() + " <AND|OR> " + part);
-			}
-		}
-	}
-	private void configureAttributePanel() {
-		Object x = field.getValue();
-		if (x == null) {
-			txtAttributeFilters.setText("");
-			attributeOptions.setInput(null);
-			return;
-		}
-		List<Attribute> allAttributes = new ArrayList<>();
-		try(Session session = HibernateManager.openSession()){
-			Category category = (Category)session.get(Category.class, ((Category)x).getUuid());
-			
-			
-			category.getAllAttribute(allAttributes, true);
-			
-			for (Attribute a : allAttributes) {
-				a.getName();
-				a.getAttributeList().forEach(e->e.getName());
-				
-				List<AttributeTreeNode> toVisit = new ArrayList<>();
-				toVisit.addAll(a.getActiveTreeNodes());
-				while(!toVisit.isEmpty()) {
-					AttributeTreeNode n = toVisit.remove(0);
-					n.getName();
-					toVisit.addAll(n.getActiveChildren());
-				}
-			}
-		}
-		
-		attributeOptions.setInput(allAttributes);		
-	}
-	
-	private Job loadDataModel = new Job("load data model") {
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			DataModel dm = null;
-			Category toSelect = null;
-			
-			try(Session session = HibernateManager.openSession()){
-				List<Category> rootCategories = QueryFactory.buildQuery(session, Category.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"parent", null}).list();
-				List<Category> all = new ArrayList<>(rootCategories);
-				while(all.size() > 0) {
-					Category c = all.remove(0);
-					c.getName();
-					if (toUpdate != null && c.getHkey().equals(toUpdate.getCategoryKey())) {
-						toSelect = c;
-					}
-					all.addAll(c.getChildren());
-				}
-				rootCategories.sort((a,b)->Integer.compare(a.getCategoryOrder(), b.getCategoryOrder()));
-				dm = new DataModel(SmartDB.getCurrentConservationArea(), rootCategories, Collections.emptyList());
-			}
-			
-			final DataModel fdm = dm;
-			final Category ftoSelect = toSelect;
-			Display.getDefault().syncExec(()->{
-				
-				if (field.getDropDown().getTreeViewer().getControl().isDisposed()) return;
-				field.getDropDown().getTreeViewer().setContentProvider(new DataModelContentProvider(true, false) {
-					@Override
-					public Object[] getElements(Object inputElement) {
-						return getChildren(root);
-					}
-				});
-				field.getDropDown().getTreeViewer().setInput(fdm);
-				if (ftoSelect != null) {
-					field.setSelectedValue(ftoSelect);
-					configureAttributePanel();
-					validate();
-				}
-					
-			});
-			
-			return Status.OK_STATUS;
-		}
-		
-	};
 }

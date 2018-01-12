@@ -113,16 +113,6 @@ public class CategoryOverviewColumn implements IOverviewTableColumn{
 		return ColumnType.INTEGER;
 	}
 
-	@Override
-	public HashMap<AssetStation, Object> computeValuesByStation(Session session, Date[] dFilter) {
-		return new HashMap<>();
-	}
-
-	@Override
-	public HashMap<AssetStationLocation, Object> computeValuesByStationLocation(Session session, Date[] dFilter) {
-		return new HashMap<>();
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public JSONObject serialize() {

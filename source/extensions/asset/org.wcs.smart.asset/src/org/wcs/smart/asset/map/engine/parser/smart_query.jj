@@ -81,6 +81,7 @@ TOKEN :
 | < SLASH : "/" >
 | < PLUS : "+" >
 | < MINUS : "-" >
+| < TIMES : "*" >
 | < CONTAINS : "contains" >
 | < STREQUALS : "equals" >
 | < BEFORE : "before" >
@@ -139,6 +140,58 @@ TOKEN :
 
 
 /* ------------ Expressions ----------------------*/
+IFilter CombinedExpression():
+{
+  
+	IFilter expression;
+}
+{
+	expression = CombinedExpressionPart()
+	< EOF >
+	 {return expression;}	  
+}
+
+IFilter CombinedExpressionPart():
+{
+  
+	IFilter expression;
+	IFilter expression2;
+	Operator op;
+	
+}
+{
+	(
+	  expression = ColumnExpressionPart()
+	  (
+			op = MathOp()
+			expression2 = ColumnExpressionPart()
+			{ expression = CombinedFilter.parse(expression, op, expression2); }
+		 )*
+	)
+	{return expression;}	  
+}
+
+IFilter ColumnExpressionPart():
+{
+  IFilter expression;
+}
+{
+	( expression = BracketExpression2() | expression = ColumnExpression() )
+   {return expression;}	  
+}
+
+IFilter ColumnExpression():
+{
+  IFilter expression;
+}
+{
+	< FILTER_OPEN >
+	< DM_KEY > { expression = ColumnFilter.parse(token.image); }
+	< FILTER_CLOSE >   {return expression;}	  
+}
+
+
+
 
 IFilter AttributeExpression():
 {
@@ -195,6 +248,20 @@ IFilter BracketExpression():
 		expression = AttributeExpressionInternal()
 		< CLOSEPAREN >
 	)
+	
+	{return BracketFilter.parse(expression);}	   
+}
+IFilter BracketExpression2():
+{
+  IFilter expression;
+}
+{
+ 	(
+		< OPENPAREN >
+		expression = CombinedExpressionPart()
+		< CLOSEPAREN >
+	)
+	
 	{return BracketFilter.parse(expression);}	   
 }
 AttributeFilter AttributeFilter():
@@ -216,8 +283,6 @@ AttributeFilter AttributeFilter():
 			<QUOTED_STRING> { expression = AttributeFilter.parse(attributeKey, op, token.image); }
 		)
 			
-	
-		
   < FILTER_CLOSE >
   
   {
@@ -261,3 +326,12 @@ Operator BooleanOp() :
   }
 }
 
+
+Operator MathOp():
+{}
+{
+  ( < SLASH > | < PLUS >  | < MINUS > | < TIMES > )
+  {
+    return Operator.parse(token.image);
+ }
+}

@@ -21,15 +21,16 @@
  */
 package org.wcs.smart.asset.ui.views.map;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
-import org.hibernate.Session;
 import org.json.simple.JSONObject;
-import org.wcs.smart.asset.model.AssetStation;
-import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.map.engine.CombinedColumnEngine;
+import org.wcs.smart.asset.map.engine.IFilter;
+import org.wcs.smart.asset.map.engine.parser.Parser;
 
 /**
  * Asset overview column that combines the values of two other columns
@@ -39,15 +40,27 @@ import org.wcs.smart.asset.model.AssetStationLocation;
  */
 public class CombinedOverviewColumn implements IOverviewTableColumn{
 
-	private IOverviewTableColumn column1;
-	private IOverviewTableColumn column2;
+	public static CombinedOverviewColumn ratio(String name, String key, IOverviewTableColumn column1, IOverviewTableColumn column2) {
+		String formula = "[" + column1.getKey() + "] / [" + column2.getKey() + "]";
+		CombinedOverviewColumn c = new CombinedOverviewColumn(name, formula);
+		c.key = key;
+		return c;
+	}
 	
 	private String name;
+	private String definition;
+	private String key;
 	
-	public CombinedOverviewColumn(String name, IOverviewTableColumn column1, IOverviewTableColumn column2) {
+	private IFilter expression;
+	
+	public CombinedOverviewColumn(String name, String formula) {
 		this.name = name;
-		this.column1 = column1;
-		this.column2 = column2;
+		this.definition = formula;
+	}
+	
+	public void updateValues(String name, String definition) {
+		this.name = name;
+		this.definition = definition;
 	}
 	
 	@Override
@@ -56,28 +69,30 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 	}
 
 	@Override
-	public Object getValue(StationData data) {
-		
-		Object value1 = data.getData(column1);
-		Object value2 = data.getData(column2);
-		if (value1 == null || value2 == null) return 0;
-		
-		if (value1 != null && value2 != null && value1 instanceof Number && value2 instanceof Number) {
-			if (((Number)value2).doubleValue() == 0) return String.valueOf(Double.NaN);
-			return ((Number)value1).doubleValue() / ((Number)value2).doubleValue() ;
-			
+	public void setKey(String key) {
+		this.key = key;
+	}
+	
+	public String getDefinition() {
+		return this.definition;
+	}
+	
+	public IFilter getParsedExpression() {
+		if (expression != null) return expression;
+		try(InputStream is = new ByteArrayInputStream(definition.getBytes())){
+			Parser p = new Parser(is);
+			expression = p.CombinedExpression();
+		}catch (Exception ex) {
+			//TODO: error
+			AssetPlugIn.log(ex.getMessage(), ex);
+			return null;
 		}
-		return Double.NaN;
+		return expression;
 	}
-
+	
 	@Override
-	public HashMap<AssetStation, Object> computeValuesByStation(Session session, Date[] dFilter) {
-		return null;
-	}
-
-	@Override
-	public HashMap<AssetStationLocation, Object> computeValuesByStationLocation(Session session, Date[] dFilter) {
-		return null;
+	public Object getValue(StationData data) {		
+		return CombinedColumnEngine.computeValue(data, this);
 	}
 
 	@Override
@@ -87,7 +102,7 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 
 	@Override
 	public String getKey() {
-		return column1.getKey() + "_" + column2.getKey();
+		return key;
 	}
 	
 	@Override
@@ -95,8 +110,8 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 		JSONObject json = new JSONObject();
 		json.put("type", "combined");
 		json.put("name", getName());
-		json.put("column1", column1.getKey());
-		json.put("column2", column2.getKey());
+		json.put("key", getKey());
+		json.put("definition", definition);
 		return json;
 	}
 	
@@ -107,23 +122,11 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 	 * @param columns the source columns
 	 * @return
 	 */
-	public static CombinedOverviewColumn deserialize(JSONObject json, List<IOverviewTableColumn> columns) {
-		if (json.containsKey("type") && json.containsKey("column1") && json.containsKey("column2")) {
-			if (json.get("type").equals("combined")) {
-				String key1 = (String) json.get("column1");
-				String key2 = (String) json.get("column2");
-				IOverviewTableColumn c1 = null;
-				IOverviewTableColumn c2 = null;
-				for(IOverviewTableColumn c : columns) {
-					if (c.getKey().equals(key1)) c1 = c;
-					if (c.getKey().equals(key2)) c2 = c;
-				}
-				
-				String name = (String)json.get("name");
-				if (c1 != null && c2 != null) {
-					return new CombinedOverviewColumn(name, c1, c2);
-				}	
-			}
+	public static CombinedOverviewColumn deserialize(JSONObject json) {
+		if (json.containsKey("type") && json.get("type").equals("combined")) {
+			CombinedOverviewColumn cc = new CombinedOverviewColumn((String)json.get("name"), (String)json.get("definition"));
+			cc.key = (String) json.get("key");
+			return cc;
 		}
 		return null;
 	}
@@ -146,7 +149,7 @@ public class CombinedOverviewColumn implements IOverviewTableColumn{
 		}
 		if (c1 == null || c2 == null) return Collections.emptyList();
 		
-		CombinedOverviewColumn i = new CombinedOverviewColumn("Total Incidents per Asset Day", c1,c2);
+		CombinedOverviewColumn i = CombinedOverviewColumn.ratio("Total Incidents per Asset Day", "incidentsperday", c1, c2);
 		return Collections.singletonList(i);
 		
 		

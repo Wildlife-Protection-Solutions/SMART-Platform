@@ -1,17 +1,47 @@
-package org.wcs.smart.asset.ui.views.map;
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.asset.map.engine;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.map.engine.parser.Parser;
+import org.wcs.smart.asset.ui.views.map.CategoryOverviewColumn;
+import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
+import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -21,7 +51,14 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
-public class CategoryComputer {
+/**
+ * Category column engine for computing category filter columns in the asset overview
+ * map table.
+ * 
+ * @author Emily
+ *
+ */
+public class CategoryColumnEngine implements IColumnEngine {
 
 	private static AtomicLong tableCnter = new AtomicLong();
 
@@ -30,7 +67,7 @@ public class CategoryComputer {
 	private Date[] dFilter;
 	private Session session;
 	
-	private Map<Attribute, String> attributeToColumn;
+	private Map<String, String> attributeToColumn;
 	
 	private ConservationArea ca = SmartDB.getCurrentConservationArea();
 	/**
@@ -42,108 +79,111 @@ public class CategoryComputer {
 		return "query_temp_asset_" + tableCnter.incrementAndGet();//$NON-NLS-1$ 
 	}
 	
-	public CategoryComputer(Date[] dFilter, Session session) {
+	public CategoryColumnEngine(Session session, Date[] dFilter) {
 		this.dFilter = dFilter;
 		attributeToColumn = new HashMap<>();
 		this.session  = session;
-		
 	}
 	
-	private HashMap<AssetStation, StationData> computeValuesByStation(CategoryOverviewColumn toCompute) {
+	public boolean canProcess(IOverviewTableColumn column) {
+		return column instanceof CategoryOverviewColumn;
+	}
+	
+	//TODOD: drop temporary table
+	public HashMap<UUID, Object> computeValues(IOverviewTableColumn column, final IOverviewTableColumn.GroupByOption groupBy) {
+		CategoryOverviewColumn toCompute = (CategoryOverviewColumn)column;
+		HashMap<UUID, Object> results = new HashMap<>();
 		
 		session.doWork(new Work() {
 
 			@Override
 			public void execute(Connection connection) throws SQLException {
+				connection.setAutoCommit(true);
 				//create a temporary table of waypoints
 				createWaypointTable(connection);
 				
 				String c1 = toCompute.getCategoryKey();
-				String c2 = c1.substring(0,  c1.length() -1);
+				String c2 = c1.substring(0,  c1.length() -1) + "/";
+				
 				
 				StringBuilder sb = new StringBuilder();
-				sb.append("SELECT distinct wp_uuid FROM ");
-				sb.append(waypointFilterTable);
+				sb.append("SELECT uuid, count(*) FROM ( ");
+				sb.append("SELECT distinct a.wp_uuid as wp_uuid,");
+				if (groupBy == GroupByOption.LOCATION) {
+					sb.append("c.station_location_uuid as uuid");
+				}else if (groupBy == GroupByOption.STATION) {
+					sb.append("d.station_uuid as uuid");
+				}
+				sb.append(" FROM ");
+				sb.append("smart.asset_waypoint a JOIN ");
+				sb.append( waypointFilterTable );
+				sb.append(" b on a.wp_uuid = b.wp_uuid JOIN ");
+				sb.append(" smart.asset_deployment c on a.asset_deployment_uuid = c.uuid ");
+				if (groupBy == GroupByOption.STATION) {
+					sb.append(" JOIN smart.asset_station_location d on d.uuid = c.station_location_uuid ");
+				}
 				sb.append(" WHERE ");
 				sb.append(" c_hkey >= ? AND c_hkey < ? ");
 				
 				Category category = findCategory(toCompute.getCategoryKey());
 				if (category == null) throw new SQLException("No category with key " + toCompute.getCategoryKey() + "found.");
 				
-				if (toCompute.getAttributeFilter() != null) {
+				
+				if (toCompute.getAttributeFilter() != null && !toCompute.getAttributeFilter().trim().isEmpty()) {
 					//we need to parse the attribute filter
-					StringBuilder where = new StringBuilder();
+					IFilter attributeFilter = null;
+					try(InputStream is = new ByteArrayInputStream(toCompute.getAttributeFilter().getBytes())){
+						Parser parser = new Parser(is);
+						attributeFilter = parser.AttributeExpression();
+					} catch (Exception e) {
+						throw new SQLException("Could not parse attribute filter.", e);
+					}
 					
-					String[] bits = toCompute.getAttributeFilter().split(" ");
-					boolean inAttribute = false;
-					int part = 0;
-					Attribute currentAttribute = null;
-					for (String bit : bits) {
-						if (bit.trim().isEmpty()) continue;
-						
-						
-						if (bit.equals("[") || bit.startsWith("[")) {
-							inAttribute = true;
-							part = 0;
-						}
-						
-						if (!inAttribute) {
-							if (bit.equals("(")) where.append(" ( ");
-							else if (bit.equals(")")) where.append(" ) ");
-							else if (bit.equalsIgnoreCase("and")) where.append(" and ");
-							else if (bit.equalsIgnoreCase("or")) where.append(" or ");
-							else throw new SQLException("Invalid token: " + bit);
-						}else {
-							if (part == 0) {
-								String attributeKey = bit;
-								if (attributeKey.startsWith("[")) attributeKey = attributeKey.substring(1);
-								currentAttribute = findAttribute(attributeKey);
-								if (currentAttribute == null) {
-									throw new SQLException("No attribute with key " + attributeKey );
-								}
-								part++;
-							}else if (part == 1) {
-								part++;
-								// here we have the operator - depends on type
-								switch(currentAttribute.getType()) {
-								case BOOLEAN:
-									break;
-								case DATE:
-									break;
-								case LIST:
-									break;
-								case NUMERIC:
-									break;
-								case TEXT:
-									break;
-								case TREE:
-									break;
-								default:
-									break;
-								
-								}
-							}else {
-								
+					Set<String> attributeKeys = new HashSet<>();
+					IFilterVisitor visitor = new IFilterVisitor() {
+						@Override
+						public void visit(IFilter filter) {
+							if (filter instanceof AttributeFilter) {
+								attributeKeys.add(((AttributeFilter) filter).getAttributeKey());
 							}
 						}
-						
-						
-						
-						if (bit.equals("]") || bit.endsWith("]")) {
-							inAttribute = false;
-							part = 0;
-							currentAttribute = null;
-						}
-						
-						
+					};
+					attributeFilter.accept(visitor);
+					
+					for (String attributeKey : attributeKeys) {
+						Attribute attribute = findAttribute(attributeKey);
+						if (attribute == null) throw new SQLException("Could not find a data model attribute with the key " + attributeKey);
+						addAttributeColumn(attribute, connection);
+					}
+					
+					String where = asSql(attributeFilter);
+					sb.append(" AND ( ");
+					sb.append(where);
+					sb.append(" ) ");
+					
+				}
+				sb.append(" ) foo GROUP BY uuid");
+				
+				log (sb.toString() );
+				log (c1  + ":" + c2);
+				PreparedStatement ps = connection.prepareStatement(sb.toString());
+				ps.setString(1, c1);
+				ps.setString(2, c2);
+				try(ResultSet rs = ps.executeQuery()){
+					while(rs.next()) {
+						UUID uuid = UuidUtils.byteToUUID(rs.getBytes(1));
+						Long cnt = rs.getLong(2);
+						System.out.println(uuid.toString() + ":" + cnt);
+						results.put(uuid, cnt);
 					}
 				}
 				
+				connection.setAutoCommit(false);
 				
 			}
 			
 		});
-		return null;
+		return results;
 	}
 	
 	private Category findCategory(String hkey) {
@@ -233,7 +273,7 @@ public class CategoryComputer {
 			sb.append(".ob_uuid");
 			break;
 		}
-		
+		sb.append(")");
 		
 		log(sb.toString());
 		log(attribute.getUuid().toString());
@@ -242,7 +282,7 @@ public class CategoryComputer {
 		ps.setBytes(1, UuidUtils.uuidToByte(attribute.getUuid()));
 		ps.executeUpdate();
 		
-		attributeToColumn.put(attribute, column);
+		attributeToColumn.put(attribute.getKeyId(), column);
 	}
 	
 	
@@ -255,9 +295,9 @@ public class CategoryComputer {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE ");
 		sb.append(waypointFilterTable);
-		sb.append(" wp_uuid char(16) as bit data ");
-		sb.append(" ob_uuid char(16) as bit data ");
-		sb.append(" c_hkey varchar(32672) ");
+		sb.append(" ( wp_uuid char(16) for bit data, ");
+		sb.append(" ob_uuid char(16) for bit data, ");
+		sb.append(" c_hkey varchar(32672)) ");
 		
 		log(sb.toString());
 		connection.createStatement().executeUpdate(sb.toString());
@@ -284,7 +324,7 @@ public class CategoryComputer {
 			}
 		}
 		log(sb.toString());
-		log(date1.getTime() + ":" + date2.getTime());
+		log((date1 == null ? "" : date1.getTime()) + ":" + (date2== null ? "" : date2.getTime()));
 		
 		PreparedStatement ps = connection.prepareStatement(sb.toString());
 		int index = 1;
@@ -299,4 +339,46 @@ public class CategoryComputer {
 		System.out.println(message);
 	}
 	
+	
+	
+	private String asSql(BracketFilter filter) {
+		String part1 = asSql(filter.getFilter());
+		return "( " + part1 + " )";
+	}
+	
+	private String asSql(AttributeExpression filter) {
+		String part1 = asSql(filter.getFilter1());
+		String part2 = asSql(filter.getFilter2());
+		return part1 + " " + filter.getOperator().operator.sql + " " + part2;
+	}
+	
+	private String asSql(AttributeFilter filter) {
+		String columnName = attributeToColumn.get( filter.getAttributeKey() );
+		StringBuilder sb = new StringBuilder();
+		sb.append(" ( ");
+		sb.append(columnName);
+		sb.append(" ");
+		sb.append(filter.getOperator().operator.sql);
+		sb.append(" ");
+		//TODO: fix this
+		//based on attribut etype - trees need like option
+		if (filter.getStringValue() != null) {
+			sb.append("'" + filter.getStringValue() + "'");
+		}else if (filter.getNumberValue() != null) {
+			sb.append(filter.getNumberValue());
+		}
+		sb.append(" ) ");
+		return sb.toString();
+	}
+	
+	public String asSql(IFilter filter) {
+		if (filter instanceof AttributeFilter) {
+			return asSql((AttributeFilter)filter);
+		}else if (filter instanceof BracketFilter) {
+			return asSql((BracketFilter)filter);
+		}else if (filter instanceof AttributeExpression) {
+			return asSql((AttributeExpression)filter);
+		}
+		return "";
+	}
 }

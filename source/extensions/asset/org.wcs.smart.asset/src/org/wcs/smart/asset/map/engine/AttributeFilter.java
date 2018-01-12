@@ -1,5 +1,32 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.map.engine;
 
+/**
+ * Attribute filter for asset overview map category column
+ * 
+ * @author Emily
+ *
+ */
 public class AttributeFilter implements IFilter{
 
 	public static AttributeFilter parse(String attributeKey, Operator op, String strValue) {
@@ -12,7 +39,6 @@ public class AttributeFilter implements IFilter{
 	
 	private String attributeKey;
 	private Operator op;
-	
 	private String strValue;
 	private Double numberValue;
 	
@@ -29,6 +55,21 @@ public class AttributeFilter implements IFilter{
 		this.numberValue = numberValue;
 	}
 	
+	public String getAttributeKey() {
+		return this.attributeKey;
+	}
+	
+	public Operator getOperator() {
+		return this.op;
+	}
+	
+	public String getStringValue() {
+		return this.strValue;
+	}
+	
+	public Double getNumberValue() {
+		return this.numberValue;
+	}
 	
 	@Override
 	public String toString() {
@@ -43,5 +84,10 @@ public class AttributeFilter implements IFilter{
 			sb.append(numberValue);
 		}
 		return sb.toString();
+	}
+	
+	@Override
+	public void accept(IFilterVisitor visitor) {
+		visitor.visit(this);
 	}
 }

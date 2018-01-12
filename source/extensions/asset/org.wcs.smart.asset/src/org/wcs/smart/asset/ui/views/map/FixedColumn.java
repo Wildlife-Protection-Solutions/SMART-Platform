@@ -27,6 +27,7 @@ import java.util.Locale;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.util.UuidUtils;
@@ -65,6 +66,9 @@ public class FixedColumn implements IOverviewTableColumn{
 		this.column = column;
 	}
 	
+	public Column getColumn() {
+		return column;
+	}
 	@Override
 	public IOverviewTableColumn.ColumnType getType(){
 		return column.type;
@@ -99,33 +103,6 @@ public class FixedColumn implements IOverviewTableColumn{
 		return data.getColumnValue(this);
 	}
 	
-	@Override
-	public HashMap<AssetStation, Object> computeValuesByStation(Session session, Date[] dFilter){
-		
-		switch(column) {
-		case ACTIVE_DAYS:
-			return StatisticComputer.computeNumberOfDaysPerStation(session, dFilter);
-		case ASSET_DAYS:
-			return StatisticComputer.computeAssetDaysPerStation(session, dFilter);
-		case INCIDENTS:
-			return StatisticComputer.incidentsPerStation(session, dFilter);
-		}
-		return new HashMap<>();	
-	}
-	
-	@Override
-	public HashMap<AssetStationLocation, Object> computeValuesByStationLocation(Session session, Date[] dFilter){
-		switch(column) {
-		case ACTIVE_DAYS:
-			return StatisticComputer.computeNumberOfDaysPerStationLocation(session, dFilter);
-		case ASSET_DAYS:
-			return StatisticComputer.computeAssetDaysPerStationLocation(session, dFilter);
-		case INCIDENTS:
-			return StatisticComputer.incidentsPerLocation(session, dFilter);
-		}
-		return new HashMap<>();
-		
-	}
 
 	/**
 	 * Serializes the column to a json object

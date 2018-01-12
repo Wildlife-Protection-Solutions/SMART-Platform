@@ -114,7 +114,7 @@ public class AssetMapColumnConfiguration {
 		if (newColumn.getKey() == null) {
 			//generate key
 			Set<String> existingKeys = allColumns.stream().map(e->e.getColumn().getKey()).collect(Collectors.toSet());
-			String key = newColumn.getName().toLowerCase().trim().replaceAll("[^A-Z0-9]", "");
+			String key = newColumn.getName().toLowerCase().trim().replaceAll("[^a-z0-9]", "");
 			int cnt=1;
 			String newKey = key;
 			while(existingKeys.contains(newKey)) {
@@ -122,7 +122,7 @@ public class AssetMapColumnConfiguration {
 				cnt++;
 			}
 			newColumn.setKey(newKey);
-			if (newColumn.getKey() == null) {
+			if (newColumn.getKey() == null || newColumn.getKey().isEmpty()) {
 				//should never happen
 				throw new IllegalStateException("An asset overview map column requires a key value.");
 			}
@@ -205,6 +205,7 @@ public class AssetMapColumnConfiguration {
 					
 					IOverviewTableColumn column = FixedColumn.deserialize(definition);
 					if (column == null) column = CategoryOverviewColumn.deserialize(definition);
+					if (column == null) column = CombinedOverviewColumn.deserialize(definition);
 					
 					if (column == null) {
 						//try again
@@ -215,16 +216,6 @@ public class AssetMapColumnConfiguration {
 						tryAgain.add(obj);
 					}
 					
-				}
-				
-				List<IOverviewTableColumn> overviewColumns = columns.stream().map(e->e.getColumn()).collect(Collectors.toList());
-				for (JSONObject obj : tryAgain) {
-					JSONObject definition = (JSONObject) obj.get("definition");
-					if (!obj.containsKey("definition")) continue;
-					IOverviewTableColumn column = CombinedOverviewColumn.deserialize(definition, overviewColumns);
-					if (column != null) {
-						columns.add(createWrapper(obj, column));
-					}
 				}
 				
 				columns.sort((a,b)->Integer.compare(a.getOrder(), b.getOrder()));

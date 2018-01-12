@@ -22,6 +22,8 @@
 package org.wcs.smart.asset.ui.views.map;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
@@ -34,21 +36,33 @@ import org.wcs.smart.asset.model.AssetStationLocation;
  */
 public class StationData {
 
+	private UUID keyUuid;
 	private AssetStation station;
 	private AssetStationLocation location;
 	
 	private HashMap<IOverviewTableColumn, Object> values = new HashMap<>();
 	
-	public StationData(AssetStation station) {
+	public StationData(UUID keyUuid) {
+		this.keyUuid = keyUuid;
+	}
+	
+	public UUID getKeyUuid() {
+		return this.keyUuid;
+	}
+	
+	public void setAssetStationObject(AssetStation station) {
 		this.station = station;
 	}
 	
-	public StationData(AssetStationLocation location) {
+	public void setAssetLocationObject(AssetStationLocation location) {
 		this.location = location;
 	}
 	
-	public Object getData(IOverviewTableColumn column) {
-		return column.getValue(this);
+	public Object getColumnValue(String columnKey) {
+		for (Entry<IOverviewTableColumn, Object> i : values.entrySet()) {
+			if (i.getKey().getKey().equals(columnKey)) return i.getValue();
+		}
+		return null;
 	}
 	
 	public Object getColumnValue(IOverviewTableColumn column) {

@@ -30,6 +30,8 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ITableColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -114,7 +116,14 @@ public class ColumnListDialog extends TitleAreaDialog {
 		chColumns.addCheckStateListener(e->{
 			getButton(IDialogConstants.OK_ID).setEnabled(true);
 		});
-			
+		
+		chColumns.addDoubleClickListener(new IDoubleClickListener() {		
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				edit();
+			}
+		});
+		
 		Composite btnPanel = new Composite(parent, SWT.NONE);
 		btnPanel.setLayout(new GridLayout());
 		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
@@ -138,7 +147,8 @@ public class ColumnListDialog extends TitleAreaDialog {
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.setEnabled(false);
 
-		new Label(btnPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label l = new Label(btnPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnMoveUp = new Button(btnPanel, SWT.PUSH);
 		btnMoveUp.setText("Move Up");
@@ -236,10 +246,11 @@ public class ColumnListDialog extends TitleAreaDialog {
 		if (!(x instanceof OverviewTableColumnWrapper)) return;
 		OverviewTableColumnWrapper c = (OverviewTableColumnWrapper)x;
 		if (c.isFixed()) return;
-		if (!(c.getColumn() instanceof CategoryOverviewColumn)) return;
+		if (!(c.getColumn() instanceof CategoryOverviewColumn || c.getColumn() instanceof CombinedOverviewColumn)) return;
 		
 		
-		CategoryColumnDialog dialog = new CategoryColumnDialog(getShell(), (CategoryOverviewColumn)c.getColumn());
+		List<IOverviewTableColumn> allcolumns = configuration.getColumns().stream().map(e->e.getColumn()).collect(Collectors.toList());
+		CategoryColumnDialog dialog = new CategoryColumnDialog(getShell(), c.getColumn(), allcolumns);
 		if (dialog.open() == Window.OK) {
 			chColumns.refresh();
 			enableOk();
@@ -260,7 +271,8 @@ public class ColumnListDialog extends TitleAreaDialog {
 	}
 	
 	private void add() {
-		CategoryColumnDialog dialog = new CategoryColumnDialog(getShell());
+		List<IOverviewTableColumn> allcolumns = configuration.getColumns().stream().map(e->e.getColumn()).collect(Collectors.toList());
+		CategoryColumnDialog dialog = new CategoryColumnDialog(getShell(), allcolumns);
 		dialog.open();
 		IOverviewTableColumn c = dialog.getNewColumn();
 		if (c != null) {

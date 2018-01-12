@@ -106,7 +106,7 @@ public class AssetStationSummaryFeatureSource extends ContentFeatureSource {
 		data[1] = UuidUtils.uuidToString(uuid);
 		int i = 2;
 		for (IOverviewTableColumn c : columns) {
-			data[i++] = sdata.getData(c);
+			data[i++] = c.getValue(sdata);
 		}
 		return SimpleFeatureBuilder.build(type, data, (String)data[1]);
 	}
