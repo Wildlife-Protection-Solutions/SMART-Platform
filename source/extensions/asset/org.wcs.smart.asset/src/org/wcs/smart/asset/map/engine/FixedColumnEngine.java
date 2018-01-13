@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.asset.map.engine;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,6 +54,12 @@ public class FixedColumnEngine implements IColumnEngine {
 	private IOverviewTableColumn.GroupByOption groupBy;
 	private Session session;
 	
+	
+	private HashMap<UUID, Object> numberOfDaysStation = null;
+	private HashMap<UUID, Object> numberOfAssetDaysStation  = null;
+	private HashMap<UUID, Object> numberOfDaysLocation  = null;
+	private HashMap<UUID, Object> numberOfAssetDaysLocation = null;
+	
 	public FixedColumnEngine(Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, Session session) {
 		this.dFilter = dFilter;
 		this.session = session;
@@ -81,9 +89,11 @@ public class FixedColumnEngine implements IColumnEngine {
 		if (groupBy == GroupByOption.STATION) {
 			switch(c.getColumn()) {
 			case ACTIVE_DAYS:
-				return computeNumberOfDaysPerStation(session, dFilter);
+				computeNumberOfPerStation(session, dFilter);
+				return numberOfDaysStation;
 			case ASSET_DAYS:
-				return computeAssetDaysPerStation(session, dFilter);
+				computeNumberOfPerStation(session, dFilter);
+				return numberOfAssetDaysStation;
 			case INCIDENTS:
 				return incidentsPerStation(session, dFilter);
 			default:
@@ -91,9 +101,11 @@ public class FixedColumnEngine implements IColumnEngine {
 		}else if (groupBy == GroupByOption.LOCATION) {
 			switch(c.getColumn()) {
 			case ACTIVE_DAYS:
-				return computeNumberOfDaysPerStationLocation(session, dFilter);
+				computeNumberOfPerLocation(session, dFilter);
+				return numberOfDaysLocation;
 			case ASSET_DAYS:
-				return computeAssetDaysPerStationLocation(session, dFilter);
+				computeNumberOfPerLocation(session, dFilter);
+				return numberOfAssetDaysLocation;
 			case INCIDENTS:
 				return incidentsPerLocation(session, dFilter);
 			default:
@@ -102,30 +114,36 @@ public class FixedColumnEngine implements IColumnEngine {
 		return new HashMap<>();
 	}
 	
-	private HashMap<UUID, Object> computeNumberOfDaysPerStation(Session session, Date[] dFilter){
+	private void computeNumberOfPerStation(Session session, Date[] dFilter){
+		if (numberOfDaysStation != null) return;
 		
 		Query<AssetDeployment> query = null;
+		LocalDate filterStart = null;
+		LocalDate filterEnd = null;
 		if (dFilter != null) {
 			String hql = "FROM AssetDeployment a WHERE startDate <= :endDate and (endDate is null or endDate >= :startDate)";
 			query = session.createQuery(hql, AssetDeployment.class)
 				.setParameter("endDate", dFilter[1])
 				.setParameter("startDate", dFilter[0]);
+			
+			filterStart = new java.sql.Date(dFilter[0].getTime()).toLocalDate();
+			filterEnd= new java.sql.Date(dFilter[1].getTime()).toLocalDate();
 		}else {
 			String hql = "FROM AssetDeployment a ";
-			query = session.createQuery(hql, AssetDeployment.class);
+			query = session.createQuery(hql, AssetDeployment.class);	
 		}
 		
-		
 		HashMap<AssetStation, HashSet<Long>> daysPerStation = new HashMap<>();
-		
+		HashMap<UUID, Object> daysCnt = new HashMap<>();
+
 		try(ScrollableResults results = query.scroll()){
 			while(results.next()) {
 				AssetDeployment d = (AssetDeployment) results.get(0);
 				
-				Long startDate = SharedUtils.getDatePart(d.getStartDate(), false).getTime();
-				Long endDate = SharedUtils.getDatePart(new Date(), false).getTime();
+				LocalDate startDate = new java.sql.Date(d.getStartDate().getTime()).toLocalDate();
+				LocalDate endDate = LocalDate.now();
 				if (d.getEndDate() != null) {
-					endDate = SharedUtils.getDatePart(d.getEndDate(), false).getTime();
+					endDate = new java.sql.Date(d.getEndDate().getTime()).toLocalDate();
 				}
 				
 				AssetStation s = d.getStationLocation().getStation();
@@ -134,14 +152,27 @@ public class FixedColumnEngine implements IColumnEngine {
 					dates = new HashSet<>();
 					daysPerStation.put(s, dates);
 				}
-				while(startDate <= endDate) {
+				int cnt = 0;
+				while(!startDate.isAfter(endDate)) {
 					if (dFilter == null) {
-						dates.add(startDate);
-					}else if (startDate >= dFilter[0].getTime() && startDate <= dFilter[1].getTime()) {
-						dates.add(startDate);
+						dates.add(startDate.toEpochDay());
+						cnt++;
+					}else if (!startDate.isBefore(filterStart) && !startDate.isAfter(filterEnd)) {
+						dates.add(startDate.toEpochDay());
+						cnt++;
 					}
-					startDate += 86400000;
+					startDate = startDate.plus(1, ChronoUnit.DAYS);
+					
 				}
+				
+				Integer days = (Integer) daysCnt.get(s.getUuid());
+				if (days == null) {
+					days = cnt;
+				}else {
+					days += cnt;
+				}
+				daysCnt.put(s.getUuid(), days);
+
 			}
 		}
 		
@@ -149,33 +180,40 @@ public class FixedColumnEngine implements IColumnEngine {
 		for (Entry<AssetStation, HashSet<Long>> e : daysPerStation.entrySet()) {
 			results.put(e.getKey().getUuid(), e.getValue().size());
 		}
-		return results;
+		numberOfAssetDaysStation = daysCnt;
+		numberOfDaysStation = results;
+		return;
 	}
-	
-	private  HashMap<UUID, Object> computeNumberOfDaysPerStationLocation(Session session, Date[] dFilter){
+	private void computeNumberOfPerLocation(Session session, Date[] dFilter){
+		if (numberOfDaysLocation!= null) return;
 		
 		Query<AssetDeployment> query = null;
+		LocalDate filterStart = null;
+		LocalDate filterEnd = null;
 		if (dFilter != null) {
 			String hql = "FROM AssetDeployment a WHERE startDate <= :endDate and (endDate is null or endDate >= :startDate)";
 			query = session.createQuery(hql, AssetDeployment.class)
 				.setParameter("endDate", dFilter[1])
 				.setParameter("startDate", dFilter[0]);
+			
+			filterStart = new java.sql.Date(dFilter[0].getTime()).toLocalDate();
+			filterEnd= new java.sql.Date(dFilter[1].getTime()).toLocalDate();
 		}else {
 			String hql = "FROM AssetDeployment a ";
-			query = session.createQuery(hql, AssetDeployment.class);
+			query = session.createQuery(hql, AssetDeployment.class);	
 		}
-				
 		
 		HashMap<AssetStationLocation, HashSet<Long>> daysPerStation = new HashMap<>();
-		
+		HashMap<UUID, Object> daysCnt = new HashMap<>();
+
 		try(ScrollableResults results = query.scroll()){
 			while(results.next()) {
 				AssetDeployment d = (AssetDeployment) results.get(0);
 				
-				Long startDate = SharedUtils.getDatePart(d.getStartDate(), false).getTime();
-				Long endDate = SharedUtils.getDatePart(new Date(), false).getTime();
+				LocalDate startDate = new java.sql.Date(d.getStartDate().getTime()).toLocalDate();
+				LocalDate endDate = LocalDate.now();
 				if (d.getEndDate() != null) {
-					endDate = SharedUtils.getDatePart(d.getEndDate(), false).getTime();
+					endDate = new java.sql.Date(d.getEndDate().getTime()).toLocalDate();
 				}
 				
 				AssetStationLocation s = d.getStationLocation();
@@ -184,14 +222,27 @@ public class FixedColumnEngine implements IColumnEngine {
 					dates = new HashSet<>();
 					daysPerStation.put(s, dates);
 				}
-				while(startDate <= endDate) {
+				int cnt = 0;
+				while(!startDate.isAfter(endDate)) {
 					if (dFilter == null) {
-						dates.add(startDate);
-					}else if (startDate >= dFilter[0].getTime() && startDate <= dFilter[1].getTime()) {
-						dates.add(startDate);
+						dates.add(startDate.toEpochDay());
+						cnt++;
+					}else if (!startDate.isBefore(filterStart) && !startDate.isAfter(filterEnd)) {
+						dates.add(startDate.toEpochDay());
+						cnt++;
 					}
-					startDate += 86400000;
+					startDate = startDate.plus(1, ChronoUnit.DAYS);
+					
 				}
+				
+				Integer days = (Integer) daysCnt.get(s.getUuid());
+				if (days == null) {
+					days = cnt;
+				}else {
+					days += cnt;
+				}
+				daysCnt.put(s.getUuid(), days);
+
 			}
 		}
 		
@@ -199,107 +250,9 @@ public class FixedColumnEngine implements IColumnEngine {
 		for (Entry<AssetStationLocation, HashSet<Long>> e : daysPerStation.entrySet()) {
 			results.put(e.getKey().getUuid(), e.getValue().size());
 		}
-		return results;
-	}
-	
-	
-	private  HashMap<UUID, Object> computeAssetDaysPerStation(Session session, Date[] dFilter){
-		
-		Query<AssetDeployment> query = null;
-		if (dFilter != null) {
-			String hql = "FROM AssetDeployment a WHERE startDate <= :endDate and (endDate is null or endDate >= :startDate)";
-			query = session.createQuery(hql, AssetDeployment.class)
-				.setParameter("endDate", dFilter[1])
-				.setParameter("startDate", dFilter[0]);
-		}else {
-			String hql = "FROM AssetDeployment a ";
-			query = session.createQuery(hql, AssetDeployment.class);
-		}
-		
-		HashMap<UUID, Object> daysCnt = new HashMap<>();
-		
-		try(ScrollableResults results = query.scroll()){
-			while(results.next()) {
-				AssetDeployment d = (AssetDeployment) results.get(0);
-				
-				Long startDate = SharedUtils.getDatePart(d.getStartDate(), false).getTime();
-				Long endDate = SharedUtils.getDatePart(new Date(), false).getTime();
-				if (d.getEndDate() != null) {
-					endDate = SharedUtils.getDatePart(d.getEndDate(), false).getTime();
-				}
-				
-				AssetStation s = d.getStationLocation().getStation();
-				int cnt = 0;
-				
-				while(startDate <= endDate) {
-					if (dFilter == null) {
-						cnt++;
-					}else if (startDate >= dFilter[0].getTime() && startDate <= dFilter[1].getTime()) {
-						cnt++;
-					}
-					startDate += 86400000;
-				}
-
-				Integer days = (Integer) daysCnt.get(s.getUuid());
-				if (days == null) {
-					days = cnt;
-				}else {
-					days += cnt;
-				}
-				daysCnt.put(s.getUuid(), days);
-				
-			}
-		}
-		return daysCnt;
-	}
-	
-	private HashMap<UUID, Object> computeAssetDaysPerStationLocation(Session session, Date[] dFilter){
-		
-		Query<AssetDeployment> query = null;
-		if (dFilter != null) {
-			String hql = "FROM AssetDeployment a WHERE startDate <= :endDate and (endDate is null or endDate >= :startDate)";
-			query = session.createQuery(hql, AssetDeployment.class)
-				.setParameter("endDate", dFilter[1])
-				.setParameter("startDate", dFilter[0]);
-		}else {
-			String hql = "FROM AssetDeployment a ";
-			query = session.createQuery(hql, AssetDeployment.class);
-		}
-		
-		
-		HashMap<UUID, Object> daysCnt = new HashMap<>();
-		
-		try(ScrollableResults results = query.scroll()){
-			while(results.next()) {
-				AssetDeployment d = (AssetDeployment) results.get(0);
-				
-				Long startDate = SharedUtils.getDatePart(d.getStartDate(), false).getTime();
-				Long endDate = SharedUtils.getDatePart(new Date(), false).getTime();
-				if (d.getEndDate() != null) {
-					endDate = SharedUtils.getDatePart(d.getEndDate(), false).getTime();
-				}
-				
-				AssetStationLocation s = d.getStationLocation();
-				int cnt = 0;
-				while(startDate <= endDate) {
-					if (dFilter == null) {
-						cnt++;
-					}else if (startDate >= dFilter[0].getTime() && startDate <= dFilter[1].getTime()) {
-						cnt++;
-					}
-					startDate += 86400000;
-				}
-				Integer days = (Integer) daysCnt.get(s.getUuid());
-				if (days == null) {
-					days = cnt;
-				}else {
-					days += cnt;
-				}
-				daysCnt.put(s.getUuid(), days);
-				
-			}
-		}
-		return daysCnt;
+		numberOfAssetDaysLocation = daysCnt;
+		numberOfDaysLocation = results;
+		return;
 	}
 
 	private HashMap<UUID, Object> incidentsPerStation(Session session, Date[] dFilter){

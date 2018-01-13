@@ -30,6 +30,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetStation;
@@ -103,7 +105,7 @@ public class OverviewmapColumnEngine {
 	 * @param groupBy type of statistic to compute
 	 * 
 	 */
-	public void computeStatistics(List<IOverviewTableColumn> column, Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy) {
+	public void computeStatistics(List<IOverviewTableColumn> column, Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, IProgressMonitor monitor) {
 		//clear existing datay
 		data.clear();
 		map.clear();
@@ -136,6 +138,7 @@ public class OverviewmapColumnEngine {
 						}
 					}
 					computedColumns.add(c);
+					if (monitor.isCanceled()) return ;
 				}
 				
 				//dipose engines
@@ -144,6 +147,7 @@ public class OverviewmapColumnEngine {
 				//compute combined columns
 				for (CombinedOverviewColumn c : combinedColumns) {
 					for (StationData d : data) CombinedColumnEngine.computeValue(d, c);
+					if (monitor.isCanceled()) return ;
 					refreshData();
 				}
 				

@@ -391,7 +391,7 @@ public class StationEditor extends EditorPart implements MapPart {
 			}
 		});
 		
-		String headers[] = new String[] {"Current Status", "Data", "Station Locations", "Properties", "History"};
+		String headers[] = new String[] {"Current Status", "Data", "Station Locations", "Properties", "Assets"};
 		Listener[] actions = new Listener[] {
 			event->{
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
