@@ -22,8 +22,10 @@
 package org.wcs.smart.connect.report;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Supported report output formats.
@@ -64,11 +66,13 @@ public enum ReportFormat {
 		return this.emitterId;
 	}
 	
-	public String getContentDisposition(String filename){
+	public String getContentDisposition(String filename, UUID uuid){
 		if (this == DOC){
-			 return "attachment;filename=" + filename + ".doc"; //$NON-NLS-1$ //$NON-NLS-2$
+			 return "attachment;filename=" + filename + "." + UuidUtils.uuidToString(uuid) + ".doc"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (this == ODT){
-			return "attachment;filename=" + filename + ".odt"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "attachment;filename=" + filename + "." + UuidUtils.uuidToString(uuid) + ".odt"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}else if (this == PDF){
+			return "attachment;filename=" + filename + "." + UuidUtils.uuidToString(uuid) + ".pdf"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		return null;
 	}

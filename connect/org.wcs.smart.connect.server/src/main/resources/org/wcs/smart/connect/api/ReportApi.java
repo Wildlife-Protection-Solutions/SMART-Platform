@@ -256,7 +256,7 @@ public class ReportApi extends HttpServlet{
 		};
 		
 		ResponseBuilder rs = Response.ok(sout, outFormat.getResponseType() + " " ); //$NON-NLS-1$
-		String content = outFormat.getContentDisposition(URLUtils.cleanFilename(r.getName()));
+		String content = outFormat.getContentDisposition(URLUtils.cleanFilename(r.getName()), r.getUuid());
 		if (content != null){
 			rs.header(HttpHeaders.CONTENT_DISPOSITION, content);
 		}
