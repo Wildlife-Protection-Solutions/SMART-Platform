@@ -131,7 +131,7 @@ public class PatrolJsonTrackProcessor  implements IJsonProcessor {
 						t.setPatrolLegDay(pld);
 					}
 					
-					List<LineString> lineStrings = t.getLineStrings();
+					List<LineString> lineStrings = new ArrayList<>(t.getLineStrings());
 					if (!lineStrings.isEmpty()) {
 						LineString newLs = JsonTrackUtils.addPointToTrack(lineStrings.get(lineStrings.size()-1), new Coordinate(x,y), dt);
 						lineStrings.set(lineStrings.size()-1, newLs);

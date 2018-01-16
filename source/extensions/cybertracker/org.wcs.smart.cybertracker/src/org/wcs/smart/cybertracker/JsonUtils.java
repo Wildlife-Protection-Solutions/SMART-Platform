@@ -50,7 +50,11 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public class JsonUtils {
+	
 	public static final String JSON_DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
+	
+	//date attributes come through in a different format; only applicable to date attributes
+	public static final String JSON_ATTRIBUTE_DATE_FORMAT_STR = "yyyy/MM/dd"; 
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static ParseResult parseDefaultAttributeValues(JSONObject defaultValues, Session session){
@@ -100,9 +104,17 @@ public class JsonUtils {
 				toUpdate.setNumberValue(0.0);
 			}	
 		}else if (att.getType() == AttributeType.DATE){
-			Date date = new SimpleDateFormat(JSON_DATE_FORMAT_STR).parse((String)value);
-			toUpdate.setDateValue(date);
+			Date date = null;
+			try {
+				date = new SimpleDateFormat(JSON_DATE_FORMAT_STR).parse((String)value);				
+			}catch (Exception ex) {}
+			try {
+				date = new SimpleDateFormat(JSON_ATTRIBUTE_DATE_FORMAT_STR).parse((String)value);
+			}catch (Exception ex) {}
 			
+			if (date == null) throw new Exception("Unable to parse date from value '" + value + "'.  Date must be provided in either '" + JSON_DATE_FORMAT_STR + "' or '" + JSON_ATTRIBUTE_DATE_FORMAT_STR + "  format.");
+
+			toUpdate.setDateValue(date);
 		}else if (att.getType() == AttributeType.LIST){
 			String listElement = (String) value;
 			if (!listElement.startsWith(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP)) throw new Exception(Messages.JsonUtils_InvalidListAttribute +listElement);
