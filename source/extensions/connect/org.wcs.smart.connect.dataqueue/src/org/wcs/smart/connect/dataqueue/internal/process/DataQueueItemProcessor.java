@@ -170,7 +170,10 @@ public class DataQueueItemProcessor extends Job {
 						ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.QUEUED);
 					}
 				}else{
-					ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.COMPLETE);
+					if (item.getStatus() == LocalDataQueueItem.Status.COMPLETE)
+						ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.COMPLETE);
+					else 
+						ConnectDataQueue.INSTANCE.updateStatus(connect, item, DataQueueApi.ServerStatus.ERROR);
 				}
 			}catch (Exception ex){
 				ConnectDataQueuePlugin.displayLog(Messages.DataQueueItemProcessor_Error3, ex);
