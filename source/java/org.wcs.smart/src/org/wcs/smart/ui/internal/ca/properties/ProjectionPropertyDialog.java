@@ -158,8 +158,8 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		prjComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		lbl = new Label(prjComp, SWT.NONE);
-		lbl.setText(Messages.ProjectionPropertyDialog_ViewProjectionLbl);
-		lbl.setToolTipText(Messages.ProjectionPropertyDialog_ViewProjectionToolip);
+		lbl.setText(Messages.ProjectionPropertyDialog_ViewProjectionLbl1);
+		lbl.setToolTipText(Messages.ProjectionPropertyDialog_ViewProjectionToolip1);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		projectionViewer = new ComboViewer(prjComp, SWT.READ_ONLY);

@@ -984,8 +984,8 @@ public class Messages extends NLS {
 	public static String ProjectionPropertyDialog_ProjectionList_Label;
 	public static String ProjectionPropertyDialog_ProjectionParseError;
 	public static String ProjectionPropertyDialog_UnknownCode;
-	public static String ProjectionPropertyDialog_ViewProjectionLbl;
-	public static String ProjectionPropertyDialog_ViewProjectionToolip;
+	public static String ProjectionPropertyDialog_ViewProjectionLbl1;
+	public static String ProjectionPropertyDialog_ViewProjectionToolip1;
 	public static String Rank_Label;
 	public static String RankDeleteAdvisor_Error_NotRank;
 	public static String RankDeleteAdvisor_Error_RankReferenced;
