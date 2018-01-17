@@ -55,8 +55,10 @@ import org.wcs.smart.util.UuidUtils;
 public abstract class ChangeLogItemSerializer {
 
 	public static final String DATE_FORMAT_STR = "yyyyMMddHHmmssSSS"; //$NON-NLS-1$
+	public static final String TIME_FORMAT_STR = "HHmmssSSS"; //$NON-NLS-1$
 	
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMAT_STR); 
+	private SimpleDateFormat timeFormatter = new SimpleDateFormat(TIME_FORMAT_STR);
 	
 	public abstract void prepareUuid(PreparedStatement ps, int index, UUID value) throws SQLException;
 	
@@ -144,7 +146,7 @@ public abstract class ChangeLogItemSerializer {
 				stream.writeObject(md.getColumnName(i));
 				int type = convertType(md.getColumnType(i), md.getPrecision(i));
 				stream.writeInt(type);
-				
+
 				if (type == Types.BLOB){
 					Blob b = rs.getBlob(i);
 					if (b == null){
@@ -191,6 +193,16 @@ public abstract class ChangeLogItemSerializer {
 						stream.writeObject(null);
 					}else{
 						stream.writeObject(dateFormatter.format(rs.getObject(i)));
+					}
+				}else if (type == Types.TIME) {
+					//serialization of dates does not include timezone which causes a problem when deserializing as
+					//it assumes the jvms default timezone which causes dates to get shifted
+					//so we will serialize and deserialize dates a strings
+					Object obj = rs.getObject(i);
+					if (obj == null){
+						stream.writeObject(null);
+					}else{
+						stream.writeObject(timeFormatter.format(rs.getObject(i)));
 					}
 				}else{
 					Object x = rs.getObject(i);

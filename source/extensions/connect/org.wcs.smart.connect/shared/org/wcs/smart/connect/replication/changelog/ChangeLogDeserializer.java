@@ -48,6 +48,8 @@ import org.wcs.smart.connect.model.ChangeLogItem.Source;
 public abstract class ChangeLogDeserializer {
 
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat(ChangeLogItemSerializer.DATE_FORMAT_STR); 
+	private SimpleDateFormat timeFormatter = new SimpleDateFormat(ChangeLogItemSerializer.TIME_FORMAT_STR); 
+
 	
 	protected Path changeLogFile;
 	protected Path changeLogFilestoreDir;
@@ -154,6 +156,16 @@ public abstract class ChangeLogDeserializer {
 					data.put(colName, null);	
 				}else{
 					data.put(colName, new java.sql.Date(dateFormatter.parse((String)x).getTime()));
+				}
+			}else if (type == Types.TIME){
+				//serialization of time does not include timezone which causes a problem when deserializing as
+				//it assumes the jvms default timezone which causes dates to get shifted
+				//so we will serialize and deserialize dates a strings
+				Object x = is.readObject();
+				if( x == null){
+					data.put(colName, null);	
+				}else{
+					data.put(colName, new java.sql.Time(timeFormatter.parse((String)x).getTime()));
 				}
 			}else if (type == Types.OTHER){
 				//uuid
