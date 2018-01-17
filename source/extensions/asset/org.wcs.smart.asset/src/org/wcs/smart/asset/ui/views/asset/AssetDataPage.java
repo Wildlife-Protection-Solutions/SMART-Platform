@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -126,8 +127,12 @@ public class AssetDataPage {
 		Job loadData = new Job("load data") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				List<UUID> waypointUuids = new ArrayList<>();
+				if (parentEditor.getAsset().getUuid() == null) {
+					dataPanel.setWaypoints(Collections.emptyList());
+					return Status.OK_STATUS;
+				}
 				
+				List<UUID> waypointUuids = new ArrayList<>();
 				try(Session session = HibernateManager.openSession()){
 					String query = "SELECT distinct id.waypoint.uuid, id.waypoint.dateTime FROM AssetWaypoint WHERE id.assetDeployment.asset = :asset ";
 					if (startDate != null) {

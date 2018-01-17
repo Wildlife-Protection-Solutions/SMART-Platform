@@ -39,20 +39,9 @@ public class AssetEditorInput implements IEditorInput {
 	private UUID assetUuid;
 	private String assetId;
 	
-	private UUID assetTypeUuid;
-	
 	public AssetEditorInput(UUID assetUuid, String assetId) {
 		this.assetId = assetId;
 		this.assetUuid = assetUuid;
-	}
-	
-	public AssetEditorInput(UUID assetTypeUuid) {
-		this.assetTypeUuid = assetTypeUuid;
-	}
-	
-	
-	public UUID getAssetTypeUuid() {
-		return this.assetTypeUuid;
 	}
 	
 	public UUID getAssetUuid() {
@@ -80,6 +69,7 @@ public class AssetEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
+		if (assetId == null) return "";
 		return assetId;
 	}
 

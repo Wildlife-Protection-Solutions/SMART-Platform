@@ -95,7 +95,6 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetHistoryRecord;
-import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.ui.CommentDialog;
 import org.wcs.smart.asset.ui.DateCommentDialog;
 import org.wcs.smart.asset.ui.IdFieldHeader;
@@ -103,7 +102,6 @@ import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -815,16 +813,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 			try(Session session = HibernateManager.openSession()){
 				//load asset data
 				if (in.getAssetUuid() == null) {
-					if (in.getAssetTypeUuid() != null) {
-						AssetType type = session.get(AssetType.class, in.getAssetTypeUuid());
-						asset = new Asset();
-						asset.setConservationArea(SmartDB.getCurrentConservationArea());
-						asset.setAssetType(type);
-						asset.setAttributeValues(new ArrayList<>());
-						asset.setIsRetired(false);
-						asset.setId("AssetId");
-						setDirty(true);
-					}
+					throw new Exception("No asset.  Asset does not exist in system.");
 				}else {
 					asset = session.get(Asset.class, in.getAssetUuid());
 				}

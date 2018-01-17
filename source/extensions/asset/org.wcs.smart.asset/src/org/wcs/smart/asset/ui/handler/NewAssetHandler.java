@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -44,15 +45,19 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.osgi.service.prefs.BackingStoreException;
@@ -81,11 +86,11 @@ public class NewAssetHandler {
 	public static final int NEW_TYPE_MAX_OPTIONS = 5;
 	public static final String OPTION_SEP = ","; //$NON-NLS-1$
 	
-	public void execute( ) {
-		execute(null);
+	public void execute( IEclipseContext context ) {
+		execute(null, context);
 	}
 	
-	public void execute(UUID assetTypeUuid) {
+	public void execute(UUID assetTypeUuid, IEclipseContext context) {
 		AssetType type = null;
 		
 		if (assetTypeUuid != null) {
@@ -94,14 +99,20 @@ public class NewAssetHandler {
 			}
 		}
 		
+		SelectAssetTypeDialog dialog = null;
+		String assetId = null;
 		if (type == null) {
 			//show select asset type dialog
-			SelectAssetTypeDialog dialog = new SelectAssetTypeDialog(Display.getDefault().getActiveShell());
-			if (dialog.open() != Window.OK) return;
-			type = dialog.getAssetType();
+			dialog = new SelectAssetTypeDialog(Display.getDefault().getActiveShell());
+		}else {
+			dialog = new SelectAssetTypeDialog(Display.getDefault().getActiveShell(), type);
 		}
 		
-		if (type == null) return;
+		if (dialog.open() != Window.OK) return;
+		type = dialog.getAssetType();
+		assetId = dialog.getAssetId();
+		
+		if (assetId == null || type == null) return;
 		
 		//update last created preference
 		String newTypes = ConfigurationScope.INSTANCE.getNode(NewAssetHandler.NEW_TYPE_OPTIONS_NODE).get(NEW_TYPE_OPTIONS_KEY, null);
@@ -128,28 +139,36 @@ public class NewAssetHandler {
 			AssetPlugIn.log(e.getMessage(), e);
 		}
 		
-		//open editor
-		AssetEditorInput in = new AssetEditorInput(type.getUuid());
-		(new OpenAssetHandler()).openAsset(in);
+		Asset newAsset = createAsset(assetId, type);
+		if (newAsset != null) {
+			//open editor
+			AssetEditorInput in = new AssetEditorInput(newAsset.getUuid(), newAsset.getId());
+			(new OpenAssetHandler()).openAsset(in);
+			context.get(IEventBroker.class).post(AssetEvents.ASSET_NEW, Collections.singleton(newAsset));
+		}
 	}
 	
 	
 	public Asset createAndSave(String assetId, IEventBroker broker) {
-		SelectAssetTypeDialog dialog = new SelectAssetTypeDialog(Display.getDefault().getActiveShell());
+		SelectAssetTypeDialog dialog = new SelectAssetTypeDialog(Display.getDefault().getActiveShell(), assetId);
 		if (dialog.open() != Window.OK) return null;
 		
 		AssetType type = dialog.getAssetType();
+		assetId = dialog.getAssetId();
+		Asset newAsset = createAsset(assetId, type);
+		if (newAsset != null) {
+			broker.post(AssetEvents.ASSET_NEW, Collections.singleton(newAsset));
+		}
+		return newAsset;
+	}
+	
+	private Asset createAsset(String assetId, AssetType type) {
 		Asset newAsset = null;
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				//ensure asset id doesn't already exist
-				String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca ";
-				Query<?> q = session.createQuery(query)
-				.setParameter("id", assetId.toLowerCase())
-				.setParameter("ca", SmartDB.getCurrentConservationArea());
-				Long cnt = (Long)q.uniqueResult();
-				if (cnt != 0) {
+				if (checkDuplicate(session, assetId)) {
 					MessageDialog.openError(Display.getDefault().getActiveShell(), "Duplicate Asset ID", MessageFormat.format("Asset with id {0} already exists in the system.  Cannot duplicate asset id", assetId));
 					return null;
 				}
@@ -169,12 +188,18 @@ public class NewAssetHandler {
 				return null;
 			}
 		}
-		
-		//todo fire event
-		broker.post(AssetEvents.ASSET_NEW, Collections.singleton(newAsset));
 		return newAsset;
 	}
 	
+	private boolean checkDuplicate(Session session, String assetId) {
+		String query =  "SELECT count(*) FROM Asset WHERE LOWER(id) = :id AND conservationArea = :ca ";
+		Query<?> q = session.createQuery(query)
+		.setParameter("id", assetId.toLowerCase())
+		.setParameter("ca", SmartDB.getCurrentConservationArea());
+		Long cnt = (Long)q.uniqueResult();
+		if (cnt == 0) return false;
+		return true;
+	}
 	/**
 	 * Dialog for selecting type of asset to create
 	 * @author Emily
@@ -184,30 +209,93 @@ public class NewAssetHandler {
 
 		private TableViewer lstAssets;
 		private AssetType selectedType;
+		private String assetId;
+		private Text txtId;
+		
+		private AssetType defaultType = null;
+		private String defaultId = null;
 		
 		public SelectAssetTypeDialog(Shell parentShell) {
 			super(parentShell);
+		}
+		
+		public SelectAssetTypeDialog(Shell parentShell, AssetType defaultType) {
+			super(parentShell);
+			this.defaultType = defaultType;
+		}
+		
+		public SelectAssetTypeDialog(Shell parentShell, String defaultId) {
+			super(parentShell);
+			this.defaultId = defaultId;
 		}
 		
 		public AssetType getAssetType() {
 			return selectedType;
 		}
 		
+		public String getAssetId() {
+			return this.assetId;
+		}
+		
 		@Override
 		public void okPressed() {
 			selectedType = null;
 			Object x = ((IStructuredSelection)lstAssets.getSelection()).getFirstElement();
-			if (x != null && x instanceof AssetType) {
-				selectedType = (AssetType) x;
-				super.okPressed();
+			if (x == null || !(x instanceof AssetType)) {
+				return;
+			}
+			selectedType = (AssetType) x;
+			
+			assetId = txtId.getText().trim();
+			if (assetId.isEmpty()) {
+				MessageDialog.openError(getShell(), "Error", "An asset Id must be provided.");
+				return;
+			}
+			boolean dup = false;
+			try(Session s = HibernateManager.openSession()){
+				dup = checkDuplicate(s, assetId);
+			}
+			if (dup) {
+				MessageDialog.openError(getShell(), "Error", MessageFormat.format("The asset Id {0} is already used in the system.  The Asset Id must be unique.", assetId));
+				return;
+			}
+			super.okPressed();
+		}
+		
+		private void validate() {
+			if (txtId.getText().trim().isEmpty()) {
+				setErrorMessage("An asset id is required.");
 			}
 		}
+		
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite c = (Composite) super.createDialogArea(parent);
 			
-			lstAssets = new TableViewer(c, SWT.READ_ONLY | SWT.BORDER);
+			Composite main = new Composite(c, SWT.NONE);
+			main.setLayout(new GridLayout(2, false));
+			main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Label l = new Label(main, SWT.NONE);
+			l.setText("Asset ID:");
+			
+			txtId = new Text(main, SWT.BORDER);
+			txtId.setText("");
+			txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			if (defaultId != null) {
+				txtId.setText(defaultId);
+			}
+			txtId.addListener(SWT.Modify, e->{
+				validate();
+			});
+			
+			l = new Label(main, SWT.NONE);
+			l.setText("Asset Type:");
+			l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			
+			lstAssets = new TableViewer(main, SWT.READ_ONLY | SWT.BORDER);
 			lstAssets.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			((GridData)lstAssets.getControl().getLayoutData()).heightHint = 150;
 			lstAssets.setContentProvider(ArrayContentProvider.getInstance());
 			lstAssets.setLabelProvider(new AssetTypeLabelProvider());
 			lstAssets.setInput(new String[] {DialogConstants.LOADING_TEXT});
@@ -228,8 +316,8 @@ public class NewAssetHandler {
 					okPressed();
 				}
 			});
-			
-			setMessage("Select the type of the new asset");
+						
+			setMessage("Select values for the asset Id type.  The Id must be unique for all attributes across the Conservation Area");
 			setTitle("New Asset");
 			getShell().setText("New Asset");
 			
@@ -260,6 +348,9 @@ public class NewAssetHandler {
 				
 				Display.getDefault().syncExec(()->{
 					lstAssets.setInput(types);
+					if (defaultType != null) {
+						lstAssets.setSelection(new StructuredSelection(defaultType));
+					}
 				});
 				
 				return Status.OK_STATUS;

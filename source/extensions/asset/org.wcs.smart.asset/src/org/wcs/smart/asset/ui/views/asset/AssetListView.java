@@ -365,7 +365,7 @@ public class AssetListView {
 		
 		MenuItem otherAssetType = new MenuItem(addAssetMenu, SWT.PUSH);
 		otherAssetType.setText("Other...");
-		otherAssetType.addListener(SWT.Selection, evt->(new NewAssetHandler()).execute());
+		otherAssetType.addListener(SWT.Selection, evt->(new NewAssetHandler()).execute(context));
 		
 		addAssetMenu.addMenuListener(new MenuListener() {
 			
@@ -465,7 +465,7 @@ public class AssetListView {
 	 * @param assetTypeUuid asset type or null if unknown
 	 */
 	private void createNewAsset(UUID assetTypeUuid) {
-		(new NewAssetHandler()).execute(assetTypeUuid);
+		(new NewAssetHandler()).execute(assetTypeUuid, context);
 	}
 	
 	private void openAsset() {
