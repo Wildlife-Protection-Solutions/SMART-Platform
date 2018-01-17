@@ -184,7 +184,7 @@ public class AssetStation extends UuidItem {
 	 * 
 	 * @return 
 	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="station", orphanRemoval=true, cascade= {CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="station", orphanRemoval=true, cascade= {CascadeType.REMOVE})
 	public List<AssetStationLocation> getLocations() {
 		return this.locations;
 	}

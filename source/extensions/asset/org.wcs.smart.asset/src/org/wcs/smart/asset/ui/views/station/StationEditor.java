@@ -123,6 +123,8 @@ public class StationEditor extends EditorPart implements MapPart {
 	private Label lblStatus;
 	private Label lblStatusImage;
 	
+	private EventHandler promptToReset;
+	
 	CoordinateReferenceSystem viewCrs;
 	
 	@Override
@@ -295,17 +297,37 @@ public class StationEditor extends EditorPart implements MapPart {
 			//refresh data page
 			initData();
 		});
+		
+		promptToReset = new EventHandler(){
+			@Override
+			public void handleEvent(org.osgi.service.event.Event event) {
+				if (parentContext.get(MPart.class) == event.getProperty(UIEvents.EventTags.ELEMENT)){
+					parentContext.get(IEventBroker.class).unsubscribe(this);
+					
+					if (MessageDialog.openQuestion(getSite().getShell(), "Station Modified", 
+							MessageFormat.format("The station ''{0}'' was modified by another part of the system.  Do you want to reload the page and loose any local changes?  By not reloading your risk overwriting other changes made outside this page.", station.getId()) )) {
+						initData();
+					}
+				}
+			}
+		};
+		handlers.add(promptToReset);
 	}
 	
 	private void validateAndRefresh() {
 		if (isDirty) {
-			if (!MessageDialog.openQuestion(getSite().getShell(), "Station Modified", 
-					"This station was modified by another part of the system.  Do you want to reload the page and loose any local changes?  By not reloading your risk overwriting other changes made outside this page." )) {
-				return;
+			if (parentContext.get(MPart.class).isOnTop()){
+				if (MessageDialog.openQuestion(getSite().getShell(), "Station Modified", 
+					MessageFormat.format("The station ''{0}'' was modified by another part of the system.  Do you want to reload the page and loose any local changes?  By not reloading your risk overwriting other changes made outside this page.", station.getId()) )) {
+					initData();
+				}
+			}else {
+				parentContext.get(IEventBroker.class).subscribe(UIEvents.UILifeCycle.BRINGTOTOP, promptToReset);
 			}
+		}else {
+			//reload
+			initData();
 		}
-		//reload
-		initData();
 	}
 	/**
 	 * Gets the asset station; may return null if the station not yet loaded

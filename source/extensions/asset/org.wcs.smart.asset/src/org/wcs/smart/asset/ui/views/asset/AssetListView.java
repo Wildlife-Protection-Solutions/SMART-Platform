@@ -253,6 +253,11 @@ public class AssetListView {
 	private void createStationsToolbar(Composite parent) {
 		ToolBar toolbar =new ToolBar(parent, SWT.FLAT);
 		
+		ToolItem overviewMap = new ToolItem(toolbar, SWT.PUSH);
+		overviewMap.setToolTipText("view overview map");
+		overviewMap.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+		overviewMap.addListener(SWT.Selection, e->showOverviewMap());
+		
 		ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
 		importData.setToolTipText("import asset data");
 		importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));

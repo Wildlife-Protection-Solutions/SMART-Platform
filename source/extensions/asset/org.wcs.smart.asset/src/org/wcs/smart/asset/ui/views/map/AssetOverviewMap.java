@@ -22,15 +22,10 @@
 package org.wcs.smart.asset.ui.views.map;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,15 +48,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPersistableElement;
@@ -78,16 +70,12 @@ import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.map.engine.StatusEngine;
-import org.wcs.smart.asset.model.AssetStation;
-import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.asset.ui.views.map.udig.AssetStationSummaryService;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -119,7 +107,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	
 	private DateFilterDropDownComposite dateFilters;
 	private TableViewer summaryTable;
-	private TableViewer statusTable;
+//	private TableViewer statusTable;
 	private AssetMapColumnConfiguration tableConfiguration;
 	private Composite tableComposite;
 	private Composite statusTableComposite;
@@ -314,7 +302,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	private void createTablePart() {
 		for (Control c : tableComposite.getChildren()) c.dispose();
 		
-		summaryTable = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+		summaryTable = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.MULTI);
 		summaryTable.getTable().setHeaderVisible(true);
 		summaryTable.getTable().setLinesVisible(true);
 		summaryTable.setContentProvider(ArrayContentProvider.getInstance());

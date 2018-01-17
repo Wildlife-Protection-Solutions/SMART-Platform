@@ -38,7 +38,8 @@ import org.wcs.smart.ca.ICaDeleteHandler;
  */
 public class DeleteCaHandler implements ICaDeleteHandler{
 
-	public static final int EXECUTE_ORDER = DeleteConservationAreaHandler.EXECUTE_ORDER + 1;
+	//execute before waypoints are removed 
+	public static final int EXECUTE_ORDER =  org.wcs.smart.observation.CaDeleteHandler.DELETE_ORDER + 1;
 	
 	private static final String SUB_TASK_MSG = "Deleting Asset Data ({0}) ...";
 	
@@ -79,11 +80,6 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Deployment ")); //$NON-NLS-1$
-		q = session.createQuery("delete from  AssetDeployment sa where sa.asset in (select a from Asset a where conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
-		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset History Record ")); //$NON-NLS-1$
 		q = session.createQuery("delete from  AssetHistoryRecord sa where sa.asset in (select a from Asset a where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
@@ -93,10 +89,24 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q = session.createQuery("delete from  AssetStationLocationHistoryRecord sa where sa.stationLocation in (select a from AssetStationLocation a join a.station b where b.conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
-		
-		
+			
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Metadata Mapping ")); //$NON-NLS-1$
 		q = session.createQuery("delete from  AssetMetadataMapping sa where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+			
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Waypoint Attachment")); //$NON-NLS-1$
+		q = session.createQuery("delete from AssetWaypointAttachment where id.assetWaypoint in (SELECT a from AssetWaypoint a where a.waypoint.conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Waypoint")); //$NON-NLS-1$
+		q = session.createQuery("delete from AssetWaypoint where waypoint in (SELECT a from Waypoint a where a.conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Deployment ")); //$NON-NLS-1$
+		q = session.createQuery("delete from  AssetDeployment sa where sa.asset in (select a from Asset a where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
@@ -120,13 +130,8 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Waypoint Attachment")); //$NON-NLS-1$
-		q = session.createQuery("delete from AssetWaypointAttachment where id.assetWaypoint in (SELECT a from AssetWaypoint a where a.waypoint.conservationArea = :ca)"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
-		
-		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Waypoint")); //$NON-NLS-1$
-		q = session.createQuery("delete from AssetWaypoint where waypoint in (SELECT a from Waypoint a where a.conservationArea = :ca)"); //$NON-NLS-1$
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset")); //$NON-NLS-1$
+		q = session.createQuery("delete from Asset where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		

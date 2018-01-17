@@ -17,7 +17,7 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".attribute.conservationArea"
+            ca_property=".id.attribute.conservationArea"
             class="org.wcs.smart.asset.model.AssetAttributeValue"
             supportsCcaa="false">
       </class>
