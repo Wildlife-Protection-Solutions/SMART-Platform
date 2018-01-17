@@ -114,6 +114,7 @@ public class AddAssetJob extends Job {
 				"alter table smart.asset_station_location add constraint asset_snlc_id_ca_unq UNIQUE(id, station_uuid)",
 				"CREATE TABLE smart.asset_station_location_attribute ( attribute_uuid char(16) for bit data NOT NULL, seq_order integer NOT NULL, PRIMARY KEY (attribute_uuid) )",
 				"CREATE TABLE smart.asset_station_location_attribute_value ( station_location_uuid char(16) for bit data NOT NULL, attribute_uuid char(16) for bit data NOT NULL, string_value varchar(1024), list_item_uuid char(16) for bit data, double_value1 double, double_value2 double, PRIMARY KEY (station_location_uuid, attribute_uuid) )",
+				"CREATE TABLE smart.asset_map_style ( uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data NOT NULL, name varchar(1024), style_string varchar(32672), PRIMARY KEY (uuid) )",
 				
 				// Create Foreign Keys
 				"ALTER TABLE smart.asset_station_location_history ADD CONSTRAINT assetstnlochistory_stnloc_fk FOREIGN KEY (station_location_uuid) REFERENCES smart.asset_station_location(uuid) DEFERRABLE INITIALLY IMMEDIATE",
@@ -156,6 +157,8 @@ public class AddAssetJob extends Job {
 				
 				"ALTER TABLE smart.asset_waypoint_attachment ADD CONSTRAINT assetwpuuid_dpl_fk FOREIGN KEY (asset_waypoint_uuid) REFERENCES smart.asset_waypoint (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_waypoint_attachment ADD CONSTRAINT wpatt_asset_wpuuid_fk FOREIGN KEY (wp_attachment_uuid) REFERENCES smart.wp_attachments (uuid) DEFERRABLE INITIALLY IMMEDIATE",
+				
+				"ALTER TABLE smart.asset_map_style ADD CONSTRAINT assetmapstyle_ca_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 
 		};
 		

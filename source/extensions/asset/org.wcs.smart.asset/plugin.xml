@@ -103,6 +103,10 @@
             class="org.wcs.smart.asset.model.AssetWaypointAttachment"
             supportsCcaa="true">
       </class>
+      <class
+            class="org.wcs.smart.asset.model.AssetMapStyle"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">

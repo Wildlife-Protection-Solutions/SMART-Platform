@@ -23,6 +23,7 @@ package org.wcs.smart.asset.ui.views.map;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -63,19 +66,28 @@ import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
+import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.map.engine.StatusEngine;
+import org.wcs.smart.asset.model.AssetMapStyle;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
+import org.wcs.smart.asset.ui.views.map.udig.AssetStationSummaryGeoResource;
 import org.wcs.smart.asset.ui.views.map.udig.AssetStationSummaryService;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -90,6 +102,9 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 
 	public static final String ID = "org.wcs.smart.asset.overviewmap"; //$NON-NLS-1$
 
+	private static final String SAVE_STYLES = "Save current map style...";
+	private static final String MANAGE_STYLES = "Manage map styles...";
+	
 	public static IEditorInput OVERVIEW_MAP_INPUT = new IEditorInput() {		
 		@Override
 		public <T> T getAdapter(Class<T> adapter) { return null; }
@@ -105,15 +120,17 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		public boolean exists() { return false; }
 	};
 	
+	private ComboViewer cmbStyles;
+	
 	private DateFilterDropDownComposite dateFilters;
 	private TableViewer summaryTable;
-//	private TableViewer statusTable;
 	private AssetMapColumnConfiguration tableConfiguration;
 	private Composite tableComposite;
 	private Composite statusTableComposite;
 	private AssetStationSummaryService service;
 	private StatusCanvas canvas;
 	
+	private List<ILayer> mapLayers;
 	private GroupByOption currentGroupByOption = GroupByOption.STATION;
 	
 	private OverviewmapColumnEngine statEngine = new OverviewmapColumnEngine() {
@@ -152,7 +169,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		((GridLayout)mapPart.getLayout()).verticalSpacing = 0;
 		
 		Composite headerPart = toolkit.createComposite(mapPart, SWT.NONE);
-		headerPart.setLayout(new GridLayout(2, false));
+		headerPart.setLayout(new GridLayout(3, false));
 		headerPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)headerPart.getLayout()).marginHeight  = 0;
 		((GridLayout)headerPart.getLayout()).marginTop = 5;
@@ -191,6 +208,27 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				refresh();
+			}
+		});
+		
+		combo = new CCombo(headerPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+		combo.setBackground(combo.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		cmbStyles = new ComboViewer(combo);
+		cmbStyles.getControl().setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		cmbStyles.getControl().setToolTipText("Select to change map styles for asset data");
+		cmbStyles.setContentProvider(ArrayContentProvider.getInstance());
+		cmbStyles.setInput(IOverviewTableColumn.GroupByOption.values());
+		cmbStyles.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof AssetMapStyle) return ((AssetMapStyle) element).getName();
+				return super.getText(element);
+			}
+		});
+		cmbStyles.setInput(DialogConstants.LOADING_TEXT);
+		cmbStyles.addSelectionChangedListener(new ISelectionChangedListener() {		
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateStyle();
 			}
 		});
 		
@@ -286,6 +324,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		LoadDefaultLayersJob loadBasemap = new LoadDefaultLayersJob(getMap(),true);
 		loadBasemap.schedule();
 		
+		loadStylesJob.schedule();
 		loadTableJob.schedule();
 		configureStatusTableJob.schedule();
 	}
@@ -330,6 +369,68 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		}
 	}
 	
+	private void manageStyles() {
+		
+	}
+	
+	private void saveStyle() {
+		if (mapLayers == null || mapLayers.isEmpty()) return;
+		AssetMapStyle toUpdate = null;
+		if (lastStyle != null && !(lastStyle instanceof DefaultAssetMapStyle)) {
+			toUpdate = lastStyle;
+		}
+		StyleBlackboard sb = (StyleBlackboard)mapLayers.get(0).getStyleBlackboard();
+		MapStyleDialog dialog = new MapStyleDialog(getSite().getShell(), toUpdate, sb);
+		if (dialog.open() == Window.OK) {
+			cmbStyles.setInput(DialogConstants.LOADING_TEXT);
+			loadStylesJob.schedule();
+		}
+	}
+	
+	private AssetMapStyle lastStyle = null;
+	
+	private void updateStyle() {
+		if (mapLayers == null || mapLayers.isEmpty()) return;
+		
+		Object x = cmbStyles.getStructuredSelection().getFirstElement();
+		if (x == SAVE_STYLES) {
+			saveStyle();
+			return;
+		}else if (x == MANAGE_STYLES) {
+			manageStyles();
+			return;
+		}
+		AssetMapStyle style = null;
+		if (x instanceof AssetMapStyle) {
+			style = (AssetMapStyle)x;
+		}else {
+			return;
+		}
+		lastStyle = style;
+		
+		if (style instanceof DefaultAssetMapStyle) {
+			final DefaultAssetMapStyle fstyle = (DefaultAssetMapStyle)style;
+			mapLayers.forEach(layer->{
+				layer.getStyleBlackboard().clear();
+				layer.getStyleBlackboard().put(SLDContent.ID, fstyle.getStyle() );
+				layer.refresh(null);
+			});
+			return;
+		}else {
+			//parse style string and update layer
+			try {
+				StyleBlackboard sBoard = StyleManager.INSTANCE.fromString(style.getStyleString());
+				mapLayers.forEach(layer->{
+					layer.getStyleBlackboard().clear();
+					layer.getStyleBlackboard().addAll(sBoard);
+					layer.refresh(null);
+				});
+			}catch (Exception ex) {
+				AssetPlugIn.displayLog("Unable to parse saved style. " + ex.getMessage(), ex);
+			}
+			
+		}
+	}
 	private void createStatusTablePart() {
 		canvas = new StatusCanvas(statusTableComposite);
 		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
@@ -347,6 +448,38 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		configureStatusTableJob.schedule(500);		
 	}
 
+	private List<DefaultAssetMapStyle> getDefaultMapStyles(){
+		DefaultAssetMapStyle statusStyle = new DefaultAssetMapStyle();
+		statusStyle.setName("Status*");
+		statusStyle.setConservationArea(SmartDB.getCurrentConservationArea());
+		statusStyle.setStyleString(null);
+		statusStyle.setStyle(AssetStationSummaryGeoResource.getDefaultLayerStyle());
+		
+		return Collections.singletonList(statusStyle);
+	}
+	
+	Job loadStylesJob = new Job("loading asest overview map styles") {
+		
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			List<Object> styles = new ArrayList<>();
+			styles.addAll(getDefaultMapStyles());
+			lastStyle = (AssetMapStyle) styles.get(0);
+			try(Session session = HibernateManager.openSession()){
+				styles.addAll(QueryFactory.buildQuery(session, AssetMapStyle.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+			}
+			styles.add("---------- Actions ------------");
+			styles.add(SAVE_STYLES);
+			styles.add(MANAGE_STYLES);
+			Display.getDefault().syncExec(()->{
+				cmbStyles.setInput(styles);
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
+	
 	Job loadTableJob = new Job("configure table and compute statistics") {
 		
 		@Override
@@ -396,7 +529,13 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 				List<IGeoResource> resources = new ArrayList<>();
 				try {
 					resources.addAll(service.resources(monitor));
-					AddLayersCommand addCmd = new AddLayersCommand(resources);
+					mapLayers = new ArrayList<>();
+					AddLayersCommand addCmd = new AddLayersCommand(resources) {
+						 public void run( IProgressMonitor monitor ) throws Exception {
+							 super.run(monitor);
+							 mapLayers.addAll(getLayers());
+						 }
+					};
 					getMap().sendCommandASync(addCmd);
 					service.setData(statEngine.getData());
 				}catch (Exception ex) {
@@ -433,7 +572,6 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			final Date[] end = new Date[] {null};
 			
 			Display.getDefault().syncExec(()->{
-//				if (statusTable.getTable().isDisposed()) return;
 				if (canvas.isDisposed()) return;
 				if (dateFilters.getDateFilter() == DateFilter.CUSTOM) {
 					start[0] = dateFilters.getCustomStartDate();
@@ -442,9 +580,6 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 					start[0] = dateFilters.getDateFilter().getStartDate();
 					end[0] = dateFilters.getDateFilter().getEndDate();	
 				}
-				
-				
-//				.setInput(DialogConstants.LOADING_TEXT);
 			});
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;	
 			Date[] dFilters = null;
@@ -478,72 +613,12 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 				sstart = new java.sql.Date(dFilters[0].getTime()).toLocalDate().toEpochDay();
 				send = new java.sql.Date(dFilters[1].getTime()).toLocalDate().toEpochDay();
 			}
-			
-//			final Long fsstart = sstart;
-//			final Long fsend = send;
-			
 			final LocalDate fsstart = LocalDate.ofEpochDay(sstart);
 			final LocalDate fsend = LocalDate.ofEpochDay(send);
 			final HashMap<Object, Set<Long>> fdata = data;
 			Display.getDefault().syncExec(()->{
 				canvas.setData(fdata.entrySet(), fsstart, fsend);
 				canvas.redraw();
-//				if (statusTable.getTable().isDisposed()) return;
-//				
-//				for (TableColumn column : statusTable.getTable().getColumns()) column.dispose();
-//				
-//				TableViewerColumn idColumn = new TableViewerColumn(statusTable, SWT.NONE);
-//				idColumn.getColumn().setText("Id");
-//				idColumn.getColumn().setWidth(100);
-//				idColumn.setLabelProvider(new ColumnLabelProvider() {
-//					@Override
-//					public String getText(Object element) {
-//						if (element instanceof Entry) {
-//							Object x = ((Entry)element).getKey();
-//							if (x instanceof AssetStation) return ((AssetStation)x).getId();
-//							if (x instanceof AssetStationLocation) return ((AssetStationLocation)x).getId();
-//						}
-//						return "";
-//					}
-//				});
-//				
-//				
-//				DateTimeFormatter form = DateTimeFormatter.ofPattern("dd");
-//				
-//				LocalDate startDate = LocalDate.ofEpochDay(fsstart);
-//				LocalDate endDate = LocalDate.ofEpochDay(fsend);
-//				
-//				while(!startDate.isAfter(endDate)) {
-//					
-//					TableViewerColumn dateColumn = new TableViewerColumn(statusTable, SWT.NONE);
-//					dateColumn.getColumn().setText(form.format(startDate));
-//					dateColumn.getColumn().setToolTipText(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(startDate));
-//					dateColumn.getColumn().setWidth(32);
-//					
-//					long ftime = startDate.toEpochDay();
-//					dateColumn.setLabelProvider(new ColumnLabelProvider() {
-//						@Override
-//						public String getText(Object element) {
-//							return "";
-//						}
-//						@Override
-//						public Color getBackground(Object element) {
-//							if (element instanceof Entry) {
-//								if (((Set<Long>)((Entry)element).getValue()).contains(ftime)) {
-//									return Display.getDefault().getSystemColor(SWT.COLOR_GREEN);
-//								}else {
-//									return Display.getDefault().getSystemColor(SWT.COLOR_RED);
-//								}
-//							}
-//								
-//							return null;
-//						}
-//					});
-//					startDate = startDate.plus(1, ChronoUnit.DAYS);
-//					if (monitor.isCanceled()) return ;
-//					
-//				}
-//				statusTable.setInput(fdata.entrySet());
 			});
 			
 
@@ -551,4 +626,19 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		}
 		
 	};
+	
+	class DefaultAssetMapStyle extends AssetMapStyle {
+		private Style style;
+		
+		public DefaultAssetMapStyle() {
+			super();
+		}
+		
+		public void setStyle(Style style) {
+			this.style = style;
+		}
+		public Style getStyle() {
+			return this.style;
+		}
+	}
 }

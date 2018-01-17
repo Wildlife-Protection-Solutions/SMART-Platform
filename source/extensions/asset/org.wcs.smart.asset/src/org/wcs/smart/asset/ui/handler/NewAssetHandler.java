@@ -265,6 +265,8 @@ public class NewAssetHandler {
 		private void validate() {
 			if (txtId.getText().trim().isEmpty()) {
 				setErrorMessage("An asset id is required.");
+			}else {
+				setErrorMessage(null);
 			}
 		}
 		

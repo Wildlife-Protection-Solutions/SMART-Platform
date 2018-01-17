@@ -168,7 +168,7 @@ public class AssetStationSummaryGeoResource extends IGeoResource implements IFil
     }
 
     
-    public Style getDefaultLayerStyle(){
+    public static Style getDefaultLayerStyle(){
 		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
     	StyleBuilder builder = new StyleBuilder(sf);
     	FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
