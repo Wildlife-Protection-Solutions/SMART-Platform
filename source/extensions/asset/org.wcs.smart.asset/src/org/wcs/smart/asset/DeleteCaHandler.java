@@ -154,6 +154,11 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q = session.createQuery("delete from org.wcs.smart.asset.model.AssetModuleSettings where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
+		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Map Styles ")); //$NON-NLS-1$
+		q = session.createQuery("delete from  AssetMapStyle sa where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
 	}
 	
 	
