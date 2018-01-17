@@ -24,7 +24,7 @@ package org.wcs.smart.connect.query.engine;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.wcs.smart.query.common.engine.NamedPreparedStatement;
+import org.wcs.smart.NamedPreparedStatement;
 
 /**
  * Extension of named prepared statement to support PostgreSQL UUID's

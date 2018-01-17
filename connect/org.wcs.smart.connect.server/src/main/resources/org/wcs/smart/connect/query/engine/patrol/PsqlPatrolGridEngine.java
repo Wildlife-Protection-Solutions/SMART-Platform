@@ -99,7 +99,6 @@ import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBReader;
 
 public class PsqlPatrolGridEngine extends AbstractQueryEngine{

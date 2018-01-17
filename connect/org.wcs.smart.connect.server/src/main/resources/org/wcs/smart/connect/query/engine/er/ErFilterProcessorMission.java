@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.wcs.smart.NamedPreparedStatement;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -47,7 +48,6 @@ import org.wcs.smart.er.query.engine.visitors.AreaFilterVisitor;
 import org.wcs.smart.er.query.engine.visitors.MissionPropertyFilterCollectorVisitor;
 import org.wcs.smart.er.query.engine.visitors.SamplingUnitAttributeFilterCollectorVisitor;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
-import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;

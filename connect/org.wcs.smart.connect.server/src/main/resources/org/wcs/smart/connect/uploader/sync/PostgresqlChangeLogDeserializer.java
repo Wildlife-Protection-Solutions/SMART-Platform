@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -171,6 +172,10 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 				params.add(sdf.format((Date)obj));
 				sb.append("cast(? as timestamp), "); //$NON-NLS-1$
+			}else if (obj instanceof Time) {
+				SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS"); //$NON-NLS-1$
+				params.add(sdf.format((Time)obj));
+				sb.append("cast(? as time without time zone),"); //$NON-NLS-1$
 			}else{
 				sb.append("?, "); //$NON-NLS-1$
 				params.add(obj);
@@ -219,6 +224,10 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 				params.add(sdf.format((Date)obj));
 				values.append("cast(? as timestamp),"); //$NON-NLS-1$
+			}else if (obj instanceof Time) {
+				SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS"); //$NON-NLS-1$
+				params.add(sdf.format((Time)obj));
+				values.append("cast(? as time without time zone),"); //$NON-NLS-1$
 			}else{
 				values.append("?,"); //$NON-NLS-1$
 				params.add(obj);

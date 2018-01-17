@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.wcs.smart.NamedPreparedStatement;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.entity.model.Entity;
@@ -46,7 +47,6 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;

@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import org.wcs.smart.NamedPreparedStatement;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -57,7 +58,6 @@ import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
