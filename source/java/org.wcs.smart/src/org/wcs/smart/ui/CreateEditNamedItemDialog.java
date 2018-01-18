@@ -111,7 +111,7 @@ public class CreateEditNamedItemDialog extends TitleAreaDialog {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent){
 		super.createButtonsForButtonBar(parent);
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		getButton(IDialogConstants.OK_ID).setEnabled(item.getUuid() == null);
 		getButton(IDialogConstants.OK_ID).setText(DialogConstants.SAVE_TEXT);
 	}
 	
