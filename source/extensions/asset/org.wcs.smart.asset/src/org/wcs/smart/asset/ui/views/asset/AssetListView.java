@@ -653,14 +653,14 @@ public class AssetListView {
 					};
 				}
 				assets.addAll(QueryFactory.buildQuery(session, Asset.class, filters).list()); 
-				assets.forEach(a->{a.getAssetType().getUuid().equals(null); a.getAssetType().getName();});
+				assets.forEach(a->{a.getAssetType().getUuid().equals(null); a.getAssetType().getName();a.computeStatus(session);});
 			}
 			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
 			if (!includeInactiveAssets) {
 				for (Iterator<Asset> iterator = assets.iterator(); iterator.hasNext();) {
 					Asset asset = iterator.next();
-					if (asset.getStatus() == Asset.Status.INACTIVE) {
+					if (asset.getCachedStatus() == Asset.Status.INACTIVE) {
 						iterator.remove();
 					}
 				}
@@ -694,13 +694,14 @@ public class AssetListView {
 			List<AssetStation> stations = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
-				stations.forEach(a->{a.getUuid().equals(null); a.getId();});
+				stations.forEach(a->{a.getUuid().equals(null); a.getId(); a.computeStatus(session);});
 				stations.forEach(a->a.getLocations().forEach(l->l.getId()));
+				
 			}
 			if (!includeInactiveStations) {
 				for (Iterator<AssetStation> iterator = stations.iterator(); iterator.hasNext();) {
 					AssetStation station = iterator.next();
-					if (station.getStatus() == Asset.Status.INACTIVE) {
+					if (station.getCachedStatus() == Asset.Status.INACTIVE) {
 						iterator.remove();
 					}
 				}

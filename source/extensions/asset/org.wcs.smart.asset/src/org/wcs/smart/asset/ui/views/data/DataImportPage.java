@@ -702,7 +702,12 @@ public class DataImportPage {
 				pmonitor.beginTask("Processing new files", files.size());
 				for (Path f : files) {
 					pmonitor.subTask(f.toString());
-					processor.addFile(f);
+					processor.addFile(f, new FileProcessor.IConnectionProvider() {
+						@Override
+						public Session openSession() {
+							return HibernateManager.openSession();
+						}
+					});
 					pmonitor.worked(1);
 					if (pmonitor.isCanceled()) break;
 				}

@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.asset.model.mapping;
 
-import org.wcs.smart.asset.AssetPlugIn;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
 
 import com.adobe.xmp.XMPIterator;
@@ -36,6 +38,8 @@ import com.drew.metadata.xmp.XmpDirectory;
  */
 public class XmpMetadataField implements IMetadataField{
 
+	private static Logger logger = Logger.getLogger(XmpMetadataField.class.getCanonicalName());
+	
 	/*
 	 * Metadata path (eg. ns:item) 
 	 */
@@ -125,7 +129,7 @@ public class XmpMetadataField implements IMetadataField{
 				}
 			}
 		}catch (Exception ex) {
-			AssetPlugIn.log(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			return null;
 		}
 		return null;

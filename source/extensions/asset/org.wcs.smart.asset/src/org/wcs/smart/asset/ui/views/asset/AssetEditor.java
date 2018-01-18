@@ -220,7 +220,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 	}
 	
 	public void refreshStatus() {
-		lblStatus.setText(asset.getStatus(true).getGuiName(Locale.getDefault()));
+		lblStatus.setText(asset.getCachedStatus().getGuiName(Locale.getDefault()));
 		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(asset));
 		lblStatus.getParent().layout(true);
 		
@@ -833,7 +833,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 						a.getAttribute().getAttributeList().forEach(l->l.getName());
 					}
 				});
-				
+				asset.computeStatus(session);
 				//update ui
 				Display.getDefault().syncExec(()->{
 					lblAssetType.setText(asset.getAssetType().getName());

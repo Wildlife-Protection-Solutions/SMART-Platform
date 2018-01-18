@@ -168,7 +168,7 @@ public class AssetPropertyPage {
 		fieldEditors = new ArrayList<>();
 		
 		if (lblRetiredState != null) {
-			lblRetiredState.setText(asset.getStatus().getGuiName(Locale.getDefault()));
+			lblRetiredState.setText(asset.getCachedStatus().getGuiName(Locale.getDefault()));
 		}
 		if (changeRetiredState != null) {
 			if (asset.getIsRetired()) {

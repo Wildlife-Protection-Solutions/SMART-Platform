@@ -176,8 +176,8 @@ public class StationEditor extends EditorPart implements MapPart {
 	}
 	
 	private void refreshStatus() {
-		lblStatus.setText(station.getStatus().getGuiName(Locale.getDefault()));
-		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(station.getStatus()));
+		lblStatus.setText(station.getCachedStatus().getGuiName(Locale.getDefault()));
+		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(station.getCachedStatus()));
 		lblStatus.getParent().layout(true);
 	}
 
@@ -607,6 +607,7 @@ public class StationEditor extends EditorPart implements MapPart {
 				if (station == null) {
 					throw new Exception("Station not found; could not initialize element controls");
 				}
+				station.computeStatus(session);
 				if (station.getAttributeValues() == null) {
 					station.setAttributeValues(new ArrayList<>());
 				}else {

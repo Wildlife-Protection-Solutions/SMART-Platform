@@ -24,6 +24,8 @@ package org.wcs.smart.asset;
 import java.text.Collator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
@@ -43,6 +45,8 @@ import org.wcs.smart.hibernate.QueryFactory;
  *
  */
 public class AssetHibernateManager {
+	
+	private static Logger logger = Logger.getLogger(AssetHibernateManager.class.getCanonicalName());
 	
 	public static AssetAttribute getAttribute(String keyId, ConservationArea ca, Session session){ 
 		return QueryFactory.buildQuery(session, AssetAttribute.class, 
@@ -122,7 +126,7 @@ public class AssetHibernateManager {
 			Double d = Double.valueOf(setting.getValue());
 			return d;
 		}catch (Exception ex) {
-			AssetPlugIn.log(ex.getMessage(),  ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 		}
 		return AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE;
 	}
@@ -145,7 +149,7 @@ public class AssetHibernateManager {
 			Double d = Double.valueOf(setting.getValue());
 			return d;
 		}catch (Exception ex) {
-			AssetPlugIn.log(ex.getMessage(),  ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 		}
 		return AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE;
 	}

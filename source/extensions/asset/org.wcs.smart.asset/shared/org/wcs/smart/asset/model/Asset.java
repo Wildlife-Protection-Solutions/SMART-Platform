@@ -37,7 +37,6 @@ import javax.persistence.Transient;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
 /**
@@ -179,22 +178,6 @@ public class Asset extends UuidItem {
 	public void setIsRetired(Boolean isRetired) {
 		this.isRetired = isRetired;
 	}
-
-
-
-	/**
-	 * Get the status value;  will returned
-	 * cached value if applicable. 
-	 * 
-	 * @return status
-	 */
-	@Transient
-	public Status getStatus() {
-		if (this.status == null) {
-			computeStatus();
-		}
-		return this.status;
-	}
 	
 	/**
 	 * Get the status value; recomputing from database
@@ -202,14 +185,17 @@ public class Asset extends UuidItem {
 	 * @return status
 	 */
 	@Transient
-	public Status getStatus(boolean refresh) {
-		if (this.status == null || refresh) {
-			computeStatus();
+	public Status getCachedStatus() {
+		if (this.status == null) {
+			throw new IllegalStateException("Status not yet computed.  You must call computeStatus(session) before you can retreive the status.");
 		}
 		return this.status;
 	}
 	
-	private void computeStatus() {
+	/**
+	 * Compute the status of the asset
+	 */
+	public void computeStatus(Session session) {
 		if (getUuid() == null) {
 			status = Status.INACTIVE;
 			return;
@@ -217,15 +203,14 @@ public class Asset extends UuidItem {
 			status = Status.RETIRED;
 			return;
 		}
-		try(Session s = HibernateManager.openSession()){
-			Long activeDeployments = QueryFactory.buildCountQuery(s, AssetDeployment.class, 
-					new Object[] {"asset", this}, //$NON-NLS-1$
-					new Object[] {"endDate", null}); //$NON-NLS-1$
-			if (activeDeployments == 0) {
-				status = Status.INACTIVE;
-			}else {
-				status = Status.ACTIVE;
-			}
+		
+		Long activeDeployments = QueryFactory.buildCountQuery(session, AssetDeployment.class, 
+				new Object[] {"asset", this}, //$NON-NLS-1$
+				new Object[] {"endDate", null}); //$NON-NLS-1$
+		if (activeDeployments == 0) {
+			status = Status.INACTIVE;
+		}else {
+			status = Status.ACTIVE;
 		}
 	}
 }

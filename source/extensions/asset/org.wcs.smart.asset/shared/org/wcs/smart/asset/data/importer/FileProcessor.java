@@ -47,7 +47,6 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -77,7 +76,7 @@ public class FileProcessor {
 		this.files = new ArrayList<>();
 	}
 	
-	public void addFile(Path file) {
+	public void addFile(Path file, IConnectionProvider provider) {
 		for (FileProxy p : files) {
 			if (p.getFile().equals(file)) return;
 			//file already exists return null
@@ -85,7 +84,7 @@ public class FileProcessor {
 		List<FileProxy> addedProxies = new ArrayList<>();
 		try {
 			FileProxy proxy = FileMetadataReader.readFile(file, ca);
-			try(Session session = HibernateManager.openSession()){
+			try(Session session = provider.openSession()){
 				processMetadata(proxy, session);
 				proxy.updateStationLocation(session, this);
 			}
@@ -838,4 +837,17 @@ public class FileProcessor {
 		newDeployment.setStationLocation(location);
 		return newDeployment;
 	}
+	
+	/**
+	 * For providing database session to file processor
+	 * @author Emily
+	 *
+	 */
+	public interface IConnectionProvider {
+		/**
+		 * Opens a new database session.  It is up to the user to close the session when they are done with it.
+		 * @return
+		 */
+		public Session openSession();
+	};
 }

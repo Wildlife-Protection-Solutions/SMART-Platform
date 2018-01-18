@@ -37,7 +37,7 @@ import org.wcs.smart.asset.model.AssetWaypointSource;
 public class AssetCoreLabelProvider implements IAssetLabelProvider {
 
 	public static Image getStatusImage(Asset asset) {
-		return getStatusImage(asset.getStatus());
+		return getStatusImage(asset.getCachedStatus());
 	}
 	
 	public static Image getStatusImage(Asset.Status status) {

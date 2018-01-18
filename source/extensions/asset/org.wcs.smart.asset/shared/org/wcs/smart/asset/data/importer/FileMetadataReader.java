@@ -27,8 +27,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.ca.ConservationArea;
 
 import com.adobe.xmp.XMPIterator;
@@ -50,6 +52,8 @@ import com.drew.metadata.xmp.XmpDirectory;
  */
 public class FileMetadataReader {
 
+	private static Logger logger = Logger.getLogger(XmpMetadataField.class.getCanonicalName());
+	
 	/**
 	 * Create file proxy from the file for the given conservation area
 	 * @param file
@@ -112,7 +116,7 @@ public class FileMetadataReader {
 						xmpMetadata.add(new String[] {info.getPath(), info.getValue()});
 				}
 			}catch (Exception ex) {
-				AssetPlugIn.log(ex.getMessage(),  ex);
+				logger.log(Level.WARNING, ex.getMessage(), ex);
 			}
 		}
 		return xmpMetadata;
@@ -138,7 +142,7 @@ public class FileMetadataReader {
 			}
 			return results;
 		}catch (Exception ex) {
-			ex.printStackTrace();
+			logger.log(Level.WARNING,ex.getMessage(),ex);
 			return null;
 		}
 	}

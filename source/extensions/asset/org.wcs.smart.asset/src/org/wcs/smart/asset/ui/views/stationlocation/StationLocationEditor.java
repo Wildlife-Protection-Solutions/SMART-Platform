@@ -185,8 +185,8 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 	}
 	
 	private void refreshStatus() {
-		lblStatus.setText(stationlocation.getStatus().getGuiName(Locale.getDefault()));
-		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(stationlocation.getStatus()));
+		lblStatus.setText(stationlocation.getCachedStatus().getGuiName(Locale.getDefault()));
+		lblStatusImage.setImage(AssetCoreLabelProvider.getStatusImage(stationlocation.getCachedStatus()));
 		lblStatus.getParent().layout(true);
 	}
 	
@@ -554,6 +554,8 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 				});
 				stationlocation.getStation().getId();
 				stationlocation.getStation().getUuid().equals(null);
+				stationlocation.getStation().computeStatus(session);
+				stationlocation.computeStatus(session);
 				
 				Display.getDefault().syncExec(()->{
 					//update uid

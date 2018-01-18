@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.asset.data.importer;
 
-
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -41,8 +40,8 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -505,7 +504,7 @@ public class FileProxy extends ISmartAttachment{
 			Double bestDistance = null;
 			for (AssetStation s : stations) {
 				try {
-					double distance = JTS.orthodromicDistance(imagePosition, new Coordinate(s.getX(), s.getY()), SmartDB.DATABASE_CRS);
+					double distance = JTS.orthodromicDistance(imagePosition, new Coordinate(s.getX(), s.getY()), GeometryUtils.SMART_CRS);
 					if (bestDistance == null || distance < bestDistance) {
 						bestDistance = distance;
 						matching = s;
@@ -542,7 +541,7 @@ public class FileProxy extends ISmartAttachment{
 		Double bestDistance = null;
 		for (AssetStationLocation location : station.getLocations()) {
 			try {
-				double distance = JTS.orthodromicDistance(imagePosition, new Coordinate(location.getX(), location.getY()), SmartDB.DATABASE_CRS);
+				double distance = JTS.orthodromicDistance(imagePosition, new Coordinate(location.getX(), location.getY()), GeometryUtils.SMART_CRS);
 				if (bestDistance == null || distance < bestDistance) {
 					bestDistance = distance;
 					matching = location;

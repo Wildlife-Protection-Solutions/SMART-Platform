@@ -380,6 +380,7 @@ public class AssetDeploymentPage {
 			session.beginTransaction();
 			try {
 				session.saveOrUpdate(newDeployment);
+				parentEditor.getAsset().computeStatus(session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -440,7 +441,7 @@ public class AssetDeploymentPage {
 					session.flush();
 					session.delete(d);
 				}
-				
+				parentEditor.getAsset().computeStatus(session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -474,6 +475,7 @@ public class AssetDeploymentPage {
 				session.getTransaction().rollback();
 				AssetPlugIn.displayLog("Unable to save changes to asset deployments.  Close editor and try again. " + ex.getMessage(), ex);
 			}
+			parentEditor.getAsset().computeStatus(session);
 		}
 		parentEditor.fireAssetModified(false);
 		sortDeployments();

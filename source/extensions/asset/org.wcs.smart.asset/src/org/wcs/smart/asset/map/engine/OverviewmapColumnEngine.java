@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetStation;
@@ -174,9 +173,13 @@ public class OverviewmapColumnEngine {
 				if (sd == null) {
 					sd = new StationData(entry.getKey());
 					if (groupBy == GroupByOption.STATION) {
-						sd.setAssetStationObject(session.get(AssetStation.class, sd.getKeyUuid()));
+						AssetStation station = (AssetStation)session.get(AssetStation.class, sd.getKeyUuid());
+						station.computeStatus(session);
+						sd.setAssetStationObject(station);
 					}else if (groupBy == GroupByOption.LOCATION) {
-						sd.setAssetLocationObject(session.get(AssetStationLocation.class, sd.getKeyUuid()));
+						AssetStationLocation l = (AssetStationLocation)session.get(AssetStationLocation.class, sd.getKeyUuid());
+						l.computeStatus(session);
+						sd.setAssetLocationObject(l);
 					}
 					data.add(sd);
 					map.put(sd.getKeyUuid(), sd);

@@ -81,12 +81,12 @@ public class FixedColumn implements IOverviewTableColumn{
 	@Override
 	public Object getValue(StationData data) {
 		if (this.column == Column.STATUS) {
-			if (data.getStation() != null) return data.getStation().getStatus().getGuiName(Locale.getDefault());
-			if (data.getStationLocation() != null) return data.getStationLocation().getStatus().getGuiName(Locale.getDefault());
+			if (data.getStation() != null) return data.getStation().getCachedStatus().getGuiName(Locale.getDefault());
+			if (data.getStationLocation() != null) return data.getStationLocation().getCachedStatus().getGuiName(Locale.getDefault());
 			return "unknown";
 		}else if (this.column == Column.STATUS_KEY) {
-			if (data.getStation() != null) return data.getStation().getStatus().name();
-			if (data.getStationLocation() != null) return data.getStationLocation().getStatus().name();
+			if (data.getStation() != null) return data.getStation().getCachedStatus().name();
+			if (data.getStationLocation() != null) return data.getStationLocation().getCachedStatus().name();
 			return "UNKNOWN";
 		}else if (this.column == Column.ID) {
 			return data.getIdField();

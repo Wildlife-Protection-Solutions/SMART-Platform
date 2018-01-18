@@ -47,6 +47,7 @@ public class StatusEngine {
 				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
 		
 		for (AssetStation ss : stations) {
+			ss.computeStatus(session);
 			for (AssetStationLocation l : ss.getLocations()) {
 				if (data.containsKey(l)) continue;
 				data.put(l, new HashSet<>());
@@ -82,7 +83,7 @@ public class StatusEngine {
 					endDate = new java.sql.Date( d.getEndDate().getTime() ).toLocalDate();
 				}
 				
-				T s = (T) getId(d, isStation);
+				T s = (T) getId(d, isStation, session);
 				Set<Long> items = data.get(s);
 				if (items == null) {
 					items = new HashSet<>();
@@ -98,8 +99,9 @@ public class StatusEngine {
 		return data;
 	}
 
-	private Object getId(AssetDeployment d, boolean isStation) {
-		
+	private Object getId(AssetDeployment d, boolean isStation, Session session) {
+		d.getStationLocation().computeStatus(session);
+		d.getStationLocation().getStation().computeStatus(session);
 		if (isStation) return d.getStationLocation().getStation();
 		return d.getStationLocation();
 	}

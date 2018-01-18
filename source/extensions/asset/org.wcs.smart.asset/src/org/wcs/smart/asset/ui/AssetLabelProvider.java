@@ -56,10 +56,10 @@ public class AssetLabelProvider extends LabelProvider{
 			return AssetCoreLabelProvider.getStatusImage((Asset)element);
 		}
 		if (element instanceof AssetStation) {
-			return AssetCoreLabelProvider.getStatusImage(((AssetStation)element).getStatus());
+			return AssetCoreLabelProvider.getStatusImage(((AssetStation)element).getCachedStatus());
 		}
 		if (element instanceof AssetStationLocation) {
-			return AssetCoreLabelProvider.getStatusImage(((AssetStationLocation)element).getStatus());
+			return AssetCoreLabelProvider.getStatusImage(((AssetStationLocation)element).getCachedStatus());
 		}
 		return super.getImage(element);
 	}

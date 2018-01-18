@@ -423,5 +423,11 @@
          </require>
       </templateCloner>
    </extension>
+   <extension
+         point="org.wcs.smart.changeLogInstaller">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.asset.plugin.ChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
 
 </plugin>
