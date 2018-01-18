@@ -415,6 +415,11 @@ public class Messages extends NLS {
 	public static String CreateCaWizard_ErrorCopyInfo;
 	public static String CreateCaWizard_ErrorCreateFromTemplate;
 	public static String CreateCaWizard_WziardName;
+	public static String CreateEditNamedItemDialog_Name;
+	public static String CreateEditNamedItemDialog_ReloadObjectJob_Error;
+	public static String CreateEditNamedItemDialog_ReloadObjectJob_Title;
+	public static String CreateEditNamedItemDialog_SaveObjectJob_Error;
+	public static String CreateEditNamedItemDialog_SaveObjectJob_Title;
 	public static String CrossCaView_Header;
 	public static String CrossCaView_Message1;
 	public static String CrossCaView_Message2;
@@ -1226,6 +1231,10 @@ public class Messages extends NLS {
 	public static String TracksComposite_View;
 	public static String TracksComposite_View_Tooltip;
 	public static String TracksComposite_ZoomTo;
+	public static String TranslateNameComposite_Button_Translate;
+	public static String TranslateNameComposite_EmptyError;
+	public static String TranslateNameComposite_ErrorDialog_Title;
+	public static String TranslateNameComposite_MaxLengthError;
 	public static String TranslateNamesHandler_Error_TranslatingName;
 	public static String TranslateSimpleListItemDialog_DialogMessage;
 	public static String TranslateSimpleListItemDialog_DialogTitle;
