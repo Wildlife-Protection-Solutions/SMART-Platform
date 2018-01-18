@@ -806,6 +806,12 @@ public class Messages extends NLS {
 	public static String ExportMapWizardPage_WidthLabel;
 	public static String FilterComposite_ClearButton_Tooltip;
 	public static String FilterComposite_Default_SearchText;
+	public static String FolderCreateEditDialog_Message;
+	public static String FolderCreateEditDialog_Name_Label;
+	public static String FolderCreateEditDialog_Name_Tooltip;
+	public static String FolderCreateEditDialog_Title;
+	public static String FolderTreeDropListener_SaveJob_Error;
+	public static String FolderTreeDropListener_SaveJob_Title;
 	public static String GpsBabelPreferencePage_CouldNotUpdate;
 	public static String GpsBabelPreferencePage_FileNotFound;
 	public static String GpsBabelPreferencePage_ProgramLocLabel;
