@@ -121,7 +121,6 @@ public abstract class AssetDataPanel {
 
 	public static final String ICON_SIZE_PREF = DataImporterView.ID + "org.wcs.smart.asset.ui.data.AssetDataPanel.iconsize"; //$NON-NLS-1$
 
-	
 	private FormToolkit toolkit;
 	private IEclipseContext context;
 	
@@ -148,6 +147,8 @@ public abstract class AssetDataPanel {
 	private boolean hideOnValidate = true;
 	private boolean canValidate = true;
 	
+	private Asset asset;
+	
 	public AssetDataPanel(FormToolkit toolkit, boolean isEditable, boolean editState, boolean hideOnValidation, boolean canValidate, IEclipseContext context) {
 		this.toolkit = toolkit;
 		this.isEdit = editState;
@@ -156,6 +157,16 @@ public abstract class AssetDataPanel {
 		this.hideOnValidate = hideOnValidation;
 		this.canValidate = canValidate;
 		displaySettings = DataDisplaySettings.getSettings();
+	}
+	
+	/**
+	 * If this data panel is specific to an asset, set that asset here.  Waypoints with attachments from
+	 * multiple assets will display the asset name for attachments that are not directly associated
+	 * with this asset.
+	 * @param asset
+	 */
+	public void setAsset(Asset asset) {
+		this.asset = asset;
 	}
 	
 	public boolean isEdit() {
@@ -1344,21 +1355,72 @@ public abstract class AssetDataPanel {
 			((GridLayout)wppart.getLayout()).marginHeight = 0;
 			
 			
-			List<ISmartAttachment> files = new ArrayList<>();
-			if (waypoint.getWaypoint().getAttachments() != null) {
-				waypoint.getWaypoint().getAttachments().forEach(a->files.add(a));
-			}
-			if (waypoint.getWaypoint().getObservations() != null) {
-				waypoint.getWaypoint().getObservations().forEach(o->{
-					if (o.getAttachments() != null) {
-						o.getAttachments().forEach(a->files.add(a));
+			if (AssetDataPanel.this.asset == null) {
+				List<ISmartAttachment> assetFiles = new ArrayList<>();
+				List<ISmartAttachment> otherFiles = new ArrayList<>();
+				
+				if (waypoint.getWaypoint().getAttachments() != null) {
+					for (AssetWaypoint aw : waypoint.getAssetLinks()) {
+						for (AssetWaypointAttachment a : aw.getAttachments()) {
+							if (aw.getAssetDeployment().getAsset().equals(asset)) {
+								assetFiles.add(a.getWaypointAttachment());
+							}else {
+								otherFiles.add(a.getWaypointAttachment());
+							}
+						}
 					}
-				});
+				}
+				if (waypoint.getWaypoint().getObservations() != null) {
+					waypoint.getWaypoint().getObservations().forEach(o->{
+						if (o.getAttachments() != null) {
+							o.getAttachments().forEach(a->otherFiles.add(a));
+						}
+					});
+				}
+				
+				List<ISmartAttachment> allFiles = new ArrayList<>();
+				allFiles.addAll(assetFiles);
+				allFiles.addAll(otherFiles);
+				tt = new AttachmentTable(wppart, toolkit, getAttachmentTableMenu(), allFiles, displaySettings.getIconSize().getSize());
+			}else {
+				List<ISmartAttachment> assetFiles = new ArrayList<>();
+				List<ISmartAttachment> otherFiles = new ArrayList<>();
+				
+				HashMap<ISmartAttachment,String> otherAssets = new HashMap<>();
+				if (waypoint.getWaypoint().getAttachments() != null) {
+					for (AssetWaypoint aw : waypoint.getAssetLinks()) {
+						for (AssetWaypointAttachment a : aw.getAttachments()) {
+							if (aw.getAssetDeployment().getAsset().equals(asset)) {
+								assetFiles.add(a.getWaypointAttachment());
+							}else {
+								otherFiles.add(a.getWaypointAttachment());
+								otherAssets.put(a.getWaypointAttachment(), aw.getAssetDeployment().getAsset().getId());
+							}
+						}
+					}
+				}
+				if (waypoint.getWaypoint().getObservations() != null) {
+					waypoint.getWaypoint().getObservations().forEach(o->{
+						if (o.getAttachments() != null) {
+							o.getAttachments().forEach(a->otherFiles.add(a));
+						}
+					});
+				}
+				
+				List<ISmartAttachment> allFiles = new ArrayList<>();
+				allFiles.addAll(assetFiles);
+				allFiles.addAll(otherFiles);
+				
+				tt = new AttachmentTable(wppart, toolkit, getAttachmentTableMenu(), allFiles, displaySettings.getIconSize().getSize()) {
+					@Override
+					protected String getWatermark(ISmartAttachment file) {
+						if (otherFiles.contains(file)) {
+							return otherAssets.get(file);
+						}
+						return null;
+					}
+				};
 			}
-			
-			
-			tt = new AttachmentTable(wppart, toolkit, getAttachmentTableMenu(), files, displaySettings.getIconSize().getSize());
-
 			tt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			((GridData)tt.getLayoutData()).widthHint = displaySettings.getIconSize().getSize()*2+20;
 					

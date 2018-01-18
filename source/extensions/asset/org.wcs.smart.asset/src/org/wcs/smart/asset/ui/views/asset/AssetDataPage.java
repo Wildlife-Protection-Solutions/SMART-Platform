@@ -78,6 +78,7 @@ public class AssetDataPage {
 				reloadData();
 			}
 		};
+		dataPanel.setAsset(parentEditor.getAsset());
 		
 		mainControl = toolkit.createComposite(parent, SWT.NONE);
 		mainControl.setLayout(new GridLayout());

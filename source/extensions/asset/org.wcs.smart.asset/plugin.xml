@@ -397,6 +397,7 @@
       <editor
             class="org.wcs.smart.asset.ui.views.map.AssetOverviewMap"
             default="false"
+            icon="images/icons/obj16/map.png"
             id="org.wcs.smart.asset.overviewmap"
             name="Asset Overview Map">
       </editor>

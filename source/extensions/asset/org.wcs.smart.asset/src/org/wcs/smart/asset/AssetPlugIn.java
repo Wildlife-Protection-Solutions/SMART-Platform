@@ -65,6 +65,8 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public static final String ICON_MERGE = "org.wcs.smart.asset.merge";
 	public static final String ICON_IMPORT_FILE = "org.wcs.smart.asset.import.file";
 	
+	public static final String ICON_STYLE_DEFAULT = "org.wcs.smart.asset.style.default";
+	
 	/**
 	 * The constructor
 	 */
@@ -142,5 +144,6 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		reg.put(ICON_VALIDATE_ALL, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/validate_all.png")); //$NON-NLS-1$);
 		reg.put(ICON_MERGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/merge.png")); //$NON-NLS-1$);
 		reg.put(ICON_IMPORT_FILE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/import_file.png")); //$NON-NLS-1$);
+		reg.put(ICON_STYLE_DEFAULT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style_default.png")); //$NON-NLS-1$);
 	}
 }

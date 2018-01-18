@@ -35,8 +35,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -48,10 +46,12 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
+import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -60,6 +60,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPersistableElement;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
@@ -74,6 +76,7 @@ import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.style.sld.SLDContent;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.map.engine.StatusEngine;
@@ -120,7 +123,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		public boolean exists() { return false; }
 	};
 	
-	private ComboViewer cmbStyles;
+	private TableComboViewer cmbStyles;
 	
 	private DateFilterDropDownComposite dateFilters;
 	private TableViewer summaryTable;
@@ -132,6 +135,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	
 	private List<ILayer> mapLayers;
 	private GroupByOption currentGroupByOption = GroupByOption.STATION;
+	private AssetMapStyle lastStyle = null;
 	
 	private OverviewmapColumnEngine statEngine = new OverviewmapColumnEngine() {
 		
@@ -211,10 +215,9 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			}
 		});
 		
-		combo = new CCombo(headerPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
-		combo.setBackground(combo.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		cmbStyles = new ComboViewer(combo);
+		cmbStyles = new TableComboViewer(headerPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		cmbStyles.getControl().setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		((GridData)(cmbStyles.getControl().getLayoutData())).widthHint = cmbSummarizeBy.getControl().getBounds().width;
 		cmbStyles.getControl().setToolTipText("Select to change map styles for asset data");
 		cmbStyles.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStyles.setInput(IOverviewTableColumn.GroupByOption.values());
@@ -223,15 +226,30 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 				if (element instanceof AssetMapStyle) return ((AssetMapStyle) element).getName();
 				return super.getText(element);
 			}
-		});
-		cmbStyles.setInput(DialogConstants.LOADING_TEXT);
-		cmbStyles.addSelectionChangedListener(new ISelectionChangedListener() {		
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				updateStyle();
+			public Image getImage(Object element) {
+				if (element instanceof DefaultAssetMapStyle) return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STYLE_ICON); //return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STYLE_DEFAULT);
+				if (element instanceof AssetMapStyle) return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STYLE_ICON);
+				if (element == MANAGE_STYLES) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_SETTINGS);
+				if (element == SAVE_STYLES) return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT);
+				return null;
+				
+					
 			}
 		});
-		
+		cmbStyles.setInput(DialogConstants.LOADING_TEXT);
+		cmbStyles.addSelectionChangedListener(new ISelectionChangedListener() {
+			boolean doSelection = false;
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (doSelection) return;
+				doSelection = true;
+				try {
+					updateStyle();
+				}finally {
+					doSelection = false;
+				}
+			}
+		});	
 		
 		Composite innerPart = toolkit.createComposite(mapPart, SWT.NONE);
 		innerPart.setLayout(new GridLayout());
@@ -370,7 +388,10 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	}
 	
 	private void manageStyles() {
-		
+		MapStyleListDialog dialog = new MapStyleListDialog(getSite().getShell());
+		if (dialog.open() == Window.OK) {
+			loadStylesJob.schedule();
+		}
 	}
 	
 	private void saveStyle() {
@@ -382,12 +403,11 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		StyleBlackboard sb = (StyleBlackboard)mapLayers.get(0).getStyleBlackboard();
 		MapStyleDialog dialog = new MapStyleDialog(getSite().getShell(), toUpdate, sb);
 		if (dialog.open() == Window.OK) {
+			lastStyle = dialog.getModifiedStyle();
 			cmbStyles.setInput(DialogConstants.LOADING_TEXT);
 			loadStylesJob.schedule();
 		}
 	}
-	
-	private AssetMapStyle lastStyle = null;
 	
 	private void updateStyle() {
 		if (mapLayers == null || mapLayers.isEmpty()) return;
@@ -395,15 +415,18 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		Object x = cmbStyles.getStructuredSelection().getFirstElement();
 		if (x == SAVE_STYLES) {
 			saveStyle();
+			cmbStyles.setSelection(new StructuredSelection(lastStyle));
 			return;
 		}else if (x == MANAGE_STYLES) {
 			manageStyles();
+			cmbStyles.setSelection(new StructuredSelection(lastStyle));
 			return;
 		}
 		AssetMapStyle style = null;
 		if (x instanceof AssetMapStyle) {
 			style = (AssetMapStyle)x;
 		}else {
+			cmbStyles.setSelection(new StructuredSelection(lastStyle));
 			return;
 		}
 		lastStyle = style;
@@ -428,9 +451,9 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			}catch (Exception ex) {
 				AssetPlugIn.displayLog("Unable to parse saved style. " + ex.getMessage(), ex);
 			}
-			
 		}
 	}
+	
 	private void createStatusTablePart() {
 		canvas = new StatusCanvas(statusTableComposite);
 		canvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
@@ -464,16 +487,22 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> styles = new ArrayList<>();
 			styles.addAll(getDefaultMapStyles());
-			lastStyle = (AssetMapStyle) styles.get(0);
+			if (lastStyle == null) lastStyle = (AssetMapStyle) styles.get(0);
 			try(Session session = HibernateManager.openSession()){
 				styles.addAll(QueryFactory.buildQuery(session, AssetMapStyle.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
 			}
-			styles.add("---------- Actions ------------");
+			styles.add("--- Actions ---");
 			styles.add(SAVE_STYLES);
 			styles.add(MANAGE_STYLES);
 			Display.getDefault().syncExec(()->{
 				cmbStyles.setInput(styles);
+				if (lastStyle != null && styles.contains(lastStyle)) {
+					cmbStyles.setSelection(new StructuredSelection(lastStyle));
+				}else {
+					cmbStyles.setSelection(new StructuredSelection(styles.get(0)));
+				}
+				
 			});
 			return Status.OK_STATUS;
 		}

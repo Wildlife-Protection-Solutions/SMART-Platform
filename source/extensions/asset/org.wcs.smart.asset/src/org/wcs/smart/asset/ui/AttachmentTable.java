@@ -29,6 +29,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
@@ -210,6 +211,10 @@ public class AttachmentTable extends Composite {
 		
 	}
 	
+	protected String getWatermark(ISmartAttachment file) {
+		return null;
+	}
+	
 	private void fireSelectionEvents(Event event) {
 		for (Listener l : AttachmentTable.this.getListeners(SWT.Selection)) {
 			l.handleEvent(event);
@@ -310,6 +315,12 @@ public class AttachmentTable extends Composite {
 					event.gc.setForeground(toolkit.getColors().getBorderColor());
 					event.gc.setLineWidth(2);
 					event.gc.drawRectangle(0, 0, thumbGui.getClientArea().width, thumbGui.getClientArea().height);
+				}
+				String mark = getWatermark(file);
+				if (mark != null) {
+					Point bounds = event.gc.textExtent(mark);
+					int x = (int)Math.round(( thumbGui.getClientArea().width - bounds.x ) / 2.0 );
+					event.gc.drawText(mark, x, thumbGui.getClientArea().height - bounds.y - 5);
 				}
 			}
 		}
