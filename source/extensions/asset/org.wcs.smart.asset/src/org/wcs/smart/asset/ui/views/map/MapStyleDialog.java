@@ -164,6 +164,7 @@ public class MapStyleDialog extends TitleAreaDialog {
 		txtName = new Text(main, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtName.addListener(SWT.Modify, e->validate());
+		txtName.setTextLimit(AssetMapStyle.MAX_NAME_LENGTH);
 		
 		btnOverride= new Button(main, SWT.RADIO);
 		btnOverride.setText("Override:");

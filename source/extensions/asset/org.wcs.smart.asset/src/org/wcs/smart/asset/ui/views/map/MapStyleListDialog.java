@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.ui.views.map;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -124,11 +125,12 @@ public class MapStyleListDialog extends TitleAreaDialog {
 			@Override
 			public String isValid(String newText) {
 				if (newText == null || newText.trim().isEmpty()) return "A name must be provided.";
+				if (newText.trim().length() > AssetMapStyle.MAX_NAME_LENGTH) return MessageFormat.format("Name must be fewer than {0} characters.", AssetMapStyle.MAX_NAME_LENGTH);
 				return null;
 			}
 		});
 		if (nameDialog.open() != Window.OK) return;
-		String newName = nameDialog.getValue();
+		String newName = nameDialog.getValue().trim();
 		toEdit.setName(newName);
 		cmbStyles.refresh();
 		

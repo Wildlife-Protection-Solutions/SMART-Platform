@@ -20,6 +20,8 @@ import org.wcs.smart.ca.UuidItem;
 @Entity(name="smart.asset_map_style")
 public class AssetMapStyle extends UuidItem{
 
+	public static final int MAX_NAME_LENGTH = 1024;
+	
 	private String name;
 	private ConservationArea conservationArea;
 	private String styleString;
