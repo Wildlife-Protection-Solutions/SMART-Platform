@@ -32,10 +32,13 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.IFolder;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.common.folder.NoneFolder;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.DateGroupBy.Type;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
@@ -84,6 +87,8 @@ public class PatrolTreeLabelProvider extends ColumnLabelProvider {
 			}else if (((DateGroupBy)element).getType() == Type.YEAR){
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.YEAR_ICON);
 			}
+		}else if (element instanceof IFolder) {
+			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_FOLDER_ICON);
 		}
 		return super.getImage(element);
 	}
@@ -98,6 +103,8 @@ public class PatrolTreeLabelProvider extends ColumnLabelProvider {
 			return ((PatrolType.Type) element).getGuiName(Locale.getDefault());
 		}else if (element instanceof DateGroupBy){
 			return ((DateGroupBy)element).getLabel();
+		}else if (element == NoneFolder.INSTANCE) {
+			return Messages.PatrolListView_NoneFolder_Name;
 		}
 		return super.getText(element);
 	}

@@ -44,6 +44,7 @@ import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.IFolderItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.util.SharedUtils;
@@ -57,7 +58,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 @Entity
 @Table(name="smart.patrol")
-public class Patrol extends UuidItem {
+public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 
 	/**
 	 * Location of patrol data in the filestore
@@ -95,6 +96,7 @@ public class Patrol extends UuidItem {
 	private Date startDate;
 	private Date endDate;
 	private String comment;
+	private PatrolFolder parentFolder;
 	
 	
 	private List<PatrolLeg> legs;
@@ -206,6 +208,14 @@ public class Patrol extends UuidItem {
 		this.legs = legs;
 	}
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="folder_uuid", referencedColumnName="uuid")
+	public PatrolFolder getParentFolder() {
+		return parentFolder;
+	}
+	public void setParentFolder(PatrolFolder parentFolder) {
+		this.parentFolder = parentFolder;
+	}
 	
 	/**
 	 * Gets the first leg associated with the patrol.  If

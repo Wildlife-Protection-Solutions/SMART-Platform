@@ -46,6 +46,7 @@ public class Messages extends NLS {
 	public static String DateComposite_Title;
 	public static String DateComposite_WarnMessage;
 	public static String DateComposite_WarnTitle;
+	public static String DeletePatrolFoldersJob_Title;
 	public static String DeletePatrolHandler_ConfirmDeletePatrol_DialogMessage;
 	public static String DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle;
 	public static String DeletePatrolHandler_DeleteErrorMessage;
@@ -301,6 +302,11 @@ public class Messages extends NLS {
 	public static String PatrolFilterDialog_SaveDefaultTooltip;
 	public static String PatrolFilterDialog_SortByOption;
 	public static String PatrolFilteredComboViewerComposite_Filter_Tooltip;
+	public static String PatrolFolderGroupingContentBuilder_SortFoldersJob_Error;
+	public static String PatrolFolderTreeDropListener_MovePatrolJob_Error;
+	public static String PatrolFolderTreeDropListener_MovePatrolJob_Title;
+	public static String PatrolFolderTreeDropListener_UnexpectedSource;
+	public static String PatrolFolderTreeDropListener_UnexpectedTarget;
 	public static String PatrolGpsImportEngine_NotracksFound;
 	public static String PatrolGpxImportEngine_NotAllTracksImported;
 	public static String PatrolGpxImportEngine_NotracksFound;
@@ -473,8 +479,16 @@ public class Messages extends NLS {
 	public static String PatrolLegTable_LegTranportType_ColumnName;
 	public static String PatrolLegTable_Mandate_ColumnName;
 	public static String PatrolListView_CollapseAllOp;
+	public static String PatrolListView_CreateFolderOp;
+	public static String PatrolListView_DefaultFolderName;
+	public static String PatrolListView_DeleteFolderConfirm_Message;
+	public static String PatrolListView_DeleteFolderConfirm_Title;
+	public static String PatrolListView_DeleteFolderOp;
+	public static String PatrolListView_DeleteFoldersJob_Error;
+	public static String PatrolListView_EditFolderOp;
 	public static String PatrolListView_ExpandAllOp;
 	public static String PatrolListView_LoadingLabel;
+	public static String PatrolListView_NoneFolder_Name;
 	public static String PatrolListView_Progress_LoadingPatrols;
 	public static String PatrolListView_UpdatePatrolJobName;
 	public static String PatrolManager_Error_CouldNotDeleteFilestore;
@@ -618,6 +632,10 @@ public class Messages extends NLS {
 	public static String PatrolTreeContentProvider_NoneOption;
 	public static String PatrolTreeContentProvider_NoStationLabel;
 	public static String PatrolTreeContentProvider_NoTeamLabel;
+	public static String PatrolTreeContentProvider_SortMandateJob_Error;
+	public static String PatrolTreeContentProvider_SortStationJob_Error;
+	public static String PatrolTreeContentProvider_SortTeamJob_Error;
+	public static String PatrolTreeContentProvider_SortTransportJob_Error;
 	public static String PatrolTreeContentProvider_StationOption;
 	public static String PatrolTreeContentProvider_TeamOption;
 	public static String PatrolTreeContentProvider_TransportOption;

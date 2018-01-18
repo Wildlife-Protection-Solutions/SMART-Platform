@@ -54,6 +54,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolFolder;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -542,4 +543,21 @@ public class PatrolHibernateManager extends HibernateManager{
 		PatrolWaypoint pw = session.createQuery(c).uniqueResult();
 		return pw;
 	}
+	
+	/**
+	 * Returns root {@link PatrolFolder} objects
+	 * 
+	 * @param session
+	 * @return list of root {@link PatrolFolder}
+	 */
+	public static List<PatrolFolder> getRootPatrolFolders(Session session) {
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<PatrolFolder> c = cb.createQuery(PatrolFolder.class);
+		Root<PatrolFolder> root = c.from(PatrolFolder.class);
+		c.where(cb.equal(root.get("conservationArea"), ca), cb.isNull(root.get("parentFolder"))).orderBy(cb.asc(root.get("folderOrder")));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		return session.createQuery(c).getResultList();
+	}
+	
 }

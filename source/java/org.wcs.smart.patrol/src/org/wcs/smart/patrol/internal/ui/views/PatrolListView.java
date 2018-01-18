@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.patrol.internal.ui.views;
 
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -50,12 +52,18 @@ import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.layout.FillLayout;
@@ -63,14 +71,20 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.handlers.RadioState;
 import org.eclipse.ui.menus.IMenuService;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.folder.FolderCreateEditDialog;
+import org.wcs.smart.common.folder.FolderTreeDragListener;
+import org.wcs.smart.common.folder.FolderTreeUtils;
+import org.wcs.smart.common.folder.NoneFolder;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -78,6 +92,7 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.PatrolTreeContentProvider.GroupByType;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolFolder;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditor;
@@ -171,7 +186,7 @@ public class PatrolListView implements IPatrolFilteringView {
 			}
 		}
 	};
-		
+
 	/**
 	 * Creates a new vies
 	 */
@@ -300,11 +315,35 @@ public class PatrolListView implements IPatrolFilteringView {
 		
 		menu.addMenuListener(new MenuListener() {
 			
+			MenuItem mnuCreateFolder = null;
+			MenuItem mnuEditFolder = null;
+			MenuItem mnuDeleteFolder = null;
+
 			MenuItem mnuCollapseAll = null;
 			MenuItem mnuExpandAll = null;
 			@Override
 			public void menuShown(MenuEvent e) {
 				if (mnuCollapseAll == null){
+					new MenuItem(menu,  SWT.SEPARATOR);
+
+					mnuCreateFolder = new MenuItem(menu, SWT.PUSH);
+					mnuCreateFolder.setText(Messages.PatrolListView_CreateFolderOp);
+					mnuCreateFolder.addListener(SWT.Selection, x->{
+						handleFolderCreate();
+					});
+
+					mnuEditFolder = new MenuItem(menu, SWT.PUSH);
+					mnuEditFolder.setText(Messages.PatrolListView_EditFolderOp);
+					mnuEditFolder.addListener(SWT.Selection, x->{
+						handleFolderEdit();
+					});
+
+					mnuDeleteFolder = new MenuItem(menu, SWT.PUSH);
+					mnuDeleteFolder.setText(Messages.PatrolListView_DeleteFolderOp);
+					mnuDeleteFolder.addListener(SWT.Selection, x->{
+						handleFolderDelete();
+					});
+					
 					new MenuItem(menu,  SWT.SEPARATOR);
 					
 					mnuCollapseAll = new MenuItem(menu, SWT.PUSH);
@@ -319,6 +358,20 @@ public class PatrolListView implements IPatrolFilteringView {
 						patrolListViewer.expandAll();
 					});
 				}
+				
+				ITreeSelection sel = patrolListViewer.getStructuredSelection();
+				boolean foldersSelected = !sel.isEmpty();
+				for (Iterator<?> it = sel.iterator(); it.hasNext();) {
+					Object next = it.next();
+					if (!(next instanceof PatrolFolder) || next == NoneFolder.INSTANCE) {
+						foldersSelected = false;
+						break;
+					}
+				}
+				mnuCreateFolder.setEnabled(contentProvider.getGroupBy() == GroupByType.FOLDER);
+				mnuEditFolder.setEnabled(contentProvider.getGroupBy() == GroupByType.FOLDER && sel.size() == 1 && foldersSelected);
+				mnuDeleteFolder.setEnabled(contentProvider.getGroupBy() == GroupByType.FOLDER && foldersSelected);
+
 				mnuCollapseAll.setEnabled(contentProvider.getGroupBy() != GroupByType.NONE);
 				mnuExpandAll.setEnabled(contentProvider.getGroupBy() != GroupByType.NONE);
 			}
@@ -328,9 +381,76 @@ public class PatrolListView implements IPatrolFilteringView {
 		});
 		
 		
-		patrolListViewer.getControl().setMenu(menu);		
+		patrolListViewer.getControl().setMenu(menu);
+
+		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
+		patrolListViewer.addDragSupport(DND.DROP_MOVE, transferTypes , new FolderTreeDragListener(patrolListViewer));
+		patrolListViewer.addDropSupport(DND.DROP_MOVE, transferTypes, new PatrolFolderTreeDropListener(patrolListViewer, contentProvider));
 	}
 
+	protected void handleFolderCreate() {
+		PatrolFolder folder = new PatrolFolder();
+		folder.setConservationArea(SmartDB.getCurrentConservationArea());
+		folder.updateName(SmartDB.getCurrentLanguage(), Messages.PatrolListView_DefaultFolderName);
+		if (!SmartDB.getCurrentLanguage().equals(SmartDB.getCurrentConservationArea().getDefaultLanguage())){
+			folder.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), Messages.PatrolListView_DefaultFolderName);
+		}
+		//look for parent folder
+		Object el = patrolListViewer.getStructuredSelection().getFirstElement();
+		if (el != null && !(el instanceof PatrolFolder)) {
+			el = contentProvider.getParent(el);
+		}
+		if (el instanceof PatrolFolder && el != NoneFolder.INSTANCE) {
+			PatrolFolder pFolder = (PatrolFolder)el;
+			folder.setParentFolder(pFolder);
+			folder.setFolderOrder(getNextFolderOrderIndex(pFolder));
+		} else {
+			folder.setFolderOrder(getNextFolderOrderIndex(null));
+		}
+		
+		FolderCreateEditDialog dlg = new FolderCreateEditDialog(Display.getCurrent().getActiveShell(), folder);
+		if (dlg.open() == Window.OK) {
+			contentProvider.applyCurrentGrouping();
+		}
+	}
+
+	protected void handleFolderEdit() {
+		ITreeSelection sel = patrolListViewer.getStructuredSelection();
+		if (sel.getFirstElement() instanceof PatrolFolder) {
+			PatrolFolder folder = (PatrolFolder) sel.getFirstElement();
+			FolderCreateEditDialog dlg = new FolderCreateEditDialog(Display.getCurrent().getActiveShell(), folder);
+			if (dlg.open() == Window.OK) {
+				contentProvider.applyCurrentGrouping();
+			}
+		}
+	}
+
+	protected void handleFolderDelete() {
+		String message = MessageFormat.format(Messages.PatrolListView_DeleteFolderConfirm_Message, Messages.PatrolListView_NoneFolder_Name);
+		if (!MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.PatrolListView_DeleteFolderConfirm_Title, message)) {
+			return;
+		}
+		ITreeSelection sel = patrolListViewer.getStructuredSelection();
+		List<?> items = sel.toList();
+		List<PatrolFolder> toDel = items.stream().filter(pf -> pf instanceof PatrolFolder && pf != NoneFolder.INSTANCE).map(pf -> (PatrolFolder)pf).collect(Collectors.toList());
+		List<PatrolFolder> roots = FolderTreeUtils.getRootFoldersFromImput(contentProvider.getElements(null));
+		Job deleteJob = new DeletePatrolFoldersJob(roots, toDel);
+		deleteJob.schedule();
+		try {
+			deleteJob.join();
+		} catch (InterruptedException ex) {
+			SmartPlugIn.displayError(Messages.PatrolListView_DeleteFoldersJob_Error, ex);
+		}
+		contentProvider.applyCurrentGrouping();
+	}
+
+	private int getNextFolderOrderIndex(PatrolFolder parent) {
+		if (parent == null) {
+			return FolderTreeUtils.getRootFoldersFromImput(contentProvider.getElements(null)).size();
+		}
+		return parent.getChildFolders().size();
+	}
+	
 	/**
 	 * updates content immediately
 	 */

@@ -265,6 +265,7 @@
                label="%menu.label.groupby">
             <command
                   commandId="org.wcs.smart.patrol.view.groupby"
+                  icon="images/icons/obj16/patrol_folder.png"
                   id="org.wcs.smart.patrol.view.groupby.folder"
                   label="%command.groupby.folder"
                   style="radio">
@@ -415,6 +416,7 @@
             locationURI="menu:org.wcs.smart.patrol.groupby.menu">
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
+               icon="images/icons/obj16/patrol_folder.png"
                id="org.wcs.smart.patrol.view.groupby.folder"
                label="%command.groupby.folder"
                style="radio">
@@ -516,6 +518,7 @@
             locationURI="menu:org.wcs.smart.patrol.groupby.menu2">
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
+               icon="images/icons/obj16/patrol_folder.png"
                id="org.wcs.smart.patrol.view.groupby.folder"
                label="%command.groupby.folder"
                style="radio">
@@ -890,6 +893,10 @@
       <class
             ca_property=".id.waypoint.conservationArea"
             class="org.wcs.smart.patrol.model.PatrolWaypoint"
+            supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.patrol.model.PatrolFolder"
             supportsCcaa="false">
       </class>
    </extension>
