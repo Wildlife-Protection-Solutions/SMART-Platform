@@ -290,7 +290,7 @@ public class CaInfoComposite extends Composite {
 		Button btnClear = new Button(iconComp, SWT.PUSH);
 		btnClear.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 		btnClear.setText(Messages.CaInfoComposite_clearButton);
-		btnBrowse.setToolTipText(Messages.CaInfoComposite_clearTooltip);
+		btnClear.setToolTipText(Messages.CaInfoComposite_clearTooltip);
 		btnClear.addListener(SWT.Selection, e->{
 			Image img = (Image) cIcon.getData(IMAGE_KEY);
 			if (img != null) img.dispose();
