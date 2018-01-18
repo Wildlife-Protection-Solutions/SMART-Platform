@@ -12,9 +12,6 @@ public class Messages extends NLS {
 	public static String AbstractInfoComposite_DisplayMode;
 	public static String AbstractInfoComposite_DisplayName;
 	public static String AbstractInfoComposite_DmLoadingTaskName;
-	public static String AbstractInfoComposite_EmptyNameNotAllowed;
-	public static String AbstractInfoComposite_ErrorDialogTitle;
-	public static String AbstractInfoComposite_InvalidNameMessage;
 	public static String AbstractInfoComposite_NewGroupDefaultName;
 	public static String AbstractRenameDialog_ConfiguredName;
 	public static String AbstractRenameDialog_DataModelColumnName;
@@ -218,7 +215,6 @@ public class Messages extends NLS {
 	public static String ShowConfigurableModelHandler_LoadDataModel_Error;
 	public static String ShowConfigurableModelHandler_NoDmDialog_Message;
 	public static String ShowConfigurableModelHandler_NoDmDialog_Title;
-	public static String TranslatableNameComposite_Button_Translate;
 	public static String TreeAttributeInfoComposite_Button_Revert;
 	public static String TreeAttributeInfoComposite_Cleanup_Error;
 	public static String TreeAttributeInfoComposite_Cleanup_Task;

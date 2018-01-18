@@ -71,7 +71,6 @@ import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
 import org.wcs.smart.dataentry.dialog.composite.DisplayModeComboViewer;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl;
 import org.wcs.smart.dataentry.dialog.composite.ImageSelectionControl.IImageContentProvider;
-import org.wcs.smart.dataentry.dialog.composite.TranslateNameComposite;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -79,6 +78,7 @@ import org.wcs.smart.dataentry.model.DisplayMode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.TranslateNameComposite;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
