@@ -618,6 +618,7 @@ public class Messages extends NLS {
 	public static String DeleteConservationAreaHandler_Progress_Employees;
 	public static String DeleteConservationAreaHandler_Progress_Stations;
 	public static String DeleteManager_DeleteError_Dialog_Title;
+	public static String DeleteObjectsJob_TaskName;
 	public static String DerbyBackupEngine_CreateDirectoryError;
 	public static String DerbyBackupEngine_DeleteOutputFileError;
 	public static String DerbyBackupEngine_ProgressMessage;
@@ -1029,6 +1030,7 @@ public class Messages extends NLS {
 	public static String SaveMapHandler_OverwriteMessage;
 	public static String SaveMapHandler_SaveOkDialogTitle;
 	public static String SaveMapHandler_SaveOkMessage;
+	public static String SaveObjectsJob_TaskName;
 	public static String ScaleRatioComposite_ErrorString;
 	public static String SearchTextBox_ClearSearchTooltip;
 	public static String SearchTextBox_SearchInfoTest;
