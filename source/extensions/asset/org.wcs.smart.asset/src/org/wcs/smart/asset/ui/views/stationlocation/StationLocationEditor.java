@@ -293,6 +293,10 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 				if (validate) validateAndRefresh();
 			}
 		});
+		
+		subscribeToEvent(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, e->{
+			initData();
+		});
 	}
 	
 	private void validateAndRefresh() {

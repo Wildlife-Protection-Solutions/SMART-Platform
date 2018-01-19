@@ -23,6 +23,7 @@ package org.wcs.smart.asset.ui.views.map;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,6 +36,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -59,8 +62,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -76,10 +81,13 @@ import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.style.sld.SLDContent;
+import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.map.engine.StatusEngine;
+import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetMapStyle;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.asset.ui.views.map.udig.AssetStationSummaryGeoResource;
@@ -137,6 +145,9 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	private GroupByOption currentGroupByOption = GroupByOption.STATION;
 	private AssetMapStyle lastStyle = null;
 	
+	private IEclipseContext parentContext;
+	private List<EventHandler> handlers = null;
+	
 	private OverviewmapColumnEngine statEngine = new OverviewmapColumnEngine() {
 		
 		public void refreshData() { 
@@ -155,6 +166,12 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			});
 		}
 	};
+	
+	@Override
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+		super.init(site, input);
+		parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
+	}
 	
 	/** Creates the map
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
@@ -345,6 +362,14 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		loadStylesJob.schedule();
 		loadTableJob.schedule();
 		configureStatusTableJob.schedule();
+		
+		
+		handlers = new ArrayList<>();
+		EventHandler refreshHandler =  event->{
+			refresh();
+			loadStylesJob.schedule();
+		};
+		parentContext.get(IEventBroker.class).subscribe(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, refreshHandler);
 	}
 
 	@Override
@@ -481,7 +506,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		return Collections.singletonList(statusStyle);
 	}
 	
-	Job loadStylesJob = new Job("loading asest overview map styles") {
+	private Job loadStylesJob = new Job("loading asest overview map styles") {
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

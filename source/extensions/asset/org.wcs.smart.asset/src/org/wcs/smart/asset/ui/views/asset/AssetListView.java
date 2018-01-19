@@ -695,7 +695,7 @@ public class AssetListView {
 			try(Session session = HibernateManager.openSession()){
 				stations.addAll(QueryFactory.buildQuery(session, AssetStation.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
 				stations.forEach(a->{a.getUuid().equals(null); a.getId(); a.computeStatus(session);});
-				stations.forEach(a->a.getLocations().forEach(l->l.getId()));
+				stations.forEach(a->a.getLocations().forEach(l-> { l.getId(); l.computeStatus(session); }));
 				
 			}
 			if (!includeInactiveStations) {

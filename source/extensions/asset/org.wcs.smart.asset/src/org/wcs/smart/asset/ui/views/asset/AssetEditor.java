@@ -305,6 +305,10 @@ public class AssetEditor extends EditorPart implements MapPart {
 			//refresh data page
 			initData();
 		});
+		
+		subscribeToEvent(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, e->{
+			initData();
+		});
 	}
 	
 	private void validateAndRefresh() {

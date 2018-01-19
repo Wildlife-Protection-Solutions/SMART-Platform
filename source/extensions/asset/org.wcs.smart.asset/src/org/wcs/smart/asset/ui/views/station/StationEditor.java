@@ -312,6 +312,15 @@ public class StationEditor extends EditorPart implements MapPart {
 			}
 		};
 		handlers.add(promptToReset);
+		
+		subscribeToEvent(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, e->{
+			if (isDirty) {
+				parentContext.get(IEventBroker.class).subscribe(UIEvents.UILifeCycle.BRINGTOTOP, promptToReset);
+			}else {
+				initData();	
+			}
+			
+		});
 	}
 	
 	private void validateAndRefresh() {
@@ -627,7 +636,8 @@ public class StationEditor extends EditorPart implements MapPart {
 				
 				//update ui
 				Display.getDefault().syncExec(()->{
-					lblId.setText(station.getId());
+					if (!lblId.isDisposed()) lblId.setText(station.getId());	
+					
 					setPartName(station.getId());
 					
 					initializeCurrentPage(station);

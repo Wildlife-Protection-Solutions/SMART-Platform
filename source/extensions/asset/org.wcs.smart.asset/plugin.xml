@@ -74,7 +74,6 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".assetType.conservationArea"
             class="org.wcs.smart.asset.model.AssetMetadataMapping"
             supportsCcaa="false">
       </class>
