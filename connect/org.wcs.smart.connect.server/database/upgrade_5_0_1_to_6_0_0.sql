@@ -1396,3 +1396,409 @@ update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org
 
 update smart.employee set smartuserlevel =  replace(smartuserlevel, 'INTEL_DATA_ENTRY', 'INTEL_RECORD_CREATE,INTEL_RECORD_VIEW,INTEL_RECORD_EDIT,INTEL_ENTITY_VIEW,INTEL_QUERY_ALL') where smartuserlevel is not null and smartuserlevel like '%INTEL_DATA_ENTRY%';
 update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.i2';
+
+
+
+
+
+
+
+-- ASSET PLUGIN --
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.asset', '1.0');
+insert into connect.ca_plugin_version (ca_uuid, plugin_id, version) select uuid, 'org.wcs.smart.asset', '1.0' from smart.conservation_area;
+
+CREATE TABLE smart.asset( 
+ uuid uuid NOT NULL, 
+ asset_type_uuid uuid NOT NULL, 
+ ca_uuid uuid NOT NULL, 
+ id varchar(128) NOT NULL, 
+ is_retired boolean DEFAULT false NOT NULL, PRIMARY KEY (uuid)
+);
+ALTER TABLE smart.asset add constraint id_ca_uuid_unq UNIQUE(id, ca_uuid);
+
+CREATE TABLE smart.asset_attribute ( 
+ uuid uuid NOT NULL, 
+ keyId varchar(128) NOT NULL, 
+ type char(8) NOT NULL, 
+ ca_uuid uuid NOT NULL, PRIMARY KEY (uuid)
+);
+ALTER TABLE smart.asset_attribute add constraint keyid_ca_uuid_unq UNIQUE(keyId, ca_uuid);
+ 
+ CREATE TABLE smart.asset_attribute_list_item ( 
+ uuid uuid NOT NULL, 
+ attribute_uuid uuid NOT NULL, 
+ keyid varchar(128) NOT NULL, 
+ PRIMARY KEY (uuid) 
+);
+ALTER TABLE smart.asset_attribute_list_item add constraint asset_li_keyid_attribute_uuid_unq UNIQUE(keyId, attribute_uuid);
+
+
+CREATE TABLE smart.asset_attribute_value ( 
+ asset_uuid uuid NOT NULL, 
+ attribute_uuid uuid NOT NULL, 
+ string_value varchar(1024), 
+ list_item_uuid uuid, 
+ double_value1 double precision, 
+ double_value2 double precision, 
+ PRIMARY KEY (asset_uuid, attribute_uuid)
+);
+
+CREATE TABLE smart.asset_deployment ( 
+ uuid uuid NOT NULL, 
+ asset_uuid uuid NOT NULL, 
+ station_location_uuid uuid NOT NULL, 
+ start_date timestamp NOT NULL, 
+ end_date timestamp, 
+ track bytea, 
+ PRIMARY KEY (uuid)
+);
+
+CREATE TABLE smart.asset_deployment_attribute_value ( 
+ asset_deployment_uuid uuid NOT NULL, 
+ attribute_uuid uuid NOT NULL, 
+ string_value varchar(1024), 
+ list_item_uuid uuid, 
+ double_value1 double precision,
+ double_value2 double precision, 
+ PRIMARY KEY (asset_deployment_uuid, attribute_uuid) 
+);
+  
+CREATE TABLE smart.asset_history_record ( 
+ uuid uuid NOT NULL, 
+ asset_uuid uuid NOT NULL, 
+ date timestamp NOT NULL, 
+ comment VARCHAR(32672), 
+ PRIMARY KEY (uuid)
+);
+
+CREATE TABLE smart.asset_module_settings ( 
+ uuid uuid NOT NULL, 
+ ca_uuid uuid NOT NULL, 
+ keyid varchar(128), 
+ value varchar(32000), 
+ PRIMARY KEY (uuid)
+);
+ALTER TABLE smart.asset_module_settings add constraint asset_module_key_ca_unq UNIQUE(keyid, ca_uuid);
+
+
+CREATE TABLE smart.asset_station (
+ uuid uuid NOT NULL,
+ ca_uuid uuid NOT NULL,
+ id varchar(128) NOT NULL, 
+ x double precision NOT NULL, 
+ y double precision NOT NULL, 
+ PRIMARY KEY (uuid)
+);
+ALTER TABLE smart.asset_station add constraint asset_sn_id_ca_unq UNIQUE(id, ca_uuid);
+
+CREATE TABLE smart.asset_station_attribute ( 
+ attribute_uuid uuid NOT NULL, 
+ seq_order integer NOT NULL, 
+ PRIMARY KEY (attribute_uuid)
+);
+
+CREATE TABLE smart.asset_station_attribute_value ( 
+ station_uuid uuid NOT NULL, 
+ attribute_uuid uuid NOT NULL, 
+ string_value varchar(1024), 
+ list_item_uuid uuid, 
+ double_value1 double precision, 
+ double_value2 double precision, 
+ PRIMARY KEY (station_uuid, attribute_uuid)
+);
+
+CREATE TABLE smart.asset_type ( 
+ uuid uuid NOT NULL, 
+ ca_uuid uuid NOT NULL, 
+ keyid varchar(128), 
+ icon bytea, 
+ incident_cutoff integer, 
+ PRIMARY KEY (uuid)
+);
+ALTER TABLE smart.asset_type add constraint asset_type_ca_keyid_unq unique(keyid, ca_uuid);
+
+
+CREATE TABLE smart.asset_type_attribute ( 
+ asset_type_uuid uuid NOT NULL, 
+ attribute_uuid uuid NOT NULL, 
+ seq_order integer NOT NULL, 
+ PRIMARY KEY (asset_type_uuid, attribute_uuid)
+);
+
+CREATE TABLE smart.asset_type_deployment_attribute ( 
+ asset_type_uuid uuid NOT NULL, 
+ attribute_uuid uuid NOT NULL, 
+ seq_order integer NOT NULL, 
+ PRIMARY KEY (asset_type_uuid, attribute_uuid)
+);
+
+CREATE TABLE smart.asset_waypoint ( 
+ uuid uuid not null, 
+ wp_uuid uuid NOT NULL, 
+ asset_deployment_uuid uuid NOT NULL, 
+ state smallint not null, 
+ PRIMARY KEY (uuid), 
+ UNIQUE(wp_uuid, asset_deployment_uuid)
+);
+
+CREATE TABLE smart.asset_waypoint_attachment ( 
+ wp_attachment_uuid uuid NOT NULL, 
+ asset_waypoint_uuid uuid NOT NULL, 
+ PRIMARY KEY (wp_attachment_uuid, asset_waypoint_uuid)
+);
+
+CREATE TABLE smart.asset_metadata_mapping (
+ uuid uuid not null, 
+ ca_uuid uuid not null,
+ metadata_type varchar(16) not null, 
+ metadata_key varchar(32672) not null, 
+ search_order integer not null, 
+ asset_field varchar(32), 
+ category_uuid uuid,
+ attribute_uuid uuid, 
+ attribute_list_item_uuid uuid, 
+ attribute_tree_node_uuid uuid,  
+ PRIMARY KEY (uuid)
+);
+
+CREATE TABLE smart.asset_station_location_history (
+ uuid uuid NOT NULL, 
+ station_location_uuid uuid NOT NULL, 
+ date timestamp NOT NULL, 
+ comment VARCHAR(32672),
+ PRIMARY KEY (uuid)
+);
+
+CREATE TABLE smart.asset_station_location ( 
+ uuid uuid NOT NULL, 
+ station_uuid uuid NOT NULL, 
+ id varchar(128) NOT NULL, 
+ x double precision NOT NULL, 
+ y double precision NOT NULL, 
+ PRIMARY KEY (uuid)
+);
+ALTER TABLE smart.asset_station_location add constraint asset_snlc_id_ca_unq UNIQUE(id, station_uuid);
+
+CREATE TABLE smart.asset_station_location_attribute ( 
+ attribute_uuid uuid NOT NULL, 
+ seq_order integer NOT NULL, 
+ PRIMARY KEY (attribute_uuid)
+);
+
+CREATE TABLE smart.asset_station_location_attribute_value ( 
+ station_location_uuid uuid NOT NULL, 
+ attribute_uuid uuid NOT NULL, 
+ string_value varchar(1024), 
+ list_item_uuid uuid, 
+ double_value1 double precision, 
+ double_value2 double precision, 
+ PRIMARY KEY (station_location_uuid, attribute_uuid)
+);
+
+CREATE TABLE smart.asset_map_style ( 
+ uuid uuid NOT NULL, 
+ ca_uuid uuid NOT NULL, 
+ name varchar(1024), 
+ style_string varchar(32672), 
+ PRIMARY KEY (uuid)
+);
+
+
+ALTER TABLE smart.asset_station_location_history ADD FOREIGN KEY (station_location_uuid) REFERENCES smart.asset_station_location(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_station_location ADD FOREIGN KEY (station_uuid) REFERENCES smart.asset_station(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;			
+ALTER TABLE smart.asset_station_location_attribute_value ADD FOREIGN KEY (station_location_uuid) REFERENCES smart.asset_station_location(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_station_location_attribute_value ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_attribute_value ADD FOREIGN KEY (asset_uuid) REFERENCES smart.asset (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_attribute_value ADD FOREIGN KEY (asset_uuid) REFERENCES smart.asset (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_deployment ADD FOREIGN KEY (asset_uuid) REFERENCES smart.asset (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_history_record ADD FOREIGN KEY (asset_uuid) REFERENCES smart.asset (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_attribute_list_item ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_attribute_value ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_deployment_attribute_value ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_station_attribute ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_station_location_attribute ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_station_attribute_value ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_type_attribute ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_type_deployment_attribute ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_attribute_value ADD FOREIGN KEY (list_item_uuid) REFERENCES smart.asset_attribute_list_item (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_deployment_attribute_value ADD FOREIGN KEY (list_item_uuid) REFERENCES smart.asset_attribute_list_item (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_station_attribute_value ADD FOREIGN KEY (list_item_uuid) REFERENCES smart.asset_attribute_list_item (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_deployment_attribute_value ADD FOREIGN KEY (asset_deployment_uuid) REFERENCES smart.asset_deployment (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_waypoint ADD FOREIGN KEY (asset_deployment_uuid) REFERENCES smart.asset_deployment (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_deployment ADD FOREIGN KEY (station_location_uuid) REFERENCES smart.asset_station_location (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_station_attribute_value ADD FOREIGN KEY (station_uuid) REFERENCES smart.asset_station (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset ADD FOREIGN KEY (asset_type_uuid) REFERENCES smart.asset_type (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_type_attribute ADD FOREIGN KEY (asset_type_uuid) REFERENCES smart.asset_type (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_type_deployment_attribute ADD FOREIGN KEY  (asset_type_uuid) REFERENCES smart.asset_type (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_attribute ADD FOREIGN KEY  (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_module_settings ADD FOREIGN KEY(ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_type ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_waypoint ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_deployment ADD FOREIGN KEY (asset_uuid) REFERENCES smart.asset (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_metadata_mapping ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_metadata_mapping ADD FOREIGN KEY (category_uuid) REFERENCES smart.dm_category (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_metadata_mapping ADD FOREIGN KEY (attribute_uuid) REFERENCES smart.dm_attribute (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_metadata_mapping ADD FOREIGN KEY (attribute_list_item_uuid) REFERENCES smart.dm_attribute_list (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_metadata_mapping ADD FOREIGN KEY (attribute_tree_node_uuid) REFERENCES smart.dm_attribute_tree (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_waypoint_attachment ADD FOREIGN KEY (asset_waypoint_uuid) REFERENCES smart.asset_waypoint (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_waypoint_attachment ADD FOREIGN KEY (wp_attachment_uuid) REFERENCES smart.wp_attachments (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_map_style ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TRIGGER trg_asset AFTER INSERT OR UPDATE OR DELETE ON smart.asset FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_asset_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.asset_attribute FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_asset_module_settings AFTER INSERT OR UPDATE OR DELETE ON smart.asset_module_settings FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_asset_station AFTER INSERT OR UPDATE OR DELETE ON smart.asset_station FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_asset_type AFTER INSERT OR UPDATE OR DELETE ON smart.asset_type FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_asset_metadata_mapping AFTER INSERT OR UPDATE OR DELETE ON smart.asset_metadata_mapping FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_asset_map_style AFTER INSERT OR UPDATE OR DELETE ON smart.asset_map_style FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_attribute_list_item() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_attribute_list_item AFTER INSERT OR UPDATE OR DELETE ON smart.asset_attribute_list_item FOR EACH ROW execute procedure connect.trg_asset_attribute_list_item();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_attribute_value() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'asset_uuid', ROW.asset_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.asset_attribute_value FOR EACH ROW execute procedure connect.trg_asset_attribute_value();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_deployment() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.asset  i WHERE i.uuid = ROW.asset_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_deployment AFTER INSERT OR UPDATE OR DELETE ON smart.asset_deployment FOR EACH ROW execute procedure connect.trg_asset_deployment();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_deployment_attribute_value() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'asset_deployment_uuid', ROW.asset_deployment_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_deployment_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.asset_deployment_attribute_value FOR EACH ROW execute procedure connect.trg_asset_deployment_attribute_value();
+
+
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_history_record() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.asset i WHERE i.uuid = ROW.asset_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_history_record AFTER INSERT OR UPDATE OR DELETE ON smart.asset_history_record FOR EACH ROW execute procedure connect.trg_asset_history_record();
+
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_station_attribute() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, i.CA_UUID 
+ 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_station_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.asset_station_attribute FOR EACH ROW execute procedure connect.trg_asset_station_attribute();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_station_attribute_value() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'station_uuid', ROW.station_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_station_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.asset_station_attribute_value FOR EACH ROW execute procedure connect.trg_asset_station_attribute_value();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_type_attribute() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'asset_type_uuid', ROW.asset_type_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_type_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.asset_type_attribute FOR EACH ROW execute procedure connect.trg_asset_type_attribute();
+CREATE TRIGGER trg_asset_type_deployment_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.asset_type_deployment_attribute FOR EACH ROW execute procedure connect.trg_asset_type_attribute();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_waypoint() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.waypoint i WHERE i.uuid = ROW.wp_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.asset_waypoint FOR EACH ROW execute procedure connect.trg_asset_waypoint();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_waypoint_attachment() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'wp_attachment_uuid', ROW.wp_attachment_uuid, 'asset_waypoint_uuid', ROW.asset_waypoint_uuid, null, i.CA_UUID 
+ 		from smart.asset_waypoint wp, smart.waypoint i WHERE i.uuid = wp.wp_uuid and wp.uuid = ROW.asset_waypoint_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_waypoint_attachment AFTER INSERT OR UPDATE OR DELETE ON smart.asset_waypoint_attachment FOR EACH ROW execute procedure connect.trg_asset_waypoint_attachment();
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_station_location_history() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.asset_station_location loc, smart.asset_station i WHERE i.uuid = loc.station_uuid and loc.uuid = ROW.station_location_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_station_location_history AFTER INSERT OR UPDATE OR DELETE ON smart.asset_station_location_history FOR EACH ROW execute procedure connect.trg_asset_station_location_history();
+
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_station_location() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+ 		from smart.asset_station i WHERE i.uuid = ROW.station_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_station_location AFTER INSERT OR UPDATE OR DELETE ON smart.asset_station_location FOR EACH ROW execute procedure connect.trg_asset_station_location();
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_station_location_attribute() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, i.CA_UUID 
+ 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_station_location_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.asset_station_location_attribute FOR EACH ROW execute procedure connect.trg_asset_station_location_attribute();
+
+
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_station_location_attribute_value() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'station_location_uuid', ROW.station_location_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
+ 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_station_location_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.asset_station_location_attribute_value FOR EACH ROW execute procedure connect.trg_asset_station_location_attribute_value();
+
+
+
+
+  

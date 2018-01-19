@@ -21,6 +21,29 @@
  */
 package org.wcs.smart.connect.hibernate;
 
+import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.model.AssetAttributeValue;
+import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
+import org.wcs.smart.asset.model.AssetHistoryRecord;
+import org.wcs.smart.asset.model.AssetMapStyle;
+import org.wcs.smart.asset.model.AssetMetadataMapping;
+import org.wcs.smart.asset.model.AssetModuleSettings;
+import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationAttribute;
+import org.wcs.smart.asset.model.AssetStationAttributeValue;
+import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetStationLocationAttribute;
+import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
+import org.wcs.smart.asset.model.AssetStationLocationHistoryRecord;
+import org.wcs.smart.asset.model.AssetType;
+import org.wcs.smart.asset.model.AssetTypeAttribute;
+import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
+import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetWaypointAttachment;
+import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -361,7 +384,32 @@ public enum SmartTable {
 	
 	QA_ERROR(QaError.class, null),
 	QA_ROUTINE(QaRoutine.class, null),
-	QA_ROUTINE_PARAMETER(QaRoutineParameter.class, ".qaRoutine.conservationArea");
+	QA_ROUTINE_PARAMETER(QaRoutineParameter.class, ".qaRoutine.conservationArea"),
+	
+	ASSET(Asset.class, null),
+	ASSET_ATTRIBUTE(AssetAttribute.class, null),
+	ASSET_ATTRIBUTE_LIST_ITEM(AssetAttributeListItem.class, ".attribute.conservationArea"),
+	ASSET_ATTRIBUTE_VALUE(AssetAttributeValue.class, ".id.attribute.conservationArea"),
+	ASSET_DEPOLYMENT(AssetDeployment.class, ".asset.conservationArea"),
+	ASSET_DEPLOYMENT_ATTRIBUTE_VALUE(AssetDeploymentAttributeValue.class, ".id.attribute.conservationArea"),
+	ASSET_HISTORY_RECORD(AssetHistoryRecord.class, ".asset.conservationArea"),
+	ASSET_MAP_STYLE(AssetMapStyle.class, null),
+	ASSET_METADATA_MAPPING(AssetMetadataMapping.class, null),
+	ASSET_MODULE_SETTINGS(AssetModuleSettings.class, null),
+	ASSET_STATION(AssetStation.class, null),
+	ASSET_STATION_ATTRIBUTE(AssetStationAttribute.class, ".attribute.conservationArea"),
+	ASSET_STATION_ATTRIBUTE_VALUE(AssetStationAttributeValue.class, ".id.attribute.conservationArea"),
+	ASSET_STATION_LOCATION(AssetStationLocation.class, ".station.conservationArea"),
+	ASSET_STATION_LOCATION_ATTRIBUTE(AssetStationLocationAttribute.class, ".attribute.conservationArea"),
+	ASSET_STATION_LOCATION_ATTRIBUTE_VALUE(AssetStationLocationAttributeValue.class, ".id.stationLocation.station.conservationArea"),
+	ASSET_STATION_LOCATION_HISTORY_RECORD(AssetStationLocationHistoryRecord.class, ".stationLocation.station.conservationArea"),
+	ASSET_TYPE(AssetType.class, null),
+	ASSET_TYPE_ATTRIBUTE(AssetTypeAttribute.class, ".id.attribute.conservationArea"),
+	ASSET_TYPE_DEPOLYMENT_ATTRIBUTE(AssetTypeDeploymentAttribute.class, ".id.assetType.conservationArea"),
+	ASSET_WAYPOINT(AssetWaypoint.class, ".id.waypoint.conservationArea"),
+	ASSET_WAYPOINT_ATTACHMENT(AssetWaypointAttachment.class, ".id.waypointAttachment.waypoint.conservationArea"),
+	
+	;
 	
 	public Class<?> hibernateClass;
 	public String caProperty;
