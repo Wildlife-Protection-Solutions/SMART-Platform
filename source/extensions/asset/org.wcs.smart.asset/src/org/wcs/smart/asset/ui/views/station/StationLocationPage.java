@@ -352,8 +352,6 @@ public class StationLocationPage {
 				SetViewportBBoxCommand cmd = new SetViewportBBoxCommand(drawCommand.getBounds());
 				getMapViewer().getMap().executeSyncWithoutUndo(cmd);
 				
-				System.out.println(getMapViewer().getMap().getViewportModel().getCRS().toString());
-				
 				Display.getDefault().syncExec(()->{
 					if (tblLocations.getTable().isDisposed()) return;
 					tblLocations.setInput(locationData);

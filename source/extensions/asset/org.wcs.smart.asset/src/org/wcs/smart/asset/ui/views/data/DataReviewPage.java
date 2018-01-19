@@ -112,7 +112,6 @@ public class DataReviewPage {
 				if (partRef.getId().equals(DataImporterView.ID)) {
 					if (requiresRefresh) {
 						requiresRefresh = false;
-						System.out.println("refreshing");
 						panel.refresh();
 					}	
 				}
