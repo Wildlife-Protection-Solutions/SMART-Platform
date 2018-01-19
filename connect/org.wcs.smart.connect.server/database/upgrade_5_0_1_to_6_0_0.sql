@@ -14,9 +14,7 @@ ALTER TABLE smart.patrol_leg ALTER COLUMN mandate_uuid SET NOT NULL;
 
 ALTER TABLE smart.patrol DROP COLUMN mandate_uuid;
 
-UPDATE connect.connect_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
-UPDATE connect.ca_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
-update connect.connect_version set version = '6.0.0';
+
 
 ALTER TABLE connect.data_queue DROP CONSTRAINT type_chk;
 
@@ -1800,5 +1798,21 @@ CREATE TRIGGER trg_asset_station_location_attribute_value AFTER INSERT OR UPDATE
 
 
 
+-- updates for patrol plug in
+CREATE TABLE smart.patrol_folder (
+	uuid uuid not null, 
+	ca_uuid uuid not null, 
+	parent_uuid uuid, 
+	folder_order smallint, 
+	primary key (uuid)
+);
+ALTER TABLE smart.patrol_folder ADD FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.patrol_folder ADD FOREIGN KEY (PARENT_UUID) REFERENCES SMART.PATROL_FOLDER(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.patrol ADD COLUMN folder_uuid UUID;
+ALTER TABLE smart.patrol ADD FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.PATROL_FOLDER(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
-  
+UPDATE connect.connect_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
+UPDATE connect.ca_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
+update connect.connect_version set version = '6.0.0';
+
+CREATE TRIGGER trg_patrol_folder AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_folder FOR EACH ROW execute procedure connect.trg_changelog_common();
