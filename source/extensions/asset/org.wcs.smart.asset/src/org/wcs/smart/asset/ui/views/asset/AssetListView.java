@@ -81,6 +81,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.StationManager;
 import org.wcs.smart.asset.model.Asset;
@@ -222,22 +223,38 @@ public class AssetListView {
 		overviewMap.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 		overviewMap.addListener(SWT.Selection, e->showOverviewMap());
 		
-		ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
-		importData.setToolTipText("import asset data");
-		importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
-		importData.addListener(SWT.Selection, e->importData());
+		if (AssetSecurityManager.INSTANCE.canImportData()) {
+			ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
+			importData.setToolTipText("import asset data");
+			importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
+			importData.addListener(SWT.Selection, e->importData());
+		}
 		
-		new ToolItem(toolbar, SWT.SEPARATOR);
+		if (AssetSecurityManager.INSTANCE.canDeleteAsset() || AssetSecurityManager.INSTANCE.canCreateAsset()) {
+			new ToolItem(toolbar, SWT.SEPARATOR);
+		}
 		
-		ToolItem deleteAsset = new ToolItem(toolbar, SWT.PUSH);
-		deleteAsset.setToolTipText("delete selected assets");
-		deleteAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteAsset.addListener(SWT.Selection, e->deleteAssets());
+		if (AssetSecurityManager.INSTANCE.canDeleteAsset() ) {
+			ToolItem deleteAsset = new ToolItem(toolbar, SWT.PUSH);
+			deleteAsset.setToolTipText("delete selected assets");
+			deleteAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			deleteAsset.addListener(SWT.Selection, e->deleteAssets());
+			
+			lstAssets.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					if (deleteAsset.isDisposed()) return;
+					deleteAsset.setEnabled(!lstAssets.getSelection().isEmpty());
+				}
+			});
+		}
 		
-		ToolItem addAsset = new ToolItem(toolbar, SWT.PUSH);
-		addAsset.setToolTipText("create a new asset");
-		addAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		addAsset.addListener(SWT.Selection, e->createNewAsset(null));
+		if (AssetSecurityManager.INSTANCE.canCreateAsset()) {
+			ToolItem addAsset = new ToolItem(toolbar, SWT.PUSH);
+			addAsset.setToolTipText("create a new asset");
+			addAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			addAsset.addListener(SWT.Selection, e->createNewAsset(null));
+		}
 		
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 	}
@@ -258,31 +275,39 @@ public class AssetListView {
 		overviewMap.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 		overviewMap.addListener(SWT.Selection, e->showOverviewMap());
 		
-		ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
-		importData.setToolTipText("import asset data");
-		importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
-		importData.addListener(SWT.Selection, e->importData());
+		if (AssetSecurityManager.INSTANCE.canImportData()) {
+			ToolItem importData = new ToolItem(toolbar, SWT.PUSH);
+			importData.setToolTipText("import asset data");
+			importData.setImage(AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_IMPORT));
+			importData.addListener(SWT.Selection, e->importData());
+		}
 		
-		new ToolItem(toolbar, SWT.SEPARATOR);
+		if (AssetSecurityManager.INSTANCE.canDeleteStationLocation() ||
+				AssetSecurityManager.INSTANCE.canCreateStationLocation()) {
+			new ToolItem(toolbar, SWT.SEPARATOR);
+		}
 		
-		ToolItem deleteStation = new ToolItem(toolbar, SWT.PUSH);
-		deleteStation.setToolTipText("delete the selected station and all related data");
-		deleteStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteStation.addListener(SWT.Selection, e->deleteStations());
+		if (AssetSecurityManager.INSTANCE.canDeleteStationLocation()) {
+			ToolItem deleteStation = new ToolItem(toolbar, SWT.PUSH);
+			deleteStation.setToolTipText("delete the selected station and all related data");
+			deleteStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			deleteStation.addListener(SWT.Selection, e->deleteStations());
+			
+			lstStations.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					if (deleteStation.isDisposed()) return;
+					deleteStation.setEnabled(!lstStations.getSelection().isEmpty());
+				}
+			});
+		}
 		
-		ToolItem addStation = new ToolItem(toolbar, SWT.PUSH);
-		addStation.setToolTipText("create a new station");
-		addStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		addStation.addListener(SWT.Selection, e->createNewStation());
-		
-		lstStations.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (deleteStation.isDisposed()) return;
-				deleteStation.setEnabled(!lstStations.getSelection().isEmpty());
-			}
-		});
-		
+		if (AssetSecurityManager.INSTANCE.canCreateStationLocation()) {
+			ToolItem addStation = new ToolItem(toolbar, SWT.PUSH);
+			addStation.setToolTipText("create a new station");
+			addStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			addStation.addListener(SWT.Selection, e->createNewStation());
+		}
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 	}
 	
@@ -318,11 +343,63 @@ public class AssetListView {
 		Menu mnu = new Menu(control);
 		control.setMenu(mnu);
 		
-		MenuItem addAsset = new MenuItem(mnu, SWT.CASCADE);
-		addAsset.setText("New Asset...");
-		addAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		if (AssetSecurityManager.INSTANCE.canCreateAsset()) {
+			MenuItem addAsset = new MenuItem(mnu, SWT.CASCADE);
+			addAsset.setText("New Asset...");
+			addAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		
-		new MenuItem(mnu, SWT.SEPARATOR);
+			new MenuItem(mnu, SWT.SEPARATOR);
+			
+			Menu addAssetMenu = new Menu(addAsset);
+			addAsset.setMenu(addAssetMenu);
+			new MenuItem(addAssetMenu, SWT.SEPARATOR);
+			
+			MenuItem otherAssetType = new MenuItem(addAssetMenu, SWT.PUSH);
+			otherAssetType.setText("Other...");
+			otherAssetType.addListener(SWT.Selection, evt->(new NewAssetHandler()).execute(context));
+			
+			addAssetMenu.addMenuListener(new MenuListener() {
+				
+				@Override
+				public void menuShown(MenuEvent e) {
+					String newTypes = ConfigurationScope.INSTANCE.getNode(NewAssetHandler.NEW_TYPE_OPTIONS_NODE).get(NewAssetHandler.NEW_TYPE_OPTIONS_KEY, null);
+					if (newTypes == null || newTypes.isEmpty()) return;
+					String[] bits = newTypes.split(NewAssetHandler.OPTION_SEP);
+					List<AssetType> menuItems = new ArrayList<>();
+					try(Session session = HibernateManager.openSession()){
+						for (int i = 0; i < bits.length; i ++) {
+							String uuid = bits[i];
+							try {
+								UUID assetTypeUuid = UuidUtils.stringToUuid(uuid);
+								if (assetTypeUuid != null) {
+									AssetType assetType = session.get(AssetType.class, assetTypeUuid);
+									if (assetType != null) {
+										assetType.getName();
+										menuItems.add(assetType);
+									}
+								}
+								
+							}catch (Exception ex) {
+								
+							}
+						}
+					}
+					for (MenuItem mi : addAssetMenu.getItems()) {
+						if (mi.getData() != null) mi.dispose();
+					}
+					for (int i = menuItems.size() - 1; i >= 0; i --) {
+						MenuItem addAssetType = new MenuItem(addAssetMenu, SWT.PUSH, 0);
+						addAssetType.setText(menuItems.get(i).getName());
+						addAssetType.setData(menuItems.get(i).getUuid());
+						final UUID assetTypeUuid = menuItems.get(i).getUuid();
+						addAssetType.addListener(SWT.Selection, evt->createNewAsset(assetTypeUuid));
+					}
+				}
+				
+				@Override
+				public void menuHidden(MenuEvent e) {}
+			});
+		}
 		
 		MenuItem openAsset = new MenuItem(mnu, SWT.PUSH);
 		openAsset.setText("Open");
@@ -350,88 +427,43 @@ public class AssetListView {
 			loadAssets();
 		});
 		
-		new MenuItem(mnu, SWT.SEPARATOR);
-		
-		MenuItem deleteAsset = new MenuItem(mnu, SWT.PUSH);
-		deleteAsset.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		deleteAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteAsset.addListener(SWT.Selection, e->{
-			deleteAssets();
-		});
-		
-		Menu addAssetMenu = new Menu(addAsset);
-		addAsset.setMenu(addAssetMenu);
-		new MenuItem(addAssetMenu, SWT.SEPARATOR);
-		
-		MenuItem otherAssetType = new MenuItem(addAssetMenu, SWT.PUSH);
-		otherAssetType.setText("Other...");
-		otherAssetType.addListener(SWT.Selection, evt->(new NewAssetHandler()).execute(context));
-		
-		addAssetMenu.addMenuListener(new MenuListener() {
+		if (AssetSecurityManager.INSTANCE.canDeleteAsset()) {
+			new MenuItem(mnu, SWT.SEPARATOR);
 			
-			@Override
-			public void menuShown(MenuEvent e) {
-				String newTypes = ConfigurationScope.INSTANCE.getNode(NewAssetHandler.NEW_TYPE_OPTIONS_NODE).get(NewAssetHandler.NEW_TYPE_OPTIONS_KEY, null);
-				if (newTypes == null || newTypes.isEmpty()) return;
-				String[] bits = newTypes.split(NewAssetHandler.OPTION_SEP);
-				List<AssetType> menuItems = new ArrayList<>();
-				try(Session session = HibernateManager.openSession()){
-					for (int i = 0; i < bits.length; i ++) {
-						String uuid = bits[i];
-						try {
-							UUID assetTypeUuid = UuidUtils.stringToUuid(uuid);
-							if (assetTypeUuid != null) {
-								AssetType assetType = session.get(AssetType.class, assetTypeUuid);
-								if (assetType != null) {
-									assetType.getName();
-									menuItems.add(assetType);
-								}
-							}
-							
-						}catch (Exception ex) {
-							
-						}
-					}
-				}
-				for (MenuItem mi : addAssetMenu.getItems()) {
-					if (mi.getData() != null) mi.dispose();
-				}
-				for (int i = menuItems.size() - 1; i >= 0; i --) {
-					MenuItem addAssetType = new MenuItem(addAssetMenu, SWT.PUSH, 0);
-					addAssetType.setText(menuItems.get(i).getName());
-					addAssetType.setData(menuItems.get(i).getUuid());
-					final UUID assetTypeUuid = menuItems.get(i).getUuid();
-					addAssetType.addListener(SWT.Selection, evt->createNewAsset(assetTypeUuid));
-				}
-			}
-			
-			@Override
-			public void menuHidden(MenuEvent e) {}
-		});
+			MenuItem deleteAsset = new MenuItem(mnu, SWT.PUSH);
+			deleteAsset.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			deleteAsset.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			deleteAsset.addListener(SWT.Selection, e->{
+				deleteAssets();
+			});
+		}
+		
+		
 	}
 	
 	private void createStationMenu(Control control) {
 		Menu mnu = new Menu(control);
 		control.setMenu(mnu);
 		
-		MenuItem newItem = new MenuItem(mnu, SWT.CASCADE);
-		newItem.setText("New ...");
-		newItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		if (AssetSecurityManager.INSTANCE.canCreateStationLocation()) {
+			MenuItem newItem = new MenuItem(mnu, SWT.CASCADE);
+			newItem.setText("New ...");
+			newItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			
+			Menu addMenu = new Menu(newItem);
+			newItem.setMenu(addMenu);
+		
+			MenuItem newStation= new MenuItem(addMenu, SWT.PUSH);
+			newStation.setText("Station");
+			newStation.addListener(SWT.Selection, e->createNewStation());
+			
+			MenuItem newLocation= new MenuItem(addMenu, SWT.PUSH);
+			newLocation.setText("Station Location");
+			newLocation.addListener(SWT.Selection, e->createNewStationLocation());
 		
 		
-		Menu addMenu = new Menu(newItem);
-		newItem.setMenu(addMenu);
-		
-		MenuItem newStation= new MenuItem(addMenu, SWT.PUSH);
-		newStation.setText("Station");
-		newStation.addListener(SWT.Selection, e->createNewStation());
-		
-		MenuItem newLocation= new MenuItem(addMenu, SWT.PUSH);
-		newLocation.setText("Station Location");
-		newLocation.addListener(SWT.Selection, e->createNewStationLocation());
-		
-		
-		new MenuItem(mnu, SWT.SEPARATOR);
+			new MenuItem(mnu, SWT.SEPARATOR);
+		}
 		
 		MenuItem openAsset = new MenuItem(mnu, SWT.PUSH);
 		openAsset.setText("Open");
@@ -452,12 +484,14 @@ public class AssetListView {
 			loadStations();
 		});
 		
-		new MenuItem(mnu, SWT.SEPARATOR);
-		
-		MenuItem deleteStation = new MenuItem(mnu, SWT.PUSH);
-		deleteStation.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		deleteStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteStation.addListener(SWT.Selection, e->deleteStations());
+		if (AssetSecurityManager.INSTANCE.canDeleteStationLocation()) {
+			new MenuItem(mnu, SWT.SEPARATOR);
+			
+			MenuItem deleteStation = new MenuItem(mnu, SWT.PUSH);
+			deleteStation.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			deleteStation.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			deleteStation.addListener(SWT.Selection, e->deleteStations());
+		}
 	}
 	
 	/**

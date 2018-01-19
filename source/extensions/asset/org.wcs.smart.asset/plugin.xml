@@ -168,26 +168,104 @@
                   commandId="org.wcs.smart.asset.command.assettype.show"
                   label="Asset Types..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.attributelist.show"
                   label="Asset Attributes..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.stationproperties.show"
                   label="Station &amp;&amp; Location Attributes..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.metadata.mapping.open"
                   label="File Metadata Mappings..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.settings.open"
                   label="Asset Module Settings..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.asset.separator2"
@@ -197,12 +275,44 @@
                   commandId="org.wcs.smart.asset.command.model.xml.export"
                   label="Export Model Data..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.model.xml.import"
                   label="Import Model Data..."
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution

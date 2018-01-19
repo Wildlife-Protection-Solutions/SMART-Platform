@@ -83,6 +83,7 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.map.engine.StatusEngine;
 import org.wcs.smart.asset.model.AssetMapStyle;
@@ -323,33 +324,33 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			}
 		});
 		
-		
-		Hyperlink hlConfigure = toolkit.createHyperlink(bottomLinks, "configure...", SWT.NONE);
-		hlConfigure.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,true, false));
-		hlConfigure.addHyperlinkListener(new IHyperlinkListener() {			
-			@Override
-			public void linkExited(HyperlinkEvent e) {}
-			
-			@Override
-			public void linkEntered(HyperlinkEvent e) {}
-			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (tableConfiguration == null) return;
+		if (AssetSecurityManager.INSTANCE.canConfigureAssetOverviewMap()) {
+			Hyperlink hlConfigure = toolkit.createHyperlink(bottomLinks, "configure...", SWT.NONE);
+			hlConfigure.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,true, false));
+			hlConfigure.addHyperlinkListener(new IHyperlinkListener() {			
+				@Override
+				public void linkExited(HyperlinkEvent e) {}
 				
-				AssetMapColumnConfiguration clone = new AssetMapColumnConfiguration();
-				try(Session s = HibernateManager.openSession()){
-					clone.loadColumnConfiguration(s);
+				@Override
+				public void linkEntered(HyperlinkEvent e) {}
+				
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					if (tableConfiguration == null) return;
+					
+					AssetMapColumnConfiguration clone = new AssetMapColumnConfiguration();
+					try(Session s = HibernateManager.openSession()){
+						clone.loadColumnConfiguration(s);
+					}
+					
+					ColumnListDialog dialog = new ColumnListDialog(summaryTable.getControl().getShell(), clone);
+					if (dialog.open() == Window.OK) {
+						//something was changed; we need to reload and recompute column values
+						loadTableJob.schedule();
+					}
 				}
-				
-				ColumnListDialog dialog = new ColumnListDialog(summaryTable.getControl().getShell(), clone);
-				if (dialog.open() == Window.OK) {
-					//something was changed; we need to reload and recompute column values
-					loadTableJob.schedule();
-				}
-			}
-		});
-				
+			});
+		}
 		sash.setWeights(new int[] {8,2});
 		
 		
@@ -366,6 +367,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			refresh();
 			loadStylesJob.schedule();
 		};
+		handlers.add(refreshHandler);
 		parentContext.get(IEventBroker.class).subscribe(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, refreshHandler);
 	}
 
@@ -375,6 +377,11 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		if (service != null) {
 			service.dispose(new NullProgressMonitor());
 			CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+		}
+		if (handlers != null) {
+			for(EventHandler h : handlers) {
+				parentContext.get(IEventBroker.class).unsubscribe(h);
+			}
 		}
 	}
 	
@@ -514,9 +521,11 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 				styles.addAll(QueryFactory.buildQuery(session, AssetMapStyle.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
 			}
-			styles.add("--- Actions ---");
-			styles.add(SAVE_STYLES);
-			styles.add(MANAGE_STYLES);
+			if (AssetSecurityManager.INSTANCE.canConfigureAssetOverviewMap()) {
+				styles.add("--- Actions ---");
+				styles.add(SAVE_STYLES);
+				styles.add(MANAGE_STYLES);
+			}
 			Display.getDefault().syncExec(()->{
 				cmbStyles.setInput(styles);
 				if (lastStyle != null && styles.contains(lastStyle)) {

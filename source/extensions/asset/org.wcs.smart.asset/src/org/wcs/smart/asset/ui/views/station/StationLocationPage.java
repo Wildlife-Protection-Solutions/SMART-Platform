@@ -63,6 +63,7 @@ import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
 import org.wcs.smart.asset.AssetHibernateManager;
+import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetDeployment;
@@ -163,18 +164,20 @@ public class StationLocationPage {
 		openItem.addListener(SWT.Selection, e->openLocation());
 
 
-		new MenuItem(mnu, SWT.SEPARATOR);
+		if (AssetSecurityManager.INSTANCE.canCreateStationLocation()) {
+			new MenuItem(mnu, SWT.SEPARATOR);
 		
-		MenuItem addItem = new MenuItem(mnu, SWT.PUSH);
-		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		addItem.setText(DialogConstants.ADD_BUTTON_TEXT);
-		addItem.addListener(SWT.Selection, e->addLocation());
-
-		
-		MenuItem editItem = new MenuItem(mnu, SWT.PUSH);
-		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		editItem.addListener(SWT.Selection, e->editLocationDetails());
+			MenuItem addItem = new MenuItem(mnu, SWT.PUSH);
+			addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			addItem.setText(DialogConstants.ADD_BUTTON_TEXT);
+			addItem.addListener(SWT.Selection, e->addLocation());
+		}
+		if (AssetSecurityManager.INSTANCE.canEditStationLocation()) {
+			MenuItem editItem = new MenuItem(mnu, SWT.PUSH);
+			editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
+			editItem.addListener(SWT.Selection, e->editLocationDetails());
+		}
 		
 		tblLocations.getControl().setMenu(mnu);
 	}
@@ -323,7 +326,7 @@ public class StationLocationPage {
 						AssetStationLocationProxy proxy = new AssetStationLocationProxy();
 						proxy.data = l;
 						locationData.add(proxy);
-						
+						l.getStation().getId();
 						l.getId();
 						
 						Long activeCnt = QueryFactory.buildCountQuery(session, AssetDeployment.class, 

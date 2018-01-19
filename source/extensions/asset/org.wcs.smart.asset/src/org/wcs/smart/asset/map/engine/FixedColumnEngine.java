@@ -272,7 +272,7 @@ public class FixedColumnEngine implements IColumnEngine {
 		sb.append(" JOIN smart.asset_deployment d on a.asset_deployment_uuid = d.uuid ");
 		sb.append(" JOIN smart.asset_station_location l on d.station_location_uuid = l.uuid ");
 		sb.append(" JOIN smart.asset_station s on l.station_uuid = s.uuid ");
-		sb.append(" WHERE s.conservationArea = :ca ");
+		sb.append(" WHERE s.ca_uuid = :ca ");
 		if (dFilter != null) {
 			sb.append(" AND ");
 			sb.append(" wp.dateTime >= :startDate and wp.dateTime <= :endDate " );
@@ -310,7 +310,7 @@ public class FixedColumnEngine implements IColumnEngine {
 		sb.append(" JOIN smart.asset_deployment d on a.asset_deployment_uuid = d.uuid ");
 		sb.append(" JOIN smart.asset_station_location l on d.station_location_uuid = l.uuid ");
 		sb.append(" JOIN smart.asset_station s on l.station_uuid = s.uuid ");
-		sb.append(" WHERE s.conservationArea = :ca ");
+		sb.append(" WHERE s.ca_uuid = :ca ");
 		if (dFilter != null) {		
 			sb.append(" AND wp.dateTime >= :startDate and wp.dateTime <= :endDate " );
 		}

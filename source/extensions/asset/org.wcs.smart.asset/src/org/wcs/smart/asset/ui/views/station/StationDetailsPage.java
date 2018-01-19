@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
@@ -81,6 +82,7 @@ public class StationDetailsPage {
 	public void createControl(Composite parent, FormToolkit toolkit) {
 		this.toolkit = toolkit;
 		
+		
 		Composite panel = toolkit.createComposite(parent, SWT.NONE);
 		panel.setLayout(new GridLayout());
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -108,6 +110,7 @@ public class StationDetailsPage {
 				
 			}
 		});
+		locFieldEditor.setEnabled(AssetSecurityManager.INSTANCE.canEditStationLocation());
 
 		Composite attributeComp = toolkit.createComposite(panel, SWT.BORDER);
 		attributeComp.setLayout(new GridLayout());
@@ -172,6 +175,7 @@ public class StationDetailsPage {
 			AttributeFieldEditor editor = new AttributeFieldEditor(attributes, attribute.getAttribute());
 			editor.adapt(toolkit);
 			fieldEditors.add(editor);
+			editor.setEnabled(AssetSecurityManager.INSTANCE.canEditStationLocation());
 			if (editor.getTextAttributeControl() != null) {
 				editor.getTextAttributeControl().addListener(SWT.Resize, e-> scroll.setMinSize(attributes.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 			}

@@ -76,6 +76,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.engine.StatisticsEngine;
 import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
@@ -179,7 +180,7 @@ public class AssetDeploymentPage {
 		
 		ToolItem itemDelete = null;
 		ToolItem itemEdit = null;
-		if (!parentEditor.getAsset().getIsRetired()) {
+		if (!parentEditor.getAsset().getIsRetired() && AssetSecurityManager.INSTANCE.canImportData()) {
 			ToolBar toolbar = new ToolBar(headerPanel, SWT.FLAT);
 			toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			
@@ -203,12 +204,8 @@ public class AssetDeploymentPage {
 		}
 		
 		SashForm bodyPanel = new SashForm(historyPanel, SWT.HORIZONTAL);
-//		bodyPanel.setLayout(new GridLayout(2, false));
 		bodyPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-//		((GridLayout)bodyPanel.getLayout()).marginHeight = 0;
-//		((GridLayout)bodyPanel.getLayout()).marginBottom = 5;
-		
+				
 		tblDeployments = new TableViewer(bodyPanel, SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER);
 		tblDeployments.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblDeployments.setContentProvider(ArrayContentProvider.getInstance());
@@ -234,7 +231,7 @@ public class AssetDeploymentPage {
 					
 		});
 		
-		if (!parentEditor.getAsset().getIsRetired()) {
+		if (!parentEditor.getAsset().getIsRetired() && AssetSecurityManager.INSTANCE.canImportData()) {
 			final ToolItem fitemDelete = itemDelete;
 			final ToolItem fitemEdit = itemEdit;
 			tblDeployments.addSelectionChangedListener(new ISelectionChangedListener() {

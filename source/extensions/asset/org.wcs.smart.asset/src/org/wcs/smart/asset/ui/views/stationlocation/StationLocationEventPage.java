@@ -57,6 +57,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationHistoryRecord;
 import org.wcs.smart.asset.ui.CommentDialog;
@@ -89,25 +90,11 @@ public class StationLocationEventPage {
 		((GridLayout)panel.getLayout()).marginHeight = 0;
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		ToolBar historyToolbar = new ToolBar(panel, SWT.FLAT | SWT.HORIZONTAL);
-		historyToolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		
-		ToolItem deleteItem = new ToolItem(historyToolbar,SWT.PUSH);
-		deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		deleteItem.setToolTipText("delete selected history records");
-		deleteItem.addListener(SWT.Selection, e->deleteHistoryRecords());
-		deleteItem.setEnabled(false);
-		
-		ToolItem editItem = new ToolItem(historyToolbar,SWT.PUSH);
-		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		editItem.setToolTipText("edit selected history record");
-		editItem.addListener(SWT.Selection, e->editHistoryRecord());
-		editItem.setEnabled(false);
-
-		ToolItem addItem = new ToolItem(historyToolbar,SWT.PUSH);
-		addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		addItem.setToolTipText("create a new history record");
-		addItem.addListener(SWT.Selection, e->addHistoryRecord());
+		ToolBar historyToolbar = null;
+		if (AssetSecurityManager.INSTANCE.canEditStationLocationHistory()) {
+			historyToolbar = new ToolBar(panel, SWT.FLAT | SWT.HORIZONTAL);
+			historyToolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		}
 		
 		tblEvents = new TableViewer(panel, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		tblEvents.setContentProvider(ArrayContentProvider.getInstance());
@@ -176,41 +163,64 @@ public class StationLocationEventPage {
 				return super.compare(viewer, e1, e2);
 			}
 		});
-		Menu mnu = new Menu(tblEvents.getControl());
 		
-		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
-		mnuAdd.setText("New ...");
-		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		mnuAdd.addListener(SWT.Selection, e->addHistoryRecord());
-		
-		MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
-		mnuEdit.setText("Edit ...");
-		mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		mnuEdit.addListener(SWT.Selection, e->editHistoryRecord());
-		
-		MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
-		mnuDelete.setText("Delete ...");
-		mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		mnuDelete.addListener(SWT.Selection, e->deleteHistoryRecords());
-		
-		mnu.addMenuListener(new MenuListener() {
-			@Override
-			public void menuShown(MenuEvent e) {
-				mnuDelete.setEnabled(!tblEvents.getSelection().isEmpty());
-				mnuEdit.setEnabled(!tblEvents.getSelection().isEmpty());
-			}
+		if (historyToolbar != null) {
+			ToolItem deleteItem = new ToolItem(historyToolbar,SWT.PUSH);
+			deleteItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			deleteItem.setToolTipText("delete selected history records");
+			deleteItem.addListener(SWT.Selection, e->deleteHistoryRecords());
+			deleteItem.setEnabled(false);
 			
-			@Override
-			public void menuHidden(MenuEvent e) {}
-		});
-		tblEvents.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				deleteItem.setEnabled(!tblEvents.getSelection().isEmpty());
-				editItem.setEnabled(!tblEvents.getSelection().isEmpty());
-			}
-		});
-		tblEvents.getControl().setMenu(mnu);
+			ToolItem editItem = new ToolItem(historyToolbar,SWT.PUSH);
+			editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			editItem.setToolTipText("edit selected history record");
+			editItem.addListener(SWT.Selection, e->editHistoryRecord());
+			editItem.setEnabled(false);
+	
+			ToolItem addItem = new ToolItem(historyToolbar,SWT.PUSH);
+			addItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			addItem.setToolTipText("create a new history record");
+			addItem.addListener(SWT.Selection, e->addHistoryRecord());
+			
+			tblEvents.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					deleteItem.setEnabled(!tblEvents.getSelection().isEmpty());
+					editItem.setEnabled(!tblEvents.getSelection().isEmpty());
+				}
+			});
+		}
+		if (AssetSecurityManager.INSTANCE.canEditStationLocationHistory()) {
+			Menu mnu = new Menu(tblEvents.getControl());
+			
+			MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
+			mnuAdd.setText("New ...");
+			mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			mnuAdd.addListener(SWT.Selection, e->addHistoryRecord());
+			
+			MenuItem mnuEdit = new MenuItem(mnu, SWT.PUSH);
+			mnuEdit.setText("Edit ...");
+			mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			mnuEdit.addListener(SWT.Selection, e->editHistoryRecord());
+			
+			MenuItem mnuDelete = new MenuItem(mnu, SWT.PUSH);
+			mnuDelete.setText("Delete ...");
+			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			mnuDelete.addListener(SWT.Selection, e->deleteHistoryRecords());
+			
+			mnu.addMenuListener(new MenuListener() {
+				@Override
+				public void menuShown(MenuEvent e) {
+					mnuDelete.setEnabled(!tblEvents.getSelection().isEmpty());
+					mnuEdit.setEnabled(!tblEvents.getSelection().isEmpty());
+				}
+				
+				@Override
+				public void menuHidden(MenuEvent e) {}
+			});
+
+			tblEvents.getControl().setMenu(mnu);
+		}
 	}
 		
 	

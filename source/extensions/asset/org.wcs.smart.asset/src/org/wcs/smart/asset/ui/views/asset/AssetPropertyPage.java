@@ -43,6 +43,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeValue;
@@ -131,14 +132,16 @@ public class AssetPropertyPage {
 		lblRetiredState = toolkit.createLabel(toppanel, "");
 		lblRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		changeRetiredState = toolkit.createHyperlink(toppanel, "", SWT.NONE);
-		changeRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		changeRetiredState.addHyperlinkListener(new HyperlinkAdapter() {			
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				retireAsset();
-			}
-		});
+		if (AssetSecurityManager.INSTANCE.canRetireAsset()) {
+			changeRetiredState = toolkit.createHyperlink(toppanel, "", SWT.NONE);
+			changeRetiredState.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			changeRetiredState.addHyperlinkListener(new HyperlinkAdapter() {			
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					retireAsset();
+				}
+			});
+		}
 		
 		Composite attributeComp = toolkit.createComposite(panel, SWT.BORDER);
 		attributeComp.setLayout(new GridLayout());
@@ -204,6 +207,7 @@ public class AssetPropertyPage {
 		for (AssetAttribute attribute : assetAttributes) {
 			AttributeFieldEditor editor = new AttributeFieldEditor(attributes, attribute);
 			editor.adapt(toolkit);
+			editor.setEnabled(AssetSecurityManager.INSTANCE.canEditAsset());
 			fieldEditors.add(editor);
 			if (editor.getTextAttributeControl() != null) {
 				editor.getTextAttributeControl().addListener(SWT.Resize, e-> scroll.setMinSize(attributes.computeSize(SWT.DEFAULT, SWT.DEFAULT)));

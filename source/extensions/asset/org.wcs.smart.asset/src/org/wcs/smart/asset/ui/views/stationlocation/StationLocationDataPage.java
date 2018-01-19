@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.ui.data.AssetDataPanel;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
@@ -70,7 +71,7 @@ public class StationLocationDataPage {
 	
 	public Composite createDataSection(Composite parent, FormToolkit toolkit) {
 		
-		dataPanel = new AssetDataPanel(toolkit, true, false, false, false, context) {
+		dataPanel = new AssetDataPanel(toolkit, AssetSecurityManager.INSTANCE.canEditStationLocationData(), false, false, false, context) {
 			@Override
 			public void loadWaypoints() {
 				reloadData();

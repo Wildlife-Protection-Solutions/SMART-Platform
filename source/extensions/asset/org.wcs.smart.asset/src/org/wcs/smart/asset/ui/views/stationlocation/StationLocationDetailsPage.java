@@ -40,6 +40,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetStation;
@@ -128,6 +129,7 @@ public class StationLocationDetailsPage {
 				
 			}
 		});
+		locFieldEditor.setEnabled(AssetSecurityManager.INSTANCE.canEditStationLocation());
 
 		Composite attributeComp = toolkit.createComposite(panel, SWT.BORDER);
 		attributeComp.setLayout(new GridLayout());
@@ -193,6 +195,7 @@ public class StationLocationDetailsPage {
 			
 			AttributeFieldEditor editor = new AttributeFieldEditor(attributes, attribute.getAttribute());
 			editor.adapt(toolkit);
+			editor.setEnabled(AssetSecurityManager.INSTANCE.canEditStationLocation());
 			fieldEditors.add(editor);
 			if (editor.getTextAttributeControl() != null) {
 				editor.getTextAttributeControl().addListener(SWT.Resize, e-> scroll.setMinSize(attributes.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
