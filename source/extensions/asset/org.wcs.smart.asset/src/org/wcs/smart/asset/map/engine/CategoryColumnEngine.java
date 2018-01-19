@@ -50,7 +50,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -79,15 +78,16 @@ public class CategoryColumnEngine implements IColumnEngine {
 	private Map<String, String> attributeToColumn;
 	private Map<String, Attribute> attributeKeyToAttribute;
 	
-	private ConservationArea ca = SmartDB.getCurrentConservationArea();
+	private ConservationArea ca ;
 	private IOverviewTableColumn.GroupByOption groupBy;
 	
-	public CategoryColumnEngine(Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, Session session) {
+	public CategoryColumnEngine(Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, ConservationArea ca, Session session) {
 		attributeToColumn = new HashMap<>();
 		attributeKeyToAttribute = new HashMap<>();
 		this.dFilter = dFilter;
 		this.session = session;
 		this.groupBy = groupBy;
+		this.ca = ca;
 	}
 	
 	@Override
@@ -227,22 +227,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 				new Object[] {"keyId", key}).uniqueResult();
 		return a;
 	}
-	
-//	private AttributeListItem findAttributeListItem(String key, Attribute attribute) {
-//		AttributeListItem a = QueryFactory.buildQuery(session,  AttributeListItem.class, 
-//				new Object[] {"conservationArea", ca},
-//				new Object[] {"keyId", key},
-//				new Object[] {"attribute", attribute}).uniqueResult();
-//		return a;
-//	}
-//	private AttributeTreeNode findAttributeTreeNode(String hkey, Attribute attribute) {
-//		AttributeTreeNode a = QueryFactory.buildQuery(session,  AttributeTreeNode.class, 
-//				new Object[] {"conservationArea", ca},
-//				new Object[] {"hKey", hkey},
-//				new Object[] {"attribute", attribute}).uniqueResult();
-//		return a;
-//	}
-	
+		
 	private synchronized void addAttributeColumn(Attribute attribute, Connection connection) throws SQLException {
 		if(attributeToColumn.containsKey(attribute.getKeyId())) return; //already exists
 		
@@ -366,8 +351,6 @@ public class CategoryColumnEngine implements IColumnEngine {
 	private void log(String message) {
 		System.out.println(message);
 	}
-	
-	
 	
 	private String asSql(BracketExpression filter, HashMap<String, Object> namesToValues) throws Exception{
 		String part1 = asSql(filter.getFilter(), namesToValues);

@@ -27,8 +27,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -39,7 +39,7 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.views.map.FixedColumn;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
-import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -53,17 +53,18 @@ public class FixedColumnEngine implements IColumnEngine {
 	private Date[] dFilter;
 	private IOverviewTableColumn.GroupByOption groupBy;
 	private Session session;
-	
+	private ConservationArea ca;
 	
 	private HashMap<UUID, Object> numberOfDaysStation = null;
 	private HashMap<UUID, Object> numberOfAssetDaysStation  = null;
 	private HashMap<UUID, Object> numberOfDaysLocation  = null;
 	private HashMap<UUID, Object> numberOfAssetDaysLocation = null;
 	
-	public FixedColumnEngine(Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, Session session) {
+	public FixedColumnEngine(Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, ConservationArea ca, Session session) {
 		this.dFilter = dFilter;
 		this.session = session;
 		this.groupBy = groupBy;
+		this.ca = ca;
 	}
 	
 	
@@ -121,16 +122,18 @@ public class FixedColumnEngine implements IColumnEngine {
 		LocalDate filterStart = null;
 		LocalDate filterEnd = null;
 		if (dFilter != null) {
-			String hql = "FROM AssetDeployment a WHERE startDate <= :endDate and (endDate is null or endDate >= :startDate)";
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca and startDate <= :endDate and (endDate is null or endDate >= :startDate)";
 			query = session.createQuery(hql, AssetDeployment.class)
+				.setParameter("ca", ca)
 				.setParameter("endDate", dFilter[1])
 				.setParameter("startDate", dFilter[0]);
 			
 			filterStart = new java.sql.Date(dFilter[0].getTime()).toLocalDate();
 			filterEnd= new java.sql.Date(dFilter[1].getTime()).toLocalDate();
 		}else {
-			String hql = "FROM AssetDeployment a ";
-			query = session.createQuery(hql, AssetDeployment.class);	
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca ";
+			query = session.createQuery(hql, AssetDeployment.class)
+					.setParameter("ca",  ca);	
 		}
 		
 		HashMap<AssetStation, HashSet<Long>> daysPerStation = new HashMap<>();
@@ -191,16 +194,18 @@ public class FixedColumnEngine implements IColumnEngine {
 		LocalDate filterStart = null;
 		LocalDate filterEnd = null;
 		if (dFilter != null) {
-			String hql = "FROM AssetDeployment a WHERE startDate <= :endDate and (endDate is null or endDate >= :startDate)";
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca  AND startDate <= :endDate and (endDate is null or endDate >= :startDate)";
 			query = session.createQuery(hql, AssetDeployment.class)
+				.setParameter("ca", ca)
 				.setParameter("endDate", dFilter[1])
 				.setParameter("startDate", dFilter[0]);
 			
 			filterStart = new java.sql.Date(dFilter[0].getTime()).toLocalDate();
 			filterEnd= new java.sql.Date(dFilter[1].getTime()).toLocalDate();
 		}else {
-			String hql = "FROM AssetDeployment a ";
-			query = session.createQuery(hql, AssetDeployment.class);	
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca ";
+			query = session.createQuery(hql, AssetDeployment.class)
+					.setParameter("ca", ca);	
 		}
 		
 		HashMap<AssetStationLocation, HashSet<Long>> daysPerStation = new HashMap<>();
@@ -267,14 +272,16 @@ public class FixedColumnEngine implements IColumnEngine {
 		sb.append(" JOIN smart.asset_deployment d on a.asset_deployment_uuid = d.uuid ");
 		sb.append(" JOIN smart.asset_station_location l on d.station_location_uuid = l.uuid ");
 		sb.append(" JOIN smart.asset_station s on l.station_uuid = s.uuid ");
+		sb.append(" WHERE s.conservationArea = :ca ");
 		if (dFilter != null) {
-			sb.append(" WHERE ");
+			sb.append(" AND ");
 			sb.append(" wp.dateTime >= :startDate and wp.dateTime <= :endDate " );
 		}
 		sb.append(") as foo ");
 		sb.append(" GROUP BY uuid");
 		
 		Query<?> query = session.createNativeQuery(sb.toString());
+		query.setParameter("ca", ca);
 		if (dFilter != null) {
 				query.setParameter("startDate", dFilter[0])
 				.setParameter("endDate", dFilter[1]);
@@ -291,7 +298,7 @@ public class FixedColumnEngine implements IColumnEngine {
 	}
 	
 
-	public static HashMap<UUID, Object> incidentsPerLocation(Session session, Date[] dFilter){
+	private HashMap<UUID, Object> incidentsPerLocation(Session session, Date[] dFilter){
 		
 		HashMap<UUID, Object> results = new HashMap<>();
 		
@@ -302,14 +309,16 @@ public class FixedColumnEngine implements IColumnEngine {
 		sb.append("FROM smart.asset_waypoint a JOIN smart.waypoint wp ON a.wp_uuid = wp.uuid ");
 		sb.append(" JOIN smart.asset_deployment d on a.asset_deployment_uuid = d.uuid ");
 		sb.append(" JOIN smart.asset_station_location l on d.station_location_uuid = l.uuid ");
-		if (dFilter != null) {
-			sb.append(" WHERE ");
-			sb.append(" wp.dateTime >= :startDate and wp.dateTime <= :endDate " );
+		sb.append(" JOIN smart.asset_station s on l.station_uuid = s.uuid ");
+		sb.append(" WHERE s.conservationArea = :ca ");
+		if (dFilter != null) {		
+			sb.append(" AND wp.dateTime >= :startDate and wp.dateTime <= :endDate " );
 		}
 		sb.append(") as foo ");
 		sb.append(" GROUP BY uuid");
 		
 		Query<?> query = session.createNativeQuery(sb.toString());
+		query.setParameter("ca", ca);
 		if (dFilter != null) {
 				query.setParameter("startDate", dFilter[0])
 				.setParameter("endDate", dFilter[1]);

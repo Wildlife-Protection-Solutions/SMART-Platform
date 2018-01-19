@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.model.AssetMapStyle;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.asset.model.AssetStationAttribute;
@@ -57,7 +58,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
 		
-		SubMonitor progress = SubMonitor.convert(monitor, "Copying Asset module data", 6);
+		SubMonitor progress = SubMonitor.convert(monitor, "Copying Asset module data", 7);
 		
 		progress.subTask("copying asset attributes");
 		cloneAttributes(engine);
@@ -78,6 +79,10 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		progress.subTask("Clone station and location attributes");
 		cloneStationAttributeSettings(engine);
 		cloneStationLocationAttributeSettings(engine);
+		progress.worked(1);		
+		
+		progress.subTask("Clone map styles");
+		cloneAssetMapStyles(engine);
 		progress.worked(1);		
 	}
 
@@ -102,7 +107,10 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			
 			if (mapping.getMappedListItem() != null) {
 				AttributeListItem a = findNewAttributeListItem(mapping.getMappedListItem(), engine);
-				if (a == null) throw new Exception("Cloned datamodel attribute list item not found");
+				if (a == null) {
+					//assume this is an entity list item that is not cloned
+					continue;
+				}
 				clone.setMappedListItem(a);
 			}
 			
@@ -166,6 +174,18 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setValue(setting.getValue());
 			engine.getSession().save(clone);
 	
+		}
+		engine.getSession().flush();
+	}
+	
+	private void cloneAssetMapStyles(ConservationAreaClonerEngine engine){
+		List<AssetMapStyle> styles = QueryFactory.buildQuery(engine.getSession(), AssetMapStyle.class, "conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$
+		for (AssetMapStyle style : styles){
+			AssetMapStyle clone = new AssetMapStyle();
+			clone.setConservationArea(engine.getNewCa());
+			clone.setName(style.getName());
+			clone.setStyleString(style.getStyleString());
+			engine.getSession().save(clone);
 		}
 		engine.getSession().flush();
 	}

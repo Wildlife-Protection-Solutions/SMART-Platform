@@ -15,24 +15,24 @@ import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 
 public class StatusEngine {
 
 	
-	public HashMap<Object, Set<Long>> computeStatus(Session session, Date[] dFilter, GroupByOption groupBy){
+	public HashMap<Object, Set<Long>> computeStatus(Session session, Date[] dFilter, ConservationArea ca, GroupByOption groupBy){
 		if (groupBy == GroupByOption.LOCATION) {
-			return computeStationLocationStatus(session, dFilter);
+			return computeStationLocationStatus(session, ca, dFilter);
 		}else {
-			return computeStationStatus(session, dFilter);
+			return computeStationStatus(session, ca, dFilter);
 		}
 	}
 	
-	private HashMap<Object, Set<Long>> computeStationStatus(Session session, Date[] dFilter){
-		HashMap<Object, Set<Long>> data = computeStatus(session, dFilter, true);
+	private HashMap<Object, Set<Long>> computeStationStatus(Session session, ConservationArea ca, Date[] dFilter){
+		HashMap<Object, Set<Long>> data = computeStatus(session, dFilter, true, ca);
 		List<AssetStation> stations = QueryFactory.buildQuery(session,  AssetStation.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+				new Object[] {"conservationArea", ca}).list();
 		
 		for (AssetStation ss : stations) {
 			if (data.containsKey(ss)) continue;
@@ -41,10 +41,10 @@ public class StatusEngine {
 		return data;
 	}
 	
-	private HashMap<Object, Set<Long>> computeStationLocationStatus(Session session, Date[] dFilter){
-		HashMap<Object, Set<Long>> data = computeStatus(session, dFilter, false);
+	private HashMap<Object, Set<Long>> computeStationLocationStatus(Session session, ConservationArea ca, Date[] dFilter){
+		HashMap<Object, Set<Long>> data = computeStatus(session, dFilter, false, ca);
 		List<AssetStation> stations = QueryFactory.buildQuery(session,  AssetStation.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+				new Object[] {"conservationArea", ca}).list();
 		
 		for (AssetStation ss : stations) {
 			ss.computeStatus(session);
@@ -57,17 +57,19 @@ public class StatusEngine {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T> HashMap<T, Set<Long>> computeStatus(Session session, Date[] dFilter, boolean isStation){
+	private <T> HashMap<T, Set<Long>> computeStatus(Session session, Date[] dFilter, boolean isStation, ConservationArea ca){
 		
 		Query<AssetDeployment> query = null;
 		if (dFilter != null) {
-			String hql = "FROM AssetDeployment a WHERE startDate <= :endDate and (endDate is null or endDate >= :startDate)";
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca and startDate <= :endDate and (endDate is null or endDate >= :startDate)";
 			query = session.createQuery(hql, AssetDeployment.class)
+				.setParameter("ca", ca)
 				.setParameter("endDate", dFilter[1])
 				.setParameter("startDate", dFilter[0]);
 		}else {
-			String hql = "FROM AssetDeployment a ";
-			query = session.createQuery(hql, AssetDeployment.class);
+			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca";
+			query = session.createQuery(hql, AssetDeployment.class)
+					.setParameter("ca", ca);
 		}
 		
 		HashMap<T, Set<Long>> data = new HashMap<>();

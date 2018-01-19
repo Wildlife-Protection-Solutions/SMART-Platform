@@ -39,6 +39,7 @@ import org.wcs.smart.asset.ui.views.map.CombinedOverviewColumn;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.asset.ui.views.map.StationData;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -53,15 +54,17 @@ public class OverviewmapColumnEngine {
 	protected List<StationData> data;
 	private HashMap<UUID, StationData> map;
 	
-	public Set<IOverviewTableColumn> computedColumns;
+	private Set<IOverviewTableColumn> computedColumns;
+	protected ConservationArea ca;
 	
 	/**
 	 * Creates a new engine
 	 */
-	public OverviewmapColumnEngine() {
+	public OverviewmapColumnEngine(ConservationArea ca) {
 		data = new ArrayList<>();
 		map = new HashMap<>();
 		computedColumns = new HashSet<>();
+		this.ca = ca;
 	}
 	
 	/**
@@ -114,8 +117,8 @@ public class OverviewmapColumnEngine {
 			session.beginTransaction();
 			
 			List<IColumnEngine> engines = new ArrayList<>();
-			engines.add(new FixedColumnEngine(dFilter, groupBy, session));
-			engines.add(new CategoryColumnEngine(dFilter, groupBy, session));
+			engines.add(new FixedColumnEngine(dFilter, groupBy, ca, session));
+			engines.add(new CategoryColumnEngine(dFilter, groupBy, ca, session));
 			
 			try {
 				//we don't compute combined columns here; do that after

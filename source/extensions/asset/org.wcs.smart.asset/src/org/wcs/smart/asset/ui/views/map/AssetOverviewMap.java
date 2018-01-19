@@ -23,7 +23,6 @@ package org.wcs.smart.asset.ui.views.map;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -83,11 +82,9 @@ import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
 import org.wcs.smart.asset.map.engine.StatusEngine;
-import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetMapStyle;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.asset.ui.views.map.udig.AssetStationSummaryGeoResource;
@@ -148,7 +145,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	private IEclipseContext parentContext;
 	private List<EventHandler> handlers = null;
 	
-	private OverviewmapColumnEngine statEngine = new OverviewmapColumnEngine() {
+	private OverviewmapColumnEngine statEngine = new OverviewmapColumnEngine(SmartDB.getCurrentConservationArea()) {
 		
 		public void refreshData() { 
 			Display.getDefault().syncExec(()->{
@@ -650,7 +647,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		
 			HashMap<Object, Set<Long>> data = new HashMap<>();
 			try(Session session = HibernateManager.openSession()){
-				data = (new StatusEngine()).computeStatus(session, dFilters, currentGroupByOption);
+				data = (new StatusEngine()).computeStatus(session, dFilters, SmartDB.getCurrentConservationArea(), currentGroupByOption);
 			}
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
