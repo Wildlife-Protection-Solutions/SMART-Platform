@@ -274,6 +274,8 @@ public class DataImportPage {
 							}
 							
 							if (isNewLocation) {
+								session.save(p.getStationLocation());
+								
 								p.getStationLocation().setId(generateLocationId(p.getStation(), session));
 								if (p.getStationLocation().getX() == null) p.getStationLocation().setX(p.getX());
 								if (p.getStationLocation().getY() == null) p.getStationLocation().setY(p.getY());
