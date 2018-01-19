@@ -65,6 +65,8 @@
 		<module>../extensions/qa/org.wcs.smart.qa.er/pom-shared.xml</module>
 		<module>../extensions/qa/org.wcs.smart.qa.incident/pom-shared.xml</module>
 		<module>../extensions/qa/org.wcs.smart.qa.patrol/pom-shared.xml</module>
+		
+		<module>../extensions/asset/org.wcs.smart.asset/pom-shared.xml</module>
 	</modules>
  
 	<build>
