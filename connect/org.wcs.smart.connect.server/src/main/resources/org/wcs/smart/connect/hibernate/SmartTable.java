@@ -43,7 +43,6 @@ import org.wcs.smart.asset.model.AssetTypeAttribute;
 import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointAttachment;
-import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -172,6 +171,7 @@ import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolFolder;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -308,6 +308,7 @@ public enum SmartTable {
 	PATROLWAYPOINT(PatrolWaypoint.class,".id.waypoint.conservationArea"),
 	PATROLWAYPOINTQUERY(PatrolWaypointQuery.class,null),
 	PATROLINTELLIGENCE(PatrolIntelligence.class,".id.patrol.conservationArea"),
+	PATROLFOLDER(PatrolFolder.class,null),
 	PLAN(Plan.class,null),
 	PLANTARGET(PlanTarget.class,null),
 	PROJECTION(Projection.class,null),
