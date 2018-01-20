@@ -219,12 +219,19 @@ public abstract class FolderTreeDropListener extends ViewerDropAdapter {
 			return false;
 		}
 		Object objFolder = folderTreeContentProvider.getParent(obj);
-
 		
+		if (obj == target) {
+			return false;
+		}
+
 		if (obj instanceof IFolder) {
 			if (!(target instanceof IFolder) && folderTreeContentProvider.getParent(target) == objFolder) {
 				//special case when element(target) and folder share the same parent folder
 				return false;
+			}
+			if (target == NoneFolder.INSTANCE || folderTreeContentProvider.getParent(target) == NoneFolder.INSTANCE) {
+				//this is drop to "None" folder or its child => we allow drop for any non-root folder
+				return folderTreeContentProvider.getParent(obj) != null;
 			}
 			return !isInChildren(obj, target);
 		} else {
