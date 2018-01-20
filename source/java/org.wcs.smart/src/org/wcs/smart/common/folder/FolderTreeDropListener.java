@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.common.folder;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -74,10 +75,11 @@ public abstract class FolderTreeDropListener extends ViewerDropAdapter {
 			return;
 		}
 		
-		List<? extends IFolder> sourceList = source.getParentFolder() != null ? source.getParentFolder().getChildFolders() :
+		//NOTE: <IFolder>.getChildFolders() need to be copied to a separate list to avoid issue caused by "orphanRemoval=true"
+		List<? extends IFolder> sourceList = source.getParentFolder() != null ? new ArrayList<>(source.getParentFolder().getChildFolders()) :
 			    FolderTreeUtils.getRootFoldersFromImput(folderTreeContentProvider.getElements(null));
 
-		List<? extends IFolder> targetList = target != null ? target.getChildFolders() : 
+		List<? extends IFolder> targetList = target != null ? new ArrayList<>(target.getChildFolders()) : 
 			FolderTreeUtils.getRootFoldersFromImput(folderTreeContentProvider.getElements(null));
 		
 		sourceList.remove(source);
@@ -103,11 +105,12 @@ public abstract class FolderTreeDropListener extends ViewerDropAdapter {
 			return;
 		}
 		
-		List<? extends IFolder> sourceList = source.getParentFolder() != null ? source.getParentFolder().getChildFolders() :
+		//NOTE: <IFolder>.getChildFolders() need to be copied to a separate list to avoid issue caused by "orphanRemoval=true"
+		List<? extends IFolder> sourceList = source.getParentFolder() != null ? new ArrayList<>(source.getParentFolder().getChildFolders()) :
 			    FolderTreeUtils.getRootFoldersFromImput(folderTreeContentProvider.getElements(null));
 
 		List<? extends IFolder> targetList = source.getParentFolder() == target.getParentFolder() ? sourceList : 
-			    target.getParentFolder() != null ?  target.getParentFolder().getChildFolders() :
+			    target.getParentFolder() != null ?  new ArrayList<>(target.getParentFolder().getChildFolders()) :
 				FolderTreeUtils.getRootFoldersFromImput(folderTreeContentProvider.getElements(null));
 
 		sourceList.remove(source);
