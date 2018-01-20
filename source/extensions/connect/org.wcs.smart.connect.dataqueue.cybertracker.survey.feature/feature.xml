@@ -4,16 +4,13 @@
       label="Core SMART CyberTracker DataQueue Mission Processor (Required)"
       version="6.0.0.qualifier"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.feature">
+      license-feature="org.wcs.smart.license.feature"
+      license-feature-version="6.0.0.qualifier">
 
    <description>
       Adds support for processing CyberTracker survey(mission) data
 sent via the network to a Connect Server.
    </description>
-
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
-   </license>
 
    <includes
          id="org.wcs.smart.er.feature"

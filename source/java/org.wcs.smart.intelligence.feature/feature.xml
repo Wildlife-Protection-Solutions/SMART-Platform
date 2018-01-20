@@ -4,7 +4,8 @@
       label="Core SMART Intelligence Module (Required)"
       version="6.0.0.qualifier"
       provider-name="org.wcs.smart"
-	license-feature="org.wcs.smart.feature">
+      license-feature="org.wcs.smart.license.feature"
+      license-feature-version="6.0.0.qualifier">
 
    <description>
       This plugin allows for tracking of intelligence related records
@@ -14,10 +15,6 @@ and associating those records with patrols.
    <copyright>
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
-
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
-   </license>
 
    <includes
          id="org.wcs.smart.intelligence.core.feature"
