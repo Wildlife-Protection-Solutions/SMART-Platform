@@ -95,6 +95,8 @@ public class AssetSettingsDialog extends TitleAreaDialog {
 				session.saveOrUpdate(setting);
 				
 				session.getTransaction().commit();
+				
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
 				AssetPlugIn.displayLog(ex.getMessage(), ex);
@@ -149,7 +151,7 @@ public class AssetSettingsDialog extends TitleAreaDialog {
 			return false;
 		}
 		try {
-			value = Double.parseDouble(txtStationBuffer.getText());
+			value = Double.parseDouble(txtLocationBuffer.getText());
 		}catch (Exception ex) {
 			setErrorMessage("Invalid location buffer value.  Value must be valid number greater than zero.");
 			return false;
@@ -175,7 +177,7 @@ public class AssetSettingsDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	Job loadSettings = new Job("load settings") {
+	private Job loadSettings = new Job("load settings") {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -194,6 +196,7 @@ public class AssetSettingsDialog extends TitleAreaDialog {
 				txtStationBuffer.setText(String.valueOf(fstation));
 				txtStationBuffer.setEnabled(true);
 				txtLocationBuffer.setEnabled(true);
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
 			});
 			return Status.OK_STATUS;
 		}
