@@ -98,7 +98,7 @@ import org.wcs.smart.ui.ca.properties.NameKeyComposite.IChangeListener;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Dialog for editing asset types.
+ * Dialog for editing an asset type.
  * 
  * @author Emily
  *
