@@ -5,7 +5,8 @@
 	<session-factory>
 		<!-- using container-managed JNDI -->
 		<property name="hibernate.connection.datasource">java:comp/env/jdbc/smart</property>
-		<property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+		<!-- <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>-->
+		<property name="dialect">org.wcs.smart.connect.hibernate.SmartPostgresDialect</property>
 
 		<!-- Echo all executed SQL to stdout -->
 		<property name="show_sql">false</property> 

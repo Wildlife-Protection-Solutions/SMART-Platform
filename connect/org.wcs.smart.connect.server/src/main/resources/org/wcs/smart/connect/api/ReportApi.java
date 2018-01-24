@@ -131,7 +131,7 @@ public class ReportApi extends HttpServlet{
 		UUID uuid = UuidUtils.stringToUuid(reportUuid);		
 		
 		Report report = null;
-		Session s = HibernateManager.getSession(context, request.getLocale());
+		
 
 		ReportFormat rformat = null;
 		for (ReportFormat fr : ReportFormat.values()){
@@ -144,35 +144,35 @@ public class ReportApi extends HttpServlet{
 		}
 		
 		List<ConservationArea> conservationAreas = new ArrayList<ConservationArea>();
-		try{
-			
-			
+		try(Session s = HibernateManager.getSession(context, request.getLocale())){
 			s.beginTransaction();
-			report = (Report) s.get(Report.class, uuid);
-			
-			if (report == null) throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ReportApi.ReportNotFound", request.getLocale())); //$NON-NLS-1$
-			
-			//for shared links; these links do not have a user but we want to check the j_username which is set to the link creator
-			//String name = (String)request.getAttribute("j_username");
-			String name = request.getUserPrincipal().getName();
-			
-			//check for permission to this query for this user.
-			if (!SecurityManager.INSTANCE.canAccess(s, name, ReportAction.RUNREPORT_KEY, uuid)){
-				if (SecurityManager.INSTANCE.canAccess(s, name, ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid())){
-					//access is OK since they have access to All Queries in this CA.
-				}else{
-					return createErrorResponse(Status.UNAUTHORIZED, Messages.getString("ReportApi.InvalidAccess", request.getLocale()));  //$NON-NLS-1$
+			try {
+				report = (Report) s.get(Report.class, uuid);
+				
+				if (report == null) throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ReportApi.ReportNotFound", request.getLocale())); //$NON-NLS-1$
+				
+				//for shared links; these links do not have a user but we want to check the j_username which is set to the link creator
+				//String name = (String)request.getAttribute("j_username");
+				String name = request.getUserPrincipal().getName();
+				
+				//check for permission to this query for this user.
+				if (!SecurityManager.INSTANCE.canAccess(s, name, ReportAction.RUNREPORT_KEY, uuid)){
+					if (SecurityManager.INSTANCE.canAccess(s, name, ReportAction.RUNREPORT_KEY, report.getConservationArea().getUuid())){
+						//access is OK since they have access to All Queries in this CA.
+					}else{
+						return createErrorResponse(Status.UNAUTHORIZED, Messages.getString("ReportApi.InvalidAccess", request.getLocale()));  //$NON-NLS-1$
+					}
 				}
+				
+				if (report.getConservationArea().getIsCcaa()){
+					//we use the ccaafilter; otherwise we ignore it
+					conservationAreas.addAll(parseCaFilter(cafilter, s));
+				}else{
+					conservationAreas.add(report.getConservationArea());
+				}
+			}finally {
+				s.getTransaction().rollback();
 			}
-			
-			if (report.getConservationArea().getIsCcaa()){
-				//we use the ccaafilter; otherwise we ignore it
-				conservationAreas.addAll(parseCaFilter(cafilter, s));
-			}else{
-				conservationAreas.add(report.getConservationArea());
-			}
-		}finally {
-			s.getTransaction().rollback();
 		}
 				
 		try{
@@ -203,32 +203,32 @@ public class ReportApi extends HttpServlet{
 		
 					IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, report.getConservationArea(), request.getUserPrincipal() == null ? "" : request.getUserPrincipal().getName()); //$NON-NLS-1$
 		
-					Session reportSession = HibernateManager.getSession(context, request.getLocale());
+					try(Session reportSession = HibernateManager.getSession(context, request.getLocale())){
 						
-					Map<Object,Object> items = task.getAppContext();
-					items.put(BirtConstants.SESSION_PARAM, reportSession);
-					items.put(SmartConnection.LOCALE_CONTEXT_VAR, request.getLocale());
-					items.put(BirtConstants.CA_PARAM, report.getConservationArea());
-					items.put(ServerSmartConnection.CCAA_FILTER_KEY, conservationAreas);
-					items.put(ServerSmartConnection.CURRENT_USER_KEY, request.getUserPrincipal().getName());
-						
-					reportSession.beginTransaction();
-					try{
-						Map<String, Object> parameters = new HashMap<String, Object>();
-							//put all the non-constant parameters in the hashmap
-
-						covertParametersToMap(parameters, parameterList, reportSession, uuid);
-//							parameters.put("reportUuid", reportUuid);
-//							parameters.put("cafilter", cafilter);
+						Map<Object,Object> items = task.getAppContext();
+						items.put(BirtConstants.SESSION_PARAM, reportSession);
+						items.put(SmartConnection.LOCALE_CONTEXT_VAR, request.getLocale());
+						items.put(BirtConstants.CA_PARAM, report.getConservationArea());
+						items.put(ServerSmartConnection.CCAA_FILTER_KEY, conservationAreas);
+						items.put(ServerSmartConnection.CURRENT_USER_KEY, request.getUserPrincipal().getName());
 							
-						task.setRenderOption(options);
-						task.setParameterValues(parameters);
-						task.run();
-					}finally{
-						reportSession.getTransaction().rollback();
-						task.close();
+						reportSession.beginTransaction();
+						try{
+							Map<String, Object> parameters = new HashMap<String, Object>();
+								//put all the non-constant parameters in the hashmap
+	
+							covertParametersToMap(parameters, parameterList, reportSession, uuid);
+	//							parameters.put("reportUuid", reportUuid);
+	//							parameters.put("cafilter", cafilter);
+								
+							task.setRenderOption(options);
+							task.setParameterValues(parameters);
+							task.run();
+						}finally{
+							reportSession.getTransaction().rollback();
+							task.close();
+						}
 					}
-				
 					if(rformat != ReportFormat.HTML){
 						return writeBinary(bos, rformat, report);
 					}else{
