@@ -162,6 +162,10 @@ public enum StationManager {
 		}
 		session.flush();
 		
+		hql = "DELETE FROM AssetDeploymentAttributeValue WHERE id.assetDeployment IN (FROM AssetDeployment WHERE stationLocation = :location)";
+		session.createQuery(hql).setParameter("location",  location).executeUpdate();
+		session.flush();	
+		
 		hql = "DELETE FROM AssetDeployment WHERE stationLocation = :location ";
 		session.createQuery(hql).setParameter("location",  location).executeUpdate();
 		session.flush();

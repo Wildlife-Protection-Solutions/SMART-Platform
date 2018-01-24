@@ -321,7 +321,7 @@
                   style="push">
                <parameter
                      name="org.wcs.smart.observation.perspective.show.focusview"
-                     value="org.wcs.smart.asset.views.asset">
+                     value="org.wcs.smart.asset.view.assets">
                </parameter>
             </command>
             <visibleWhen
