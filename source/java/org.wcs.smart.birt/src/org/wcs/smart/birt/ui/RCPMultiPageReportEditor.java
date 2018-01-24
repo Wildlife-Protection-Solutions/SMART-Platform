@@ -24,6 +24,8 @@ package org.wcs.smart.birt.ui;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.batik.script.rhino.BatikSecurityController;
+import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 import org.eclipse.birt.report.designer.internal.ui.util.UIUtil;
 import org.eclipse.birt.report.designer.ui.editors.IReportProvider;
 import org.eclipse.birt.report.designer.ui.editors.MultiPageReportEditor;
@@ -38,6 +40,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.wcs.smart.birt.Activator;
+
+import com.vividsolutions.jts.geom.util.GeometryEditor.GeometryEditorOperation;
 
 /**
  * BIRT Report editor for SMART birt editors.  This editor looks
@@ -81,6 +85,11 @@ public class RCPMultiPageReportEditor extends MultiPageReportEditor {
 						manager = (IReportEditorManager) e.createExecutableExtension("EditorManager"); //$NON-NLS-1$
 						break;
 					}
+				}
+				if (manager == null && getEditorInput().getClass()==ReportEditorInput.class) {
+					BasicReportEditorManager mgr = new BasicReportEditorManager();
+					mgr.init(this);
+					manager = mgr;
 				}
 			}
 			}catch (Exception ex){
