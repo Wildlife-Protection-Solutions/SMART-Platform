@@ -1,4 +1,4 @@
-/*
+/*   
  * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -21,29 +21,40 @@
  */
 package org.wcs.smart.asset.ui.handler;
 
-import java.text.MessageFormat;
-
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.ui.views.data.DataImporterInput;
-import org.wcs.smart.asset.ui.views.data.DataImporterView;
+import org.wcs.smart.asset.ui.views.map.AssetOverviewMap;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
- * Opens the data importer view.
- * 
+ * Opens the asset overview map
  * @author Emily
  *
  */
-public class ImportDataHandler {
+@SuppressWarnings("restriction")
+public class ShowAssetOverviewMapHandler {
 
-	public void execute() {
-		DataImporterInput input = new DataImporterInput();
-		try {			
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, DataImporterView.ID);
+	@Execute
+	public void execute(IEclipseContext context) {
+		(new org.wcs.smart.ui.ShowPerspectiveHandler()).execute(FieldDataPerspective.ID, context.get(MWindow.class));
+
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(AssetOverviewMap.OVERVIEW_MAP_INPUT, AssetOverviewMap.ID);
 		} catch (PartInitException e) {
-			AssetPlugIn.displayLog(MessageFormat.format("Error opening station editor: {0}", e.getMessage()), e);
-		}	
-		
+			AssetPlugIn.displayLog(e.getMessage(), e);
+		}
+	}
+
+	
+	// E3
+	public static class ShowAssetOverviewMapHandlerWrapper extends DIHandler<ShowAssetOverviewMapHandler> {
+		public ShowAssetOverviewMapHandlerWrapper() {
+			super(ShowAssetOverviewMapHandler.class);
+		}
 	}
 }

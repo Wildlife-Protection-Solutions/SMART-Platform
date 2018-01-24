@@ -58,7 +58,7 @@ public class DataImporterView extends EditorPart{
 	private FormToolkit toolkit;
 	
 	private DataImportPage importPage;
-	DataReviewPage reviewPage;
+	private DataReviewPage reviewPage;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -66,6 +66,17 @@ public class DataImporterView extends EditorPart{
 
 	@Override
 	public void doSaveAs() {
+	}
+	
+	public DataReviewPage getReviewPage() {
+		return this.reviewPage;
+	}
+	
+	@Override
+	public void dispose() {
+		importPage.dispose();
+		reviewPage.dispose();
+		super.dispose();
 	}
 	
 	@Override

@@ -117,6 +117,7 @@ public class AddAssetJob extends Job {
 				"CREATE TABLE smart.asset_map_style ( uuid char(16) for bit data NOT NULL, ca_uuid char(16) for bit data NOT NULL, name varchar(1024), style_string varchar(32672), PRIMARY KEY (uuid) )",
 				
 				// Create Foreign Keys
+				"ALTER TABLE smart.asset_station ADD CONSTRAINT assetstation_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_station_location_history ADD CONSTRAINT assetstnlochistory_stnloc_fk FOREIGN KEY (station_location_uuid) REFERENCES smart.asset_station_location(uuid) DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE smart.asset_station_location ADD CONSTRAINT assetstnloc_stn_fk FOREIGN KEY (station_uuid) REFERENCES smart.asset_station(uuid) DEFERRABLE INITIALLY IMMEDIATE",			
 				"ALTER TABLE smart.asset_station_location_attribute_value ADD CONSTRAINT sntlocattvalu_stnloc_fk FOREIGN KEY (station_location_uuid) REFERENCES smart.asset_station_location(uuid) DEFERRABLE INITIALLY IMMEDIATE",

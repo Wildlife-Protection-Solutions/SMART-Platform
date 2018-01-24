@@ -71,9 +71,11 @@ public class DataReviewPage {
 		panel.refresh();
 	}
 	
+	public void dispose() {
+		this.view = null;
+	}
+	
 	public void createControl(Composite parent) {
-		
-		
 		panel.createControl(parent);
 		
 		EventHandler refreshHandler = event->{

@@ -52,6 +52,16 @@ public class ImagesTablePanel {
 	public ImagesTablePanel(Composite parent, DataImportPage view, FormToolkit toolkit) {
 		this.view = view;
 		createComposite(parent, toolkit);
+		
+		parent.addListener(SWT.Dispose, e->{
+			dispose();
+		});
+	}
+	
+	public void dispose() {
+		if (tblResultsImg != null && !tblResultsImg.isDisposed()) tblResultsImg.dispose();
+		tblResultsImg = null;
+		view = null;
 	}
 	
 	public void refresh() {

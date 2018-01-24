@@ -21,44 +21,37 @@
  */
 package org.wcs.smart.asset.ui.handler;
 
-import java.text.MessageFormat;
-
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.ui.views.data.DataImporterInput;
-import org.wcs.smart.asset.ui.views.data.DataImporterView;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.asset.ui.inout.AssetDataImportWizard;
 
 /**
- * Import assetdata files
+ * Import model data from xml file
  * 
  * @author Emily
  *
  */
 @SuppressWarnings("restriction")
-public class ImportAssetDataHandler {
+public class ImportAssetModelDataHandler {
+
+	public static final String PREFERENCE_DIR_KEY = ImportAssetModelDataHandler.class.getCanonicalName() + ".dir";  //$NON-NLS-1$
 	
 	@Execute
 	public void execute(IEclipseContext context) {
-		(new org.wcs.smart.ui.ShowPerspectiveHandler()).execute(FieldDataPerspective.ID, context.get(MWindow.class));
-		
-		DataImporterInput input = new DataImporterInput();
-		try {			
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, DataImporterView.ID);
-		} catch (PartInitException e) {
-			AssetPlugIn.displayLog(MessageFormat.format("Error opening station editor: {0}", e.getMessage()), e);
-		}	
+		AssetDataImportWizard wizard = new AssetDataImportWizard();
+		ContextInjectionFactory.inject(wizard, context);
+		WizardDialog wd = new WizardDialog(context.get(Shell.class), wizard);
+		wd.open();
 	}
 	
 	// E3
-	public static class ImportAssetDataHandlerWrapper extends DIHandler<ImportAssetDataHandler> {
-		public ImportAssetDataHandlerWrapper() {
-			super(ImportAssetDataHandler.class);
+	public static class ImportAssetModelDataHandlerWrapper extends DIHandler<ImportAssetModelDataHandler> {
+		public ImportAssetModelDataHandlerWrapper() {
+			super(ImportAssetModelDataHandler.class);
 		}
 	}
 

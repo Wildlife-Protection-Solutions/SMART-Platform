@@ -74,8 +74,6 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -93,12 +91,12 @@ import org.wcs.smart.asset.ui.SectionHeader;
 import org.wcs.smart.asset.ui.StationDialog;
 import org.wcs.smart.asset.ui.StationLocationDialog;
 import org.wcs.smart.asset.ui.handler.DeleteAssetHandler;
-import org.wcs.smart.asset.ui.handler.ImportDataHandler;
+import org.wcs.smart.asset.ui.handler.ImportAssetDataHandler;
 import org.wcs.smart.asset.ui.handler.NewAssetHandler;
 import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
-import org.wcs.smart.asset.ui.views.map.AssetOverviewMap;
+import org.wcs.smart.asset.ui.handler.ShowAssetOverviewMapHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -114,7 +112,7 @@ import org.wcs.smart.util.UuidUtils;
 @SuppressWarnings("restriction")
 public class AssetListView {
 	
-	public static final String ID = "org.wcs.smart.asset.ui.view.assets"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.asset.view.assets"; //$NON-NLS-1$
 	
 	@Inject
 	private IEclipseContext context;
@@ -260,11 +258,7 @@ public class AssetListView {
 	}
 	
 	private void showOverviewMap() {
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(AssetOverviewMap.OVERVIEW_MAP_INPUT, AssetOverviewMap.ID);
-		} catch (PartInitException e) {
-			AssetPlugIn.displayLog(e.getMessage(), e);
-		}
+		(new ShowAssetOverviewMapHandler()).execute(context);
 	}
 	
 	private void createStationsToolbar(Composite parent) {
@@ -312,7 +306,7 @@ public class AssetListView {
 	}
 	
 	private void importData() {
-		(new ImportDataHandler()).execute();
+		(new ImportAssetDataHandler()).execute(context);
 	}
 	
 	private Composite createStationsPanel(Composite parent) {

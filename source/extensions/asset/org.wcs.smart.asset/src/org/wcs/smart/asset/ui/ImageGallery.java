@@ -214,7 +214,8 @@ public class ImageGallery extends Composite{
 			needsRefresh.set(true);
 			return;
 		}		
-		ArrayList<ThumbInfo> old = new ArrayList<ThumbInfo>(thumbs);
+		ArrayList<ThumbInfo> old = new ArrayList<ThumbInfo>();
+		if (thumbs != null) old.addAll(thumbs);
 		thumbs = new ArrayList<ThumbInfo>();
 		
 		List<Node> orderedNodes = new ArrayList<>();
@@ -249,6 +250,11 @@ public class ImageGallery extends Composite{
     public synchronized void createThumbnails()  {
     	Platform.setImplicitExit(false);
         
+    	if (fxCanvas != null && !fxCanvas.isDisposed()) {
+    		
+    		fxCanvas.dispose();
+    		fxCanvas = null;
+    	}
     	fxCanvas = new FXCanvas(this, SWT.NONE);
         toolkit.adapt(fxCanvas);
         

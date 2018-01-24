@@ -132,6 +132,9 @@ public class DataImportPage {
 		loadLists();
 	}
 	
+	public void dispose() {
+		this.view = null;
+	}
 	
 	public void createPage(Composite parent) {
 		rowColors = new Color[] {
@@ -397,7 +400,7 @@ public class DataImportPage {
 					refreshProxies();
 					//fire events
 					view.getContext().get(IEventBroker.class).post(AssetEvents.ASSETDATA, null);
-					if (view.reviewPage != null) view.reviewPage.refresh();
+					if (view.getReviewPage() != null) view.getReviewPage().refresh();
 				});
 				monitor.worked(1);
 			}

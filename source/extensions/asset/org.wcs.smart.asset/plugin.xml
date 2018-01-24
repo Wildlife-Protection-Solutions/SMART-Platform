@@ -152,16 +152,29 @@
          <menu
                label="Assets">
             <command
-                  commandId="org.wcs.smart.observation.perspective.show"
-                  label="View Assets"
+                  commandId="org.wcs.smart.asset.command.data.import"
+                  label="Import Asset Data..."
                   style="push">
-               <parameter
-                     name="org.wcs.smart.observation.perspective.show.focusview"
-                     value="org.wcs.smart.asset.views.asset">
-               </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <separator
-                  name="org.wcs.smart.asset.separator1"
+                  name="org.wcs.smart.asset.separator3"
                   visible="true">
             </separator>
             <command
@@ -178,19 +191,6 @@
                      <test
                            property="org.wcs.smart.smartAdminUser"
                            value="manager">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
                      </test>
                   </or>
                </visibleWhen>
@@ -267,51 +267,93 @@
                   </or>
                </visibleWhen>
             </command>
+            <menu
+                  label="Import/Export Data">
+               <command
+                     commandId="org.wcs.smart.asset.command.model.xml.export"
+                     label="Export Model Data..."
+                     style="push">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </visibleWhen>
+               </command>
+               <command
+                     commandId="org.wcs.smart.asset.command.model.xml.import"
+                     label="Import Model Data..."
+                     style="push">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </visibleWhen>
+               </command>
+            </menu>
             <separator
-                  name="org.wcs.smart.asset.separator2"
+                  name="org.wcs.smart.asset.separator1"
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.asset.command.model.xml.export"
-                  label="Export Model Data..."
+                  commandId="org.wcs.smart.asset.command.overviewmap.show"
+                  label="View Asset Overview Map..."
                   style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.asset.command.model.xml.import"
-                  label="Import Model Data..."
+                  commandId="org.wcs.smart.observation.perspective.show"
+                  label="View Assets"
                   style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
+               <parameter
+                     name="org.wcs.smart.observation.perspective.show.focusview"
+                     value="org.wcs.smart.asset.views.asset">
+               </parameter>
             </command>
             <visibleWhen
                   checkEnabled="false">
-               <test
-                     property="org.wcs.smart.caSingle">
-               </test>
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </and>
             </visibleWhen>
          </menu>
       </menuContribution>
@@ -372,6 +414,51 @@
             </visibleWhen>
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
+         <command
+               commandId="org.wcs.smart.observation.perspective.show"
+               icon="images/icons/obj16/asset.png"
+               style="push"
+               tooltip="open the asset perspective">
+            <parameter
+                  name="org.wcs.smart.observation.perspective.show.focusview"
+                  value="org.wcs.smart.asset.view.assets">
+            </parameter>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -403,6 +490,14 @@
             id="org.wcs.smart.asset.command.model.xml.import"
             name="Import Model Data...">
       </command>
+      <command
+            id="org.wcs.smart.asset.command.data.import"
+            name="Import Asset Data">
+      </command>
+      <command
+            id="org.wcs.smart.asset.command.overviewmap.show"
+            name="View Asset Overview Map">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -431,8 +526,16 @@
             commandId="org.wcs.smart.asset.command.model.xml.export">
       </handler>
       <handler
-            class="org.wcs.smart.asset.ui.handler.ImportAssetDataHandler$ImportAssetDataHandlerWrapper"
+            class="org.wcs.smart.asset.ui.handler.ImportAssetModelDataHandler$ImportAssetModelDataHandlerWrapper"
             commandId="org.wcs.smart.asset.command.model.xml.import">
+      </handler>
+      <handler
+            class="org.wcs.smart.asset.ui.handler.ImportAssetDataHandler$ImportAssetDataHandlerWrapper"
+            commandId="org.wcs.smart.asset.command.data.import">
+      </handler>
+      <handler
+            class="org.wcs.smart.asset.ui.handler.ShowAssetOverviewMapHandler$ShowAssetOverviewMapHandlerWrapper"
+            commandId="org.wcs.smart.asset.command.overviewmap.show">
       </handler>
    </extension>
    <extension
@@ -452,7 +555,7 @@
             targetID="org.wcs.smart.observation.FieldDataPerspective">
          <view
                closeable="false"
-               id="org.wcs.smart.asset.views.asset"
+               id="org.wcs.smart.asset.view.assets"
                minimized="false"
                moveable="true"
                ratio="0.6"
@@ -469,7 +572,7 @@
       <view
             class="org.wcs.smart.asset.ui.views.asset.AssetListView$AssetListViewWrapper"
             icon="images/icons/obj16/asset.png"
-            id="org.wcs.smart.asset.views.asset"
+            id="org.wcs.smart.asset.view.assets"
             name="Assets"
             restorable="true">
       </view>
@@ -520,6 +623,14 @@
       <image
             commandId="org.wcs.smart.asset.command.assettype.show"
             icon="images/icons/obj16/asset.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.asset.command.data.import"
+            icon="images/icons/obj16/import.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.asset.command.overviewmap.show"
+            icon="images/icons/obj16/map.png">
       </image>
    </extension>
    <extension
