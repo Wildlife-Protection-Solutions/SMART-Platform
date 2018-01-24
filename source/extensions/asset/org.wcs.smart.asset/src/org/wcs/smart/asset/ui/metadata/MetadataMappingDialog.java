@@ -320,6 +320,18 @@ public class MetadataMappingDialog extends TitleAreaDialog{
 	}
 	
 	private Void editMapping() {
+		Object x = tblMappings.getStructuredSelection().getFirstElement();
+		if (!(x instanceof AssetMetadataMapping)) return null;
+		
+		NewMappingDialog dialog = new NewMappingDialog(getShell(), ((AssetMetadataMapping)x));
+		if (dialog.open() != NewMappingDialog.OK) return null;
+		
+		AssetMetadataMapping toEdit = (AssetMetadataMapping)x;
+		mappings.remove(toEdit);
+		mappings.addAll(dialog.getMappings());
+		mappingsToDelete.add(toEdit);
+		tblMappings.refresh();
+		modified();
 		return null;
 	}
 	

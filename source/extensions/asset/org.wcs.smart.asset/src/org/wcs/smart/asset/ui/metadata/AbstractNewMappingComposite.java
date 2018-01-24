@@ -38,6 +38,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
@@ -60,6 +61,8 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
+import org.wcs.smart.asset.model.mapping.ExifMetadataField;
+import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -291,6 +294,42 @@ public abstract class AbstractNewMappingComposite {
 		btnExifMulti.addListener(SWT.Selection, listener);
 
 		btnExifSingle.setSelection(true);
+		
+		if (dialog.getEditItem() != null) {
+			btnExifSingle.setEnabled(false);
+			btnExifMulti.setEnabled(false);
+			if (dialog.getEditItem().getMappedAssetProperty() != null) {
+				btnExifSingle.setSelection(true);
+				btnExifMulti.setSelection(false);
+				
+				cmbExifMappingField.setSelection(new StructuredSelection(dialog.getEditItem().getMappedAssetProperty()));
+				tblExifValueMapping.getControl().setEnabled(false);
+				cmbExifMappingField.getControl().setEnabled(true);
+			}else if (dialog.getEditItem().getMappedAssetProperty() == null) {
+				btnExifSingle.setSelection(false);
+				btnExifMulti.setSelection(true);
+				
+				MetadataValueMapping mapping = new MetadataValueMapping();
+				if (dialog.getEditItem().getMetadataField() instanceof ExifMetadataField) {
+					mapping.tagValue = ((ExifMetadataField)dialog.getEditItem().getMetadataField()).getTagValue();
+				}else if (dialog.getEditItem().getMetadataField() instanceof XmpMetadataField) {
+					mapping.tagValue = ((XmpMetadataField)dialog.getEditItem().getMetadataField()).getValue();
+				}
+				mapping.category = dialog.getEditItem().getMappedCategory();
+				mapping.attribute = dialog.getEditItem().getMappedAttribute();
+				mapping.listItem = dialog.getEditItem().getMappedListItem();
+				mapping.treeNode = dialog.getEditItem().getMappedTreeNode();
+				
+				exifTagValueMappings.add(mapping);
+				tblExifValueMapping.refresh();
+				tblExifValueMapping.getControl().setEnabled(true);
+				cmbExifMappingField.getControl().setEnabled(false);
+				
+				btnAdd.setEnabled(true);
+				btnRemove.setEnabled(true);
+				
+			}
+		}
 		
 		return panel;
 	}

@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
+import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -60,7 +61,6 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 	
 	public NewMappingExif(NewMappingDialog dialog) {
 		super(dialog);
-		
 	}
 	
 	@Override
@@ -125,7 +125,7 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 		txtExifTag.addListener(SWT.Modify, e->modified());
 		
 		l = new Label(panel, SWT.NONE);
-		l.setText("EXIF Tag Name):");
+		l.setText("EXIF Tag (Name):");
 		
 		txtExifTagTxt = new Text(panel, SWT.BORDER);
 		txtExifTagTxt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -135,6 +135,13 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 		linkSelectFromFile.setText("<a>" + "Select Tag From File ..." + "</a>");
 		linkSelectFromFile.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
 		linkSelectFromFile.addListener(SWT.Selection, e -> selectExifTagFromFile());
+		
+		if (dialog.getEditItem() != null && dialog.getEditItem().getMetadataType() == MetadataType.EXIF) {
+			ExifMetadataField field = (ExifMetadataField)dialog.getEditItem().getMetadataField();
+			txtExifTag.setText(String.valueOf(field.getTagType()));
+			
+			
+		}
 		
 		Composite p = createMappingPanel(panel);
 		p.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));

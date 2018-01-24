@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
+import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
 import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -133,6 +134,9 @@ public class NewMappingXmp extends AbstractNewMappingComposite{
 		linkaddFromFile.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
 		linkaddFromFile.addListener(SWT.Selection, e -> selectValuesFromFiles());
 		
+		if (dialog.getEditItem() != null && dialog.getEditItem().getMetadataType() == MetadataType.XMP) {
+			txtXmpPath.setText( ((XmpMetadataField)dialog.getEditItem().getMetadataField()).getPath() );
+		}
 		return panel;
 	}
 	

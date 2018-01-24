@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
+import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
@@ -69,10 +70,21 @@ public class NewMappingDialog extends TitleAreaDialog {
 	
 	private DataModel cachedDm;
 	
+	private AssetMetadataMapping toEdit = null;
+	
 	public NewMappingDialog(Shell parentShell) {
 		super(parentShell);
 	}
 
+	public NewMappingDialog(Shell parentShell, AssetMetadataMapping toEdit) {
+		super(parentShell);
+		this.toEdit = toEdit;
+	}
+	
+	public AssetMetadataMapping getEditItem() {
+		return this.toEdit;
+	}
+	
 	public List<AssetMetadataMapping> getMappings() {
 		return mappings;
 	}
@@ -193,6 +205,23 @@ public class NewMappingDialog extends TitleAreaDialog {
 		
 		((StackLayout)stackPanel.getLayout()).topControl = exifPanelComposite;
 		stackPanel.layout();
+		
+		
+		if (toEdit != null) {
+			if (toEdit.getMetadataType() == MetadataType.EXIF) {
+				((StackLayout)stackPanel.getLayout()).topControl = exifPanelComposite;
+				btnExif.setSelection(true);
+				btnXmp.setSelection(false);
+			}else if (toEdit.getMetadataType() == MetadataType.XMP) {
+				((StackLayout)stackPanel.getLayout()).topControl = xmpPanel;
+				btnExif.setSelection(false);
+				btnXmp.setSelection(true);
+			}
+			stackPanel.layout();
+			btnExif.setEnabled(false);
+			btnXmp.setEnabled(false);
+		}
+		
 		modified();
 		
 		setTitle("Asset Metadata Mapping");
