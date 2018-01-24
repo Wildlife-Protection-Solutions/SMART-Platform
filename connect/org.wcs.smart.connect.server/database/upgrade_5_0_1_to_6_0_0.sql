@@ -1601,7 +1601,7 @@ CREATE TABLE smart.asset_map_style (
  PRIMARY KEY (uuid)
 );
 
-
+ALTER TABLE smart.asset_station ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.asset_station_location_history ADD FOREIGN KEY (station_location_uuid) REFERENCES smart.asset_station_location(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.asset_station_location ADD FOREIGN KEY (station_uuid) REFERENCES smart.asset_station(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;			
 ALTER TABLE smart.asset_station_location_attribute_value ADD FOREIGN KEY (station_location_uuid) REFERENCES smart.asset_station_location(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
@@ -1811,8 +1811,9 @@ ALTER TABLE smart.patrol_folder ADD FOREIGN KEY (PARENT_UUID) REFERENCES SMART.P
 ALTER TABLE smart.patrol ADD COLUMN folder_uuid UUID;
 ALTER TABLE smart.patrol ADD FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.PATROL_FOLDER(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
+CREATE TRIGGER trg_patrol_folder AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_folder FOR EACH ROW execute procedure connect.trg_changelog_common();
+
 UPDATE connect.connect_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
 UPDATE connect.ca_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
 update connect.connect_version set version = '6.0.0';
 
-CREATE TRIGGER trg_patrol_folder AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_folder FOR EACH ROW execute procedure connect.trg_changelog_common();

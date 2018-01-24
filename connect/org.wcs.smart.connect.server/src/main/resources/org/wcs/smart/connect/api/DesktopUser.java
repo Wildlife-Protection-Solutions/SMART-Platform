@@ -62,6 +62,7 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 
 /**
@@ -141,7 +142,7 @@ public class DesktopUser extends HttpServlet {
 			return authorizedEmployees;
 		}catch(Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, ex); //$NON-NLS-1$	
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, ex); 	
 		}finally{
 			s.getTransaction().commit();
 		}
@@ -311,7 +312,9 @@ public class DesktopUser extends HttpServlet {
 			
 			
 			//ensure username is unique
-			Long userCount = (Long) s.createQuery("select count(*) from Employee e join e.conservationArea c where e.smartUserId = '" + e.getSmartUserId() + "' AND c.uuid = '" + e.getConservationArea().getUuid() + "'").uniqueResult();
+			Long userCount = QueryFactory.buildCountQuery(s, Employee.class, 
+					new Object[] {"smartUserId", e.getSmartUserId()}, //$NON-NLS-1$
+					new Object[] {"conservationArea", e.getConservationArea()}); //$NON-NLS-1$
 			if (userCount > 0){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, 
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotUnique", SmartUtils.getRequestLocale(request)), e.getSmartUserId())); //$NON-NLS-1$
@@ -386,7 +389,7 @@ public class DesktopUser extends HttpServlet {
 				}
 			}
 			
-			if (newUser.getSmartPassword() != null && newUser.getSmartPassword() != ""){
+			if (newUser.getSmartPassword() != null && !newUser.getSmartPassword().trim().isEmpty()){
 				
 				String err = validatePassword(newUser.getSmartPassword(), SmartUtils.getRequestLocale(request));
 				if (err != null){
@@ -525,7 +528,7 @@ public class DesktopUser extends HttpServlet {
 			return results;
 		}catch(Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, ex); //$NON-NLS-1$	
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, ex); 
 		}finally{
 			s.getTransaction().commit();
 		}

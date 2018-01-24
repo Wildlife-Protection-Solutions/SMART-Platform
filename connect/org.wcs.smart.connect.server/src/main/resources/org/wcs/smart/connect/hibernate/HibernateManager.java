@@ -301,11 +301,12 @@ public class HibernateManager {
 	*/
 	public static List<EmployeeInfo> getDesktopUsers(Session s) {
 		
-		List results = s.createQuery("select e.smartUserId, c.name as caLabel, c.uuid as caUuid from Employee e join e.conservationArea c where e.smartUserId != '' AND c.uuid != '00000000-0000-0000-0000-000000000000' and e.endEmploymentDate = null"). list( );
-		
-		ArrayList<EmployeeInfo> l = new ArrayList<EmployeeInfo>(); 
-		for(int i=0; i < results.size(); i++){
-			l.add(new EmployeeInfo( (String)((Object[])results.get(i))[0], (String)((Object[])results.get(i))[1], (UUID)((Object[])results.get(i))[2]) );
+		List<Employee> results = s.createQuery("FROM Employee e WHERE e.smartUserId is not null AND e.conservationArea.uuid != :ccaauuid and e.endEmploymentDate is null", Employee.class) //$NON-NLS-1$
+				.setParameter("ccaauuid", ConservationArea.MULTIPLE_CA) //$NON-NLS-1$
+				. list( );
+		ArrayList<EmployeeInfo> l = new ArrayList<>();
+		for (Employee e : results) {
+			l.add(new EmployeeInfo(e.getSmartUserId(), e.getConservationArea().getName(),  e.getConservationArea().getUuid()));
 		}
 		return l;
 	}
@@ -315,10 +316,13 @@ public class HibernateManager {
 	 * @return 
 	*/
 	public static ArrayList<SimpleConservationAreaList> getDesktopUserAllCas(Session s, String username) {
-		List results = s.createQuery("select c.name, c.uuid from Employee e join e.conservationArea c where e.smartUserId = '" + username + "' and e.endEmploymentDate = null").list();
-		ArrayList<SimpleConservationAreaList> l = new ArrayList<SimpleConservationAreaList>(); 
-		for(int i=0; i < results.size(); i++){
-			l.add(new SimpleConservationAreaList( (String)((Object[])results.get(i))[0], (UUID)((Object[])results.get(i))[1]) );
+		List<ConservationArea> cas = s.createQuery("SELECT e.conservationArea FROM Employee e WHERE e.smartUserId = :username AND e.endEmploymentDate is null", ConservationArea.class) //$NON-NLS-1$
+				.setParameter("username", username) //$NON-NLS-1$
+				.list();
+		
+		ArrayList<SimpleConservationAreaList> l = new ArrayList<>();
+		for (ConservationArea ca : cas) {
+			l.add(new SimpleConservationAreaList(ca.getNameLabel(), ca.getUuid()));
 		}
 		return l;
 	}
@@ -327,17 +331,21 @@ public class HibernateManager {
 	* Returns the desktop user accounts with that username in the CA, if it isn't deactivated already.
 	*/
 	public static Employee getDesktopUserInCa(Session s, String username, String cauuid) {
-		//return (Employee) s.createQuery("from Employee e join e.conservationArea c where e.smartUserId = '" + username + "' AND c.uuid = '" + cauuid + "' and e.endEmploymentDate = null").uniqueResult();
 		UUID uuid = UUID.fromString(cauuid);
-		ConservationArea ca = (ConservationArea) QueryFactory.buildQuery(s, ConservationArea.class, "uuid", uuid).uniqueResult(); //$NON-NLS-1$
-		Object[] one = new Object[]{"smartUserId",username};
-		Object[] two = new Object[]{"conservationArea", ca};
-
-		return QueryFactory.buildQuery(s, Employee.class, one, two).uniqueResult(); //$NON-NLS-1$ 
+		return QueryFactory.buildQuery(s, Employee.class,
+				new Object[] {"smartUserId", username}, //$NON-NLS-1$
+				new Object[] {"conservationArea.uuid", uuid}) //$NON-NLS-1$ 
+				.uniqueResult();  
 	}
 
+	/**
+	 * Find the conservation area associated with the provided conservation area uuid
+	 * @param s
+	 * @param caUuid
+	 * @return
+	 */
 	public static ConservationArea getConservationArea(Session s, UUID caUuid) {
-		return (ConservationArea) s.createQuery("from ConservationArea where uuid = '" + caUuid + "'").uniqueResult();
+		return s.get(ConservationArea.class,  caUuid);
 	}
 	
 }
