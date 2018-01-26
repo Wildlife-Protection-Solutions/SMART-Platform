@@ -4,5 +4,12 @@ metaRequirements.0.name=onInstall
 metaRequirements.1.namespace=org.wcs.smart.asset
 metaRequirements.1.name=onUninstall
 
-instructions.install=org.wcs.smart.asset.onInstall();
-instructions.uninstall=org.wcs.smart.asset.onUninstall();
+metaRequirements.2.namespace=org.wcs.smart.asset.query
+metaRequirements.2.name=onInstall
+
+metaRequirements.3.namespace=org.wcs.smart.asset.query
+metaRequirements.3.name=onUninstall
+
+
+instructions.install=org.wcs.smart.asset.onInstall();org.wcs.smart.asset.query.onInstall();
+instructions.uninstall=org.wcs.smart.asset.onUninstall();org.wcs.smart.asset.query.onUninstall();

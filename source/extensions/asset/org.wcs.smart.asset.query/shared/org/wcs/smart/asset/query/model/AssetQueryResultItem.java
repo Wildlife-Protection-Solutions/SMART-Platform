@@ -1,0 +1,344 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.asset.query.model;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
+import org.wcs.smart.util.ReprojectUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+
+/**
+ * A class to hold the results of a waypoint 
+ * query.  Each class contains the results for
+ * a single observation.  The observation contains
+ * a single category and all attributes.
+ * 
+ * 
+ * @author Emily
+ * @since 1.0.0
+ */
+public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
+
+	/**
+	 * Waypoint geometry field name
+	 */
+	public static final String WAYPOINT_GEOMCOLUMN_KEY = "wp:geometry"; //$NON-NLS-1$
+	
+	private String caId;
+	private String caName;
+	
+	private String station;
+	private String assets;
+	private String locations;
+	
+	private UUID waypointUuid;
+	private int waypointId;
+	private double waypointX;
+	private double waypointY;
+	private Float waypointDistance;
+	private Float waypointDirection;
+	private String waypointComment;
+	private String waypointObserver;
+	private Date waypointDate;
+	
+	private UUID observationUuid;
+	private String[] observationCategory;
+	private HashMap<String, Object> attributes = new HashMap<String, Object>();
+	
+	
+	
+	public void setAssets(String assets) {
+		this.assets = assets;
+	}
+	public String getAssets() {
+		return this.assets;
+	}
+	public void setLocations(String locations) {
+		this.locations = locations;
+	}
+	public String getLocations() {
+		return this.locations;
+	}
+	public void setStation(String station) {
+		this.station = station;
+	}
+	public String getStation() {
+		return this.station;
+	}
+	
+	/**
+	 * @param observationUuid the observation uuid
+	 */
+	public void setObservationUuid(UUID observationUuid){
+		this.observationUuid = observationUuid;
+	}
+	
+	/**
+	 * @return the observation uuid
+	 */
+	public UUID getObservationUuid(){
+		return this.observationUuid;
+	}
+	
+	/**
+	 * Each item is associated with a single category.  This
+	 * returns an array of the names of the category and
+	 * all the parent categories:
+	 *   - {parent1, parent2, category}
+	 * 
+	 * @return an array of the category names of the category & parent categories
+	 */
+	public String[] getCategories(){
+		return this.observationCategory;
+	}
+	
+	/**
+	 * @param cat sets the category
+	 */
+	public void setCategory(String[] categoryLabels){
+		this.observationCategory = categoryLabels;
+	}
+	
+	public void setAttributes(HashMap<String, Object> attributes) {
+		this.attributes = attributes;
+	}
+	
+	/**
+	 * Finds the attribute value of the associated attribute
+	 * key.
+	 * 
+	 * @param attributeKey the attribute key
+	 * @return the value associated with the attribute given key
+	 */
+	public Object getAttributeValue(String attributeKey){
+		return attributes.get(attributeKey);
+	}
+	
+	/**
+	 * Adds an attribute to the observation results 
+	 * @param key the attribute key
+	 * @param value the attribute value
+	 */
+	public void addAttribute(String key, Object value){
+		attributes.put(key, value);
+	}
+		
+	/**
+	 * sets the waypoint uuid
+	 * @param uuid
+	 */
+	public void setWaypointUuid(UUID uuid){
+		this.waypointUuid = uuid;
+	}
+	/**
+	 * 
+	 * @return the waypoint uuid
+	 */
+	public UUID getWaypointUuid(){
+		return this.waypointUuid;
+	}
+	
+	
+	/**
+	 * @return waypoint id
+	 */
+	public int getWaypointId() {
+		return waypointId;
+	}
+	/**
+	 * @param waypointId waypoint id
+	 */
+	public void setWaypointId(int waypointId) {
+		this.waypointId = waypointId;
+	}
+	/**
+	 * @return waypoint x (longitude) position
+	 */
+	public double getWaypointX(CoordinateReferenceSystem crs) {
+		if (crs == null) return waypointX;
+		return ReprojectUtils.transform(waypointX, waypointY, crs).getX();
+	}
+	/**
+	 * @param waypointX waypoint y (longitude)
+	 */
+	public void setWaypointX(double waypointX) {
+		this.waypointX = waypointX;
+	}
+	
+	
+	/**
+	 * @return the waypoint y (latitude)
+	 */
+	public double getWaypointY(CoordinateReferenceSystem crs) {
+		if (crs == null) return waypointY;
+		return ReprojectUtils.transform(waypointX, waypointY, crs).getY();
+	}
+	/**
+	 * @param waypointY the waypoint y (latitude)
+	 */
+	public void setWaypointY(double waypointY) {
+		this.waypointY = waypointY;
+	}
+	
+	/**
+	 * @return waypoint distance observation
+	 */
+	public Float getWaypointDistance() {
+		return waypointDistance;
+	}
+	/**
+	 * @param waypointDistance
+	 */
+	public void setWaypointDistance(Float waypointDistance) {
+		this.waypointDistance = waypointDistance;
+	}
+	
+	/**
+	 * @return the waypoint direction of observation
+	 */
+	public Float getWaypointDirection() {
+		return waypointDirection;
+	}
+	/**
+	 * @param waypointDirection direction of observation
+	 */
+	public void setWaypointDirection(Float waypointDirection) {
+		this.waypointDirection = waypointDirection;
+	}
+	
+	/**
+	 * @return waypoint comment
+	 */
+	public String getWaypointComment() {
+		return waypointComment;
+	}
+	/**
+	 * @param wpComment wyapoint comment
+	 */
+	public void setWaypointComment(String wpComment) {
+		this.waypointComment = wpComment;
+	}
+	
+	
+	/**
+	 * Sets the ca id
+	 * @param caId
+	 */
+	public void setConservationAreaId(String caId){
+		this.caId = caId;
+	}
+	
+	/**
+	 * Sets the ca name
+	 * @param caName
+	 */
+	public void setConservationAreaName(String caName){
+		this.caName = caName;
+	}
+	
+	/**
+	 * 
+	 * @return this conservation area id
+	 */
+	public String getConservationAreaId(){
+		return this.caId;
+	}
+	/**
+	 * the conservation area name
+	 * @return
+	 */
+	public String getConservationAreaName(){
+		return this.caName;
+	}
+	
+	/**
+	 * the waypoint observer
+	 * @return
+	 */
+	public String getWaypointObserver(){
+		return this.waypointObserver;
+	}
+	
+	public void setWaypointObserver(String observer){
+		this.waypointObserver = observer;
+	}
+
+	public void setWaypointDate(Date d) {
+		this.waypointDate = d;
+	}
+	
+	public Date getWaypointDate() {
+		return this.waypointDate;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if (adapter.equals(Waypoint.class) && getWaypointUuid() != null){
+			Waypoint wp = new Waypoint();
+			wp.setUuid(getWaypointUuid());
+			return (T)wp;
+		}
+		if (adapter.equals(WaypointObservation.class) && getObservationUuid() != null){
+			WaypointObservation wo = new WaypointObservation();
+			wo.setUuid(getObservationUuid());
+			return (T)wo;
+		}
+		return null;
+	}
+	
+	@Override
+	public Geometry asGeometry(String columnName) {
+		return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(waypointX, waypointY));
+	}
+	
+	@Override
+	public int hashCode(){
+		return Objects.hash(waypointUuid, observationUuid);
+		
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if (other == this) return true;
+		if (other == null) return false;
+		if (!other.getClass().equals(getClass())) return false;
+		AssetQueryResultItem o = (AssetQueryResultItem) other;
+		
+		return Objects.equals(waypointUuid, o.waypointUuid) && 
+				Objects.equals(observationUuid, o.observationUuid);
+	}
+
+
+}

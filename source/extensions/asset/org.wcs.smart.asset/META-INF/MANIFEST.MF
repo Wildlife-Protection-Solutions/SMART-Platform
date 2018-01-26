@@ -13,6 +13,7 @@ Require-Bundle: org.eclipse.ui,
  org.locationtech.udig.style.sld
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: org.wcs.smart.asset.model
+Export-Package: org.wcs.smart.asset,
+ org.wcs.smart.asset.model
 Bundle-ClassPath: lib/jfxswt.jar,
  .
