@@ -26,15 +26,14 @@ import java.text.MessageFormat;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.asset.query.AssetQueryPlugIn;
-import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Zoom to provider for asset data queries.
@@ -55,20 +54,24 @@ public class AssetZoomToResultProvider extends AbstractZoomToInfoProvider {
 			
 		}
 		if (resultItem instanceof IQueryImageData) {
-			//TODO: implement me
-//			PatrolEditorInput input = null;
-//			PatrolWaypoint pw = null;
-//			try(Session s = HibernateManager.openSession()){
-//				pw = AssetQueryPlugIn.findWaypoint(s, (IQueryImageData)resultItem);
-//				if (pw != null) {
-//					Patrol p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-//					input = new PatrolEditorInput(p);
-//				}
-//			}
-//			if (input != null) {
-//				zoomTo(pw.getWaypoint().getX(), pw.getWaypoint().getY());
-//				return;
-//			}
+			Waypoint wp = null;
+			try(Session s = HibernateManager.openSession()){
+				ObservationAttachment a = s.get(ObservationAttachment.class, ((IQueryImageData)resultItem).getAttachment().getUuid());
+				if (a != null) {
+					wp = a.getObservation().getWaypoint();
+				}else {
+					WaypointAttachment ww = s.get(WaypointAttachment.class, ((IQueryImageData)resultItem).getAttachment().getUuid());
+					if (ww != null) wp = ww.getWaypoint();
+				}
+				if (wp != null) {
+					wp.getX();
+					wp.getY();
+				}
+			}
+			if (wp != null) {
+				zoomTo(wp.getX(), wp.getY());
+				return;
+			}
 		}
 		
 		MessageDialog.openError(

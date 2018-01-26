@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
@@ -81,6 +82,8 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.IdFieldHeader;
 import org.wcs.smart.asset.ui.SectionHeader;
+import org.wcs.smart.asset.ui.handler.OpenStationHandler;
+import org.wcs.smart.asset.ui.views.station.StationEditorInput;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -167,6 +170,12 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 		
 	}
 
+	void openStation(AssetStation station) {
+		IEclipseContext ctx = parentContext.createChild();
+		ctx.set(OpenStationHandler.STATION_PARAM, new StationEditorInput(station.getUuid(), station.getId()));
+		ContextInjectionFactory.invoke(new OpenStationHandler(), Execute.class, ctx);
+	}
+	
 	@Override
 	public void doSaveAs() {
 		

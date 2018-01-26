@@ -21,16 +21,18 @@
  */
 package org.wcs.smart.asset.query.model.types;
 
+import java.util.UUID;
+
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.query.common.engine.IQueryImageData;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
@@ -45,48 +47,47 @@ public class AssetQueryShowInTableResultProvider extends ShowInTableInfoProvider
 	@Override
 	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof IQueryImageData) {
-			//TODO: implement me
-//			try(Session s = HibernateManager.openSession()){
-//				PatrolWaypoint pw = AssetQueryPlugIn.findWaypoint(s, (IQueryImageData)resultItem);
-//				if (pw == null) return;
-//				
-//				WaypointObservation wo = AssetQueryPlugIn.findObservation(s, (IQueryImageData)resultItem);
-//				AssetQueryResultItem tmp = new AssetQueryResultItem();
-//				tmp.setPatrolUuid(pw.getPatrolLegDay().getPatrolLeg().getPatrol().getUuid());
-//				//tmp.setPatrolLegUuid(pw.getPatrolLegDay().getPatrolLeg().getUuid());
-//				tmp.setWaypointUuid(pw.getWaypoint().getUuid());
-//				//TODO: this is only applicable for observation queries
-//				if (wo != null) {
-//					tmp.setObservationUuid(wo.getUuid());
-//				}else if (!pw.getWaypoint().getObservations().isEmpty()) {
-//					//this attachment is associated with a waypoint so pick any random observation to zoom to
-//					tmp.setObservationUuid(pw.getWaypoint().getObservations().get(0).getUuid());
-//				}
-//				resultItem = tmp;
-//			}
+			UUID wpUuid = null;
+			UUID obsUuid = null;
+			try(Session s = HibernateManager.openSession()){
+				ObservationAttachment a = s.get(ObservationAttachment.class, ((IQueryImageData)resultItem).getAttachment().getUuid());
+				if (a == null) {
+					//waypoint attachment
+					WaypointAttachment wa = s.get(WaypointAttachment.class, ((IQueryImageData)resultItem).getAttachment().getUuid());
+					wpUuid = wa.getWaypoint().getUuid();
+					//pick a random observation to zoom to
+					if (!wa.getWaypoint().getObservations().isEmpty()) {
+						obsUuid = wa.getWaypoint().getObservations().get(0).getUuid();
+					}
+				}else {
+					obsUuid = a.getObservation().getUuid();
+					wpUuid = a.getObservation().getWaypoint().getUuid();
+				}
+
+			}
+			AssetQueryResultItem tmp = new AssetQueryResultItem();
+			tmp.setObservationUuid(obsUuid);
+			tmp.setWaypointUuid(wpUuid);
+			resultItem = tmp;
 		}
+		
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		EPartService service = ctx.get(EPartService.class);
 		for (MPart p : service.getParts()){
-//			if (p.isVisible() && p.getTags().contains("active")){ //$NON-NLS-1$
-//				Object src = null;
-//				if (E3Utils.isCompatibilityEditor(p)){
-//					src = E3Utils.getSourceObject(p);
-//				}else{
-//					src = p.getObject();
-//				}
-//				if (src instanceof AssetQueryResultsEditor){
-//					AssetQueryResultsEditor e = (AssetQueryResultsEditor) src;
-//					e.showTablePage();
-//					e.getQueryResultsTable().revealSelection(resultItem);	
-//				}
-//				if (src instanceof QueryResultsEditor){
-//					QueryResultsEditor e = (QueryResultsEditor) src;
-//					if (e.getQuery().getTypeKey().equals(AssetWaypointQuery.KEY)) ((AssetQueryResultItem)resultItem).setObservationUuid(null);
-//					e.showTablePage();
-//					e.getQueryResultsTable().revealSelection(resultItem);	
-//				}
-//			}
+			if (p.isVisible() && p.getTags().contains("active")){ //$NON-NLS-1$
+				Object src = null;
+				if (E3Utils.isCompatibilityEditor(p)){
+					src = E3Utils.getSourceObject(p);
+				}else{
+					src = p.getObject();
+				}
+				if (src instanceof QueryResultsEditor){
+					QueryResultsEditor e = (QueryResultsEditor) src;
+					if (e.getQuery().getTypeKey().equals(AssetWaypointQuery.KEY)) ((AssetQueryResultItem)resultItem).setObservationUuid(null);
+					e.showTablePage();
+					e.getQueryResultsTable().revealSelection(resultItem);	
+				}
+			}
 		}
 	}
 }

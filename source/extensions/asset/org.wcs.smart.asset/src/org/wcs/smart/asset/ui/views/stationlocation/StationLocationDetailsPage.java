@@ -107,7 +107,7 @@ public class StationLocationDetailsPage {
 			public void linkActivated(HyperlinkEvent e) {
 				AssetStation stn = (AssetStation) linkStn.getData(STATION_DATA_KEY);
 				if (stn == null) return;
-				(new OpenStationHandler()).openStation(stn);
+				parentEditor.openStation(stn);
 			}
 		});
 		linkStn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));

@@ -144,15 +144,12 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	 * creates the query observation flattened table
 	 */
 	private void createTemporaryTable(Connection c) throws SQLException {
-
 		String createTableStatement = engine.getTemporaryTableCreateClause(tableName);
 		QueryPlugIn.logSql(createTableStatement);
 		c.createStatement().execute(createTableStatement);
-		
 		engine.buildTemporaryTableIndexes(c, tableName);
 	}
 	
-
 	/*
 	 * return the sql prefix for the given class
 	 */
@@ -206,24 +203,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		HashSet<Class<?>> usedTables = new HashSet<Class<?>>();
 		
 		// ---- FROM CLAUSE -----
-		sql.append(" FROM "); //$NON-NLS-1$
-		
-//		if (caFilter != null) {
-//			String filter = AssetFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
-//			if (filter.length() > 0) {
-//				sql.append(" AND "); //$NON-NLS-1$
-//				sql.append("(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-//			}
-//		}
-//		
-//		if (dateFilter != null) {
-//			String filter = AssetFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
-//			if (filter.length() > 0) {
-//				sql.append(" and "); //$NON-NLS-1$
-//				sql.append(filter);
-//			}
-//		}
-					
+		sql.append(" FROM "); //$NON-NLS-1$				
 		sql.append(namePrefix(Waypoint.class));
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
@@ -251,8 +231,6 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		AreaFilterVisitor av = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
 		queryFilter.accept(av);
 
-		sql.append(engine.appendFromClause(usedTables));
-		
 		// ---- WHERE CLAUSE -----
 		if (queryFilter != EmptyFilter.INSTANCE) {
 			String filter = AssetFilterSqlGenerator.INSTANCE.toSql(queryFilter, engine);
@@ -274,7 +252,6 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 
 		SubMonitor progress = SubMonitor.convert(monitor, 1);
 		progress.subTask("Creating temporary waypoint table");
-		//HashMap<IFilter, String> filter2Column = new HashMap<IFilter, String>();
 		
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
@@ -352,7 +329,6 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
 
-
 			sql = new StringBuilder();
 			sql.append("CREATE INDEX "); //$NON-NLS-1$
 			sql.append(colName + "_wp_uuid_idx on "); //$NON-NLS-1$
@@ -379,8 +355,6 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}else if (assetFilter != null) {
 				processAssetFilter(assetFilter, colName, c);
 			}
-			
-			
 		}
 	}
 	
@@ -392,12 +366,11 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(" SELECT ");
 		sql.append("a.wp_uuid ");
 		sql.append(" FROM ");
-		sql.append(waypointTable);
-		sql.append(" a join ");  //$NON-NLS-1$
+		sql.append(waypointTable + " a");
 		sql.append(" JOIN ");
 		sql.append(namePrefix(AssetWaypoint.class));
 		sql.append(" ON ");
-		sql.append("a.uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid");
+		sql.append("a.wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid");
 		
 		sql.append(" LEFT JOIN ");
 		sql.append(namePrefix(AssetDeployment.class));

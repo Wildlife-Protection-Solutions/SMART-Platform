@@ -180,7 +180,6 @@ public class AssetObservationQueryType implements IMappableQueryType {
 		
 		//validate query
 		String queryString = filters;
-		System.out.println("QUERY: " + queryString);
 		if (queryString.isEmpty()) return null;
 		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);

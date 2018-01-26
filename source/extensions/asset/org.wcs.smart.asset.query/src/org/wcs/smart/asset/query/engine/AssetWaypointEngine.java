@@ -67,8 +67,6 @@ import org.wcs.smart.util.UuidUtils;
  * that user see. {@link AssetPagedObservationResult} obtains the name of this table and is
  * responsible for all other operations (fetching/sorting/deleting tables)
  * 
- * @author elitvin
- * @since 1.0.0
  */
 public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypointEngine {
 
@@ -177,32 +175,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		dropTable(c, queryDataTable);
 	}
 
-	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
-		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		QueryPlugIn.logSql(sql);
-		
-		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
-			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			int count = 0;
-			while (rs.next()) {
-				byte[] ca_uuid = rs.getBytes(1);
-				byte[] uuid = rs.getBytes(2);
-				if (uuid == null || ca_uuid == null)
-					continue;
-				String name = getName(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(ca_uuid), session);
-				statement.setString(1, name);
-				statement.setBytes(2, uuid);
-				statement.addBatch();
-				count ++;
-				if (count > 100){
-					statement.executeBatch();
-					count = 0;
-				}				
-			}
-			statement.executeBatch();
-			
-		}
-	}
+
 	private String toString(Set<String> strings) {
 		if (strings.size() == 0) return "";
 		if (strings.size() == 1) return strings.iterator().next();
@@ -228,82 +201,82 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 			{"asset_asset","varchar(32000)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
-	};
+		};
 	
-	for (int i = 0; i < columnsToAdd.length; i ++){
-		String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql);
-		c.createStatement().execute(sql);
-	}
-	
-	if (monitor.isCanceled()){
-		return;
-	}
-	
-	progress.subTask("Populate Station, Location, and Asset Fields");
-	progress.split(3);
-	
-	StringBuilder sb = new StringBuilder();
-	sb.append("SELECT DISTINCT tmp.wp_uuid, ");
-	sb.append(tablePrefix(Asset.class) + ".id, ");
-	sb.append(tablePrefix(AssetStation.class) + ".id, ");
-	sb.append(tablePrefix(AssetStationLocation.class) + ".id ");
-	sb.append(" FROM " + queryDataTable + " tmp ");
-	sb.append(" JOIN ");
-	sb.append(tableNamePrefix(AssetWaypoint.class));
-	sb.append(" ON " + tablePrefix(AssetWaypoint.class) + ".wp_uuid = tmp.wp_uuid ");
-	sb.append(" JOIN ");
-	sb.append(tableNamePrefix(AssetDeployment.class));
-	sb.append(" ON " + tablePrefix(AssetWaypoint.class) + ".asset_deployment_uuid = " + tablePrefix(AssetDeployment.class) + ".uuid ");
-	sb.append(" JOIN ");
-	sb.append(tableNamePrefix(AssetStationLocation.class));
-	sb.append(" ON " + tablePrefix(AssetStationLocation.class) + ".uuid = " + tablePrefix(AssetDeployment.class) + ".station_location_uuid ");
-	sb.append(" JOIN ");
-	sb.append(tableNamePrefix(AssetStation.class));
-	sb.append(" ON " + tablePrefix(AssetStation.class) + ".uuid = " + tablePrefix(AssetStationLocation.class) + ".station_uuid ");
-	sb.append(" JOIN ");
-	sb.append(tableNamePrefix(Asset.class));
-	sb.append(" ON " + tablePrefix(Asset.class) + ".uuid = " + tablePrefix(AssetDeployment.class) + ".asset_uuid");
-	sb.append(" ORDER BY tmp.wp_uuid ");
-	
-	QueryPlugIn.logSql(sb.toString());
-	PreparedStatement updatePs = c.prepareStatement("UPDATE " + queryDataTable + " SET asset_station = ?, asset_location = ?, asset_asset = ? WHERE wp_uuid = ?");
-	try(Statement s = c.createStatement()){
-		byte[] lastWp = null;
-		Set<String> asset = new HashSet<>();
-		Set<String> station = new HashSet<>();
-		Set<String> location = new HashSet<>();
-		try(ResultSet rs = s.executeQuery(sb.toString())){
-			while(rs.next()) {
-				byte[] uuid = rs.getBytes(1);
-				if (lastWp != null &&  !Arrays.equals(lastWp,  uuid) ) {
-					updatePs.setString(1,  toString(station));
-					updatePs.setString(2, toString(location));
-					updatePs.setString(3, toString(asset));
-					updatePs.setBytes(4,  lastWp);
-					updatePs.addBatch();
-					asset.clear();
-					station.clear();
-					location.clear();
-				}
-				
-				asset.add(rs.getString(2));
-				station.add(rs.getString(3));
-				location.add(rs.getString(4));
-				lastWp = uuid;
-			}
+		for (int i = 0; i < columnsToAdd.length; i ++){
+			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			QueryPlugIn.logSql(sql);
+			c.createStatement().execute(sql);
 		}
-		updatePs.setString(1,  toString(station));
-		updatePs.setString(2, toString(location));
-		updatePs.setString(3, toString(asset));
-		updatePs.setBytes(4,  lastWp);
-		updatePs.addBatch();
 		
-		updatePs.executeBatch();
-	}
-	
-	//ca information
-	progress.split(1);
+		if (monitor.isCanceled()){
+			return;
+		}
+		
+		progress.subTask("Populate Station, Location, and Asset Fields");
+		progress.split(3);
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT DISTINCT tmp.wp_uuid, ");
+		sb.append(tablePrefix(Asset.class) + ".id, ");
+		sb.append(tablePrefix(AssetStation.class) + ".id, ");
+		sb.append(tablePrefix(AssetStationLocation.class) + ".id ");
+		sb.append(" FROM " + queryDataTable + " tmp ");
+		sb.append(" JOIN ");
+		sb.append(tableNamePrefix(AssetWaypoint.class));
+		sb.append(" ON " + tablePrefix(AssetWaypoint.class) + ".wp_uuid = tmp.wp_uuid ");
+		sb.append(" JOIN ");
+		sb.append(tableNamePrefix(AssetDeployment.class));
+		sb.append(" ON " + tablePrefix(AssetWaypoint.class) + ".asset_deployment_uuid = " + tablePrefix(AssetDeployment.class) + ".uuid ");
+		sb.append(" JOIN ");
+		sb.append(tableNamePrefix(AssetStationLocation.class));
+		sb.append(" ON " + tablePrefix(AssetStationLocation.class) + ".uuid = " + tablePrefix(AssetDeployment.class) + ".station_location_uuid ");
+		sb.append(" JOIN ");
+		sb.append(tableNamePrefix(AssetStation.class));
+		sb.append(" ON " + tablePrefix(AssetStation.class) + ".uuid = " + tablePrefix(AssetStationLocation.class) + ".station_uuid ");
+		sb.append(" JOIN ");
+		sb.append(tableNamePrefix(Asset.class));
+		sb.append(" ON " + tablePrefix(Asset.class) + ".uuid = " + tablePrefix(AssetDeployment.class) + ".asset_uuid");
+		sb.append(" ORDER BY tmp.wp_uuid ");
+		
+		QueryPlugIn.logSql(sb.toString());
+		PreparedStatement updatePs = c.prepareStatement("UPDATE " + queryDataTable + " SET asset_station = ?, asset_location = ?, asset_asset = ? WHERE wp_uuid = ?");
+		try(Statement s = c.createStatement()){
+			byte[] lastWp = null;
+			Set<String> asset = new HashSet<>();
+			Set<String> station = new HashSet<>();
+			Set<String> location = new HashSet<>();
+			try(ResultSet rs = s.executeQuery(sb.toString())){
+				while(rs.next()) {
+					byte[] uuid = rs.getBytes(1);
+					if (lastWp != null &&  !Arrays.equals(lastWp,  uuid) ) {
+						updatePs.setString(1,  toString(station));
+						updatePs.setString(2, toString(location));
+						updatePs.setString(3, toString(asset));
+						updatePs.setBytes(4,  lastWp);
+						updatePs.addBatch();
+						asset.clear();
+						station.clear();
+						location.clear();
+					}
+					
+					asset.add(rs.getString(2));
+					station.add(rs.getString(3));
+					location.add(rs.getString(4));
+					lastWp = uuid;
+				}
+			}
+			updatePs.setString(1,  toString(station));
+			updatePs.setString(2, toString(location));
+			updatePs.setString(3, toString(asset));
+			updatePs.setBytes(4,  lastWp);
+			updatePs.addBatch();
+			
+			updatePs.executeBatch();
+		}
+		
+		//ca information
+		progress.split(1);
 		if (SmartDB.isMultipleAnalysis()){
 			//ca id and names are only used for cross-ca analysis
 			progress.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
@@ -340,7 +313,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		sql.append(tablePrefix(Waypoint.class) + ".distance, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid "); //$NON-NLS-1$
 		return sql.toString();
 	}
 
@@ -348,7 +321,6 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 	protected String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_id integer,"); //$NON-NLS-1$
 		sql.append("wp_x double,"); //$NON-NLS-1$
@@ -357,7 +329,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_date timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
-		sql.append("wp_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("wp_ca_uuid char(16) for bit data "); //$NON-NLS-1$
 
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
@@ -368,7 +340,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getDate("wp_date")); //$NON-NLS-1$		
+		it.setWaypointDate(rs.getTimestamp("wp_date")); //$NON-NLS-1$		
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
@@ -376,7 +348,9 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-//		
+		it.setAssets(rs.getString("asset_asset")); //$NON-NLS-1$
+		it.setStation(rs.getString("asset_station")); //$NON-NLS-1$
+		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
 		return it;
 	}
 	

@@ -210,7 +210,7 @@ public class AssetWaypointQueryType implements IMappableQueryType {
 		return new IQueryResultInfoProvider[]{
 				new AssetResultInfoProvider(),
 				new AssetZoomToResultProvider(),
-				new ShowInTableInfoProvider(),
+				new AssetQueryShowInTableResultProvider(),
 				new DeleteObservationResultInfoProvider()
 		};
 	}

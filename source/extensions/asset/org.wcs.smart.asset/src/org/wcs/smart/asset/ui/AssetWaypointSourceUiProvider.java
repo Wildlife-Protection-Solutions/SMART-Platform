@@ -23,8 +23,9 @@ package org.wcs.smart.asset.ui;
 
 import java.util.UUID;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
@@ -32,11 +33,10 @@ import org.hibernate.Session;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
-import org.wcs.smart.asset.ui.views.asset.AssetListView;
+import org.wcs.smart.asset.ui.views.station.StationEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
-import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
  * Source provider for survey waypoints.
@@ -68,9 +68,9 @@ public class AssetWaypointSourceUiProvider implements
 		
 		//TODO: go to correct page
 		IEclipseContext ctx = ((IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class)).getActiveLeaf();
-		(new ShowFieldDataPerspective()).execute(AssetListView.ID,ctx.get(MWindow.class));
-		
-		(new OpenStationHandler()).openStation(station);
+		ctx.set(OpenStationHandler.STATION_PARAM, new StationEditorInput(station.getUuid(), station.getId()));
+		ContextInjectionFactory.invoke(new OpenStationHandler(), Execute.class, ctx);
+
 	}
 
 }

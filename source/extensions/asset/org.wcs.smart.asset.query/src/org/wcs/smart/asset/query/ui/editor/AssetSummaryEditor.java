@@ -34,7 +34,7 @@ import org.wcs.smart.query.common.ui.SummaryEditor;
  */
 public class AssetSummaryEditor extends SummaryEditor{
 
-	public static final String ID = "org.wcs.asset.query.ui.SummaryEditor"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.asset.query.ui.SummaryEditor"; //$NON-NLS-1$
 
 	public SummaryQuery createNewQuery(){
 		return AssetQueryFactory.createSummaryQuery();

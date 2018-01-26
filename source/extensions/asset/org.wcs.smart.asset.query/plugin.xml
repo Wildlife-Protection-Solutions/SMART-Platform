@@ -123,14 +123,14 @@
             class="org.wcs.smart.asset.query.ui.editor.AssetSimpleQueryResultEditor"
             default="false"
             icon="images/icons/obj16/observation_query.png"
-            id="org.wcs.smart.query.ui.QueryResultsEditor"
+            id="org.wcs.smart.asset.query.ui.QueryResultsEditor"
             name="%observationqueryeditor.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.asset.query.ui.editor.AssetSummaryEditor"
             default="false"
             icon="images/icons/obj16/summary_query.png"
-            id="org.wcs.smart.query.ui.SummaryEditor"
+            id="org.wcs.smart.asset.query.ui.SummaryEditor"
             name="%summaryqueryeditor.editor.name">
       </editor>
    </extension>

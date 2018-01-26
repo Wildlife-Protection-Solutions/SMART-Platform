@@ -37,11 +37,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
-
+import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
-import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.asset.query.model.observation.AssetAttributeQueryColumn;
 import org.wcs.smart.asset.query.model.observation.AssetCategoryQueryColumn;
+import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -73,8 +73,6 @@ import org.wcs.smart.util.UuidUtils;
  * Wrapper for resulted temporary table which was build for particular query.
  * Provides ability to lazy load items from this table and sorting  functionality.
  *  
- * @author elitvin
- * @since 1.0.0
  */
 public class AssetPagedObservationResult extends AssetPagedWaypointResult implements IObservationPagedQueryResultSet, IWaypointUpdateableResultSet, IPagedImageResultSet {
 	
@@ -230,15 +228,11 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 				attrSql.append("x'").append(UuidUtils.uuidToString(it.getObservationUuid())).append('\''); //$NON-NLS-1$
 			}
 		}
-		
-		
-		if (!hasObservations) {
-			//no observations in current data fragment, so no need to select attributes as they will be empty
-			return;
-		}
 		attrSql.append(')');
-
 		
+		//no observations in current data fragment, so no need to select attributes as they will be empty
+		if (!hasObservations) return;
+				
 		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
 			HashMap<UUID, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
 			for (IResultItem pit : result){
@@ -265,7 +259,7 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
 				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (sortColumn.getType() == ColumnType.STRING){
-				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
+				result = "order by UPPER(r." + key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
 			}else{
 				result = "order by r."+key; //$NON-NLS-1$
 			}
@@ -502,7 +496,6 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 	@Override
 	public boolean update(QueryColumn column, IResultItem item, Object newValue) throws Exception{
 		if (super.update(column, item, newValue)) return true;
-		
 		if (column instanceof AttributeQueryColumn){
 			return updateAttributeColumn((AttributeQueryColumn)column, (AssetQueryResultItem)item, newValue);
 		}else if (column instanceof CategoryQueryColumn){
@@ -512,68 +505,51 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 	}
 	
 	public boolean deleteObservation(UUID observationUuid) throws Exception{
-		//TODO: implement me
-		return false;
-//		Waypoint wp = null;
-//		Patrol p = null;
-//	
-//		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
-//		
-//	
-//			s.getTransaction().begin();
-//			try{		
-//				WaypointObservation wo = (WaypointObservation) s.get(WaypointObservation.class, observationUuid);
-//				if (wo == null) return false;
-//				wp = wo.getWaypoint();
-//				s.delete(wo);
-//				
-//				//find patrol updated for events
-//				PatrolWaypoint pw = PatrolHibernateManager.getPatrolWaypoint(s, wp);
-//				if (pw != null){
-//					p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-//					p.equals(p);	//required to prevent patrol equals from failing in event manager
-//				}
-//					
-//				//update category names in query results table
-//				StringBuilder sql = new StringBuilder();
-//				sql.append("SELECT count(*) FROM " + queryTempTable + " WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-//				NativeQuery<?> queryUpdate = s.createNativeQuery(sql.toString());
-//				queryUpdate.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
-//				Integer cnt = (Integer)queryUpdate.uniqueResult();
-//				if (cnt > 1){
-//					sql = new StringBuilder();
-//					sql.append(" DELETE FROM " + queryTempTable + " WHERE ob_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-//					queryUpdate = s.createNativeQuery(sql.toString());
-//					queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
-//					queryUpdate.executeUpdate();
-//					
-//					((AssetObservationEngine) engine).updateResultCount(s, this);
-//				}else{
-//					sql = new StringBuilder();
-//					sql.append(" UPDATE " + queryTempTable + " SET ob_uuid = null,"); //$NON-NLS-1$ //$NON-NLS-2$
-//					for (int j = 0; j < ((AssetObservationEngine)engine).getCategoryCount(); j++) {
-//						sql.append("category_" + j + " = null, "); //$NON-NLS-1$ //$NON-NLS-2$
-//					}
-//					sql.deleteCharAt(sql.length() - 1);
-//					sql.deleteCharAt(sql.length() - 1);
-//					sql.append(" WHERE ob_uuid = :uuid "); //$NON-NLS-1$
-//					queryUpdate = s.createNativeQuery(sql.toString());
-//					queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
-//					queryUpdate.executeUpdate();
-//				}
-//				s.getTransaction().commit();
-//				
-//			}catch(Exception ex){
-//				s.getTransaction().rollback();
-//				throw ex;
-//			}
-//		}
-//		
-//		WaypointEventManager.getInstance().waypointModified(wp);
-//		if (p != null){
-//			PatrolEventManager.getInstance().patrolSaved(p, true);
-//		}
-//		return true;
+		Waypoint wp = null;
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
+			s.getTransaction().begin();
+			try{		
+				WaypointObservation wo = (WaypointObservation) s.get(WaypointObservation.class, observationUuid);
+				if (wo == null) return false;
+				wp = wo.getWaypoint();
+				s.delete(wo);
+
+				//update category names in query results table
+				StringBuilder sql = new StringBuilder();
+				sql.append("SELECT count(*) FROM " + queryTempTable + " WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				NativeQuery<?> queryUpdate = s.createNativeQuery(sql.toString());
+				queryUpdate.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
+				Integer cnt = (Integer)queryUpdate.uniqueResult();
+				if (cnt > 1){
+					sql = new StringBuilder();
+					sql.append(" DELETE FROM " + queryTempTable + " WHERE ob_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					queryUpdate = s.createNativeQuery(sql.toString());
+					queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
+					queryUpdate.executeUpdate();
+					
+					((AssetObservationEngine) engine).updateResultCount(s, this);
+				}else{
+					sql = new StringBuilder();
+					sql.append(" UPDATE " + queryTempTable + " SET ob_uuid = null,"); //$NON-NLS-1$ //$NON-NLS-2$
+					for (int j = 0; j < ((AssetObservationEngine)engine).getCategoryCount(); j++) {
+						sql.append("category_" + j + " = null, "); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					sql.deleteCharAt(sql.length() - 1);
+					sql.deleteCharAt(sql.length() - 1);
+					sql.append(" WHERE ob_uuid = :uuid "); //$NON-NLS-1$
+					queryUpdate = s.createNativeQuery(sql.toString());
+					queryUpdate.setParameter("uuid", observationUuid); //$NON-NLS-1$
+					queryUpdate.executeUpdate();
+				}
+				s.getTransaction().commit();
+			}catch(Exception ex){
+				s.getTransaction().rollback();
+				throw ex;
+			}
+		}
+		WaypointEventManager.getInstance().waypointModified(wp);
+		getEventBroker().post(AssetEvents.ASSETDATA, null);
+		return true;
 	}
 	
 	public boolean updateObservation(AssetQueryResultItem item, Object newValue) throws Exception{
@@ -681,42 +657,30 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 	}
 	
 	private boolean updateAttributeColumn(AttributeQueryColumn column, AssetQueryResultItem item, Object value) throws Exception{
-		//TODO: implement me
+		boolean change = false;
+		WaypointObservation wpo = null;
+		try(Session s = HibernateManager.openSession()){
+			s.getTransaction().begin();
+			try {
+				wpo = (WaypointObservation) s.get(WaypointObservation.class, item.getObservationUuid());
+				if (wpo != null) {
+					change = updateAttribute(wpo, column.getAttributeId(), value, s);
+				}
+				s.getTransaction().commit();
+			} catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
+		}
+
+		if (change) {
+			WaypointEventManager.getInstance().waypointModified(wpo.getWaypoint());
+			getEventBroker().post(AssetEvents.ASSETDATA, null);
+			return true;
+		}
 		return false;
-//		Patrol p = null;
-//		WaypointObservation wpo = null;
-//		boolean change = false;
-//		
-//		try(Session s = HibernateManager.openSession()){
-//			s.getTransaction().begin();
-//			try {
-//				wpo = (WaypointObservation) s.get(WaypointObservation.class, item.getObservationUuid());
-//				if (wpo != null) {
-//					//find patrol updated for events
-//					PatrolWaypoint pw = PatrolHibernateManager.getPatrolWaypoint(s, wpo.getWaypoint());					
-//					if (pw != null) {
-//						p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-//						p.equals(p);	//required to prevent patrol equals from failing in event manager
-//						//update attribute value
-//						change = updateAttribute(wpo, column.getAttributeId(), value, s);
-//					}
-//				}
-//				s.getTransaction().commit();
-//			} catch (Exception ex) {
-//				s.getTransaction().rollback();
-//				throw ex;
-//			}
-//		}
-//
-//		if (change) {
-//			WaypointEventManager.getInstance().waypointModified(wpo.getWaypoint());
-//			if (p != null){
-//				PatrolEventManager.getInstance().patrolSaved(p, true);
-//			}
-//			return true;
-//		}
-//		return false;
 	}
+	
 	
 	@Override
 	public void dispose(Session session)throws SQLException {
@@ -760,16 +724,21 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO "); //$NON-NLS-1$
 				sb.append(imageTempTable + "(attach_uuid) "); //$NON-NLS-1$
-				sb.append(" SELECT z.uuid "); //$NON-NLS-1$
-				sb.append("FROM "); //$NON-NLS-1$
-				sb.append(" (SELECT distinct e.uuid, a.wp_uuid, a.wp_time, a.wp_id FROM "); //$NON-NLS-1$
-				sb.append(queryTempTable);
-				sb.append(" a join "); //$NON-NLS-1$
-				sb.append("(SELECT b.obs_uuid as obs_uuid, b.uuid as uuid FROM smart.observation_attachment b "); //$NON-NLS-1$
-				sb.append(" UNION "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as obs_uuid, d.uuid as uuid FROM smart.wp_observation c JOIN smart.waypoint b on c.wp_uuid = b.uuid "); //$NON-NLS-1$
-				sb.append("JOIN smart.wp_attachments d on d.wp_uuid = b.uuid) e "); //$NON-NLS-1$
-				sb.append("on a.ob_uuid = e.obs_uuid ORDER BY a.wp_time desc, a.wp_id) z"); //$NON-NLS-1$
+				
+				sb.append(" SELECT z.attach_uuid FROM ( ");
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id " );
+				sb.append(" FROM ");
+				sb.append( queryTempTable + " a ");
+				sb.append(" JOIN ");
+				sb.append(" smart.observation_attachment c on a.ob_uuid = c.obs_uuid ");
+				sb.append( " UNION ");
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id " );
+				sb.append(" FROM ");
+				sb.append( queryTempTable + " a ");
+				sb.append(" JOIN ");
+				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid ");
+				sb.append(" ) z ORDER BY z.wp_date desc, z.wp_id ");
+
 				s.createNativeQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();

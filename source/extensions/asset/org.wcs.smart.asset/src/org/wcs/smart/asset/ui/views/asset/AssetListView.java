@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
@@ -97,6 +98,7 @@ import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
 import org.wcs.smart.asset.ui.handler.ShowAssetOverviewMapHandler;
+import org.wcs.smart.asset.ui.views.station.StationEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -509,9 +511,15 @@ public class AssetListView {
 		IStructuredSelection selection = (IStructuredSelection)lstStations.getSelection();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object station = (Object) iterator.next();
-			if (station instanceof AssetStation) (new OpenStationHandler()).openStation((AssetStation)station);
+			if (station instanceof AssetStation) openStation((AssetStation)station);
 			if (station instanceof AssetStationLocation) (new OpenStationLocationHandler()).openStationLocation(((AssetStationLocation)station));
 		}
+	}
+	
+	private void openStation(AssetStation station) {
+		IEclipseContext ctx = context.createChild();
+		ctx.set(OpenStationHandler.STATION_PARAM, new StationEditorInput(station.getUuid(), station.getId()));
+		ContextInjectionFactory.invoke(new OpenStationHandler(), Execute.class, ctx);
 	}
 	
 	private void createNewStation() {
@@ -522,7 +530,7 @@ public class AssetListView {
 		ContextInjectionFactory.inject(dialog, context);
 		dialog.open();
 		if (newStation.getUuid() != null) {
-			(new OpenStationHandler()).openStation(newStation);
+			openStation(newStation);
 		}
 	}
 	

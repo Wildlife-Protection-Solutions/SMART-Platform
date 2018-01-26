@@ -32,10 +32,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -71,6 +76,7 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
 import org.wcs.smart.asset.ui.map.StationLocationDrawCommand;
+import org.wcs.smart.asset.ui.views.station.StationEditorInput;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -109,6 +115,9 @@ public class AssetCurrentPage {
 
 	private UUID deployUuid = null;
 	private StationLocationDrawCommand drawCommand;
+	
+	@Inject
+	private IEclipseContext context;
 	
 	public AssetCurrentPage(AssetEditor parent) {
 		this.parentEditor = parent;
@@ -235,7 +244,10 @@ public class AssetCurrentPage {
 				if (uuid != null) {
 					AssetStation temp = new AssetStation();
 					temp.setUuid(uuid);
-					(new OpenStationHandler()).openStation(temp);
+					
+					IEclipseContext ctx = context.createChild();
+					ctx.set(OpenStationHandler.STATION_PARAM, new StationEditorInput(temp.getUuid(), temp.getId()));
+					ContextInjectionFactory.invoke(new OpenStationHandler(), Execute.class, ctx);
 				}
 			}
 		});

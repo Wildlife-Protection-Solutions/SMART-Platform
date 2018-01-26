@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStationLocation;
-import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.query.engine.visitors.AreaFilterVisitor;
@@ -231,9 +230,8 @@ public class FilterProcessor implements IFilterProcessor {
 			sql.append(" left join ");
 			sql.append(t);
 			sql.append(" on " + t + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid ");
-			
-			
 		}
+		
 		engine.filterTables.clear();
 		engine.filterTables.putAll(assetFilterTables);
 		
@@ -263,19 +261,16 @@ public class FilterProcessor implements IFilterProcessor {
 					+ ".uuid = " //$NON-NLS-1$
 					+ prefix(WaypointObservation.class)
 					+ ".category_uuid "); //$NON-NLS-1$
-				if (observationFilterVisitor.hasAttributeFilter()){
-					sql.append(" left join "); //$NON-NLS-1$
-					sql.append(observationTable + " qa on qa.observation_uuid = "); //$NON-NLS-1$
-					sql.append(prefix(WaypointObservation.class) + ".uuid"); //$NON-NLS-1$
-				}
+			if (observationFilterVisitor.hasAttributeFilter()){
+				sql.append(" left join "); //$NON-NLS-1$
+				sql.append(observationTable + " qa on qa.observation_uuid = "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservation.class) + ".uuid"); //$NON-NLS-1$
+			}
 		}
 
-		
 		// area filters
 		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables, query.getConservationArea());
 		queryFilter.accept(areaVisitor);
-		
-		sql.append(engine.appendFromClause(usedTables));
 		
 		sql.append(" WHERE ");
 		sql.append(prefix(Waypoint.class) + ".source = '" + AssetWaypointSource.KEY + "' ");
@@ -309,7 +304,6 @@ public class FilterProcessor implements IFilterProcessor {
 		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
 			ps.executeUpdate();
 		}
-		
 	}
 	
 	/**

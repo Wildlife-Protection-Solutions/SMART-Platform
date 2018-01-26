@@ -23,12 +23,22 @@ package org.wcs.smart.asset.ui.handler;
 
 import java.text.MessageFormat;
 
+import javax.inject.Named;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.ui.views.asset.AssetListView;
 import org.wcs.smart.asset.ui.views.station.StationEditor;
 import org.wcs.smart.asset.ui.views.station.StationEditorInput;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
  * Open asset handler 
@@ -38,7 +48,16 @@ import org.wcs.smart.asset.ui.views.station.StationEditorInput;
  */
 public class OpenStationHandler {	
 	
-	public void openStation(StationEditorInput input){
+	public static final String STATION_PARAM = "stationinput"; //$NON-NLS-1$
+
+	
+	@Execute
+	public void openStation(@Named(STATION_PARAM) StationEditorInput input, MWindow activeWindow){
+//		MWindow activeWindow = EclipseContextFactory.getServiceContext(AssetPlugIn.getDefault().getBundle().getBundleContext()).get(MWindow.class);
+//		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+//		MWindow activeWindow = ctx.get(MWindow.class);
+		(new ShowFieldDataPerspective()).execute(AssetListView.ID, activeWindow);
+		
 		try {			
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, StationEditor.ID);
 		} catch (PartInitException e) {
@@ -46,9 +65,5 @@ public class OpenStationHandler {
 		}	
 	}
 	
-	public void openStation(AssetStation station){
-		StationEditorInput input = new StationEditorInput(station.getUuid(),  station.getId());
-		openStation(input);
-	}
 }
 

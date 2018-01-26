@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
@@ -34,7 +33,6 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -83,8 +81,7 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine implements IA
 	protected abstract String getTemporaryTableSelectClause(boolean includeObservations);
 	
 	/**
-	 * Converts the a row in the temporary table select clause to
-	 * a result item
+	 * Converts a row in the temporary table to a result item
 	 * @param rs result set item to convert to the queryresultitem
 	 * @param session current database connection
 	 * @return
@@ -93,25 +90,13 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine implements IA
 	protected abstract AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
 	
 	/**
-	 * Create the temporary table for hold observation data
+	 * Create the temporary table to hold observation data
 	 * for querying
 	 * 
 	 * @param tableName temporary table name
 	 * @return 
 	 */
 	protected abstract String getTemporaryTableCreateClause(String tableName);
-	
-	/**
-	 * A string to append to the from clause of the select
-	 * statement to create the temporary table.
-	 * <p>Depending on the select clause additional tables may
-	 * be required.  See {@link AssetQueryEngine#getTemporaryTableCreateClause(String)}. </p> 
-	 * @param tables List of tables already included in the from clause
-	 * @return
-	 */
-	protected String appendFromClause(HashSet<Class<?>> tables){
-		return ""; //$NON-NLS-1$
-	}
 	
 	
 	/**

@@ -32,6 +32,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.collections.comparators.NullComparator;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
@@ -39,11 +41,15 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
+import org.wcs.smart.asset.AssetEvents;
+import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetWaypointAttachment;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryPlugIn;
@@ -62,10 +68,7 @@ import org.wcs.smart.util.SmartUtils;
 import com.vividsolutions.jts.geom.Envelope;
 
 public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implements IUpdateableResultSet, IWaypointUpdateableResultSet, ISearchabledResultSet, IDesktopPagedImageResultSet{
-	
-	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-		{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
-	};
+
 	private final static NullComparator NULL_COMPARATOR = new NullComparator(false);
 	
 	protected String queryTempTable;
@@ -148,15 +151,13 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
-			String key = sortColumn.getKey();
-			key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
-			for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
-				key = key.replace(data[0], data[1]);
-			}
-			if (sortColumn.getType() == ColumnType.STRING){
-				result = "order by UPPER(r."+ key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
+			String key = FixedQueryColumn.getDbColumnName(sortColumn.getKey());
+			if (sortColumn.getKey().equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
+				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (sortColumn.getType() == ColumnType.STRING){
+				result = "order by UPPER(r." + key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
 			}else{
-				result = "order by r." + key; //$NON-NLS-1$
+				result = "order by r."+key; //$NON-NLS-1$
 			}
 		}
 		
@@ -242,103 +243,93 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	}
 
 	private boolean updateWaypointDetails(FixedQueryColumn column, AssetQueryResultItem item, Object value) throws Exception{
+		Waypoint wp = null;
+		boolean change = false;
+		try(Session s = HibernateManager.openSession()){
+			try {
+				s.getTransaction().begin();
+				wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
+				if (wp != null) {
+					switch (column.getColumn()) {
+						case WAYPOINT_COMMENT:
+							if (value instanceof String) {
+								if (((String) value).length() == 0) value = null;
+								if (NULL_COMPARATOR.compare(value, wp.getComment()) != 0) {
+									change = true;
+									updateWaypointComment(wp,(String) value, s);
+								}
+							}
+							break;
+						case WAYPOINT_TIME:
+							if (value instanceof Date) {
+								Date newDate = (Date) value;
+								if (!SharedUtils.isSameTime(newDate,
+										wp.getDateTime())) {
+									change = true;
+									updateWaypointTime(wp, newDate, s);
+								}
+							}
+							break;
+						case WAYPOINT_DIRECTION:
+							if (value instanceof Double) {
+								float newValue = ((Double) value).floatValue();
+								if (NULL_COMPARATOR.compare(newValue, wp.getDirection()) != 0) {
+									change = true;
+									updateWaypointDirection(wp, newValue, s);
+								}
+							}
+							break;
+						case WAYPOINT_DISTANCE:
+							if (value instanceof Double) {
+								float newValue = ((Double) value).floatValue();
+								if (NULL_COMPARATOR.compare(newValue, wp.getDistance()) != 0) {
+									change = true;
+									updateWaypointDistance(wp, newValue, s);
+								}
+							}
+							break;
+						case WAYPOINT_ID:
+							if (value instanceof Integer) {
+								if (!value.equals(wp.getId())) {
+									change = true;
+									updateWaypointId(wp, (Integer) value, s);
+								}
+							}
+							break;
+						case WAYPOINT_X:
+							if (value instanceof Double) {
+								if (!value.equals(wp.getX())) {
+									change = true;
+									updateWaypointPosition(wp, (Double) value, wp.getY(), s);
+								}
+							}
+							break;
+						case WAYPOINT_Y:
+							if (value instanceof Double) {
+								if (!value.equals(wp.getX())) {
+									change = true;
+									updateWaypointPosition(wp, wp.getX(), (Double) value, s);
+								}
+							}
+							break;
+						default:
+							break;
+					}
+					
+				}
+				s.getTransaction().commit();
+			} catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
+		}
+
+		if (change) {
+			WaypointEventManager.getInstance().waypointModified(wp);
+			getEventBroker().post(AssetEvents.ASSETDATA, null);
+			return true;
+		}
 		return false;
-		//TODO: implement me
-//		Waypoint wp = null;
-//		Patrol p = null;
-//		boolean change = false;
-//		try(Session s = HibernateManager.openSession()){
-//			try {
-//				s.getTransaction().begin();
-//				wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
-//				if (wp != null) {
-//					PatrolWaypoint pw = PatrolHibernateManager.getPatrolWaypoint(s, wp);
-//					if (pw != null) {
-//						p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-//						p.equals(p); //necessary for using outside session
-//						
-//						switch (column.getColumn()) {
-//						case WAYPOINT_COMMENT:
-//							if (value instanceof String) {
-//								if (((String) value).length() == 0) value = null;
-//								if (NULL_COMPARATOR.compare(value, wp.getComment()) != 0) {
-//									change = true;
-//									updateWaypointComment(wp,(String) value, s);
-//								}
-//							}
-//							break;
-//						case WAYPOINT_TIME:
-//							if (value instanceof Date) {
-//								Date newDate = (Date) value;
-//								if (!SharedUtils.isSameTime(newDate,
-//										wp.getDateTime())) {
-//									change = true;
-//									updateWaypointTime(wp, newDate, s);
-//								}
-//							}
-//							break;
-//						case WAYPOINT_DIRECTION:
-//							if (value instanceof Double) {
-//								float newValue = ((Double) value).floatValue();
-//								if (NULL_COMPARATOR.compare(newValue, wp.getDirection()) != 0) {
-//									change = true;
-//									updateWaypointDirection(wp, newValue, s);
-//								}
-//							}
-//							break;
-//						case WAYPOINT_DISTANCE:
-//							if (value instanceof Double) {
-//								float newValue = ((Double) value).floatValue();
-//								if (NULL_COMPARATOR.compare(newValue, wp.getDistance()) != 0) {
-//									change = true;
-//									updateWaypointDistance(wp, newValue, s);
-//								}
-//							}
-//							break;
-//						case WAYPOINT_ID:
-//							if (value instanceof Integer) {
-//								if (!value.equals(wp.getId())) {
-//									change = true;
-//									updateWaypointId(wp, (Integer) value, s);
-//								}
-//							}
-//							break;
-//						case WAYPOINT_X:
-//							if (value instanceof Double) {
-//								if (!value.equals(wp.getX())) {
-//									change = true;
-//									updateWaypointPosition(wp, (Double) value, wp.getY(), s);
-//								}
-//							}
-//							break;
-//						case WAYPOINT_Y:
-//							if (value instanceof Double) {
-//								if (!value.equals(wp.getX())) {
-//									change = true;
-//									updateWaypointPosition(wp, wp.getX(), (Double) value, s);
-//								}
-//							}
-//							break;
-//						default:
-//							break;
-//						}
-//					}
-//				}
-//				s.getTransaction().commit();
-//			} catch (Exception ex) {
-//				s.getTransaction().rollback();
-//				throw ex;
-//			}
-//		}
-//
-//		if (change) {
-//			WaypointEventManager.getInstance().waypointModified(wp);
-//			if (p != null){
-//				PatrolEventManager.getInstance().patrolSaved(p, true);
-//			}
-//			return true;
-//		}
-//		return false;
 	}
 	
 	
@@ -384,8 +375,8 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		Date dttime = SmartUtils.combineDateTime(wp.getDateTime(), newTime);
 		wp.setDateTime(dttime);
 		
-		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_time = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("id", newTime); //$NON-NLS-1$
+		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_date = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("id", dttime); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 	}
@@ -400,94 +391,83 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		q.executeUpdate();
 	}
 	
+	protected IEventBroker getEventBroker() {
+		return EclipseContextFactory.getServiceContext(AssetQueryPlugIn.getDefault().getBundle().getBundleContext()).get(IEventBroker.class);
+	}
+	
 	@Override
 	public boolean deleteWaypoint(UUID waypointUuid) throws Exception{
-		return false;
-		//TODO: implement me
-//		Waypoint wp = null;
-//		Patrol p = null;
-//		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
-//			
-//			try{
-//				s.getTransaction().begin();
-//				
-//				Waypoint wo = (Waypoint) s.get(Waypoint.class, waypointUuid);
-//				if (wo == null) return false;
-//				wp = wo;
-//				
-//				//find patrol updated for events
-//				PatrolWaypoint pw = PatrolHibernateManager.getPatrolWaypoint(s, wp);
-//				if (pw == null) throw new Exception("No patrol link found for waypoint.  Waypoint will not be deleted."); //$NON-NLS-1$
-//				s.delete(pw);
-//				s.delete(wp);
-//				
-//				p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-//				p.equals(p);	//required to prevent patrol equals from failing in event manager
-//				
-//				s.flush();
-//				
-//				//update category names in query results table
-//				StringBuilder sql = new StringBuilder();
-//				sql.append(" DELETE FROM " + queryTempTable + " WHERE wp_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-//				NativeQuery<?> queryUpdate = s.createNativeQuery(sql.toString());
-//				queryUpdate.setParameter("uuid", waypointUuid); //$NON-NLS-1$
-//				queryUpdate.executeUpdate();
-//					
-//				if (engine instanceof IDerbyWaypointEngine) {
-//					((IDerbyWaypointEngine) engine).updateResultCount(s, this);
-//				}
-//				
-//				s.getTransaction().commit();
-//				
-//			}catch(Exception ex){
-//				s.getTransaction().rollback();
-//				throw ex;
-//			}
-//		}
-//		
-//		WaypointEventManager.getInstance().waypointModified(wp);
-//		if (p != null){
-//			PatrolEventManager.getInstance().patrolSaved(p, true);
-//		}
-//		return true;
+		Waypoint wp = null;
+		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
+			try{
+				s.getTransaction().begin();
+				
+				Waypoint wo = (Waypoint) s.get(Waypoint.class, waypointUuid);
+				if (wo == null) return false;
+				wp = wo;
+				
+				//delete asset waypoints 
+				List<AssetWaypoint> assetWaypoints =  QueryFactory.buildQuery(s, AssetWaypoint.class, new Object[] {"wp_uuid", wo.getUuid()}).list();
+				for (AssetWaypoint aw : assetWaypoints) {
+					for (AssetWaypointAttachment attlink : aw.getAttachments()) {
+						s.delete(attlink);
+					}
+					s.delete(aw);
+				}
+				//delete waypoint
+				s.delete(wo);
+				s.flush();
+				
+				//update category names in query results table
+				StringBuilder sql = new StringBuilder();
+				sql.append(" DELETE FROM " + queryTempTable + " WHERE wp_uuid = :uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				NativeQuery<?> queryUpdate = s.createNativeQuery(sql.toString());
+				queryUpdate.setParameter("uuid", waypointUuid); //$NON-NLS-1$
+				queryUpdate.executeUpdate();
+					
+				if (engine instanceof IDerbyWaypointEngine) {
+					((IDerbyWaypointEngine) engine).updateResultCount(s, this);
+				}
+				
+				s.getTransaction().commit();
+				
+			}catch(Exception ex){
+				s.getTransaction().rollback();
+				throw ex;
+			}
+		}
+		
+		WaypointEventManager.getInstance().waypointModified(wp);
+		getEventBroker().post(AssetEvents.ASSETDATA, null);
+		return true;
 	}
 	
 	
 	@Override
 	public boolean updateWaypointPosition(AssetQueryResultItem item, Double x, Double y) throws Exception{
+		Waypoint wp = null;
+		boolean change = false;
+		try(Session s = HibernateManager.openSession()){
+			try {
+				s.getTransaction().begin();
+				wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
+				if (wp != null) {
+					updateWaypointPosition(wp, x, y, s);
+					change = true;
+				}
+				s.getTransaction().commit();
+			} catch (Exception ex) {
+				s.getTransaction().rollback();
+				throw ex;
+			}
+		}
+
+		if (change) {
+			WaypointEventManager.getInstance().waypointModified(wp);
+			getEventBroker().post(AssetEvents.ASSETDATA, null);
+			return true;
+		}
 		return false;
-		//TODO: implement me
-//		Waypoint wp = null;
-//		Patrol p = null;
-//		boolean change = false;
-//		try(Session s = HibernateManager.openSession()){
-//			try {
-//				s.getTransaction().begin();
-//				wp = (Waypoint) s.get(Waypoint.class, item.getWaypointUuid());
-//				if (wp != null) {
-//					PatrolWaypoint pw = PatrolHibernateManager.getPatrolWaypoint(s, wp);
-//					if (pw != null) {
-//						p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-//						p.equals(p); //necessary for using outside session
-//						updateWaypointPosition(wp, x, y, s);
-//						change = true;
-//					}
-//				}
-//				s.getTransaction().commit();
-//			} catch (Exception ex) {
-//				s.getTransaction().rollback();
-//				throw ex;
-//			}
-//		}
-//
-//		if (change) {
-//			WaypointEventManager.getInstance().waypointModified(wp);
-//			if (p != null){
-//				PatrolEventManager.getInstance().patrolSaved(p, true);
-//			}
-//			return true;
-//		}
-//		return false;
 	}
 	
 	/**

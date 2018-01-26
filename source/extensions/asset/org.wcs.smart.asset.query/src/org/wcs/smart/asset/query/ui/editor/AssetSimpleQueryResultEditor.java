@@ -77,7 +77,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 
-	public static final String ID = "org.wcs.smart.query.ui.QueryResultsEditor";  //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.asset.query.ui.QueryResultsEditor";  //$NON-NLS-1$
 
 	
 	/**

@@ -21,7 +21,11 @@
  */
 package org.wcs.smart.asset.query;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -186,6 +190,22 @@ public class AssetQueryPlugIn extends AbstractUIPlugin {
 			return a.getObservation();
 		}
 		return null;
+	}
+	
+	public static String asString(Set<String> strings) {
+		if (strings.size() == 0) return "";
+		if (strings.size() == 1) return strings.iterator().next();
+		
+		ArrayList<String> sorted = new ArrayList<>();
+		sorted.addAll(strings);
+		Collections.sort(sorted, (a,b)->Collator.getInstance().compare(a, b));
+		StringBuilder s = new StringBuilder();
+		s.append(sorted.get(0));
+		for (int i = 1; i < sorted.size(); i ++) {
+			s.append(", ");
+			s.append(sorted.get(i));
+		}
+		return s.toString();
 	}
 
 }

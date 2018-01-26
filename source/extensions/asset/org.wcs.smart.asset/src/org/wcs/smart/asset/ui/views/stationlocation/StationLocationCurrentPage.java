@@ -356,7 +356,7 @@ public class StationLocationCurrentPage {
 					(new OpenAssetHandler()).openAsset(d.getAsset());
 				}else if (colIndex == Column.STATION.ordinal()) {
 					AssetDeployment d = (AssetDeployment) cell.getElement();
-					(new OpenStationHandler()).openStation(d.getStationLocation().getStation());
+					parentEditor.openStation(d.getStationLocation().getStation());
 				}
 			}
 					
@@ -390,7 +390,7 @@ public class StationLocationCurrentPage {
 				miAdd2.setText(MessageFormat.format("Goto {0}", d.getStationLocation().getStation().getId()));
 				miAdd2.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
 				miAdd2.addListener(SWT.Selection, e2->{
-					(new OpenStationHandler()).openStation(d.getStationLocation().getStation());
+					parentEditor.openStation(d.getStationLocation().getStation());
 				});
 			}
 		});

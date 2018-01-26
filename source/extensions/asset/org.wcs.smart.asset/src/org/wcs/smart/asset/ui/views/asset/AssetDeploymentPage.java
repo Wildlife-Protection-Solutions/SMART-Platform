@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -88,6 +89,7 @@ import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.handler.OpenStationLocationHandler;
+import org.wcs.smart.asset.ui.views.station.StationEditorInput;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -220,7 +222,11 @@ public class AssetDeploymentPage {
 				int colIndex = cell.getColumnIndex();
 				if (colIndex == AssetDeploymentTableColumn.FixedColumn.STATION.ordinal()){
 					AssetDeployment d = ((AssetDeploymentWrapper) cell.getElement()).getDeployment();
-					(new OpenStationHandler()).openStation(d.getStationLocation().getStation());
+					
+					IEclipseContext ctx = parentContext.createChild();
+					ctx.set(OpenStationHandler.STATION_PARAM, new StationEditorInput(d.getStationLocation().getStation().getUuid(), d.getStationLocation().getStation().getId()));
+					ContextInjectionFactory.invoke(new OpenStationHandler(), Execute.class, ctx);
+					
 				}else if (colIndex == AssetDeploymentTableColumn.FixedColumn.LOCATION.ordinal()){
 					AssetDeployment d = ((AssetDeploymentWrapper) cell.getElement()).getDeployment();
 					(new OpenStationLocationHandler()).openStationLocation(d.getStationLocation());
