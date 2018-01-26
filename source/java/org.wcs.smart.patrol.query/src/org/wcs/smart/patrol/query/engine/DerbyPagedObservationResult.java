@@ -759,16 +759,20 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO "); //$NON-NLS-1$
 				sb.append(imageTempTable + "(attach_uuid) "); //$NON-NLS-1$
-				sb.append(" SELECT z.uuid "); //$NON-NLS-1$
-				sb.append("FROM "); //$NON-NLS-1$
-				sb.append(" (SELECT distinct e.uuid, a.wp_uuid, a.wp_date, a.wp_id FROM "); //$NON-NLS-1$
-				sb.append(queryTempTable);
-				sb.append(" a join "); //$NON-NLS-1$
-				sb.append("(SELECT b.obs_uuid as obs_uuid, b.uuid as uuid FROM smart.observation_attachment b "); //$NON-NLS-1$
-				sb.append(" UNION "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as obs_uuid, d.uuid as uuid FROM smart.wp_observation c JOIN smart.waypoint b on c.wp_uuid = b.uuid "); //$NON-NLS-1$
-				sb.append("JOIN smart.wp_attachments d on d.wp_uuid = b.uuid) e "); //$NON-NLS-1$
-				sb.append("on a.ob_uuid = e.obs_uuid ORDER BY a.wp_date desc, a.wp_id) z"); //$NON-NLS-1$
+				sb.append(" SELECT z.attach_uuid FROM ( ");
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id " );
+				sb.append(" FROM ");
+				sb.append( queryTempTable + " a ");
+				sb.append(" JOIN ");
+				sb.append(" smart.observation_attachment c on a.ob_uuid = c.obs_uuid ");
+				sb.append( " UNION ");
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id " );
+				sb.append(" FROM ");
+				sb.append( queryTempTable + " a ");
+				sb.append(" JOIN ");
+				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid ");
+				sb.append(" ) z ORDER BY z.wp_date desc, z.wp_id ");
+				
 				s.createNativeQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();
