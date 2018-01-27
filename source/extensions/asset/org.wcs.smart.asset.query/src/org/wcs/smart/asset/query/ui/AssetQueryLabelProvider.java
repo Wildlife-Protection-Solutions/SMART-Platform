@@ -23,7 +23,6 @@ package org.wcs.smart.asset.query.ui;
 
 import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.model.AssetValueOption;
@@ -75,16 +74,4 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 		return null;
 	}
 
-	public static Image getImage(AssetValueOption item){
-		//TODO: implement me
-		return null;
-	}
-	
-	/**
-	 * @return the image that represents a particular asset filter option
-	 */
-	public static Image getImage(AssetFilterOption option){
-		//TODO: implement me
-		return null;
-	}
 }

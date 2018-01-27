@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -94,6 +95,7 @@ public class StationEditor extends EditorPart implements MapPart {
 	
 	private AssetStation station;
 	
+	private SectionHeader headerSection ;
 	private Composite sectionBody;
 	
 	private Composite currentPanel;
@@ -203,6 +205,13 @@ public class StationEditor extends EditorPart implements MapPart {
 		refreshJob.schedule();
 	}
 
+	public void findAndShow(UUID waypointUuid) {
+		if (waypointUuid == null) return;
+		headerSection.selectPanel(1);
+		dataPage.scrollTo(waypointUuid);
+	}
+	
+	
 	@Override
 	public boolean isDirty() {
 		return isDirty;
@@ -459,7 +468,7 @@ public class StationEditor extends EditorPart implements MapPart {
 				
 		};
 		
-		SectionHeader headerSection = new SectionHeader(body, SWT.NONE, headers, actions, toolkit);
+		headerSection = new SectionHeader(body, SWT.NONE, headers, actions, toolkit);
 		headerSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		sectionBody = toolkit.createComposite(body);

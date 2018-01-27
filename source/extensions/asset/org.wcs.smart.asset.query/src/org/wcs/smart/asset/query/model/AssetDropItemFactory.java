@@ -39,8 +39,12 @@ import org.wcs.smart.asset.query.parser.internal.summary.AssetCategoryValueItem;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetValueItem;
 import org.wcs.smart.asset.query.ui.AssetOptionData;
+import org.wcs.smart.asset.query.ui.definition.AssetSimpleFilterPanel;
+import org.wcs.smart.asset.query.ui.definition.AssetSummaryGroupByValuePanel;
 import org.wcs.smart.asset.query.ui.definition.dropItems.AssetFillterDropItem;
+import org.wcs.smart.asset.query.ui.definition.dropItems.AssetGroupByDropItem;
 import org.wcs.smart.asset.query.ui.definition.dropItems.AssetValueDropItem;
+import org.wcs.smart.asset.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -50,6 +54,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.BooleanExpression;
@@ -70,8 +75,6 @@ import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Drop item factory for asset queries.
@@ -111,15 +114,24 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 			items = new DropItem[] {new AssetFillterDropItem((AssetStation)source) };
 		}else if (source instanceof AssetStationLocation) {
 			items = new DropItem[] {new AssetFillterDropItem((AssetStationLocation)source) };
+		} else if (source instanceof SummaryDmObject) {
+			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
+		} else if (source instanceof AssetFilterOption) {
+			if (queryItemPanelId == SummaryFilterPanel.ID){
+				items = new DropItem[]{createAssetGroupByDropItem((AssetFilterOption) source)};
+			}
+		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
+			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ){
+				items = new DropItem[]{createCategoryValueDropItem(null)};
+			}
 		}
+//			
 		
 //		} else if (source instanceof AssetValueOption) {
 //			items = new DropItem[]{createAssetValueDropItem(
 //							(AssetValueOption) source)};
 //
-//		} else if (source instanceof AssetFilterOption) {
-//			if (queryItemPanelId == SummaryFilterPanel.ID){
-//				items = new DropItem[]{createAssetGroupByDropItem((AssetFilterOption) source)};
+		
 //			}else{
 //				items = new DropItem[]{createAssetFilterDropItem((AssetFilterOption) source)};
 //			}
@@ -138,11 +150,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 //			if (queryItemPanelId.equals(SummaryFilterPanel.ID)){
 //				items = new DropItem[]{createAreaGroupByDropItem((Area)source)};
 //			}
-//		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
-//			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ){
-//				items = new DropItem[]{createCategoryValueDropItem(null)};
-//			}
-//		}
+
 		return items;
 		
 	}
@@ -162,11 +170,9 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	 * @return
 	 */
 	public DropItem createAssetGroupByDropItem(AssetFilterOption item){
-//		DropItem di = new AssetGroupByDropItem(item);
-//		di.initializeData(new Object[]{new AssetOptionData(item)});
-//		return di;
-		//TODO: implement me
-		return null;
+		DropItem di = new AssetGroupByDropItem(item);
+		di.initializeData(new Object[]{new AssetOptionData(item)});
+		return di;
 	}
 	
 	
@@ -321,34 +327,25 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 			}else if (proxy.getQuery().getTypeKey().equals(AssetSummaryQuery.KEY)){
 				AssetSummaryQuery q = (AssetSummaryQuery) proxy.getQuery();
 				SumQueryDefinition def = q.getQueryDefinition();
-				//TODO: implement me
-//				//value filter panel
-//				proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE, //$NON-NLS-1$
-//						def == null || def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session));
-//				//rate filter panel
-//				proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, //$NON-NLS-1$
-//						def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
-//				//column group by
-//				proxy.setDropItems(AssetSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
-//						def == null || def.getColumnGroupByPart() == null ? null :
-//							groupByToDropItems(def.getColumnGroupByPart(), session));
-//							
-//				//row group by
-//				proxy.setDropItems(AssetSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
-//						def == null || def.getRowGroupByPart() == null ? null : 
-//							groupByToDropItems(def.getRowGroupByPart(), session));
-//	
-//				//values
-//				List<DropItem> items = null;
-//				if (def != null && def.getValuePart() != null){
-//					items = valuePartToDropItems(def.getValuePart(),session);
-//					for (DropItem i : items){
-//						if (i instanceof AbstractValueDropItem){
-//							((AbstractValueDropItem)i).setEncounterRateOptions(PatrolDropItems.SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS);
-//						}
-//					}
-//				}
-//				proxy.setDropItems(AssetSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.VALUE.name(), items);//$NON-NLS-1$
+
+				//value filter panel
+				proxy.setDropItems(AssetSimpleFilterPanel.ID, def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
+ 
+				//column group by
+				proxy.setDropItems(AssetSummaryGroupByValuePanel.ID + "." + AssetSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
+						def == null || def.getColumnGroupByPart() == null ? null :
+							groupByToDropItems(def.getColumnGroupByPart(), session));
+							
+				//row group by
+				proxy.setDropItems(AssetSummaryGroupByValuePanel.ID + "." + AssetSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
+						def == null || def.getRowGroupByPart() == null ? null : 
+							groupByToDropItems(def.getRowGroupByPart(), session));
+				//values
+				List<DropItem> items = null;
+				if (def != null && def.getValuePart() != null){
+					items = valuePartToDropItems(def.getValuePart(),session);
+				}
+				proxy.setDropItems(AssetSummaryGroupByValuePanel.ID + "." + AssetSummaryGroupByValuePanel.ListTargetType.VALUE.name(), items);//$NON-NLS-1$
 			}
 		}catch (Exception ex){
 			AssetQueryPlugIn.log(ex.getMessage(), ex);

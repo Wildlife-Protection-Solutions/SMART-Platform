@@ -26,11 +26,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
-import org.wcs.smart.query.model.filter.date.IDateGroupBy;
-import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
-import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
-
 /**
  * Class that defines asset based options for
  * queries.  This includes both values for summary queries
@@ -40,35 +35,35 @@ import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
  * @since 1.0.0
  */
 public class AssetQueryOptions {
-
-	/**
-	 * Asset group by options for summary queries.
-	 */
-	public final static AssetFilterOption[] ASSET_GROUBY_OPTIONS = {
-			AssetFilterOption.ASSET, 
-			AssetFilterOption.STATION, 
-			AssetFilterOption.ASSETTYPE, 
-			AssetFilterOption.STATIONLOCATION, 
-	};
+//
+//	/**
+//	 * Asset group by options for summary queries.
+//	 */
+//	public final static AssetFilterOption[] ASSET_GROUBY_OPTIONS = {
+//			AssetFilterOption.ASSET, 
+//			AssetFilterOption.STATION, 
+//			AssetFilterOption.ASSETTYPE, 
+//			AssetFilterOption.STATIONLOCATION, 
+//	};
 	
-	
-	/**
-	 * Asset filter options for summary and observation queries
-	 */
-	public final static AssetFilterOption[] ASSET_FILTER_OPTIONS = {
-			AssetFilterOption.ASSET, 
-			AssetFilterOption.STATION, 
-			AssetFilterOption.ASSETTYPE, 
-			AssetFilterOption.STATIONLOCATION, 
-	};
-	
-	
-
-	public static IDateGroupBy[] DATE_GROUBY_OPS = new IDateGroupBy[]{
-		DayDateGroupBy.INSTANCE,
-		MonthDateGroupBy.INSTANCE,
-		YearDateGroupBy.INSTANCE
-	};
+//	
+//	/**
+//	 * Asset filter options for summary and observation queries
+//	 */
+//	public final static AssetFilterOption[] ASSET_FILTER_OPTIONS = {
+//			AssetFilterOption.ASSET, 
+//			AssetFilterOption.STATION, 
+//			AssetFilterOption.ASSETTYPE, 
+//			AssetFilterOption.STATIONLOCATION, 
+//	};
+//	
+//	
+//
+//	public static IDateGroupBy[] DATE_GROUBY_OPS = new IDateGroupBy[]{
+//		DayDateGroupBy.INSTANCE,
+//		MonthDateGroupBy.INSTANCE,
+//		YearDateGroupBy.INSTANCE
+//	};
 
 	/**
 	 * Finds a particular asset filter option based

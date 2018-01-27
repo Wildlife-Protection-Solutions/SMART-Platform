@@ -148,6 +148,7 @@ public abstract class AssetDataPanel {
 	private boolean canValidate = true;
 	
 	private Asset asset;
+	private UUID scrollTo = null;
 	
 	public AssetDataPanel(FormToolkit toolkit, boolean isEditable, boolean editState, boolean hideOnValidation, boolean canValidate, IEclipseContext context) {
 		this.toolkit = toolkit;
@@ -312,14 +313,23 @@ public abstract class AssetDataPanel {
 			resizeScroll();
 		});
 		
+		Control showControl = null;
 		for (AssetWaypointMapping aw : waypoints) {
 			RowItem item = new RowItem(aw);
-			item.createControl(scrollDetails);
+			Control c = item.createControl(scrollDetails);
+			if (scrollTo != null && scrollTo.equals(aw.getWaypoint().getUuid())) {
+				showControl = c;
+			}
 			rows.add(item);
 		}
 		createPageControl(scrollDetails, false, false);
 		details.layout();
 		resizeScroll();
+		
+		if (showControl != null) {
+			scroll.showControl(showControl);
+		}
+		scrollTo = null;
 	}
 	
 	private AssetWaypointMapping newIncident(AssetWaypointMapping aw, List<WaypointAttachment> attachments) {
@@ -670,6 +680,33 @@ public abstract class AssetDataPanel {
 		loadPage.schedule();
 	}
 	
+	
+	public boolean scrollToWaypoint (UUID waypointUuid) {
+		if (waypointsToDisplay == null) return false;
+		final int index = waypointsToDisplay.indexOf(waypointUuid);
+		if (index < 0) return false;
+		
+		int pageSize = displaySettings.getPageSize().getPageSize();
+		startIndex = index / pageSize;
+		
+		Job j = new Job("background zoom") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					loadPage.join();
+				} catch (InterruptedException e) {
+				}
+				scrollTo = waypointUuid;
+				loadPage.schedule();
+				return Status.OK_STATUS;
+			}
+			
+		};
+		j.setSystem(true);
+		j.schedule();
+		
+		return true;
+	}
 	
 	private void markValidated(Collection<AssetWaypointMapping> tovalidate) {
 		if (!isEdit) return;
@@ -1294,7 +1331,7 @@ public abstract class AssetDataPanel {
 			headerLabel.setText(sb.toString());
 			headerLabel.getParent().layout();
 		}
-		public void createControl(Composite parent) {
+		public Control createControl(Composite parent) {
 			item = toolkit.createComposite(parent, SWT.NONE);
 			item.setLayout(new GridLayout());
 			item.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
@@ -1305,7 +1342,7 @@ public abstract class AssetDataPanel {
 			
 			if (!waypoint.hasDirty() && hideOnValidate) {
 				hideAndDisable("**VALIDATED**");
-				return;
+				return item;
 			}
 			header = toolkit.createComposite(item, SWT.NONE);
 			header.setLayout(new GridLayout(2, false));
@@ -1501,6 +1538,7 @@ public abstract class AssetDataPanel {
 					if (e.button == 3) createHeaderMenu(headerLabel);
 				});
 			}
+			return item;
 		}
 		
 		

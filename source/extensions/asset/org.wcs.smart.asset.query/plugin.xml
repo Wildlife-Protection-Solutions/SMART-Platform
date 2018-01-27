@@ -38,9 +38,6 @@
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.query.asset.filterPanel">
          </DefinitionPanel>
-         <DefinitionPanel
-               id="org.wcs.smart.query.conservationAreaPanel">
-         </DefinitionPanel>
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.asset.query.group.AssetQueries"
@@ -49,9 +46,6 @@
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.query.asset.filterPanel">
-         </DefinitionPanel>
-         <DefinitionPanel
-               id="org.wcs.smart.query.conservationAreaPanel">
          </DefinitionPanel>
       </QueryType>
      
@@ -64,7 +58,8 @@
                itemPanelId="org.wcs.smart.query.asset.summaryItemPanel">
          </DefinitionPanel>
          <DefinitionPanel
-               id="org.wcs.smart.query.conservationAreaPanel">
+               id="org.wcs.smart.query.common.definition.filter"
+               itemPanelId="org.wcs.smart.query.asset.filterPanel">
          </DefinitionPanel>
       </QueryType>
    </extension>

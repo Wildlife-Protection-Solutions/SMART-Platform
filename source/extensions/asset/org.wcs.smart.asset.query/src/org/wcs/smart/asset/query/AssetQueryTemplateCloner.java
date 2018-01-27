@@ -23,14 +23,12 @@ package org.wcs.smart.asset.query;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetQueryFactory;
-import org.wcs.smart.asset.query.model.AssetQueryOptionType;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;

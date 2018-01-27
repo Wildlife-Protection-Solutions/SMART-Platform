@@ -22,7 +22,6 @@
 package org.wcs.smart.asset.query.exportimport;
 
 import org.hibernate.Session;
-import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionExporter;
@@ -32,7 +31,6 @@ import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IGroupBy.GroupByType;
 import org.wcs.smart.query.xml.model.QueryType;
-import org.wcs.smart.query.xml.model.UuidItemType;
 
 /**
  * Summary query definition exporter

@@ -7,10 +7,9 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.model.AssetQueryOptionType;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
-import org.wcs.smart.asset.query.ui.IAssetOptionData;
 import org.wcs.smart.asset.query.ui.AssetOptionData;
+import org.wcs.smart.asset.query.ui.IAssetGroupByOptionData;
 import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -19,9 +18,9 @@ import org.wcs.smart.util.UuidUtils;
 
 public class AssetGroupByViewer extends AbstractGroupByViewer<AssetGroupBy> {
 	
-	private IAssetOptionData data;
+	private IAssetGroupByOptionData data;
 	
-	public AssetGroupByViewer(AssetGroupBy gb, IAssetOptionData data) {
+	public AssetGroupByViewer(AssetGroupBy gb, IAssetGroupByOptionData data) {
 		super(gb);
 		this.data = data;
 	}

@@ -24,9 +24,9 @@ package org.wcs.smart.asset.query.ui.querytable;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.asset.query.model.observation.AssetAttributeQueryColumn;
 import org.wcs.smart.asset.query.model.observation.AssetCategoryQueryColumn;
+import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;

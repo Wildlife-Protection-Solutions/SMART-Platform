@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.asset.query.ui.definition.dropItems;
 
-import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.swt.SWT;

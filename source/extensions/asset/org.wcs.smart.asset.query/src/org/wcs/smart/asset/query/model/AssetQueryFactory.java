@@ -22,9 +22,6 @@
 package org.wcs.smart.asset.query.model;
 
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.model.AssetObservationQuery;
-import org.wcs.smart.asset.query.model.AssetSummaryQuery;
-import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.asset.query.model.types.AssetObservationQueryType;
 import org.wcs.smart.asset.query.model.types.AssetSummaryQueryType;
 import org.wcs.smart.asset.query.model.types.AssetWaypointQueryType;

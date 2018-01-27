@@ -21,19 +21,16 @@
  */
 package org.wcs.smart.asset.query.exportimport;
 
-import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.model.AssetQueryOptionType;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Filter visitor for processing asset filters.

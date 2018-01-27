@@ -165,7 +165,7 @@ TOKEN :
 |    < AGG  : ("sum" | "avg" | "min" | "max" | "var_samp" | "stddev_samp" ) >
 | 	 < DATE_GROUPBY_ITEM : "date:" ("day" | "week" | "month" | "quarter" | "year" | "starthour" | "endhour" ) >
 |    < QUERY_SPLITTER : "|" >
-|    < ASSET_GROUPBY_OPTION : ("asset" | "station" | "stationlocation" ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
+|    < ASSET_GROUPBY_OPTION : ("asset:asset" | "asset:station" | "asset:assettype" | "asset:location" ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 | 	<  CATEGORY_GROUPBY_ITEM : "category:" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  AREA_GROUPBY_ITEM : "area:" < AREA_TYPE_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  ATTRIBUTE_GROUPBY_ITEM :
@@ -312,11 +312,7 @@ IValueItem SingleValueItem() :
 }
 {
 	(
-		< ASSET_VALUE_ITEM >
-		{	
-			item = AssetValueItem.createItem( token.image );
-		}
-	| 
+	
 		< SUM_CAT_VALUE_KEY >
 		{
 			item = AssetCategoryValueItem.createItem( token.image );
@@ -377,9 +373,7 @@ IGroupBy GroupByItem() :
 }
 {
 	(
-		(
-		  < ASSET_GROUPBY_OPTION >
-		) 
+		< ASSET_GROUPBY_OPTION >
 		{
 			item = AssetGroupBy.createGroupBy( token.image );
 		}

@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -43,7 +44,7 @@ import org.hibernate.Session;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.model.AssetQueryOptionType;
-import org.wcs.smart.asset.query.ui.IAssetOptionData;
+import org.wcs.smart.asset.query.ui.IAssetGroupByOptionData;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -59,11 +60,11 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class AssetGroupByDropItem extends DropItem implements IGroupByDropItem{
 
-	private IAssetOptionData data;
+	private IAssetGroupByOptionData data;
 	private AssetFilterOption groupBy;
 	private List<ListItem> filteredValues = new ArrayList<ListItem>();
-	private ToolTip toolTip;
 	
+	private ToolTip toolTip;
 	private Font smallerFont;
 	
 	/**
@@ -131,7 +132,7 @@ public class AssetGroupByDropItem extends DropItem implements IGroupByDropItem{
 	@Override
 	public void initializeData(Object data) {
 		Object[] values = (Object[])data;
-		this.data = (IAssetOptionData) values[0];
+		this.data = (IAssetGroupByOptionData) values[0];
 		if (values.length < 2 || values[1] == null){
 			this.filteredValues.clear();
 		}else{
@@ -184,13 +185,15 @@ public class AssetGroupByDropItem extends DropItem implements IGroupByDropItem{
 			}
 		});
 		
-		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
+		toolTip = new ToolTip(parent.getShell(), SWT.NONE);
 		toolTip.setText(Messages.AssetGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateToolTipMessage();
 		link.addListener(SWT.MouseHover, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
+				Point p = link.toDisplay(event.x, event.y);
+				toolTip.setLocation(p.x + 15, p.y + 5);
 				toolTip.setVisible(true);
 			}
 		});
@@ -204,7 +207,7 @@ public class AssetGroupByDropItem extends DropItem implements IGroupByDropItem{
 	
 	private void updateToolTipMessage(){
 		StringBuilder tipStr = new StringBuilder();
-		if (filteredValues == null){
+		if (filteredValues == null || filteredValues.isEmpty()){
 			tipStr.append(Messages.AssetGroupByDropItem_AllLabel);
 		}else{
 			for (ListItem item: filteredValues){

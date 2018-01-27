@@ -22,7 +22,6 @@
 package org.wcs.smart.asset.query.ui.itempanel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,9 +42,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.model.AssetQueryOptions;
+import org.wcs.smart.asset.query.model.AssetFilterOption;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.SmartDB;
@@ -58,9 +57,7 @@ import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
-import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
-import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
@@ -182,9 +179,11 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			
 			
 			if (!SmartDB.isMultipleAnalysis()){
-				
 				List<Object> options = new ArrayList<Object>();
-				options.addAll(Arrays.asList(AssetQueryOptions.ASSET_GROUBY_OPTIONS));
+				options.add(AssetFilterOption.STATION);
+				options.add(AssetFilterOption.STATIONLOCATION);
+				options.add(AssetFilterOption.ASSET);
+				options.add(AssetFilterOption.ASSETTYPE);
 				input.put(AssetGroupByTreeItem.KEY, options.toArray());
 				
 			}

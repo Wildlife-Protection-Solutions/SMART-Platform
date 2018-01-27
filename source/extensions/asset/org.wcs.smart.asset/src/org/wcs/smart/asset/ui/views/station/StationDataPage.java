@@ -113,6 +113,12 @@ public class StationDataPage {
 		return mainControl;
 	}
 	
+	private UUID scrollToWp = null;
+	public void scrollTo(UUID waypointUuid) {
+		if (dataPanel.scrollToWaypoint(waypointUuid)) return;
+		scrollToWp = waypointUuid;
+	}
+	
 	
 	public void initializePanel() {
 		reloadData();
@@ -146,6 +152,10 @@ public class StationDataPage {
 					}
 				}
 				dataPanel.setWaypoints(waypointUuids);
+				if (scrollToWp != null) {
+					dataPanel.scrollToWaypoint(scrollToWp);
+					scrollToWp = null;
+				}
 				return Status.OK_STATUS;
 			}
 			

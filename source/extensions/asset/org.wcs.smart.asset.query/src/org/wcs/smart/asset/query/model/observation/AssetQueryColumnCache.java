@@ -14,9 +14,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
-import org.wcs.smart.asset.query.model.observation.AssetAttributeQueryColumn;
-import org.wcs.smart.asset.query.model.observation.AssetCategoryQueryColumn;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -24,14 +21,11 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
-import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**

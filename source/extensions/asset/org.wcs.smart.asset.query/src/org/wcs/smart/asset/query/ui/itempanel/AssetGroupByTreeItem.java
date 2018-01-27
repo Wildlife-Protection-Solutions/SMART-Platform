@@ -30,7 +30,6 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
-import org.wcs.smart.asset.query.ui.AssetQueryLabelProvider;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
@@ -84,7 +83,16 @@ public class AssetGroupByTreeItem implements IItemTreeNode{
 		
 		public Image getImage(Object element){
 			if (element instanceof AssetFilterOption){
-				return AssetQueryLabelProvider.getImage((AssetFilterOption)element);
+				switch(((AssetFilterOption)element)) {
+				case ASSET:
+					return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_ASSET);
+				case ASSETTYPE:
+					return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_ASSET);
+				case STATION:
+					return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION);
+				case STATIONLOCATION:
+					return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION_LOCATION);
+				}
 			}
 			return super.getImage(element);
 		}

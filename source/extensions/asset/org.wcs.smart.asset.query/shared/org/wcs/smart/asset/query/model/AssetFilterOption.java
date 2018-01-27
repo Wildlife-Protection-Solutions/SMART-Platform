@@ -5,7 +5,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
@@ -13,9 +12,7 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.ui.IQueryAssetLabelProvider;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 
@@ -25,8 +22,8 @@ import org.wcs.smart.observation.model.Waypoint;
 public enum AssetFilterOption  {
 	
 	ASSET("asset", "uuid", Asset.class, Asset.class, AssetQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
-	STATION("station", "uuid", AssetStation.class, Station.class, AssetQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
-	STATIONLOCATION("location", "uuid", AssetStationLocation.class, Station.class, AssetQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
+	STATION("station", "uuid", AssetStation.class, AssetStation.class, AssetQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
+	STATIONLOCATION("location", "uuid", AssetStationLocation.class, AssetStationLocation.class, AssetQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 	ASSETTYPE("assettype", "uuid", AssetType.class, AssetType.class, AssetQueryOptionType.UUID),
 	
 	CONSERVATION_AREA("ca", "ca_uuid", Waypoint.class, ConservationArea.class, AssetQueryOptionType.UUID);  //$NON-NLS-1$//$NON-NLS-2$
