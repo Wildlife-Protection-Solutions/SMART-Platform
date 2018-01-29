@@ -159,11 +159,11 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
 			String p1 = engine.addParameterValue(bits[0].toString());
 			String p2 = engine.addParameterValue(bits[1].toString());
-			f = " ( " + field + " >= " + p1 + " and " + field  + " <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( cast( " + field + " as date ) >= " + p1 + " and cast( " + field  + " as date) <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else if (bits.length == 2){
 			String p1 = engine.addParameterValue(bits[0].toString());
 			String p2 = engine.addParameterValue(bits[1].toString());
-			f = " ( " + field + " >= " + p1 + " and " + field  + " < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			f = " ( cast ( " + field + " as date ) >= " + p1 + " and cast( " + field  + " as date ) < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 		return f;

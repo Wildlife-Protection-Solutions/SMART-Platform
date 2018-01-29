@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,27 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset;
+package org.wcs.smart.asset.report.table;
 
-import org.wcs.smart.ISharedLabelProvider;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.asset.AssetPlugIn;
+import org.wcs.smart.data.oda.smart.impl.table.ITableImageProvider;
+import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 
 /**
- * Asset label provider for labels shared with Connect 
- * 
+ * Image provider for Asset related BIRT tables.
  * @author Emily
  *
  */
-public interface IAssetLabelProvider extends ISharedLabelProvider {
-	
-	public static final String ASSET_TABLE_NAME = "asset_table_name";
-	public static final String STATION_TABLE_NAME = "asset_station_name";
-	public static final String STATIONLOCATION_TABLE_NAME = "asset_stationlocation_name";
-	
-	public static final String ID_COL_NAME = "asset_id_col_name";
-	public static final String ASSET_TYPE_COL_NAME = "asset_type_col_name";
-	public static final String ASSET_TYPEKEY_COL_NAME = "asset_type_key_name";
-	public static final String STATUS_COL_NAME = "asset_status_col_name";
-	public static final String STATUSKEY_COL_NAME = "asset_status_key_col_name";
-	public static final String POSITION_COL_NAME = "asset_position";
+public class TableImageProvider implements ITableImageProvider {
+
+	public TableImageProvider() {
+	}
+
+	@Override
+	public Image getImage(SmartBirtTable table) {
+		if (table.getClass().equals(AssetTable.class)) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_ASSET);
+		if (table.getClass().equals(StationTable.class)) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION);
+		if (table.getClass().equals(LocationTable.class)) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION_LOCATION);
+		return null;
+	}
 
 }

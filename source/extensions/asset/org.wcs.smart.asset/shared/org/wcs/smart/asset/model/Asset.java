@@ -199,7 +199,8 @@ public class Asset extends UuidItem {
 		if (getUuid() == null) {
 			status = Status.INACTIVE;
 			return;
-		}else if (getIsRetired()) {
+		}
+		if (getIsRetired()) {
 			status = Status.RETIRED;
 			return;
 		}

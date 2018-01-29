@@ -415,8 +415,13 @@ public class AttributeFieldEditor {
 			btnChDateTime.setEnabled(enabled);
 			dtDateTime.setEnabled(enabled);
 		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
-			btnChOnOff.setEnabled(enabled);
 			btnOnOff.setEnabled(enabled);
+			if (!enabled) {
+				btnChOnOff.setEnabled(enabled);
+			}else {
+				btnChOnOff.setEnabled(true);
+				btnOnOff.setEnabled(btnChOnOff.getSelection());
+			}
 		}
 	}
 	
@@ -573,6 +578,7 @@ public class AttributeFieldEditor {
 				}
 			});
 			btnOnOff.setSelection(true);
+			btnOnOff.setEnabled(false);
 			cd = createDecoration(btnOnOff);
 		}else if (attribute.getType() == AttributeType.POSITION){
 			

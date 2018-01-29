@@ -23,11 +23,10 @@ package org.wcs.smart.asset.query.ui.editor;
 
 import java.awt.Point;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -156,7 +155,7 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 						
 						List<IResultItem> searchResults = ((ISearchabledResultSet)r).search(dbll.x, dbll.y, dbur.x,  dbur.y);
 						
-						HashMap<UUID, Set<AssetQueryResultItem>> items = new HashMap<>();
+						List<AssetQueryResultItem> items = new ArrayList<>();
 						double distance = Double.POSITIVE_INFINITY;
 						for (IResultItem ri : searchResults){
 							AssetQueryResultItem i = (AssetQueryResultItem)ri;
@@ -165,49 +164,52 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 							
 							if (d < distance){
 								items.clear();
-								HashSet<AssetQueryResultItem> set = (HashSet<AssetQueryResultItem>) items.get(i.getWaypointUuid());
-								if (set == null){
-									set = new HashSet<>();
-									items.put(i.getWaypointUuid(), set);
-								}
-								set.add(i);
-								
+								items.add(i);
 								distance = d;
-							}else if (d == distance){
-								HashSet<AssetQueryResultItem> set = (HashSet<AssetQueryResultItem>) items.get(i.getWaypointUuid());
-								if (set == null){
-									set = new HashSet<>();
-									items.put(i.getWaypointUuid(), set);
-								}
-								set.add(i);
+							}else if (d == distance) {
+								items.add(i);
 							}
 						}
 
 						if (items.isEmpty()) return null;
 					
-						AssetQueryResultItem first = items.values().iterator().next().iterator().next();
+						AssetQueryResultItem first = items.get(0);
+						HashMap<UUID, List<AssetQueryResultItem>> mergedByWp = new HashMap<>();
+						for (AssetQueryResultItem i : items) {
+							List<AssetQueryResultItem> list = mergedByWp.get(i.getWaypointUuid());
+							if (list == null) {
+								list = new ArrayList<>();
+								mergedByWp.put(i.getWaypointUuid(), list);
+							}
+							list.add(i);
+						}
 						
 						Coordinate px = ReprojectUtils.reproject(first.getWaypointX(null), first.getWaypointY(null), SmartDB.DATABASE_CRS, vm.getCRS());
 						Point pnt = vm.worldToPixel(px);
 						if (pnt.distance(x, y) > 5) return null;
 						StringBuilder sb = new StringBuilder();
-						
-						for (Set<AssetQueryResultItem> i : items.values()){
+						int i = 0;
+						for (List<AssetQueryResultItem> wpItems: mergedByWp.values()) {
 							if (sb.length() != 0) sb.append("\n"); //$NON-NLS-1$
-							first = i.iterator().next();
-							//TODO:
-							sb.append( first.getWaypointId() ); //$NON-NLS-1$ //$NON-NLS-2$
+							AssetQueryResultItem firstItem = wpItems.get(0);
+							sb.append( firstItem.getWaypointId() ); //$NON-NLS-1$ //$NON-NLS-2$
 							sb.append("\n"); //$NON-NLS-1$
-							sb.append(DateFormat.getDateTimeInstance().format(first.getWaypointDate()));
+							sb.append(DateFormat.getDateTimeInstance().format(firstItem.getWaypointDate()));
 							sb.append("\n"); //$NON-NLS-1$
-							for (AssetQueryResultItem result : i){
-								if (result.getCategories() != null && result.getCategories().length > 0){
-									sb.append(result.getCategories()[result.getCategories().length-1]);
+							for (AssetQueryResultItem item : wpItems) {
+								if (item.getCategories() != null && item.getCategories().length > 0){
+									sb.append(item.getCategories()[item.getCategories().length-1]);
 									sb.append("\n"); //$NON-NLS-1$
 								}
 							}
-						}
 						
+							i++;
+							if (i >= 3) break;
+						}
+						if (mergedByWp.size() >= 3 ) {
+							sb.append("\n");
+							sb.append(MessageFormat.format("{0} more ...", mergedByWp.size() - 3));
+						}
 						createMenu(page2.getMapViewer().getControl(), first);
 						return new InfoPoint(vm.worldToPixel(px), null, sb.toString());	
 					}

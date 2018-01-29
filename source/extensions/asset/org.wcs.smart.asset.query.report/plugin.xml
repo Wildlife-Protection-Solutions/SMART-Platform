@@ -4,11 +4,14 @@
    <extension
          point="org.wcs.smart.birt.map.maplayer">
       <MapLayer
-            maplayer="org.wcs.smart.asset.report.query.map.QueryMapLayer">
+            maplayer="org.wcs.smart.asset.report.map.QueryMapLayer">
       </MapLayer>
       <StyleProvider
             styleprovider="org.wcs.smart.asset.report.query.data.oda.query.QueryStyleProvider">
       </StyleProvider>
+      <MapLayer
+            maplayer="org.wcs.smart.asset.report.map.StationLocationTableMapLayer">
+      </MapLayer>
    </extension>
    <extension
          point="org.wcs.smart.report.birt.query.queryDataset">
@@ -25,6 +28,32 @@
             class="org.wcs.smart.asset.report.query.data.oda.query.AssetSmartQuery"
             queryTypeKey="assetwaypoint">
       </QueryTypeDataset>
+   </extension>
+   <extension
+         point="org.wcs.smart.report.birt.query.smartTable">
+      <TableCategory
+            icon="images/icons/obj16/asset.png"
+            id="org.wcs.smart.asset.query.report.assetcategory"
+            name="Assets">
+      </TableCategory>
+      <StaticTable
+            category="org.wcs.smart.asset.query.report.assetcategory"
+            class="org.wcs.smart.asset.report.table.AssetTable"
+            supportsCcaa="false">
+      </StaticTable>
+      <StaticTable
+            category="org.wcs.smart.asset.query.report.assetcategory"
+            class="org.wcs.smart.asset.report.table.StationTable"
+            supportsCcaa="false">
+      </StaticTable>
+      <ImageProvider
+            class="org.wcs.smart.asset.report.table.TableImageProvider">
+      </ImageProvider>
+      <StaticTable
+            category="org.wcs.smart.asset.query.report.assetcategory"
+            class="org.wcs.smart.asset.report.table.LocationTable"
+            supportsCcaa="false">
+      </StaticTable>
    </extension>
 
 </plugin>

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.report.query.map;
+package org.wcs.smart.asset.report.map;
 
 import java.util.Collections;
 import java.util.List;

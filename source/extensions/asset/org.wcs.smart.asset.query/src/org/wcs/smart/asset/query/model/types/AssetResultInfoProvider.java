@@ -65,7 +65,6 @@ public class AssetResultInfoProvider implements IQueryResultInfoProvider {
 	private void showItem(StationEditorInput in, UUID waypointUuid) {
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		ctx.set(OpenStationHandler.STATION_PARAM, in);
-		//TODO: waypoint
 		if (waypointUuid != null){
 			ctx.set(OpenStationHandler.INIT_SELECTION_WP_UUID, waypointUuid);
 		}

@@ -67,6 +67,18 @@ public class AssetCoreLabelProvider implements IAssetLabelProvider {
 		if (item instanceof AssetWaypointSource) {
 			return "Asset";
 		}
+		if (item == ASSET_TABLE_NAME) return "Assets";
+		if (item == STATION_TABLE_NAME) return "Stations";
+		if (item == STATIONLOCATION_TABLE_NAME) return "Station Locations";
+		
+		
+		if (item == ID_COL_NAME) return "ID";
+		if (item == ASSET_TYPE_COL_NAME) return "Type";
+		if (item == STATUS_COL_NAME) return "Status";
+		if (item == STATUSKEY_COL_NAME) return "Status Key";
+		if (item == ASSET_TYPEKEY_COL_NAME) return "Type Key";
+		if (item == POSITION_COL_NAME) return "Position";
+		
 		return null;
 	}
 }
