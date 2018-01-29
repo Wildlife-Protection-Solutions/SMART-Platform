@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.report.map;
+package org.wcs.smart.asset.report.query;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +27,6 @@ import java.util.List;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
-import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.report.birt.query.AbstractQueryMapLayer;
@@ -51,7 +50,6 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
-		queryTypeKey = QueryTypeManager.INSTANCE.findDeprecatedQueryTypeString(queryTypeKey);
 		if (queryTypeKey.equals(AssetWaypointQuery.KEY) ||
 				queryTypeKey.equals(AssetObservationQuery.KEY)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, AssetQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY);

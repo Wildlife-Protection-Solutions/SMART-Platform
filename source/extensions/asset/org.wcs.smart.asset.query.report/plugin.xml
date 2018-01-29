@@ -4,7 +4,7 @@
    <extension
          point="org.wcs.smart.birt.map.maplayer">
       <MapLayer
-            maplayer="org.wcs.smart.asset.report.map.QueryMapLayer">
+            maplayer="org.wcs.smart.asset.report.query.QueryMapLayer">
       </MapLayer>
       <StyleProvider
             styleprovider="org.wcs.smart.asset.report.query.data.oda.query.QueryStyleProvider">
@@ -21,7 +21,7 @@
       </QueryTypeDataset>
       <QueryTypeDataset
             class="org.wcs.smart.asset.report.query.data.oda.query.AssetSmartQuery"
-            metadataProvider="org.wcs.smart.asset.report.query.data.oda.query.AssetSummaryMetadataProvider"
+            metadataProvider="org.wcs.smart.asset.report.query.AssetSummaryMetadataProvider"
             queryTypeKey="assetsummary">
       </QueryTypeDataset>
       <QueryTypeDataset
