@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Asset Query Report PlugIn
+Bundle-SymbolicName: org.wcs.smart.asset.query.report;singleton:=true
+Bundle-Version: 6.0.0.qualifier
+Bundle-Activator: org.wcs.smart.asset.report.query.AssetQueryReportPlugIn
+Require-Bundle: org.wcs.smart.asset.query,
+ org.wcs.smart.query,
+ org.wcs.smart.report,
+ org.wcs.smart.report.birt.query,
+ org.wcs.smart
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: org.wcs.smart
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+
