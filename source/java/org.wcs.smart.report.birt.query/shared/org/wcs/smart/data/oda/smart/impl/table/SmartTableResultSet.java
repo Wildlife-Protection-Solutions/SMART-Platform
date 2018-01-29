@@ -336,9 +336,11 @@ public class SmartTableResultSet  implements IResultSet {
 		if (lastObject instanceof Boolean) {
 			return (Boolean) lastObject;
 		} else if (lastObject instanceof Integer) {
-			return ((Integer) lastObject) <= 0;
+			return ((Integer) lastObject) > 0;
 		} else if (lastObject instanceof Double) {
-			return ((Double) lastObject) <= 0.5;
+			return ((Double) lastObject) >= 0.5;
+		} else if (lastObject == null ) {
+			return false;
 		}
 		throw new UnsupportedOperationException();
 	}
