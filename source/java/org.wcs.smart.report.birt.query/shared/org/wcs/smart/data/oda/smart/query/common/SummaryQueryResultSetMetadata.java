@@ -73,7 +73,7 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	public String getColumnLabel(int index) throws OdaException {
 		index = index - 1;
 		if (index < results.getRowHeaders().size()){
-			return ""; //$NON-NLS-1$
+			return HEADER_COLUMN_KEY + "_" + index; //$NON-NLS-1$
 		}else{
 			StringBuilder sb= new StringBuilder();
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){

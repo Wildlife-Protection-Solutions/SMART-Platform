@@ -45,10 +45,13 @@ public class BirtSmartUtils {
 		
 			ArrayList<?> columns = (ArrayList<?>) dataset.getProperty("columnHints");  //$NON-NLS-1$
 			for (Object col : columns){
-				String displayName = ((ColumnHint)col).getProperty(dataset.getModule(), ColumnHint.DISPLAY_NAME_MEMBER).toString();
-				String colName = name2key.get(displayName); 
-				if (colName != null) ((ColumnHint)col).setProperty(ColumnHint.COLUMN_NAME_MEMBER, colName);
-				((ColumnHint)col).setProperty(ColumnHint.ALIAS_MEMBER, displayName);
+				Object displayNameObj = ((ColumnHint)col).getProperty(dataset.getModule(), ColumnHint.DISPLAY_NAME_MEMBER);
+				if (displayNameObj != null) {
+					String displayName = displayNameObj.toString();
+					String colName = name2key.get(displayName); 
+					if (colName != null) ((ColumnHint)col).setProperty(ColumnHint.COLUMN_NAME_MEMBER, colName);
+					((ColumnHint)col).setProperty(ColumnHint.ALIAS_MEMBER, displayName);
+				}
 			}
 		}catch (Exception ex){
 			Logger.getLogger(BirtSmartUtils.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
