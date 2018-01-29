@@ -305,6 +305,8 @@
 				<module>../extensions/i2/org.wcs.smart.connect.dataqueue.i2.feature</module>  
 				
 				<module>../extensions/asset/org.wcs.smart.asset</module>
+				<module>../extensions/asset/org.wcs.smart.asset.query</module>
+				<module>../extensions/asset/org.wcs.smart.asset.query.report</module>
 				<module>../extensions/asset/org.wcs.smart.asset.feature</module>
 				<module>../extensions/asset/org.wcs.smart.asset.core.feature</module>
 				
