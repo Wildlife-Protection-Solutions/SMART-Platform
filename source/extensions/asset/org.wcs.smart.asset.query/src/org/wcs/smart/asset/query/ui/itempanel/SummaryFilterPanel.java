@@ -177,7 +177,6 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));			
 			input.put(DateTreeNode.KEY, dates);
 			
-			
 			if (!SmartDB.isMultipleAnalysis()){
 				List<Object> options = new ArrayList<Object>();
 				options.add(AssetFilterOption.STATION);
@@ -187,8 +186,6 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 				input.put(AssetGroupByTreeItem.KEY, options.toArray());
 				
 			}
-			//TODO: implement me
-//			input.put(PatrolValueTreeItem.KEY, AssetQueryOptions.PATROL_VALUE_OPTIONS);
 
 			Display.getDefault().asyncExec(new Runnable(){
 

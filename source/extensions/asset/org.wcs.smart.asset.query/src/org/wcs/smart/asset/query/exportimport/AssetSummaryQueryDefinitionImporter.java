@@ -53,7 +53,7 @@ public class AssetSummaryQueryDefinitionImporter extends SummaryQueryDefinitionI
 	protected void validateQuery(ConservationArea caImport, SumQueryDefinition sumDef, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session)
 			throws Exception {
-		AssetQueryValidator validator = new AssetQueryValidator(langCode, uuidLookup, session, QueryDataModelManager.getManager(caImport), caImport);
+		AssetQueryValidator validator = new AssetQueryValidator(uuidLookup, session, QueryDataModelManager.getManager(caImport), caImport);
 		if (sumDef.getValueFilter() != null ){
 			warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));
 		}

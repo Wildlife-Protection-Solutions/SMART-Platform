@@ -255,6 +255,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			}
 			
 			engine.getSession().save(clone);
+			engine.addConservationItemMapping(asset, clone);
 		}	
 		engine.getSession().flush();
 	}

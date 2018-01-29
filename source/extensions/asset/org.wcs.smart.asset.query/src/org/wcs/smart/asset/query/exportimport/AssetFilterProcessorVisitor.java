@@ -24,13 +24,17 @@ package org.wcs.smart.asset.query.exportimport;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
-import org.wcs.smart.asset.query.model.AssetQueryOptionType;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Filter visitor for processing asset filters.
@@ -40,50 +44,10 @@ import org.wcs.smart.query.xml.model.UuidItemType;
  */
 public class AssetFilterProcessorVisitor implements IFilterVisitor {
 
-	/**
-     * Converts a asset option and associated uuid option to
-     * a xml uuiditemtype
-     *
-     * @param option
-     * @param uuid
-     * @param session
-     * @return
-     * @throws Exception
-     */
-    public static UuidItemType processAssetOption(AssetFilterOption option, UUID uuid, Session session) throws Exception{
-
-        if (option.getType() == AssetQueryOptionType.UUID){
-//            //we need to add a uuid type
-//            //find item in database
-//            if (NamedKeyItem.class.isAssignableFrom(option.getSourceClass())){
-//            	//match items based on key
-//            	NamedKeyItem ki = (NamedKeyItem)option.getObject(session,  uuid);
-//            	item.getValue().add(ki.getKeyId());
-//            }else{
-            	//TODO: implement me
-//            	//match items based on name
-//            	String[] data = option.getNames(session, UuidUtils.stringToUuid(uuid), Locale.getDefault());
-//            	if (data != null){
-//            		int index = 0;
-//            		if (data.length > 1){
-//            			item.setId(data[0]);
-//            			index = 1;
-//            		}
-//            		for (;index < data.length; index++){
-//            			item.getValue().add(data[index]);
-//            		}
-//            	}
-//            }
-
-//            return item;
-        	//TODO:
-        }
-        return null;
-    }
-    
 	private Session session;
 	private Exception ex;
 	private QueryType qt;
+	
 	public AssetFilterProcessorVisitor(Session session, QueryType qt){
 		this.session = session;
 		this.qt =qt;
@@ -109,5 +73,35 @@ public class AssetFilterProcessorVisitor implements IFilterVisitor {
 	}
 	
 	
+	/**
+     * Converts a asset option to a xml uuiditemtype
+     *
+     * @param option
+     * @param uuid
+     * @param session
+     * @return
+     * @throws Exception
+     */
+	public static UuidItemType processAssetOption(AssetFilterOption assetOption, UUID uuid, Session session) throws Exception{
+    	UuidItemType type = new UuidItemType();
+    	
+    	type.setUuid(UuidUtils.uuidToString(uuid));
+    	
+    	if (assetOption == AssetFilterOption.ASSET) {
+    		Asset a = session.get(Asset.class, uuid);
+    		if (a != null) type.setId(a.getId());
+    	}else if (assetOption == AssetFilterOption.ASSETTYPE) {
+    		AssetType a = session.get(AssetType.class, uuid);
+    		if (a != null) type.setId(a.getKeyId());
+    	}else if (assetOption == AssetFilterOption.STATION) {
+    		AssetStation a = session.get(AssetStation.class, uuid);
+    		if (a != null) type.setId(a.getId());
+    	}else if (assetOption == AssetFilterOption.STATIONLOCATION) {
+    		AssetStationLocation a = session.get(AssetStationLocation.class, uuid);
+    		if (a != null) type.setId(a.getId());
+    	}
+    	
+    	return type;
+    }
 
 }

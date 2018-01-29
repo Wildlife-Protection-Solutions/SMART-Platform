@@ -66,7 +66,7 @@ public class AssetSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImp
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				AssetQueryValidator validator = new AssetQueryValidator(langCode, uuidLookup, session, QueryDataModelManager.getManager(importCa), importCa);
+				AssetQueryValidator validator = new AssetQueryValidator(uuidLookup, session, QueryDataModelManager.getManager(importCa), importCa);
 				warnings.addAll(validator.validate(queryFilter.getFilter()));
 			} finally {
 				session.getTransaction().rollback();

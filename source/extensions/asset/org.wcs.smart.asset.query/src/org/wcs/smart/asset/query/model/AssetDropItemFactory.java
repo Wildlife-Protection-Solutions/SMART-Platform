@@ -47,6 +47,7 @@ import org.wcs.smart.asset.query.ui.definition.dropItems.AssetValueDropItem;
 import org.wcs.smart.asset.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
@@ -107,13 +108,29 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 		if (source instanceof Operator) {
 			items = createOtherDropItem((Operator)source);
 		}else if (source instanceof AssetType) {
-			items = new DropItem[] {new AssetFillterDropItem((AssetType)source) };
+			if (!((AssetType) source).getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
+				items = new DropItem[] {new ErrorDropItem(MessageFormat.format("Asset type {0} not found.", ((AssetType)source).getKeyId()))};
+			}else {
+				items = new DropItem[] {new AssetFillterDropItem((AssetType)source) };
+			}
 		}else if (source instanceof Asset) {
-			items = new DropItem[] {new AssetFillterDropItem((Asset)source) };
+			if (!((Asset) source).getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
+				items = new DropItem[] {new ErrorDropItem(MessageFormat.format("Asset {0} not found.", ((Asset)source).getId()))};
+			}else {
+				items = new DropItem[] {new AssetFillterDropItem((Asset)source) };
+			}
 		}else if (source instanceof AssetStation) {
-			items = new DropItem[] {new AssetFillterDropItem((AssetStation)source) };
+			if (!((AssetStation) source).getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
+				items = new DropItem[] {new ErrorDropItem(MessageFormat.format("Asset {0} not found.", ((AssetStation)source).getId()))};
+			}else {
+				items = new DropItem[] {new AssetFillterDropItem((AssetStation)source) };
+			}
 		}else if (source instanceof AssetStationLocation) {
-			items = new DropItem[] {new AssetFillterDropItem((AssetStationLocation)source) };
+			if (!((AssetStationLocation) source).getStation().getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
+				items = new DropItem[] {new ErrorDropItem(MessageFormat.format("Asset {0} not found.", ((AssetStationLocation)source).getId()))};
+			}else {
+				items = new DropItem[] {new AssetFillterDropItem((AssetStationLocation)source) };
+			}
 		} else if (source instanceof SummaryDmObject) {
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
 		} else if (source instanceof AssetFilterOption) {
@@ -519,28 +536,28 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 		DropItem it = null;
 		if (option == AssetFilterOption.ASSET) {
 			Asset asset = session.get(Asset.class, uuid);
-			if (asset == null) {
+			if (asset == null || !asset.getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
 				it = new ErrorDropItem("Asset not found");
 			}else {
 				it = new AssetFillterDropItem(asset);
 			}
 		}else if (option == AssetFilterOption.ASSETTYPE) {
 			AssetType asset = session.get(AssetType.class, uuid);
-			if (asset == null) {
+			if (asset == null || !asset.getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
 				it = new ErrorDropItem("Asset type not found");
 			}else {
 				it = new AssetFillterDropItem(asset);
 			}
 		}else if (option == AssetFilterOption.STATION) {
 			AssetStation asset = session.get(AssetStation.class, uuid);
-			if (asset == null) {
+			if (asset == null || !asset.getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
 				it = new ErrorDropItem("Asset Station type not found");
 			}else {
 				it = new AssetFillterDropItem(asset);
 			}
 		}else if (option == AssetFilterOption.STATIONLOCATION) {
 			AssetStationLocation asset = session.get(AssetStationLocation.class, uuid);
-			if (asset == null) {
+			if (asset == null || !asset.getStation().getConservationArea().equals(SmartDB.getCurrentConservationArea())) {
 				it = new ErrorDropItem("Asset Station Location type not found");
 			}else {
 				it = new AssetFillterDropItem(asset);

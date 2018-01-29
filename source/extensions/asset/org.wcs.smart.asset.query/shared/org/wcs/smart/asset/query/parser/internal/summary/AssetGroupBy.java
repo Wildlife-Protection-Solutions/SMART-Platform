@@ -124,6 +124,12 @@ public class AssetGroupBy implements IGroupBy {
 		return GroupByType.STRING;
 	}
 	
+	/**
+	 * clears all group by options
+	 */
+	public void clearItems() {
+		this.items = null;
+	}
 	
 	/**
 	 * 

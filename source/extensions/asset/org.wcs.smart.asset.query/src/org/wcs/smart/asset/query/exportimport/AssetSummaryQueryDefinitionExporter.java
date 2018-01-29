@@ -29,8 +29,9 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
-import org.wcs.smart.query.model.summary.IGroupBy.GroupByType;
 import org.wcs.smart.query.xml.model.QueryType;
+import org.wcs.smart.query.xml.model.UuidItemType;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Summary query definition exporter
@@ -59,18 +60,14 @@ public class AssetSummaryQueryDefinitionExporter extends SummaryQueryDefinitionE
 		for (IGroupBy item: values.getGroupBys()){
 			if (item instanceof AssetGroupBy){
 				AssetGroupBy gb = (AssetGroupBy)item;
-				if (gb.getType() == GroupByType.BYTE){
-					if (gb.getItems() != null){
-						//TODO: implement me
-//						for (String uuid : gb.getItems()){
-//							AssetFilterOption option = gb.getOption();
-//							UuidItemType uuidItem = AssetFilterProcessorVisitor.processAssetOption(option, uuid, session);
-//							if (uuid != null){
-//								qt.getUuiditem().add(uuidItem);
-//							}
-//						}						
+				
+				if (gb.getItems() != null) {
+					for (String uuid: gb.getItems()) {
+						UuidItemType uuidItem = AssetFilterProcessorVisitor.processAssetOption(gb.getOption(), UuidUtils.stringToUuid(uuid), session);
+						qt.getUuiditem().add(uuidItem);
 					}
 				}
+				
 			}
 		}
 	}

@@ -86,7 +86,7 @@ public class AssetFilter implements IFilter {
 	 */
 	@Override
 	public String asString(){
-		return "asset: " + option.getKey() + " " + op.asSmartValue() + " \"" + UuidUtils.uuidToString(value) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$	
+		return "asset:" + option.getKey() + " " + op.asSmartValue() + " \"" + UuidUtils.uuidToString(value) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$	
 	}
 	
 	/**

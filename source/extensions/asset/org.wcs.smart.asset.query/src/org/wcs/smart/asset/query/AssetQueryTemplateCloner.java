@@ -23,10 +23,12 @@ package org.wcs.smart.asset.query;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetQueryFactory;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
@@ -49,9 +51,7 @@ import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
-import org.wcs.smart.query.model.summary.IGroupBy.GroupByType;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Clones the various shared asset queries.
@@ -135,11 +135,14 @@ public class AssetQueryTemplateCloner implements
 			clone.setIsShared(query.getIsShared());
 			clone.setOwner(newEmployee);
 			clone.setVisibleColumns(query.getVisibleColumns());
-			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
-			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
-			
-			engine.getSession().save(clone);
-			engine.addConservationItemMapping(query, clone);
+			String queryFilter = cloneQueryFilter(query.getQueryFilter(), engine);
+			if (queryFilter != null) {
+				clone.setQueryFilter(queryFilter);
+				clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
+				
+				engine.getSession().save(clone);
+				engine.addConservationItemMapping(query, clone);
+			}
 		}
 		engine.getSession().flush();
 	}
@@ -167,11 +170,14 @@ public class AssetQueryTemplateCloner implements
 			clone.setIsShared(query.getIsShared());
 			clone.setOwner(newEmployee);
 			clone.setVisibleColumns(query.getVisibleColumns());
-			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
-			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
-			
-			engine.getSession().save(clone);
-			engine.addConservationItemMapping(query, clone);
+			String queryFilter = cloneQueryFilter(query.getQueryFilter(), engine);
+			if (queryFilter != null) {
+				clone.setQueryFilter(queryFilter);
+				clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
+				
+				engine.getSession().save(clone);
+				engine.addConservationItemMapping(query, clone);
+			}
 		}
 		engine.getSession().flush();
 	}
@@ -192,7 +198,7 @@ public class AssetQueryTemplateCloner implements
 			return queryfilter.asString();
 		}catch (Throwable t){
 			QueryPlugIn.log("Error cloning query definition: " + strFilter, t); //$NON-NLS-1$
-			return strFilter;
+			return null;
 		}
 	}
 	
@@ -202,16 +208,9 @@ public class AssetQueryTemplateCloner implements
 	 */
 	private void updateGroupBy(GroupByPart groupBy, ConservationAreaClonerEngine engine) throws Exception{
 		for(IGroupBy gb : groupBy.getGroupBys()){
-			if (gb instanceof AssetGroupBy && gb.getType().equals(GroupByType.BYTE)){
+			if (gb instanceof AssetGroupBy ){
 				AssetGroupBy pgb = (AssetGroupBy)gb;
-				if (pgb.getItems() != null){
-					for (int i = 0; i < pgb.getItems().length; i ++){
-						UuidItem it = engine.getNewConservationItem(UuidUtils.stringToUuid(pgb.getItems()[i]));
-						if (it != null){
-							pgb.getItems()[i] = UuidUtils.uuidToString(it.getUuid());
-						}
-					}
-				}
+				pgb.clearItems();
 			}
 		}
 	}
@@ -233,31 +232,37 @@ public class AssetQueryTemplateCloner implements
 			public void visit(IFilter filter) {
 				if (filter instanceof AssetFilter){
 					try{
-					AssetFilter pFilter = (AssetFilter)filter;
+						AssetFilter pFilter = (AssetFilter)filter;
 					
-					//TODO: implement me
-//					if (pFilter.getAssetOption().getType() == AssetQueryOptionType.UUID){
-//						//need to find the old uuid items and match to new items
-//						UUID templateUuid = pFilter.getValue();
-//						UuidItem newItem = engine.getNewConservationItem(UuidUtils.stringToUuid(templateUuid));
-//						if (newItem != null){
-//							pFilter.setValue(UuidUtils.uuidToString(newItem.getUuid()));
-//						}
-//					}
+						//need to find the old uuid items and match to new items
+						UUID templateUuid = pFilter.getValue();
+						if (pFilter.getAssetOption() == AssetFilterOption.ASSETTYPE) {
+							UuidItem newItem = engine.getNewConservationItem(templateUuid);
+							if (newItem != null){
+								//this will only work for asset types
+								pFilter.setValue(newItem.getUuid());
+							}else {
+								//throw exception
+								throw new Exception ("Asset type not found.");
+							}
+						}else {
+							//we don't clone asset id, stations, or locations so 
+							//this is no point in cloning this query.
+							throw new Exception("Query contains asset id, asset station or asset station location filters.  These items are not copied, therefore this query will not be copied");							
+						}
 					}catch (Exception ex){
 						errorex[0] = ex;
 					}
 				}
 			}
 		};
+		queryfilter.getFilter().accept(visitor);
 		if (errorex[0] != null){
 			throw errorex[0];
 		}
-		queryfilter.getFilter().accept(visitor);
+		
 		
 	}
-	
-	
 	
 	
 	/*

@@ -680,7 +680,12 @@ public abstract class AssetDataPanel {
 		loadPage.schedule();
 	}
 	
-	
+	/**
+	 * Scroll in the results table to the given waypoint
+	 * uuid. 
+	 * @param waypointUuid
+	 * @return
+	 */
 	public boolean scrollToWaypoint (UUID waypointUuid) {
 		if (waypointsToDisplay == null) return false;
 		final int index = waypointsToDisplay.indexOf(waypointUuid);
