@@ -29,8 +29,10 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.asset.query.parser.internal.parser.Parser;
+import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
 /**
@@ -92,5 +94,15 @@ public class AssetSummaryQuery extends SummaryQuery {
 		q.setOwner(newOwner);
 		q.setQuery(getQuery());
 		return q;
+	}
+	
+	public static final boolean canAddGeometry(SumQueryDefinition definition) {
+		if (definition.getRowGroupByPart().getGroupBys().size() != 1) return false;
+		IGroupBy gb = definition.getRowGroupByPart().getGroupBys().get(0);
+		if (!(gb instanceof AssetGroupBy)) return false;
+		AssetGroupBy asset = (AssetGroupBy)gb;
+		if (asset.getOption() == AssetFilterOption.STATION) return true;
+		if (asset.getOption() == AssetFilterOption.STATIONLOCATION) return true;
+		return false;
 	}
 }

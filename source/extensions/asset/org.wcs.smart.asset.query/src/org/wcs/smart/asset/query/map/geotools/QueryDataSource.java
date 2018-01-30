@@ -157,15 +157,10 @@ public class QueryDataSource extends ContentDataStore {
 		List<QueryColumn> columns = new ArrayList<>();
 		
 		//add a row for the station id or station location id
-		GroupByPart rowPart =  (((AssetSummaryQuery) query).getQueryDefinition().getRowGroupByPart());
-		if (rowPart.getGroupBys().size() != 1) {
+		if (!AssetSummaryQuery.canAddGeometry(query.getQueryDefinition())) {
 			throw new Exception("Cannot create map layer for asset summary query that does not have a single column group by that is station or location");
 		}
-		IGroupBy gb = rowPart.getGroupBys().get(0);
-		if (!(gb instanceof AssetGroupBy)) {
-			throw new Exception("Cannot create map layer for asset summary query that does not have a single column group by that is station or location");
-		}
-		AssetGroupBy assetGp = (AssetGroupBy)gb;
+		AssetGroupBy assetGp = (AssetGroupBy)query.getQueryDefinition().getRowGroupByPart().getGroupBys().get(0);
 		if (assetGp.getOption() == AssetFilterOption.STATION) {
 			columns.add(new EmptyQueryColumn("Station ID", "assetstationid", ColumnType.STRING));
 		}else if (assetGp.getOption() == AssetFilterOption.STATIONLOCATION) {

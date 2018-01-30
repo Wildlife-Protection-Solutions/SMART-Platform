@@ -29,6 +29,7 @@ import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.query.common.IMetadataProvider;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
+import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -51,14 +52,20 @@ public class AssetSummaryMetadataProvider implements IMetadataProvider {
 		if (q.getDateFilter() == null){
 			q.setDateFilter(new DateFilter(WaypointDateField.INSTANCE, Last30DaysDateFilter.INSTANCE));
 		}
-			
-		SummaryQueryResult results = new SummaryQueryResult();
+		
 		try {
+			SummaryQueryResult results = null;
+			if (AssetSummaryQuery.canAddGeometry(q.getQueryDefinition())) {
+				results = new GeometrySummaryQueryResult();
+			}else {
+				results = new SummaryQueryResult();
+			}
 			AssetSummaryEngine.getHeaderInfo(q, results, c.getSession());
+			return new SummaryQueryResultSetMetadata(results);
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
-		return new SummaryQueryResultSetMetadata(results);
+		
 	}
 }
 

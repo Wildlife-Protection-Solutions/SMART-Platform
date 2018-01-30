@@ -23,13 +23,23 @@ package org.wcs.smart.asset.report.query;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
+import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.hibernate.Session;
+import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
+import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
+import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.report.birt.query.AbstractQueryMapLayer;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * SMART Query Map Layer
@@ -47,12 +57,41 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean canAddToMap(DataSetHandle handle) {
+		if (!(handle instanceof OdaDataSetHandle)) {
+			return false;
+		}
+		OdaDataSetHandle odaHandle = (OdaDataSetHandle) handle;
+		if (odaHandle.getExtensionID().equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)) {
+			String queryText = odaHandle.getQueryText();
+			String queryTypeKey = queryText.split(":")[0]; //$NON-NLS-1$
+			if (canAddToMap(queryTypeKey)) return true;
+			
+			if (queryTypeKey.equals(AssetSummaryQuery.KEY)) {
+				try(Session session = HibernateManager.openSession()){
+					UUID uuid = UuidUtils.stringToUuid(queryText.split(":")[1]);
+					AssetSummaryQuery q = session.get(AssetSummaryQuery.class, uuid);
+					if (q != null) {
+						return AssetSummaryQuery.canAddGeometry(q.getQueryDefinition());
+					}
+				}catch (Exception ex) {
+					AssetPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
 		if (queryTypeKey.equals(AssetWaypointQuery.KEY) ||
 				queryTypeKey.equals(AssetObservationQuery.KEY)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, AssetQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY);
+			return Collections.singletonList(def);
+		}else if (queryTypeKey.equals(AssetSummaryQuery.KEY)) {
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, GeometrySummaryQueryResult.GEOMETRY_COLUMN_KEY);
 			return Collections.singletonList(def);
 		}
 		return null;

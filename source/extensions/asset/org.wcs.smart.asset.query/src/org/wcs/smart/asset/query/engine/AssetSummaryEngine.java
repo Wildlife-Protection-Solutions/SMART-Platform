@@ -64,6 +64,7 @@ import org.wcs.smart.query.common.engine.visitors.AreaFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
+import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
@@ -105,7 +106,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class AssetSummaryEngine extends AssetQueryEngine{
 
-	private AssetSummaryQueryResult sumResults = null;
+	private SummaryQueryResult sumResults = null;
 	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 	
 	private String valueWaypointTable;
@@ -177,8 +178,13 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 			throw new SQLException (ex);
 		}
 
-		//parse query bits that are needed for processing
-		sumResults = new AssetSummaryQueryResult();
+		//determine the type or query results to return
+		if (AssetSummaryQuery.canAddGeometry(def)) {
+			sumResults = new GeometrySummaryQueryResult();
+		}else {
+			sumResults = new SummaryQueryResult();
+		}
+		
 		cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 		
 		//create a date filter that caches the dates so the same
@@ -258,7 +264,9 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 					if (data == null) return;
 					sumResults.setData(data);
 					
-					addCoordinatesForMap(ldef, sumResults, session, cafilter);
+					if (sumResults instanceof GeometrySummaryQueryResult) {
+						addCoordinatesForMap(ldef, (GeometrySummaryQueryResult)sumResults, session, cafilter);
+					}
 					
 				}catch (OperationCanceledException ex) {
 					return;
@@ -272,12 +280,10 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		return sumResults ;
 	}
 
-	private void addCoordinatesForMap(SumQueryDefinition ldef, AssetSummaryQueryResult results, Session session, ConservationAreaFilter caFilter) {
-		if (ldef.getRowGroupByPart().getGroupBys().size() != 1) return;
-		IGroupBy groupBy = ldef.getRowGroupByPart().getGroupBys().get(0);
-		if (!(groupBy instanceof AssetGroupBy)) return;
+	private void addCoordinatesForMap(SumQueryDefinition ldef, GeometrySummaryQueryResult results, Session session, ConservationAreaFilter caFilter) {
+		if (!AssetSummaryQuery.canAddGeometry(ldef)) return;
 		
-		AssetGroupBy gb = (AssetGroupBy)groupBy;
+		AssetGroupBy gb = (AssetGroupBy)ldef.getRowGroupByPart().getGroupBys().get(0);
 		if (gb.getOption() == AssetFilterOption.STATION) {
 			try {
 				List<AssetStation> stations = session.createQuery("FROM AssetStation WHERE conservationArea.uuid IN (:cas)", AssetStation.class)
@@ -309,7 +315,6 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 	}
 	
 	private void dropTableInternal(Connection c){
-
 		if (valueWaypointTable != null){
 			dropTable(c, valueWaypointTable);
 			valueWaypointTable= null;
