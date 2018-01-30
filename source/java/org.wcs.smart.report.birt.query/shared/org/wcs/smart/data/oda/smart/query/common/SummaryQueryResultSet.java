@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.UUID;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
@@ -32,7 +33,13 @@ import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
+import org.wcs.smart.util.UuidUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Result set for a summary SMART query.
@@ -46,7 +53,7 @@ public class SummaryQueryResultSet implements IResultSet {
 
 	private SummaryQueryResultSetMetadata metadata;
 	private SummaryQueryResult results = null;
-
+	
 	private boolean lastIsNull = false;
 
 	/**
@@ -127,9 +134,14 @@ public class SummaryQueryResultSet implements IResultSet {
 	public String getString(int index) throws OdaException {
 		index--;
 		if (index < results.getRowHeaders().size()) {
-			return results.getRowHeaderValues()[m_currentRowId][index]
-					.getName();
-
+			lastIsNull = false;
+			return results.getRowHeaderValues()[m_currentRowId][index].getName();
+		}else if (metadata.isGeometryColumn(index)) {
+			lastIsNull = false;
+			UUID uuid = UuidUtils.stringToUuid( results.getRowHeaderValues()[m_currentRowId][0].getIdentifier() );
+			Coordinate c = ((GeometrySummaryQueryResult)results).getCoordinate(uuid);
+			Point p = GeometryFactoryProvider.getFactory().createPoint(c);
+			return p.toText();
 		} else {
 			index = index - results.getRowHeaders().size();
 			Double data = results.getData()[m_currentRowId][index];
@@ -314,9 +326,14 @@ public class SummaryQueryResultSet implements IResultSet {
 	public Object getObject(int index) throws OdaException {
 		index--;
 		if (index < results.getRowHeaders().size()) {
-			return results.getRowHeaderValues()[m_currentRowId][index]
-					.getName();
-
+			lastIsNull = false;
+			return results.getRowHeaderValues()[m_currentRowId][index].getName();
+		}else if (metadata.isGeometryColumn(index)) {
+			UUID uuid = UuidUtils.stringToUuid( results.getRowHeaderValues()[m_currentRowId][0].getIdentifier() );
+			Coordinate c = ((GeometrySummaryQueryResult)results).getCoordinate(uuid);
+			Point p = GeometryFactoryProvider.getFactory().createPoint(c);
+			lastIsNull = false;
+			return p;
 		} else {
 			index = index - results.getRowHeaders().size();
 			Double data = results.getData()[m_currentRowId][index];

@@ -64,9 +64,9 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 		
 		OdaDataSetHandle odaHandle = (OdaDataSetHandle) handle;
 		if (odaHandle.getExtensionID().equals(SmartQuery.SMART_DATASET_TYPE)) {
-			String queryText = odaHandle.getQueryText();
-			String queryTypeKey = queryText.split(":")[0]; //$NON-NLS-1$
-			if (canAddToMap(queryTypeKey)){return getGeometryOptions(queryTypeKey);
+			if (canAddToMap(odaHandle)) {
+				String queryTypeKey = odaHandle.getQueryText().split(":")[0]; //$NON-NLS-1$
+				return getGeometryOptions(queryTypeKey);
 			}
 		}
 		return new ArrayList<MapLayerInfo>();

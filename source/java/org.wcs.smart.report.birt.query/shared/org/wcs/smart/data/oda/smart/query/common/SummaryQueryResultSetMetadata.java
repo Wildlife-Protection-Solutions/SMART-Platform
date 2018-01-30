@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.data.oda.smart.query.common;
 
+import java.sql.Types;
+
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -38,7 +41,9 @@ import org.wcs.smart.query.model.QueryColumn;
 public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 
 	private final static String HEADER_COLUMN_KEY = "header"; //$NON-NLS-1$
+		
 	protected SummaryQueryResult results;
+	private int geometryColumnIndex = -1;
 	
 	/**
 	 * creates a new metadata object for a given query.  The summary
@@ -47,6 +52,9 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	public SummaryQueryResultSetMetadata(SummaryQueryResult results){
 		this.results = results;
+		if (hasGeometryColumn()) {
+			geometryColumnIndex =  results.getNumDataColumns() + results.getRowHeaders().size();
+		}
 	}
 	
 	/**
@@ -54,9 +62,21 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return results.getNumDataColumns() + results.getRowHeaders().size();
+		int cnt = results.getNumDataColumns() + results.getRowHeaders().size();
+		if (hasGeometryColumn()) cnt++;
+		return cnt;
 	}
 
+	private boolean hasGeometryColumn() {
+		return results instanceof GeometrySummaryQueryResult;
+	}
+	
+	
+	public boolean isGeometryColumn(int index) {
+		if (!hasGeometryColumn()) return false;
+		return (index == geometryColumnIndex);
+	}
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnDisplayLength(int)
 	 * @return -1
@@ -74,6 +94,8 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 		index = index - 1;
 		if (index < results.getRowHeaders().size()){
 			return HEADER_COLUMN_KEY + "_" + index; //$NON-NLS-1$
+		}else if (isGeometryColumn(index)) {
+			return GeometrySummaryQueryResult.GEOMETRY_COLUMN_NAME;
 		}else{
 			StringBuilder sb= new StringBuilder();
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
@@ -94,6 +116,8 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 		index = index - 1;
 		if (index < results.getRowHeaders().size()){
 			return HEADER_COLUMN_KEY + "_" + index; //$NON-NLS-1$
+		}else if (isGeometryColumn(index)) {
+			return GeometrySummaryQueryResult.GEOMETRY_COLUMN_KEY;
 		}else{
 			StringBuilder sb= new StringBuilder();
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
@@ -119,6 +143,8 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 		index--;
 		if (index < results.getRowHeaders().size()){
 			return QueryColumn.ColumnType.STRING.getSqlType();
+		}else if (isGeometryColumn(index)) {
+			return Types.JAVA_OBJECT;
 		}else{
 			return QueryColumn.ColumnType.NUMBER.getSqlType();
 		}
