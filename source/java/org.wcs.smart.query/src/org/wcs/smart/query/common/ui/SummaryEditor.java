@@ -188,6 +188,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		}
 	};
 
+	
 	/**
 	 * Creates a new editor
 	 */
@@ -198,6 +199,14 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
 	}
 
+	/**
+	 * 
+	 * @return the job used to run the query
+	 */
+	public Job getRunQueryJob() {
+		return runQueryJob;
+	}
+	
 	/**
 	 * @see org.eclipse.ui.part.MultiPageEditorPart#dispose()
 	 */
@@ -213,7 +222,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 			ConservationAreaManager.getInstance().removeAreaChangeListener(areaListener);
 		}
 		query.dispose();
-		runQueryJob.cancel();
+		getRunQueryJob().cancel();
 	}
 
 	@Override
@@ -279,7 +288,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 	 * Re-run the query and refresh the results.
 	 */
 	public void refreshQuery() {
-		runQueryJob.cancel();
+		getRunQueryJob().cancel();
 		// update date filter
 		getQuery().setDateFilter(dateFilterComposite.getDateFilter());
 
@@ -291,7 +300,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		}
 		// show progress area
 		resultsArea.showProgressArea();
-		runQueryJob.schedule();
+		getRunQueryJob().schedule();
 	}
 
 	@Override
@@ -358,7 +367,9 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		resultsArea.setFocus();
 	}
 
-
+	public SummaryResultsArea getResultArea() {
+		return this.resultsArea;
+	}
 	
 
 	/*
