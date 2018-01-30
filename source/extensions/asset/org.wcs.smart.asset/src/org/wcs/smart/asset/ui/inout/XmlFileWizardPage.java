@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -62,6 +63,11 @@ public class XmlFileWizardPage extends WizardPage {
 		super("XML_FILE_PAGE");
 	}
 
+	@Override
+	public IWizardPage getNextPage() {
+		return null;
+	}
+	
 	public Path getFile() {
 		return Paths.get(txtFile.getText());
 	}
