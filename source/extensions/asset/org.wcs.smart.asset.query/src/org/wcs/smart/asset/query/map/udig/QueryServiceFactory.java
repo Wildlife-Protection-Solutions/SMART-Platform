@@ -23,6 +23,7 @@ package org.wcs.smart.asset.query.map.udig;
 
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 
@@ -45,6 +46,9 @@ public class QueryServiceFactory {
 	public static IService generateQueryService(Query query, IProjectionProvider prjProvider){
 		if (query instanceof SimpleQuery){
 			return new QueryService((SimpleQuery)query, prjProvider);
+		}
+		if (query instanceof AssetSummaryQuery) {
+			return new QueryService ((AssetSummaryQuery) query);
 		}
 		return null;
 	}

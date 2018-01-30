@@ -36,8 +36,10 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.AssetValueItemLabelProvider;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetDropItemFactory;
@@ -92,6 +94,8 @@ import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
+import com.vividsolutions.jts.geom.Coordinate;
+
 /**
  * Query engine for executing summary
  * queries.
@@ -101,7 +105,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class AssetSummaryEngine extends AssetQueryEngine{
 
-	private SummaryQueryResult sumResults = null;
+	private AssetSummaryQueryResult sumResults = null;
 	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 	
 	private String valueWaypointTable;
@@ -174,7 +178,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		}
 
 		//parse query bits that are needed for processing
-		sumResults = new SummaryQueryResult();
+		sumResults = new AssetSummaryQueryResult();
 		cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 		
 		//create a date filter that caches the dates so the same
@@ -254,6 +258,8 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 					if (data == null) return;
 					sumResults.setData(data);
 					
+					addCoordinatesForMap(ldef, sumResults, session, cafilter);
+					
 				}catch (OperationCanceledException ex) {
 					return;
 				} finally {
@@ -266,6 +272,38 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		return sumResults ;
 	}
 
+	private void addCoordinatesForMap(SumQueryDefinition ldef, AssetSummaryQueryResult results, Session session, ConservationAreaFilter caFilter) {
+		if (ldef.getRowGroupByPart().getGroupBys().size() != 1) return;
+		IGroupBy groupBy = ldef.getRowGroupByPart().getGroupBys().get(0);
+		if (!(groupBy instanceof AssetGroupBy)) return;
+		
+		AssetGroupBy gb = (AssetGroupBy)groupBy;
+		if (gb.getOption() == AssetFilterOption.STATION) {
+			try {
+				List<AssetStation> stations = session.createQuery("FROM AssetStation WHERE conservationArea.uuid IN (:cas)", AssetStation.class)
+						.setParameterList("cas", caFilter.getConservationAreaFilterIds())
+						.list();
+				for (AssetStation s : stations) {
+					results.addCoordinateDetails(s.getUuid(), new Coordinate(s.getX(), s.getY()));
+				}
+			}catch (Exception ex) {
+				AssetQueryPlugIn.log(ex.getMessage(), ex);
+			}
+			
+		}else if (gb.getOption() == AssetFilterOption.STATIONLOCATION) {
+			try {
+				List<AssetStationLocation> locations = session.createQuery("SELECT l FROM AssetStationLocation l join l.station s WHERE s.conservationArea.uuid IN (:cas)", AssetStationLocation.class)
+						.setParameterList("cas", caFilter.getConservationAreaFilterIds())
+						.list();
+				for (AssetStationLocation s : locations) {
+					results.addCoordinateDetails(s.getUuid(), new Coordinate(s.getX(), s.getY()));
+				}
+			}catch (Exception ex) {
+				AssetQueryPlugIn.log(ex.getMessage(), ex);
+			}
+		}		
+	}
+	
 	@Override
 	public void dropTables(Connection c){
 	}

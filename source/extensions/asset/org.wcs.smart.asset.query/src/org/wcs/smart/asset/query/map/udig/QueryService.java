@@ -41,6 +41,7 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.asset.query.map.geotools.QueryDataSource;
 import org.wcs.smart.asset.query.map.geotools.QueryDataSourceFactory;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
+import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -71,7 +72,7 @@ public class QueryService extends IService implements IQueryService {
 	private IProjectionProvider prjProvider;
 	
 	/**
-	 * Creates a new query service .
+	 * Creates a new query service for simple queries
 	 * 
 	 * @param query waypoint query
 	 */
@@ -83,6 +84,18 @@ public class QueryService extends IService implements IQueryService {
 		this.url = QueryServiceExtension.createURL(this.params);		
 	}
 
+	/**
+	 * New query service for summary queries
+	 * 
+	 * @param query
+	 */
+	public QueryService(AssetSummaryQuery query){
+		this.query = query;
+		this.params = new HashMap<String, Serializable>();
+		this.params.put(QueryDataSourceFactory.QUERY_UUID.key, this.query.getUuid());
+		this.url = QueryServiceExtension.createURL(this.params);		
+	}
+	
 	/**
 	 * @return the query 
 	 */
@@ -98,14 +111,14 @@ public class QueryService extends IService implements IQueryService {
 	 * @throws IOException
 	 */
 	public void refresh(IProgressMonitor monitor) throws IOException{
-		for (IGeoResource member : resources(monitor)){
-			((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
-		}
 		if (ds != null){
 			for (String name : ds.getTypeNames()){
 				ds.removeSchema(name);
 			}
 		}
+//		for (IGeoResource member : resources(monitor)){
+//		((QueryGeoResourceInfo)member.getInfo(monitor)).computeBounds((QueryGeoResource)member, monitor);
+//	}
 	}	
 	
 	
@@ -150,6 +163,8 @@ public class QueryService extends IService implements IQueryService {
 					ArrayList<QueryGeoResource> temp = new ArrayList<QueryGeoResource>();
 					if (query.getTypeKey().equals(AssetObservationQuery.KEY) || 
 							query.getTypeKey().equals(AssetWaypointQuery.KEY) ){
+						temp.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
+					}else if (query.getTypeKey().equals(AssetSummaryQuery.KEY)) {
 						temp.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
 					}
 					this.members = temp;
@@ -215,6 +230,8 @@ public class QueryService extends IService implements IQueryService {
                 			ds = new QueryDataSource((AssetObservationQuery)query, prjProvider);
                 		}else if (query.getTypeKey().equals(AssetWaypointQuery.KEY) ){
                     		ds = new QueryDataSource((AssetWaypointQuery)query, prjProvider);
+                		}else if (query.getTypeKey().equals(AssetSummaryQuery.KEY)) {
+                			ds = new QueryDataSource((AssetSummaryQuery)query);
                 		}
                 	}else{
                 		//use factory

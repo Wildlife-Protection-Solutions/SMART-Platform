@@ -34,7 +34,9 @@ import org.locationtech.udig.project.internal.command.navigation.SetViewportBBox
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.query.map.udig.QueryService;
 import org.wcs.smart.asset.query.model.AssetQueryFactory;
+import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
@@ -72,8 +74,6 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 				
 				if (monitor.isCanceled() || mymonitor.isCanceled()){
 					page1.getResultArea().updateAndShowTable(null);
-					//TODO:
-//					page2.clear();
 					return Status.CANCEL_STATUS;
 				}
 				page1.getResultArea().updateAndShowTable((SummaryQueryResult)results);
@@ -84,8 +84,6 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 			return Status.OK_STATUS;
 		}
 	};
-	
-	
 	
 	@Override
 	public void refreshQuery() {
@@ -121,8 +119,6 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 
 	@Override
 	protected void createPages() {
-		
-		
 		QueryEditorInput input = ((QueryEditorInput) getEditorInput());
 		super.setPartName(input.getName());
 		showBusy(true);
@@ -141,9 +137,8 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 			
 			int pageIndex = 0;
 			addPage(pageIndex, page1, input);
-			setPageText(pageIndex, "Tabular Results");
+			setPageText(pageIndex, "Summary Results");
 			setPageImage(pageIndex, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
-//			page1.updateQueryName();
 			
 			pageIndex++;
 			page2 = new SummaryMapPagePart(this);
@@ -176,8 +171,7 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 
 	@Override
 	public IQueryService createQueryService() {
-		// TODO Auto-generated method stub
-		return null;
+		return new QueryService((AssetSummaryQuery)getQueryProxy().getQuery());
 	}
 
 	@Override
@@ -219,4 +213,5 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 	public IStatusLineManager getStatusLineManager() {
 		return page2.getStatusLineManager();
 	}
+
 }

@@ -95,7 +95,7 @@ public class QueryServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		String url = "smart://smartdb/query/"; //$NON-NLS-1$
+		String url = "smart://smartdb/asset/query/"; //$NON-NLS-1$
 		if (params.get(QUERY_UUID_KEY) == null || !(params.get(QUERY_UUID_KEY) instanceof UUID)){
 			url += System.nanoTime();
 		}else{
