@@ -21,9 +21,32 @@
  */
 package org.wcs.smart.asset.query.ui.editor;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.part.MultiPageEditorPart;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.query.model.AssetQueryFactory;
-import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.QueryExecutor;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
+import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.ui.ISummaryEditor;
 import org.wcs.smart.query.common.ui.SummaryEditor;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.ui.editor.IMapQueryEditor;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Editor for displaying query results. The editor includes two pages a tabular
@@ -32,11 +55,168 @@ import org.wcs.smart.query.common.ui.SummaryEditor;
  * @author Emily
  * @since 1.0.0
  */
-public class AssetSummaryEditor extends SummaryEditor{
+public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEditor, ISummaryEditor, MapPart, IMapQueryEditor{
 
 	public static final String ID = "org.wcs.smart.asset.query.ui.SummaryEditor"; //$NON-NLS-1$
 
-	public SummaryQuery createNewQuery(){
-		return AssetQueryFactory.createSummaryQuery();
+	private SummaryEditor page1 = null;
+	private SummaryMapPagePart page2 = null;
+
+	private Job runQueryJob = new Job("Run asset summary query") {
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			setName("Running Query:" + page1.getQuery().getName());
+			try {
+				IProgressMonitor mymonitor = page1.getResultArea().createProgressMonitor();
+				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(page1.getQuery(), null, mymonitor);
+				
+				if (monitor.isCanceled() || mymonitor.isCanceled()){
+					page1.getResultArea().updateAndShowTable(null);
+					//TODO:
+//					page2.clear();
+					return Status.CANCEL_STATUS;
+				}
+				page1.getResultArea().updateAndShowTable((SummaryQueryResult)results);
+				page2.refresh();
+			} catch (Exception ex) {
+				QueryPlugIn.displayLog("Error running asset summary query", ex);
+			}
+			return Status.OK_STATUS;
+		}
+	};
+	
+	
+	
+	@Override
+	public void refreshQuery() {
+		page1.refreshQuery();
+		page2.refresh();
+	}
+
+	@Override
+	public QueryProxy getQueryProxy() {
+		return page1.getQueryProxy();
+	}
+
+	@Override
+	public QueryEditorInput getInputInternal() {
+		return page1.getInputInternal();
+	}
+
+	@Override
+	public void validate() {
+		page1.validate();
+	}
+
+	@Override
+	public void reparseQuery() {
+		page1.reparseQuery();
+		
+	}
+
+	@Override
+	public void setDirty(boolean dirty) {
+		page1.setDirty(dirty);
+	}
+
+	@Override
+	protected void createPages() {
+		
+		
+		QueryEditorInput input = ((QueryEditorInput) getEditorInput());
+		super.setPartName(input.getName());
+		showBusy(true);
+		try {
+			page1 = new SummaryEditor() {
+				@Override
+				public Query createNewQuery() {
+					return AssetQueryFactory.createSummaryQuery();
+				}
+				
+				@Override
+				public Job getRunQueryJob() {
+					return runQueryJob;
+				}
+			};
+			
+			int pageIndex = 0;
+			addPage(pageIndex, page1, input);
+			setPageText(pageIndex, "Tabular Results");
+			setPageImage(pageIndex, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
+//			page1.updateQueryName();
+			
+			pageIndex++;
+			page2 = new SummaryMapPagePart(this);
+			addPage(pageIndex, page2, input);
+			setPageText(pageIndex, "Map");
+			setPageImage(pageIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+		}catch (Exception ex) {
+			QueryPlugIn.log("Could not open query editor", ex); //$NON-NLS-1$
+			throw new RuntimeException("Could not open query editor" + ex.getMessage(), ex); //$NON-NLS-1$
+		}finally {
+			showBusy(false);
+		}
+	}
+
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+		page1.doSave(monitor);
+	}
+
+	@Override
+	public void doSaveAs() {
+		page1.doSaveAs();
+		
+	}
+
+	@Override
+	public boolean isSaveAsAllowed() {
+		return page1.isSaveAsAllowed();
+	}
+
+	@Override
+	public IQueryService createQueryService() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void showMapPage(ReferencedEnvelope env) {
+		if (env != null){
+			page2.setInitialZoom(env);
+			getMap().sendCommandSync(new SetViewportBBoxCommand(env));
+		}
+		for (int i = 0; i < getPageCount(); i ++){
+			if (getEditor(i) == page2){
+				setActivePage(i);
+				return;
+			}
+		}
+	}
+
+	@Override
+	public Map getMap() {
+		return page2.getMap();
+	}
+
+	@Override
+	public void openContextMenu() {
+		page2.openContextMenu();
+		
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+		page2.setFont(textArea);		
+	}
+
+	@Override
+	public void setSelectionProvider(IMapEditorSelectionProvider selectionProvider) {
+		page2.setSelectionProvider(selectionProvider);
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return page2.getStatusLineManager();
 	}
 }
