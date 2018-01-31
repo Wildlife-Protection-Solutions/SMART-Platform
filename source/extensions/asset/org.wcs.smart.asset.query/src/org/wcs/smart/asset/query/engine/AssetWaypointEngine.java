@@ -26,10 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.Collator;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,6 +41,7 @@ import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
@@ -174,23 +172,6 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 	public void dropTables(Connection c) throws SQLException {
 		dropTable(c, queryDataTable);
 	}
-
-
-	private String toString(Set<String> strings) {
-		if (strings.size() == 0) return "";
-		if (strings.size() == 1) return strings.iterator().next();
-		
-		ArrayList<String> sorted = new ArrayList<>();
-		sorted.addAll(strings);
-		Collections.sort(sorted, (a,b)->Collator.getInstance().compare(a, b));
-		StringBuilder s = new StringBuilder();
-		s.append(sorted.get(0));
-		for (int i = 1; i < sorted.size(); i ++) {
-			s.append(", ");
-			s.append(sorted.get(i));
-		}
-		return s.toString();
-	}
 	
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
 		SubMonitor progress = SubMonitor.convert(monitor, 18);
@@ -250,9 +231,9 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 				while(rs.next()) {
 					byte[] uuid = rs.getBytes(1);
 					if (lastWp != null &&  !Arrays.equals(lastWp,  uuid) ) {
-						updatePs.setString(1,  toString(station));
-						updatePs.setString(2, toString(location));
-						updatePs.setString(3, toString(asset));
+						updatePs.setString(1, AssetQueryPlugIn.asString(station));
+						updatePs.setString(2, AssetQueryPlugIn.asString(location));
+						updatePs.setString(3, AssetQueryPlugIn.asString(asset));
 						updatePs.setBytes(4,  lastWp);
 						updatePs.addBatch();
 						asset.clear();
@@ -266,9 +247,9 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 					lastWp = uuid;
 				}
 			}
-			updatePs.setString(1,  toString(station));
-			updatePs.setString(2, toString(location));
-			updatePs.setString(3, toString(asset));
+			updatePs.setString(1, AssetQueryPlugIn.asString(station));
+			updatePs.setString(2, AssetQueryPlugIn.asString(location));
+			updatePs.setString(3, AssetQueryPlugIn.asString(asset));
 			updatePs.setBytes(4,  lastWp);
 			updatePs.addBatch();
 			
@@ -294,7 +275,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
 			sql.append(AssetQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".wp_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
