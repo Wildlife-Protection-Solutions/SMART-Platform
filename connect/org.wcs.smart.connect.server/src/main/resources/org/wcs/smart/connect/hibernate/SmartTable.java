@@ -43,6 +43,9 @@ import org.wcs.smart.asset.model.AssetTypeAttribute;
 import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointAttachment;
+import org.wcs.smart.asset.query.model.AssetObservationQuery;
+import org.wcs.smart.asset.query.model.AssetSummaryQuery;
+import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -410,6 +413,9 @@ public enum SmartTable {
 	ASSET_WAYPOINT(AssetWaypoint.class, ".id.waypoint.conservationArea"),
 	ASSET_WAYPOINT_ATTACHMENT(AssetWaypointAttachment.class, ".id.waypointAttachment.waypoint.conservationArea"),
 	
+	ASSET_OBSERVATION_QUERY(AssetObservationQuery.class, null),
+	ASSET_WAYPOINT_QUERY(AssetWaypointQuery.class, null),
+	ASSET_SUMMARY_QUERY(AssetSummaryQuery.class, null)
 	;
 	
 	public Class<?> hibernateClass;

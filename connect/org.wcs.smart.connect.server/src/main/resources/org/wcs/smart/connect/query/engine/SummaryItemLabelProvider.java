@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +48,12 @@ import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetType;
+import org.wcs.smart.asset.query.model.AssetFilterOption;
+import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -345,6 +352,8 @@ public class SummaryItemLabelProvider {
 			results = getName((SurveyIdGroupBy)item);
 		}else if (item instanceof SamplingUnitGroupBy){
 			results = getName((SamplingUnitGroupBy)item);
+		}else if (item instanceof AssetGroupBy){
+			results = getName((AssetGroupBy)item);
 		}
 		return results;
 	}
@@ -833,6 +842,8 @@ public class SummaryItemLabelProvider {
 		}
 		return items;
 	}
+	
+	
 	private List<ListItem> getName(PatrolGroupBy item){
 		List<ListItem> results = new ArrayList<ListItem>();
 		PatrolQueryOptionType type = item.getOption().getType();
@@ -976,6 +987,85 @@ public class SummaryItemLabelProvider {
 		return results;
 	}
 	
+	private List<ListItem> getName(AssetGroupBy item){
+		List<ListItem> results = new ArrayList<ListItem>();
+		AssetFilterOption type = item.getOption();
+		
+		String[] keys = item.getItems();
+		Set<UUID> selectedItems = null; 
+		if (keys != null){
+			selectedItems = new HashSet<>();
+			for (String key : keys) {
+				selectedItems.add(UuidUtils.stringToUuid(key));
+			}
+		}
+		
+		if (type == AssetFilterOption.ASSET) {
+			List<Asset> assets = null;
+			if (selectedItems == null) {
+				assets = s.createQuery("FROM Asset WHERE conservationArea.uuid in (:cas)", Asset.class) //$NON-NLS-1$
+					.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+					.list();
+			}else {
+				assets = s.createQuery("FROM Asset WHERE uuid in (:uuids) and conservationArea.uuid in (:cas)", Asset.class) //$NON-NLS-1$
+						.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+						.setParameterList("uuids", selectedItems) //$NON-NLS-1$
+						.list();
+			}
+			for (Asset a : assets) {
+				results.add(new ListItem(a.getUuid(), a.getId(), UuidUtils.uuidToString(a.getUuid())));
+			}
+			
+		}else if (type == AssetFilterOption.ASSETTYPE) {
+			List<AssetType> assets = null;
+			if (selectedItems == null) {
+				assets = s.createQuery("FROM AssetType WHERE conservationArea.uuid in (:cas)", AssetType.class) //$NON-NLS-1$
+					.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+					.list();
+			}else {
+				assets = s.createQuery("FROM AssetType WHERE uuid in (:uuids) and conservationArea.uuid in (:cas)", AssetType.class) //$NON-NLS-1$
+						.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+						.setParameterList("uuids", selectedItems) //$NON-NLS-1$
+						.list();
+			}
+			for (AssetType a : assets) {
+				results.add(new ListItem(a.getUuid(), a.getName(), UuidUtils.uuidToString(a.getUuid())));
+			}
+			
+		}else if (type == AssetFilterOption.STATION) {
+			List<AssetStation> stations = null;
+			if (selectedItems == null) {
+				stations = s.createQuery("FROM AssetStation WHERE conservationArea.uuid in (:cas)", AssetStation.class) //$NON-NLS-1$
+					.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+					.list();
+			}else {
+				stations = s.createQuery("FROM AssetStation WHERE uuid in (:uuids) and conservationArea.uuid in (:cas)", AssetStation.class) //$NON-NLS-1$
+						.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+						.setParameterList("uuids", selectedItems) //$NON-NLS-1$
+						.list();
+			}
+			for (AssetStation a : stations) {
+				results.add(new ListItem(a.getUuid(), a.getId(), UuidUtils.uuidToString(a.getUuid())));
+			}
+		}else if (type == AssetFilterOption.STATIONLOCATION) {
+			List<AssetStationLocation> locations = null;
+			if (selectedItems == null) {
+				locations = s.createQuery("SELECT l FROM AssetStationLocation l join l.station s WHERE s.conservationArea.uuid in (:cas)", AssetStationLocation.class) //$NON-NLS-1$
+					.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+					.list();
+			}else {
+				locations = s.createQuery("SELECT l FROM AssetStationLocation l join l.station s WHERE l.uuid in (:uuids) and s.conservationArea.uuid in (:cas)", AssetStationLocation.class) //$NON-NLS-1$
+						.setParameterList("cas", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+						.setParameterList("uuids", selectedItems) //$NON-NLS-1$
+						.list();
+			}
+			for (AssetStationLocation a : locations) {
+				results.add(new ListItem(a.getUuid(), a.getId(), UuidUtils.uuidToString(a.getUuid())));
+			}
+		}
+		sortItems(results);
+		return results;
+	}
 	
 	private List<ListItem> getName(SamplingUnitAttributeGroupBy item){
 		CriteriaBuilder cb = s.getCriteriaBuilder();

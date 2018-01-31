@@ -54,6 +54,7 @@ import org.apache.commons.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
+import org.json.simple.JSONObject;
 import org.wcs.smart.ProjectionProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
@@ -667,12 +668,17 @@ public class QueryApi extends HttpServlet{
 		return passed;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Response createErrorResponse(Status code, String message){
-		String error = MessageFormat.format("\"status\": {0}, \"error:\": \"" + message + "\"", code.getStatusCode(), message); //$NON-NLS-1$ //$NON-NLS-2$
+		JSONObject json = new JSONObject();
+		json.put("status", code.getStatusCode()); //$NON-NLS-1$
+		json.put("error", message); //$NON-NLS-1$
+		
+		String error = json.toJSONString();
 		return Response
 				.status(code)
 				.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
-				.entity("{" + error +"}") //$NON-NLS-1$ //$NON-NLS-2$
+				.entity(error)
 				.build();
 	}
 	

@@ -37,11 +37,17 @@ import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.internal.util.ReflectHelper;
+import org.wcs.smart.asset.query.model.AssetObservationQuery;
+import org.wcs.smart.asset.query.model.AssetSummaryQuery;
+import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.query.engine.asset.AssetObservationEngine;
+import org.wcs.smart.connect.query.engine.asset.AssetSummaryEngine;
+import org.wcs.smart.connect.query.engine.asset.AssetWaypointEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
@@ -138,7 +144,12 @@ public enum QueryManager {
 		queryClasses.add(IntelligenceRecordQuery.class);
 		queryClasses.add(IntelligenceSummaryQuery.class);
 		
+		queryClasses.add(AssetObservationQuery.class);
+		queryClasses.add(AssetWaypointQuery.class);
+		queryClasses.add(AssetSummaryQuery.class);
+		
 		queryClasses.add(CompoundMapQuery.class);
+		
 	}
 	
 	private static final IQueryEngine[] engines = new IQueryEngine[]{
@@ -162,7 +173,10 @@ public enum QueryManager {
 		new PsqlErSummaryEngine(),
 		new PsqlErWaypointEngine(),
 		new PsqlRecordQueryIntelligenceEngine(),
-		new PsqlSummaryIntelligenceQueryEngine()
+		new PsqlSummaryIntelligenceQueryEngine(),
+		new AssetSummaryEngine(),
+		new AssetObservationEngine(),
+		new AssetWaypointEngine()
 	};
 	
 	public static IDateFieldFilter[] dateFields = new IDateFieldFilter[]{
@@ -206,6 +220,10 @@ public enum QueryManager {
 		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
 		
 		DATE_FILTERS.put(IntelRecordObservationQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
+		
+		DATE_FILTERS.put(AssetObservationQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetWaypointQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetSummaryQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
 	}
 	
 	/**

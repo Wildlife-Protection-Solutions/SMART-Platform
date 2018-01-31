@@ -117,7 +117,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 							query, caFilter, 
 							false, true);
 					
-					populateTemporaryTableExtra(c, caFilter.getConservationAreaFilterIds().size() > 1, session);
+					populateTemporaryTableExtra(c, session);
 					
 					//item cnt
 					int itemcnt = 0;
@@ -148,7 +148,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 		});
 	}
 	
-	private void populateTemporaryTableExtra(Connection c, boolean isMultipleCa, Session session) throws SQLException {
+	private void populateTemporaryTableExtra(Connection c, Session session) throws SQLException {
 		String[][] columnsToAdd = new String[][]{
 				{"p_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_team","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$

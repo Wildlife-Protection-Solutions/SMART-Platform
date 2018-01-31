@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -203,9 +204,22 @@ public enum PsqlFilterToSqlGenerator {
 		}else if (filter instanceof CmCategoryAttributeFilter){
 			CmCategoryAttributeFilter afilter = (CmCategoryAttributeFilter)filter;
 			return asSql(new CategoryAttributeFilter(afilter.getCategoryFilter(), afilter.getAttributeFilter()), engine);
+		}else if (filter instanceof AssetFilter) {
+			return asSql((AssetFilter)filter, engine);
 		}
 		throw new SQLException(MessageFormat.format("Filter not supported '{0}'.", filter.asString())); //$NON-NLS-1$
 		
+	}
+	
+	/*
+	 * Asset Filter
+	 */
+	protected String asSql(AssetFilter filter, IQueryEngine engine) throws SQLException{
+		String col = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (col != null){
+			return col + ".wp_uuid is not null "; //$NON-NLS-1$
+		}
+		throw new SQLException("Cannot process asset filter, no table data found.");	 //$NON-NLS-1$
 	}
 	
 	/*

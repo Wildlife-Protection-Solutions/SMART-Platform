@@ -33,8 +33,11 @@ import org.hibernate.type.PostgresUUIDType;
 import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.asset.query.model.IAssetQueryColumnProvider;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.i18n.labels.AdvancedLabelProviderImpl;
+import org.wcs.smart.connect.i18n.labels.AssetLabelProvider;
+import org.wcs.smart.connect.i18n.labels.AssetQueryLabelProvider;
 import org.wcs.smart.connect.i18n.labels.EntityLabelProvider;
 import org.wcs.smart.connect.i18n.labels.EntityQueryLabelProvider;
 import org.wcs.smart.connect.i18n.labels.ErLabelProvider;
@@ -56,13 +59,13 @@ import org.wcs.smart.connect.qa.QaLabelProvider;
 import org.wcs.smart.connect.qa.QaPatrolLabelProvider;
 import org.wcs.smart.connect.query.PatrolContributionFinder;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
+import org.wcs.smart.connect.query.columns.AssetQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.EntityQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.IntelligenceQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.ObservationQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.PatrolQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
 import org.wcs.smart.connect.query.engine.i2.IntelConnectionFactory;
-import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryEngine;
 import org.wcs.smart.connect.report.SmartServiceLabelProvider;
 import org.wcs.smart.entity.IEntityLabelProvider;
 import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
@@ -137,6 +140,10 @@ public class SmartContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(org.wcs.smart.qa.incident.ILabelProvider.class, new QaIncidentLabelProvider());
 		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.i2.IIntelligenceLabelProvider.class, new AdvancedLabelProviderImpl());
+		
+		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.ui.IQueryAssetLabelProvider.class, new AssetQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.IAssetLabelProvider.class, new AssetLabelProvider());
+		SmartContext.INSTANCE.setClass(IAssetQueryColumnProvider.class, new AssetQueryColumnProvider());
 		
 //		SmartContext.INSTANCE.setClass(IIntelObservationQueryEngine.class, new IntelObservationQueryEngine());
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new IntelConnectionFactory());

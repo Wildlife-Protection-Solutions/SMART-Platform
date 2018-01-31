@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.Session;
+import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.i18n.Messages;
@@ -153,6 +154,10 @@ public class QueryColumnUtils {
 						if (((SurveyQueryResultItem) item).getCategories().length > level){
 							return ((SurveyQueryResultItem) item).getCategories()[level];
 						}
+					}else if (item instanceof AssetQueryResultItem) {
+						if (((AssetQueryResultItem) item).getCategories().length > level){
+							return ((AssetQueryResultItem) item).getCategories()[level];
+						}
 					}
 					return null;
 				}
@@ -202,6 +207,8 @@ public class QueryColumnUtils {
 						return ((PatrolQueryResultItem) item).getAttributeValue(keyid);
 					}else if (item instanceof SurveyQueryResultItem ){
 						return ((SurveyQueryResultItem) item).getAttributeValue(keyid);
+					}else if (item instanceof AssetQueryResultItem ){
+						return ((AssetQueryResultItem) item).getAttributeValue(keyid);
 					}
 					return null;
 				}
