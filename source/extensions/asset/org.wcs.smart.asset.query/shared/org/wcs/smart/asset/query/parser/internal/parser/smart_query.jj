@@ -396,7 +396,12 @@ IGroupBy GroupByItem() :
 		< CATEGORY_ATTRIBUTE_GROUPBY_ITEM >
 		{
 		  	item = AttributeGroupBy.createCategoryAttributeGroupBy(token.image);
-		}	
+		}
+	|
+		< DATE_GROUPBY_ITEM >
+		{
+		  	item = DateGroupBy.createGroupBy(token.image);
+		}		
 			 
 	)
 	{
