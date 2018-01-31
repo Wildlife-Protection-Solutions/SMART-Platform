@@ -391,12 +391,12 @@ public class AssetDeploymentPage {
 				AssetPlugIn.displayLog("Unable to save changes to asset deployments.  Close editor and try again. " + ex.getMessage(), ex);
 			}
 		}
-		parentEditor.fireAssetModified(false);
+		
 		allDeployments.add(new AssetDeploymentWrapper(newDeployment));
 		sortDeployments();
 		tblDeployments.refresh();
-		refreshSummaryStatistics();
-		
+		parentEditor.fireAssetModified(false);
+		parentEditor.deploymentModified();
 	}
 	
 	private void deleteSelectedDeployments() {
@@ -452,11 +452,10 @@ public class AssetDeploymentPage {
 				AssetPlugIn.displayLog("Unable to save changes to asset deployments.  Close editor and try again. " + ex.getMessage(), ex);
 			}
 		}
-		parentEditor.fireAssetModified(false);
 		allDeployments.removeAll(toDelete);
 		tblDeployments.refresh();
-		refreshSummaryStatistics();
-		
+		parentEditor.fireAssetModified(false);
+		parentEditor.deploymentModified();
 	}
 	
 	private void editSelectedDeployments() {
@@ -481,10 +480,10 @@ public class AssetDeploymentPage {
 			}
 			parentEditor.getAsset().computeStatus(session);
 		}
-		parentEditor.fireAssetModified(false);
 		sortDeployments();
 		tblDeployments.refresh();
-		refreshSummaryStatistics();
+		parentEditor.fireAssetModified(false);
+		parentEditor.deploymentModified();
 	}
 	
 	private void sortDeployments() {

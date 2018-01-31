@@ -191,6 +191,10 @@ public class AssetEditor extends EditorPart implements MapPart {
 		fireAssetModified(isNew);
 	}
 
+	public void deploymentModified() {
+		parentContext.get(IEventBroker.class).post(AssetEvents.ASSETDATA, null);
+	}
+	
 	public void fireAssetModified(boolean isNew) {
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put(UIEvents.EventTags.ELEMENT, parentContext.get(MPart.class));
