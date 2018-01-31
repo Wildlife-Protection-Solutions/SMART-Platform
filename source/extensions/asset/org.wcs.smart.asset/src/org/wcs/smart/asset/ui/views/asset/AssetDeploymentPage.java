@@ -368,6 +368,7 @@ public class AssetDeploymentPage {
 	public void refreshSummaryStatistics() {
 //		refreshSummaryStatsJob.setSystem(true);
 		refreshSummaryStatsJob.schedule();
+		computeDeploymentStats.schedule();
 	}
 	
 	private void addDeployment() {
@@ -589,8 +590,9 @@ public class AssetDeploymentPage {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (allDeployments == null) return Status.OK_STATUS;
+			final List<AssetDeploymentWrapper> items = new ArrayList<>(allDeployments);
 			try(Session s = HibernateManager.openSession()){
-				for (AssetDeploymentWrapper d : allDeployments) {
+				for (AssetDeploymentWrapper d : items) {
 					
 					Map<Statistic, Object> stats = StatisticsEngine.INSTANCE.computeStatistics(Collections.singleton(StatisticsEngine.Statistic.NUMBER_INCIDENTS), d.getDeployment());
 					d.addStatistic(stats);

@@ -22,8 +22,8 @@
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.text.Collator;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -100,8 +100,8 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 	private List<AssetDeploymentWrapper> allDeployments;
 	private List<AttributeFieldEditor> attributeFields;
 	
-	private Long minWaypointDate = null;
-	private Long maxWaypointDate = null;
+	private LocalDateTime minWaypointDate = null;
+	private LocalDateTime maxWaypointDate = null;
 	
 	public AssetDeploymentDialog(Shell parentShell, AssetDeployment toUpdate, List<AssetDeploymentWrapper> allDeployments) {
 		super(parentShell);
@@ -112,9 +112,9 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 			try(Session s = HibernateManager.openSession()){
 				s.saveOrUpdate(toUpdate);
 				toUpdate.getAssetWaypoints().forEach(w->{
-					Long dt = w.getWaypoint().getDateTime().getTime();
-					if (minWaypointDate == null || dt < minWaypointDate) minWaypointDate = dt;
-					if (maxWaypointDate == null || dt > maxWaypointDate) maxWaypointDate = dt;
+					LocalDateTime dt = new java.sql.Timestamp(w.getWaypoint().getDateTime().getTime()).toLocalDateTime();
+					if (minWaypointDate == null || dt.isBefore(minWaypointDate)) minWaypointDate = dt;
+					if (maxWaypointDate == null || dt.isAfter(maxWaypointDate)) maxWaypointDate = dt;
 				});
 			}
 		}
@@ -199,27 +199,30 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		}
 		
 		boolean overlaps = false;
-		long start = SmartUtils.combineDateTime(SmartUtils.getDate(dtStartDate), SmartUtils.getTime(dtStartTime)).getTime();
-		long end = (new Date()).getTime();
+		
+		LocalDateTime start = new java.sql.Timestamp(SmartUtils.combineDateTime(SmartUtils.getDate(dtStartDate), SmartUtils.getTime(dtStartTime)).getTime()).toLocalDateTime();
+		LocalDateTime end = LocalDateTime.now();
+
 		if (chEndDate.getSelection()) {
-			end = SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime)).getTime();
-			
-			if (start > end ) {
+			end = new java.sql.Timestamp(SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime)).getTime()).toLocalDateTime();
+			if (start.isAfter(end)) {
 				setErrorMessage("Start date cannot be after the end date");
 				return;
 			}
 		}
 		
-		long now = (new Date()).getTime();
+		LocalDateTime now = LocalDateTime.now();
+		
 		for (AssetDeploymentWrapper deployment : allDeployments) {
 			AssetDeployment deploy = deployment.getDeployment();
 			if (deploy.equals(toUpdate)) continue;
 				
-			long starttest = deploy.getStartDate().getTime();
-			long endtest = now;
-			if (deploy.getEndDate() != null) endtest = deploy.getEndDate().getTime();
+			LocalDateTime startTest = new java.sql.Timestamp(deploy.getStartDate().getTime()).toLocalDateTime();
+			LocalDateTime endTest = now;
 			
-			if (!(endtest < start || starttest > end)) {
+			if (deploy.getEndDate() != null) endTest = new java.sql.Timestamp(deploy.getEndDate().getTime()).toLocalDateTime();
+			
+			if (!(endTest.isBefore(start) || startTest.isAfter(end))) { 
 				overlaps = true;
 			}
 			if (!chEndDate.getSelection() && deploy.getEndDate() == null) {
@@ -234,7 +237,7 @@ public class AssetDeploymentDialog extends TitleAreaDialog{
 		}
 		
 		//check waypoint are all within deployment date/time
-		if ((minWaypointDate != null && minWaypointDate < start) || (maxWaypointDate != null && chEndDate.getSelection() && maxWaypointDate > end)) {
+		if ((minWaypointDate != null && minWaypointDate.isBefore(start)) || (maxWaypointDate != null && chEndDate.getSelection() && maxWaypointDate.isAfter(end))) {
 			setErrorMessage("At least one waypoint exists outside the start and end date.  Deployment date range must include all incidents associated with the deployment");
 			return;
 		}
