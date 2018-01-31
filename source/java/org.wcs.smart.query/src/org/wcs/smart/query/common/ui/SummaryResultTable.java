@@ -349,6 +349,13 @@ public class SummaryResultTable extends Composite {
 		
 		topTable.getTable().setBackground(topTableComp.getDisplay().getSystemColor(TABLE_HEADER_COLOR));
 		
+		if (results.getNumDataColumns() == 0) {
+			topTable.setLabelProvider(new LabelProvider() {
+				public String getText(Object element) {
+					return "";
+				}
+			});
+		}
 		for (int i = 0; i < results.getNumDataColumns(); i ++){
 			TableViewerColumn tvc = new TableViewerColumn(topTable, SWT.NONE);
 			tvc.getColumn().setWidth(DEFAULT_COL_SIZE);
@@ -427,7 +434,6 @@ public class SummaryResultTable extends Composite {
 		 */
 		@Override
 		public Object[] getElements(Object inputElement) {
-//			return new Double[61][15];
 			return ((SummaryQueryResult)inputElement).getData();
 		}
 		
@@ -440,6 +446,7 @@ public class SummaryResultTable extends Composite {
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			Double[] data = (Double[])element;
+			if (columnIndex >= data.length) return "";
 			Object value = data[columnIndex];
 			if (value == null){
 				return ""; //$NON-NLS-1$
@@ -479,8 +486,7 @@ public class SummaryResultTable extends Composite {
 			if (element instanceof SummaryHeader[]) {
 				SummaryHeader[] array = (SummaryHeader[]) element;
 				if (array.length > cell.getColumnIndex()) {
-					SummaryHeader header = ((SummaryHeader[]) element)[cell
-							.getColumnIndex()];
+					SummaryHeader header = ((SummaryHeader[]) element)[cell.getColumnIndex()];
 					cell.setText(header.getName());
 
 					if (header.isValue()) {
