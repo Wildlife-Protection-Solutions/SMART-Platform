@@ -23,6 +23,7 @@ package org.wcs.smart.connect.report.query;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
@@ -30,6 +31,7 @@ import org.wcs.smart.data.oda.smart.impl.QueryMetadataProvider;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.query.common.IMetadataProvider;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
+import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
@@ -56,7 +58,13 @@ public enum ServerQueryMetadataProvider implements IMetadataProvider {
 				a.setDateFilter(new DateFilter(WaypointDateField.INSTANCE, Last30DaysDateFilter.INSTANCE));
 			}
 			try{
+				
 				SummaryQueryResult results = new SummaryQueryResult();
+				if (query instanceof AssetSummaryQuery) {
+					if (AssetSummaryQuery.canAddGeometry(((SummaryQuery) query).getQueryDefinition())) {
+						results = new GeometrySummaryQueryResult();
+					}
+				}
 				ISummaryEngine engine = (ISummaryEngine)QueryManager.INSTANCE.findQueryEngine(a);
 				engine.getHeaderInfo(a, results, c.getCurrentLocale(), c.getSession());
 				return new SummaryQueryResultSetMetadata(results);

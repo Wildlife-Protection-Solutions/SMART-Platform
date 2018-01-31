@@ -1046,7 +1046,8 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 	 * @param session hibernate session
 	 */
 	public void getHeaderInfo(SummaryQuery query, 
-			SummaryQueryResult results, Locale l, Session session) throws Exception{		
+			SummaryQueryResult results, Locale l, Session session) throws Exception{
+		parseConservationAreaFilterInternal(query);
 		// value headers
 		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter); 
 
