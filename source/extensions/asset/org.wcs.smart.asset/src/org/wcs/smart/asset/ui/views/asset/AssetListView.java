@@ -625,6 +625,13 @@ public class AssetListView {
 	
 	@Optional
 	@Inject
+	public void deploymentsModified(@UIEventTopic(AssetEvents.ASSETDEPLOYMENT_ALL) Object payLoad) {
+		loadStations(250);
+		loadAssets(250);
+	}
+	
+	@Optional
+	@Inject
 	public void stationlocationModified(@UIEventTopic(AssetEvents.ASSETSTATIONLOCATION_ALL) Object payLoad) {
 		loadStations(250);
 	}

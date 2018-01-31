@@ -191,8 +191,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 		fireAssetModified(isNew);
 	}
 
-	public void deploymentModified() {
-		parentContext.get(IEventBroker.class).post(AssetEvents.ASSETDATA, null);
+	public void deploymentModified(List<AssetDeployment> deployments, String eventType) {
+		parentContext.get(IEventBroker.class).post(eventType, deployments);
 	}
 	
 	public void fireAssetModified(boolean isNew) {
@@ -868,6 +868,7 @@ public class AssetEditor extends EditorPart implements MapPart {
 					
 					initializeAttributePanel(asset);
 					initializeEventsPanel(asset);
+ 
 					if (deploymentPage != null) deploymentPage.initializePanel(asset); 
 					if (dataPage != null) dataPage.reloadData();
 					

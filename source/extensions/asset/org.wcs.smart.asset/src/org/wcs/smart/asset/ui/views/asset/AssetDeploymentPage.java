@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -76,6 +77,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.AssetUtils;
@@ -396,7 +398,7 @@ public class AssetDeploymentPage {
 		sortDeployments();
 		tblDeployments.refresh();
 		parentEditor.fireAssetModified(false);
-		parentEditor.deploymentModified();
+		parentEditor.deploymentModified(Collections.singletonList(newDeployment), AssetEvents.ASSETDEPLOYMENT_NEW);
 	}
 	
 	private void deleteSelectedDeployments() {
@@ -455,7 +457,7 @@ public class AssetDeploymentPage {
 		allDeployments.removeAll(toDelete);
 		tblDeployments.refresh();
 		parentEditor.fireAssetModified(false);
-		parentEditor.deploymentModified();
+		parentEditor.deploymentModified(toDelete.stream().map(e->e.getDeployment()).collect(Collectors.toList()), AssetEvents.ASSETDEPLOYMENT_DELETE);
 	}
 	
 	private void editSelectedDeployments() {
@@ -483,7 +485,7 @@ public class AssetDeploymentPage {
 		sortDeployments();
 		tblDeployments.refresh();
 		parentEditor.fireAssetModified(false);
-		parentEditor.deploymentModified();
+		parentEditor.deploymentModified(Collections.singletonList(toUpdate), AssetEvents.ASSETDEPLOYMENT_MODIFIED);
 	}
 	
 	private void sortDeployments() {
