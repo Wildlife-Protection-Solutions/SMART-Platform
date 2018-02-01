@@ -64,6 +64,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
@@ -122,6 +123,10 @@ public class DataImportPage {
 	
 	private FileProcessor processor;
 	
+	private EventHandler listRefreshHandler = e->{
+		loadLists(500);
+	};
+	
 	public DataImportPage(DataImporterView view, FormToolkit toolkit) {
 		this.view = view;
 		this.toolkit = toolkit;
@@ -129,10 +134,15 @@ public class DataImportPage {
 		processor = new FileProcessor(SmartDB.getCurrentConservationArea());
 		deletedItems = new ArrayList<>();
 		
-		loadLists();
+		loadLists(0);
+		
+		view.getContext().get(IEventBroker.class).subscribe(AssetEvents.ASSET_DELETE, listRefreshHandler);
+		view.getContext().get(IEventBroker.class).subscribe(AssetEvents.ASSETSTATION_DELETE, listRefreshHandler);
+		view.getContext().get(IEventBroker.class).subscribe(AssetEvents.ASSETSTATIONLOCATION_DELETE, listRefreshHandler);
 	}
 	
 	public void dispose() {
+		view.getContext().get(IEventBroker.class).unsubscribe(listRefreshHandler);
 		this.view = null;
 	}
 	
@@ -732,54 +742,57 @@ public class DataImportPage {
 	 * load assets and stations location from
 	 * preference store
 	 */
-	private void loadLists() {
-		Job j = new Job("initialize history") {
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try(Session session = HibernateManager.openSession()){
-					String assets = AssetPlugIn.getDefault().getPreferenceStore().getString(ASSET_LIST_KEY);
-					if (assets != null && !assets.isEmpty()) {
-						String[] uuids = assets.split(SEP_CHAR);
-						for (int i = uuids.length-1; i >= 0 ; i --) {
-							try {
-								if (uuids[i].isEmpty()) continue;
-								UUID uuid = UuidUtils.stringToUuid(uuids[i]);
-								Asset a = session.get(Asset.class, uuid);
-								
-								if (a != null) {
-									a.getId();
-									a.getAssetType().getIncidentCutoff();
-									addToQueue(selectedAssets, a, null);
-								}
-							}catch (Exception ex) {
-								
+	private void loadLists(long delay) {
+		loadListsJob.schedule(delay);
+	}
+	
+	private Job loadListsJob = new Job("initialize history") {
+		
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			selectedAssets.clear();
+			selectedLocations.clear();
+			try(Session session = HibernateManager.openSession()){
+				String assets = AssetPlugIn.getDefault().getPreferenceStore().getString(ASSET_LIST_KEY);
+				if (assets != null && !assets.isEmpty()) {
+					String[] uuids = assets.split(SEP_CHAR);
+					for (int i = uuids.length-1; i >= 0 ; i --) {
+						try {
+							if (uuids[i].isEmpty()) continue;
+							UUID uuid = UuidUtils.stringToUuid(uuids[i]);
+							Asset a = session.get(Asset.class, uuid);
+							
+							if (a != null) {
+								a.getId();
+								a.getAssetType().getIncidentCutoff();
+								addToQueue(selectedAssets, a, null);
 							}
-						}
-					}
-					
-					String locations = AssetPlugIn.getDefault().getPreferenceStore().getString(STATIONLOCATION_LIST_KEY);
-					if (locations != null && !locations.isEmpty()) {
-						String[] uuids = locations.split(SEP_CHAR);
-						for (int i = uuids.length-1; i >= 0 ; i --) {
-							try {
-								if (uuids[i].isEmpty()) continue;
-								UUID uuid = UuidUtils.stringToUuid(uuids[i]);
-								AssetStationLocation a = session.get(AssetStationLocation.class, uuid);
-								if (a != null) {
-									a.getId();
-									a.getStation().getId();
-									addToQueue(selectedLocations, a, null);
-								}
-							}catch (Exception ex) {
-								
-							}
+						}catch (Exception ex) {
+							
 						}
 					}
 				}
-				return Status.OK_STATUS;
+				
+				String locations = AssetPlugIn.getDefault().getPreferenceStore().getString(STATIONLOCATION_LIST_KEY);
+				if (locations != null && !locations.isEmpty()) {
+					String[] uuids = locations.split(SEP_CHAR);
+					for (int i = uuids.length-1; i >= 0 ; i --) {
+						try {
+							if (uuids[i].isEmpty()) continue;
+							UUID uuid = UuidUtils.stringToUuid(uuids[i]);
+							AssetStationLocation a = session.get(AssetStationLocation.class, uuid);
+							if (a != null) {
+								a.getId();
+								a.getStation().getId();
+								addToQueue(selectedLocations, a, null);
+							}
+						}catch (Exception ex) {
+							
+						}
+					}
+				}
 			}
-		};
-		j.schedule();
-	}
+			return Status.OK_STATUS;
+		}
+	};
 }

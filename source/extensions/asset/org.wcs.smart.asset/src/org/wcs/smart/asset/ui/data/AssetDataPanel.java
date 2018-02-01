@@ -720,8 +720,11 @@ public abstract class AssetDataPanel {
 			try {
 				for (AssetWaypointMapping aw : tovalidate) {
 					aw.getAssetLinks().forEach(assetWaypoint ->{
-						assetWaypoint.setState(AssetWaypoint.State.OK);
-						session.saveOrUpdate(assetWaypoint);
+						AssetWaypoint aww = session.get(AssetWaypoint.class, assetWaypoint.getUuid());
+						if (aww != null) {
+							aww.setState(AssetWaypoint.State.OK);
+							assetWaypoint.setState(AssetWaypoint.State.OK);
+						}
 					});
 				}
 				session.getTransaction().commit();

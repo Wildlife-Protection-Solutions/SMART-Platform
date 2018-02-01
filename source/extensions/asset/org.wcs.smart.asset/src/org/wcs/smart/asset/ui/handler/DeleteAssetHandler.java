@@ -24,6 +24,7 @@ package org.wcs.smart.asset.ui.handler;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +37,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetManager;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetUtils;
@@ -107,7 +109,8 @@ public class DeleteAssetHandler {
 		}catch (Exception ex) {
 			AssetPlugIn.displayLog("Error deleting assets. Refresh and try again." + ex.getMessage(),  ex);
 		}
-		
+		eventBroker.post(AssetEvents.ASSETDATA, null);
+
 		
 	}
 }

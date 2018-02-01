@@ -236,15 +236,10 @@ public class ImageGallery extends Composite{
 			}
 			found.index = index++;
 			found.updateStyle();
-			orderedNodes.add(found.imageNode);
+			orderedNodes.add(found.imageNode);	
 		}
-		
-		
-		if (thumbs.isEmpty()) return;
-		TilePane parent = (TilePane) orderedNodes.get(0).getParent();
-		parent.getChildren().clear();
-		parent.getChildren().addAll(orderedNodes);
-		
+		tile.getChildren().clear();
+		tile.getChildren().addAll(orderedNodes);
 	}
 	
     public synchronized void createThumbnails()  {

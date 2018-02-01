@@ -133,6 +133,9 @@ public class AssetListView {
 	
 	public AssetListView() {
 		super();
+
+		loadAssetsJob.setSystem(true);
+		loadStationsJob.setSystem(true);
 	}
 	
 	private Composite toolbarHeaderComposite;
@@ -368,10 +371,10 @@ public class AssetListView {
 							try {
 								UUID assetTypeUuid = UuidUtils.stringToUuid(uuid);
 								if (assetTypeUuid != null) {
-									AssetType assetType = session.get(AssetType.class, assetTypeUuid);
+									AssetType assetType = QueryFactory.buildQuery(session, AssetType.class, new Object[] {"uuid", assetTypeUuid}, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult();
 									if (assetType != null) {
 										assetType.getName();
-										menuItems.add(assetType);
+										if (!menuItems.contains(assetType)) menuItems.add(assetType);
 									}
 								}
 								
@@ -663,7 +666,7 @@ public class AssetListView {
 	}
 	private void loadAssets(int delay) {
 		loadAssetsJob.cancel();
-		loadAssetsJob.setSystem(true);
+		
 		loadAssetsJob.schedule(delay);
 	}
 
@@ -673,7 +676,6 @@ public class AssetListView {
 	}
 	private void loadStations(int delay) {
 		loadStationsJob.cancel();
-		loadStationsJob.setSystem(true);
 		loadStationsJob.schedule(delay);
 	}
 
