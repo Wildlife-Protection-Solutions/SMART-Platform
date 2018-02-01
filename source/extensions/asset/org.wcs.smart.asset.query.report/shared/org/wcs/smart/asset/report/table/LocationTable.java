@@ -96,6 +96,7 @@ public class LocationTable extends SmartBirtTable {
 				.setParameterList("cas", connection.getConservationAreas())
 				.list();
 		attributeColumns = assetAttributes;
+		attributeColumns.sort((a,b)->a.getKeyId().compareTo(b.getKeyId()));
 	}
 	
 	

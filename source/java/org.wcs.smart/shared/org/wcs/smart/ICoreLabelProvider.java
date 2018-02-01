@@ -54,7 +54,7 @@ public interface ICoreLabelProvider extends ISharedLabelProvider {
 	public static final String EMP_GIVEN_NAME_KEY = "employeegivennamekey"; //$NON-NLS-1$
 	public static final String STATION_ID_KEY = "employeestationidkey"; //$NON-NLS-1$
 	public static final String STATION_NAME_KEY = "employeestationnamekey"; //$NON-NLS-1$
-	public static final String STATION_ACTIVE_KEY = "employeestationnamekey"; //$NON-NLS-1$
+	public static final String STATION_ACTIVE_KEY = "stationactivekey"; //$NON-NLS-1$
 	public static final String STATION_DESCRIPTION_KEY = "employeedescriptionkey"; //$NON-NLS-1$
 	public static final String AGENCY_RANK_TABLENAME_KEY = "agencyranktablenamekey"; //$NON-NLS-1$
 	public static final String CA_ID_KEY = "caidnamekey"; //$NON-NLS-1$
