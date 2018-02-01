@@ -1012,6 +1012,7 @@ public class SummaryItemLabelProvider {
 						.setParameterList("uuids", selectedItems) //$NON-NLS-1$
 						.list();
 			}
+			assets.sort((a,b)->a.getId().compareTo(b.getId()));
 			for (Asset a : assets) {
 				results.add(new ListItem(a.getUuid(), a.getId(), UuidUtils.uuidToString(a.getUuid())));
 			}
@@ -1028,6 +1029,7 @@ public class SummaryItemLabelProvider {
 						.setParameterList("uuids", selectedItems) //$NON-NLS-1$
 						.list();
 			}
+			assets.sort((a,b)->a.getKeyId().compareTo(b.getKeyId()));
 			for (AssetType a : assets) {
 				results.add(new ListItem(a.getUuid(), a.getName(), UuidUtils.uuidToString(a.getUuid())));
 			}
@@ -1044,9 +1046,11 @@ public class SummaryItemLabelProvider {
 						.setParameterList("uuids", selectedItems) //$NON-NLS-1$
 						.list();
 			}
+			stations.sort((a,b)->a.getId().compareTo(b.getId()));
 			for (AssetStation a : stations) {
 				results.add(new ListItem(a.getUuid(), a.getId(), UuidUtils.uuidToString(a.getUuid())));
 			}
+
 		}else if (type == AssetFilterOption.STATIONLOCATION) {
 			List<AssetStationLocation> locations = null;
 			if (selectedItems == null) {
@@ -1059,9 +1063,11 @@ public class SummaryItemLabelProvider {
 						.setParameterList("uuids", selectedItems) //$NON-NLS-1$
 						.list();
 			}
+			locations.sort((a,b)->a.getId().compareTo(b.getId()));
 			for (AssetStationLocation a : locations) {
 				results.add(new ListItem(a.getUuid(), a.getId(), UuidUtils.uuidToString(a.getUuid())));
 			}
+			
 		}
 		sortItems(results);
 		return results;
