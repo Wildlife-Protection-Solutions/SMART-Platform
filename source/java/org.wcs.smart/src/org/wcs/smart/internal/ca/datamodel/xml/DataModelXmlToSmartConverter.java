@@ -175,6 +175,7 @@ public class DataModelXmlToSmartConverter {
 		
 		//update labels for categories
 		List<Category> toProcess = new ArrayList<Category>();
+		toProcess.addAll(dm.getCategories());
 		while(!toProcess.isEmpty()) {
 			Category c = toProcess.remove(0);
 			if (c.getChildren() != null) toProcess.addAll(c.getChildren());
