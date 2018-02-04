@@ -65,14 +65,17 @@ import org.wcs.smart.hibernate.QueryFactory;
  *
  */
 @SuppressWarnings("unchecked")
-public class DataModelItemListener implements IDataModelItemListener {
+public enum DataModelItemListener implements IDataModelItemListener {
+	
+	INSTANCE;
+	
+	private List<ICmItemListener> listeners = new ArrayList<>(1);
 
 	/**
 	 * Called when item is removed from the data model.
 	 */
 	@Override
-	public void deleteItem(Session currentSession, Object itemToDelete)
-			throws Exception {
+	public void deleteItem(Session currentSession, Object itemToDelete) throws Exception {
 		
 		//we cannot add the associatedimageinterceptor to the session as the session is provider by
 		//another plugin so here we manually use it to ensure images are deleted when nodes are deleted
@@ -133,10 +136,12 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * remove any nodes that reference the category
 	 * @param currentSession
 	 * @param c
+	 * @throws Exception  
 	 */
-	private void categoryDelete(Session currentSession, Category c, AssociatedImageInterceptor interceptor ){
+	private void categoryDelete(Session currentSession, Category c, AssociatedImageInterceptor interceptor ) throws Exception {
 		List<CmNode> nodes = QueryFactory.buildQuery(currentSession, CmNode.class, "category", c).list(); //$NON-NLS-1$
 		for (CmNode n : nodes){
+			fireCmDeleteItem(currentSession, n);
 			if (n.getParent() == null){
 				currentSession.delete(n);	
 				interceptor.onDelete(n, n.getUuid(), null, null, null);
@@ -154,8 +159,9 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * category.
 	 * @param currentSession
 	 * @param ca
+	 * @throws Exception  
 	 */
-	private void attributeDelete(Session currentSession, CategoryAttribute ca, AssociatedImageInterceptor interceptor){
+	private void attributeDelete(Session currentSession, CategoryAttribute ca, AssociatedImageInterceptor interceptor) throws Exception {
 		deleteAttribute(currentSession, ca.getCategory(), ca.getAttribute(), interceptor);
 		List<Category> kids = new ArrayList<Category>();
 		kids.addAll(ca.getCategory().getChildren());
@@ -166,7 +172,7 @@ public class DataModelItemListener implements IDataModelItemListener {
 		}
 	}
 	
-	private void deleteAttribute(Session currentSession, Category category, Attribute attribute, AssociatedImageInterceptor interceptor){
+	private void deleteAttribute(Session currentSession, Category category, Attribute attribute, AssociatedImageInterceptor interceptor) throws Exception {
 		Query<CmAttribute> q = currentSession.createQuery(
 				"FROM CmAttribute a WHERE a.attribute = :attribute and a.node.category = :category", CmAttribute.class); //$NON-NLS-1$
 		q.setParameter("attribute", attribute); //$NON-NLS-1$
@@ -174,6 +180,7 @@ public class DataModelItemListener implements IDataModelItemListener {
 		
 		List<CmAttribute> attributes = q.list();
 		for (CmAttribute a : attributes){
+			fireCmDeleteItem(currentSession, a);
 			a.setAttribute(null);
 			a.getNode().getCmAttributes().remove(a);
 			
@@ -190,10 +197,12 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * remove list item configurations
 	 * @param currentSession
 	 * @param li
+	 * @throws Exception  
 	 */
-	private void listItemDelete(Session currentSession, AttributeListItem li, AssociatedImageInterceptor interceptor){
+	private void listItemDelete(Session currentSession, AttributeListItem li, AssociatedImageInterceptor interceptor) throws Exception {
 		List<CmAttributeListItem> items = QueryFactory.buildQuery(currentSession, CmAttributeListItem.class, "listItem", li).list(); //$NON-NLS-1$
 		for (CmAttributeListItem item: items){
+			fireCmDeleteItem(currentSession, item);
 			currentSession.delete(item);
 			interceptor.onDelete(item, item.getUuid(),null, null, null);
 		}
@@ -204,10 +213,12 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * remove tree node configurations
 	 * @param currentSession
 	 * @param node
+	 * @throws Exception  
 	 */
-	private void treeNodeDelete(Session currentSession, AttributeTreeNode node, AssociatedImageInterceptor interceptor){
+	private void treeNodeDelete(Session currentSession, AttributeTreeNode node, AssociatedImageInterceptor interceptor) throws Exception {
 		List<CmAttributeTreeNode> nodes = QueryFactory.buildQuery(currentSession, CmAttributeTreeNode.class, "dmTreeNode", node).list(); //$NON-NLS-1$
 		for (CmAttributeTreeNode tnode : nodes){
+			fireCmDeleteItem(currentSession, tnode);
 			currentSession.delete(tnode);
 			interceptor.onDelete(tnode, tnode.getUuid(), null, null, null);
 		}
@@ -351,6 +362,20 @@ public class DataModelItemListener implements IDataModelItemListener {
 				//enabled; add to category
 				addItem(currentSession, ca);
 			}
+		}
+	}
+
+	public void addCmItemListener(ICmItemListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeCmItemListener(ICmItemListener listener) {
+		listeners.add(listener);
+	}
+	
+	private void fireCmDeleteItem(Session currentSession, Object itemToDelete) throws Exception {
+		for (ICmItemListener l : listeners) {
+			l.deleteItem(currentSession, itemToDelete);
 		}
 	}
 }

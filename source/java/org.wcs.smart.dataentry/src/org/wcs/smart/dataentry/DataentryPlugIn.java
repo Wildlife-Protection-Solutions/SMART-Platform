@@ -43,7 +43,7 @@ public class DataentryPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static DataentryPlugIn plugin;
 	
-	private DataModelItemListener deleteListener = new DataModelItemListener();
+	private DataModelItemListener deleteListener = DataModelItemListener.INSTANCE;
 	private DataModelListener dmListener = new DataModelListener();
 	
 	/**
