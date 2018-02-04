@@ -2,6 +2,8 @@ package org.wcs.smart.connect.cybertracker;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.dataentry.DataModelItemListener;
+import org.wcs.smart.dataentry.ICmItemListener;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -17,6 +19,8 @@ public class ConnectCtPlugIn extends AbstractUIPlugin {
 	
 	// The shared instance
 	private static ConnectCtPlugIn plugin;
+
+	private ICmItemListener cmDeleteListener = new ConnectCtCmItemListener();
 	
 	/**
 	 * The constructor
@@ -31,6 +35,8 @@ public class ConnectCtPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		DataModelItemListener.INSTANCE.addCmItemListener(cmDeleteListener);
 	}
 
 	/*
@@ -38,6 +44,8 @@ public class ConnectCtPlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		DataModelItemListener.INSTANCE.removeCmItemListener(cmDeleteListener);
+
 		plugin = null;
 		super.stop(context);
 	}
