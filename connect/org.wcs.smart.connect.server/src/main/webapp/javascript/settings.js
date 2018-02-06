@@ -448,7 +448,7 @@ function createTypeTable(){
 
  		var row = tableCreateRowTDs(parent,
  				[label, color, opacity, markerIcon, markerColor, spin, null], 
- 				"layerrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 				"typerow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.id = "typerow" + i;
  		row.dataset.uuid = types[i].uuid;
