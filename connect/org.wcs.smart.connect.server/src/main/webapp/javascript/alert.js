@@ -987,10 +987,10 @@ function sort(str){
 	
 	refreshAlerts();
 }
+
 //Delete all alerts that meet the current filter criteria
 function deleteFilteredAlerts(){
 	displayConfirmDialog(i18n("alert.deleteallheading"), i18n("alert.areyousuredeleteallalerts"), function(){
-
 		var alerts = document.querySelectorAll(".alertrow");
 		for (var i = 0; i < alerts.length-1; i++){ //-1 because the delete all link is in the list as well. 
 			var uuid = alerts[i].dataset.uuid;
@@ -999,9 +999,7 @@ function deleteFilteredAlerts(){
 			oReq.open("DELETE", ALERT_URL  + encodeURIComponent(uuid), true);
 			oReq.send();
 		}
-		return false;
 	});
-	return false;
 }
 function allAlertDeleted(){	
 	if (this.status == 200  && this.status != 201 ) {
