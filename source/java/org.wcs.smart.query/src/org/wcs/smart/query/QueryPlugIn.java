@@ -63,7 +63,7 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
  */
 public class QueryPlugIn extends AbstractUIPlugin {
 
-	private static final boolean LOG_QUERY = true;
+	private static final boolean LOG_QUERY = false;
 
 	
 	// The plug-in ID
