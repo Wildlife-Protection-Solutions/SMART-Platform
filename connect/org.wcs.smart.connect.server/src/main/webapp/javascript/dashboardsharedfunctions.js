@@ -200,23 +200,7 @@ function addBooleanParamater(param, parent, newGroup){
 
 //check if the user selected or deselected "custom dates" and grey/de-grey the custom inputs. 
 function checkForCustomDates(){
-	var date = document.getElementById('filterDate1');
-	if(date.value == -1){
-		document.getElementById('report1From').disabled = false;
-		document.getElementById('report1To').disabled = false;
-	}else{
-		document.getElementById('report1From').disabled = true;
-		document.getElementById('report1To').disabled = true;
-	}
-	
-	var date = document.getElementById('filterDate2');
-	if(date.value == -1){
-		document.getElementById('report2From').disabled = false;
-		document.getElementById('report2To').disabled = false;
-	}else{
-		document.getElementById('report2From').disabled = true;
-		document.getElementById('report2To').disabled = true;
-	}
+
 	
 	//Update the Custom date fields all the time, so we can just use that date range when submitting
 	var startYear = new Date();
@@ -251,6 +235,25 @@ function checkForCustomDates(){
 		picker4.setDate(new Date(), false);
 	}
 
+	var date = document.getElementById('filterDate1');
+	if(date.value == -1){
+		document.getElementById('report1From').disabled = false;
+		document.getElementById('report1To').disabled = false;
+	}else{
+		document.getElementById('report1From').disabled = true;
+		document.getElementById('report1To').disabled = true;
+	}
+	
+	var date = document.getElementById('filterDate2');
+	if(date.value == -1){
+		document.getElementById('report2From').disabled = false;
+		document.getElementById('report2To').disabled = false;
+	}else{
+		document.getElementById('report2From').disabled = true;
+		document.getElementById('report2To').disabled = true;
+	}
+	document.getElementById('savedatebutton1').disabled = true;
+	document.getElementById('savedatebutton2').disabled = true;
 }
 
 //enable save date buttons
@@ -303,7 +306,8 @@ function initDatePickers(){
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
         yearRange: [2000,2050],
-        i18n: pickaday_i18n
+        i18n: pickaday_i18n,
+        onSelect: function(){date1Changed();}
 	});
 
 	picker2 = new Pikaday({
@@ -311,7 +315,8 @@ function initDatePickers(){
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
         yearRange: [2000,2050],
-        i18n: pickaday_i18n
+        i18n: pickaday_i18n,
+        onSelect: function(){date1Changed();}
 	});
 	
 	picker3 = new Pikaday({
@@ -319,7 +324,8 @@ function initDatePickers(){
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
         yearRange: [2000,2050],
-        i18n: pickaday_i18n
+        i18n: pickaday_i18n,
+        onSelect: function(){date2Changed();}
 	});
 
 	picker4 = new Pikaday({
@@ -327,7 +333,8 @@ function initDatePickers(){
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
         yearRange: [2000,2050],
-        i18n: pickaday_i18n
+        i18n: pickaday_i18n,
+        onSelect: function(){date2Changed();}
 	});
 }
 
