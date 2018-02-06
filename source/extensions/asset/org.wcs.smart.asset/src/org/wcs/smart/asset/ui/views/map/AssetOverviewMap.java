@@ -82,6 +82,7 @@ import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.map.engine.OverviewmapColumnEngine;
@@ -361,14 +362,18 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		loadTableJob.schedule();
 		configureStatusTableJob.schedule();
 		
-		
+		//EVENTS
 		handlers = new ArrayList<>();
 		EventHandler refreshHandler =  event->{
 			refresh();
-			loadStylesJob.schedule();
+			loadStylesJob.schedule(500);
 		};
 		handlers.add(refreshHandler);
 		parentContext.get(IEventBroker.class).subscribe(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, refreshHandler);
+		parentContext.get(IEventBroker.class).subscribe(AssetEvents.ASSETDEPLOYMENT_ALL, refreshHandler);
+		parentContext.get(IEventBroker.class).subscribe(AssetEvents.ASSETDATA, refreshHandler);
+		parentContext.get(IEventBroker.class).subscribe(AssetEvents.ASSETSTATION_ALL, refreshHandler);
+		parentContext.get(IEventBroker.class).subscribe(AssetEvents.ASSETSTATIONLOCATION_ALL, refreshHandler);
 	}
 
 	@Override
