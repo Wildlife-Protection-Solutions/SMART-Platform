@@ -344,6 +344,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 	@Override
 	public void reportEvent(Object o, EventType eventType) {
 		if (eventType == EventType.REPORT_DELETED){
+			if (getEditorInputLocal() == null) return;
 			if (getEditorInputLocal().getReport().equals(o)){
 				//close me; I have been deleted
 				editor.getSite().getShell().getDisplay().asyncExec(new Runnable(){
