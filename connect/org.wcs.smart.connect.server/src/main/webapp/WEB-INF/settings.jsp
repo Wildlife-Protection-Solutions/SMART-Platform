@@ -143,11 +143,11 @@
 	<button class="button top-spacer" id="btnNewStyleConfiguration"><fmt:message key="settings.addnewstyleconfiguration" /></button>
 	<table id="styletable" class="top-spacer smart-table">
   	<tr class="table-row smart-table-header">
-			<th class="table-cell smart-table-cell">Server Name</th>
-			<th class="table-cell smart-table-cell">Footer Text</th>
-			<th class="table-cell smart-table-cell">Header Style/CSS</th>
-			<th class="table-cell smart-table-cell">Body CSS</th>
-			<th class="table-cell smart-table-cell">Actions</th>
+			<th class="table-cell smart-table-cell"><fmt:message key="settings.style.servername" /></th>
+			<th class="table-cell smart-table-cell"><fmt:message key="settings.style.footertext" /></th>
+			<th class="table-cell smart-table-cell"><fmt:message key="settings.style.headerstyle" /></th>
+			<th class="table-cell smart-table-cell"><fmt:message key="settings.style.bodystyle" /></th>
+			<th class="table-cell smart-table-cell"><fmt:message key="settings.style.actions" /></th>
 	</tr>
 	</table>
 
@@ -158,17 +158,17 @@
 <!-- dialogs                  -------------------              -->
 
 <div id="newStyleDialog" style="display: none; width:400px;" class="dialog">
-  <div class="dialog-title">Create a New Style</div>
+  <div class="dialog-title"><fmt:message key="settings.style.newstyle" /></div>
   <div id="dialogerror" class="errorsection"></div>
   <form id="newstyleform" method="POST" enctype="multipart/form-data">
   
-    <label class="block top-spacer">Server Name / Title Text:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.servername" /></label>
 	<input class="formtext" id="server_name" name="server_name" type="text" value="SMART Connect <img src='https://smartconservationsoftware.org/photos/smart_logo_96.png'>"/>
 	
-    <label class="block top-spacer">Footer Text:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.footertext" /></label>
 	<input class="formtext" id="footer_text" name="footer_text" type="text" value="<img src='${pageContext.request.contextPath}/css/images/smart_logo.png'> Copyright 2015, 2016"/>
   
-    <label class="block top-spacer">Header Style(use css syntax):</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.headerstyle" /></label>
     <textarea id="header_style" name="header_style" class="formtext block" rows=5>border: 0px solid black;
 padding: 10px 5px 10px 5px;
 text-align: center;
@@ -176,22 +176,20 @@ color: black;
 font-family: 'Allerta', Helvetica, Arial, sans-serif;
 font-size: 40px;</textarea>
     
-	<label class="block top-spacer">Body Style(use css syntax):</label>
-    <textarea id="body_style" name="body_style" class="formtext block" rows=5>margin: 0px;
-background-color: lightsteelblue
-    </textarea>
+	<label class="block top-spacer"><fmt:message key="settings.style.bodystyle" /></label>
+    <textarea id="body_style" name="body_style" class="formtext block" rows=5>margin: 0px; background-color: lightsteelblue</textarea>
     
-    <label class="block top-spacer">Header Image:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.titlebackgroundimage" /></label>
     <input id="header_image" type="file" name="header_image" class="formtext block" />
     
-    <label class="block top-spacer">Background Image:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.maincontentimage" /></label>
     <input id="bg_image" type="file" name="bg_image" class="formtext block" />
     
-    <label class="block top-spacer">Login Page Image:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.loginpageimage" /></label>
     <input id="login_image" type="file" name="login_image" class="formtext block" />
     
-     <input class="button top-spacer" type="submit" id="btnNewStyle" value="Create Style" />
-     <input class="button top-spacer" type="button" id="cancelNewStyle" value="Cancel" />
+     <input class="button top-spacer" type="submit" id="btnNewStyle" value="<fmt:message key="settings.style.createnewstyle" />" />
+     <input class="button top-spacer" type="button" id="cancelNewStyle" value="<fmt:message key="settings.style.cancel" />" />
   </form>
   </div>
 
@@ -201,31 +199,31 @@ background-color: lightsteelblue
   <div id="dialogerror" class="errorsection"></div>
   <form id="updatestyleform" action="settings" method="POST" enctype="multipart/form-data">
 
-    <label class="block top-spacer">Server Name / Title Text:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.servername" /></label>
 	<input class="formtext" id="server_name" name="server_name" type="text" value="SMART Connect"/>
     
-    <label class="block top-spacer">Footer Text:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.footertext" /></label>
 	<input class="formtext" id="footer_text" name="footer_text" type="text" value="Copyright 2015, 2016"/>
 
-    <label class="block top-spacer">Header Style(use css syntax):</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.headerstyle" /></label>
     <textarea id="header_style" name="header_style" class="formtext block" rows=5>
     </textarea>
 
-    <label class="block top-spacer">Body Style(use css syntax):</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.bodystyle" /></label>
     <textarea id="body_style" name="body_style" class="formtext block" rows=5>
     </textarea>
    
-    <label class="block top-spacer">Replacement Header Image:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.titlebackgroundimage" /></label>
     <input id="header_image" type="file" name="header_image" class="formtext block" />
     
-    <label class="block top-spacer">Replacement Background Image:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.maincontentimage" /></label>
     <input id="bg_image" type="file" name="bg_image" class="formtext block" />
     
-    <label class="block top-spacer">Replacement Login Page Image:</label>
+    <label class="block top-spacer"><fmt:message key="settings.style.loginpageimage" /></label>
     <input id="login_image" type="file" name="login_image" class="formtext block" />
     
-     <input class="button top-spacer" type="submit" id="btnUpdateStyle" value="Update Style" />
-     <input class="button top-spacer" type="button" id="cancelUpdateStyle" value="Cancel" />
+     <input class="button top-spacer" type="submit" id="btnUpdateStyle" value="<fmt:message key="settings.style.updatestyle" />" />
+     <input class="button top-spacer" type="button" id="cancelUpdateStyle" value="<fmt:message key="settings.style.cancel" />" />
    
   </form>
   </div>
