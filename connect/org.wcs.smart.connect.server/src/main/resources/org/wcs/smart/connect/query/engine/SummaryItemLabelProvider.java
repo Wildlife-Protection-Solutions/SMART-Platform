@@ -886,6 +886,7 @@ public class SummaryItemLabelProvider {
 				}
 			}
 //			c.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+			c.where(cb.and(filters.toArray(new Predicate[filters.size()])));
 			Collection<?> data = s.createQuery(c).list();
 			List<UUID> caUuids = caFilter.getConservationAreaFilterIds();
 			for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
