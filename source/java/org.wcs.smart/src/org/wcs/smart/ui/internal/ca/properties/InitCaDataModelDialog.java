@@ -357,6 +357,8 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 					}else if (isBlank){
 						progress = SubMonitor.convert(monitor);
 						dm = new DataModel(ca, new ArrayList<Category>(), new ArrayList<Attribute>());
+					}else {
+						progress = SubMonitor.convert(monitor);
 					}
 					
 					if (dm == null){
