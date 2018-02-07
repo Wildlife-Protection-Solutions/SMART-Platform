@@ -239,4 +239,16 @@
          </require>
       </templateCloner>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrade">
+      <dbUpgrader
+            upgrader="org.wcs.smart.asset.query.plugin.AssetQueryDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.changeLogInstaller">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.asset.query.plugin.ChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
 </plugin>
