@@ -41,6 +41,7 @@ import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -570,6 +571,19 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 							MultiLineString mg = (MultiLineString)g;
 							for (int j = 0; j < mg.getNumGeometries(); j ++){
 								lss.add((LineString)mg.getGeometryN(j));
+							}
+						}else if (g instanceof GeometryCollection) {
+							GeometryCollection gc = (GeometryCollection)g;
+							for (int j = 0; j < gc.getNumGeometries(); j ++) {
+								Geometry x = gc.getGeometryN(j);
+								if (x instanceof LineString) {
+									lss.add((LineString)x);
+								}else if (x instanceof MultiLineString) {
+									MultiLineString mg = (MultiLineString)x;
+									for (int k = 0; k < mg.getNumGeometries(); k ++){
+										lss.add((LineString)mg.getGeometryN(k));
+									}
+								}
 							}
 						}
 					}
