@@ -162,6 +162,26 @@
             advisor="org.wcs.smart.i2.handlers.DeleteIntelAttributeListItemAdvisor"
             class="org.wcs.smart.i2.model.IntelAttributeListItem">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.i2.internal.AttributeListItemDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.AttributeListItem">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.i2.internal.AttributeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.Attribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.i2.internal.AttributeTreeNodeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.AttributeTreeNode">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.i2.internal.CategoryAttributeDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.CategoryAttribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.i2.internal.CategoryDMAdvisor"
+            class="org.wcs.smart.ca.datamodel.Category">
+      </DeleteAdvisor>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
