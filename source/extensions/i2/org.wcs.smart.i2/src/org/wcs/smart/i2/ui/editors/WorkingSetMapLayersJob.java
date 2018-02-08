@@ -39,6 +39,9 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ICatalog;
@@ -52,9 +55,11 @@ import org.locationtech.udig.project.LayerEvent;
 import org.locationtech.udig.project.LayerEvent.EventType;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
+import org.locationtech.udig.project.internal.impl.ContextModelImpl;
 import org.opengis.filter.Filter;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -391,77 +396,103 @@ public class WorkingSetMapLayersJob extends Job {
 			}
 		}
 		
-		if (!filterResources.isEmpty()){
-			Filter f = null;
-			if (dates != null) {
-				f = IntelEntityDataSource.createDateFilter(dates[0], dates[1]);
-			}
-			AddContentFilterLayersCommand addCmd = new AddContentFilterLayersCommand(filterResources, 1, f){
-				 public void run( IProgressMonitor monitor ) throws Exception {
-					 super.run(monitor);
-					 
-					 for (Layer layer : getLayers()){
-						 layer.getBlackboard().put(WS_MAP_LAYER_KEY, Boolean.TRUE);
+		map.getRenderManagerInternal().disableRendering();
+		map.eSetDeliver(false);
+		map.getContextModel().eSetDeliver(false); 
+		map.getLayerFactory().eSetDeliver(false);
+		map.getViewportModelInternal().eSetDeliver(false);
+		map.getEditManagerInternal().eSetDeliver(false);
+		List<Layer> allLayers = new ArrayList();
+		try {
+			if (!filterResources.isEmpty()){
+				Filter f = null;
+				if (dates != null) {
+					f = IntelEntityDataSource.createDateFilter(dates[0], dates[1]);
+				}
+				AddContentFilterLayersCommand addCmd = new AddContentFilterLayersCommand(filterResources, 1, f){
+					 public void run( IProgressMonitor monitor ) throws Exception {
+						 super.run(monitor);
 						 
-						 //configure style and visibility
-						 ID styleId = getLayerStyleIdentifier(layer.getGeoResource());
-						 StyleBlackboard bb = layerStyles.get(styleId);
-						 if (bb != null){
-							 layer.setStyleBlackboard(bb);
-						 }
-						 
-						 boolean visible = false;
-						 for(LayerInfo rr : toAdd){
-							 if (getLayerStyleIdentifier(rr.resource).equals(styleId)){
-								visible = rr.layerObject.getIsVisible();
-								break;
+						 for (Layer layer : getLayers()){
+							 allLayers.add(layer);
+							 layer.getBlackboard().put(WS_MAP_LAYER_KEY, Boolean.TRUE);
+							 
+							 //configure style and visibility
+							 ID styleId = getLayerStyleIdentifier(layer.getGeoResource());
+							 StyleBlackboard bb = layerStyles.get(styleId);
+							 if (bb != null){
+								 layer.setStyleBlackboard(bb);
+							 }
+							 
+							 boolean visible = false;
+							 for(LayerInfo rr : toAdd){
+								 if (getLayerStyleIdentifier(rr.resource).equals(styleId)){
+									visible = rr.layerObject.getIsVisible();
+									break;
+								 }
+							 }
+							 if(!visible) layer.setVisible(visible);
+	
+							 //then add listeners
+							 layer.addListener(styleListener);
+							 for (ILayerListener l : listeners){
+								 layer.addListener(l);	 
 							 }
 						 }
-						 if(!visible) layer.setVisible(visible);
-
-						 //then add listeners
-						 layer.addListener(styleListener);
-						 for (ILayerListener l : listeners){
-							 layer.addListener(l);	 
-						 }
 					 }
-				 }
-			};
-			map.sendCommandSync(addCmd);
-		}
-		if (!noFilterResources.isEmpty()){
-			AddLayersCommand addCmd = new AddLayersCommand(noFilterResources, 1) {
-				public void run(IProgressMonitor monitor) throws Exception {
-					super.run(monitor);
-					for (Layer layer : getLayers()) {
-						layer.getBlackboard().put(WS_MAP_LAYER_KEY,
-								Boolean.TRUE);
-						
-						//configure style and visibility
-						ID styleId = getLayerStyleIdentifier(layer.getGeoResource());
-						StyleBlackboard bb = layerStyles.get(styleId);
-						if (bb != null) {
-							layer.setStyleBlackboard(bb);
-						}
-						boolean visible = false;
-						for(LayerInfo rr : toAdd){
-							if (getLayerStyleIdentifier(rr.resource).equals(styleId)){
-								visible = rr.layerObject.getIsVisible();
-								break;
+				};
+				map.sendCommandSync(addCmd);
+			}
+			if (!noFilterResources.isEmpty()){
+				AddLayersCommand addCmd = new AddLayersCommand(noFilterResources, 1) {
+					public void run(IProgressMonitor monitor) throws Exception {
+						super.run(monitor);
+						for (Layer layer : getLayers()) {
+							allLayers.add(layer);
+							layer.getBlackboard().put(WS_MAP_LAYER_KEY, Boolean.TRUE);
+							
+							//configure style and visibility
+							ID styleId = getLayerStyleIdentifier(layer.getGeoResource());
+							StyleBlackboard bb = layerStyles.get(styleId);
+							if (bb != null) {
+								layer.setStyleBlackboard(bb);
+							}
+							boolean visible = false;
+							for(LayerInfo rr : toAdd){
+								if (getLayerStyleIdentifier(rr.resource).equals(styleId)){
+									visible = rr.layerObject.getIsVisible();
+									break;
+								}
+							}
+							if(!visible) layer.setVisible(visible);
+							
+							//then add listeners
+							layer.addListener(styleListener);
+							for (ILayerListener l : listeners) {
+								layer.addListener(l);
 							}
 						}
-						if(!visible) layer.setVisible(visible);
-						
-						//then add listeners
-						layer.addListener(styleListener);
-						for (ILayerListener l : listeners) {
-							layer.addListener(l);
-						}
-						
 					}
-				}
-			};
-			map.sendCommandSync(addCmd);
+				};
+				map.sendCommandSync(addCmd);
+			}
+		}finally {
+        	map.getRenderManagerInternal().enableRendering();
+        	map.eSetDeliver(true);
+    		map.getContextModel().eSetDeliver(true); 
+    		map.getLayerFactory().eSetDeliver(true);
+    		map.getViewportModelInternal().eSetDeliver(true);
+    		map.getEditManagerInternal().eSetDeliver(true);
+//    		
+//    		map.getViewportModelInternal().eNotify(notification);
+        	
+        	
+        	 ENotificationImpl notification = new ENotificationImpl((ContextModelImpl)map.getContextModel(),
+                     Notification.ADD_MANY, ProjectPackage.CONTEXT_MODEL__LAYERS,
+                     null, allLayers);
+        	 map.getContextModel().eNotify(notification);
+        	 
+        	 map.getRenderManager().refresh(null);
 		}
 	}
 
