@@ -24,11 +24,7 @@ package org.wcs.smart.dataentry.dialog.composite;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -42,7 +38,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -62,18 +57,17 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
 public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoComposite {
 
 	private ComboViewer configViewer;
-	private Map<Attribute, List<CmAttributeConfig>> configsMap = new HashMap<>();
-
 	private ConfigurableModelEditDialog dialog;
-	
+	private List<CmAttributeConfig> deletedConfigs = null;
 	/**
 	 * @param parent
 	 * @param model
 	 * @param session
 	 */
-	public CmAttributeConfInfoComposite(Composite parent, ConfigurableModelEditDialog dialog) {
+	public CmAttributeConfInfoComposite(Composite parent, ConfigurableModelEditDialog dialog, List<CmAttributeConfig> deletedConfigs) {
 		super(parent, dialog.getModel());
 		this.dialog = dialog;
+		this.deletedConfigs = deletedConfigs;
 	}
 	
 	public ConfigurableModelEditDialog getDialog() {
@@ -81,45 +75,18 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 	}
 	
 	private List<CmAttributeConfig> getConfigs(CmAttribute cmAttr) {
-		List<CmAttributeConfig> cfgList = configsMap.get(cmAttr.getAttribute());
-		if (cfgList == null) {
-			ConfigurableModel cm = cmAttr.getNode().getModel();
-			cfgList = new ArrayList<>(DataentryHibernateManager.getCmAttributeConfigs(dialog.getSession(), cm, cmAttr.getAttribute()));
-			cfgList.addAll(getUnsavedConfigs(cmAttr.getAttribute()));
-			CmAttributeConfig defaultCfg = dialog.getModel().getDefaultConfigs().get(cmAttr.getAttribute());
-			if (defaultCfg != null && !cfgList.contains(defaultCfg)) {
-				cfgList.add(defaultCfg);
-			}
-			cfgList.sort(new CmAttributeConfigComparator());
-			configsMap.put(cmAttr.getAttribute(), cfgList);
+		ConfigurableModel cm = cmAttr.getNode().getModel();
+		List<CmAttributeConfig> cfgList = new ArrayList<>(DataentryHibernateManager.getCmAttributeConfigs(dialog.getSession(), cm, cmAttr.getAttribute()));
+		cfgList.removeAll(deletedConfigs);
+		CmAttributeConfig defaultCfg = dialog.getModel().getDefaultConfigs().get(cmAttr.getAttribute());
+		if (defaultCfg != null && !cfgList.contains(defaultCfg)) {
+			cfgList.add(defaultCfg);
 		}
+		cfgList.sort(new CmAttributeConfigComparator());
+
 		return cfgList;
 	}
 
-	private Set<CmAttributeConfig> getUnsavedConfigs(Attribute attribute) {
-		Set<CmAttributeConfig> result = new HashSet<>();
-		for (CmNode cmNode : getModel().getNodes()) {
-			result.addAll(getUnsavedConfigs(cmNode, attribute));
-		}
-		return result;
-	}
-	
-	private Set<CmAttributeConfig> getUnsavedConfigs(CmNode cmNode, Attribute attribute) {
-		Set<CmAttributeConfig> result = new HashSet<>();
-		for (CmAttribute cmAttr : cmNode.getCmAttributes()) {
-			if (attribute.equals(cmAttr.getAttribute())) {
-				CmAttributeConfig cfg = cmAttr.getConfig();
-				if (cfg != null && cfg.getUuid() == null) {
-					result.add(cfg);
-				}
-			}
-		}
-		for (CmNode childNode : cmNode.getChildren()) {
-			result.addAll(getUnsavedConfigs(childNode, attribute));
-		}
-		return result;
-	}
-	
 	protected void createConfigSelectionControl(Composite container) {
 		Label label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmAttributeConfInfoComposite_Configuration_Label);
@@ -194,6 +161,7 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		configViewer.setSelection(new StructuredSelection(getModel().getDefaultConfigs().get(config.getAttribute())));
 		if (config.getUuid() != null) {
 			dialog.getSession().delete(config);
+			deletedConfigs.add(config);
 		}
 		handleConfigViewerSelectionChanged();
 		fireModelChanged();

@@ -84,6 +84,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	private List<IModelChangedListener> modelListeners = new ArrayList<IModelChangedListener>();
 	private List<ISourceObjectChangedListener> sourceListeners = new ArrayList<ISourceObjectChangedListener>();
 
+	
 	public AbstractInfoComposite(Composite parent, ConfigurableModel model) {
 		super(parent, SWT.NONE);
 		this.model = model;

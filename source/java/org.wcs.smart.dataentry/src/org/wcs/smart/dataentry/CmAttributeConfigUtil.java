@@ -21,9 +21,15 @@
  */
 package org.wcs.smart.dataentry;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
+import org.wcs.smart.dataentry.model.CmNode;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -32,6 +38,29 @@ import org.wcs.smart.hibernate.SmartDB;
  *
  */
 public class CmAttributeConfigUtil {
+	
+	/**
+	 * Searches the model for a reference to the database model.  Returns true if at least one
+	 * found, false if none found.
+	 * @param c
+	 * @param model
+	 * @return
+	 */
+	public static boolean referencesAttribute(Attribute attribute, ConfigurableModel model) {
+		List<CmNode> tosearch = new ArrayList<>();
+		tosearch.addAll(model.getNodes());
+		while(!tosearch.isEmpty()) {
+			CmNode n = tosearch.remove(0);
+			
+			if (n.getCmAttributes() != null) {
+				for (CmAttribute c : n.getCmAttributes()) {
+					if (c.getAttribute().equals(attribute)) return true;
+				}
+			}
+			tosearch.addAll(n.getChildren());
+		}
+		return false;
+	}
 	
 	public static final void assignCustomName(CmAttributeConfig cfg, CmAttribute cmAttr) {
 		String name = Messages.CmAttributeConfig_Custom_Prefix + " " + cmAttr.findName(SmartDB.getCurrentLanguage()); //$NON-NLS-1$

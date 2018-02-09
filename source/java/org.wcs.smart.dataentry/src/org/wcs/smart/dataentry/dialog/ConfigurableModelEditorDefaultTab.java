@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -46,7 +48,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite;
@@ -62,6 +67,7 @@ import org.wcs.smart.dataentry.dialog.composite.TextAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.TreeAttributeInfoComposite;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -102,6 +108,8 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	private Map<AttributeType, CmAttributeInfoComposite> attributeComposites;
 	
 	private HashMap<ControlButton, Button> controlButtons = new HashMap<ControlButton, Button>();
+	
+	private List<CmAttributeConfig> deletedConfigs = new ArrayList<>();
 	
 	public ConfigurableModelEditorDefaultTab(ConfigurableModelEditDialog dialog) {
 		this.dialog = dialog;
@@ -157,6 +165,9 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		});
 		modelTreeViewer.expandToLevel(2);
 		
+		
+		
+		
 		languageViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -176,26 +187,37 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		Menu treeMenu = new Menu(modelTreeViewer.getControl());
+		
 		for (final ControlButton cbtn : ControlButton.values()){
+			if (cbtn == ControlButton.DELETE) {
+				new MenuItem(treeMenu, SWT.SEPARATOR);
+			}
+			MenuItem mi = new MenuItem(treeMenu, SWT.PUSH);
+			mi.setText(cbtn.name);
+			mi.addListener(SWT.Selection, e->doControlButtonPress(cbtn));
+			mi.setEnabled(true);
+			
+			if (cbtn == ControlButton.ADD_CATEGORY || cbtn == ControlButton.ADD_GROUP) {
+				mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			}else if (cbtn == ControlButton.DELETE) {
+				mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			}
+			
 			Button btn = new Button(buttonPanel, SWT.PUSH);
 			btn.setText(cbtn.name);
 			btn.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					Control currentPanel = ((StackLayout)infoInnerPanel.getLayout()).topControl;
-					if (currentPanel instanceof AbstractInfoComposite){
-						((AbstractInfoComposite)currentPanel).processButton(cbtn);
-						
-						//we we add or remove something make sure the current selection is expanded
-						Object x = ((StructuredSelection)modelTreeViewer.getSelection()).getFirstElement();
-						if (x != null) modelTreeViewer.setExpandedState(x, true);
-					}
+					doControlButtonPress(cbtn);
 				}
 			});
+			btn.setData("MENU_ITEM", mi);
 			btn.setEnabled(false);
 			dialog.setButtonLayoutData(btn);
 			controlButtons.put(cbtn,btn);
 		}		
+		modelTreeViewer.getControl().setMenu(treeMenu);
 		
 		Group area = new Group(rightPanel, SWT.NONE);
 		((Group)area).setText(Messages.ConfigurableModelEditDialog_PropertiesLabel);
@@ -235,10 +257,10 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		rootNodeComposite = new CmRootNodeInfoComposite(infoInnerPanel, model);
 		rootNodeComposite.addModelChangedListener(modelChangeListener);
 
-		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), true);
+		groupNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), true, deletedConfigs);
 		groupNodeComposite.addModelChangedListener(modelChangeListener);
 		
-		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), false);
+		categoryNodeComposite = new CmNodeInfoComposite(infoInnerPanel, model, dialog.getSession(), false, deletedConfigs);
 		categoryNodeComposite.addModelChangedListener(modelChangeListener);
 
 		attributeComposites = new HashMap<AttributeType, CmAttributeInfoComposite>();
@@ -252,11 +274,11 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TEXT, attrComposite);
 
-		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, dialog);
+		attrComposite = new ListAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.LIST, attrComposite);
 
-		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, dialog);
+		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TREE, attrComposite);
 
@@ -281,6 +303,16 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		return container;
 	}
 
+	private void doControlButtonPress(ControlButton cbtn) {
+		Control currentPanel = ((StackLayout)infoInnerPanel.getLayout()).topControl;
+		if (currentPanel instanceof AbstractInfoComposite){
+			((AbstractInfoComposite)currentPanel).processButton(cbtn);
+			
+			//we we add or remove something make sure the current selection is expanded
+			Object x = ((StructuredSelection)modelTreeViewer.getSelection()).getFirstElement();
+			if (x != null) modelTreeViewer.setExpandedState(x, true);
+		}
+	}
 	private void updateRightPanelState() {
 		IStructuredSelection selection = (IStructuredSelection) modelTreeViewer.getSelection();
 		Object obj = selection.getFirstElement();
@@ -320,13 +352,19 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		}else{
 			for (Button btn : controlButtons.values()){
 				btn.setEnabled(false);
+				
 			}
+		}
+		for (Button btn : controlButtons.values()){
+			((MenuItem)btn.getData("MENU_ITEM")).setEnabled(btn.isEnabled());
 		}
 	}
 
 	@Override
 	public void performSave(Session s) {
 		s.saveOrUpdate(dialog.getModel());
+		dialog.getModel().getDefaultConfigs().values().forEach(e->s.saveOrUpdate(e));
+		deletedConfigs.clear();
 	}
 
 	@Override

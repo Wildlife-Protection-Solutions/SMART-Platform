@@ -170,7 +170,7 @@ public class ConfigurableModel extends NamedItem {
 		}
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="model", cascade={CascadeType.ALL}, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="model")
 	@MapKey(name="attribute")
 	@Where(clause = "is_default")
 	public Map<Attribute, CmAttributeConfig> getDefaultConfigs() {

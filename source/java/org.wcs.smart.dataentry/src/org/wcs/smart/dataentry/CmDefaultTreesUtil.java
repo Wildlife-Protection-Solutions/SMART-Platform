@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -75,6 +76,7 @@ public class CmDefaultTreesUtil {
 		return result;
 	}
 	
+	
 	public static CmAttributeConfig buildDefaultTreeConfig(ConfigurableModel model, Attribute a) {
 		CmAttributeConfig cfg = CmAttributeConfig.createConfig(model, a, true);
 		cfg.setName(a.getName());
@@ -90,7 +92,16 @@ public class CmDefaultTreesUtil {
 	
 	private static List<CmAttributeTreeNode> buildDefaultTree(CmAttributeConfig cfg, Attribute a, CmAttributeTreeNode cmParent, AttributeTreeNode dmParent, Map<AttributeTreeNode, CmAttributeTreeNode> preMapping) {
 		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
-		List<AttributeTreeNode> source = dmParent != null ? dmParent.getActiveChildren() : a.getActiveTreeNodes();
+		List<AttributeTreeNode> source = null;
+		
+		//we don't use the getActiveChildren function here because it is not properly configured when
+		//it's a newly created attribute.
+		if (dmParent != null) {
+			source = dmParent.getChildren().stream().filter(e->e.getIsActive()).collect(Collectors.toList());
+		}else {
+			source = a.getTree().stream().filter(e->e.getIsActive()).collect(Collectors.toList());
+		}
+		
 		for (AttributeTreeNode dmNode : source) {
 			CmAttributeTreeNode cmNode = preMapping == null ? null : preMapping.get(dmNode);
 			if (cmNode == null) {

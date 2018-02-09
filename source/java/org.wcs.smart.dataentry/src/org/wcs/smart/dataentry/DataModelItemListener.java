@@ -22,9 +22,7 @@
 package org.wcs.smart.dataentry;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.transaction.Synchronization;
@@ -180,7 +178,11 @@ public enum DataModelItemListener implements IDataModelItemListener {
 		
 		List<CmAttribute> attributes = q.list();
 		for (CmAttribute a : attributes){
+			Attribute dmAttribute = a.getAttribute();
+			ConfigurableModel model = a.getNode().getModel();
+
 			fireCmDeleteItem(currentSession, a);
+			
 			a.setAttribute(null);
 			a.getNode().getCmAttributes().remove(a);
 			
@@ -189,6 +191,22 @@ public enum DataModelItemListener implements IDataModelItemListener {
 			//update the order of other attribute
 			for (int i = 0; i < a.getNode().getCmAttributes().size(); i ++){
 				a.getNode().getCmAttributes().get(i).setOrder(i);
+			}
+			
+			//if this attribute is not used anywhere else in the model then we want to remove all
+			//CMAttributeConfig objects related to this attribute
+			if (!CmAttributeConfigUtil.referencesAttribute(dmAttribute, model)) {
+				//delete all configurations associated with model
+				model.getDefaultConfigs().remove(dmAttribute);
+				currentSession.flush();	
+				List<CmAttributeConfig> configs= DataentryHibernateManager.getCmAttributeConfigs(currentSession, model, dmAttribute);
+				for (CmAttributeConfig cfg : configs) {
+					//EG: I tried session.delete(cfg) here and it generated some hibernate errors I could not sort out
+					currentSession.createQuery("DELETE From CmAttributeConfig WHERE uuid = :uuid").setParameter("uuid", cfg.getUuid()).executeUpdate();
+					currentSession.flush();	
+				}
+				
+				
 			}
 		}
 	}
@@ -267,7 +285,6 @@ public enum DataModelItemListener implements IDataModelItemListener {
 	
 	private void addAttributeToCategory(Session currentSession, Category category, Attribute attribute){
 		List<CmNode> nodes = QueryFactory.buildQuery(currentSession, CmNode.class, "category", category).list(); //$NON-NLS-1$
-		Set<ConfigurableModel> changedModels = new HashSet<>();
 		for (CmNode node : nodes){
 			//ensure attribute doesn't already exist
 			boolean add = true;
@@ -287,28 +304,16 @@ public enum DataModelItemListener implements IDataModelItemListener {
 				newAttribute.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(newAttribute, attribute.getType()));
 				
 				ConfigurableModel cm = node.getModel();
-				if (AttributeType.TREE.equals(attribute.getType()) || AttributeType.LIST.equals(attribute.getType())) {
-					if (!changedModels.contains(cm)) {
-						//create default configurations if needed
-						changedModels.add(cm);
-						if (AttributeType.TREE.equals(attribute.getType())) {
-							ensureDefaultTreeExists(currentSession, cm, attribute);
-						} else if (AttributeType.LIST.equals(attribute.getType())) {
-							ensureDefaultListExists(currentSession, cm, attribute);
-						}
-					}
-					//create custom configurations
+				if (AttributeType.TREE.equals(attribute.getType()) || AttributeType.LIST.equals(attribute.getType())) {				
+					//we want to reuse the default configuration here; don't want to create a new one
+					//unless the user specifically requests it
+					CmAttributeConfig config = null;
 					if (AttributeType.TREE.equals(attribute.getType())) {
-						CmAttributeConfig cfg = CmAttributeConfig.createConfig(cm, attribute, false);
-						CmAttributeConfigUtil.assignCustomName(cfg, newAttribute);
-						cfg.setTree(CmCustomTreesUtil.buildCustomTree(cfg, attribute));
-						newAttribute.setConfig(cfg);
+						config = ensureDefaultTreeExists(currentSession, cm, attribute);
 					} else if (AttributeType.LIST.equals(attribute.getType())) {
-						CmAttributeConfig cfg = CmAttributeConfig.createConfig(cm, attribute, false);
-						CmAttributeConfigUtil.assignCustomName(cfg, newAttribute);
-						cfg.setList(CmCustomListsUtil.buildCustomList(cfg, attribute));
-						newAttribute.setConfig(cfg);
+						config = ensureDefaultListExists(currentSession, cm, attribute);
 					}
+					newAttribute.setConfig(config);
 				}
 
 				node.getCmAttributes().add(newAttribute);
@@ -317,22 +322,26 @@ public enum DataModelItemListener implements IDataModelItemListener {
 		}
 	}
 
-	private void ensureDefaultTreeExists(Session s, ConfigurableModel m, Attribute a) {
-		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(m);
-		if (!existingTrees.contains(a)) {
-			CmAttributeConfig cfg = CmDefaultTreesUtil.buildDefaultTreeConfig(m, a);
-			m.getDefaultConfigs().put(a, cfg);
+	private CmAttributeConfig ensureDefaultTreeExists(Session s, ConfigurableModel m, Attribute a) {
+		CmAttributeConfig config = m.getDefaultConfigs().get(a);
+		if (config == null) {
+			config = CmDefaultTreesUtil.buildDefaultTreeConfig(m, a);
+			m.getDefaultConfigs().put(a, config);
+			s.save(config);
 			s.saveOrUpdate(m);
 		}
+		return config;
 	}
 
-	private void ensureDefaultListExists(Session s, ConfigurableModel m, Attribute a) {
-		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
-		if (!existingLists.contains(a)) {
-			CmAttributeConfig cfg = CmDefaultListsUtil.buildDefaultListConfig(m, a);
-			m.getDefaultConfigs().put(a, cfg);
+	private CmAttributeConfig ensureDefaultListExists(Session s, ConfigurableModel m, Attribute a) {
+		CmAttributeConfig config = m.getDefaultConfigs().get(a);
+		if (config == null) {
+			config = CmDefaultListsUtil.buildDefaultListConfig(m, a);
+			m.getDefaultConfigs().put(a, config);
+			s.save(config);
 			s.saveOrUpdate(m);
 		}
+		return config;
 	}
 	
 	private void addAttributeListItem(Session currentSession, AttributeListItem dmListItem) {
