@@ -144,7 +144,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		
 		String[] sql = new String[] {
-			"create table smart.i_config_option (uuid char(16) for bit data, ca_uuid char(16) for bit data, keyid varchar(32000), value varchar(32000), unique(ca_uuid, keyid), primary key (uuid));",
+			"create table smart.i_config_option (uuid char(16) for bit data, ca_uuid char(16) for bit data not null, keyid varchar(32000) not null, value varchar(32000), unique(ca_uuid, keyid), primary key (uuid));",
 			"ALTER TABLE SMART.i_config_option ADD CONSTRAINT intelconfigopcauuid FOREIGN KEY (ca_uuid) REFERENCES SMART.conservation_area(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 		};
 		
