@@ -65,7 +65,7 @@ import org.wcs.smart.user.UserLevelManager;
  */
 public class SmartStartUp {
 	
-	public static final String LOGIN_EXT_ID = "org.wcs.smart.caLogin"; //$NON-NLS-1$
+	
 	
 	/**
 	 * Initializes the db and checks the version.
@@ -333,7 +333,7 @@ public class SmartStartUp {
 		//run login handlers
 		List<ILoginHandler> handlers = new ArrayList<ILoginHandler>();
 		try{
-			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(LOGIN_EXT_ID);
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(ILoginHandler.LOGIN_EXT_ID);
 			for (IConfigurationElement e : config) {	
 				if (e.getName().equals("loginHandler")){ //$NON-NLS-1$
 					ILoginHandler handler = (ILoginHandler) e.createExecutableExtension("clazz"); //$NON-NLS-1$

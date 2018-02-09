@@ -29,6 +29,8 @@ package org.wcs.smart;
  */
 public interface ILoginHandler {
 
+	public static final String LOGIN_EXT_ID = "org.wcs.smart.caLogin"; //$NON-NLS-1$
+	
 	/**
 	 * If an exception is thrown the login will fail.
 	 * 
