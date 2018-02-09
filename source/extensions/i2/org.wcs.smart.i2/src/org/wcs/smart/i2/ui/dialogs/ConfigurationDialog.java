@@ -58,6 +58,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelConfigurationOption;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -124,7 +125,7 @@ public class ConfigurationDialog extends TitleAreaDialog{
 		}
 		if (cnt > 1) {
 			isError = true;
-			setErrorMessage("Only a single default value (value without language) can be provided.");
+			setErrorMessage(Messages.ConfigurationDialog_SingleDefaultRequired);
 		}else {
 			HashSet<String> lang = new HashSet<>();
 			for (Name item : items) {
@@ -139,13 +140,13 @@ public class ConfigurationDialog extends TitleAreaDialog{
 					}
 					if (!fnd) {
 						isError = true;
-						setErrorMessage(MessageFormat.format("Invalid language code: {0}",item.getLanguage()));
+						setErrorMessage(MessageFormat.format(Messages.ConfigurationDialog_InvalidLanguageCode,item.getLanguage()));
 						break;
 					}
 				}
 				if (lang.contains(item.getLanguage())) {
 					isError = true;
-					setErrorMessage(MessageFormat.format("Duplicate labels for language: {0}",item.getLanguage()));
+					setErrorMessage(MessageFormat.format(Messages.ConfigurationDialog_DuplicateLanguage,item.getLanguage()));
 					break;
 				}
 			}
@@ -162,11 +163,11 @@ public class ConfigurationDialog extends TitleAreaDialog{
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(parent, SWT.NONE);
-		l.setText("Menu Label:");
+		l.setText(Messages.ConfigurationDialog_MenuLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		l = new Label(parent, SWT.WRAP);
-		l.setText("Select no language to select the default label.  This is the value that will be displayed if a language specific value is not found. Remove all values if you want to use the modules default values.");
+		l.setText(Messages.ConfigurationDialog_MenuInfo);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)l.getLayoutData()).widthHint = 200;
 		
@@ -178,15 +179,15 @@ public class ConfigurationDialog extends TitleAreaDialog{
 		viewer.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		
 		TableViewerColumn colLanguage = new TableViewerColumn(viewer,  SWT.NONE);
-		colLanguage.getColumn().setText("Language");
+		colLanguage.getColumn().setText(Messages.ConfigurationDialog_LanguageColumn);
 		colLanguage.getColumn().setWidth(200);
 		colLanguage.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof Name) {
 					String l = ((Name)element).getLanguage();
-					if (l == null) return "<default>";
+					if (l == null) return Messages.ConfigurationDialog_defaultLabel;
 					for (Locale x : Locale.getAvailableLocales()) {
-						if (x.getLanguage().equals(l)) return l + " (" + x.getDisplayLanguage() + ") ";
+						if (x.getLanguage().equals(l)) return l + " (" + x.getDisplayLanguage() + ") "; //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					return l;
 				}
@@ -194,7 +195,7 @@ public class ConfigurationDialog extends TitleAreaDialog{
 			}
 		});
 		final String[] langs = new String[Locale.getISOLanguages().length+1];
-		langs[0] = "";
+		langs[0] = ""; //$NON-NLS-1$
 		for (int i = 0; i < Locale.getISOLanguages().length; i ++) {
 			langs[i+1] = Locale.getISOLanguages()[i];
 		}
@@ -224,7 +225,7 @@ public class ConfigurationDialog extends TitleAreaDialog{
 					if (value.toString().isEmpty()) {
 						((Name)element).op.setKey(IntelConfigurationOption.MENU_NAME_KEY);
 					}else {
-						((Name)element).op.setKey(IntelConfigurationOption.MENU_NAME_KEY + "." + value.toString());
+						((Name)element).op.setKey(IntelConfigurationOption.MENU_NAME_KEY + "." + value.toString()); //$NON-NLS-1$
 					}
 					viewer.refresh();
 					modified();
@@ -234,7 +235,7 @@ public class ConfigurationDialog extends TitleAreaDialog{
 		});
 		
 		TableViewerColumn colLabel = new TableViewerColumn(viewer,  SWT.NONE);
-		colLabel.getColumn().setText("Label");
+		colLabel.getColumn().setText(Messages.ConfigurationDialog_LabelLabel);
 		colLabel.getColumn().setWidth(200);
 		colLabel.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
@@ -320,9 +321,9 @@ public class ConfigurationDialog extends TitleAreaDialog{
 		
 		loadConfigs.schedule();
 		
-		setTitle("Configuration");
-		setMessage("Configurate menu label for multi languages");
-		getShell().setText("Configuration");
+		setTitle(Messages.ConfigurationDialog_Title);
+		setMessage(Messages.ConfigurationDialog_Message);
+		getShell().setText(Messages.ConfigurationDialog_Title);
 		return parent;
 	}
 
@@ -330,7 +331,7 @@ public class ConfigurationDialog extends TitleAreaDialog{
 		if (items == null) return;
 		IntelConfigurationOption op = new IntelConfigurationOption();
 		op.setConservationArea(SmartDB.getCurrentConservationArea());
-		op.setValue("Advanced Intelligence");
+		op.setValue(Messages.ConfigurationDialog_DefaultName);
 		op.setKey(IntelConfigurationOption.MENU_NAME_KEY);
 		items.add(new Name(op));
 		viewer.refresh();
@@ -373,14 +374,14 @@ public class ConfigurationDialog extends TitleAreaDialog{
 		}
 	}
 
-	private Job loadConfigs = new Job("loading configuration options") {
+	private Job loadConfigs = new Job(Messages.ConfigurationDialog_JobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Name> items = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				List<IntelConfigurationOption> options = QueryFactory.buildQuery(session, IntelConfigurationOption.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 				for (IntelConfigurationOption o : options) {
 					if (o.getKey().startsWith(IntelConfigurationOption.MENU_NAME_KEY)) {
 						items.add(new Name(o));

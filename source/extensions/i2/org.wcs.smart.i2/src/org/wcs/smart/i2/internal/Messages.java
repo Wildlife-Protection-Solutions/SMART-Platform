@@ -122,6 +122,18 @@ public class Messages extends NLS {
 	public static String CleanUpJob_jobname;
 	public static String CompareEntitiesHandler_DifferentTypeError;
 	public static String CompareEntitiesHandler_EntityRequired;
+	public static String ConfigurationDialog_defaultLabel;
+	public static String ConfigurationDialog_DefaultName;
+	public static String ConfigurationDialog_DuplicateLanguage;
+	public static String ConfigurationDialog_InvalidLanguageCode;
+	public static String ConfigurationDialog_JobName;
+	public static String ConfigurationDialog_LabelLabel;
+	public static String ConfigurationDialog_LanguageColumn;
+	public static String ConfigurationDialog_MenuInfo;
+	public static String ConfigurationDialog_MenuLabel;
+	public static String ConfigurationDialog_Message;
+	public static String ConfigurationDialog_SingleDefaultRequired;
+	public static String ConfigurationDialog_Title;
 	public static String ConfigureRecordAttributesHandler_SaveError;
 	public static String ConfigureRecordAttributesHandler_SaveRequired;
 	public static String ConfigureRecordAttributesHandler_Title;
