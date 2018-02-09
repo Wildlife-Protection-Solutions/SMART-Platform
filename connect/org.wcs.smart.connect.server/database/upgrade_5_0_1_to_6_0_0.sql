@@ -74,21 +74,20 @@ ALTER TABLE smart.qa_error ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa
 
 
 --NEEDS TO BE FIXED SEE TICKET 2209
-delete from smart.CONFIGURABLE_MODEL;
+--delete from smart.CONFIGURABLE_MODEL;
 
 CREATE TABLE smart.cm_attribute_config(uuid UUID not null, cm_uuid UUID not null, dm_attribute_uuid UUID not null, display_mode varchar(10), is_default boolean, primary key (uuid));
 ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (CM_UUID) REFERENCES SMART.CONFIGURABLE_MODEL(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES SMART.DM_ATTRIBUTE(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
-
 alter table smart.cm_attribute add column config_uuid UUID;
 ALTER TABLE smart.cm_attribute ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
-
 alter table smart.cm_attribute_list add column config_uuid UUID;
 ALTER TABLE SMART.CM_ATTRIBUTE_LIST ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ; 
-
 alter table smart.cm_attribute_tree_node add column config_uuid UUID;
 ALTER TABLE SMART.CM_ATTRIBUTE_TREE_NODE ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
+
+
 
 drop table SMART.CM_DM_ATTRIBUTE_SETTINGS;
 
@@ -129,10 +128,18 @@ BEGIN
 END;
 $$LANGUAGE plpgsql;
 
+create table smart.i_config_option (
+  uuid uuid, 
+  ca_uuid uuid not null,
+  keyid varchar(32000) not null, 
+  value varchar(32000), 
+  unique(ca_uuid, keyid),
+  primary key (uuid));
 
---TRIGGERS FOR CHANGELOG
+ALTER TABLE SMART.i_config_option ADD FOREIGN KEY (ca_uuid) REFERENCES SMART.conservation_area(UUID)  ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 
---- QA MODULE TRIGGERS --- 
+ 
+ -- TRIGGERS FOR CHANGELOG
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -988,6 +995,7 @@ CREATE TRIGGER trg_i_working_set_record AFTER INSERT OR UPDATE OR DELETE ON smar
 CREATE TRIGGER trg_i_record_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value FOR EACH ROW execute procedure connect.trg_i_record_attribute_value();
 CREATE TRIGGER trg_i_record_attribute_value_list AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value_list FOR EACH ROW execute procedure connect.trg_i_record_attribute_value_list();
 CREATE TRIGGER trg_i_recordsource_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_recordsource_attribute FOR EACH ROW execute procedure connect.trg_i_recordsource_attribute();
+CREATE TRIGGER trg_i_config_option AFTER INSERT OR UPDATE OR DELETE ON smart.i_config_option FOR EACH ROW execute procedure connect.trg_changelog_common();
 
 
 -- INTELLIGENCE QUERIES --

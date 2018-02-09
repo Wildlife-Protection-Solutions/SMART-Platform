@@ -127,6 +127,7 @@ import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelConfigurationOption;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
@@ -385,6 +386,7 @@ public enum SmartTable {
 	I2_RECORD_ATTRIBUTE(IntelRecordSourceAttribute.class, ".id.source.conservationArea"),
 	I2_RECORD_ATTRIBUTE_VALUE(IntelRecordAttributeValue.class, ".id.record.conservationArea"),
 	I2_RECORD_ATTRIBUTE_LIST_VALUE(IntelRecordAttributeValueList.class, ".id.value.record.conservationArea"),
+	I2_CONFIG_OPTION(IntelConfigurationOption.class, null),
 	
 	QA_ERROR(QaError.class, null),
 	QA_ROUTINE(QaRoutine.class, null),
