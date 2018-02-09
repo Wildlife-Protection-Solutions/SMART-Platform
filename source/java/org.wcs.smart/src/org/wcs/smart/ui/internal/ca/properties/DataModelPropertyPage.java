@@ -1073,6 +1073,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			refreshTree();
 		}
 		
+		session.flush();
 		for (CategoryAttribute newAttribute: newAttributes){
 			//added category/attribute links
 			DataModelManager.INSTANCE.fireAddListener(session, newAttribute);
