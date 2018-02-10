@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -53,6 +54,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -105,7 +107,9 @@ public class ConfigurationDialog extends TitleAreaDialog{
 	@Override
 	protected void cancelPressed() {
 		if (modified) {
-			//TODO: update menu label
+			if (MessageDialog.openQuestion(getShell(), Messages.ConfigurationDialog_RestartOp, Messages.ConfigurationDialog_RestartMsg)) {
+				PlatformUI.getWorkbench().restart();
+			}
 		}
 		super.cancelPressed();
 	}

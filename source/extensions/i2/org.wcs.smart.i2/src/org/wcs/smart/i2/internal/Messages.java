@@ -132,6 +132,8 @@ public class Messages extends NLS {
 	public static String ConfigurationDialog_MenuInfo;
 	public static String ConfigurationDialog_MenuLabel;
 	public static String ConfigurationDialog_Message;
+	public static String ConfigurationDialog_RestartMsg;
+	public static String ConfigurationDialog_RestartOp;
 	public static String ConfigurationDialog_SingleDefaultRequired;
 	public static String ConfigurationDialog_Title;
 	public static String ConfigureRecordAttributesHandler_SaveError;
