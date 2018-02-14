@@ -52,6 +52,8 @@ import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 
+import com.ibm.icu.text.Collator;
+
 
 /**
  * Smart Connect REST API for Dashboards
@@ -144,7 +146,9 @@ public class DashboardBetaApi extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return QueryFactory.buildQuery(s,  Dashboard.class).list();
+			List<Dashboard> boards =  QueryFactory.buildQuery(s,  Dashboard.class).list();
+			boards.sort((a,b)->Collator.getInstance(request.getLocale()).compare(a.getLabel(), b.getLabel()));
+			return boards;
 		}finally{
 			s.getTransaction().rollback();
 		}
