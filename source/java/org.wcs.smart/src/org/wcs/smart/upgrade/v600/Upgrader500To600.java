@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -167,6 +168,35 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 					ps_cma_upd.setBytes(3, cm_uuid);
 					ps_cma_upd.executeUpdate();
 				}
+			}
+		}
+		String attType = null;
+		if (tableName.equals("smart.CM_ATTRIBUTE_LIST")){ //$NON-NLS-1$
+			attType = Attribute.AttributeType.LIST.name();
+		}else if (tableName.equals("smart.CM_ATTRIBUTE_TREE_NODE")) { //$NON-NLS-1$
+			attType = Attribute.AttributeType.TREE.name();
+		}
+		if (attType == null) return;
+		//for configurations with no elements
+		try(ResultSet rs = c.createStatement().executeQuery("select c.cm_uuid as cm_uuid, a.uuid as cm_attribute_uuid, a.attribute_uuid as dm_attribute_uuid from smart.cm_node c, smart.cm_attribute a, smart.dm_attribute b where c.uuid = a.node_uuid and a.attribute_uuid = b.uuid and b.att_type = '" + attType + "' and config_uuid is null")){ //$NON-NLS-1$ //$NON-NLS-2$
+			while (rs.next()) {
+				byte[] cm_uuid = rs.getBytes(1);
+				byte[] cma_uuid = rs.getBytes(2);
+				byte[] cfg_uuid = DerbyUtils.createUuid();
+
+				//create custom config and make default
+				insertConfig(c, cfg_uuid, cm_uuid, getDmAttributeForCmAttribute(c, cma_uuid), getDisplayModeForCustomCmAttribute(c, cma_uuid), true);
+
+				PreparedStatement ps_upd = c.prepareStatement("UPDATE " + tableName + " SET CONFIG_UUID = ? WHERE CM_UUID = ? AND CM_ATTRIBUTE_UUID = ? AND DM_ATTRIBUTE_UUID IS NULL"); //$NON-NLS-1$ //$NON-NLS-2$
+				ps_upd.setBytes(1, cfg_uuid);
+				ps_upd.setBytes(2, cm_uuid);
+				ps_upd.setBytes(3, cma_uuid);
+				ps_upd.executeUpdate();
+
+				PreparedStatement ps_cma_upd = c.prepareStatement("UPDATE smart.cm_attribute SET CONFIG_UUID = ? WHERE UUID = ?"); //$NON-NLS-1$
+				ps_cma_upd.setBytes(1, cfg_uuid);
+				ps_cma_upd.setBytes(2, cma_uuid);
+				ps_cma_upd.executeUpdate();
 			}
 		}
 	}
