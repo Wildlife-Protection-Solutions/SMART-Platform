@@ -589,7 +589,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				}
 				return element.getRank().getName();
 			case GENDER: return String.valueOf(element.getGender());
-			case BIRTHDATE: return DateFormat.getDateInstance().format(element.getBirthDate());
+			case BIRTHDATE: return element.getBirthDate() == null ? "" : DateFormat.getDateInstance().format(element.getBirthDate()); //$NON-NLS-1$
 			case DATE_CREATED: return DateFormat.getDateInstance().format(element.getDateCreated());
 			case EMPLOYEMENT_DATE: return DateFormat.getDateInstance().format(element.getStartEmploymentDate());
 			case EMPLOYEMENT_ENDDATE: 
