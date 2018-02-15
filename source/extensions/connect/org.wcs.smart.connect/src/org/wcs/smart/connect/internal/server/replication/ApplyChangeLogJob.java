@@ -406,6 +406,7 @@ public class ApplyChangeLogJob extends Job {
 			final boolean[] cont = new boolean[]{true};
 			if (afterDownload == null ||
 					afterDownload.getSmartUserLevelKeys() == null ||
+					afterDownload.getEndEmploymentDate() != null || //no longer active
 					!afterDownload.getSmartUserLevelKeys().equals(currentEmployee.getSmartUserLevelKeys())){
 				//current employee no longer exists; 
 				//or no longer a smart user
