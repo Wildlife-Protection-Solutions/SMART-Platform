@@ -39,6 +39,9 @@ alter table connect.map_layers add constraint type_chk check (layer_type in ('WM
 alter table connect.map_layers add primary key (uuid);
  alter table connect.map_layers drop column mapboxid;
 
+ --unique user id constraint
+ ALTER TABLE smart.employee ADD CONSTRAINT smartuseridunq UNIQUE(ca_uuid, smartuserid)
+ 
 -- QA Plugin
 
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.qa', '1.0');

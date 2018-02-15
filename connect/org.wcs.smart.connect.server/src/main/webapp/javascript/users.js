@@ -70,13 +70,14 @@ window.onload = function(){
 
 	//new desktop user dialog
 	document.querySelector("#btnNewDesktopUser").onclick=showNewDesktopUserDialog;
+	document.querySelector("#btnRefreshDesktop").onclick=refreshDesktopUsers;
 	document.querySelector("#canceldesktopnewuser").onclick = function(){closeDialog('newDesktopUserDialog');};
 	document.querySelector("#newdesktopuserform").onsubmit = createNewDesktopUser;
 	
 	//edit desktop dialog
 	document.querySelector("#canceldesktopedituser").onclick = function(){closeDialog('editDesktopUserDialog');};
 	document.querySelector("#editdesktopuserform").onsubmit = editDesktopUserSubmit;
-	
+		
 	clearUserInfo();
 	
 	document.querySelector("#roledetailinner").style.display = "none";

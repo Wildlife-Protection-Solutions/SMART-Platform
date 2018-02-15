@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.api;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -128,7 +129,7 @@ public class DesktopUser extends HttpServlet {
 		try{
 			ArrayList<EmployeeInfo> authorizedEmployees = new ArrayList<EmployeeInfo>(); 
 			ArrayList<EmployeeInfo> allEmployees = (ArrayList<EmployeeInfo>) HibernateManager.getDesktopUsers(s);
-		
+			allEmployees.sort((a,b)->Collator.getInstance().compare(a.getSmartUserId(), b.getSmartUserId()));
 			if(isCaAdmin){
 				uuidCaAdminIn = SecurityManager.INSTANCE.listOfUuidsIsCaAdminOf(s, request.getUserPrincipal().getName() );
 				for(EmployeeInfo e: allEmployees){
@@ -421,9 +422,10 @@ public class DesktopUser extends HttpServlet {
 			toUpdate.setGender(newUser.getGender());
 			toUpdate.setDateCreated(new Date());
 			toUpdate.setStartEmploymentDate(new Date());
-			ArrayList<SmartUserLevel> level = new ArrayList<SmartUserLevel>();
-			level.add(new SmartUserLevel(newUser.getUserLevelKey()));
-			toUpdate.setSmartUserLevel(level);
+			//DO NOT SUPPORT updating user levels
+//			ArrayList<SmartUserLevel> level = new ArrayList<SmartUserLevel>();
+//			level.add(new SmartUserLevel(newUser.getUserLevelKey()));
+//			toUpdate.setSmartUserLevel(level);
 			
 			s.update(toUpdate);
 			s.getTransaction().commit();
@@ -478,13 +480,33 @@ public class DesktopUser extends HttpServlet {
 				}
 			}
 			
+			//ensure fields needed below are lazily loaded
+			toDelete.getConservationArea().getName();
+			toDelete.getConservationArea().getId();
+			toDelete.getSmartUserId();
 			
 			toDelete.setEndEmploymentDate(new Date()); //setting an end date deactivates the user.
 			s.save(toDelete);
 			s.flush();
-			//might have to check for deleting the last administrator user? maybe the DB constraints prevents that
-			//TODO
-			
+
+			//check for deleting the last administrator user
+			//check to ensure this CA still has at least one active employee with admin user level access
+			boolean hasAdmin = false;
+			List<Employee> otherEmployees  = s.createQuery("FROM Employee WHERE conservationArea = :ca and smartUserId is not null and endEmploymentDate is null and uuid != :uuid ", Employee.class) //$NON-NLS-1$
+			.setParameter("ca", toDelete.getConservationArea()) //$NON-NLS-1$
+			.setParameter("uuid",  toDelete.getUuid()) //$NON-NLS-1$
+			.list();
+			for (Employee e : otherEmployees) {
+				if (e.getSmartUserLevels().contains("ADMIN")) { //$NON-NLS-1$
+					hasAdmin = true;
+					break;
+				}
+			}
+			if (!hasAdmin) {
+				//there will be no more active admin employees; fail to make change
+				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("DesktopUser.CannotDeactivate", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+				
+			}
 			s.getTransaction().commit();
 			
 		}catch (SmartConnectException ex){

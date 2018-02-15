@@ -186,7 +186,7 @@ function desktopUserDeactivated() {
 	if (this.status == 200) {
 		displayInfo(user.smartUserId + i18n("users.userdeactivated"));
 	} else {
-		displayError(parseError(i18n("users.userdeactivationerror") + user.smartUserId, this.responseText));
+		displayError(parseError(i18n("users.userdeactivationerror"), this.responseText));
 	}
 	refreshDesktopUsers();
 }
@@ -225,8 +225,9 @@ function showEditDesktopUserDialog(){
  	document.querySelector("input[name=edit_givenName]").value = user.givenName;
  	document.querySelector("select[name=edit_gender]").value = user.gender;
  	document.querySelector("input[name=edit_id]").value = user.id
- 	
- 	document.querySelector("select[name=edit_userLevel]").value = user.userLevelKey;//this won't work for users with multiple levels//TODO make sure it doesn't crash it. 	
+
+ 	//this won't work for users with multiple levels//TODO make sure it doesn't crash it.
+ 	//document.querySelector("select[name=edit_userLevel]").value = user.userLevelKey;
  	
  	document.querySelector("#newDesktopUserDialog > #dialogerror").style.display = "none";
  	displayDialog('editDesktopUserDialog', 'main');
@@ -356,7 +357,11 @@ function makeJsonEmployee(prefix){
 	
 	var id = document.querySelector("input[name=" + prefix + "id]").value;
 
-	var userLevel = document.querySelector("select[name=" + prefix + "userLevel]").value;
+	var element = document.querySelector("select[name=" + prefix + "userLevel]");
+	var userLevel = "";
+	if (element != null){
+		userLevel = document.querySelector("select[name=" + prefix + "userLevel]").value;
+	}
 	
 	if (user.length < 3 ) {
 		error = i18n("settings.usernamelength");
