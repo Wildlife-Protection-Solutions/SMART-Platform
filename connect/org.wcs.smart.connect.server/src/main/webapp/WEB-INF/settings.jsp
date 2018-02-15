@@ -35,7 +35,14 @@
 	<button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
 	
 	<table id="layertable"  class="top-spacer smart-table" style="width:100%">
-		<tr class="table-row smart-table-header"><th class="smart-table"><fmt:message key="settings.layerorder" /></th><th class="smart-table"><fmt:message key="settings.layername" /></th><th><fmt:message key="settings.type" /></th><th><fmt:message key="settings.onbydefault" /></th><th><fmt:message key="settings.mapboxid" /></th><th><fmt:message key="settings.layerlist" /></th><th><fmt:message key="settings.token" /></th><th><fmt:message key="actions" /></th>
+		<tr class="table-row smart-table-header">
+		  <th><fmt:message key="settings.layerorder" /></th>
+		  <th><fmt:message key="settings.layername" /></th>
+		  <th><fmt:message key="settings.type" /></th>
+		  <th><fmt:message key="settings.onbydefault" /></th>
+		  <th><fmt:message key="settings.token" /></th>
+		  <th><fmt:message key="settings.layerlist" /></th>		  
+		  <th><fmt:message key="actions" /></th>
 		</tr>
 	</table>
 </div>
@@ -236,37 +243,31 @@ font-size: 40px;</textarea>
 	<form id="maplayersform">
      		<div id="layererror" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
      		<label class="top-spacer block"><fmt:message key="settings.layeredit.orderlabel" /></label>
-     		<input class="layer_order" type=number name="layer_order"/>
+     		<input class="formtext" type=number name="layer_order"/>
      		
      		<label class="top-spacer block"><fmt:message key="settings.layeredit.namelabel" /></label>
-     		<input class="layer_field" type=text name="layer_name" value="" maxlength="32"/>
-     		
+     		<input class="formtext" type=text name="layer_name" value="" maxlength="32"/>
      		
      		<input type="hidden" name="uuid" value="" />
      		
-     		
-     		<label class="top-spacer block"><fmt:message key="settings.layeredit.typelabel" /></label>
-			<select name="layer_type" class="block formtext alert-select">
-			<option value=1><fmt:message key="settings.layeredit.mapbox" /></option>
-			<option value=2><fmt:message key="settings.layeredit.giscloud" /></option>
-			<option value=3><fmt:message key="settings.layeredit.wms" /></option>
-			</select>
-     		
      		<label class="top-spacer block"><fmt:message key="settings.layeredit.onbydefaultlabel" /></label>
-     		<select name="layer_status" class="block formtext alert-select">
+     		<select name="layer_status" class="block formtext">
 			<option value="true"><fmt:message key="true" /></option>
 			<option value="false"><fmt:message key="false" /></option>
 			</select>
+			
+     		<label class="top-spacer block"><fmt:message key="settings.layeredit.typelabel" /></label>
+			<select name="layer_type" class="block formtext">
+			<option value="WMS"><fmt:message key="settings.layeredit.wms" /></option>
+			</select>
      		
      		<label class="top-spacer block"><fmt:message key="settings.layeredit.tokenorurl" /></label>
-     		<input class="layer_field" type=text name="layer_token" value="" maxlength="256"/>
+     		<input class="formtext" type=text name="layer_token" value="" maxlength="256"/>
  		
-     		<label class="top-spacer block"><fmt:message key="settings.layeredit.mapboxid" /></label>
-     		<input class="layer_field" type=text name="layer_mapbox_id" value="" maxlength="64"/>
-     		
      		<label class="top-spacer block"><fmt:message key="settings.layeredit.layerlist" /></label>
-     		<input class="layer_field" type=text name="layer_list" value=""/>
-     		<div class="top-spacer block">
+     		<input class="formtext" type=text name="layer_list" value=""/>
+     		
+     		<div class="top-spacer block" style="text-align: right">
      			<input id="newLayerButton" class="button" type="button" value="<fmt:message key="settings.createlayerbutton"/>" />
      			<input id="updateLayerButton" class="button" type="button" value="<fmt:message key="settings.updatelayerbutton"/>" />
      			<input class="button" type="button" id="cancelLayer" value="<fmt:message key="settings.cancel"/>" />
@@ -282,25 +283,28 @@ font-size: 40px;</textarea>
 	<form id="alerttypesform">
      		<div id="layererror" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
      		<label class="top-spacer block"><fmt:message key="settings.typeedit.typelabel" /></label>
-     		<input class="type_field" type=text name="type_label" value="" maxlength="32"/>
+     		<input class="formtext" type=text name="type_label" value="" maxlength="32"/>
      		
      		<input type="hidden" name="uuid" value="" />
      		
-     		
      		<label class="top-spacer block"><fmt:message key="settings.typeedit.outlinecolorlabel" /></label>
-			<input id="type_color" class="type_field jscolor" type=text name="type_color" value="" maxlength="16"/>
+			<input id="type_color" class=" formtext type_field jscolor" type=text name="type_color" value="" maxlength="16"/>
 
       		<label class="top-spacer block"><fmt:message key="settings.typeedit.opactiylabel" /></label>
-			<input class="type_field" type=text name="type_opacity" value="" maxlength="8"/>
+			<input class="formtext" type=text name="type_opacity" value="" maxlength="8"/>
 
       		<label class="top-spacer block"><fmt:message key="settings.markerIcon" />: <i id="exampleIcon" class=""></i></label> 
-			<select id="type_markerIcon" class="type_field" name="type_markerIcon">
-<!-- selected from:		http://fortawesome.github.io/Font-Awesome/icons/ -->				
-			</select> <fmt:message key="settings.oroneof"/> <a title="<fmt:message key="settings.iconHover" />" target="_blank" href="http://fortawesome.github.io/Font-Awesome/icons/">(<fmt:message key="settings.list" />)</a>:<input type="text" name="iconOveride" id="iconOveride" value=""/>
-
+      		<span>
+			<select id="type_markerIcon" class="formtext" style="width: auto !important" name="type_markerIcon">
+		<!-- selected from:		http://fortawesome.github.io/Font-Awesome/icons/ -->				
+			</select> <fmt:message key="settings.oroneof"/> 
+			<a title="<fmt:message key="settings.iconHover" />" target="_blank" href="http://fortawesome.github.io/Font-Awesome/icons/">
+			(<fmt:message key="settings.list" />)</a>:
+			<input class="formtext" type="text" name="iconOveride" id="iconOveride" style="width: auto !important" value=""/>
+			</span>
 
       		<label class="top-spacer block"><fmt:message key="settings.markerColor"/>:</label>
-			<select class="type_field" name="type_markerColor">
+			<select class="formtext" name="type_markerColor">
 				<option value="white"><fmt:message key="settings.colorwhite"/></option>
 				<option value="black"><fmt:message key="settings.colorblack"/></option>
 				<option value="gray"><fmt:message key="settings.colorgray"/></option>
@@ -322,11 +326,11 @@ font-size: 40px;</textarea>
 			</select>
 
 			<label class="top-spacer block"><fmt:message key="settings.iconSpin"/>:</label>
-     		<select class="type_field" name="type_spin">
+     		<select class="formtext" name="type_spin">
      			<option value="true"><fmt:message key="settings.true"/></option>
      			<option value="false"><fmt:message key="settings.false"/></option>
      		</select>
-       		<div class="top-spacer block">
+       		<div class="top-spacer block" style="text-align: right">
      			<input id="newTypeButton" class="button" type="button" value="<fmt:message key="settings.newtypebutton"/>" />
      			<input id="updateTypeButton" class="button" type="button" value="<fmt:message key="settings.updatetypebutton"/>" />
      			<input class="button" type="button" id="cancelType" value="<fmt:message key="settings.cancel"/>" />

@@ -78,48 +78,12 @@ window.onload = function(){
 
 	//Load all saved, active layers
 	for (i = 0; i < mapLayers.length; ++i) {
-		//Mapbox layer type
-		if(mapLayers[i][0] == 1){
-			var accesstoken = mapLayers[i][1];
-			var mapboxId = mapLayers[i][2];
-
-			L.mapbox.accessToken = accesstoken;
-			var layer = L.mapbox.tileLayer(mapboxId)
-			var flayer = L.mapbox.featureLayer(mapboxId)
-
-			//add the new layer to the list of datalayers
-			baseMaps[mapLayers[i][4]] = layer;
-			dataLayers[mapLayers[i][4]] = flayer;
-			
-			
-			//add to layer list so it is active to start with
-			if(mapLayers[i][5] == "true"){
-				activeLayers.push(flayer);
-			}
-
-		}else if(mapLayers[i][0] == 2){	//GIScloud layer type
-
+		if(mapLayers[i][0] == "WMS"){ //WMS type
 			var token = mapLayers[i][1];
-		    var layerName =  mapLayers[i][3];
-			
-			var giscloud= L.tileLayer.wms("https://editor.giscloud.com/wms/" + token, {
-				layers: layerName ,
-			    format: 'image/png',
-			    transparent: true,
-			    attribution: "giscloud.com"
-			});
-			dataLayers[mapLayers[i][4]] = giscloud;
-			//add to layer list so it is active to start with
-			if(mapLayers[i][5] == "true"){
-				activeLayers.push(giscloud);
-			}
-
-		}else if(mapLayers[i][0] == 3){ //WMS type
-			var token = mapLayers[i][1];
-		    var layerName =  mapLayers[i][3];
+		    var wmslayers =  mapLayers[i][2];
 		    
 		    var wmsLayer = L.tileLayer.wms(token, {
-		    	layers: layerName,
+		    	layers: wmslayers,
 		    	tiled: true,
 		    	format: 'image/png',
 		    	transparent: true,
@@ -128,9 +92,9 @@ window.onload = function(){
 		        continuousWorld: true
 		    });
 		
-		    dataLayers[mapLayers[i][4]] = wmsLayer;
+		    dataLayers[mapLayers[i][3]] = wmsLayer;
 			//add to layer list so it is active to start with
-			if(mapLayers[i][5] == "true"){
+			if(mapLayers[i][4] == "true"){
 				activeLayers.push(wmsLayer);
 			}
 		}

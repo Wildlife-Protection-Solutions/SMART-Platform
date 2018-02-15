@@ -190,20 +190,13 @@ function createLayerTable(){
  	var layers = JSON.parse(this.responseText);
  	for (var i = 0; i < layers.length; i ++){
  		var type = layers[i].layerType;
- 		var typeText = i18n("settings.unknown");
- 		if(type == 1){
- 			typeText = "Mapbox.com";
- 		}else if(type == 2){
- 			typeText = "GISCloud.com";
- 		}else if (type==3){
- 			typeText = "WMS";
- 		}
+ 		
  		var active = i18n("settings.false")
  		if (layers[i].active){
  			active = i18n("settings.true")
  		}
  		var row = tableCreateRowTDs(parent,
- 				[layers[i].layerOrder, layers[i].layerName, typeText , active, layers[i].mapboxId, layers[i].wmsLayerList, null, null], 
+ 				[layers[i].layerOrder, layers[i].layerName, layers[i].layerType , active, null, null,  null], 
  				"layerrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.id = "layerRow" + i;
  		row.dataset.uuid = layers[i].uuid;
@@ -211,21 +204,26 @@ function createLayerTable(){
  	    var scrollable = document.createElement("div");
  	    scrollable.className = "scrollable";
  	    scrollable.innerHTML = layers[i].token;
- 		row.childNodes[6].appendChild(scrollable);
+ 		row.childNodes[4].appendChild(scrollable);
 
+ 	    var scrollable = document.createElement("div");
+ 	    scrollable.className = "scrollable";
+ 	    scrollable.innerHTML = layers[i].wmsLayerList;
+ 		row.childNodes[5].appendChild(scrollable);
+ 		
  		var updateicon = document.createElement("a");
  		updateicon.className="update-icon";
  		updateicon.title= i18n("settings.updatelayer");
  		updateicon.onclick = updateLayer;
  		updateicon.href="";
- 		row.childNodes[7].appendChild(updateicon);
+ 		row.childNodes[6].appendChild(updateicon);
 
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
  		deleteicon.title= i18n("settings.deletelayer");
  		deleteicon.onclick = deleteLayer;
  		deleteicon.href="";
- 		row.childNodes[7].appendChild(deleteicon);
+ 		row.childNodes[6].appendChild(deleteicon);
  	}
 }
 
@@ -259,7 +257,6 @@ function createNewLayer(){
 	
 	var layer_order = document.querySelector("input[name=layer_order]").value;
 	var layer_name = document.querySelector("input[name=layer_name]").value;
-	var layer_mapbox_id = document.querySelector("input[name=layer_mapbox_id]").value;
 	var layer_list = document.querySelector("input[name=layer_list]").value;
 	var layer_token = document.querySelector("input[name=layer_token]").value;
 	var layer_type = document.querySelector("select[name=layer_type]").value;
@@ -272,7 +269,6 @@ function createNewLayer(){
 		"wmsLayerList" : layer_list,
 		"layerType" : layer_type,
 		"token" : layer_token,
-		"mapboxId" : layer_mapbox_id,
 		"active" : layer_status
 	};
 
@@ -332,7 +328,6 @@ function showCurrentLayer() {
 	form.layer_type.value = r.layerType;
 	form.layer_status.value = r.active;
 	form.layer_token.value = r.token;
-	form.layer_mapbox_id.value = r.mapboxId;
 	form.layer_list.value = r.wmsLayerList;
 
 	document.getElementById("updateLayerButton").classList.remove("hide");
@@ -350,7 +345,6 @@ function submitUpdateLayer(){
 	
 	var layer_order = document.querySelector("input[name=layer_order]").value;
 	var layer_name = document.querySelector("input[name=layer_name]").value;
-	var layer_mapbox_id = document.querySelector("input[name=layer_mapbox_id]").value;
 	var layer_list = document.querySelector("input[name=layer_list]").value;
 	var layer_token = document.querySelector("input[name=layer_token]").value;
 	var layer_type = document.querySelector("select[name=layer_type]").value;
@@ -363,7 +357,6 @@ function submitUpdateLayer(){
 		"wmsLayerList" : layer_list,
 		"layerType" : layer_type,
 		"token" : layer_token,
-		"mapboxId" : layer_mapbox_id,
 		"active" : layer_status
 	};
 

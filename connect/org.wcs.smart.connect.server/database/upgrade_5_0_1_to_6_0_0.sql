@@ -28,6 +28,17 @@ $$LANGUAGE plpgsql;
 
 ALTER TABLE connect.users ALTER COLUMN username TYPE varchar(256);
 
+--changes to map layers table and removing all non-wms map layers
+delete from connect.map_layers where layer_type != 3;
+alter table connect.map_layers add column layer_type_tmp varchar(16);
+update connect.map_layers set layer_type_tmp = 'WMS';
+alter table connect.map_layers alter column layer_type_tmp set not null;
+alter table connect.map_layers drop column layer_type;
+alter table connect.map_layers rename column layer_type_tmp to layer_type;
+alter table connect.map_layers add constraint type_chk check (layer_type in ('WMS'));
+alter table connect.map_layers add primary key (uuid);
+ alter table connect.map_layers drop column mapboxid;
+
 -- QA Plugin
 
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.qa', '1.0');
