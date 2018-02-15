@@ -62,6 +62,8 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.patrol ADD COLUMN folder_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.patrol ADD CONSTRAINT PATROL_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.PATROL_FOLDER(UUID) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 
+				//unique userid/ca combo
+				"ALTER TABLE smart.employee ADD CONSTRAINT smartuseridunq UNIQUE(ca_uuid, smartuserid)", //$NON-NLS-1$
 		};
 
 		for (String s : sql) {
