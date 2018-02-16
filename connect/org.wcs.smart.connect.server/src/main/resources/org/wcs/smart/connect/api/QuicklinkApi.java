@@ -294,7 +294,6 @@ public class QuicklinkApi extends HttpServlet {
 			}
 		}catch(Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
-			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
 			s.getTransaction().rollback();

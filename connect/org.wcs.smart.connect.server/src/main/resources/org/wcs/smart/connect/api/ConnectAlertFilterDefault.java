@@ -154,7 +154,7 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 			}
 			
 			setDefaultValues(newDefault, toUpdate, s);
-			
+			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
@@ -187,6 +187,7 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 		AlertFilterDefault toUpdate = new AlertFilterDefault();
 		try{
 			setDefaultValues(newDefault, toUpdate, s);
+			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
@@ -232,7 +233,6 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 		toUpdate.setStartingLat(newDefault.getStartingLat());  
 		
 		s.saveOrUpdate(toUpdate);
-		s.getTransaction().commit();
 	}
 	
 }

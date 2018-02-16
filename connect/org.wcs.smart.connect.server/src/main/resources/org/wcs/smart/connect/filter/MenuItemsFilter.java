@@ -114,7 +114,7 @@ public class MenuItemsFilter implements Filter {
 					Messages.getString(p.nameKey, l),
 					pathprefix + p.url,
 					styleAll, p.imageFileName});
-		}
+			}
 		}finally{
 			s.getTransaction().commit();
 		}
