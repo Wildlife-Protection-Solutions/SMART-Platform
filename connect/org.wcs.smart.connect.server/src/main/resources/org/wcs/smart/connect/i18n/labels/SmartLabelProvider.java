@@ -56,6 +56,7 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		
 		if (value.equals(GEOMETRY_LABEL)) return Messages.getString("SmartLabelProvider.GeometryColumnLabel", l); //$NON-NLS-1$
 		if (value.equals(AGENCY_NAME_KEY)) return Messages.getString("SmartLabelProvider.AgencyName", l); //$NON-NLS-1$
+		if (value.equals(AGENCY_KEY_KEY)) return Messages.getString("SmartLabelProvider.KeyName", l); //$NON-NLS-1$
 		if (value.equals(RANK_NAME_KEY)) return Messages.getString("SmartLabelProvider.RankName", l); //$NON-NLS-1$
 		if (value.equals(EMP_AGENCY_KEY)) return Messages.getString("SmartLabelProvider.EmployeeAgencyName", l); //$NON-NLS-1$
 		if (value.equals(EMP_RANK_KEY)) return Messages.getString("SmartLabelProvider.EmployeeRankName", l); //$NON-NLS-1$

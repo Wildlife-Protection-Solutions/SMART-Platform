@@ -37,10 +37,29 @@ alter table connect.map_layers drop column layer_type;
 alter table connect.map_layers rename column layer_type_tmp to layer_type;
 alter table connect.map_layers add constraint type_chk check (layer_type in ('WMS'));
 alter table connect.map_layers add primary key (uuid);
- alter table connect.map_layers drop column mapboxid;
+alter table connect.map_layers drop column mapboxid;
 
- --unique user id constraint
- ALTER TABLE smart.employee ADD CONSTRAINT smartuseridunq UNIQUE(ca_uuid, smartuserid)
+--unique user id constraint
+ALTER TABLE smart.employee ADD CONSTRAINT smartuseridunq UNIQUE(ca_uuid, smartuserid);
+ 
+--agency key ids
+ALTER table smart.agency add column keyid varchar(128);
+ 
+UPDATE smart.agency SET keyId = regexp_replace(a.value, '[^a-zA-Z0-9]', '', 'g') 
+from smart.i18n_label a, smart.language b 
+where b.uuid = a.language_uuid and a.element_uuid = smart.agency.uuid and b.isdefault;
+
+UPDATE smart.agency SET keyId = cast(uuid as varchar) where keyId is null or trim(keyId) = '';
+ 
+--ensure unique keys by using uuids
+ update smart.agency
+ set keyId = keyId || replace(cast(uuid as varchar), '-', '')  WHERE uuid IN (
+ select uuid from smart.agency a, 
+ (select ca_uuid, keyid from smart.agency group by ca_uuid, keyid having count(*) > 1) b
+ WHERE a.ca_uuid = b.ca_uuid and a.keyid = b.keyid
+ );
+
+ALTER TABLE smart.agency ADD CONSTRAINT keyunq UNIQUE (keyid, ca_uuid);
  
 -- QA Plugin
 
