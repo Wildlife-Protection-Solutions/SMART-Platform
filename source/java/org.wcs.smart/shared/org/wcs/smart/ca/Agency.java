@@ -40,7 +40,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name ="smart.agency")
-public class Agency extends NamedItem{
+public class Agency extends NamedKeyItem{
 	
 	public static final Integer MAX_AGENCY_LENGTH = 128;
 	

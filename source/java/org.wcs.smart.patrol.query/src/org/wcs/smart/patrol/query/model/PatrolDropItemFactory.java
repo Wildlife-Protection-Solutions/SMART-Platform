@@ -208,6 +208,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 				option == PatrolQueryOption.LEADER ||
 				option == PatrolQueryOption.TEAM ||
 				option == PatrolQueryOption.TEAM_KEY ||
+				option == PatrolQueryOption.AGENCY_KEY ||
 				option == PatrolQueryOption.PILOT){
 			item = new PatrolListDropItem(option);
 		} else {
@@ -665,7 +666,8 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			}
 		} else if (option == PatrolQueryOption.TEAM_KEY
 				|| option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY
-				|| option == PatrolQueryOption.MANDATE_KEY) {
+				|| option == PatrolQueryOption.MANDATE_KEY
+				|| option == PatrolQueryOption.AGENCY_KEY) {
 			List<ListItem> items = null;
 			// TODO: should get all not just active
 			if (option == PatrolQueryOption.TEAM_KEY) {
@@ -677,6 +679,8 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			} else if (option == PatrolQueryOption.MANDATE_KEY) {
 				items = PatrolQueryHibernateManager.getInstance()
 						.getActiveMandates(session);
+			} else if (option == PatrolQueryOption.AGENCY_KEY) {
+				items = PatrolQueryHibernateManager.getInstance().getAgencies(session);				
 			}
 			boolean found = false;
 			if (items != null) {

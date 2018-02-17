@@ -159,6 +159,7 @@ TOKEN :
  | < PATROLLEG_PILOT_KEY : "patrol:pilot" >
  | < PATROLLEG_MEMBER_KEY : "patrol:member" >
  | < PATROLLEG_AGENCY_KEY : "patrol:agency" >
+ | < PATROLLEG_AGENCY_KEY_KEY : "patrol:agencykey" >
  | < PATROLLEG_RANK_KEY : "patrol:rank" >
  | < PATROL_CONTRIBUTION : "patrol:contribution" >
  | < PATROL_CONTRIBUTION_BOOL_KEY : (< PATROL_CONTRIBUTION > ":boolean:"(< LETTER >)*) >
@@ -778,6 +779,7 @@ IFilter StringExpression():
  				< PATROLLEG_PILOT_KEY > |
  				< PATROLLEG_MEMBER_KEY > |
  				< PATROLLEG_AGENCY_KEY > |
+ 				< PATROLLEG_AGENCY_KEY_KEY > |
  				< PATROLLEG_RANK_KEY > 
  				
  			) 

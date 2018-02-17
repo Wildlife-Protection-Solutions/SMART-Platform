@@ -95,7 +95,7 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 			//reading the first line with language codes
 			String[] row = reader.readNext();
 			int size = row.length;
-			int langNumber = size/2;
+			int langNumber = (size-1)/2;
 			List<String> langCodes = getLanguageCodes(row);
 
 			code2Language = createCode2Language(langCodes);
@@ -117,10 +117,10 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 				//adding ranks
 				Rank rank = new Rank();
 				boolean hasRecords = false;
-				for (int i = langNumber; i < size; i++) {
+				for (int i = langNumber+1; i < size; i++) {
 					String value = row[i];
 					if (value != null && !value.isEmpty()) {
-						Language lang = getLanguage(langCodes.get(i-langNumber));
+						Language lang = getLanguage(langCodes.get(i-(langNumber+1)));
 						if (lang != null) {
 							hasRecords = true;
 							rank.updateName(lang, value);
@@ -147,15 +147,16 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 	 * @return
 	 */
 	private Agency handleAgency(String[] row, List<String> langCodes) {
-		int langNum = row.length/2;
+		int langNum = (row.length-1)/2;
 		String record = Arrays.toString(Arrays.copyOf(row, langNum));
 		Agency agency = record2Agency.get(record);
 		if (agency == null) {
 			agency = new Agency();
-			for (int i = 0; i < langNum; i++) {
+			agency.setKeyId(row[0]);
+			for (int i = 1; i <= langNum; i++) {
 				String value = row[i];
 				if (value != null && !value.isEmpty()) {
-					Language lang = getLanguage(langCodes.get(i));
+					Language lang = getLanguage(langCodes.get(i-1));
 					if (lang != null) {
 						agency.updateName(lang, value);
 					}
@@ -173,8 +174,9 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 
 	private List<String> getLanguageCodes(String[] columns) {
 		List<String> result = new ArrayList<String>();
-		int langNum = columns.length/2;
-		for (int i = 0; i < langNum; i++) {
+		//the first column is agency id
+		int langNum = (columns.length-1)/2;
+		for (int i = 1; i <= langNum; i++) {
 			int index = columns[i].lastIndexOf('>');
 			result.add(columns[i].substring(index+1));
 		}

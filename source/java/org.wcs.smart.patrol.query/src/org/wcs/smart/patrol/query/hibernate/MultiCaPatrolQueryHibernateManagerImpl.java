@@ -33,6 +33,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -81,6 +82,14 @@ public class MultiCaPatrolQueryHibernateManagerImpl extends
 
 	}
 
+
+	@Override
+	public List<ListItem> getAgencies(Session session) {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		items.addAll(getNamedKeyItem(session, Agency.class, false));
+		return items;
+	}
+	
 	public Collection<ListItem> getTeams(Session session) {
 		return getNamedKeyItem(session, Team.class, false);
 	}

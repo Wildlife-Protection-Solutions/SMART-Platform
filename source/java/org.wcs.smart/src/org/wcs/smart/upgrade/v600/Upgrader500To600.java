@@ -15,6 +15,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 import org.wcs.smart.util.DerbyUtils;
+import org.wcs.smart.util.UuidUtils;
 
 public class Upgrader500To600 implements IDatabaseUpgrader { 
 	private Exception thrownException = null;
@@ -64,6 +65,8 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 
 				//unique userid/ca combo
 				"ALTER TABLE smart.employee ADD CONSTRAINT smartuseridunq UNIQUE(ca_uuid, smartuserid)", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.agency ADD COLUMN keyid varchar(128)", //$NON-NLS-1$
 		};
 
 		for (String s : sql) {
@@ -72,6 +75,10 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 		}
 		upgradeConfigurableModel(c);
 
+		//create keys for agency rank
+		addKeys(c);
+		c.createStatement().execute("ALTER TABLE smart.agency ADD CONSTRAINT keyunq UNIQUE (keyid, ca_uuid)"); //$NON-NLS-1$
+		
 		//create qa plugin tables
 		QaPlugInInstaller.createTables(session, c);
 		
@@ -81,6 +88,38 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 		c.commit();
 	}
 
+	private void addKeys(Connection c) throws SQLException {
+		String query = "select a.value, b.uuid as item_uuid, b.ca_uuid from smart.I18N_LABEL a, smart.agency b, smart.language c  where b.uuid = a.element_uuid and c.uuid = a.language_uuid and c.isdefault ORDER BY b.uuid"; //$NON-NLS-1$
+		
+		String query2 = "UPDATE smart.agency SET keyid = ? WHERE uuid = ?";  //$NON-NLS-1$ 
+		PreparedStatement ps = c.prepareStatement(query2);
+		try(ResultSet rs = c.createStatement().executeQuery(query)){
+			while(rs.next()) {
+				String name = rs.getString(1);
+				byte[] itemuuid = rs.getBytes(2);
+				
+				String keyId = name.toLowerCase().replaceAll("[^a-zA-Z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				if (keyId.isEmpty()) keyId = UuidUtils.uuidToString(UuidUtils.byteToUUID(itemuuid));
+				ps.setString(1, keyId);
+				ps.setBytes(2, itemuuid);
+				ps.executeUpdate();
+			}
+		}
+		
+		//ensure unique
+		query = "SELECT a.uuid, a.keyId FROM smart.agency a, (SELECT ca_uuid, keyid FROM smart.agency GROUP BY ca_uuid, keyid HAVING count(*) > 1) b  WHERE a.ca_uuid = b.ca_uuid and a.keyid = b.keyid"; //$NON-NLS-1$
+		try(ResultSet rs = c.createStatement().executeQuery(query)){
+			while(rs.next()) {
+				byte[] itemuuid = rs.getBytes(1);
+				String key = rs.getString(2);
+				String keyId = key + UuidUtils.uuidToString(UuidUtils.byteToUUID(itemuuid));
+				ps.setString(1, keyId);
+				ps.setBytes(2, itemuuid);
+				ps.executeUpdate();
+			}
+		}
+	}
+	
 	private void upgradeConfigurableModel(Connection c) throws Exception {
 		String[] sql = new String[] {
 				"CREATE TABLE smart.cm_attribute_config(uuid char(16) for bit data not null, cm_uuid char(16) for bit data not null, dm_attribute_uuid char(16) for bit data not null, display_mode varchar(10), is_default boolean, primary key (uuid))", //$NON-NLS-1$
