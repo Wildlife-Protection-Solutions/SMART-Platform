@@ -205,6 +205,12 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q = session.createQuery("delete from IntelAttribute where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
+		
+		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelConfigurationOption")); //$NON-NLS-1$
+		q = session.createQuery("delete from IntelConfigurationOption where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
 	
 	}
 	
