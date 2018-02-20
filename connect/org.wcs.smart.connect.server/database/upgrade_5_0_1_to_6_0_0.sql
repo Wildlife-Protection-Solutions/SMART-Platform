@@ -45,7 +45,7 @@ ALTER TABLE smart.employee ADD CONSTRAINT smartuseridunq UNIQUE(ca_uuid, smartus
 --agency key ids
 ALTER table smart.agency add column keyid varchar(128);
  
-UPDATE smart.agency SET keyId = regexp_replace(a.value, '[^a-zA-Z0-9]', '', 'g') 
+UPDATE smart.agency SET keyId = lower(regexp_replace(a.value, '[^a-zA-Z0-9]', '', 'g')) 
 from smart.i18n_label a, smart.language b 
 where b.uuid = a.language_uuid and a.element_uuid = smart.agency.uuid and b.isdefault;
 
