@@ -488,6 +488,7 @@ function populateCaList(){
 		value = cas[i].uuid;
 	    opt.value = value;
 	    opt.innerHTML = label;
+	    opt.className="formtext";
 	    parent.appendChild(opt);
 	    
 	    if (cas[i].status.toUpperCase() == "DATA"){
@@ -587,6 +588,7 @@ function addTextboxParamater(param, parent, newGroup){
 	newInput.setAttribute("id", param.name);
 	newInput.style.width="100%";
 	newInput.type = "text";
+	newInput.className = "formtext";
 
 	f.appendChild(newInput);
 	parent.insertBefore(f, parent.childNodes[4]);

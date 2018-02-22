@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,22 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart;
+package org.wcs.smart.i2.ui.handler;
+
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.wcs.smart.i2.ui.dialogs.ConfigurationDialog;
 
 /**
- * Handler to run on login to conservation area.
- * 
+ * Open configuration dialog
  * @author Emily
  *
  */
-public interface ILoginHandler {
+@SuppressWarnings("restriction")
+public class ShowConfigurationDialogHandler extends ShowDialogHandler{
 
-	public static final String LOGIN_EXT_ID = "org.wcs.smart.caLogin"; //$NON-NLS-1$
+	public ShowConfigurationDialogHandler() {
+		super(ConfigurationDialog.class);
+	}
+
 	
-	/**
-	 * If an exception is thrown the login will fail.
-	 * 
-	 * @throws Exception
-	 */
-	public void onLogin() throws Exception;
+	// E3
+	public static class ShowConfigurationDialogHandlerWrapper extends DIHandler<ShowConfigurationDialogHandler> {
+		public ShowConfigurationDialogHandlerWrapper() {
+			super(ShowConfigurationDialogHandler.class);
+		}
+	}
 }

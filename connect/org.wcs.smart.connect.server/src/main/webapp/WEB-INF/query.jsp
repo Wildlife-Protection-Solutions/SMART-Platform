@@ -58,10 +58,10 @@
 <div class="top-spacer"> 
 	<!-- Search Parameters -->
 	<label><fmt:message key="query.search" /></label>
-	<input type=text name="textsearch" id="textsearch" maxlength=30 oninput="searchChanged()"/>
+	<input class="formtext" type=text name="textsearch" id="textsearch" maxlength=30 oninput="searchChanged()" style="width:30em"/>
 
 	<label><fmt:message key="query.inca" /></label>
-	<select id="caselect" onchange="searchChanged()" style="max-width:24em">
+	<select id="caselect" class="formtext"  onchange="searchChanged()" style="max-width:24em">
 	<option value="allcas"><fmt:message key="query.allcas" /></option>
 	</select>
 </div>
@@ -94,29 +94,29 @@
      		
      		<fieldset>
 	     		<legend><fmt:message key="query.queryproperties"/></legend>
-	     		<p><fmt:message key="query.queryname" /><input id="queryname" type="text" name="name" value="" style="width:100%" disabled/></p>
-	     		<p><fmt:message key="query.queryuuid" /><input id="queryuuid" type="text" name="uuid" value="" style="width:100%" disabled/></p>
+	     		<p><fmt:message key="query.queryname" /><input id="queryname" class="formtext" type="text" name="name" value="" style="width:100%" disabled/></p>
+	     		<p><fmt:message key="query.queryuuid" /><input id="queryuuid" class="formtext" type="text" name="uuid" value="" style="width:100%" disabled/></p>
      		</fieldset>
      		
      		<fieldset>
 	     		<legend><fmt:message key="query.datefilter"/></legend>
 	     		<p><fmt:message key="query.datefield" />
-		     		<select id="datefield" name="datefield" style="width:100%">
+		     		<select id="datefield" name="datefield" style="width:100%" class="formtext" >
 		     		</select>
 		     	</p>
 		     	<p><fmt:message key="query.datefilterlabel"/>
-		     	  <select style="width:100%" id="defineddates"></select>
+		     	  <select style="width:100%" id="defineddates" class="formtext" ></select>
 		     	</p>
 	     		
 	     		<div style="margin-left:20px">
-		     		<p><fmt:message key="query.startdate" /> <input id="startdate" type="text" name="startdate" class="date-input" style="float:none;"/></p>
-		     		<p><fmt:message key="query.enddate" /> <input id="enddate" type="text" name="enddate" class="date-input" style="float:none;"/></p>
+		     		<p><fmt:message key="query.startdate" /> <input id="startdate"  type="text" name="startdate" class="formtext date-input" style="float:none;"/></p>
+		     		<p><fmt:message key="query.enddate" /> <input id="enddate" type="text" name="enddate" class="formtext date-input" style="float:none;"/></p>
 	     		</div>
      		</fieldset>
      		
      		<fieldset>
 	     		<legend><fmt:message key="query.format" /></legend>
-	     		<select id="queryformat" name="format" style="width:100%">
+	     		<select id="queryformat" name="format" style="width:100%" class="formtext" >
 					<c:forEach var="exp" items="${exporters}" varStatus="count">
 	     				<option value="${exp[0]}">${exp[1]}</option> 
 					</c:forEach> 
@@ -124,7 +124,7 @@
      			<table><tr><td>
      			<label id="sridDropdownLobel" style="display:none">EPSG:</label>
      			</td><td>
-     			<select id="sridDropdown" name="sridDropdown" style="display:none">
+     			<select id="sridDropdown" name="sridDropdown" style="display:none" class="formtext" >
      				<option value="-1">custom</option>
      				<option selected value="4326">4326(lat/long, WGS84)</option>
      				<option value="4269">4269(lat/long, NAD83)</option>
@@ -157,9 +157,9 @@
 <div id="SharedLinksDialog" style="display: none;" class="level2dialog">
   <div class="dialog-title"><fmt:message key="query.sharequery" /></div>
   	<form id="sharedlinkform" name="sharedlinkform">
-     		<div style="text-align: right">
+     		<div style="text-align: right" >
      			
-     			<fieldset class="linkdialog">
+     			<fieldset class="linkdialog" style='border:1px solid #BBC6F5; border-radius: 3px'>
      				<fmt:message key="query.sharingDescriptionUsers" />
 					<input id='urllink' type=text name="urllink" class="linkdialog">
 				</fieldset>
@@ -168,14 +168,14 @@
 					<a href='' id='createcustomlinklink'><fmt:message key="query.createcustomtitle"/></a>
 				</div>
 				<div id='createcustomlink' style='display:none'>
-					<fieldset class="linkdialog">
+					<fieldset class="linkdialog" style='border:1px solid #BBC6F5; border-radius: 3px'>
 						<p><fmt:message key="query.sharingDescriptionAll"/> <span class="smart-warninghighlight"><fmt:message key="query.sharingDescriptionAll2" /></span></p>
 						
 						<table class="top-spacer" style="width:100%">
 						  <tr>
 						   <td><fmt:message key="query.numminutes" /></td>
 						   <td>
-							<select id="quickMinSelect">
+							<select id="quickMinSelect" class="formtext">
 								<option value=60><fmt:message key="sharedlinks.onehour"/></option>
 								<option value=1440><fmt:message key="sharedlinks.oneday"/></option>
 								<option value=10080><fmt:message key="sharedlinks.oneweek"/></option>
@@ -185,10 +185,10 @@
 								<option value=-1><fmt:message key="sharedlinks.custom"/></option>
 							</select>
 						  </td>
-						   <td><input id="expiresAfter" type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
+						   <td><input id="expiresAfter" class="formtext"  type="number" name="expiresAfter" value=60 style='width:65px' min="0" max="2147483647" disabled> <fmt:message key="query.numminutes2"/></td>
 						  </tr>
 						  <tr >
-						     <td colspan=3 align="center"><input id="createlinkbutton" class="button close" type="button" value="<fmt:message key="query.creatbutton"/>" /></td>
+						     <td colspan=3 align="center"><input id="createlinkbutton" class="button close" type="button" style="width: 100%" value="<fmt:message key="query.creatbutton"/>" /></td>
 						  </tr>
 						  <tr >
 						     <td colspan=3><input id="createdlink" class="hide linkdialog" type="text"/></td>

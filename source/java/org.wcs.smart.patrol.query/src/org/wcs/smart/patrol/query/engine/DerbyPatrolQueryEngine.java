@@ -65,6 +65,7 @@ public abstract class DerbyPatrolQueryEngine extends AbstractQueryEngine impleme
 		tablePrefix.put(Team.class, "smart.team"); //$NON-NLS-1$
 		tablePrefix.put(PatrolTransportType.class, "smart.patrol_transport"); //$NON-NLS-1$
 		tablePrefix.put(PatrolMandate.class, "smart.patrol_mandate"); //$NON-NLS-1$
+
 	}
 
 	

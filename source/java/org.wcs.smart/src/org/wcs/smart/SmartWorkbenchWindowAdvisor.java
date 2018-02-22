@@ -22,9 +22,13 @@
 package org.wcs.smart;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -58,6 +62,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.startup.EncryptCleanUp;
 
 /**
  * Smart Workbench Window Advisor.
@@ -108,6 +113,11 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 			} catch (Exception e) {
 			}
 			
+			//delete temporary files directory
+			try {
+				(new EncryptCleanUp()).run(null);
+			} catch (Exception e) {
+			}
 		}
 	};
 	
@@ -145,6 +155,27 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
         
         // setup drag and drop support 
         UDIGDragDropUtilities.registerUDigDND(configurer);
+        
+        List<ILoginHandler> handlers = new ArrayList<ILoginHandler>();
+		try{
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(ILoginHandler.LOGIN_EXT_ID);
+			for (IConfigurationElement e : config) {	
+				if (e.getName().equals("windowHandler")){ //$NON-NLS-1$
+					ILoginHandler handler = (ILoginHandler) e.createExecutableExtension("class"); //$NON-NLS-1$
+					handlers.add(handler);
+				}
+			}
+		}catch (Exception ex){
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		for (ILoginHandler h : handlers){
+			try{
+				h.onLogin();
+			}catch (Exception ex){
+				SmartPlugIn.log(ex.getMessage(), ex);
+			}
+		}
+
     }
     
     @Override
@@ -243,10 +274,8 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		MToolControl tc = modelService.createModelElement(MToolControl.class);
 		tc.setElementId("org.wcs.smart.trim.status.spacer"); //$NON-NLS-1$
 		statusBar.getChildren().add(tc);
-		tc.getTags().add("stretch"); //$NON-NLS-1$
-		
+		tc.getTags().add("stretch"); //$NON-NLS-1$		
     }
-    
     
     public void postWindowCreate() {
     	super.postWindowCreate();

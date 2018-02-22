@@ -35,10 +35,11 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.query.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -64,6 +65,7 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 	
 	private Session currentSession = null;
 	
+	private AbstractIntelBirtConnection connection;
 	/**
 	 * Creates a new summary results set
 	 * 
@@ -78,7 +80,8 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 			EntityAttachmentParameterMetadata pmetadata) {
 		
 		this.metadata = metadata;
-	
+		this.connection = connection;
+				
 		String q1 = "SELECT count(*) FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
 		String q2 = "FROM IntelEntityAttachment l WHERE l.id.entity.entityType = :type "; //$NON-NLS-1$
 		
@@ -187,7 +190,12 @@ public class EntityAttachmentDatasetResultSet implements IResultSet {
 		} catch (Exception e) {
 			Logger.getLogger(EntityAttachmentDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e);
 		}
-		return EntityAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		Object x = EntityAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		if (x instanceof ISmartAttachment) {
+			ISmartAttachment a = (ISmartAttachment) x;
+			return connection.decryptAttachment(a);
+		}
+		return x;
 	}
 
 	/**

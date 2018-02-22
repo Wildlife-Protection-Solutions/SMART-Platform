@@ -29,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 
 /**
@@ -60,5 +61,8 @@ public class IntelligenceAttachment extends ISmartAttachment {
 		return intelligence.getDatastoreLocation();
 	}
 	
-
+	@Transient
+	public ConservationArea getConservationArea() {
+		return this.intelligence.getConservationArea();
+	}
 }

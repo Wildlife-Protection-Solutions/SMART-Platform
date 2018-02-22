@@ -22,8 +22,6 @@
 package org.wcs.smart.i2.birt.entity.attachment;
 
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
@@ -73,14 +71,7 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 		public Object getValue(IntelEntityAttachment location) {
 			if (this == ENTITY_UUID) return location.getEntity().getUuid();
 			if (this == FILE_NAME) return location.getAttachment().getFilename();
-			if (this == PATH){
-				try {
-					return location.getAttachment().getAttachmentFile().getCanonicalFile().toURI().toString();
-				} catch (Exception e) {
-					Logger.getLogger(EntityAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
-				}
-				return null;
-			}
+			if (this == PATH) return location.getAttachment();
 			if (this ==  DATE_CREATED){
 				return location.getAttachment().getDateCreated();
 			}
@@ -89,6 +80,7 @@ public class EntityAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 	}
 	
 	private Locale l;
+		
 	public EntityAttachmentDatasetResultSetMetadata(Locale l){
 		this.l = l;
 	}

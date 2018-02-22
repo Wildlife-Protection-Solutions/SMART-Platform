@@ -46,6 +46,7 @@ import java.util.UUID;
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.changetracking.IFileStoreWatcher;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
@@ -64,6 +65,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 
+	private static final Boolean LOGME = Boolean.TRUE;
+	
     private final WatchService watcher;
     private final Map<WatchKey,Path> keys;
     private final Set<Path> ignorePaths;
@@ -82,6 +85,7 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
      */
     @Override
     public void addIgnorePath(Path ignorePath){
+    	if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: adding ingore path '" + ignorePath.toString() + "'");
     	ignorePaths.add(ignorePath);
     }
     
@@ -90,6 +94,7 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
      */
     private void registerDirectory(Path dir) throws IOException {
     	if (ignorePaths.contains(dir)) return;
+    	if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: register dir '" + dir.toString() + "'");
         WatchKey key = dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
         keys.put(key, dir);
     }
@@ -114,6 +119,7 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
      * Deregister all listeners and closes the watcher
      */
     public void deregister() throws IOException {
+    	if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: deregister");
     	synchronized (keys) {
     		for (WatchKey key : keys.keySet()){
         		key.cancel();
@@ -124,8 +130,11 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 
     
     private void processEvent(Path p, Kind<?> kind){
-    	if (ignorePaths.contains(p)) return;
-    	
+    	if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: file: '" + p.toString() + "', Kind: '" + kind.name() + "'");
+    	if (ignorePaths.contains(p)) {
+    		if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: IGNORED: in ignore path");
+    		return;
+    	}
     	Path relativePath = FileSystems.getDefault()
     			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
     			.relativize(p);
@@ -135,6 +144,7 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     		caUuid = UuidUtils.stringToUuid(relativePath.getName(0).toString());
     	}catch (Exception ex){
     		//not in a ca directory so we do not replicate
+    		if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: Error cannot determine CA from '" + relativePath.getName(0).toString() + "'");
     		return;
     	}
     	
@@ -150,10 +160,12 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     	if (type == ChangeLogItem.Action.FS_UPDATE){
     		if (!Files.exists(p)){
     			//path has been deleted by next event skip
+    			if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: IGNORED: path has been deleted by next event/skip");
     			return;
     		}
     		if (Files.isDirectory(p)){
     			//don't want to log changes to directories
+    			if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: IGNORED: directory modified");
     			return;
     		}
     	}
@@ -162,7 +174,6 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     			.relativize(p)
     			.toString());
 
-    	
     	try(Session s = HibernateManager.openSession()){
     		if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(caUuid, s)){			
 	    		ChangeLogItem item = new ChangeLogItem();
@@ -174,6 +185,9 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 	    	    s.beginTransaction();
 	    	    ChangeLogTableManager.INSTANCE.addItem(s, item);
 	    		s.getTransaction().commit();
+	    		if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: ADDED: event added to change log table");
+    		}else {
+    			if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: IGNORED: replication is not enabled");
     		}
     	}catch (Exception ex){
     		ConnectPlugIn.displayLog(MessageFormat.format(Messages.FileStoreWatcher_FilestoreLogError, relativeFileName, ex.getMessage()), ex);
@@ -183,16 +197,19 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
+		if (LOGME) SmartPlugIn.logInfo("run()");
 		for (;;) {
 			// wait for key to be signalled
 			WatchKey key;
 			try {
 				key = watcher.take();
 			} catch (InterruptedException x) {
+				if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: run: ENDED: InterruptedException " + x.getMessage());
 				return;
 			} catch (ClosedWatchServiceException x){
 				//we have disabled replication so don't worry about
 				//this event
+				if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: run: ENDED: CloseWatchServiceException " + x.getMessage());
 				return;
 			}
 
@@ -225,6 +242,7 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 						}
 					} catch (IOException x) {
 						// ignore to keep sample readbale
+						if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: run: error: " + x.getMessage());
 					}
 				}
 				try {
@@ -237,13 +255,17 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 			// reset key and remove from set if directory no longer accessible
 			boolean valid = key.reset();
 			if (!valid) {
+				if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: watchkey not valid / removing");
 				keys.remove(key);
 
 				// all directories are inaccessible
 				if (keys.isEmpty()) {
+					if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: no more keys");
 					break;
 				}
 			}
 		}
+		if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: run() loop is finished");
+		
 	}
 }

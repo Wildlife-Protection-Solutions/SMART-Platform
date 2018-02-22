@@ -24,6 +24,7 @@ package org.wcs.smart.common.folder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -164,45 +165,60 @@ public abstract class FolderTreeDropListener extends ViewerDropAdapter {
 	@Override
 	public boolean performDrop(Object data) {
 		StructuredSelection selection = (StructuredSelection)LocalSelectionTransfer.getTransfer().getSelection();
-		if (selection == null){
+		if (selection == null || selection.isEmpty()){
 			return false;
 		}
-
-		Object obj = selection.getFirstElement();
-		if (obj instanceof IFolder) {
-			Object target = getCurrentTarget();
-			int location = getCurrentLocation();
-
-			if (!(target instanceof IFolder)) {
-				target = folderTreeContentProvider.getParent(target);
-				location = LOCATION_ON;
-			}
-
-			switch (location) {
-			case LOCATION_BEFORE:
-			case LOCATION_AFTER: {
-				moveFolderPosition((IFolder)obj, (IFolder)target, location == LOCATION_BEFORE);
-				break;
-			}
-			default:
-				moveFolderToFolder((IFolder)obj, (IFolder)target);
-				break;
-			}
-		} else {
-			//item need to be moved to another folder
-			Object target = getCurrentTarget();
-			if (target instanceof IFolder) {
-				moveToFolder(obj, (IFolder)target);
-				return true;
+		
+		List<Object> toProcess = new ArrayList<>();
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			Object object = iterator.next();
+			toProcess.add(object);
+		}
+		for(Object obj : toProcess) {
+			if (obj instanceof IFolder) {
+				IFolder folder = (IFolder)obj;
+				if (folder.getParentFolder() != null && toProcess.contains(folder.getParentFolder())) {
+					//processed by parent; skip
+					continue;
+				}
+				Object target = getCurrentTarget();
+				int location = getCurrentLocation();
+	
+				if (!(target instanceof IFolder)) {
+					target = folderTreeContentProvider.getParent(target);
+					location = LOCATION_ON;
+				}
+	
+				switch (location) {
+				case LOCATION_BEFORE:
+				case LOCATION_AFTER: {
+					moveFolderPosition((IFolder)obj, (IFolder)target, location == LOCATION_BEFORE);
+					break;
+				}
+				default:
+					moveFolderToFolder((IFolder)obj, (IFolder)target);
+					break;
+				}
 			} else {
-				target = folderTreeContentProvider.getParent(target);
+				//item need to be moved to another folder
+				Object parent = folderTreeContentProvider.getParent(obj);
+				if (parent != null && toProcess.contains(parent)) {
+					//processed by parent; skip
+					continue;
+				}
+				
+				Object target = getCurrentTarget();
 				if (target instanceof IFolder) {
 					moveToFolder(obj, (IFolder)target);
-					return true;
+				} else {
+					target = folderTreeContentProvider.getParent(target);
+					if (target instanceof IFolder) {
+						moveToFolder(obj, (IFolder)target);
+					}
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/**

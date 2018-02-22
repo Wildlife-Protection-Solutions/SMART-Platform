@@ -47,7 +47,6 @@ public class CleanUpJob implements ILoginHandler {
 	@Override
 	public void onLogin() throws Exception {
 		Job j = new Job(Messages.CleanUpJob_jobname){
-
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				//delete all files in the temporary output directory

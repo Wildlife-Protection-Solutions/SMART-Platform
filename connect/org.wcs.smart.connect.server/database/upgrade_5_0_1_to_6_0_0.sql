@@ -28,6 +28,39 @@ $$LANGUAGE plpgsql;
 
 ALTER TABLE connect.users ALTER COLUMN username TYPE varchar(256);
 
+--changes to map layers table and removing all non-wms map layers
+delete from connect.map_layers where layer_type != 3;
+alter table connect.map_layers add column layer_type_tmp varchar(16);
+update connect.map_layers set layer_type_tmp = 'WMS';
+alter table connect.map_layers alter column layer_type_tmp set not null;
+alter table connect.map_layers drop column layer_type;
+alter table connect.map_layers rename column layer_type_tmp to layer_type;
+alter table connect.map_layers add constraint type_chk check (layer_type in ('WMS'));
+alter table connect.map_layers add primary key (uuid);
+alter table connect.map_layers drop column mapboxid;
+
+--unique user id constraint
+ALTER TABLE smart.employee ADD CONSTRAINT smartuseridunq UNIQUE(ca_uuid, smartuserid);
+ 
+--agency key ids
+ALTER table smart.agency add column keyid varchar(128);
+ 
+UPDATE smart.agency SET keyId = lower(regexp_replace(a.value, '[^a-zA-Z0-9]', '', 'g')) 
+from smart.i18n_label a, smart.language b 
+where b.uuid = a.language_uuid and a.element_uuid = smart.agency.uuid and b.isdefault;
+
+UPDATE smart.agency SET keyId = cast(uuid as varchar) where keyId is null or trim(keyId) = '';
+ 
+--ensure unique keys by using uuids
+ update smart.agency
+ set keyId = keyId || replace(cast(uuid as varchar), '-', '')  WHERE uuid IN (
+ select uuid from smart.agency a, 
+ (select ca_uuid, keyid from smart.agency group by ca_uuid, keyid having count(*) > 1) b
+ WHERE a.ca_uuid = b.ca_uuid and a.keyid = b.keyid
+ );
+
+ALTER TABLE smart.agency ADD CONSTRAINT keyunq UNIQUE (keyid, ca_uuid);
+ 
 -- QA Plugin
 
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.qa', '1.0');
@@ -74,21 +107,20 @@ ALTER TABLE smart.qa_error ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa
 
 
 --NEEDS TO BE FIXED SEE TICKET 2209
-delete from smart.CONFIGURABLE_MODEL;
+--delete from smart.CONFIGURABLE_MODEL;
 
 CREATE TABLE smart.cm_attribute_config(uuid UUID not null, cm_uuid UUID not null, dm_attribute_uuid UUID not null, display_mode varchar(10), is_default boolean, primary key (uuid));
 ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (CM_UUID) REFERENCES SMART.CONFIGURABLE_MODEL(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES SMART.DM_ATTRIBUTE(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
-
 alter table smart.cm_attribute add column config_uuid UUID;
 ALTER TABLE smart.cm_attribute ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
-
 alter table smart.cm_attribute_list add column config_uuid UUID;
 ALTER TABLE SMART.CM_ATTRIBUTE_LIST ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ; 
-
 alter table smart.cm_attribute_tree_node add column config_uuid UUID;
 ALTER TABLE SMART.CM_ATTRIBUTE_TREE_NODE ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
+
+
 
 drop table SMART.CM_DM_ATTRIBUTE_SETTINGS;
 
@@ -129,10 +161,18 @@ BEGIN
 END;
 $$LANGUAGE plpgsql;
 
+create table smart.i_config_option (
+  uuid uuid, 
+  ca_uuid uuid not null,
+  keyid varchar(32000) not null, 
+  value varchar(32000), 
+  unique(ca_uuid, keyid),
+  primary key (uuid));
 
---TRIGGERS FOR CHANGELOG
+ALTER TABLE SMART.i_config_option ADD FOREIGN KEY (ca_uuid) REFERENCES SMART.conservation_area(UUID)  ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 
---- QA MODULE TRIGGERS --- 
+ 
+ -- TRIGGERS FOR CHANGELOG
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -988,6 +1028,7 @@ CREATE TRIGGER trg_i_working_set_record AFTER INSERT OR UPDATE OR DELETE ON smar
 CREATE TRIGGER trg_i_record_attribute_value AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value FOR EACH ROW execute procedure connect.trg_i_record_attribute_value();
 CREATE TRIGGER trg_i_record_attribute_value_list AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_attribute_value_list FOR EACH ROW execute procedure connect.trg_i_record_attribute_value_list();
 CREATE TRIGGER trg_i_recordsource_attribute AFTER INSERT OR UPDATE OR DELETE ON smart.i_recordsource_attribute FOR EACH ROW execute procedure connect.trg_i_recordsource_attribute();
+CREATE TRIGGER trg_i_config_option AFTER INSERT OR UPDATE OR DELETE ON smart.i_config_option FOR EACH ROW execute procedure connect.trg_changelog_common();
 
 
 -- INTELLIGENCE QUERIES --

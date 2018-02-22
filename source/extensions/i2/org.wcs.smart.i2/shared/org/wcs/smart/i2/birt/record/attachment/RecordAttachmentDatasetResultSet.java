@@ -35,9 +35,10 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.hibernate.query.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.query.Query;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
@@ -167,7 +168,11 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelRecordAttachment i = (IntelRecordAttachment) ((Object[])currentItem)[0];
-		return RecordAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		Object value = RecordAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		if (value instanceof ISmartAttachment) {
+			return connection.decryptAttachment(((ISmartAttachment)value));
+		}
+		return value;
 	}
 
 	/**

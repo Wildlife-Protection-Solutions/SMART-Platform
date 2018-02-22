@@ -79,15 +79,17 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 
 			Set<Label> agentAllLang;
 			Set<Label> rankAllLang;
-			String csv_out[] = new String[agencyCols.length];
+			
 			// must change the following to write one column for each of the
 			// corresponding languages
 			for (Agency agt : agencies) {
+				String csv_out[] = new String[agencyCols.length];
 				if (monitor.isCanceled()) return false;
 				agentAllLang = agt.getNames();
 				// entry in string array (csv_out) of names
+				csv_out[0] = agt.getKeyId();
 				for (Label agt_lbl : agentAllLang) {
-					csv_out[findcolumnIndex(agt_lbl)] = agt_lbl.getValue();
+					csv_out[findcolumnIndex(agt_lbl)+1] = agt_lbl.getValue();
 				}
 				writer.writeNext(csv_out);
 				// now for this agency get ranks
@@ -96,13 +98,9 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 					for (Rank ranker : ranks) {
 						rankAllLang = ranker.getNames();
 						for (Label rnk_lbl : rankAllLang) {
-							csv_out[(languages.size() + findcolumnIndex(rnk_lbl))] = rnk_lbl.getValue();	
+							csv_out[(languages.size() + 1 + findcolumnIndex(rnk_lbl))] = rnk_lbl.getValue();	
 						}
 						writer.writeNext(csv_out);
-					}
-					// clear the csv_out Array.
-					for (int i = 0; i < csv_out.length; i++) {
-						csv_out[i] = ""; //$NON-NLS-1$
 					}
 				}
 			}
@@ -113,14 +111,14 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 	}
 	
 	private String[] createColumns(List<Language> langs) {
-		String[] agtcols = new String[(2*langs.size())];
+		String[] agtcols = new String[(2*langs.size())+1];
 		
 		int i=0;
+		agtcols[i++] = "Agency Key";//$NON-NLS-1$
 		for (Language lng : langs) {
-			agtcols[i] = "Agent>" + lng.getCode(); //$NON-NLS-1$
+			agtcols[i] = "Agency>" + lng.getCode(); //$NON-NLS-1$
 			i++;
 		}
-
 		for (Language lng : langs) {
 			agtcols[i] = "Rank>" + lng.getCode(); //$NON-NLS-1$
 			i++;
@@ -147,12 +145,7 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 	}
 
 	private List<Agency> getAgencies(Session session) {
-		session.beginTransaction();
-		try{
-			return HibernateManager.getAgencies(ca, session);
-		}finally{
-			session.getTransaction().rollback();
-		}
+		return HibernateManager.getAgencies(ca, session);
 	}
 
 }

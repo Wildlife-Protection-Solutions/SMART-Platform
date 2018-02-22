@@ -22,9 +22,11 @@
 package org.wcs.smart.common.attachment;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.eclipse.swt.program.Program;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cipher.EncryptUtils;
 
 /**
  * Util class for attachments
@@ -39,7 +41,12 @@ public class AttachmentUtil {
 			launch(attachment.getCopyFromLocation());
 		} else {
 			try{
-				launch(attachment.getAttachmentFile());
+				Path p = EncryptUtils.decryptAttachment(attachment);
+				if (p != null) {
+					p.toFile().deleteOnExit();
+					launch(p.toFile());
+				}
+				
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(ex.getMessage(), ex);
 			}

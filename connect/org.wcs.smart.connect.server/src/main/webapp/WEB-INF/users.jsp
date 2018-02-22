@@ -133,11 +133,8 @@
 				</div>
 			</div>
 		</div>
-
 	</div>
 	</div>
-	
-	
 	
 	<!--  Desktop Users tab section  -->
 	<div id="desktopusers_body" class="tabbody">
@@ -145,7 +142,10 @@
 	<div>
     	<div id="desktopmessage" class="msgsection"></div>
     	<div id="desktoperror" class="errorsection"></div>
-    	<button class="block button top-spacer" id="btnNewDesktopUser"><fmt:message key="users.newdesktopuserbutton"/></button>
+    	<span>
+    	<button class="block button top-spacer" id="btnNewDesktopUser" style="display:inline"><fmt:message key="users.newdesktopuserbutton"/></button>
+    	<button class="block button top-spacer " id="btnRefreshDesktop"style="display:inline">Refresh</button>
+    	</span>
   	</div>
   
 	<div class="top-spacer"   >
@@ -157,6 +157,7 @@
 				<div class="table-cell smart-table-cell"></div>
 			</div>
   		</div>
+    	
 
 		<div id="desktopuserdetails" style="width:100%;" class="table-cell border-section">
 			<div class="pageheader"><fmt:message key="users.destkopuserdetails"/></div>
@@ -173,7 +174,8 @@
 		</div>
 
 	</div>
-	</div>
+	
+</div>
 	
 	
 </div>
@@ -237,7 +239,7 @@
     <label class="block top-spacer"><fmt:message key="users.newusernamelabel"/></label>
     <input type="text" name="dusername" class="formtext block" />
     <label class="block top-spacer"><fmt:message key="users.calabel"/></label>
-    <select name="dca" multiple>
+    <select name="dca" class="formtext" multiple>
     	<c:forEach var="ca" items="${dataCas}" varStatus="count">
      		<c:if test="${ca.getUuid() != '00000000-0000-0000-0000-000000000000'}">
 					<option value="${ca.getUuid()}"> ${ca.getLabel()} </option>
@@ -262,7 +264,7 @@
     <input type="text" name="familyName" class="formtext table-row"/>
 
     <label class="block top-spacer"><fmt:message key="users.userLevel"/></label>
-    <select name="userLevel">
+    <select name="userLevel" class="formtext">
 		<option value="ADMIN"><fmt:message key="users.ADMIN"/></option>
 		<option value="DATA_ENTRY"><fmt:message key="users.DATA_ENTRY"/></option>
 		<option value="ANALYST"><fmt:message key="users.ANALYST"/></option>
@@ -270,7 +272,7 @@
     </select>
 
 	<label class="block top-spacer"><fmt:message key="users.gender"/></label>
-    <select name="gender">
+    <select name="gender" class="formtext">
 		<option value="M"><fmt:message key="users.genderm"/></option>
 		<option value="F"><fmt:message key="users.genderf"/></option>
 	</select>
@@ -285,7 +287,7 @@
   
   
 <div id="editDesktopUserDialog" style="display: none;" class="dialog">
-  <div class="dialog-title"><fmt:message key="users.newdialogtitle"/></div>
+  <div class="dialog-title"><fmt:message key="users.neweditmessage"/></div>
   <div id="dialogerror" class="errorsection"></div>
   <div><fmt:message key="users.neweditmessage"/></div>
   <form id="editdesktopuserform" >
@@ -295,10 +297,10 @@
     
     
     <label class="block top-spacer"><fmt:message key="users.calabel"/></label>
-    <input type="text" disabled name="edit_ca_label">
+    <input type="text"  class="formtext" disabled name="edit_ca_label">
     <input type="hidden" name="edit_dca">
     
-    <select id="edit_multi_dca" name="edit_multi_dca" multiple disabled style="display:none">
+    <select id="edit_multi_dca" class="formtext" name="edit_multi_dca" multiple disabled style="display:none">
     </select>
     
     <label class="block top-spacer"><fmt:message key="users.newpass1"/></label>
@@ -316,16 +318,18 @@
     <label class="block top-spacer"><fmt:message key="users.familyName"/></label>
     <input type="text" name="edit_familyName" class="formtext table-row"/>
 
+<!-- 
     <label class="block top-spacer"><fmt:message key="users.userLevel"/></label>
-    <select name="edit_userLevel">
+    <select name="edit_userLevel" class="formtext" >
 		<option value="ADMIN"><fmt:message key="users.ADMIN"/></option>
 		<option value="DATA_ENTRY"><fmt:message key="users.DATA_ENTRY"/></option>
 		<option value="ANALYST"><fmt:message key="users.ANALYST"/></option>
 		<option value="MANAGER"><fmt:message key="users.MANAGER"/></option>
     </select>
-
+ -->
+ 
 	<label class="block top-spacer"><fmt:message key="users.gender"/></label>
-    <select name="edit_gender">
+    <select name="edit_gender" class="formtext" >
 		<option value="M"><fmt:message key="users.genderm"/></option>
 		<option value="F"><fmt:message key="users.genderf"/></option>
 	</select>

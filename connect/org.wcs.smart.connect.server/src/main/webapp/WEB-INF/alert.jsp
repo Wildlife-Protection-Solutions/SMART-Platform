@@ -82,9 +82,9 @@
 	<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 	var mapLayers = [ 
 	  <c:forEach var="layer" items="${mapLayers}">
-		  [ <c:out value="${layer.getLayerType()}"/>,
-		  "<c:out value="${layer.getToken()}"/>",
-		  "<c:out value="${layer.getMapboxId()}"/>", 
+		  [ 
+		  "<c:out value="${layer.getLayerType()}"/>",
+		  "<c:out value="${layer.getToken()}"/>", 
 		  "<c:out value="${layer.getWmsLayerList()}"/>",
 		  "<c:out value="${layer.getLayerName()}"/>", 
 		  "<c:out value="${layer.isActive()}"/>"],

@@ -91,6 +91,7 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
 			filters.add(cb.equal(from.get("record").get("uuid"), recordUuid)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		c.where(filters.toArray(new Predicate[filters.size()]));
 		
 		results = connection.getSession().createQuery(c).setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
 		this.m_currentRowId = 0;

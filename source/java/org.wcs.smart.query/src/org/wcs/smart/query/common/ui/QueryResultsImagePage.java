@@ -46,6 +46,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
@@ -284,9 +285,9 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 						}
 						
 						try {
-							Files.copy(a.getAttachment().getAttachmentFile().toPath(), outputFile);
+							EncryptUtils.decryptAttachment(a.getAttachment(), outputFile);
 							cnt ++;
-						}catch (IOException e1) {
+						}catch (Exception e1) {
 							QueryPlugIn.displayLog(MessageFormat.format(Messages.QueryResultsImagePage_CouldNotExport, a.getAttachment().getFilename(), e1.getMessage()), e1);
 						}
 					}

@@ -350,27 +350,29 @@ public class ConservationAreas extends HttpServlet{
 		
 		try(Session s = HibernateManager.getSession(context)){
 			s.beginTransaction();
-		
-			for (ConservationAreaProxy ca : allConservationAreas){
-				if(ca.getStatus().equals(ConservationAreaInfo.Status.CCAA) || ca.getStatus().equals(ConservationAreaInfo.Status.DATA)){
-					
-					if (permissionFilter == null) {
-						conservationAreas.add(ca);
+			try {
+				for (ConservationAreaProxy ca : allConservationAreas){
+					if(ca.getStatus().equals(ConservationAreaInfo.Status.CCAA) || ca.getStatus().equals(ConservationAreaInfo.Status.DATA)){
 						
-					}else {
-						boolean ok = false;
-						for (String actionKey : permissions) {
-							ISmartConnectAction action = ActionManager.INSTANCE.findAction(actionKey);
-							if (action != null && SecurityManager.INSTANCE.canAccess(s,  request.getUserPrincipal().getName(),actionKey, ca.getUuid())){  
-									ok = true;
-									break;
+						if (permissionFilter == null) {
+							conservationAreas.add(ca);
+							
+						}else {
+							boolean ok = false;
+							for (String actionKey : permissions) {
+								ISmartConnectAction action = ActionManager.INSTANCE.findAction(actionKey);
+								if (action != null && SecurityManager.INSTANCE.canAccess(s,  request.getUserPrincipal().getName(),actionKey, ca.getUuid())){  
+										ok = true;
+										break;
+								}
 							}
+							if (ok) conservationAreas.add(ca);
 						}
-						if (ok) conservationAreas.add(ca);
 					}
 				}
+			}finally {
+				s.getTransaction().rollback();
 			}
-			s.getTransaction().rollback();
 		}
 		return conservationAreas;
 	}

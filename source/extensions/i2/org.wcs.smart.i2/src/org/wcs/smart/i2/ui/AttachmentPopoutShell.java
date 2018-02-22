@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.i2.ui;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -31,6 +34,7 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.ui.SmartShellDialog;
 
@@ -53,31 +57,44 @@ public class AttachmentPopoutShell extends SmartShellDialog {
 	@Override
 	public void createContents(Composite parent) {
 		final Canvas draw = new Canvas(parent, SWT.BORDER);
-		final Image rawImage = new Image(Display.getDefault(), attachment.getAttachmentFile().getAbsolutePath());
-		draw.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		draw.addPaintListener(new PaintListener() {
-			
-			@Override
-			public void paintControl(PaintEvent e) {
-				Rectangle dst = draw.getClientArea();
-				Rectangle r = rawImage.getBounds();
+		Path tempImage = null;
+		try {
+			tempImage = EncryptUtils.decryptAttachment(attachment);
+			final Image rawImage = new Image(Display.getDefault(), tempImage.toString());
+		
+		
+			draw.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			draw.addPaintListener(new PaintListener() {
 				
-				double ratio = (r.height*1.0) / r.width;
-				int height = dst.height;
-				int width = dst.width;
-				int x = 0;
-				int y = 0;
-				if (dst.width < dst.height){
-					height = (int)(dst.width * ratio);
-				}else{
-					width = (int)(dst.height / ratio);
+				@Override
+				public void paintControl(PaintEvent e) {
+					Rectangle dst = draw.getClientArea();
+					Rectangle r = rawImage.getBounds();
+					
+					double ratio = (r.height*1.0) / r.width;
+					int height = dst.height;
+					int width = dst.width;
+					int x = 0;
+					int y = 0;
+					if (dst.width < dst.height){
+						height = (int)(dst.width * ratio);
+					}else{
+						width = (int)(dst.height / ratio);
+					}
+					x = (dst.width - width) / 2;
+					y = (dst.height - height) / 2;
+					e.gc.drawImage(rawImage, 0,0,r.width, r.height, x, y, width, height);
 				}
-				x = (dst.width - width) / 2;
-				y = (dst.height - height) / 2;
-				e.gc.drawImage(rawImage, 0,0,r.width, r.height, x, y, width, height);
+			});
+			draw.addListener(SWT.Dispose, d -> rawImage.dispose());	
+		}catch (Exception ex) {
+		}finally {
+			if (tempImage != null) {
+				try {
+					Files.delete(tempImage);
+				}catch (Exception ex) {}
 			}
-		});
-		draw.addListener(SWT.Dispose, d -> rawImage.dispose());	
+		}
 	}
 
 }

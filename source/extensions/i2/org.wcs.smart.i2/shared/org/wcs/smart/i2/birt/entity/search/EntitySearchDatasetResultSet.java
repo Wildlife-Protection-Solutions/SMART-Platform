@@ -37,6 +37,7 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
@@ -158,7 +159,12 @@ public class EntitySearchDatasetResultSet implements IResultSet {
 			}
 		}
 		try {
-			return EntitySearchDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
+			Object value = EntitySearchDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
+			if (value instanceof ISmartAttachment) {
+				ISmartAttachment a = (ISmartAttachment) value;
+				return connection.decryptAttachment(a);
+			}
+			return value;
 		} catch (IOException e) {
 			Logger.getLogger(EntitySearchDatasetResultSet.class.getName()).log(Level.SEVERE, e.getMessage(), e); 
 			return null;	

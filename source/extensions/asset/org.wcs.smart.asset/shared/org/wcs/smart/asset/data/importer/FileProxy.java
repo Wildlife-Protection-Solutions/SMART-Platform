@@ -96,6 +96,10 @@ public class FileProxy extends ISmartAttachment{
 		warnings = new ArrayList<>();
 	}
 	
+	public ConservationArea getConservationArea() {
+		return this.ca;
+	}
+	
 	/**
 	 * Gets the incident group 
 	 * 

@@ -43,6 +43,7 @@ public class AgencyRankTable  extends SmartBirtTable {
 	private enum Column{
 		CA(ICoreLabelProvider.CA_NAME_KEY, "Conservation Area", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		AGENCY(ICoreLabelProvider.AGENCY_NAME_KEY, "Agency Name", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		AGENCY_KEY(ICoreLabelProvider.AGENCY_KEY_KEY, "Agency Key", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		RANK(ICoreLabelProvider.RANK_NAME_KEY, "Rank", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		private String name;
@@ -68,6 +69,8 @@ public class AgencyRankTable  extends SmartBirtTable {
 			switch(this){
 			case AGENCY:
 				return rank.getAgency().getName();
+			case AGENCY_KEY:
+				return rank.getAgency().getKeyId();
 			case RANK:
 				return rank.getName();
 			case CA:
@@ -91,7 +94,7 @@ public class AgencyRankTable  extends SmartBirtTable {
 			if (connection.getConservationAreas().size() > 1){
 				this.activeColumns = Column.values();	
 			}else{
-				this.activeColumns = new Column[]{Column.AGENCY, Column.RANK};	
+				this.activeColumns = new Column[]{Column.AGENCY, Column.AGENCY_KEY, Column.RANK};	
 			}
 		}
 	}

@@ -86,6 +86,7 @@ public class EmployeeComposite extends Composite {
 	protected Text txtSmartPassword = null;
 	protected Button opFemale = null;
 	protected Button opMale = null;
+	protected Button chBirthDate = null;
 	protected DateTime dtBirthDate = null;
 	protected DateTime dtEmploymentStart = null;
 	protected DateTime dtEmploymentEnd = null;
@@ -182,6 +183,8 @@ public class EmployeeComposite extends Composite {
 					validate();
 				}
 			});
+			chNotActive.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false ));
+			((GridData)chNotActive.getLayoutData()).horizontalIndent = 8;
 			
 			createLabelField(this, SmartLabelProvider.EMP_EMPLOYEMENT_ENDDATE + ":"); //$NON-NLS-1$
 			dtEmploymentEnd = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
@@ -192,7 +195,18 @@ public class EmployeeComposite extends Composite {
 
 		}
 		createLabelField(this, SmartLabelProvider.EMP_BIRTHDATE + ":"); //$NON-NLS-1$
-		dtBirthDate = createDateField(this, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG | SWT.DATE, dateValidate);
+		Composite tempComp = new Composite(this, SWT.NONE);
+		tempComp.setLayout(new GridLayout(2, false));
+		((GridLayout)tempComp.getLayout()).marginWidth = 0;
+		((GridLayout)tempComp.getLayout()).marginHeight = 0;
+		tempComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false ));
+		((GridData)tempComp.getLayoutData()).horizontalIndent = 8;
+		
+		chBirthDate = new Button(tempComp, SWT.CHECK);
+		chBirthDate.setEnabled(true);
+		chBirthDate.setSelection(true);
+		
+		dtBirthDate = createDateField(tempComp, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG | SWT.DATE, dateValidate);
 		//default the date to something other than today.
 		dtBirthDate.setYear(1950);
 		dtBirthDate.setMonth(0);
@@ -200,7 +214,11 @@ public class EmployeeComposite extends Composite {
 		data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		data.horizontalIndent = 8;
 		dtBirthDate.setLayoutData(data);
-
+		
+		chBirthDate.addListener(SWT.Selection, e->{
+			dtBirthDate.setEnabled(chBirthDate.getSelection());
+			validate();
+		});
 		createLabelField(this, SmartLabelProvider.EMP_GENDER + ":"); //$NON-NLS-1$
 
 		composite = new Composite(this, SWT.NONE);
@@ -600,7 +618,14 @@ public class EmployeeComposite extends Composite {
 		opFemale.setSelection(e.getGender() == Employee.DB_FEMALE);
 		opMale.setSelection(e.getGender() ==  Employee.DB_MALE);
 		
-		SmartUtils.initDateDateTimeWidget(dtBirthDate, e.getBirthDate());
+		if (e.getBirthDate() != null) {
+			SmartUtils.initDateDateTimeWidget(dtBirthDate, e.getBirthDate());
+			chBirthDate.setSelection(true);
+			dtBirthDate.setEnabled(true);
+		}else {
+			chBirthDate.setSelection(false);
+			dtBirthDate.setEnabled(false);
+		}
 		SmartUtils.initDateDateTimeWidget(dtEmploymentStart, e.getStartEmploymentDate());
 		
 		
@@ -669,6 +694,7 @@ public class EmployeeComposite extends Composite {
 				this.txtStaffId,
 				this.txtSmartId,
 				this.dtBirthDate,
+				this.chBirthDate,
 //				this.dtEmploymentEnd,
 				this.dtEmploymentStart,
 				this.opMale,
@@ -686,6 +712,7 @@ public class EmployeeComposite extends Composite {
 		if (chSmartUser != null && enable){
 			enableSmartUser(chSmartUser.getSelection());
 		}
+		if (enable) dtBirthDate.setEnabled(chBirthDate.getSelection());
 	}
 	
 	protected void enableSmartUser(boolean enable){
@@ -712,14 +739,18 @@ public class EmployeeComposite extends Composite {
 	 */
 	public void updateEmploye(Employee e){
 
-		e.setBirthDate(SmartUtils.getDate(dtBirthDate));
-		e.setStartEmploymentDate(SmartUtils.getDate(dtEmploymentStart));
 		
+		e.setStartEmploymentDate(SmartUtils.getDate(dtEmploymentStart));
 		e.setFamilyName(txtFamilyName.getText().trim());
 		e.setGender(opFemale.getSelection() ? Employee.DB_FEMALE : Employee.DB_MALE);
 		e.setGivenName(txtGivenName.getText().trim());
-		
 		e.setId(txtStaffId.getText().trim());
+		
+		if (chBirthDate.getSelection()) {
+			e.setBirthDate(SmartUtils.getDate(dtBirthDate));
+		}else {
+			e.setBirthDate(null);
+		}
 		
 		if (dtEmploymentEnd != null){
 			if (!chNotActive.getSelection()){

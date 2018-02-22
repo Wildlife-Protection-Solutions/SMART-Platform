@@ -94,6 +94,7 @@ public class PatrolQueryOptions {
 	public final static PatrolQueryOption[] SHARED_PATROL_FILTER_OPTIONS = {
 			PatrolQueryOption.ARMED, 
 			PatrolQueryOption.TEAM_KEY,
+			PatrolQueryOption.AGENCY_KEY,
 			PatrolQueryOption.MANDATE_KEY,
 			PatrolQueryOption.PATROL_TYPE,
 			PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY

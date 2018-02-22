@@ -23,6 +23,8 @@ package org.wcs.smart.connect.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 /*
@@ -37,20 +39,26 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "connect.map_layers")
 public class MapLayer extends ConnectUuidItem{
-		
-	private Integer layerType;
+	
+	public enum MapLayerType{
+		WMS
+		//MAPBOX,
+		//GISCLOUW
+	}
+	
+	private MapLayerType layerType;
 	private String token; 
-	private String mapboxId;
 	private String wmsLayerList;
 	private String layerName;
 	private boolean active;
 	private int layerOrder;
 	
 	@Column(name="layer_type")
-	public Integer getLayerType() {
+	@Enumerated(value=EnumType.STRING)
+	public MapLayerType getLayerType() {
 		return layerType;
 	}
-	public void setLayerType(Integer layerType) {
+	public void setLayerType(MapLayerType layerType) {
 		this.layerType = layerType;
 	}
 	
@@ -60,14 +68,6 @@ public class MapLayer extends ConnectUuidItem{
 	}
 	public void setToken(String token) {
 		this.token = token;
-	}
-	
-	@Column(name="mapboxid")
-	public String getMapboxId() {
-		return mapboxId;
-	}
-	public void setMapboxId(String mapboxId) {
-		this.mapboxId = mapboxId;
 	}
 	
 	@Column(name="wms_layer_list")

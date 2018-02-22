@@ -45,6 +45,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.cipher.EncryptUtils;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -82,7 +84,7 @@ public class EntityToXml {
 	private Session session;
 	
 	private InstanceData data;
-	private Set<Path> filesToInclude;
+	private Set<ISmartAttachment> filesToInclude;
 	
 	public EntityToXml(Session session) {
 		this.session = session;
@@ -118,9 +120,13 @@ public class EntityToXml {
 			SubMonitor sub = progress.split(1);
 			sub.setWorkRemaining(filesToInclude.size());
 			//copy other files
-			for (Path src : filesToInclude) {
-				Path trg = tempDir.resolve(src.getFileName());
-				Files.copy(src, trg);
+			for (ISmartAttachment src : filesToInclude) {
+				try {
+					Path trg = tempDir.resolve(src.getFilename());
+					EncryptUtils.decryptAttachment(src,trg);
+				}catch (Exception ex) {
+					//unable to decrypt
+				}
 				sub.worked(1);
 			}
 			
@@ -227,7 +233,7 @@ public class EntityToXml {
 					}
 					xmlAttachment.setFilename(attach.getAttachment().getFilename());
 					xmlAttachment.setDescription(attach.getAttachment().getDescription());
-					filesToInclude.add(attach.getAttachment().getAttachmentFile().toPath());
+					filesToInclude.add(attach.getAttachment());
 					
 					xmlEntity.getAttachments().add(xmlAttachment);
 				}

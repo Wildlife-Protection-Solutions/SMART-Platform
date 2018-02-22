@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -402,7 +401,7 @@ public class WorkingSetMapLayersJob extends Job {
 		map.getLayerFactory().eSetDeliver(false);
 		map.getViewportModelInternal().eSetDeliver(false);
 		map.getEditManagerInternal().eSetDeliver(false);
-		List<Layer> allLayers = new ArrayList();
+		List<Layer> allLayers = new ArrayList<>();
 		try {
 			if (!filterResources.isEmpty()){
 				Filter f = null;

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -46,6 +48,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
@@ -202,34 +205,45 @@ public class AttachmentPropertiesDialog {
 		
 		
 		try{
-			Metadata metadata = ImageMetadataReader.readMetadata(attachment.getAttachmentFile());
-			
-			List<Directory> dirs = new ArrayList<>();
-			for (Directory directory : metadata.getDirectories()) dirs.add(directory);
-			dirs.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-			
-			for (Directory directory : dirs) {
-				String name = directory.getName();
-				List<Entry> details = properties.get(name);
-				if (details == null){
-					details = new ArrayList<AttachmentPropertiesDialog.Entry>();
-					properties.put(name, details);
-				}
-				if (directory.getClass().equals(XmpDirectory.class)) {
-					XMPMeta meta = ((XmpDirectory)directory).getXMPMeta();
-					try {
-						XMPIterator i = meta.iterator();
-						while(i.hasNext()) {
-							XMPPropertyInfo info = (XMPPropertyInfo)i.next();
-							if (info.getPath() != null && !info.getPath().isEmpty())
-								details.add(new Entry(info.getPath(), info.getValue()));
-						}
-					}catch (Exception ex) {
-						SmartPlugIn.log(ex.getMessage(),  ex);
+			Path imageFile = EncryptUtils.decryptAttachment(attachment);
+			try {
+				Metadata metadata = ImageMetadataReader.readMetadata(imageFile.toFile());
+				
+				List<Directory> dirs = new ArrayList<>();
+				for (Directory directory : metadata.getDirectories()) dirs.add(directory);
+				dirs.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+				
+				for (Directory directory : dirs) {
+					String name = directory.getName();
+					List<Entry> details = properties.get(name);
+					if (details == null){
+						details = new ArrayList<AttachmentPropertiesDialog.Entry>();
+						properties.put(name, details);
 					}
-				}else {
-					for (Tag g : directory.getTags()){
-						details.add(new Entry(g.getTagName(), g.getDescription()));
+					if (directory.getClass().equals(XmpDirectory.class)) {
+						XMPMeta meta = ((XmpDirectory)directory).getXMPMeta();
+						try {
+							XMPIterator i = meta.iterator();
+							while(i.hasNext()) {
+								XMPPropertyInfo info = (XMPPropertyInfo)i.next();
+								if (info.getPath() != null && !info.getPath().isEmpty())
+									details.add(new Entry(info.getPath(), info.getValue()));
+							}
+						}catch (Exception ex) {
+							SmartPlugIn.log(ex.getMessage(),  ex);
+						}
+					}else {
+						for (Tag g : directory.getTags()){
+							details.add(new Entry(g.getTagName(), g.getDescription()));
+						}
+					}
+				}
+			}finally {
+				if (imageFile != null) {
+					try {
+						Files.delete(imageFile);
+					}catch (Exception ex) {
+						//eat me
 					}
 				}
 			}

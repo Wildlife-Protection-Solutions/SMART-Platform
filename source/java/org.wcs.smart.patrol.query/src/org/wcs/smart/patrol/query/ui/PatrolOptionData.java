@@ -128,6 +128,8 @@ public class PatrolOptionData implements IPatrolOptionData{
 					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getTransportTypes(session);
 				}else if (option == PatrolQueryOption.MANDATE_KEY){
 					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getMandates(session);
+				}else if (option ==  PatrolQueryOption.AGENCY_KEY) {
+					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getAgencies(session);
 				}
 			}
 			if (data != null){
@@ -215,11 +217,8 @@ public class PatrolOptionData implements IPatrolOptionData{
 			for (Employee t : employees){
 				items.add(new ListItem(t.getUuid(), SmartLabelProvider.getShortLabel(t), t.isActive()));
 			}
-		}else if (option == PatrolQueryOption.AGENCY){
-			List<Agency> agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), session);
-			for (Agency a : agencies){
-				items.add(new ListItem(a.getUuid(), a.getName()));
-			}
+		}else if (option == PatrolQueryOption.AGENCY || option == PatrolQueryOption.AGENCY_KEY){
+			items.addAll(PatrolQueryHibernateManager.getInstance().getAgencies(session));
 		}else if (option == PatrolQueryOption.RANK){
 			List<Agency> agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), session);
 			for (Agency a : agencies){

@@ -34,10 +34,10 @@
 <div class="top-spacer"> 
 	<!-- Search Parameters -->
 	<label><fmt:message key="report.search" /></label>
-	<input type=text name="textsearch" id="textsearch" maxlength=30 oninput="searchChanged()"/>
+	<input type=text class="formtext" style="width:30em" name="textsearch" id="textsearch" maxlength=30 oninput="searchChanged()"/>
 
 	<label><fmt:message key="report.inca" /></label>
-	<select id="caselect" onchange="searchChanged()" style="max-width:24em">
+	<select id="caselect" onchange="searchChanged()" class="formtext" style="max-width:24em">
 	<option value="allcas"><fmt:message key="report.allcas" /></option>
 	</select>
 </div>
@@ -68,8 +68,8 @@
      		
      		<fieldset>
 	     		<legend><fmt:message key="report.reportproperties"/></legend>
-	     		<p><fmt:message key="report.reportname" /><input id="reportname" type="text" name="name" value="" style="width:100%" disabled/></p>
-	     		<p><fmt:message key="report.reportuuid" /><input id="reportuuid" type="text" name="uuid" value="" style="width:100%" disabled/></p>
+	     		<p><fmt:message key="report.reportname" /><input class="formtext" id="reportname" type="text" name="name" value="" style="width:100%" disabled/></p>
+	     		<p><fmt:message key="report.reportuuid" /><input class="formtext" id="reportuuid" type="text" name="uuid" value="" style="width:100%" disabled/></p>
      		</fieldset>
      		
      		<p id="customParamters"></p>
@@ -77,18 +77,18 @@
      		<fieldset id="paramaters_fieldset" style="display:none">
 	     		<legend><fmt:message key="report.datefilter"/></legend>
 		     	<p><fmt:message key="report.datefilterlabel"/>
-		     	  <select style="width:100%" id="defineddates"></select>
+		     	  <select style="width:100%" id="defineddates" class="formtext" ></select>
 		     	</p>
 	     		
 	     		<div>
-		     		<p><fmt:message key="report.startdate" /> <input id="Start Date" type="text" name="startdate" class="date-input" style="float:none; margin-top:5px"/>
-		     		<fmt:message key="report.enddate" /> <input id="End Date" type="text" name="enddate" class="date-input" style="float:none; margin-top:5px"/></p>
+		     		<p><fmt:message key="report.startdate" /> <input id="Start Date" type="text" name="startdate" class="formtext date-input" style="float:none; margin-top:5px"/>
+		     		<fmt:message key="report.enddate" /> <input id="End Date" type="text" name="enddate" class="formtext date-input" style="float:none; margin-top:5px"/></p>
 	     		</div>
      		</fieldset>
      		
      		<fieldset>
 	     		<legend><fmt:message key="report.format" /></legend>
-	     		<select id="reportformat" name="format" style="width:100%">
+	     		<select id="reportformat" name="format" class="formtext"  style="width:100%">
 	     			<c:forEach var="exp" items="${reportformats}" varStatus="count">
 	     				<option value="${exp[0]}">${exp[1]}</option> 
 					</c:forEach>

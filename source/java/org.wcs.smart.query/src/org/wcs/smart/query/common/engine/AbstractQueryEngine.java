@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.hibernate.Session;
 import org.wcs.smart.NamedPreparedStatement;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -84,6 +85,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(AttributeListItem.class, "ali"); //$NON-NLS-1$
 		tablePrefix.put(Area.class, "ar"); //$NON-NLS-1$
 		tablePrefix.put(Employee.class, "e"); //$NON-NLS-1$
+		tablePrefix.put(Agency.class, "aa"); //$NON-NLS-1$
 	}
 
 	
@@ -103,6 +105,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(AttributeListItem.class, "smart.dm_attribute_list"); //$NON-NLS-1$
 		tableNames.put(Area.class, "smart.area_geometries"); //$NON-NLS-1$
 		tableNames.put(Employee.class, "smart.employee"); //$NON-NLS-1$
+		tableNames.put(Agency.class, "smart.agency"); //$NON-NLS-1$
 	}
 		
 	/**

@@ -38,6 +38,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.query.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
@@ -170,7 +171,11 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelEntityRecord i = (IntelEntityRecord) ((Object[])currentItem)[0];
-		return RecordEntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
+		Object value = RecordEntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
+		if (value instanceof ISmartAttachment) {
+			return connection.decryptAttachment((ISmartAttachment)value);
+		}
+		return value;
 	}
 
 	/**

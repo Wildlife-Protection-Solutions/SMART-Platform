@@ -30,9 +30,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -42,12 +48,23 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.ICatalog;
+import org.locationtech.udig.catalog.ID;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.IServiceFactory;
 import org.locationtech.udig.catalog.URLUtils;
+import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.internal.commands.DeleteLayerCommand;
 import org.locationtech.udig.project.render.RenderException;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.ApplicationGIS.DrawMapParameter;
 import org.locationtech.udig.project.ui.SelectionStyle;
+import org.locationtech.udig.project.ui.internal.ProjectUIPlugin;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
@@ -179,11 +196,64 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 		monitor.setTaskName(MessageFormat.format(Messages.ExportMapToImageWizard_Progress_WriteDisk, new Object[] { map.getName() }));
 		mapSelectorPage.getSelectedFormat().write(renderedMap, image, destination);
 
+		resetCatalog( destination ); 
 
 		monitor.done();
 		return true;
 	}
 
+	//reset the catalog if service exists
+	//SMART BUG #1592
+	private void resetCatalog(final File file) {
+		if (!file.exists()) return; //file not created
+        if ( file.getAbsolutePath().toLowerCase().endsWith("pdf") ) return; //$NON-NLS-1$
+
+        Job resetCatalog = new Job("Resetting " + file.getName() ){ //$NON-NLS-1$
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                ICatalog localCatalog = CatalogPlugin.getDefault().getLocalCatalog();                
+                IServiceFactory serviceFactory = CatalogPlugin.getDefault().getServiceFactory();
+                List<IService> services = serviceFactory.createService(new ID(file,null).toURL());
+                if (!services.isEmpty()) {
+                	ID id = services.get(0).getID();
+                	IService found = localCatalog.getById(IService.class, id, new NullProgressMonitor());
+                	if (found != null) {
+                		//reset service
+                		localCatalog.replace(id, found);
+                		
+                		//delete and add back layers
+                		Collection<? extends IMap> maps = ApplicationGIS.getOpenMaps();
+                		
+                        for (IMap m : maps) {
+                        	List<ILayer> mapLayers = new ArrayList<>(m.getMapLayers());
+                        	for (ILayer l : mapLayers) {
+								try {
+									IService ssService = l.getGeoResource().service(new NullProgressMonitor());
+									if (ssService.getID().equals(id)) {
+	                        			//delete layer and add it back to reset it
+										DeleteLayerCommand dd = new DeleteLayerCommand((Layer)l);
+										m.sendCommandSync(dd);
+										AddLayersCommand cmd = new AddLayersCommand(Collections.singletonList(l.getGeoResource()), mapLayers.indexOf(l)) {
+											public void run( IProgressMonitor monitor ) throws Exception {
+												super.run(monitor);
+												getLayers().get(0).setStyleBlackboard((StyleBlackboard)l.getStyleBlackboard());
+											}
+										};
+										m.sendCommandSync(cmd);
+	                        		}
+								} catch (IOException e) {
+									SmartPlugIn.log(e.getMessage(), e);
+								}		
+                        	}
+                        }       
+                	}
+                }
+                return !services.isEmpty() ? Status.OK_STATUS : new Status( IStatus.ERROR, ProjectUIPlugin.ID, "Failed to add " + file ); //$NON-NLS-1$
+            }
+        };
+        resetCatalog.schedule();
+	}
+	
 	private File determineDestinationFile(IMap map) {
 		File exportDir = mapSelectorPage.getOutputDir();
 		if (!exportDir.exists()){

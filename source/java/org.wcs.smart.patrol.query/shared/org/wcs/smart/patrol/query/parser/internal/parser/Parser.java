@@ -56,6 +56,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
     case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
@@ -101,6 +102,7 @@ public class Parser implements ParserConstants {
       case PATROLLEG_PILOT_KEY:
       case PATROLLEG_MEMBER_KEY:
       case PATROLLEG_AGENCY_KEY:
+      case PATROLLEG_AGENCY_KEY_KEY:
       case PATROLLEG_RANK_KEY:
       case PATROL_CONTRIBUTION_BOOL_KEY:
       case PATROL_CONTRIBUTION_STRING_KEY:
@@ -165,6 +167,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
     case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
@@ -208,6 +211,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
     case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
@@ -256,6 +260,7 @@ public class Parser implements ParserConstants {
       case PATROLLEG_PILOT_KEY:
       case PATROLLEG_MEMBER_KEY:
       case PATROLLEG_AGENCY_KEY:
+      case PATROLLEG_AGENCY_KEY_KEY:
       case PATROLLEG_RANK_KEY:
       case PATROL_CONTRIBUTION_BOOL_KEY:
       case PATROL_CONTRIBUTION_STRING_KEY:
@@ -556,6 +561,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
     case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
@@ -663,6 +669,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
     case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
       /* String comparison */
@@ -803,6 +810,7 @@ public class Parser implements ParserConstants {
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
     case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_AGENCY_KEY_KEY:
     case PATROLLEG_RANK_KEY:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case PATROL_ID_KEY:
@@ -843,6 +851,9 @@ public class Parser implements ParserConstants {
         break;
       case PATROLLEG_AGENCY_KEY:
         jj_consume_token(PATROLLEG_AGENCY_KEY);
+        break;
+      case PATROLLEG_AGENCY_KEY_KEY:
+        jj_consume_token(PATROLLEG_AGENCY_KEY_KEY);
         break;
       case PATROLLEG_RANK_KEY:
         jj_consume_token(PATROLLEG_RANK_KEY);
@@ -1010,7 +1021,7 @@ public class Parser implements ParserConstants {
       jj_la1_1 = new int[] {0xf7f97ffe,0xf7f97ffe,0x0,0xf7f97ffe,0xf7f97ffe,0xf7f97ffe,0x0,0x10000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf7f87ffe,0x4410,0x208,0xf7f87ffc,0x2080,0xf7e80000,0xf7f80104,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0xb7,0xb7,0x100000,0xb7,0xb7,0xb7,0x100000,0x0,0x3f400,0x0,0x0,0x3f400,0xfe80000,0x0,0xa00000,0xfe80000,0x0,0x0,0xb7,0x10,0x0,0x37,0x0,0x7,0x27,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x16f,0x16f,0x200000,0x16f,0x16f,0x16f,0x200000,0x0,0x7e800,0x0,0x0,0x7e800,0x1fd00000,0x0,0x1400000,0x1fd00000,0x0,0x0,0x16f,0x20,0x0,0x6f,0x0,0xf,0x4f,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -1127,7 +1138,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[93];
+    boolean[] la1tokens = new boolean[94];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1147,7 +1158,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 93; i++) {
+    for (int i = 0; i < 94; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

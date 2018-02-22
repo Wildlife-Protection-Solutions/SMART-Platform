@@ -319,12 +319,14 @@ public class CmXmlToSmartImporter {
 			config.setDefault(xmlConfig.isIsDefault());
 			config.setDisplayMode(getDisplayMode(xmlConfig.getDisplayMode()));
 			Attribute dmAttribute = fetchAttribute(xmlConfig.getAttributeKey());
-			config.setAttribute(dmAttribute);
-			config.setList(processCmListItems(config, dmAttribute, xmlConfig.getListItem(), monitor));
-			config.setTree(processCmTreeNodes(config, dmAttribute, null, xmlConfig.getTreeNode(), monitor));
-			
-			addToDataMap(xmlConfig.getId(), config);
-			configMap.put(xmlConfig.getId(), config);
+			if (dmAttribute != null) {
+				config.setAttribute(dmAttribute);
+				config.setList(processCmListItems(config, dmAttribute, xmlConfig.getListItem(), monitor));
+				config.setTree(processCmTreeNodes(config, dmAttribute, null, xmlConfig.getTreeNode(), monitor));
+				
+				addToDataMap(xmlConfig.getId(), config);
+				configMap.put(xmlConfig.getId(), config);
+			}
 		}
 		return configMap;
 	}
@@ -497,8 +499,12 @@ public class CmXmlToSmartImporter {
 			//tree mapping was introduced in 3.2.0, previous version were using different mapping
 			Map<String, List<TreeNodeType>> attrMap = xmlCm.getDefaultTrees().getTreeNode().stream().collect(Collectors.groupingBy(TreeNodeType::getAttributeKey));
 			for (String attrKey : attrMap.keySet()) {
-				CmAttributeConfig config = createCompatibilityConfig(cm, fetchAttribute(attrKey), true, attr2DisplayMode.get(attrKey), null, attrMap.get(attrKey), monitor);
-				result.put(config.getAttribute(), config);
+				Attribute dmAttribute = fetchAttribute(attrKey);
+				if (dmAttribute != null) {
+					CmAttributeConfig config = createCompatibilityConfig(cm, dmAttribute, true, attr2DisplayMode.get(attrKey), null, attrMap.get(attrKey), monitor);
+					result.put(config.getAttribute(), config);
+				}
+				
 			}
 		}
 
@@ -507,8 +513,12 @@ public class CmXmlToSmartImporter {
 			//list mapping was introduced in 3.2.1, previous version were using different mapping
 			Map<String, List<ListItemType>> attrMap = xmlCm.getDefaultLists().getListItem().stream().collect(Collectors.groupingBy(ListItemType::getAttributeKey));
 			for (String attrKey : attrMap.keySet()) {
-				CmAttributeConfig config = createCompatibilityConfig(cm, fetchAttribute(attrKey), true, attr2DisplayMode.get(attrKey), attrMap.get(attrKey), null, monitor);
-				result.put(config.getAttribute(), config);
+				Attribute dmAttribute = fetchAttribute(attrKey);
+				if (dmAttribute != null) {
+					//attribute doesn't exist so we skip it here
+					CmAttributeConfig config = createCompatibilityConfig(cm, dmAttribute, true, attr2DisplayMode.get(attrKey), attrMap.get(attrKey), null, monitor);
+					result.put(config.getAttribute(), config);
+				}
 			}
 		}
 		return result;

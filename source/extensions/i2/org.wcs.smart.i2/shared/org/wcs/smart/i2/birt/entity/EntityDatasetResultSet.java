@@ -39,6 +39,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
@@ -192,7 +193,12 @@ public class EntityDatasetResultSet implements IResultSet {
 				}
 				return v.getAttributeValue();
 			}else{
-				return EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getValue(i, connection.getCurrentLocale());
+				Object attachment = EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE.getValue(i, connection.getCurrentLocale());
+				if (attachment instanceof ISmartAttachment) {
+					ISmartAttachment a = (ISmartAttachment) attachment;
+					return connection.decryptAttachment(a);
+				}
+				return attachment;
 			}
 		} catch (IOException e) {
 			Logger.getLogger(EntityDatasetResultSet.class.getName()).log(Level.SEVERE, e.getMessage(), e); 

@@ -50,6 +50,7 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	PATROL_TRANSPORT_TYPE("transport", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.UUID), //$NON-NLS-2$ //$NON-NLS-1$
 	PATROL_TRANSPORT_TYPE_KEY("transportkey", "transport_uuid", PatrolLeg.class, PatrolTransportType.class, PatrolQueryOptionType.KEY), //$NON-NLS-2$ //$NON-NLS-1$
 	AGENCY("agency", "agency_uuid", PatrolLegMember.class, Agency.class, PatrolQueryOptionType.UUID), //$NON-NLS-1$ //$NON-NLS-2$
+	AGENCY_KEY("agencykey", "agency_uuid", PatrolLegMember.class, Agency.class, PatrolQueryOptionType.KEY), //$NON-NLS-1$ //$NON-NLS-2$
 	RANK("rank", "rank_uuid", PatrolLegMember.class, Rank.class, PatrolQueryOptionType.UUID), //$NON-NLS-1$ //$NON-NLS-2$
 	
 	CONSERVATION_AREA("ca", "ca_uuid", Patrol.class, ConservationArea.class, PatrolQueryOptionType.UUID);  //$NON-NLS-1$//$NON-NLS-2$
@@ -75,7 +76,7 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	 * @return <code>true</code> if this option involved employees
 	 */
 	public boolean isEmployeeItem(){
-		return this == EMPLOYEE || this == PILOT || this == LEADER || this == AGENCY || this == RANK;
+		return this == EMPLOYEE || this == PILOT || this == LEADER || this == AGENCY || this == AGENCY_KEY || this == RANK;
 	}
 	
 	/**

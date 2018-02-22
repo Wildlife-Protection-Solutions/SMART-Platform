@@ -163,12 +163,6 @@ public class ConnectMapLayers extends HttpServlet {
 		validateUser();
 			
 		//validate
-		if (newLayer.getLayerType() < 0 && newLayer.getLayerType() > 2){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectMapLayers.InvalidType", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-		}
-		if (newLayer.getMapboxId().length() > 64){
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectMapLayers.MapBoxIdTooLong", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-		}
 		if (newLayer.getToken().length() > 256){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectMapLayers.TokenTooLong", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
@@ -178,8 +172,6 @@ public class ConnectMapLayers extends HttpServlet {
 		m.setLayerOrder(newLayer.getLayerOrder());
 		m.setActive(newLayer.isActive());
 		m.setLayerName(newLayer.getLayerName());
-		m.setMapboxId(newLayer.getMapboxId());
-		
 		m.setToken(newLayer.getToken());
 		m.setWmsLayerList(newLayer.getWmsLayerList());
 		m.setLayerType(newLayer.getLayerType());
@@ -240,9 +232,6 @@ public class ConnectMapLayers extends HttpServlet {
 			if (newLayer.getLayerType() != null){
 				toUpdate.setLayerType(newLayer.getLayerType());
 			}
-			if (newLayer.getMapboxId() != null){
-				toUpdate.setMapboxId(newLayer.getMapboxId());
-			}
 			if (newLayer.getToken() != null){
 				toUpdate.setToken(newLayer.getToken());
 			}
@@ -253,20 +242,12 @@ public class ConnectMapLayers extends HttpServlet {
 			toUpdate.setLayerName(newLayer.getLayerName());
 
 			//validate values
-			if(toUpdate.getLayerType() < 0 || toUpdate.getLayerType() > 10){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectMapLayers.InvalidLayerType", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			}
-			if(toUpdate.getMapboxId().length() > 64){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectMapLayers.MapBoxIdTooLong", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			}
 			if(toUpdate.getToken().length() > 256){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectMapLayers.TokenTooLong", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			if(toUpdate.getLayerName().length() > 32){
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectMapLayers.LayerNameTooLong", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
-
-			
 			
 			s.update(toUpdate);
 			s.getTransaction().commit();

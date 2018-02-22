@@ -84,6 +84,12 @@ public interface IPatrolQueryHibernateManager {
 	
 	/**
 	 * 
+	 * @return  list of all agencies
+	 */
+	public List<ListItem> getAgencies(Session session);
+	
+	/**
+	 * 
 	 * @return  list of all active teams as list items
 	 */
 	public List<ListItem> getActiveTeams(Session session);

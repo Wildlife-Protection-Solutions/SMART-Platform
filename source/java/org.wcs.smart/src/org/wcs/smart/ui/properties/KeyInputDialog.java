@@ -23,9 +23,12 @@ package org.wcs.smart.ui.properties;
 
 import java.util.Collection;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -74,7 +77,8 @@ public class KeyInputDialog extends InputDialog{
 	 */
 	@Override
 	public int open(){
-		MessageDialog.openInformation(getShell(), Messages.KeyInputDialog_DialogTitle, Messages.KeyInputDialog_EditKeyWarning);
+		int ret = MessageDialog.open(MessageDialog.INFORMATION, getShell(), Messages.KeyInputDialog_DialogTitle, Messages.KeyInputDialog_EditKeyWarning, SWT.NONE, IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL);
+		if (ret == 1) { return Window.CANCEL; }
 		return super.open();
 	}
 

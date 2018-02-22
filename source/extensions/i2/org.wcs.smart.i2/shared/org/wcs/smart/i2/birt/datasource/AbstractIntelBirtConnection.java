@@ -21,12 +21,20 @@
  */
 package org.wcs.smart.i2.birt.datasource;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import org.eclipse.birt.report.engine.api.HTMLRenderOption;
+import org.eclipse.birt.report.engine.api.impl.RunAndRenderTask;
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDataSetMetaData;
 import org.eclipse.datatools.connectivity.oda.IQuery;
@@ -37,9 +45,12 @@ import org.eclipse.datatools.connectivity.oda.util.manifest.ManifestExplorer;
 import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.cipher.EncryptUtils;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
 import org.wcs.smart.i2.birt.entity.EntityDatasetMetadata;
 import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
@@ -89,7 +100,8 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	protected boolean m_isOpen = false;
 	protected Session localSession;
 	protected Map<Object,Object> appContext;
-		
+	private List<Path> attachmentFiles;
+	
 	private final static IProjectionProvider defaultProjectionProvider = new IProjectionProvider() {
 		private Projection p; 
 		@Override
@@ -102,12 +114,116 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 			return p;
 		}
 	};
+	
+	/**
+	 * Decrypt attachment to a file uri which is returned.  The uri will
+	 * be absolute if the file is located within the SMART filestore or the
+	 * output emitter is not html.  For HTML outside the SMART filestore we return
+	 * a relative url, this enables the html to be passed around with the files.
+	 * 
+	 * If the output type is NOT HTML all files are deleted once the connection is closed.
+	 * 
+	 * @param attachment
+	 * @return
+	 */
+	public String decryptAttachment(ISmartAttachment attachment) {
+		if (attachment == null) return null;
+		
+		Path imageOutDir = getImageOutputDirectory();
+		Path imageFile = null;
+		try {
+			if (imageOutDir == null) {
+				imageFile = EncryptUtils.decryptAttachment(attachment);
+			}else {
+				imageFile = imageOutDir.resolve(attachment.getFilename());
+				imageFile = EncryptUtils.uniqueFile(imageFile);
+				EncryptUtils.decryptAttachment(attachment, imageFile);
+			}
+			attachmentFiles.add(imageFile);
+			
+			if (imageFile.startsWith(Paths.get(SmartContext.INSTANCE.getFilestoreLocation()))) {
+				return imageFile.toAbsolutePath().toUri().toString();
+			}else {
+				if (isHtml()) {
+					//relatize
+					return imageOutDir.relativize(imageFile).toString();
+				}else {
+					return imageFile.toAbsolutePath().toUri().toString();	
+				}
+			}
+		} catch (Exception e) {
+			//we are going to eat this; likely an issue decrypting the attachment 
+		}
+		return null;
+	}
+	
+	/**
+	 * 
+	 * @return the image output directory supplied in the app context.  Will
+	 * return null if not specified
+	 */
+	private Path getImageOutputDirectory() {
+		Object randrtask = appContext.get("EngineTask");
+		if (randrtask == null || !(randrtask instanceof RunAndRenderTask)) return null;
+		
+		RunAndRenderTask task = (RunAndRenderTask)randrtask;
+		Object x = task.getRenderOption().getOption(HTMLRenderOption.IMAGE_DIRECTROY);
+		if (x instanceof File) {
+			return ((File) x).toPath();
+		}else if (x instanceof String) {
+			return Paths.get((String)x);
+		}else if (x instanceof Path) {
+			return (Path)x;
+		}
+		return null;
+		
+	}
+	
+	/**
+	 * If the output type is html
+	 * @return
+	 */
+	private boolean isHtml() {
+		if (appContext == null) return false;
+		Object randrtask = appContext.get("EngineTask");
+		if (randrtask == null || !(randrtask instanceof RunAndRenderTask)) {
+			return false;
+		}else {
+			RunAndRenderTask task = (RunAndRenderTask)randrtask;
+			if (task.getRenderOption().getOutputFormat().equalsIgnoreCase(HTMLRenderOption.HTML)) {
+				return true;
+			}else {
+				return false;
+			}
+		}
+	}
+	
+	/**
+	 * Will clean up set of attachment files if the report system should clean them
+	 * up after running.  If emitting to HTML these files should not be removed otherwise
+	 * the files should be deleted after the report is generated.
+	 * 
+	 * @param files
+	 */
+	private void cleanUpAttachmentFiles(List<Path> files) {
+		boolean doCleanUp = !isHtml();		
+		if (!doCleanUp) return;
+		for (Path p : files) {
+			try {
+				if (p != null ) {
+					Files.delete(p);
+				}
+			}catch (Exception ex) {}
+		}
+	}
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IConnection#open(java.util.Properties)
 	 */
 	public void open(Properties connProperties) throws OdaException{
 		openSession();
 		m_isOpen = true;
+		attachmentFiles = new ArrayList<>();
 	}
 
 	/**
@@ -116,6 +232,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	public void close() throws OdaException {
 		closeSession();
 		m_isOpen = false;
+		cleanUpAttachmentFiles(attachmentFiles);
 	}
 
 	/**

@@ -9,11 +9,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 import org.wcs.smart.util.DerbyUtils;
+import org.wcs.smart.util.UuidUtils;
 
 public class Upgrader500To600 implements IDatabaseUpgrader { 
 	private Exception thrownException = null;
@@ -61,6 +63,10 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.patrol ADD COLUMN folder_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.patrol ADD CONSTRAINT PATROL_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.PATROL_FOLDER(UUID) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 
+				//unique userid/ca combo
+				"ALTER TABLE smart.employee ADD CONSTRAINT smartuseridunq UNIQUE(ca_uuid, smartuserid)", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.agency ADD COLUMN keyid varchar(128)", //$NON-NLS-1$
 		};
 
 		for (String s : sql) {
@@ -69,6 +75,10 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 		}
 		upgradeConfigurableModel(c);
 
+		//create keys for agency rank
+		addKeys(c);
+		c.createStatement().execute("ALTER TABLE smart.agency ADD CONSTRAINT keyunq UNIQUE (keyid, ca_uuid)"); //$NON-NLS-1$
+		
 		//create qa plugin tables
 		QaPlugInInstaller.createTables(session, c);
 		
@@ -78,6 +88,38 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 		c.commit();
 	}
 
+	private void addKeys(Connection c) throws SQLException {
+		String query = "select a.value, b.uuid as item_uuid, b.ca_uuid from smart.I18N_LABEL a, smart.agency b, smart.language c  where b.uuid = a.element_uuid and c.uuid = a.language_uuid and c.isdefault ORDER BY b.uuid"; //$NON-NLS-1$
+		
+		String query2 = "UPDATE smart.agency SET keyid = ? WHERE uuid = ?";  //$NON-NLS-1$ 
+		PreparedStatement ps = c.prepareStatement(query2);
+		try(ResultSet rs = c.createStatement().executeQuery(query)){
+			while(rs.next()) {
+				String name = rs.getString(1);
+				byte[] itemuuid = rs.getBytes(2);
+				
+				String keyId = name.toLowerCase().replaceAll("[^a-zA-Z0-9]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				if (keyId.isEmpty()) keyId = UuidUtils.uuidToString(UuidUtils.byteToUUID(itemuuid));
+				ps.setString(1, keyId);
+				ps.setBytes(2, itemuuid);
+				ps.executeUpdate();
+			}
+		}
+		
+		//ensure unique
+		query = "SELECT a.uuid, a.keyId FROM smart.agency a, (SELECT ca_uuid, keyid FROM smart.agency GROUP BY ca_uuid, keyid HAVING count(*) > 1) b  WHERE a.ca_uuid = b.ca_uuid and a.keyid = b.keyid"; //$NON-NLS-1$
+		try(ResultSet rs = c.createStatement().executeQuery(query)){
+			while(rs.next()) {
+				byte[] itemuuid = rs.getBytes(1);
+				String key = rs.getString(2);
+				String keyId = key + UuidUtils.uuidToString(UuidUtils.byteToUUID(itemuuid));
+				ps.setString(1, keyId);
+				ps.setBytes(2, itemuuid);
+				ps.executeUpdate();
+			}
+		}
+	}
+	
 	private void upgradeConfigurableModel(Connection c) throws Exception {
 		String[] sql = new String[] {
 				"CREATE TABLE smart.cm_attribute_config(uuid char(16) for bit data not null, cm_uuid char(16) for bit data not null, dm_attribute_uuid char(16) for bit data not null, display_mode varchar(10), is_default boolean, primary key (uuid))", //$NON-NLS-1$
@@ -167,6 +209,35 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 					ps_cma_upd.setBytes(3, cm_uuid);
 					ps_cma_upd.executeUpdate();
 				}
+			}
+		}
+		String attType = null;
+		if (tableName.equals("smart.CM_ATTRIBUTE_LIST")){ //$NON-NLS-1$
+			attType = Attribute.AttributeType.LIST.name();
+		}else if (tableName.equals("smart.CM_ATTRIBUTE_TREE_NODE")) { //$NON-NLS-1$
+			attType = Attribute.AttributeType.TREE.name();
+		}
+		if (attType == null) return;
+		//for configurations with no elements
+		try(ResultSet rs = c.createStatement().executeQuery("select c.cm_uuid as cm_uuid, a.uuid as cm_attribute_uuid, a.attribute_uuid as dm_attribute_uuid from smart.cm_node c, smart.cm_attribute a, smart.dm_attribute b where c.uuid = a.node_uuid and a.attribute_uuid = b.uuid and b.att_type = '" + attType + "' and config_uuid is null")){ //$NON-NLS-1$ //$NON-NLS-2$
+			while (rs.next()) {
+				byte[] cm_uuid = rs.getBytes(1);
+				byte[] cma_uuid = rs.getBytes(2);
+				byte[] cfg_uuid = DerbyUtils.createUuid();
+
+				//create custom config and make default
+				insertConfig(c, cfg_uuid, cm_uuid, getDmAttributeForCmAttribute(c, cma_uuid), getDisplayModeForCustomCmAttribute(c, cma_uuid), true);
+
+				PreparedStatement ps_upd = c.prepareStatement("UPDATE " + tableName + " SET CONFIG_UUID = ? WHERE CM_UUID = ? AND CM_ATTRIBUTE_UUID = ? AND DM_ATTRIBUTE_UUID IS NULL"); //$NON-NLS-1$ //$NON-NLS-2$
+				ps_upd.setBytes(1, cfg_uuid);
+				ps_upd.setBytes(2, cm_uuid);
+				ps_upd.setBytes(3, cma_uuid);
+				ps_upd.executeUpdate();
+
+				PreparedStatement ps_cma_upd = c.prepareStatement("UPDATE smart.cm_attribute SET CONFIG_UUID = ? WHERE UUID = ?"); //$NON-NLS-1$
+				ps_cma_upd.setBytes(1, cfg_uuid);
+				ps_cma_upd.setBytes(2, cma_uuid);
+				ps_cma_upd.executeUpdate();
 			}
 		}
 	}

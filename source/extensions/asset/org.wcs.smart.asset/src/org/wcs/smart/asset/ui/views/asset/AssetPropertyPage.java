@@ -101,6 +101,7 @@ public class AssetPropertyPage {
 				asset.setIsRetired(!asset.getIsRetired());
 				session.saveOrUpdate(historyRecord);
 				session.saveOrUpdate(asset);
+				asset.computeStatus(session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -110,7 +111,7 @@ public class AssetPropertyPage {
 			parentEditor.activeHistoryRecords.add(historyRecord);
 			parentEditor.refreshHistoryRecords();
 		}
-		parentEditor.refreshStatus();
+		parentEditor.fireAssetModified(false);		
 	}
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {

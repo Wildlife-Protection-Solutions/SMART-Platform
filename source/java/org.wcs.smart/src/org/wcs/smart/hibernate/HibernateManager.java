@@ -510,9 +510,12 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param session the database session
 	 */
 	public static void generateEmployeeId(Employee e, Session session){
-
 		Calendar c = Calendar.getInstance();
-		c.setTime(e.getBirthDate());
+		if (e.getBirthDate() != null) {
+			c.setTime(e.getBirthDate());
+		}else {
+			c.setTime(e.getStartEmploymentDate());
+		}
 		int year = c.get(Calendar.YEAR);
 		
 		String query = HibernateUtil.getHibernateCurrentDialect(session).getSequenceNextValString("smart.smart_user_id_seq"); //$NON-NLS-1$

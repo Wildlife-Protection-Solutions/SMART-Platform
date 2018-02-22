@@ -33,13 +33,13 @@ public class AgencyCsvExportConfig extends AbstractCsvExportConfig {
 	public String getInfo() {
 		return Messages.CsvConfig_Agency_Export_Info +
 				SharedUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Export_Info_Content +
+				Messages.CsvConfig_Agency_Export_Info_Content1 +
 				SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR +
 				Messages.CsvConfig_Agency_Example_Label +
 				SharedUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Example_HeaderRow +
+				Messages.CsvConfig_Agency_Example_HeaderRow1 +
 				SharedUtils.LINE_SEPARATOR +
-				Messages.CsvConfig_Agency_Example_ContentRow;
+				Messages.CsvConfig_Agency_Example_ContentRow1;
 	}
 
 	@Override

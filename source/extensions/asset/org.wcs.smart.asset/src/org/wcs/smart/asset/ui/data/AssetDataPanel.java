@@ -354,6 +354,7 @@ public abstract class AssetDataPanel {
 				Waypoint cloneWp = aw.getWaypoint().clone(session);
 				cloneWp.setAttachments(new ArrayList<>());
 				cloneWp.setDateTime(dtWaypoint.getDateTime());
+				cloneWp.setComment(dtWaypoint.getComment());
 				
 				//clone attachments and associate deployments
 				Map<AssetDeployment, AssetWaypoint> newDeployments = new HashMap<>(); 

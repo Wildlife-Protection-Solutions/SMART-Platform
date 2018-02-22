@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
+import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -593,7 +594,30 @@ public enum PsqlFilterToSqlGenerator {
 				sb.append(p1);
 				sb.append(")"); //$NON-NLS-1$
 				return sb.toString();
-				
+			}else if (option == PatrolQueryOption.AGENCY_KEY) {
+				String p1 = engine.addParameterValue(SharedUtils.stripQuotes(filter.getValue()));
+				StringBuilder sb = new StringBuilder();
+				sb.append(engine.tablePrefix(PatrolLeg.class));
+				sb.append(".uuid IN (SELECT patrol_leg_uuid FROM "); //$NON-NLS-1$
+				sb.append(engine.tableNamePrefix(PatrolLegMember.class));
+				sb.append(","); //$NON-NLS-1$
+				sb.append(engine.tableNamePrefix(Employee.class));
+				sb.append(","); //$NON-NLS-1$
+				sb.append(engine.tableNamePrefix(Agency.class));
+				sb.append(" WHERE "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(PatrolLegMember.class));
+				sb.append(".employee_uuid = "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Employee.class));
+				sb.append(".uuid "); //$NON-NLS-1$
+				sb.append(" AND "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Employee.class));
+				sb.append(".agency_uuid = "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Agency.class));
+				sb.append(".uuid AND "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Agency.class));
+				sb.append(".keyid = " + p1); //$NON-NLS-1$
+				sb.append(")"); //$NON-NLS-1$
+				return sb.toString();
 			}else{
 				String prefix = engine.tablePrefix(PatrolLeg.class);
 				String x = prefix + ".uuid IN ( select patrol_leg_uuid from smart.patrol_leg_members "  //$NON-NLS-1$

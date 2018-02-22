@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Agency;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -40,6 +42,15 @@ import org.wcs.smart.query.ui.model.ListItem;
  */
 public class CaPatrolQueryHibernateManagerImpl extends AbstractPatrolQueryHibernateManager {
 
+	@Override
+	public List<ListItem> getAgencies(Session session) {
+		List<Agency> teams = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), session);
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		for (Agency t : teams){
+			items.add(new ListItem(t.getUuid(), t.getName(), t.getKeyId()));
+		}
+		return items;
+	}
 	
 	@Override
 	public List<ListItem> getActiveTeams(Session session) {

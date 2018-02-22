@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -1811,8 +1810,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		for (Listener l : ls) txtScratchpad.addListener(SWT.Modify, l);
 		
 		if (entity.getPrimaryAttachment() != null){
-			File imageFile = entity.getPrimaryAttachment().getAttachmentFile();
-			if (imageFile.exists()){
+			if (entity.getPrimaryAttachment().getAttachmentFile().exists()){
 				Thumbnail thum = new Thumbnail(entity.getPrimaryAttachment(), THUMB_SIZE);
 				imgMain = thum.getImage();
 				lblMainImage.redraw();

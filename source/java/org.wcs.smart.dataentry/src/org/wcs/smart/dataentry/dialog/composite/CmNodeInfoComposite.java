@@ -74,12 +74,15 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	
 	private ImageSelectionControl imageControl;
 	
-	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
+	private List<CmAttributeConfig> deletedConfigs;
+	
+	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup, List<CmAttributeConfig> deletedConfigs) {
 		super(parent, model);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
 		this.setLayout(layout);
 		this.session = session;
+		this.deletedConfigs = deletedConfigs;
 		this.isGroup = isGroup;
 		
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -307,7 +310,6 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				removeRelatedConfigs(a);
 			}
 		}
-
 		fireModelChanged();
 	}
 
@@ -315,6 +317,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		List<CmAttributeConfig> configs = DataentryHibernateManager.getCmAttributeConfigs(this.session, getModel(), a);
 		for (CmAttributeConfig cfg : configs) {
 			this.session.delete(cfg);
+			this.deletedConfigs.add(cfg);
 		}
 	}
 	

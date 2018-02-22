@@ -147,6 +147,10 @@
             class="org.wcs.smart.i2.model.IntelRecordAttributeValueList"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.i2.model.IntelConfigurationOption"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.caDeleteAdvisor">
@@ -450,6 +454,18 @@
                   </or>
                </visibleWhen>
             </menu>
+            <command
+                  commandId="org.wcs.smart.i2.command.config.show"
+                  label="Module Settings..."
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
+                  </test>
+               </visibleWhen>
+            </command>
             <separator
                   name="org.wcs.smart.i2.separator3"
                   visible="true">
@@ -1000,6 +1016,10 @@
             id="org.wcs.smart.i2.command.import.model.xml"
             name="%ImportModelElementsCommandName">
       </command>
+      <command
+            id="org.wcs.smart.i2.command.config.show"
+            name="Module Settings...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -1116,6 +1136,10 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.ImportEntitiesFromXmlHandler$ImportEntitiesFromXmlHandlerWrapper"
             commandId="org.wcs.smart.i2.command.import.entity.xml">
+      </handler>
+      <handler
+            class="org.wcs.smart.i2.ui.handler.ShowConfigurationDialogHandler$ShowConfigurationDialogHandlerWrapper"
+            commandId="org.wcs.smart.i2.command.config.show">
       </handler>
    </extension>
    <extension
@@ -2126,6 +2150,9 @@
       <loginHandler
             clazz="org.wcs.smart.i2.CleanUpJob">
       </loginHandler>
+      <windowHandler
+            class="org.wcs.smart.i2.MenuHandler">
+      </windowHandler>
    </extension>
    <extension
          point="org.wcs.smart.caFilestoreDir">
