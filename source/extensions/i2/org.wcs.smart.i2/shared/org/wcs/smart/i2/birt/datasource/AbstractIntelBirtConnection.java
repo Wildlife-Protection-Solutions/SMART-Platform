@@ -100,7 +100,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	protected boolean m_isOpen = false;
 	protected Session localSession;
 	protected Map<Object,Object> appContext;
-	private List<Path> attachmentFiles;
+	protected List<Path> attachmentFiles;
 	
 	private final static IProjectionProvider defaultProjectionProvider = new IProjectionProvider() {
 		private Projection p; 
@@ -162,7 +162,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	 * @return the image output directory supplied in the app context.  Will
 	 * return null if not specified
 	 */
-	private Path getImageOutputDirectory() {
+	protected Path getImageOutputDirectory() {
 		Object randrtask = appContext.get("EngineTask");
 		if (randrtask == null || !(randrtask instanceof RunAndRenderTask)) return null;
 		
@@ -183,7 +183,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	 * If the output type is html
 	 * @return
 	 */
-	private boolean isHtml() {
+	protected boolean isHtml() {
 		if (appContext == null) return false;
 		Object randrtask = appContext.get("EngineTask");
 		if (randrtask == null || !(randrtask instanceof RunAndRenderTask)) {
