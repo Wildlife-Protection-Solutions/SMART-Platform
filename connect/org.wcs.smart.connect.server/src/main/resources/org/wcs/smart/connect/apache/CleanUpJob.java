@@ -25,6 +25,7 @@ import java.io.File;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,12 +38,15 @@ import java.util.logging.Logger;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.servlet.ServletContext;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.connect.api.DataQueue;
+import org.wcs.smart.connect.api.ReportApi;
 import org.wcs.smart.connect.api.Uploader;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.datastore.DataStoreManager;
@@ -69,9 +73,11 @@ public class CleanUpJob implements Runnable {
 	private Integer syncDownloadAvailableHrs = null;
 	private Integer caExportAvailableDays = null;
 	private Integer changeLogCleanUpDays = null;
+	private ServletContext context;
 	
-	public CleanUpJob(SessionFactory sessionFactory){
+	public CleanUpJob(SessionFactory sessionFactory, ServletContext context){
 		this.sessionFactory = sessionFactory;
+		this.context = context;
 	}
 	
 	@Override
@@ -147,6 +153,41 @@ public class CleanUpJob implements Runnable {
 			
 			//clean up temporary tables
 			cleanupQueryTempTables(s);
+		}
+		
+		cleanReportImages();
+		cleanTemporaryFiles();
+	}
+	
+	private void cleanTemporaryFiles() {
+		Path uploadDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(EncryptUtils.TEMP_DIR);
+		deleteFilesInDir(uploadDir);
+	}
+	
+	private void cleanReportImages() {
+		java.nio.file.Path imagesDir = Paths.get(context.getRealPath(ReportApi.REPORT_IMAGES_DIR));
+		deleteFilesInDir(imagesDir);
+	}
+	
+	/*
+	 * Delete all files in the provided directorys
+	 */
+	private void deleteFilesInDir(Path dir) {
+		if (!Files.exists(dir)) return;
+		try(DirectoryStream<Path> stream = Files.newDirectoryStream(dir)){
+			for (Path path : stream){
+				try{
+					if (Files.isDirectory(path)){
+						FileUtils.deleteDirectory(path.toFile());
+					}else{
+						Files.delete(path);
+					}
+				}catch (Exception ex){
+					logger.log(Level.WARNING, "Unable to cleanup file: " + path.toString(), ex); //$NON-NLS-1$
+				}
+			}
+		}catch (Exception ex){
+			logger.log(Level.WARNING, "Unable to list files in directory for cleaning.", ex); //$NON-NLS-1$
 		}
 	}
 	

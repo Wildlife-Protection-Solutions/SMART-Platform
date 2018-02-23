@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -108,6 +109,12 @@ public class ReportApi extends HttpServlet{
 	
 	public static final String PATH = "report"; //$NON-NLS-1$
 
+	/**
+	 * Output directory for images included in reports
+	 * Files are cleaned out of this directory when the cleanup job is run
+	 */
+	public static final String REPORT_IMAGES_DIR = "/images/report"; //$NON-NLS-1$
+	
 	@Context private ServletContext context; 
 	@Context private HttpServletRequest request;
 	
@@ -182,6 +189,8 @@ public class ReportApi extends HttpServlet{
 				Report.REPORT_DIR,
 				report.getFilename());
 
+			java.nio.file.Path p = Paths.get(context.getRealPath(REPORT_IMAGES_DIR));
+			if (!Files.exists(p)) Files.createDirectories(p);
 			
 			try(InputStream inStream = Files.newInputStream(reportFile)){
 					final IReportRunnable design = engine.openReportDesign(inStream);
@@ -190,8 +199,8 @@ public class ReportApi extends HttpServlet{
 					RenderOption options ;
 					if (rformat == ReportFormat.HTML){
 						options = new HTMLRenderOption();
-						((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + "/images"); //$NON-NLS-1$
-						((HTMLRenderOption)options).setImageDirectory(context.getRealPath("/images")); //$NON-NLS-1$
+						((HTMLRenderOption)options).setBaseImageURL(request.getContextPath() + REPORT_IMAGES_DIR); 
+						((HTMLRenderOption)options).setImageDirectory(context.getRealPath(REPORT_IMAGES_DIR)); 
 						options.setOutputFormat(HTMLRenderOption.HTML);
 					}else{
 						options = new RenderOption();

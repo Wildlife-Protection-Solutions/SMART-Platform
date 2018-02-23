@@ -45,6 +45,7 @@ import javax.media.jai.JAI;
 import javax.media.jai.OperationRegistry;
 import javax.media.jai.RegistryElementDescriptor;
 import javax.media.jai.RegistryMode;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -350,10 +351,10 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(numthreads);
 		sce.getServletContext().setAttribute(EXECUTOR_KEY, scheduler);
 		
-		initCleanUpJob(sf, scheduler);
+		initCleanUpJob(sf, scheduler, sce.getServletContext());
 	}
 	
-	private void initCleanUpJob(SessionFactory sf, ScheduledExecutorService scheduler){
+	private void initCleanUpJob(SessionFactory sf, ScheduledExecutorService scheduler, ServletContext context){
 		Integer cleanUpSchedule = 24;
 		try{
 			cleanUpSchedule = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL);
@@ -361,7 +362,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL.key, ex); //$NON-NLS-1$
 		}
 		if (cleanUpSchedule >= 0){
-			CleanUpJob job = new CleanUpJob(sf);
+			CleanUpJob job = new CleanUpJob(sf, context);
 			scheduler.scheduleWithFixedDelay(job, 0, cleanUpSchedule, TimeUnit.HOURS);
 		}
 	}
