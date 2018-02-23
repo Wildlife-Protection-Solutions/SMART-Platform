@@ -1,15 +1,46 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.upgrade.v600;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -17,6 +48,12 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 import org.wcs.smart.util.DerbyUtils;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Scripts for upgrading from 500 to 600
+ * 
+ * @author Emily
+ *
+ */
 public class Upgrader500To600 implements IDatabaseUpgrader { 
 	private Exception thrownException = null;
 
@@ -82,12 +119,20 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 		//create qa plugin tables
 		QaPlugInInstaller.createTables(session, c);
 		
+		//ecnrypt files
+		encryptFilestoreData(c);
+		
 		/* VERSION UDATE */
 		String ssql = "update smart.db_version set version = '" + UpgradeEngine.UpgradeFromVersion.V600.toVersion + "' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$ //$NON-NLS-2$
 		c.createStatement().execute(ssql);
 		c.commit();
 	}
 
+	/**
+	 * Generate and add keys for agency upgrade
+	 * @param c
+	 * @throws SQLException
+	 */
 	private void addKeys(Connection c) throws SQLException {
 		String query = "select a.value, b.uuid as item_uuid, b.ca_uuid from smart.I18N_LABEL a, smart.agency b, smart.language c  where b.uuid = a.element_uuid and c.uuid = a.language_uuid and c.isdefault ORDER BY b.uuid"; //$NON-NLS-1$
 		
@@ -118,6 +163,76 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 				ps.executeUpdate();
 			}
 		}
+	}
+	
+	
+	/**
+	 * Here we encrypt all files in the filestore including other plugins
+	 * @param c
+	 * @throws SQLException
+	 */
+	private void encryptFilestoreData(Connection c) throws Exception {
+		//here we are encrypting all attachment files
+		String[] subDirs = new String[]
+				{"incidents", "intelligence", "intelligence2\\attachments", "patrol", "survey"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		String query = "SELECT uuid FROM smart.conservation_area"; //$NON-NLS-1$
+		
+		Path tempDir = Paths.get(SmartContext.INSTANCE.getFilestoreLocation())
+				.resolve(EncryptUtils.TEMP_DIR);
+		if (!Files.exists(tempDir)) {
+			try{
+				Files.createDirectory(tempDir);
+			}catch (Exception ex) {
+				throw new Exception("Unable to create temporary files directory in filestore.  Cannot upgrade SMART."); //$NON-NLS-1$
+			}
+		}
+		
+		try(ResultSet rs = c.createStatement().executeQuery(query)){
+			while(rs.next()) {
+				UUID cauuid = UuidUtils.byteToUUID(rs.getBytes(1));
+				String uuid = UuidUtils.uuidToString( cauuid );
+				
+				Path caPath = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(uuid);
+				
+				for (String subDir : subDirs) {
+					Path p = caPath.resolve(subDir);
+					if (!Files.exists(p)) continue; 	//nothing in this directory
+					
+					List<Path> allFiles = null;
+					//walk directory recursively and encrypt files
+					try {
+						allFiles = Files.walk(p)
+								.filter(Files::isRegularFile)
+								.collect(Collectors.toList());
+					}catch (Exception ex) {
+						throw new Exception("Unable to determine files to encrypt in filestore: " + p.toString(), ex); //$NON-NLS-1$
+					}
+					
+					if (allFiles == null) continue;
+					for (Path file : allFiles) {
+						//don't encrypt files in root directory except the intelligence2 attachments dir
+						if (file.getParent().equals(p) && !subDir.equals(subDirs[2])) return;	
+						
+						//encrypt the files
+						Path outputFile = tempDir.resolve(file.getFileName().toString());
+						try {
+							EncryptUtils.encryptFile(file, outputFile,  cauuid);
+						} catch (Exception e) {
+							throw new Exception("Unable to encrypt filestore file: " + file.toString(), e); //$NON-NLS-1$
+						}
+						
+						//copy file
+						try {
+							Files.copy(outputFile, file, StandardCopyOption.REPLACE_EXISTING);
+						} catch (IOException e) {
+							throw new Exception("Unable to encrypt filestore file.  Unable to encrypted files to original location " + file.toString(), e); //$NON-NLS-1$
+						}				
+					};
+				}
+				
+			}
+		}
+		
 	}
 	
 	private void upgradeConfigurableModel(Connection c) throws Exception {
