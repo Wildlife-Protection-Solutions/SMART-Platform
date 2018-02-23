@@ -30,7 +30,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -132,60 +134,63 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 	 * @param c
 	 * @throws SQLException
 	 */
-	private void encryptFilestoreData(Connection c) throws SQLException {
+	private void encryptFilestoreData(Connection c) throws Exception {
 		//here we are encrypting all attachment files
 		String[] subDirs = new String[]
-				{"incidents", "intelligence", "intelligence2/attachments", "patrol", "survey"};
-		String query = "SELECT uuid FROM smart.conservation_area";
+				{"incidents", "intelligence", "intelligence2\\attachments", "patrol", "survey"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		String query = "SELECT uuid FROM smart.conservation_area"; //$NON-NLS-1$
 		
 		Path tempDir = Paths.get(SmartContext.INSTANCE.getFilestoreLocation())
 				.resolve(EncryptUtils.TEMP_DIR);
+		if (!Files.exists(tempDir)) {
+			try{
+				Files.createDirectory(tempDir);
+			}catch (Exception ex) {
+				throw new Exception("Unable to create temporary files directory in filestore.  Cannot upgrade SMART."); //$NON-NLS-1$
+			}
+		}
 		
 		try(ResultSet rs = c.createStatement().executeQuery(query)){
 			while(rs.next()) {
 				UUID cauuid = UuidUtils.byteToUUID(rs.getBytes(1));
 				String uuid = UuidUtils.uuidToString( cauuid );
 				
-				Path caPath = Paths.get(SmartContext.INSTANCE.getFilestoreLocation())
-						.resolve(uuid);
-				
+				Path caPath = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(uuid);
 				
 				for (String subDir : subDirs) {
 					Path p = caPath.resolve(subDir);
 					if (!Files.exists(p)) continue; 	//nothing in this directory
+					
+					List<Path> allFiles = null;
 					//walk directory recursively and encrypt files
 					try {
-						Files.walk(p)
-						.filter(Files::isRegularFile)
-						.forEach(file->{
-							if (file.getParent().equals(p)) return;	//don't encrypt files in root directory
-							//encrypt the files
-							Path outputFile = tempDir.resolve(p.getFileName().toString());
-							
-							try {
-								EncryptUtils.encryptFile(p, outputFile,  cauuid);
-							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-								System.out.println("ENCRYPTION FAILED");
-							}
-							
-							//copy file
-							try {
-								Files.copy(outputFile, p, StandardCopyOption.REPLACE_EXISTING);
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-								System.out.println("ENCRYPTION FAILED - copy failed");
-							}
-							
-							
-						});
+						allFiles = Files.walk(p)
+								.filter(Files::isRegularFile)
+								.collect(Collectors.toList());
 					}catch (Exception ex) {
-						ex.printStackTrace();
-						System.out.println("ENCRYPTION FAILED");
+						throw new Exception("Unable to determine files to encrypt in filestore: " + p.toString(), ex); //$NON-NLS-1$
 					}
 					
+					if (allFiles == null) continue;
+					for (Path file : allFiles) {
+						//don't encrypt files in root directory except the intelligence2 attachments dir
+						if (file.getParent().equals(p) && !subDir.equals(subDirs[2])) return;	
+						
+						//encrypt the files
+						Path outputFile = tempDir.resolve(file.getFileName().toString());
+						try {
+							EncryptUtils.encryptFile(file, outputFile,  cauuid);
+						} catch (Exception e) {
+							throw new Exception("Unable to encrypt filestore file: " + file.toString(), e); //$NON-NLS-1$
+						}
+						
+						//copy file
+						try {
+							Files.copy(outputFile, file, StandardCopyOption.REPLACE_EXISTING);
+						} catch (IOException e) {
+							throw new Exception("Unable to encrypt filestore file.  Unable to encrypted files to original location " + file.toString(), e); //$NON-NLS-1$
+						}				
+					};
 				}
 				
 			}
