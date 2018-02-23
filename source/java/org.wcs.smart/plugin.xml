@@ -1657,6 +1657,12 @@
             name="Smart Legend Renderer">
       </renderer>
    </extension>
+   <extension
+         point="org.wcs.smart.dbStartUp">
+      <StartUpRunner
+            class="org.wcs.smart.startup.EncryptCleanUp">
+      </StartUpRunner>
+   </extension>
 
 </plugin>
 

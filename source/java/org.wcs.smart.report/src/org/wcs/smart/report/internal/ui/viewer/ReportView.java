@@ -22,7 +22,11 @@
 package org.wcs.smart.report.internal.ui.viewer;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
@@ -30,6 +34,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -50,7 +55,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.birt.ui.ReportEngineManager;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.IReportListener;
@@ -64,6 +71,7 @@ import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -85,9 +93,19 @@ public class ReportView implements IReportListener{
 
 	@Inject private MPart part;
 
+	private Path imageDirectory;
+	
 	Job reportRunner = new Job(Messages.ReportView_PreviewReportJobName){
 		
 		protected IStatus run(IProgressMonitor monitor) {
+			cleanUpFiles();
+			imageDirectory = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(EncryptUtils.TEMP_DIR).resolve(UuidUtils.uuidToString(report.getUuid()));
+			try {
+				Files.createDirectories(imageDirectory);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			try{
 				try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
 					HTMLRenderOption options = new HTMLRenderOption();
@@ -95,6 +113,7 @@ public class ReportView implements IReportListener{
 					options.setOutputStream(bos);
 					options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
 					options.setOutputFormat(HTMLRenderOption.HTML);
+					options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, imageDirectory);
 					
 					try(Session s = HibernateManager.openSession()){
 						try {
@@ -121,6 +140,7 @@ public class ReportView implements IReportListener{
 								throw new IllegalStateException(Messages.ReportView_UTF8NotSupported);
 							}
 						}});
+					
 				}
 		} catch (Exception e) {
 			ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportView_RunReportError1, new Object[]{report.getName()}) + e.getLocalizedMessage(), e);
@@ -131,6 +151,19 @@ public class ReportView implements IReportListener{
 	@PreDestroy
 	public void dispose(){
 		ReportEventManager.getInstance().removeReportListener(this);
+		cleanUpFiles();
+	}
+	
+	private void cleanUpFiles() {
+		Path cleanUp = imageDirectory;
+		if (cleanUp == null) return;
+		
+		try {
+			FileUtils.deleteDirectory(cleanUp.toFile());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 

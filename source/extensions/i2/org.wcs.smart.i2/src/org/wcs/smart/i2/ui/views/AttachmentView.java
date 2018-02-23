@@ -23,6 +23,8 @@ package org.wcs.smart.i2.ui.views;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -52,6 +54,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
@@ -117,7 +120,21 @@ public class AttachmentView {
 		
 		rawImage = context.get(Image.class);
 		IntelAttachment att = context.get(IntelAttachment.class);
-		exifTransform = SmartUtils.getExifImageTransform(att.getAttachmentFile(), rawImage.getBounds().width, rawImage.getBounds().height);
+		try {
+			Path temp = EncryptUtils.decryptAttachment(att);
+			try {
+				exifTransform = SmartUtils.getExifImageTransform(temp.toFile(), rawImage.getBounds().width, rawImage.getBounds().height);
+			}finally {
+				if (temp != null) {
+					try {
+						Files.delete(temp);
+					}catch (Exception ex) {}
+				}
+			}
+		}catch (Exception ex) {
+			//eatme
+		}
+		
 		
 		if (exifTransform != null){
 			float[] bounds = new float[]{0,0,rawImage.getBounds().width, rawImage.getBounds().height};

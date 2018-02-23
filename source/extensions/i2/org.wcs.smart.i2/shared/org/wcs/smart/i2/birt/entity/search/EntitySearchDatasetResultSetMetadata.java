@@ -80,7 +80,7 @@ public class EntitySearchDatasetResultSetMetadata implements IResultSetMetaData 
 				if (entity.getPrimaryAttachment() == null){
 					return null;
 				}
-				return entity.getPrimaryAttachment().getAttachmentFile().getCanonicalFile().toURI().toString();
+				return entity.getPrimaryAttachment().getAttachmentFile();
 			}
 			return null;
 		}

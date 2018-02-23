@@ -21,17 +21,13 @@
  */
 package org.wcs.smart.i2.birt.record.entities;
 
-import java.io.IOException;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
-import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetResultSetMetadata;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.util.UuidUtils;
 
@@ -72,13 +68,7 @@ public class RecordEntityDatasetResultSetMetadata implements IResultSetMetaData 
 				return entityrecord.getEntity().getIdAttributeAsText(l);
 			case ENTITY_IMAGE:
 				if (entityrecord.getEntity().getPrimaryAttachment() == null) return null;
-				try {
-					return entityrecord.getEntity().getPrimaryAttachment().getAttachmentFile().getCanonicalFile().toURI().toString();
-				} catch (IOException e) {
-					Logger.getLogger(EntityAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
-				}
-				return null;
-			
+				return entityrecord.getEntity().getPrimaryAttachment();
 			default:
 				break;
 			}

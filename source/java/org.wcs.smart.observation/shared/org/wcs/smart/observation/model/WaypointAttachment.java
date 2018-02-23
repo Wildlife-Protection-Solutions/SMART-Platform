@@ -32,6 +32,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.util.UuidUtils;
 
@@ -109,6 +110,11 @@ public class WaypointAttachment extends ISmartAttachment {
 			}
 		}
 		return null;
+	}
+	
+	@Transient
+	public ConservationArea getConservationArea() {
+		return this.wp.getConservationArea();
 	}
 }
 

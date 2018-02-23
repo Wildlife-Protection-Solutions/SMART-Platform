@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.i2.search.attachment;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +30,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.FileCharSequence;
 import org.wcs.smart.i2.internal.Messages;
@@ -53,15 +55,23 @@ public class TextFileSearcher implements IFileSearcher {
 		Matcher fMatcher = Pattern.compile(searchString, Pattern.CASE_INSENSITIVE).matcher(searchString);
 		
 		int k = 0;
-		File file = null;
+		Path file = null;
+		boolean deleteme = false;
 		if (attachment.getCopyFromLocation() != null){
-			file = attachment.getCopyFromLocation();
+			file = attachment.getCopyFromLocation().toPath();
 		}else{
-			file = attachment.getAttachmentFile();
+			try {
+				file = EncryptUtils.decryptAttachment(attachment);
+				deleteme = true;
+			}catch (Exception ex) {
+				SearchResult errorResult = new SearchResult(attachment, Messages.TextFileSearcher_ErrorItemName, "Unable to decrypt file", 0,0);
+				collector.addMatch(errorResult);
+				return;
+			}
 		}		
 		
 		try{
-			try(FileCharSequence sequence = new FileCharSequence(file)){
+			try(FileCharSequence sequence = new FileCharSequence(file.toFile())){
 			
 				fMatcher.reset(sequence);
 				int matchCount = 0;
@@ -97,6 +107,12 @@ public class TextFileSearcher implements IFileSearcher {
 		}catch (Exception ex){
 			SearchResult errorResult = new SearchResult(attachment, Messages.TextFileSearcher_ErrorItemName, ex.getMessage(), 0,0);
 			collector.addMatch(errorResult);
+		}finally {
+			if (deleteme) {
+				try {
+					Files.delete(file);
+				}catch (Exception ex) {}
+			}
 		}
 	}
 

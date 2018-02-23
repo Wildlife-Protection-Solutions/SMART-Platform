@@ -62,6 +62,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.startup.EncryptCleanUp;
 
 /**
  * Smart Workbench Window Advisor.
@@ -112,6 +113,11 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 			} catch (Exception e) {
 			}
 			
+			//delete temporary files directory
+			try {
+				(new EncryptCleanUp()).run(null);
+			} catch (Exception e) {
+			}
 		}
 	};
 	

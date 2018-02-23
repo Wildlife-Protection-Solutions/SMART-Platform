@@ -21,10 +21,7 @@
  */
 package org.wcs.smart.i2.birt.record.attachment;
 
-import java.io.IOException;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
@@ -70,13 +67,7 @@ public class RecordAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 			case DATE_CREATED:
 				return record.getAttachment().getDateCreated();
 			case PATH:
-				try {
-					return record.getAttachment().getAttachmentFile().getCanonicalFile().toURI().toString();
-				} catch (IOException e) {
-					Logger.getLogger(RecordAttachmentDatasetResultSetMetadata.class.getName()).log(Level.INFO, e.getMessage(), e); 
-				}
-				return null;
-			
+				return record.getAttachment();
 			default:
 				break;
 			}

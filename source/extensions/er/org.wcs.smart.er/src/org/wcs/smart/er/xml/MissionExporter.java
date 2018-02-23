@@ -34,6 +34,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
@@ -167,14 +168,11 @@ public class MissionExporter {
 				}
 			}
 			for (ISmartAttachment att : allAttach){
-				File attFile = att.getAttachmentFile();
 				zout.putNextEntry(new ZipEntry(MissionXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
-
-				
-				try(FileInputStream inStream = new FileInputStream(attFile)) {
-					while ((bytesRead = inStream.read(buffer)) > 0) {
-						zout.write(buffer, 0, bytesRead);
-					}
+				try {
+					EncryptUtils.decryptAttachment(att, zout);
+				}catch (Exception ex) {
+					//eat me
 				}
 			}
 		}

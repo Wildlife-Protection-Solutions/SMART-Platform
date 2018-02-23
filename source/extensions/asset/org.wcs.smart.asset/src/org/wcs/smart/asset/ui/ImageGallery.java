@@ -1,6 +1,28 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.ui;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -351,49 +373,51 @@ public class ImageGallery extends Composite{
 		private void createNode() {
 			imageNode = null;
 	        try {
-	            final Image image = new Image(new FileInputStream(file.getAttachmentFile()), thumbSize, thumbSize, true, true);
-	            ImageView imageView = new ImageView(image);
-	            
-	            imageNode = new BorderPane(imageView);
-	            imageNode.setPrefHeight(thumbSize);
-	            imageNode.setPrefWidth(thumbSize);
-	            
-	            updateStyle();
-	            
-	            imageNode.setOnMouseEntered(new EventHandler<MouseEvent>() {
-					@Override
-					public void handle(MouseEvent event) {
-						mouseOver = true;
-						updateStyle();
-					}
-	            	
-	            });
-	            
-	            imageNode.setOnMouseExited(new EventHandler<MouseEvent>() {
-					@Override
-					public void handle(MouseEvent event) {
-						mouseOver = false;
-						updateStyle();		
-					}
-	            	
-	            });
-	            
-	            imageNode.setOnMouseClicked(new EventHandler<MouseEvent>() {
-					@Override
-					public void handle(MouseEvent event) {
-						changeSelection(event);
-						updateStyle();
-						
-						if (event.getButton() == MouseButton.SECONDARY) {
-							//show menu
-							Point p = ImageGallery.this.toDisplay((int)event.getSceneX(), (int)event.getSceneY());
-							if (thumbMenu != null) thumbMenu.show(imageNode, p.x, p.y);
+	        	//these "attachments" are not encrypted so we can access the files directly
+	        	try(InputStream is = Files.newInputStream(file.getAttachmentFile().toPath())){
+		            final Image image = new Image(is, thumbSize, thumbSize, true, true);
+		            ImageView imageView = new ImageView(image);
+	        	
+		            imageNode = new BorderPane(imageView);
+		            imageNode.setPrefHeight(thumbSize);
+		            imageNode.setPrefWidth(thumbSize);
+		            
+		            updateStyle();
+		            
+		            imageNode.setOnMouseEntered(new EventHandler<MouseEvent>() {
+						@Override
+						public void handle(MouseEvent event) {
+							mouseOver = true;
+							updateStyle();
 						}
-						event.consume();
-					}
-	            	
-	            });
-	            
+		            	
+		            });
+		            
+		            imageNode.setOnMouseExited(new EventHandler<MouseEvent>() {
+						@Override
+						public void handle(MouseEvent event) {
+							mouseOver = false;
+							updateStyle();		
+						}
+		            	
+		            });
+		            
+		            imageNode.setOnMouseClicked(new EventHandler<MouseEvent>() {
+						@Override
+						public void handle(MouseEvent event) {
+							changeSelection(event);
+							updateStyle();
+							
+							if (event.getButton() == MouseButton.SECONDARY) {
+								//show menu
+								Point p = ImageGallery.this.toDisplay((int)event.getSceneX(), (int)event.getSceneY());
+								if (thumbMenu != null) thumbMenu.show(imageNode, p.x, p.y);
+							}
+							event.consume();
+						}
+		            	
+		            });
+	        	}		            
 	        }catch (Exception ex) {
 	        	AssetPlugIn.log(ex.getMessage(), ex);
 	        	imageNode = new BorderPane();

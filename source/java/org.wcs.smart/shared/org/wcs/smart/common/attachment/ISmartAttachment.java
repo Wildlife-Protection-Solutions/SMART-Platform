@@ -30,6 +30,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 
 /**
@@ -127,4 +128,13 @@ public abstract class ISmartAttachment extends UuidItem{
 	 */
 	@Transient
 	protected abstract String getDatastoreFolderPath(Session session) throws Exception;
+
+	/**
+	 * The conservation area associated with the attachment
+	 * @param session
+	 * @return
+	 * @throws Exception
+	 */
+	@Transient
+	public abstract ConservationArea getConservationArea();
 }

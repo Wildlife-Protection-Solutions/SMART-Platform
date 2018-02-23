@@ -46,6 +46,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
+import org.wcs.smart.cipher.EncryptUtils;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -120,7 +122,7 @@ public class RecordXmlExporter {
 		RecordType xmlRecord = null;
 		String fileName = null;
 		Path outputFile = null;
-		List<File> attachmentsToInclude = new ArrayList<File>();
+		List<ISmartAttachment> attachmentsToInclude = new ArrayList<>();
 			
 		try(Session session = HibernateManager.openSession()){
 			IntelRecord record = (IntelRecord) session.get(IntelRecord.class, recordUuid);
@@ -230,7 +232,7 @@ public class RecordXmlExporter {
 					AttachmentType xmlAttachment = factory.createAttachmentType();
 					xmlAttachment.setFilename(attachment.getAttachment().getFilename());
 					xmlRecord.getAttachments().add(xmlAttachment);
-					attachmentsToInclude.add(attachment.getAttachment().getAttachmentFile());
+					attachmentsToInclude.add(attachment.getAttachment());
 					
 					//entity attachments
 					for (IntelEntityRecord entity : record.getEntities()){
@@ -327,8 +329,12 @@ public class RecordXmlExporter {
 		if (attachmentsToInclude.size() > 0){
 			attachDir = tempDir.resolve(ATTACHMENT_DIR);
 			Files.createDirectory(attachDir);
-			for (File f : attachmentsToInclude){
-				Files.copy(f.toPath(), attachDir.resolve(f.getName()));
+			for (ISmartAttachment f : attachmentsToInclude){
+				try {
+					EncryptUtils.decryptAttachment(f, attachDir.resolve(f.getFilename()));
+				}catch (Exception ex) {
+					//unable to decrypt
+				}
 			}
 		}
 		progress.worked(1);

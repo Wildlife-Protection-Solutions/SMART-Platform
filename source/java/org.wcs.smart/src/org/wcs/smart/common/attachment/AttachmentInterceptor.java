@@ -32,6 +32,7 @@ import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.hibernate.SessionInterceptor;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -149,19 +150,22 @@ public class AttachmentInterceptor extends SessionInterceptor {
     				}
     				to = new File(to.getParentFile(), basename + extension);
     			}
-    			if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){
-    				throw new RuntimeException(getExceptionErrorMessage());
-    			}else{
-    				//state is what is written to db and should be updated
-    				attachment.setFilename(to.getName());
-    				for (int i = 0; i < propertyNames.length;i++){
-    					if (propertyNames[i].equals("filename")){ //$NON-NLS-1$
-    						state[i] = to.getName();
-    					}
-    				}
-    				attachment.setCopyFromLocation(null);
-    				attachment.computeFileLocation(to);
+    			try {
+    				EncryptUtils.encryptFile(attachment.getCopyFromLocation().toPath(), to.toPath(), attachment);
+    			}catch (Exception ex) {
+    				throw new RuntimeException(getExceptionErrorMessage() + ": " + ex.getMessage()); //$NON-NLS-1$
     			}
+    			
+    			//state is what is written to db and should be updated
+    			attachment.setFilename(to.getName());
+    			for (int i = 0; i < propertyNames.length;i++){
+    				if (propertyNames[i].equals("filename")){ //$NON-NLS-1$
+    					state[i] = to.getName();
+    				}
+    			}
+    			attachment.setCopyFromLocation(null);
+    			attachment.computeFileLocation(to);
+    			
     		}
     		
     	}

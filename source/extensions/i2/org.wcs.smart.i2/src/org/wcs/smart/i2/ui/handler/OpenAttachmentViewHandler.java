@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.handler;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.ui.views.AttachmentView;
@@ -53,8 +56,18 @@ public class OpenAttachmentViewHandler {
 	public void execute(IntelAttachment attachment, IEclipseContext context){
 		Image rawImage = null;
 		try{
-			rawImage = new Image(Display.getDefault(), attachment
-					.getAttachmentFile().getAbsolutePath());
+			Path p = EncryptUtils.decryptAttachment(attachment);
+			try {
+				rawImage = new Image(Display.getDefault(), p.toString());
+			}finally {
+				if (p != null) {
+					try {
+						Files.delete(p);
+					}catch (Exception ex) {
+						
+					}
+				}
+			}
 		}catch (Exception ex){
 			MessageDialog.openError(context.get(Shell.class), Messages.OpenAttachmentViewHandler_InvalidTitle, Messages.OpenAttachmentViewHandler_InvalidMsg);
 			return;

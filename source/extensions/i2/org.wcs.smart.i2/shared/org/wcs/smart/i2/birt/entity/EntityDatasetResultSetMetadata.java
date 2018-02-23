@@ -81,11 +81,11 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 			if (this == DATE_MODIFIED) return entity.getDateModified();
 			if (this == CREATED_BY) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getCreatedBy(), l);
 			if (this == MODIFIED_BY) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(entity.getLastModifiedBy(), l);
-			if (this == PRIMARY_IMAGE){
+			if (this == PRIMARY_IMAGE) { 
 				if (entity.getPrimaryAttachment() == null){
 					return null;
 				}
-				return entity.getPrimaryAttachment().getAttachmentFile().getCanonicalFile().toURI().toString();
+				return entity.getPrimaryAttachment();
 			}
 			return null;
 		}

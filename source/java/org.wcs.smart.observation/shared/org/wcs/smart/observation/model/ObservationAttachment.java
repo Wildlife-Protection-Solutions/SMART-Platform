@@ -106,4 +106,8 @@ public class ObservationAttachment extends ISmartAttachment {
 		return null;
 	}
 
+	@Transient
+	public ConservationArea getConservationArea() {
+		return this.observation.getWaypoint().getConservationArea();
+	}
 }

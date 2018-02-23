@@ -22,6 +22,8 @@
 package org.wcs.smart.ui;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +46,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.util.SmartUtils;
@@ -192,54 +195,70 @@ public class Thumbnail {
 				return Status.OK_STATUS;
 			try {
 				File file = null;
-				if (attachment.getCopyFromLocation() != null) {
-					file = attachment.getCopyFromLocation();
-				} else {
-					file = attachment.getAttachmentFile();
-				}
-
-				if (file.length() > 200 * Math.pow(10, 6)) {
-					// skip images > 200MB
-					return Status.OK_STATUS;
-				}
-
-				Image rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
-
-				// scale image
-				Rectangle bounds = rawImage.getBounds();
-				int x = 0, y = 0, width = 0, height = 0;
-				if (bounds.width > bounds.height) {
-					width = thumbnailSize;
-					height = bounds.height * thumbnailSize / bounds.width;
-					y = (thumbnailSize - height) / 2;
-				} else {
-					height = thumbnailSize;
-					width = bounds.width * thumbnailSize / bounds.height;
-					x = (thumbnailSize - width) / 2;
-				}
-				// resize image
-				Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-				GC gc = new GC(image2);
-				gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
-				rawImage.dispose();
-
-				// transform based on exif orientation data
-				Transform imageTransform = SmartUtils.getExifImageTransform(file, thumbnailSize, thumbnailSize);
-				if (imageTransform != null) {
-					Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
-					GC gc3 = new GC(image3);
-					gc3.setTransform(imageTransform);
-					gc3.drawImage(image2, 0, 0);
-					image2.dispose();
-					image = image3;
-				} else {
-					image = image2;
-				}
-				if (thumbnailComposite != null) {
-					Display.getDefault().syncExec(() -> {
-						if (!thumbnailComposite.isDisposed())
-							thumbnailComposite.redraw();
-					});
+				boolean deleteMe = false;
+				try {
+					if (attachment.getCopyFromLocation() != null) {
+						file = attachment.getCopyFromLocation();
+					} else {
+						deleteMe = true;
+						try {
+							Path p = EncryptUtils.decryptAttachment(attachment);
+							if (p != null) file = p.toFile();		
+						}catch (Exception ex) {
+							file = null;
+						}
+						
+					}
+					
+					if (file == null || file.length() > 200 * Math.pow(10, 6)) {
+						// skip images > 200MB
+						return Status.OK_STATUS;
+					}
+	
+					Image rawImage = new Image(Display.getDefault(), file.getAbsolutePath());
+	
+					// scale image
+					Rectangle bounds = rawImage.getBounds();
+					int x = 0, y = 0, width = 0, height = 0;
+					if (bounds.width > bounds.height) {
+						width = thumbnailSize;
+						height = bounds.height * thumbnailSize / bounds.width;
+						y = (thumbnailSize - height) / 2;
+					} else {
+						height = thumbnailSize;
+						width = bounds.width * thumbnailSize / bounds.height;
+						x = (thumbnailSize - width) / 2;
+					}
+					// resize image
+					Image image2 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
+					GC gc = new GC(image2);
+					gc.drawImage(rawImage, 0, 0, bounds.width, bounds.height, x, y, width, height);
+					rawImage.dispose();
+	
+					// transform based on exif orientation data
+					Transform imageTransform = SmartUtils.getExifImageTransform(file, thumbnailSize, thumbnailSize);
+					if (imageTransform != null) {
+						Image image3 = new Image(Display.getDefault(), thumbnailSize, thumbnailSize);
+						GC gc3 = new GC(image3);
+						gc3.setTransform(imageTransform);
+						gc3.drawImage(image2, 0, 0);
+						image2.dispose();
+						image = image3;
+					} else {
+						image = image2;
+					}
+					if (thumbnailComposite != null) {
+						Display.getDefault().syncExec(() -> {
+							if (!thumbnailComposite.isDisposed())
+								thumbnailComposite.redraw();
+						});
+					}
+				}finally {
+					if (deleteMe && file != null) {
+						try {
+							Files.delete(file.toPath());
+						}catch (Exception ex) {}
+					}
 				}
 			} catch (SWTException ex) {
 				// eatme
