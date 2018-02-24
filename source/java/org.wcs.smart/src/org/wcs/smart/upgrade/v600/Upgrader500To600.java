@@ -211,7 +211,7 @@ public class Upgrader500To600 implements IDatabaseUpgrader {
 					if (allFiles == null) continue;
 					for (Path file : allFiles) {
 						//don't encrypt files in root directory except the intelligence2 attachments dir
-						if (file.getParent().equals(p) && !subDir.equals(subDirs[2])) return;	
+						if (file.getParent().equals(p) && !subDir.equals(subDirs[2])) continue;	
 						
 						//encrypt the files
 						Path outputFile = tempDir.resolve(file.getFileName().toString());
