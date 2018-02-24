@@ -1918,7 +1918,12 @@ ALTER TABLE smart.patrol ADD FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.PATROL_F
 
 CREATE TRIGGER trg_patrol_folder AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_folder FOR EACH ROW execute procedure connect.trg_changelog_common();
 
+
+-- UPDATE VERSION
+ALTER TABLE connect.connect_version ADD COLUMN filestore_version varchar(5) default '-1';
+
 UPDATE connect.connect_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
 UPDATE connect.ca_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
 update connect.connect_version set version = '6.0.0';
-
+--flag the filestore as not upgraded; this will require administrator to upgrade before you can login
+update connect.connect_version set filestore_version = '5.0.0';

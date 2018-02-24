@@ -1,0 +1,45 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+	<%@include file="includes.jsp" %>
+	<title><fmt:message key="upgrade.pagetitle"/></title>
+</head>
+
+<body style="${style_bodycss}">
+<div id="mainheader" <c:if test="${not empty style_headercss}"> style="${style_headercss}" </c:if>  >
+<c:out value="${empty style_headername ? 'SMART Connect' : style_headername}"/>
+</div>
+
+<div style="display:block; padding:20px">
+<div class="pageheader"><fmt:message key="upgrade.pagetitle"/></div>
+
+<c:set var="errmsg"  value="${requestScope['org.wcs.smart.upgrade']}"/>
+<c:if test="${errmsg == 'NOACTION'}">
+<br/>
+<p><fmt:message key="upgrade.uptodate"/></p>
+</c:if>
+
+<c:if test="${errmsg == 'UPGRADE_COMPLETE'}">
+<br/>
+<p><fmt:message key="upgrade.upgradeok"/></p>
+</c:if>
+
+<c:if test="${errmsg == 'RUNNING'}">
+<br/>
+<p><fmt:message key="upgrade.running"/></p>
+</c:if>
+
+<c:if test="${errmsg == 'UPGRADE_ERROR'}">
+<br/>
+<p style="font-weight:bold; font-size:1.5em"><fmt:message key="upgrade.upgradefailheader"/></p>
+<p><fmt:message key="upgrade.upgradefailmsg1"/></p>
+<br>
+<p><fmt:message key="upgrade.upgradefailmsg2"/></p>
+</c:if>
+
+<p style="padding-top:10px"><a href="${pageContext.request.contextPath}/connect/home">Connect Home</a></p>
+</div>
+</body>
+</html>
