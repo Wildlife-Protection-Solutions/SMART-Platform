@@ -13,7 +13,9 @@ var startDatePicker, endDatePicker;
 var shpValues = ["entityobservation", "entitywaypoint","intelligencerecord",  "surveymission",
                  "surveymissiontrack", "observationobservation", "observationwaypoint", 
                  "patrolobservation", "patrolquery", "patrolwaypoint", 
-                 "surveyobservation", "surveywaypoint"];
+                 "surveyobservation", "surveywaypoint",
+                 "assetobservation", "assetwaypoint"
+                 ];
 
 var tifValues = ["entitygrid", "observationgrid","patrolgrid",  "surveygrid"];
 
