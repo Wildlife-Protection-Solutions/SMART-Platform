@@ -374,10 +374,15 @@ public class ImageGallery extends Composite{
 			imageNode = null;
 	        try {
 	        	//these "attachments" are not encrypted so we can access the files directly
+	        	double[] transform = SmartUtils.getExifRotation(file.getAttachmentFile());
 	        	try(InputStream is = Files.newInputStream(file.getAttachmentFile().toPath())){
 		            final Image image = new Image(is, thumbSize, thumbSize, true, true);
 		            ImageView imageView = new ImageView(image);
-	        	
+		            
+		            imageView.setScaleX(transform[1]);
+		            imageView.setScaleY(transform[2]);
+		            imageView.setRotate(transform[0]);
+		            
 		            imageNode = new BorderPane(imageView);
 		            imageNode.setPrefHeight(thumbSize);
 		            imageNode.setPrefWidth(thumbSize);

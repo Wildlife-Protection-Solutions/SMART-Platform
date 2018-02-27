@@ -599,6 +599,55 @@ public class SmartUtils {
 		return toReplace.replaceAll(search, replace);
 	}
 	
+	/**
+	 * Get the rotation in degrees of the image from the metadata.  Will return
+	 * 0 if it cannot be found.
+	 *   
+	 * @param file
+	 * @param width
+	 * @param height
+	 * @return scalex, scaley, rotation - assumption is the scaling is applied before rotation
+	 */
+	public static double[] getExifRotation(File file){
+		
+		Metadata metadata = null;
+		try {
+			metadata = ImageMetadataReader.readMetadata(file.getAbsoluteFile());
+		} catch (Exception e) {
+			return new double[] {0,1,1};
+		}
+		ExifIFD0Directory exifIFD0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+		int orientation = 1;
+		try {
+			if (exifIFD0Directory != null && exifIFD0Directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)){
+				orientation = exifIFD0Directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+			}
+		} catch (Exception ex) {
+			return new double[] {0,1,1};
+		}	
+		
+		switch (orientation) {
+		case 1:
+			return new double[] {0,1,1}; //default
+		case 2: // Flip X
+			return new double[] {0,-1,1};
+		case 3: // PI rotation
+			return new double[] {180,1,1};
+		case 4: // Flip Y
+			return new double[] {0,1,-1};
+		case 5: // - PI/2 and Flip X
+			return new double[] {90,1,-1};
+		case 6: // -PI/2 and -width 
+			return new double[] {90,1,1};
+		case 7: // PI/2 and Flip
+			return new double[] {270,1,-1};
+		case 8: // PI / 2
+			return new double[] {270,1,1};
+		default:
+			return new double[] {0,1,1};
+		}
+	}
+
 	public static Transform getExifImageTransform(File file, int width, int height){
 		
 		Metadata metadata = null;
