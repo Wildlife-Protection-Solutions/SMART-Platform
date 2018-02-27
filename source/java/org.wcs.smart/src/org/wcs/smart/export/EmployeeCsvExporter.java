@@ -72,7 +72,11 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 				data[0] = employee.getId();
 				data[1] = employee.getGivenName();
 				data[2] = employee.getFamilyName();
-				data[3] = dateFormat.format(employee.getBirthDate());
+				if (employee.getBirthDate() == null) {
+					data[3] = null;
+				}else{
+					data[3] = dateFormat.format(employee.getBirthDate());
+				}
 				data[4] = String.valueOf(employee.getGender());
 				data[5] = dateFormat.format(employee.getStartEmploymentDate());
 				Date endDate = employee.getEndEmploymentDate();
