@@ -30,6 +30,7 @@ import java.util.Locale;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -54,6 +55,7 @@ import org.wcs.smart.i2.query.observation.filter.EntityTypeFilter;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -226,6 +228,20 @@ public class DropItemFactory {
 					labels.add(i.getName());
 					keys.add(i.getKeyId());
 				}
+			}
+			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+			item.setInitialValue(filter.getKeyValue());
+			return Collections.singletonList(item);
+		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.EMPLOYEE){
+			final List<String> labels = new ArrayList<String>();
+			final List<String> keys = new ArrayList<String>();
+			labels.add(ANY_LABEL);
+			keys.add(IQueryFilter.ANY_OPTION_KEY);
+
+			List<Employee> emps = QueryFactory.buildQuery(session, Employee.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+			for (Employee e : emps) {
+				labels.add(SmartLabelProvider.getFullLabel(e));
+				keys.add(UuidUtils.uuidToString(e.getUuid()));
 			}
 			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
 			item.setInitialValue(filter.getKeyValue());
