@@ -99,7 +99,7 @@ public class IconComposite extends Composite {
 		        fileChooser.setText(Messages.IconComposite_SelectFile);
 		        fileChooser.setFilterPath(lastDir);
 		        fileChooser.setFilterExtensions(new String[] { "*.gif;*.jpg;*.png;*.ico;*.bmp;*.jpeg", "*.*" });  //$NON-NLS-1$ //$NON-NLS-2$
-		        fileChooser.setFilterNames(new String[] { Messages.IconComposite_ImagesLbl + " (gif, jpg, jpeg, png, ico, bmp)", Messages.IconComposite_AllFilesOp });  //$NON-NLS-2$
+		        fileChooser.setFilterNames(new String[] { Messages.IconComposite_ImagesLbl + " (gif, jpg, jpeg, png, ico, bmp)", Messages.IconComposite_AllFilesOp });  //$NON-NLS-1$
 		        String filename = fileChooser.open();
 		        if (filename != null){
 		        	loadImage(filename);
