@@ -47,7 +47,7 @@ public class CategoryAttributeDMAdvisor implements IDeleteAdvisor{
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof CategoryAttribute)){
-			return "Invalid Object";
+			return "Invalid Object"; //$NON-NLS-1$
 		}
 		CategoryAttribute categoryAttribute = (CategoryAttribute)object;
 		if (categoryAttribute.getCategory().getUuid() == null 
@@ -62,7 +62,7 @@ public class CategoryAttributeDMAdvisor implements IDeleteAdvisor{
 		long cnt = ((Long)query.list().get(0));
 		if (cnt != 0){
 			return MessageFormat.format(
-					"The category/attribute relationship is associated with {0} intelligence observations.  These observations must be removed before the attribute can be deleted.",
+					Messages.CategoryAttributeDMAdvisor_CatAttUsedObs,
 					cnt);
 		}
 		return null;

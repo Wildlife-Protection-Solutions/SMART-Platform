@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -90,6 +91,7 @@ import org.wcs.smart.i2.xml.record.ObservationAttributeType;
 import org.wcs.smart.i2.xml.record.ObservationType;
 import org.wcs.smart.i2.xml.record.RecordAttributeType;
 import org.wcs.smart.i2.xml.record.RecordType;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -619,6 +621,27 @@ public class RecordXmlImporter {
 					newValue.setAttributeListItems(listItems);
 					
 					break;
+				case EMPLOYEE:
+					if (recordAttribute.getListValue() == null || recordAttribute.getListValue().isEmpty()) continue;
+					
+					List<IntelRecordAttributeValueList> listItems2 = new ArrayList<IntelRecordAttributeValueList>();
+					for (LabelUuid list : recordAttribute.getListValue()){
+						Employee item = parseEmployeeListItem(list, srcAttribute.getAttribute(), session, warnings);
+						
+						if (item != null){
+							IntelRecordAttributeValueList newItem = new IntelRecordAttributeValueList();
+							newItem.getId().setElementUuid(item.getUuid());
+							newItem.getId().setValue(newValue);
+							listItems2.add(newItem);
+						}
+					}
+					if (nullEquals(srcAttribute.getIsMultiple(), false) && listItems2.size() > 1){
+						listItems2 = Collections.singletonList(listItems2.get(0));
+					}
+					newValue.setAttributeListItems(listItems2);
+					
+					break;
+					
 				case POSITION:
 					if (recordAttribute.getNumberValue1() == null || recordAttribute.getNumberValue2() == null) continue;
 					newValue.setNumberValue(recordAttribute.getNumberValue1());
@@ -689,6 +712,28 @@ public class RecordXmlImporter {
 		}
 		//add to warnings;
 		warnings.add(MessageFormat.format(Messages.RecordXmlImporter_SourceAttributeListItemNotFound, attribute.getName(), attributeListItem.getName()));
+		return null;
+	}
+	
+	private Employee parseEmployeeListItem(LabelUuid employeeListItem, IntelAttribute attribute, Session session, List<String> warnings){
+		if (employeeListItem == null) return null;
+		
+		//search uuids
+		Employee ee = (Employee) session.get(Employee.class, UuidUtils.stringToUuid(employeeListItem.getUuid()));
+		if (ee != null && ee.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+			return ee;
+		}
+		
+		//search by name
+		List<Employee> allEmployees = QueryFactory.buildQuery(session, Employee.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+		for (Employee e : allEmployees) {
+			if (SmartLabelProvider.getFullLabel(e).equals(employeeListItem.getName())) {
+				return e;
+			}
+		}
+		
+		//add to warnings;
+		warnings.add(MessageFormat.format(Messages.RecordXmlImporter_EmployeeNotFound, attribute.getName(), employeeListItem.getName()));
 		return null;
 	}
 	

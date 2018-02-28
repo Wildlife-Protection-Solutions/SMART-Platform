@@ -51,7 +51,7 @@ public class AttributeTreeNodeDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof AttributeTreeNode)){
-			return "Invalid Object";
+			return "Invalid Object"; //$NON-NLS-1$
 		}
 		AttributeTreeNode node = (AttributeTreeNode)object;
 		if (node.getUuid() == null) return null;
@@ -60,7 +60,7 @@ public class AttributeTreeNodeDMAdvisor implements IDeleteAdvisor {
 		if (cnt == 0){
 			return null;
 		}
-		return MessageFormat.format("Attribute node {0} is associated with {1} intelligence observations.  These observations must be removed before the attribute node item can be deleted.", node.getName(), cnt);
+		return MessageFormat.format(Messages.AttributeTreeNodeDMAdvisor_AttributeAssocatedObs, node.getName(), cnt);
 
 	}
 

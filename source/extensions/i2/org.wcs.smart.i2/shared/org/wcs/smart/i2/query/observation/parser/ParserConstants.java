@@ -73,43 +73,47 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int DM_KEY = 35;
   /** RegularExpression Id. */
-  int CATEGORY_KEY = 36;
+  int UUID = 36;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_NUMERIC = 37;
+  int CATEGORY_KEY = 37;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_STRING = 38;
+  int ATTRIBUTE_KEY_NUMERIC = 38;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_BOOLEAN = 39;
+  int ATTRIBUTE_KEY_STRING = 39;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_DATE = 40;
+  int ATTRIBUTE_KEY_BOOLEAN = 40;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_LIST = 41;
+  int ATTRIBUTE_KEY_DATE = 41;
   /** RegularExpression Id. */
-  int ATTRIBUTE_KEY_TREE = 42;
+  int ATTRIBUTE_KEY_LIST = 42;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_NUMERIC = 43;
+  int ATTRIBUTE_KEY_TREE = 43;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_STRING = 44;
+  int EATTRIBUTE_KEY_NUMERIC = 44;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_BOOLEAN = 45;
+  int EATTRIBUTE_KEY_STRING = 45;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_DATE = 46;
+  int EATTRIBUTE_KEY_BOOLEAN = 46;
   /** RegularExpression Id. */
-  int EATTRIBUTE_KEY_LIST = 47;
+  int EATTRIBUTE_KEY_DATE = 47;
   /** RegularExpression Id. */
-  int DATE_STRING = 48;
+  int EATTRIBUTE_KEY_LIST = 48;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 49;
+  int EATTRIBUTE_KEY_EMPLOYEE = 49;
   /** RegularExpression Id. */
-  int AREA_KEY = 50;
+  int DATE_STRING = 50;
   /** RegularExpression Id. */
-  int ENTITY_TYPE_KEY = 51;
+  int AREA_TYPE_KEY = 51;
   /** RegularExpression Id. */
-  int ENTITY_KEY = 52;
+  int AREA_KEY = 52;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 53;
+  int ENTITY_TYPE_KEY = 53;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 54;
+  int ENTITY_KEY = 54;
+  /** RegularExpression Id. */
+  int QUERY_SPLITTER = 55;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 56;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -152,6 +156,7 @@ public interface ParserConstants {
     "<LETTER>",
     "<SPECIAL_CHARS>",
     "<DM_KEY>",
+    "<UUID>",
     "<CATEGORY_KEY>",
     "<ATTRIBUTE_KEY_NUMERIC>",
     "<ATTRIBUTE_KEY_STRING>",
@@ -164,6 +169,7 @@ public interface ParserConstants {
     "<EATTRIBUTE_KEY_BOOLEAN>",
     "<EATTRIBUTE_KEY_DATE>",
     "<EATTRIBUTE_KEY_LIST>",
+    "<EATTRIBUTE_KEY_EMPLOYEE>",
     "<DATE_STRING>",
     "<AREA_TYPE_KEY>",
     "<AREA_KEY>",

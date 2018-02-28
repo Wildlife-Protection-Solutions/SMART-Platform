@@ -30,16 +30,16 @@ public class MenuHandler implements ILoginHandler {
 	public void onLogin() throws Exception {
 		
 		String langeCode = Locale.getDefault().getLanguage();
-		String key = IntelConfigurationOption.MENU_NAME_KEY + "." + langeCode;
+		String key = IntelConfigurationOption.MENU_NAME_KEY + "." + langeCode; //$NON-NLS-1$
 		IntelConfigurationOption op = null;
 		try (Session session = HibernateManager.openSession()){
 			op = QueryFactory.buildQuery(session, IntelConfigurationOption.class, 
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-					new Object[] {"key", key}).uniqueResult();
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"key", key}).uniqueResult(); //$NON-NLS-1$
 			if (op == null) {
 				op = QueryFactory.buildQuery(session, IntelConfigurationOption.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"key", IntelConfigurationOption.MENU_NAME_KEY}).uniqueResult();
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"key", IntelConfigurationOption.MENU_NAME_KEY}).uniqueResult(); //$NON-NLS-1$
 			}
 		}
 		if (op == null) return;
@@ -48,7 +48,7 @@ public class MenuHandler implements ILoginHandler {
         MApplication app = ctx.get(MApplication.class);
     	for (MMenuContribution c : app.getMenuContributions()) {
     		for (MMenuElement i : c.getChildren()) {
-    			if (i.getElementId().equals("org.wcs.smart.i2.menu.main")) {
+    			if (i.getElementId().equals("org.wcs.smart.i2.menu.main")) { //$NON-NLS-1$
     				i.setLabel(op.getValue());
     			}
     		}

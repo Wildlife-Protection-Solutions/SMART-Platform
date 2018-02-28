@@ -105,6 +105,8 @@ public class IntelligenceLabelProviderImpl implements
 				return Messages.IntelligenceLabelProviderImpl_PositionAttributeName;
 			case TEXT:
 				return Messages.IntelligenceLabelProviderImpl_TextAttributeName;
+			case EMPLOYEE:
+				return Messages.IntelligenceLabelProviderImpl_EmployeeAttributeName;
 			}
 		}
 		if (item == QUERY_COLUMN_CATEGORY_LABEL) return Messages.IntelligenceLabelProviderImpl_QueryCategoryLabel;

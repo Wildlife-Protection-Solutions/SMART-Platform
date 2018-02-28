@@ -85,7 +85,7 @@ public class QueryEditorInput implements IEditorInput{
 
 	@Override
 	public String getName() {
-		return name == null ? "" : name;
+		return name == null ? "" : name; //$NON-NLS-1$
 	}
 
 	@Override

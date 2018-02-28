@@ -66,6 +66,7 @@ import org.wcs.smart.i2.xml.entity.Location;
 import org.wcs.smart.i2.xml.entity.ObjectFactory;
 import org.wcs.smart.i2.xml.entity.Record;
 import org.wcs.smart.i2.xml.entity.Relationship;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -308,6 +309,10 @@ public class EntityToXml {
 		if (value.getNumberValue2() != null) xmlValue.setDoubleValue2(value.getNumberValue2());
 		if (value.getStringValue() != null) xmlValue.setStringValue(value.getStringValue());
 		if (value.getAttributeListItem() != null) xmlValue.setListKey(value.getAttributeListItem().getKeyId());
+		if (value.getEmployee() != null) {
+			xmlValue.setStringValue(SmartLabelProvider.getFullLabel(value.getEmployee()));
+			xmlValue.setListKey(UuidUtils.uuidToString(value.getEmployee().getUuid()));
+		}
 		return xmlValue;
 	}
 

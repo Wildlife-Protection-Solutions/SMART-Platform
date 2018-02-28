@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -47,6 +48,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
@@ -71,6 +73,7 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.record.importer.RecordImportConfig.Column;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
@@ -111,6 +114,7 @@ public enum RecordImportEngine {
 		monitor.subTask(Messages.RecordImportEngine_LoadingSubTaskName);
 //		//load the attributes 
 		Set<IntelRecordSource> sources = new HashSet<>();
+		Collection<Employee> allEmployees = new ArrayList<>();
 		try(Session s = HibernateManager.openSession()){
 			sources.addAll( QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
 			sources.forEach(src -> {
@@ -125,7 +129,8 @@ public enum RecordImportEngine {
 						}
 					}
 				}
-				
+				allEmployees.addAll( QueryFactory.buildQuery(s, Employee.class, "conservationArea", SmartDB.getCurrentConservationArea()).list() ); //$NON-NLS-1$
+				allEmployees.forEach(e->{e.getUuid(); SmartLabelProvider.getFullLabel(e);});
 			});
 			
 		}
@@ -238,7 +243,7 @@ public enum RecordImportEngine {
 								if (v2 != null && !data[v2].trim().isEmpty()) value2 = data[v2].trim();
 							}
 							try{
-								attributeValue = convertValue(value, value2, ia.getAttribute(), dateFormatter, transform);
+								attributeValue = convertValue(value, value2, ia.getAttribute(), dateFormatter, transform, allEmployees);
 							}catch (Exception ex){
 								attributeValue = null;
 								warnings.add(MessageFormat.format(Messages.RecordImportEngine_AttributeConversionError, value, ia.getAttribute().getName(), ex.getMessage()));
@@ -370,7 +375,7 @@ public enum RecordImportEngine {
 	}
 	
 	
-	private IntelRecordAttributeValue convertValue(String strvalue, String strvalue2, IntelAttribute attribute, DateTimeFormatter dFormatter, MathTransform transform) throws Exception{
+	private IntelRecordAttributeValue convertValue(String strvalue, String strvalue2, IntelAttribute attribute, DateTimeFormatter dFormatter, MathTransform transform, Collection<Employee> allEmployees) throws Exception{
 		if (strvalue.isEmpty()) return null;
 		
 		IntelRecordAttributeValue value = new IntelRecordAttributeValue();
@@ -409,6 +414,17 @@ public enum RecordImportEngine {
 				}
 			}
 			throw new Exception(MessageFormat.format(Messages.RecordImportEngine_InvalidListItem, strvalue, attribute.getName()));
+		case EMPLOYEE:
+			for (Employee e : allEmployees) {
+				if(strvalue.equalsIgnoreCase(SmartLabelProvider.getFullLabel(e))) {
+					IntelRecordAttributeValueList list = new IntelRecordAttributeValueList();
+					list.getId().setElementUuid(e.getUuid());
+					list.getId().setValue(value);
+					value.setAttributeListItems(Collections.singletonList(list));
+					return value;
+				}
+			}
+			throw new Exception(MessageFormat.format(Messages.RecordImportEngine_EmployeeNotFound, strvalue, attribute.getName()));
 		case NUMERIC:
 			try{
 				Double dvalue = Double.parseDouble(strvalue);

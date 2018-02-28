@@ -34,7 +34,10 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -82,6 +85,12 @@ public class DeleteEmployeeAdvisor implements IDeleteAdvisor {
 			sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_QueryError, SmartLabelProvider.getFullLabel(em), cnt));
 		}
 		
+		cnt = getAttributeValueCount(session, em);
+		if (cnt != 0) {
+			sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_EmployeedUsedAttribute, SmartLabelProvider.getFullLabel(em), cnt));		
+		}
+		
+		
 		if (sb.length() == 0) return null;
 		
 		return sb.append(Messages.DeleteEmployeeAdvisor_LinkError).toString();
@@ -98,5 +107,22 @@ public class DeleteEmployeeAdvisor implements IDeleteAdvisor {
 				cb.equal( root.get("lastModifiedBy"), em))); //$NON-NLS-1$
 		
 		return session.createQuery(c).uniqueResult();
+	}
+	
+	/*
+	 * check for location where employees are referenced an employee attribute
+	 */
+	private Long getAttributeValueCount(Session session, Employee em) {
+		
+		Long cnt1 = QueryFactory.buildCountQuery(session, IntelEntityAttributeValue.class,
+				new Object[] {"employee", em}).longValue(); //$NON-NLS-1$
+		
+		Long cnt2 = QueryFactory.buildCountQuery(session, IntelEntityRelationshipAttributeValue.class, 
+				new Object[] {"employee", em}).longValue(); //$NON-NLS-1$
+		
+		Long cnt3 = QueryFactory.buildCountQuery(session, IntelRecordAttributeValueList.class,
+				new Object[] {"id.elementUuid", em.getUuid()}).longValue(); //$NON-NLS-1$
+		
+		return cnt1 + cnt2 + cnt3;
 	}
 }

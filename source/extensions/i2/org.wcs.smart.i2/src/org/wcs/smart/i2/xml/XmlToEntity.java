@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -46,6 +47,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -77,6 +79,8 @@ import org.wcs.smart.i2.xml.entity.InstanceData;
 import org.wcs.smart.i2.xml.entity.Location;
 import org.wcs.smart.i2.xml.entity.Record;
 import org.wcs.smart.i2.xml.entity.Relationship;
+import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 import com.ibm.icu.text.MessageFormat;
@@ -267,7 +271,9 @@ public class XmlToEntity {
 					continue;
 				}
 				value.setAttribute(attribute);
-				if (xmlValue.getStringValue() != null) value.setStringValue(xmlValue.getStringValue());
+				if (attribute.getType() == AttributeType.DATE || attribute.getType() == AttributeType.TEXT) {
+					if (xmlValue.getStringValue() != null) value.setStringValue(xmlValue.getStringValue());
+				}
 				
 				if (xmlValue.getListKey() != null && attribute.getType() == AttributeType.LIST) {
 					for (IntelAttributeListItem i : attribute.getAttributeList()) {
@@ -281,18 +287,44 @@ public class XmlToEntity {
 						continue;
 					}
 				}
+				if (attribute.getType() == AttributeType.EMPLOYEE) {
+					UUID euuid = UuidUtils.stringToUuid(xmlValue.getListKey());
+					Employee ee = session.get(Employee.class, euuid);
+					if (ee != null && ee.getConservationArea().equals(ca)) {
+						value.setEmployee(ee);
+					}else {
+						//search by name
+						String name = xmlValue.getStringValue();
+						List<Employee> ees = QueryFactory.buildQuery(session, Employee.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+						for (Employee ee1 : ees) {
+							if (SmartLabelProvider.getFullLabel(ee1).equalsIgnoreCase(name)) {
+								value.setEmployee(ee1);
+								break;
+							}
+						}
+					}
+					if (value.getEmployee() == null) {
+						warnings.add(MessageFormat.format(Messages.XmlToEntity_employeeNotFound, xmlValue.getStringValue(), attribute.getName(), xmlEntity.getId())); 
+						continue;
+					}					
+				}
 				value.setEntity(newEntity);
 				newEntity.getAttributes().add(value);
 			}
 			
 			newEntity.setEntityAttachments(new ArrayList<>());
 			for (Attachment xmlAttachment : xmlEntity.getAttachments()) {
+				Path file = rootPath.resolve(xmlAttachment.getFilename());
+				if (!Files.exists(file)) {
+					warnings.add(MessageFormat.format(Messages.XmlToEntity_FileNotFound, xmlAttachment.getFilename()));
+					continue;
+				}
 				//TODO: look to reuse ?  likely impossible although I supposed we could compare files byte of byte??
 				IntelAttachment attachment = new IntelAttachment();
 				attachment.setDateCreated(new Date());
 				attachment.setCreatedBy(SmartDB.getCurrentEmployee());
 				attachment.setConservationArea(ca);
-				attachment.setCopyFromLocation(rootPath.resolve(xmlAttachment.getFilename()).toFile());
+				attachment.setCopyFromLocation(file.toFile());
 				attachment.setFilename(xmlAttachment.getFilename());
 				attachment.setDescription(xmlAttachment.getDescription());
 				

@@ -46,6 +46,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -73,6 +74,7 @@ import org.wcs.smart.i2.xml.record.ObservationAttributeType;
 import org.wcs.smart.i2.xml.record.ObservationType;
 import org.wcs.smart.i2.xml.record.RecordAttributeType;
 import org.wcs.smart.i2.xml.record.RecordType;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -211,8 +213,13 @@ public class RecordXmlExporter {
 							
 							if (listAttribute.getId().getValue().getAttribute().getAttribute() != null) {
 								//attribute type
-								IntelAttributeListItem item = session.get(IntelAttributeListItem.class, listAttribute.getId().getElementUuid());
-								listItem.setName(item.getKeyId());
+								if (listAttribute.getId().getValue().getAttribute().getAttribute().getType() == org.wcs.smart.i2.model.IntelAttribute.AttributeType.LIST) {
+									IntelAttributeListItem item = session.get(IntelAttributeListItem.class, listAttribute.getId().getElementUuid());
+									listItem.setName(item.getKeyId());
+								}else if (listAttribute.getId().getValue().getAttribute().getAttribute().getType() == org.wcs.smart.i2.model.IntelAttribute.AttributeType.EMPLOYEE) {
+									Employee e = session.get(Employee.class, listAttribute.getId().getElementUuid());
+									listItem.setName(SmartLabelProvider.getFullLabel(e));
+								}
 							}else if (listAttribute.getId().getValue().getAttribute().getEntityType() != null) {
 								//entity type
 								IntelEntity ie = session.get(IntelEntity.class, listAttribute.getId().getElementUuid());

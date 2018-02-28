@@ -127,7 +127,7 @@ TOKEN :
  | < #SPECIAL_CHARS : ("." | "_")>
  
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
- //|  < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
+ | < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
  
  | < CATEGORY_KEY : "dm_category:"< DM_KEY > >
  | < ATTRIBUTE_KEY_NUMERIC : "dm_attribute:n:"(< DM_KEY >)?":"< DM_KEY >>
@@ -143,6 +143,7 @@ TOKEN :
  | < EATTRIBUTE_KEY_BOOLEAN : "e_attribute:b:"< DM_KEY >":"(< DM_KEY >)?>
  | < EATTRIBUTE_KEY_DATE: "e_attribute:d:"< DM_KEY >":"(< DM_KEY >)?>
  | < EATTRIBUTE_KEY_LIST: "e_attribute:l:"< DM_KEY >":"(< DM_KEY >)?>
+ | < EATTRIBUTE_KEY_EMPLOYEE: "e_attribute:e:"< DM_KEY >":"(< DM_KEY >)?>
   
  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
 
@@ -516,6 +517,12 @@ IQueryFilter EntityKeyExpression():
 		<EATTRIBUTE_KEY_LIST> {key = token.image;}
 		<  EQUAL > {op = token.image;}
 		< DM_KEY >  {value = token.image;}
+	)
+	|
+	( 
+		<EATTRIBUTE_KEY_EMPLOYEE> {key = token.image;}
+		<  EQUAL > {op = token.image;}
+		(< UUID > | < DM_KEY >)  {value = token.image;}
 	)
 	{
   		return IntelAttributeFilter.create(key, value);

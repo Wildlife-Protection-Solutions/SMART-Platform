@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.hibernate.query.Query;
 import org.hibernate.query.NativeQuery;
@@ -34,10 +35,12 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -48,6 +51,8 @@ import org.wcs.smart.i2.query.observation.filter.EntityTypeFilter;
 import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
+import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Manages columns for intelligence queries.
@@ -211,6 +216,27 @@ public class IntelQueryColumnProvider {
 					IntelAttributeListItem i = IntelHibernateManager.getAttributeListItem(attribute, filter.getKeyValue(), session);
 					if (i != null){
 						sb.append(i.getName());
+					}else{
+						sb.append(filter.getKeyValue());
+					}
+				}
+				break;
+			case EMPLOYEE:
+				if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
+					sb.append(": "); //$NON-NLS-1$
+					sb.append(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(ANY_ITEM, l));
+				}else{
+					sb.append(": "); //$NON-NLS-1$
+					Employee e = null;
+					try {
+						UUID uuid = UuidUtils.stringToUuid(filter.getKeyValue());
+						e = session.get(Employee.class, uuid);
+					}catch (Exception ex) {
+						Intelligence2PlugIn.log(ex.getMessage(), ex);
+					}
+					
+					if (e != null){
+						sb.append(SmartLabelProvider.getFullLabel(e));
 					}else{
 						sb.append(filter.getKeyValue());
 					}

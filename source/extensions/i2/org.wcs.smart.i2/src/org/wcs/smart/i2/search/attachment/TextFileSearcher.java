@@ -64,7 +64,7 @@ public class TextFileSearcher implements IFileSearcher {
 				file = EncryptUtils.decryptAttachment(attachment);
 				deleteme = true;
 			}catch (Exception ex) {
-				SearchResult errorResult = new SearchResult(attachment, Messages.TextFileSearcher_ErrorItemName, "Unable to decrypt file", 0,0);
+				SearchResult errorResult = new SearchResult(attachment, Messages.TextFileSearcher_ErrorItemName, Messages.TextFileSearcher_DecryptError, 0,0);
 				collector.addMatch(errorResult);
 				return;
 			}

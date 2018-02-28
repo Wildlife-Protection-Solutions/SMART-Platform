@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="LIST"/>
  *     &lt;enumeration value="DATE"/>
  *     &lt;enumeration value="POSITION"/>
+ *     &lt;enumeration value="EMPLOYEE"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -40,7 +41,8 @@ public enum AttributeType {
     BOOLEAN,
     LIST,
     DATE,
-    POSITION;
+    POSITION,
+    EMPLOYEE;
 
     public String value() {
         return name();

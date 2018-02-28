@@ -96,6 +96,7 @@ public class IntelHibernateManager {
 		case POSITION:
 			return java.sql.Types.VARCHAR;
 		case LIST:
+		case EMPLOYEE:
 		case TEXT:
 			return java.sql.Types.VARCHAR;
 		};

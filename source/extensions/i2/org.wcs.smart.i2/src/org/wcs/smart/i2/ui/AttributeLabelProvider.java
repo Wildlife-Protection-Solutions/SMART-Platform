@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
@@ -83,7 +84,8 @@ public class AttributeLabelProvider extends LabelProvider {
 		case POSITION:
 			key = SmartPlugIn.ATTRIBUTE_LOCATION_ICON;
 			break;
-			
+		case EMPLOYEE:
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ATTRIBUTE_EMPLOYEE);
 		}
 		if (key == null) return null;
 		return SmartPlugIn.getDefault().getImageRegistry().get(key);

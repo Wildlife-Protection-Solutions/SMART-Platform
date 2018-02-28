@@ -115,8 +115,8 @@ public enum SearchManager {
 		NativeQuery<?> q = session.createNativeQuery(sql.toString());
 		//these two lines are required to get this to work
 		//on Connect with the postgresql libraries
-		q.addScalar("string_value", StringType.INSTANCE);
-		q.addScalar("entity_uuid", SmartContext.INSTANCE.getClass(UUIDBinaryType.class));
+		q.addScalar("string_value", StringType.INSTANCE); //$NON-NLS-1$
+		q.addScalar("entity_uuid", SmartContext.INSTANCE.getClass(UUIDBinaryType.class)); //$NON-NLS-1$
 		q.setParameterList("cas", conservationAreas); //$NON-NLS-1$
 		if (types != null){
 			q.setParameterList("types", types); //$NON-NLS-1$

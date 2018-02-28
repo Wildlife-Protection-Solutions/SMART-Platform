@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -143,6 +144,8 @@ public class AttributeValueLabelProvider extends LabelProvider {
 					return Messages.AttributeValueLabelProvider_ErrorLabel + ex.getMessage();
 				}
 			}
+		}else if (value instanceof Employee) {
+			return SmartLabelProvider.getFullLabel((Employee)value);
 		}else{
 			return value.toString();
 		}
