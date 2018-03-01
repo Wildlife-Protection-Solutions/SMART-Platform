@@ -29,9 +29,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.hibernate.query.Query;
-import org.hibernate.query.NativeQuery;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
+import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
@@ -50,7 +51,6 @@ import org.wcs.smart.i2.query.observation.filter.EntityTypeFilter;
 import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
-import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -235,7 +235,7 @@ public class IntelQueryColumnProvider {
 					}
 					
 					if (e != null){
-						sb.append(SmartLabelProvider.getFullLabel(e));
+						sb.append(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(e, l));
 					}else{
 						sb.append(filter.getKeyValue());
 					}
