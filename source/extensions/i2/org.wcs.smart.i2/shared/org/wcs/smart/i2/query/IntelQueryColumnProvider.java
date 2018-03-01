@@ -40,7 +40,6 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.IntelHibernateManager;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -232,7 +231,7 @@ public class IntelQueryColumnProvider {
 						UUID uuid = UuidUtils.stringToUuid(filter.getKeyValue());
 						e = session.get(Employee.class, uuid);
 					}catch (Exception ex) {
-						Intelligence2PlugIn.log(ex.getMessage(), ex);
+						ex.printStackTrace();
 					}
 					
 					if (e != null){
