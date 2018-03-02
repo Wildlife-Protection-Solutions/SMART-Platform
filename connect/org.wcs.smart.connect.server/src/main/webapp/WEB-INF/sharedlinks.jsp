@@ -30,19 +30,15 @@
 <div class="pageheader"><fmt:message key="sharedlinks.title"/></div>
 <div><div id="message" class="msgsection"></div></div>
 
-<div>
- 	<p class="smart-warninghighlight"><fmt:message key="query.sharingDescriptionAll2"/></p>
-</div>
-
 
 <div style="display:table; border-collapse: collapse;">
 <div style="display:table-row;">
-  <div style="display:table-cell; white-space:nowrap; padding: 10px 25px 10px 0px"><fmt:message key="sharedlinks.linktitle" /></div>
-  <div style="display:table-cell;padding: 10px 10px 10px 0px"><p><fmt:message key="sharedlinks.linkinfo" /></p></div>
+  <div style="display:table-cell; white-space:nowrap; padding: 10px 25px 10px 0px"><span title="<fmt:message key="sharedlinks.linkinfo"/>" > <fmt:message key="sharedlinks.linktitle"/> </span></div>
+  <div style="display:table-cell;padding: 10px 10px 10px 0px"><p><fmt:message key="sharedlinks.shared_creation"/></p></div>
 </div>
 <div style="display:table-row; " >
-  <div style="display:table-cell; white-space:nowrap;padding: 10px 25px 10px 0px"><fmt:message key="sharedlinks.tokentitle" /></div>
-  <div style="display:table-cell;padding: 10px 10px 10px 0px"> <fmt:message key="sharedlinks.tokeninfo" /><p style="margin:5px 0px 5px 0px"><button id="opentokendialog" class="button" type="button"><fmt:message key="sharedlinks.maketoken" /></button></p></div>
+  <div style="display:table-cell; white-space:nowrap;padding: 10px 25px 10px 0px"><span title="<fmt:message key="sharedlinks.tokeninfo"/>" ><fmt:message key="sharedlinks.tokentitle" /></span></div>
+  <button id="opentokendialog" class="button" type="button"><fmt:message key="sharedlinks.maketoken" /></button></p></div>
 </div>
 </div>
 

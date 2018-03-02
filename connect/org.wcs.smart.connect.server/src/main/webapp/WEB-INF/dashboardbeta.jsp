@@ -19,8 +19,8 @@
 	</div>
 	
 	<div style="padding-top: 5px">
-	<select id="admin-selectlist" class="uielement" name="admin-selectlist"></select>
-	<button onClick="showDashboard(); return false;" class="button" style="padding:1px"> <fmt:message key="dashboardbeta.viewdashboard"/></button>
+	<select id="admin-selectlist" class="uielement" name="admin-selectlist" onchange="javascript:showDashboard();return false;"></select>
+	<!--  <button onClick="showDashboard(); return false;" class="button" style="padding:1px"> <fmt:message key="dashboardbeta.viewdashboard"/></button> -->
 
 	
 	</div>

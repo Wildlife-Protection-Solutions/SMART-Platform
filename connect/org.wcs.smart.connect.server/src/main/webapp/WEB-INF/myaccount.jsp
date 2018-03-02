@@ -107,11 +107,11 @@
 
 <form style="width:220px; display: block" id="userform" onsubmit="return updateUser();" >
     <input type="hidden" name="currentuser" value="${username}"/>
-    <label class="block top-spacer"><fmt:message key="myaccount.username"/>:</label>
+    <label class="block "><fmt:message key="myaccount.username"/>:</label>
     <input type="text" name="username" class="block formtext" value="${username}"/>
-    <label class="block top-spacer"><fmt:message key="myaccount.homeca" /></label>
+    <label class="block "><fmt:message key="myaccount.homeca" /></label>
 	<select id="caselect" class="formtext" style="max-width:24em"> </select>
-    <label class="block top-spacer"><fmt:message key="myaccount.email"/>:</label>
+    <label class="block "><fmt:message key="myaccount.email"/>:</label>
     <input type="text" name="email" class="block formtext" value="${email}"/>
     <div class="block infotext"><fmt:message key="myaccount.emailinfo"/></div>
     <p><br></p>

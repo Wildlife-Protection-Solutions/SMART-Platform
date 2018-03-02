@@ -38,7 +38,7 @@ function login(){
   <div id="login_left">
    <form  style="width:200px;" action="${logintarget}" method="POST" id="loginform" onsubmit="return login();">
 	   <label class="top-spacer block"><fmt:message key="login.usernamelabel"/></label>
-	   <input type="text" name="j_username" class="block formtext" value="" tabindex="1"/>
+	   <input type="text" name="j_username" class="block formtext" value="" tabindex="1" autofocus/>
 	   <label class="top-spacer block"><fmt:message key="login.passwordlabel"/></label>
 	   <input type="password" name="j_password" class="formtext" value="" tabindex="2"/>
 	   <a href="${pageContext.request.contextPath}/forgot" class="block link_small" tabindex="4"><fmt:message key="login.forgot"/></a>

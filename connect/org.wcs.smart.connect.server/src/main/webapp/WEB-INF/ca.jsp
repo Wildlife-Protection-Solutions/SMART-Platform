@@ -58,15 +58,18 @@
 	</div>
 	
 	<div id="dmmanager_body" class="tabbody">
-		<p class="infomessage"><fmt:message key="ca.dmlabelheader"/></p>
+
 		<div class="top-spacer"  style="" >
 		
 			<label class="block top-spacer"><fmt:message key="ca.dmfilefield"/></label>
 			<input id="dmfile" type="file" name="file" class="formtext block" />
 			
 			<label class="block top-spacer"><fmt:message key="ca.dmcafield"/></label>
-			<div class = warn-icon style="float:left"></div>
-			<label class="small" ><fmt:message key="ca.dmcawarn"/></label>
+			
+			<!-- <div class = warn-icon style="float:left"></div> 
+			<label class="small" ><fmt:message key="ca.dmcawarn"/></label>-->
+			
+			
 			<div id="dm_calist" style="border:1px solid #BBC6F5; height: 150px; overflow-y:scroll">
 					<c:forEach var="ca" items="${cas}" varStatus="count">
 						<label class="block"><input type="checkbox" value="${ca.getUuid()}"/>${ca.getLabel()}</label>

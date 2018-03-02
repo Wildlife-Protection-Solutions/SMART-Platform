@@ -76,7 +76,7 @@
 
 
 
-		<div id="userdetails" style="width:100%;" class="table-cell border-section">
+		<div id="userdetails" style="width:100%; min-width:250px;" class="table-cell border-section">
 			<div class="pageheader"><fmt:message key="users.userdetails"/></div>
 			<div id="userinfo">
 				<div id="userinfodefaults"></div>
@@ -113,7 +113,7 @@
   	</div>
   
 	<div class="top-spacer" >
-  		<div id="allroletable" class="table-cell smart-table">
+  		<div id="allroletable" class="user-tables-float table-cell smart-table">
   			<div class="table-row smart-table-header">
 				<div class="table-cell smart-table-cell"><fmt:message key="users.rolelabel"/></div>
 				<div class="table-cell smart-table-cell"></div>
@@ -149,7 +149,7 @@
   	</div>
   
 	<div class="top-spacer"   >
-  		<div id="deskptopuserstable" class="table-cell smart-table" style="width:50%">
+  		<div id="deskptopuserstable" class="user-tables-float table-cell smart-table">
   			<div class="table-row smart-table-header">
 				<div class="table-cell smart-table-cell"><fmt:message key="users.desktopuserlabel"/></div>
 				<div class="table-cell smart-table-cell"><fmt:message key="users.desktopuserCAlabel"/></div>

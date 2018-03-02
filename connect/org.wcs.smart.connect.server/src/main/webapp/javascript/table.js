@@ -31,8 +31,7 @@ function tableCreateRow(table, values, rowstyle){
 		cell = document.createElement("div");
 		cell.className="table-cell smart-table-cell";
 		if (values[i] != null && values[i].length > 0){
-			cell.appendChild(document.createTextNode(values[i]));
-//			cell.innerHTML=values[i];
+			cell.innerHTML=values[i];
 		}
 		row.appendChild(cell);
 	}

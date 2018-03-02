@@ -73,7 +73,6 @@
   <div id="querytable" class="catable table-cell smart-table">
   	<div class="table-row smart-table-header">
 		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('conservationArea')"><fmt:message key="query.conservationarea" /></a></div>
-		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('id')"><fmt:message key="query.id" /></a></div>
 		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')"><fmt:message key="query.name" /></a></div>
 		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('type')"><fmt:message key="query.type" /></a></div>
 		<div class="table-cell smart-table-cell"></div>

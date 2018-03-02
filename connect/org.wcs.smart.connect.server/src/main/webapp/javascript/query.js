@@ -267,7 +267,6 @@ function sortTable(sortColumn){
 
 function createQueryTable(){ 
 	var parent = document.getElementById('querytable');
-	
 
  	//clear current table
 	var objects = document.querySelectorAll("div.queryrow");
@@ -286,9 +285,11 @@ function createQueryTable(){
  			 
  					drawnRowCount++;
  					var row = tableCreateRow(parent, 
- 							[queries[i].conservationArea, queries[i].id, queries[i].name, queries[i].type,  null], 
+ 							[queries[i].conservationArea, "<span title='" + queries[i].id + "'> " + queries[i].name , queries[i].type ,  null], 
  							"queryrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
-	 		
+ 					
+
+ 					
  					row.dataset.queryuuid = queries[i].uuid;
  					row.dataset.queryname = queries[i].name;
  					row.dataset.querytype = queries[i].typeKey;

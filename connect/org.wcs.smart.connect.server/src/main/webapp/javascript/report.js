@@ -257,7 +257,7 @@ function createReportTable(){
  		 if(search == "" || isFoundInRow(reports[i]) ){
  			drawnRowCount++;
 	 		var row = tableCreateRow(parent, 
-	 				[reports[i].conservationArea, reports[i].id, reports[i].name, null], 
+	 				[reports[i].conservationArea, "<span title='" + reports[i].id + "'> " + reports[i].name , null], 
 	 				"reportrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 	 		
 	 		row.dataset.reportuuid = reports[i].uuid;

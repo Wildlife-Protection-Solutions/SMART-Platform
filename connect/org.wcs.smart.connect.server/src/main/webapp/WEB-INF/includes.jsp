@@ -30,14 +30,14 @@ var menuOpen = true;
 
 function menuCheckOnload(){
 	var menuState = readCookie("smartMenuState");
-	if(menuState == "hidden"){
+	if(menuState == "hidden" || ""){
 		var items = document.getElementsByClassName("textMenu");
 		for (i = 0; i < items.length; i++) {
 	    	items[i].style.display = "none";
 		}
 		menuOpen = false;
 		document.getElementById("verticalmenu").style.minWidth = "0px";
-	}else{
+	}else if(menuState == "show"){
 		var items = document.getElementsByClassName("textMenu");
 		for (i = 0; i < items.length; i++) {
 	    	items[i].style.display = "inline-block";
@@ -55,7 +55,7 @@ function hamburgerMenu(){
 		menuOpen = false;
 		document.getElementById("verticalmenu").style.minWidth = "0px";
 	}else{
-		writeCookie("smartMenuState","",7);
+		writeCookie("smartMenuState","show",7);
 		newState = "inline-block";
 		menuOpen = true;
 		document.getElementById("verticalmenu").style.minWidth = "180px";
