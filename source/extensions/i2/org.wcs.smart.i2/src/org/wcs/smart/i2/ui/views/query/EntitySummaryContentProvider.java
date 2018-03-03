@@ -1,0 +1,335 @@
+package org.wcs.smart.i2.ui.views.query;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+
+import javax.imageio.ImageIO;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
+import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.query.observation.filter.ValuePart;
+import org.wcs.smart.i2.ui.AttributeLabelProvider;
+import org.wcs.smart.i2.ui.views.query.dropitem.AttributeGroupByDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.EntityTypeGroupByDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.ValueDropItem;
+import org.wcs.smart.ui.properties.DialogConstants;
+
+public class EntitySummaryContentProvider implements ITreeContentProvider{
+
+	private enum RootNode{
+		GROUP_BY_OPTION,
+		VALUE_OPTION,
+		FILTER_OPTION
+	}
+	
+	private enum SubRootNode{
+		ENTITY_TYPE_ITEM,ATTRIBUTE_ITEM
+	}
+
+	private Viewer viewer;
+	private HashMap<String, IntelEntityType> types;
+	
+	public EntitySummaryContentProvider() {
+	}
+	
+	
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		this.viewer = viewer;
+		types = null;
+		if (newInput != null) {
+			loadDataJob.schedule();	
+		}
+	}
+	
+	@Override
+	public Object[] getElements(Object inputElement) {
+		if (types == null) return new Object[] {DialogConstants.LOADING_TEXT};
+		return new Object[] {
+				new TreeNode(RootNode.GROUP_BY_OPTION, RootNode.GROUP_BY_OPTION, "Group By"),
+				new TreeNode(RootNode.VALUE_OPTION, RootNode.VALUE_OPTION, "Values"),
+				new TreeNode(RootNode.FILTER_OPTION, RootNode.FILTER_OPTION, "Filters")};
+	}
+
+	@Override
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof TreeNode) {
+			List<?> items = ((TreeNode) parentElement).getChildren();
+			if (items == null) return null;
+			return items.toArray();
+		}
+		return null;
+	}
+
+	@Override
+	public Object getParent(Object element) {
+		if (element instanceof TreeNode) {
+			return ((TreeNode) element).getParent();
+		}
+		return null;
+	}
+
+	@Override
+	public boolean hasChildren(Object element) {
+		if (element instanceof TreeNode) {
+			TreeNode n = (TreeNode)element;
+			if (n.item instanceof RootNode) return true;
+			if (n.item instanceof SubRootNode) return true;
+			if (n.item instanceof IntelEntityType) return true;
+		}
+		return false;
+	}
+
+	
+	private void setData(List<IntelEntityType> entityTypes) {
+		types = new HashMap<>();
+		for (IntelEntityType t : entityTypes) types.put(t.getKeyId(), t);
+	
+		Display.getDefault().syncExec(()->viewer.refresh());
+	}
+	
+//	public void refresh() {
+//		loadDataJob.schedule();
+//	}
+	
+	public class TreeNode extends BasicTreeFilterItem {
+		
+		private Object item;
+		private RootNode source;
+		
+		public TreeNode(RootNode source, Object item, String guiName) {
+			super(guiName);
+			this.item = item;
+			this.source = source;
+		}
+		
+		public Object getItem() { return this.item; }
+		public Object getSource() { return this.source; }
+		
+		
+		public boolean equals(Object other) {
+			if (this == other) return true;
+			if (other == null) return false;
+			if (other.getClass() != TreeNode.class) return false;
+			return Objects.equals(item, ((TreeNode)other).item) && Objects.equals(source, ((TreeNode)other).source);
+		}
+		
+		public int hashCode() {
+			return Objects.hash(item, source);
+		}
+		
+		@Override
+		public ImageDescriptor getImage(){
+			if (item instanceof IntelEntityTypeAttribute) {
+				return AttributeLabelProvider.getImageDescriptor(((IntelEntityTypeAttribute) item).getAttribute().getType());
+			}else if (item instanceof IntelAttribute) {
+				return AttributeLabelProvider.getImageDescriptor(((IntelAttribute) item).getType());
+			}else if (item instanceof IntelEntityType) {
+				final byte[] icon = ((IntelEntityType) item).getIcon();
+				if (icon != null){
+					return new ImageDescriptor() {
+						@Override
+						public ImageData getImageData() {
+							try(ByteArrayInputStream in = new ByteArrayInputStream(icon)){
+								BufferedImage image = ImageIO.read(in);
+								if (image != null){
+									return AWTSWTImageUtils.convertToSWTImage(image).getImageData();
+								}
+							}catch (Exception ex){
+								
+							}
+							return null;
+						}
+					};
+					
+				}
+			}else if (item == SubRootNode.ENTITY_TYPE_ITEM) {
+				return Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY);
+			}else if (item == SubRootNode.ATTRIBUTE_ITEM) {
+				if (source == RootNode.GROUP_BY_OPTION) {
+					return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ATTRIBUTE_LIST_ICON);	
+				}
+				return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
+			}else if (item == RootNode.GROUP_BY_OPTION) {
+				return Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_GROUP_BY);
+			}else if (item == RootNode.VALUE_OPTION) {
+				return Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_VALUES);
+			}else if (item == RootNode.FILTER_OPTION) {
+				return Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_FILTERS);
+			}
+			return image;
+		}
+
+		@Override
+		public FilterTreeItem getParent() {
+			if (item instanceof RootNode ) return null;
+			if (item instanceof SubRootNode ) return new TreeNode(source, source, null);
+			if (item instanceof IntelEntityType ) return new TreeNode(source, SubRootNode.ENTITY_TYPE_ITEM, null);
+			if (item instanceof IntelEntityTypeAttribute ) return new TreeNode(source, ((IntelEntityTypeAttribute) item).getEntityType(), null);
+			return null;
+		}
+
+		@Override
+		public List<FilterTreeItem> getChildren() {
+			if (item == RootNode.FILTER_OPTION || item == RootNode.GROUP_BY_OPTION) {
+				List<FilterTreeItem> items = new ArrayList<>();
+				items.add(new TreeNode((RootNode)item, SubRootNode.ENTITY_TYPE_ITEM, "Entity Types"));
+				items.add(new TreeNode((RootNode)item, SubRootNode.ATTRIBUTE_ITEM, "Attributes"));
+				return items;
+			}
+			
+			if (item == RootNode.VALUE_OPTION) {
+				List<FilterTreeItem> kids = new ArrayList<>();
+				for (ValuePart.ValueOption op : ValuePart.ValueOption.values()) {
+					kids.add(new TreeNode(RootNode.VALUE_OPTION,op, op.name()));
+				}
+				return kids;
+			}
+			
+			
+			if (item == SubRootNode.ENTITY_TYPE_ITEM) {
+				List<FilterTreeItem> nodes = new ArrayList<>();
+				for (IntelEntityType t : types.values()) {
+					nodes.add(new TreeNode(source, t, t.getName()));
+				}
+				return nodes;
+			}
+			
+			if (item == SubRootNode.ATTRIBUTE_ITEM) {
+				HashSet<String> keys = new HashSet<>();
+				
+				List<FilterTreeItem> nodes = new ArrayList<>();
+				for (IntelEntityType t : types.values()) {
+					for (IntelEntityTypeAttribute a : t.getAttributes()) {
+						if (keys.contains(a.getAttribute().getKeyId())) continue;
+						keys.add(a.getAttribute().getKeyId());
+						if (source == RootNode.FILTER_OPTION || (
+								source == RootNode.GROUP_BY_OPTION && isGroupByAttribute(a.getAttribute()))) {
+							nodes.add(new TreeNode(source, a.getAttribute(), a.getAttribute().getName()));
+						}
+					}
+				}
+				
+				return nodes;
+			}
+		
+			if (item instanceof IntelEntityType) {
+				IntelEntityType entityType = (IntelEntityType)item;
+					
+				if (source == RootNode.GROUP_BY_OPTION) {
+					List<FilterTreeItem> kids = new ArrayList<>();
+					for (IntelEntityTypeAttribute a : entityType.getAttributes()) {
+						if ( isGroupByAttribute(a.getAttribute())) {
+							kids.add(new TreeNode(RootNode.GROUP_BY_OPTION, a, a.getAttribute().getName()));
+						}
+					}
+					return kids;
+				}
+					
+				if (source == RootNode.FILTER_OPTION) {
+					List<FilterTreeItem> kids = new ArrayList<>();
+					for (IntelEntityTypeAttribute a : entityType.getAttributes()) {
+						kids.add(new TreeNode(RootNode.FILTER_OPTION, a, a.getAttribute().getName()));
+					}
+					return kids;
+				}
+				
+			}
+			return null;
+		}
+
+		@Override
+		public DropItem[] asDropItem() {
+			if (source == RootNode.GROUP_BY_OPTION) {
+				if (item instanceof IntelEntityType) {
+					return new DropItem[] {
+							new EntityTypeGroupByDropItem((IntelEntityType) item)
+					};
+				}
+				if (item instanceof IntelEntityTypeAttribute) {
+					if (isGroupByAttribute(((IntelEntityTypeAttribute) item).getAttribute())) {
+						return new DropItem[] {new AttributeGroupByDropItem((IntelEntityTypeAttribute) item)};
+					}
+				}
+				if (item instanceof IntelAttribute) {
+					if (isGroupByAttribute((IntelAttribute) item)) {
+						return new DropItem[] {new AttributeGroupByDropItem((IntelAttribute)item)};
+					}
+				}
+			}
+			if (source == RootNode.VALUE_OPTION && item instanceof ValuePart.ValueOption) {
+				return new DropItem[] { new ValueDropItem((ValuePart.ValueOption) item) };
+			}
+			if (source == RootNode.FILTER_OPTION) {
+				if (item instanceof IntelEntityType) {
+					return (new EntityTreeFilterItem((IntelEntityType)item)).asDropItem();
+				}else if (item instanceof IntelAttribute) {
+					return (new AttributeTreeFilterItem( ((IntelAttribute)item))).asDropItem();
+				}else if (item instanceof IntelEntityTypeAttribute) {
+					return (new AttributeTreeFilterItem( ((IntelEntityTypeAttribute)item))).asDropItem();
+				}
+			}
+			return null;
+		}
+		
+		private boolean isGroupByAttribute(IntelAttribute a) {
+			return a.getType().equals(AttributeType.DATE) ||
+					a.getType().equals(AttributeType.EMPLOYEE) ||
+					a.getType().equals(AttributeType.POSITION) ||
+					a.getType().equals(AttributeType.LIST);
+		}
+	}
+	
+	
+	private Job loadDataJob = new Job("loading entity summary query filter tree") {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			
+			List<IntelEntityType> entityTypes = new ArrayList<>();
+			try(Session session = HibernateManager.openSession()){
+				entityTypes.addAll(QueryFactory.buildQuery(session, IntelEntityType.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+				
+				for (IntelEntityType type : entityTypes) {
+					type.getName();
+					type.getIcon();
+					for (IntelEntityTypeAttribute attribute : type.getAttributes()) {
+						attribute.getAttribute().getType();
+						attribute.getAttribute().getName();
+					}
+				}
+			}
+			
+			setData(entityTypes);
+			
+			return Status.OK_STATUS;
+		}
+		
+	};
+}
+
