@@ -26,6 +26,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 
@@ -45,8 +46,15 @@ public class NewQueryHandler {
 		kid.set( org.wcs.smart.ui.ShowPerspectiveHandler.PERSPECTIVE_ID_PARAM, IntelDataAnalysisPerspective.ID);
 		ContextInjectionFactory.invoke(new ShowPerspectiveHandler(), Execute.class, kid);
 
+		String typeKey = (String) context.get(AbstractIntelQuery.class.getCanonicalName());
+		if (typeKey == null) {
+			//TODO: show dialog requesting query type;
+			System.out.println("TODO FILL THIS");
+			return;
+		}
+		
 		//open editor
-		QueryEditorInput input = new QueryEditorInput(Messages.NewQueryHandler_DefaultQueryName, null);
+		QueryEditorInput input = new QueryEditorInput(Messages.NewQueryHandler_DefaultQueryName, null, typeKey);
 		(new OpenQueryHandler()).openQuery(input, true);
 	}
 	

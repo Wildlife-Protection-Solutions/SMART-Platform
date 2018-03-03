@@ -52,7 +52,7 @@ public class AttributeDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Attribute)){
-			return "Invalid Object";
+			return "Invalid Object"; //$NON-NLS-1$
 		}
 		Attribute attribute = (Attribute)object;
 		if (attribute.getUuid() == null ) return null;
@@ -67,6 +67,6 @@ public class AttributeDMAdvisor implements IDeleteAdvisor {
 		if (cnt == 0){
 			return null;
 		}
-		return MessageFormat.format("The attribute is associated in {0} intelligence observations.  These observations must be removed before the attribute can be deleted.", cnt);
+		return MessageFormat.format(Messages.AttributeDMAdvisor_AttributeUsedInObs, cnt);
 	}
 }

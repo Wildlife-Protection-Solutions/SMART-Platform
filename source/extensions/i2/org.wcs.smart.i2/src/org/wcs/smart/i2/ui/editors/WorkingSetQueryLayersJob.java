@@ -27,10 +27,13 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IQueryResult;
+import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.query.RunQueryJob;
 import org.wcs.smart.i2.udig.query.QueryDataSourceFactory;
 import org.wcs.smart.i2.udig.query.QueryGeoResource;
@@ -94,11 +97,19 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 	protected IStatus run(IProgressMonitor monitor) {
 		IntelWorkingSet workingset = null;
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+		HashMap<UUID, AbstractIntelQuery> queryNames = new HashMap<>();
+		
 		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
 			try(Session s = HibernateManager.openSession()){
 				workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
 				if (workingset.getQueries() != null){
-					workingset.getQueries().forEach(e->e.getQuery().getName());
+					
+					workingset.getQueries().forEach(e->{
+						AbstractIntelQuery qq = QueryManager.INSTANCE.findQuery(s, e.getQuery(), e.getQueryType());
+						if (qq  != null) {
+							queryNames.put(qq.getUuid(),qq);
+						}
+					});
 				}
 			}
 		}
@@ -140,7 +151,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 					if (l.getGeoResource().canResolve(QueryService.class)){
 						try{
 							QueryService currentService = l.getGeoResource().resolve(QueryService.class, new NullProgressMonitor());
-							if (currentService.getConnectionParams().get(QueryDataSourceFactory.QUERY_UUID.key).equals(query.getQuery().getUuid())){
+							if (currentService.getConnectionParams().get(QueryDataSourceFactory.QUERY_UUID.key).equals(query.getQuery())){
 								existing = currentService;
 								break;
 							}
@@ -158,7 +169,9 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 				if (queriesToUpdate == null && existing.getState() != State.NO_RESULTS) continue;	
 				existing.setState(State.SCHEDULED);
 				
-				RunQueryJob job = new RunQueryJob(query.getQuery()) {
+				AbstractIntelQuery intelQuery = queryNames.get(query.getQuery());
+				if (intelQuery == null) continue;
+				RunQueryJob job = new RunQueryJob(intelQuery) {
 					
 					@Override
 					protected void onError(Exception ex) {
@@ -171,10 +184,12 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 					}
 					
 					@Override
-					protected void onComplete(IPagedQueryResultSet results) {
+					protected void onComplete(IQueryResult results) {
 						UUID ws = WorkingSetManager.INSTANCE.getActiveWorkingSet();
 						if (ws == null) return;
 						
+						
+						if (!(results instanceof IPagedQueryResultSet)) return; //cannot be added to map
 						
 						//ensure the query is still part of the working set; it might have been deleted by the user
 						boolean add = false;
@@ -211,7 +226,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 							if (l.getGeoResource().canResolve(QueryService.class)){
 								try{
 									QueryService currentService = l.getGeoResource().resolve(QueryService.class, new NullProgressMonitor());
-									if (currentService.getConnectionParams().get(QueryDataSourceFactory.QUERY_UUID.key).equals(query.getQuery().getUuid())){
+									if (currentService.getConnectionParams().get(QueryDataSourceFactory.QUERY_UUID.key).equals(query.getQuery())){
 										toRemove.add(l);
 									}
 									
@@ -223,14 +238,14 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 						removeLayers(map, toRemove);
 						
 						
-						QueryService service = new QueryService(results, query.getQuery().getUuid(), query.getQuery().getName());
+						QueryService service = new QueryService((IPagedQueryResultSet) results, query.getQuery(), intelQuery.getName());
 						computeLayers(toAdd, layerStyles, query, service, false, monitor);
 						service.setState(State.RESULTS);
 						for (LayerInfo r : toAdd){
 							ID styleId = getLayerStyleIdentifier(r.resource);
 							if (layerStyles.get(styleId) == null){
 								//look for query style
-								String style = query.getQuery().getStyle();
+								String style = intelQuery.getStyle();
 								java.util.Map<String, StyleBlackboard> styles = null;
 								if (style != null){
 									try{

@@ -96,6 +96,6 @@ public class IntelRecordSourceAttribute extends NamedItem{
 	
 	@Transient
 	public boolean isListAttribute(){
-		return getEntityType() != null || getAttribute().getType() == AttributeType.LIST;
+		return getEntityType() != null || getAttribute().getType() == AttributeType.LIST || getAttribute().getType() == AttributeType.EMPLOYEE;
 	}
 }

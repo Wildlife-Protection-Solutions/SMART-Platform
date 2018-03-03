@@ -38,7 +38,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.i2.IIntelObservationQueryEngine;
+import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
@@ -87,7 +87,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 			dfilter[1] = (Date) parameters.get(eindex);
 		}
 		
-		IIntelObservationQueryEngine engine = IIntelObservationQueryEngine.createEngine();
+		IIntelQueryEngine engine = IIntelQueryEngine.createEngine(query.getKeyId());
 		HashMap<String, Object> eparameters = new HashMap<>();
 		eparameters.put(Session.class.getName(), dataset.getConnection().getSession());
 		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
@@ -95,7 +95,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 		eparameters.put(Locale.class.getName(), dataset.getConnection().getCurrentLocale());
 		eparameters.put(ConservationArea.class.getName(), query.getConservationArea());
 		try {
-			results = engine.executeQuery(query, eparameters);
+			results = (IPagedQueryResultSet) engine.executeQuery(query, eparameters);
 			m_maxRows = results.getItemCount();
 			iterator = results.iterator(dataset.getConnection().getSession());
 		} catch (Exception e) {

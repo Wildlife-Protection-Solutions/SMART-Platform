@@ -45,8 +45,10 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
@@ -66,6 +68,7 @@ import org.wcs.smart.asset.data.importer.FileProxy;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.util.SmartUtils;
 
 import com.drew.metadata.Directory;
 import com.drew.metadata.Tag;
@@ -607,12 +610,24 @@ public class FileDetailsPanel {
 				if (proxy == null) return Status.OK_STATUS;
 				
 				Image img = new Image(toUpdate.getDisplay(), proxy.getFile().toString());
+				
+				// transform based on exif orientation data
+				Transform imageTransform = SmartUtils.getExifImageTransform(proxy.getFile().toFile(), img.getBounds().width, img.getBounds().height);
+				if (imageTransform != null) {
+					//TODO: performance
+					Image image3 = new Image(Display.getDefault(), img.getBounds().height, img.getBounds().width);
+					GC gc3 = new GC(image3);
+					gc3.setTransform(imageTransform);
+					gc3.drawImage(img, 0, 0);
+					img = image3;
+				}
+				final Image ii = img;
 				Display.getDefault().syncExec(()->{
 					if (toUpdate.isDisposed()) {
-						img.dispose();
+						ii.dispose();
 						return;
 					}
-					toUpdate.setData(IMAGE_DATAKEY, img);
+					toUpdate.setData(IMAGE_DATAKEY, ii);
 					toUpdate.redraw();
 				});
 			}catch (Exception ex) {

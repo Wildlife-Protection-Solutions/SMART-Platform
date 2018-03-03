@@ -34,7 +34,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.engine.IntelEntitySummaryQueryEngine;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 import org.wcs.smart.i2.ui.editors.query.ProgressPanel;
 import org.wcs.smart.i2.ui.editors.query.QueryProgressMonitor;
@@ -46,26 +49,26 @@ import org.wcs.smart.i2.ui.editors.query.QueryProgressMonitor;
  */
 public abstract class RunQueryJob extends Job {
 
-	private IntelRecordObservationQuery query;
+	private AbstractIntelQuery query;
 	
 	private HashMap<String,Object> parameters ;
 	
 	private ProgressPanel progressPanel;
 	
 	
-	public RunQueryJob(IntelRecordObservationQuery query) {
+	public RunQueryJob(AbstractIntelQuery query) {
 		super(Messages.RunQueryJob_jobname + query.getName());
 		this.query = query;
 		parameters = new HashMap<String, Object>();
 		
 	}
 
-	public IntelRecordObservationQuery getQuery(){
+	public AbstractIntelQuery getQuery(){
 		return this.query;
 	}
 	protected abstract void onError(Exception ex);
 	
-	protected abstract void onComplete(IPagedQueryResultSet results);
+	protected abstract void onComplete(IQueryResult results);
 	
 	protected abstract void onCancel();
 	
@@ -90,14 +93,22 @@ public abstract class RunQueryJob extends Job {
 		if (!parameters.containsKey(IProgressMonitor.class.getName())) parameters.put(IProgressMonitor.class.getName(), monitor);
 		if (!parameters.containsKey(ConservationArea.class.getName())) parameters.put(ConservationArea.class.getName(), SmartDB.getCurrentConservationArea());
 		
-		IPagedQueryResultSet results = null;
+		IQueryResult results = null;
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
 				parameters.put(Session.class.getName(), session);
-				results = (new IntelObservationQueryEngine()).executeQuery(query, parameters);
-			}finally {
+				if (query instanceof IntelRecordObservationQuery) {
+					results = (new IntelObservationQueryEngine()).executeQuery((IntelRecordObservationQuery)query, parameters);
+				}else if (query instanceof IntelEntitySummaryQuery) {
+					results = (new IntelEntitySummaryQueryEngine()).executeQuery((IntelEntitySummaryQuery)query, parameters);
+				}else {
+					//TODO: othe rquery types
+				}
 				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				throw ex;
 			}
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(Messages.RunQueryJob_error + ex.getMessage(), ex);

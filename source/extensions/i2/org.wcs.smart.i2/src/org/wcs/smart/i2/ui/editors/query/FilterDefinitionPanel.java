@@ -94,13 +94,24 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	private ToolItem runItem;
 	private ToolItem saveItem;
 	
+	private boolean addToolbar;
+	private boolean includeWpObsOption;
+	
 	/**
 	 * Creates a new drop target panel.
+	 * @param addToolbar if the save/clear/run toolbar should be added to the panel
+	 * @param includeWpObsOption if the op/way filter option should be included
 	 * 
 	 */
-	public FilterDefinitionPanel(){
+	public FilterDefinitionPanel(boolean addToolbar, boolean includeWpObsOption){
 		this.targetPanels = new HashSet<IDefinitionPanel>();
 		targetPanels.add(this);
+		this.addToolbar = addToolbar;
+		this.includeWpObsOption = includeWpObsOption;
+	}
+	
+	public FilterDefinitionPanel(){
+		this(true, true);
 	}
 
 	/**
@@ -108,6 +119,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	 * @param filterType
 	 */
 	public void setFilterType(IQueryFilter.FilterType filterType){
+		if (opWaypoint == null || opObservation == null) return;
 		if (filterType.equals(FilterType.WAYPOINT)){
 			opWaypoint.setSelection(true);
 			opObservation.setSelection(false);
@@ -163,13 +175,15 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		StringBuilder query = new StringBuilder();
 		
 		if (items.size() > 0){
-			//if non-empty filter then include filter type
-			if (opWaypoint.getSelection()){
-				query.append(IQueryFilter.FilterType.WAYPOINT.getKey());
-			}else{
-				query.append(IQueryFilter.FilterType.OBSERVATION.getKey());
+			if (opWaypoint != null) {
+				//if non-empty filter then include filter type
+				if (opWaypoint.getSelection()){
+					query.append(IQueryFilter.FilterType.WAYPOINT.getKey());
+				}else{
+					query.append(IQueryFilter.FilterType.OBSERVATION.getKey());
+				}
+				query.append("|"); //$NON-NLS-1$
 			}
-			query.append("|"); //$NON-NLS-1$
 		}
 		
 		for (Object item : items){
@@ -320,6 +334,8 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	}
 	
 	public void setErrorMessage(String message, Exception fullMessage){
+		if (infoPanel == null) return;
+		
 		for (Control c : infoPanel.getChildren()){
 			c.dispose();
 		}
@@ -349,6 +365,8 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 	 * @return
 	 */
 	protected void createFilterTypeComposite(Composite parent){
+		if (!includeWpObsOption && !addToolbar) return;
+		
 		Composite filterTypeComp = new Composite(parent, SWT.NONE);
 		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		GridLayout layout = new GridLayout(5, false);
@@ -359,73 +377,76 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		filterTypeComp.setLayout(layout);
 		
-		Label l = new Label(filterTypeComp, SWT.NONE);
-		l.setText(Messages.FilterDefinitionPanel_FilterTypeLabel);
-		
-		
-		opWaypoint = new Button(filterTypeComp, SWT.RADIO);
-		opWaypoint.setToolTipText(Messages.FilterDefinitionPanel_incidenttooltip);
-		opWaypoint.setText(Messages.FilterDefinitionPanel_IncidentQueryOption);
-		opWaypoint.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				fireQueryChangedListeners();
-			}
-		});
-		opWaypoint.setSelection(true);
-		
-		opObservation = new Button(filterTypeComp, SWT.RADIO);
-		opObservation.setToolTipText(Messages.FilterDefinitionPanel_obsTooltip);
-		opObservation.setText(Messages.FilterDefinitionPanel_ObservationQueryType);
-		opObservation.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				fireQueryChangedListeners();
-			}
-		});
-		
-		infoPanel = new Composite(filterTypeComp, SWT.NONE);
-		infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)infoPanel.getLayoutData()).heightHint = 30;
-		
-		ToolBar toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
-		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
-			saveItem = new ToolItem(toolbar, SWT.PUSH);
-			saveItem.setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
-			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
-			saveItem.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					saveQuery();
-				}
-			});
+		if (includeWpObsOption) {
+			Label l = new Label(filterTypeComp, SWT.NONE);
+			l.setText(Messages.FilterDefinitionPanel_FilterTypeLabel);
 			
-			ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
-			clear.setToolTipText(Messages.FilterDefinitionPanel_clearTooltip);
-			clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
-			clear.addSelectionListener(new SelectionAdapter() {
-				
+			
+			opWaypoint = new Button(filterTypeComp, SWT.RADIO);
+			opWaypoint.setToolTipText(Messages.FilterDefinitionPanel_incidenttooltip);
+			opWaypoint.setText(Messages.FilterDefinitionPanel_IncidentQueryOption);
+			opWaypoint.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					clear();
 					fireQueryChangedListeners();
 				}
 			});
-		}
+			opWaypoint.setSelection(true);
+			
+			opObservation = new Button(filterTypeComp, SWT.RADIO);
+			opObservation.setToolTipText(Messages.FilterDefinitionPanel_obsTooltip);
+			opObservation.setText(Messages.FilterDefinitionPanel_ObservationQueryType);
+			opObservation.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					fireQueryChangedListeners();
+				}
+			});
+		}			
 		
-		runItem = new ToolItem(toolbar, SWT.PUSH);
-		runItem.setToolTipText(Messages.FilterDefinitionPanel_runtooltip);
-		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
-		runItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				runQuery();
+		
+		if (addToolbar) {
+			infoPanel = new Composite(filterTypeComp, SWT.NONE);
+			infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)infoPanel.getLayoutData()).heightHint = 30;
+			
+			ToolBar toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
+			toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			
+			if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+				saveItem = new ToolItem(toolbar, SWT.PUSH);
+				saveItem.setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
+				saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+				saveItem.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						saveQuery();
+					}
+				});
+				
+				ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
+				clear.setToolTipText(Messages.FilterDefinitionPanel_clearTooltip);
+				clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+				clear.addSelectionListener(new SelectionAdapter() {
+					
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						clear();
+						fireQueryChangedListeners();
+					}
+				});
 			}
-		});
-		
-		
+			
+			runItem = new ToolItem(toolbar, SWT.PUSH);
+			runItem.setToolTipText(Messages.FilterDefinitionPanel_runtooltip);
+			runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+			runItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					runQuery();
+				}
+			});
+		}
 	}
 	
 	public void setQueryState(boolean isDirty){

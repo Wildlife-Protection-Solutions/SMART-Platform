@@ -46,6 +46,8 @@ import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.hibernate.QueryFactory;
 
+import com.ibm.icu.text.MessageFormat;
+
 /**
  * Servlet implementation class LoginServlet
  */
@@ -71,6 +73,29 @@ public class LoginServlet extends HttpServlet {
 		Long userCnt = 1l;
 		try{
 			s.beginTransaction();
+			
+			//check database and filestore match expected version
+			String query = "SELECT version, filestore_version FROM connect.connect_version"; //$NON-NLS-1$
+			Object[] data = (Object[])s.createNativeQuery(query).uniqueResult();
+			if (data == null) {
+				//throw new exception filestore not configured
+				throw new ServletException(Messages.getString("LoginServlet.NotConfigured", request.getLocale())); //$NON-NLS-1$
+			}
+			String version = (String) data[0];
+			if (!version.equals(HibernateManager.DATABASE_VERSION)) {
+				logger.log(Level.SEVERE, MessageFormat.format("SMART Connect upgrade has not been completed.  Version in database ({0}) does not match the software version ({1})", version, HibernateManager.DATABASE_VERSION)); //$NON-NLS-1$
+				request.setAttribute("javax.servlet.error.message", Messages.getString("LoginServlet.DbVersionError", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
+				request.getRequestDispatcher("WEB-INF/errorpages/unknown.jsp").forward(request, response); //$NON-NLS-1$
+				return;
+			}
+			version = (String) data[1];
+			if (!version.equals(HibernateManager.FILESTORE_VERSION)) {
+				logger.log(Level.SEVERE, "SMART Connect upgrade has not been completed.  Upgraded flag in database not set"); //$NON-NLS-1$
+				request.setAttribute("javax.servlet.error.message", Messages.getString("LoginServlet.FsVersionError", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
+				request.getRequestDispatcher("WEB-INF/errorpages/unknown.jsp").forward(request, response); //$NON-NLS-1$
+				return;
+			}
+			
 			userCnt = QueryFactory.buildCountQuery(s, SmartUser.class);
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);

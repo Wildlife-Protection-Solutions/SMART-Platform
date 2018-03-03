@@ -69,8 +69,9 @@ public class IntelRecordAttributeValueList {
 	@Embeddable
 	public static class IntelRecordAttributeValueListPk implements Serializable{
 		private static final long serialVersionUID = 1L;
+		
 		private IntelRecordAttributeValue valueItem;
-		private UUID uuid;
+		private UUID elementUuid;
 		
 		public IntelRecordAttributeValueListPk(){
 			
@@ -87,15 +88,15 @@ public class IntelRecordAttributeValueList {
 		
 		@Column(name="element_uuid")
 		public UUID getElementUuid(){
-			return this.uuid;
+			return this.elementUuid;
 		}
-		public void setElementUuid(UUID uuid){
-			this.uuid = uuid;
+		public void setElementUuid(UUID elementUuid){
+			this.elementUuid = elementUuid;
 		}
 		
 		@Override
 		public int hashCode(){
-			return Objects.hash(uuid, valueItem);
+			return Objects.hash(elementUuid, valueItem);
 		}
 		
 		@Override
@@ -104,7 +105,7 @@ public class IntelRecordAttributeValueList {
 			if (other == null) return false;
 			if (getClass() != other.getClass()) return false;
 			IntelRecordAttributeValueListPk pk = (IntelRecordAttributeValueListPk) other;
-			return Objects.equals(uuid, pk.uuid) && Objects.equals(valueItem, pk.valueItem);
+			return Objects.equals(elementUuid, pk.elementUuid) && Objects.equals(valueItem, pk.valueItem);
 		}
 	}
 }

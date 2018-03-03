@@ -86,6 +86,7 @@ import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -94,6 +95,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
@@ -741,8 +743,13 @@ public class RecordSummaryPage extends EditorPart{
 							if (v.getKey().getAttribute().getAttribute() != null){
 								//attributes
 								for (IntelRecordAttributeValueList l : v.getKey().getAttributeListItems()){
-									String lbl = ((IntelAttributeListItem)session.get(IntelAttributeListItem.class, l.getId().getElementUuid())).getName();
-									sb.append(lbl);
+									if (v.getKey().getAttribute().getAttribute().getType() == AttributeType.LIST) {
+										String lbl = ((IntelAttributeListItem)session.get(IntelAttributeListItem.class, l.getId().getElementUuid())).getName();
+										sb.append(lbl);
+									}else if (v.getKey().getAttribute().getAttribute().getType() == AttributeType.EMPLOYEE) {
+										String lbl = SmartLabelProvider.getFullLabel( ((Employee)session.get(Employee.class, l.getId().getElementUuid())) );
+										sb.append(lbl);
+									}
 									sb.append(", "); //$NON-NLS-1$
 								}
 							}else if(v.getKey().getAttribute().getEntityType() != null){

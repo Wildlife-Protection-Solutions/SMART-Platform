@@ -143,6 +143,7 @@ public class IntelRecordAttributeValue extends UuidItem{
 				return getNumberValue();
 			case DATE:
 				return getDateValue();
+			case EMPLOYEE:
 			case LIST:
 				return getAttributeListItems();
 			case POSITION:
@@ -177,6 +178,7 @@ public class IntelRecordAttributeValue extends UuidItem{
 			case DATE:
 				return DateFormat.getDateInstance().format(getDateValue());
 			case LIST:
+			case EMPLOYEE:
 				return String.valueOf(listItems.size());
 			case NUMERIC:
 				return String.valueOf(getNumberValue());

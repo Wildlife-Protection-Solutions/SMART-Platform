@@ -46,9 +46,11 @@ import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -58,6 +60,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -67,7 +70,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 
 /**
- * Import entity engine.
+ * Import entity engine for importing from csv file.
  * 
  * @author Emily
  *
@@ -96,6 +99,7 @@ public enum EntityImportEngine {
 		monitor.subTask(Messages.EntityImportEngine_AttributeTaskName);
 		//load the attributes 
 		Set<IntelAttribute> attributes = new HashSet<>();
+		List<Employee> allEmployees = new ArrayList<>();
 		try(Session s = HibernateManager.openSession()){
 			for (IntelAttribute a : config.getMappedAttributes()){
 				IntelAttribute attribute = (IntelAttribute) s.get(IntelAttribute.class, a.getUuid());
@@ -106,6 +110,9 @@ public enum EntityImportEngine {
 				}
 				attributes.add(attribute);
 			}
+			
+			allEmployees.addAll(QueryFactory.buildQuery(s, Employee.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+			allEmployees.forEach(e->{e.getUuid(); SmartLabelProvider.getFullLabel(e);});
 		}
 		monitor.worked(1);
 		monitor.checkCanceled();
@@ -228,6 +235,19 @@ public enum EntityImportEngine {
 							warnings.add(MessageFormat.format(Messages.EntityImportEngine_InvalidListValue, value1, line, a.getName()));
 						}
 						
+						break;
+					case EMPLOYEE:
+						for (Employee e : allEmployees) {
+							if (SmartLabelProvider.getFullLabel(e).equalsIgnoreCase(value1)) {
+								avalue.setEmployee(e);
+								add = true;
+								break;
+							}
+						}
+						//not found ask the user if they want to add it
+						if (avalue.getEmployee() == null){
+							warnings.add(MessageFormat.format(Messages.EntityImportEngine_EmployeeNotFound, value1, line, a.getName()));
+						}						
 						break;
 					case NUMERIC:
 						try{

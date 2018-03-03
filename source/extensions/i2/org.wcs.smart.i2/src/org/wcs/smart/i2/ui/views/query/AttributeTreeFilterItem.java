@@ -30,7 +30,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -44,6 +47,8 @@ import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
+import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Intelligence attribute tree filter item.
@@ -123,13 +128,39 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 			}
 			
 			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]))};
+		case EMPLOYEE:
+			final List<String> elabels = new ArrayList<String>();
+			final List<String> ekeys = new ArrayList<String>();
+			
+			elabels.add(DropItemFactory.ANY_LABEL);
+			ekeys.add(IQueryFilter.ANY_OPTION_KEY);
+			
+			Job j2 = new Job("creating employee drop item"){ //$NON-NLS-1$
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try(Session s = HibernateManager.openSession()){
+						List<Employee> emps = QueryFactory.buildQuery(s, Employee.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+						for (Employee e : emps) {
+							elabels.add(SmartLabelProvider.getFullLabel(e));
+							ekeys.add(UuidUtils.uuidToString(e.getUuid()));
+						}
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			j2.schedule();
+			try {
+				j2.join();
+			} catch (InterruptedException e) {
+				Intelligence2PlugIn.displayLog(Messages.AttributeTreeFilterItem_employeeNotFound, e);
+			}
+			
+			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, elabels.toArray(new String[elabels.size()]), ekeys.toArray(new String[ekeys.size()]))};
 		case NUMERIC:
 			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.NUMERIC)};
 		case TEXT:
 			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT)};
-		default:
-			break;
-			
 		}
 		return null;
 	}

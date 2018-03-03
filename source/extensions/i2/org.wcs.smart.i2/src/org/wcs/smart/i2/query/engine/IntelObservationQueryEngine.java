@@ -41,8 +41,9 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.i2.IIntelObservationQueryEngine;
+import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
@@ -61,7 +62,7 @@ import com.vividsolutions.jts.io.WKBReader;
  * @author Emily
  *
  */
-public class IntelObservationQueryEngine implements IIntelObservationQueryEngine {
+public class IntelObservationQueryEngine implements IIntelQueryEngine {
 
 	
 	private IntelObservationQueryResults queryResults;
@@ -72,7 +73,9 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 	 * @param parameters
 	 * @return
 	 */
-	public IPagedQueryResultSet executeQuery(IntelRecordObservationQuery query,  HashMap<String, Object> parameters) throws Exception{
+	public IPagedQueryResultSet executeQuery(AbstractIntelQuery iquery,  HashMap<String, Object> parameters) throws Exception{
+		
+		IntelRecordObservationQuery query = (IntelRecordObservationQuery) iquery;
 		
 		Session session = (Session) parameters.get(Session.class.getName());
 		IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());

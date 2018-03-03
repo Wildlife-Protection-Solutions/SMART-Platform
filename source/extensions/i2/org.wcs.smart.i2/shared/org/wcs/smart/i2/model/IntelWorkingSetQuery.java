@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -47,6 +48,7 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 	
 	private String mapStyle;
 	private Boolean isVisible;
+	private String queryType;
 	
 	public IntelWorkingSetQuery(){
 		
@@ -73,6 +75,16 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 		this.isVisible = isVisible;
 	}
 	
+	
+	@Column(name="query_type")
+	public String getQueryType() {
+		return this.queryType;
+	}
+
+	public void setQueryType(String queryType){
+		this.queryType = queryType;
+	}
+	
 	@EmbeddedId
 	public IWorkingSetQueryPk getId(){
 		return this.id;
@@ -82,11 +94,11 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 	}
 	
 	@Transient
-	public IntelRecordObservationQuery getQuery() {
+	public UUID getQuery() {
 		return id.getQuery();
 	}
 
-	public void setQuery(IntelRecordObservationQuery entity) {
+	public void setQuery(UUID entity) {
 		id.setQuery(entity);
 	}
 	
@@ -128,7 +140,7 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 	public static class IWorkingSetQueryPk implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
-		private IntelRecordObservationQuery query;
+		private UUID queryUuid;
 		private IntelWorkingSet workingSet;
 		
 
@@ -136,14 +148,13 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 			
 		}
 		
-		@ManyToOne(cascade = {CascadeType.ALL})
 		@JoinColumn(name="query_uuid")
-		public IntelRecordObservationQuery getQuery() {
-			return query;
+		public UUID getQuery() {
+			return queryUuid;
 		}
 
-		public void setQuery(IntelRecordObservationQuery query) {
-			this.query = query;
+		public void setQuery(UUID queryUuid) {
+			this.queryUuid = queryUuid;
 		}
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
@@ -163,23 +174,23 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 			}
 			IWorkingSetQueryPk p = (IWorkingSetQueryPk)key;
 			
-			if (p.query == null || this.query == null ||
+			if (p.queryUuid == null || this.queryUuid == null ||
 				p.workingSet == null || this.workingSet == null ){
 				
-				if (p.query == null && this.query == null && 
+				if (p.queryUuid == null && this.queryUuid == null && 
 					p.workingSet == null && this.workingSet == null){
 						return true;
 				}
 				return false;
 			}
 			
-			return p.query.equals(this.query) &&
+			return p.queryUuid.equals(this.queryUuid) &&
 					p.workingSet.equals(this.workingSet);
 		}
 		@Override
 		public int hashCode() {
 		    int code = 0;
-		    if (query != null) {code += query.hashCode();}
+		    if (queryUuid != null) {code += queryUuid.hashCode();}
 		    code *= 31;
 		    if (workingSet != null) {code += workingSet.hashCode(); }
 		    return code;

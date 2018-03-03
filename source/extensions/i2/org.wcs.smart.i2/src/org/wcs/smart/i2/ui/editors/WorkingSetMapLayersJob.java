@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -68,6 +69,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IWorkingSetMapLayer;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -76,6 +78,7 @@ import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
+import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.udig.IWorkingSetResource;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
@@ -211,6 +214,7 @@ public class WorkingSetMapLayersJob extends Job {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		HashMap<UUID, String> queryNames = new HashMap<>();
 		
 		IntelWorkingSet workingset = null;
 		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
@@ -224,7 +228,10 @@ public class WorkingSetMapLayersJob extends Job {
 					workingset.getRecords().forEach(e->e.getRecord().getTitle());
 				}
 				if (workingset.getQueries() != null){
-					workingset.getQueries().forEach(e->e.getQuery().getName());
+					workingset.getQueries().forEach(e->{
+						AbstractIntelQuery q = QueryManager.INSTANCE.findQuery(s, e.getQuery(), e.getQueryType());
+						if (q != null) queryNames.put(q.getUuid(), q.getName());
+					});
 				}
 			}
 		}
@@ -273,7 +280,9 @@ public class WorkingSetMapLayersJob extends Job {
 		}
 		
 		for (IntelWorkingSetQuery query : workingset.getQueries()){
-			QueryService service = new QueryService(null, query.getQuery().getUuid(), query.getQuery().getName());
+			String name = queryNames.get(query.getQuery());
+			if (name == null) name = "QUERY NOT FOUND";
+			QueryService service = new QueryService(null, query.getQuery(), name);
 			computeLayers(toAdd, layerStyles, query, service, false, monitor);
 		}
 		

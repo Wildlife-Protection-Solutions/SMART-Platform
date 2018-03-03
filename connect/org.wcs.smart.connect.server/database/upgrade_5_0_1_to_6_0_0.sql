@@ -1432,18 +1432,23 @@ CREATE  TRIGGER trg_connect_account_after AFTER INSERT ON connect.change_log  FO
 ALTER TABLE smart.connect_data_queue DROP CONSTRAINT type_chk;
 ALTER TABLE connect.data_queue drop constraint type_chk;
 update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.connect.dataqueue';
-
-update smart.employee set smartuserlevel =  replace(smartuserlevel, 'INTEL_DATA_ENTRY', 'INTEL_RECORD_CREATE,INTEL_RECORD_VIEW,INTEL_RECORD_EDIT,INTEL_ENTITY_VIEW,INTEL_QUERY_ALL') where smartuserlevel is not null and smartuserlevel like '%INTEL_DATA_ENTRY%';
-update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.i2';
+update connect.ca_plugin_version set version = '3.0' where plugin_id = = 'org.wcs.smart.connect.dataqueue';
 
 
+ALTER TABLE smart.i_entity_attribute_value add column employee_uuid uuid;
+ALTER TABLE smart.i_entity_relationship_attribute_value add column employee_uuid uuid;
+			
+ALTER TABLE smart.i_entity_attribute_value ADD  FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_entity_relationship_attribute_value ADD FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+			
+UPDATE smart.employee SET smartuserlevel =  replace(smartuserlevel, 'INTEL_DATA_ENTRY', 'INTEL_RECORD_CREATE,INTEL_RECORD_VIEW,INTEL_RECORD_EDIT,INTEL_ENTITY_VIEW,INTEL_QUERY_ALL') where smartuserlevel is not null and smartuserlevel like '%INTEL_DATA_ENTRY%';
+UPDATE connect.connect_plugin_version SET version = '3.0' WHERE plugin_id = 'org.wcs.smart.i2';
+UPDATE connect.ca_plugin_version SET version = '3.0' WHERE plugin_id = 'org.wcs.smart.i2';
 
 
-
-
-
--- ASSET PLUGIN --
+-- ASSET PLUGIN --qqq
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.asset', '1.0');
+insert into connect.ca_plugin_version (ca_uuid, plugin_id, version) select ca_uuid, 'org.wcs.smart.asset', '1.0' from connect.ca_info;
 
 CREATE TABLE smart.asset( 
  uuid uuid NOT NULL, 
@@ -1840,7 +1845,7 @@ CREATE TRIGGER trg_asset_station_location_attribute_value AFTER INSERT OR UPDATE
 -- Asset Queries 
 
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.asset.query', '1.0');
-
+insert into connect.ca_plugin_version (ca_uuid, plugin_id, version) select ca_uuid, 'org.wcs.smart.asset.query', '1.0' from connect.ca_info;
 
 CREATE TABLE SMART.ASSET_OBSERVATION_QUERY(
  UUID UUID NOT NULL,
@@ -1918,7 +1923,14 @@ ALTER TABLE smart.patrol ADD FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.PATROL_F
 
 CREATE TRIGGER trg_patrol_folder AFTER INSERT OR UPDATE OR DELETE ON smart.patrol_folder FOR EACH ROW execute procedure connect.trg_changelog_common();
 
+
+-- UPDATE VERSION
+ALTER TABLE connect.connect_version ADD COLUMN filestore_version varchar(5) default '-1';
+
 UPDATE connect.connect_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
 UPDATE connect.ca_plugin_version SET version = '6.0.0' WHERE plugin_id = 'org.wcs.smart';
-update connect.connect_version set version = '6.0.0';
 
+--database version
+update connect.connect_version set version = '6.0.0';
+--flag the filestore as not upgraded; this will require administrator to upgrade before you can login
+update connect.connect_version set filestore_version = '5.0.0';

@@ -55,7 +55,7 @@ import org.wcs.smart.udig.style.StyleManager;
 public class QueryMapPanel extends MapComposite {
 
 	
-	public QueryMapPanel(Composite parent, IntelQueryEditor parentEditor) {
+	public QueryMapPanel(Composite parent, IntelRecordObservationQueryEditor parentEditor) {
 		super(parent, parentEditor);
 	}
 
@@ -82,7 +82,7 @@ public class QueryMapPanel extends MapComposite {
 		}
 		if (results != null){
 			
-			service = new QueryService(results, ((IntelQueryEditor)editor).getQuery().getUuid(), ((IntelQueryEditor)editor).getQuery().getName());
+			service = new QueryService(results, ((IntelRecordObservationQueryEditor)editor).getQuery().getUuid(), ((IntelRecordObservationQueryEditor)editor).getQuery().getName());
 			try {
 				List<? extends IGeoResource> resources = service.resources(new NullProgressMonitor());
 				AddLayersCommand addLayers = new AddLayersCommand(resources, layerIndex < 0 ? 0 : layerIndex){
@@ -91,7 +91,7 @@ public class QueryMapPanel extends MapComposite {
 						super.run(monitor);
 						mapLayers = getLayers();
 						
-						String style = ((IntelQueryEditor)editor).getQuery().getStyle();
+						String style = ((IntelRecordObservationQueryEditor)editor).getQuery().getStyle();
 						Map<String, StyleBlackboard> styles = null;;
 						if (style != null){
 							styles = StyleManager.INSTANCE.fromStringMap(style);
@@ -131,9 +131,9 @@ public class QueryMapPanel extends MapComposite {
 		}
 		try{
 			String styleString = StyleManager.INSTANCE.asString(styles);
-			((IntelQueryEditor)editor).getQuery().setStyle(styleString);
+			((IntelRecordObservationQueryEditor)editor).getQuery().setStyle(styleString);
 			
-			Display.getDefault().syncExec(()->((IntelQueryEditor)editor).setDirty(true));
+			Display.getDefault().syncExec(()->((IntelRecordObservationQueryEditor)editor).setDirty(true));
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(Messages.QueryMapPanel_StyleSaveError, ex);
 		}

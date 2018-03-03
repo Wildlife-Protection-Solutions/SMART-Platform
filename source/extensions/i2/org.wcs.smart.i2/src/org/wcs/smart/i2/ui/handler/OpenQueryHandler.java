@@ -28,7 +28,10 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.ui.editors.query.IntelEntitySummaryQueryEditor;
+import org.wcs.smart.i2.ui.editors.query.IntelRecordObservationQueryEditor;
 import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 
 /**
@@ -41,14 +44,18 @@ public class OpenQueryHandler {
 
 	public void openQuery(QueryEditorInput editorInput, boolean editMode){
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelQueryEditor.ID);
+			if (editorInput.getTypeKey().equals(IntelRecordObservationQuery.KEY)) {
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelRecordObservationQueryEditor.ID);
+			}else if (editorInput.getTypeKey().equals(IntelEntitySummaryQuery.KEY)) {
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelEntitySummaryQueryEditor.ID);
+			}
 		} catch (PartInitException e) {
 			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.OpenQueryHandler_OpenError, e.getMessage()), e);
 		}
 	}
 	
-	public void openQuery(UUID queryUuid, boolean editMode){
-		QueryEditorInput input = new QueryEditorInput(null, queryUuid);
+	public void openQuery(UUID queryUuid, String queryType, boolean editMode){
+		QueryEditorInput input = new QueryEditorInput(null, queryUuid, queryType);
 		openQuery(input, editMode);
 	}
 }

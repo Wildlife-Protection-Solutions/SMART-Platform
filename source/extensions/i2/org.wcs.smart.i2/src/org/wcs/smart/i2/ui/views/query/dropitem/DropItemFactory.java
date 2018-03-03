@@ -26,10 +26,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -43,7 +45,10 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
+import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.AreaFilter;
 import org.wcs.smart.i2.query.observation.filter.BooleanFilter;
@@ -51,9 +56,13 @@ import org.wcs.smart.i2.query.observation.filter.BracketFilter;
 import org.wcs.smart.i2.query.observation.filter.DataModelFilter;
 import org.wcs.smart.i2.query.observation.filter.EntityFilter;
 import org.wcs.smart.i2.query.observation.filter.EntityTypeFilter;
+import org.wcs.smart.i2.query.observation.filter.GroupByItem;
+import org.wcs.smart.i2.query.observation.filter.GroupByPart;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
+import org.wcs.smart.i2.query.observation.filter.ValuePart;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -71,12 +80,122 @@ public class DropItemFactory {
 		return (new DropItemFactory(session)).generateDropItems(filter);
 	}
 
+	public static List<DropItem> generateDropItems(GroupByPart part, Session session){
+		if (part == null || part.getItems().isEmpty()) return Collections.emptyList();
+		return (new DropItemFactory(session)).generateDropItems(part);
+	}
+	
+
+	public static List<DropItem> generateDropItems(ValuePart part, Session session){
+		if (part == null ) return Collections.emptyList();
+		return (new DropItemFactory(session)).generateDropItems(part);
+	}
 	private Session session;
 	
 	private DropItemFactory(Session session){
 		this.session = session;
 	}
 	
+	public List<DropItem> generateDropItems(ValuePart part){
+		return Collections.singletonList(new ValueDropItem(part.getValueOption()));
+	}
+	
+	public List<DropItem> generateDropItems(GroupByPart part){
+		List<DropItem> allItems = new ArrayList<>();
+		for (GroupByItem i : part.getItems()) {
+			
+			if (i.getGroupByType() == GroupByItem.GroupByType.ENTITYTYPE) {
+				EntityTypeGroupByDropItem di = new EntityTypeGroupByDropItem();
+				for (String entityTypeKey : i.getFilterOptions()) {
+					IntelEntityType type = QueryFactory.buildQuery(session, IntelEntityType.class, 
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
+							new Object[] {"keyId", entityTypeKey}).uniqueResult();
+					if (type == null) {
+						DropItem edi = new ErrorDropItem(MessageFormat.format("No entity type with key {0} found.", entityTypeKey));
+						return Collections.singletonList(edi);
+					}	
+					di.addEntityType(type);
+				}
+				return Collections.singletonList(di);
+			}else if (i.getGroupByType() == GroupByItem.GroupByType.ATTRIBUTE) {
+				String attributeKey = i.getAttributeKey();
+				
+				IntelAttribute attribute = QueryFactory.buildQuery(session, IntelAttribute.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
+						new Object[] {"keyId", attributeKey}).uniqueResult();
+				if (attribute == null) {
+					DropItem edi = new ErrorDropItem(MessageFormat.format("No attribute with key {0} found.", attributeKey));
+					return Collections.singletonList(edi);
+				}
+				
+				String entityTypeKey = i.getEntityTypeKey();
+				IntelEntityType type = null;
+				if (entityTypeKey != null) {
+					type = QueryFactory.buildQuery(session, IntelEntityType.class, 
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
+							new Object[] {"keyId", entityTypeKey}).uniqueResult();
+					if (type == null) {
+						DropItem edi = new ErrorDropItem(MessageFormat.format("No entity type with key {0} found.", entityTypeKey));
+						return Collections.singletonList(edi);
+					}	
+				}
+				
+				AttributeGroupByDropItem di = null;
+				if (type == null) {
+					di = new AttributeGroupByDropItem(attribute);
+				}else {
+					IntelEntityTypeAttribute temp = new IntelEntityTypeAttribute();
+					temp.setAttribute(attribute);
+					temp.setEntityType(type);
+					di = new AttributeGroupByDropItem(temp);
+				}
+				
+				if (attribute.getType() == AttributeType.DATE) {
+					di.setDateOption(i.getDateOption());
+				}
+				if (attribute.getType() == AttributeType.POSITION) {
+					di.setAreaOption(i.getAreaType());
+					
+					List<String> keys = i.getFilterOptions();
+					for (String areaKey : keys) {
+						Area a = QueryFactory.buildQuery(session, Area.class, 
+								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
+								new Object[] {"type", i.getAreaType().name()},
+								new Object[] {"keyId", areaKey}).uniqueResult();
+						if (a == null) {
+							DropItem edi = new ErrorDropItem(MessageFormat.format("No area of type {0} with key {1} found.", i.getAreaType().name(), areaKey));
+							return Collections.singletonList(edi);
+						}
+						di.addFilterOption(new ListItem(a.getKeyId(), a.getName()));
+					}
+					
+				}
+				if (attribute.getType() == AttributeType.LIST) {
+					List<String> keys = i.getFilterOptions();
+					for (String areaKey : keys) {
+						for (IntelAttributeListItem listItem : attribute.getAttributeList()) {
+							if (listItem.getKeyId().equals(areaKey)) {
+								di.addFilterOption(new ListItem(listItem.getKeyId(), listItem.getName()));
+								break;
+							}
+						}
+					}
+				}
+				if (attribute.getType() == AttributeType.EMPLOYEE) {
+					List<String> keys = i.getFilterOptions();
+					for (String employeUuid : keys) {
+						UUID eu = UuidUtils.stringToUuid(employeUuid);
+						Employee e = session.get(Employee.class,  eu);
+						if (e != null) {
+							di.addFilterOption(new ListItem(UuidUtils.uuidToString(e.getUuid()), SmartLabelProvider.getFullLabel(e)));
+						}
+					}
+				}
+				allItems.add(di);
+			}
+		}
+		return allItems;
+	}
 	
 	public List<DropItem> generateDropItems(IQueryFilter filter){
 		if (filter.getClass().equals(DataModelFilter.class))
@@ -226,6 +345,20 @@ public class DropItemFactory {
 					labels.add(i.getName());
 					keys.add(i.getKeyId());
 				}
+			}
+			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
+			item.setInitialValue(filter.getKeyValue());
+			return Collections.singletonList(item);
+		}else if (filter.getAttributeType() == IntelAttribute.AttributeType.EMPLOYEE){
+			final List<String> labels = new ArrayList<String>();
+			final List<String> keys = new ArrayList<String>();
+			labels.add(ANY_LABEL);
+			keys.add(IQueryFilter.ANY_OPTION_KEY);
+
+			List<Employee> emps = QueryFactory.buildQuery(session, Employee.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+			for (Employee e : emps) {
+				labels.add(SmartLabelProvider.getFullLabel(e));
+				keys.add(UuidUtils.uuidToString(e.getUuid()));
 			}
 			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]));
 			item.setInitialValue(filter.getKeyValue());

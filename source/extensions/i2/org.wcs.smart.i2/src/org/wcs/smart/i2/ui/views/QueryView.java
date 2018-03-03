@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.views;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -49,15 +50,17 @@ import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -71,6 +74,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -96,16 +100,20 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.QueryManager;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.SectionTabHeader;
-import org.wcs.smart.i2.ui.editors.query.IntelQueryEditor;
+import org.wcs.smart.i2.ui.editors.query.IQueryEditor;
 import org.wcs.smart.i2.ui.handler.NewQueryHandler;
 import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
+import org.wcs.smart.i2.ui.views.query.EntitySummaryContentProvider;
 import org.wcs.smart.i2.ui.views.query.FilterTreeContentProvider;
 import org.wcs.smart.i2.ui.views.query.FilterTreeItem;
 import org.wcs.smart.i2.ui.views.query.FilterTreeLabelProvider;
@@ -133,14 +141,16 @@ public class QueryView {
 	private IEclipseContext context;
 	
 	private QueryViewerFilter queryFilter;
-	private ListViewer queryList;
+	private TableViewer queryList;
 	
 	private TreeViewer filterTree = null;
-	private Job refreshJob;
+	//private Job refreshJob;
 	
 	//query filter tree
 	private Composite treePart;
 	private Listener refreshListener = (event)->refreshFiltersView();
+	
+	private HashMap<String, ITreeContentProvider> queryToContentProvider;
 	
 	private IAreaModifiedListener areaListener = new IAreaModifiedListener() {
 		@Override
@@ -164,6 +174,7 @@ public class QueryView {
 	
 	public QueryView() {
 		super();
+		queryToContentProvider = new HashMap<>();
 	}
 
 	@PostConstruct
@@ -226,12 +237,23 @@ public class QueryView {
 			}
 		});
 		
-		queryList = new ListViewer(part, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		queryList = new TableViewer(part, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		queryList.setContentProvider(ArrayContentProvider.getInstance());
 		queryList.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof QueryProxy) return ((QueryProxy) element).getName();
 				return super.getText(element);
+			}
+			
+			public Image getImage(Object element) {
+				if (element instanceof QueryProxy) {
+					if (((QueryProxy) element).getTypeKey().equals(IntelRecordObservationQuery.KEY)) {
+						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD);
+					}else if (((QueryProxy) element).getTypeKey().equals(IntelEntitySummaryQuery.KEY)) {
+						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY);
+					}
+				}
+				return null;
 			}
 		});
 		queryList.setInput(new String[]{DialogConstants.LOADING_TEXT});
@@ -297,7 +319,7 @@ public class QueryView {
 		
 		filterTree = new TreeViewer(treePart, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
 		filterTree.setLabelProvider(new FilterTreeLabelProvider());
-		filterTree.setContentProvider(new FilterTreeContentProvider());
+		//filterTree.setContentProvider(new FilterTreeContentProvider());
 
 		treePart.addListener(SWT.Resize, e->{
 			filterTree.getTree().setBounds(0,0,treePart.getBounds().width, treePart.getBounds().height);
@@ -330,19 +352,19 @@ public class QueryView {
 			});
 		}
 		
-		refreshJob = new LoadFilterOptions(filterTree);
+		//refreshJob = new LoadFilterOptions(filterTree);
 		
 		return part;
 	}
 	
-	private IntelQueryEditor getActiveQueryEditor() {
-		IntelQueryEditor addTo = null;
+	private IQueryEditor getActiveQueryEditor() {
+		IQueryEditor addTo = null;
 		EPartService pService = context.get(EPartService.class);
 		for (MPart part : context.get(EPartService.class).getParts()){
 			if (pService.isPartVisible(part)){
 				Object item = E3Utils.getSourceObject(part);
-				if (item instanceof IntelQueryEditor){
-					addTo = (IntelQueryEditor) item;
+				if (item instanceof IQueryEditor){
+					addTo = (IQueryEditor) item;
 					break;
 				}
 			}
@@ -365,7 +387,7 @@ public class QueryView {
 	}
 	
 	private void addFilterSelectionToQuery(){
-		IntelQueryEditor addTo = getActiveQueryEditor();
+		IQueryEditor addTo = getActiveQueryEditor();
 		if (addTo == null) return; //no query open
 		for (DropItem[] di : getSelectedDropItems()) {
 			addTo.addDropItems(di);
@@ -373,17 +395,17 @@ public class QueryView {
 	}
 	
 	private void refreshFiltersView(){	
-		filterTree.setInput(null);
-		refreshJob.schedule();
+		//filterTree.setInput(null);
+		//refreshJob.schedule();
 	}
 	
 	private void renameQuery(){
 		Object x = ((IStructuredSelection)queryList.getSelection()).getFirstElement();
 		if (x == null) return;
 		if (x instanceof QueryProxy){
-			IntelRecordObservationQuery toEdit = null;
+			AbstractIntelQuery toEdit = null;
 			try(Session s = HibernateManager.openSession()){
-				toEdit = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, ((QueryProxy) x).getUuid());
+				toEdit = QueryManager.INSTANCE.findQuery(s, ((QueryProxy) x).getUuid(),((QueryProxy) x).getTypeKey());
 				if (toEdit != null){
 					toEdit.getNames();
 				}
@@ -409,11 +431,11 @@ public class QueryView {
 			return;
 		}
 		
-		List<IntelRecordObservationQuery> removed = new ArrayList<IntelRecordObservationQuery>();
+		List<AbstractIntelQuery> removed = new ArrayList<AbstractIntelQuery>();
 		for (Iterator<?> iterator = ((IStructuredSelection)queryList.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof QueryProxy){
-				IntelRecordObservationQuery deletedItem = QueryManager.INSTANCE.deleteQuery(((QueryProxy) x).getUuid());
+				AbstractIntelQuery deletedItem = InternalQueryManager.INSTANCE.deleteQuery(((QueryProxy) x).getUuid(), ((QueryProxy) x).getTypeKey());
 				if (deletedItem != null){
 					removed.add(deletedItem);
 				}
@@ -422,19 +444,21 @@ public class QueryView {
 		context.get(IEventBroker.class).post(IntelEvents.QUERY_DELETED, removed);
 	}
 	
-	private void createNewQuery(){
-		ContextInjectionFactory.invoke(new NewQueryHandler(), Execute.class, context);
+	private void createNewQuery(String queryTypeKey){
+		IEclipseContext kid = context.createChild();
+		kid.set(AbstractIntelQuery.class.getCanonicalName(), queryTypeKey);
+		ContextInjectionFactory.invoke(new NewQueryHandler(), Execute.class, kid);
 	}
 	private void openSelection(){
 		for (Iterator<?> iterator = ((IStructuredSelection)queryList.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			//open query
 			if (x instanceof QueryProxy){
-				(new OpenQueryHandler()).openQuery(((QueryProxy) x).getUuid(), true);
+				(new OpenQueryHandler()).openQuery( ((QueryProxy) x).getUuid(), ((QueryProxy)x).getTypeKey(), true );
 			}
 		}
 	}
-	private void createMenu(ListViewer control){
+	private void createMenu(Viewer control){
 		Menu m = new Menu(control.getControl());
 		control.getControl().setMenu(m);
 	
@@ -452,15 +476,22 @@ public class QueryView {
 
 		
 		if (IntelSecurityManager.INSTANCE.canEditQuery()){
-			MenuItem miNew = new MenuItem(m, SWT.PUSH);
+			MenuItem miNew = new MenuItem(m, SWT.CASCADE);
 			miNew.setText(Messages.QueryView_NewQueryOption);
 			miNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-			miNew.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					createNewQuery();
-				}
-			});
+			
+			Menu mnuTypes = new Menu(miNew);
+			miNew.setMenu(mnuTypes);
+			for (String[] queryTypes : InternalQueryManager.INSTANCE.getSupportQueryTypes()) {
+				MenuItem mi = new MenuItem(mnuTypes, SWT.PUSH);
+				mi.setText(queryTypes[1]);
+				mi.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						createNewQuery(queryTypes[0]);
+					}
+				});	
+			}
 			
 			new MenuItem(m, SWT.SEPARATOR);
 			
@@ -540,13 +571,13 @@ public class QueryView {
 	 
 	 @Optional
 	 @Inject
-	 private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) IntelRecordObservationQuery data){
-		 queryList.refresh(new QueryProxy(data.getName(), data.getUuid()));
+	 private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) AbstractIntelQuery data){
+		 queryList.refresh(new QueryProxy(data.getName(), data.getUuid(), data.getKeyId()));
 	 }
 	 @Optional
 	 @Inject
-	 private void multiQueryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) List<IntelRecordObservationQuery> data){
-		 data.forEach(i-> queryList.refresh(new QueryProxy(i.getName(), i.getUuid())));
+	 private void multiQueryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) List<AbstractIntelQuery> data){
+		 data.forEach(i-> queryList.refresh(new QueryProxy(i.getName(), i.getUuid(), i.getKeyId())));
 	 }
 	 
 	@Optional
@@ -555,6 +586,39 @@ public class QueryView {
 		refreshQueryList();
 	}
 
+	@Inject
+	@Optional
+	public void handleBringToTop(@UIEventTopic(UIEvents.UILifeCycle.BRINGTOTOP) Event event) {
+		IQueryEditor editor = getActiveQueryEditor();
+		if (editor == null) return;
+		System.out.println(editor.getClass().getCanonicalName());
+		if (editor.getQuery() == null) return;
+		String queryTypeKey = editor.getQuery().getKeyId();
+		
+		ITreeContentProvider provider = queryToContentProvider.get(queryTypeKey);
+		if (provider == null) {
+			if (queryTypeKey.equals(IntelEntitySummaryQuery.KEY)) {
+				provider = new EntitySummaryContentProvider();
+			}else if (queryTypeKey.equals(IntelRecordObservationQuery.KEY)) {
+				provider = new FilterTreeContentProvider();
+			}
+			queryToContentProvider.put(queryTypeKey, provider);
+		}
+		if (provider == null) {
+			//TODO:
+			return;
+		}
+		if (filterTree.getContentProvider() == provider) {
+			filterTree.refresh(true);
+			return;
+		}
+		filterTree.setContentProvider(provider);
+		filterTree.setInput(DialogConstants.LOADING_TEXT);
+//		filterTree.setInput(null);
+//		provider.inputChanged(filterTree, null,null);
+		//filterTree.setContentProvider(new FilterTreeContentProvider());
+	}
+	
 	@Optional
 	@Inject
 	private void queryDeleted(
@@ -575,7 +639,7 @@ public class QueryView {
 	 
 	@Focus
 	public void setFocus() {
-		queryList.getList().setFocus();
+		queryList.getControl().setFocus();
 	}
 
 	@PreDestroy
@@ -601,7 +665,12 @@ public class QueryView {
 				List<IntelRecordObservationQuery> items =
 						QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
 			
-				proxyItems = items.stream().map(t->new QueryProxy(t.getName(), t.getUuid())).collect(Collectors.toList());
+				proxyItems = items.stream().map(t->new QueryProxy(t.getName(), t.getUuid(), IntelRecordObservationQuery.KEY)).collect(Collectors.toList());
+				
+				List<IntelEntitySummaryQuery> items2 =
+						QueryFactory.buildQuery(s, IntelEntitySummaryQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+			
+				proxyItems.addAll(items2.stream().map(t->new QueryProxy(t.getName(), t.getUuid(), IntelEntitySummaryQuery.KEY)).collect(Collectors.toList()));
 			}
 
 			proxyItems.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));
@@ -615,16 +684,26 @@ public class QueryView {
 	};
 	
 	private class QueryProxy implements IAdaptable{
+		
 		private String name;
 		private UUID uuid;
-		public QueryProxy(String name, UUID uuid){
+		private String type;
+		
+		
+		public QueryProxy(String name, UUID uuid, String typeKey){
 			this.name = name;
 			this.uuid = uuid;
+			this.type = typeKey;
+		}
+		
+		public String getTypeKey() {
+			return this.type;
 		}
 		
 		public String getName(){
 			return this.name;
 		}
+		
 		public UUID getUuid(){
 			return this.uuid;
 		}
@@ -636,6 +715,11 @@ public class QueryView {
 				IntelRecordObservationQuery q = new IntelRecordObservationQuery();
 				q.setUuid(getUuid());
 				return (T) q;
+			}
+			if (adapter == IntelEntitySummaryQuery.class) {
+				IntelEntitySummaryQuery q = new IntelEntitySummaryQuery();
+				q.setUuid(getUuid());
+				return (T)q;
 			}
 			return null;
 		}

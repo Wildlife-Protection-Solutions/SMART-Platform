@@ -64,6 +64,7 @@ public class Messages extends NLS {
 	public static String AttributeDialog_ShellTitle;
 	public static String AttributeDialog_Title;
 	public static String AttributeDialog_TypeLabel;
+	public static String AttributeDMAdvisor_AttributeUsedInObs;
 	public static String AttributeFieldEditor_InvalidCoordinate;
 	public static String AttributeFieldEditor_InvalidNumber;
 	public static String AttributeFieldEditor_maplink;
@@ -80,6 +81,7 @@ public class Messages extends NLS {
 	public static String AttributeListDialog_Title;
 	public static String AttributeListItemDialog_Message;
 	public static String AttributeListItemDialog_Title;
+	public static String AttributeListItemDMAdvisor_ListItemAssociateObs;
 	public static String AttributeListPanel_ConfirmMsg;
 	public static String AttributeListPanel_ConfirmTitle;
 	public static String AttributeManager_DeleteError;
@@ -103,7 +105,9 @@ public class Messages extends NLS {
 	public static String AttributeMappingWizardPage1_XpositionValue;
 	public static String AttributeMappingWizardPage_YColumn;
 	public static String AttributeMappingWizardPage1_YPositionValue;
+	public static String AttributeTreeFilterItem_employeeNotFound;
 	public static String AttributeTreeFilterItem_ErrorMsg;
+	public static String AttributeTreeNodeDMAdvisor_AttributeAssocatedObs;
 	public static String AttributeValueLabelProvider_ErrorLabel;
 	public static String BasicEntitySearch_taskName;
 	public static String BasicRecordSearchPanel_AddToWsMenuItem;
@@ -119,6 +123,8 @@ public class Messages extends NLS {
 	public static String BasicRecordSearchPanel_SourceLabel;
 	public static String BasicRecordSearchPanel_TitleLabel;
 	public static String BasicRecordSearchPanel_unauthorized;
+	public static String CategoryAttributeDMAdvisor_CatAttUsedObs;
+	public static String CategoryDMAdvisor_CategoryAssociatedObs;
 	public static String CleanUpJob_jobname;
 	public static String CompareEntitiesHandler_DifferentTypeError;
 	public static String CompareEntitiesHandler_EntityRequired;
@@ -149,6 +155,7 @@ public class Messages extends NLS {
 	public static String DeleteCaHandler_SubTaskName;
 	public static String DeleteCaHandler_TaskName;
 	public static String DeleteEmployeeAdvisor_AttachmentError;
+	public static String DeleteEmployeeAdvisor_EmployeedUsedAttribute;
 	public static String DeleteEmployeeAdvisor_EntityError;
 	public static String DeleteEmployeeAdvisor_InvalidObject;
 	public static String DeleteEmployeeAdvisor_LinkError;
@@ -275,6 +282,7 @@ public class Messages extends NLS {
 	public static String EntityExportReportJob_JobName;
 	public static String EntityExportReportJob_ProgressMsg;
 	public static String EntityImportEngine_AttributeTaskName;
+	public static String EntityImportEngine_EmployeeNotFound;
 	public static String EntityImportEngine_ImportTaskName;
 	public static String EntityImportEngine_InvalidBoolean;
 	public static String EntityImportEngine_InvalidDate;
@@ -675,6 +683,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_DateAttributeName;
 	public static String IntelligenceLabelProviderImpl_DateColumnLabel;
 	public static String IntelligenceLabelProviderImpl_DefaultRecordDatasetName;
+	public static String IntelligenceLabelProviderImpl_EmployeeAttributeName;
 	public static String IntelligenceLabelProviderImpl_EntitiesWorkingSetLabel;
 	public static String IntelligenceLabelProviderImpl_EntityAttachmentDsName;
 	public static String IntelligenceLabelProviderImpl_EntityAttachmentRsEntityDateCreatedColumn;
@@ -941,6 +950,7 @@ public class Messages extends NLS {
 	public static String ObservationDialog_UpdateButtonText;
 	public static String ObservationFilterProcessor_AreaKeyNotFound;
 	public static String ObservationFilterProcessor_AttributeKeyNotFound;
+	public static String ObservationFilterProcessor_EmployeeNotFound;
 	public static String ObservationFilterProcessor_EntityTypeKeyNotFound;
 	public static String ObservationFilterProcessor_IntelAttributeKeyNotFound;
 	public static String ObservationFilterProcessor_IntelListItemNotFound;
@@ -1062,6 +1072,7 @@ public class Messages extends NLS {
 	public static String RecordImportEngine_AttributeConversionError;
 	public static String RecordImportEngine_DateParseError;
 	public static String RecordImportEngine_DuplicateTitle;
+	public static String RecordImportEngine_EmployeeNotFound;
 	public static String RecordImportEngine_EntityConversionError;
 	public static String RecordImportEngine_InvalidBoolean;
 	public static String RecordImportEngine_InvalidDate;
@@ -1214,6 +1225,7 @@ public class Messages extends NLS {
 	public static String RecordXmlImporter_AttributeListNotFound;
 	public static String RecordXmlImporter_CategoryAttributeNotFound;
 	public static String RecordXmlImporter_CategoryNotFound;
+	public static String RecordXmlImporter_EmployeeNotFound;
 	public static String RecordXmlImporter_EntityNotFound;
 	public static String RecordXmlImporter_EntityOfTypeNotFound;
 	public static String RecordXmlImporter_EventError;
@@ -1325,10 +1337,12 @@ public class Messages extends NLS {
 	public static String ShowAttributeListDialogHandler_ConfirmTitle;
 	public static String SqlGenerator_OpNotSupported;
 	public static String TextFileSearcher_CanceledMsg;
+	public static String TextFileSearcher_DecryptError;
 	public static String TextFileSearcher_ErrorItemName;
 	public static String TextFileSearcher_TaskName;
 	public static String WaypointFilterProcessor_AreaKeyNotFound;
 	public static String WaypointFilterProcessor_AttributeKeyNotFound;
+	public static String WaypointFilterProcessor_EmployeeNotFound;
 	public static String WaypointFilterProcessor_EntityTypeKeyNotFound;
 	public static String WaypointFilterProcessor_IntelAttributeKeyNotfound;
 	public static String WaypointFilterProcessor_IntelAttributeListItemNotFound;
@@ -1395,7 +1409,9 @@ public class Messages extends NLS {
 	public static String XmlToEntity_ConversionTaskName;
 	public static String XmlToEntity_ConvertingEntitiesSubTaxk;
 	public static String XmlToEntity_ConvertingRelationshipSubTask;
+	public static String XmlToEntity_employeeNotFound;
 	public static String XmlToEntity_EntityTypeNotFound;
+	public static String XmlToEntity_FileNotFound;
 	public static String XmlToEntity_ImportedDialogTitle;
 	public static String XmlToEntity_ImportedMsg;
 	public static String XmlToEntity_LoadedEntitiesCnt;

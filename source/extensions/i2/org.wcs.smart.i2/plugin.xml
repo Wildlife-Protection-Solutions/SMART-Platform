@@ -151,6 +151,10 @@
             class="org.wcs.smart.i2.model.IntelConfigurationOption"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.i2.model.IntelEntitySummaryQuery"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.caDeleteAdvisor">
@@ -930,11 +934,17 @@
             name="%EntityCompareEditorName">
       </editor>
       <editor
-            class="org.wcs.smart.i2.ui.editors.query.IntelQueryEditor"
+            class="org.wcs.smart.i2.ui.editors.query.IntelRecordObservationQueryEditor"
             default="false"
             icon="images/icons/obj16/entity_query.png"
-            id="org.wcs.smart.i2.editor.query"
+            id="org.wcs.smart.i2.editor.query.recordobservation"
             name="%QueryEditorNames">
+      </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.query.IntelEntitySummaryQueryEditor"
+            default="false"
+            id="org.wcs.smart.i2.editor.query.entitysummary"
+            name="Entity Summary Query">
       </editor>
    </extension>
    <extension

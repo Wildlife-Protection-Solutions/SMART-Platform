@@ -54,7 +54,7 @@ public class JsonUtils {
 	public static final String JSON_DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
 	
 	//date attributes come through in a different format; only applicable to date attributes
-	public static final String JSON_ATTRIBUTE_DATE_FORMAT_STR = "yyyy/MM/dd"; 
+	public static final String JSON_ATTRIBUTE_DATE_FORMAT_STR = "yyyy/MM/dd";  //$NON-NLS-1$
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static ParseResult parseDefaultAttributeValues(JSONObject defaultValues, Session session){
@@ -112,7 +112,7 @@ public class JsonUtils {
 				date = new SimpleDateFormat(JSON_ATTRIBUTE_DATE_FORMAT_STR).parse((String)value);
 			}catch (Exception ex) {}
 			
-			if (date == null) throw new Exception("Unable to parse date from value '" + value + "'.  Date must be provided in either '" + JSON_DATE_FORMAT_STR + "' or '" + JSON_ATTRIBUTE_DATE_FORMAT_STR + "  format.");
+			if (date == null) throw new Exception(MessageFormat.format(Messages.JsonUtils_InvalidDate, value, JSON_DATE_FORMAT_STR, JSON_ATTRIBUTE_DATE_FORMAT_STR));
 
 			toUpdate.setDateValue(date);
 		}else if (att.getType() == AttributeType.LIST){

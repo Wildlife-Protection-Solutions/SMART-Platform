@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 
 /**
@@ -39,12 +40,13 @@ public class QueryEditorInput implements IEditorInput{
 
 	private String name;
 	private UUID uuid;
-	
+	private String typeKey;
 	private boolean isNew;
 	
-	public QueryEditorInput(String name, UUID uuid){
+	public QueryEditorInput(String name, UUID uuid, String typeKey){
 		this.name = name;
 		this.uuid = uuid;
+		this.typeKey = typeKey;
 		if (this.uuid == null){
 			isNew = true;
 			//generate temporary random uuid
@@ -53,7 +55,11 @@ public class QueryEditorInput implements IEditorInput{
 	}
 	
 	public QueryEditorInput(IntelRecordObservationQuery record){
-		this(record.getName(), record.getUuid());
+		this(record.getName(), record.getUuid(), IntelRecordObservationQuery.KEY);
+	}
+	
+	public QueryEditorInput(IntelEntitySummaryQuery record){
+		this(record.getName(), record.getUuid(), IntelEntitySummaryQuery.KEY);
 	}
 	
 	public void setUuid(UUID uuid){
@@ -61,9 +67,14 @@ public class QueryEditorInput implements IEditorInput{
 		this.uuid = uuid;
 	}
 	
+	public String getTypeKey() {
+		return this.typeKey;
+	}
+	
 	public boolean isNew(){
 		return this.isNew;
 	}
+	
 	public UUID getUuid(){
 		return this.uuid;
 	}
@@ -85,7 +96,7 @@ public class QueryEditorInput implements IEditorInput{
 
 	@Override
 	public String getName() {
-		return name == null ? "" : name;
+		return name == null ? "" : name; //$NON-NLS-1$
 	}
 
 	@Override

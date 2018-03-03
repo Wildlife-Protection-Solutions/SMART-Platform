@@ -31,21 +31,24 @@ import java.util.UUID;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.GeometryUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -141,8 +144,13 @@ public class RecordCsvExporter implements ICsvDataExporter {
 								
 								for ( IntelRecordAttributeValueList  listItem : v.getAttributeListItems()){
 									if (ia.getAttribute() != null){
-										IntelAttributeListItem list = (IntelAttributeListItem) session.get(IntelAttributeListItem.class, listItem.getId().getElementUuid());
-										sb.append(list.getName());
+										if (ia.getAttribute().getType() == AttributeType.LIST) {
+											IntelAttributeListItem list = (IntelAttributeListItem) session.get(IntelAttributeListItem.class, listItem.getId().getElementUuid());
+											sb.append(list.getName());
+										}else if (ia.getAttribute().getType() == AttributeType.EMPLOYEE) {
+											Employee e = (Employee) session.get(Employee.class, listItem.getId().getElementUuid());
+											sb.append(SmartLabelProvider.getFullLabel(e));
+										}
 									}else if (ia.getEntityType() != null){
 										IntelEntity list = (IntelEntity) session.get(IntelEntity.class, listItem.getId().getElementUuid());
 										sb.append(list.getIdAttributeAsText());

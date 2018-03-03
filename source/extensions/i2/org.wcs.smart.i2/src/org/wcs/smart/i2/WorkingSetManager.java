@@ -35,6 +35,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -42,6 +43,7 @@ import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
+import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
 /**
@@ -221,9 +223,8 @@ public enum WorkingSetManager {
 				try{
 					s.beginTransaction();
 				
-					IntelRecordObservationQuery query = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
+					AbstractIntelQuery query = QueryManager.INSTANCE.findQuery(s, queryUuid);
 					if (query == null) throw new Exception(Messages.WorkingSetManager_QueryNotFound);
-					
 					queryName = query.getName();
 					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
 					if (wset != null){
@@ -237,7 +238,8 @@ public enum WorkingSetManager {
 						
 						if (!found){
 							IntelWorkingSetQuery wsrecord = new IntelWorkingSetQuery();
-							wsrecord.setQuery(query);
+							wsrecord.setQuery(query.getUuid());
+							wsrecord.setQueryType(query.getKeyId());
 							wsrecord.setWorkingSet(wset);
 							wsrecord.setIsVisible(true);
 							s.save(wsrecord);
@@ -255,7 +257,7 @@ public enum WorkingSetManager {
 		if (wset != null && modified) fireEvent(IntelEvents.WS_MODIFIED, wset, context);
 	}
 	
-	public void addQueryToActiveWorkingSet(Collection<IntelRecordObservationQuery> query, IEclipseContext context){
+	public void addQueryToActiveWorkingSet(Collection<AbstractIntelQuery> query, IEclipseContext context){
 		addQueryUuidToActiveWorkingSet(query.stream().map(a->a.getUuid()).collect(Collectors.toList()), context);
 	}
 	

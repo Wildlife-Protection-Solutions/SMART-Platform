@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.i2.ui;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
@@ -83,9 +85,38 @@ public class AttributeLabelProvider extends LabelProvider {
 		case POSITION:
 			key = SmartPlugIn.ATTRIBUTE_LOCATION_ICON;
 			break;
-			
+		case EMPLOYEE:
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ATTRIBUTE_EMPLOYEE);
 		}
 		if (key == null) return null;
 		return SmartPlugIn.getDefault().getImageRegistry().get(key);
+	}
+	
+	public static ImageDescriptor getImageDescriptor(IntelAttribute.AttributeType type){
+		String key = null;
+		switch(type){
+		case BOOLEAN:
+			key = SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON;
+			break;
+		case DATE:
+			key = SmartPlugIn.ATTRIBUTE_DATE_ICON;
+			break;
+		case LIST:
+			key = SmartPlugIn.ATTRIBUTE_LIST_ICON;
+			break;
+		case NUMERIC:
+			key = SmartPlugIn.ATTRIBUTE_NUMBER_ICON;
+			break;
+		case TEXT:
+			key = SmartPlugIn.ATTRIBUTE_TEXT_ICON;
+			break;
+		case POSITION:
+			key = SmartPlugIn.ATTRIBUTE_LOCATION_ICON;
+			break;
+		case EMPLOYEE:
+			return Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ATTRIBUTE_EMPLOYEE);
+		}
+		if (key == null) return null;
+		return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(key);
 	}
 }

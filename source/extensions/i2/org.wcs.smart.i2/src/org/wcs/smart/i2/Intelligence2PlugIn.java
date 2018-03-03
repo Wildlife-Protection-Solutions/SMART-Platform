@@ -35,6 +35,7 @@ import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.handlers.DeleteCaHandler;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
+import org.wcs.smart.i2.query.engine.QueryEngineFactory;
 
 
 /**
@@ -86,6 +87,12 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	
 	public static final String ICON_ATTACHMENT_SEARCH = "org.wcs.smart.i2.icon.attachment.search"; //$NON-NLS-1$
 	
+	public static final String ICON_ATTRIBUTE_EMPLOYEE = "org.wcs.smart.i2.attribute.employee"; //$NON-NLS-1$
+	
+	public static final String ICON_GROUP_BY = "org.wcs.smart.i2.query.groupby";
+	public static final String ICON_VALUES = "org.wcs.smart.i2.query.value";
+	public static final String ICON_FILTERS = "org.wcs.smart.i2.query.filters";
+	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
 
@@ -135,6 +142,11 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		
 		reg.put(ICON_ATTACHMENT_SEARCH, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attachment_search.png")); //$NON-NLS-1$);
 		reg.put(ICON_LOCATION_IMPORT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/point_import.png")); //$NON-NLS-1$);
+		reg.put(ICON_ATTRIBUTE_EMPLOYEE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_employee.png")); //$NON-NLS-1$);
+		
+		reg.put(ICON_GROUP_BY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/group_by.png")); //$NON-NLS-1$);
+		reg.put(ICON_FILTERS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/filter.png")); //$NON-NLS-1$);
+		reg.put(ICON_VALUES, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/values.png")); //$NON-NLS-1$);
 	}
 	
 	/*
@@ -147,7 +159,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	
 		SmartContext.INSTANCE.setClass(IIntelligenceLabelProvider.class, new IntelligenceLabelProviderImpl());
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new DesktopConnectionFactory());
-		SmartContext.INSTANCE.setClass(IIntelObservationQueryEngine.class, new IntelObservationQueryEngine());
+		SmartContext.INSTANCE.setClass(IIntelQueryEngine.class, new QueryEngineFactory());
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteCaHandler(), DeleteCaHandler.EXECUTE_ORDER);
 	}

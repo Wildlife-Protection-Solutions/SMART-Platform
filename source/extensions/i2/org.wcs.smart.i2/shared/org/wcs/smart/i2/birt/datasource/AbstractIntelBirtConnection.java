@@ -163,7 +163,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	 * return null if not specified
 	 */
 	protected Path getImageOutputDirectory() {
-		Object randrtask = appContext.get("EngineTask");
+		Object randrtask = appContext.get("EngineTask"); //$NON-NLS-1$
 		if (randrtask == null || !(randrtask instanceof RunAndRenderTask)) return null;
 		
 		RunAndRenderTask task = (RunAndRenderTask)randrtask;
@@ -185,7 +185,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	 */
 	protected boolean isHtml() {
 		if (appContext == null) return false;
-		Object randrtask = appContext.get("EngineTask");
+		Object randrtask = appContext.get("EngineTask"); //$NON-NLS-1$
 		if (randrtask == null || !(randrtask instanceof RunAndRenderTask)) {
 			return false;
 		}else {

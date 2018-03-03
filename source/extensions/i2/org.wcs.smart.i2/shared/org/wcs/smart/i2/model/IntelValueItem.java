@@ -30,6 +30,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.map.GeometryFactoryProvider;
 
@@ -48,6 +49,7 @@ public abstract class IntelValueItem {
 	protected Double doubleValue;
 	protected Double doubleValue2;
 	protected IntelAttributeListItem listItem;
+	protected Employee employee;
 	
 	@ManyToOne(fetch =FetchType.LAZY)
 	@JoinColumn(name="list_item_uuid", referencedColumnName="uuid")
@@ -56,6 +58,15 @@ public abstract class IntelValueItem {
 	}
 	public void setAttributeListItem(IntelAttributeListItem listItem){
 		this.listItem = listItem;
+	}
+	
+	@ManyToOne(fetch =FetchType.LAZY)
+	@JoinColumn(name="employee_uuid", referencedColumnName="uuid")
+	public Employee getEmployee(){
+		return this.employee;
+	}
+	public void setEmployee(Employee employee){
+		this.employee = employee;
 	}
 		
 	@Column(name="string_value")
@@ -118,6 +129,8 @@ public abstract class IntelValueItem {
 				return getDateValue();
 			case LIST:
 				return getAttributeListItem();
+			case EMPLOYEE:
+				return getEmployee();
 			case POSITION:
 				if (getNumberValue() == null || getNumberValue2() == null) return null;
 				return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(getNumberValue(), getNumberValue2()));

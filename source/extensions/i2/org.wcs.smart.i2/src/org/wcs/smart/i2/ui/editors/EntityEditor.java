@@ -184,6 +184,7 @@ import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.i2.ui.views.FileSearchView;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
@@ -278,9 +279,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 						}
 					}
 				}
+				
 				for (IntelEntityAttributeValue v : temp.getAttributes()){
-					v.getAttribute().getName();
 					if (v.getAttributeListItem() != null) v.getAttributeListItem().getName();
+					if (v.getEmployee() != null) SmartLabelProvider.getFullLabel(v.getEmployee());
+					v.getAttribute().getName();
 					v.getAttributeValue();
 				}
 				if (temp.getEntityAttachments() != null){
@@ -323,9 +326,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 						r.getAttributes().forEach((e) -> {
 							e.getAttribute().getName();
 							e.getAttributeValue();
-							if (e.getAttributeListItem() != null){
-								e.getAttributeListItem().getName();
-							}
+							if (e.getAttributeListItem() != null) e.getAttributeListItem().getName();
+							if (e.getEmployee() != null) SmartLabelProvider.getFullLabel(e.getEmployee());
 						});
 					}
 					if (r.getSourceId() != null){

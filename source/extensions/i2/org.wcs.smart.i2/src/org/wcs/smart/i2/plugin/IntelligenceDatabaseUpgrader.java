@@ -144,8 +144,22 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		
 		String[] sql = new String[] {
-			"create table smart.i_config_option (uuid char(16) for bit data, ca_uuid char(16) for bit data not null, keyid varchar(32000) not null, value varchar(32000), unique(ca_uuid, keyid), primary key (uuid))",
-			"ALTER TABLE SMART.i_config_option ADD CONSTRAINT intelconfigopcauuid FOREIGN KEY (ca_uuid) REFERENCES SMART.conservation_area(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+			"create table smart.i_config_option (uuid char(16) for bit data, ca_uuid char(16) for bit data not null, keyid varchar(32000) not null, value varchar(32000), unique(ca_uuid, keyid), primary key (uuid))", //$NON-NLS-1$
+			"ALTER TABLE smart.i_config_option ADD CONSTRAINT intelconfigopcauuid FOREIGN KEY (ca_uuid) REFERENCES SMART.conservation_area(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			
+			//employee attribute option
+			"ALTER TABLE smart.i_entity_attribute_value add column employee_uuid char(16) for bit data", //$NON-NLS-1$
+			"ALTER TABLE smart.i_entity_relationship_attribute_value add column employee_uuid char(16) for bit data", //$NON-NLS-1$
+			"ALTER TABLE smart.i_entity_attribute_value ADD CONSTRAINT entityattributevalue_employee_uuid_fk FOREIGN KEY (employee_uuid) REFERENCES SMART.employee(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.i_entity_relationship_attribute_value ADD CONSTRAINT relationshipattrvalue_employee_uuid_fk FOREIGN KEY (employee_uuid) REFERENCES SMART.employee(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			
+			//entity summary queries
+			"CREATE TABLE smart.i_entity_summary_query(uuid char(16) for bit data NOT NULL,ca_uuid char(16) for bit data NOT NULL,query_string long varchar,date_created timestamp NOT NULL,last_modified_date timestamp,created_by char(16) for bit data NOT NULL,last_modified_by char(16) for bit data,PRIMARY KEY (uuid))", //$NON-NLS-1$
+			"ALTER TABLE smart.i_entity_summary_query ADD CONSTRAINT ientitysummquery_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.i_entity_summary_query ADD CONSTRAINT ientitysummquery_createdby_fk FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.i_entity_summary_query ADD CONSTRAINT ientitysummquery_modifiedby_fk FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			"ALTER TABLE smart.i_working_set_query DROP CONSTRAINT iworkingsetquery_query_fk", //$NON-NLS-1$
+			"ALTER TABLE smart.I_WORKING_SET_QUERY add column query_type varchar(32)", //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

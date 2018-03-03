@@ -49,14 +49,14 @@ public class CategoryDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof Category)){
-			return "Invalid Object";
+			return "Invalid Object"; //$NON-NLS-1$
 		}
 		Category category = (Category)object;
 		if (category.getUuid() == null) return null;
 		
 		long cnt = QueryFactory.buildCountQuery(session, IntelObservation.class,  new Object[] {"category", category}); //$NON-NLS-1$
 		if (cnt != 0){
-			return MessageFormat.format("The category is associated with {0,number,integer}  observations.  These observations must be removed before the category can be deleted.", cnt);
+			return MessageFormat.format(Messages.CategoryDMAdvisor_CategoryAssociatedObs, cnt);
 		}
 		
 		if (category.getChildren() != null){

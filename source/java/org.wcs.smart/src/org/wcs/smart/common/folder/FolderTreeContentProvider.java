@@ -75,6 +75,8 @@ public class FolderTreeContentProvider implements ITreeContentProvider {
 			fillMapping(mapping, roots);
 			obj2TreeElement = mapping;
 			treeRoot = roots;
+			if (input == null) return;
+			
 			Display.getDefault().syncExec(()->{
 				if (viewer != null) {
 					viewer.refresh();

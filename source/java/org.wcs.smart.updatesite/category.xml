@@ -19,7 +19,7 @@
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.i2.feature_6.0.0.qualifier.jar" id="org.wcs.smart.i2.feature" version="6.0.0.qualifier">
-      <category name="intelligence"/>
+      <category name="profiles"/>
    </feature>
    <feature url="features/org.wcs.smart.er.feature_6.0.0.qualifier.jar" id="org.wcs.smart.er.feature" version="6.0.0.qualifier">
       <category name="ecologicalrecords"/>
@@ -96,9 +96,10 @@
          SMART Application Language Packs
       </description>
    </category-def>
-   <category-def name="asset" label="SMART Asset Plug-in">
+   <category-def name="asset" label="SMART Technical Asset (Camers, Sensors etc) Plug-in">
       <description>
          The SMART Asset plug-in extends the SMART capability to asset specific data collection (including camera trap and sound detector).
       </description>
    </category-def>
+   <category-def name="profiles" label="SMART Profiles Plugin"/>
 </site>

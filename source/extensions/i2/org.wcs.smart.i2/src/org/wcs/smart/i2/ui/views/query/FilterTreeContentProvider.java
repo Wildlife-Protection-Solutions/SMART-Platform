@@ -29,7 +29,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -51,16 +53,31 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
-		if (newInput == null){
-			items = null;
-			return;
+//		if (newInput == null){
+//			items = null;
+//			return;
+//		}
+//		if (newInput instanceof List){
+//			items = (List<FilterTreeItem>) newInput;
+//		}
+//		
+		this.items = null;
+		if (newInput != null) {
+			(new LoadFilterOptions(this)).schedule();
 		}
-		if (newInput instanceof List){
-			items = (List<FilterTreeItem>) newInput;
-		}
-		
 	}
 
+	public void setItems(List<FilterTreeItem> items) {
+		this.items = items;
+		viewer.refresh();
+		
+		Object label = viewer.getControl().getData(QueryView.REFRESHLABEL_KEY);
+		if (label != null && label instanceof Control){
+			((Control)label).dispose();
+			viewer.getControl().setData(QueryView.REFRESHLABEL_KEY, null);
+		}
+	}
+	
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (items == null) return new Object[]{DialogConstants.LOADING_TEXT};

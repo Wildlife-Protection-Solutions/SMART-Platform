@@ -104,6 +104,9 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 			}
 			String[] data ;
 			
+			SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
+			format.setLenient(false);
+			
 			while( (data = reader.readNext()) != null ){
 				if (monitor.isCanceled()) return false;
 				if (data.length != 9){
@@ -133,16 +136,15 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 				
 				//birth date
 				String birth = data[index++];
-				if (birth == null || birth.trim().length() != 10){
-					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_BirthDateFormat, new Object[]{DATE_FORMAT,line}));
-				}
-				SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
-				format.setLenient(false);
-				try{
-					Date dt = format.parse(birth);
-					e.setBirthDate(dt);
-				}catch (ParseException ex){
-					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_BirthDate, new Object[]{line}), ex);
+				if (birth == null || birth.trim().isEmpty()) {
+					e.setBirthDate(null);
+				}else {
+					try{
+						Date dt = format.parse(birth);
+						e.setBirthDate(dt);
+					}catch (ParseException ex){
+						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_BirthDate, new Object[]{line}), ex);
+					}
 				}
 				
 				//gender
@@ -168,7 +170,7 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 				}catch (ParseException ex){
 					throw new Exception( MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartDateFormat, new Object[]{ DATE_FORMAT, line }));
 				}
-				if (e.getStartEmploymentDate().before(e.getBirthDate())){
+				if (e.getBirthDate() != null && e.getStartEmploymentDate().before(e.getBirthDate())){
 					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartAfterEmployeeBirthDate, new Object[]{line}));
 				}
 					

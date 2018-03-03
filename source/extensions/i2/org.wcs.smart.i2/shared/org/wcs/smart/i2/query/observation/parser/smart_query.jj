@@ -125,9 +125,10 @@ TOKEN :
   < #UUIDLETTER : [ "a"-"f", "A"-"F", "-"] >
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
- 
+ | < VALUE_KEY: "numentities" >
+| < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
- //|  < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
+ | < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
  
  | < CATEGORY_KEY : "dm_category:"< DM_KEY > >
  | < ATTRIBUTE_KEY_NUMERIC : "dm_attribute:n:"(< DM_KEY >)?":"< DM_KEY >>
@@ -143,10 +144,8 @@ TOKEN :
  | < EATTRIBUTE_KEY_BOOLEAN : "e_attribute:b:"< DM_KEY >":"(< DM_KEY >)?>
  | < EATTRIBUTE_KEY_DATE: "e_attribute:d:"< DM_KEY >":"(< DM_KEY >)?>
  | < EATTRIBUTE_KEY_LIST: "e_attribute:l:"< DM_KEY >":"(< DM_KEY >)?>
-  
- | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
-
- 
+ | < EATTRIBUTE_KEY_EMPLOYEE: "e_attribute:e:"< DM_KEY >":"(< DM_KEY >)?>
+    
  | < AREA_TYPE_KEY : ( "CA" | "BA" | "ADMIN" | "MNGT" | "PATRL" ) >
  | < AREA_KEY : "area:" < AREA_TYPE_KEY > ":" < DM_KEY > >
 
@@ -154,6 +153,13 @@ TOKEN :
  | < ENTITY_KEY : "entity:" (< DIGIT> | < UUIDLETTER >)+>
 
  | < QUERY_SPLITTER : "|" >
+ | < DATE_GB_KEY : ( "day" | "month" | "year" ) >
+ | < ENTITYTYPE_GB: "entitytype_gb:" (< DM_KEY > ":")*>
+ | < EATTRIBUTE_GB_KEY_POSITION: "e_attribute_gb:p:"< DM_KEY >":"(< DM_KEY >)?":"(< AREA_TYPE_KEY >)":"(< DM_KEY > ":")*>
+ | < EATTRIBUTE_GB_KEY_DATE: "e_attribute_gb:d:"< DM_KEY >":"(< DM_KEY >)?":"(< DATE_GB_KEY >)>
+ | < EATTRIBUTE_GB_KEY_LIST: "e_attribute_gb:l:" < DM_KEY > ":" (< DM_KEY >)? ":" (< DM_KEY > ":")* >
+ | < EATTRIBUTE_GB_KEY_EMPLOYEE: "e_attribute_gb:e:"< DM_KEY > ":" (< DM_KEY >)? ":" (< UUID > ":")* >
+ 
 }
 
 
@@ -169,6 +175,107 @@ TOKEN :
     >
 }
 
+
+/* SUMMARY QUERY */
+
+SumQueryDefinition ParseSummary() :
+{
+	SumQueryDefinition expr;
+}
+{
+	(	  expr = SummaryQueryInternal()
+		< EOF >
+  		{
+    		return expr;
+  		}
+ 	)
+}
+
+
+SumQueryDefinition SummaryQueryInternal() :
+{
+	GroupByPart row;
+	GroupByPart col;
+	ValuePart value;
+	IQueryFilter expr = null;
+}
+{
+	(	  	row = GroupByPart()
+		< QUERY_SPLITTER >
+		col = GroupByPart()
+		< QUERY_SPLITTER >
+		value = ValueItem()
+		< QUERY_SPLITTER >
+		(		  expr = ExpressionPart()
+		)?
+	
+	)
+	{
+	  return SumQueryDefinition.parse(row, col, value, expr);
+	}
+}
+
+GroupByPart GroupByPart() :
+{
+	GroupByItem item;
+	List<GroupByItem> items = new ArrayList<GroupByItem>();
+}
+{
+	(
+	  	item = GroupByItem()
+		{
+			items.add(item);
+		}
+	)?
+	(
+		< COMMA >
+		item = GroupByItem()
+		{
+			items.add(item);
+		}
+	)*
+	{
+		return GroupByPart.parse(items);
+	}  
+}
+
+GroupByItem GroupByItem() :
+{
+  GroupByItem item;
+}
+{
+  
+	(
+	  < EATTRIBUTE_GB_KEY_POSITION >
+		|
+ 	 < EATTRIBUTE_GB_KEY_DATE>
+		|
+	< EATTRIBUTE_GB_KEY_LIST>
+		|
+	< EATTRIBUTE_GB_KEY_EMPLOYEE>
+		|
+		< ENTITYTYPE_GB > 
+	)
+	{
+	  item = GroupByItem.parse(token.image );
+	  return item;
+	}
+}
+
+ValuePart ValueItem() :
+{
+  ValuePart item; 
+}
+{
+  
+	(
+	  < VALUE_KEY >
+	)
+	{
+	  item = ValuePart.parse(token.image );
+	  return item;
+	}
+}
 
 
 /* ------------ Expressions ----------------------*/
@@ -512,10 +619,17 @@ IQueryFilter EntityKeyExpression():
   String value = null;
 }
 {
-	( 
-		<EATTRIBUTE_KEY_LIST> {key = token.image;}
-		<  EQUAL > {op = token.image;}
-		< DM_KEY >  {value = token.image;}
+	(	  	( 
+			<EATTRIBUTE_KEY_LIST> {key = token.image;}
+			<  EQUAL > {op = token.image;}
+			< DM_KEY >  {value = token.image;}
+		)
+		|
+		( 
+			<EATTRIBUTE_KEY_EMPLOYEE> {key = token.image;}
+			<  EQUAL > {op = token.image;}
+			(< UUID > | < DM_KEY >)  {value = token.image;}
+		)
 	)
 	{
   		return IntelAttributeFilter.create(key, value);

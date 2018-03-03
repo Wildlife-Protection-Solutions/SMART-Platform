@@ -58,7 +58,7 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 		return filter;
 	}
 	
-	//list and tree
+	//list and tree and employee
 	public static IntelAttributeFilter create(String key, String keyId){
 		IntelAttributeFilter filter = createCore(key);
 		filter.keyValue = keyId;
@@ -162,6 +162,9 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 			sb.append(dateValues[0].getTime());
 			sb.append("_"); //$NON-NLS-1$
 			sb.append(dateValues[1].getTime());
+			break;
+		case EMPLOYEE:
+			sb.append(keyValue);
 			break;
 		case LIST:
 			sb.append(keyValue);

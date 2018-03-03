@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -569,6 +570,21 @@ public class ObservationFilterProcessor {
 			}
 		}
 		
+		Employee employee = null;
+		if (filter.getAttributeType() == AttributeType.EMPLOYEE && filter.getKeyValue() != null) {
+			if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
+				//find the employee
+				Employee e = s.get(Employee.class, UuidUtils.stringToUuid(filter.getKeyValue()));
+				if (!ca.getIsCcaa() && !e.getConservationArea().equals(ca)) {
+					e = null;
+				}
+				if (e == null) {
+					throw new Exception(MessageFormat.format(Messages.getString("ObservationFilterProcessor.EmployeeNotFound", l), filter.getKeyValue())); //$NON-NLS-1$
+				}
+				employee = e;
+			}
+		}
+		
 		IntelEntityType type = null;
 		if (filter.getEntityTypeKey() != null){
 			type =  QueryFactory.buildQuery(s,IntelEntityType.class, 
@@ -616,6 +632,14 @@ public class ObservationFilterProcessor {
 				sql.append(" v.list_item_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			break;
+		case EMPLOYEE:
+			if (employee == null) {
+				//any option
+				sql.append(" v.employee_uuid is not null "); //$NON-NLS-1$
+			}else {
+				sql.append(" v.employee_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			break;
 		case NUMERIC:
 			sql.append(" v.double_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
@@ -647,6 +671,12 @@ public class ObservationFilterProcessor {
 			if (listItem != null){
 				logString(UuidUtils.uuidToString(listItem.getUuid()));
 				query.setParameter("value", listItem.getUuid()); //$NON-NLS-1$
+			}
+			break;
+		case EMPLOYEE:
+			if (employee != null){
+				logString(UuidUtils.uuidToString(employee.getUuid()));
+				query.setParameter("value", employee.getUuid()); //$NON-NLS-1$
 			}
 			break;
 		case NUMERIC:

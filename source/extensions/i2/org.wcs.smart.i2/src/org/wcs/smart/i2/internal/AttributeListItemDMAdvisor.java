@@ -50,7 +50,7 @@ public class AttributeListItemDMAdvisor implements IDeleteAdvisor {
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof AttributeListItem)){
-			return "Invalid Object";
+			return "Invalid Object"; //$NON-NLS-1$
 		}
 		AttributeListItem item = (AttributeListItem)object;
 		if (item.getUuid() == null) return null;
@@ -59,7 +59,7 @@ public class AttributeListItemDMAdvisor implements IDeleteAdvisor {
 		if (cnt == 0){
 	     	return null;
 		 }
-		return MessageFormat.format("Attribute list item is associated with {0, number, integer} intelligence observations.  These observations must be removed before the attribute list item can be deleted.", cnt);
+		return MessageFormat.format(Messages.AttributeListItemDMAdvisor_ListItemAssociateObs, cnt);
 			
 
 	}

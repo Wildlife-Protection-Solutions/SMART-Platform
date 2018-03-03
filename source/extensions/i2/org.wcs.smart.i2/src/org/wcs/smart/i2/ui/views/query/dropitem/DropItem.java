@@ -230,6 +230,17 @@ public abstract class DropItem {
 		return true;
 	}
 	
+	/**
+	 * Moves this drop item to a new panel.
+	 * 
+	 * @param newPanel new drop item panel
+	 */
+	public void moveParent(IDefinitionPanel newPanel){
+		//TODO: not necessarily supported on all os's
+		widget.setParent(newPanel.getDropTargetComposite());
+		targetPanel = newPanel;
+	}
+	
 	public String getNotAllowedMessage() {
 		return notAllowedMessage;
 	}

@@ -246,8 +246,9 @@ public class QueryApi extends HttpServlet{
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
+			}finally {
+				session.getTransaction().commit();
 			}
-			session.getTransaction().commit();	
 		}
 		
 	}

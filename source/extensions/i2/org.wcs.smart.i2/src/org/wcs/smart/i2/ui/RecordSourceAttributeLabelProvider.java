@@ -28,7 +28,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 
 /**
@@ -61,7 +60,7 @@ public class RecordSourceAttributeLabelProvider extends ColumnLabelProvider impl
 		if (element instanceof IntelRecordSourceAttribute){
 			IntelRecordSourceAttribute a= (IntelRecordSourceAttribute)element;
 			if (column == Column.MULTI){
-				if ((a.getAttribute() != null && a.getAttribute().getType() == AttributeType.LIST) || a.getEntityType() != null){
+				if ((a.getAttribute() != null && a.isListAttribute()) || a.getEntityType() != null){
 					if (a.getIsMultiple() != null && a.getIsMultiple()){
 						//true
 						return Messages.RecordSourceAttributeLabelProvider_YesLabel;

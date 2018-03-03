@@ -75,6 +75,9 @@ public enum EntityManager {
 			case LIST:
 				query += " and v.attributeListItem = :test"; //$NON-NLS-1$
 				break;
+			case EMPLOYEE:
+				query += " and v.employee = :test"; //$NON-NLS-1$
+				break;
 			case NUMERIC:
 				query += " and v.numberValue = :test"; //$NON-NLS-1$
 				break;
@@ -100,6 +103,7 @@ public enum EntityManager {
 			case LIST:
 			case NUMERIC:
 			case TEXT:
+			case EMPLOYEE:
 				hql.setParameter("test", newId); //$NON-NLS-1$
 				break;
 				

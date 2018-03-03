@@ -72,9 +72,9 @@ import org.wcs.smart.i2.ui.views.QueryView;
  */
 public class LoadFilterOptions extends Job {
 
-	private TreeViewer viewer;
+	private FilterTreeContentProvider viewer;
 	
-	public LoadFilterOptions(TreeViewer viewer) {
+	public LoadFilterOptions(FilterTreeContentProvider viewer) {
 		super(Messages.LoadFilterOptions_JobName);
 		this.viewer= viewer;
 	}
@@ -92,13 +92,9 @@ public class LoadFilterOptions extends Job {
 		}
 		
 		Display.getDefault().syncExec(()->{
-			viewer.setInput(roots);
-			viewer.getTree().setEnabled(true);
-			Object label = viewer.getTree().getData(QueryView.REFRESHLABEL_KEY);
-			if (label != null && label instanceof Control){
-				((Control)label).dispose();
-				viewer.getTree().setData(QueryView.REFRESHLABEL_KEY, null);
-			}
+			viewer.setItems(roots);
+//			viewer.setInput(roots);
+//			viewer.getTree().setEnabled(true);
 			
 		});
 		return Status.OK_STATUS;

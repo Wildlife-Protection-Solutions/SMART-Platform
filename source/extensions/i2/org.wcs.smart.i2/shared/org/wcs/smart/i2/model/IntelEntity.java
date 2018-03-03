@@ -36,6 +36,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -332,7 +333,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	 */
 	@Transient
 	public String getIdAttributeAsText(){
-		return getIdAttributeAsText(null);
+		return getIdAttributeAsText( null);
 	}
 	
 	/**
@@ -364,6 +365,8 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 					return DateFormat.getDateInstance().format((Date)value);
 				}else if (value instanceof NamedItem){
 					return ((NamedItem) value).getName();
+				}else if (value instanceof Employee) {
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel((Employee)value, l);
 				}else{
 					return value.toString();
 				}

@@ -21,11 +21,16 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -33,6 +38,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -52,6 +58,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -62,14 +69,18 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.geotools.referencing.CRS;
+import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.common.control.OnOffButton;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -82,6 +93,8 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.ui.AttributeListItemLabelProvider;
 import org.wcs.smart.ui.CheckBoxDropDown;
+import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
@@ -95,6 +108,8 @@ import com.vividsolutions.jts.geom.Coordinate;
  *
  */
 public class AttributeFieldEditor {
+
+	private static final String DEFAULT_VALUE_KEY = "DEFAULT"; //$NON-NLS-1$
 
 	private static final String SELELECTION_KEY = "sel"; //$NON-NLS-1$
 	
@@ -120,6 +135,8 @@ public class AttributeFieldEditor {
 	private String crsLabel = null;
 	
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
+	
+	private boolean fireEvents = true;
 	
 	/**
 	 * Assumption is the parent layout is a 2 column grid layout
@@ -282,6 +299,7 @@ public class AttributeFieldEditor {
 	}
 	
 	private void modified(){
+		if (!fireEvents) return;
 		for (SelectionListener l : listeners){
 			l.widgetSelected(null);
 		}
@@ -327,6 +345,16 @@ public class AttributeFieldEditor {
 				if (item instanceof IntelAttributeListItem){
 					add = true;
 					value.setAttributeListItem((IntelAttributeListItem) item);
+				}
+			}
+		}else if (attribute.getType() == AttributeType.EMPLOYEE){
+			if (isMulti) throw new IllegalStateException(Messages.AttributeFieldEditor_MultiSelectNotSupportedRelationships);
+			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
+			if (!selection.isEmpty()){
+				Object item = selection.getFirstElement();
+				if (item instanceof Employee){
+					add = true;
+					value.setEmployee((Employee) item);
 				}
 			}
 		}else if (attribute.getType() == AttributeType.NUMERIC){
@@ -409,6 +437,39 @@ public class AttributeFieldEditor {
 					value.getAttributeListItems().add(newItem);
 				}
 			}
+		}else if (attribute.getType() == AttributeType.EMPLOYEE){
+			if (value.getAttributeListItems() == null){
+				value.setAttributeListItems(new ArrayList<>());
+			}
+			ArrayList<IntelRecordAttributeValueList> listValues = new ArrayList<IntelRecordAttributeValueList>();
+			
+			Collection<?> objects = Collections.emptyList();
+			if (!isMulti){
+				if (!cmbViewer.getSelection().isEmpty()){
+					objects = Collections.singletonList(  ((IStructuredSelection)((ComboViewer)cmbViewer).getSelection()).getFirstElement() );
+				}
+			}else{
+				objects = cmbMultiSelect.getCheckObjects();
+			}
+			for (Object item : objects) {					
+				if (item instanceof Employee){
+					IntelRecordAttributeValueList list = new IntelRecordAttributeValueList();
+					list.getId().setElementUuid(((Employee) item).getUuid());
+					list.getId().setValue(value);
+					listValues.add(list);
+					add = true;
+				}
+			}
+			List<IntelRecordAttributeValueList> delete = new ArrayList<IntelRecordAttributeValueList>();
+			for (IntelRecordAttributeValueList existing : value.getAttributeListItems()){
+				if (!listValues.contains(existing)) delete.add(existing);
+			}
+			value.getAttributeListItems().removeAll(delete);
+			for (IntelRecordAttributeValueList newItem: listValues){
+				if (!value.getAttributeListItems().contains(newItem)){
+					value.getAttributeListItems().add(newItem);
+				}
+			}
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			try{
 				String dvalue = ((Text)txtValue).getText();
@@ -459,6 +520,11 @@ public class AttributeFieldEditor {
 			txtValue.setText(String.valueOf(value.getNumberValue()));
 		}else if (attribute.getType() ==  AttributeType.LIST){
 			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
+		}else if (attribute.getType() ==  AttributeType.EMPLOYEE){
+			cmbViewer.getControl().setData(DEFAULT_VALUE_KEY, value.getEmployee());
+			if (value.getEmployee() != null) {
+				cmbViewer.setSelection(new StructuredSelection(value.getEmployee()));
+			}
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			if(value.getDateValue() == null){
 				btnChDateTime.setSelection(false);
@@ -514,6 +580,16 @@ public class AttributeFieldEditor {
 					value.setAttributeListItem((IntelAttributeListItem) item);
 				}
 			}
+		}else if (attribute.getType() == AttributeType.EMPLOYEE){
+			if (isMulti) throw new IllegalStateException(Messages.AttributeFieldEditor_MultiSelectNotSupportedAttributes);
+			IStructuredSelection selection = (IStructuredSelection)((ComboViewer)cmbViewer).getSelection();
+			if (!selection.isEmpty()){
+				Object item = selection.getFirstElement();
+				if (item instanceof Employee){
+					add = true;
+					value.setEmployee((Employee) item);
+				}
+			}
 		}else if (attribute.getType() == AttributeType.NUMERIC){
 			try{
 				String dvalue = ((Text)txtValue).getText();
@@ -553,6 +629,11 @@ public class AttributeFieldEditor {
 			initPositionValues(value.getNumberValue(), value.getNumberValue2());
 		}else if (attribute.getType() ==  AttributeType.LIST){
 			cmbViewer.setSelection(new StructuredSelection(value.getAttributeListItem()));
+		}else if (attribute.getType() ==  AttributeType.EMPLOYEE){
+			cmbViewer.getControl().setData(DEFAULT_VALUE_KEY, value.getEmployee());
+			if (value.getEmployee() != null) {
+				cmbViewer.setSelection(new StructuredSelection(value.getEmployee()));
+			}
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			if(value.getDateValue() == null){
 				btnChDateTime.setSelection(false);
@@ -619,6 +700,27 @@ public class AttributeFieldEditor {
 				cmbMultiSelect.setValue(selectedObjs);
 			}else{
 				cmbViewer.setSelection(new StructuredSelection(selectedObjs));
+			}
+			
+		}else if (attribute.getType() ==  AttributeType.EMPLOYEE){
+			List<Object> selectedObjects = new ArrayList<>();
+			if (value.getAttributeListItems() != null){
+				for (IntelRecordAttributeValueList i : value.getAttributeListItems()){
+					if (value.getAttribute().getAttribute() != null){
+						Employee temp = new Employee();
+						temp.setUuid(i.getId().getElementUuid());
+						selectedObjects.add(temp);
+					}
+				}
+			}
+			if (isMulti) {
+				cmbMultiSelect.setData(DEFAULT_VALUE_KEY, selectedObjects);
+				initEmployeeControl(selectedObjects);
+			}else {
+				if (!selectedObjects.isEmpty()) {
+					cmbViewer.getControl().setData(DEFAULT_VALUE_KEY, selectedObjects.get(0));
+					initEmployeeControl(selectedObjects.get(0));
+				}
 			}
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			if(value.getDateValue() == null){
@@ -754,6 +856,34 @@ public class AttributeFieldEditor {
 				CheckBoxDropDown control = createMultiSelectWidget(parent);
 				cd = createDecoration(control);
 			}
+		}else if (attribute.getType() ==  AttributeType.EMPLOYEE){
+			if (!isMulti){
+				cmbViewer = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
+				cmbViewer.setLabelProvider(new LabelProvider() {
+					public String getText(Object element) {
+						if (element instanceof Employee) return SmartLabelProvider.getFullLabel((Employee)element);
+						return super.getText(element);
+					}
+				});
+				
+				cmbViewer.setInput(new Object[] {DialogConstants.LOADING_TEXT});
+				cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+					@Override
+					public void selectionChanged(SelectionChangedEvent event) {
+						modified();
+					}
+				});
+				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
+				
+				cd = createDecoration(cmbViewer.getControl());
+				
+			}else{
+				CheckBoxDropDown control = createMultiSelectWidget(parent);
+				cd = createDecoration(control);
+			}
+			loadEmployees.schedule();
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			Composite t = new Composite(parent, SWT.NONE);
 			t.setLayout(new GridLayout(2, false));
@@ -919,8 +1049,18 @@ public class AttributeFieldEditor {
 			}
 		};
 		cmbMultiSelect.setContentProvider(ArrayContentProvider.getInstance());
-		cmbMultiSelect.setLabelProvider(new AttributeListItemLabelProvider());
-		cmbMultiSelect.setInput(attribute.getAttributeList());
+		if (attribute.getType() == AttributeType.LIST) {
+			cmbMultiSelect.setLabelProvider(new AttributeListItemLabelProvider());
+			cmbMultiSelect.setInput(attribute.getAttributeList());
+		}else if (attribute.getType() == AttributeType.EMPLOYEE) {
+			cmbMultiSelect.setLabelProvider(new LabelProvider() {
+				public String getText(Object element) {
+					if (element instanceof Employee) return SmartLabelProvider.getFullLabel((Employee)element);
+					return super.getText(element);
+				}
+			});
+		}
+		
 		cmbMultiSelect.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -950,4 +1090,78 @@ public class AttributeFieldEditor {
 		});
 		return cd;
 	}
+	
+	
+	private void initEmployeeControl(Object defaultValue) {
+		//do not fire events; we are initializing values not changing them
+		fireEvents = false;
+		try {
+			if (!isMulti) {
+				Object data = cmbViewer.getInput();
+				if (data != null && data instanceof Collection) {
+					Collection<?> datavalues = (Collection<?>) cmbViewer.getInput();
+					if (defaultValue == null) {
+						cmbViewer.setSelection(new StructuredSelection(datavalues.iterator().next()));
+					}
+					for (Object x : datavalues) {
+						if (x.equals(defaultValue)) {
+							cmbViewer.setSelection(new StructuredSelection(x));
+							return;
+						}
+					}	
+				}
+			}else {
+				if (defaultValue == null) return;
+				Object input = cmbMultiSelect.getInput();
+				if (input != null && input instanceof Collection) {
+					Collection<?> data = (Collection<?>)input;
+					Collection<?> selectedObjects = (Collection<?>)defaultValue;
+					List<Object> items = new ArrayList<Object>();
+					for (Object x : data){
+						for (Object y : selectedObjects){
+							if (x.equals(y)){
+								items.add(x);
+								break;
+							}
+						}
+					}
+					cmbMultiSelect.setValue(items);
+				}
+			}
+		}finally {
+			fireEvents = true;
+		}
+	}
+	
+	
+	private Job loadEmployees = new Job("loading employees") { //$NON-NLS-1$
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			List<Employee> items = new ArrayList<>();
+			try(Session session = HibernateManager.openSession()){
+				items.addAll( QueryFactory.buildQuery(session,  Employee.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"endEmploymentDate", null}).list() ); //$NON-NLS-1$
+				
+				items.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel(a), SmartLabelProvider.getFullLabel(b)));
+			}
+			Display.getDefault().syncExec(()->{
+				if (cmbViewer != null) {
+					List<Object> allItems = new ArrayList<>();
+					allItems.add(0, ""); //$NON-NLS-1$
+					allItems.addAll(items);
+					cmbViewer.setInput(allItems);
+					Object defaultv = cmbViewer.getControl().getData(DEFAULT_VALUE_KEY);
+					initEmployeeControl(defaultv);
+				}else if (cmbMultiSelect != null) {
+					cmbMultiSelect.setInput(items);
+					Object defaultv = cmbMultiSelect.getData(DEFAULT_VALUE_KEY);
+					initEmployeeControl(defaultv);
+				}
+			});
+			return Status.OK_STATUS;
+		}
+		
+	};
 }

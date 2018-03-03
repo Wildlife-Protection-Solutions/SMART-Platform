@@ -59,7 +59,8 @@ public class IntelAttribute extends NamedKeyItem{
 		BOOLEAN("b"), //$NON-NLS-1$
 		LIST("l"), //$NON-NLS-1$
 		DATE("d"), //$NON-NLS-1$
-		POSITION("p"); //$NON-NLS-1$
+		POSITION("p"), //$NON-NLS-1$
+		EMPLOYEE("e"); //$NON-NLS-1$
 		
 		public String key;
 		
