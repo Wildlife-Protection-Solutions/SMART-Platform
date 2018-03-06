@@ -1432,7 +1432,7 @@ CREATE  TRIGGER trg_connect_account_after AFTER INSERT ON connect.change_log  FO
 ALTER TABLE smart.connect_data_queue DROP CONSTRAINT type_chk;
 ALTER TABLE connect.data_queue drop constraint type_chk;
 update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.connect.dataqueue';
-update connect.ca_plugin_version set version = '3.0' where plugin_id = = 'org.wcs.smart.connect.dataqueue';
+update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.connect.dataqueue';
 
 
 ALTER TABLE smart.i_entity_attribute_value add column employee_uuid uuid;
