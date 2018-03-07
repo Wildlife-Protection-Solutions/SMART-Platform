@@ -32,13 +32,12 @@ import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
@@ -199,12 +198,10 @@ public class GroupByItem {
 		return this.attributeType;
 	}
 	
-	
-	public List<ListItem> getAllOptions(Session session, ConservationArea ca, LocalDate[] dateRange, Locale l) {
+	public List<ListItem> getAllOptions(Session session, IQueryItemProvider itemProvider, LocalDate[] dateRange, Locale l) {
 		if(type == GroupByType.ENTITYTYPE) {
 			List<ListItem> items = new ArrayList<>();
-			List<IntelEntityType> types = QueryFactory.buildQuery(session, IntelEntityType.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
-			for (IntelEntityType t : types) {
+			for (IntelEntityType t : itemProvider.getEntityTypes(session)) {
 				items.add(new ListItem(t.getKeyId(), t.getName()));
 			}
 			return items;
@@ -214,17 +211,15 @@ public class GroupByItem {
 			
 			String entityType = null;
 			if (entityTypeKey != null && !entityTypeKey.isEmpty()) {
-				IntelEntityType type = QueryFactory.buildQuery(session, IntelEntityType.class, new Object[] {"conservationArea", ca}, new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+				IntelEntityType type = itemProvider.getEntityType(entityTypeKey, session);
 				entityType = type.getName();
 			}
 			
-			IntelAttribute intelAttribute = QueryFactory.buildQuery(session, IntelAttribute.class, 
-					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-					new Object[] {"keyId", attributeKey}).uniqueResult(); //$NON-NLS-1$
+			IntelAttribute intelAttribute = itemProvider.getAttribute(attributeKey, session);
 			
 			List<ListItem> items = new ArrayList<>();
 			if (attributeType == AttributeType.EMPLOYEE) {
-				List<Employee> types = QueryFactory.buildQuery(session, Employee.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+				List<Employee> types = itemProvider.getEmployees(session);
 				for (Employee t : types) {
 					String name = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(t, l);
 					String fullName = name;
@@ -236,7 +231,8 @@ public class GroupByItem {
 					items.add(new ListItem(UuidUtils.uuidToString(t.getUuid()), name, fullName));
 				}	
 			}else if (attributeType == AttributeType.LIST) {
-				for (IntelAttributeListItem i : intelAttribute.getAttributeList()) {
+				List<IntelAttributeListItem> listItems = itemProvider.getAttributeListItems(intelAttribute.getKeyId(), session);
+				for (IntelAttributeListItem i : listItems) {
 					String name = i.getName();
 					String fullName = name;
 					if (entityType != null) {
@@ -247,9 +243,7 @@ public class GroupByItem {
 					items.add(new ListItem(i.getKeyId(), name, fullName));
 				}
 			}else if (attributeType == AttributeType.POSITION) {
-				List<Area> areas = QueryFactory.buildQuery(session, Area.class, 
-						new Object[] {"conservationArea", ca},  //$NON-NLS-1$
-						new Object[] {"type", areaKey}).list(); //$NON-NLS-1$
+				List<Area> areas = itemProvider.getAreas(areaKey, session);
 				
 				for (Area i : areas) {
 					String name = i.getName();

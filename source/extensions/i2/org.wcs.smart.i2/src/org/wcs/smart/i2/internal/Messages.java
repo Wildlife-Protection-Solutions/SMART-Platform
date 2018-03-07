@@ -896,6 +896,8 @@ public class Messages extends NLS {
 	public static String IntelReportManager_ResetValidate;
 	public static String IntelReportManager_SaveMessage;
 	public static String IntelReportManager_SaveTitle;
+	public static String InternalQueryManager_EntitySummaryQueryName;
+	public static String InternalQueryManager_RecordObservationQueryName;
 	public static String LoadFilterOptions_AttributeFilterLabel;
 	public static String LoadFilterOptions_CategoriesFilterLabel;
 	public static String LoadFilterOptions_DataModelFilterLabel;

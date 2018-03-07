@@ -25,6 +25,7 @@ import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,9 +46,12 @@ import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.CaQueryItemProvider;
+import org.wcs.smart.i2.query.CcaaQueryItemProvider;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
+import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
@@ -89,15 +93,21 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 			locale = Locale.getDefault();
 		}
 		
-		ConservationArea ca = (ConservationArea)parameters.get(ConservationArea.class.getName());
-		if (ca == null){
+		Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
+		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 		}
+		IQueryItemProvider itemProvider = new CcaaQueryItemProvider(cas, query.getConservationArea());
+		if (cas.size() == 1) {
+			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
+		}
+		
 		progress.subTask(Messages.IntelObservationQueryEngine_Progress2);
 		ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
 		progress.worked(1);
 		final SubMonitor fmonitor = progress;
 		final Locale flocale = locale;
+		final IQueryItemProvider fItemProvider = itemProvider;
 		return session.doReturningWork(new ReturningWork<IPagedQueryResultSet>() {
 			@Override
 			public IPagedQueryResultSet execute(Connection connection) throws SQLException {
@@ -108,7 +118,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 						queryResults = new IntelObservationQueryResults();
 						
 						//session.beginTransaction();
-						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session); 
+						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session); 
 						String dataTable = parser.processFilter(fmonitor.split(2));
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -139,7 +149,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 						queryResults = new IntelObservationQueryResults();
 						
 						//session.beginTransaction();
-						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session); 
+						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session); 
 						String dataTable = parser.processFilter(fmonitor.split(2));
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());

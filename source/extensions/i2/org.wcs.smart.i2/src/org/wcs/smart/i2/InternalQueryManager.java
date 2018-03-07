@@ -21,15 +21,22 @@
  */
 package org.wcs.smart.i2;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.CaQueryItemProvider;
+import org.wcs.smart.i2.query.CcaaQueryItemProvider;
+import org.wcs.smart.i2.query.IQueryItemProvider;
 
 /**
  * Query manager for intelligence queries.
@@ -41,6 +48,8 @@ import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 public enum InternalQueryManager {
 
 	INSTANCE;
+	
+	private volatile IQueryItemProvider queryItemProvider= null;
 	
 	/**
 	 * Returns the query deleted from the database if a query is deleted; otherwise
@@ -77,10 +86,47 @@ public enum InternalQueryManager {
 		return removed;
 	}
 	
+	/**
+	 * 
+	 * @return the supported query types as a two element array where the first element
+	 * is the key and the second is the query type name.
+	 */
 	public String[][] getSupportQueryTypes() {
 		return new String[][] {
-			{ IntelRecordObservationQuery.KEY, "Record Observation Query"},
-			{ IntelEntitySummaryQuery.KEY, "Entity Summary Query"}
+			{ IntelRecordObservationQuery.KEY, Messages.InternalQueryManager_RecordObservationQueryName},
+			{ IntelEntitySummaryQuery.KEY, Messages.InternalQueryManager_EntitySummaryQueryName}
 		};
 	}
+	
+	
+	/**
+	 * 
+	 * @return the query item provider for the current conservation are aconfiguration
+	 * 
+	 */
+	public IQueryItemProvider getQueryItemProvider() {
+		if (queryItemProvider == null) {
+			synchronized (INSTANCE) {
+				if (queryItemProvider != null) return queryItemProvider;
+				if (SmartDB.isMultipleAnalysis()) {
+					queryItemProvider = new CcaaQueryItemProvider(Collections.emptyList(), SmartDB.getCurrentConservationArea()) {
+						@Override
+						public Collection<ConservationArea> getConservationAreas() {
+							return SmartDB.getConservationAreaConfiguration().getConservationAreas();
+						}
+						
+						@Override
+						protected ConservationArea getMainConservationArea() {
+							return SmartDB.getConservationAreaConfiguration().getMainConservationArea();
+						}
+					};
+				}else {
+					queryItemProvider = new CaQueryItemProvider(SmartDB.getCurrentConservationArea(), SmartDB.getCurrentConservationArea());
+				}	
+			}
+			
+		}
+		return queryItemProvider;
+	}
+	
 }

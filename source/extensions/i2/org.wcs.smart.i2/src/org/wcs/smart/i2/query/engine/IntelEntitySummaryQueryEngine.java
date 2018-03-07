@@ -23,7 +23,7 @@ package org.wcs.smart.i2.query.engine;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,13 +40,15 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.query.CaQueryItemProvider;
+import org.wcs.smart.i2.query.CcaaQueryItemProvider;
+import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.i2.query.Operator;
@@ -78,6 +80,8 @@ import org.wcs.smart.util.UuidUtils;
 public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	
 	private DataTable dataTable;
+	
+	
 	/**
 	 * Parameters required are session, monitor, and date filter object
 	 * @param query
@@ -98,9 +102,13 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		}
 		
 		//Conservation Area
-		ConservationArea ca = (ConservationArea)parameters.get(ConservationArea.class.getName());
-		if (ca == null){
+		Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
+		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
+		}
+		IQueryItemProvider itemProvider = new CcaaQueryItemProvider(cas, query.getConservationArea());
+		if (cas.size() == 1) {
+			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 		}
 		
 		
@@ -111,7 +119,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 
 		//parse query
 		progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressEntityType);
-		createTemporaryEntityTable(session, Collections.singletonList(ca));
+		createTemporaryEntityTable(session,cas);
 		progress.worked(1);
 		
 		try {
@@ -130,11 +138,11 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			progress.worked(1);
 			
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressAreaGroupBy);
-			Map<GroupByItem, String> areaTables = processAreaGroupBys(dataTable.tableName, parsedQuery, ca, session);
+			Map<GroupByItem, String> areaTables = processAreaGroupBys(dataTable.tableName, parsedQuery, cas, session);
 			progress.worked(1);
 			
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressLoadingResults);
-			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, dateRange, areaTables, locale, session);
+			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, dateRange, areaTables, locale, itemProvider, session);
 			progress.worked(1);
 			
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressCleanUp);
@@ -167,7 +175,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * a separate table as it is possible for a single position attribute to be in multiple
 	 * areas and we want to count each one
 	 */
-	private Map<GroupByItem, String> processAreaGroupBys(String queryTable, SumQueryDefinition definition, ConservationArea ca, Session session) {
+	private Map<GroupByItem, String> processAreaGroupBys(String queryTable, SumQueryDefinition definition, Collection<ConservationArea> cas, Session session) {
 		List<GroupByItem> groupByItems = new ArrayList<>();
 		groupByItems.addAll(definition.getRowGroupByPart().getItems());
 		groupByItems.addAll(definition.getColumnGroupByPart().getItems());
@@ -206,7 +214,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			session.createNativeQuery(sb.toString())
 				.setParameter("attributeKey",  groupBy.getAttributeKey()) //$NON-NLS-1$
 				.setParameter("areaType",  groupBy.getAreaType().name()) //$NON-NLS-1$
-				.setParameterList("cas", Collections.singletonList(ca)) //$NON-NLS-1$
+				.setParameterList("cas", cas) //$NON-NLS-1$
 				.executeUpdate();
 			
 			areaToTables.put(groupBy,  tableName);
@@ -219,7 +227,8 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	/*
 	 * Runs a sql statement on the data table to get the results for the table
 	 */
-	private SummaryQueryResult getResults(String queryTable, SumQueryDefinition definition, LocalDate[] dateRange, Map<GroupByItem, String> areaTables, Locale l, Session session) throws Exception {
+	private SummaryQueryResult getResults(String queryTable, SumQueryDefinition definition, LocalDate[] dateRange, 
+			Map<GroupByItem, String> areaTables, Locale l, IQueryItemProvider itemProvider, Session session) throws Exception {
 		
 		StringBuilder selectSql = new StringBuilder();
 		StringBuilder groupBySql = new StringBuilder();
@@ -304,13 +313,10 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			sb.append(groupBySql);
 		}
 		
-		
-		
 		logme(sb);
 		
-		
 		SummaryQueryResult results = new SummaryQueryResult();
-		getHeaderInfo(definition, results, dateRange, l, session);
+		getHeaderInfo(definition, results, dateRange, itemProvider, l, session);
 		
 		HashMap<SummaryResultKey, Double> data = new HashMap<>();
 		
@@ -358,7 +364,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * create temporary entity table and populate with all entities
 	 * that match the given conservation area
 	 */
-	private String createTemporaryEntityTable(Session session, List<ConservationArea> cas) {
+	private String createTemporaryEntityTable(Session session, Collection<ConservationArea> cas) {
 		String obsTable = SqlGenerator.createTempTableName();
 		
 		dataTable = new DataTable(obsTable);
@@ -822,7 +828,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * @param results the summary query results to update
 	 * @param session hibernate session
 	 */
-	public static void getHeaderInfo(SumQueryDefinition queryDefinition, SummaryQueryResult results, LocalDate[] dateRange, Locale l, Session session) throws Exception{
+	private static void getHeaderInfo(SumQueryDefinition queryDefinition, SummaryQueryResult results, LocalDate[] dateRange, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
 		
 		// value headers
 		ValuePart vp = queryDefinition.getValuePart();
@@ -830,7 +836,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		results.addValueHeader(header);
 
 		for (GroupByItem item : queryDefinition.getRowGroupByPart().getItems()) {
-			List<ListItem> allItems = item.getAllOptions(session, SmartDB.getCurrentConservationArea(), dateRange, l);
+			List<ListItem> allItems = item.getAllOptions(session, itemProvider, dateRange, l);
 			String colkey = computeColumnKey(item);
 			List<SummaryHeader> rowHeaders = new ArrayList<>();
 			
@@ -853,7 +859,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		}
 		
 		for (GroupByItem item : queryDefinition.getColumnGroupByPart().getItems()) {
-			List<ListItem> allItems = item.getAllOptions(session, SmartDB.getCurrentConservationArea(), dateRange, l);
+			List<ListItem> allItems = item.getAllOptions(session, itemProvider, dateRange, l);
 			String colkey = computeColumnKey(item);
 			
 			List<SummaryHeader> rowHeaders = new ArrayList<>();

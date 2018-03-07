@@ -26,23 +26,23 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.AreaFilter;
 import org.wcs.smart.i2.query.observation.filter.BooleanFilter;
@@ -70,13 +70,13 @@ public class ObservationFilterProcessor {
 	
 	private Exception visitorException;
 	private HashMap<IQueryFilter, String> filterToColumnName = new HashMap<IQueryFilter, String>();
-	private ConservationArea ca;
+	private IQueryItemProvider itemProvider;
 	
-	public ObservationFilterProcessor(IQueryFilter filter, Date[] dFilter, ConservationArea ca, Session s){
+	public ObservationFilterProcessor(IQueryFilter filter, Date[] dFilter, IQueryItemProvider itemProvider, Session s){
 		this.filter = filter;
 		this.dFilter = dFilter;
 		this.s = s;
-		this.ca = ca;
+		this.itemProvider = itemProvider;
 	}
 	
 	public HashMap<IQueryFilter, String> getFilterToColumnNames(){
@@ -135,19 +135,21 @@ public class ObservationFilterProcessor {
 		sql.append(" SELECT l.uuid, o.uuid FROM smart.i_location l "); //$NON-NLS-1$
 		sql.append(" LEFT JOIN smart.i_observation o on l.uuid = o.location_uuid "); //$NON-NLS-1$
 		sql.append( " WHERE "); //$NON-NLS-1$
-		sql.append(" l.ca_uuid = :ca "); //$NON-NLS-1$
+		sql.append(" l.ca_uuid in (:cas) "); //$NON-NLS-1$
 		
 		String dateFilter = SqlGenerator.generateDateClause(dFilter, "datetime"); //$NON-NLS-1$
 		if (dateFilter != null){
 			sql.append(" AND "); //$NON-NLS-1$
 			sql.append(dateFilter);
 		}
-		
-		logString(UuidUtils.uuidToString(ca.getUuid()));		
+		List<UUID> caUuids = itemProvider.getConservationAreas().stream().map(e->e.getUuid()).collect(Collectors.toList());
+		for (UUID uuid : caUuids) {
+			logString(UuidUtils.uuidToString(uuid));
+		}
 		logString(sql.toString());
 		if (monitor.isCanceled()) return null;
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
+		query.setParameter("cas", caUuids); //$NON-NLS-1$
 		query.executeUpdate();
 		
 		//create indexes to help with performance
@@ -344,11 +346,7 @@ public class ObservationFilterProcessor {
 			
 		}
 		//category and perhaps an attribute filter
-
-		Attribute attribute = QueryFactory.buildQuery(s,Attribute.class,
-						new Object[] {"keyId", filter.getAttributeKey()}, //$NON-NLS-1$
-						new Object[] {"conservationArea", ca}).uniqueResult(); //$NON-NLS-1$
-				
+		Attribute attribute = itemProvider.getDataModelAttribute(filter.getAttributeKey(), s);
 		if (attribute == null){
 			throw new Exception(MessageFormat.format(Messages.ObservationFilterProcessor_AttributeKeyNotFound , filter.getAttributeKey()));
 		}
@@ -356,17 +354,11 @@ public class ObservationFilterProcessor {
 		AttributeTreeNode treenode = null;
 		if (filter.getAttributeType() == Attribute.AttributeType.LIST){
 			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
-				
-				li = QueryFactory.buildQuery(s,AttributeListItem.class,
-						new Object[] {"keyId", filter.getKeyValue()}, //$NON-NLS-1$
-						new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
+				li = itemProvider.getDataModelAttributeListItem(attribute.getKeyId(), filter.getKeyValue(), s);
 				if (li == null) throw new Exception(MessageFormat.format(Messages.ObservationFilterProcessor_ListItemNotFound, filter.getKeyValue(), attribute.getName()));
 			}
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
-			treenode = QueryFactory.buildQuery(s,AttributeTreeNode.class,
-					new Object[] {"hkey", filter.getKeyValue()}, //$NON-NLS-1$
-					new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
-			
+			treenode = itemProvider.getDataModelAttributeTreeNode(attribute.getKeyId(), filter.getKeyValue(), s);
 			if (treenode == null) throw new Exception(MessageFormat.format(Messages.ObservationFilterProcessor_TreeNodeNotFound, filter.getKeyValue(), attribute.getName()));
 		}
 		
@@ -379,10 +371,15 @@ public class ObservationFilterProcessor {
 			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid "); //$NON-NLS-1$
 		}
 		sql.append(" JOIN smart.i_observation_attribute ia on ia.observation_uuid = o.uuid "); //$NON-NLS-1$
+		sql.append(" JOIN smart.dm_attribute dma on dma.uuid = ia.attribute_uuid "); //$NON-NLS-1$
+
 		if (treenode != null){
 			sql.append(" JOIN smart.dm_attribute_tree ta ON ia.tree_node_uuid = ta.uuid "); //$NON-NLS-1$
 		}
-		sql.append(" WHERE ia.attribute_uuid = :attributeUuid "); //$NON-NLS-1$
+		if (li != null) {
+			sql.append(" JOIN smart.dm_attribute_list tl ON ia.list_element_uuid = tl.uuid "); //$NON-NLS-1$
+		}
+		sql.append(" WHERE dma.keyId = :attributeKey "); //$NON-NLS-1$
 		if (filter.getCategoryKey() != null){
 			sql.append(" AND (c.hkey >= :hkey1 and c.hkey < :hkey2) "); //$NON-NLS-1$
 		}
@@ -399,7 +396,7 @@ public class ObservationFilterProcessor {
 			if (li == null){
 				sql.append(" ia.list_element_uuid is not null "); //$NON-NLS-1$
 			}else{
-				sql.append(" ia.list_element_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" tl.keyid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			break;
 		case NUMERIC:
@@ -415,15 +412,14 @@ public class ObservationFilterProcessor {
 			break;
 		}
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("attributeUuid", attribute.getUuid()); //$NON-NLS-1$
-		logString(UuidUtils.uuidToString(attribute.getUuid()));
+		query.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
+		logString(attribute.getKeyId());
 		
 		if (filter.getCategoryKey() != null){
 			String hkey1 = filter.getCategoryKey();
 			String hkey2 = filter.getCategoryKey().substring(0, filter.getCategoryKey().length() - 1) + "/"; //$NON-NLS-1$
 			logString(hkey1);
 			logString(hkey2);
-			logString(UuidUtils.uuidToString(ca.getUuid()));
 			
 			query.setParameter("hkey1", hkey1); //$NON-NLS-1$
 			query.setParameter("hkey2", hkey2); //$NON-NLS-1$
@@ -439,8 +435,8 @@ public class ObservationFilterProcessor {
 			break;
 		case LIST:
 			if (li != null){
-				logString(UuidUtils.uuidToString(li.getUuid()));
-				query.setParameter("value", li.getUuid()); //$NON-NLS-1$
+				logString(li.getKeyId());
+				query.setParameter("value", li.getKeyId()); //$NON-NLS-1$
 			}
 			break;
 		case TREE:
@@ -572,19 +568,19 @@ public class ObservationFilterProcessor {
 	
 	private void addFilterColumn(IntelAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
 		
-		IntelAttribute attribute =  QueryFactory.buildQuery(s,IntelAttribute.class, 
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"keyId", filter.getAttributeKey()}).uniqueResult(); //$NON-NLS-1$
-				
+		IntelAttribute attribute = itemProvider.getAttribute(filter.getAttributeKey(), s);
 		if (attribute == null) throw new Exception(MessageFormat.format(Messages.ObservationFilterProcessor_IntelAttributeKeyNotFound, filter.getAttributeKey()));
 		
 		IntelAttributeListItem listItem = null;
 		if (filter.getAttributeType() == AttributeType.LIST && filter.getKeyValue() != null){
 			if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)){
-				listItem =  QueryFactory.buildQuery(s,IntelAttributeListItem.class, 
-						new Object[] {"attribute", attribute}, //$NON-NLS-1$
-						new Object[] {"keyId", filter.getKeyValue()}).uniqueResult(); //$NON-NLS-1$
-			
+				List<IntelAttributeListItem> items = itemProvider.getAttributeListItems(filter.getAttributeKey(), s);
+				for (IntelAttributeListItem item : items) {
+					if (item.getKeyId().equals(filter.getKeyValue())) {
+						listItem = item;
+						break;
+					}
+				}
 				if (listItem == null) throw new Exception(MessageFormat.format(Messages.ObservationFilterProcessor_IntelListItemNotFound, filter.getAttributeKey()));
 			}
 		}
@@ -594,7 +590,7 @@ public class ObservationFilterProcessor {
 			if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
 				//find the employee
 				Employee e = s.get(Employee.class, UuidUtils.stringToUuid(filter.getKeyValue()));
-				if (!ca.getIsCcaa() && !e.getConservationArea().equals(ca)) {
+				if (e != null && itemProvider.getConservationAreas().contains(e.getConservationArea())) {
 					e = null;
 				}
 				if (e == null) {
@@ -603,16 +599,7 @@ public class ObservationFilterProcessor {
 				employee = e;
 			}
 		}
-		
-		IntelEntityType type = null;
-		if (filter.getEntityTypeKey() != null){
-			type =  QueryFactory.buildQuery(s,IntelEntityType.class, 
-					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-					new Object[] {"keyId", filter.getEntityTypeKey()}).uniqueResult(); //$NON-NLS-1$
-			
-			if (type == null) throw new Exception(MessageFormat.format(Messages.ObservationFilterProcessor_EntityTypeKeyNotFound, filter.getEntityTypeKey()));
-		}
-		
+
 		String t2 = SqlGenerator.createTempTableName();
 		StringBuilder sql = new StringBuilder();
 		sql.append(" CREATE TABLE " + t2); //$NON-NLS-1$
@@ -626,13 +613,18 @@ public class ObservationFilterProcessor {
 		sql.append (" SELECT distinct l.location_uuid "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a JOIN smart.i_entity_location l on a.location_uuid = l.location_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" JOIN smart.i_entity_attribute_value v on v.entity_uuid = l.entity_uuid "); //$NON-NLS-1$
+		sql.append(" JOIN smart.i_attribute ia on ia.uuid = v.attribute_uuid "); //$NON-NLS-1$
+		if (listItem != null) {
+			sql.append(" LEFT JOIN smart.i_attribute_list_item ali on ali.uuid = v.list_item_uuid "); //$NON-NLS-1$	
+		}
 		if (filter.getEntityTypeKey() != null){
-			sql.append("LEFT JOIN smart.i_entity e on l.entity_uuid = e.uuid"); //$NON-NLS-1$
+			sql.append("LEFT JOIN smart.i_entity e on l.entity_uuid = e.uuid "); //$NON-NLS-1$
+			sql.append(" LEFT JOIN smart.i_entity_type et on et.uuid = e.entity_type_uuid "); //$NON-NLS-1$
 		}
 		sql.append(" WHERE "); //$NON-NLS-1$
-		sql.append(" v.attribute_uuid = :attributeUuid "); //$NON-NLS-1$
-		if (type != null){
-			sql.append(" AND e.entity_type_uuid = :entityTypeUuid "); //$NON-NLS-1$
+		sql.append(" ia.keyId = :attributeKey "); //$NON-NLS-1$
+		if (filter.getEntityTypeKey() != null){
+			sql.append(" AND et.keyId = :entityTypeKey "); //$NON-NLS-1$
 		}
 		
 		sql.append(" AND "); //$NON-NLS-1$
@@ -648,7 +640,7 @@ public class ObservationFilterProcessor {
 				//any option
 				sql.append(" v.list_item_uuid is not null "); //$NON-NLS-1$
 			}else{
-				sql.append(" v.list_item_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" ali.keyid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			break;
 		case EMPLOYEE:
@@ -672,11 +664,13 @@ public class ObservationFilterProcessor {
 		logString(sql.toString());
 		
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("attributeUuid", attribute.getUuid()); //$NON-NLS-1$
+		logString(attribute.getKeyId());
+		query.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 		if (filter.getEntityTypeKey() != null){
-			logString(UuidUtils.uuidToString(type.getUuid()));
-			query.setParameter("entityTypeUuid", type.getUuid()); //$NON-NLS-1$
+			logString(filter.getEntityTypeKey());
+			query.setParameter("entityTypeKey", filter.getEntityTypeKey()); //$NON-NLS-1$
 		}
+		
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
 			break;
@@ -688,8 +682,8 @@ public class ObservationFilterProcessor {
 			break;
 		case LIST:
 			if (listItem != null){
-				logString(UuidUtils.uuidToString(listItem.getUuid()));
-				query.setParameter("value", listItem.getUuid()); //$NON-NLS-1$
+				logString(listItem.getKeyId());
+				query.setParameter("value", listItem.getKeyId()); //$NON-NLS-1$
 			}
 			break;
 		case EMPLOYEE:
@@ -751,10 +745,10 @@ private void addFilterColumn(AreaFilter filter, String obsTable, String tempTabl
 		logString(sql.toString());
 		logString(filter.getKey());
 		logString(filter.getType().name());
-		logString(UuidUtils.uuidToString(ca.getUuid()));
+		logString(UuidUtils.uuidToString(itemProvider.getQueryConservationArea().getUuid()));
 		
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
+		query.setParameter("ca", itemProvider.getQueryConservationArea().getUuid()); //$NON-NLS-1$
 		query.setParameter("keyid", filter.getKey()); //$NON-NLS-1$
 		query.setParameter("type", filter.getType().name()); //$NON-NLS-1$
 		

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -91,7 +92,14 @@ public abstract class RunQueryJob extends Job {
 			parameters.put(IProgressMonitor.class.getName(), monitor);
 		}
 		if (!parameters.containsKey(IProgressMonitor.class.getName())) parameters.put(IProgressMonitor.class.getName(), monitor);
-		if (!parameters.containsKey(ConservationArea.class.getName())) parameters.put(ConservationArea.class.getName(), SmartDB.getCurrentConservationArea());
+		if (!parameters.containsKey(ConservationArea.class.getName())) {
+			if (SmartDB.isMultipleAnalysis()) {
+				parameters.put(ConservationArea.class.getName(), SmartDB.getConservationAreaConfiguration().getConservationAreas() );
+			}else {
+				parameters.put(ConservationArea.class.getName(), Collections.singletonList( SmartDB.getCurrentConservationArea()) );	
+			}
+			
+		}
 		
 		IQueryResult results = null;
 		try(Session session = HibernateManager.openSession()){
