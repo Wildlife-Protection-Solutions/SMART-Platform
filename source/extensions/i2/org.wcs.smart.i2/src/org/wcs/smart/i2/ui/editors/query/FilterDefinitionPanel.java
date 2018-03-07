@@ -347,7 +347,6 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		runItem.setEnabled(false);
 		
-		infoPanel.setLayout(new GridLayout(2, false));
 		Label l = new Label(infoPanel, SWT.NONE);
 		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -407,8 +406,10 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		if (addToolbar) {
 			infoPanel = new Composite(filterTypeComp, SWT.NONE);
-			infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			((GridData)infoPanel.getLayoutData()).heightHint = 30;
+			infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			infoPanel.setLayout(new GridLayout(2, false));
+			((GridLayout)infoPanel.getLayout()).marginWidth = 0;
+			((GridLayout)infoPanel.getLayout()).marginHeight = 0;
 			
 			ToolBar toolbar = new ToolBar(filterTypeComp, SWT.FLAT);
 			toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -472,16 +473,23 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		mainComposite = new Composite(parent, SWT.BORDER);
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridLayout layout = new GridLayout();
+		GridLayout layout = new GridLayout(2, false);
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		mainComposite.setLayout(layout);
 		
-		createFilterTypeComposite(mainComposite);
+		Composite left = new Composite(mainComposite, SWT.NONE);
+		left.setLayout(new GridLayout());
+		((GridLayout)left.getLayout()).marginWidth = 0;
+		((GridLayout)left.getLayout()).marginHeight = 0;
+		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
 		
-		dropTarget = new ScrolledComposite(mainComposite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.NONE);
+		createFilterTypeComposite(left);
+		
+		dropTarget = new ScrolledComposite(left, SWT.H_SCROLL | SWT.V_SCROLL | SWT.NONE);
 		dropTarget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dropTarget.addListener(SWT.Resize, new Listener() {
 			@Override
@@ -624,6 +632,8 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		dropTargetContent.setSize(dropTarget.computeSize(SWT.DEFAULT,
 				SWT.DEFAULT));
 		
+		createRightArea(mainComposite);
+		
 		//create proxy item
 		proxy = new ProxyItem();
 		proxy.createWidget(this, dropTargetContent);
@@ -632,7 +642,9 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		return mainComposite;
 	}
 
-
+	protected void createRightArea(Composite parent) {
+		
+	}
 
 
 

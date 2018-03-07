@@ -833,7 +833,9 @@
             locationURI="toolbar:org.wcs.smart.i2.ui.view.queries">
          <command
                commandId="org.wcs.smart.i2.command.query.record.new"
-               style="push">
+               icon="images/icons/obj16/new_entity_query.png"
+               style="push"
+               tooltip="create a new entity summary query">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -841,6 +843,27 @@
                      value="create_query">
                </test>
             </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.i2.query.new.type"
+                  value="I2_ENTITY_SUMM_QUERY">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.i2.command.query.record.new"
+               icon="images/icons/obj16/new_entity_query.png"
+               style="push"
+               tooltip="create a new record observation query">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.i2.permission"
+                     value="create_query">
+               </test>
+            </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.i2.query.new.type"
+                  value="I2_OBS_QUERY">
+            </parameter>
          </command>
          <command
                commandId="org.wcs.smart.i2.command.query.refresh"
@@ -1005,6 +1028,11 @@
       <command
             id="org.wcs.smart.i2.command.query.record.new"
             name="%NewQueryName3">
+         <commandParameter
+               id="org.wcs.smart.i2.query.new.type"
+               name="Query Type Parameter"
+               optional="true">
+         </commandParameter>
       </command>
       <command
             id="org.wcs.smart.i2.command.query.refresh"

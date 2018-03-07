@@ -33,9 +33,22 @@ public class ListItem {
 	private String keyId;
 	private String name;
 	
+	private String fullName;
+	
 	public ListItem(String keyId, String name) {
 		this.keyId = keyId;
 		this.name = name;
+	}
+	
+	public ListItem(String keyId, String name, String fullName) {
+		this.keyId = keyId;
+		this.name = name;
+		
+		this.fullName = fullName;
+	}
+	
+	public String getFullName() {
+		return this.fullName;
 	}
 	
 	public String getName() {

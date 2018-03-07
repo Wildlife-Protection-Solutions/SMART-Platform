@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.views.query;
 
 import java.awt.image.BufferedImage;
@@ -16,8 +37,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
@@ -26,28 +49,73 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
+import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.i2.ui.views.query.dropitem.AttributeGroupByDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.EntityTypeGroupByDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.ValueDropItem;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Content provider for the entity summary query types. 
+ * 
+ * If the input provided is not null, then the class
+ * will spawn a job to load the elements and returning loading...
+ * until the job is finished loading the element.
+ * 
+ * @author Emily
+ *
+ */
 public class EntitySummaryContentProvider implements ITreeContentProvider{
 
+	/* 
+	 * tree root nodes
+	 */
 	private enum RootNode{
-		GROUP_BY_OPTION,
-		VALUE_OPTION,
-		FILTER_OPTION
+		GROUP_BY_OPTION (Messages.EntitySummaryContentProvider_GroupByTreeNode),
+		VALUE_OPTION (Messages.EntitySummaryContentProvider_ValuesTreeNode),
+		FILTER_OPTION(Messages.EntitySummaryContentProvider_FiltersTreeNode);
+		
+		String guiName;
+		
+		RootNode(String name){
+			this.guiName = name;
+		}
 	}
 	
+	/*
+	 * sub nodes
+	 */
 	private enum SubRootNode{
-		ENTITY_TYPE_ITEM,ATTRIBUTE_ITEM
+		ENTITY_TYPE_ITEM(Messages.EntitySummaryContentProvider_EntityTypesTreeNode),
+		ATTRIBUTE_ITEM(Messages.EntitySummaryContentProvider_AttributeTreeNode);
+		String guiName;
+		
+		SubRootNode(String name){
+			this.guiName = name;
+		}
+	}
+	
+	/*
+	 * not node
+	 */
+	private enum NotNode{
+		NOT(Messages.EntitySummaryContentProvider_NotNode);
+		
+		String guiName;
+		
+		NotNode(String name){
+			this.guiName = name;
+		}
 	}
 
 	private Viewer viewer;
@@ -70,9 +138,9 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	public Object[] getElements(Object inputElement) {
 		if (types == null) return new Object[] {DialogConstants.LOADING_TEXT};
 		return new Object[] {
-				new TreeNode(RootNode.GROUP_BY_OPTION, RootNode.GROUP_BY_OPTION, "Group By"),
-				new TreeNode(RootNode.VALUE_OPTION, RootNode.VALUE_OPTION, "Values"),
-				new TreeNode(RootNode.FILTER_OPTION, RootNode.FILTER_OPTION, "Filters")};
+				new TreeNode(RootNode.GROUP_BY_OPTION, RootNode.GROUP_BY_OPTION, RootNode.GROUP_BY_OPTION.guiName),
+				new TreeNode(RootNode.VALUE_OPTION, RootNode.VALUE_OPTION, RootNode.VALUE_OPTION.guiName),
+				new TreeNode(RootNode.FILTER_OPTION, RootNode.FILTER_OPTION, RootNode.FILTER_OPTION.guiName)};
 	}
 
 	@Override
@@ -108,13 +176,21 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	private void setData(List<IntelEntityType> entityTypes) {
 		types = new HashMap<>();
 		for (IntelEntityType t : entityTypes) types.put(t.getKeyId(), t);
-	
-		Display.getDefault().syncExec(()->viewer.refresh());
+		Display.getDefault().syncExec(()->{
+			Object label = viewer.getControl().getData(QueryView.REFRESHLABEL_KEY);
+			if (label != null && label instanceof Control){
+				((Control)label).dispose();
+				viewer.getControl().setData(QueryView.REFRESHLABEL_KEY, null);
+			}
+			
+			viewer.refresh();
+			((TreeViewer)viewer).expandToLevel(2);	
+			viewer.getControl().setEnabled(true);
+			
+		});
+		
 	}
-	
-//	public void refresh() {
-//		loadDataJob.schedule();
-//	}
+
 	
 	public class TreeNode extends BasicTreeFilterItem {
 		
@@ -197,15 +273,18 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 		public List<FilterTreeItem> getChildren() {
 			if (item == RootNode.FILTER_OPTION || item == RootNode.GROUP_BY_OPTION) {
 				List<FilterTreeItem> items = new ArrayList<>();
-				items.add(new TreeNode((RootNode)item, SubRootNode.ENTITY_TYPE_ITEM, "Entity Types"));
-				items.add(new TreeNode((RootNode)item, SubRootNode.ATTRIBUTE_ITEM, "Attributes"));
+				items.add(new TreeNode((RootNode)item, SubRootNode.ENTITY_TYPE_ITEM, SubRootNode.ENTITY_TYPE_ITEM.guiName));
+				items.add(new TreeNode((RootNode)item, SubRootNode.ATTRIBUTE_ITEM, SubRootNode.ATTRIBUTE_ITEM.guiName));
+				if (item == RootNode.FILTER_OPTION) {
+					items.add(new TreeNode(RootNode.FILTER_OPTION, NotNode.NOT,  NotNode.NOT.guiName));
+				}
 				return items;
 			}
 			
 			if (item == RootNode.VALUE_OPTION) {
 				List<FilterTreeItem> kids = new ArrayList<>();
 				for (ValuePart.ValueOption op : ValuePart.ValueOption.values()) {
-					kids.add(new TreeNode(RootNode.VALUE_OPTION,op, op.name()));
+					kids.add(new TreeNode(RootNode.VALUE_OPTION, op, ValueDropItem.NAME));
 				}
 				return kids;
 			}
@@ -284,6 +363,9 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			if (source == RootNode.VALUE_OPTION && item instanceof ValuePart.ValueOption) {
 				return new DropItem[] { new ValueDropItem((ValuePart.ValueOption) item) };
 			}
+			if (item == NotNode.NOT) {
+				return new DropItem[] { new TextOperatorDropItem(Operator.NOT) };
+			}
 			if (source == RootNode.FILTER_OPTION) {
 				if (item instanceof IntelEntityType) {
 					return (new EntityTreeFilterItem((IntelEntityType)item)).asDropItem();
@@ -305,7 +387,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	}
 	
 	
-	private Job loadDataJob = new Job("loading entity summary query filter tree") {
+	private Job loadDataJob = new Job("loading entity summary query filter tree") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -313,7 +395,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			List<IntelEntityType> entityTypes = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				entityTypes.addAll(QueryFactory.buildQuery(session, IntelEntityType.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				
 				for (IntelEntityType type : entityTypes) {
 					type.getName();

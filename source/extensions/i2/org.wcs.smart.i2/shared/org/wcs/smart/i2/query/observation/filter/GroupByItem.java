@@ -1,31 +1,60 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.query.observation.filter;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.query.ListItem;
-import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Represents an entity summary query group by drop item
+ * 
+ * @author Emily
+ *
+ */
 public class GroupByItem {
 
+	public static final String INTERNAL_SEPERATOR = ":"; //$NON-NLS-1$
+	
 	public static enum GroupByType{
-		ENTITYTYPE ("entitytype_gb"),
-		ATTRIBUTE ("e_attribute_gb");
+		ENTITYTYPE ("entitytype_gb"), //$NON-NLS-1$
+		ATTRIBUTE ("e_attribute_gb"); //$NON-NLS-1$
 		
 		String key;
 		GroupByType(String key) {
@@ -37,9 +66,9 @@ public class GroupByItem {
 	}
 	
 	public static enum DateOption{
-		DAY("day"),
-		MONTH("month"),
-		YEAR("year");
+		DAY("day"), //$NON-NLS-1$
+		MONTH("month"), //$NON-NLS-1$
+		YEAR("year"); //$NON-NLS-1$
 		
 		String key;
 		
@@ -52,7 +81,7 @@ public class GroupByItem {
 	}
 	
 	public static GroupByItem parse(String part) {
-		String[] bits = part.split(":");
+		String[] bits = part.split(INTERNAL_SEPERATOR);
 		if (bits[0].equals(GroupByType.ENTITYTYPE.getKey())) {
 			//remaining bits are keys
 			List<String> ops = new ArrayList<>();
@@ -65,7 +94,7 @@ public class GroupByItem {
 		if (bits[0].equals(GroupByType.ATTRIBUTE.getKey())) {
 			String attributeType = bits[1];
 			String attributeKey = bits[2];
-			String entityType = "";
+			String entityType = ""; //$NON-NLS-1$
 			if (bits.length > 3 ) {
 				entityType = bits[3];
 			}
@@ -103,7 +132,7 @@ public class GroupByItem {
 				for (DateOption key : DateOption.values()) {
 					if (key.getKey().equals(dateOp)) op = key;
 				}
-				if (op == null) throw new IllegalStateException("Invalid date option: " + dateOp);
+				if (op == null) throw new IllegalStateException("Invalid date option: " + dateOp); //$NON-NLS-1$
 				return new GroupByItem(GroupByType.ATTRIBUTE, attributeKey, atype, entityType, op);
 			}
 			
@@ -171,10 +200,10 @@ public class GroupByItem {
 	}
 	
 	
-	public List<ListItem> getAllOptions(Session session, ConservationArea ca) {
+	public List<ListItem> getAllOptions(Session session, ConservationArea ca, LocalDate[] dateRange, Locale l) {
 		if(type == GroupByType.ENTITYTYPE) {
 			List<ListItem> items = new ArrayList<>();
-			List<IntelEntityType> types = QueryFactory.buildQuery(session, IntelEntityType.class, new Object[] {"conservationArea", ca}).list();
+			List<IntelEntityType> types = QueryFactory.buildQuery(session, IntelEntityType.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 			for (IntelEntityType t : types) {
 				items.add(new ListItem(t.getKeyId(), t.getName()));
 			}
@@ -182,25 +211,114 @@ public class GroupByItem {
 		}
 		
 		if (type == GroupByType.ATTRIBUTE) {
+			
+			String entityType = null;
+			if (entityTypeKey != null && !entityTypeKey.isEmpty()) {
+				IntelEntityType type = QueryFactory.buildQuery(session, IntelEntityType.class, new Object[] {"conservationArea", ca}, new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+				entityType = type.getName();
+			}
+			
+			IntelAttribute intelAttribute = QueryFactory.buildQuery(session, IntelAttribute.class, 
+					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+					new Object[] {"keyId", attributeKey}).uniqueResult(); //$NON-NLS-1$
+			
 			List<ListItem> items = new ArrayList<>();
 			if (attributeType == AttributeType.EMPLOYEE) {
-				List<Employee> types = QueryFactory.buildQuery(session, Employee.class, new Object[] {"conservationArea", ca}).list();
+				List<Employee> types = QueryFactory.buildQuery(session, Employee.class, new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 				for (Employee t : types) {
-					items.add(new ListItem(UuidUtils.uuidToString(t.getUuid()), SmartLabelProvider.getFullLabel(t)));
+					String name = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(t, l);
+					String fullName = name;
+					if (entityType != null) {
+						fullName = fullName + " [" + intelAttribute.getName() + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}else {
+						fullName = fullName + " [" + intelAttribute.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					items.add(new ListItem(UuidUtils.uuidToString(t.getUuid()), name, fullName));
 				}	
 			}else if (attributeType == AttributeType.LIST) {
-				IntelAttribute temp = QueryFactory.buildQuery(session, IntelAttribute.class, 
-						new Object[] {"conservationArea", ca},
-						new Object[] {"keyId", attributeKey}).uniqueResult();
-				for (IntelAttributeListItem i : temp.getAttributeList()) {
-					items.add(new ListItem(i.getKeyId(), i.getName()));
+				for (IntelAttributeListItem i : intelAttribute.getAttributeList()) {
+					String name = i.getName();
+					String fullName = name;
+					if (entityType != null) {
+						fullName = fullName + " [" + intelAttribute.getName() + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}else {
+						fullName = fullName + " [" + intelAttribute.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					items.add(new ListItem(i.getKeyId(), name, fullName));
 				}
 			}else if (attributeType == AttributeType.POSITION) {
 				List<Area> areas = QueryFactory.buildQuery(session, Area.class, 
-						new Object[] {"conservationArea", ca}, 
-						new Object[] {"type", areaKey.name()}).list();
+						new Object[] {"conservationArea", ca},  //$NON-NLS-1$
+						new Object[] {"type", areaKey}).list(); //$NON-NLS-1$
+				
 				for (Area i : areas) {
-					items.add(new ListItem(i.getKeyId(), i.getName()));
+					String name = i.getName();
+					String fullName = name;
+					if (entityType != null) {
+						fullName = name + " [" + SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(i.getType(), l) + ": " + intelAttribute.getName() + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					}else {
+						fullName = name + " [" + SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(i.getType(), l) + ": " + intelAttribute.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					
+					items.add(new ListItem(i.getType().name() + "_" + i.getKeyId(), name, fullName)); //$NON-NLS-1$
+				}
+			}else if (attributeType == AttributeType.DATE) {
+				if (dateRange == null || dateRange[0] == null || dateRange[1] == null) return items;
+				
+				if (dateOption == DateOption.YEAR) {
+					int startYear = dateRange[0].getYear();
+					int endYear = dateRange[1].getYear();
+					while(startYear <= endYear) {
+						String name = String.valueOf(startYear);
+						String fullName = name;
+						if (entityType != null) {
+							fullName = name + " [" + intelAttribute.getName() + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}else {
+							fullName = name + " [" + intelAttribute.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+						}
+						items.add(new ListItem(name, name, fullName));
+						startYear ++;
+					}
+				}else if (dateOption == DateOption.MONTH) {
+					LocalDate start = LocalDate.of(dateRange[0].getYear(), dateRange[0].getMonth(), 1);
+					LocalDate end = LocalDate.of(dateRange[1].getYear(), dateRange[1].getMonth(), 1);
+					
+					DateTimeFormatter keyFormatter = DateTimeFormatter.ofPattern("yyyy-M"); //$NON-NLS-1$
+					DateTimeFormatter nameFormatter = DateTimeFormatter.ofPattern("MMM, yyyy"); //$NON-NLS-1$
+					
+					while(start.isBefore(end) || start.isEqual(end)) {
+						String key = start.format(keyFormatter);
+						
+						String name = start.format(nameFormatter);
+						String fullName = name;
+						if (entityType != null) {
+							fullName = name + " [" + intelAttribute.getName() + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}else {
+							fullName = name + " [" + intelAttribute.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+						}
+						items.add(new ListItem(key, name, fullName));
+						
+						start = start.plusMonths(1);
+					}
+					
+				}else if (dateOption == DateOption.DAY) {
+					LocalDate start = LocalDate.from(dateRange[0]);
+					LocalDate end = dateRange[1];
+					DateTimeFormatter keyFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); //$NON-NLS-1$
+					DateTimeFormatter nameFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy"); //$NON-NLS-1$
+					
+					while(start.isBefore(end) || start.isEqual(end)) {
+						String key = start.format(keyFormatter);
+						String name = start.format(nameFormatter);
+						String fullName = name;
+						if (entityType != null) {
+							fullName = name + " [" + intelAttribute.getName() + ": " + entityType + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}else {
+							fullName = name + " [" + intelAttribute.getName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+						}
+						items.add(new ListItem(key, name, fullName));
+						start = start.plusDays(1);
+					}
 				}
 			}
 			return items;

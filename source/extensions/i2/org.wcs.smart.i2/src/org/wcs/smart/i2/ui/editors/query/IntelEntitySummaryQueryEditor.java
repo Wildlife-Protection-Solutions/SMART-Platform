@@ -417,26 +417,10 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	
 	public void runQuery(){
 		for (Control c : resultsArea.getChildren()) c.dispose();
-		
 		((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
 		stackPanel.layout(true);
-		
-//		Date[] dateFilter = null;
-//		if (datePart.getDateFilter() == DateFilter.CUSTOM){
-//			dateFilter = new Date[]{datePart.getCustomStartDate(), datePart.getCustomEndDate()};
-//		}else if (datePart.getDateFilter() == DateFilter.ALL){
-//			dateFilter = new Date[]{null, null};
-//		}else{
-//			dateFilter = new Date[]{datePart.getDateFilter().getStartDate(), datePart.getDateFilter().getEndDate()};
-//		}
-//		
-//		final Date[] fdateFilter = dateFilter;
-		
 		String queryString = summaryPanel.getQueryPart();
 		query.setQueryString(queryString);
-//		resultsTable.setQuery(query);
-		
-//		runJob.setDateFilter(fdateFilter);
 		runJob.schedule();
 	}
 	

@@ -254,9 +254,6 @@ public class SummaryQueryResult implements IQueryResult{
 		
 		data = new Double[rowSize][colSize];
 			
-		//TODO: consider going through results instead
-		//of each cell as it will likely be faster
-			
 		for (int x = 0; x < rowSize; x++){
 			String[] rowBys = new String[getRowHeaders().size()];
 			int index = 0;

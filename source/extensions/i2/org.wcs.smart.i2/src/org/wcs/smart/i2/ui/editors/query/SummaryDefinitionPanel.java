@@ -57,6 +57,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
@@ -68,6 +69,7 @@ import org.wcs.smart.i2.ui.views.query.dropitem.ProxyItem;
 
 /**
  * Query definition panel for summary queries
+ * 
  * @author Emily
  *
  */
@@ -108,7 +110,7 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		((GridLayout)headerPart.getLayout()).marginHeight = 0;
 		headerPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		header = new SectionTabHeader(new String[] {"Group By Options", "Filter Options"}, headerPart, toolkit, Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		header = new SectionTabHeader(new String[] {Messages.SummaryDefinitionPanel_GroupByOpHeader, Messages.SummaryDefinitionPanel_FilterOpHeader}, headerPart, toolkit, Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridLayout)header.getLayout()).marginWidth = 0;
 		
@@ -141,6 +143,26 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 			}
 			public void saveQuery(){
 				editor.getSite().getPage().saveEditor(editor, false);
+			}
+			
+			@Override
+			protected void createRightArea(Composite parent){
+				if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+					ToolBar toolbar = new ToolBar(parent, SWT.FLAT | SWT.NONE);
+					toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+					
+					ToolItem clear = new ToolItem(toolbar, SWT.PUSH);
+					clear.setToolTipText(Messages.SummaryDefinitionPanel_CleanFiltertooltip);
+					clear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+					clear.addSelectionListener(new SelectionAdapter() {
+						
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							clear();
+							fireQueryChangedListeners();
+						}
+					});
+				}
 			}
 		};
 		filterPanel.addQueryChangedListener(()->fireQueryChangedListeners());
@@ -204,9 +226,23 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		((GridLayout)rowComp.getLayout()).marginWidth = 0;
 		((GridLayout)rowComp.getLayout()).marginHeight = 0;
 		
-		Label l = new Label(rowComp, SWT.NONE);
-		l.setText("Row Group Bys");
+		Composite header = new Composite(rowComp, SWT.NONE);
+		header.setLayout(new GridLayout(2, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		
+		Label l = new Label(header, SWT.NONE);
+		l.setText(Messages.SummaryDefinitionPanel_RowGroupByHeader);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+			ToolBar t = new ToolBar(header, SWT.FLAT);
+			ToolItem rgbClear = new ToolItem(t, SWT.PUSH);
+			rgbClear.setToolTipText(Messages.SummaryDefinitionPanel_ClearPanelTooltip);
+			rgbClear.addListener(SWT.Selection, e-> rowGroupByPanel.clear());
+			rgbClear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+		}
 		rowGroupByPanel = new ListDefinitionPanel();
 		rowGroupByPanel.createComposite(rowComp);
 		
@@ -216,21 +252,48 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		((GridLayout)colComp.getLayout()).marginWidth = 0;
 		((GridLayout)colComp.getLayout()).marginHeight = 0;
 		
-		l = new Label(colComp, SWT.NONE);
-		l.setText("Column Group Bys");
+		header = new Composite(colComp, SWT.NONE);
+		header.setLayout(new GridLayout(2, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		l = new Label(header, SWT.NONE);
+		l.setText(Messages.SummaryDefinitionPanel_ColumnGroupbyHeader);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+			ToolBar t = new ToolBar(header, SWT.FLAT);
+			ToolItem cgbClear = new ToolItem(t, SWT.PUSH);
+			cgbClear.setToolTipText(Messages.SummaryDefinitionPanel_ClearPanelTooltip);
+			cgbClear.addListener(SWT.Selection, e-> columnGroupByPanel.clear());
+			cgbClear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+		}		
 		columnGroupByPanel = new ListDefinitionPanel();
 		columnGroupByPanel.createComposite(colComp);
-		
 		
 		Composite valueComp = new Composite(areas, SWT.BORDER);
 		valueComp.setLayout(new GridLayout());
 		((GridLayout)valueComp.getLayout()).marginWidth = 0;
 		((GridLayout)valueComp.getLayout()).marginHeight = 0;
 		
-		l = new Label(valueComp, SWT.NONE);
-		l.setText("Values");
+		header = new Composite(valueComp, SWT.NONE);
+		header.setLayout(new GridLayout(2, false));
+		((GridLayout)header.getLayout()).marginWidth = 0;
+		((GridLayout)header.getLayout()).marginHeight = 0;
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		l = new Label(header, SWT.NONE);
+		l.setText(Messages.SummaryDefinitionPanel_ValuesHeader);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
+			ToolBar t = new ToolBar(header, SWT.FLAT);
+			ToolItem vClear = new ToolItem(t, SWT.PUSH);
+			vClear.setToolTipText(Messages.SummaryDefinitionPanel_ClearPanelTooltip);
+			vClear.addListener(SWT.Selection, e-> valuePanel.clear());
+			vClear.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CLEAR));
+		}		
 		valuePanel = new ListDefinitionPanel();
 		valuePanel.createComposite(valueComp);
 		
@@ -318,7 +381,15 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 
 	@Override
 	public String getQueryPart() {
-		return rowGroupByPanel.getQueryPart() + "|" + columnGroupByPanel.getQueryPart() + "|" + valuePanel.getQueryPart() + "|" + filterPanel.getQueryPart();
+		StringBuilder sb = new StringBuilder();
+		sb.append(rowGroupByPanel.getQueryPart());
+		sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
+		sb.append(columnGroupByPanel.getQueryPart());
+		sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
+		sb.append(valuePanel.getQueryPart());
+		sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
+		sb.append(filterPanel.getQueryPart());
+		return sb.toString();
 	}
 
 
@@ -425,14 +496,6 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 			proxy.getWidget().setVisible(false);
 			items.clear();
 			dropTarget.redraw();
-		}
-		
-		/**
-		 * @return the current set of drop items associated
-		 * with this query
-		 */
-		public List<DropItem> getItems(){
-			return items;
 		}
 		
 		/**
@@ -774,23 +837,11 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		@Override
 		public void fireQueryChangedListeners() {
 			SummaryDefinitionPanel.this.fireQueryChangedListeners();
-			//TODO:
 		}
 		
 		@Override
 		public void dispose() {
 			dropTarget.dispose();
-		}
-		
-		/**
-		 * @see org.wcs.smart.query.ui.IDefinitionPanel.IDropPanel#layout()
-		 */
-		public void layout() {
-			orderElements();
-		}
-
-		public void clearDragItem() {
-			this.dragItem = null;
 		}
 		
 		@Override

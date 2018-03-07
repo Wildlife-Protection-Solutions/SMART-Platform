@@ -108,10 +108,10 @@ public class DropItemFactory {
 				EntityTypeGroupByDropItem di = new EntityTypeGroupByDropItem();
 				for (String entityTypeKey : i.getFilterOptions()) {
 					IntelEntityType type = QueryFactory.buildQuery(session, IntelEntityType.class, 
-							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-							new Object[] {"keyId", entityTypeKey}).uniqueResult();
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$
 					if (type == null) {
-						DropItem edi = new ErrorDropItem(MessageFormat.format("No entity type with key {0} found.", entityTypeKey));
+						DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_EntityTypeNotFound, entityTypeKey));
 						return Collections.singletonList(edi);
 					}	
 					di.addEntityType(type);
@@ -121,21 +121,21 @@ public class DropItemFactory {
 				String attributeKey = i.getAttributeKey();
 				
 				IntelAttribute attribute = QueryFactory.buildQuery(session, IntelAttribute.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"keyId", attributeKey}).uniqueResult();
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"keyId", attributeKey}).uniqueResult(); //$NON-NLS-1$
 				if (attribute == null) {
-					DropItem edi = new ErrorDropItem(MessageFormat.format("No attribute with key {0} found.", attributeKey));
+					DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_AttributeNotFound, attributeKey));
 					return Collections.singletonList(edi);
 				}
 				
 				String entityTypeKey = i.getEntityTypeKey();
 				IntelEntityType type = null;
-				if (entityTypeKey != null) {
+				if (entityTypeKey != null && !entityTypeKey.isEmpty()) {
 					type = QueryFactory.buildQuery(session, IntelEntityType.class, 
-							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-							new Object[] {"keyId", entityTypeKey}).uniqueResult();
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$
 					if (type == null) {
-						DropItem edi = new ErrorDropItem(MessageFormat.format("No entity type with key {0} found.", entityTypeKey));
+						DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_EntityTypeNotFound, entityTypeKey));
 						return Collections.singletonList(edi);
 					}	
 				}
@@ -159,11 +159,11 @@ public class DropItemFactory {
 					List<String> keys = i.getFilterOptions();
 					for (String areaKey : keys) {
 						Area a = QueryFactory.buildQuery(session, Area.class, 
-								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-								new Object[] {"type", i.getAreaType().name()},
-								new Object[] {"keyId", areaKey}).uniqueResult();
+								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+								new Object[] {"type", i.getAreaType().name()}, //$NON-NLS-1$
+								new Object[] {"keyId", areaKey}).uniqueResult(); //$NON-NLS-1$
 						if (a == null) {
-							DropItem edi = new ErrorDropItem(MessageFormat.format("No area of type {0} with key {1} found.", i.getAreaType().name(), areaKey));
+							DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_AreaTypeNotFound, i.getAreaType().name(), areaKey));
 							return Collections.singletonList(edi);
 						}
 						di.addFilterOption(new ListItem(a.getKeyId(), a.getName()));

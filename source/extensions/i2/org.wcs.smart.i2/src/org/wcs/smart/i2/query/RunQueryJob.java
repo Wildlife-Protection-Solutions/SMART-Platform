@@ -103,7 +103,7 @@ public abstract class RunQueryJob extends Job {
 				}else if (query instanceof IntelEntitySummaryQuery) {
 					results = (new IntelEntitySummaryQueryEngine()).executeQuery((IntelEntitySummaryQuery)query, parameters);
 				}else {
-					//TODO: othe rquery types
+					return Status.OK_STATUS;
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex) {

@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.views.query.dropitem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -102,9 +103,9 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 		sb.append(attribute.getName());
 		
 		if (type != null) {
-			sb.append(" [");
+			sb.append(" ["); //$NON-NLS-1$
 			sb.append(type.getName());
-			sb.append("]");
+			sb.append("]"); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
@@ -113,24 +114,24 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(GroupByItem.GroupByType.ATTRIBUTE.getKey());
-		sb.append(":");
+		sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		sb.append(attribute.getType().key);
-		sb.append(":");
+		sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		sb.append(attribute.getKeyId());
-		sb.append(":");
+		sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		if (type != null) sb.append(type.getKeyId());
-		sb.append(":");
+		sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		
 		if (attribute.getType() == AttributeType.LIST) {
 			for (ListItem key : filteredItems) {
 				sb.append(key.getKeyId());
-				sb.append(":");
+				sb.append(GroupByItem.INTERNAL_SEPERATOR);
 			}
 		}
 		if (attribute.getType() == AttributeType.EMPLOYEE) {
 			for (ListItem key : filteredItems) {
 				sb.append(key.getKeyId());
-				sb.append(":");
+				sb.append(GroupByItem.INTERNAL_SEPERATOR);
 			}
 		}
 		if (attribute.getType() == AttributeType.DATE) {
@@ -147,10 +148,10 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 				if (x instanceof Area.AreaType) {
 					sb.append(((Area.AreaType) x).name());
 				}
-				sb.append(":");
+				sb.append(GroupByItem.INTERNAL_SEPERATOR);
 				for (ListItem key : filteredItems) {
 					sb.append(key.getKeyId());
-					sb.append(":");
+					sb.append(GroupByItem.INTERNAL_SEPERATOR);
 				}
 			}
 		}
@@ -223,12 +224,12 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 			cmbOptions.getControl().addListener(SWT.Dispose, e->f.dispose());
 			
 			Link link = new Link(main, SWT.NONE);
-			link.setText("<a>" + "..." + "</a>");
+			link.setText("<a>...</a>"); //$NON-NLS-1$
 			link.addListener(SWT.Selection, e->openOptionDialog(parent.getShell()));
 		}else {
 			//list or employee
 			Link link = new Link(main, SWT.NONE);
-			link.setText("<a>" + "..." + "</a>");	
+			link.setText("<a>...</a>");	 //$NON-NLS-1$
 			link.addListener(SWT.Selection, e->openOptionDialog(parent.getShell()));
 		}
 	}
@@ -252,15 +253,15 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 	public List<ListItem> getListOptions() {
 		try(Session session = HibernateManager.openSession()){
 			if (attribute.getType() == AttributeType.EMPLOYEE) {
-				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, SmartDB.getCurrentConservationArea());
+				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, SmartDB.getCurrentConservationArea(), null, Locale.getDefault());
 			}else if (attribute.getType() == AttributeType.LIST) {
-				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, SmartDB.getCurrentConservationArea());
+				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, SmartDB.getCurrentConservationArea(), null, Locale.getDefault());
 			}else if (attribute.getType() == AttributeType.POSITION) {
 				final Area.AreaType[] atype = new Area.AreaType[] {null};
 				Display.getDefault().syncExec(()->{
 					atype[0] = (AreaType) cmbOptions.getStructuredSelection().getFirstElement();
 				});
-				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session, SmartDB.getCurrentConservationArea());
+				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session, SmartDB.getCurrentConservationArea(), null, Locale.getDefault());
 			}
 			
 		}

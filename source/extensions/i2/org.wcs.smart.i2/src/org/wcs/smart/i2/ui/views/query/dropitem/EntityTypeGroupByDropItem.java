@@ -24,7 +24,7 @@ package org.wcs.smart.i2.ui.views.query.dropitem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -34,8 +34,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
@@ -85,13 +85,17 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	@Override
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < Math.min(types.size(), 3); i ++) {
-			if (i != 0) sb.append("\n");
-			sb.append(types.get(i).getName());
-		}
-		if (types.size() > 3) {
-			sb.append("\n");
-			sb.append("...");
+		if (types == null || types.isEmpty()) {
+			sb.append(Messages.EntityTypeGroupByDropItem_AllTypes);
+		}else {
+			for (int i = 0; i < Math.min(types.size(), 3); i ++) {
+				if (i != 0) sb.append("\n"); //$NON-NLS-1$
+				sb.append(types.get(i).getName());
+			}
+			if (types.size() > 3) {
+				sb.append("\n"); //$NON-NLS-1$
+				sb.append("..."); //$NON-NLS-1$
+			}
 		}
 		
 		return sb.toString();
@@ -101,7 +105,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 		StringBuilder sb = new StringBuilder();
 		for (ListItem t : types) {
 			sb.append(t.getName());
-			sb.append("\n");
+			sb.append("\n"); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
@@ -110,10 +114,10 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(GroupByItem.GroupByType.ENTITYTYPE.getKey());
-		sb.append(":");
+		sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		for (ListItem t : types) {
 			sb.append(t.getKeyId());
-			sb.append(":");
+			sb.append(GroupByItem.INTERNAL_SEPERATOR);
 		}
 		return sb.toString();
 	}
@@ -134,7 +138,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 		
 		Link link = new Link(main, SWT.NONE);
 		link.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
-		link.setText("<a>...</a>");
+		link.setText("<a>...</a>"); //$NON-NLS-1$
 		link.addListener(SWT.Selection, e->{
 			OptionDialog dialog = new OptionDialog(parent.getShell());
 			dialog.setGroupByItem(this, types);
@@ -156,7 +160,7 @@ public class EntityTypeGroupByDropItem extends DropItem implements IGroupByDropI
 	@Override
 	public List<ListItem> getListOptions() {
 		try(Session session = HibernateManager.openSession()){
-			return (new GroupByItem(GroupByType.ENTITYTYPE, Collections.emptyList()).getAllOptions(session, SmartDB.getCurrentConservationArea()));
+			return (new GroupByItem(GroupByType.ENTITYTYPE, Collections.emptyList()).getAllOptions(session, SmartDB.getCurrentConservationArea(), null, Locale.getDefault()));
 		}
 	}
 

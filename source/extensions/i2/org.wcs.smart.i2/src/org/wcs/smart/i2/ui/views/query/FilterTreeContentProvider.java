@@ -35,7 +35,11 @@ import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Content provider for tree that contains FilterTreeItems
+ * Content provider for tree that contains FilterTreeItems.
+ * 
+ * If the input provided is not null, then the class
+ * will spawn a job to load the elements and returning loading...
+ * until the job is finished loading the element.
  * 
  * @author Emily
  *
@@ -49,24 +53,19 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 	public void dispose() {
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
-//		if (newInput == null){
-//			items = null;
-//			return;
-//		}
-//		if (newInput instanceof List){
-//			items = (List<FilterTreeItem>) newInput;
-//		}
-//		
 		this.items = null;
 		if (newInput != null) {
 			(new LoadFilterOptions(this)).schedule();
 		}
 	}
 
+	/**
+	 * Sets the items to show in the filter tree
+	 * @param items
+	 */
 	public void setItems(List<FilterTreeItem> items) {
 		this.items = items;
 		viewer.refresh();
@@ -76,6 +75,7 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 			((Control)label).dispose();
 			viewer.getControl().setData(QueryView.REFRESHLABEL_KEY, null);
 		}
+		viewer.getControl().setEnabled(true);
 	}
 	
 	@Override

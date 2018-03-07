@@ -144,6 +144,11 @@ public class SummaryResultTable extends Composite {
 		});
 				
 		// sync selection the same in both tables
+		Listener mouseWheel = e-> {
+			vSlider.setSelection(vSlider.getSelection() + -1*e.count);	
+			updateVerticalSlider();
+		};
+		
 		leftTable.getTable().addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainTable.getTable().setSelection(
@@ -160,6 +165,9 @@ public class SummaryResultTable extends Composite {
 		});
 		
 		mainTable.setItemCount(results.getNumDataRows());
+		mainTable.getControl().addListener(SWT.MouseWheel, mouseWheel);
+		leftTable.getControl().addListener(SWT.MouseWheel, mouseWheel);
+		
 		topTable.setInput(results);
 		leftTable.setInput(results);
 		mainTable.setInput(results);
@@ -355,7 +363,7 @@ public class SummaryResultTable extends Composite {
 		if (results.getNumDataColumns() == 0) {
 			topTable.setLabelProvider(new LabelProvider() {
 				public String getText(Object element) {
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 			});
 		}
@@ -449,7 +457,7 @@ public class SummaryResultTable extends Composite {
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			Double[] data = (Double[])element;
-			if (columnIndex >= data.length) return "";
+			if (columnIndex >= data.length) return ""; //$NON-NLS-1$
 			Object value = data[columnIndex];
 			if (value == null){
 				return ""; //$NON-NLS-1$

@@ -117,7 +117,6 @@ import org.wcs.smart.i2.ui.views.query.EntitySummaryContentProvider;
 import org.wcs.smart.i2.ui.views.query.FilterTreeContentProvider;
 import org.wcs.smart.i2.ui.views.query.FilterTreeItem;
 import org.wcs.smart.i2.ui.views.query.FilterTreeLabelProvider;
-import org.wcs.smart.i2.ui.views.query.LoadFilterOptions;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -319,8 +318,6 @@ public class QueryView {
 		
 		filterTree = new TreeViewer(treePart, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
 		filterTree.setLabelProvider(new FilterTreeLabelProvider());
-		//filterTree.setContentProvider(new FilterTreeContentProvider());
-
 		treePart.addListener(SWT.Resize, e->{
 			filterTree.getTree().setBounds(0,0,treePart.getBounds().width, treePart.getBounds().height);
 		});
@@ -351,9 +348,6 @@ public class QueryView {
 				}
 			});
 		}
-		
-		//refreshJob = new LoadFilterOptions(filterTree);
-		
 		return part;
 	}
 	
@@ -394,9 +388,10 @@ public class QueryView {
 		}
 	}
 	
-	private void refreshFiltersView(){	
-		//filterTree.setInput(null);
-		//refreshJob.schedule();
+	private void refreshFiltersView(){
+		if (filterTree.getContentProvider() == null) return;
+		filterTree.setInput(DialogConstants.LOADING_TEXT);
+		filterTree.refresh();
 	}
 	
 	private void renameQuery(){
@@ -446,7 +441,7 @@ public class QueryView {
 	
 	private void createNewQuery(String queryTypeKey){
 		IEclipseContext kid = context.createChild();
-		kid.set(AbstractIntelQuery.class.getCanonicalName(), queryTypeKey);
+		kid.set(NewQueryHandler.QUERY_TYPE_KEY, queryTypeKey);
 		ContextInjectionFactory.invoke(new NewQueryHandler(), Execute.class, kid);
 	}
 	private void openSelection(){
@@ -591,7 +586,6 @@ public class QueryView {
 	public void handleBringToTop(@UIEventTopic(UIEvents.UILifeCycle.BRINGTOTOP) Event event) {
 		IQueryEditor editor = getActiveQueryEditor();
 		if (editor == null) return;
-		System.out.println(editor.getClass().getCanonicalName());
 		if (editor.getQuery() == null) return;
 		String queryTypeKey = editor.getQuery().getKeyId();
 		
@@ -605,7 +599,6 @@ public class QueryView {
 			queryToContentProvider.put(queryTypeKey, provider);
 		}
 		if (provider == null) {
-			//TODO:
 			return;
 		}
 		if (filterTree.getContentProvider() == provider) {
@@ -614,9 +607,6 @@ public class QueryView {
 		}
 		filterTree.setContentProvider(provider);
 		filterTree.setInput(DialogConstants.LOADING_TEXT);
-//		filterTree.setInput(null);
-//		provider.inputChanged(filterTree, null,null);
-		//filterTree.setContentProvider(new FilterTreeContentProvider());
 	}
 	
 	@Optional

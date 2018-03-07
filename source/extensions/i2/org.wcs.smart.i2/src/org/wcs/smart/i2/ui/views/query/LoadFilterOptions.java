@@ -40,9 +40,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
@@ -62,7 +60,6 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.ui.views.QueryView;
 
 /**
  * Job for loading roots for filter tree
@@ -93,8 +90,6 @@ public class LoadFilterOptions extends Job {
 		
 		Display.getDefault().syncExec(()->{
 			viewer.setItems(roots);
-//			viewer.setInput(roots);
-//			viewer.getTree().setEnabled(true);
 			
 		});
 		return Status.OK_STATUS;

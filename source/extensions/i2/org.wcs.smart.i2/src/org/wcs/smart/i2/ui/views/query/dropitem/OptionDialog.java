@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.ui.views.query.dropitem;
 
 import java.util.Iterator;
@@ -28,9 +49,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Dialog for filtering group by drop items
+ * 
+ * @author Emily
+ *
+ */
 public class OptionDialog extends TitleAreaDialog {
 	
 	private Composite main = null;
@@ -71,7 +99,7 @@ public class OptionDialog extends TitleAreaDialog {
 	protected void buttonPressed(int buttonId) {
 		if(buttonId == IDialogConstants.OK_ID){
 			if (viewer.getCheckedElements().length == 0){
-				MessageDialog.openError(getShell(), "Group By Options", "At least one item must be selected");
+				MessageDialog.openError(getShell(), Messages.OptionDialog_GroupByOptions, Messages.OptionDialog_ItemRequired);
 				return;
 			}
 		}
@@ -147,7 +175,7 @@ public class OptionDialog extends TitleAreaDialog {
 		links.setLayout(gl);
 		
 		Link lnkSelectAll = new Link(links,SWT.NONE);
-		lnkSelectAll.setText("<a>" + "all" + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		lnkSelectAll.setText("<a>" + Messages.OptionDialog_AllItems + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		lnkSelectAll.addListener (SWT.Selection, new Listener () {
 			public void handleEvent(Event event) {
 				viewer.setAllChecked(true);
@@ -158,14 +186,14 @@ public class OptionDialog extends TitleAreaDialog {
 		gd.heightHint = lnkSelectAll.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		lbl.setLayoutData(gd);
 		Link lnkDeSelectAll = new Link(links,SWT.NONE);
-		lnkDeSelectAll.setText("<a>" + "none" + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		lnkDeSelectAll.setText("<a>" + Messages.OptionDialog_NoItems + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		lnkDeSelectAll.addListener (SWT.Selection, new Listener () {
 			public void handleEvent(Event event) {
 				viewer.setAllChecked(false);
 			}
 		});
 		
-		getInputJob = new Job("loading options") {
+		getInputJob = new Job(Messages.OptionDialog_Loading) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				allItems = dropItem.getListOptions();
@@ -203,8 +231,8 @@ public class OptionDialog extends TitleAreaDialog {
 			}
 		});
 		
-		setMessage("Select the options for filtering the group by items");
-		String title = "Group BY Filter Option";
+		setMessage(Messages.OptionDialog_Message);
+		String title = Messages.OptionDialog_Title;
 		setTitle(title);
 		getShell().setText(title);
 		return main;
