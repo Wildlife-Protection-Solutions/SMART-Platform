@@ -538,6 +538,8 @@ public class Messages extends NLS {
 	public static String ExportModelElementsDialog_zipFile;
 	public static String ExportQueryWizard_CreateDialogMessage;
 	public static String ExportQueryWizard_CreateDialogTitle;
+	public static String ExportQueryWizard_ExportDone;
+	public static String ExportQueryWizard_ExportDoneMsg;
 	public static String ExportQueryWizard_ExportError;
 	public static String ExportQueryWizard_OverwriteDialogMsg;
 	public static String ExportQueryWizard_OverwriteDialogTitle;

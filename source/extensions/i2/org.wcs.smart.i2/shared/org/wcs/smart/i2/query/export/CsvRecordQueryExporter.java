@@ -33,9 +33,11 @@ import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryColumn.Type;
+import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.util.GeometryUtils;
@@ -49,12 +51,19 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author Emily
  *
  */
-public class CsvQueryExporter implements IQueryExporter{
+public class CsvRecordQueryExporter implements IQueryExporter{
 
 	@Override
-	public void exportQuery(Session session, IPagedQueryResultSet results, Path destination,
-			HashMap<ExportOption, Object> exportOptions) throws Exception {
+	public boolean canExport(String queryType) {
+		return queryType.equalsIgnoreCase(IntelRecordObservationQuery.KEY);
+	}
 	
+	@Override
+	public void exportQuery(Session session, IQueryResult result, Path destination,
+			HashMap<ExportOption, Object> exportOptions) throws Exception {
+		
+		IPagedQueryResultSet results = (IPagedQueryResultSet) result;
+		
 		char delimiter = ',';
 		if (exportOptions.containsKey(ExportOption.DELIMITER) && exportOptions.get(ExportOption.DELIMITER) instanceof Character){
 			delimiter = (Character)exportOptions.get(ExportOption.DELIMITER);

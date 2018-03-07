@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -45,9 +46,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.query.export.CsvQueryExporter;
+import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
+import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.IQueryExporter;
-import org.wcs.smart.i2.query.export.ShpQueryExporter;
+import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
 
 /**
  * Export query wizard page for selection query format
@@ -99,8 +101,14 @@ public class QueryFormatPage extends WizardPage {
 			}
 		});
 		List<IQueryExporter> exports = new ArrayList<>();
-		exports.add(new CsvQueryExporter());
-		exports.add(new ShpQueryExporter());
+		exports.add(new CsvRecordQueryExporter());
+		exports.add(new ShpRecordQueryExporter());
+		exports.add(new CsvEntitySummaryQueryExporter());
+		
+		for (Iterator<IQueryExporter> iterator = exports.iterator(); iterator.hasNext();) {
+			IQueryExporter iQueryExporter = iterator.next();
+			if (!iQueryExporter.canExport(((ExportQueryWizard)getWizard()).getQuery().getKeyId())) iterator.remove();
+		}
 		
 		Collections.sort(exports, new Comparator<IQueryExporter>() {
 			@Override

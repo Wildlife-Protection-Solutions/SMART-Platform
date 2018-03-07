@@ -57,8 +57,9 @@ import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.query.export.CsvQueryExporter;
-import org.wcs.smart.i2.query.export.ShpQueryExporter;
+import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
+import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
+import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -151,8 +152,9 @@ public class IntelligenceLabelProviderImpl implements
 			}
 		}
 		
-		if (item instanceof CsvQueryExporter) return Messages.IntelligenceLabelProviderImpl_CSVLabel;
-		if (item instanceof ShpQueryExporter) return Messages.IntelligenceLabelProviderImpl_ShapefileLabel;
+		if (item instanceof CsvRecordQueryExporter) return Messages.IntelligenceLabelProviderImpl_CSVLabel;
+		if (item instanceof CsvEntitySummaryQueryExporter) return Messages.IntelligenceLabelProviderImpl_CSVLabel;
+		if (item instanceof ShpRecordQueryExporter) return Messages.IntelligenceLabelProviderImpl_ShapefileLabel;
 		if (item == IntelQueryColumnProvider.ANY_ITEM) return Messages.IntelligenceLabelProviderImpl_AnyLabel;
 		if (item == Boolean.TRUE) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 		if (item == Boolean.FALSE) return SmartLabelProvider.BOOLEAN_FALSE_LABEL;

@@ -40,6 +40,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
@@ -85,6 +86,7 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
 import org.wcs.smart.i2.ui.SmartSection;
+import org.wcs.smart.i2.ui.dialogs.query.ExportQueryWizard;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
@@ -130,6 +132,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	
 	private FormToolkit toolkit;
 	
+	private SummaryQueryResult cachedResults;
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
@@ -404,18 +407,18 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	}
 	
 	private void exportQuery(){
-		//TODO: implement me
-//		if (resultsTable.getCurrentResults() == null){
-//			MessageDialog.openInformation(getSite().getShell(), Messages.IntelQueryEditor_ExportTitle, Messages.IntelQueryEditor_ExportMsg);
-//			return;
-//		}
-//		
-//		ExportQueryWizard wizard = new ExportQueryWizard(query, resultsTable.getCurrentResults());
-//		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
-//		wd.open();
+		SummaryQueryResult results = cachedResults;
+		if (results == null){
+			MessageDialog.openInformation(getSite().getShell(), Messages.IntelQueryEditor_ExportTitle, Messages.IntelQueryEditor_ExportMsg);
+			return;
+		}
+		ExportQueryWizard wizard = new ExportQueryWizard(query, results);
+		WizardDialog wd = new WizardDialog(getSite().getShell(), wizard);
+		wd.open();
 	}
 	
 	public void runQuery(){
+		cachedResults = null;
 		for (Control c : resultsArea.getChildren()) c.dispose();
 		((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
 		stackPanel.layout(true);
@@ -568,6 +571,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 			runJob = new RunQueryJob(query) {
 				@Override
 				protected void onError(Exception ex) {
+					cachedResults = null;
 					Display.getDefault().syncExec(()->{
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
 						errorPanel.setError(Messages.IntelQueryEditor_RunError + ex.getMessage());
@@ -577,6 +581,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 				
 				@Override
 				protected void onComplete(IQueryResult results) {
+					cachedResults = (SummaryQueryResult) results;
 					Display.getDefault().syncExec(()->{
 						SummaryResultTable summaryTable = new SummaryResultTable(resultsArea, (SummaryQueryResult) results, toolkit);
 						summaryTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -588,6 +593,7 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 				
 				@Override
 				protected void onCancel(){
+					cachedResults = null;
 					Display.getDefault().syncExec(()->{
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
 						errorPanel.setError(Messages.IntelQueryEditor_CancelledError);
