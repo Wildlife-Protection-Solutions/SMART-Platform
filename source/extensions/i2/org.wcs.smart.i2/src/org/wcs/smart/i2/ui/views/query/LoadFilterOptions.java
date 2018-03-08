@@ -215,7 +215,8 @@ public class LoadFilterOptions extends Job {
 				attributeMapping.get(a.getAttributeGroup()).add(a);
 			}
 			
-			Stream<IntelEntityTypeAttributeGroup> groups = t.getAttributes().stream()
+			List<IntelEntityTypeAttribute> eattributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypeAttributes(t, session);
+			Stream<IntelEntityTypeAttributeGroup> groups = eattributes.stream()
 				.map(IntelEntityTypeAttribute::getAttributeGroup)
 				.distinct().sorted(Comparator.nullsLast((a,b)-> ((Integer)a.getOrder()).compareTo(b.getOrder())));
 			
