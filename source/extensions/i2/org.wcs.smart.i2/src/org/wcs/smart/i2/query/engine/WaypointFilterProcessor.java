@@ -36,8 +36,6 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -339,22 +337,6 @@ public class WaypointFilterProcessor {
 			
 		}
 		//category and perhaps an attribute filter
-		Attribute attribute = itemProvider.getDataModelAttribute(filter.getAttributeKey(), s);
-		if (attribute == null){
-			throw new Exception(MessageFormat.format(Messages.WaypointFilterProcessor_AttributeKeyNotFound , filter.getAttributeKey()));
-		}
-		AttributeListItem li = null;
-		AttributeTreeNode treenode = null;
-		if (filter.getAttributeType() == Attribute.AttributeType.LIST){
-			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
-				li = itemProvider.getDataModelAttributeListItem(attribute.getKeyId(), filter.getKeyValue(), s);
-				if (li == null) throw new Exception(MessageFormat.format(Messages.WaypointFilterProcessor_ListItemNotFound, filter.getKeyValue(), attribute.getName()));
-			}
-		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
-			treenode = itemProvider.getDataModelAttributeTreeNode(attribute.getKeyId(), filter.getKeyValue(), s);
-			if (treenode == null) throw new Exception(MessageFormat.format(Messages.WaypointFilterProcessor_TreeNodeNotFound, filter.getKeyValue(), attribute.getName()));
-		}
-		
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 		sql.append(" SELECT distinct o.location_uuid "); //$NON-NLS-1$
@@ -365,10 +347,10 @@ public class WaypointFilterProcessor {
 		}
 		sql.append(" JOIN smart.i_observation_attribute ia on ia.observation_uuid = o.uuid "); //$NON-NLS-1$
 		sql.append(" JOIN smart.dm_attribute dma on dma.uuid = ia.attribute_uuid "); //$NON-NLS-1$
-		if (treenode != null){
+		if (filter.getAttributeType() == Attribute.AttributeType.TREE ){
 			sql.append(" JOIN smart.dm_attribute_tree ta ON ia.tree_node_uuid = ta.uuid "); //$NON-NLS-1$
 		}
-		if (li != null) {
+		if (filter.getAttributeType() == Attribute.AttributeType.LIST){
 			sql.append(" JOIN smart.dm_attribute_list tl ON ia.list_element_uuid = tl.uuid "); //$NON-NLS-1$
 		}
 		sql.append(" WHERE dma.keyId = :attributeKey "); //$NON-NLS-1$
@@ -385,7 +367,7 @@ public class WaypointFilterProcessor {
 			sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
 		case LIST:
-			if (li == null){
+			if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
 				sql.append(" ia.list_element_uuid is not null "); //$NON-NLS-1$
 			}else{
 				sql.append(" tl.keyid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -404,8 +386,8 @@ public class WaypointFilterProcessor {
 			break;
 		}
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		logString(attribute.getKeyId());
+		query.setParameter("attributeKey", filter.getAttributeKey()); //$NON-NLS-1$
+		logString(filter.getAttributeKey());
 		
 		if (filter.getCategoryKey() != null){
 			String hkey1 = filter.getCategoryKey();
@@ -426,9 +408,9 @@ public class WaypointFilterProcessor {
 			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
 			break;
 		case LIST:
-			if (li != null){
-				logString(li.getKeyId());
-				query.setParameter("value", li.getKeyId()); //$NON-NLS-1$
+			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
+				logString(filter.getKeyValue());
+				query.setParameter("value",  filter.getKeyValue()); //$NON-NLS-1$
 			}
 			break;
 		case TREE:

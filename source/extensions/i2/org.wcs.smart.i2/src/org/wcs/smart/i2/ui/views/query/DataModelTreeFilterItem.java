@@ -25,7 +25,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,6 +37,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
@@ -58,8 +58,8 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 
 	private Object LOCK = new Object();
 	
-	private UUID categoryUuid = null;
-	private UUID attributeUuid = null;
+	private String categoryHkey = null;
+	private String attributeKey = null;
 	
 	private Attribute.AttributeType type;
 
@@ -68,14 +68,14 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 
 	public DataModelTreeFilterItem(Category category){
 		super(category.getName());
-		this.categoryUuid = category.getUuid();
+		this.categoryHkey = category.getHkey();
 		queryKey = "dm_category:" + category.getHkey(); //$NON-NLS-1$
 		dropItemName = IntelQueryColumnProvider.generateName(null, category);
 	}
 	
 	public DataModelTreeFilterItem(Attribute attribute){
 		super(attribute.getName());
-		this.attributeUuid = attribute.getUuid();
+		this.attributeKey = attribute.getKeyId();
 		this.type = attribute.getType();
 		queryKey = "dm_attribute:" + attribute.getType().typeKey + "::" + attribute.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
 		dropItemName = IntelQueryColumnProvider.generateName(attribute, null);
@@ -84,8 +84,8 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 	public DataModelTreeFilterItem(CategoryAttribute attribute){
 		super(attribute.getAttribute().getName());
 		
-		this.categoryUuid = attribute.getCategory().getUuid();
-		this.attributeUuid = attribute.getAttribute().getUuid();
+		this.categoryHkey = attribute.getCategory().getHkey();
+		this.attributeKey = attribute.getAttribute().getKeyId();
 		this.type = attribute.getAttribute().getType();
 		
 		queryKey = "dm_attribute:" + attribute.getAttribute().getType().typeKey + ":" + attribute.getCategory().getHkey() + ":" + attribute.getAttribute().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -101,12 +101,13 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		if (kids == null ){
 			synchronized (LOCK) {
 				if (kids == null){
-					if (attributeUuid != null){
+					if (attributeKey != null){
 						//not kids; this is an attribute
 						kids = new ArrayList<FilterTreeItem>();
 					}else{
 						try(Session s = HibernateManager.openSession()){
-							Category c = (Category)s.get(Category.class, categoryUuid);
+							Category c = InternalQueryManager.INSTANCE.getQueryItemProvider().getCategory(categoryHkey, s);
+							
 							ArrayList<FilterTreeItem> temp = new ArrayList<>();
 							if (c != null){
 								for (Category kid : c.getChildren()){
@@ -132,14 +133,14 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 	
 	@Override
 	public boolean hasChildren(){
-		if (attributeUuid != null) return false;
+		if (attributeKey != null) return false;
 		return super.hasChildren();
 	}
 	
 	
 	@Override
 	public DropItem[] asDropItem() {
-		if (attributeUuid == null){
+		if (attributeKey == null){
 			//not attribute; this is definities a category
 			return new DropItem[]{new TextDropItem(dropItemName, queryKey)};
 		}
@@ -158,15 +159,16 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					try(Session s = HibernateManager.openSession()){
-						Attribute a = (Attribute) s.get(Attribute.class, attributeUuid);
-						if (a.getAttributeList() != null){
+					try(Session session = HibernateManager.openSession()){
+						Attribute a = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttribute(attributeKey, session);
+						if (a.getAttributeList() != null) {
 							for (AttributeListItem i : a.getAttributeList()){
 								labels.add(i.getName());
 								keys.add(i.getKeyId());
 							}
 						}
-					}					
+					}
+									
 					return Status.OK_STATUS;
 				}
 			};
@@ -184,7 +186,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		case TEXT:
 			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT)};
 		case TREE:
-			return new DropItem[]{new AttributeTreeDropItem(dropItemName, queryKey, attributeUuid)};
+			return new DropItem[]{new AttributeTreeDropItem(dropItemName, attributeKey)};
 		default:
 			break;
 			

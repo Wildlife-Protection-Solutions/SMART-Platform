@@ -216,8 +216,12 @@ public class MapComposite extends Composite implements MapPart{
 		strtools[strtools.length - 1] = ClearSelectionTool.ID;
        	tools = new MapToolComposite(strtools);
 		tools.createComposite(composite);
-		tools.selectTool("org.locationtech.udig.tools.Pan"); //$NON-NLS-1$
-		
+		try {
+			tools.selectTool("org.locationtech.udig.tools.Pan"); //$NON-NLS-1$
+		}catch (Throwable t) {
+			
+		}
+        
         Composite infoArea = new Composite(composite, SWT.NONE);
         GridLayout gl = new GridLayout(5, false);
         gl.marginTop = gl.marginBottom = gl.marginHeight= 0;
@@ -305,6 +309,7 @@ public class MapComposite extends Composite implements MapPart{
         
         editor.getSite().getWorkbenchWindow().getPartService().addPartListener(partlistener);
         registerFeatureFlasher();
+		
 	}
 
 		

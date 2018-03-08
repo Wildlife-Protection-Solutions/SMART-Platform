@@ -21,23 +21,33 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DataModelMerger;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 
 /**
  * Multiple conservation area item provider for cross CCAA
@@ -78,6 +88,40 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		.list();
 	}
 	
+	public List<IntelEntityTypeAttribute> getEntityTypeAttributes(IntelEntityType entityType, Session session){
+		
+		HashMap<String, IntelEntityTypeAttribute> attributes = new HashMap<>();
+		List<IntelEntityType> allTypes = session.createQuery("FROM IntelEntityType WHERE keyId = :keyid AND conservationArea in (:cas)", IntelEntityType.class) //$NON-NLS-1$
+				.setParameterList("cas",  getConservationAreas()) //$NON-NLS-1$
+				.setParameter("keyid",  entityType.getKeyId()) //$NON-NLS-1$
+				.list();
+		
+		for (IntelEntityType type : allTypes) {
+			for (IntelEntityTypeAttribute attribute : type.getAttributes()) {
+				IntelEntityTypeAttribute newAttribute = attributes.get(attribute.getAttribute().getKeyId());
+				if (newAttribute == null) {
+					IntelAttribute aNewAttribute = new IntelAttribute();
+					aNewAttribute.setName(attribute.getAttribute().getName());
+					aNewAttribute.setKeyId(attribute.getAttribute().getKeyId());
+					aNewAttribute.setType(attribute.getAttribute().getType());
+					//TODO: attribute list?
+					
+					newAttribute = new IntelEntityTypeAttribute();
+					newAttribute.setAttribute(aNewAttribute);
+					newAttribute.setEntityType(entityType);
+					
+					attributes.put(aNewAttribute.getKeyId(), newAttribute);
+				}
+				if (attribute.getAttribute().getConservationArea().equals(getMainConservationArea())) {
+					newAttribute.getAttribute().setName(attribute.getAttribute().getName());
+				}
+				
+			}
+		}
+		
+		return attributes.values().stream().collect(Collectors.toList());
+	}
+	
 	public List<IntelEntityType> getEntityTypes(Session session){
 		HashMap<String, IntelEntityType> types = new HashMap<>();
 		
@@ -104,29 +148,11 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	}
 	
 	public List<Area> getAreas(Area.AreaType areaType, Session session){
-		
-		HashMap<String, Area> areas = new HashMap<>();
-		
-		List<Area> allAreas = session.createQuery("FROM Area WHERE type = :atype and conservationArea in (:cas)", Area.class) //$NON-NLS-1$
-				.setParameterList("cas",  getConservationAreas()) //$NON-NLS-1$
+		List<Area> allAreas = session.createQuery("FROM Area WHERE type = :atype and conservationArea = :ca", Area.class) //$NON-NLS-1$
+				.setParameter("ca",  getQueryConservationArea()) //$NON-NLS-1$
 				.setParameter("atype",  areaType) //$NON-NLS-1$
 				.list();
-		
-		for (Area type : allAreas) {
-			Area newArea = areas.get(type.getKeyId());
-			if (newArea == null) {
-				newArea = new Area();
-				newArea.setKeyId(type.getKeyId());
-				newArea.setName(type.getName());
-				areas.put(type.getKeyId(), newArea);
-			}
-			if (type.getConservationArea().equals(getMainConservationArea())) {
-				newArea.setName(type.getName());
-			}
-		}
-		List<Area> newAreas = new ArrayList<>();
-		newAreas.addAll(areas.values());
-		return newAreas;
+		return allAreas;
 	}
 	
 
@@ -167,24 +193,9 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		return null;
 	}
 	
-	public Attribute getDataModelAttribute(String attributeKey, Session session) {
-		List<Attribute> allAttributes = session.createQuery("FROM Attribute WHERE keyId = :attribute and conservationArea in (:cas)", Attribute.class) //$NON-NLS-1$
-				.setParameterList("cas",  getConservationAreas()) //$NON-NLS-1$
-				.setParameter("attribute",  attributeKey) //$NON-NLS-1$
-				.list();
-		
-		for (Attribute type : allAttributes) {
-			if (type.getConservationArea().equals(getMainConservationArea())) {
-				Attribute a = new Attribute();
-				a.setKeyId(type.getKeyId());
-				a.setName(type.getName());
-				a.setType(type.getType());				
-				return a;
-			}
-		}
-		return null;
-	}
 	
+	
+
 	public List<IntelAttributeListItem> getAttributeListItems(String attributeKey, Session session){
 		List<IntelAttribute> allAttributes = session.createQuery("FROM IntelAttribute WHERE keyId = :attribute and conservationArea in (:cas)", IntelAttribute.class) //$NON-NLS-1$
 				.setParameterList("cas",  getConservationAreas()) //$NON-NLS-1$
@@ -236,35 +247,124 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		return conservationAreas.iterator().next();
 	}
 
-	@Override
-	public AttributeListItem getDataModelAttributeListItem(String attributeKey, String listItemKey, Session session) {
-		Query<AttributeListItem> q = session.createQuery(" SELECT ali From AttributeListItem ali join ali.attribute as a where a.conservationArea in (:cas) and ali.keyId = :key and a.keyId = :attributeKey", AttributeListItem.class); //$NON-NLS-1$
-		q.setParameterList("cas", getConservationAreas()); //$NON-NLS-1$
-		q.setParameter("key", listItemKey); //$NON-NLS-1$
-		q.setParameter("attributeKey", attributeKey); //$NON-NLS-1$
-		q.setCacheable(true);
-
-		List<AttributeListItem> results = q.list();
-		for (AttributeListItem i : results) {
-			if (i.getAttribute().getConservationArea().equals(getMainConservationArea())) return i;
+	
+	
+	
+	public List<IntelEntity> getEntities(String entityTypeKey, Session session){
+		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE i.conservationArea in (:cas) and t.keyId = :entityType", IntelEntity.class) //$NON-NLS-1$
+			.setParameter("entityType", entityTypeKey) //$NON-NLS-1$
+			.setParameter("cas",  getConservationAreas()) //$NON-NLS-1$
+			.list();
+	}
+	
+	
+	/**
+	 * Get all intelligence attributes
+	 * @param session
+	 * @return
+	 */
+	public List<IntelAttribute> getAttributes(Session session){
+		HashMap<String, IntelAttribute> attributes = new HashMap<>();
+		
+		List<IntelAttribute> allAttributes = session.createQuery("FROM IntelAttribute WHERE conservationArea in (:cas)", IntelAttribute.class) //$NON-NLS-1$
+				.setParameterList("cas",  getConservationAreas()).list(); //$NON-NLS-1$
+		
+		for (IntelAttribute type : allAttributes) {
+			IntelAttribute newType = attributes.get(type.getKeyId());
+			if (newType == null) {
+				newType = new IntelAttribute();
+				newType.setKeyId(type.getKeyId());
+				newType.setName(type.getName());
+				newType.setType(type.getType());
+				
+				attributes.put(type.getKeyId(), newType);
+			}
+			if (type.getConservationArea().equals(getMainConservationArea())) {
+				newType.setName(type.getName());
+			}
 		}
-		if (results.size() > 0) return results.get(0);
+		List<IntelAttribute> newAttributes = new ArrayList<>();
+		newAttributes.addAll(attributes.values());
+		return newAttributes;
+	}
+	
+	
+	public List<Category> getRootCategories(Session session){
+		return getDataModel().getCategories();
+		
+	}
+	
+	public List<Category> getChildren(Category category, Session session){
+		return category.getChildren();
+	}
+	
+	public Category getCategory(String categoryHkey, Session session){
+		List<Category> toSearch = new ArrayList<>();
+		toSearch.addAll(getDataModel().getCategories());
+		while(!toSearch.isEmpty()) {
+			Category temp = toSearch.remove(0);
+			if (temp.getHkey().equals(categoryHkey)) {
+				return temp;
+			}
+			if (temp.getChildren() != null) toSearch.addAll(temp.getChildren());
+		}
 		return null;
 	}
-
-	@Override
-	public AttributeTreeNode getDataModelAttributeTreeNode(String attributeKey, String hkey, Session session) {
-		Query<AttributeTreeNode> q = session.createQuery(" SELECT ali From AttributeTreeNode ali join ali.attribute as a where a.conservationArea IN (:cas) and ali.hkey = :key and a.keyId = :attribute", AttributeTreeNode.class); //$NON-NLS-1$
-		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
-		q.setParameter("key", hkey); //$NON-NLS-1$
-		q.setParameter("attribute", attributeKey); //$NON-NLS-1$
-		q.setCacheable(true);
-		
-		List<AttributeTreeNode> results = q.list();
-		for (AttributeTreeNode i : results) {
-			if (i.getAttribute().getConservationArea().equals(getMainConservationArea())) return i;
+	
+	public List<Attribute> getDmAttributes(Session session){
+		return getDataModel().getAttributes();
+	}
+	
+	public Attribute getDmAttribute(String attributeKey, Session session) {
+		for (Attribute a : getDmAttributes(session)) {
+			if (a.getKeyId().equals(attributeKey)) return a;
 		}
-		if (results.size() > 0) return results.get(0);
 		return null;
+	}
+	
+	//TODO: listen and reset if necessayr
+	private volatile DataModel mergedDataModel = null;
+	
+	private DataModel getDataModel() {
+		if (mergedDataModel == null) {
+			synchronized (this) {
+				if (mergedDataModel != null) return mergedDataModel;
+				
+				Display.getDefault().syncExec(()->{
+					DataModelMerger merger = new DataModelMerger();
+					final ConservationArea[] cas = SmartDB.getConservationAreaConfiguration().getConservationAreas().toArray(new ConservationArea[SmartDB.getConservationAreaConfiguration().getCaCount()]);
+					final ConservationArea defaultCa = SmartDB.getConservationAreaConfiguration().getMainConservationArea();
+					ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+					try {
+						pmd.run(true, false, new IRunnableWithProgress() {
+							@Override
+							public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+								try(Session session = HibernateManager.openSession()){
+									mergedDataModel = merger.mergeDataModels(cas, defaultCa, session, monitor);
+								}
+							}
+						});
+					}catch (Exception ex) {
+						Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+					}
+				});
+			}
+		}
+		return mergedDataModel;
+	}
+	
+	private static Category findCategory(DataModel model, String categoryHkey) {
+		List<Category> toSearch = new ArrayList<>();
+		toSearch.addAll(model.getCategories());
+		while (!toSearch.isEmpty()) {
+			Category temp = toSearch.remove(0);
+			if (temp.getHkey().equals(categoryHkey)) {
+				return temp;
+			}
+			if (temp.getChildren() != null)
+				toSearch.addAll(temp.getChildren());
+		}
+		return null;
+
 	}
 }

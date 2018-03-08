@@ -29,11 +29,12 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 /**
  * Query item provider for providing items for query module 
  * 
@@ -65,6 +66,20 @@ public interface IQueryItemProvider {
 	public List<IntelEntityType> getEntityTypes(Session session);
 	
 	/**
+	 * Get all entity types
+	 * @param session
+	 * @return
+	 */
+	public List<IntelAttribute> getAttributes(Session session);
+	
+	/**
+	 * Get all entity attribute associated with the entity type
+	 * @param session
+	 * @return
+	 */
+	public List<IntelEntityTypeAttribute> getEntityTypeAttributes(IntelEntityType entityType, Session session);
+	
+	/**
 	 * Get all areas of the given types
 	 * @param type
 	 * @param session
@@ -88,34 +103,7 @@ public interface IQueryItemProvider {
 	 * @return
 	 */
 	public IntelAttribute getAttribute(String attributeKey, Session session);
-	
-	/**
-	 * Find the datamode attribute associated with the attribute key
-	 * 
-	 * @param attributeKey
-	 * @param session
-	 * @return
-	 */
-	public Attribute getDataModelAttribute(String attributeKey, Session session);
-	
-	/**
-	 * Find the datamodel attribute list associated with the attribute key and list item key
-	 * 
-	 * @param attributeKey
-	 * @param session
-	 * @return
-	 */
-	public AttributeListItem getDataModelAttributeListItem(String attributeKey, String listItemKey, Session session);
-	
-	/**
-	 * Find the datamodel attribute list associated with the attribute key and tree hkey item key
-	 * 
-	 * @param attributeKey
-	 * @param session
-	 * @return
-	 */
-	public AttributeTreeNode getDataModelAttributeTreeNode(String attributeKey, String hkey, Session session);
-	
+
 	/**
 	 * Get all conservation areas supported by item provider
 	 * @return
@@ -126,4 +114,20 @@ public interface IQueryItemProvider {
 	 * The conservation area the system is logged into 
 	 */
 	public ConservationArea getQueryConservationArea();
+	
+	/**
+	 * Get all entities of the given type
+	 * @param entityTypeKey
+	 * @param session
+	 * @return
+	 */
+	public List<IntelEntity> getEntities(String entityTypeKey, Session session);
+	
+	
+	public List<Attribute> getDmAttributes(Session session);
+	public List<Category> getRootCategories(Session session);
+	public List<Category> getChildren(Category category, Session session);
+	public Category getCategory(String categoryHkey, Session session);
+	public Attribute getDmAttribute(String attributeKey, Session session);
+	
 }

@@ -21,13 +21,21 @@
  */
 package org.wcs.smart.i2;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-import org.hibernate.query.Query;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
@@ -49,7 +57,7 @@ public enum InternalQueryManager {
 
 	INSTANCE;
 	
-	private volatile IQueryItemProvider queryItemProvider= null;
+	private volatile IQueryItemProvider queryItemProvider = null;
 	
 	/**
 	 * Returns the query deleted from the database if a query is deleted; otherwise
@@ -128,5 +136,6 @@ public enum InternalQueryManager {
 		}
 		return queryItemProvider;
 	}
+	
 	
 }

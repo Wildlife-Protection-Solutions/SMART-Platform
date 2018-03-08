@@ -256,12 +256,18 @@
             </parameter>
             <visibleWhen
                   checkEnabled="false">
-               <not>
+               <and>
+                  <not>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </not>
                   <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
                   </test>
-               </not>
+               </and>
             </visibleWhen>
          </command>
       </menuContribution>
@@ -285,12 +291,18 @@
             </command>
             <visibleWhen
                   checkEnabled="false">
-               <not>
+               <and>
+                  <not>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </not>
                   <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.caSingle">
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
                   </test>
-               </not>
+               </and>
             </visibleWhen>
          </menu>
       </menuContribution>

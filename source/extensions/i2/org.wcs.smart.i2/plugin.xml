@@ -89,7 +89,7 @@
       </class>
       <class
             class="org.wcs.smart.i2.model.IntelRecordObservationQuery"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </class>
       <class
             class="org.wcs.smart.i2.model.IntelRelationshipGroup"
@@ -153,7 +153,7 @@
       </class>
       <class
             class="org.wcs.smart.i2.model.IntelEntitySummaryQuery"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </class>
    </extension>
    <extension
@@ -523,6 +523,41 @@
                            value="assessment_perspective">
                      </test>
                   </or>
+               </and>
+            </visibleWhen>
+         </menu>
+         <menu
+               id="org.wcs.smart.i2.menu.main"
+               label="Profiles">
+            <command
+                  commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/obj16/analysis.png"
+                  label="%DataAnalysisModeCommandName">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+               </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="analyst_perspective">
+                  </test>
+               </visibleWhen>
+            </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="analyst_perspective">
+                  </test>
+                  <not>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </not>
                </and>
             </visibleWhen>
          </menu>
@@ -2179,9 +2214,6 @@
       <StyleProvider
             styleprovider="org.wcs.smart.i2.birt.query.QueryMapLayer">
       </StyleProvider>
-   </extension>
-   <extension
-         point="org.eclipse.ui.perspectiveExtensions">
    </extension>
    <extension
          point="org.wcs.smart.caLogin">

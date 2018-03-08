@@ -39,14 +39,14 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
-import org.wcs.smart.i2.IntelHibernateManager;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
-import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.i2.query.Operator;
@@ -107,9 +107,7 @@ public class DropItemFactory {
 			if (i.getGroupByType() == GroupByItem.GroupByType.ENTITYTYPE) {
 				EntityTypeGroupByDropItem di = new EntityTypeGroupByDropItem();
 				for (String entityTypeKey : i.getFilterOptions()) {
-					IntelEntityType type = QueryFactory.buildQuery(session, IntelEntityType.class, 
-							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-							new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$
+					IntelEntityType type = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityType(entityTypeKey, session);
 					if (type == null) {
 						DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_EntityTypeNotFound, entityTypeKey));
 						return Collections.singletonList(edi);
@@ -119,10 +117,8 @@ public class DropItemFactory {
 				return Collections.singletonList(di);
 			}else if (i.getGroupByType() == GroupByItem.GroupByType.ATTRIBUTE) {
 				String attributeKey = i.getAttributeKey();
+				IntelAttribute attribute = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttribute(attributeKey, session);
 				
-				IntelAttribute attribute = QueryFactory.buildQuery(session, IntelAttribute.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-						new Object[] {"keyId", attributeKey}).uniqueResult(); //$NON-NLS-1$
 				if (attribute == null) {
 					DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_AttributeNotFound, attributeKey));
 					return Collections.singletonList(edi);
@@ -131,9 +127,7 @@ public class DropItemFactory {
 				String entityTypeKey = i.getEntityTypeKey();
 				IntelEntityType type = null;
 				if (entityTypeKey != null && !entityTypeKey.isEmpty()) {
-					type = QueryFactory.buildQuery(session, IntelEntityType.class, 
-							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-							new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$
+					type = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityType(entityTypeKey, session);
 					if (type == null) {
 						DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_EntityTypeNotFound, entityTypeKey));
 						return Collections.singletonList(edi);
@@ -158,6 +152,7 @@ public class DropItemFactory {
 					
 					List<String> keys = i.getFilterOptions();
 					for (String areaKey : keys) {
+						
 						Area a = QueryFactory.buildQuery(session, Area.class, 
 								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 								new Object[] {"type", i.getAreaType().name()}, //$NON-NLS-1$
@@ -172,9 +167,11 @@ public class DropItemFactory {
 				}
 				if (attribute.getType() == AttributeType.LIST) {
 					List<String> keys = i.getFilterOptions();
-					for (String areaKey : keys) {
-						for (IntelAttributeListItem listItem : attribute.getAttributeList()) {
-							if (listItem.getKeyId().equals(areaKey)) {
+					
+					for (String listItemKey : keys) {
+						List<IntelAttributeListItem> listItems = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributeListItems(attribute.getKeyId(), session);
+						for (IntelAttributeListItem listItem : listItems) {
+							if (listItem.getKeyId().equals(listItemKey)) {
 								di.addFilterOption(new ListItem(listItem.getKeyId(), listItem.getName()));
 								break;
 							}
@@ -260,7 +257,7 @@ public class DropItemFactory {
 	public List<DropItem> generateDropItem(EntityTypeFilter filter){
 		IntelEntityType type = null; 
 		if (filter.getTypeKey() != null){
-			type = IntelHibernateManager.getEntityType(filter.getTypeKey(),SmartDB.getCurrentConservationArea(), session);
+			type = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityType(filter.getTypeKey(), session);
 			if (type != null){
 				return Collections.singletonList(new TextDropItem(type.getName(), "entitytype:" + type.getKeyId())); //$NON-NLS-1$
 			}
@@ -303,7 +300,7 @@ public class DropItemFactory {
 			queryKeyPart += filter.getEntityTypeKey();
 		}
 		
-		IntelAttribute ia = IntelHibernateManager.getAttribute(filter.getAttributeKey(), SmartDB.getCurrentConservationArea(), session);
+		IntelAttribute ia = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttribute(filter.getAttributeKey(), session);
 		if (ia == null){
 			ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidAttributeKey, filter.getAttributeKey()));
 			return Collections.singletonList(item);
@@ -311,7 +308,7 @@ public class DropItemFactory {
 		
 		IntelEntityType type = null; 
 		if (filter.getEntityTypeKey() != null){
-			type = IntelHibernateManager.getEntityType(filter.getEntityTypeKey(), SmartDB.getCurrentConservationArea(), session);
+			type = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityType(filter.getEntityTypeKey(), session);
 			if (type == null){
 				ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidEntityTypeKey, filter.getEntityTypeKey()));
 				return Collections.singletonList(item);	
@@ -340,8 +337,9 @@ public class DropItemFactory {
 			labels.add(ANY_LABEL);
 			keys.add(IQueryFilter.ANY_OPTION_KEY);
 			
-			if (ia.getAttributeList() != null){
-				for (IntelAttributeListItem i : ia.getAttributeList()){
+			List<IntelAttributeListItem> listItems = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributeListItems(ia.getKeyId(), session);
+			if (listItems != null){
+				for (IntelAttributeListItem i : listItems){
 					labels.add(i.getName());
 					keys.add(i.getKeyId());
 				}
@@ -355,7 +353,7 @@ public class DropItemFactory {
 			labels.add(ANY_LABEL);
 			keys.add(IQueryFilter.ANY_OPTION_KEY);
 
-			List<Employee> emps = QueryFactory.buildQuery(session, Employee.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+			List<Employee> emps = InternalQueryManager.INSTANCE.getQueryItemProvider().getEmployees(session);
 			for (Employee e : emps) {
 				labels.add(SmartLabelProvider.getFullLabel(e));
 				keys.add(UuidUtils.uuidToString(e.getUuid()));
@@ -371,11 +369,7 @@ public class DropItemFactory {
 		
 		Category category = null;
 		if (filter.getCategoryKey() != null){
-			
-			category = QueryFactory.buildQuery(session, Category.class,
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-					new Object[] {"hkey", filter.getCategoryKey()}).uniqueResult(); //$NON-NLS-1$
-			
+			category = InternalQueryManager.INSTANCE.getQueryItemProvider().getCategory(filter.getCategoryKey(), session);
 			if (category == null){
 				DropItem di = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_InvalidCategory, filter.getCategoryKey()));
 				return Collections.singletonList(di);
@@ -394,10 +388,7 @@ public class DropItemFactory {
 		}
 		queryKeyPart += ":" + filter.getAttributeKey(); //$NON-NLS-1$
 		
-
-		Attribute attribute = QueryFactory.buildQuery(session, Attribute.class,
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-				new Object[] {"keyId", filter.getAttributeKey()}).uniqueResult(); //$NON-NLS-1$
+		Attribute attribute = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttribute(filter.getAttributeKey(), session);
 
 		if (attribute == null){
 			DropItem di = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_AttributeKeyNotFound, filter.getAttributeKey()));
@@ -427,7 +418,8 @@ public class DropItemFactory {
 			labels.add(ANY_LABEL);
 			keys.add(IQueryFilter.ANY_OPTION_KEY);
 			if (attribute.getAttributeList() != null){
-				for (AttributeListItem i : attribute.getAttributeList()){
+				List<AttributeListItem> items = attribute.getAttributeList();
+				for (AttributeListItem i : items){
 					labels.add(i.getName());
 					keys.add(i.getKeyId());
 				}
@@ -436,17 +428,23 @@ public class DropItemFactory {
 			item.setInitialValue(filter.getKeyValue());
 			return Collections.singletonList(item);
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
-			
-			AttributeTreeNode treeNode = QueryFactory.buildQuery(session, AttributeTreeNode.class,
-					new Object[] {"hkey", filter.getKeyValue()}, //$NON-NLS-1$
-					new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
-	
+			List<AttributeTreeNode> toSearch = new ArrayList<>();
+			toSearch.addAll(attribute.getTree());
+			AttributeTreeNode treeNode = null;
+			while(!toSearch.isEmpty()) {
+				AttributeTreeNode n = toSearch.remove(0);
+				if (n.getHkey().equals(filter.getKeyValue())) {
+					treeNode = n;
+					break;
+				}
+				toSearch.addAll(n.getChildren());
+			}
 			if (treeNode == null){
 				DropItem di = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_TreeNodeNotFound, filter.getKeyValue(),attribute.getName()));
 				return Collections.singletonList(di);
 			}
 			
-			AttributeTreeDropItem item = new AttributeTreeDropItem(name, queryKeyPart, attribute.getUuid());
+			AttributeTreeDropItem item = new AttributeTreeDropItem(name, queryKeyPart);
 			item.setInitialValue(treeNode);
 			return Collections.singletonList(item);
 		}

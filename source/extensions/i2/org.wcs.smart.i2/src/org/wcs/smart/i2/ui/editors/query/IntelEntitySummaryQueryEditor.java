@@ -37,15 +37,11 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -68,9 +64,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import org.wcs.smart.common.filter.DateFilterComposite;
-import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
-import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -112,11 +105,10 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	
 	//header & date part
 	private IntelQueryNameLabel header;
-	private DateFilterDropDownComposite datePart;
 	
 	//filter panel
 	private SummaryDefinitionPanel summaryPanel;
-	private ToolItem[] runItem = new ToolItem[2];
+	private ToolItem runItem;
 	private ToolItem saveItem;
 	private ToolItem wsetItem;
 
@@ -350,16 +342,13 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		exportItem.addListener(SWT.Selection, (event)->exportQuery());
 		exportItem.setToolTipText(Messages.IntelQueryEditor_ExportTooltip);
 		
-		runItem[0] = new ToolItem(headerToolbar, SWT.PUSH);
-		runItem[0].setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
-		runItem[0].addListener(SWT.Selection, (event)->runQuery());
-		runItem[0].setToolTipText(Messages.IntelQueryEditor_RunTooltip);
-		
-		createDatePart(main, toolkit);
-		
+		runItem = new ToolItem(headerToolbar, SWT.PUSH);
+		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem.addListener(SWT.Selection, (event)->runQuery());
+		runItem.setToolTipText(Messages.IntelQueryEditor_RunTooltip);
+				
 		SashForm core = new SashForm(main, SWT.VERTICAL);
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
 		
 		Composite c = toolkit.createComposite(core);
 		c.setLayout(new GridLayout());
@@ -434,11 +423,11 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 		try{
 			IntelEntitySummaryQuery.parseQuery(queryString);
 			summaryPanel.setErrorMessage(null, null);
-			for(ToolItem i : runItem) i.setEnabled(true);
+			runItem.setEnabled(true);
 			
 			return queryString;
 		}catch (Exception ex){
-			for(ToolItem i : runItem) i.setEnabled(false);
+			runItem.setEnabled(false);
 			summaryPanel.setErrorMessage(Messages.IntelQueryEditor_InvalidQueryError, ex);
 			return null;
 		}
@@ -456,53 +445,6 @@ public class IntelEntitySummaryQueryEditor extends EditorPart implements IQueryE
 	public void setFocus() {
 		header.setFocus();
 	}
-	
-	private void createDatePart(Composite parent, FormToolkit toolkit){
-		Composite main = toolkit.createComposite(parent);
-		main.setLayout(new GridLayout(2, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)main.getLayout()).marginWidth = 0;
-		((GridLayout)main.getLayout()).marginHeight = 0;
-		((GridLayout)main.getLayout()).horizontalSpacing = 0;
-		
-		DateFilterComposite.DateFilter[] defaultFilters = new DateFilter[]{
-				DateFilter.CURRENT_MONTH,
-				DateFilter.LAST_30_DAYS,
-				DateFilter.LAST_60_DAYS,
-				DateFilter.CURRENT_YEAR,
-				DateFilter.LAST_YEAR,
-				DateFilter.LAST_5_YEARS,
-				DateFilter.ALL,
-				DateFilter.CUSTOM
-		};
-		
-		datePart = new DateFilterDropDownComposite(main, defaultFilters, DateFilter.ALL, true);
-		datePart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		datePart.addChangeListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				main.layout(true);
-			}
-		}); 
-		datePart.adapt(toolkit);
-		
-		ToolBar headerToolbar = new ToolBar(main, SWT.FLAT);
-		runItem[1] = new ToolItem(headerToolbar, SWT.PUSH);
-		runItem[1].setToolTipText(Messages.IntelQueryEditor_runTooltip);
-		runItem[1].setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
-		runItem[1].addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				runQuery();
-			}
-		});
-		headerToolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		main.getParent().layout(true, true);
-		headerToolbar.redraw();
-		headerToolbar.layout(true, true);
-	}
-	
 	
 	private void initUiField(){
 		setPartName(query.getName());

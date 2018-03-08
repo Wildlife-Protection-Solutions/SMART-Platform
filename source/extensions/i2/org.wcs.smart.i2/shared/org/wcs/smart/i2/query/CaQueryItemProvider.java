@@ -30,12 +30,13 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 
 /**
  * Single conservation area query item provider.  Works for a single
@@ -62,6 +63,10 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 		return Collections.singletonList(ca);
 	}
 	
+	public List<IntelEntityTypeAttribute> getEntityTypeAttributes(IntelEntityType entityType, Session session){
+		return entityType.getAttributes();
+	}
+
 	public List<Employee> getEmployees(Session session){
 		return QueryFactory.buildQuery(session, Employee.class, 
 				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
@@ -102,36 +107,50 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 		return ca;
 	}
 	
-	public Attribute getDataModelAttribute(String attributeKey, Session session) {
-		Attribute attribute = QueryFactory.buildQuery(session, Attribute.class,
-				new Object[] {"keyId", attributeKey},  //$NON-NLS-1$
-				new Object[] {"conservationArea", ca}).uniqueResult(); //$NON-NLS-1$
-		return attribute;
+	
+	
+	public List<IntelEntity> getEntities(String entityTypeKey, Session session){
+		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE i.conservationArea = :ca and t.keyId = :entityType", IntelEntity.class) //$NON-NLS-1$
+			.setParameter("entityType", entityTypeKey) //$NON-NLS-1$
+			.setParameter("ca",  getCa()) //$NON-NLS-1$
+			.list();
 	}
 	
-	public AttributeListItem getDataModelAttributeListItem(String attributeKey, String listItemKey, Session session) {
-		Attribute attribute = getDataModelAttribute(attributeKey, session);
-		if (attribute == null) return null;
-		
-		return QueryFactory.buildQuery(session, AttributeListItem.class,
-				new Object[] {"keyId", listItemKey},  //$NON-NLS-1$
-				new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
-	 }
-	
 	/**
-	 * Find the datamodel attribute list associated with the attribute key and tree hkey item key
-	 * 
-	 * @param attributeKey
+	 * Get all intelligence attributes
 	 * @param session
 	 * @return
 	 */
-	public AttributeTreeNode getDataModelAttributeTreeNode(String attributeKey, String hkey, Session session) {
-		Attribute attribute = getDataModelAttribute(attributeKey, session);
-		if (attribute == null) return null;
-		
-		return QueryFactory.buildQuery(session, AttributeTreeNode.class,
-				new Object[] {"hkey", hkey},  //$NON-NLS-1$
-				new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
-
+	public List<IntelAttribute> getAttributes(Session session){
+		return QueryFactory.buildQuery(session, IntelAttribute.class, 
+				"conservationArea", getCa()).getResultList(); //$NON-NLS-1$
+	}
+	
+	public List<Category> getRootCategories(Session session){
+		return QueryFactory.buildQuery(session, Category.class,
+				new Object[] {"conservationArea", getCa()},
+				new Object[] {"parent", null}).list();
+	}
+	public Category getCategory(String categoryHkey, Session session){
+		return QueryFactory.buildQuery(session, Category.class,
+				new Object[] {"conservationArea", getCa()},
+				new Object[] {"hkey", categoryHkey}).uniqueResult();
+	}
+	
+	public List<Attribute> getDmAttributes(Session session){
+		return QueryFactory.buildQuery(session, Attribute.class,
+				new Object[] {"conservationArea", getCa()})
+				.list();
+	}
+	
+	public Attribute getDmAttribute(String attributeKey, Session session) {
+		return QueryFactory.buildQuery(session, Attribute.class,
+				new Object[] {"conservationArea", getCa()},
+				new Object[] {"keyId", attributeKey}).uniqueResult();
+	}
+	
+	public List<Category> getChildren(Category category, Session session){
+		Category c = session.get(Category.class, category.getUuid());
+		return c.getChildren();
 	}
 }

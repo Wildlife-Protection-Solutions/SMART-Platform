@@ -23,10 +23,12 @@ package org.wcs.smart.i2.ui.views.query;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import javax.imageio.ImageIO;
@@ -46,9 +48,8 @@ import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -119,7 +120,9 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	}
 
 	private Viewer viewer;
-	private HashMap<String, IntelEntityType> types;
+	
+	private List<IntelEntityType> types;
+	private HashMap<String, List<IntelEntityTypeAttribute>> typeAttributes;
 	
 	public EntitySummaryContentProvider() {
 	}
@@ -173,9 +176,14 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 	}
 
 	
-	private void setData(List<IntelEntityType> entityTypes) {
-		types = new HashMap<>();
-		for (IntelEntityType t : entityTypes) types.put(t.getKeyId(), t);
+	private void setData(HashMap<IntelEntityType, List<IntelEntityTypeAttribute>> entityTypes) {
+		types = new ArrayList<>();
+		typeAttributes = new HashMap<>();
+		types.addAll(entityTypes.keySet());
+		for (Entry<IntelEntityType, List<IntelEntityTypeAttribute>> items : entityTypes.entrySet()) {
+			typeAttributes.put(items.getKey().getKeyId(), items.getValue());
+		}
+
 		Display.getDefault().syncExec(()->{
 			Object label = viewer.getControl().getData(QueryView.REFRESHLABEL_KEY);
 			if (label != null && label instanceof Control){
@@ -292,9 +300,8 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			
 			if (item == SubRootNode.ENTITY_TYPE_ITEM) {
 				List<FilterTreeItem> nodes = new ArrayList<>();
-				for (IntelEntityType t : types.values()) {
-					nodes.add(new TreeNode(source, t, t.getName()));
-				}
+				types.stream().sorted((a,b)-> Collator.getInstance().compare(a.getName(), b.getName())).forEach(n->nodes.add(new TreeNode(source, n, n.getName())));
+				
 				return nodes;
 			}
 			
@@ -302,8 +309,8 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 				HashSet<String> keys = new HashSet<>();
 				
 				List<FilterTreeItem> nodes = new ArrayList<>();
-				for (IntelEntityType t : types.values()) {
-					for (IntelEntityTypeAttribute a : t.getAttributes()) {
+				for (List<IntelEntityTypeAttribute> atts : typeAttributes.values()) {
+					for (IntelEntityTypeAttribute a : atts) {
 						if (keys.contains(a.getAttribute().getKeyId())) continue;
 						keys.add(a.getAttribute().getKeyId());
 						if (source == RootNode.FILTER_OPTION || (
@@ -321,7 +328,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 					
 				if (source == RootNode.GROUP_BY_OPTION) {
 					List<FilterTreeItem> kids = new ArrayList<>();
-					for (IntelEntityTypeAttribute a : entityType.getAttributes()) {
+					for (IntelEntityTypeAttribute a : typeAttributes.get(entityType.getKeyId())) {
 						if ( isGroupByAttribute(a.getAttribute())) {
 							kids.add(new TreeNode(RootNode.GROUP_BY_OPTION, a, a.getAttribute().getName()));
 						}
@@ -331,7 +338,7 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 					
 				if (source == RootNode.FILTER_OPTION) {
 					List<FilterTreeItem> kids = new ArrayList<>();
-					for (IntelEntityTypeAttribute a : entityType.getAttributes()) {
+					for (IntelEntityTypeAttribute a : typeAttributes.get(entityType.getKeyId())) {
 						kids.add(new TreeNode(RootNode.FILTER_OPTION, a, a.getAttribute().getName()));
 					}
 					return kids;
@@ -391,23 +398,26 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
-			List<IntelEntityType> entityTypes = new ArrayList<>();
+			HashMap<IntelEntityType, List<IntelEntityTypeAttribute>> attributes = new HashMap<>();
 			try(Session session = HibernateManager.openSession()){
-				entityTypes.addAll(QueryFactory.buildQuery(session, IntelEntityType.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+				List<IntelEntityType> entityTypes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(session);
 				
 				for (IntelEntityType type : entityTypes) {
-					type.getName();
-					type.getIcon();
-					for (IntelEntityTypeAttribute attribute : type.getAttributes()) {
-						attribute.getAttribute().getType();
-						attribute.getAttribute().getName();
-					}
+					List<IntelEntityTypeAttribute> thisattributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypeAttributes(type, session);
+					attributes.put(type, thisattributes);
 				}
+				
+//				for (IntelEntityType type : entityTypes) {
+//					type.getName();
+//					type.getIcon();
+//					for (IntelEntityTypeAttribute attribute : type.getAttributes()) {
+//						attribute.getAttribute().getType();
+//						attribute.getAttribute().getName();
+//					}
+//				}
 			}
 			
-			setData(entityTypes);
+			setData(attributes);
 			
 			return Status.OK_STATUS;
 		}

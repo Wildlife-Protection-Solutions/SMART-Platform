@@ -24,7 +24,6 @@ package org.wcs.smart.i2.ui.views.query.dropitem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -50,6 +49,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.query.FilterDefinitionPanel;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
@@ -73,8 +73,6 @@ public class AttributeTreeDropItem extends DropItem {
 	protected Label lblitem;
 	private Button btnEdit = null;
 	
-	private UUID attributeUuid;
-	
 	protected AttributeTreeNode currentSelection = null;
 	private Object input = Collections.singletonList(DialogConstants.LOADING_TEXT);
 	private TreeDropDownViewer treeviewer = null;
@@ -90,14 +88,14 @@ public class AttributeTreeDropItem extends DropItem {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					Attribute a = (Attribute)s.get(Attribute.class, attributeUuid);
+					Attribute main = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttribute(key, s);
 					List<AttributeTreeNode> toVisit = new ArrayList<>();
-					toVisit.addAll(a.getTree());
+					toVisit.addAll(main.getTree());
 					while(!toVisit.isEmpty()){
 						AttributeTreeNode v = toVisit.remove(0);
 						if (v.getChildren() != null) toVisit.addAll(v.getChildren());
 					}
-					roots.addAll(a.getActiveTreeNodes());
+					roots.addAll(main.getActiveTreeNodes());
 				}catch(Exception ex){
 					Intelligence2PlugIn.log(ex.getMessage(), ex);
 					roots.clear();
@@ -129,11 +127,9 @@ public class AttributeTreeDropItem extends DropItem {
 	};
 
 
-	public AttributeTreeDropItem(String text, String key, UUID attributeUuid) {
-		//super(parent, panel);
-		this.key = key;
+	public AttributeTreeDropItem(String text, String attributeKey) {
+		this.key = attributeKey;
 		this.text = text;
-		this.attributeUuid = attributeUuid;
 	}
 	
 	
