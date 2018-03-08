@@ -360,7 +360,8 @@ public class HibernateManager extends SmartHibernateManager{
 			List<ConservationArea> areas = new ArrayList<ConservationArea>();
 			for (Employee e : es){
 				if (!e.getConservationArea().getIsCcaa() && e.getEndEmploymentDate() == null){
-					if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.ANALYST)){
+					if (e.getSmartUserLevelKeys() != null && !e.getSmartUserLevelKeys().isEmpty()) {
+//					if (UserLevelManager.INSTANCE.supportsUser(e, UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.ANALYST)){
 						if (validatePassword(password, e)){
 							areas.add(e.getConservationArea());
 						}

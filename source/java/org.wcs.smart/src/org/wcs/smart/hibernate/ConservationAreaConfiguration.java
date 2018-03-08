@@ -147,8 +147,6 @@ public class ConservationAreaConfiguration {
 		
 		if (mainConservationArea == null && conservationAreas.size() > 0){
 			mainConservationArea = conservationAreas.iterator().next();
-//			this.displayLanguage = mainConservationArea.getDefaultLanguage();
 		}
-		
 	}
 }

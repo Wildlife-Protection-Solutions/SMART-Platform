@@ -119,7 +119,7 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 		Query<?> q = session.createQuery(query);
 		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
 		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", SmartDB.getConservationAreaConfiguration().getCaCount()); //$NON-NLS-1$
+		q.setParameter("cnt", new Long(SmartDB.getConservationAreaConfiguration().getCaCount())); //$NON-NLS-1$
 		
 		List<?> keys = q.list();
 		if (keys.size() == 0){
@@ -171,7 +171,7 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 		Query<?> q = session.createQuery(query);
 		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
 		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", SmartDB.getConservationAreaConfiguration().getCaCount()); //$NON-NLS-1$
+		q.setParameter("cnt", new Long(SmartDB.getConservationAreaConfiguration().getCaCount())); //$NON-NLS-1$
 		
 		List<String> hkeys = (List<String>) q.list();
 		if (hkeys.size() == 0){
