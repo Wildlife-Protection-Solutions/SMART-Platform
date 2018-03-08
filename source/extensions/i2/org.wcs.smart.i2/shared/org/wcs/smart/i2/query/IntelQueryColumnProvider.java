@@ -25,17 +25,17 @@ import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
-import org.hibernate.query.Query;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -95,7 +95,7 @@ public class IntelQueryColumnProvider {
 		return instance;	
 	}
 	
-	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, Locale l, Session session) throws Exception{
+	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
 		
 		List<IQueryColumn> columns = new ArrayList<>();
 		
@@ -103,7 +103,6 @@ public class IntelQueryColumnProvider {
 		for (FixedQueryColumn.Column c : FixedQueryColumn.Column.values()){
 			columns.add(new FixedQueryColumn(c, l));
 		}
-		ConservationArea ca = query.getConservationArea();
 		
 		//Columns for various filter items in queries
 		try{
@@ -116,10 +115,10 @@ public class IntelQueryColumnProvider {
 						if (filter instanceof EntityFilter){
 							column = generateColumn((EntityFilter)filter, l, session);
 						}else if (filter instanceof EntityTypeFilter){
-							column = generateColumn((EntityTypeFilter)filter, ca, session);
+							column = generateColumn((EntityTypeFilter)filter, itemProvider, session);
 						}else if (filter instanceof IntelAttributeFilter){
 							IntelAttributeFilter afilter = (IntelAttributeFilter)filter;
-							column = new FilterQueryColumn(generateColumnName(afilter, ca, session, l), afilter.getUniqueColumnIdentifier(), afilter);
+							column = new FilterQueryColumn(generateColumnName(afilter, itemProvider, session, l), afilter.getUniqueColumnIdentifier(), afilter);
 						}
 						if (column != null && !columns.contains(column)){
 							columns.add(column);
@@ -135,18 +134,22 @@ public class IntelQueryColumnProvider {
 
 		//data model columns
 		//categories
-		NativeQuery<?> sq = session.createNativeQuery("SELECT max(smart.hkeylength(hkey)) from smart.dm_category WHERE ca_uuid = :ca"); //$NON-NLS-1$
-		sq.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
-		Integer maxCategory = (Integer) sq.uniqueResult();
-		
+		Integer maxCategory = itemProvider.getMaxDmCategoryDepth(session);
 		for (int i = 0; i < maxCategory; i ++){
 			columns.add(new DataModelColumn(i, l));
 		}
 		
-		//attributes
-		Query<Attribute> q = session.createQuery("SELECT distinct id.attribute FROM CategoryAttribute a WHERE a.id.attribute.conservationArea = :ca and a.isActive = 'true'", Attribute.class); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		List<Attribute> attributes = q.list();
+		//attributes - keep only active attributes
+		List<?> q = session.createQuery("SELECT distinct id.attribute.keyId FROM CategoryAttribute a WHERE a.id.attribute.conservationArea in ( :cas ) and a.isActive = 'true'") //$NON-NLS-1$
+				.setParameterList("cas", itemProvider.getConservationAreas()).list(); //$NON-NLS-1$
+		Set<String> attributeKeys = new HashSet<>();
+		q.forEach(e->attributeKeys.add((String)e));
+			
+		List<Attribute> attributes = itemProvider.getDmAttributes(session);
+		for (Iterator<Attribute> iterator = attributes.iterator(); iterator.hasNext();) {
+			Attribute attribute = (Attribute) iterator.next();
+			if (!attributeKeys.contains(attribute.getKeyId())) iterator.remove();
+		}
 
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 		for (Attribute attribute : attributes){
@@ -156,8 +159,8 @@ public class IntelQueryColumnProvider {
 		return columns;
 	}
 	
-	private IQueryColumn generateColumn(EntityTypeFilter filter, ConservationArea ca, Session session){
-		IntelEntityType entity = IntelHibernateManager.getEntityType(filter.getTypeKey(), ca, session);
+	private IQueryColumn generateColumn(EntityTypeFilter filter, IQueryItemProvider itemProvider, Session session){
+		IntelEntityType entity = itemProvider.getEntityType(filter.getTypeKey(), session);
 		String name = null;
 		if (entity != null){
 			name = entity.getName();
@@ -178,14 +181,13 @@ public class IntelQueryColumnProvider {
 		return new FilterQueryColumn(name,  filter.getUniqueColumnIdentifier(), filter);
 	}
 	
-	private String generateColumnName(IntelAttributeFilter filter, ConservationArea ca, Session session, Locale l){
+	private String generateColumnName(IntelAttributeFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
 		
 		StringBuilder sb = new StringBuilder();
-		
-		IntelAttribute attribute = IntelHibernateManager.getAttribute(filter.getAttributeKey(), ca, session);
+		IntelAttribute attribute = itemProvider.getAttribute(filter.getAttributeKey(), session);
 		IntelEntityType etype = null;
 		if (filter.getEntityTypeKey() != null){
-			etype = IntelHibernateManager.getEntityType(filter.getEntityTypeKey(), ca, session);
+			etype = itemProvider.getEntityType(filter.getEntityTypeKey(), session);
 		}
 		
 		if (attribute != null){
@@ -212,9 +214,16 @@ public class IntelQueryColumnProvider {
 					sb.append(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(ANY_ITEM, l));
 				}else{
 					sb.append(": "); //$NON-NLS-1$
-					IntelAttributeListItem i = IntelHibernateManager.getAttributeListItem(attribute, filter.getKeyValue(), session);
-					if (i != null){
-						sb.append(i.getName());
+					List<IntelAttributeListItem> items = itemProvider.getAttributeListItems(attribute.getKeyId(), session);
+					IntelAttributeListItem item = null;
+					for (IntelAttributeListItem i : items) {
+						if (i.getKeyId().equals(filter.getKeyValue())) {
+							item = i;
+							break;
+						}
+					}
+					if (item != null){
+						sb.append(item.getName());
 					}else{
 						sb.append(filter.getKeyValue());
 					}

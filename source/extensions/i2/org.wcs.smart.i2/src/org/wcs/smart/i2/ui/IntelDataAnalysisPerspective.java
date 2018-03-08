@@ -32,6 +32,7 @@ import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordsView;
 import org.wcs.smart.i2.ui.views.WorkingSetView;
+import org.wcs.smart.ui.ConservationAreaListView;
 
 /**
  * Data analysis perspective 
@@ -82,6 +83,7 @@ public class IntelDataAnalysisPerspective implements IPerspectiveFactory {
 				layout.getViewLayout(QueryView.ID).setCloseable(false);
 			}
 			rightFolder.addView(LayersView.ID);
+			rightFolder.addView(ConservationAreaListView.ID);
 		}
 		
 	}

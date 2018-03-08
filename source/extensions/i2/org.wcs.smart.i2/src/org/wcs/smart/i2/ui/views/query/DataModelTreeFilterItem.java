@@ -161,8 +161,9 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session session = HibernateManager.openSession()){
 						Attribute a = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttribute(attributeKey, session);
-						if (a.getAttributeList() != null) {
-							for (AttributeListItem i : a.getAttributeList()){
+						List<AttributeListItem> items = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttributeListItem(a, session);
+						if (items != null) {
+							for (AttributeListItem i : items){
 								labels.add(i.getName());
 								keys.add(i.getKeyId());
 							}
@@ -186,7 +187,7 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		case TEXT:
 			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.TEXT)};
 		case TREE:
-			return new DropItem[]{new AttributeTreeDropItem(dropItemName, attributeKey)};
+			return new DropItem[]{new AttributeTreeDropItem(dropItemName, queryKey, attributeKey)};
 		default:
 			break;
 			

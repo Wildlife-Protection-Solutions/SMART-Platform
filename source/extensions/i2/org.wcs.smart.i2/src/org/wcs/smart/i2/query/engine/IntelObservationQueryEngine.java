@@ -43,6 +43,7 @@ import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -226,7 +227,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 	 */
 	@SuppressWarnings("unchecked")
 	private void computeQueryColumns(Session session, Locale locale, IntelRecordObservationQuery query) throws Exception{
-		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, locale, session);
+		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, InternalQueryManager.INSTANCE.getQueryItemProvider(), locale, session);
 		//remove unused attribute columns
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT distinct a.keyid FROM "); //$NON-NLS-1$

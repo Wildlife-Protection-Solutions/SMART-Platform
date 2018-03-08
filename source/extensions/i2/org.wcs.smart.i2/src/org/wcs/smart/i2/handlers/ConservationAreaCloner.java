@@ -38,6 +38,7 @@ import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelConfigurationOption;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
@@ -81,6 +82,10 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		cloneRecordSource(engine);
 		progress.worked(1);
 			
+		progress.subTask(Messages.ConservationAreaCloner_SettingsSubTask);
+		cloneSettings(engine);
+		progress.worked(1);
+		
 		//clone record template
 		Path source = IntelReportManager.INSTANCE.getRecordTemplate(engine.getTemplateCa());
 		Path target = IntelReportManager.INSTANCE.getRecordTemplate(engine.getNewCa());
@@ -89,6 +94,20 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		
 	}
 
+	
+	private void cloneSettings(ConservationAreaClonerEngine engine){
+		List<IntelConfigurationOption> options = QueryFactory.buildQuery(engine.getSession(), 
+				IntelConfigurationOption.class, new Object[] {"conservationArea", engine.getTemplateCa()}).list(); //$NON-NLS-1$
+		for (IntelConfigurationOption option: options) {
+			IntelConfigurationOption clone = new IntelConfigurationOption();
+			clone.setConservationArea(engine.getNewCa());
+			clone.setKey(option.getKey());
+			clone.setValue(option.getValue());
+			
+			engine.getSession().save(clone);
+		}
+		engine.getSession().flush();
+	}
 	
 	private void cloneAttributes(ConservationAreaClonerEngine engine){
 		List<IntelAttribute> attributes = QueryFactory.buildQuery(engine.getSession(), IntelAttribute.class, "conservationArea", engine.getTemplateCa()).list(); //$NON-NLS-1$

@@ -67,7 +67,8 @@ public class AttributeTreeDropItem extends DropItem {
 	private static AttributeTreeLabelProvider lProvider = null;
 	
 	protected String text;
-	protected String key;
+	protected String queryKey;
+	protected String attributeKey;
 	
 	protected Label lblAttribute;
 	protected Label lblitem;
@@ -88,14 +89,15 @@ public class AttributeTreeDropItem extends DropItem {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					Attribute main = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttribute(key, s);
+					Attribute main = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttribute(attributeKey, s);
+					List<AttributeTreeNode> rootNodes = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttributeTreeNodes(main, s);
 					List<AttributeTreeNode> toVisit = new ArrayList<>();
-					toVisit.addAll(main.getTree());
+					toVisit.addAll(rootNodes);
 					while(!toVisit.isEmpty()){
 						AttributeTreeNode v = toVisit.remove(0);
 						if (v.getChildren() != null) toVisit.addAll(v.getChildren());
 					}
-					roots.addAll(main.getActiveTreeNodes());
+					roots.addAll(rootNodes);
 				}catch(Exception ex){
 					Intelligence2PlugIn.log(ex.getMessage(), ex);
 					roots.clear();
@@ -127,8 +129,9 @@ public class AttributeTreeDropItem extends DropItem {
 	};
 
 
-	public AttributeTreeDropItem(String text, String attributeKey) {
-		this.key = attributeKey;
+	public AttributeTreeDropItem(String text, String queryKey, String attributeKey) {
+		this.queryKey = queryKey;
+		this.attributeKey = attributeKey;
 		this.text = text;
 	}
 	
@@ -148,7 +151,7 @@ public class AttributeTreeDropItem extends DropItem {
 	 */
 	@Override
 	public String asQueryPart() {
-		StringBuilder query = new StringBuilder(this.key);
+		StringBuilder query = new StringBuilder(this.queryKey);
 		query.append(" = "); //$NON-NLS-1$
 
 		if (currentSelection != null){

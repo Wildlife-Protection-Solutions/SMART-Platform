@@ -444,7 +444,7 @@ public class DropItemFactory {
 				return Collections.singletonList(di);
 			}
 			
-			AttributeTreeDropItem item = new AttributeTreeDropItem(name, queryKeyPart);
+			AttributeTreeDropItem item = new AttributeTreeDropItem(name, queryKeyPart, attribute.getKeyId());
 			item.setInitialValue(treeNode);
 			return Collections.singletonList(item);
 		}

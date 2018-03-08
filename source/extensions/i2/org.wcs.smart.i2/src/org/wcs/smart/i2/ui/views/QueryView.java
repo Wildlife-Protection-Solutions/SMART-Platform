@@ -557,6 +557,15 @@ public class QueryView {
 		});
 		
 	}
+	
+	
+	 @Optional
+	 @Inject
+	 private void configurationChanged(@UIEventTopic(SmartDB.CCAA_CONFIGURATION_MODIFIED) Object data){
+		 InternalQueryManager.INSTANCE.getQueryItemProvider().reset();
+		 sourceModified();
+	 }
+	 
 	 @Optional
 	 @Inject
 	 private void dbModified(@UIEventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){

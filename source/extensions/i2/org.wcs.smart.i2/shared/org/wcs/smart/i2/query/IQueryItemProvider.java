@@ -29,6 +29,8 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -123,11 +125,69 @@ public interface IQueryItemProvider {
 	 */
 	public List<IntelEntity> getEntities(String entityTypeKey, Session session);
 	
-	
+	/**
+	 * Get all data model attributes
+	 * @param session
+	 * @return
+	 */
 	public List<Attribute> getDmAttributes(Session session);
+	
+	/**
+	 * The the data model root categories
+	 * @param session
+	 * @return
+	 */
 	public List<Category> getRootCategories(Session session);
+
+	/**
+	 * Get the children categories for a given parent category
+	 * @param category
+	 * @param session
+	 * @return
+	 */
 	public List<Category> getChildren(Category category, Session session);
+	
+	/**
+	 * Find a category based on the hkey
+	 * @param categoryHkey
+	 * @param session
+	 * @return
+	 */
 	public Category getCategory(String categoryHkey, Session session);
+	
+	/**
+	 * Find data model attribute based on the attribute key
+	 * @param attributeKey
+	 * @param session
+	 * @return
+	 */
 	public Attribute getDmAttribute(String attributeKey, Session session);
 	
+	/**
+	 * Find all data model attribute list items for a given attribute
+	 * @param attribute
+	 * @param session
+	 * @return
+	 */
+	public List<AttributeListItem> getDmAttributeListItem(Attribute attribute, Session session);
+	
+	/**
+	 * Find root data model attribute tree nodes for a given attribute
+	 * @param attribute
+	 * @param session
+	 * @return
+	 */
+	public List<AttributeTreeNode> getDmAttributeTreeNodes(Attribute attribute, Session session);
+	
+	/**
+	 * The maximum category depth for the datamodel
+	 * @param session
+	 * @return
+	 */
+	public int getMaxDmCategoryDepth(Session session);
+	
+	/**
+	 * resets any cached items in the query item provider
+	 */
+	public default void reset() {}
 }

@@ -149,6 +149,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaCloner_EntityTypeSubTask;
 	public static String ConservationAreaCloner_GroupsSubTask;
 	public static String ConservationAreaCloner_RelationshiptypesSubTask;
+	public static String ConservationAreaCloner_SettingsSubTask;
 	public static String ConservationAreaCloner_SourceTypesSubTask;
 	public static String ConservationAreaCloner_TaskName;
 	public static String DataModelTreeFilterItem_ErrorMsg;

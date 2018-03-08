@@ -530,6 +530,22 @@
                id="org.wcs.smart.i2.menu.main"
                label="Profiles">
             <command
+                  commandId="org.wcs.smart.i2.command.config.show"
+                  label="Module Settings..."
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
+                  </test>
+               </visibleWhen>
+            </command>
+            <separator
+                  name="org.wcs.smart.i2.separator5"
+                  visible="true">
+            </separator>
+            <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/obj16/analysis.png"
                   label="%DataAnalysisModeCommandName">
@@ -579,10 +595,6 @@
                <visibleWhen
                      checkEnabled="false">
                   <and>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
                      <test
                            property="org.wcs.smart.i2.permission"
                            value="analyst_perspective">

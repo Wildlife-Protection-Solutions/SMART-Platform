@@ -84,7 +84,6 @@ public class IntelRecordObservationQuery extends AbstractIntelQuery {
 	@Transient
 	public static ParsedObservationQuery parseQuery(String queryString) throws ParseException, IOException{
 		if (queryString.isEmpty()) return new ParsedObservationQuery(FilterType.OBSERVATION, null);
-			
 		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			return parser.ParseQuery();
