@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -73,12 +74,15 @@ import org.wcs.smart.connect.query.engine.HtmlExporter;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
-import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryEngine;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
+import org.wcs.smart.i2.query.export.IQueryExporter.ExportOption;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -185,15 +189,11 @@ public class QueryApi extends HttpServlet{
 			}
 		}
 		
-		IDateFieldFilter dateField = QueryManager.INSTANCE.findDateField(filter);
-		if (dateField == null){
-			return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateField", SmartUtils.getRequestLocale(request)), filter)); //$NON-NLS-1$
-		}
-		
 		if (delimiter == null){
 			delimiter = ","; //$NON-NLS-1$
 		}
 		
+		IDateFieldFilter dateField = QueryManager.INSTANCE.findDateField(filter);
 		IDateFilter dfilter = null;
 		if (startDate == null && endDate == null){
 			dfilter = AllDatesFilter.INSTANCE; 
@@ -215,11 +215,13 @@ public class QueryApi extends HttpServlet{
 		try {
 			Query query = QueryManager.INSTANCE.findQuery(uuid, s);
 			if (query != null) {
+				validateDateFilter(query.getTypeKey(), filter);
 				QueryResult results = executeCoreQuery(query, cafilter, df, srid, format, delimiter,  sortColumnName, sortDirectionInt, s);
 				result = results.result;
 				return results.response;
 			}else {
-				IntelRecordObservationQuery query2 = QueryManager.INSTANCE.findIntelQuery(uuid, s);
+				AbstractIntelQuery query2 = QueryManager.INSTANCE.findIntelQuery(uuid, s);
+				validateDateFilter(query2.getTypeKey(), filter);
 				QueryResult results = executeAdvIntelQuery(query2, cafilter, df, srid, format, delimiter,  sortColumnName, sortDirectionInt, s);
 				result = results.result;
 				return results.response;
@@ -241,7 +243,6 @@ public class QueryApi extends HttpServlet{
 			session.beginTransaction();
 			try {
 				if (result != null){
-
 					result.dispose(session);
 				}
 			} catch (SQLException e) {
@@ -251,6 +252,24 @@ public class QueryApi extends HttpServlet{
 			}
 		}
 		
+	}
+	
+	private void validateDateFilter(String queryType, String filter) {
+		if (filter.isEmpty()) filter = null;
+		String[] dateFilters = QueryManager.DATE_FILTERS.get(queryType.toLowerCase());
+		if (dateFilters == null && filter != null ) {
+			throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateField", SmartUtils.getRequestLocale(request)), filter)); //$NON-NLS-1$
+		}else if (filter != null ) {
+			if (dateFilters == null) throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateField", SmartUtils.getRequestLocale(request)), filter)); //$NON-NLS-1$
+			boolean ok = false;
+			for (String f : dateFilters) {
+				if (filter.equals(f)) {
+					ok = true;
+					break;
+				}
+			}
+			if (!ok) throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateField", SmartUtils.getRequestLocale(request)), filter)); //$NON-NLS-1$
+		}
 	}
 	
 	private QueryResult executeCoreQuery(Query query, String cafilter, DateFilter df, String srid, String format, String delimiter, String sortColumnName, QueryApi.Direction sortDirectionInt, Session s) throws Exception {
@@ -404,8 +423,8 @@ public class QueryApi extends HttpServlet{
 	}
 	
 	
-	private QueryResult executeAdvIntelQuery(IntelRecordObservationQuery query, String cafilter, DateFilter df, String srid, String format, String delimiter, String sortColumnName, QueryApi.Direction sortDirectionInt, Session s) throws Exception {
-		IQueryResult result = null;
+	private QueryResult executeAdvIntelQuery(AbstractIntelQuery query, String cafilter, DateFilter df, String srid, String format, String delimiter, String sortColumnName, QueryApi.Direction sortDirectionInt, Session s) throws Exception {
+		org.wcs.smart.i2.query.IQueryResult result = null;
 		
 		if (query == null){
 			//query not found
@@ -425,16 +444,24 @@ public class QueryApi extends HttpServlet{
 			}
 		}
 									
-		IntelObservationQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
+		IIntelQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
 		if(engine == null){
 			String error = MessageFormat.format(Messages.getString("QueryApi.NoQueryEngine", SmartUtils.getRequestLocale(request)), IntelRecordObservationQuery.KEY); //$NON-NLS-1$
 			return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, error));
 		}
 		
+		//ca filter
+		List<ConservationArea> cas = null;
+		if (query.getConservationArea().getIsCcaa()){
+			cas = parseCaFilterToCa(cafilter, s);
+		}else {
+			cas = Collections.singletonList(query.getConservationArea());
+		}
+		
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		params.put(Session.class.getName(), s);
 		params.put(Locale.class.getName(), request.getLocale());
-		params.put(ConservationArea.class.getName(), query.getConservationArea());
+		params.put(ConservationArea.class.getName(), cas);
 		Date[] dateFilters = new Date[] {null, null};
 		if (df.getDateFilterOption().getDates() != null) {
 			dateFilters = df.getDateFilterOption().getDates();
@@ -458,10 +485,11 @@ public class QueryApi extends HttpServlet{
 			((IntelObservationQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
 			((IntelObservationQueryResults)result).configureSort(s);
 			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
+				//TODO: delete temporary file??
 				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
 				CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
 				exporter.exportResults( (IntelObservationQueryResults)result, s);
-				return new QueryResult(writeText(outputFile), result);
+				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
 				
 //			}else if (format.equalsIgnoreCase(ShpExporter.FORMAT_KEY)){
 //				String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -478,7 +506,7 @@ public class QueryApi extends HttpServlet{
 						.status(Status.OK)
 						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
 						.entity(exporter.getGeoJsonOutput() )
-						.build(), result);
+						.build(), new NoDisposeQueryResult());
 			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
 				HtmlExporter exporter = new HtmlExporter(request.getLocale());
 				exporter.exportResults( (IntelObservationQueryResults)result, s);
@@ -486,10 +514,32 @@ public class QueryApi extends HttpServlet{
 						.status(Status.OK)
 						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
 						.entity(exporter.getHtml() )
-						.build(), result);
+						.build(), new NoDisposeQueryResult());
 			}
 		}
-		return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$
+		if (result instanceof org.wcs.smart.i2.query.SummaryQueryResult){
+			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
+				
+				HashMap<ExportOption, Object> exportOptions = new HashMap<>();
+				exportOptions.put(ExportOption.DELIMITER, delimiter.charAt(0));
+				
+				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
+				CsvEntitySummaryQueryExporter exporter = new CsvEntitySummaryQueryExporter();
+				exporter.exportQuery( s, result, outputFile, exportOptions);
+				
+				//TODO: delete temporary file??
+				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
+			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)) {
+				HtmlExporter exporter = new HtmlExporter(request.getLocale());
+				exporter.exportResults( (org.wcs.smart.i2.query.SummaryQueryResult )result, s);
+				return new QueryResult( Response
+						.status(Status.OK)
+						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
+						.entity(exporter.getHtml() )
+						.build(), new NoDisposeQueryResult());	
+			}
+		}
+		return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), new NoDisposeQueryResult()); //$NON-NLS-1$
 	}
 	
 	private Response writeText(java.nio.file.Path thisfile){
@@ -522,6 +572,26 @@ public class QueryApi extends HttpServlet{
 		        }
 		      }
 		    };
+	}
+	
+	private List<ConservationArea> parseCaFilterToCa(String caFilter, Session session){
+		if (caFilter == null) throw new SmartConnectException(Status.BAD_REQUEST, Messages.getString("QueryApi.InvalidCAFilter", SmartUtils.getRequestLocale(request)));  //$NON-NLS-1$
+		String bits[] = caFilter.split(ConservationAreaFilter.CA_SPLITTER);
+
+		List<ConservationArea> cas = new ArrayList<>();
+		
+		for (String cafilter : bits){
+			try{
+				UUID cauuid = UuidUtils.stringToUuid(cafilter);
+				ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, cauuid);
+				if (ca != null && !ca.getIsCcaa()){
+					cas.add(ca);
+				}
+			}catch (Exception ex){
+				//cannot parse UUID for any reason
+			}
+		}
+		return cas;
 	}
 	
 	private String parseCaFilter(String caFilter, Session session){
@@ -683,6 +753,18 @@ public class QueryApi extends HttpServlet{
 				.build();
 	}
 	
+
+	private class NoDisposeQueryResult implements IQueryResult {
+		@Override
+		public void dispose(Session session) throws SQLException {
+		}
+
+		@Override
+		public boolean isDisposed() {
+			return true;
+		}
+		
+	}
 	private class QueryResult{
 		Response response;
 		IQueryResult result;

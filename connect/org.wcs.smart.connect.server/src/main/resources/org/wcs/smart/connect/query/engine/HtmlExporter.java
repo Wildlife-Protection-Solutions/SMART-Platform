@@ -267,6 +267,43 @@ public class HtmlExporter {
 	
 	}
 	
+	public void exportResults(org.wcs.smart.i2.query.SummaryQueryResult results,Session session) throws SQLException{
+		htmlText.append("<table>");
+		htmlText.append("<tr>");
+		
+		try{
+			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
+				for (int j = 0; j < results.getRowHeaders().size(); j++){
+					htmlText.append("<td style='border: solid 1px grey;'></td>");
+				}
+				for (int k = 0; k < results.getColumnHeaderValues()[i].length; k ++){
+					htmlText.append("<th style='border: solid 1px grey;'>" + results.getColumnHeaderValues()[i][k].getName() + "</th>");
+				}
+				htmlText.append("</tr>");
+			}
+			
+			//row headers & data
+			for (int i = 0; i < results.getNumDataRows(); i ++){
+				htmlText.append("<tr>");
+				for (int j = 0; j < results.getRowHeaders().size(); j++){
+					htmlText.append("<td style='border: solid 1px grey;'>" + results.getRowHeaderValues()[i][j].getName() + "</td>");
+				}
+				for(int k = 0; k < results.getData()[i].length; k ++){
+					if (results.getData()[i][k] == null){
+						htmlText.append("<td style='border: solid 1px grey;'></td>");
+					}else{
+						htmlText.append("<td style='border: solid 1px grey;'>" + String.valueOf(results.getData()[i][k]) + "</td>");
+					}
+				}
+				htmlText.append("</tr>");
+			}
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SQLException(ex);
+		}
+	
+	}
+	
 	public String getHtml(){
 		return htmlText.toString();
 	}

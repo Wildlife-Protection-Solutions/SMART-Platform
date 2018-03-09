@@ -98,7 +98,7 @@
 	     		<p><fmt:message key="query.queryuuid" /><input id="queryuuid" class="formtext" type="text" name="uuid" value="" style="width:100%" disabled/></p>
      		</fieldset>
      		
-     		<fieldset>
+     		<fieldset id="datefieldset">
 	     		<legend><fmt:message key="query.datefilter"/></legend>
 	     		<p><fmt:message key="query.datefield" />
 		     		<select id="datefield" name="datefield" style="width:100%" class="formtext" >

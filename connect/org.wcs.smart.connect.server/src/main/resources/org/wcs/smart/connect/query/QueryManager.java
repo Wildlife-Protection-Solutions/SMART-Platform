@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.internal.util.ReflectHelper;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
@@ -58,6 +59,7 @@ import org.wcs.smart.connect.query.engine.er.PsqlErMissionTrackEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErObservationEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErSummaryEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErWaypointEngine;
+import org.wcs.smart.connect.query.engine.i2.IntelEntitySummaryQueryEngine;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryEngine;
 import org.wcs.smart.connect.query.engine.intelligence.PsqlRecordQueryIntelligenceEngine;
 import org.wcs.smart.connect.query.engine.intelligence.PsqlSummaryIntelligenceQueryEngine;
@@ -84,6 +86,10 @@ import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.IQueryEngineFactory;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
@@ -226,6 +232,17 @@ public enum QueryManager {
 		DATE_FILTERS.put(AssetSummaryQuery.KEY.toLowerCase(), new String[]{WaypointDateField.INSTANCE.getKey()});
 	}
 	
+	static {
+		SmartContext.INSTANCE.setClass(IQueryEngineFactory.class, new IQueryEngineFactory() {
+			
+			@Override
+			public IIntelQueryEngine findQueryEngine(String queryType) {
+				if (queryType.equals(IntelEntitySummaryQuery.KEY)) return new IntelEntitySummaryQueryEngine();
+				if (queryType.equals(IntelRecordObservationQuery.KEY)) return new IntelObservationQueryEngine();
+				return null;
+			}
+		});
+	}
 	/**
 	 * Find a given query based on the uuid.
 	 * @param uuid
@@ -248,8 +265,11 @@ public enum QueryManager {
 	 * @param session
 	 * @return
 	 */
-	public IntelRecordObservationQuery findIntelQuery(UUID uuid, Session session){
-		return session.get(IntelRecordObservationQuery.class, uuid);
+	public AbstractIntelQuery findIntelQuery(UUID uuid, Session session){
+		AbstractIntelQuery query = session.get(IntelRecordObservationQuery.class, uuid);
+		if (query != null) return query;
+		query = session.get(IntelEntitySummaryQuery.class, uuid);
+		return query;
 	}
 	
 	/**
@@ -339,6 +359,19 @@ public enum QueryManager {
 						IntelRecordObservationQuery.KEY.toLowerCase());
 			queries.add(qp);
 		}
+		
+		List<IntelEntitySummaryQuery> summQuery = QueryFactory.buildQuery(session, IntelEntitySummaryQuery.class).list();
+		for (IntelEntitySummaryQuery q : summQuery) {
+			QueryProxy qp = new QueryProxy(q.getUuid(), q.getName(), Messages.getString("QueryManager.AdvIntlEntitySummaryQueryTypeName", l), //$NON-NLS-1$
+						q.getConservationArea().getId(), 
+						"-",//$NON-NLS-1$
+						true,
+						q.getConservationArea().getUuid(),
+						q.getConservationArea().getIsCcaa(),
+						IntelEntitySummaryQuery.KEY.toLowerCase());
+			queries.add(qp);
+		}
+		
 		Collections.sort(queries, new Comparator<QueryProxy>() {
 
 			@Override
@@ -374,8 +407,9 @@ public enum QueryManager {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	public IntelObservationQueryEngine findQueryEngine(IntelRecordObservationQuery i2query) throws InstantiationException, IllegalAccessException{
-		return new IntelObservationQueryEngine();
+	public IIntelQueryEngine findQueryEngine(AbstractIntelQuery i2query) throws InstantiationException, IllegalAccessException{
+			return IIntelQueryEngine.createEngine(i2query.getTypeKey());
+		 
 	}
 	
 	
