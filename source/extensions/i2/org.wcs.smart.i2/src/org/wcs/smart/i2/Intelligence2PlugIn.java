@@ -159,7 +159,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	
 		SmartContext.INSTANCE.setClass(IIntelligenceLabelProvider.class, new IntelligenceLabelProviderImpl());
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new DesktopConnectionFactory());
-		SmartContext.INSTANCE.setClass(IIntelQueryEngine.class, new QueryEngineFactory());
+		SmartContext.INSTANCE.setClass(IQueryEngineFactory.class, new QueryEngineFactory());
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteCaHandler(), DeleteCaHandler.EXECUTE_ORDER);
 	}

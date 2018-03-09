@@ -1302,10 +1302,10 @@
    </extension>
    <extension
          id="org.wcs.smart.i2.oda.datasource"
-         name="SMART Advanced Intelligence Data Source"
+         name="SMART Profile Data Source"
          point="org.eclipse.datatools.connectivity.oda.dataSource">
       <dataSource
-            defaultDisplayName="SMART Advanced Intelligence Data Source"
+            defaultDisplayName="SMART Profile Data Source"
             driverClass="org.wcs.smart.i2.birt.datasource.IntelBirtDataSource"
             id="org.wcs.smart.i2.birt.datasource"
             odaVersion="3.0"
@@ -1912,7 +1912,7 @@
          </dataTypeMapping>
       </dataSet>
       <dataSet
-            defaultDisplayName="Advanced Intelligence Query"
+            defaultDisplayName="Record Observation Query"
             id="org.wcs.smart.i2.birt.dataset.query">
          <dataTypeMapping
                nativeDataType="Double"
@@ -2029,8 +2029,8 @@
          <newDataSourceWizard
                includesProgressMonitor="false"
                pageClass="org.wcs.smart.i2.birt.datasource.ui.IntelligenceDataSourceWizardPage"
-               pageTitle="SMART Advanced Intelligence Data Source"
-               windowTitle="SMART Advanced Intelligence Data Source">
+               pageTitle="SMART Profile Data Source"
+               windowTitle="SMART Profile Data Source">
          </newDataSourceWizard>
       </dataSourceUI>
       <dataSetUI
@@ -2039,7 +2039,7 @@
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="Intelligence Entities"></dataSetWizard>
+               windowTitle="Entities"></dataSetWizard>
          <dataSetPage
                displayName="Entities"
                id="org.wcs.smart.i2.birt.ui.dataset.entity.wizard.page.list"
@@ -2052,7 +2052,7 @@
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="Intelligence Entity Locations"></dataSetWizard>
+               windowTitle="Entity Locations"></dataSetWizard>
          <dataSetPage
                displayName="Entity Locations"
                id="org.wcs.smart.i2.birt.ui.dataset.entity.location.wizard.page.list"
@@ -2065,7 +2065,7 @@
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="Intelligence Entity Records"></dataSetWizard>
+               windowTitle="Entity Records"></dataSetWizard>
          <dataSetPage
                displayName="Entity Records"
                id="org.wcs.smart.i2.birt.ui.dataset.entity.record.wizard.page.list"
@@ -2170,7 +2170,7 @@
              supportsOutParameters="false">
           <dataSetWizard
                 class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-                windowTitle="Intelligence Entities">
+                windowTitle="Entities">
           </dataSetWizard>
           <dataSetPage
                 displayName="Entity Location Attributes"
@@ -2184,10 +2184,10 @@
              supportsOutParameters="false">
           <dataSetWizard
                 class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-                windowTitle="Advanced Intelligence Queries">
+                windowTitle="Record Observation Queries">
           </dataSetWizard>
           <dataSetPage
-                displayName="Advanced Intelligence Queries"
+                displayName="Profile Queries"
                 id="org.wcs.smart.i2.birt.ui.dataset.query.wizard.page.list"
                 wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelQueryWizardPage">
           </dataSetPage>
@@ -2198,9 +2198,9 @@
              supportsOutParameters="false">
           <dataSetWizard
                 class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-                windowTitle="Advanced Intelligence Entity Searches"></dataSetWizard>
+                windowTitle="Entity Searches"></dataSetWizard>
           <dataSetPage
-                displayName="Advanced Intelligence Entity Search"
+                displayName="Entity Search"
                 id="org.wcs.smart.i2.birt.ui.dataset.query.wizard.page.list"
                 wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelEntitySearchWizardPage">
           </dataSetPage>
@@ -2346,7 +2346,7 @@
       <page
             class="org.wcs.smart.i2.birt.AdvancedIntelDataSourcePropertyPage"
             id="org.wcs.smart.i2.birt.datasource"
-            name="Advanced Intelligence Data Source">
+            name="Profile Data Source">
          <enabledWhen>
             <instanceof
                   value="org.eclipse.datatools.connectivity.IConnectionProfile">

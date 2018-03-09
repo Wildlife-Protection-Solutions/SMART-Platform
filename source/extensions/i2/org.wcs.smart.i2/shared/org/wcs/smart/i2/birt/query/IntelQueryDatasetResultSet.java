@@ -93,7 +93,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
 		eparameters.put(Date.class.getName(), dfilter);
 		eparameters.put(Locale.class.getName(), dataset.getConnection().getCurrentLocale());
-		eparameters.put(ConservationArea.class.getName(), query.getConservationArea());
+		eparameters.put(ConservationArea.class.getName(), dataset.getConnection().getConservationAreas());
 		try {
 			results = (IPagedQueryResultSet) engine.executeQuery(query, eparameters);
 			m_maxRows = results.getItemCount();
