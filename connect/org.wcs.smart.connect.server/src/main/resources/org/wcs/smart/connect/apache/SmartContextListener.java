@@ -66,6 +66,7 @@ import org.wcs.smart.connect.query.columns.ObservationQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.PatrolQueryColumnProvider;
 import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
 import org.wcs.smart.connect.query.engine.i2.IntelConnectionFactory;
+import org.wcs.smart.connect.query.engine.i2.QueryEngineFactory;
 import org.wcs.smart.connect.report.SmartServiceLabelProvider;
 import org.wcs.smart.entity.IEntityLabelProvider;
 import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
@@ -73,6 +74,7 @@ import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
 import org.wcs.smart.er.query.model.ISurveyQueryColumnProvider;
+import org.wcs.smart.i2.IQueryEngineFactory;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.incident.IIncidentLabelProvider;
 import org.wcs.smart.intelligence.IIntelligenceLabelProvider;
@@ -149,6 +151,7 @@ public class SmartContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new IntelConnectionFactory());
 		
 		SmartContext.INSTANCE.setClass(UUIDBinaryType.class, PostgresUUIDType.INSTANCE);
+		SmartContext.INSTANCE.setClass(IQueryEngineFactory.class, new QueryEngineFactory());
 		
 		/* filestore configurations */
 		SmartContext.INSTANCE.setTempFilestoreLocation((File)arg0.getServletContext().getAttribute(ServletContext.TEMPDIR));

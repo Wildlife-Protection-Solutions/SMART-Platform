@@ -109,7 +109,9 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case PATROL_TRANSPORT_TYPE_KEY: return Messages.getString("PatrolQueryLabelProvider.TransportTypeOp", l); //$NON-NLS-1$
 				case CONSERVATION_AREA: return Messages.getString("PatrolQueryLabelProvider.CaOp", l); //$NON-NLS-1$
 				case AGENCY: return Messages.getString("PatrolQueryLabelProvider.AgencyOp", l); //$NON-NLS-1$
+				case AGENCY_KEY: return Messages.getString("PatrolQueryLabelProvider.AgencyOp", l); //$NON-NLS-1$
 				case RANK: return Messages.getString("PatrolQueryLabelProvider.RankOp", l); //$NON-NLS-1$
+			
 			}
 		}
 		if (item instanceof PatrolEndDateField){

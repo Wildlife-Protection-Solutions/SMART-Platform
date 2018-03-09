@@ -272,6 +272,7 @@ public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryR
 		return item;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public String configureSort(Session session){
 		if (sortColumn == null || sortDirection == null) return ""; //$NON-NLS-1$
 		

@@ -44,6 +44,7 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
  * @author Emily
  *
  */
+@SuppressWarnings("deprecation")
 public class IntelConnection extends AbstractIntelBirtConnection {
 	
 	@Override
@@ -75,7 +76,7 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 				return imageFile.toAbsolutePath().toUri().toString();
 			}else {
 				if (isHtml()) {
-					return getImageUrl() + "/" + imageOutDir.relativize(imageFile).toString();
+					return getImageUrl() + "/" + imageOutDir.relativize(imageFile).toString(); //$NON-NLS-1$
 				}else {
 					return imageFile.toAbsolutePath().toUri().toString();	
 				}
@@ -86,6 +87,7 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<ConservationArea> getConservationAreas() {
 		Object x = appContext.get(ServerSmartConnection.CCAA_FILTER_KEY);
@@ -103,7 +105,7 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 	 */
 	@Override
 	protected Path getImageOutputDirectory() {
-		Object ops = appContext.get("HTML_RENDER_CONTEXT");
+		Object ops = appContext.get("HTML_RENDER_CONTEXT"); //$NON-NLS-1$
 		if (ops == null) return null;
 		HTMLRenderContext context = (HTMLRenderContext)ops;
 		if (context.getImageDirectory() == null) return null;
@@ -117,7 +119,7 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 	 */
 	
 	protected String getImageUrl() {
-		Object ops = appContext.get("HTML_RENDER_CONTEXT");
+		Object ops = appContext.get("HTML_RENDER_CONTEXT"); //$NON-NLS-1$
 		if (ops == null) return null;
 		HTMLRenderContext context = (HTMLRenderContext)ops;
 		if (context.getBaseImageURL() == null) return null;
@@ -130,7 +132,7 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 	@Override
 	protected boolean isHtml() {
 		if (appContext == null) return false;
-		Object ctx = appContext.get("HTML_RENDER_CONTEXT");
+		Object ctx = appContext.get("HTML_RENDER_CONTEXT"); //$NON-NLS-1$
 		if (ctx == null) return false;
 		if (!(ctx instanceof HTMLRenderContext)) return false;
 		HTMLRenderContext cc = (HTMLRenderContext)ctx;

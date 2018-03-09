@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
@@ -53,7 +54,16 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		}else if (value instanceof Employee){
 			return getFullName((Employee) value, l);
 		}
-		
+		if (value instanceof AreaType){
+			switch((AreaType)value){
+				case CA: return Messages.getString("SmartLabelProvider.CaAreaName", l);  //$NON-NLS-1$
+				case BA: return Messages.getString("SmartLabelProvider.BufferedAreaName", l); //$NON-NLS-1$
+				case ADMIN: return Messages.getString("SmartLabelProvider.AdminAreaName", l); //$NON-NLS-1$
+				case MNGT: return Messages.getString("SmartLabelProvider.MgtAreaName", l); //$NON-NLS-1$
+				case PATRL: return Messages.getString("SmartLabelProvider.PatrolAreaName", l); //$NON-NLS-1$
+				default: return ((AreaType) value).name();
+			}
+		}
 		if (value.equals(GEOMETRY_LABEL)) return Messages.getString("SmartLabelProvider.GeometryColumnLabel", l); //$NON-NLS-1$
 		if (value.equals(AGENCY_NAME_KEY)) return Messages.getString("SmartLabelProvider.AgencyName", l); //$NON-NLS-1$
 		if (value.equals(AGENCY_KEY_KEY)) return Messages.getString("SmartLabelProvider.KeyName", l); //$NON-NLS-1$

@@ -26,24 +26,24 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.PostgresUUIDType;
-import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
-import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.AreaFilter;
 import org.wcs.smart.i2.query.observation.filter.BooleanFilter;
@@ -68,18 +68,18 @@ public class WaypointFilterProcessor {
 	private IQueryFilter filter;
 	private Date[] dFilter;
 	private Session s;
-	private ConservationArea ca;
+	private IQueryItemProvider itemProvider;
 	
 	private Exception visitorException;
 	private HashMap<IQueryFilter, String> filterToColumnName = new HashMap<IQueryFilter, String>();
 	
 	private Locale l;
 	
-	public WaypointFilterProcessor(IQueryFilter filter, Date[] dFilter, ConservationArea ca, Session s, Locale l){
+	public WaypointFilterProcessor(IQueryFilter filter, Date[] dFilter, IQueryItemProvider itemProvider, Session s, Locale l){
 		this.filter = filter;
 		this.dFilter = dFilter;
 		this.s = s;
-		this.ca = ca;
+		this.itemProvider = itemProvider;
 		this.l = l;
 	}
 	
@@ -136,7 +136,7 @@ public class WaypointFilterProcessor {
 		sql.append("INSERT INTO " + obsTable); //$NON-NLS-1$
 		sql.append(" SELECT l.uuid FROM smart.i_location l "); //$NON-NLS-1$
 		sql.append( " WHERE "); //$NON-NLS-1$
-		sql.append(" l.ca_uuid = :ca "); //$NON-NLS-1$
+		sql.append(" l.ca_uuid in (:cas) "); //$NON-NLS-1$
 		String dateFilter = SqlGenerator.generateDateClause(dFilter, "datetime"); //$NON-NLS-1$
 		if (dateFilter != null){
 			sql.append( " AND "); //$NON-NLS-1$
@@ -144,10 +144,12 @@ public class WaypointFilterProcessor {
 		}
 				
 				
-		logString(UuidUtils.uuidToString(ca.getUuid()));		
-		logString(sql.toString());
+		List<UUID> caUuids = itemProvider.getConservationAreas().stream().map(e->e.getUuid()).collect(Collectors.toList());
+		for (UUID uuid : caUuids) {
+			logString(UuidUtils.uuidToString(uuid));
+		}		logString(sql.toString());
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("ca", ca.getUuid()); //$NON-NLS-1$
+		query.setParameterList("cas", caUuids); //$NON-NLS-1$
 		query.executeUpdate();
 		
 		//create indexes to help with performance
@@ -325,32 +327,6 @@ public class WaypointFilterProcessor {
 			
 		}
 		//category and perhaps an attribute filter
-		Attribute attribute = QueryFactory.buildQuery(s, Attribute.class,
-				new Object[] {"keyId", filter.getAttributeKey()},  //$NON-NLS-1$
-				new Object[] {"conservationArea", ca}).uniqueResult(); //$NON-NLS-1$
-		
-		if (attribute == null){
-			throw new Exception(MessageFormat.format(Messages.getString("WaypointFilterProcessor_AttributeNotfound", l) , filter.getAttributeKey())); //$NON-NLS-1$
-		}
-		AttributeListItem li = null;
-		AttributeTreeNode treenode = null;
-		if (filter.getAttributeType() == Attribute.AttributeType.LIST){
-			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
-				
-				li = QueryFactory.buildQuery(s, AttributeListItem.class,
-						new Object[] {"keyId", filter.getKeyValue()},  //$NON-NLS-1$
-						new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
-				
-				if (li == null) throw new Exception(MessageFormat.format(Messages.getString("WaypointFilterProcessor_AttributeListItemNotFound", l), filter.getKeyValue(), attribute.getName())) ; //$NON-NLS-1$
-			}
-		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
-			treenode = QueryFactory.buildQuery(s, AttributeTreeNode.class,
-					new Object[] {"hkey", filter.getKeyValue()},  //$NON-NLS-1$
-					new Object[] {"attribute", attribute}).uniqueResult(); //$NON-NLS-1$
-	
-			if (treenode == null) throw new Exception(MessageFormat.format(Messages.getString("WaypointFilterProcessor_AttributeTreeNodeNotFound", l), filter.getKeyValue(), attribute.getName())); //$NON-NLS-1$
-		}
-		
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 		sql.append(" SELECT distinct o.location_uuid "); //$NON-NLS-1$
@@ -360,10 +336,14 @@ public class WaypointFilterProcessor {
 			sql.append(" JOIN smart.dm_category c on c.uuid = o.category_uuid "); //$NON-NLS-1$
 		}
 		sql.append(" JOIN smart.i_observation_attribute ia on ia.observation_uuid = o.uuid "); //$NON-NLS-1$
-		if (treenode != null){
+		sql.append(" JOIN smart.dm_attribute dma on dma.uuid = ia.attribute_uuid "); //$NON-NLS-1$
+		if (filter.getAttributeType() == Attribute.AttributeType.TREE ){
 			sql.append(" JOIN smart.dm_attribute_tree ta ON ia.tree_node_uuid = ta.uuid "); //$NON-NLS-1$
 		}
-		sql.append(" WHERE ia.attribute_uuid = :attributeUuid "); //$NON-NLS-1$
+		if (filter.getAttributeType() == Attribute.AttributeType.LIST){
+			sql.append(" JOIN smart.dm_attribute_list tl ON ia.list_element_uuid = tl.uuid "); //$NON-NLS-1$
+		}
+		sql.append(" WHERE dma.keyId = :attributeKey "); //$NON-NLS-1$
 		if (filter.getCategoryKey() != null){
 			sql.append(" AND (c.hkey like :hkey1 ) "); //$NON-NLS-1$
 		}
@@ -377,10 +357,10 @@ public class WaypointFilterProcessor {
 			sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
 		case LIST:
-			if (li == null){
+			if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
 				sql.append(" ia.list_element_uuid is not null "); //$NON-NLS-1$
 			}else{
-				sql.append(" ia.list_element_uuid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" tl.keyid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			break;
 		case NUMERIC:
@@ -396,13 +376,12 @@ public class WaypointFilterProcessor {
 			break;
 		}
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("attributeUuid", attribute.getUuid()); //$NON-NLS-1$
-		logString(UuidUtils.uuidToString(attribute.getUuid()));
+		query.setParameter("attributeKey", filter.getAttributeKey()); //$NON-NLS-1$
+		logString(filter.getAttributeKey());
 		
 		if (filter.getCategoryKey() != null){
 			String hkey1 = filter.getCategoryKey() + "%"; //$NON-NLS-1$
 			logString(hkey1);
-			logString(UuidUtils.uuidToString(ca.getUuid()));
 			query.setParameter("hkey1", hkey1); //$NON-NLS-1$
 		}
 		switch(filter.getAttributeType()){
@@ -415,9 +394,9 @@ public class WaypointFilterProcessor {
 			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
 			break;
 		case LIST:
-			if (li != null){
-				logString(UuidUtils.uuidToString(li.getUuid()));
-				query.setParameter("value", li.getUuid()); //$NON-NLS-1$
+			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
+				logString(filter.getKeyValue());
+				query.setParameter("value",  filter.getKeyValue()); //$NON-NLS-1$
 			}
 			break;
 		case TREE:
@@ -545,12 +524,7 @@ public class WaypointFilterProcessor {
 	}
 	
 	private void addFilterColumn(IntelAttributeFilter filter, String obsTable, String tempTable, String columnName) throws Exception{
-		
-		
-		IntelAttribute attribute = QueryFactory.buildQuery(s, IntelAttribute.class,
-				new Object[] {"keyId", filter.getAttributeKey()},  //$NON-NLS-1$
-				new Object[] {"conservationArea", ca}).uniqueResult(); //$NON-NLS-1$
-		
+		IntelAttribute attribute = itemProvider.getAttribute(filter.getAttributeKey(), s);
 		if (attribute == null) throw new Exception(MessageFormat.format(Messages.getString("WaypointFilterProcessor_AttributeNotFound2", l), filter.getAttributeKey())); //$NON-NLS-1$
 		
 		IntelAttributeListItem listItem = null;
@@ -570,7 +544,7 @@ public class WaypointFilterProcessor {
 			if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
 				//find the employee
 				Employee e = s.get(Employee.class, UuidUtils.stringToUuid(filter.getKeyValue()));
-				if (!ca.getIsCcaa() && !e.getConservationArea().equals(ca)) {
+				if (e != null && !itemProvider.getConservationAreas().contains(e.getConservationArea())) {
 					e = null;
 				}
 				if (e == null) {
@@ -578,15 +552,6 @@ public class WaypointFilterProcessor {
 				}
 				employee = e;
 			}
-		}
-		
-		IntelEntityType type = null;
-		if (filter.getEntityTypeKey() != null){
-			type = QueryFactory.buildQuery(s, IntelEntityType.class,
-					new Object[] {"keyId", filter.getEntityTypeKey()},  //$NON-NLS-1$
-					new Object[] {"conservationArea", ca}).uniqueResult(); //$NON-NLS-1$
-			
-			if (type == null) throw new Exception(MessageFormat.format(Messages.getString("WaypointFilterProcessor_EntityTypeNotFound", l),  filter.getEntityTypeKey())); //$NON-NLS-1$
 		}
 		
 		String t2 = SqlGenerator.createTempTableName();
@@ -607,8 +572,9 @@ public class WaypointFilterProcessor {
 		}
 		sql.append(" WHERE "); //$NON-NLS-1$
 		sql.append(" v.attribute_uuid = :attributeUuid "); //$NON-NLS-1$
-		if (type != null){
-			sql.append(" AND e.entity_type_uuid = :entityTypeUuid "); //$NON-NLS-1$
+		if (filter.getEntityTypeKey() != null){
+			sql.append("LEFT JOIN smart.i_entity e on l.entity_uuid = e.uuid "); //$NON-NLS-1$
+			sql.append(" LEFT JOIN smart.i_entity_type et on et.uuid = e.entity_type_uuid "); //$NON-NLS-1$
 		}
 		
 		sql.append(" AND "); //$NON-NLS-1$
@@ -648,10 +614,12 @@ public class WaypointFilterProcessor {
 		logString(sql.toString());
 		
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("attributeUuid", attribute.getUuid()); //$NON-NLS-1$
+		logString(attribute.getKeyId());
+		query.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
+		
 		if (filter.getEntityTypeKey() != null){
-			logString(UuidUtils.uuidToString(type.getUuid()));
-			query.setParameter("entityTypeUuid", type.getUuid()); //$NON-NLS-1$
+			logString(filter.getEntityTypeKey());
+			query.setParameter("entityTypeKey", filter.getEntityTypeKey()); //$NON-NLS-1$
 		}
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
@@ -723,11 +691,11 @@ public class WaypointFilterProcessor {
 		logString(sql.toString());
 		logString(filter.getKey());
 		logString(filter.getType().name());
-		logString(UuidUtils.uuidToString(ca.getUuid()));
+		logString(UuidUtils.uuidToString(itemProvider.getQueryConservationArea().getUuid()));
 		
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
 		query.addScalar("uuid", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		query.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
+		query.setParameter("ca", itemProvider.getQueryConservationArea().getUuid(), PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		query.setParameter("keyid", filter.getKey()); //$NON-NLS-1$
 		query.setParameter("type", filter.getType().name()); //$NON-NLS-1$
 		

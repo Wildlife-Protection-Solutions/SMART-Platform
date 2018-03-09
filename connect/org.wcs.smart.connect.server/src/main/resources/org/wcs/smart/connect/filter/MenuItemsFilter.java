@@ -53,19 +53,19 @@ import org.wcs.smart.connect.security.SecurityManager;
 public class MenuItemsFilter implements Filter {
 
 	private enum Page{
-		HOME("MenuItemsFilter.HomePageLabel", ConnectRESTApplication.SERVLET_PATH + "home", null, "house.png"), //$NON-NLS-1$ //$NON-NLS-2$
-		DASHBOARDBETA("MenuItemsFilter.DashboardBetaLabel", ConnectRESTApplication.SERVLET_PATH + "dashboardbeta", null, "dashboard.png"), //$NON-NLS-1$ //$NON-NLS-2$
-		ACCOUNT("MenuItemsFilter.MyAccountLabel", ConnectRESTApplication.SERVLET_PATH + "myaccount", null, "myaccount.png"), //$NON-NLS-1$ //$NON-NLS-2$
-		CA("MenuItemsFilter.CaLabel", ConnectRESTApplication.SERVLET_PATH + "ca", null, "calist.png"), //$NON-NLS-1$ //$NON-NLS-2$
-		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY, "alert.png"), //$NON-NLS-1$ //$NON-NLS-2$
-		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null, "query.png"), //$NON-NLS-1$ //$NON-NLS-2$
-		REPORT("MenuItemsFilter.ReportLabel", ConnectRESTApplication.SERVLET_PATH + "report", null, "reports.png"),  //$NON-NLS-1$ //$NON-NLS-2$
-		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", CaAdminAccountAction.KEY, "share.png"),  //$NON-NLS-1$ //$NON-NLS-2$
-		SHAREDLINKSADMIN("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", AdminAccountAction.KEY, "share.png"),  //$NON-NLS-1$ //$NON-NLS-2$
-		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY, "dataq.png"), //$NON-NLS-1$ //$NON-NLS-2$
-		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$
-		CAUSERS("MenuItemsFilter.CaAccountsLabel", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$
-		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY, "settings.png");   //$NON-NLS-1$//$NON-NLS-2$
+		HOME("MenuItemsFilter.HomePageLabel", ConnectRESTApplication.SERVLET_PATH + "home", null, "house.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		DASHBOARDBETA("MenuItemsFilter.DashboardBetaLabel", ConnectRESTApplication.SERVLET_PATH + "dashboardbeta", null, "dashboard.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		ACCOUNT("MenuItemsFilter.MyAccountLabel", ConnectRESTApplication.SERVLET_PATH + "myaccount", null, "myaccount.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		CA("MenuItemsFilter.CaLabel", ConnectRESTApplication.SERVLET_PATH + "ca", null, "calist.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALERTS_KEY, "alert.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null, "query.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		REPORT("MenuItemsFilter.ReportLabel", ConnectRESTApplication.SERVLET_PATH + "report", null, "reports.png"),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		SHAREDLINKS("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", CaAdminAccountAction.KEY, "share.png"),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		SHAREDLINKSADMIN("MenuItemsFilter.SharedLinksLabel", ConnectRESTApplication.SERVLET_PATH + "sharedlinksadmin", AdminAccountAction.KEY, "share.png"),  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY, "dataq.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		CAUSERS("MenuItemsFilter.CaAccountsLabel", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY, "users.png"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY, "settings.png");   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		
 		String nameKey;
 		String url;

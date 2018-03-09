@@ -56,8 +56,10 @@ import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.query.export.CsvQueryExporter;
-import org.wcs.smart.i2.query.export.ShpQueryExporter;
+import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
+import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
+import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
+import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 
 /**
@@ -92,6 +94,7 @@ public class AdvancedLabelProviderImpl implements
 			case NUMERIC: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypeNumeric", l); //$NON-NLS-1$
 			case POSITION: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypePosition", l); //$NON-NLS-1$
 			case TEXT: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypeText", l); //$NON-NLS-1$
+			case EMPLOYEE: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypeEmployee", l); //$NON-NLS-1$
 			}
 		}
 		if (item == QUERY_COLUMN_CATEGORY_LABEL) return Messages.getString("AdvancedLabelProviderImpl.CategoryColumnLabel", l); //$NON-NLS-1$
@@ -135,8 +138,10 @@ public class AdvancedLabelProviderImpl implements
 			}
 		}
 		
-		if (item instanceof CsvQueryExporter) return Messages.getString("AdvancedLabelProviderImpl.CsvExporter", l); //$NON-NLS-1$
-		if (item instanceof ShpQueryExporter) return Messages.getString("AdvancedLabelProviderImpl.ShpExporter", l); //$NON-NLS-1$
+		if (item instanceof CsvRecordQueryExporter) return Messages.getString("AdvancedLabelProviderImpl.CsvExporter", l); //$NON-NLS-1$
+		if (item instanceof ShpRecordQueryExporter) return Messages.getString("AdvancedLabelProviderImpl.ShpExporter", l); //$NON-NLS-1$
+		if (item instanceof CsvEntitySummaryQueryExporter) return Messages.getString("AdvancedLabelProviderImpl.CsvExporter", l); //$NON-NLS-1$
+		
 		if (item == IntelQueryColumnProvider.ANY_ITEM) return Messages.getString("AdvancedLabelProviderImpl.AnyLabel", l); //$NON-NLS-1$
 		if (item == Boolean.TRUE) return  Messages.getString("SmartLabelProvider.BooleanYesOp",l); //$NON-NLS-1$
 		if (item == Boolean.FALSE) return Messages.getString("SmartLabelProvider.BooleanNoOp",l); //$NON-NLS-1$
@@ -250,6 +255,7 @@ public class AdvancedLabelProviderImpl implements
 		if (item.equals(AdvancedEntitySearch.Error.RUN_ERROR)) return Messages.getString("AdvancedLabelProviderImpl.AdvSearchAttributeTypeNotSupported", l); //$NON-NLS-1$
 		if (item.equals(AdvancedEntitySearch.Error.TOKEN_NOT_SUPPORTED)) return Messages.getString("AdvancedLabelProviderImpl.AdvSearchTokenNotSupported", l); //$NON-NLS-1$
 		
+		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.getString("AdvancedLabelProviderImpl.NumberOfEntitiesValue", l); //$NON-NLS-1$
 		return ""; //$NON-NLS-1$
 	}
 

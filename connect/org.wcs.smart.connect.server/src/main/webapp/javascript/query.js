@@ -379,21 +379,29 @@ function showQueryOptions(){
 	//selected option if available
 	var selectedIndex = 0;
 	var ops = qdatefilter[querytype];
-	for (var i = 0; i < ops.length; i++){
-		var doption = ops[i];
-		var name = datefilters[doption];
-		
-		var object = document.createElement("option");
-		object.value = doption;
-		object.innerHTML = name;
-		datefielddiv.appendChild(object);
-		
-		if (currentselection == doption){
-			selectedIndex = i;
+	var datefieldset = document.getElementById("datefieldset");
+	if (ops != null){
+		for (var i = 0; i < ops.length; i++){
+			var doption = ops[i];
+			var name = datefilters[doption];
+			
+			var object = document.createElement("option");
+			object.value = doption;
+			object.innerHTML = name;
+			datefielddiv.appendChild(object);
+			
+			if (currentselection == doption){
+				selectedIndex = i;
+			}
 		}
+		datefielddiv.selectedIndex = selectedIndex;
+		datefieldset.style.display = "block";
+	}else{
+		datefieldset.style.display = "none";
 	}
-	datefielddiv.selectedIndex = selectedIndex;
 
+	
+	
 	// export format selection index
 	var formatIndex = 0;
 	var formatSelection = document.querySelector("#queryformat").value;

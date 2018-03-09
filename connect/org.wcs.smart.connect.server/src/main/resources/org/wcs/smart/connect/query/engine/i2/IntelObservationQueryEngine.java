@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,10 +40,14 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.i2.IIntelObservationQueryEngine;
+import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.CaQueryItemProvider;
+import org.wcs.smart.i2.query.CcaaQueryItemProvider;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.IQueryColumn;
+import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
@@ -53,7 +58,7 @@ import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
  * @author Emily
  *
  */
-public class IntelObservationQueryEngine implements IIntelObservationQueryEngine{
+public class IntelObservationQueryEngine implements IIntelQueryEngine{
 
 	
 	private IntelObservationQueryResults queryResults;
@@ -64,7 +69,8 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 	 * @param parameters
 	 * @return
 	 */
-	public IntelObservationQueryResults executeQuery(IntelRecordObservationQuery query,  HashMap<String, Object> parameters) throws Exception{
+	@SuppressWarnings("unchecked")
+	public IntelObservationQueryResults executeQuery(AbstractIntelQuery query,  HashMap<String, Object> parameters) throws Exception{
 		
 		Session session = (Session) parameters.get(Session.class.getName());
 		//one or both element of array may be null
@@ -76,13 +82,22 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 			locale = Locale.getDefault();
 		}
 		
-		ConservationArea ca = (ConservationArea)parameters.get(ConservationArea.class.getName());
-		if (ca == null){
-			 throw new Exception("Conservation area parameter not supplied."); //$NON-NLS-1$
+		Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
+		if (cas == null){
+			throw new Exception("Conservation area parameter not supplied."); //$NON-NLS-1$
 		}
 		ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
 
+		IQueryItemProvider itemProvider = null;
+		if (!query.getConservationArea().getIsCcaa()) {
+			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
+		}else {
+			itemProvider = new CcaaQueryItemProvider(cas, query.getConservationArea());
+		}
+		
 		final Locale flocale = locale;
+		final IQueryItemProvider fItemProvider = itemProvider;
+		
 		return session.doReturningWork(new ReturningWork<IntelObservationQueryResults>() {
 			@Override
 			public IntelObservationQueryResults execute(Connection connection) throws SQLException {
@@ -91,7 +106,7 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 						queryResults = new IntelObservationQueryResults();
 
 						//session.beginTransaction();
-						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session, flocale); 
+						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session, flocale); 
 						String dataTable = parser.processFilter();
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -101,16 +116,14 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 						String sql = "DROP TABLE " + dataTable; //$NON-NLS-1$
 						SqlGenerator.logString(sql);
 						session.createNativeQuery(sql).executeUpdate();
-						computeQueryColumns(session, flocale, query);
-//						computeCount(session);
-//						computeBounds(session);
+						computeQueryColumns(session, fItemProvider, flocale, (IntelRecordObservationQuery) query);
 						connection.commit();
 						return queryResults;
 					}else if (parsedQuery.getFilterType() == IQueryFilter.FilterType.WAYPOINT){
 						queryResults = new IntelObservationQueryResults();
 						
 						//session.beginTransaction();
-						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session, flocale); 
+						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session, flocale); 
 						String dataTable = parser.processFilter();
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -120,7 +133,7 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 						String sql = "DROP TABLE " + dataTable; //$NON-NLS-1$
 						SqlGenerator.logString(sql);
 						session.createNativeQuery(sql).executeUpdate();
-						computeQueryColumns(session, flocale, query);
+						computeQueryColumns(session, fItemProvider, flocale, (IntelRecordObservationQuery) query);
 						computeCount(session);
 //						computeBounds(session);
 						
@@ -143,37 +156,13 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 		BigInteger obs = (BigInteger) session.createNativeQuery("SELECT count(*) FROM " + queryResults.getQueryDataTable()).uniqueResult(); //$NON-NLS-1$
 		queryResults.setRowCount(obs.intValue());
 	}
-//	
-//	private void computeBounds(Session session){
-////		very slow: Query q = session.createNativeQuery("SELECT geometry FROM smart.i_location WHERE uuid in (select location_uuid FROM " + queryResults.getQueryDataTable() + ")");
-//		Query<?> q = session.createNativeQuery("SELECT loc_geometry FROM " + queryResults.getQueryDataTable() ); //$NON-NLS-1$
-//		List<?> geoms = q.list();
-//		Envelope env = null;
-//		for (Object x : geoms){
-//			if (x == null)  continue;
-//			if (!(x instanceof Blob))  continue;
-//			
-//			Blob b = (Blob)x;
-//			WKBReader reader = new WKBReader();
-//			try{
-//				Envelope e = reader.read(b.getBytes(1l, (int) b.length())).getEnvelopeInternal();
-//				if (env == null){
-//					env = e;
-//				}else{
-//					env.expandToInclude(e);
-//				}
-//			}catch(Exception ex){
-//				//eat this
-//			}
-//		}
-//		queryResults.setBounds(env);
-//	}
+
 	/*
 	 * Configures the query columns; removing non populated attribute columns
 	 */
 	@SuppressWarnings("unchecked")
-	private void computeQueryColumns(Session session, Locale locale, IntelRecordObservationQuery query) throws Exception{
-		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, locale, session);
+	private void computeQueryColumns(Session session, IQueryItemProvider itemProvider,  Locale locale, IntelRecordObservationQuery query) throws Exception{
+		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, locale, session);
 		//remove unused attribute columns
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT distinct a.keyid FROM "); //$NON-NLS-1$
