@@ -68,9 +68,8 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Station;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.export.TableInfo;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
@@ -678,20 +677,8 @@ public class HibernateManager extends SmartHibernateManager{
 	 */
 	public static DataModel loadDataModel(ConservationArea ca, Session session){
 		try{
-			CriteriaBuilder cb = session.getCriteriaBuilder();
-			CriteriaQuery<Category> c = cb.createQuery(Category.class);
-			Root<Category> root = c.from(Category.class);
-			c.where(cb.and(
-					cb.equal(root.get("conservationArea"), ca), //$NON-NLS-1$
-					cb.isNull(root.get("parent")) //$NON-NLS-1$
-					));
-			c.orderBy(cb.asc(root.get("categoryOrder"))); //$NON-NLS-1$
-			List<Category> rootCategories = session.createQuery(c).getResultList();
-						
-			List<Attribute> attribute = QueryFactory.buildQuery(session, Attribute.class, 
-					new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$
-			
-			DataModel dm = new DataModel(ca, rootCategories, attribute);
+			SimpleDataModel simple = SimpleDataModel.loadDataModel(ca, session);
+			DataModel dm = new DataModel(ca, simple.getCategories(), simple.getAttributes());
 			return dm;
 		}catch (final Exception ex){
 			SmartPlugIn.displayLog(Messages.HibernateManager_Error_LoadingDataModel, ex);

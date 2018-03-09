@@ -24,16 +24,15 @@ package org.wcs.smart.ca.datamodel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Language;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+
 
 /**
  * Merges two datamodels, returning a data model that only
@@ -44,7 +43,12 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class DataModelMerger {
 
-	private Language defaultLanguage = null;
+	public enum ProgressMessages{
+		TASKNAME,
+		LOADING,
+		MERGINGATTRIBUTES,
+		MERGINGCATEGORIES
+	}
 	
 	public DataModelMerger(){
 		
@@ -57,35 +61,39 @@ public class DataModelMerger {
 	 * 
 	 * @param cas conservation area data models to merge
 	 * @param session hibernate session
+	 * @param l - the local (only used for progress messages and if null the default locale will be used)
 	 * @return a merged data model
 	 */
-	public DataModel mergeDataModels(ConservationArea[] cas, 
+	public SimpleDataModel mergeDataModels(ConservationArea[] cas, 
 			ConservationArea defaultCa, 
-			Session session, IProgressMonitor monitor){
+			Session session, Locale l, 
+			IProgressMonitor monitor){
 		
+		if (l == null) l = Locale.getDefault();
 		if (cas == null || cas.length < 2){
 			throw new IllegalStateException("more than 1 conservation area must be provided");//$NON-NLS-1$
 		}
 		// load data model for default Ca
-		monitor.beginTask(Messages.DataModelMerger_TaskName, 4);
+		monitor.beginTask(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ProgressMessages.TASKNAME, l), 4);
 		
-		monitor.subTask(Messages.DataModelMerger_SubTask1);
-		DataModel dm = HibernateManager.loadDataModel(defaultCa, session);
+		monitor.subTask(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ProgressMessages.LOADING, l));
+		SimpleDataModel dm;
+		try {
+			dm = SimpleDataModel.loadDataModel(defaultCa, session);
+		} catch (Exception e) {
+			throw new IllegalStateException("unable to load data model");//$NON-NLS-1$
+		}
 		monitor.worked(1);
 		
-		DataModel newDataModel = new DataModel(defaultCa, new ArrayList<Category>(), new ArrayList<Attribute>());
-		defaultLanguage = SmartUtils.findLanguageMatch(defaultCa.getLanguages());
-		if (defaultLanguage == null){
-			defaultLanguage = defaultCa.getDefaultLanguage();
-		}
-				
+		SimpleDataModel newDataModel = new SimpleDataModel(defaultCa, new ArrayList<Category>(), new ArrayList<Attribute>());
+						
 		// ATTRIBUTES
-		monitor.subTask(Messages.DataModelMerger_SubTask2);
+		monitor.subTask(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ProgressMessages.MERGINGATTRIBUTES, l));
 		for (Attribute a : dm.getAttributes()){
 			if (canKeep(a, cas, session)){
 				Attribute copy = new Attribute();
 				copy.setAggregations(a.getAggregations());
-				copy.setConservationArea(SmartDB.getCurrentConservationArea());
+				//copy.setConservationArea(SmartDB.getCurrentConservationArea());
 				copy.setIsRequired(a.getIsRequired());
 				copy.setKeyId(a.getKeyId());
 				copy.setMaxValue(a.getMaxValue());
@@ -101,11 +109,11 @@ public class DataModelMerger {
 		monitor.worked(1);
 		
 		/* root categories */
-		monitor.subTask(Messages.DataModelMerger_SubTask3);
+		monitor.subTask(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ProgressMessages.MERGINGCATEGORIES, l));
 		for (Category c : dm.getCategories()){
 			if (canKeep(c, cas, session)){
 				Category newRoot = cloneCategory(c, null, newDataModel.getAttributes(), cas,session);
-				newDataModel.addRootCategories(newRoot);
+				newDataModel.getCategories().add(newRoot);
 			}
 		}
 		monitor.worked(1);
@@ -258,4 +266,6 @@ public class DataModelMerger {
 		}
 		return false;
 	}
+	
+
 }

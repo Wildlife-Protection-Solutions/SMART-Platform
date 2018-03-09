@@ -27,14 +27,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -44,6 +45,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
+import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -552,10 +554,11 @@ public class MultiCaDataModelManagerImpl extends AbstractDataModelManager {
 				try{
 					ConservationAreaConfiguration config = SmartDB.getConservationAreaConfiguration();
 					DataModelMerger merger = new DataModelMerger();
-					dm = merger.mergeDataModels(
+					SimpleDataModel simple = merger.mergeDataModels(
 							config.getConservationAreas().toArray(new ConservationArea[config.getCaCount()]),
-							config.getMainConservationArea(),
-							session, monitor);
+							config.getMainConservationArea(), 
+							session, Locale.getDefault(), monitor);
+					dm = new DataModel(simple.getConservationArea(), simple.getCategories(), simple.getAttributes());
 							
 				}finally{
 					session.getTransaction().rollback();
