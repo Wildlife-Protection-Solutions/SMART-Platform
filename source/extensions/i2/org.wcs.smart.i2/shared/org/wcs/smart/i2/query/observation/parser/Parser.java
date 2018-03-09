@@ -9,6 +9,125 @@ import java.lang.Exception;
 
 public class Parser implements ParserConstants {
 
+/* SUMMARY QUERY */
+  final public SumQueryDefinition ParseSummary() throws ParseException {
+        SumQueryDefinition expr;
+    expr = SummaryQueryInternal();
+    jj_consume_token(0);
+                {if (true) return expr;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public SumQueryDefinition SummaryQueryInternal() throws ParseException {
+        GroupByPart row;
+        GroupByPart col;
+        ValuePart value;
+        IQueryFilter expr = null;
+    row = GroupByPart();
+    jj_consume_token(QUERY_SPLITTER);
+    col = GroupByPart();
+    jj_consume_token(QUERY_SPLITTER);
+    value = ValueItem();
+    jj_consume_token(QUERY_SPLITTER);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case K_NOT:
+    case OPENPAREN:
+    case CATEGORY_KEY:
+    case ATTRIBUTE_KEY_NUMERIC:
+    case ATTRIBUTE_KEY_STRING:
+    case ATTRIBUTE_KEY_BOOLEAN:
+    case ATTRIBUTE_KEY_DATE:
+    case ATTRIBUTE_KEY_LIST:
+    case ATTRIBUTE_KEY_TREE:
+    case EATTRIBUTE_KEY_NUMERIC:
+    case EATTRIBUTE_KEY_STRING:
+    case EATTRIBUTE_KEY_BOOLEAN:
+    case EATTRIBUTE_KEY_DATE:
+    case EATTRIBUTE_KEY_LIST:
+    case EATTRIBUTE_KEY_EMPLOYEE:
+    case AREA_KEY:
+    case ENTITY_TYPE_KEY:
+    case ENTITY_KEY:
+      expr = ExpressionPart();
+      break;
+    default:
+      jj_la1[0] = jj_gen;
+      ;
+    }
+          {if (true) return SumQueryDefinition.parse(row, col, value, expr);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public GroupByPart GroupByPart() throws ParseException {
+        GroupByItem item;
+        List<GroupByItem> items = new ArrayList<GroupByItem>();
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case ENTITYTYPE_GB:
+    case EATTRIBUTE_GB_KEY_POSITION:
+    case EATTRIBUTE_GB_KEY_DATE:
+    case EATTRIBUTE_GB_KEY_LIST:
+    case EATTRIBUTE_GB_KEY_EMPLOYEE:
+      item = GroupByItem();
+                        items.add(item);
+      break;
+    default:
+      jj_la1[1] = jj_gen;
+      ;
+    }
+    label_1:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[2] = jj_gen;
+        break label_1;
+      }
+      jj_consume_token(COMMA);
+      item = GroupByItem();
+                        items.add(item);
+    }
+                {if (true) return GroupByPart.parse(items);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public GroupByItem GroupByItem() throws ParseException {
+  GroupByItem item;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case EATTRIBUTE_GB_KEY_POSITION:
+      jj_consume_token(EATTRIBUTE_GB_KEY_POSITION);
+      break;
+    case EATTRIBUTE_GB_KEY_DATE:
+      jj_consume_token(EATTRIBUTE_GB_KEY_DATE);
+      break;
+    case EATTRIBUTE_GB_KEY_LIST:
+      jj_consume_token(EATTRIBUTE_GB_KEY_LIST);
+      break;
+    case EATTRIBUTE_GB_KEY_EMPLOYEE:
+      jj_consume_token(EATTRIBUTE_GB_KEY_EMPLOYEE);
+      break;
+    case ENTITYTYPE_GB:
+      jj_consume_token(ENTITYTYPE_GB);
+      break;
+    default:
+      jj_la1[3] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+          item = GroupByItem.parse(token.image );
+          {if (true) return item;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ValuePart ValueItem() throws ParseException {
+  ValuePart item;
+    jj_consume_token(VALUE_KEY);
+          item = ValuePart.parse(token.image );
+          {if (true) return item;}
+    throw new Error("Missing return statement in function");
+  }
+
 /* ------------ Expressions ----------------------*/
   final public ParsedObservationQuery ParseQuery() throws ParseException {
         ParsedObservationQuery expr;
@@ -34,7 +153,7 @@ public class Parser implements ParserConstants {
   Operator op = null;
   IQueryFilter expr2 = null;
     expr = BooleanPart();
-    label_1:
+    label_2:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case K_AND:
@@ -42,8 +161,8 @@ public class Parser implements ParserConstants {
         ;
         break;
       default:
-        jj_la1[0] = jj_gen;
-        break label_1;
+        jj_la1[4] = jj_gen;
+        break label_2;
       }
       op = BooleanOp();
       expr2 = BooleanPart();
@@ -62,7 +181,7 @@ public class Parser implements ParserConstants {
                     hasNot = true;
       break;
     default:
-      jj_la1[1] = jj_gen;
+      jj_la1[5] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -101,7 +220,7 @@ public class Parser implements ParserConstants {
                         filter = BracketFilter.create(filter);
       break;
     default:
-      jj_la1[2] = jj_gen;
+      jj_la1[6] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -140,7 +259,7 @@ public class Parser implements ParserConstants {
               filter = DmKeyExpression();
       break;
     default:
-      jj_la1[3] = jj_gen;
+      jj_la1[7] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -217,7 +336,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(ATTRIBUTE_KEY_TREE);
       break;
     default:
-      jj_la1[4] = jj_gen;
+      jj_la1[8] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -270,7 +389,7 @@ public class Parser implements ParserConstants {
               filter = EntityKeyExpression();
       break;
     default:
-      jj_la1[5] = jj_gen;
+      jj_la1[9] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -342,17 +461,17 @@ public class Parser implements ParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case EATTRIBUTE_KEY_LIST:
       jj_consume_token(EATTRIBUTE_KEY_LIST);
-                                       key = token.image;
+                                               key = token.image;
       jj_consume_token(EQUAL);
-                            op = token.image;
+                                    op = token.image;
       jj_consume_token(DM_KEY);
-                             value = token.image;
+                                     value = token.image;
       break;
     case EATTRIBUTE_KEY_EMPLOYEE:
       jj_consume_token(EATTRIBUTE_KEY_EMPLOYEE);
-                                           key = token.image;
+                                                   key = token.image;
       jj_consume_token(EQUAL);
-                            op = token.image;
+                                    op = token.image;
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case UUID:
         jj_consume_token(UUID);
@@ -361,18 +480,18 @@ public class Parser implements ParserConstants {
         jj_consume_token(DM_KEY);
         break;
       default:
-        jj_la1[6] = jj_gen;
+        jj_la1[10] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
-                                          value = token.image;
-                {if (true) return IntelAttributeFilter.create(key, value);}
+                                                  value = token.image;
       break;
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[11] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+                {if (true) return IntelAttributeFilter.create(key, value);}
     throw new Error("Missing return statement in function");
   }
 
@@ -424,7 +543,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(LESSEQUAL);
       break;
     default:
-      jj_la1[8] = jj_gen;
+      jj_la1[12] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -444,7 +563,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(NOT_CONTAINS);
       break;
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[13] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -466,7 +585,7 @@ public class Parser implements ParserConstants {
                      fulltoken = fulltoken + " " + token.image;
       break;
     default:
-      jj_la1[10] = jj_gen;
+      jj_la1[14] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -483,7 +602,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(K_OR);
       break;
     default:
-      jj_la1[11] = jj_gen;
+      jj_la1[15] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -500,7 +619,7 @@ public class Parser implements ParserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[12];
+  final private int[] jj_la1 = new int[16];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -508,10 +627,10 @@ public class Parser implements ParserConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x4000100,0x280,};
+      jj_la1_0 = new int[] {0x40100,0x0,0x400,0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x4000100,0x280,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x73ffe0,0xfc0,0xc00,0x3f000,0x18,0x30000,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0xefff80,0x7c000000,0x0,0x7c000000,0x0,0x0,0xefff80,0x3f00,0x3000,0xfc000,0x60,0xc0000,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -525,7 +644,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 12; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -539,7 +658,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 12; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -549,7 +668,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 12; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -559,7 +678,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 12; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -568,7 +687,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 12; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -577,7 +696,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 12; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 16; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -628,12 +747,12 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[57];
+    boolean[] la1tokens = new boolean[64];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 16; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -645,7 +764,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 57; i++) {
+    for (int i = 0; i < 64; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

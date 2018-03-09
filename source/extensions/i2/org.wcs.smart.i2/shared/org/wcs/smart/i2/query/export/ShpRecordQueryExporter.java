@@ -49,8 +49,10 @@ import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IGeometryResultItem;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.i2.udig.query.FeatureGenerator;
@@ -65,12 +67,19 @@ import com.vividsolutions.jts.geom.Polygon;
  * @author Emily
  *
  */
-public class ShpQueryExporter implements IQueryExporter {
+public class ShpRecordQueryExporter implements IQueryExporter {
 
+	@Override
+	public boolean canExport(String queryType) {
+		return queryType.equalsIgnoreCase(IntelRecordObservationQuery.KEY);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void exportQuery(Session session, IPagedQueryResultSet results, Path destination,
+	public void exportQuery(Session session, IQueryResult result, Path destination,
 			HashMap<ExportOption, Object> exportOptions) throws Exception {
+		
+		IPagedQueryResultSet results = (IPagedQueryResultSet) result;
 		
 		Projection pp  = null;
 		if (exportOptions.containsKey(ExportOption.PROJECTION) && exportOptions.get(ExportOption.PROJECTION) instanceof Projection){

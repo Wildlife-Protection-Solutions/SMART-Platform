@@ -24,7 +24,6 @@ package org.wcs.smart.i2.ui.views.query.dropitem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -50,6 +49,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.query.FilterDefinitionPanel;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
@@ -67,13 +67,12 @@ public class AttributeTreeDropItem extends DropItem {
 	private static AttributeTreeLabelProvider lProvider = null;
 	
 	protected String text;
-	protected String key;
+	protected String queryKey;
+	protected String attributeKey;
 	
 	protected Label lblAttribute;
 	protected Label lblitem;
 	private Button btnEdit = null;
-	
-	private UUID attributeUuid;
 	
 	protected AttributeTreeNode currentSelection = null;
 	private Object input = Collections.singletonList(DialogConstants.LOADING_TEXT);
@@ -90,14 +89,15 @@ public class AttributeTreeDropItem extends DropItem {
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					Attribute a = (Attribute)s.get(Attribute.class, attributeUuid);
+					Attribute main = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttribute(attributeKey, s);
+					List<AttributeTreeNode> rootNodes = InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttributeTreeNodes(main, s);
 					List<AttributeTreeNode> toVisit = new ArrayList<>();
-					toVisit.addAll(a.getTree());
+					toVisit.addAll(rootNodes);
 					while(!toVisit.isEmpty()){
 						AttributeTreeNode v = toVisit.remove(0);
 						if (v.getChildren() != null) toVisit.addAll(v.getChildren());
 					}
-					roots.addAll(a.getActiveTreeNodes());
+					roots.addAll(rootNodes);
 				}catch(Exception ex){
 					Intelligence2PlugIn.log(ex.getMessage(), ex);
 					roots.clear();
@@ -129,11 +129,10 @@ public class AttributeTreeDropItem extends DropItem {
 	};
 
 
-	public AttributeTreeDropItem(String text, String key, UUID attributeUuid) {
-		//super(parent, panel);
-		this.key = key;
+	public AttributeTreeDropItem(String text, String queryKey, String attributeKey) {
+		this.queryKey = queryKey;
+		this.attributeKey = attributeKey;
 		this.text = text;
-		this.attributeUuid = attributeUuid;
 	}
 	
 	
@@ -152,7 +151,7 @@ public class AttributeTreeDropItem extends DropItem {
 	 */
 	@Override
 	public String asQueryPart() {
-		StringBuilder query = new StringBuilder(this.key);
+		StringBuilder query = new StringBuilder(this.queryKey);
 		query.append(" = "); //$NON-NLS-1$
 
 		if (currentSelection != null){

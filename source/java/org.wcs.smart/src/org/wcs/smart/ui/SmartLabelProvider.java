@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
+import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -143,6 +144,11 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_KEY)) return Messages.XmlDataModelValidator_InvalidKey;
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_NAME)) return Messages.XmlDataModelValidator_InvalidName;
 				
+		if (value.equals(DataModelMerger.ProgressMessages.LOADING)) return Messages.DataModelMerger_SubTask1;
+		if (value.equals(DataModelMerger.ProgressMessages.TASKNAME)) return Messages.DataModelMerger_TaskName;
+		if (value.equals(DataModelMerger.ProgressMessages.MERGINGATTRIBUTES)) return Messages.DataModelMerger_SubTask2;
+		if (value.equals(DataModelMerger.ProgressMessages.MERGINGCATEGORIES)) return Messages.DataModelMerger_SubTask3;
+						
 		return null;
 	}
 

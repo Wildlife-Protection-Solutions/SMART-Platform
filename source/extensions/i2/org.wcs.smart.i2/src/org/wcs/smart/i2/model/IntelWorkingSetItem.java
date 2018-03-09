@@ -24,6 +24,8 @@ package org.wcs.smart.i2.model;
 import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 
 /**
  * Working set item for displaying in the working set view
@@ -37,19 +39,34 @@ public class IntelWorkingSetItem {
 	private UUID uuid;
 	private boolean isVisible;
 	private ImageDescriptor descriptor;
+	private String queryType;
 	
-	public IntelWorkingSetItem(IntelWorkingSetCategory category, String label, boolean isVisible, UUID uuid){
-		this.category = category;
-		this.label = label;
-		this.uuid = uuid;
+	public IntelWorkingSetItem(UUID uuid, boolean visible) {
+		this(null, null, visible, uuid, null);
+	}
+	public IntelWorkingSetItem(IntelWorkingSetEntity entity) {
+		this(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()));
 	}
 	
-	public IntelWorkingSetItem(IntelWorkingSetCategory category, String label, boolean isVisible, UUID uuid, ImageDescriptor descriptor){
+	public IntelWorkingSetItem(IntelWorkingSetRecord record, ImageDescriptor img) {
+		this(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(),img);
+	}
+	
+	public IntelWorkingSetItem(IntelWorkingSetQuery query, AbstractIntelQuery queryImpl) {
+		this(IntelWorkingSetCategory.QUERIES, queryImpl.getName(), query.getIsVisible(), queryImpl.getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY_QUERY));
+		this.queryType = query.getQueryType();
+	}
+	
+	private IntelWorkingSetItem(IntelWorkingSetCategory category, String label, boolean isVisible, UUID uuid, ImageDescriptor descriptor){
 		this.category = category;
 		this.label = label;
 		this.uuid = uuid;
 		this.descriptor = descriptor;
 		this.isVisible = isVisible;
+	}
+	
+	public String getQueryTypeKey() {
+		return this.queryType;
 	}
 	
 	public boolean isVisible(){

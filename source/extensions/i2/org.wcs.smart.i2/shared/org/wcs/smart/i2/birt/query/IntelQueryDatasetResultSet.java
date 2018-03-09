@@ -38,7 +38,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.i2.IIntelObservationQueryEngine;
+import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
@@ -76,7 +76,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 		
 		IntelRecordObservationQuery query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
 		if (query == null) {
-			throw new OdaException("Intelligence Record Observtion Query not found"); //$NON-NLS-1$
+			throw new OdaException("Profiles Record Observtion Query not found"); //$NON-NLS-1$
 		}
 		
 		int sindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.START_DATE.getName());
@@ -87,20 +87,19 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 			dfilter[1] = (Date) parameters.get(eindex);
 		}
 		
-		IIntelObservationQueryEngine engine = IIntelObservationQueryEngine.createEngine();
+		IIntelQueryEngine engine = IIntelQueryEngine.createEngine(query.getTypeKey());
 		HashMap<String, Object> eparameters = new HashMap<>();
 		eparameters.put(Session.class.getName(), dataset.getConnection().getSession());
 		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
 		eparameters.put(Date.class.getName(), dfilter);
 		eparameters.put(Locale.class.getName(), dataset.getConnection().getCurrentLocale());
-		eparameters.put(ConservationArea.class.getName(), query.getConservationArea());
+		eparameters.put(ConservationArea.class.getName(), dataset.getConnection().getConservationAreas());
 		try {
-			results = engine.executeQuery(query, eparameters);
+			results = (IPagedQueryResultSet) engine.executeQuery(query, eparameters);
 			m_maxRows = results.getItemCount();
 			iterator = results.iterator(dataset.getConnection().getSession());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new OdaException(e);
 		}
 		
 		

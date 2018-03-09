@@ -25,6 +25,7 @@ import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,12 +42,17 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.i2.IIntelObservationQueryEngine;
+import org.wcs.smart.i2.IIntelQueryEngine;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.DataModelColumn;
+import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
+import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
@@ -61,7 +67,7 @@ import com.vividsolutions.jts.io.WKBReader;
  * @author Emily
  *
  */
-public class IntelObservationQueryEngine implements IIntelObservationQueryEngine {
+public class IntelObservationQueryEngine implements IIntelQueryEngine {
 
 	
 	private IntelObservationQueryResults queryResults;
@@ -72,7 +78,9 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 	 * @param parameters
 	 * @return
 	 */
-	public IPagedQueryResultSet executeQuery(IntelRecordObservationQuery query,  HashMap<String, Object> parameters) throws Exception{
+	public IPagedQueryResultSet executeQuery(AbstractIntelQuery iquery,  HashMap<String, Object> parameters) throws Exception{
+		
+		IntelRecordObservationQuery query = (IntelRecordObservationQuery) iquery;
 		
 		Session session = (Session) parameters.get(Session.class.getName());
 		IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
@@ -86,15 +94,21 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 			locale = Locale.getDefault();
 		}
 		
-		ConservationArea ca = (ConservationArea)parameters.get(ConservationArea.class.getName());
-		if (ca == null){
+		Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
+		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 		}
+		IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
+		if (cas.size() == 1) {
+			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
+		}
+		
 		progress.subTask(Messages.IntelObservationQueryEngine_Progress2);
 		ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
 		progress.worked(1);
 		final SubMonitor fmonitor = progress;
 		final Locale flocale = locale;
+		final IQueryItemProvider fItemProvider = itemProvider;
 		return session.doReturningWork(new ReturningWork<IPagedQueryResultSet>() {
 			@Override
 			public IPagedQueryResultSet execute(Connection connection) throws SQLException {
@@ -105,7 +119,7 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 						queryResults = new IntelObservationQueryResults();
 						
 						//session.beginTransaction();
-						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session); 
+						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session); 
 						String dataTable = parser.processFilter(fmonitor.split(2));
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -136,7 +150,7 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 						queryResults = new IntelObservationQueryResults();
 						
 						//session.beginTransaction();
-						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, ca, session); 
+						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session); 
 						String dataTable = parser.processFilter(fmonitor.split(2));
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -213,7 +227,7 @@ public class IntelObservationQueryEngine implements IIntelObservationQueryEngine
 	 */
 	@SuppressWarnings("unchecked")
 	private void computeQueryColumns(Session session, Locale locale, IntelRecordObservationQuery query) throws Exception{
-		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, locale, session);
+		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, InternalQueryManager.INSTANCE.getQueryItemProvider(), locale, session);
 		//remove unused attribute columns
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT distinct a.keyid FROM "); //$NON-NLS-1$

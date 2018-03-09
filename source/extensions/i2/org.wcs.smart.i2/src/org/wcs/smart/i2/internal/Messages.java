@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.i2.internal.messages"; //$NON-NLS-1$
+	public static String AbstractIntelEntityTypeListWizardPage_DatasetNotSupported;
 	public static String AbstractIntelEntityTypeListWizardPage_EntityTypeRequired;
 	public static String AbstractIntelEntityTypeListWizardPage_LinkParameter1;
 	public static String AbstractIntelEntityTypeListWizardPage_unauthorized;
@@ -149,6 +150,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaCloner_EntityTypeSubTask;
 	public static String ConservationAreaCloner_GroupsSubTask;
 	public static String ConservationAreaCloner_RelationshiptypesSubTask;
+	public static String ConservationAreaCloner_SettingsSubTask;
 	public static String ConservationAreaCloner_SourceTypesSubTask;
 	public static String ConservationAreaCloner_TaskName;
 	public static String DataModelTreeFilterItem_ErrorMsg;
@@ -175,7 +177,10 @@ public class Messages extends NLS {
 	public static String DrawPointTool_InvalidPointMsg;
 	public static String DrawPolygonTool_InvalidPolygonMsg;
 	public static String DropItem_DeleteItemTooltip;
+	public static String DropItemFactory_AreaTypeNotFound;
 	public static String DropItemFactory_AttributeKeyNotFound;
+	public static String DropItemFactory_AttributeNotFound;
+	public static String DropItemFactory_EntityTypeNotFound;
 	public static String DropItemFactory_FilterTypeNotSupported;
 	public static String DropItemFactory_InvalidAreaType;
 	public static String DropItemFactory_InvalidAttributeKey;
@@ -424,6 +429,12 @@ public class Messages extends NLS {
 	public static String EntitySearchView_SearchLabel;
 	public static String EntitySearchView_SerachButton;
 	public static String EntitySearchView_unauthorized;
+	public static String EntitySummaryContentProvider_AttributeTreeNode;
+	public static String EntitySummaryContentProvider_EntityTypesTreeNode;
+	public static String EntitySummaryContentProvider_FiltersTreeNode;
+	public static String EntitySummaryContentProvider_GroupByTreeNode;
+	public static String EntitySummaryContentProvider_NotNode;
+	public static String EntitySummaryContentProvider_ValuesTreeNode;
 	public static String EntityToXml_ConvertingEntitiesSubTask;
 	public static String EntityToXml_ConvertingRelationshipsSubTask;
 	public static String EntityToXml_ConvertingXmlSubTask;
@@ -464,6 +475,7 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_Title;
 	public static String EntityTypeDialog_WarningDialogMsg;
 	public static String EntityTypeDialog_WarningsDialogTitle;
+	public static String EntityTypeGroupByDropItem_AllTypes;
 	public static String EntityTypeListDialog_DeleteError;
 	public static String EntityTypeListDialog_DeleteError2;
 	public static String EntityTypeListDialog_DeleteMsg;
@@ -528,6 +540,8 @@ public class Messages extends NLS {
 	public static String ExportModelElementsDialog_zipFile;
 	public static String ExportQueryWizard_CreateDialogMessage;
 	public static String ExportQueryWizard_CreateDialogTitle;
+	public static String ExportQueryWizard_ExportDone;
+	public static String ExportQueryWizard_ExportDoneMsg;
 	public static String ExportQueryWizard_ExportError;
 	public static String ExportQueryWizard_OverwriteDialogMsg;
 	public static String ExportQueryWizard_OverwriteDialogTitle;
@@ -663,6 +677,15 @@ public class Messages extends NLS {
 	public static String IntelEntityServiceInfo_keyword3;
 	public static String IntelEntityServiceInfo_keyword4;
 	public static String IntelEntityServiceInfo_title;
+	public static String IntelEntitySummaryQueryEngine_progressAreaGroupBy;
+	public static String IntelEntitySummaryQueryEngine_progressAttributeColumns;
+	public static String IntelEntitySummaryQueryEngine_progressCleanUp;
+	public static String IntelEntitySummaryQueryEngine_progressDateRange;
+	public static String IntelEntitySummaryQueryEngine_progressEntityType;
+	public static String IntelEntitySummaryQueryEngine_progressFilter;
+	public static String IntelEntitySummaryQueryEngine_progressLoadingResults;
+	public static String IntelEntitySummaryQueryEngine_progressParsing;
+	public static String IntelEntitySummaryQueryEngine_progressProcessing;
 	public static String IntelEntityTypeWizardPage_SelectType;
 	public static String IntelligenceDatabaseUpgrader_JobName;
 	public static String IntelligenceDatabaseUpgrader_TaskName;
@@ -736,6 +759,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_NotContainsLabel;
 	public static String IntelligenceLabelProviderImpl_NotLabel;
 	public static String IntelligenceLabelProviderImpl_NumberAttributeName;
+	public static String IntelligenceLabelProviderImpl_NumberOfEntitiesValue;
 	public static String IntelligenceLabelProviderImpl_OrLabel;
 	public static String IntelligenceLabelProviderImpl_PositionAttributeName;
 	public static String IntelligenceLabelProviderImpl_QueriewWorkingSetLabel;
@@ -780,6 +804,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnStatusLabel;
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnTitle;
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnUUID;
+	public static String IntelligenceLabelProviderImpl_RecordRsPrimaryDateColumnTitle;
 	public static String IntelligenceLabelProviderImpl_RecordsWorkingSetLabel;
 	public static String IntelligenceLabelProviderImpl_RecordUnprocessedLabel;
 	public static String IntelligenceLabelProviderImpl_SearchNotFound;
@@ -875,6 +900,8 @@ public class Messages extends NLS {
 	public static String IntelReportManager_ResetValidate;
 	public static String IntelReportManager_SaveMessage;
 	public static String IntelReportManager_SaveTitle;
+	public static String InternalQueryManager_EntitySummaryQueryName;
+	public static String InternalQueryManager_RecordObservationQueryName;
 	public static String LoadFilterOptions_AttributeFilterLabel;
 	public static String LoadFilterOptions_CategoriesFilterLabel;
 	public static String LoadFilterOptions_DataModelFilterLabel;
@@ -929,6 +956,9 @@ public class Messages extends NLS {
 	public static String NewEntityDialog_SaveError;
 	public static String NewEntityDialog_Title;
 	public static String NewQueryHandler_DefaultQueryName;
+	public static String NewQueryHandler_ErrorTitle;
+	public static String NewQueryHandler_InvalidQueryType;
+	public static String NewQueryHandler_NoQueryType;
 	public static String NewRecordHandler_DefaultRecordName;
 	public static String ObservationDetailsShell_NoneLabel;
 	public static String ObservationDialog_AttributeLabel;
@@ -968,6 +998,13 @@ public class Messages extends NLS {
 	public static String OpenEntityHandler_OpenError;
 	public static String OpenQueryHandler_OpenError;
 	public static String OpenRecordHandler_OpenError;
+	public static String OptionDialog_AllItems;
+	public static String OptionDialog_GroupByOptions;
+	public static String OptionDialog_ItemRequired;
+	public static String OptionDialog_Loading;
+	public static String OptionDialog_Message;
+	public static String OptionDialog_NoItems;
+	public static String OptionDialog_Title;
 	public static String OtherAttributeGroup_GroupName;
 	public static String ProgressPanel_CancelBtn;
 	public static String QueryDataSourceFactory_Description;
@@ -1336,10 +1373,18 @@ public class Messages extends NLS {
 	public static String ShowAttributeListDialogHandler_ConfirmMsg;
 	public static String ShowAttributeListDialogHandler_ConfirmTitle;
 	public static String SqlGenerator_OpNotSupported;
+	public static String SummaryDefinitionPanel_CleanFiltertooltip;
+	public static String SummaryDefinitionPanel_ClearPanelTooltip;
+	public static String SummaryDefinitionPanel_ColumnGroupbyHeader;
+	public static String SummaryDefinitionPanel_FilterOpHeader;
+	public static String SummaryDefinitionPanel_GroupByOpHeader;
+	public static String SummaryDefinitionPanel_RowGroupByHeader;
+	public static String SummaryDefinitionPanel_ValuesHeader;
 	public static String TextFileSearcher_CanceledMsg;
 	public static String TextFileSearcher_DecryptError;
 	public static String TextFileSearcher_ErrorItemName;
 	public static String TextFileSearcher_TaskName;
+	public static String ValueDropItem_NumberOfEntitiesOption;
 	public static String WaypointFilterProcessor_AreaKeyNotFound;
 	public static String WaypointFilterProcessor_AttributeKeyNotFound;
 	public static String WaypointFilterProcessor_EmployeeNotFound;

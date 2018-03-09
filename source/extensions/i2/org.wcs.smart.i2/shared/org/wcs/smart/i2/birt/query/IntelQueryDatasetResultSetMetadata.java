@@ -28,7 +28,10 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.CaQueryItemProvider;
+import org.wcs.smart.i2.query.CcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryColumn;
+import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 
 /**
@@ -44,10 +47,16 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	public IntelQueryDatasetResultSetMetadata(IntelQueryDataset dataset) throws OdaException{
 		IntelRecordObservationQuery query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
 		if (query == null) {
-			throw new OdaException("Intelligence Record Observtion Query not found"); //$NON-NLS-1$
+			throw new OdaException("Profiles Record Observtion Query not found"); //$NON-NLS-1$
 		}
 		try {
-			columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
+			IQueryItemProvider itemProvider = null;
+			if (!query.getConservationArea().getIsCcaa()) {
+				itemProvider = new CaQueryItemProvider(dataset.getConnection().getConservationAreas().iterator().next(), query.getConservationArea());
+			}else {
+				itemProvider = new CcaaQueryItemProvider(dataset.getConnection().getConservationAreas(), query.getConservationArea());
+			}
+			columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
 			names = new ArrayList<>(columns.size());
 			//ensure names are unique
 			for(IQueryColumn c: columns) {

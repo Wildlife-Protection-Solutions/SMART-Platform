@@ -25,12 +25,14 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.locationtech.udig.project.ui.internal.LayersView;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.QueryView;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordsView;
 import org.wcs.smart.i2.ui.views.WorkingSetView;
+import org.wcs.smart.ui.ConservationAreaListView;
 
 /**
  * Data analysis perspective 
@@ -52,27 +54,37 @@ public class IntelDataAnalysisPerspective implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(true);
 
 		IFolderLayout rightFolder = layout.createFolder("org.wcs.smart.i2.analysis.right", IPageLayout.RIGHT, 0.7f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
-		if (IntelSecurityManager.INSTANCE.canViewEntities() || 
-				IntelSecurityManager.INSTANCE.canEditEntity()) {
-			rightFolder.addView(EntitySearchView.ID);
-			layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
+		if (!SmartDB.isMultipleAnalysis()) {
+			if (IntelSecurityManager.INSTANCE.canViewEntities() || 
+					IntelSecurityManager.INSTANCE.canEditEntity()) {
+				rightFolder.addView(EntitySearchView.ID);
+				layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
+			}
+			if (IntelSecurityManager.INSTANCE.canViewRecords() || 
+					IntelSecurityManager.INSTANCE.canEditRecord()) {
+				rightFolder.addView(RecordsView.ID);
+				layout.getViewLayout(RecordsView.ID).setCloseable(false);
+			}
+			if (IntelSecurityManager.INSTANCE.canViewQueries()){
+				rightFolder.addView(QueryView.ID);
+				layout.getViewLayout(QueryView.ID).setCloseable(false);
+			}
+			rightFolder.addView(LayersView.ID);
+			
+			if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
+				IFolderLayout bottomFolder = layout.createFolder("org.wcs.smart.i2.analysis.rightbottom", IPageLayout.BOTTOM, 0.7f, "org.wcs.smart.i2.analysis.right"); //$NON-NLS-1$ //$NON-NLS-2$
+				bottomFolder.addView(WorkingSetView.ID);
+				bottomFolder.addPlaceholder(RecordNarrativeView.ID);
+				layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
+			}
+		}else {
+			if (IntelSecurityManager.INSTANCE.canViewQueries()){
+				rightFolder.addView(QueryView.ID);
+				layout.getViewLayout(QueryView.ID).setCloseable(false);
+			}
+			rightFolder.addView(LayersView.ID);
+			rightFolder.addView(ConservationAreaListView.ID);
 		}
-		if (IntelSecurityManager.INSTANCE.canViewRecords() || 
-				IntelSecurityManager.INSTANCE.canEditRecord()) {
-			rightFolder.addView(RecordsView.ID);
-			layout.getViewLayout(RecordsView.ID).setCloseable(false);
-		}
-		if (IntelSecurityManager.INSTANCE.canViewQueries()){
-			rightFolder.addView(QueryView.ID);
-			layout.getViewLayout(QueryView.ID).setCloseable(false);
-		}
-		rightFolder.addView(LayersView.ID);
 		
-		if (IntelSecurityManager.INSTANCE.canViewWorkingSets()){
-			IFolderLayout bottomFolder = layout.createFolder("org.wcs.smart.i2.analysis.rightbottom", IPageLayout.BOTTOM, 0.7f, "org.wcs.smart.i2.analysis.right"); //$NON-NLS-1$ //$NON-NLS-2$
-			bottomFolder.addView(WorkingSetView.ID);
-			bottomFolder.addPlaceholder(RecordNarrativeView.ID);
-			layout.getViewLayout(WorkingSetView.ID).setCloseable(false);
-		}
 	}
 }

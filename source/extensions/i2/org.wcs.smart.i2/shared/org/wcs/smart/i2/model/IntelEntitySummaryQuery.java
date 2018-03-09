@@ -1,0 +1,66 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.i2.model;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
+import org.wcs.smart.i2.query.observation.parser.ParseException;
+import org.wcs.smart.i2.query.observation.parser.Parser;
+
+/**
+ * Entity summary query.
+ * 
+ * @author Emily
+ *
+ */
+@Entity
+@Table(name="smart.i_entity_summary_query")
+public class IntelEntitySummaryQuery extends AbstractIntelQuery {
+	
+	public static final String KEY = "I2_ENTITY_SUMM_QUERY"; //$NON-NLS-1$
+
+	public static final String PART_SEPERATOR = "|"; //$NON-NLS-1$
+	
+	@Override
+	@Transient
+	public String getTypeKey() {
+		return KEY;
+	}
+	
+	
+	@Transient
+	public static SumQueryDefinition parseQuery(String queryString) throws Exception{
+		if (queryString.isEmpty()) throw new ParseException("At least one value must be supplied."); //$NON-NLS-1$
+		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+			Parser parser = new Parser(is);
+			return parser.ParseSummary();
+		}catch (Throwable ex) {
+			throw new Exception(ex);
+		}
+	}
+}

@@ -99,6 +99,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -109,8 +110,8 @@ import org.wcs.smart.i2.model.IntelWorkingSetEntity;
 import org.wcs.smart.i2.model.IntelWorkingSetItem;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
+import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.security.IntelSecurityManager;
-import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.WorkingSetLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.WorkingSetListDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
@@ -352,7 +353,7 @@ public class WorkingSetView {
 								}
 								if (found) break;
 								for (IntelWorkingSetQuery layer : ws.getQueries()){
-									if (uuid.equals(layer.getQuery().getUuid())){
+									if (uuid.equals(layer.getQuery())){
 										layer.setIsVisible(true);
 										break;
 									}
@@ -378,7 +379,7 @@ public class WorkingSetView {
 								}
 								if (found) break;
 								for (IntelWorkingSetQuery layer : ws.getQueries()){
-									if (uuid.equals(layer.getQuery().getUuid())){
+									if (uuid.equals(layer.getQuery())){
 										layer.setIsVisible(false);
 										break;
 									}
@@ -620,7 +621,7 @@ public class WorkingSetView {
 					}
 					(new OpenRecordHandler()).openRecord(i, false);
 				}else if (toOpen.getCategory() == IntelWorkingSetCategory.QUERIES){
-					(new OpenQueryHandler()).openQuery(toOpen.getUuid(), false);
+					(new OpenQueryHandler()).openQuery(toOpen.getUuid(), toOpen.getQueryTypeKey(), false);
 				}
 				return;
 			}
@@ -676,17 +677,17 @@ public class WorkingSetView {
 			isConfigureVisibility = true;
 			
 			for (UUID uuid : event.allVisible){
-				IntelWorkingSetItem i = new IntelWorkingSetItem(null, null, true, uuid);
+				IntelWorkingSetItem i = new IntelWorkingSetItem(uuid, true);
 				workingsetTree.setChecked(i, true);
 				workingsetTree.setGrayed(i, false);
 			}
 			for (UUID uuid : event.partVisible){
-				IntelWorkingSetItem i = new IntelWorkingSetItem(null, null, false, uuid);
+				IntelWorkingSetItem i = new IntelWorkingSetItem(uuid, false);
 				workingsetTree.setChecked(i, true);
 				workingsetTree.setGrayed(i, true);
 			}
 			for (UUID uuid : event.notVisible){
-				IntelWorkingSetItem i = new IntelWorkingSetItem(null, null, false, uuid);
+				IntelWorkingSetItem i = new IntelWorkingSetItem(uuid, false);
 				workingsetTree.setChecked(i, false);
 				workingsetTree.setGrayed(i, false);
 			}
@@ -899,7 +900,7 @@ public class WorkingSetView {
 						if (ws != null){
 							ws.getName();
 							for (IntelWorkingSetEntity entity : ws.getEntities()){
-								IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()));
+								IntelWorkingSetItem i = new IntelWorkingSetItem(entity);
 								items.add(i);
 							}
 							
@@ -928,11 +929,12 @@ public class WorkingSetView {
 										sourceImages.put(record.getRecord().getRecordSource(), img);
 									}
 								}
-								IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(),img);
+								IntelWorkingSetItem i = new IntelWorkingSetItem(record, img);
 								items.add(i);
 							}
 							for (IntelWorkingSetQuery query : ws.getQueries()){
-								IntelWorkingSetItem i = new IntelWorkingSetItem(IntelWorkingSetCategory.QUERIES, query.getQuery().getName(), query.getIsVisible(), query.getQuery().getUuid(), Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY_QUERY));
+								AbstractIntelQuery queryImpl = QueryManager.INSTANCE.findQuery(s, query.getQuery(), query.getQueryType());
+								IntelWorkingSetItem i = new IntelWorkingSetItem(query, queryImpl);
 								items.add(i);
 							}
 						}

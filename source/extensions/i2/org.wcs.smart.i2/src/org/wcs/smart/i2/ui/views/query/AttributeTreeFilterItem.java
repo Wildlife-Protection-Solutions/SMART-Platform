@@ -23,7 +23,6 @@ package org.wcs.smart.i2.ui.views.query;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -32,9 +31,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -58,10 +56,10 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 
-	private UUID attributeUuid;
 	private IntelAttribute.AttributeType type;
 	private String dropItemName = null;
 	private String queryKey = ""; //$NON-NLS-1$
+	private String attributeKey = null;
 	
 	/**
 	 * Creates a new attribute filter for an entity type attribute
@@ -69,8 +67,8 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 	 */
 	public AttributeTreeFilterItem(IntelEntityTypeAttribute attribute) {
 		super(attribute.getAttribute().getName());
-		this.attributeUuid = attribute.getAttribute().getUuid();
 		type = attribute.getAttribute().getType();
+		attributeKey = attribute.getAttribute().getKeyId();
 		dropItemName = IntelQueryColumnProvider.generateName(attribute.getAttribute(),  attribute.getEntityType());
 		queryKey = "e_attribute:" + attribute.getAttribute().getType().key + ":" + attribute.getAttribute().getKeyId() + ":" + attribute.getEntityType().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
@@ -81,8 +79,8 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 	 */
 	public AttributeTreeFilterItem(IntelAttribute attribute) {
 		super(attribute.getName());
-		this.attributeUuid = attribute.getUuid();
 		type = attribute.getType();
+		attributeKey = attribute.getKeyId();
 		dropItemName = IntelQueryColumnProvider.generateName(attribute, null);
 		queryKey = "e_attribute:" + attribute.getType().key + ":" + attribute.getKeyId() + ":" ; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
@@ -109,12 +107,9 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session s = HibernateManager.openSession()){
-						IntelAttribute a = (IntelAttribute) s.get(IntelAttribute.class, attributeUuid);
-						if (a.getAttributeList() != null){
-							for (IntelAttributeListItem i : a.getAttributeList()){
-								labels.add(i.getName());
-								keys.add(i.getKeyId());
-							}
+						for (IntelAttributeListItem item : InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributeListItems(attributeKey, s)) {
+							labels.add(item.getName());
+							keys.add(item.getKeyId());
 						}
 					}
 					return Status.OK_STATUS;
@@ -140,7 +135,7 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session s = HibernateManager.openSession()){
-						List<Employee> emps = QueryFactory.buildQuery(s, Employee.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+						List<Employee> emps = InternalQueryManager.INSTANCE.getQueryItemProvider().getEmployees(s);
 						for (Employee e : emps) {
 							elabels.add(SmartLabelProvider.getFullLabel(e));
 							ekeys.add(UuidUtils.uuidToString(e.getUuid()));

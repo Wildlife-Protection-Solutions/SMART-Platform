@@ -25,8 +25,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -54,7 +56,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
-import org.wcs.smart.user.UserLevelManager;
 
 /**
  * This class contains some of the basic functions required
@@ -261,10 +262,27 @@ public class SmartStartUp {
 								ccaaUser.setStartEmploymentDate(new Date());
 								ccaaUser.setId(ccaaUser.getSmartUserId());
 								ccaaUser.setConservationArea(ca);
-								ccaaUser.setSmartUserLevel(UserLevelManager.INSTANCE.getUserLevels().values()); //give them all seeing access
+//								ccaaUser.setSmartUserLevel(UserLevelManager.INSTANCE.getUserLevels().values()); //give them all seeing access
 								session.save(ccaaUser);
 								session.flush();
 							}
+							
+							//determine user levels by combining all permissions 
+							List<Employee> employeeUsers = session.createQuery("FROM Employee WHERE conservationArea in (:cas) and upper(smartUserId) = :id", Employee.class) //$NON-NLS-1$
+									.setParameterList("cas", areas) //$NON-NLS-1$
+									.setParameter("id",  users.get(0).getSmartUserId().toUpperCase()) //$NON-NLS-1$
+									.list();
+							Set<String> userLevelKeys = new HashSet<>();
+							for (Employee employee : employeeUsers) {
+								userLevelKeys.addAll( employee.getSmartUserLevels());
+							}
+							StringBuilder sb = new StringBuilder();
+							for (String str : userLevelKeys) {
+								sb.append(str);
+								sb.append(Employee.USER_LEVEL_SEP);
+							}
+							sb.deleteCharAt(sb.length() - 1);
+							ccaaUser.setSmartUserLevelKeys(sb.toString());
 							
 							Query<Language> q = session.createQuery("FROM Language WHERE ca = :ca and code = :code", Language.class); //$NON-NLS-1$
 							q.setParameter("ca", ca); //$NON-NLS-1$

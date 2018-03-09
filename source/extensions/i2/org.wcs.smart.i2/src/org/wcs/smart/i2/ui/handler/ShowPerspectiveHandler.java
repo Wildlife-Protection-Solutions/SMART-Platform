@@ -31,6 +31,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.ui.editors.IntelligenceMapEditor;
 import org.wcs.smart.util.E3Utils;
 
@@ -46,18 +47,19 @@ public class ShowPerspectiveHandler {
 	public void execute(IEclipseContext context){
 		ContextInjectionFactory.invoke(new org.wcs.smart.ui.ShowPerspectiveHandler(), Execute.class, context);
 		
-		EPartService parts = context.get(EPartService.class);
-		for (MPart p : parts.getParts()){
-			if (E3Utils.getSourceObject(p) instanceof IntelligenceMapEditor) return;
-		}
-		
-		try {
-			//ensure map editor is open
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(IntelligenceMapEditor.MAPINPUT, IntelligenceMapEditor.ID);
-		} catch (PartInitException e) {
-			e.printStackTrace();
-		}
-		
+		if (!SmartDB.isMultipleAnalysis()) {
+			EPartService parts = context.get(EPartService.class);
+			for (MPart p : parts.getParts()){
+				if (E3Utils.getSourceObject(p) instanceof IntelligenceMapEditor) return;
+			}
+			
+			try {
+				//ensure map editor is open
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(IntelligenceMapEditor.MAPINPUT, IntelligenceMapEditor.ID);
+			} catch (PartInitException e) {
+				e.printStackTrace();
+			}
+		}			
 	}
 	
 	public static class ShowPerspectiveHandlerWrapper extends AbstractHandler{

@@ -37,6 +37,8 @@ import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -49,7 +51,7 @@ public class IntelQueryDataset implements IQuery {
 	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.query"; //$NON-NLS-1$
 
 	private IResultSetMetaData r_metadata = null;
-	protected IntelQueryDatasetParameterMetadata pMetadata = null;
+	protected IParameterMetaData pMetadata = null;
 	private int m_maxRows;
 	
 	protected AbstractIntelBirtConnection connection;
@@ -119,15 +121,23 @@ public class IntelQueryDataset implements IQuery {
 	@Override
 	public IResultSetMetaData getMetaData() throws OdaException {
 		if (r_metadata == null){
-			r_metadata = new IntelQueryDatasetResultSetMetadata(this);
+			if (queryType.equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
+				r_metadata = new IntelQueryDatasetResultSetMetadata(this);
+			}else if (queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
+				r_metadata = new IntelEntitySummaryDatasetResultSetMetadata(this);
+			}
 		}
 		return r_metadata;
 	}
 
 	@Override
 	public IResultSet executeQuery() throws OdaException {
-		IntelQueryDatasetResultSet set = new IntelQueryDatasetResultSet(this, parameters);
-		return set;
+		if (queryType.equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
+			return new IntelQueryDatasetResultSet(this, parameters);
+		}else if (queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
+			return new IntelEntitySummaryDatasetResultSet(this, parameters);
+		}
+		return null;
 	}
 
 	@Override
@@ -279,7 +289,11 @@ public class IntelQueryDataset implements IQuery {
 	@Override
 	public IParameterMetaData getParameterMetaData() throws OdaException {
 		if (pMetadata == null) {
-			pMetadata = new IntelQueryDatasetParameterMetadata();
+			if (queryType.equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
+				pMetadata = new IntelQueryDatasetParameterMetadata();
+			}else if (queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
+				pMetadata = new IntelEntitySummaryDatasetParameterMetadata();
+			}
 		}
 		return pMetadata;
 	}

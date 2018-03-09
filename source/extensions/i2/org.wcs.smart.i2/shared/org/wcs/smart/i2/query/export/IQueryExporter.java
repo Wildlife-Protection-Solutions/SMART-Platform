@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import org.hibernate.Session;
-import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IQueryResult;
 
 /**
  * Query result exporter.
@@ -41,12 +41,41 @@ public interface IQueryExporter {
 		PROJECTION,
 		LOCALE;
 	}
+
+	/**
+	 * 
+	 * @param queryType
+	 * @return true if the exporter can export the results from the givane query type key
+	 */
+	public boolean canExport(String queryType);
 	
-	public void exportQuery(Session session, IPagedQueryResultSet results, Path destination, HashMap<ExportOption,Object> exportOptions) throws Exception;
+	/**
+	 * Exports the results
+	 * @param session
+	 * @param results
+	 * @param destination
+	 * @param exportOptions
+	 * @throws Exception
+	 */
+	public void exportQuery(Session session, IQueryResult results, Path destination, HashMap<ExportOption,Object> exportOptions) throws Exception;
 	
+	/**
+	 * 
+	 * @param option
+	 * @return true if the given export option is supported for this exporter
+	 */
 	public boolean supportsOption(ExportOption option);
 	
+	/**
+	 * 
+	 * @param l
+	 * @return the name of the exporter
+	 */
 	public String getName(Locale l);
 	
+	/**
+	 * The file extension 
+	 * @return
+	 */
 	public String getExtension();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,16 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.hibernate;
+package org.wcs.smart.i2.ui.views.query.dropitem;
+
+import java.util.List;
+
+import org.wcs.smart.i2.query.ListItem;
 
 /**
- * Listener for changes in the cross ca analysis configuration.
+ * Summary group by option
+ * 
  * @author Emily
  *
  */
-public interface IConservationAreaConfigurationListener {
+public interface IGroupByDropItem {
+
 	/**
-	 * Fired when the configuration has changed
+	 * Get all options for group by filter.  Should not be
+	 * called from the display thread.
+	 * @return
 	 */
-	public void configurationChanged();
+	public List<ListItem> getListOptions();
 }

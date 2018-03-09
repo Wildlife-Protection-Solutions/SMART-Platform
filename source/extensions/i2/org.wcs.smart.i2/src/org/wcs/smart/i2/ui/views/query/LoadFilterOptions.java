@@ -32,17 +32,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
@@ -52,9 +48,8 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -62,7 +57,6 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.ui.views.QueryView;
 
 /**
  * Job for loading roots for filter tree
@@ -72,9 +66,9 @@ import org.wcs.smart.i2.ui.views.QueryView;
  */
 public class LoadFilterOptions extends Job {
 
-	private TreeViewer viewer;
+	private FilterTreeContentProvider viewer;
 	
-	public LoadFilterOptions(TreeViewer viewer) {
+	public LoadFilterOptions(FilterTreeContentProvider viewer) {
 		super(Messages.LoadFilterOptions_JobName);
 		this.viewer= viewer;
 	}
@@ -92,13 +86,7 @@ public class LoadFilterOptions extends Job {
 		}
 		
 		Display.getDefault().syncExec(()->{
-			viewer.setInput(roots);
-			viewer.getTree().setEnabled(true);
-			Object label = viewer.getTree().getData(QueryView.REFRESHLABEL_KEY);
-			if (label != null && label instanceof Control){
-				((Control)label).dispose();
-				viewer.getTree().setData(QueryView.REFRESHLABEL_KEY, null);
-			}
+			viewer.setItems(roots);
 			
 		});
 		return Status.OK_STATUS;
@@ -145,15 +133,7 @@ public class LoadFilterOptions extends Job {
 		categoryItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.CATEGORY_ICON));
 		dataModelItem.addChild(categoryItem);
 		
-		CriteriaQuery<Category> c = session.getCriteriaBuilder().createQuery(Category.class);
-		Root<Category> from = c.from(Category.class);
-		c.where(session.getCriteriaBuilder().and(
-				session.getCriteriaBuilder().equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
-				session.getCriteriaBuilder().isNull(from.get("parent")) //$NON-NLS-1$
-				));
-		c.orderBy(session.getCriteriaBuilder().asc(from.get("categoryOrder"))); //$NON-NLS-1$
-		
-		List<Category> categories = session.createQuery(c).getResultList();
+		List<Category> categories = InternalQueryManager.INSTANCE.getQueryItemProvider().getRootCategories(session);
 		for (Category category : categories){
 			DataModelTreeFilterItem item = new DataModelTreeFilterItem(category);
 			categoryItem.addChild(item);
@@ -162,7 +142,7 @@ public class LoadFilterOptions extends Job {
 		BasicTreeFilterItem attributesItem = new BasicTreeFilterItem(Messages.LoadFilterOptions_DmAttributesFilterLabel);
 		attributesItem.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ATTRIBUTE_NUMBER_ICON));
 		dataModelItem.addChild(attributesItem);
-		List<Attribute> attributes= QueryFactory.buildQuery(session, Attribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+		List<Attribute> attributes= InternalQueryManager.INSTANCE.getQueryItemProvider().getDmAttributes(session);
 		
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (Attribute a : attributes){
@@ -176,8 +156,7 @@ public class LoadFilterOptions extends Job {
 	private FilterTreeItem loadAttributes(Session session){
 		AttributeHeaderFilterItem attributeRoots = new AttributeHeaderFilterItem(Messages.LoadFilterOptions_EntityAttributeFilterLabel, false);
 		
-		List<IntelAttribute> attributes= QueryFactory.buildQuery(session, IntelAttribute.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
-		
+		List<IntelAttribute> attributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributes(session);
 		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for (IntelAttribute a : attributes){
 			AttributeTreeFilterItem item = new AttributeTreeFilterItem(a);
@@ -191,7 +170,9 @@ public class LoadFilterOptions extends Job {
 		BasicTreeFilterItem entityTypeRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_EntityTypeFilterLabel);
 		entityTypeRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY));
 
-		List<IntelEntityType> types= QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+		List<IntelEntityType> types =
+			InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(session);
+		
 		
 		types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelEntityType t : types){
@@ -226,14 +207,16 @@ public class LoadFilterOptions extends Job {
 			entityNode.addChild(attributesNode);
 
 			Map<IntelEntityTypeAttributeGroup, List<IntelEntityTypeAttribute>> attributeMapping = new HashMap<>();
-			for (IntelEntityTypeAttribute a : t.getAttributes()){
+			List<IntelEntityTypeAttribute> typeAttributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypeAttributes(t, session);
+			for (IntelEntityTypeAttribute a : typeAttributes){
 				if (attributeMapping.get(a.getAttributeGroup()) == null){
 					attributeMapping.put(a.getAttributeGroup(), new ArrayList<>());
 				}
 				attributeMapping.get(a.getAttributeGroup()).add(a);
 			}
 			
-			Stream<IntelEntityTypeAttributeGroup> groups = t.getAttributes().stream()
+			List<IntelEntityTypeAttribute> eattributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypeAttributes(t, session);
+			Stream<IntelEntityTypeAttributeGroup> groups = eattributes.stream()
 				.map(IntelEntityTypeAttribute::getAttributeGroup)
 				.distinct().sorted(Comparator.nullsLast((a,b)-> ((Integer)a.getOrder()).compareTo(b.getOrder())));
 			

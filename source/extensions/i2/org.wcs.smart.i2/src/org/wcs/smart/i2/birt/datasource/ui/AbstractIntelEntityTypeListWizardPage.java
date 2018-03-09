@@ -122,33 +122,38 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 
 		composite.setLayoutData(gridData);
 		
-		if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
-			setPageComplete(false);
+		if (SmartDB.isMultipleAnalysis()) {
 			Label l = new Label(composite, SWT.NONE);
-			l.setText(Messages.AbstractIntelEntityTypeListWizardPage_unauthorized);
-			return composite;
-		}
-		
-		lstEntityTypes = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		lstEntityTypes.setLabelProvider(new EntityTypeLabelProvider());
-		lstEntityTypes.setContentProvider(ArrayContentProvider.getInstance());
-		
-
-		lstEntityTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)lstEntityTypes.getControl().getLayoutData()).heightHint = 300;
-		lstEntityTypes.getControl().addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				validateData();
+			l.setText(Messages.AbstractIntelEntityTypeListWizardPage_DatasetNotSupported);
+		}else {
+			if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
+				setPageComplete(false);
+				Label l = new Label(composite, SWT.NONE);
+				l.setText(Messages.AbstractIntelEntityTypeListWizardPage_unauthorized);
+				return composite;
 			}
-		});
-		List<IntelEntityType> types = null;
-		try(Session s = HibernateManager.openSession()){
-			types = QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+			
+			lstEntityTypes = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+			lstEntityTypes.setLabelProvider(new EntityTypeLabelProvider());
+			lstEntityTypes.setContentProvider(ArrayContentProvider.getInstance());
+			
+	
+			lstEntityTypes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			((GridData)lstEntityTypes.getControl().getLayoutData()).heightHint = 300;
+			lstEntityTypes.getControl().addListener(SWT.Selection, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					validateData();
+				}
+			});
+			List<IntelEntityType> types = null;
+			try(Session s = HibernateManager.openSession()){
+				types = QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+			}
+			
+			Collections.sort(types, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
+			lstEntityTypes.setInput(types);
 		}
-		
-		Collections.sort(types, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
-		lstEntityTypes.setInput(types);
 		
 		setPageComplete(false);
 		return composite;
@@ -168,19 +173,20 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 		DataSetDesign dataSetDesign = getInitializationDesign();
 		if (dataSetDesign == null)
 			return; // nothing to initialize
-
-		String queryText = dataSetDesign.getQueryText();
-		if (queryText != null && !queryText.isEmpty()){
-			List<IntelEntityType> types = (List<IntelEntityType>) lstEntityTypes.getInput();
-			IntelEntityType selection = null;
-			for(IntelEntityType t : types){
-				if(t.getKeyId().equals(queryText)){
-					selection = t;
-					break;
+		if (lstEntityTypes != null) {
+			String queryText = dataSetDesign.getQueryText();
+			if (queryText != null && !queryText.isEmpty()){
+				List<IntelEntityType> types = (List<IntelEntityType>) lstEntityTypes.getInput();
+				IntelEntityType selection = null;
+				for(IntelEntityType t : types){
+					if(t.getKeyId().equals(queryText)){
+						selection = t;
+						break;
+					}
 				}
+				
+				if (selection != null) lstEntityTypes.setSelection(new StructuredSelection(selection));
 			}
-			
-			if (selection != null) lstEntityTypes.setSelection(new StructuredSelection(selection));
 		}
 		validateData();
 		setMessage(message);
@@ -191,8 +197,8 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 	 * @return the user selected query
 	 */
 	public IntelEntityType getSelectedEntityType() {
-		return (IntelEntityType) ((IStructuredSelection) lstEntityTypes.getSelection())
-				.getFirstElement();
+		if (lstEntityTypes == null) return null;
+		return (IntelEntityType) lstEntityTypes.getStructuredSelection().getFirstElement();
 	}
 
 	/**
@@ -239,7 +245,10 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 	 * blank text. Set page message accordingly.
 	 */
 	private void validateData() {
-		if (lstEntityTypes == null) return ;
+		if (lstEntityTypes == null) {
+			setPageComplete(false);
+			return ;
+		}
 		boolean isValid = true;
 		if (lstEntityTypes.getSelection().isEmpty()) {
 			isValid = false;

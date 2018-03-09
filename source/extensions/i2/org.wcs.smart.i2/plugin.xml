@@ -89,7 +89,7 @@
       </class>
       <class
             class="org.wcs.smart.i2.model.IntelRecordObservationQuery"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </class>
       <class
             class="org.wcs.smart.i2.model.IntelRelationshipGroup"
@@ -150,6 +150,10 @@
       <class
             class="org.wcs.smart.i2.model.IntelConfigurationOption"
             supportsCcaa="false">
+      </class>
+      <class
+            class="org.wcs.smart.i2.model.IntelEntitySummaryQuery"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension
@@ -522,6 +526,57 @@
                </and>
             </visibleWhen>
          </menu>
+         <menu
+               id="org.wcs.smart.i2.menu.main"
+               label="Profiles">
+            <command
+                  commandId="org.wcs.smart.i2.command.config.show"
+                  label="Module Settings..."
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="configure">
+                  </test>
+               </visibleWhen>
+            </command>
+            <separator
+                  name="org.wcs.smart.i2.separator5"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/obj16/analysis.png"
+                  label="%DataAnalysisModeCommandName">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.IntelDataAnalysisPerspective">
+               </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="analyst_perspective">
+                  </test>
+               </visibleWhen>
+            </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="analyst_perspective">
+                  </test>
+                  <not>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </not>
+               </and>
+            </visibleWhen>
+         </menu>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -540,10 +595,6 @@
                <visibleWhen
                      checkEnabled="false">
                   <and>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
                      <test
                            property="org.wcs.smart.i2.permission"
                            value="analyst_perspective">
@@ -741,32 +792,6 @@
          <separator
                name="org.wcs.smart.query.separator3"
                visible="true">
-            <visibleWhen
-                  checkEnabled="false">
-               <or>
-                 <test
-                              property="org.wcs.smart.i2.permission"
-                              value="analyst_perspective">
-                        </test>
-                        <test
-                              property="org.wcs.smart.i2.permission"
-                              value="assessment_perspective">
-                        </test>
-               </or>
-            </visibleWhen>
-            <visibleWhen
-                  checkEnabled="false">
-               <and>
-                  <test
-                              property="org.wcs.smart.i2.permission"
-                              value="analyst_perspective">
-                        </test>
-                        <test
-                              property="org.wcs.smart.i2.permission"
-                              value="assessment_perspective">
-                        </test>
-               </and>
-            </visibleWhen>
          </separator>
       </menuContribution>
       <menuContribution
@@ -791,13 +816,6 @@
       <menuContribution
             allPopups="false"
             locationURI="popup:outlinemenu?after=org.eclipse.birt.report.designer.ui.actions.NewJointDataSetAction">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     property="org.wcs.smart.i2.permission"
-                     value="configure">
-               </test>
-            </visibleWhen>
          <separator
                name="org.wcs.smart.i2.entity.template.query.separator"
                visible="true">
@@ -829,7 +847,9 @@
             locationURI="toolbar:org.wcs.smart.i2.ui.view.queries">
          <command
                commandId="org.wcs.smart.i2.command.query.record.new"
-               style="push">
+               icon="images/icons/obj16/new_entity_query.png"
+               style="push"
+               tooltip="create a new entity summary query">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -837,6 +857,27 @@
                      value="create_query">
                </test>
             </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.i2.query.new.type"
+                  value="I2_ENTITY_SUMM_QUERY">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.i2.command.query.record.new"
+               icon="images/icons/obj16/new_entity_query.png"
+               style="push"
+               tooltip="create a new record observation query">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.i2.permission"
+                     value="create_query">
+               </test>
+            </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.i2.query.new.type"
+                  value="I2_OBS_QUERY">
+            </parameter>
          </command>
          <command
                commandId="org.wcs.smart.i2.command.query.refresh"
@@ -930,11 +971,17 @@
             name="%EntityCompareEditorName">
       </editor>
       <editor
-            class="org.wcs.smart.i2.ui.editors.query.IntelQueryEditor"
+            class="org.wcs.smart.i2.ui.editors.query.IntelRecordObservationQueryEditor"
             default="false"
             icon="images/icons/obj16/entity_query.png"
-            id="org.wcs.smart.i2.editor.query"
+            id="org.wcs.smart.i2.editor.query.recordobservation"
             name="%QueryEditorNames">
+      </editor>
+      <editor
+            class="org.wcs.smart.i2.ui.editors.query.IntelEntitySummaryQueryEditor"
+            default="false"
+            id="org.wcs.smart.i2.editor.query.entitysummary"
+            name="Entity Summary Query">
       </editor>
    </extension>
    <extension
@@ -995,6 +1042,11 @@
       <command
             id="org.wcs.smart.i2.command.query.record.new"
             name="%NewQueryName3">
+         <commandParameter
+               id="org.wcs.smart.i2.query.new.type"
+               name="Query Type Parameter"
+               optional="true">
+         </commandParameter>
       </command>
       <command
             id="org.wcs.smart.i2.command.query.refresh"
@@ -1217,10 +1269,10 @@
    </extension>
    <extension
          id="org.wcs.smart.i2.oda.datasource"
-         name="SMART Advanced Intelligence Data Source"
+         name="SMART Profile Data Source"
          point="org.eclipse.datatools.connectivity.oda.dataSource">
       <dataSource
-            defaultDisplayName="SMART Advanced Intelligence Data Source"
+            defaultDisplayName="SMART Profile Data Source"
             driverClass="org.wcs.smart.i2.birt.datasource.IntelBirtDataSource"
             id="org.wcs.smart.i2.birt.datasource"
             odaVersion="3.0"
@@ -1827,7 +1879,7 @@
          </dataTypeMapping>
       </dataSet>
       <dataSet
-            defaultDisplayName="Advanced Intelligence Query"
+            defaultDisplayName="Profiles Query"
             id="org.wcs.smart.i2.birt.dataset.query">
          <dataTypeMapping
                nativeDataType="Double"
@@ -1944,8 +1996,8 @@
          <newDataSourceWizard
                includesProgressMonitor="false"
                pageClass="org.wcs.smart.i2.birt.datasource.ui.IntelligenceDataSourceWizardPage"
-               pageTitle="SMART Advanced Intelligence Data Source"
-               windowTitle="SMART Advanced Intelligence Data Source">
+               pageTitle="SMART Profile Data Source"
+               windowTitle="SMART Profile Data Source">
          </newDataSourceWizard>
       </dataSourceUI>
       <dataSetUI
@@ -1954,7 +2006,7 @@
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="Intelligence Entities"></dataSetWizard>
+               windowTitle="Entities"></dataSetWizard>
          <dataSetPage
                displayName="Entities"
                id="org.wcs.smart.i2.birt.ui.dataset.entity.wizard.page.list"
@@ -1967,7 +2019,7 @@
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="Intelligence Entity Locations"></dataSetWizard>
+               windowTitle="Entity Locations"></dataSetWizard>
          <dataSetPage
                displayName="Entity Locations"
                id="org.wcs.smart.i2.birt.ui.dataset.entity.location.wizard.page.list"
@@ -1980,7 +2032,7 @@
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="Intelligence Entity Records"></dataSetWizard>
+               windowTitle="Entity Records"></dataSetWizard>
          <dataSetPage
                displayName="Entity Records"
                id="org.wcs.smart.i2.birt.ui.dataset.entity.record.wizard.page.list"
@@ -2085,7 +2137,7 @@
              supportsOutParameters="false">
           <dataSetWizard
                 class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-                windowTitle="Intelligence Entities">
+                windowTitle="Entities">
           </dataSetWizard>
           <dataSetPage
                 displayName="Entity Location Attributes"
@@ -2099,10 +2151,10 @@
              supportsOutParameters="false">
           <dataSetWizard
                 class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-                windowTitle="Advanced Intelligence Queries">
+                windowTitle="Profiles Query">
           </dataSetWizard>
           <dataSetPage
-                displayName="Advanced Intelligence Queries"
+                displayName="Profile Queries"
                 id="org.wcs.smart.i2.birt.ui.dataset.query.wizard.page.list"
                 wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelQueryWizardPage">
           </dataSetPage>
@@ -2113,9 +2165,9 @@
              supportsOutParameters="false">
           <dataSetWizard
                 class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-                windowTitle="Advanced Intelligence Entity Searches"></dataSetWizard>
+                windowTitle="Entity Searches"></dataSetWizard>
           <dataSetPage
-                displayName="Advanced Intelligence Entity Search"
+                displayName="Entity Search"
                 id="org.wcs.smart.i2.birt.ui.dataset.query.wizard.page.list"
                 wizardPageClass="org.wcs.smart.i2.birt.datasource.ui.IntelEntitySearchWizardPage">
           </dataSetPage>
@@ -2141,9 +2193,6 @@
       <StyleProvider
             styleprovider="org.wcs.smart.i2.birt.query.QueryMapLayer">
       </StyleProvider>
-   </extension>
-   <extension
-         point="org.eclipse.ui.perspectiveExtensions">
    </extension>
    <extension
          point="org.wcs.smart.caLogin">
@@ -2264,7 +2313,7 @@
       <page
             class="org.wcs.smart.i2.birt.AdvancedIntelDataSourcePropertyPage"
             id="org.wcs.smart.i2.birt.datasource"
-            name="Advanced Intelligence Data Source">
+            name="Profile Data Source">
          <enabledWhen>
             <instanceof
                   value="org.eclipse.datatools.connectivity.IConnectionProfile">

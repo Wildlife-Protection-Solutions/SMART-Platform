@@ -40,8 +40,8 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
-import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.export.IQueryExporter;
 
 /**
@@ -54,8 +54,8 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	
 	public static final String LAST_DIR_KEY = "org.wcs.smart.i2.query.export.directory"; //$NON-NLS-1$
 
-	private IntelRecordObservationQuery query;
-	private IPagedQueryResultSet queryResults;
+	private AbstractIntelQuery query;
+	private IQueryResult queryResults;
 	
 	private QueryFormatPage page1;
 	private QueryFormatOptionPage page2;
@@ -63,7 +63,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private List<Projection> supportedProjections = null;
 	private Projection defaultProjection = null;
 	
-	public ExportQueryWizard(IntelRecordObservationQuery query, IPagedQueryResultSet results) {
+	public ExportQueryWizard(AbstractIntelQuery query, IQueryResult results) {
 		this.query = query;
 		this.queryResults = results;
 		
@@ -121,7 +121,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 * The query to export or null if no specific query is active
 	 * @return
 	 */
-	public IntelRecordObservationQuery getQuery(){
+	public AbstractIntelQuery getQuery(){
 		return this.query;
 	}
 	
@@ -163,6 +163,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			displayError(ex);
 			return false;
 		}
+		if (runOk[0]) {
+			MessageDialog.openInformation(getShell(), Messages.ExportQueryWizard_ExportDone, MessageFormat.format(Messages.ExportQueryWizard_ExportDoneMsg, page2.getFile().toString()));
+		}					
 		return runOk[0];
 	}
 	

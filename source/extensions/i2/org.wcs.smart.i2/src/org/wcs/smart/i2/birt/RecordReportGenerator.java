@@ -246,7 +246,7 @@ public enum RecordReportGenerator {
 		rdh.getBody().add(headerId);
 		
 		/* Details */
-		GridHandle headerGrid = factory.newGridItem(null, 2, 4);
+		GridHandle headerGrid = factory.newGridItem(null, 2, 5);
 		rdh.getBody().add(headerGrid);
 		headerGrid.setDataSet(recordDataset);
 		headerGrid.setStyleName(tableStyle.getName());
@@ -286,6 +286,17 @@ public enum RecordReportGenerator {
 		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.STATUS.getColumnName(Locale.getDefault()));
 		headerGrid.getCell(row,2).getContent().add(di);
 		row++;
+		
+		//primary date
+		l = factory.newLabel(null);
+		l.setText(MessageFormat.format("{0}:",RecordDatasetResultSetMetadata.Column.PRIMARY_DATE.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
+		headerGrid.getCell(row,1).getContent().add(l);
+		
+		di = factory.newDataItem(null);
+		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.PRIMARY_DATE.getColumnName(Locale.getDefault()));
+		headerGrid.getCell(row,2).getContent().add(di);
+		row++;
+		
 		
 		//created details
 		l = factory.newLabel(null);

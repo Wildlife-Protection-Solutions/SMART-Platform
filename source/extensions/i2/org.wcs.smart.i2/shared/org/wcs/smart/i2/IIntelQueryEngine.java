@@ -24,8 +24,8 @@ package org.wcs.smart.i2;
 import java.util.HashMap;
 
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
-import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.query.IQueryResult;
 
 /**
  * Intelligence Observation query engine.
@@ -33,21 +33,20 @@ import org.wcs.smart.i2.query.IPagedQueryResultSet;
  * @author Emily
  *
  */
-public interface IIntelObservationQueryEngine {
+public interface IIntelQueryEngine {
 
-	public static IIntelObservationQueryEngine createEngine() {
-		try {
-			return SmartContext.INSTANCE.getClass(IIntelObservationQueryEngine.class).getClass().newInstance();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+	public static IIntelQueryEngine createEngine( String queryType ) {
+		return SmartContext.INSTANCE.getClass(IQueryEngineFactory.class).findQueryEngine(queryType);
 	}
 	
-	public IPagedQueryResultSet executeQuery(IntelRecordObservationQuery query,  HashMap<String, Object> parameters) throws Exception;
+	/**
+	 * Execute a query and return the results
+	 * 
+	 * @param query
+	 * @param parameters
+	 * @return
+	 * @throws Exception
+	 */
+	public IQueryResult executeQuery(AbstractIntelQuery query,  HashMap<String, Object> parameters) throws Exception;
 
 }

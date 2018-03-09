@@ -26,7 +26,6 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
@@ -35,7 +34,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -49,12 +48,12 @@ import org.wcs.smart.i2.model.IntelEntityType;
 public class EntityTypeTreeFilterItem extends DeferredTreeFilterItem {
 
 	private Object LOCK = new Object();
-	private UUID typeUuid;
+	private String typeKey;
 	
 	
 	public EntityTypeTreeFilterItem(IntelEntityType type) {
 		super(Messages.EntityTypeTreeFilterItem_EntitiesLabel);
-		typeUuid = type.getUuid();
+		typeKey = type.getKeyId();
 	
 		final byte[] icon = type.getIcon();
 		if (icon != null){
@@ -82,8 +81,7 @@ public class EntityTypeTreeFilterItem extends DeferredTreeFilterItem {
 			synchronized (LOCK) {
 				if (kids == null){
 					try(Session s = HibernateManager.openSession()){
-						List<IntelEntity> entities = 
-								QueryFactory.buildQuery(s, IntelEntity.class, "entityType.uuid", typeUuid).list(); //$NON-NLS-1$
+						List<IntelEntity> entities = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntities(typeKey, s);
 						ArrayList<FilterTreeItem> temp = new ArrayList<>();
 						for (IntelEntity e : entities){
 							temp.add(new EntityTreeFilterItem(e));

@@ -4,6 +4,7 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +140,11 @@ public class PatrolDataGenerator {
 			
 			p.setTeam(teams.get( random.nextInt(teams.size() - 1) ));
 			p.setStation(stations.get(random.nextInt(stations.size() - 1)));
-			PatrolType.Type pt = PatrolType.Type.values()[random.nextInt(PatrolType.Type.values().length - 1)];
+			PatrolType.Type pt = null;
+			while(pt == null) {
+				pt = PatrolType.Type.values()[random.nextInt(PatrolType.Type.values().length - 1)];
+				if (transports.get(pt) == null) pt = null;
+			}
 			p.setPatrolType(pt);
 			
 			PatrolLeg pl = new PatrolLeg();
@@ -189,8 +194,8 @@ public class PatrolDataGenerator {
 			session.flush();
 			session.clear();
 			
-			double cx = (random.nextInt(5238) + 112700) / 10000.0;
-			double cy = -1 * ((random.nextInt(10093) + 350) / 10000.0);
+			double cx = (random.nextInt(2618) + 347810) / 10000.0;
+			double cy = -1 * ((random.nextInt(2883) + 12360) / 10000.0);
 			
 			for (int k = 0; k < daysPerPatrol; k++){
 				System.out.println("patrol day: " + k + "/" + daysPerPatrol);
@@ -293,7 +298,7 @@ public class PatrolDataGenerator {
 				
 				Track t = new Track();
 				t.setPatrolLegDay(pld);
-				t.setLineString(ls);
+				t.setLineStrings(Collections.singletonList(ls));
 				pld.setTrack(t);
 				
 				session.save(t);

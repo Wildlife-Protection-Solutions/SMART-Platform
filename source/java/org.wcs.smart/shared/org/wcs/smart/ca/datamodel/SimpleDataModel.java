@@ -8,11 +8,17 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
+import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.hibernate.QueryFactory;
 
 public class SimpleDataModel {
 
@@ -155,5 +161,23 @@ public class SimpleDataModel {
 		}else{ 
 			return true;
 		}		
+	}
+	
+	public static SimpleDataModel loadDataModel(ConservationArea ca, Session session) throws Exception{
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Category> c = cb.createQuery(Category.class);
+		Root<Category> root = c.from(Category.class);
+		c.where(cb.and(
+				cb.equal(root.get("conservationArea"), ca), //$NON-NLS-1$
+				cb.isNull(root.get("parent")) //$NON-NLS-1$
+				));
+		c.orderBy(cb.asc(root.get("categoryOrder"))); //$NON-NLS-1$
+		List<Category> rootCategories = session.createQuery(c).getResultList();
+					
+		List<Attribute> attribute = QueryFactory.buildQuery(session, Attribute.class, 
+			new Object[] {"conservationArea", ca}).getResultList(); //$NON-NLS-1$
+		
+		SimpleDataModel dm = new SimpleDataModel(ca, rootCategories, attribute);
+		return dm;
 	}
 }

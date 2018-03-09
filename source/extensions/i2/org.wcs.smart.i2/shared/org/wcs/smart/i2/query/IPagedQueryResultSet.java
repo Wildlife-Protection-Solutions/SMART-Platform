@@ -35,7 +35,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @author Emily
  *
  */
-public interface IPagedQueryResultSet {
+public interface IPagedQueryResultSet extends IQueryResult{
 	
 	/**
 	 * Sort direction

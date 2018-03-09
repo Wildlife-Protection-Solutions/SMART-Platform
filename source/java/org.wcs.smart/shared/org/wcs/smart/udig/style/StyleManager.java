@@ -147,7 +147,7 @@ public class StyleManager {
 						StyleContent sc = loadStyleContent(styleId);
 						XMLMemento memento = null;
 						try{
-							XMLMemento.createReadRoot(new StringReader(value));
+							memento = XMLMemento.createReadRoot(new StringReader(value));
 						}catch (WorkbenchException ex) {
 							throw new IOException(ex.getMessage(), ex);
 						}
