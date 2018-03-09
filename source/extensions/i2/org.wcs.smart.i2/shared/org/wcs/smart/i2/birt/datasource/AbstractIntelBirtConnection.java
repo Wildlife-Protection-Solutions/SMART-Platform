@@ -190,7 +190,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 			return false;
 		}else {
 			RunAndRenderTask task = (RunAndRenderTask)randrtask;
-			if (task.getRenderOption().getOutputFormat().equalsIgnoreCase(HTMLRenderOption.HTML)) {
+			if (task.getRenderOption()!= null && task.getRenderOption().getOutputFormat().equalsIgnoreCase(HTMLRenderOption.HTML)) {
 				return true;
 			}else {
 				return false;

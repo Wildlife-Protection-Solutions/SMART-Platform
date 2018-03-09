@@ -34,7 +34,6 @@ import org.wcs.smart.i2.birt.datasource.DesktopConnectionFactory;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.handlers.DeleteCaHandler;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
-import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
 import org.wcs.smart.i2.query.engine.QueryEngineFactory;
 
 
@@ -75,23 +74,17 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_DELETE_SMALL = "org.wcs.smart.i2.icon.delete.small"; //$NON-NLS-1$
 	public static final String ICON_CLEAR = "org.wcs.smart.i2.icon.clear"; //$NON-NLS-1$
 	public static final String ICON_ENTITY_EXPORT = "org.wcs.smart.i2.icon.entity.export"; //$NON-NLS-1$
-	
 	public static final String ICON_LOCATION_IMPORT = "org.wcs.smart.i2.icon.location.import"; //$NON-NLS-1$
-	
 	public static final String ICON_IMG_ZOOMIN = "org.wcs.smart.i2.icon.zoom.in"; //$NON-NLS-1$
 	public static final String ICON_IMG_ZOOMOUT = "org.wcs.smart.i2.icon.zoom.out"; //$NON-NLS-1$
-	
 	public static final String ICON_SRC_NEW = "org.wcs.smart.i2.icon.record.source.new"; //$NON-NLS-1$
 	public static final String ICON_SRC_IP = "org.wcs.smart.i2.icon.record.source.ip"; //$NON-NLS-1$
 	public static final String ICON_SRC_DONE = "org.wcs.smart.i2.icon.record.source.done"; //$NON-NLS-1$
-	
 	public static final String ICON_ATTACHMENT_SEARCH = "org.wcs.smart.i2.icon.attachment.search"; //$NON-NLS-1$
-	
 	public static final String ICON_ATTRIBUTE_EMPLOYEE = "org.wcs.smart.i2.attribute.employee"; //$NON-NLS-1$
-	
-	public static final String ICON_GROUP_BY = "org.wcs.smart.i2.query.groupby";
-	public static final String ICON_VALUES = "org.wcs.smart.i2.query.value";
-	public static final String ICON_FILTERS = "org.wcs.smart.i2.query.filters";
+	public static final String ICON_GROUP_BY = "org.wcs.smart.i2.query.groupby"; //$NON-NLS-1$
+	public static final String ICON_VALUES = "org.wcs.smart.i2.query.value"; //$NON-NLS-1$
+	public static final String ICON_FILTERS = "org.wcs.smart.i2.query.filters"; //$NON-NLS-1$
 	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;

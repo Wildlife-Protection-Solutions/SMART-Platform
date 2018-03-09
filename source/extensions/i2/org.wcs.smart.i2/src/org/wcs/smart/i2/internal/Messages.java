@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.i2.internal.messages"; //$NON-NLS-1$
+	public static String AbstractIntelEntityTypeListWizardPage_DatasetNotSupported;
 	public static String AbstractIntelEntityTypeListWizardPage_EntityTypeRequired;
 	public static String AbstractIntelEntityTypeListWizardPage_LinkParameter1;
 	public static String AbstractIntelEntityTypeListWizardPage_unauthorized;
@@ -758,6 +759,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_NotContainsLabel;
 	public static String IntelligenceLabelProviderImpl_NotLabel;
 	public static String IntelligenceLabelProviderImpl_NumberAttributeName;
+	public static String IntelligenceLabelProviderImpl_NumberOfEntitiesValue;
 	public static String IntelligenceLabelProviderImpl_OrLabel;
 	public static String IntelligenceLabelProviderImpl_PositionAttributeName;
 	public static String IntelligenceLabelProviderImpl_QueriewWorkingSetLabel;
@@ -802,6 +804,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnStatusLabel;
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnTitle;
 	public static String IntelligenceLabelProviderImpl_RecordRsColumnUUID;
+	public static String IntelligenceLabelProviderImpl_RecordRsPrimaryDateColumnTitle;
 	public static String IntelligenceLabelProviderImpl_RecordsWorkingSetLabel;
 	public static String IntelligenceLabelProviderImpl_RecordUnprocessedLabel;
 	public static String IntelligenceLabelProviderImpl_SearchNotFound;

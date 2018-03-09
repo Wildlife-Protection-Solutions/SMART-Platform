@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,7 +35,6 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -58,7 +56,6 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -74,7 +71,6 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -109,6 +105,7 @@ import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.IntelQueryLabelProvider;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.query.IQueryEditor;
 import org.wcs.smart.i2.ui.handler.NewQueryHandler;
@@ -238,23 +235,7 @@ public class QueryView {
 		
 		queryList = new TableViewer(part, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		queryList.setContentProvider(ArrayContentProvider.getInstance());
-		queryList.setLabelProvider(new LabelProvider(){
-			public String getText(Object element){
-				if (element instanceof QueryProxy) return ((QueryProxy) element).getName();
-				return super.getText(element);
-			}
-			
-			public Image getImage(Object element) {
-				if (element instanceof QueryProxy) {
-					if (((QueryProxy) element).getTypeKey().equals(IntelRecordObservationQuery.KEY)) {
-						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD);
-					}else if (((QueryProxy) element).getTypeKey().equals(IntelEntitySummaryQuery.KEY)) {
-						return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY);
-					}
-				}
-				return null;
-			}
-		});
+		queryList.setLabelProvider(new IntelQueryLabelProvider());
 		queryList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		queryList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		queryList.addDoubleClickListener(new IDoubleClickListener() {
@@ -678,65 +659,9 @@ public class QueryView {
 			});
 			
 			return Status.OK_STATUS;
-		}
-		
+		}	
 	};
 	
-	private class QueryProxy implements IAdaptable{
-		
-		private String name;
-		private UUID uuid;
-		private String type;
-		
-		
-		public QueryProxy(String name, UUID uuid, String typeKey){
-			this.name = name;
-			this.uuid = uuid;
-			this.type = typeKey;
-		}
-		
-		public String getTypeKey() {
-			return this.type;
-		}
-		
-		public String getName(){
-			return this.name;
-		}
-		
-		public UUID getUuid(){
-			return this.uuid;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T> T getAdapter(Class<T> adapter) {
-			if (adapter == IntelRecordObservationQuery.class){
-				IntelRecordObservationQuery q = new IntelRecordObservationQuery();
-				q.setUuid(getUuid());
-				return (T) q;
-			}
-			if (adapter == IntelEntitySummaryQuery.class) {
-				IntelEntitySummaryQuery q = new IntelEntitySummaryQuery();
-				q.setUuid(getUuid());
-				return (T)q;
-			}
-			return null;
-		}
-		
-		@Override
-		public boolean equals(Object other){
-			if (other == null) return false;
-			if (other == this) return true;
-			if (getClass() != other.getClass()) return false;
-			return Objects.equals(uuid, ((QueryProxy)other).uuid);
-		}
-		
-		@Override
-		public int hashCode(){
-			return Objects.hash(uuid);
-		}
-
-	}
 	
 	private class QueryViewerFilter extends ViewerFilter{
 

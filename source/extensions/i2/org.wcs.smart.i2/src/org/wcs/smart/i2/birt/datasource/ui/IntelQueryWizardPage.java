@@ -1,6 +1,7 @@
 package org.wcs.smart.i2.birt.datasource.ui;
 
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,7 +22,6 @@ import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPag
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -40,8 +40,11 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.query.IntelQueryDataset;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.IntelQueryLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
 public class IntelQueryWizardPage extends DataSetWizardPage {
@@ -102,17 +105,8 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 		}
 		
 		lstQueries = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		lstQueries.setLabelProvider(new LabelProvider() {
-			public String getText(Object x) {
-				if (x instanceof IntelRecordObservationQuery) {
-					return ((IntelRecordObservationQuery) x).getName();
-				}
-				return super.getText(x);
-			}
-		});
+		lstQueries.setLabelProvider(new IntelQueryLabelProvider());
 		lstQueries.setContentProvider(ArrayContentProvider.getInstance());
-		
-
 		lstQueries.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstQueries.getControl().getLayoutData()).heightHint = 300;
 		lstQueries.getControl().addListener(SWT.Selection, new Listener() {
@@ -121,13 +115,14 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 				validateData();
 			}
 		});
-		List<IntelRecordObservationQuery> types = null;
+		List<AbstractIntelQuery> queries = new ArrayList<>();
 		try(Session s = HibernateManager.openSession()){
-			types = QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+			queries.addAll( QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
+			queries.addAll( QueryFactory.buildQuery(s, IntelEntitySummaryQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
 		}
 		
-		Collections.sort(types, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
-		lstQueries.setInput(types);
+		Collections.sort(queries, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
+		lstQueries.setInput(queries);
 		
 		setPageComplete(false);
 		return composite;
@@ -150,11 +145,11 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 
 		String queryText = dataSetDesign.getQueryText();
 		if (queryText != null && !queryText.isEmpty()){
-			List<IntelRecordObservationQuery> types = (List<IntelRecordObservationQuery>) lstQueries.getInput();
-			IntelRecordObservationQuery selection = null;
+			List<AbstractIntelQuery> types = (List<AbstractIntelQuery>) lstQueries.getInput();
+			AbstractIntelQuery selection = null;
 			
-			for(IntelRecordObservationQuery t : types){
-				String queryKey = IntelRecordObservationQuery.KEY + IntelQueryDataset.QUERY_DEF_SEP + UuidUtils.uuidToString(t.getUuid());
+			for(AbstractIntelQuery t : types){
+				String queryKey = t.getTypeKey() + IntelQueryDataset.QUERY_DEF_SEP + UuidUtils.uuidToString(t.getUuid());
 				if(queryKey.equals(queryText)){
 					selection = t;
 					break;
@@ -171,8 +166,8 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 	 * 
 	 * @return the user selected query
 	 */
-	public IntelRecordObservationQuery getSelectedEntityType() {
-		return (IntelRecordObservationQuery) ((IStructuredSelection) lstQueries.getSelection()).getFirstElement();
+	public AbstractIntelQuery getSelectedQuery() {
+		return (AbstractIntelQuery)lstQueries.getStructuredSelection().getFirstElement();
 	}
 
 	/**
@@ -224,11 +219,8 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 		if (lstQueries.getSelection().isEmpty()) {
 			isValid = false;
 		} else {
-			Object selection = ((IStructuredSelection) lstQueries.getSelection())
-					.getFirstElement();
-			if (!(selection instanceof IntelRecordObservationQuery)) {
-				isValid = false;
-			}
+			Object selection = ((IStructuredSelection) lstQueries.getSelection()).getFirstElement();
+			isValid = selection instanceof AbstractIntelQuery;
 		}
 
 		if (isValid) {
@@ -250,7 +242,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 	}
 
 	private String getQueryText() {
-		return IntelRecordObservationQuery.KEY + IntelQueryDataset.QUERY_DEF_SEP + UuidUtils.uuidToString(getSelectedEntityType().getUuid());
+		return getSelectedQuery().getTypeKey() + IntelQueryDataset.QUERY_DEF_SEP + UuidUtils.uuidToString(getSelectedQuery().getUuid());
 	}
 	/**
 	 * Saves the user-defined value in this page, and updates the specified
@@ -277,7 +269,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 
 			// update the data set design with the
 			// query's current runtime metadata
-			updateDesign(dataSetDesign, customConn, getSelectedEntityType());
+			updateDesign(dataSetDesign, customConn, getSelectedQuery());
 
 		} catch (OdaException e) {
 			// not able to get current metadata, reset previous derived metadata
@@ -303,7 +295,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 	 * @param type
 	 * @return
 	 */
-	protected String getDatasetName(IntelRecordObservationQuery type){
+	protected String getDatasetName(AbstractIntelQuery type){
 		return type.getName();
 	}
 	
@@ -313,7 +305,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 	 */
 	private void updateDesign(DataSetDesign dataSetDesign, 
 			IConnection conn,
-			IntelRecordObservationQuery entityType) throws OdaException {
+			AbstractIntelQuery intelQuery) throws OdaException {
 
 		//create dataests
 		IQuery query = conn.newQuery(getDatasetType());
@@ -345,8 +337,8 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
-		dataSetDesign.setDisplayName(getDatasetName(entityType));
-		dataSetDesign.setName(getDatasetName(entityType));
+		dataSetDesign.setDisplayName(getDatasetName(intelQuery));
+		dataSetDesign.setName(getDatasetName(intelQuery));
 		
 		
 	}

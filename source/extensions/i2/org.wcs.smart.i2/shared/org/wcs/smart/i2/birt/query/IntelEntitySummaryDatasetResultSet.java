@@ -22,10 +22,9 @@
 package org.wcs.smart.i2.birt.query;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
+import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -39,65 +38,45 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.IIntelQueryEngine;
-import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
-import org.wcs.smart.i2.query.IPagedQueryResultSet;
-import org.wcs.smart.i2.query.IResultItem;
-import org.wcs.smart.i2.query.PagedResultSetIterator;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.query.SummaryQueryResult;
 
 /**
- * Intelligence record attribute dataset results
+ * Result set for the summary entity queries
+ * 
  * @author Emily
  *
  */
-public class IntelQueryDatasetResultSet implements IResultSet {
-
-	private long m_maxRows = -1;
+public class IntelEntitySummaryDatasetResultSet implements IResultSet {
+	
+	private int m_maxRows = -1;
 	private int m_currentRowId = -1;
 
-	private IResultItem currentItem;
-	private Object lastRowItem;
+	private IntelEntitySummaryDatasetResultSetMetadata metadata;
+	private SummaryQueryResult results = null;
 	
-	private IPagedQueryResultSet results;
-	private PagedResultSetIterator iterator;
-	
-	private IntelQueryDataset dataset;
-	
+	private boolean lastIsNull = false;
+
 	/**
 	 * Creates a new summary results set
-	 * 
-	 * @param query
-	 *            the summary query
-	 * @param metadata
-	 *            the metadata
 	 */
-	public IntelQueryDatasetResultSet(IntelQueryDataset dataset, HashMap<Integer, Object> parameters) throws OdaException {
-		this.dataset = dataset;
+	public IntelEntitySummaryDatasetResultSet(IntelQueryDataset dataset, HashMap<Integer, Object> parameters) throws OdaException {
+
 		
-		IntelRecordObservationQuery query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
+		IntelEntitySummaryQuery query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
 		if (query == null) {
-			throw new OdaException("Profiles Record Observtion Query not found"); //$NON-NLS-1$
+			throw new OdaException("Entity Summary Query not found"); //$NON-NLS-1$
 		}
-		
-		int sindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.START_DATE.getName());
-		int eindex = ((IntelQueryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.END_DATE.getName());
-		Date[] dfilter = new Date[] {null, null};
-		if (sindex > 0 && eindex > 0 && parameters.get(sindex) != null && parameters.get(eindex) != null) {
-			dfilter[0] = (Date) parameters.get(sindex);
-			dfilter[1] = (Date) parameters.get(eindex);
-		}
-		
+	
 		IIntelQueryEngine engine = IIntelQueryEngine.createEngine(query.getTypeKey());
 		HashMap<String, Object> eparameters = new HashMap<>();
 		eparameters.put(Session.class.getName(), dataset.getConnection().getSession());
 		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
-		eparameters.put(Date.class.getName(), dfilter);
 		eparameters.put(Locale.class.getName(), dataset.getConnection().getCurrentLocale());
 		eparameters.put(ConservationArea.class.getName(), dataset.getConnection().getConservationAreas());
 		try {
-			results = (IPagedQueryResultSet) engine.executeQuery(query, eparameters);
-			m_maxRows = results.getItemCount();
-			iterator = results.iterator(dataset.getConnection().getSession());
+			results = (SummaryQueryResult) engine.executeQuery(query, eparameters);
+			m_maxRows = results.getNumDataRows();
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
@@ -105,14 +84,11 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 		
 		this.m_currentRowId = 0;
 	}
-	
-	
-
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getMetaData()
 	 */
 	public IResultSetMetaData getMetaData() throws OdaException {
-		return dataset.getMetaData();
+		return metadata;
 	}
 
 	/**
@@ -129,18 +105,23 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @return the maximum number of rows to fetch.
 	 */
 	protected int getMaxRows() {
-		return (int)m_maxRows;
+		return m_maxRows;
 	}
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#next()
 	 */
 	public boolean next() throws OdaException {
-		m_currentRowId++;
-		if (iterator.hasNext()) {
-			currentItem = iterator.next();
+		lastIsNull = false;
+		int maxRows = getMaxRows();
+		if (maxRows <= 0) // no limit is specified
+			maxRows = results.getNumDataRows(); 
+		
+		if (m_currentRowId < maxRows - 1) {
+			m_currentRowId++;
 			return true;
 		}
+
 		return false;
 	}
 
@@ -148,15 +129,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#close()
 	 */
 	public void close() throws OdaException {
-		iterator.close();
-		try {
-//			dataset.getConnection().getSession().beginTransaction();
-			results.dispose(dataset.getConnection().getSession());
-//			dataset.getConnection().getSession().getTransaction().commit();
-		} catch (SQLException e) {
-//			dataset.getConnection().getSession().getTransaction().rollback();
-			throw new OdaException(e);
-		}
+		m_currentRowId = 0; // reset row counter
 		results = null;
 		m_maxRows = -1;
 	}
@@ -167,26 +140,20 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	public int getRow() throws OdaException {
 		return m_currentRowId;
 	}
+
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getString(int)
 	 */
 	public String getString(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return ""; //$NON-NLS-1$
-		return lastRowItem.toString();
-	}
-
-	/**
-	 * object for the current row in the given column index 
-	 * @param colIndex column index
-	 * @return
-	 */
-	private Object getCurrentItem(int colIndex) {
-		if (currentItem == null) return null;
-		try{
-			return ((IntelQueryDatasetResultSetMetadata)getMetaData()).getQueryColumn(colIndex - 1).getValue(currentItem);
-		}catch (Exception ex){
-			return "ERROR: " + ex.getMessage(); //$NON-NLS-1$
+		index--;
+		if (index < results.getRowHeaders().size()) {
+			lastIsNull = false;
+			return results.getRowHeaderValues()[m_currentRowId][index].getName();
+		} else {
+			index = index - results.getRowHeaders().size();
+			Double data = results.getData()[m_currentRowId][index];
+			lastIsNull = (data == null);
+			return String.valueOf(data);
 		}
 	}
 
@@ -203,10 +170,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getInt(int)
 	 */
 	public int getInt(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		if (lastRowItem == null) return -1;
-		if (lastRowItem instanceof Integer) return (int) lastRowItem;
-		return -1;
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -222,17 +186,19 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getDouble(int)
 	 */
 	public double getDouble(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		if (lastRowItem instanceof Double) {
-			return (Double) lastRowItem;
-		} else if (lastRowItem instanceof Float) {
-			return (Float) lastRowItem;
-		} else if (lastRowItem instanceof Integer) {
-			return (Integer) lastRowItem;
-		} else if (lastRowItem instanceof Long) {
-			return (Long) lastRowItem;
+		index--;
+		if (index < results.getRowHeaders().size()) {
+			return -1;
+
+		} else {
+			index = index - results.getRowHeaders().size();
+			Double data = results.getData()[m_currentRowId][index];
+			lastIsNull = (data == null);
+			if (data == null) {
+				return Double.NaN;
+			}
+			return data;
 		}
-		return -1;
 	}
 
 	/**
@@ -248,15 +214,8 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getBigDecimal(int)
 	 */
 	public BigDecimal getBigDecimal(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		if (lastRowItem instanceof BigDecimal) {
-			return (BigDecimal) lastRowItem;
-		} else if (lastRowItem instanceof Double || lastRowItem instanceof Float) {
-			return BigDecimal.valueOf((Double) lastRowItem);
-		} else if (lastRowItem instanceof Long ) {
-			return BigDecimal.valueOf((Long) lastRowItem);
-		}
-		return BigDecimal.valueOf(-1);
+
+		return BigDecimal.valueOf(getDouble(index));
 	}
 
 	/**
@@ -271,17 +230,8 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getDate(int)
 	 */
-	public java.sql.Date getDate(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		if (lastRowItem instanceof java.sql.Date) {
-			return (java.sql.Date) lastRowItem;
-		} else if (lastRowItem instanceof Time) {
-			return new java.sql.Date(((Time) lastRowItem).getTime());
-		} else if (lastRowItem instanceof java.util.Date) {
-			return new java.sql.Date(((java.util.Date) lastRowItem).getTime());
-		}else if (lastRowItem == null){
-			return null;
-		}
+	public Date getDate(int index) throws OdaException {
+
 		throw new UnsupportedOperationException();
 	}
 
@@ -290,7 +240,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * org.eclipse.datatools.connectivity.oda.IResultSet#getDate(java.lang.String
 	 * )
 	 */
-	public java.sql.Date getDate(String columnName) throws OdaException {
+	public Date getDate(String columnName) throws OdaException {
 		return getDate(findColumn(columnName));
 	}
 
@@ -298,12 +248,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getTime(int)
 	 */
 	public Time getTime(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		if (lastRowItem instanceof Time) {
-			return (Time) lastRowItem;
-		}else if (lastRowItem instanceof Timestamp) {
-			return new Time(((Timestamp)lastRowItem).getTime());
-		}
+
 		throw new UnsupportedOperationException();
 	}
 
@@ -320,15 +265,12 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getTimestamp(int)
 	 */
 	public Timestamp getTimestamp(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		if (lastRowItem instanceof Timestamp) {
-			return (Timestamp) lastRowItem;
-		}
+
 		throw new UnsupportedOperationException();
 	}
 
-	/*
-	 * @s*ee
+	/**
+	 * @see
 	 * org.eclipse.datatools.connectivity.oda.IResultSet#getTimestamp(java.lang
 	 * .String)
 	 */
@@ -337,7 +279,6 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	}
 
 	/**
-	 * Not Supported.
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getBlob(int)
 	 */
 	public IBlob getBlob(int index) throws OdaException {
@@ -354,7 +295,6 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	}
 
 	/**
-	 * Not supported.
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getClob(int)
 	 */
 	public IClob getClob(int index) throws OdaException {
@@ -374,16 +314,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getBoolean(int)
 	 */
 	public boolean getBoolean(int index) throws OdaException {
-		lastRowItem = getCurrentItem(index);
-		if (lastRowItem instanceof Boolean) {
-			return (Boolean) lastRowItem;
-		} else if (lastRowItem instanceof Integer) {
-			return ((Integer) lastRowItem) <= 0;
-		} else if (lastRowItem instanceof Double) {
-			return ((Double) lastRowItem) <= 0.5;
-		}else if (lastRowItem == null){
-			return false;
-		}
+
 		throw new UnsupportedOperationException();
 	}
 
@@ -400,7 +331,16 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#getObject(int)
 	 */
 	public Object getObject(int index) throws OdaException {
-		return getCurrentItem(index);
+		index--;
+		if (index < results.getRowHeaders().size()) {
+			lastIsNull = false;
+			return results.getRowHeaderValues()[m_currentRowId][index].getName();
+		} else {
+			index = index - results.getRowHeaders().size();
+			Double data = results.getData()[m_currentRowId][index];
+			lastIsNull = (data == null);
+			return data;
+		}
 	}
 
 	/**
@@ -416,7 +356,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#wasNull()
 	 */
 	public boolean wasNull() throws OdaException {
-		return lastRowItem == null;
+		return lastIsNull;
 	}
 
 	/**
@@ -425,8 +365,8 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 	 * .String)
 	 */
 	public int findColumn(String columnName) throws OdaException {
-		for (int i = 0; i < getMetaData().getColumnCount(); i++) {
-			if (getMetaData().getColumnName(i).equals(columnName)) {
+		for (int i = 0; i < metadata.getColumnCount(); i++) {
+			if (metadata.getColumnName(i).equals(columnName)) {
 				return i + 1;
 			}
 		}

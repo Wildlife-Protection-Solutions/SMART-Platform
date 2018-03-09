@@ -50,9 +50,7 @@ import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryResult;
-import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.query.SummaryHeader;
 import org.wcs.smart.i2.query.SummaryQueryResult;
 import org.wcs.smart.i2.query.SummaryResultKey;
 import org.wcs.smart.i2.query.observation.filter.BooleanFilter;
@@ -66,9 +64,7 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
-import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.query.observation.filter.ValuePart.ValueOption;
-import org.wcs.smart.i2.ui.views.query.dropitem.ValueDropItem;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -316,7 +312,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		logme(sb);
 		
 		SummaryQueryResult results = new SummaryQueryResult();
-		getHeaderInfo(definition, results, dateRange, itemProvider, l, session);
+		EntitySummaryQueryHeaderEngine.INSTANCE.getHeaderInfo(definition, results, dateRange, itemProvider, l, session);
 		
 		HashMap<SummaryResultKey, Double> data = new HashMap<>();
 		
@@ -337,7 +333,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			String[] groupBys = new String[groupByItems.size()];
 			int index = 0;
 			for (GroupByItem groupBy : groupByItems) {
-				String colkey = computeColumnKey(groupBy);
+				String colkey = EntitySummaryQueryHeaderEngine.INSTANCE.computeColumnKey(groupBy);
 				Object value = rowdata[column++];
 				
 				if (groupBy.getAttributeType() != null && groupBy.getAttributeType() == AttributeType.EMPLOYEE && value != null) {
@@ -589,20 +585,6 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 	}
 	
-	private static String computeColumnKey(GroupByItem item) {
-		String colkey = null;
-		if (item.getGroupByType() == GroupByType.ENTITYTYPE) {
-			colkey = "ET"; //$NON-NLS-1$
-		}else {
-			colkey = item.getAttributeKey();
-			if (item.getEntityTypeKey() != null) {
-				colkey += "_" + item.getEntityTypeKey(); //$NON-NLS-1$
-			}
-		}
-		return colkey;
-	}
-	
-	
 	/*
 	 * Filters the data table by creating a new data table and only 
 	 * including the elements that match the filter,  
@@ -820,67 +802,5 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		}
 	}
 	
-	/**
-	 * Computes the header information for a given
-	 * query.
-	 * 
-	 * @param query the summary query
-	 * @param results the summary query results to update
-	 * @param session hibernate session
-	 */
-	private static void getHeaderInfo(SumQueryDefinition queryDefinition, SummaryQueryResult results, LocalDate[] dateRange, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
-		
-		// value headers
-		ValuePart vp = queryDefinition.getValuePart();
-		SummaryHeader header = new SummaryHeader(ValueDropItem.NAME, ValueDropItem.NAME, vp.getValueOption().getKey(), true);
-		results.addValueHeader(header);
-
-		for (GroupByItem item : queryDefinition.getRowGroupByPart().getItems()) {
-			List<ListItem> allItems = item.getAllOptions(session, itemProvider, dateRange, l);
-			String colkey = computeColumnKey(item);
-			List<SummaryHeader> rowHeaders = new ArrayList<>();
-			
-			for (int i = 0; i < allItems.size(); i ++){
-				ListItem it = allItems.get(i);
-				if (item.getFilterOptions() == null || item.getFilterOptions().isEmpty()) {
-					rowHeaders.add( new SummaryHeader( it.getName(), it.getFullName(), colkey, it.getKeyId(), false) );
-				}else {
-					for (String key : item.getFilterOptions()) {
-						if (key.equals(it.getKeyId())) {
-							rowHeaders.add( new SummaryHeader( it.getName(), it.getFullName(), colkey, it.getKeyId(), false) );
-							break;
-						}
-					}
-				}
-					
-				
-			}
-			results.addRowHeader(rowHeaders.toArray(new SummaryHeader[rowHeaders.size()]));
-		}
-		
-		for (GroupByItem item : queryDefinition.getColumnGroupByPart().getItems()) {
-			List<ListItem> allItems = item.getAllOptions(session, itemProvider, dateRange, l);
-			String colkey = computeColumnKey(item);
-			
-			List<SummaryHeader> rowHeaders = new ArrayList<>();
-			
-			for (int i = 0; i < allItems.size(); i ++){
-				ListItem it = allItems.get(i);
-				if (item.getFilterOptions() == null || item.getFilterOptions().isEmpty()) {
-					rowHeaders.add( new SummaryHeader( it.getName(), it.getFullName(), colkey, it.getKeyId(), false) );
-				}else {
-					for (String key : item.getFilterOptions()) {
-						if (key.equals(it.getKeyId())) {
-							rowHeaders.add( new SummaryHeader( it.getName(), it.getFullName(), colkey, it.getKeyId(), false) );
-							break;
-						}
-					}
-				}
-					
-				
-			}
-			results.addColumnHeader(rowHeaders.toArray(new SummaryHeader[rowHeaders.size()]));
-		}
-		
-	}
+	
 }

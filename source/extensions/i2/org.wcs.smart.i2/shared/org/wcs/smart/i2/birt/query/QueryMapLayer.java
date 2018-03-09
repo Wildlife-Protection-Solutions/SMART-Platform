@@ -68,7 +68,12 @@ public class QueryMapLayer implements IBirtMapLayerManager, IBirtLayerStyleProvi
 		}
 		OdaDataSetHandle odaHandle = (OdaDataSetHandle) handle;
 		if (odaHandle.getExtensionID().equals(IntelQueryDataset.DATASET_TYPE)) {
-			return true;
+			String queryText = odaHandle.getQueryText();
+			String[] bits = queryText.split(IntelQueryDataset.QUERY_DEF_SEP);
+			String queryType = bits[0];
+			if (queryType.equals(IntelRecordObservationQuery.KEY)) {
+				return true;
+			}
 		}
 		return false;
 	}

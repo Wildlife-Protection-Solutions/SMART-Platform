@@ -27,9 +27,12 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
@@ -94,8 +97,13 @@ public class RecordAttributeDatasetResultSetMetadata implements IResultSetMetaDa
 					StringBuilder sb = new StringBuilder();
 					for (IntelRecordAttributeValueList item : record.getAttributeListItems()){
 						if (record.getAttribute().getAttribute() != null){
-							IntelAttributeListItem a = (IntelAttributeListItem) s.get(IntelAttributeListItem.class, item.getId().getElementUuid());
-							if (a != null) sb.append(a.getName());
+							if (record.getAttribute().getAttribute().getType() == IntelAttribute.AttributeType.LIST) {
+								IntelAttributeListItem a = (IntelAttributeListItem) s.get(IntelAttributeListItem.class, item.getId().getElementUuid());
+								if (a != null) sb.append(a.getName());
+							}else if (record.getAttribute().getAttribute().getType() == IntelAttribute.AttributeType.EMPLOYEE) {
+								Employee e = s.get(Employee.class, item.getId().getElementUuid());
+								if (e != null) sb.append(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(e, l));
+							}
 						}else if (record.getAttribute().getEntityType() != null){
 							IntelEntity a = (IntelEntity) s.get(IntelEntity.class, item.getId().getElementUuid());
 							if (a != null) sb.append(a.getIdAttributeAsText(l));

@@ -43,6 +43,7 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 	public static enum Column{
 		UUID("record:uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		TITLE("record:title", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		PRIMARY_DATE("record:primarydate", java.sql.Types.DATE), //$NON-NLS-1$
 		DESCRIPTION("record:description", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		SCRATCHPAD("record:scratchpad",  java.sql.Types.VARCHAR), //$NON-NLS-1$
 		CREATED_BY("record:createdby", java.sql.Types.VARCHAR), //$NON-NLS-1$
@@ -74,6 +75,8 @@ public class RecordDatasetResultSetMetadata implements IResultSetMetaData {
 				return UuidUtils.uuidToString(record.getUuid());
 			case TITLE:
 				return record.getTitle();
+			case PRIMARY_DATE:
+				return record.getPrimaryDate();
 			case DESCRIPTION:
 				return record.getDescription();
 			case SCRATCHPAD:

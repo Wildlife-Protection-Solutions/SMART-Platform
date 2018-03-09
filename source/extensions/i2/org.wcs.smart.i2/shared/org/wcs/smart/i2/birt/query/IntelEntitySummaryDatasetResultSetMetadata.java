@@ -21,79 +21,73 @@
  */
 package org.wcs.smart.i2.birt.query;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.CcaaQueryItemProvider;
-import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryItemProvider;
-import org.wcs.smart.i2.query.IntelQueryColumnProvider;
+import org.wcs.smart.i2.query.SummaryQueryResult;
+import org.wcs.smart.i2.query.engine.EntitySummaryQueryHeaderEngine;
+import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 
 /**
- * Record attribute dataset result set metadata
+ * Result set metadata for summary queries
+ * 
  * @author Emily
  *
  */
-public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
+public class IntelEntitySummaryDatasetResultSetMetadata implements IResultSetMetaData {
+
+	private final static String HEADER_COLUMN_KEY = "header"; //$NON-NLS-1$
+		
+	protected SummaryQueryResult results;
 	
-	private List<IQueryColumn> columns;
-	private List<String> names;
-	
-	public IntelQueryDatasetResultSetMetadata(IntelQueryDataset dataset) throws OdaException{
-		IntelRecordObservationQuery query = dataset.getConnection().getSession().get(IntelRecordObservationQuery.class, dataset.getQuery());
+	/**
+	 * creates a new metadata object for a given query.  The summary
+	 * query must have header parsed before configuring.
+	 * @param query
+	 */
+	public IntelEntitySummaryDatasetResultSetMetadata(IntelQueryDataset dataset) throws OdaException{
+		IntelEntitySummaryQuery query = dataset.getConnection().getSession().get(IntelEntitySummaryQuery.class, dataset.getQuery());
 		if (query == null) {
-			throw new OdaException("Profiles Record Observtion Query not found"); //$NON-NLS-1$
+			throw new OdaException("Entity Summary Query not found"); //$NON-NLS-1$
 		}
+		
 		try {
+			SumQueryDefinition parsedQuery = IntelEntitySummaryQuery.parseQuery(query.getQueryString());
+	
 			IQueryItemProvider itemProvider = null;
 			if (!query.getConservationArea().getIsCcaa()) {
 				itemProvider = new CaQueryItemProvider(dataset.getConnection().getConservationAreas().iterator().next(), query.getConservationArea());
 			}else {
 				itemProvider = new CcaaQueryItemProvider(dataset.getConnection().getConservationAreas(), query.getConservationArea());
 			}
-			columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
-			names = new ArrayList<>(columns.size());
-			//ensure names are unique
-			for(IQueryColumn c: columns) {
-				String name = c.getColumnName();
-				int i = 0;
-				while(names.contains(name)) {
-					name += name + " " + i++; //$NON-NLS-1$
-				}
-				names.add(name);
-			}
+			
+			results = new SummaryQueryResult();
+			EntitySummaryQueryHeaderEngine.INSTANCE.getHeaderInfo(parsedQuery, results, null, itemProvider, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
+
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
 	}
-	
-	/**
-	 * 
-	 * @param index 0 based
-	 * @return
-	 */
-	public IQueryColumn getQueryColumn(int index) {
-		return columns.get(index);
-	}
-	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnCount()
 	 */
 	@Override
 	public int getColumnCount() throws OdaException {
-		return columns.size();		
+		if (results == null) return 0;
+		int cnt = results.getNumDataColumns() + results.getRowHeaders().size();
+		return cnt;
 	}
-
+	
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getColumnDisplayLength(int)
+	 * @return -1
 	 */
 	@Override
-	public int getColumnDisplayLength(int arg0) throws OdaException {
+	public int getColumnDisplayLength(int index) throws OdaException {
 		return -1;
 	}
 
@@ -102,7 +96,19 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnLabel(int index) throws OdaException {
-		return names.get(index-1);
+		index = index - 1;
+		if (index < results.getRowHeaders().size()){
+			return HEADER_COLUMN_KEY + "_" + index; //$NON-NLS-1$
+		}else{
+			StringBuilder sb= new StringBuilder();
+			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
+				if (i != 0){
+					sb.append("\n");	 //$NON-NLS-1$
+				}
+				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getName());
+			}
+			return sb.toString();
+		}
 	}
 
 	/**
@@ -110,7 +116,24 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnName(int index) throws OdaException {
-		return  columns.get(index-1).getKey();
+		index = index - 1;
+		if (index < results.getRowHeaders().size()){
+			return HEADER_COLUMN_KEY + "_" + index; //$NON-NLS-1$
+		}else{
+			StringBuilder sb= new StringBuilder();
+			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
+				if (i != 0){
+					sb.append(" _ "); //$NON-NLS-1$
+				}
+				sb.append(results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getKey());
+				String identifier = results.getColumnHeaderValues()[i][index - results.getRowHeaders().size()].getIdentifier();
+				if ( identifier != null){
+					sb.append("_"); //$NON-NLS-1$
+					sb.append(identifier);
+				}
+			}
+			return sb.toString();
+		}
 	}
 
 	/**
@@ -118,15 +141,11 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnType(int index) throws OdaException {
-		switch (columns.get(index-1).getDataType()) {
-		case BOOLEAN: return java.sql.Types.BOOLEAN;
-		case DATE: return java.sql.Types.DATE;
-		case GEOMETRY: return java.sql.Types.JAVA_OBJECT;
-		case NUMERIC: return java.sql.Types.DOUBLE;
-		case STRING: return java.sql.Types.VARCHAR;
-		case TIME: return java.sql.Types.TIME;
-		default:
+		index--;
+		if (index < results.getRowHeaders().size()){
 			return java.sql.Types.VARCHAR;
+		}else{
+			return java.sql.Types.DOUBLE;
 		}
 	}
 
@@ -135,23 +154,25 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public String getColumnTypeName(int index) throws OdaException {
-		 int nativeTypeCode = getColumnType( index );
+		int nativeTypeCode = getColumnType( index );
 	     return AbstractIntelBirtConnection.getNativeDataTypeName( nativeTypeCode, IntelQueryDataset.DATASET_TYPE );
 	}
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getPrecision(int)
+	 * @return -1
 	 */
 	@Override
-	public int getPrecision(int arg0) throws OdaException {
+	public int getPrecision(int index) throws OdaException {
 		return -1;
 	}
 
 	/**
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#getScale(int)
+	 * @return -1
 	 */
 	@Override
-	public int getScale(int arg0) throws OdaException {
+	public int getScale(int index) throws OdaException {
 		return -1;
 	}
 
@@ -159,7 +180,7 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSetMetaData#isNullable(int)
 	 */
 	@Override
-	public int isNullable(int arg0) throws OdaException {
+	public int isNullable(int index) throws OdaException {
 		return columnNullableUnknown;
 	}
 
