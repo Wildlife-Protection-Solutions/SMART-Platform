@@ -107,7 +107,7 @@ public class QueryFormatPage extends WizardPage {
 		
 		for (Iterator<IQueryExporter> iterator = exports.iterator(); iterator.hasNext();) {
 			IQueryExporter iQueryExporter = iterator.next();
-			if (!iQueryExporter.canExport(((ExportQueryWizard)getWizard()).getQuery().getKeyId())) iterator.remove();
+			if (!iQueryExporter.canExport(((ExportQueryWizard)getWizard()).getQuery().getTypeKey())) iterator.remove();
 		}
 		
 		Collections.sort(exports, new Comparator<IQueryExporter>() {

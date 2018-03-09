@@ -21,21 +21,13 @@
  */
 package org.wcs.smart.i2;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.ca.datamodel.DataModelManager;
-import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
@@ -43,7 +35,7 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
-import org.wcs.smart.i2.query.CcaaQueryItemProvider;
+import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 
 /**
@@ -117,7 +109,7 @@ public enum InternalQueryManager {
 			synchronized (INSTANCE) {
 				if (queryItemProvider != null) return queryItemProvider;
 				if (SmartDB.isMultipleAnalysis()) {
-					queryItemProvider = new CcaaQueryItemProvider(Collections.emptyList(), SmartDB.getCurrentConservationArea()) {
+					queryItemProvider = new DesktopCcaaQueryItemProvider(Collections.emptyList(), SmartDB.getCurrentConservationArea()) {
 						@Override
 						public Collection<ConservationArea> getConservationAreas() {
 							return SmartDB.getConservationAreaConfiguration().getConservationAreas();

@@ -48,7 +48,7 @@ public class IntelEntitySummaryQuery extends AbstractIntelQuery {
 	
 	@Override
 	@Transient
-	public String getKeyId() {
+	public String getTypeKey() {
 		return KEY;
 	}
 	

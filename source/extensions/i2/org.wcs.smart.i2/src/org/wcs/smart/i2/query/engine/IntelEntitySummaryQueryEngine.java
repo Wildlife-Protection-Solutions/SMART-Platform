@@ -47,7 +47,7 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
-import org.wcs.smart.i2.query.CcaaQueryItemProvider;
+import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.ListItem;
@@ -106,7 +106,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 		}
-		IQueryItemProvider itemProvider = new CcaaQueryItemProvider(cas, query.getConservationArea());
+		IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
 		if (cas.size() == 1) {
 			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 		}

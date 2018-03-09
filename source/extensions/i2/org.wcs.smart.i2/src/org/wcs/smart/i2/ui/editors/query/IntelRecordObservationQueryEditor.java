@@ -616,6 +616,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 				@Override
 				protected void onError(Exception ex) {
 					Display.getDefault().syncExec(()->{
+						if (stackPanel.isDisposed()) return;
 						resultsTable.setInput(null);
 						mapPanel.updateQueryLayers(null);
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;
@@ -627,6 +628,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 				@Override
 				protected void onComplete(IQueryResult results) {
 					Display.getDefault().syncExec(()->{
+						if (stackPanel.isDisposed()) return;
 						resultsTable.setInput((IPagedQueryResultSet) results);
 						mapPanel.updateQueryLayers((IPagedQueryResultSet) results);
 						((StackLayout)stackPanel.getLayout()).topControl = resultsTable;
@@ -637,6 +639,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 				@Override
 				protected void onCancel(){
 					Display.getDefault().syncExec(()->{
+						if (stackPanel.isDisposed()) return;
 						resultsTable.setInput(null);
 						mapPanel.updateQueryLayers(null);
 						((StackLayout)stackPanel.getLayout()).topControl = errorPanel;

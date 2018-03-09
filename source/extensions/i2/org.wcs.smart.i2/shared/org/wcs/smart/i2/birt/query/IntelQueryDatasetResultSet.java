@@ -87,7 +87,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 			dfilter[1] = (Date) parameters.get(eindex);
 		}
 		
-		IIntelQueryEngine engine = IIntelQueryEngine.createEngine(query.getKeyId());
+		IIntelQueryEngine engine = IIntelQueryEngine.createEngine(query.getTypeKey());
 		HashMap<String, Object> eparameters = new HashMap<>();
 		eparameters.put(Session.class.getName(), dataset.getConnection().getSession());
 		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());

@@ -104,7 +104,7 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 		IntelEntityType type = QueryFactory.buildQuery(session, IntelEntityType.class, 
 				new Object[] {"conservationArea", getCa()},  //$NON-NLS-1$
 				new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$
-		type.getName();
+		if (type != null) type.getName();
 		return type;
 	}
 	

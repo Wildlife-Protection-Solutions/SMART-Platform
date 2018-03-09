@@ -146,7 +146,7 @@ public class WaypointFilterProcessor {
 		logString(sql.toString());
 		if (monitor.isCanceled()) return null;
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("cas", caUuids); //$NON-NLS-1$
+		query.setParameterList("cas", caUuids); //$NON-NLS-1$
 		query.executeUpdate();
 		
 		//create indexes to help with performance
@@ -563,7 +563,7 @@ public class WaypointFilterProcessor {
 			if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
 				//find the employee
 				Employee e = s.get(Employee.class, UuidUtils.stringToUuid(filter.getKeyValue()));
-				if (e != null && itemProvider.getConservationAreas().contains(e.getConservationArea())) {
+				if (e != null && !itemProvider.getConservationAreas().contains(e.getConservationArea())) {
 					e = null;
 				}
 				if (e == null) {

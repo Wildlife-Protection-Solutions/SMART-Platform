@@ -58,7 +58,7 @@ public class IntelRecordObservationQuery extends AbstractIntelQuery {
 
 	@Override
 	@Transient
-	public String getKeyId() {
+	public String getTypeKey() {
 		return KEY;
 	}
 	

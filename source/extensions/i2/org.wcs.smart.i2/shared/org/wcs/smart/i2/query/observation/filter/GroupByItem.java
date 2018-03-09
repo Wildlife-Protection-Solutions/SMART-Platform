@@ -212,10 +212,12 @@ public class GroupByItem {
 			String entityType = null;
 			if (entityTypeKey != null && !entityTypeKey.isEmpty()) {
 				IntelEntityType type = itemProvider.getEntityType(entityTypeKey, session);
+				if (type == null) return Collections.emptyList();
 				entityType = type.getName();
 			}
 			
 			IntelAttribute intelAttribute = itemProvider.getAttribute(attributeKey, session);
+			if (intelAttribute == null) return Collections.emptyList();
 			
 			List<ListItem> items = new ArrayList<>();
 			if (attributeType == AttributeType.EMPLOYEE) {

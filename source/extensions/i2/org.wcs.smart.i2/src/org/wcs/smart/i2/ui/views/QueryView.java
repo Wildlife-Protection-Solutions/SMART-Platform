@@ -576,12 +576,12 @@ public class QueryView {
 	 @Optional
 	 @Inject
 	 private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) AbstractIntelQuery data){
-		 queryList.refresh(new QueryProxy(data.getName(), data.getUuid(), data.getKeyId()));
+		 queryList.refresh(new QueryProxy(data.getName(), data.getUuid(), data.getTypeKey()));
 	 }
 	 @Optional
 	 @Inject
 	 private void multiQueryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) List<AbstractIntelQuery> data){
-		 data.forEach(i-> queryList.refresh(new QueryProxy(i.getName(), i.getUuid(), i.getKeyId())));
+		 data.forEach(i-> queryList.refresh(new QueryProxy(i.getName(), i.getUuid(), i.getTypeKey())));
 	 }
 	 
 	@Optional
@@ -596,7 +596,7 @@ public class QueryView {
 		IQueryEditor editor = getActiveQueryEditor();
 		if (editor == null) return;
 		if (editor.getQuery() == null) return;
-		String queryTypeKey = editor.getQuery().getKeyId();
+		String queryTypeKey = editor.getQuery().getTypeKey();
 		
 		ITreeContentProvider provider = queryToContentProvider.get(queryTypeKey);
 		if (provider == null) {

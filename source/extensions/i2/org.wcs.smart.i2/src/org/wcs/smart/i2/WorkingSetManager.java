@@ -239,7 +239,7 @@ public enum WorkingSetManager {
 						if (!found){
 							IntelWorkingSetQuery wsrecord = new IntelWorkingSetQuery();
 							wsrecord.setQuery(query.getUuid());
-							wsrecord.setQueryType(query.getKeyId());
+							wsrecord.setQueryType(query.getTypeKey());
 							wsrecord.setWorkingSet(wset);
 							wsrecord.setIsVisible(true);
 							s.save(wsrecord);

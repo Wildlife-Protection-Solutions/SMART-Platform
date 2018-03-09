@@ -21,17 +21,13 @@
  */
 package org.wcs.smart.i2.query;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.Area;
@@ -41,11 +37,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -63,9 +56,9 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 
 	private Collection<ConservationArea> conservationAreas = null;
 	private ConservationArea queryCa;
-	
-	private static volatile DataModel mergedDataModel = null;
 		
+	protected volatile SimpleDataModel mergedDataModel = null;
+	
 	public CcaaQueryItemProvider(Collection<ConservationArea> conservationAreas, ConservationArea queryCa) {
 		this.conservationAreas = conservationAreas;
 		this.queryCa = queryCa;
@@ -286,8 +279,12 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public List<Category> getRootCategories(Session session){
-		return getDataModel().getCategories();
-		
+		return getDataModel(session).getCategories();
+	}
+	
+	@Override
+	public List<Attribute> getDmAttributes(Session session){
+		return getDataModel(session).getAttributes();
 	}
 	
 	@Override
@@ -298,7 +295,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	@Override
 	public Category getCategory(String categoryHkey, Session session){
 		List<Category> toSearch = new ArrayList<>();
-		toSearch.addAll(getDataModel().getCategories());
+		toSearch.addAll(getDataModel(session).getCategories());
 		while(!toSearch.isEmpty()) {
 			Category temp = toSearch.remove(0);
 			if (temp.getHkey().equals(categoryHkey)) {
@@ -309,10 +306,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		return null;
 	}
 	
-	@Override
-	public List<Attribute> getDmAttributes(Session session){
-		return getDataModel().getAttributes();
-	}
+
 	
 	@Override
 	public Attribute getDmAttribute(String attributeKey, Session session) {
@@ -328,9 +322,9 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		//we need to only include items that are shared across all conservation areas
 		String query = "SELECT a.keyId FROM AttributeListItem a join a.attribute b WHERE b.keyId = :attributeKey AND b.conservationArea IN (:cas) group by a.keyId having count(*) = :cnt"; //$NON-NLS-1$
 		Query<?> q = session.createQuery(query);
-		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
+		q.setParameterList("cas", getConservationAreas()); //$NON-NLS-1$
 		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", new Long(SmartDB.getConservationAreaConfiguration().getCaCount())); //$NON-NLS-1$
+		q.setParameter("cnt", new Long(getConservationAreas().size())); //$NON-NLS-1$
 				
 		List<?> keys = q.list();
 		if (keys.size() == 0){
@@ -339,7 +333,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		}
 		query = "FROM AttributeListItem a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca AND a.keyId IN (:keys)"; //$NON-NLS-1$
 		q = session.createQuery(query);
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
+		q.setParameter("ca", getConservationAreas()); //$NON-NLS-1$
 		q.setParameterList("keys", keys); //$NON-NLS-1$
 		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 				
@@ -353,9 +347,9 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		//we need to only include items that are shared across all conservation areas
 		String query = "SELECT a.hkey FROM AttributeTreeNode a join a.attribute b WHERE b.keyId = :attributeKey AND b.conservationArea in (:cas) group by a.hkey having count(*) = :cnt"; //$NON-NLS-1$
 		Query<?> q = session.createQuery(query);
-		q.setParameterList("cas", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
+		q.setParameterList("cas", getConservationAreas()); //$NON-NLS-1$
 		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", new Long(SmartDB.getConservationAreaConfiguration().getCaCount())); //$NON-NLS-1$
+		q.setParameter("cnt", new Long(getConservationAreas().size())); //$NON-NLS-1$
 		
 		List<String> hkeys = (List<String>) q.list();
 		if (hkeys.size() == 0){
@@ -363,7 +357,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		}
 		query = "FROM AttributeTreeNode a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca and a.hkey IN (:keys) and parent is null"; //$NON-NLS-1$
 		q = session.createQuery(query);
-		q.setParameter("ca", SmartDB.getConservationAreaConfiguration().getMainConservationArea()); //$NON-NLS-1$
+		q.setParameter("ca", getMainConservationArea()); //$NON-NLS-1$
 		q.setParameterList("keys", hkeys); //$NON-NLS-1$
 		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
 		
@@ -378,39 +372,16 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		return cnt.intValue();
 	}
 	
-	@Override
-	public void reset() {
-		mergedDataModel = null;
-	}
-	
-	
-	private DataModel getDataModel() {
+	protected SimpleDataModel getDataModel(final Session session) {
 		if (mergedDataModel == null) {
 			synchronized (this) {
 				if (mergedDataModel != null) return mergedDataModel;
-				
-				Display.getDefault().syncExec(()->{
-					DataModelMerger merger = new DataModelMerger();
-					final ConservationArea[] cas = SmartDB.getConservationAreaConfiguration().getConservationAreas().toArray(new ConservationArea[SmartDB.getConservationAreaConfiguration().getCaCount()]);
-					final ConservationArea defaultCa = SmartDB.getConservationAreaConfiguration().getMainConservationArea();
-					ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-					try {
-						pmd.run(true, false, new IRunnableWithProgress() {
-							@Override
-							public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-								try(Session session = HibernateManager.openSession()){
-									mergedDataModel = merger.mergeDataModels(cas, defaultCa, session, monitor);
-								}
-							}
-						});
-					}catch (Exception ex) {
-						Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
-					}
-				});
+				DataModelMerger merger = new DataModelMerger();
+				final ConservationArea[] cas =getConservationAreas().toArray(new ConservationArea[getConservationAreas().size()]);
+				final ConservationArea defaultCa = getMainConservationArea();
+				mergedDataModel = merger.mergeDataModels(cas, defaultCa, session, null, new NullProgressMonitor());
 			}
 		}
 		return mergedDataModel;
 	}
-	
-	
 }

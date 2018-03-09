@@ -401,20 +401,11 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			HashMap<IntelEntityType, List<IntelEntityTypeAttribute>> attributes = new HashMap<>();
 			try(Session session = HibernateManager.openSession()){
 				List<IntelEntityType> entityTypes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(session);
-				
 				for (IntelEntityType type : entityTypes) {
-					List<IntelEntityTypeAttribute> thisattributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypeAttributes(type, session);
+					List<IntelEntityTypeAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypeAttributes(type, session));
+					thisattributes.forEach(e->e.getAttribute().getName());
 					attributes.put(type, thisattributes);
 				}
-				
-//				for (IntelEntityType type : entityTypes) {
-//					type.getName();
-//					type.getIcon();
-//					for (IntelEntityTypeAttribute attribute : type.getAttributes()) {
-//						attribute.getAttribute().getType();
-//						attribute.getAttribute().getName();
-//					}
-//				}
 			}
 			
 			setData(attributes);
