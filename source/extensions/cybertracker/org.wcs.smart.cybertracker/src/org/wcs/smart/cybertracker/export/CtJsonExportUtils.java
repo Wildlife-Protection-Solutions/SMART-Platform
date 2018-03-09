@@ -60,23 +60,6 @@ import org.wcs.smart.util.UuidUtils;
 public class CtJsonExportUtils {
 	
 	/**
-	 * Json key for comment metadata
-	 */
-	public static final String JSON_COMMENT_METADATA_KEY = "comment"; //$NON-NLS-1$
-	/**
-	 * JSON key for employee metadata
-	 */
-	public static final String JSON_EMPLOYEE_METADATA_KEY = "employees";  //$NON-NLS-1$
-	/**
-	 * JSON key for leader metadata
-	 */
-	public static final String JSON_LEADER_METADATA_KEY = "leader";  //$NON-NLS-1$
-	/**
-	 * JSON key for pilot metadata
-	 */
-	public static final String JSON_PILOT_METADATA_KEY = "pilot";  //$NON-NLS-1$
-	
-	/**
 	 * JSON is visible property key
 	 */
 	public static final String JSON_ISVISIBILE_PROP_KEY = "isVisible"; //$NON-NLS-1$
@@ -106,6 +89,15 @@ public class CtJsonExportUtils {
 	 */
 	public static final String JSON_OPTION_TYPE_KEY = "type"; //$NON-NLS-1$
 	
+	/**
+	 * JSON options property key that identifies the type
+	 */
+	public static final String JSON_OPTION_GENERATED_KEY = "generated"; //$NON-NLS-1$
+	
+	/**
+	 * JSON options property key that identifies the type
+	 */
+	public static final String JSON_EMPLOYEE_METADATA_KEY = ScreensUtil.COMMON_PREFIX + "Employees"; //$NON-NLS-1$
 	
 	/**
 	 * JSON options property key that identifies the type
@@ -121,7 +113,10 @@ public class CtJsonExportUtils {
 		BOOLEAN,
 		TEXT,
 		SINGLE_CHOICE,
-		MULTI_CHOICE
+		MULTI_CHOICE,
+		UUID,
+		DATE,
+		TIME
 	}
 	
 	public static final String PROJECT_FILE = "project.json"; //$NON-NLS-1$
@@ -379,4 +374,49 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
+	public static JSONObject createPatrolId() {
+		JSONObject dataType = new JSONObject();
+		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.UUID.name());
+		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
+		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
+		
+		JSONObject typeOp = new JSONObject();
+		typeOp.put(ScreensUtil.RESULT_ID, dataType);
+		return typeOp;
+	}
+	
+	public static JSONObject createStartDate() {
+		JSONObject dataType = new JSONObject();
+		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.DATE.name());
+		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
+		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
+
+		JSONObject typeOp = new JSONObject();
+		typeOp.put(ScreensUtil.RESULT_START_DATE, dataType);
+		return typeOp;
+	}
+	
+	
+	public static JSONObject createEndDate() {
+		JSONObject dataType = new JSONObject();
+		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.TIME.name());
+		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
+		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
+
+		JSONObject typeOp = new JSONObject();
+		typeOp.put(ScreensUtil.RESULT_START_TIME, dataType);
+		return typeOp;
+	}
+	
+	public static JSONObject createDataType(String outputDataType) {
+		JSONObject dataType = new JSONObject();
+		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.TEXT.name());
+		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
+		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, false);
+		dataType.put(CtJsonExportUtils.JSON_DEFAULT_PROP_KEY, outputDataType);
+		
+		JSONObject typeOp = new JSONObject();
+		typeOp.put(ScreensUtil.RESULT_DATATYPE, dataType);
+		return typeOp;
+	}
 }

@@ -44,11 +44,11 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
-import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -172,7 +172,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			}
 		} else if (ScreensUtil.RESULT_ID.equals(n)) {
 			ctPatrol.setId(v);
-		} else if (PatrolScreensUtil.RESULT_TRANSPORT.equals(n)) {
+		} else if (PatrolScreenOptionMeta.TRANSPORT.key.equals(n)) {
 			E e = eMap.get(v);
 			PatrolTransportType transportType = fetchFromTag0(PatrolTransportType.class, e, session);
 			if (transportType != null && !transportType.getConservationArea().equals(SmartDB.getCurrentConservationArea())) transportType = null; //transport type not valid for current conservation area
@@ -180,13 +180,13 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 				ctPatrol.addError(PatrolMeta.TRANSPORT, MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
 			ctPatrol.setCtTransport(e.getN());
 			ctPatrol.setPatrolTransportType(transportType);
-		} else if (PatrolScreensUtil.RESULT_ARMED.equals(n)) {
+		} else if (PatrolScreenOptionMeta.ARMED.key.equals(n)) {
 			E e = eMap.get(v);
 			String tag0 = e != null ? e.getTag0() : null;
 			if (tag0 != null) {
 				ctPatrol.setArmed(ElementsUtil.BOOL_TRUE.equals(tag0.toLowerCase()));
 			}				
-		} else if (PatrolScreensUtil.RESULT_TEAM.equals(n)) {
+		} else if (PatrolScreenOptionMeta.TEAM.key.equals(n)) {
 			E e = eMap.get(v);
 			Team t = fetchFromTag0(Team.class, e, session);
 			if (t != null && !t.getConservationArea().equals(SmartDB.getCurrentConservationArea())) t = null; //not valid for current conservation area
@@ -194,7 +194,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 				ctPatrol.addWarning(PatrolMeta.TEAM, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
 			ctPatrol.setCtTeam(e.getN());
 			ctPatrol.setTeam(t);
-		} else if (PatrolScreensUtil.RESULT_STATION.equals(n)) {
+		} else if (PatrolScreenOptionMeta.STATION.key.equals(n)) {
 			E e = eMap.get(v);
 			Station st = fetchFromTag0(Station.class, e, session);
 			if (st != null && !st.getConservationArea().equals(SmartDB.getCurrentConservationArea())) st = null; //not valid for current conservation area
@@ -202,25 +202,25 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 				ctPatrol.addWarning(PatrolMeta.STATION, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
 			ctPatrol.setCtStation(e.getN());
 			ctPatrol.setStation(st);
-		} else if (PatrolScreensUtil.RESULT_MANDATE.equals(n)) {
+		} else if (PatrolScreenOptionMeta.MANDATE.key.equals(n)) {
 			E e = eMap.get(v);
 			PatrolMandate m = fetchFromTag0(PatrolMandate.class, e, session);
 			if (m != null && !m.getConservationArea().equals(SmartDB.getCurrentConservationArea())) m = null; //not valid for current conservation area
 			if (m == null && e.getTag0() != null)
 				ctPatrol.addWarning(PatrolMeta.MANDATE, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
 			ctPatrol.setMandate(m);
-		} else if (PatrolScreensUtil.RESULT_OBJECTIVE.equals(n)) {
+		} else if (PatrolScreenOptionMeta.OBJECTIVE.key.equals(n)) {
 			ctPatrol.setObjective(v);
-		} else if (PatrolScreensUtil.RESULT_COMMENTS.equals(n)) {
+		} else if (PatrolScreenOptionMeta.COMMENT.key.equals(n)) {
 			ctPatrol.setComment(v);
-		} else if (PatrolScreensUtil.RESULT_LEADER.equals(n)) {
+		} else if (PatrolScreenOptionMeta.LEADER.key.equals(n)) {
 			E e = eMap.get(v);
 			Employee emp = fetchFromTag0(Employee.class, e, session);
 			if (emp == null && e.getTag0() != null)
 				ctPatrol.addError(PatrolMeta.LEADER, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
 			ctPatrol.setCtLeader(e.getN());
 			ctPatrol.setLeader(emp);
-		} else if (PatrolScreensUtil.RESULT_PILOT.equals(n)) {
+		} else if (PatrolScreenOptionMeta.PILOT.key.equals(n)) {
 			E e = eMap.get(v);
 			Employee emp = fetchFromTag0(Employee.class, e, session);
 			if (emp == null && e.getTag0() != null)

@@ -71,11 +71,12 @@ elementFormDefault="qualified">
     	</sequence>
     	<attribute name="categoryKey" type="string"></attribute>
     	<attribute name="categoryHkey" type="string"></attribute>
-    	<attribute name="photoAllowed" type="boolean"></attribute>
+        <attribute name="dmUuid" type="string"></attribute>
+        <attribute name="photoAllowed" type="boolean"></attribute>
     	<attribute name="photoRequired" type="boolean"></attribute>
     	<attribute name="displayMode" type="string"></attribute>
     	<attribute name="imageFile" type="string"></attribute>
-    	<attribute name="id" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
     </complexType>
 
     <complexType name="NameType">
@@ -107,7 +108,8 @@ elementFormDefault="qualified">
     		</element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
-    	<attribute name="id" type="string"></attribute>
+        <attribute name="dmUuid" type="string"></attribute>
+        <attribute name="id" type="string"></attribute>
     	<attribute name="configId" type="string"></attribute>
     	<attribute name="type">
     		<simpleType>
@@ -120,7 +122,7 @@ elementFormDefault="qualified">
     				<enumeration value="NUMERIC"></enumeration>
     			</restriction>
     		</simpleType>
-    	</attribute>
+    	</attribute>
     </complexType>
 
     <complexType name="AttributeOptionType">
@@ -129,6 +131,7 @@ elementFormDefault="qualified">
     	<attribute name="doubleValue" type="double"></attribute>
     	<attribute name="keyRef" type="string"></attribute>
     	<attribute name="hkeyRef" type="string"></attribute>
+    	<attribute name="dmUuid" type="string"></attribute>
     </complexType>
 
     <complexType name="AttributeListItemTypeList">
@@ -170,12 +173,13 @@ elementFormDefault="qualified">
     		</element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
-    	<attribute name="keyRef" type="string"></attribute>
+        <attribute name="keyRef" type="string"></attribute>
     	<attribute name="hkeyRef" type="string"></attribute>
-    	<attribute name="isActive" type="boolean"></attribute>
+        <attribute name="dmUuid" type="string"></attribute>
+        <attribute name="isActive" type="boolean"></attribute>
     	<attribute name="displayMode" type="string"></attribute>
     	<attribute name="imageFile" type="string"></attribute>
-    	<attribute name="id" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
     </complexType>
 
     <complexType name="AttributeCmListItemTypeList">
@@ -192,9 +196,10 @@ elementFormDefault="qualified">
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
     	<attribute name="keyRef" type="string"></attribute>
-    	<attribute name="isActive" type="boolean"></attribute>
+        <attribute name="dmUuid" type="string"></attribute>
+        <attribute name="isActive" type="boolean"></attribute>
     	<attribute name="imageFile" type="string"></attribute>
-    	<attribute name="id" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
     </complexType>
 
     <complexType name="CmDmAttributeSettingsTypeList">
@@ -223,9 +228,10 @@ elementFormDefault="qualified">
     	<attribute name="id" type="string"></attribute>
     	<attribute name="attributeKey" type="string"></attribute>
     	<attribute name="displayMode" type="string"></attribute>
-    	<attribute name="isDefault" type="boolean"/>
-	</complexType>
-	
+    	<attribute name="isDefault" type="boolean" />
+    	<attribute name="attributeUuid" type="string"></attribute>
+    </complexType>
+
     <complexType name="CmExtraDataType">
     	<sequence>
             <element name="stringKey" type="smrt:CmExtraDataStringKeyType" maxOccurs="unbounded" minOccurs="0"/>

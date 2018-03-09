@@ -167,10 +167,15 @@ public enum SurveyPackageExporter {
 		
 		JSONArray metadataScreens = new JSONArray();
 		
-		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(MissionScreenOptionMeta.COMMENT), CtJsonExportUtils.JSON_COMMENT_METADATA_KEY, Messages.SurveyPackageExporter_CommentPageLabel, session, ca)); 
+		metadataScreens.add(CtJsonExportUtils.convertStringOp(options.get(MissionScreenOptionMeta.COMMENT), MissionScreenOptionMeta.COMMENT.key, Messages.SurveyPackageExporter_CommentPageLabel, session, ca)); 
 		metadataScreens.add(CtJsonExportUtils.convertEmployees(options.get(MissionScreenOptionMeta.MEMBERS), session, ca));
-		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(MissionScreenOptionMeta.LEADER), CtJsonExportUtils.JSON_LEADER_METADATA_KEY, Messages.SurveyPackageExporter_LeaderPageLabel, session, ca)); 
-				
+		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(options.get(MissionScreenOptionMeta.LEADER), MissionScreenOptionMeta.LEADER.key, Messages.SurveyPackageExporter_LeaderPageLabel, session, ca)); 
+			
+		metadataScreens.add(CtJsonExportUtils.createDataType(MissionScreenOptionMeta.MISSION_RESOURCE_ID));
+		metadataScreens.add(CtJsonExportUtils.createPatrolId());
+		metadataScreens.add(CtJsonExportUtils.createStartDate());
+		metadataScreens.add(CtJsonExportUtils.createEndDate());
+		
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
 			fw.write(metadataScreens.toJSONString());
 		}

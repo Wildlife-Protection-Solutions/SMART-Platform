@@ -26,9 +26,15 @@ package org.wcs.smart.er.ui.meta;
  * @author elitvin
  */
 public enum MissionScreenOptionMeta {
-	COMMENT,
-	MEMBERS,
-	LEADER;
+	COMMENT("SMART_Comments"), //$NON-NLS-1$
+	MEMBERS("SMART_Members"), //$NON-NLS-1$
+	LEADER("SMART_Leader"); //$NON-NLS-1$
 	
 	public static final String MISSION_RESOURCE_ID = "mission"; //$NON-NLS-1$
+	
+	public String key;
+	
+	MissionScreenOptionMeta(String key){
+		this.key = key;
+	}
 }

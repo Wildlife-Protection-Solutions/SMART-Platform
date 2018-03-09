@@ -21,21 +21,29 @@
  */
 package org.wcs.smart.patrol.meta;
 
+
 /**
  * Meta options for patrol screens
  * @author elitvin
  */
 public enum PatrolScreenOptionMeta {
-	TRANSPORT,
-	ARMED,
-	STATION,
-	TEAM,
-	MANDATE,
-	OBJECTIVE,
-	COMMENT,
-	MEMBERS,
-	LEADER,
-	PILOT;
 
+	TRANSPORT("SMART_PatrolTransport"), //$NON-NLS-1$
+	ARMED("SMART_Armed"), //$NON-NLS-1$
+	STATION("SMART_Team"), //$NON-NLS-1$
+	TEAM("SMART_Station"), //$NON-NLS-1$
+	MANDATE("SMART_Mandate"), //$NON-NLS-1$
+	OBJECTIVE("SMART_Objective"), //$NON-NLS-1$
+	COMMENT("SMART_Comments"), //$NON-NLS-1$
+	MEMBERS("SMART_Members"), //$NON-NLS-1$
+	LEADER("SMART_Leader"), //$NON-NLS-1$
+	PILOT("SMART_Pilot"); //$NON-NLS-1$
+	
 	public static final String PATROL_RESOURCE_ID = "patrol"; //$NON-NLS-1$
+	
+	public String key;
+	
+	PatrolScreenOptionMeta(String key) {
+		this.key = key;
+	}
 }

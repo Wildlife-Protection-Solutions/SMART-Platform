@@ -35,6 +35,7 @@ import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil.JsonPatrolKey;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
+import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
@@ -58,42 +59,42 @@ public class PatrolJsonUtils {
 		
 		if (jsonValues == null) jsonValues = new JSONObject();
 		
-		String ptransport = (String)jsonValues.get(PatrolScreensUtil.RESULT_TRANSPORT);
+		String ptransport = (String)jsonValues.get(PatrolScreenOptionMeta.TRANSPORT.key);
 		if (ptransport == null){
-			ptransport = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_TRANSPORT);	
+			ptransport = (String)jsonDefaults.get(PatrolScreenOptionMeta.TRANSPORT.key);	
 		}
 		
-		String armed = (String)jsonValues.get(PatrolScreensUtil.RESULT_ARMED);
+		String armed = (String)jsonValues.get(PatrolScreenOptionMeta.ARMED.key);
 		if (armed == null){
-			armed = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_ARMED);
+			armed = (String)jsonDefaults.get(PatrolScreenOptionMeta.ARMED.key);
 		}
-		String team = (String)jsonValues.get(PatrolScreensUtil.RESULT_TEAM);
+		String team = (String)jsonValues.get(PatrolScreenOptionMeta.TEAM.key);
 		if (team == null){
-			team = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_TEAM);
+			team = (String)jsonDefaults.get(PatrolScreenOptionMeta.TEAM.key);
 		}
-		String station = (String)jsonValues.get(PatrolScreensUtil.RESULT_STATION);
+		String station = (String)jsonValues.get(PatrolScreenOptionMeta.STATION.key);
 		if (station == null){
-			station = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_STATION);
+			station = (String)jsonDefaults.get(PatrolScreenOptionMeta.STATION.key);
 		}
-		String mandate = (String)jsonValues.get(PatrolScreensUtil.RESULT_MANDATE);
+		String mandate = (String)jsonValues.get(PatrolScreenOptionMeta.MANDATE.key);
 		if (mandate == null){
-			mandate = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_MANDATE);
+			mandate = (String)jsonDefaults.get(PatrolScreenOptionMeta.MANDATE.key);
 		}
-		String objective = (String)jsonValues.get(PatrolScreensUtil.RESULT_OBJECTIVE);
+		String objective = (String)jsonValues.get(PatrolScreenOptionMeta.OBJECTIVE.key);
 		if (objective == null){
-			objective = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_OBJECTIVE);
+			objective = (String)jsonDefaults.get(PatrolScreenOptionMeta.OBJECTIVE.key);
 		}
-		String comment = (String)jsonValues.get(PatrolScreensUtil.RESULT_COMMENTS);
+		String comment = (String)jsonValues.get(PatrolScreenOptionMeta.COMMENT.key);
 		if (comment == null){
-			comment = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_COMMENTS);
+			comment = (String)jsonDefaults.get(PatrolScreenOptionMeta.COMMENT.key);
 		}
-		String leader = (String)jsonValues.get(PatrolScreensUtil.RESULT_LEADER);
+		String leader = (String)jsonValues.get(PatrolScreenOptionMeta.LEADER.key);
 		if (leader == null){
-			leader = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_LEADER);
+			leader = (String)jsonDefaults.get(PatrolScreenOptionMeta.LEADER.key);
 		}
-		String pilot = (String)jsonValues.get(PatrolScreensUtil.RESULT_PILOT);
+		String pilot = (String)jsonValues.get(PatrolScreenOptionMeta.PILOT.key);
 		if (pilot == null){
-			pilot = (String)jsonDefaults.get(PatrolScreensUtil.RESULT_PILOT);
+			pilot = (String)jsonDefaults.get(PatrolScreenOptionMeta.PILOT.key);
 		}
 		List<String> members = new ArrayList<String>();
 		for (Object x : jsonValues.keySet()){

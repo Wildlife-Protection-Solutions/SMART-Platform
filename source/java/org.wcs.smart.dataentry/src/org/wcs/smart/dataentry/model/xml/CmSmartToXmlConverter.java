@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -130,6 +131,8 @@ public class CmSmartToXmlConverter {
 				xmlConfig.setDisplayMode(config.getDisplayMode().name());
 			}
 			xmlConfig.setAttributeKey(config.getAttribute().getKeyId());
+			xmlConfig.setAttributeUuid(toString(config.getAttribute().getUuid()));
+			
 			processCmListItems(config.getList(), xmlConfig.getListItem(), llookup, monitor);
 			processCmTreeNodes(config.getTree(), xmlConfig.getTreeNode(), llookup, monitor);
 			
@@ -138,6 +141,10 @@ public class CmSmartToXmlConverter {
 		
 	}
 
+	private static String toString(UUID uuid) {
+		return UuidUtils.uuidToString(uuid);
+	}
+	
 	private static void processCmTreeNodes(List<CmAttributeTreeNode> cmList,
 			List<TreeNodeType> xmlList, HashMap<String, Language> llookup, IProgressMonitor monitor) {
 		if(monitor.isCanceled()) return;
@@ -151,6 +158,7 @@ public class CmSmartToXmlConverter {
 			}else{
 				xmlNode.setKeyRef(cmNode.getDmTreeNode().getKeyId());
 				xmlNode.setHkeyRef(cmNode.getDmTreeNode().getHkey());
+				xmlNode.setDmUuid(toString(cmNode.getDmTreeNode().getUuid()));
 			}
 			if (cmNode.getDisplayMode() != null) {
 				xmlNode.setDisplayMode(cmNode.getDisplayMode().name());
@@ -174,6 +182,7 @@ public class CmSmartToXmlConverter {
 				xmlNode.setKeyRef(null);
 			}else{
 				xmlNode.setKeyRef(cmNode.getListItem().getKeyId());
+				xmlNode.setDmUuid(toString(cmNode.getListItem().getUuid()));
 			}
 			xmlNode.setImageFile(getImageFileRef(cmNode));
 			xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
@@ -203,6 +212,7 @@ public class CmSmartToXmlConverter {
 		if (node.getCategory() != null) {
 			nt.setCategoryKey(node.getCategory().getKeyId());
 			nt.setCategoryHkey(node.getCategory().getHkey());
+			nt.setDmUuid(toString(node.getCategory().getUuid()));
 		}
 		nt.setPhotoAllowed(node.isPhotoAllowed());
 		nt.setPhotoRequired(node.isPhotoRequired());
@@ -217,6 +227,7 @@ public class CmSmartToXmlConverter {
 				AttributeType at = new AttributeType();
 				setNames(at.getName(), ca.getNames(), null, llookup);
 				at.setAttributeKey(ca.getAttribute().getKeyId());
+				at.setDmUuid(toString(ca.getAttribute().getUuid()));
 				for (CmAttributeOption option : ca.getCmAttributeOptions().values()) {
 					AttributeOptionType aot = new AttributeOptionType();
 					aot.setId(option.getOptionId());
@@ -230,6 +241,7 @@ public class CmSmartToXmlConverter {
 							if (item != null) {
 								aot.setKeyRef(item.getKeyId());
 								aot.setHkeyRef(null); //not relevant for list items attributes
+								aot.setDmUuid(toString(item.getUuid()));
 							}
 							break;
 						}
@@ -239,6 +251,7 @@ public class CmSmartToXmlConverter {
 							if (item != null) {
 								aot.setKeyRef(item.getKeyId());
 								aot.setHkeyRef(item.getHkey());
+								aot.setDmUuid(toString(item.getUuid()));
 							}
 							break;
 						}

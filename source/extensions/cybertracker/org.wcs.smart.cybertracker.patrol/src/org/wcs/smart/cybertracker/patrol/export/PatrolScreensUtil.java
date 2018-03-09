@@ -95,19 +95,10 @@ public class PatrolScreensUtil extends ScreensUtil {
 		}
 	}
 	
-	public static final String RESULT_TRANSPORT = ScreensUtil.COMMON_PREFIX + "PatrolTransport"; //$NON-NLS-1$
-	public static final String RESULT_ARMED = ScreensUtil.COMMON_PREFIX + "Armed"; //$NON-NLS-1$
-	public static final String RESULT_TEAM = ScreensUtil.COMMON_PREFIX + "Team"; //$NON-NLS-1$
-	public static final String RESULT_STATION = ScreensUtil.COMMON_PREFIX + "Station"; //$NON-NLS-1$
-	public static final String RESULT_MANDATE = ScreensUtil.COMMON_PREFIX + "Mandate"; //$NON-NLS-1$
-	public static final String RESULT_OBJECTIVE = ScreensUtil.COMMON_PREFIX + "Objective"; //$NON-NLS-1$
-	public static final String RESULT_COMMENTS = ScreensUtil.COMMON_PREFIX + "Comments"; //$NON-NLS-1$
-	public static final String RESULT_LEADER = ScreensUtil.COMMON_PREFIX + "Leader"; //$NON-NLS-1$
-	public static final String RESULT_PILOT = ScreensUtil.COMMON_PREFIX + "Pilot"; //$NON-NLS-1$
-	
+
 	public static final String END_PATROL_KEY = "SMART_EndPatrol"; //$NON-NLS-1$
 	
-	public static final String DATATYPE_PATROL = "patrol"; //$NON-NLS-1$
+	private static final String DATATYPE_PATROL = PatrolScreenOptionMeta.PATROL_RESOURCE_ID; 
 
 	private CyberTrackerUtil ctUtil;
 
@@ -148,20 +139,20 @@ public class PatrolScreensUtil extends ScreensUtil {
 		so = screenOptions.get(PatrolScreenOptionMeta.ARMED);
 		if (so == null || so.isVisible()) {
 			List<CyberTrackerId> armedIds = ElementsUtil.buildBooleanElements(elements);
-			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_IsArmed, RESULT_ARMED, armedIds, false);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_IsArmed, PatrolScreenOptionMeta.ARMED.key, armedIds, false);
 		} else {
 			boolean value = Boolean.TRUE.equals(so.getBooleanValue());
 			String elId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item aValue = ElementsUtil.addElementsItem(elements, "", elId, Boolean.toString(value)); //$NON-NLS-1$
 			aValue.setJsonId(Boolean.toString(value));
-			result.defaultValues.add(createDefaultResultRecord(RESULT_ARMED, elements, aValue));
+			result.defaultValues.add(createDefaultResultRecord(PatrolScreenOptionMeta.ARMED.key, elements, aValue));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.TEAM);
 		if (so == null || so.isVisible()) {
 			List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
 			cyberTrackerIds = toCyberTrackerIds(elements, teams, JsonPatrolKey.TEAM.key);
-			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Team, RESULT_TEAM, cyberTrackerIds, true);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Team, PatrolScreenOptionMeta.TEAM.key, cyberTrackerIds, true);
 		} else if (so.getUuidValue() != null) {
 			Team team = CyberTrackerHibernateManager.fetchByUuid(Team.class, so.getUuidValue(), session);
 			if (team == null) {
@@ -171,14 +162,14 @@ public class PatrolScreensUtil extends ScreensUtil {
 			String elId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item teamValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(team), elId, UuidUtils.uuidToString(team.getUuid()));
 			teamValue.setJsonId(JsonPatrolKey.TEAM.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(team.getUuid()));
-			result.defaultValues.add(createDefaultResultRecord(RESULT_TEAM, elements, teamValue));
+			result.defaultValues.add(createDefaultResultRecord(PatrolScreenOptionMeta.TEAM.key, elements, teamValue));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.STATION);
 		if (so == null || so.isVisible()) {
 			List<Station> stations = PatrolHibernateManager.getActiveStations(ca, session);
 			cyberTrackerIds = toCyberTrackerIds(elements, stations, JsonPatrolKey.STATION.key);
-			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Station, RESULT_STATION, cyberTrackerIds, true);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Station, PatrolScreenOptionMeta.STATION.key, cyberTrackerIds, true);
 		} else if (so.getUuidValue() != null) {
 			Station station = CyberTrackerHibernateManager.fetchByUuid(Station.class, so.getUuidValue(), session);
 			if (station == null) {
@@ -188,14 +179,14 @@ public class PatrolScreensUtil extends ScreensUtil {
 			String elId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item stValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(station), elId, UuidUtils.uuidToString(station.getUuid()));
 			stValue.setJsonId(JsonPatrolKey.STATION.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(station.getUuid()));
-			result.defaultValues.add(createDefaultResultRecord(RESULT_STATION, elements, stValue));
+			result.defaultValues.add(createDefaultResultRecord(PatrolScreenOptionMeta.STATION.key, elements, stValue));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.MANDATE);
 		if (so == null || so.isVisible()) {
 			List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
 			cyberTrackerIds = toCyberTrackerIds(elements, mandates, JsonPatrolKey.MANDATE.key);
-			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, RESULT_MANDATE, cyberTrackerIds, true);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Mandate, PatrolScreenOptionMeta.MANDATE.key, cyberTrackerIds, true);
 			
 		} else if (so.getUuidValue() != null) {
 			PatrolMandate mandate = CyberTrackerHibernateManager.fetchByUuid(PatrolMandate.class, so.getUuidValue(), session);
@@ -206,21 +197,21 @@ public class PatrolScreensUtil extends ScreensUtil {
 			String elId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item mndValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(mandate), elId, UuidUtils.uuidToString(mandate.getUuid()));
 			mndValue.setJsonId(JsonPatrolKey.MANDATE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(mandate.getUuid()));
-			result.defaultValues.add(createDefaultResultRecord(RESULT_MANDATE, elements, mndValue));
+			result.defaultValues.add(createDefaultResultRecord(PatrolScreenOptionMeta.MANDATE.key, elements, mndValue));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.OBJECTIVE);
 		if (so == null || so.isVisible()) {
-			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, RESULT_OBJECTIVE, Patrol.MAX_OBJECTIVE_LENGTH);
+			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, PatrolScreenOptionMeta.OBJECTIVE.key, Patrol.MAX_OBJECTIVE_LENGTH);
 		} else {
-			result.defaultValues.add(createDefaultResultRecord(RESULT_OBJECTIVE, elements, so.getStringValue()));
+			result.defaultValues.add(createDefaultResultRecord(PatrolScreenOptionMeta.OBJECTIVE.key, elements, so.getStringValue()));
 		}
 
 		so = screenOptions.get(PatrolScreenOptionMeta.COMMENT);
 		if (so == null || so.isVisible()) {
-			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_COMMENTS, Patrol.MAX_COMMENT_LENGTH);
+			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, PatrolScreenOptionMeta.COMMENT.key, Patrol.MAX_COMMENT_LENGTH);
 		} else {
-			result.defaultValues.add(createDefaultResultRecord(RESULT_COMMENTS, elements, so.getStringValue()));
+			result.defaultValues.add(createDefaultResultRecord(PatrolScreenOptionMeta.COMMENT.key, elements, so.getStringValue()));
 		}
 
 		List<Employee> employees = HibernateManager.getActiveEmployees(ca, session);
@@ -251,7 +242,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			}
 			
 			id = addMembersNode(id, result, memberIds);
-			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_LEADER, memberIds, filter);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, PatrolScreenOptionMeta.LEADER.key, memberIds, filter);
 			
 			id = addPilotScreen(id, result, elements, screenOptions, memberIds, transportTypes, t2tMap, session, filter);
 		} else {
@@ -280,13 +271,13 @@ public class PatrolScreensUtil extends ScreensUtil {
 			}
 			
 			if (leader_so == null || leader_so.isVisible()) {
-				id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_LEADER, memberIds, false);
+				id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, PatrolScreenOptionMeta.LEADER.key, memberIds, false);
 			} else {
 				if (leaderItem == null) {
 					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Leader, null);
 					return null;
 				}
-				result.defaultValues.add(createDefaultResultRecord(RESULT_LEADER, elements, leaderItem));
+				result.defaultValues.add(createDefaultResultRecord(PatrolScreenOptionMeta.LEADER.key, elements, leaderItem));
 			}
 
 			if (pilot_so == null || pilot_so.isVisible()) {
@@ -296,7 +287,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 					CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Pilot, null);
 					return null;
 				}
-				result.defaultValues.add(createDefaultResultRecord(RESULT_PILOT, elements, pilotItem));
+				result.defaultValues.add(createDefaultResultRecord(PatrolScreenOptionMeta.PILOT.key, elements, pilotItem));
 			}
 			
 		}
@@ -340,7 +331,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		ScreenOption tr_so = screenOptions.get(PatrolScreenOptionMeta.TRANSPORT);
 		if (tr_so == null || tr_so.isVisible()) {
 			String pilotNodeId = id.getNodeId();
-			id = addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
+			id = addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, PatrolScreenOptionMeta.PILOT.key, memberIds, filter);
 			//NOTE: if previous screen is transport than we need to update several screens with formula
 			for (int i = container.screenNodes.size()-2; i >= 0; i--) {
 				//need to change all prev screens that refer to this screen as their "next screen"
@@ -356,7 +347,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		} else if (tr_so.getUuidValue() != null && Type.GROUND.equals(CyberTrackerHibernateManager.fetchByUuid(PatrolTransportType.class, tr_so.getUuidValue(), session).getPatrolType())) {
 			return id;
 		} else {
-			return addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
+			return addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, PatrolScreenOptionMeta.PILOT.key, memberIds, filter);
 		}
 	}
 	
@@ -426,12 +417,12 @@ public class PatrolScreensUtil extends ScreensUtil {
 				types.add(name);
 				typeIds.add(addElementsGpsAccuracyItem(elements, name, tag0, ctProps.getDilutionOfPrecision(), getMaxSpeed(tt, t2tMap), jsonValue));
 			}
-			String resultTransportId = createResultElement(RESULT_TRANSPORT, elements);
+			String resultTransportId = createResultElement(PatrolScreenOptionMeta.TRANSPORT.key, elements);
 			Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Transport, typeIds, resultTransportId, true);
 			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 			control7.setResultGlobalValue(GLOBAL_PATROL_TR_TYPE);
 			container.screenNodes.add(node);
-			container.resultElements.add(new IdNamePair(resultTransportId, RESULT_TRANSPORT));
+			container.resultElements.add(new IdNamePair(resultTransportId, PatrolScreenOptionMeta.TRANSPORT.key));
 			return toNextScreen(node, false);
 		} else {
 			PatrolTransportType transport = CyberTrackerHibernateManager.fetchByUuid(PatrolTransportType.class, trOption.getUuidValue(), session);
@@ -442,7 +433,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			String trElId = (new CyberTrackerId()).getItemId();
 			Elements.List.Items.Item trValue = ElementsUtil.addElementsItem(elements, ctUtil.getName(transport), trElId, UuidUtils.uuidToString(transport.getUuid()));
 			trValue.setJsonId(JsonPatrolKey.TRANSPORT_TYPE.key + CyberTrackerConfExporter.KEY_SEP + UuidUtils.uuidToString(transport.getUuid()));
-			container.defaultValues.add(createDefaultResultRecord(RESULT_TRANSPORT, elements, trValue));
+			container.defaultValues.add(createDefaultResultRecord(PatrolScreenOptionMeta.TRANSPORT.key, elements, trValue));
 			return id;
 		}
 	}

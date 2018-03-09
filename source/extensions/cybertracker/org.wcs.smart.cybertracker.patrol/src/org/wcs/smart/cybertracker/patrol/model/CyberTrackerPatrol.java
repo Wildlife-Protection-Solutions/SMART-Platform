@@ -32,10 +32,10 @@ import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
 import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
-import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.patrol.importer.PatrolCTLabelProvider;
 import org.wcs.smart.cybertracker.patrol.importer.PatrolCTLabelProvider.CTPatrolUIMeta;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -226,7 +226,7 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 
 	@Override
 	public String getType() {
-		return PatrolScreensUtil.DATATYPE_PATROL;
+		return PatrolScreenOptionMeta.PATROL_RESOURCE_ID;
 	}
 
 	@Override

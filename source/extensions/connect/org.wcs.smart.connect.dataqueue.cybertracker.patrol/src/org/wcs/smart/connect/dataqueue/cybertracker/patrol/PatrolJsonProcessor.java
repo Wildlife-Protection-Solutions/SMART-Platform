@@ -68,6 +68,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -132,7 +133,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
 				
 				// Validate data type
-				if (!PatrolScreensUtil.DATATYPE_PATROL.equalsIgnoreCase(type)){
+				if (!PatrolScreenOptionMeta.PATROL_RESOURCE_ID.equalsIgnoreCase(type)){
 					//not a valid patrol point; skip it
 					continue;
 				}
