@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
@@ -162,7 +163,7 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 	}
 	
 	@Override
-	public void initValues(ConnectServer server){
+	public void initValues(ConnectServer server, Session session){
 		if (server == null){
 			for (Text l : optionCntrls.values()){
 				l.setText(Messages.ServerOptionsPanel_NotApplicable);
@@ -177,7 +178,7 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 	}
 	
 	@Override
-	public void updateServer(ConnectServer server){
+	public void updateServer(ConnectServer server, Session session){
 		for (ConnectServerOption.ConnectionOption op : OPTION_KEYS){
 			Text ctr = optionCntrls.get(op);
 			

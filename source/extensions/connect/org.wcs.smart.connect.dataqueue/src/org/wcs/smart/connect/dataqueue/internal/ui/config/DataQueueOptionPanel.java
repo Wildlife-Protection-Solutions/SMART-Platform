@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
@@ -321,7 +322,7 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 	}
 	
 	@Override
-	public void initValues(ConnectServer server){
+	public void initValues(ConnectServer server, Session session){
 		if (server == null){
 			btnCheckStartUp.setSelection(DataQueueServerOptions.CHECK_ONSTARTUP.getDefaultValueAsBoolean());
 			opStartUpAutoStart.setSelection(DataQueueServerOptions.STARTUP_AUTOPROCESS.getDefaultValueAsBoolean());
@@ -352,7 +353,7 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 	}
 	
 	@Override
-	public void updateServer(ConnectServer server){
+	public void updateServer(ConnectServer server, Session session){
 		server.setOption(DataQueueServerOptions.CHECK_ONSTARTUP.name(), ((Boolean)btnCheckStartUp.getSelection()).toString());
 		server.setOption(DataQueueServerOptions.STARTUP_AUTOPROCESS.name(), ((Boolean)opStartUpAutoStart.getSelection()).toString());
 		server.setOption(DataQueueServerOptions.STARTUP_PROMPT.name(), ((Boolean)opStartUpPrompt.getSelection()).toString());

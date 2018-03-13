@@ -80,7 +80,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 		};
 		server.setServerUrl(url);
 		server.setOptions(new HashMap<String, ConnectServerOption>());
-		((ServerOptionsWizardPage)getPage(ServerOptionsPanel.class.getCanonicalName())).updateServer(server);
+		((ServerOptionsWizardPage)getPage(ServerOptionsPanel.class.getCanonicalName())).updateServer(server, null);
 		if (!certificateFile.trim().isEmpty()){
 			server.setCertificateFileName(certificateFile);
 		}

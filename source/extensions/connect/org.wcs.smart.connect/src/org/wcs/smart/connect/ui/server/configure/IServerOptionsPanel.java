@@ -23,6 +23,7 @@ package org.wcs.smart.connect.ui.server.configure;
 
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -66,14 +67,14 @@ public interface IServerOptionsPanel {
 	 * 
 	 * @param server
 	 */
-	public void initValues(ConnectServer server);
+	public void initValues(ConnectServer server, Session session);
 	
 	/**
 	 * Updates the connect server object with the items
 	 * from the panel
 	 * @param server
 	 */
-	public void updateServer(ConnectServer server);
+	public void updateServer(ConnectServer server, Session session);
 	
 	/**
 	 * Function called after the server options are saved to the database.

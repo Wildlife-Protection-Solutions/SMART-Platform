@@ -24,13 +24,21 @@ package org.wcs.smart.connect.ui.server.configure;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -39,8 +47,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -49,6 +55,7 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Dialog for modifying connect server account details.
@@ -191,21 +198,19 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 				}
 				
 				for (IServerOptionsPanel pnl : optionPanels){
-					pnl.updateServer(server);
+					pnl.updateServer(server, s);
 				}
 				
 				s.getTransaction().commit();
-				
-				for (IServerOptionsPanel pnl : optionPanels){
-					pnl.afterSave(server);
-				}
-				
 			}catch (Exception ex){
 				ConnectPlugIn.displayLog(Messages.EditConnectServerInfoDialog_ServerError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				return;
 			}
 		}
 		
+		for (IServerOptionsPanel pnl : optionPanels){
+			pnl.afterSave(server);
+		}
 		super.okPressed();
 	}
 	
@@ -213,6 +218,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 	protected void createButtonsForButtonBar(Composite parent){
 		super.createButtonsForButtonBar(parent);
 		getButton(OK).setEnabled(false);
+		getButton(OK).setText(DialogConstants.SAVE_TEXT);
 	}
 	@Override
 	protected Control createDialogArea(Composite parent) {
@@ -231,31 +237,88 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		};
 		Group g = new Group(main, SWT.NONE);
 		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		g.setText(Messages.EditConnectServerInfoDialog_ConfigLabel);
-		serverpnl = new ServerPanel(g);
 		
+		serverpnl = new ServerPanel(g);
 		serverpnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		TabFolder tabConfig = new TabFolder(g, SWT.NONE);
-		tabConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Group partComposite = new Group(main, SWT.FLAT );
+		partComposite.setText(Messages.EditConnectServerInfoDialog_SettingsSection);
+		partComposite.setLayout(new GridLayout(2, false));
+		partComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		for(IServerOptionsPanel pnl : optionPanels){
-			TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
-			ti.setText(pnl.getName());
-						
-			ScrolledComposite scroll = new ScrolledComposite(tabConfig, SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
-			Composite part = pnl.createComposite(scroll, true);
+		ListViewer lstViewer = new ListViewer(partComposite, SWT.BORDER | SWT.V_SCROLL);
+		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
+		lstViewer.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof IServerOptionsPanel) return ((IServerOptionsPanel) element).getName();
+				return super.getText(element);
+			}
+		});
+		lstViewer.setInput(optionPanels);
+		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite rightPanel = new Composite(partComposite, SWT.BORDER);
+		rightPanel.setLayout(new StackLayout());
+		rightPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((StackLayout)rightPanel.getLayout()).marginWidth = 0;
+		((StackLayout)rightPanel.getLayout()).marginHeight = 0;
+
+		HashMap<IServerOptionsPanel, Composite> panels = new HashMap<>();
+		for (IServerOptionsPanel p : optionPanels){
+			ScrolledComposite scroll = new ScrolledComposite(rightPanel, SWT.V_SCROLL | SWT.H_SCROLL);
+			Composite part = p.createComposite(scroll, true);
 			scroll.setContent(part);
 			scroll.setExpandHorizontal(true);
 			scroll.setExpandVertical(true);
 			scroll.setMinSize(part.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			panels.put(p,  scroll);
 			
-			ti.setControl(scroll);
+			List<Control> c = new ArrayList<>();
+			c.add(scroll);
+			while(!c.isEmpty()) {
+				Control k = c.remove(0);
+				k.setBackground(scroll.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				if (k instanceof Composite) {
+					Composite kk = (Composite)k;
+					for (Control kkk : kk.getChildren()) c.add(kkk);
+				}
+			}
 			
-			pnl.initValues(server);
-			pnl.addChangeListener(validateListener);
+			try(Session session = HibernateManager.openSession()){
+				p.initValues(server, session);
+			}
+			p.addChangeListener(validateListener);
 		}
+		
+		lstViewer.addSelectionChangedListener(e->{
+			IServerOptionsPanel pp = (IServerOptionsPanel)lstViewer.getStructuredSelection().getFirstElement();
+			((StackLayout)rightPanel.getLayout()).topControl = panels.get(pp);	
+			rightPanel.layout();
+		});
+		
+		lstViewer.setSelection(new StructuredSelection(optionPanels[0]));
+		
+//		TabFolder tabConfig = new TabFolder(g, SWT.NONE);
+//		tabConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		
+//		for(IServerOptionsPanel pnl : optionPanels){
+//			TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
+//			ti.setText(pnl.getName());
+//						
+//			ScrolledComposite scroll = new ScrolledComposite(tabConfig, SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
+//			Composite part = pnl.createComposite(scroll, true);
+//			scroll.setContent(part);
+//			scroll.setExpandHorizontal(true);
+//			scroll.setExpandVertical(true);
+//			scroll.setMinSize(part.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+//			
+//			ti.setControl(scroll);
+//			
+//			pnl.initValues(server);
+//			pnl.addChangeListener(validateListener);
+//		}
 		
 		serverpnl.initValues(server);
 		serverpnl.addChangeListener(validateListener);

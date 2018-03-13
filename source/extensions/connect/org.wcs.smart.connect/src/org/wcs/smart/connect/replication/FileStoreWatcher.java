@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -144,7 +145,8 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     
     private void processEvent(Path p, Kind<?> kind){
     	if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: file: '" + p.toString() + "', Kind: '" + kind.name() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    	if (ignorePaths.contains(p)) {
+    	if ((Files.isDirectory(p) && ignorePaths.contains(p)) ||
+    			(!Files.isDirectory(p) && ignorePaths.contains(p.getParent()))) {
     		if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: IGNORED: in ignore path"); //$NON-NLS-1$
     		return;
     	}
@@ -258,6 +260,15 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 						if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: run: error: " + x.getMessage()); //$NON-NLS-1$
 					}
 				}
+				if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+					//delete folders; find and remove key as we don't want these registered anymore
+					for (Entry<WatchKey,Path> keyset : keys.entrySet()) {
+						if (keyset.getValue().equals(child)) {
+							keyset.getKey().cancel();
+							break;
+						}
+					}
+				}
 				try {
 					processEvent(child, kind);
 				} catch (Throwable t) {
@@ -267,6 +278,7 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 
 			// reset key and remove from set if directory no longer accessible
 			boolean valid = key.reset();
+			
 			if (!valid) {
 				if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: watchkey not valid / removing"); //$NON-NLS-1$
 				keys.remove(key);

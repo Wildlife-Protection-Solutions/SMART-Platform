@@ -28,8 +28,10 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Wizard page to enter SMART Connect connection options.
@@ -45,6 +47,7 @@ public class ServerOptionsWizardPage extends WizardPage  {
 		super(panel.getClass().getCanonicalName());
 		this.panel = panel;
 	}
+	
 	@Override
 	public void createControl(Composite parent) {
 		Composite outer = new Composite(parent, SWT.NONE);
@@ -64,7 +67,10 @@ public class ServerOptionsWizardPage extends WizardPage  {
 		setControl(outer);
 	
 		ConnectServer tmp = new ConnectServer();
-		panel.initValues(tmp);
+		try(Session session = HibernateManager.openSession()){
+			panel.initValues(tmp, session);
+		}
+		
 		panel.addChangeListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -80,8 +86,8 @@ public class ServerOptionsWizardPage extends WizardPage  {
 		return panel.isValid();
 	}
 	
-	public void updateServer(ConnectServer server){
-		panel.updateServer(server);
+	public void updateServer(ConnectServer server, Session session){
+		panel.updateServer(server, session);
 	}
 	
 	public IServerOptionsPanel getPanel(){

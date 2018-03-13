@@ -71,6 +71,13 @@ public class Messages extends NLS {
 	public static String ConvertedConnectCt2CmExtraData_Missing_PingFrequency;
 	public static String ConvertedConnectCt2CmExtraData_Missing_DataFrequency;
 	public static String ConvertedConnectCt2CmExtraData_PositionTypeNotSet;
+	public static String CtxOptionsPanel_Name;
+	public static String CtxOptionsPanel_Option;
+	public static String CtxOptionsPanel_OptionTooltip;
+	public static String CtxOptionsPanel_ReplicationInfo;
+	public static String CtxOptionsPanel_RestartInfo;
+	public static String CtxOptionsPanel_RestartOpMsg;
+	public static String CtxOptionsPanel_RestartOpTitle;
 	public static String RemoveConnectCtJob_Title;
 	public static String RemoveConnectCtJob_UninstallError;
 	static {

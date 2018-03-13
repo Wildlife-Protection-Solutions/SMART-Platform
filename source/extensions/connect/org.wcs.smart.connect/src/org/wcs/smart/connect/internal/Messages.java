@@ -153,6 +153,7 @@ public class Messages extends NLS {
 	public static String ConnectServerInfoDialog_resetTooltip;
 	public static String ConnectServerInfoDialog_ServerLabel;
 	public static String ConnectServerInfoDialog_SetButton;
+	public static String ConnectServerInfoDialog_SettingsSection;
 	public static String ConnectServerInfoDialog_ShellTitle;
 	public static String ConnectServerInfoDialog_SmartNameColumnLabel;
 	public static String ConnectServerInfoDialog_SmartUserIdColumnLabel;
@@ -247,6 +248,7 @@ public class Messages extends NLS {
 	public static String EditConnectServerInfoDialog_PanelErrorMessage;
 	public static String EditConnectServerInfoDialog_serverError;
 	public static String EditConnectServerInfoDialog_ServerError;
+	public static String EditConnectServerInfoDialog_SettingsSection;
 	public static String EditConnectServerInfoDialog_Shell;
 	public static String EditConnectServerInfoDialog_Title;
 	public static String EditConnectServerInfoDialog_ValidateError1;

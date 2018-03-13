@@ -72,5 +72,17 @@
             class="org.wcs.smart.connect.cybertracker.xml.dataentry.ConnectCt2CmXmlExtraDataContribution">
       </contribution>
    </extension>
+   <extension
+         point="org.wcs.smart.connect.configure.optionpanel">
+      <Panel
+            class="org.wcs.smart.connect.cybertracker.CtxOptionsPanel">
+      </Panel>
+   </extension>
+   <extension
+         point="org.wcs.smart.changeLogEventHandler">
+      <handler
+            class="org.wcs.smart.connect.cybertracker.FilestoreWatcherConfigurator">
+      </handler>
+   </extension>
 
 </plugin>

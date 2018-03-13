@@ -91,49 +91,50 @@ public class ConnectServerWizard extends Wizard {
 		server.setServerUrl(url);
 		server.setOptions(new HashMap<String, ConnectServerOption>());
 		
-		for (ServerOptionsWizardPage p : opPages){
-			p.updateServer(server);
-		}
-		
-		if (!certificateFile.trim().isEmpty()){
-			try{
-				server.setCertificateFile(Paths.get(certificateFile));
-			}catch (Exception ex){
-				ConnectPlugIn.displayLog(Messages.ConnectServerWizard_CertificateError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-				return false;
-			}
-		}
-		
-		SmartConnect cs = SmartConnect.findInstance(server, username, password);
-		error = cs.validateUser();
-		
-		if (error != null){
-			try{
-				//try to delete certificate file
-				Files.deleteIfExists(server.getLocalCertificateFile());
-			}catch (Exception ex){}
-			MessageDialog.openError(getShell(), Messages.ConnectServerWizard_ErrorDialog, error);
-			return false;
-		}
-		
-		ConnectUser user = new ConnectUser();
-		
-		if (savePassword){
-			String encryptedPass = null;
-			try{
-				encryptedPass = ConnectPlugIn.encryptPassword(password);
-			}catch (Exception ex){
-				ConnectPlugIn.log(Messages.ConnectServerWizard_EncryptPasswordError + ex.getMessage(), ex);
-			}
-			user.setConnectPassword(encryptedPass);
-		}
-		user.setConnectUsername(username);
-		user.setSmartUser(SmartDB.getCurrentEmployee());
-		user.setServer(server);
-
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
+				for (ServerOptionsWizardPage p : opPages){
+					p.updateServer(server, s);
+				}
+				
+				if (!certificateFile.trim().isEmpty()){
+					try{
+						server.setCertificateFile(Paths.get(certificateFile));
+					}catch (Exception ex){
+						ConnectPlugIn.displayLog(Messages.ConnectServerWizard_CertificateError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+						return false;
+					}
+				}
+				
+				SmartConnect cs = SmartConnect.findInstance(server, username, password);
+				error = cs.validateUser();
+				
+				if (error != null){
+					try{
+						//try to delete certificate file
+						Files.deleteIfExists(server.getLocalCertificateFile());
+					}catch (Exception ex){}
+					MessageDialog.openError(getShell(), Messages.ConnectServerWizard_ErrorDialog, error);
+					return false;
+				}
+				
+				ConnectUser user = new ConnectUser();
+				
+				if (savePassword){
+					String encryptedPass = null;
+					try{
+						encryptedPass = ConnectPlugIn.encryptPassword(password);
+					}catch (Exception ex){
+						ConnectPlugIn.log(Messages.ConnectServerWizard_EncryptPasswordError + ex.getMessage(), ex);
+					}
+					user.setConnectPassword(encryptedPass);
+				}
+				user.setConnectUsername(username);
+				user.setSmartUser(SmartDB.getCurrentEmployee());
+				user.setServer(server);
+
+		
 				s.save(server);
 				s.save(user);
 				s.getTransaction().commit();

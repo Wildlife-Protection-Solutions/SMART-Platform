@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.internal.Messages;
@@ -335,7 +336,7 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 	}
 	
 	@Override
-	public void initValues(ConnectServer server){
+	public void initValues(ConnectServer server, Session session){
 		if (server == null){
 			btnDownShutDown.setSelection(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_SHUTDOWN.getDefaultValueAsBoolean());
 			btnDownStartUp.setSelection(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_STARTUP.getDefaultValueAsBoolean());
@@ -370,7 +371,7 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 	}
 	
 	@Override
-	public void updateServer(ConnectServer server){		
+	public void updateServer(ConnectServer server, Session session){		
 		server.setOption(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_SHUTDOWN.name(), ((Boolean)btnDownShutDown.getSelection()).toString());
 		server.setOption(ConnectServerOption.ConnectionOption.DOWNLOAD_ON_STARTUP.name(), ((Boolean)btnDownStartUp.getSelection()).toString());
 		server.setOption(ConnectServerOption.ConnectionOption.UPLOAD_ON_SHUTDOWN.name(), ((Boolean)btnUploadShutDown.getSelection()).toString());
