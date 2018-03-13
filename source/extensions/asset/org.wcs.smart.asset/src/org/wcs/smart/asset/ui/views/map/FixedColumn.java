@@ -35,7 +35,7 @@ import org.wcs.smart.util.UuidUtils;
 public class FixedColumn implements IOverviewTableColumn{
 
 	public enum Column{
-		ID("Id", IOverviewTableColumn.ColumnType.STRING, true),
+		ID("ID", IOverviewTableColumn.ColumnType.STRING, true),
 		UUID("UUID", IOverviewTableColumn.ColumnType.STRING, false),
 		STATUS("Current Status", IOverviewTableColumn.ColumnType.STRING, true),
 		STATUS_KEY("Current Status Key", IOverviewTableColumn.ColumnType.STRING, false),

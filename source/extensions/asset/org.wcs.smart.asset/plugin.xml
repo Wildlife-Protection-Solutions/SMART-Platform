@@ -150,6 +150,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.fielddata">
          <menu
+               icon="images/icons/obj16/asset.png"
                label="Assets">
             <command
                   commandId="org.wcs.smart.asset.command.data.import"
@@ -197,6 +198,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.attributelist.show"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/obj16/attribute_text.png"
                   label="Asset Attributes..."
                   style="push">
                <visibleWhen
@@ -251,6 +253,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.asset.command.settings.open"
+                  icon="images/icons/obj16/configure.png"
                   label="Asset Module Settings..."
                   style="push">
                <visibleWhen
@@ -609,7 +612,7 @@
       <editor
             class="org.wcs.smart.asset.ui.views.map.AssetOverviewMap"
             default="false"
-            icon="images/icons/obj16/map.png"
+            icon="platform:/plugin/org.wcs.smart/images/icons/obj16/map.png"
             id="org.wcs.smart.asset.overviewmap"
             name="Asset Overview Map">
       </editor>
@@ -630,7 +633,7 @@
       </image>
       <image
             commandId="org.wcs.smart.asset.command.overviewmap.show"
-            icon="images/icons/obj16/map.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/obj16/map.png">
       </image>
    </extension>
    <extension

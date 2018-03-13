@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -123,7 +124,17 @@ public class ColumnListDialog extends TitleAreaDialog {
 				edit();
 			}
 		});
-		
+		chColumns.getControl().addListener(SWT.KeyDown, e->{
+			if (e.keyCode == SWT.SPACE) {
+				IStructuredSelection selection = chColumns.getStructuredSelection();
+				boolean value = chColumns.getChecked( selection.getFirstElement() );
+				for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+					Object tp = (Object) iterator.next();
+					chColumns.setChecked(tp, !value);
+				}
+				e.doit = false;
+			}
+		});
 		Composite btnPanel = new Composite(parent, SWT.NONE);
 		btnPanel.setLayout(new GridLayout());
 		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
