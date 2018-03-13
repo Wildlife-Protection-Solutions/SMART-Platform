@@ -141,6 +141,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 		for (CmNode n : nodes){
 			fireCmDeleteItem(currentSession, n);
 			if (n.getParent() == null){
+				n.getModel().getNodes().remove(n);
 				currentSession.delete(n);	
 				interceptor.onDelete(n, n.getUuid(), null, null, null);
 			}else{
@@ -202,7 +203,7 @@ public enum DataModelItemListener implements IDataModelItemListener {
 				List<CmAttributeConfig> configs= DataentryHibernateManager.getCmAttributeConfigs(currentSession, model, dmAttribute);
 				for (CmAttributeConfig cfg : configs) {
 					//EG: I tried session.delete(cfg) here and it generated some hibernate errors I could not sort out
-					currentSession.createQuery("DELETE From CmAttributeConfig WHERE uuid = :uuid").setParameter("uuid", cfg.getUuid()).executeUpdate();
+					currentSession.createQuery("DELETE From CmAttributeConfig WHERE uuid = :uuid").setParameter("uuid", cfg.getUuid()).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 					currentSession.flush();	
 				}
 				
