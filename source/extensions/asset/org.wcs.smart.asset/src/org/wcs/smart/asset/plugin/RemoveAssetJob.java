@@ -56,7 +56,6 @@ public class RemoveAssetJob extends Job {
 			session.beginTransaction();
 			try {
 				uninstall(session);
-				HibernateManager.setPlugInVersion(AssetPlugIn.PLUGIN_ID, null, session);
 				session.getTransaction().commit();
 			} catch (Exception e) {
 				try{
@@ -107,36 +106,27 @@ public class RemoveAssetJob extends Job {
 		List<ConservationArea> cas = null;
 		//drop tables
 		
-		try {
-			cas = HibernateManager.getConservationAreas(session);
-			//delete all waypoints associated with type SURVEY
-			Query<?> q = session.createQuery("DELETE Waypoint WHERE source = :src"); //$NON-NLS-1$
-			q.setParameter("src", AssetWaypointSource.KEY); //$NON-NLS-1$
-			q.executeUpdate();
-			
-				
-			for (String table : LABELTABLES){
-				if (DerbyHibernateExtensions.tableExists(session, table)){
-					session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
-				}
+		
+		cas = HibernateManager.getConservationAreas(session);
+		//delete all waypoints associated with type SURVEY
+		Query<?> q = session.createQuery("DELETE Waypoint WHERE source = :src"); //$NON-NLS-1$
+		q.setParameter("src", AssetWaypointSource.KEY); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		for (String table : LABELTABLES){
+			if (DerbyHibernateExtensions.tableExists(session, table)){
+				session.createNativeQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			
-			for (String table : TABLES){
-				if (DerbyHibernateExtensions.tableExists(session, table)){
-					session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
-				}
-			}		
-				
-			HibernateManager.setPlugInVersion(AssetPlugIn.PLUGIN_ID, null, session);
-			session.getTransaction().commit();
-		} catch (Exception e) {
-			try{
-				session.getTransaction().rollback();
-			}catch (Exception ex){
-				AssetPlugIn.log(ex.getMessage(), ex);	
-			}
-			throw e;
 		}
+			
+		for (String table : TABLES){
+			if (DerbyHibernateExtensions.tableExists(session, table)){
+				session.createNativeQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+			}
+		}		
+
+		//remove from plugin table
+		HibernateManager.setPlugInVersion(AssetPlugIn.PLUGIN_ID, null, session);
 		
 		if (cas != null){
 			for (ConservationArea ca : cas){
