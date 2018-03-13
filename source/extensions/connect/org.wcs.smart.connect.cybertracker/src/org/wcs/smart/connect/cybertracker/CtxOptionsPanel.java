@@ -57,7 +57,7 @@ public class CtxOptionsPanel implements IServerOptionsPanel {
 	private List<ModifyListener> listeners = new ArrayList<>();
 	
 	private boolean requiresRestart = false;
-	
+	private ConnectServer toUpdate;
 	@Override
 	public boolean isSupported(ConservationArea ca) {
 		return !ca.getIsCcaa();
@@ -75,12 +75,11 @@ public class CtxOptionsPanel implements IServerOptionsPanel {
 
 	@Override
 	public void initValues(ConnectServer server, Session session) {
+		this.toUpdate = server;
 		option = QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class, 
 				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 				new Object[] {"optionId", FilestoreWatcherConfigurator.EXCLUDE_CTX_DIR_OPTION}).uniqueResult(); //$NON-NLS-1$
 		btnExcludeCtxFiles.setSelection(option == null || option.getBooleanValue());
-		
-		
 	}
 
 	@Override
@@ -141,10 +140,12 @@ public class CtxOptionsPanel implements IServerOptionsPanel {
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 120;
 		
-		l = new Label(part, SWT.WRAP);
-		l.setText(Messages.CtxOptionsPanel_RestartInfo);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)l.getLayoutData()).widthHint = 120;
+		if (toUpdate != null && toUpdate.getUuid() != null) {
+			l = new Label(part, SWT.WRAP);
+			l.setText(Messages.CtxOptionsPanel_RestartInfo);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).widthHint = 120;
+		}
 		
 		btnExcludeCtxFiles = new Button(part, SWT.CHECK);
 		btnExcludeCtxFiles.setText(Messages.CtxOptionsPanel_Option);
