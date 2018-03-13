@@ -105,7 +105,7 @@ public class CyberTrackerImporter {
 		int code = proc.waitFor();
 		result.setReturnCode(code);
 
-		File cxtDataFolder = PdaUtil.getDowloadFolder(ca);
+		File cxtDataFolder = ICyberTrackerConstants.getDowloadFolder(ca);
 		File xmlTempDir = PdaUtil.createTempDirectory();
 		//scan files in this directory and obtain raw xml for them
 		progress.subTask(Messages.CyberTrackerImporter_Task_ExtractRawData);
@@ -122,7 +122,7 @@ public class CyberTrackerImporter {
 			}
 
 			//move processed files to storage
-			File storageFolder = PdaUtil.getStorageFolder(ca);
+			File storageFolder = ICyberTrackerConstants.getStorageFolder(ca);
 			for (final File file : cxtDataFolder.listFiles()) {
 				if (file.isFile() && file.getName().toLowerCase().endsWith(".ctx")) { //$NON-NLS-1$
 					if (patrols.isEmpty()) {

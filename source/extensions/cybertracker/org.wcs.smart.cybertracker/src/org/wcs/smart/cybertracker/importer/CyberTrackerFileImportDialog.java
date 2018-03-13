@@ -36,7 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -229,7 +229,7 @@ public class CyberTrackerFileImportDialog extends TitleAreaDialog {
 	}
 
 	private File[] getStorageFiles() {
-		File storageFolder = PdaUtil.getStorageFolder(SmartDB.getCurrentConservationArea());
+		File storageFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
 		return storageFolder.listFiles();
 	}
 

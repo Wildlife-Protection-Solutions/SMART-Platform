@@ -63,7 +63,7 @@ public class CyberTrackerProperties {
 		CyberTrackerPropertiesOption option = map.get(optionId);
 		if (option == null) {
 			option = new CyberTrackerPropertiesOption();
-			option.setOptionId(optionId);
+			option.setOptionId(optionId.name());
 			map.put(optionId, option);
 		}
 		return option;

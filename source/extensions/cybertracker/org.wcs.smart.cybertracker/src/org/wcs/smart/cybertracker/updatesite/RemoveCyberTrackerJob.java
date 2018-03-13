@@ -33,7 +33,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -74,7 +74,7 @@ public class RemoveCyberTrackerJob extends Job {
 				}		
 				//clean filestore
 				for (ConservationArea ca : caList) {
-					FileUtils.deleteDirectory(PdaUtil.getDowloadFolder(ca));
+					FileUtils.deleteDirectory(ICyberTrackerConstants.getDowloadFolder(ca));
 				}
 				HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, null, session);
 				session.getTransaction().commit();

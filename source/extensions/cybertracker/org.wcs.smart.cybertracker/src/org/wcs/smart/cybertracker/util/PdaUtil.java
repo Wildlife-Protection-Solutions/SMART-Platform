@@ -58,26 +58,8 @@ public class PdaUtil {
 		return ICyberTrackerConstants.REG_KEY_SMART + UuidUtils.uuidToString(ca.getUuid());
 	}
 
-//	public static String getFilestoreFromRegistry(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-//		return WinRegistry.readString(WinRegistry.HKEY_CURRENT_USER,
-//				ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
-//	}
-
-	private static String getCyberTrackerFolder(ConservationArea ca) {
-		return ca.getFileDataStoreLocation() + File.separator + ICyberTrackerConstants.SMART_CTX_DOWNLOAD_FOLDER;
-	}
-	
-	public static File getDowloadFolder(ConservationArea ca) {
-		return new File(getCyberTrackerFolder(ca));
-	}
-
-	public static File getStorageFolder(ConservationArea ca) {
-		String dir = getCyberTrackerFolder(ca) + File.separator + ICyberTrackerConstants.SMART_CTX_STORAGE_FOLDER;
-		return new File(dir);
-	}
-	
 	public static void updateRegistryKey(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
-		File folder = getDowloadFolder(ca);
+		File folder = ICyberTrackerConstants.getDowloadFolder(ca);
 		if (!folder.exists())
 			folder.mkdirs();
 

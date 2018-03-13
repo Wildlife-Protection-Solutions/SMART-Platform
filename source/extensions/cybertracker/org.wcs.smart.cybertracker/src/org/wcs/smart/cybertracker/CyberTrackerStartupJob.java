@@ -38,6 +38,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -98,7 +99,7 @@ public class CyberTrackerStartupJob extends Job {
 		
 		for (ConservationArea ca : caList) {
 			CyberTrackerPropertiesOption ctp = propMap.get(ca.getUuid());
-			File storageDir = PdaUtil.getStorageFolder(ca);
+			File storageDir = ICyberTrackerConstants.getStorageFolder(ca);
 			int dayLimit = (ctp != null) ? ctp.getIntegerValue() : CyberTrackerProperties.STORAGE_TIME_DEFAULT_VALUE;
 			cleanStorage(storageDir, dayLimit);
 		}

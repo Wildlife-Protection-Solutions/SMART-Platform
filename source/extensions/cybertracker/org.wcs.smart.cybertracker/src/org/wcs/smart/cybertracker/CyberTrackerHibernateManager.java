@@ -68,7 +68,7 @@ public class CyberTrackerHibernateManager {
 	 */
 	public static List<CyberTrackerPropertiesOption> getAllStorageOptions(Session session) {
 		List<CyberTrackerPropertiesOption> list =
-				QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,"optionId", OptionID.STORAGE_TIME).getResultList(); //$NON-NLS-1$
+				QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,"optionId", OptionID.STORAGE_TIME.name()).getResultList(); //$NON-NLS-1$
 		return list;
 	}
 
@@ -85,7 +85,12 @@ public class CyberTrackerHibernateManager {
 		CyberTrackerProperties properties = new CyberTrackerProperties();
 		for (Object object : options) {
 			CyberTrackerPropertiesOption o = (CyberTrackerPropertiesOption) object;
-			properties.getOptions().put(o.getOptionId(), o);
+			try {
+				CyberTrackerPropertiesOption.OptionID opId = CyberTrackerPropertiesOption.OptionID.valueOf( o.getOptionId() );
+				properties.getOptions().put(opId, o);
+			}catch (Exception ex) {
+				//this property is not supported by this plugin
+			}
 		}
 		return properties;
 	}

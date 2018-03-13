@@ -110,7 +110,7 @@ public abstract class AbstractSmartImporter {
 	public static CyberTrackerPropertiesOption getImageResizeOption(ConservationArea ca, Session session){
 		return QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"optionId", OptionID.RESIZE_IMAGE}).uniqueResult(); //$NON-NLS-1$
+				new Object[] {"optionId", OptionID.RESIZE_IMAGE.name()}).uniqueResult(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -123,7 +123,7 @@ public abstract class AbstractSmartImporter {
 	public static double getImageMaxSizeOption(ConservationArea ca, Session session){
 		CyberTrackerPropertiesOption opImageMaxSize = QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"optionId", OptionID.MAX_IMAGE_SIZE}).uniqueResult(); //$NON-NLS-1$
+				new Object[] {"optionId", OptionID.MAX_IMAGE_SIZE.name()}).uniqueResult(); //$NON-NLS-1$
 		if (opImageMaxSize == null || opImageMaxSize.getDoubleValue() == null) return 0;
 		return opImageMaxSize.getDoubleValue();
 	}
@@ -138,7 +138,7 @@ public abstract class AbstractSmartImporter {
 	public static int[] getImageAutoResizeSizeOption(ConservationArea ca, Session session){
 		CyberTrackerPropertiesOption opImageSize = QueryFactory.buildQuery(session, CyberTrackerPropertiesOption.class,
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"optionId", OptionID.IMAGE_SIZE}).uniqueResult(); //$NON-NLS-1$
+				new Object[] {"optionId", OptionID.IMAGE_SIZE.name()}).uniqueResult(); //$NON-NLS-1$
 		
 		if (opImageSize == null) return new int[]{-1,-1};
 		if (opImageSize.getStringValue().startsWith(ImageSizeOption.CUSTOM.name())){

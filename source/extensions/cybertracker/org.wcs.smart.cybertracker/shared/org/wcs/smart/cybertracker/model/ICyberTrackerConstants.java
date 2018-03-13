@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.cybertracker.model;
 
+import java.io.File;
+
+import org.wcs.smart.ca.ConservationArea;
+
 /**
  * Place holder for CyberTracker constants
  * 
@@ -135,4 +139,18 @@ public interface ICyberTrackerConstants {
 	public static final String LATITUDE = "{F6636A2D-2E9A-474D-A77D-2E1BAE1EF857}"; //$NON-NLS-1$
 	public static final String LONGITUDE = "{D93E86A8-2629-44FE-AFC4-2EC510FB1820}"; //$NON-NLS-1$
 	public static final String PHOTO = "{82D16C8E-776E-4E8B-A459-6EBF62E50076}"; //$NON-NLS-1$
+	
+	
+	static String getCyberTrackerFolder(ConservationArea ca) {
+		return ca.getFileDataStoreLocation() + File.separator + ICyberTrackerConstants.SMART_CTX_DOWNLOAD_FOLDER;
+	}
+	
+	public static File getDowloadFolder(ConservationArea ca) {
+		return new File(getCyberTrackerFolder(ca));
+	}
+
+	public static File getStorageFolder(ConservationArea ca) {
+		String dir = getCyberTrackerFolder(ca) + File.separator + ICyberTrackerConstants.SMART_CTX_STORAGE_FOLDER;
+		return new File(dir);
+	}
 }

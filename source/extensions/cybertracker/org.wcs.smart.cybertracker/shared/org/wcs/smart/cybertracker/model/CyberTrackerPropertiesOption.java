@@ -23,8 +23,6 @@ package org.wcs.smart.cybertracker.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -41,6 +39,9 @@ import org.wcs.smart.ca.UuidItem;
  * @author elitvin
  * @since 1.0.0
  */
+//EG: I modified this class so the OptionID is stored as a string
+//so other plugins can also store related configurations
+//in this table
 @Entity
 @Table(name = "smart.ct_properties_option")
 public class CyberTrackerPropertiesOption extends UuidItem {
@@ -81,7 +82,7 @@ public class CyberTrackerPropertiesOption extends UuidItem {
 	}
 	
 	private ConservationArea conservationArea;
-	private OptionID optionId;
+	private String optionId;
 	private Double doubleValue;
 	private Integer integerValue;
 	private String stringValue;
@@ -96,11 +97,10 @@ public class CyberTrackerPropertiesOption extends UuidItem {
 	}
 
 	@Column(name="option_id")
-	@Enumerated(EnumType.STRING)
-	public OptionID getOptionId() {
+	public String getOptionId() {
 		return optionId;
 	}
-	public void setOptionId(OptionID optionId) {
+	public void setOptionId(String optionId) {
 		this.optionId = optionId;
 	}
 	

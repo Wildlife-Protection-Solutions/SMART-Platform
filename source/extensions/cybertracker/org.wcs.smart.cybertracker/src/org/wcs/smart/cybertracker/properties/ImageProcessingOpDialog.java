@@ -227,20 +227,20 @@ public class ImageProcessingOpDialog extends TitleAreaDialog implements Listener
 				
 				CyberTrackerPropertiesOption resizeOp = QueryFactory.buildQuery(s, CyberTrackerPropertiesOption.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-						new Object[] {"optionId", OptionID.RESIZE_IMAGE}).uniqueResult(); //$NON-NLS-1$
+						new Object[] {"optionId", OptionID.RESIZE_IMAGE.name()}).uniqueResult(); //$NON-NLS-1$
 						
 				CyberTrackerPropertiesOption sizeOp = QueryFactory.buildQuery(s, CyberTrackerPropertiesOption.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-						new Object[] {"optionId", OptionID.IMAGE_SIZE}).uniqueResult(); //$NON-NLS-1$
+						new Object[] {"optionId", OptionID.IMAGE_SIZE.name()}).uniqueResult(); //$NON-NLS-1$
 				
 				CyberTrackerPropertiesOption maxSize = QueryFactory.buildQuery(s, CyberTrackerPropertiesOption.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-						new Object[] {"optionId", OptionID.MAX_IMAGE_SIZE}).uniqueResult(); //$NON-NLS-1$
+						new Object[] {"optionId", OptionID.MAX_IMAGE_SIZE.name()}).uniqueResult(); //$NON-NLS-1$
 
 				
 				if (resizeOp == null){
 					resizeOp = new CyberTrackerPropertiesOption();
-					resizeOp.setOptionId(OptionID.RESIZE_IMAGE);
+					resizeOp.setOptionId(OptionID.RESIZE_IMAGE.name());
 					resizeOp.setConservationArea(SmartDB.getCurrentConservationArea());
 				}
 				if (!btnDoResize.getSelection()){
@@ -251,7 +251,7 @@ public class ImageProcessingOpDialog extends TitleAreaDialog implements Listener
 				}else{
 					if (maxSize == null){
 						maxSize = new CyberTrackerPropertiesOption();
-						maxSize.setOptionId(OptionID.MAX_IMAGE_SIZE);
+						maxSize.setOptionId(OptionID.MAX_IMAGE_SIZE.name());
 						maxSize.setConservationArea(SmartDB.getCurrentConservationArea());
 					}
 					maxSize.setDoubleValue(Double.parseDouble(txtMaxSize.getText()));
@@ -264,7 +264,7 @@ public class ImageProcessingOpDialog extends TitleAreaDialog implements Listener
 						resizeOp.setStringValue(ImageResizeOption.AUTO.name());
 						if (sizeOp == null){
 							sizeOp = new CyberTrackerPropertiesOption();
-							sizeOp.setOptionId(OptionID.IMAGE_SIZE);
+							sizeOp.setOptionId(OptionID.IMAGE_SIZE.name());
 							sizeOp.setConservationArea(SmartDB.getCurrentConservationArea());
 						}
 						ImageSizeOption selectedSizeOp = resizeComp.getResizeOption();
@@ -304,14 +304,14 @@ public class ImageProcessingOpDialog extends TitleAreaDialog implements Listener
 					Root<CyberTrackerPropertiesOption> from = c.from(CyberTrackerPropertiesOption.class);
 					c.where(cb.and(
 							cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
-							from.get("optionId").in(new Object[]{OptionID.RESIZE_IMAGE, OptionID.IMAGE_SIZE, OptionID.MAX_IMAGE_SIZE}))); //$NON-NLS-1$
+							from.get("optionId").in(new Object[]{OptionID.RESIZE_IMAGE.name(), OptionID.IMAGE_SIZE.name(), OptionID.MAX_IMAGE_SIZE.name()}))); //$NON-NLS-1$
 					options.addAll(s.createQuery(c).getResultList());
 				}
 
 				Display.getDefault().syncExec(()->{
 					
 					for (CyberTrackerPropertiesOption o : options){
-						if (o.getOptionId().equals(OptionID.RESIZE_IMAGE)){
+						if (o.getOptionId().equals(OptionID.RESIZE_IMAGE.name())){
 							String value = o.getStringValue();
 							for (CyberTrackerPropertiesOption.ImageResizeOption r : ImageResizeOption.values()){
 								if (r.name().equalsIgnoreCase(value)){
@@ -331,7 +331,7 @@ public class ImageProcessingOpDialog extends TitleAreaDialog implements Listener
 									break;
 								}
 							}
-						}else if (o.getOptionId().equals(OptionID.MAX_IMAGE_SIZE)){
+						}else if (o.getOptionId().equals(OptionID.MAX_IMAGE_SIZE.name())){
 							txtMaxSize.setText(String.valueOf(o.getDoubleValue()));
 						}
 					}
@@ -341,7 +341,7 @@ public class ImageProcessingOpDialog extends TitleAreaDialog implements Listener
 					if (btnAuto.isEnabled() && btnAuto.getSelection()){
 						//find size
 						for (CyberTrackerPropertiesOption o : options){
-							if (o.getOptionId().equals(OptionID.IMAGE_SIZE)){
+							if (o.getOptionId().equals(OptionID.IMAGE_SIZE.name())){
 								if (o.getStringValue().startsWith(ImageSizeOption.CUSTOM.name())){
 									//custom
 									resizeComp.setResizeOption(ImageSizeOption.CUSTOM);
