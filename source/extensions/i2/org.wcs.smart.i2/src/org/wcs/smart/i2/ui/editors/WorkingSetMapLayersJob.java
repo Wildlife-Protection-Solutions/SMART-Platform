@@ -281,7 +281,7 @@ public class WorkingSetMapLayersJob extends Job {
 		
 		for (IntelWorkingSetQuery query : workingset.getQueries()){
 			String name = queryNames.get(query.getQuery());
-			if (name == null) name = "QUERY NOT FOUND";
+			if (name == null) name = Messages.WorkingSetMapLayersJob_QueryNotFound;
 			QueryService service = new QueryService(null, query.getQuery(), name);
 			computeLayers(toAdd, layerStyles, query, service, false, monitor);
 		}

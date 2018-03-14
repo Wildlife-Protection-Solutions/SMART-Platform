@@ -188,7 +188,6 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			MessageDialog.openError(getSite().getShell(), Messages.IntelQueryEditor_ErrorDialogTitle, Messages.IntelQueryEditor_InvalidQuery);
 			return;
 		}
-		query.setQueryString(queryString);
 		
 		InputDialog newName = new InputDialog(getSite().getShell(), Messages.IntelQueryEditor_SaveAsTitle, Messages.IntelQueryEditor_SaveAsMessage, MessageFormat.format(Messages.IntelQueryEditor_DefaultQueryName, query.getName()), new IInputValidator() {
 			@Override
@@ -204,7 +203,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		IntelRecordObservationQuery clone = new IntelRecordObservationQuery();
 		clone.setConservationArea(SmartDB.getCurrentConservationArea());
 		clone.setColumnFilter(query.getColumnFilter());
-		clone.setQueryString(query.getQueryString());
+		clone.setQueryString(queryString);
 		clone.setStyle(query.getStyle());
 		clone.setName(newName.getValue());
 		clone.updateName(SmartDB.getCurrentLanguage(), clone.getName());
@@ -471,6 +470,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		query.setQueryString(queryString);
 		resultsTable.setQuery(query);
 		
+		runJob.setQuery(query);
 		runJob.setDateFilter(fdateFilter);
 		runJob.schedule();
 	}

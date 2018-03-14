@@ -585,21 +585,20 @@ public class WaypointFilterProcessor {
 		sql.append (" SELECT distinct l.location_uuid "); //$NON-NLS-1$
 		sql.append(" FROM " + obsTable + " a JOIN smart.i_entity_location l on a.location_uuid = l.location_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" JOIN smart.i_entity_attribute_value v on v.entity_uuid = l.entity_uuid "); //$NON-NLS-1$
-		sql.append(" JOIN smart.i_attribute ia on ia.uuid = v.attribute_uuid "); //$NON-NLS-1$
+		sql.append(" JOIN smart.i_attribute ia on ia.uuid = v.attribute_uuid and ia.keyId = :attributeKey "); //$NON-NLS-1$
 		if (listItem != null) {
 			sql.append(" LEFT JOIN smart.i_attribute_list_item ali on ali.uuid = v.list_item_uuid "); //$NON-NLS-1$	
 		}
 		if (filter.getEntityTypeKey() != null){
 			sql.append("LEFT JOIN smart.i_entity e on l.entity_uuid = e.uuid "); //$NON-NLS-1$
-			sql.append(" LEFT JOIN smart.i_entity_type et on et.uuid = e.entity_type_uuid "); //$NON-NLS-1$
+			sql.append(" LEFT JOIN smart.i_entity_type et on et.uuid = e.entity_type_uuid AND et.keyId = :entityTypeKey "); //$NON-NLS-1$
 		}
 		
 		sql.append(" WHERE "); //$NON-NLS-1$
 		sql.append(" ia.keyId = :attributeKey "); //$NON-NLS-1$
-		if (filter.getEntityTypeKey() != null){
-			sql.append(" AND et.keyId = :entityTypeKey "); //$NON-NLS-1$
+		if (filter.getEntityTypeKey() != null) {
+			sql.append(" AND et.keyid = :entityTypeKey "); //$NON-NLS-1$
 		}
-		
 		sql.append(" AND "); //$NON-NLS-1$
 		switch(filter.getAttributeType()){
 		case BOOLEAN:

@@ -267,6 +267,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
+                  icon="images/icons/obj16/query_record_obs_add.png"
                   label="%NewQueryCommandName"
                   style="push">
                <visibleWhen
@@ -276,6 +277,27 @@
                         value="create_query">
                   </test>
                </visibleWhen>
+               <parameter
+                     name="org.wcs.smart.i2.query.new.type"
+                     value="I2_OBS_QUERY">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.query.record.new"
+                  icon="images/icons/obj16/query_entity_sum_add.png"
+                  label="%NewEntitySumQueryCommandName"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="create_query">
+                  </test>
+               </visibleWhen>
+               <parameter
+                     name="org.wcs.smart.i2.query.new.type"
+                     value="I2_ENTITY_SUMM_QUERY">
+               </parameter>
             </command>
             <separator
                   name="org.wcs.smart.i2.separator1"
@@ -847,7 +869,7 @@
             locationURI="toolbar:org.wcs.smart.i2.ui.view.queries">
          <command
                commandId="org.wcs.smart.i2.command.query.record.new"
-               icon="images/icons/obj16/new_entity_query.png"
+               icon="images/icons/obj16/query_entity_sum_add.png"
                style="push"
                tooltip="create a new entity summary query">
             <visibleWhen
@@ -864,7 +886,7 @@
          </command>
          <command
                commandId="org.wcs.smart.i2.command.query.record.new"
-               icon="images/icons/obj16/new_entity_query.png"
+               icon="images/icons/obj16/query_record_obs_add.png"
                style="push"
                tooltip="create a new record observation query">
             <visibleWhen
@@ -973,13 +995,14 @@
       <editor
             class="org.wcs.smart.i2.ui.editors.query.IntelRecordObservationQueryEditor"
             default="false"
-            icon="images/icons/obj16/entity_query.png"
+            icon="images/icons/obj16/query_record_obs.png"
             id="org.wcs.smart.i2.editor.query.recordobservation"
             name="%QueryEditorNames">
       </editor>
       <editor
             class="org.wcs.smart.i2.ui.editors.query.IntelEntitySummaryQueryEditor"
             default="false"
+            icon="images/icons/obj16/query_entity_sum.png"
             id="org.wcs.smart.i2.editor.query.entitysummary"
             name="Entity Summary Query">
       </editor>
@@ -1223,10 +1246,6 @@
       <image
             commandId="org.wcs.smart.i2.command.query.refresh"
             icon="images/icons/obj16/refresh.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.i2.command.query.record.new"
-            icon="images/icons/obj16/new_entity_query.png">
       </image>
       <image
             commandId="org.wcs.smart.i2.command.record.configuration"

@@ -67,6 +67,10 @@ public abstract class RunQueryJob extends Job {
 	public AbstractIntelQuery getQuery(){
 		return this.query;
 	}
+	
+	public void setQuery(AbstractIntelQuery query) {
+		this.query = query;
+	}
 	protected abstract void onError(Exception ex);
 	
 	protected abstract void onComplete(IQueryResult results);

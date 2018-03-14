@@ -71,7 +71,7 @@ public enum InternalQueryManager {
 				if (removed == null) throw new Exception(Messages.QueryManager_NotFoundError);
 				
 				Query<?> wsQuery = s.createQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query"); //$NON-NLS-1$
-				wsQuery.setParameter("query", removed); //$NON-NLS-1$
+				wsQuery.setParameter("query", removed.getUuid()); //$NON-NLS-1$
 				wsQuery.executeUpdate();
 				
 				s.delete(removed);

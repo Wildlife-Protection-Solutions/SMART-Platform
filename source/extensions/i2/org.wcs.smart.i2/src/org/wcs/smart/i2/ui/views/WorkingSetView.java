@@ -574,7 +574,7 @@ public class WorkingSetView {
 		}
 		List<IntelRecord> records = new ArrayList<>();
 		List<IntelEntity> entities = new ArrayList<>();
-		List<IntelRecordObservationQuery> queries = new ArrayList<>();
+		List<AbstractIntelQuery> queries = new ArrayList<>();
 		for (IntelWorkingSetItem toDelete: toDeleteItems){
 			if (toDelete.getCategory() == IntelWorkingSetCategory.ENTITY){
 				try(Session s = HibernateManager.openSession()){
@@ -589,7 +589,7 @@ public class WorkingSetView {
 				}
 			}else if (toDelete.getCategory() == IntelWorkingSetCategory.QUERIES){
 				try(Session s = HibernateManager.openSession()){
-					IntelRecordObservationQuery i = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, toDelete.getUuid());
+					AbstractIntelQuery i = QueryManager.INSTANCE.findQuery(s, toDelete.getUuid(), toDelete.getQueryTypeKey());
 					queries.add(i);
 				}	
 			}

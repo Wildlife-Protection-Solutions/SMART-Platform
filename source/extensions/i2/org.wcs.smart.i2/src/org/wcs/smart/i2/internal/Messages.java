@@ -1429,6 +1429,7 @@ public class Messages extends NLS {
 	public static String WorkingSetManager_RecordError;
 	public static String WorkingSetManager_RecordRemoveError;
 	public static String WorkingSetMapLayersJob_ParseError;
+	public static String WorkingSetMapLayersJob_QueryNotFound;
 	public static String WorkingSetQueryLayersJob_QueryRunError;
 	public static String WorkingSetView_copyTooltip;
 	public static String WorkingSetView_createnewTooltip;

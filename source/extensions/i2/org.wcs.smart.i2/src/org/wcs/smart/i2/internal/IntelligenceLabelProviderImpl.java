@@ -282,6 +282,8 @@ public class IntelligenceLabelProviderImpl implements
 			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD);
 		}else if (item == IntelWorkingSetCategory.ENTITY){
 			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY);
+		}else if (item == IntelWorkingSetCategory.QUERIES) {
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS);
 		}
 		return null;
 	}

@@ -461,6 +461,11 @@ public class QueryView {
 			for (String[] queryTypes : InternalQueryManager.INSTANCE.getSupportQueryTypes()) {
 				MenuItem mi = new MenuItem(mnuTypes, SWT.PUSH);
 				mi.setText(queryTypes[1]);
+				if (queryTypes[0].equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
+					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM));
+				}else if (queryTypes[0].equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
+					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS));
+				}
 				mi.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {

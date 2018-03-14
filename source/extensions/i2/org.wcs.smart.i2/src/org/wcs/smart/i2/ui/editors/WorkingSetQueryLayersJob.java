@@ -188,6 +188,11 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 						UUID ws = WorkingSetManager.INSTANCE.getActiveWorkingSet();
 						if (ws == null) return;
 						
+						if (results == null){
+							//Do something better here - show something on tree with error image overlay
+							Intelligence2PlugIn.displayLog(Messages.WorkingSetQueryLayersJob_QueryRunError, null);
+							return;
+						}
 						
 						if (!(results instanceof IPagedQueryResultSet)) return; //cannot be added to map
 						
@@ -205,17 +210,10 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 							}
 						}
 						if (!add) return;
-						
-						
-						if (results == null){
-							//Do something better here - show something on tree with error image overlay
-							Intelligence2PlugIn.displayLog(Messages.WorkingSetQueryLayersJob_QueryRunError, null);
-							return;
-						}
+	
 						//add a new query service with associated layers
 						List<LayerInfo> toAdd = new ArrayList<>();
 						HashMap<ID, StyleBlackboard>layerStyles = new HashMap<>();
-						
 						
 						//lets find the layers on the map and update;
 						//I tried to set the results in the query service but the layer caches all sorts of information

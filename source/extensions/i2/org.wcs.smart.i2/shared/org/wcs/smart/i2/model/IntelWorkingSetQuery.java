@@ -148,7 +148,7 @@ public class IntelWorkingSetQuery implements IWorkingSetMapLayer{
 			
 		}
 		
-		@JoinColumn(name="query_uuid")
+		@Column(name="query_uuid")
 		public UUID getQuery() {
 			return queryUuid;
 		}

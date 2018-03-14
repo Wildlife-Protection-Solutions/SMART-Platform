@@ -38,7 +38,6 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
@@ -261,18 +260,18 @@ public enum WorkingSetManager {
 		addQueryUuidToActiveWorkingSet(query.stream().map(a->a.getUuid()).collect(Collectors.toList()), context);
 	}
 	
-	public void removeQueryFromWorkingSet(Collection<IntelRecordObservationQuery> queries, IEclipseContext context){
+	public void removeQueryFromWorkingSet(Collection<AbstractIntelQuery> queries, IEclipseContext context){
 		if (activeWorkingSet == null || queries.isEmpty()) return;
 		IntelWorkingSet wset = null;
 		try(Session s = HibernateManager.openSession()){
-			for (IntelRecordObservationQuery query : queries){
+			for (AbstractIntelQuery query : queries){
 				try{
 					s.beginTransaction();
 					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
 					if (wset != null){
 						IntelWorkingSetQuery wsrecord = null;
 						for (IntelWorkingSetQuery r : wset.getQueries()){
-							if (r.getQuery().equals(query)){
+							if (r.getQuery().equals(query.getUuid())){
 								wsrecord = r;
 								break;
 							}
