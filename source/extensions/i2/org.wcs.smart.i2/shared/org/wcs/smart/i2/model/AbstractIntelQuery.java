@@ -62,6 +62,11 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	@Transient
 	public abstract String getTypeKey();
 	
+	@Transient
+	public String getIconName() {
+		return getTypeKey() + ".png";
+	}
+	
 	/**
 	 * 
 	 * @return style string for map based queries; null for all other queries
