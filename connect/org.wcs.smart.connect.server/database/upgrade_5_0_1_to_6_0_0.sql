@@ -127,9 +127,9 @@ ALTER TABLE smart.qa_error ADD FOREIGN KEY (qa_routine_uuid) REFERENCES smart.qa
 
 
 
---NEEDS TO BE FIXED SEE TICKET 2209
---delete from smart.CONFIGURABLE_MODEL;
-
+-- UPGRADE CONFIGURABLE MODEL CONFIGURATIONS
+-- SEE UpgradeServlet.java for full Configurable Model update code
+--create new tables
 CREATE TABLE smart.cm_attribute_config(uuid UUID not null, cm_uuid UUID not null, dm_attribute_uuid UUID not null, display_mode varchar(10), is_default boolean, primary key (uuid));
 ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (CM_UUID) REFERENCES SMART.CONFIGURABLE_MODEL(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.cm_attribute_config ADD FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES SMART.DM_ATTRIBUTE(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
@@ -141,21 +141,19 @@ ALTER TABLE SMART.CM_ATTRIBUTE_LIST ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMA
 alter table smart.cm_attribute_tree_node add column config_uuid UUID;
 ALTER TABLE SMART.CM_ATTRIBUTE_TREE_NODE ADD FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED ;
 
+-- the following run in the upgradeservlet code
+--drop table SMART.CM_DM_ATTRIBUTE_SETTINGS;
+--alter table smart.cm_attribute_list drop column CM_ATTRIBUTE_UUID;
+--alter table smart.cm_attribute_list drop column DM_ATTRIBUTE_UUID;
+--alter table smart.cm_attribute_list drop column CM_UUID;
+--alter table smart.cm_attribute_list alter column config_uuid SET NOT NULL;
 
+--alter table smart.cm_attribute_tree_node drop column CM_ATTRIBUTE_UUID;
+--alter table smart.cm_attribute_tree_node drop column DM_ATTRIBUTE_UUID;
+--alter table smart.cm_attribute_tree_node drop column CM_UUID;
+--alter table smart.cm_attribute_tree_node alter column config_uuid SET NOT NULL;
 
-drop table SMART.CM_DM_ATTRIBUTE_SETTINGS;
-
-alter table smart.cm_attribute_list drop column CM_ATTRIBUTE_UUID;
-alter table smart.cm_attribute_list drop column DM_ATTRIBUTE_UUID;
-alter table smart.cm_attribute_list drop column CM_UUID;
-alter table smart.cm_attribute_list alter column config_uuid SET NOT NULL;
-
-alter table smart.cm_attribute_tree_node drop column CM_ATTRIBUTE_UUID;
-alter table smart.cm_attribute_tree_node drop column DM_ATTRIBUTE_UUID;
-alter table smart.cm_attribute_tree_node drop column CM_UUID;
-alter table smart.cm_attribute_tree_node alter column config_uuid SET NOT NULL;
-
-delete from smart.CM_ATTRIBUTE_OPTION where OPTION_ID = 'DISPLAY_MODE' OR OPTION_ID = 'CUSTOM_CONFIG';
+--delete from smart.CM_ATTRIBUTE_OPTION where OPTION_ID = 'DISPLAY_MODE' OR OPTION_ID = 'CUSTOM_CONFIG';
 ---- END OF SECTION
 
 
@@ -342,84 +340,84 @@ DROP TRIGGER IF EXISTS trg_qa_error ON smart.qa_error;
 DROP TRIGGER IF EXISTS trg_qa_routine_parameter ON smart.qa_routine_parameter;                                                                  
 DROP TRIGGER IF EXISTS trg_observation_attachment on smart.observation_attachment;
 
- DROP FUNCTION connect.trg_changelog_common();
- DROP FUNCTION connect.trg_cm_attribute();
- DROP FUNCTION connect.trg_cm_attribute_config();
- DROP FUNCTION connect.trg_cm_attribute_list();
- DROP FUNCTION connect.trg_cm_attribute_option();
- DROP FUNCTION connect.trg_cm_attribute_tree_node();
- DROP FUNCTION connect.trg_cm_ct_properties_profile();
- DROP FUNCTION connect.trg_cm_node();
- DROP FUNCTION connect.trg_compound_query_layer();
- DROP FUNCTION connect.trg_connect_account();
- DROP FUNCTION connect.trg_connect_alert();
- DROP FUNCTION connect.trg_connect_ct_properties();
- DROP FUNCTION connect.trg_ct_mission_link();
- DROP FUNCTION connect.trg_ct_patrol_link();
- DROP FUNCTION connect.trg_ct_properties_profile_option();
- DROP FUNCTION connect.trg_dm_att_agg_map();
- DROP FUNCTION connect.trg_dm_attribute_list();
- DROP FUNCTION connect.trg_dm_attribute_tree();
- DROP FUNCTION connect.trg_dm_cat_att_map();
- DROP FUNCTION connect.trg_entity();
- DROP FUNCTION connect.trg_entity_attribute();
- DROP FUNCTION connect.trg_entity_attribute_value();
- DROP FUNCTION connect.trg_i18n_label();
- DROP FUNCTION connect.trg_i_attribute_list_item();
- DROP FUNCTION connect.trg_i_entity_attachment();
- DROP FUNCTION connect.trg_i_entity_attribute_value();
- DROP FUNCTION connect.trg_i_entity_location();
- DROP FUNCTION connect.trg_i_entity_record();
- DROP FUNCTION connect.trg_i_entity_relationship();
- DROP FUNCTION connect.trg_i_entity_relationship_attribute_value();
- DROP FUNCTION connect.trg_i_entity_type_attribute();
- DROP FUNCTION connect.trg_i_entity_type_attribute_group();
- DROP FUNCTION connect.trg_i_observation();
- DROP FUNCTION connect.trg_i_observation_attribute();
- DROP FUNCTION connect.trg_i_record_attachment();
- DROP FUNCTION connect.trg_i_record_attribute_value();
- DROP FUNCTION connect.trg_i_record_attribute_value_list();
- DROP FUNCTION connect.trg_i_recordsource_attribute();
- DROP FUNCTION connect.trg_i_relationship_type_attribute();
- DROP FUNCTION connect.trg_i_working_set_entity();
- DROP FUNCTION connect.trg_i_working_set_query();
- DROP FUNCTION connect.trg_i_working_set_record();
- DROP FUNCTION connect.trg_intelligence_attachment();
- DROP FUNCTION connect.trg_intelligence_point();
- DROP FUNCTION connect.trg_mission();
- DROP FUNCTION connect.trg_mission_attribute_list();
- DROP FUNCTION connect.trg_mission_day();
- DROP FUNCTION connect.trg_mission_member();
- DROP FUNCTION connect.trg_mission_property();
- DROP FUNCTION connect.trg_mission_property_value();
- DROP FUNCTION connect.trg_mission_track();
- DROP FUNCTION connect.trg_observation_attachment();
- DROP FUNCTION connect.trg_patrol_intelligence();
- DROP FUNCTION connect.trg_patrol_leg();
- DROP FUNCTION connect.trg_patrol_leg_day();
- DROP FUNCTION connect.trg_patrol_leg_members();
- DROP FUNCTION connect.trg_patrol_plan();
- DROP FUNCTION connect.trg_patrol_type();
- DROP FUNCTION connect.trg_patrol_waypoint();
- DROP FUNCTION connect.trg_plan_target();
- DROP FUNCTION connect.trg_plan_target_point();
- DROP FUNCTION connect.trg_qa_routine_parameter();
- DROP FUNCTION connect.trg_rank();
- DROP FUNCTION connect.trg_report_query();
- DROP FUNCTION connect.trg_sampling_unit();
- DROP FUNCTION connect.trg_sampling_unit_attribute_list();
- DROP FUNCTION connect.trg_sampling_unit_attribute_value();
- DROP FUNCTION connect.trg_screen_option_uuid();
- DROP FUNCTION connect.trg_survey();
- DROP FUNCTION connect.trg_survey_design_property();
- DROP FUNCTION connect.trg_survey_design_sampling_unit();
- DROP FUNCTION connect.trg_survey_waypoint();
- DROP FUNCTION connect.trg_track();
- DROP FUNCTION connect.trg_wp_attachments();
- DROP FUNCTION connect.trg_wp_observation();
- DROP FUNCTION connect.trg_wp_observation_attributes();
- DROP FUNCTION connect.trg_conservation_area();
- DROP FUNCTION connect.trg_observation_options();
+DROP FUNCTION IF EXISTS connect.trg_changelog_common();
+DROP FUNCTION IF EXISTS connect.trg_cm_attribute();
+DROP FUNCTION IF EXISTS connect.trg_cm_attribute_config();
+DROP FUNCTION IF EXISTS connect.trg_cm_attribute_list();
+DROP FUNCTION IF EXISTS connect.trg_cm_attribute_option();
+DROP FUNCTION IF EXISTS connect.trg_cm_attribute_tree_node();
+DROP FUNCTION IF EXISTS connect.trg_cm_ct_properties_profile();
+DROP FUNCTION IF EXISTS connect.trg_cm_node();
+DROP FUNCTION IF EXISTS connect.trg_compound_query_layer();
+DROP FUNCTION IF EXISTS connect.trg_connect_account();
+DROP FUNCTION IF EXISTS connect.trg_connect_alert();
+DROP FUNCTION IF EXISTS connect.trg_connect_ct_properties();
+DROP FUNCTION IF EXISTS connect.trg_ct_mission_link();
+DROP FUNCTION IF EXISTS connect.trg_ct_patrol_link();
+DROP FUNCTION IF EXISTS connect.trg_ct_properties_profile_option();
+DROP FUNCTION IF EXISTS connect.trg_dm_att_agg_map();
+DROP FUNCTION IF EXISTS connect.trg_dm_attribute_list();
+DROP FUNCTION IF EXISTS connect.trg_dm_attribute_tree();
+DROP FUNCTION IF EXISTS connect.trg_dm_cat_att_map();
+DROP FUNCTION IF EXISTS connect.trg_entity();
+DROP FUNCTION IF EXISTS connect.trg_entity_attribute();
+DROP FUNCTION IF EXISTS connect.trg_entity_attribute_value();
+DROP FUNCTION IF EXISTS connect.trg_i18n_label();
+DROP FUNCTION IF EXISTS connect.trg_i_attribute_list_item();
+DROP FUNCTION IF EXISTS connect.trg_i_entity_attachment();
+DROP FUNCTION IF EXISTS connect.trg_i_entity_attribute_value();
+DROP FUNCTION IF EXISTS connect.trg_i_entity_location();
+DROP FUNCTION IF EXISTS connect.trg_i_entity_record();
+DROP FUNCTION IF EXISTS connect.trg_i_entity_relationship();
+DROP FUNCTION IF EXISTS connect.trg_i_entity_relationship_attribute_value();
+DROP FUNCTION IF EXISTS connect.trg_i_entity_type_attribute();
+DROP FUNCTION IF EXISTS connect.trg_i_entity_type_attribute_group();
+DROP FUNCTION IF EXISTS connect.trg_i_observation();
+DROP FUNCTION IF EXISTS connect.trg_i_observation_attribute();
+DROP FUNCTION IF EXISTS connect.trg_i_record_attachment();
+DROP FUNCTION IF EXISTS connect.trg_i_record_attribute_value();
+DROP FUNCTION IF EXISTS connect.trg_i_record_attribute_value_list();
+DROP FUNCTION IF EXISTS connect.trg_i_recordsource_attribute();
+DROP FUNCTION IF EXISTS connect.trg_i_relationship_type_attribute();
+DROP FUNCTION IF EXISTS connect.trg_i_working_set_entity();
+DROP FUNCTION IF EXISTS connect.trg_i_working_set_query();
+DROP FUNCTION IF EXISTS connect.trg_i_working_set_record();
+DROP FUNCTION IF EXISTS connect.trg_intelligence_attachment();
+DROP FUNCTION IF EXISTS connect.trg_intelligence_point();
+DROP FUNCTION IF EXISTS connect.trg_mission();
+DROP FUNCTION IF EXISTS connect.trg_mission_attribute_list();
+DROP FUNCTION IF EXISTS connect.trg_mission_day();
+DROP FUNCTION IF EXISTS connect.trg_mission_member();
+DROP FUNCTION IF EXISTS connect.trg_mission_property();
+DROP FUNCTION IF EXISTS connect.trg_mission_property_value();
+DROP FUNCTION IF EXISTS connect.trg_mission_track();
+DROP FUNCTION IF EXISTS connect.trg_observation_attachment();
+DROP FUNCTION IF EXISTS connect.trg_patrol_intelligence();
+DROP FUNCTION IF EXISTS connect.trg_patrol_leg();
+DROP FUNCTION IF EXISTS connect.trg_patrol_leg_day();
+DROP FUNCTION IF EXISTS connect.trg_patrol_leg_members();
+DROP FUNCTION IF EXISTS connect.trg_patrol_plan();
+DROP FUNCTION IF EXISTS connect.trg_patrol_type();
+DROP FUNCTION IF EXISTS connect.trg_patrol_waypoint();
+DROP FUNCTION IF EXISTS connect.trg_plan_target();
+DROP FUNCTION IF EXISTS connect.trg_plan_target_point();
+DROP FUNCTION IF EXISTS connect.trg_qa_routine_parameter();
+DROP FUNCTION IF EXISTS connect.trg_rank();
+DROP FUNCTION IF EXISTS connect.trg_report_query();
+DROP FUNCTION IF EXISTS connect.trg_sampling_unit();
+DROP FUNCTION IF EXISTS connect.trg_sampling_unit_attribute_list();
+DROP FUNCTION IF EXISTS connect.trg_sampling_unit_attribute_value();
+DROP FUNCTION IF EXISTS connect.trg_screen_option_uuid();
+DROP FUNCTION IF EXISTS connect.trg_survey();
+DROP FUNCTION IF EXISTS connect.trg_survey_design_property();
+DROP FUNCTION IF EXISTS connect.trg_survey_design_sampling_unit();
+DROP FUNCTION IF EXISTS connect.trg_survey_waypoint();
+DROP FUNCTION IF EXISTS connect.trg_track();
+DROP FUNCTION IF EXISTS connect.trg_wp_attachments();
+DROP FUNCTION IF EXISTS connect.trg_wp_observation();
+DROP FUNCTION IF EXISTS connect.trg_wp_observation_attributes();
+DROP FUNCTION IF EXISTS connect.trg_conservation_area();
+DROP FUNCTION IF EXISTS connect.trg_observation_options();
 
 CREATE OR REPLACE FUNCTION connect.trg_changelog_common() RETURNS trigger AS $$
 	DECLARE
@@ -1413,10 +1411,10 @@ CREATE TRIGGER trg_compound_query_layer AFTER INSERT OR UPDATE OR DELETE ON smar
 
 
 -- Lock the change log table so cannot apply chnages at the same time as sync or packaging conservation area
-DROP TRIGGER trg_connect_account_before ON connect.change_log;
-DROP TRIGGER trg_connect_account_after ON connect.change_log; 
-DROP FUNCTION connect.trg_changelog_before();
-DROP FUNCTION connect.trg_changelog_after();
+DROP TRIGGER IF EXISTS trg_connect_account_before ON connect.change_log;
+DROP TRIGGER IF EXISTS trg_connect_account_after ON connect.change_log; 
+DROP FUNCTION IF EXISTS connect.trg_changelog_before();
+DROP FUNCTION IF EXISTS connect.trg_changelog_after();
 
 
 --If we upgrade to Postgresql 9.6 this function can be removed

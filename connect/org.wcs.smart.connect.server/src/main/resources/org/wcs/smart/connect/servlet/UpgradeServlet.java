@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -46,6 +47,7 @@ import javax.ws.rs.core.Response.Status;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -152,6 +154,7 @@ public class UpgradeServlet extends HttpServlet {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				try {
+					upgradeConfigurableModel5To6(c);
 					encryptFilestoreData(c);
 				}catch (Exception ex) {
 					throw new SQLException (ex);
@@ -231,5 +234,217 @@ public class UpgradeServlet extends HttpServlet {
 			}
 		}
 		
+	}
+	
+	private void upgradeConfigurableModel5To6(Connection c) throws SQLException {
+		//this code is run as a part of the databaes sql script; it is run there so we also create necessary triggers 
+//		String[] sql = new String[] {
+//				"CREATE TABLE smart.cm_attribute_config(uuid char(16) for bit data not null, cm_uuid char(16) for bit data not null, dm_attribute_uuid char(16) for bit data not null, display_mode varchar(10), is_default boolean, primary key (uuid))", //$NON-NLS-1$
+//				"ALTER TABLE smart.cm_attribute_config ADD CONSTRAINT CM_ATTRIBUTE_CONFIG_CM_UUID_FK FOREIGN KEY (CM_UUID) REFERENCES SMART.CONFIGURABLE_MODEL(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+//				"ALTER TABLE smart.cm_attribute_config ADD CONSTRAINT CM_ATTRIBUTE_CONFIG_DM_ATTRIBUTE_UUID_FK FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES SMART.DM_ATTRIBUTE(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+//
+//				"GRANT ALL PRIVILEGES ON smart.cm_attribute_config TO manager", //$NON-NLS-1$
+//				"GRANT ALL PRIVILEGES ON smart.cm_attribute_config TO data_entry", //$NON-NLS-1$
+//				"GRANT ALL PRIVILEGES ON smart.cm_attribute_config TO analyst", //$NON-NLS-1$
+//
+//				"alter table smart.cm_attribute add column config_uuid char(16) for bit data", //$NON-NLS-1$
+//				"ALTER TABLE smart.cm_attribute ADD CONSTRAINT CM_ATTRIBUTE_CONFIG_UUID_FK FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+//
+//				"alter table smart.cm_attribute_list add column config_uuid char(16) for bit data", //$NON-NLS-1$
+//				"ALTER TABLE SMART.CM_ATTRIBUTE_LIST ADD CONSTRAINT CM_ATTRIBUTE_LIST_CONFIG_UUID_FK FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$ 
+//
+//				"alter table smart.cm_attribute_tree_node add column config_uuid char(16) for bit data", //$NON-NLS-1$
+//				"ALTER TABLE SMART.CM_ATTRIBUTE_TREE_NODE ADD CONSTRAINT CM_ATTRIBUTE_TREE_NODE_CONFIG_UUID_FK FOREIGN KEY (CONFIG_UUID) REFERENCES SMART.CM_ATTRIBUTE_CONFIG(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$ 
+//		};
+		
+		//disable triggers
+		c.createStatement().executeUpdate("SET session_replication_role = replica"); //$NON-NLS-1$
+		
+		populateConfigs(c, "smart.CM_ATTRIBUTE_LIST"); //$NON-NLS-1$
+		populateConfigs(c, "smart.CM_ATTRIBUTE_TREE_NODE"); //$NON-NLS-1$
+		
+		String[] sql = new String[] {
+				"drop table SMART.CM_DM_ATTRIBUTE_SETTINGS", //$NON-NLS-1$
+
+				"alter table smart.cm_attribute_list drop column CM_ATTRIBUTE_UUID", //$NON-NLS-1$
+				"alter table smart.cm_attribute_list drop column DM_ATTRIBUTE_UUID", //$NON-NLS-1$
+				"alter table smart.cm_attribute_list drop column CM_UUID", //$NON-NLS-1$
+				"alter table smart.cm_attribute_list alter column config_uuid SET NOT NULL", //$NON-NLS-1$
+
+				"alter table smart.cm_attribute_tree_node drop column CM_ATTRIBUTE_UUID", //$NON-NLS-1$
+				"alter table smart.cm_attribute_tree_node drop column DM_ATTRIBUTE_UUID", //$NON-NLS-1$
+				"alter table smart.cm_attribute_tree_node drop column CM_UUID", //$NON-NLS-1$
+				"alter table smart.cm_attribute_tree_node alter column config_uuid SET NOT NULL", //$NON-NLS-1$
+
+				"delete from smart.CM_ATTRIBUTE_OPTION where OPTION_ID = 'DISPLAY_MODE' OR OPTION_ID = 'CUSTOM_CONFIG'", //$NON-NLS-1$
+
+				//change ca version so users cannot sync with this and cause problems
+				"update connect.ca_info SET version = uuid_generate_v4()", //$NON-NLS-1$
+				"delete from connect.change_log", //$NON-NLS-1$
+				"delete from connect.change_log_history", //$NON-NLS-1$
+		};
+
+		for (String s : sql) {
+			logger.log(Level.INFO, s);
+			c.createStatement().execute(s);
+		}
+		//re-enable triggers
+		c.createStatement().executeUpdate("SET session_replication_role = DEFAULT"); //$NON-NLS-1$
+	}
+	
+	private UUID createUuid(Connection c) throws SQLException {
+		try(ResultSet rs2 = c.createStatement().executeQuery("select uuid_generate_v4()")){ //$NON-NLS-1$
+			if (rs2.next()) return (UUID)rs2.getObject(1);
+		}
+		throw new SQLException("Unable to generate a new uuid"); //$NON-NLS-1$
+	}
+	
+	private void populateConfigs(Connection c, String tableName) throws SQLException {
+		try (ResultSet rs = c.createStatement().executeQuery("select distinct CM_UUID, CM_ATTRIBUTE_UUID, DM_ATTRIBUTE_UUID from " + tableName)) { //$NON-NLS-1$
+			while (rs.next()) {
+				UUID cm_uuid = (UUID) rs.getObject(1);
+				UUID cma_uuid = (UUID) rs.getObject(2);
+				UUID dma_uuid = (UUID) rs.getObject(3);
+				UUID cfg_uuid = createUuid(c);
+
+				if (cma_uuid != null) {
+					//this is custom config
+					insertConfig(c, cfg_uuid, cm_uuid, getDmAttributeForCmAttribute(c, cma_uuid), getDisplayModeForCustomCmAttribute(c, cma_uuid), false);
+
+					PreparedStatement ps_upd = c.prepareStatement("UPDATE " + tableName + " SET CONFIG_UUID = ? WHERE CM_UUID = ? AND CM_ATTRIBUTE_UUID = ? AND DM_ATTRIBUTE_UUID IS NULL"); //$NON-NLS-1$ //$NON-NLS-2$
+					ps_upd.setObject(1, cfg_uuid);
+					ps_upd.setObject(2, cm_uuid);
+					ps_upd.setObject(3, cma_uuid);
+					ps_upd.executeUpdate();
+
+					PreparedStatement ps_cma_upd = c.prepareStatement("UPDATE smart.cm_attribute SET CONFIG_UUID = ? WHERE UUID = ?"); //$NON-NLS-1$
+					ps_cma_upd.setObject(1, cfg_uuid);
+					ps_cma_upd.setObject(2, cma_uuid);
+					ps_cma_upd.executeUpdate();
+
+				} else if (dma_uuid != null) {
+					//this is default config
+					insertConfig(c, cfg_uuid, cm_uuid, dma_uuid, getDisplayModeForDefaultAttribute(c, cm_uuid, dma_uuid), true);
+
+					PreparedStatement ps_upd = c.prepareStatement("UPDATE " + tableName + " SET CONFIG_UUID = ? WHERE CM_UUID = ? AND CM_ATTRIBUTE_UUID IS NULL AND DM_ATTRIBUTE_UUID = ?"); //$NON-NLS-1$ //$NON-NLS-2$
+					ps_upd.setObject(1, cfg_uuid);
+					ps_upd.setObject(2, cm_uuid);
+					ps_upd.setObject(3, dma_uuid);
+					ps_upd.executeUpdate();
+
+					PreparedStatement ps_cma_upd = c.prepareStatement("UPDATE smart.cm_attribute SET CONFIG_UUID = ? WHERE CONFIG_UUID IS NULL and ATTRIBUTE_UUID = ? AND NODE_UUID IN (select uuid from smart.cm_node where cm_uuid = ?)"); //$NON-NLS-1$
+					ps_cma_upd.setObject(1, cfg_uuid);
+					ps_cma_upd.setObject(2, dma_uuid);
+					ps_cma_upd.setObject(3, cm_uuid);
+					ps_cma_upd.executeUpdate();
+				}
+			}
+		}
+		String attType = null;
+		if (tableName.equals("smart.CM_ATTRIBUTE_LIST")){ //$NON-NLS-1$
+			attType = Attribute.AttributeType.LIST.name();
+		}else if (tableName.equals("smart.CM_ATTRIBUTE_TREE_NODE")) { //$NON-NLS-1$
+			attType = Attribute.AttributeType.TREE.name();
+		}
+		if (attType == null) return;
+		//for configurations with no elements
+		try(ResultSet rs = c.createStatement().executeQuery("select c.cm_uuid as cm_uuid, a.uuid as cm_attribute_uuid, a.attribute_uuid as dm_attribute_uuid from smart.cm_node c, smart.cm_attribute a, smart.dm_attribute b where c.uuid = a.node_uuid and a.attribute_uuid = b.uuid and b.att_type = '" + attType + "' and config_uuid is null")){ //$NON-NLS-1$ //$NON-NLS-2$
+			while (rs.next()) {
+				UUID cm_uuid = (UUID) rs.getObject(1);
+				UUID cma_uuid = (UUID) rs.getObject(2);
+				UUID cfg_uuid = createUuid(c);
+
+				//create custom config and make default
+				insertConfig(c, cfg_uuid, cm_uuid, getDmAttributeForCmAttribute(c, cma_uuid), getDisplayModeForCustomCmAttribute(c, cma_uuid), true);
+
+				PreparedStatement ps_upd = c.prepareStatement("UPDATE " + tableName + " SET CONFIG_UUID = ? WHERE CM_UUID = ? AND CM_ATTRIBUTE_UUID = ? AND DM_ATTRIBUTE_UUID IS NULL"); //$NON-NLS-1$ //$NON-NLS-2$
+				ps_upd.setObject(1, cfg_uuid);
+				ps_upd.setObject(2, cm_uuid);
+				ps_upd.setObject(3, cma_uuid);
+				ps_upd.executeUpdate();
+
+				PreparedStatement ps_cma_upd = c.prepareStatement("UPDATE smart.cm_attribute SET CONFIG_UUID = ? WHERE UUID = ?"); //$NON-NLS-1$
+				ps_cma_upd.setObject(1, cfg_uuid);
+				ps_cma_upd.setObject(2, cma_uuid);
+				ps_cma_upd.executeUpdate();
+			}
+		}
+	}
+
+	private void insertConfig(Connection c, UUID cfg_uuid, UUID cm_uuid, UUID dma_uuid, String displayMode, boolean isDefault) throws SQLException {
+		try(PreparedStatement ps_cfg = c.prepareStatement("INSERT INTO smart.CM_ATTRIBUTE_CONFIG (UUID, CM_UUID, DM_ATTRIBUTE_UUID, DISPLAY_MODE, IS_DEFAULT) VALUES (?, ?, ?, ?, ?)")){ //$NON-NLS-1$
+			ps_cfg.setObject(1, cfg_uuid);
+			ps_cfg.setObject(2, cm_uuid);
+			ps_cfg.setObject(3, dma_uuid);
+			ps_cfg.setString(4, displayMode);
+			ps_cfg.setBoolean(5, isDefault);
+			ps_cfg.executeUpdate();
+		}
+		//assigning name for the config
+		UUID lng_uuid = null;
+		PreparedStatement ps_lng = c.prepareStatement("select lng.UUID from smart.LANGUAGE lng join smart.CONFIGURABLE_MODEL cm on lng.CA_UUID = cm.CA_UUID where lng.ISDEFAULT and cm.UUID = ?"); //$NON-NLS-1$
+		ps_lng.setObject(1, cm_uuid);
+		try (ResultSet rs = ps_lng.executeQuery()) {
+			if (rs.next()) {
+				lng_uuid = (UUID) rs.getObject(1);
+			} else {
+				throw new SQLException("Unable to detect default language while upgrading configurable model."); //$NON-NLS-1$
+			}
+		}
+
+		String cfgName = "Configuration"; //$NON-NLS-1$ Some default that will be owerwritten
+		try(PreparedStatement ps_name = c.prepareStatement("select VALUE from smart.I18N_LABEL where ELEMENT_UUID = ? AND LANGUAGE_UUID = ?")){ //$NON-NLS-1$
+			ps_name.setObject(1, dma_uuid);
+			ps_name.setObject(2, lng_uuid);
+			try (ResultSet rs = ps_name.executeQuery()) {
+				if (rs.next()) {
+					cfgName = rs.getString(1);
+				}
+			}
+		}
+		if (!isDefault) {
+			int customCount = 0;
+			try(PreparedStatement ps_count = c.prepareStatement("select count(UUID) from smart.CM_ATTRIBUTE_CONFIG where DM_ATTRIBUTE_UUID = ? AND not IS_DEFAULT AND CM_UUID = ?")){ //$NON-NLS-1$
+				ps_count.setObject(1, dma_uuid);
+				ps_count.setObject(2, cm_uuid);
+				try (ResultSet rs = ps_count.executeQuery()) {
+					if (rs.next()) {
+						customCount = rs.getInt(1);
+					}
+				}
+				cfgName = "Custom " + cfgName + " " + customCount; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+		try(	PreparedStatement ps_lbl = c.prepareStatement("INSERT INTO smart.I18N_LABEL (LANGUAGE_UUID, ELEMENT_UUID, VALUE) VALUES (?, ?, ?)") ){ //$NON-NLS-1$
+			ps_lbl.setObject(1, lng_uuid);
+			ps_lbl.setObject(2, cfg_uuid);
+			ps_lbl.setString(3, cfgName);
+			ps_lbl.executeUpdate();
+		}
+	}
+
+	private String getDisplayModeForDefaultAttribute(Connection c, UUID cm_uuid, UUID dma_uuid) throws SQLException {
+		PreparedStatement ps = c.prepareStatement("select DISPLAY_MODE from smart.CM_DM_ATTRIBUTE_SETTINGS where CM_UUID = ? AND DM_ATTRIBUTE_UUID = ?"); //$NON-NLS-1$
+		ps.setObject(1, cm_uuid);
+		ps.setObject(2, dma_uuid);
+		try (ResultSet rs = ps.executeQuery()) {
+			return rs.next() ? rs.getString(1) : null;
+		}
+	}
+
+	private String getDisplayModeForCustomCmAttribute(Connection c, UUID cma_uuid) throws SQLException {
+		PreparedStatement ps = c.prepareStatement("select STRING_VALUE from smart.CM_ATTRIBUTE_OPTION where OPTION_ID = 'DISPLAY_MODE' AND CM_ATTRIBUTE_UUID = ?"); //$NON-NLS-1$
+		ps.setObject(1, cma_uuid);
+		try (ResultSet rs = ps.executeQuery()) {
+			return rs.next() ? rs.getString(1) : null;
+		}
+	}
+
+	private UUID getDmAttributeForCmAttribute(Connection c, UUID cma_uuid) throws SQLException {
+		PreparedStatement ps = c.prepareStatement("select ATTRIBUTE_UUID from smart.CM_ATTRIBUTE where UUID = ?"); //$NON-NLS-1$
+		ps.setObject(1, cma_uuid);
+		try (ResultSet rs = ps.executeQuery()) {
+			return rs.next() ? (UUID)rs.getObject(1) : null;
+		}
 	}
 }
